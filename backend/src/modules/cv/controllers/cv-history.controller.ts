@@ -31,11 +31,7 @@ import { ResponseInterceptor } from '../../../common/interceptors/response.inter
 import type { PaginatedResult } from '../../../common/types/api-response.types.js';
 import type { MulterFile } from '../../../common/types/multer-file.type.js';
 import { buildRequestValidationException } from '../../../common/utils/build-request-validation-exception.js';
-import {
-  CV_DEFAULT_PAGE_SIZE,
-  CV_FIELD_NAME,
-  CV_UPLOAD_LIMIT_BYTES,
-} from '../constants/cv.constants.js';
+import { CV_DEFAULT_PAGE_SIZE, CV_UPLOAD_LIMIT_BYTES } from '../constants/cv.constants.js';
 import { cvIdSchema } from '../requests/cv-id.request.js';
 import { listCvsSchema, type ListCvsRequest } from '../requests/list-cvs.request.js';
 import type { CvResponse } from '../responses/cv.response.js';
@@ -69,7 +65,7 @@ export class CvHistoryController {
 
   @Post()
   @UseInterceptors(
-    FileInterceptor(CV_FIELD_NAME, {
+    FileInterceptor('file', {
       limits: { fileSize: CV_UPLOAD_LIMIT_BYTES, files: 1 },
     }),
   )
@@ -77,9 +73,9 @@ export class CvHistoryController {
   @ApiBody({
     schema: {
       type: 'object',
-      required: [CV_FIELD_NAME],
+      required: ['file'],
       properties: {
-        [CV_FIELD_NAME]: { type: 'string', format: 'binary' },
+        ['file']: { type: 'string', format: 'binary' },
       },
     },
   })
