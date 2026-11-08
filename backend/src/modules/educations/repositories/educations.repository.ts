@@ -3,7 +3,7 @@ import type { EducationAnalysisSourceResponse } from '../responses/education-ana
 import type { Prisma } from '../../../prisma/client.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
-import { EDUCATION_TRANSACTION_ATTEMPTS } from '../constants/education-conflict.constants.js';
+
 import { DuplicateEducationException } from '../exceptions/duplicate-education.exception.js';
 import { EducationWriteConflictException } from '../exceptions/education-write-conflict.exception.js';
 import { normalizeEducationText } from '../utils/normalize-education-text.js';
@@ -143,7 +143,7 @@ export class EducationsRepository {
   ): Promise<T> {
     for (
       let attempt = 0;
-      attempt < EDUCATION_TRANSACTION_ATTEMPTS;
+      attempt < 3;
       attempt += 1
     ) {
       try {
