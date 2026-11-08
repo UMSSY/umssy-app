@@ -40,10 +40,7 @@ import {
   FIND_APPOINTMENT_DOCS,
   UPLOAD_APPOINTMENT_DOCUMENT_DOCS,
 } from '../constants/appointment-docs.constants.js';
-import {
-  APPOINTMENT_DOCUMENT_FIELD_NAME,
-  APPOINTMENT_DOCUMENT_UPLOAD_LIMIT_BYTES,
-} from '../constants/appointment-document.constants.js';
+import { APPOINTMENT_DOCUMENT_UPLOAD_LIMIT_BYTES } from '../constants/appointment-document.constants.js';
 import { appointmentIdSchema } from '../requests/appointment-id.request.js';
 import { AppointmentDocumentsService } from '../services/appointment-documents.service.js';
 import type { AppointmentDocumentResponse } from '../types/appointment-document-response.types.js';
@@ -68,7 +65,7 @@ export class AppointmentDocumentsController {
 
   @Post()
   @UseInterceptors(
-    FileInterceptor(APPOINTMENT_DOCUMENT_FIELD_NAME, {
+    FileInterceptor('file', {
       limits: { fileSize: APPOINTMENT_DOCUMENT_UPLOAD_LIMIT_BYTES, files: 1 },
     }),
   )
@@ -80,9 +77,9 @@ export class AppointmentDocumentsController {
   @ApiBody({
     schema: {
       type: 'object',
-      required: [APPOINTMENT_DOCUMENT_FIELD_NAME],
+      required: ['file'],
       properties: {
-        [APPOINTMENT_DOCUMENT_FIELD_NAME]: {
+        ['file']: {
           type: 'string',
           format: 'binary',
           description: UPLOAD_APPOINTMENT_DOCUMENT_DOCS.fileDescription,

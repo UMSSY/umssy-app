@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  APPOINTMENT_MESSAGES,
-  APPOINTMENT_MESSAGE_MAX_LENGTH,
-} from '../constants/appointment-docs.constants.js';
+import { APPOINTMENT_MESSAGES } from '../constants/appointment-docs.constants.js';
 import { createAppointmentSchema } from '../requests/create-appointment.request.js';
 
 const BLOCK_ID = '55555555-5555-4555-8555-555555555555';
@@ -58,7 +55,7 @@ describe('createAppointmentSchema', () => {
       getMessages({
         blockId: BLOCK_ID,
         orientationTypeId: TOPIC_ID,
-        message: 'x'.repeat(APPOINTMENT_MESSAGE_MAX_LENGTH + 1),
+        message: 'x'.repeat(300 + 1),
       }),
     ).toEqual([APPOINTMENT_MESSAGES.messageTooLong]);
   });
@@ -68,7 +65,7 @@ describe('createAppointmentSchema', () => {
       getMessages({
         blockId: BLOCK_ID,
         orientationTypeId: TOPIC_ID,
-        message: 'x'.repeat(APPOINTMENT_MESSAGE_MAX_LENGTH),
+        message: 'x'.repeat(300),
       }),
     ).toEqual([]);
   });
@@ -78,9 +75,9 @@ describe('createAppointmentSchema', () => {
       getMessage({
         blockId: BLOCK_ID,
         orientationTypeId: TOPIC_ID,
-        message: ` ${'x'.repeat(APPOINTMENT_MESSAGE_MAX_LENGTH)} `,
+        message: ` ${'x'.repeat(300)} `,
       }),
-    ).toHaveLength(APPOINTMENT_MESSAGE_MAX_LENGTH);
+    ).toHaveLength(300);
   });
 
   it('recorta los espacios del mensaje', () => {
