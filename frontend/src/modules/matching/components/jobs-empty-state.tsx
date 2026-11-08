@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Briefcase } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button-variants";
-import { JOB_MATCHING_MESSAGES, PROFILE_SKILLS_ROUTE } from "../constants/job-matching.constants";
+import { JOB_MATCHING_MESSAGES } from "../constants/job-matching.constants";
 
 interface JobsEmptyStateProps {
   variant: "incomplete-profile" | "no-matches";
@@ -32,7 +32,7 @@ export function JobsEmptyState({ variant }: JobsEmptyStateProps) {
       </div>
       <h2 className="font-tight text-lg font-bold text-ink">{title}</h2>
       <p className="text-sm text-text-secondary">{text}</p>
-      <Link href={PROFILE_SKILLS_ROUTE} className={buttonVariants({ size: "lg" })}>
+      <Link href={"/profile/trajectory/skills"} className={buttonVariants({ size: "lg" })}>
         {action}
       </Link>
     </div>

@@ -1,13 +1,11 @@
 import type { JobFeedFilters } from "../types/job-feed-filters.types";
 import type { BreadcrumbEntry } from "@/shared/types/breadcrumb-entry.types";
 
-export const RECOMMENDED_JOBS_ENDPOINT = "/job-offers/recommendations";
 export function getJobMatchEndpoint(jobOfferId: string): string {
   return `/job-offers/${jobOfferId}/match`;
 }
 
 export const JOBS_ROUTE = "/vacancies/recommended";
-export const PROFILE_SKILLS_ROUTE = "/profile/trajectory/skills";
 
 export const JOB_MATCHING_QUERY_KEYS = {
   recommendations: ["job-matching", "recommendations"] as const,
