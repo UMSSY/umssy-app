@@ -63,18 +63,3 @@ export const APPOINTMENT_WEEKDAY_LABELS = [
   "Sábado",
   "Domingo",
 ] as const;
-
-export const APPOINTMENT_MONTH_LABELS = [
-  "enero",
-  "febrero",
-  "marzo",
-  "abril",
-  "mayo",
-  "junio",
-  "julio",
-  "agosto",
-  "septiembre",
-  "octubre",
-  "noviembre",
-  "diciembre",
-] as const;
