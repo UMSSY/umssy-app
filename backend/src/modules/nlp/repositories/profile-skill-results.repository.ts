@@ -1,3 +1,4 @@
+import { UNIQUE_CONSTRAINT_VIOLATION_CODE } from '../../../common/constants/prisma-errors.constants.js';
 import { Injectable } from '@nestjs/common';
 import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
@@ -6,7 +7,6 @@ import type { NlpPublishResult } from '../types/nlp-publish-result.type.js';
 import type { ProfileSkillProcessingState } from '../types/profile-skill-processing-state.type.js';
 import { toErrorCode } from '../utils/to-error-code.js';
 
-const UNIQUE_CONSTRAINT_VIOLATION = 'P2002';
 
 export const processingStateSelect = {
   userId: true,
@@ -53,7 +53,7 @@ export class ProfileSkillResultsRepository {
     try {
       return await upsert();
     } catch (error) {
-      if (toErrorCode(error) !== UNIQUE_CONSTRAINT_VIOLATION) throw error;
+      if (toErrorCode(error) !== UNIQUE_CONSTRAINT_VIOLATION_CODE) throw error;
       return upsert();
     }
   }
