@@ -15,5 +15,3 @@ export const ALLOWED_ATTACHMENT_MIME_TYPES = [
   ...ALLOWED_IMAGE_MIME_TYPES,
   ...ALLOWED_PDF_MIME_TYPES,
 ] as const;
-
-export const ATTACHMENT_FIELD_NAME = 'file';

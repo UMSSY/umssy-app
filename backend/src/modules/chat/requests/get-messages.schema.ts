@@ -1,8 +1,5 @@
 import { z } from 'zod';
-import {
-  DEFAULT_MESSAGE_PAGE_SIZE,
-  MAX_MESSAGE_PAGE_SIZE,
-} from '../constants/chat.constants.js';
+
 import { conversationIdField } from './chat-fields.schema.js';
 
 export const getMessagesQuerySchema = z
@@ -14,10 +11,10 @@ export const getMessagesQuerySchema = z
       .int('El límite debe ser un número entero')
       .min(1, 'El límite debe ser mayor o igual a 1')
       .max(
-        MAX_MESSAGE_PAGE_SIZE,
-        `El límite no puede superar ${MAX_MESSAGE_PAGE_SIZE}`,
+        50,
+        `El límite no puede superar 50`,
       )
-      .default(DEFAULT_MESSAGE_PAGE_SIZE),
+      .default(20),
   })
   .strict();
 

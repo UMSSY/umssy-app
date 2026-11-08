@@ -27,10 +27,7 @@ import { RolesGuard } from '../../../common/guards/roles.guard.js';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { ResponseInterceptor } from '../../../common/interceptors/index.js';
 import type { MulterFile } from '../../../common/types/multer-file.type.js';
-import {
-  ATTACHMENT_FIELD_NAME,
-  MAX_ATTACHMENT_UPLOAD_SIZE_BYTES,
-} from '../constants/attachment.constants.js';
+import { MAX_ATTACHMENT_UPLOAD_SIZE_BYTES } from '../constants/attachment.constants.js';
 import { AttachmentUploadInterceptor } from '../interceptors/attachment-upload.interceptor.js';
 import {
   sendAttachmentMessageSchema,
@@ -76,7 +73,7 @@ export class AttachmentController {
   @ApiResponse({ status: 404, description: 'Conversación no encontrada' })
   @UseInterceptors(
     AttachmentUploadInterceptor,
-    FileInterceptor(ATTACHMENT_FIELD_NAME, {
+    FileInterceptor('file', {
       limits: {
         fileSize: MAX_ATTACHMENT_UPLOAD_SIZE_BYTES,
       },
@@ -94,7 +91,7 @@ export class AttachmentController {
   @Post('attachments')
   @UseInterceptors(
     AttachmentUploadInterceptor,
-    FileInterceptor(ATTACHMENT_FIELD_NAME, {
+    FileInterceptor('file', {
       limits: {
         fileSize: MAX_ATTACHMENT_UPLOAD_SIZE_BYTES,
       },

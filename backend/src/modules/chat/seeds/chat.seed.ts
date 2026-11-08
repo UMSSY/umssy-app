@@ -1,3 +1,4 @@
+import { MINUTE_MS } from '../../../common/constants/date-time.constants.js';
 import type { Prisma } from '../../../prisma/client.js';
 import {
   SEED_CONVERSATIONS,
@@ -5,8 +6,6 @@ import {
   SEED_USER_PRESENCES,
 } from '../constants/seed-chat.constants.js';
 import type { ChatSeedResult } from '../types/chat-seed-result.types.js';
-
-const MS_PER_MINUTE = 60_000;
 
 async function seedMessageStatuses(
   tx: Prisma.TransactionClient,
@@ -35,7 +34,7 @@ async function seedUserPresences(
     const lastSeenAt =
       presence.minutesAgo === undefined
         ? new Date(now)
-        : new Date(now - presence.minutesAgo * MS_PER_MINUTE);
+        : new Date(now - presence.minutesAgo * MINUTE_MS);
 
     await tx.userPresence.upsert({
       where: { userId: user.id },
@@ -60,7 +59,7 @@ function resolveLastReadAt(
 ): Date {
   return spec === 'now'
     ? new Date(now)
-    : new Date(now - spec.minutesAgo * MS_PER_MINUTE);
+    : new Date(now - spec.minutesAgo * MINUTE_MS);
 }
 
 async function seedConversations(
@@ -128,7 +127,7 @@ if (existing) continue;
 
     for (const message of definition.messages) {
       const senderId = message.fromA ? userA.id : userB.id;
-      const sentAt = new Date(now - message.minutesAgo * MS_PER_MINUTE);
+      const sentAt = new Date(now - message.minutesAgo * MINUTE_MS);
       const statusId = statusIdByTitle.get(message.status);
       if (!statusId) {
         throw new Error(

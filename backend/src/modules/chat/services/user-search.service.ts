@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { UserLookupRepository } from '../repositories/user-lookup.repository.js';
 import { ChatRolePolicyService } from './chat-role-policy.service.js';
-import { MIN_SEARCH_CHARS, MAX_SEARCH_RESULTS } from '../constants/chat.constants.js';
+import { MIN_SEARCH_CHARS } from '../constants/chat.constants.js';
 import type { ChatUserResponse } from '../responses/chat-user.response.js';
 
 @Injectable()
@@ -24,7 +24,7 @@ export class UserSearchService {
     const rows = await this.userLookupRepository.searchActiveByName(
       normalized,
       currentUserId,
-      MAX_SEARCH_RESULTS * 2,
+      20 * 2,
     );
 
     const results: ChatUserResponse[] = [];
@@ -47,7 +47,7 @@ export class UserSearchService {
         continue;
       }
 
-      if (results.length >= MAX_SEARCH_RESULTS) break;
+      if (results.length >= 20) break;
     }
 
     return results;
