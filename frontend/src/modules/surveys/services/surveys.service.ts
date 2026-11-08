@@ -64,7 +64,7 @@ export const surveysService = {
   },
 
   exportSurveyPdf: async (id: string, period?: string): Promise<{ file: Blob; fileName: string }> => {
-    const response = await apiClient.get<Blob>(`/surveys/${id}/export-pdf`, {
+    const response = await apiClient.get<Blob>(`/surveys/${id}/report`, {
       responseType: "blob",
       params: { period },
     });

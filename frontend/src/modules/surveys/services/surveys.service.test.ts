@@ -46,7 +46,7 @@ describe("surveysService", () => {
     expect(get).toHaveBeenNthCalledWith(2, "/surveys/survey-1/statistics", { params: { period: undefined } });
   });
 
-  it("exporta el PDF del semestre elegido con GET /surveys/:id/export-pdf?period=", async () => {
+  it("exporta el PDF del semestre elegido con GET /surveys/:id/report?period=", async () => {
     const get = vi.spyOn(apiClient, "get").mockResolvedValue({
       data: new Blob(["pdf"]),
       headers: { "content-disposition": 'attachment; filename="reporte.pdf"' },
@@ -54,7 +54,7 @@ describe("surveysService", () => {
 
     const { fileName } = await surveysService.exportSurveyPdf("survey-1", "I-2026");
 
-    expect(get).toHaveBeenCalledWith("/surveys/survey-1/export-pdf", { responseType: "blob", params: { period: "I-2026" } });
+    expect(get).toHaveBeenCalledWith("/surveys/survey-1/report", { responseType: "blob", params: { period: "I-2026" } });
     expect(fileName).toBe("reporte.pdf");
   });
 });
