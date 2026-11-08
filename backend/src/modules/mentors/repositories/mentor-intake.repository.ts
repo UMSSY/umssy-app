@@ -1,3 +1,4 @@
+import { DAY_MS } from '../../../common/constants/date-time.constants.js';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
 import type { Prisma } from '../../../prisma/client.js';
 import type { MentorCachedAttempt } from '../types/mentor-cached-attempt.types.js';
@@ -23,11 +24,12 @@ export abstract class MentorIntakeRepository {
     userId: string,
     operation: string,
     key: string,
-  ) {
-    const [cached] = await tx.$queryRaw<MentorCachedAttempt[]>`
-      SELECT payload_hash AS "payloadHash", response_data AS outcome FROM mentor_intake_attempts
-      WHERE user_id = ${userId}::uuid AND operation = ${operation} AND idempotency_key = ${key}::uuid`;
-    return cached;
+  ): Promise<MentorCachedAttempt | undefined> {
+    const cached = await tx.mentorIntakeAttempt.findUnique({
+      where: { userId_operation_idempotencyKey: { userId, operation, idempotencyKey: key } },
+      select: { payloadHash: true, responseData: true },
+    });
+    return cached ? { payloadHash: cached.payloadHash, outcome: cached.responseData as unknown as MentorIntakeOutcome } : undefined;
   }
 
   async activeSanction(
@@ -35,20 +37,20 @@ export abstract class MentorIntakeRepository {
     userId: string,
     now: Date,
   ) {
-    const [active] = await tx.$queryRaw<{ endsAt: Date }[]>`
-      SELECT ends_at AS "endsAt" FROM mentor_participation_sanctions
-      WHERE user_id = ${userId}::uuid AND ends_at > ${now} ORDER BY ends_at DESC LIMIT 1`;
-    return active;
+    return (await tx.mentorParticipationSanction.findFirst({
+      where: { userId, endsAt: { gt: now } },
+      orderBy: { endsAt: 'desc' },
+      select: { endsAt: true },
+    })) ?? undefined;
   }
 
   async attemptCount(tx: Prisma.TransactionClient, userId: string, now: Date) {
-    const [{ count }] = await tx.$queryRaw<{ count: number }[]>`
-      SELECT count(*)::int AS count FROM mentor_intake_attempts WHERE user_id = ${userId}::uuid
-        AND counted AND occurred_at > ${now}::timestamptz - INTERVAL '24 hours' AND occurred_at <= ${now}`;
-    return count;
+    return tx.mentorIntakeAttempt.count({
+      where: { userId, counted: true, occurredAt: { gt: new Date(now.getTime() - DAY_MS), lte: now } },
+    });
   }
 
-  saveAttempt(
+  async saveAttempt(
     tx: Prisma.TransactionClient,
     id: string,
     userId: string,
@@ -59,9 +61,12 @@ export abstract class MentorIntakeRepository {
     counted: boolean,
     result: MentorIntakeOutcome,
   ) {
-    return tx.$executeRaw`
-      INSERT INTO mentor_intake_attempts(id, user_id, operation, idempotency_key, payload_hash, occurred_at, counted, response_status, response_data)
-      VALUES (${id}::uuid, ${userId}::uuid, ${operation}, ${key}::uuid, ${payloadHash}, ${now}, ${counted}, ${result.status}, ${JSON.stringify(result)}::jsonb)`;
+    const { count } = await tx.mentorIntakeAttempt.createMany({
+      data: [{ id, userId, operation, idempotencyKey: key, payloadHash, occurredAt: now,
+        counted, responseStatus: result.status,
+        responseData: JSON.parse(JSON.stringify(result)) as Prisma.InputJsonValue }],
+    });
+    return count;
   }
 
   async saveSanction(
@@ -71,8 +76,9 @@ export abstract class MentorIntakeRepository {
     now: Date,
     endsAt: Date,
   ) {
-    await tx.$executeRaw`
-      INSERT INTO mentor_participation_sanctions(id, user_id, trigger_attempt_id, started_at, ends_at)
-      VALUES (gen_random_uuid(), ${userId}::uuid, ${attemptId}::uuid, ${now}, ${endsAt})`;
+    await tx.mentorParticipationSanction.create({
+      data: { userId, triggerAttemptId: attemptId, startedAt: now, endsAt },
+      select: { id: true },
+    });
   }
 }
