@@ -1,3 +1,4 @@
+import "@/shared/testing/indexed-db.mock";
 
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import {
@@ -406,7 +407,7 @@ describe("MentorDirectoryView", () => {
   });
 
   it("distingue la tarjeta propia por UUID sin repetir la consulta de identidad", async () => {
-    saveAccessToken("test-token");
+    await saveAccessToken("test-token");
 
     vi.spyOn(directoryService, "getMentorDirectory").mockResolvedValue(
       makeDirectoryPage(mentors),
