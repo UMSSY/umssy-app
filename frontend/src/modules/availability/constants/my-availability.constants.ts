@@ -8,8 +8,6 @@ export const MY_AVAILABILITY_TEXT = {
   loadError: "Error al obtener los bloques de disponibilidad",
 } as const;
 
-export const MY_AVAILABILITY_EYEBROW = "Mentorías";
-
 export const MONTH_LABELS = [
   "enero",
   "febrero",
