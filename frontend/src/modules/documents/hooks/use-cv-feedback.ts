@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import type { Feedback } from "@/modules/profile";
-import { CV_SUCCESS_FEEDBACK_DURATION_MS } from "../constants/cv-feedback.constants";
 
 export function useCvFeedback() {
   const [feedback, setFeedback] = useState<Feedback | null>(null);
@@ -12,7 +11,7 @@ export function useCvFeedback() {
       return;
     }
 
-    const timeoutId = setTimeout(() => setFeedback(null), CV_SUCCESS_FEEDBACK_DURATION_MS);
+    const timeoutId = setTimeout(() => setFeedback(null), 5000);
     return () => clearTimeout(timeoutId);
   }, [feedback]);
 
