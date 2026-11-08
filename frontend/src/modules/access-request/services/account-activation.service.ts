@@ -1,15 +1,13 @@
 import { ROLE_TAGS } from "@/shared/constants/roles.constants";
 import { apiClient } from "@/shared/services/api-client";
 
-import type {
-  ActivationFailure,
-  ActivationReason,
-  ActivationResend,
-  ActivationResult,
-  ActivationSession,
-  ActivationState,
-  ActivationStatus,
-} from "../types/account-activation.types";
+import type { ActivationFailure } from "../types/activation-failure.types";
+import type { ActivationReason } from "../types/activation-reason.types";
+import type { ActivationResend } from "../types/activation-resend.types";
+import type { ActivationResult } from "../types/activation-result.types";
+import type { ActivationSession } from "../types/activation-session.types";
+import type { ActivationState } from "../types/activation-state.types";
+import type { ActivationStatus } from "../types/activation-status.types";
 
 const STATES: ActivationState[] = ["no_code", "ready", "expired", "locked", "activated"];
 const REASONS: ActivationReason[] = [

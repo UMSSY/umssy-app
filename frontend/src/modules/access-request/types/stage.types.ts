@@ -1,4 +1,4 @@
-export type StageState = "done" | "current" | "pending";
+import type { StageState } from "./stage-state.types";
 
 export interface Stage {
   label: string;

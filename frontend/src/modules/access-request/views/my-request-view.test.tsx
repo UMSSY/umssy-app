@@ -2,10 +2,8 @@ import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { accessRequestService } from "../services/access-request.service";
-import type {
-  ApiResult,
-  RequestStatusResponse,
-} from "../types/access-request.types";
+import type { ApiResult } from "../types/api-result.types";
+import type { RequestStatusResponse } from "../types/request-status-response.types";
 import { MyRequestView } from "./my-request-view";
 
 vi.mock("../services/access-request.service", () => ({

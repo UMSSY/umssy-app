@@ -1,17 +1,15 @@
 import { BEARER_PREFIX } from "@/shared/constants/auth.constants";
 import { NETWORK_ERROR_MESSAGE } from "@/shared/constants/error-messages.constants";
 import { apiClient } from "@/shared/services/api-client";
-import type {
-  AccessRequestPayload,
-  ApiResult,
-  CreateAccessRequestResponse,
-  FieldErrors,
-  RequestStatusResponse,
-  SubmitRequestResponse,
-  UploadDocumentResponse,
-} from "../types/access-request.types";
+import type { AccessRequestPayload } from "../types/access-request-payload.types";
+import type { ApiResult } from "../types/api-result.types";
+import type { CreateAccessRequestResponse } from "../types/create-access-request-response.types";
+import type { FieldErrors } from "../types/field-errors.types";
+import type { RequestStatusResponse } from "../types/request-status-response.types";
+import type { SubmitRequestResponse } from "../types/submit-request-response.types";
+import type { UploadDocumentResponse } from "../types/upload-document-response.types";
 import { DOCUMENT_TYPES, type DocumentType } from "../constants/document-types.constants";
-import type { DocumentCorrectionResponse } from "../types/document-correction.types";
+import type { DocumentCorrectionResponse } from "../types/document-correction-response.types";
 import { getRequestCodeFromLink } from "../utils/get-request-code-from-link";
 import { isDocumentCorrectionToken } from "../utils/document-correction-link";
 import { CORRECTION_AUTHORIZATION_MESSAGE, CORRECTION_MISSING_FILE_MESSAGE, CORRECTION_MISSING_TYPE_MESSAGE, CORRECTION_RETRY_MESSAGE } from "../constants/document-correction.constants";
@@ -88,13 +86,23 @@ function fromDomainError(status: number, detail: string): ApiResult<never> {
   return failure(status, detail, fieldErrors);
 }
 
-function parseError(status: number, body: unknown, notFoundMessage = NOT_FOUND_MESSAGE): ApiResult<never> {
+function parseError(
+  status: number,
+  body: unknown,
+  notFoundMessage = NOT_FOUND_MESSAGE,
+): ApiResult<never> {
   if (status === 404) return failure(404, notFoundMessage);
   if (status === 413) return failure(413, FILE_TOO_LARGE_MESSAGE);
   if (!isRecord(body)) return failure(0, NETWORK_ERROR_MESSAGE);
   if (Array.isArray(body.message)) return fromZodIssues(body.message);
   if (Array.isArray(body.errors)) {
-    return fromZodIssues(body.errors.map((error) => (isRecord(error) && typeof error.field === "string" ? { ...error, path: error.field.split(".") } : error)));
+    return fromZodIssues(
+      body.errors.map((error) =>
+        isRecord(error) && typeof error.field === "string"
+          ? { ...error, path: error.field.split(".") }
+          : error,
+      ),
+    );
   }
   if (typeof body.detail === "string") return fromDomainError(status, body.detail);
   if (typeof body.message === "string") return failure(status, body.message);
@@ -147,12 +155,17 @@ async function uploadDocument(
   form.append("file", file);
   form.append("documentType", documentType);
 
-  const result = await send<Record<string, unknown>>("post", `/access-requests/${id}/document`, form, {
-    onUploadProgress: (event) => {
-      if (!onProgress || !event.total) return;
-      onProgress(Math.min(100, Math.max(0, Math.round((event.loaded / event.total) * 100))));
+  const result = await send<Record<string, unknown>>(
+    "post",
+    `/access-requests/${id}/document`,
+    form,
+    {
+      onUploadProgress: (event) => {
+        if (!onProgress || !event.total) return;
+        onProgress(Math.min(100, Math.max(0, Math.round((event.loaded / event.total) * 100))));
+      },
     },
-  });
+  );
   if (!result.ok) return result;
   const { documentFileId } = result.data;
   if (typeof documentFileId !== "string" || documentFileId.trim().length === 0) {
@@ -161,8 +174,13 @@ async function uploadDocument(
   return { ok: true, data: { id, documentFileId, documentType } };
 }
 
-async function submitAccessRequest(id: string): Promise<ApiResult<SubmitRequestResponse>> {
-  const result = await send<Record<string, unknown>>("post", `/access-requests/${id}/submit`);
+async function submitAccessRequest(
+  id: string,
+): Promise<ApiResult<SubmitRequestResponse>> {
+  const result = await send<Record<string, unknown>>(
+    "post",
+    `/access-requests/${id}/submit`,
+  );
   if (!result.ok) return result;
   const { requestCode, submittedAt, status } = result.data;
   if (typeof requestCode !== "string" || requestCode.trim().length === 0 || typeof submittedAt !== "string") {
@@ -171,11 +189,19 @@ async function submitAccessRequest(id: string): Promise<ApiResult<SubmitRequestR
   return { ok: true, data: { id, requestCode, status: typeof status === "string" ? status : "pending", submittedAt } };
 }
 
-async function getRequestStatus(code: string, email: string): Promise<ApiResult<RequestStatusResponse>> {
-  const result = await send<Record<string, unknown>>("get", `/access-requests/status/${code}`, undefined, {
-    params: { email },
-    notFoundMessage: STATUS_NOT_FOUND_MESSAGE,
-  });
+async function getRequestStatus(
+  code: string,
+  email: string,
+): Promise<ApiResult<RequestStatusResponse>> {
+  const result = await send<Record<string, unknown>>(
+    "get",
+    `/access-requests/status/${code}`,
+    undefined,
+    {
+      params: { email },
+      notFoundMessage: STATUS_NOT_FOUND_MESSAGE,
+    },
+  );
   if (!result.ok) {
     const [firstFieldMessage] = Object.values(result.fieldErrors);
     return result.status === 400 && firstFieldMessage
@@ -218,13 +244,18 @@ async function resubmitDocument(
   const form = new FormData();
   form.append("file", file);
   form.append("documentType", documentType);
-  const result = await send<Record<string, unknown>>("post", `/access-requests/${requestCode}/resubmit`, form, {
-    headers: { Authorization: `${BEARER_PREFIX}${token}` },
-    onUploadProgress: (event) => {
-      if (!onProgress || !event.total) return;
-      onProgress(Math.min(100, Math.max(0, Math.round((event.loaded / event.total) * 100))));
+  const result = await send<Record<string, unknown>>(
+    "post",
+    `/access-requests/${requestCode}/resubmit`,
+    form,
+    {
+      headers: { Authorization: `${BEARER_PREFIX}${token}` },
+      onUploadProgress: (event) => {
+        if (!onProgress || !event.total) return;
+        onProgress(Math.min(100, Math.max(0, Math.round((event.loaded / event.total) * 100))));
+      },
     },
-  });
+  );
   if (!result.ok) return correctionFailure(result.status);
   if (result.data.requestCode !== requestCode || result.data.status !== "pending") return correctionFailure(0);
   return { ok: true, data: { requestCode, status: "pending" } };
@@ -234,12 +265,22 @@ export const accessRequestService = {
   resubmitDocument,
   createAccessRequest,
   updateAccessRequest: (id: string, payload: AccessRequestPayload) =>
-    send<Partial<CreateAccessRequestResponse>>("patch", `/access-requests/${id}`, payload),
+    send<Partial<CreateAccessRequestResponse>>(
+      "patch",
+      `/access-requests/${id}`,
+      payload,
+    ),
   deleteAccessRequest: (id: string) =>
-    send<Partial<CreateAccessRequestResponse>>("delete", `/access-requests/${id}`),
+    send<Partial<CreateAccessRequestResponse>>(
+      "delete",
+      `/access-requests/${id}`,
+    ),
   uploadDocument,
   removeDocument: (id: string) =>
-    send<{ id: string; documentFileId: null }>("delete", `/access-requests/${id}/document`),
+    send<{ id: string; documentFileId: null }>(
+      "delete",
+      `/access-requests/${id}/document`,
+    ),
   submitAccessRequest,
   getRequestStatus,
 };

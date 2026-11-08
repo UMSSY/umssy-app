@@ -1,14 +1,5 @@
 import type { DocumentType } from "../constants/document-types.constants";
-
-export interface DocumentCorrectionResponse {
-  requestCode: string;
-  status: "pending";
-}
-
-export interface DocumentCorrectionSelection {
-  file: File;
-  previewUrl: string;
-}
+import type { DocumentCorrectionResponse } from "./document-correction-response.types";
 
 export interface DocumentCorrectionFormProps {
   requestCode: string;

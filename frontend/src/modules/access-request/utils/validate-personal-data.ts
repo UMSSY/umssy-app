@@ -2,7 +2,8 @@ import { DATE_PATTERN } from "@/shared/constants/date-time.constants";
 import { CAREERS } from "../constants/careers.constants";
 import { ID_CARD_ISSUED_IN } from "../constants/id-card-issued-in.constants";
 import { ID_CARD_MAX_LENGTH, SIS_CODE_LENGTH } from "../constants/personal-data-rules.constants";
-import type { FieldErrors, PersonalDataValues } from "../types/access-request.types";
+import type { FieldErrors } from "../types/field-errors.types";
+import type { PersonalDataValues } from "../types/personal-data-values.types";
 import { detectEmailTypo } from "./detect-email-typo";
 
 export const MIN_AGE = 18;
@@ -14,7 +15,9 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)*\.[a-z]{2,}$/;
 
 function isRealIsoDate(value: string): boolean {
   const date = new Date(`${value}T00:00:00.000Z`);
-  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
+  return (
+    !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value
+  );
 }
 
 function isAdult(birthDate: string, now: Date): boolean {
