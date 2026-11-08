@@ -22,7 +22,7 @@ import { EventNotOpenException } from '../exceptions/event-not-open.exception.js
 import { RegistrationAlreadyCancelledException } from '../exceptions/registration-already-cancelled.exception.js';
 import { RegistrationNotFoundException } from '../exceptions/registration-not-found.exception.js';
 import { RegistrationNotOwnedException } from '../exceptions/registration-not-owned.exception.js';
-import { REGISTRATION_TRANSACTION_ATTEMPTS } from '../constants/registrations.constants.js';
+
 import { mapRegistration } from '../mappers/registration.mapper.js';
 import { assertRegistrationOpen } from '../utils/assert-registration-open.js';
 import type { RegistrationResponse } from '../types/registration-response.types.js';
@@ -97,7 +97,7 @@ export class EventRegistrationsService {
   }
 
   private async transact<T>(operation: (tx: Prisma.TransactionClient) => Promise<T>): Promise<T> {
-    for (let attempt = 0; attempt < REGISTRATION_TRANSACTION_ATTEMPTS; attempt += 1) {
+    for (let attempt = 0; attempt < 3; attempt += 1) {
       try {
         return await this.repository.transaction(operation, Prisma.TransactionIsolationLevel.Serializable);
       } catch (error) {
