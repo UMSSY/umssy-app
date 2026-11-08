@@ -1,7 +1,3 @@
-import {
-  NO_RESPONSES_TREND_TEXT,
-  TREND_MIN_CHANGE_POINTS,
-} from '../constants/survey-statistics.constants.js';
 import type { SurveyQuestionTrendResponse } from '../responses/survey-statistics.response.js';
 import type {
   TrendChange,
@@ -33,13 +29,13 @@ function describeChange(
       1,
     ),
   );
-  if (change >= TREND_MIN_CHANGE_POINTS) {
+  if (change >= 1) {
     return {
       direction: 'up',
       sentence: ` Sube ${change} pts frente a ${comparison.period}.`,
     };
   }
-  if (change <= -TREND_MIN_CHANGE_POINTS) {
+  if (change <= -1) {
     return {
       direction: 'down',
       sentence: ` Baja ${Math.abs(change)} pts frente a ${comparison.period}.`,
@@ -58,7 +54,7 @@ export function buildQuestionTrend({
   comparison,
 }: TrendInput): SurveyQuestionTrendResponse {
   if (totalSelections <= 0) {
-    return { text: NO_RESPONSES_TREND_TEXT, direction: 'neutral' };
+    return { text: 'Sin respuestas registradas en este periodo.', direction: 'neutral' };
   }
 
   const maxCount = Math.max(...options.map((option) => option.count));

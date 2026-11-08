@@ -1,16 +1,5 @@
 import { z } from 'zod';
-import {
-  SURVEY_ACADEMIC_PERIOD_PATTERN,
-  SURVEY_ALL_CAREERS,
-  SURVEY_DESCRIPTION_MAX_LENGTH,
-  SURVEY_MIN_OPTIONS_TO_PUBLISH,
-  SURVEY_MIN_QUESTIONS_TO_PUBLISH,
-  SURVEY_OPTION_MAX_LENGTH,
-  SURVEY_STATEMENT_MAX_LENGTH,
-  SURVEY_TITLE_MAX_LENGTH,
-  SURVEY_TITLE_MIN_LENGTH,
-  SURVEY_VALIDATION_MESSAGES as MESSAGES,
-} from '../constants/survey.constants.js';
+import { SURVEY_ACADEMIC_PERIOD_PATTERN, SURVEY_ALL_CAREERS, SURVEY_VALIDATION_MESSAGES as MESSAGES } from '../constants/survey.constants.js';
 import {
   SURVEY_QUESTION_TYPES,
   SURVEY_STATUSES,
@@ -23,14 +12,14 @@ const optionSchema = z.object({
     .string({ message: MESSAGES.OPTION_REQUIRED })
     .trim()
     .min(1, MESSAGES.OPTION_REQUIRED)
-    .max(SURVEY_OPTION_MAX_LENGTH, MESSAGES.OPTION_TOO_LONG),
+    .max(100, MESSAGES.OPTION_TOO_LONG),
 });
 
 const questionSchema = z.object({
   statement: z
     .string({ message: MESSAGES.STATEMENT_REQUIRED })
     .trim()
-    .max(SURVEY_STATEMENT_MAX_LENGTH, MESSAGES.STATEMENT_TOO_LONG),
+    .max(250, MESSAGES.STATEMENT_TOO_LONG),
   type: z.enum(SURVEY_QUESTION_TYPES, { message: MESSAGES.INVALID_QUESTION_TYPE }),
   isRequired: z.boolean().default(true),
   options: z.array(optionSchema).default([]),
@@ -49,12 +38,12 @@ export const createSurveySchema = z
     title: z
       .string({ message: MESSAGES.TITLE_REQUIRED })
       .trim()
-      .min(SURVEY_TITLE_MIN_LENGTH, MESSAGES.TITLE_TOO_SHORT)
-      .max(SURVEY_TITLE_MAX_LENGTH, MESSAGES.TITLE_TOO_LONG),
+      .min(5, MESSAGES.TITLE_TOO_SHORT)
+      .max(150, MESSAGES.TITLE_TOO_LONG),
     description: z
       .string()
       .trim()
-      .max(SURVEY_DESCRIPTION_MAX_LENGTH, MESSAGES.DESCRIPTION_TOO_LONG)
+      .max(500, MESSAGES.DESCRIPTION_TOO_LONG)
       .nullish()
       .transform((value) => (value ? value : undefined)),
     careerId: optionalText(
@@ -95,7 +84,7 @@ export const createSurveySchema = z
       }
     }
 
-    if (survey.questions.length < SURVEY_MIN_QUESTIONS_TO_PUBLISH) {
+    if (survey.questions.length < 1) {
       ctx.addIssue({
         code: 'custom',
         path: ['questions'],
@@ -113,7 +102,7 @@ export const createSurveySchema = z
       }
 
       const labels = question.options.map(({ label }) => label);
-      if (labels.length < SURVEY_MIN_OPTIONS_TO_PUBLISH) {
+      if (labels.length < 2) {
         ctx.addIssue({
           code: 'custom',
           path: ['questions', index, 'options'],

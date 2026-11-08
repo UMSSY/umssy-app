@@ -1,18 +1,10 @@
-import {
-  PDF_BOLD_CHAR_WIDTH_RATIO,
-  PDF_DEFAULT_FONT_SIZE,
-  PDF_DEFAULT_TEXT_COLOR,
-  PDF_PAGE_HEIGHT,
-  PDF_PAGE_WIDTH,
-  PDF_REGULAR_CHAR_WIDTH_RATIO,
-} from '../constants/survey-pdf.constants.js';
 import type { PdfTextOptions } from '../types/pdf-text-options.type.js';
 
 export class SimplePdfDocument {
   private pages: string[][] = [[]];
   private curPage = 0;
-  readonly pageW = PDF_PAGE_WIDTH;
-  readonly pageH = PDF_PAGE_HEIGHT;
+  readonly pageW = 595.28;
+  readonly pageH = 841.89;
 
   addPage() {
     this.pages.push([]);
@@ -62,7 +54,7 @@ export class SimplePdfDocument {
   }
 
   private charWidth(fontSize: number, isBold: boolean): number {
-    return fontSize * (isBold ? PDF_BOLD_CHAR_WIDTH_RATIO : PDF_REGULAR_CHAR_WIDTH_RATIO);
+    return fontSize * (isBold ? 0.58 : 0.52);
   }
 
   rect(x: number, y: number, w: number, h: number, fillHex?: string, strokeHex?: string, strokeW = 0.5) {
@@ -86,10 +78,10 @@ export class SimplePdfDocument {
   }
 
   text(str: string, x: number, y: number, opts: PdfTextOptions = {}) {
-    const fontSize = opts.fontSize ?? PDF_DEFAULT_FONT_SIZE;
+    const fontSize = opts.fontSize ?? 8;
     const font = opts.font ?? 'Helvetica';
     const fontRef = font === 'Helvetica-Bold' ? '/F2' : '/F1';
-    const [r, g, b] = this.hexToRgb(opts.color ?? PDF_DEFAULT_TEXT_COLOR);
+    const [r, g, b] = this.hexToRgb(opts.color ?? '#000000');
     const safeStr = this.escapeWinAnsi(str);
 
     let drawX = x;
