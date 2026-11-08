@@ -1,4 +1,5 @@
-import { BAD_REQUEST_STATUS } from "@/modules/profile";
+import { BAD_REQUEST_STATUS } from "@/shared/constants/http.constants";
+
 import { getHttpStatus } from "@/modules/profile";
 
 import type { CertificationUploadError } from "../types/certification-upload-error.types";

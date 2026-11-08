@@ -1,6 +1,7 @@
+import { ACCESS_TOKEN_STORAGE_KEY } from "@/shared/constants/auth.constants";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { apiClient } from "@/shared/services/api-client";
-import { ACCESS_TOKEN_STORAGE_KEY } from "@/modules/profile/config/auth-storage.config";
+
 import type { Certification } from "../types/certification.types";
 import type { CreateCertificationDto } from "../types/create-certification-dto.types";
 
