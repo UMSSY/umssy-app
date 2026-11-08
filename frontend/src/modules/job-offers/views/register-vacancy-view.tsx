@@ -18,11 +18,11 @@ import { useJobOfferForm } from "../hooks/use-job-offer-form";
 import { useLeaveGuard } from "../hooks/use-leave-guard";
 import { usePublishJobOffer } from "../hooks/use-publish-job-offer";
 import type { RegisterVacancyViewProps } from "../types/register-vacancy-view-props.types";
-import { getCurrentCompany } from "../utils/get-current-company";
+import { useCurrentCompany } from "../hooks/use-current-company";
 
 export function RegisterVacancyView({ jobOfferId }: RegisterVacancyViewProps) {
   const isEditMode = !!jobOfferId;
-  const company = getCurrentCompany();
+  const company = useCurrentCompany();
   const router = useRouter();
   const discardText = isEditMode ? EDIT_DISCARD_DIALOG_TEXT : DISCARD_DIALOG_TEXT;
   const leaveText = isEditMode ? EDIT_LEAVE_DIALOG_TEXT : LEAVE_DIALOG_TEXT;

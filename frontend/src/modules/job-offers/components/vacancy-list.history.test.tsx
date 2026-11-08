@@ -1,3 +1,5 @@
+import "@/shared/testing/indexed-db.mock";
+import "@/modules/job-offers/testing/current-company.mock";
 import { cleanup, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { AxiosError, type AxiosResponse } from "axios";
@@ -23,9 +25,9 @@ function mockOffers(offers = OFFERS) {
 }
 
 describe("VacancyList en modo historial", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.stubEnv("NEXT_PUBLIC_DEMO_COMPANY_ID", COMPANY_ID);
-    saveAccessToken(buildSessionToken("empresa"));
+    await saveAccessToken(buildSessionToken("empresa"));
   });
 
   afterEach(() => {

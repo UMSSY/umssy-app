@@ -1,44 +1,18 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
-import { clearAccessToken, saveAccessToken } from "@/shared/services/storage/access-token-storage";
-
-import { buildSessionToken } from "../testing/vacancy-fixtures";
+import { describe, expect, it } from "vitest";
 import { getCurrentCompany } from "./get-current-company";
 
 describe("getCurrentCompany", () => {
-  afterEach(() => {
-    vi.unstubAllEnvs();
-    clearAccessToken();
+  it("uses the company supplied by the authenticated session", () => {
+    expect(
+      getCurrentCompany({ id: "company-2", name: "NovaSoft Bolivia" }),
+    ).toEqual({ id: "company-2", name: "NovaSoft Bolivia", initials: "NS" });
   });
-
-  it("usa la empresa del seed cuando la sesión es de empresa", () => {
-    vi.stubEnv("NEXT_PUBLIC_DEMO_COMPANY_ID", "");
-    vi.stubEnv("NEXT_PUBLIC_DEMO_COMPANY_NAME", "");
-    saveAccessToken(buildSessionToken("empresa"));
-
-    expect(getCurrentCompany()).toEqual({ id: "a0000000-0000-4000-8000-000000000001", name: "TechBolivia S.R.L.", initials: "TB" });
-  });
-
-  it("permite sobrescribir la empresa por entorno", () => {
-    vi.stubEnv("NEXT_PUBLIC_DEMO_COMPANY_ID", "  company-id  ");
-    vi.stubEnv("NEXT_PUBLIC_DEMO_COMPANY_NAME", "NovaSoft Bolivia");
-    saveAccessToken(buildSessionToken("empresa"));
-
-    expect(getCurrentCompany()).toEqual({ id: "company-id", name: "NovaSoft Bolivia", initials: "NS" });
-  });
-
-  it("no asocia empresa si la sesión es de otro rol", () => {
-    saveAccessToken(buildSessionToken("titulado"));
-
+  it("does not invent a company when no relationship exists", () => {
     expect(getCurrentCompany().id).toBeNull();
   });
-
-  it("no asocia empresa sin sesión", () => {
-    expect(getCurrentCompany().id).toBeNull();
-  });
-
-  it("calcula iniciales aunque el nombre no tenga mayúsculas", () => {
-    vi.stubEnv("NEXT_PUBLIC_DEMO_COMPANY_NAME", "acme");
-
-    expect(getCurrentCompany().initials).toBe("AC");
+  it("derives initials from lowercase names", () => {
+    expect(getCurrentCompany({ id: "company-1", name: "acme" }).initials).toBe(
+      "AC",
+    );
   });
 });
