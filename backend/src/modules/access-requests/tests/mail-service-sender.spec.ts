@@ -4,11 +4,7 @@ import { buildFrontendUrl, frontendBaseUrl } from '../mail/helpers/frontend-url.
 import { MailServiceSender } from '../mail/mail-service-sender.js';
 import type { MailService } from '../../mail/services/mail.service.js';
 import type { RejectionMailLinkService } from '../services/rejection-mail-link.service.js';
-import {
-  ACCOUNT_ACTIVATED_MJML,
-  ACTIVATION_CODE_MJML,
-  loadRejectionTemplate,
-} from '../mail/templates/access-request-mails.template.js';
+import { loadMailTemplate } from '../../mail/helpers/load-mail-template.js';
 
 const NOW = new Date('2026-10-05T12:00:00.000Z');
 
@@ -68,7 +64,7 @@ describe('MailServiceSender', () => {
     const payload = mailService.send.mock.calls[0][0];
     expect(payload).toMatchObject({
       to: 'ana@umss.test',
-      mjml: ACTIVATION_CODE_MJML,
+      mjml: await loadMailTemplate('activation-code'),
       values: {
         code: '482719',
         expiresInMinutes: '10',
@@ -91,7 +87,7 @@ describe('MailServiceSender', () => {
 
     expect(mailService.send.mock.calls[0][0]).toMatchObject({
       to: 'ana@umss.test',
-      mjml: ACCOUNT_ACTIVATED_MJML,
+      mjml: await loadMailTemplate('account-activated'),
       values: { firstName: 'Ana', loginUrl: 'https://umssy.test/login' },
     });
   });
@@ -102,7 +98,7 @@ describe('MailServiceSender', () => {
     await sender.sendRejection('ana@umss.test', 'Documento ilegible');
 
     expect(mailService.send.mock.calls[0][0]).toMatchObject({
-      mjml: await loadRejectionTemplate(),
+      mjml: await loadMailTemplate('access-request-rejection'),
       values: {
         reason: 'Documento ilegible', requestCode: 'SOL-2026-0001',
         requestStatusUrl: `https://umssy.test/request-access/status?code=SOL-2026-0001#correctionToken=dcr1.${'x'.repeat(43)}`,
@@ -122,7 +118,7 @@ describe('plantillas MJML', () => {
   const templates = new MailTemplateService();
 
   it('el correo del código se genera con validación estricta e incluye el código y el botón', async () => {
-    const html = await templates.render(ACTIVATION_CODE_MJML, {
+    const html = await templates.render(await loadMailTemplate('activation-code'), {
       ...brand,
       code: '482719',
       expiresInMinutes: '10',
@@ -135,7 +131,7 @@ describe('plantillas MJML', () => {
   });
 
   it('el correo de cuenta activada incluye el nombre y el enlace de inicio de sesión', async () => {
-    const html = await templates.render(ACCOUNT_ACTIVATED_MJML, {
+    const html = await templates.render(await loadMailTemplate('account-activated'), {
       ...brand,
       firstName: 'Ana',
       loginUrl: 'https://umssy.test/login',
@@ -145,8 +141,24 @@ describe('plantillas MJML', () => {
     expect(html).toContain('href="https://umssy.test/login"');
   });
 
+  it('compila el correo de recuperación desde su archivo y escapa el nombre', async () => {
+    const html = await templates.render(await loadMailTemplate('password-reset-email'), {
+      ...brand,
+      recipientName: '<Ana>',
+      code: '123456',
+      expirationMinutes: '5',
+    });
+
+    expect(html).toContain('Recupera tu contraseña');
+    expect(html).toContain('&lt;Ana&gt;');
+    expect(html).toContain('123456');
+    expect(html).toContain('5 minutos');
+    expect(html).not.toContain('{{');
+    expect(html).not.toContain('<mj-');
+  });
+
   it('el correo de rechazo escapa el HTML del motivo', async () => {
-    const html = await templates.render(await loadRejectionTemplate(), {
+    const html = await templates.render(await loadMailTemplate('access-request-rejection'), {
       ...brand,
       reason: '<script>alert(1)</script>',
       requestCode: 'SOL-2026-0001',
