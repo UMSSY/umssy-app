@@ -1,5 +1,5 @@
 import { ROLE_NAMES, type RoleName } from '../../../common/enums/roles.enum.js';
-import { DEFAULT_REPORT_USER_TYPE } from '../constants/reports-access.constants.js';
+
 import type {
   ReportAccessRequestRecord,
   ReportDocumentType,
@@ -11,7 +11,7 @@ import type {
 function toRoleName(name: string | undefined): RoleName {
   const normalized = name?.toLowerCase().trim();
   return (
-    ROLE_NAMES.find((role) => role === normalized) ?? DEFAULT_REPORT_USER_TYPE
+    ROLE_NAMES.find((role) => role === normalized) ?? 'titulado'
   );
 }
 
@@ -53,7 +53,7 @@ export function toAccessRequestReportUser(
     id: request.id,
     fullName: toFullName(request.firstName, request.lastName),
     email: request.email,
-    userType: DEFAULT_REPORT_USER_TYPE,
+    userType: 'titulado',
     identifier: request.idCardNumber ?? '',
     documentType: toDocumentType(request),
     registeredAt: (request.submittedAt ?? request.createdAt).toISOString(),
