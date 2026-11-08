@@ -12,11 +12,7 @@ import { DOCUMENT_TYPES, type DocumentType } from "../constants/document-types.c
 import type { DocumentCorrectionResponse } from "../types/document-correction.types";
 import { getRequestCodeFromLink } from "../utils/get-request-code-from-link";
 import { isDocumentCorrectionToken } from "../utils/document-correction-link";
-import {
-  CORRECTION_AUTHORIZATION_MESSAGE, CORRECTION_CONFLICT_MESSAGE,
-  CORRECTION_FILE_ERROR_MESSAGE, CORRECTION_MISSING_FILE_MESSAGE,
-  CORRECTION_MISSING_TYPE_MESSAGE, CORRECTION_RETRY_MESSAGE,
-} from "../constants/document-correction.constants";
+import { CORRECTION_AUTHORIZATION_MESSAGE, CORRECTION_MISSING_FILE_MESSAGE, CORRECTION_MISSING_TYPE_MESSAGE, CORRECTION_RETRY_MESSAGE } from "../constants/document-correction.constants";
 import { FILE_TOO_LARGE_MESSAGE, validateDocumentFile } from "../utils/validate-document-file";
 import type { SendOptions } from "../types/access-request-send-options.types";
 
@@ -194,11 +190,11 @@ function correctionFailure(status: number): ApiResult<never> {
   const message = status === 401 || status === 403
     ? CORRECTION_AUTHORIZATION_MESSAGE
     : status === 409
-      ? CORRECTION_CONFLICT_MESSAGE
+      ? "La solicitud cambió o no admite este reenvío. Vuelve a verificar su estado desde el enlace de tu correo."
       : status === 413
         ? FILE_TOO_LARGE_MESSAGE
         : status === 400
-          ? CORRECTION_FILE_ERROR_MESSAGE
+          ? "No se pudo aceptar el archivo. Revisa su formato, tamaño y tipo de documento."
           : CORRECTION_RETRY_MESSAGE;
   return failure(status, message);
 }

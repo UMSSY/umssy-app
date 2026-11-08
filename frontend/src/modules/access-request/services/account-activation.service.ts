@@ -1,9 +1,6 @@
 import { ROLE_TAGS } from "@/shared/constants/roles.constants";
 import { apiClient } from "@/shared/services/api-client";
-import {
-  ACTIVATION_GENERIC_MESSAGE,
-  ACTIVATION_NETWORK_MESSAGE,
-} from "../constants/account-activation.constants";
+
 import type {
   ActivationFailure,
   ActivationReason,
@@ -39,8 +36,8 @@ function failure(status: number, message: string, extra: Partial<ActivationFailu
 }
 
 function parseError(status: number, body: unknown): ActivationFailure {
-  if (!isRecord(body)) return failure(0, ACTIVATION_NETWORK_MESSAGE);
-  const detail = typeof body.detail === "string" ? body.detail : ACTIVATION_GENERIC_MESSAGE;
+  if (!isRecord(body)) return failure(0, "No se pudo conectar con el servidor. Inténtalo de nuevo.");
+  const detail = typeof body.detail === "string" ? body.detail : "No se pudo completar la operación. Inténtalo de nuevo.";
   const data = isRecord(body.data) ? body.data : {};
   const reason = REASONS.find((item) => item === data.reason);
 
@@ -78,11 +75,11 @@ async function request<T>(
     if (response.status >= 200 && response.status < 300) {
       const body = unwrap(response.data);
       const parsed = isRecord(body) ? parse(body) : null;
-      return parsed === null ? failure(0, ACTIVATION_GENERIC_MESSAGE) : { ok: true, data: parsed };
+      return parsed === null ? failure(0, "No se pudo completar la operación. Inténtalo de nuevo.") : { ok: true, data: parsed };
     }
     return parseError(response.status, response.data);
   } catch {
-    return failure(0, ACTIVATION_NETWORK_MESSAGE);
+    return failure(0, "No se pudo conectar con el servidor. Inténtalo de nuevo.");
   }
 }
 

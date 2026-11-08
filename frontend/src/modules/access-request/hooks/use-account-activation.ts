@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { startSession } from "@/modules/auth";
-import { OTP_MAX_ATTEMPTS } from "../constants/account-activation.constants";
+
 import { accountActivationService } from "../services/account-activation.service";
 import type { ActivationFailure, ActivationResult, ActivationSession, ActivationStatus, ActivationStep } from "../types/account-activation.types";
 
@@ -100,7 +100,7 @@ export function useAccountActivation(email: string) {
         const data = result.data;
         client.setQueryData<StatusData>(key, {
           offsetMs: clockOffset(data.serverTime),
-          result: { ok: true, data: { state: "ready", ...data, remainingAttempts: OTP_MAX_ATTEMPTS } },
+          result: { ok: true, data: { state: "ready", ...data, remainingAttempts: 5 } },
         });
         setStep("code"); setVerifiedCode("");
         setFeedback({ info: "Te enviamos un nuevo código. Revisa tu correo." });

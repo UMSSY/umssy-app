@@ -1,6 +1,6 @@
 import { CAREERS } from "../constants/careers.constants";
 import { ID_CARD_ISSUED_IN } from "../constants/id-card-issued-in.constants";
-import { ID_CARD_MAX_LENGTH, ID_CARD_MIN_LENGTH, SIS_CODE_LENGTH } from "../constants/personal-data-rules.constants";
+import { ID_CARD_MAX_LENGTH, SIS_CODE_LENGTH } from "../constants/personal-data-rules.constants";
 import type { FieldErrors, PersonalDataValues } from "../types/access-request.types";
 import { detectEmailTypo } from "./detect-email-typo";
 
@@ -38,8 +38,8 @@ function validateIdCard(value: string): string | undefined {
   const digitsError = validateDigits(value, "El carnet de identidad");
   if (digitsError) return digitsError;
   const length = value.trim().length;
-  if (length < ID_CARD_MIN_LENGTH || length > ID_CARD_MAX_LENGTH) {
-    return `El carnet de identidad debe tener entre ${ID_CARD_MIN_LENGTH} y ${ID_CARD_MAX_LENGTH} dígitos`;
+  if (length < 6 || length > ID_CARD_MAX_LENGTH) {
+    return `El carnet de identidad debe tener entre 6 y ${ID_CARD_MAX_LENGTH} dígitos`;
   }
 }
 

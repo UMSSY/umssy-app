@@ -3,7 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { ArrowRight, LoaderCircle, MailCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { OTP_LENGTH } from "../../constants/account-activation.constants";
+
 import type { ActivationStatus } from "../../types/account-activation.types";
 import { formatCountdown } from "../../utils/format-countdown";
 import { maskEmail } from "@/shared/utils/mask-email";
@@ -27,7 +27,7 @@ interface ActivationCodeStepProps {
 export function ActivationCodeStep(props: ActivationCodeStepProps) {
   const { email, status, expiresIn, resendIn, isBusy, isVerifying, isResending, error, info, onVerify, onResend } = props;
   const [code, setCode] = useState("");
-  const canSubmit = code.length === OTP_LENGTH && !isBusy;
+  const canSubmit = code.length === 6 && !isBusy;
   const canResend = resendIn === 0 && status.resendsRemaining > 0 && !isBusy;
 
   function handleSubmit(event: FormEvent) {
