@@ -1,5 +1,6 @@
 'use client';
 
+import { Progress } from "@/components/ui/progress";
 import { Calendar, Check, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -78,10 +79,10 @@ export function EventCard({
         onClick={handleCardClick}
         onKeyDown={handleKeyDown}
         className={cn(
-          'flex h-auto w-full cursor-pointer flex-col items-stretch justify-between gap-4 rounded-lg border bg-surface p-5 text-left whitespace-normal transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring',
+          "flex h-auto w-full cursor-pointer flex-col items-stretch justify-between gap-4 rounded-lg border bg-surface p-5 text-left whitespace-normal transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring",
           isSelected
-            ? 'border-accent bg-interaction ring-1 ring-accent hover:bg-interaction'
-            : 'border-border hover:border-border-strong',
+            ? "border-accent bg-interaction ring-1 ring-accent hover:bg-interaction"
+            : "border-border hover:border-border-strong",
         )}
       >
         <WorkshopCover
@@ -94,18 +95,18 @@ export function EventCard({
             {categoryName}
           </span>
 
-          {displayStatus === 'voting' && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-700">
+          {displayStatus === "voting" && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-surface-soft px-3 py-1 text-xs font-semibold text-ink">
               <Clock className="size-3.5" aria-hidden="true" />
               En votación
             </span>
           )}
-          {displayStatus === 'expired' && (
+          {displayStatus === "expired" && (
             <span className="rounded-full bg-surface-soft px-3 py-1 text-xs font-semibold text-text-secondary">
               Vencido
             </span>
           )}
-          {displayStatus === 'full' && isFull && (
+          {displayStatus === "full" && isFull && (
             <span
               data-testid="event-full-badge"
               className="rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-danger"
@@ -113,8 +114,8 @@ export function EventCard({
               Lleno
             </span>
           )}
-          {displayStatus === 'published' && event.status === 'Publicado' && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800">
+          {displayStatus === "published" && event.status === "Publicado" && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-surface-soft px-3 py-1 text-xs font-semibold text-ink">
               <Check className="size-3.5" aria-hidden="true" />
               Publicada
             </span>
@@ -122,7 +123,12 @@ export function EventCard({
         </div>
 
         <div className="flex flex-col gap-2.5">
-          {isSelected ? <span aria-hidden="true" className="h-0.5 w-8 rounded-full bg-brand-red" /> : null}
+          {isSelected ? (
+            <span
+              aria-hidden="true"
+              className="h-0.5 w-8 rounded-full bg-brand-red"
+            />
+          ) : null}
           <h2 className="text-base leading-snug font-bold text-ink">
             {event.title}
           </h2>
@@ -136,18 +142,32 @@ export function EventCard({
           {isProposal ? (
             votingDeadline && (
               <p className="flex items-center gap-2 text-xs text-text-secondary">
-                <Calendar className="size-3.5 shrink-0 text-accent" aria-hidden="true" />
-                <span>{displayStatus === 'expired' ? 'Plazo cerrado:' : 'Fecha límite:'} {votingDeadline}</span>
+                <Calendar
+                  className="size-3.5 shrink-0 text-accent"
+                  aria-hidden="true"
+                />
+                <span>
+                  {displayStatus === "expired"
+                    ? "Plazo cerrado:"
+                    : "Fecha límite:"}{" "}
+                  {votingDeadline}
+                </span>
               </p>
             )
           ) : (
             <div className="flex flex-col gap-1.5 text-xs text-text-secondary">
               <div className="flex items-center gap-2">
-                <Calendar className="size-3.5 shrink-0 text-accent" aria-hidden="true" />
+                <Calendar
+                  className="size-3.5 shrink-0 text-accent"
+                  aria-hidden="true"
+                />
                 <span>{formatEventDate(event.eventDate)}</span>
               </div>
               <div className="flex items-center gap-2">
-                <Clock className="size-3.5 shrink-0 text-accent" aria-hidden="true" />
+                <Clock
+                  className="size-3.5 shrink-0 text-accent"
+                  aria-hidden="true"
+                />
                 <span>{formatTimeRange(event.startTime, event.endTime)}</span>
               </div>
             </div>
@@ -156,9 +176,15 @@ export function EventCard({
 
         {isProposal ? (
           <div className="space-y-3 pt-1">
-            <ProposalProgress event={event} isExpired={displayStatus === 'expired'} />
-            {displayStatus === 'voting' && event.hasSupported && (
-              <p role="status" className="rounded-md bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-800">
+            <ProposalProgress
+              event={event}
+              isExpired={displayStatus === "expired"}
+            />
+            {displayStatus === "voting" && event.hasSupported && (
+              <p
+                role="status"
+                className="rounded-md bg-surface-soft px-3 py-2 text-xs font-medium text-ink"
+              >
                 <Check className="mr-1 inline size-3.5" aria-hidden="true" />
                 {PROPOSAL_SUPPORT_ERROR_MESSAGES.ALREADY_SUPPORTED}
               </p>
@@ -171,23 +197,11 @@ export function EventCard({
                 Sin limite de cupos
               </span>
             ) : (
-              <div
-                role="progressbar"
-                aria-label={`Cupos ocupados para ${event.title}`}
-                aria-valuenow={progressPercentage}
-                aria-valuemin={0}
-                aria-valuemax={100}
-                className="h-2 flex-1 overflow-hidden rounded-full bg-availability-border"
-              >
-                <div
-                  data-testid="event-capacity-bar"
-                  className={cn(
-                    'h-full rounded-full transition-all',
-                    isFull ? 'bg-danger' : 'bg-success',
-                  )}
-                  style={{ width: `${progressPercentage}%` }}
-                />
-              </div>
+              <Progress
+                value={progressPercentage}
+                aria-label="Cupos ocupados"
+                className="w-full"
+              />
             )}
             <span className="shrink-0 text-xs font-medium text-text-secondary">
               {capacity === null
