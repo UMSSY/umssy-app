@@ -1,3 +1,4 @@
+import { MIN_SEARCH_CHARS } from "@/modules/chat/constants/contact-search.constants";
 import {
   AttachmentType,
   Conversation,
@@ -32,7 +33,7 @@ import type {
   RawBackendAttachmentItem,
   RawBackendMessageItem,
 } from '../types/chat-api.types';
-const MIN_SEARCH_CHARS = 2;
+
 const DEFAULT_MESSAGE_PAGE_SIZE = 10;
 
 export function getCurrentSessionUserId(): string {
@@ -133,7 +134,6 @@ export async function getMessages(
     return getMessagesByConversation(conversationId);
   }
 }
-
 
 export async function getPaginatedMessages({
   conversationId,
@@ -313,7 +313,6 @@ export async function getPaginatedMessages({
   };
 }
 
-
 /**
  * HU-2: obtiene o crea la conversación con un contacto.
  * Llama a POST /chat/conversations.
@@ -457,7 +456,7 @@ export async function markConversationAsRead(
   try {
     await apiClient.patch(`/chat/messages/${conversationId}/read`);
   } catch {
-    
+
   }
 }
 
