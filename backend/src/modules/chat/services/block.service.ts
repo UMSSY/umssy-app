@@ -1,3 +1,4 @@
+import { RECORD_NOT_FOUND_CODE, UNIQUE_CONSTRAINT_VIOLATION_CODE } from '../../../common/constants/prisma-errors.constants.js';
 import { Injectable } from '@nestjs/common';
 import { z } from 'zod';
 import { ChatUserBlockRepository } from '../repositories/chat-user-block.repository.js';
@@ -11,8 +12,6 @@ import {
 } from '../exceptions/index.js';
 import type { BlockResponse } from '../responses/block.response.js';
 
-const UNIQUE_VIOLATION_CODE = 'P2002';
-const RECORD_NOT_FOUND_CODE = 'P2025';
 const uuid = z.string().uuid();
 
 function hasPrismaCode(error: unknown, code: string): boolean {
@@ -45,7 +44,7 @@ export class BlockService {
       };
     } catch (error) {
       // Dos peticiones simultáneas: la restricción única responde 409, no 500.
-      if (hasPrismaCode(error, UNIQUE_VIOLATION_CODE)) {
+      if (hasPrismaCode(error, UNIQUE_CONSTRAINT_VIOLATION_CODE)) {
         throw new UserAlreadyBlockedException();
       }
       throw error;

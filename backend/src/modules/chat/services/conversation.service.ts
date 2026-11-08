@@ -1,3 +1,4 @@
+import { UNIQUE_CONSTRAINT_VIOLATION_CODE } from '../../../common/constants/prisma-errors.constants.js';
 import { ForbiddenException, Injectable } from '@nestjs/common';
 
 import { ConversationRepository } from '../repositories/conversation.repository.js';
@@ -154,8 +155,8 @@ export class ConversationService {
       };
 
       if (
-        err?.code === 'P2002' ||
-        err?.message?.includes('P2002') ||
+        err?.code === UNIQUE_CONSTRAINT_VIOLATION_CODE ||
+        err?.message?.includes(UNIQUE_CONSTRAINT_VIOLATION_CODE) ||
         err?.message?.includes('Unique constraint')
       ) {
         const concurrentExisting =

@@ -1,13 +1,9 @@
+import { MAX_FILE_UPLOAD_SIZE_BYTES } from '../../../common/constants/file-upload.constants.js';
 import { Injectable } from '@nestjs/common';
 import type { MulterFile } from '../../../common/types/multer-file.type.js';
 import { FileValidationService } from '../../../common/services/file-validation.service.js';
 import { EmptyFileException } from '../../../common/exceptions/empty-file.exception.js';
-import {
-  MAX_IMAGE_SIZE_BYTES,
-  MAX_PDF_SIZE_BYTES,
-  ALLOWED_IMAGE_MIME_TYPES,
-  ALLOWED_PDF_MIME_TYPES,
-} from '../constants/attachment.constants.js';
+import { MAX_IMAGE_SIZE_BYTES, ALLOWED_IMAGE_MIME_TYPES, ALLOWED_PDF_MIME_TYPES } from '../constants/attachment.constants.js';
 import {
   AttachmentNotFoundException,
   AttachmentTooLargeException,
@@ -69,7 +65,7 @@ export class AttachmentService {
       );
     }
 
-    if (isPdf && file.size > MAX_PDF_SIZE_BYTES) {
+    if (isPdf && file.size > MAX_FILE_UPLOAD_SIZE_BYTES) {
       throw new AttachmentTooLargeException(
         'El documento supera el tamaño maximo permitido 10 MB.',
       );
@@ -78,7 +74,7 @@ export class AttachmentService {
     const uploadedFile = this.attachmentMapper.toUploadedFile(file);
     const validatedFile = this.fileValidationService.validate(uploadedFile, {
       allowedTypes: isImage ? ['jpg', 'png'] : ['pdf'],
-      maxSizeBytes: isImage ? MAX_IMAGE_SIZE_BYTES : MAX_PDF_SIZE_BYTES,
+      maxSizeBytes: isImage ? MAX_IMAGE_SIZE_BYTES : MAX_FILE_UPLOAD_SIZE_BYTES,
     });
 
     const conversation = await this.conversationRepository.findById(

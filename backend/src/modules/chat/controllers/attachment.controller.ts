@@ -27,7 +27,7 @@ import { RolesGuard } from '../../../common/guards/roles.guard.js';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { ResponseInterceptor } from '../../../common/interceptors/index.js';
 import type { MulterFile } from '../../../common/types/multer-file.type.js';
-import { MAX_ATTACHMENT_UPLOAD_SIZE_BYTES } from '../constants/attachment.constants.js';
+import { MAX_FILE_UPLOAD_SIZE_BYTES } from '../../../common/constants/file-upload.constants.js';
 import { AttachmentUploadInterceptor } from '../interceptors/attachment-upload.interceptor.js';
 import {
   sendAttachmentMessageSchema,
@@ -75,7 +75,7 @@ export class AttachmentController {
     AttachmentUploadInterceptor,
     FileInterceptor('file', {
       limits: {
-        fileSize: MAX_ATTACHMENT_UPLOAD_SIZE_BYTES,
+        fileSize: MAX_FILE_UPLOAD_SIZE_BYTES,
       },
     }),
   )
@@ -93,7 +93,7 @@ export class AttachmentController {
     AttachmentUploadInterceptor,
     FileInterceptor('file', {
       limits: {
-        fileSize: MAX_ATTACHMENT_UPLOAD_SIZE_BYTES,
+        fileSize: MAX_FILE_UPLOAD_SIZE_BYTES,
       },
     }),
   )
