@@ -1,7 +1,5 @@
 export const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 
-export const MAX_FILE_NAME_LENGTH = 200;
-
 // El tipo se decide por los primeros bytes del contenido, nunca por el nombre ni el MIME declarado
 export const FILE_TYPES = [
   { extension: 'pdf', mimeType: 'application/pdf', signature: [0x25, 0x50, 0x44, 0x46] },
