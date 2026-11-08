@@ -1,3 +1,4 @@
+import { UNIQUE_CONSTRAINT_VIOLATION_CODE } from '../../../common/constants/prisma-errors.constants.js';
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '../../../prisma/client.js';
 import { JOB_APPLICATION_STATUS } from '../constants/job-application.constants.js';
@@ -14,7 +15,7 @@ import type {
 function isUniqueViolation(error: unknown): boolean {
   return (
     error instanceof Prisma.PrismaClientKnownRequestError &&
-    error.code === 'P2002'
+    error.code === UNIQUE_CONSTRAINT_VIOLATION_CODE
   );
 }
 
