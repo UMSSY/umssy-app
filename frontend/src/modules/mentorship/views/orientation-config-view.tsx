@@ -1,10 +1,12 @@
 "use client";
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { PageHeading } from "@/shared/components/layout";
 import { Label } from "@/components/ui/label";
-import { AlertCircle, CheckCircle2 } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
 import {
   AlertDialog,
@@ -32,21 +34,12 @@ export function OrientationConfigView() {
   const { orientationTypes, savedIds, isLoading, isSaving, hasLoadError, isMentorActive, retry, save } = useOrientationConfig();
   const [draftIds, setSelectedIds] = useState<string[] | null>(null);
   const selectedIds = draftIds ?? savedIds;
-  const [showToast, setShowToast] = useState(false);
   const [isDiscardDialogOpen, setIsDiscardDialogOpen] = useState(false);
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!showToast) return;
-
-    const timer = window.setTimeout(() => setShowToast(false), 4000);
-    return () => window.clearTimeout(timer);
-  }, [showToast]);
-
   const handleCheckboxChange = (id: string) => {
     setErrorMessage(null);
-    setShowToast(false);
     setSelectedIds((previous) =>
       (previous ?? savedIds).includes(id)
         ? (previous ?? savedIds).filter((item) => item !== id)
@@ -62,12 +55,11 @@ export function OrientationConfigView() {
       return;
     }
 
-    setShowToast(false);
     const idsToSave = [...selectedIds];
     try {
       await save(idsToSave);
       setErrorMessage(null);
-      setShowToast(true);
+      toast.success("Tipos de orientación actualizados correctamente");
     } catch {
       setErrorMessage(
         "No se pudieron guardar los cambios. Intente nuevamente.",
@@ -140,8 +132,10 @@ export function OrientationConfigView() {
     <main className="min-h-full w-full bg-background">
       <div className="flex w-full flex-col">
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
-
-          <PageHeading title="Editar tipos de orientación" description="Selecciona los tipos de orientación que deseas brindar." />
+          <PageHeading
+            title="Editar tipos de orientación"
+            description="Selecciona los tipos de orientación que deseas brindar."
+          />
 
           <Card className="w-full max-w-none gap-6 rounded-lg border border-border bg-white py-0 shadow-none ring-0">
             <CardContent className="flex flex-col gap-6 px-4 pt-4 sm:px-8 sm:pt-8">
@@ -177,13 +171,14 @@ export function OrientationConfigView() {
                     return (
                       <Label
                         key={option.id}
-                        className={`group flex cursor-pointer items-center justify-between gap-3 rounded-lg border p-4 transition-colors ${
+                        className={cn(
+                          "group flex cursor-pointer items-center justify-between gap-3 rounded-lg border p-4 transition-colors ",
                           !isSelected
                             ? "border-transparent bg-surface-soft/50 hover:bg-interaction"
                             : isSaved
                               ? "border-border bg-surface-soft/50"
-                              : "border-accent bg-interaction/50"
-                        }`}
+                              : "border-accent bg-interaction/50",
+                        )}
                       >
                         <div className="flex min-w-0 flex-1 flex-col gap-1">
                           <span
@@ -208,13 +203,14 @@ export function OrientationConfigView() {
                               handleCheckboxChange(option.id)
                             }
                             aria-labelledby={`orientation-label-${option.id}`}
-                            className={`size-5 border-0 bg-border text-transparent data-checked:text-accent-foreground [&_[data-slot=checkbox-indicator]>svg]:size-4 ${
+                            className={cn(
+                              "size-5 border-0 bg-border text-transparent data-checked:text-accent-foreground [&_[data-slot=checkbox-indicator]>svg]:size-4 ",
                               !isSelected
                                 ? ""
                                 : isSaved
                                   ? "data-checked:bg-accent"
-                                  : "data-checked:bg-accent"
-                            }`}
+                                  : "data-checked:bg-accent",
+                            )}
                           />
                         </div>
                       </Label>
@@ -226,7 +222,9 @@ export function OrientationConfigView() {
             <CardFooter className="mx-4 flex items-center justify-between gap-4 border-t border-border bg-transparent px-0 py-4 sm:mx-8 sm:pb-8">
               <Link
                 href="/mentors/participation"
-                onClick={(event) => { if (hasChanges) { event.preventDefault(); setIsDiscardDialogOpen(true); } }}
+                onClick={(event) => {
+                  if (hasChanges) { event.preventDefault(); setIsDiscardDialogOpen(true); }
+                }}
                 className={buttonVariants({
                   className:
                     "h-10 rounded-lg bg-surface-soft px-6 text-sm font-semibold text-ink hover:bg-interaction active:translate-y-0",
@@ -237,7 +235,12 @@ export function OrientationConfigView() {
               <Button
                 type="button"
                 onClick={() => setIsConfirmDialogOpen(true)}
-                disabled={!hasChanges || selectedIds.length === 0 || isSaving || hasLoadError}
+                disabled={
+                  !hasChanges ||
+                  selectedIds.length === 0 ||
+                  isSaving ||
+                  hasLoadError
+                }
                 className="h-10 rounded-lg bg-primary px-6 text-sm font-semibold text-primary-foreground shadow-none hover:bg-brand-hover active:translate-y-0 disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isSaving ? "Guardando..." : "Guardar cambios"}
@@ -294,7 +297,8 @@ export function OrientationConfigView() {
               ¿Descartar cambios?
             </AlertDialogTitle>
             <AlertDialogDescription className="mt-2 text-base text-text-secondary">
-              Tienes cambios sin guardar. Si vuelves a tu participación, se perderán.
+              Tienes cambios sin guardar. Si vuelves a tu participación, se
+              perderán.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="mx-0 mt-8 mb-0 flex-row justify-end gap-3 border-t-0 bg-transparent p-0">
@@ -317,18 +321,6 @@ export function OrientationConfigView() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      {showToast && (
-        <Alert
-          className="fixed inset-x-4 bottom-4 z-50 flex w-auto items-center gap-3 rounded-lg border-2 border-green-600 bg-green-50 px-6 py-3 text-green-950 shadow-md sm:right-8 sm:bottom-8 sm:left-auto"
-          role="status"
-        >
-          <CheckCircle2 size={24} className="shrink-0 text-green-700" />
-          <span className="text-base font-medium">
-            Tipos de orientación actualizados correctamente
-          </span>
-        </Alert>
-      )}
     </main>
   );
 }
