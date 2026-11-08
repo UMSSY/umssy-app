@@ -21,8 +21,6 @@ export const DOCUMENT_TYPE_LABELS: Record<string, string> = {
   national_title: "Título en provisión nacional",
 };
 
-export const SESSION_TOKEN_KEY = "accessToken";
-
 export const INBOX_PATH = "/backoffice/solicitudes";
 
 export const REJECTION_MAX_LENGTH = 500;
