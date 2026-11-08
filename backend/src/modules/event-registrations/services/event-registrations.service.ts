@@ -1,3 +1,4 @@
+import { TRANSACTION_CONFLICT_CODE, UNIQUE_CONSTRAINT_VIOLATION_CODE } from '../../../common/constants/prisma-errors.constants.js';
 import { RegistrationScheduleConflictException } from '../exceptions/registration-schedule-conflict.exception.js';
 import { PassNotFoundException } from '../exceptions/pass-not-found.exception.js';
 import type { SupportTransactionResult } from '../types/support-transaction-result.types.js';
@@ -101,7 +102,7 @@ export class EventRegistrationsService {
       try {
         return await this.repository.transaction(operation, Prisma.TransactionIsolationLevel.Serializable);
       } catch (error) {
-        if (!(error instanceof Prisma.PrismaClientKnownRequestError) || !['P2034', 'P2002'].includes(error.code)) {
+        if (!(error instanceof Prisma.PrismaClientKnownRequestError) || ![TRANSACTION_CONFLICT_CODE, UNIQUE_CONSTRAINT_VIOLATION_CODE].includes(error.code)) {
           throw error;
         }
       }
