@@ -42,15 +42,11 @@ export class CvMetadataRepository {
   }
 
   async countByUserId(userId: string): Promise<number | null> {
-    const rows = await this.prisma.$queryRaw<{ total: number }[]>(Prisma.sql`
-      SELECT count(c.id)::int AS "total"
-      FROM users u
-      LEFT JOIN user_cv_file c ON c.user_id = u.id AND ${visibleCvCondition}
-      WHERE u.id = ${userId}::uuid
-      GROUP BY u.id
-    `);
-
-    return rows[0]?.total ?? null;
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { _count: { select: { cvFiles: { where: { cvPdfData: { not: null }, cvUploadedAt: { not: null } } } } } },
+    });
+    return user?._count.cvFiles ?? null;
   }
 
   findPageByUserId(
