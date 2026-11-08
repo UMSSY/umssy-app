@@ -1,5 +1,7 @@
 "use client";
 
+import { JOB_MODALITIES } from "@/shared/constants/job-offer.constants";
+
 import { format } from "date-fns/format";
 import { parseISO } from "date-fns/parseISO";
 import { ListFilter } from "lucide-react";
@@ -14,11 +16,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  CONTRACT_TYPES,
-  MODALITIES,
-  STATUS_FILTER_OPTIONS,
-} from "../constants/job-offers.constants";
+import { CONTRACT_TYPES, STATUS_FILTER_OPTIONS } from "../constants/job-offers.constants";
 import { DEFAULT_JOB_OFFER_FILTERS } from "../utils/filter-job-offers";
 import type { ApplicantsOrder } from "../types/applicants-order.types";
 import type { FilterOption } from "../types/filter-option.types";
@@ -122,7 +120,7 @@ export function VacancyFiltersDialog({
           </div>
           <FilterColumn
             title="Modalidad"
-            options={MODALITIES.map((item) => ({ value: item as string, label: item }))}
+            options={JOB_MODALITIES.map((item) => ({ value: item as string, label: item }))}
             selected={filters.modality}
             onSelect={(value) => onChange("modality", value === filters.modality ? "" : value)}
           />

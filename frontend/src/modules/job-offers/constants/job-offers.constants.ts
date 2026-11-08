@@ -1,4 +1,3 @@
-export const MODALITIES = ["Presencial", "Remoto", "Híbrido"] as const;
 export const CONTRACT_TYPES = ["Tiempo completo", "Medio tiempo", "Pasantía"] as const;
 export const INTERNSHIP_CONTRACT_TYPE = "Pasantía";
 export const SALARY_TO_BE_AGREED = "A convenir";
