@@ -2,12 +2,12 @@
 
 import { FileText, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { NO_EVIDENCE_LABEL } from "../../constants/audit-log.constants";
+
 import type { EvidenceButtonProps } from "../../types/audit-log-component-props.types";
 
 export function EvidenceButton({ event, isLoading, onOpen }: EvidenceButtonProps) {
   if (!event.evidence) {
-    return <span className="text-[13px] text-text-secondary">{NO_EVIDENCE_LABEL}</span>;
+    return <span className="text-[13px] text-text-secondary">{"Sin documento"}</span>;
   }
 
   return (

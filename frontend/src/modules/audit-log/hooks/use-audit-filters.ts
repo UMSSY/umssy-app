@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
 import { DEFAULT_AUDIT_FILTERS } from "../constants/audit-log.constants";
-import { INVALID_PERIOD_MESSAGE, MIN_SEARCH_LENGTH, SEARCH_DEBOUNCE_MS } from "../constants/audit-log-filters.constants";
+
 import type { AuditAction } from "../types/audit-event.types";
 import type { AuditLogFilters } from "../types/audit-log-filters.types";
 import { getCurrentMonthPeriod } from "../utils/get-current-month-period";
@@ -21,11 +21,11 @@ export function useAuditFilters() {
   const [to, setTo] = useState(defaultPeriod.to);
 
   // Espera corta para no enviar una petición por cada tecla
-  const debouncedSearch = useDebouncedValue(searchInput.trim(), SEARCH_DEBOUNCE_MS);
-  const search = debouncedSearch.length >= MIN_SEARCH_LENGTH ? debouncedSearch : "";
+  const debouncedSearch = useDebouncedValue(searchInput.trim(), 300);
+  const search = debouncedSearch.length >= 2 ? debouncedSearch : "";
   const fromDate = isCompleteDate(from) ? from : "";
   const toDate = isCompleteDate(to) ? to : "";
-  const periodError = fromDate && toDate && fromDate > toDate ? INVALID_PERIOD_MESSAGE : null;
+  const periodError = fromDate && toDate && fromDate > toDate ? "La fecha final no puede ser anterior a la fecha inicial." : null;
 
   // Una fecha incompleta o un período inválido no se envían al servidor; el error se muestra junto a las fechas
   const filters: AuditLogFilters = useMemo(

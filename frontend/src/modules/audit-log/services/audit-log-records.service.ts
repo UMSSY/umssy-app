@@ -1,5 +1,5 @@
 import { apiClient } from "@/shared/services/api-client";
-import { CSV_FALLBACK_FILE_NAME } from "../constants/audit-log-filters.constants";
+
 import type { AuditApiResult } from "../types/audit-api-result.types";
 import type { AuditCsvFile, AuditResponsibleOption } from "../types/audit-log-records.types";
 import type { AuditLogFilters } from "../types/audit-log-filters.types";
@@ -20,9 +20,9 @@ async function listResponsibles(): Promise<AuditApiResult<AuditResponsibleOption
 }
 
 function readFileName(disposition: unknown): string {
-  if (typeof disposition !== "string") return CSV_FALLBACK_FILE_NAME;
+  if (typeof disposition !== "string") return "registro-auditoria.csv";
   const match = /filename="?([^";]+)"?/i.exec(disposition);
-  return match?.[1] ?? CSV_FALLBACK_FILE_NAME;
+  return match?.[1] ?? "registro-auditoria.csv";
 }
 
 async function readErrorBody(data: unknown): Promise<unknown> {
