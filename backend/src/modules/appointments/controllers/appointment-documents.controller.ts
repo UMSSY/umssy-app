@@ -1,3 +1,4 @@
+import { MAX_FILE_UPLOAD_SIZE_BYTES } from '../../../common/constants/file-upload.constants.js';
 import {
   Controller,
   Get,
@@ -40,7 +41,7 @@ import {
   FIND_APPOINTMENT_DOCS,
   UPLOAD_APPOINTMENT_DOCUMENT_DOCS,
 } from '../constants/appointment-docs.constants.js';
-import { APPOINTMENT_DOCUMENT_UPLOAD_LIMIT_BYTES } from '../constants/appointment-document.constants.js';
+
 import { appointmentIdSchema } from '../requests/appointment-id.request.js';
 import { AppointmentDocumentsService } from '../services/appointment-documents.service.js';
 import type { AppointmentDocumentResponse } from '../types/appointment-document-response.types.js';
@@ -66,7 +67,7 @@ export class AppointmentDocumentsController {
   @Post()
   @UseInterceptors(
     FileInterceptor('file', {
-      limits: { fileSize: APPOINTMENT_DOCUMENT_UPLOAD_LIMIT_BYTES, files: 1 },
+      limits: { fileSize: MAX_FILE_UPLOAD_SIZE_BYTES, files: 1 },
     }),
   )
   @ApiOperation({
