@@ -40,7 +40,12 @@ export class AuthService {
   }
 
   getSession(user: AuthenticatedUser): SessionResponse {
-    return { id: user.id, email: user.email, roles: user.roles };
+    return {
+      id: user.id,
+      email: user.email,
+      roles: user.roles,
+      company: user.company ?? null,
+    };
   }
 
   async login(dto: LoginDto): Promise<LoginResponse> {
@@ -59,27 +64,44 @@ export class AuthService {
     const roles = LOGIN_ROLE_PRIORITY.filter((role) => assignedRoles.has(role));
     const roleTag = dto.roleTag ?? roles[0];
     if (!roleTag || !roles.includes(roleTag)) {
-      throw new RoleNotAssignedException(dto.roleTag ? undefined : "El usuario no tiene roles habilitados");
+      throw new RoleNotAssignedException(
+        dto.roleTag ? undefined : 'El usuario no tiene roles habilitados',
+      );
     }
 
     const accessToken = this.jwtService.sign({ sub: user.id, roleTag, roles });
     return { accessToken, roleTag, roles };
   }
 
-  async requestPasswordReset(dto: RequestPasswordResetDto): Promise<{ ok: boolean; message: string }> {
+  async requestPasswordReset(
+    dto: RequestPasswordResetDto,
+  ): Promise<{ ok: boolean; message: string }> {
     const user = await this.authRepository.findUserByEmail(dto.email);
 
     if (!user || !user.isActive) {
-      this.logger.warn(`Solicitud de recuperación de contraseña para correo inexistente o inactivo: ${dto.email}`);
-      return { ok: true, message: 'Si el correo está registrado, recibirás un código de verificación. Si ya solicitaste uno, espera 2 minutos.' };
+      this.logger.warn(
+        `Solicitud de recuperación de contraseña para correo inexistente o inactivo: ${dto.email}`,
+      );
+      return {
+        ok: true,
+        message:
+          'Si el correo está registrado, recibirás un código de verificación. Si ya solicitaste uno, espera 2 minutos.',
+      };
     }
 
     const latestOtp = await this.authRepository.findLatestOtp(user.id);
     if (latestOtp) {
-      const elapsedSeconds = (Date.now() - latestOtp.createdAt.getTime()) / 1000;
+      const elapsedSeconds =
+        (Date.now() - latestOtp.createdAt.getTime()) / 1000;
       if (elapsedSeconds < RESEND_COOLDOWN_SECONDS) {
-        this.logger.warn('Cooldown activo para solicitud de código de: ' + dto.email);
-        return { ok: true, message: 'Si el correo está registrado, recibirás un código de verificación. Si ya solicitaste uno, espera 2 minutos.' };
+        this.logger.warn(
+          'Cooldown activo para solicitud de código de: ' + dto.email,
+        );
+        return {
+          ok: true,
+          message:
+            'Si el correo está registrado, recibirás un código de verificación. Si ya solicitaste uno, espera 2 minutos.',
+        };
       }
     }
 
@@ -87,9 +109,14 @@ export class AuthService {
     const codeHash = await bcrypt.hash(code, 10);
     const expiresAt = new Date(Date.now() + OTP_EXPIRATION_MINUTES * 60 * 1000);
 
-    await this.authRepository.createPasswordResetOtp(user.id, codeHash, expiresAt);
+    await this.authRepository.createPasswordResetOtp(
+      user.id,
+      codeHash,
+      expiresAt,
+    );
 
-    const recipientName = `${user.firstName} ${user.lastName}`.trim() || 'Usuario';
+    const recipientName =
+      `${user.firstName} ${user.lastName}`.trim() || 'Usuario';
     await this.mailService.send({
       to: user.email,
       subject: `${code} es tu código de recuperación de contraseña - UMSSY`,
@@ -102,7 +129,11 @@ export class AuthService {
       },
     });
 
-    return { ok: true, message: 'Si el correo está registrado, recibirás un código de verificación. Si ya solicitaste uno, espera 2 minutos.' };
+    return {
+      ok: true,
+      message:
+        'Si el correo está registrado, recibirás un código de verificación. Si ya solicitaste uno, espera 2 minutos.',
+    };
   }
 
   private async validateResetCode(email: string, code: string) {
@@ -133,15 +164,23 @@ export class AuthService {
     return { user, otp };
   }
 
-  async verifyPasswordReset(dto: VerifyPasswordResetDto): Promise<{ ok: boolean; message: string }> {
+  async verifyPasswordReset(
+    dto: VerifyPasswordResetDto,
+  ): Promise<{ ok: boolean; message: string }> {
     await this.validateResetCode(dto.email, dto.code);
     return { ok: true, message: 'Código de verificación validado con éxito.' };
   }
 
-  async resetPassword(dto: ResetPasswordDto): Promise<{ ok: boolean; message: string }> {
+  async resetPassword(
+    dto: ResetPasswordDto,
+  ): Promise<{ ok: boolean; message: string }> {
     const { user, otp } = await this.validateResetCode(dto.email, dto.code);
     const newPasswordHash = await bcrypt.hash(dto.password, 10);
-    await this.authRepository.updateUserPasswordAndInvalidateOtp(user.id, newPasswordHash, otp.id);
+    await this.authRepository.updateUserPasswordAndInvalidateOtp(
+      user.id,
+      newPasswordHash,
+      otp.id,
+    );
 
     return { ok: true, message: 'Contraseña actualizada correctamente.' };
   }
