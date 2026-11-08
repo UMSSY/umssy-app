@@ -37,9 +37,11 @@ export class RadarReviewRepository {
       RETURNING evidence.user_id,status.title AS review_status`;
   }
 
-  cvOwner(cvId: string, context: TransactionContext) {
-    return context.client.$queryRaw<{ user_id: string }[]>`
-      SELECT user_id FROM radar_cv_evidence WHERE cv_id=${cvId}::uuid`;
+  async cvOwner(cvId: string, context: TransactionContext) {
+    const row = await context.client.radarCvEvidence.findUnique({
+      where: { cvId }, select: { userId: true },
+    });
+    return row ? [{ user_id: row.userId }] : [];
   }
 
 }
