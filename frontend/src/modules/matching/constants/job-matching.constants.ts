@@ -62,8 +62,6 @@ export const EMPTY_JOB_FEED_FILTERS: JobFeedFilters = {
   onlyHighAffinity: false,
 };
 
-export const JOB_FEED_MODALITIES = ["Presencial", "Remoto", "Híbrido"] as const;
-
 export const JOB_FEED_MESSAGES = {
   listTitle: "Vacantes recomendadas para ti",
   orderedByAffinity: "ordenadas de mayor a menor afinidad",

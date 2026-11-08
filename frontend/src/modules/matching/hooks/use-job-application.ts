@@ -1,13 +1,13 @@
 "use client";
 
+import { CONFLICT_STATUS } from "@/shared/constants/http.constants";
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef } from "react";
 import { isApiError } from "@/shared/services/api-client";
 import { JOB_APPLICATION_QUERY_KEYS } from "../constants/job-application.constants";
 import { jobApplicationService } from "../services/job-application.service";
 import type { MyJobApplication } from "../types/job-application.types";
-
-const CONFLICT_STATUS = 409;
 
 export function useJobApplication(jobOfferId: string) {
   const queryClient = useQueryClient();
