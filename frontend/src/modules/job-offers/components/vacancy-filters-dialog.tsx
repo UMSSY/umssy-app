@@ -1,6 +1,7 @@
 "use client";
 
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns/format";
+import { parseISO } from "date-fns/parseISO";
 import { ListFilter } from "lucide-react";
 import type { DateRange } from "react-day-picker";
 import { es } from "react-day-picker/locale";
