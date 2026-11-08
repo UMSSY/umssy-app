@@ -1,3 +1,4 @@
+import { UNIQUE_CONSTRAINT_VIOLATION_CODE } from '../../../common/constants/prisma-errors.constants.js';
 import { RequestValidationException } from '../../../common/exceptions/request-validation.exception.js';
 import { ForbiddenRoleException } from '../../../common/exceptions/forbidden-role.exception.js';
 import { ProposalKeyConflictException } from '../exceptions/proposal-key-conflict.exception.js';
@@ -44,7 +45,7 @@ export class EventProposalsService {
       });
     } catch (error) {
       // A concurrent retry can win the unique constraint. Return its committed result.
-      if (typeof error === 'object' && error !== null && 'code' in error && error.code === 'P2002') {
+      if (typeof error === 'object' && error !== null && 'code' in error && error.code === UNIQUE_CONSTRAINT_VIOLATION_CODE) {
         const winner = await this.repository.findByKey(userId, key);
         if (winner) return this.replay(winner, hash);
       }

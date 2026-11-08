@@ -1,5 +1,5 @@
-import type { RegistrationScheduleEvent } from '../types/registration-schedule-event.types.js';
 import { REGISTRATION_STATUS_TITLES } from '../../../common/constants/registration-status.constants.js';
+import type { RegistrationScheduleEvent } from '../types/registration-schedule-event.types.js';
 import type { EventSupportContext } from '../types/event-support-context.types.js';
 import { mapSupportContext } from '../mappers/support-context.mapper.js';
 import { Injectable } from '@nestjs/common';
@@ -7,7 +7,7 @@ import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { escapePgWildcards } from '../../../common/utils/escape-pg-wildcards.js';
 import type { Prisma } from '../../../prisma/client.js';
 import type { FindEventsPayload, FindEventsResponse, EventWithRelations } from '../types/events.types.js';
-import { CATALOG_STATUS_TITLES, COMMUNITY_ORIGIN_TITLE, CONFIRMED_REGISTRATION_TITLE, EXPIRED_STATUS_TITLE, PUBLISHED_STATUS_TITLE, VOTING_STATUS_TITLES } from '../constants/events.constants.js';
+import { CATALOG_STATUS_TITLES, COMMUNITY_ORIGIN_TITLE, EXPIRED_STATUS_TITLE, PUBLISHED_STATUS_TITLE, VOTING_STATUS_TITLES } from '../constants/events.constants.js';
 
 function buildSelect(userId?: string): Prisma.EventSelect {
   return {
@@ -33,7 +33,7 @@ function buildSelect(userId?: string): Prisma.EventSelect {
         registrations: {
           where: {
             cancelledAt: null,
-            status: { title: CONFIRMED_REGISTRATION_TITLE },
+            status: { title: REGISTRATION_STATUS_TITLES.confirmed },
           },
         },
       },
@@ -43,7 +43,7 @@ function buildSelect(userId?: string): Prisma.EventSelect {
         where: {
           userId,
           cancelledAt: null,
-          status: { title: CONFIRMED_REGISTRATION_TITLE },
+          status: { title: REGISTRATION_STATUS_TITLES.confirmed },
         },
         select: { id: true },
         take: 1,
