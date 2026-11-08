@@ -32,7 +32,7 @@ describe('desactivación de participación HU6', () => {
     const query = vi.fn(async (strings: TemplateStringsArray) =>
       strings.join(' ').includes('AS "hasFutureAppointments"') ? [{ hasFutureAppointments: false }] : [{ id: 'role' }]);
     const update = vi.fn().mockRejectedValue(failure);
-    const tx = { $executeRaw: vi.fn(), $queryRaw: query, user: { update } };
+    const tx = { $executeRaw: vi.fn(), $queryRaw: query, mentorParticipationRequest: { updateMany: vi.fn() }, user: { update } };
     const transaction = vi.fn(async (operation: (value: typeof tx) => Promise<unknown>) => operation(tx));
     const repository = new MentorExitRepository({ $transaction: transaction } as unknown as PrismaService);
     await expect(new MentorExitService(repository).leave('user')).rejects.toBe(failure);
@@ -45,7 +45,7 @@ describe('desactivación de participación HU6', () => {
       strings.join(' ').includes('AS "hasFutureAppointments"') ? [{ hasFutureAppointments: false }] : [{ id: 'role' }]);
     const execute = vi.fn().mockResolvedValue(1);
     const tx = { $queryRaw: query, $executeRaw: execute,
-      user: { update: vi.fn().mockResolvedValue({ id: 'user' }) },
+      mentorParticipationRequest: { updateMany: vi.fn() }, user: { update: vi.fn().mockResolvedValue({ id: 'user' }) },
       mentorTechnicalArea: { deleteMany: vi.fn() },
       mentorOrientationType: { deleteMany: vi.fn() },
     };
@@ -54,7 +54,7 @@ describe('desactivación de participación HU6', () => {
 
     expect(await new MentorExitService(repository).leave('user')).toEqual({ id: 'user', status: 'ENDED', alreadyEnded: false });
     expect(execute.mock.calls.some(([strings]) => strings.join(' ').includes('UPDATE user_roles'))).toBe(true);
-    expect(execute.mock.calls.some(([strings]) => strings.join(' ').includes('status = \'ENDED\''))).toBe(true);
+    expect(tx.mentorParticipationRequest.updateMany).toHaveBeenCalledWith({ where: { userId: 'user', status: 'ACTIVE' }, data: { status: 'ENDED' } });
     expect(tx.user.update).toHaveBeenCalledWith({ where: { id: 'user' }, data: { isAvailableForMentoring: false } });
     expect(tx.mentorTechnicalArea.deleteMany).not.toHaveBeenCalled();
     expect(tx.mentorOrientationType.deleteMany).not.toHaveBeenCalled();
@@ -69,7 +69,7 @@ describe('desactivación de participación HU6', () => {
   });
 
   it('no altera el cupo ni las preferencias cuando ya salió', async () => {
-    const tx = { $queryRaw: vi.fn().mockResolvedValue([]), $executeRaw: vi.fn(), user: { update: vi.fn() } };
+    const tx = { $queryRaw: vi.fn().mockResolvedValue([]), $executeRaw: vi.fn(), mentorParticipationRequest: { updateMany: vi.fn() }, user: { update: vi.fn() } };
     const repository = new MentorExitRepository({
       $transaction: async (operation: (value: typeof tx) => Promise<unknown>) => operation(tx),
     } as unknown as PrismaService);
@@ -83,7 +83,7 @@ describe('desactivación de participación HU6', () => {
     const tx = {
       $queryRaw: vi.fn(async (strings: TemplateStringsArray) =>
         strings.join(' ').includes('AS "hasFutureAppointments"') ? [{ hasFutureAppointments: true }] : [{ id: 'role' }]),
-      $executeRaw: vi.fn(), user: { update: vi.fn() },
+      $executeRaw: vi.fn(), mentorParticipationRequest: { updateMany: vi.fn() }, user: { update: vi.fn() },
     };
     const repository = new MentorExitRepository({
       $transaction: async (operation: (value: typeof tx) => Promise<unknown>) => operation(tx),
@@ -104,7 +104,7 @@ describe('desactivación de participación HU6', () => {
       $queryRaw: vi.fn(async (strings: TemplateStringsArray) =>
         strings.join(' ').includes('AS "hasFutureAppointments"') ? [{ hasFutureAppointments: false }] : [{ id: 'role' }]),
       $executeRaw: vi.fn(),
-      user: { update: vi.fn() },
+      mentorParticipationRequest: { updateMany: vi.fn() }, user: { update: vi.fn() },
     };
     const transaction = vi.fn(async (operation: (value: typeof tx) => Promise<unknown>) => operation(tx));
     const repository = new MentorExitRepository({ $transaction: transaction } as unknown as PrismaService);
