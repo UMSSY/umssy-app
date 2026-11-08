@@ -1,3 +1,4 @@
+import { DATE_PATTERN } from "@/shared/constants/date-time.constants";
 import { CAREERS } from "../constants/careers.constants";
 import { ID_CARD_ISSUED_IN } from "../constants/id-card-issued-in.constants";
 import { ID_CARD_MAX_LENGTH, SIS_CODE_LENGTH } from "../constants/personal-data-rules.constants";
@@ -8,7 +9,7 @@ export const MIN_AGE = 18;
 
 const NAME_REGEX = /^\p{L}[\p{L}\p{M}]*(?:[ '’-]\p{L}[\p{L}\p{M}]*)*$/u;
 const DIGITS_REGEX = /^\d+$/;
-const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+
 const EMAIL_REGEX = /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)*\.[a-z]{2,}$/;
 
 function isRealIsoDate(value: string): boolean {
@@ -61,7 +62,7 @@ function validateEmail(value: string): string | undefined {
 function validateBirthDate(value: string, now: Date): string | undefined {
   const text = value.trim();
   if (text.length === 0) return "La fecha de nacimiento es obligatoria";
-  if (!ISO_DATE_REGEX.test(text)) return "La fecha de nacimiento debe tener el formato AAAA-MM-DD";
+  if (!DATE_PATTERN.test(text)) return "La fecha de nacimiento debe tener el formato AAAA-MM-DD";
   if (!isRealIsoDate(text)) return "La fecha de nacimiento no es válida";
   if (!isAdult(text, now)) return `Debes ser mayor de ${MIN_AGE} años`;
 }

@@ -1,3 +1,5 @@
+import { BEARER_PREFIX } from "@/shared/constants/auth.constants";
+import { NETWORK_ERROR_MESSAGE } from "@/shared/constants/error-messages.constants";
 import { apiClient } from "@/shared/services/api-client";
 import type {
   AccessRequestPayload,
@@ -16,7 +18,6 @@ import { CORRECTION_AUTHORIZATION_MESSAGE, CORRECTION_MISSING_FILE_MESSAGE, CORR
 import { FILE_TOO_LARGE_MESSAGE, validateDocumentFile } from "../utils/validate-document-file";
 import type { SendOptions } from "../types/access-request-send-options.types";
 
-const NETWORK_ERROR_MESSAGE = "No se pudo conectar con el servidor. Inténtalo de nuevo.";
 const GENERIC_ERROR_MESSAGE = "No se pudo completar la solicitud. Inténtalo de nuevo.";
 const NOT_FOUND_MESSAGE = "La solicitud ya no existe";
 const STATUS_NOT_FOUND_MESSAGE = "No se encontró la solicitud";
@@ -218,7 +219,7 @@ async function resubmitDocument(
   form.append("file", file);
   form.append("documentType", documentType);
   const result = await send<Record<string, unknown>>("post", `/access-requests/${requestCode}/resubmit`, form, {
-    headers: { Authorization: `Bearer ${token}` },
+    headers: { Authorization: `${BEARER_PREFIX}${token}` },
     onUploadProgress: (event) => {
       if (!onProgress || !event.total) return;
       onProgress(Math.min(100, Math.max(0, Math.round((event.loaded / event.total) * 100))));
