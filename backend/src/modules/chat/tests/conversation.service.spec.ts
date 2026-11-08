@@ -1,15 +1,15 @@
 import { ForbiddenException } from '@nestjs/common';
 import { UserBlockedException } from '../exceptions/index.js';
 import { describe, expect, it, vi } from 'vitest';
-import { ConversationService } from './conversation.service.js';
+import { ConversationService } from '../services/conversation.service.js';
 import { ConversationMapper } from '../mappers/conversation.mapper.js';
 import type { ConversationRepository } from '../repositories/conversation.repository.js';
 import type { ConversationParticipantRepository } from '../repositories/conversation-participant.repository.js';
 import type { UserLookupRepository } from '../repositories/user-lookup.repository.js';
 import type { ConnectionRequestRepository } from '../repositories/connection-request.repository.js';
-import type { UserPresenceService } from './user-presence.service.js';
-import type { BlockService } from './block.service.js';
-import type { ChatRolePolicyService } from './chat-role-policy.service.js';
+import type { UserPresenceService } from '../services/user-presence.service.js';
+import type { BlockService } from '../services/block.service.js';
+import type { ChatRolePolicyService } from '../services/chat-role-policy.service.js';
 import type { EducationsService } from '../../educations/services/educations.service.js';
 import type { UserSkillService } from '../../skills/services/user-skill.service.js';
 const noBlocks = () =>

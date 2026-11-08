@@ -1,6 +1,6 @@
 
 import { describe, it, expect } from 'vitest';
-import { AttachmentMapper } from './attachment.mapper.js';
+import { AttachmentMapper } from '../mappers/attachment.mapper.js';
 import type { MulterFile } from '../../../common/types/multer-file.type.js';
 import type { AttachmentRecord } from '../types/attachment.types.js';
 

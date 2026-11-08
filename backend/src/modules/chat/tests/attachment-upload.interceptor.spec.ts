@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { of, throwError, lastValueFrom } from 'rxjs';
 import { PayloadTooLargeException } from '@nestjs/common';
-import { AttachmentUploadInterceptor } from './attachment-upload.interceptor.js';
+import { AttachmentUploadInterceptor } from '../interceptors/attachment-upload.interceptor.js';
 import { AttachmentTooLargeException } from '../exceptions/attachment-too-large.exception.js';
 
 describe('AttachmentUploadInterceptor', () => {

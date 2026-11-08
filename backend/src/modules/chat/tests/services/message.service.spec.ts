@@ -1,17 +1,17 @@
 import { describe, expect, it, vi } from 'vitest';
-import { MessageService } from './message.service.js';
-import type { MessageRepository } from '../repositories/message.repository.js';
-import type { ConversationRepository } from '../repositories/conversation.repository.js';
-import type { ConversationParticipantRepository } from '../repositories/conversation-participant.repository.js';
-import type { MessageStatusService } from './message-status.service.js';
-import type { BlockService } from './block.service.js';
-import type { ChatRolePolicyService } from './chat-role-policy.service.js';
+import { MessageService } from '../../services/message.service.js';
+import type { MessageRepository } from '../../repositories/message.repository.js';
+import type { ConversationRepository } from '../../repositories/conversation.repository.js';
+import type { ConversationParticipantRepository } from '../../repositories/conversation-participant.repository.js';
+import type { MessageStatusService } from '../../services/message-status.service.js';
+import type { BlockService } from '../../services/block.service.js';
+import type { ChatRolePolicyService } from '../../services/chat-role-policy.service.js';
 import {
   ConversationNotFoundException,
   InvalidMessageContentException,
   NotConversationParticipantException,
   UserBlockedException,
-} from '../exceptions/index.js';
+} from '../../exceptions/index.js';
 
 describe('MessageService', () => {
   const createMockService = () => {

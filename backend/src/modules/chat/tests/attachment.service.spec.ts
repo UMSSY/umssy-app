@@ -1,13 +1,13 @@
 import { describe, expect, it, vi } from 'vitest';
-import { AttachmentService } from './attachment.service.js';
+import { AttachmentService } from '../services/attachment.service.js';
 import type { AttachmentRepository } from '../repositories/attachment.repository.js';
 import type { AttachmentMapper } from '../mappers/attachment.mapper.js';
 import type { ConversationRepository } from '../repositories/conversation.repository.js';
 import type { ConversationParticipantRepository } from '../repositories/conversation-participant.repository.js';
 import type { MessageRepository } from '../repositories/message.repository.js';
-import type { MessageStatusService } from './message-status.service.js';
-import type { BlockService } from './block.service.js';
-import type { ChatRolePolicyService } from './chat-role-policy.service.js';
+import type { MessageStatusService } from '../services/message-status.service.js';
+import type { BlockService } from '../services/block.service.js';
+import type { ChatRolePolicyService } from '../services/chat-role-policy.service.js';
 import type { FileValidationService } from '../../../common/services/file-validation.service.js';
 import type { MulterFile } from '../../../common/types/multer-file.type.js';
 import { EmptyFileException } from '../../../common/exceptions/empty-file.exception.js';

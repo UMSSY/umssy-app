@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ConversationMapper } from './conversation.mapper.js';
+import { ConversationMapper } from '../mappers/conversation.mapper.js';
 import type { RawConversationRecord } from '../types/raw-conversation-record.types.js';
 import type { RawConversationUser } from '../types/raw-conversation-user.types.js';
 

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { LinkPreviewService } from './link-preview.service.js';
+import { LinkPreviewService } from '../services/link-preview.service.js';
 import { InvalidLinkUrlException } from '../exceptions/invalid-link-url.exception.js';
 import { BlockedLinkUrlException } from '../exceptions/blocked-link-url.exception.js';
 

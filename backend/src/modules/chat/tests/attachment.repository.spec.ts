@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { AttachmentRepository } from './attachment.repository.js';
+import { AttachmentRepository } from '../repositories/attachment.repository.js';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
 
 describe('AttachmentRepository', () => {

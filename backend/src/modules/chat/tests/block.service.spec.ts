@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { BlockService } from './block.service.js';
+import { BlockService } from '../services/block.service.js';
 import type { ChatUserBlockRepository } from '../repositories/chat-user-block.repository.js';
 import type { UserLookupRepository } from '../repositories/user-lookup.repository.js';
 import {

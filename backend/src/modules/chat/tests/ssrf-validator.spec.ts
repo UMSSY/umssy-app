@@ -8,7 +8,7 @@ import {
   isPrivateOrReservedIPv6,
   isPrivateOrReservedIp,
   validateSafeUrl,
-} from './ssrf-validator.js';
+} from '../utils/ssrf-validator.js';
 
 describe('SSRF Validator', () => {
   describe('isPrivateOrReservedIPv4', () => {
