@@ -17,14 +17,12 @@ const DIPLOMA_TEXT =
 function build(state: Record<string, unknown> | null = STATE) {
   const repository = { findAutomationState: vi.fn().mockResolvedValue(state) };
   const files = {
-    getContent: vi
-      .fn()
-      .mockResolvedValue({
-        name: 'diploma',
-        extension: 'pdf',
-        mimeType: 'application/pdf',
-        content: Buffer.from('x'),
-      }),
+    getContent: vi.fn().mockResolvedValue({
+      name: 'diploma',
+      extension: 'pdf',
+      mimeType: 'application/pdf',
+      content: Buffer.from('x'),
+    }),
   };
   const extractor = {
     extract: vi

@@ -97,14 +97,12 @@ describe('AuditEventsExportService', () => {
 
   it('escapa comillas, comas y saltos de línea y neutraliza fórmulas', async () => {
     const repository = {
-      findBatch: vi
-        .fn()
-        .mockResolvedValue([
-          row(1, {
-            detail: '=HYPERLINK("x"), con coma\ny salto',
-            actorName: '@admin',
-          }),
-        ]),
+      findBatch: vi.fn().mockResolvedValue([
+        row(1, {
+          detail: '=HYPERLINK("x"), con coma\ny salto',
+          actorName: '@admin',
+        }),
+      ]),
     };
 
     const { content } = await new AuditEventsExportService(
@@ -129,12 +127,10 @@ describe('AuditEventsExportService', () => {
 describe('AuditEventsController: exportación', () => {
   it('la exportación devuelve un archivo CSV adjunto', async () => {
     const exporter = {
-      exportCsv: vi
-        .fn()
-        .mockResolvedValue({
-          fileName: 'registro-auditoria-2026-10-22.csv',
-          content: 'a,b\r\n',
-        }),
+      exportCsv: vi.fn().mockResolvedValue({
+        fileName: 'registro-auditoria-2026-10-22.csv',
+        content: 'a,b\r\n',
+      }),
     };
     const controller = new AuditEventsController({} as any, exporter as any);
 

@@ -115,13 +115,11 @@ describe('AccessRequestsService.list y controller', () => {
 
   it('el controller delega el listado al servicio', async () => {
     const service = {
-      list: vi
-        .fn()
-        .mockResolvedValue({
-          data: { items: [], total: 0 },
-          page: 1,
-          offset: 0,
-        }),
+      list: vi.fn().mockResolvedValue({
+        data: { items: [], total: 0 },
+        page: 1,
+        offset: 0,
+      }),
     };
     const controller = new AccessRequestsController(service as any);
     const query = { page: 1, limit: 10 };

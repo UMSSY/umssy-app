@@ -2,9 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class RadarPdfExtractionService {
-  async extract(
-    buffer: Buffer,
-  ): Promise<{
+  async extract(buffer: Buffer): Promise<{
     extractedText: string;
     extractionStatus: 'ready' | 'unreadable' | 'error';
   }> {

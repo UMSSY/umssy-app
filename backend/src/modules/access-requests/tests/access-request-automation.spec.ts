@@ -55,17 +55,15 @@ describe('AccessRequestsService.submit: cola de lectura OCR', () => {
   it('CA9: al enviar registra el evento y deja la solicitud en cola dentro de la misma transacción', async () => {
     const tx = {};
     const repository = {
-      findById: vi
-        .fn()
-        .mockResolvedValue({
-          id: 'req-1',
-          email: 'a@b.test',
-          idCardNumber: '1',
-          sisCode: '2',
-          documentFileId: 'f',
-          documentType: { title: 'academic_diploma' },
-          status: { title: 'draft' },
-        }),
+      findById: vi.fn().mockResolvedValue({
+        id: 'req-1',
+        email: 'a@b.test',
+        idCardNumber: '1',
+        sisCode: '2',
+        documentFileId: 'f',
+        documentType: { title: 'academic_diploma' },
+        status: { title: 'draft' },
+      }),
       findActiveDuplicates: vi.fn().mockResolvedValue([]),
       submitWithGeneratedCode: vi.fn(
         async (

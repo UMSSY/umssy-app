@@ -46,12 +46,10 @@ function setup() {
     $transaction: vi.fn((fn) => fn(tx)),
   };
   const files = {
-    validate: vi
-      .fn()
-      .mockReturnValue({
-        buffer: Buffer.from('validated image'),
-        detectedMimeType: 'image/png',
-      }),
+    validate: vi.fn().mockReturnValue({
+      buffer: Buffer.from('validated image'),
+      detectedMimeType: 'image/png',
+    }),
   };
   return {
     tx,

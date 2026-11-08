@@ -95,13 +95,11 @@ describe('MatchingController', () => {
 
   it('pasa el texto nulo al servicio sin modificarlo', async () => {
     const matchingService = {
-      analyzeExperience: vi
-        .fn()
-        .mockResolvedValue({
-          experienceId: EXPERIENCE_ID,
-          skills: [],
-          processingTimeMs: 0,
-        }),
+      analyzeExperience: vi.fn().mockResolvedValue({
+        experienceId: EXPERIENCE_ID,
+        skills: [],
+        processingTimeMs: 0,
+      }),
     };
     const controller = new MatchingController(
       matchingService as unknown as MatchingService,

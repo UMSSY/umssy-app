@@ -351,14 +351,12 @@ describe('AccessRequestsController: detalle y documento', () => {
   it('getDocument responde el binario con Content-Type y Content-Disposition inline', async () => {
     const content = Buffer.from('%PDF-1.4');
     const service = {
-      getDocument: vi
-        .fn()
-        .mockResolvedValue({
-          name: 'título académico',
-          extension: 'pdf',
-          mimeType: 'application/pdf',
-          content,
-        }),
+      getDocument: vi.fn().mockResolvedValue({
+        name: 'título académico',
+        extension: 'pdf',
+        mimeType: 'application/pdf',
+        content,
+      }),
     };
     const controller = new AccessRequestsController(service as any);
     const response = { set: vi.fn(), end: vi.fn() };

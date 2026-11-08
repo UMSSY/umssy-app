@@ -23,13 +23,11 @@ describe('desactivación de participación HU6', () => {
 
   it('exige JWT y utiliza exclusivamente el usuario autenticado', async () => {
     const service = {
-      leave: vi
-        .fn()
-        .mockResolvedValue({
-          id: 'authenticated-user',
-          status: 'ENDED',
-          alreadyEnded: false,
-        }),
+      leave: vi.fn().mockResolvedValue({
+        id: 'authenticated-user',
+        status: 'ENDED',
+        alreadyEnded: false,
+      }),
     };
     const controller = new MentorExitController(
       service as unknown as MentorExitService,
