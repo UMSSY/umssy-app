@@ -130,7 +130,9 @@ export const ModelName = {
   RadarScoreSnapshot: 'RadarScoreSnapshot',
   RadarAuditEvent: 'RadarAuditEvent',
   RadarCvExtractionStatus: 'RadarCvExtractionStatus',
-  RadarCvReviewStatus: 'RadarCvReviewStatus'
+  RadarCvReviewStatus: 'RadarCvReviewStatus',
+  MentorParticipationStatus: 'MentorParticipationStatus',
+  MentorOfferStatus: 'MentorOfferStatus'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -381,7 +383,9 @@ export const UserCvFileScalarFieldEnum = {
   userId: 'userId',
   cvFileName: 'cvFileName',
   cvUploadedAt: 'cvUploadedAt',
-  cvPdfData: 'cvPdfData'
+  cvPdfData: 'cvPdfData',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type UserCvFileScalarFieldEnum = (typeof UserCvFileScalarFieldEnum)[keyof typeof UserCvFileScalarFieldEnum]
@@ -500,7 +504,9 @@ export const AppointmentDocumentScalarFieldEnum = {
   mimeType: 'mimeType',
   sizeBytes: 'sizeBytes',
   data: 'data',
-  uploadedAt: 'uploadedAt'
+  uploadedAt: 'uploadedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type AppointmentDocumentScalarFieldEnum = (typeof AppointmentDocumentScalarFieldEnum)[keyof typeof AppointmentDocumentScalarFieldEnum]
@@ -754,7 +760,9 @@ export const MentorParticipationRequestScalarFieldEnum = {
   queuedAt: 'queuedAt',
   createdAt: 'createdAt',
   technicalAreaIds: 'technicalAreaIds',
-  orientationTypeIds: 'orientationTypeIds'
+  orientationTypeIds: 'orientationTypeIds',
+  updatedAt: 'updatedAt',
+  statusId: 'statusId'
 } as const
 
 export type MentorParticipationRequestScalarFieldEnum = (typeof MentorParticipationRequestScalarFieldEnum)[keyof typeof MentorParticipationRequestScalarFieldEnum]
@@ -767,7 +775,10 @@ export const MentorSlotOfferScalarFieldEnum = {
   offeredAt: 'offeredAt',
   expiresAt: 'expiresAt',
   requestId: 'requestId',
-  confirmedAt: 'confirmedAt'
+  confirmedAt: 'confirmedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  statusId: 'statusId'
 } as const
 
 export type MentorSlotOfferScalarFieldEnum = (typeof MentorSlotOfferScalarFieldEnum)[keyof typeof MentorSlotOfferScalarFieldEnum]
@@ -1219,6 +1230,28 @@ export const RadarCvReviewStatusScalarFieldEnum = {
 } as const
 
 export type RadarCvReviewStatusScalarFieldEnum = (typeof RadarCvReviewStatusScalarFieldEnum)[keyof typeof RadarCvReviewStatusScalarFieldEnum]
+
+
+export const MentorParticipationStatusScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MentorParticipationStatusScalarFieldEnum = (typeof MentorParticipationStatusScalarFieldEnum)[keyof typeof MentorParticipationStatusScalarFieldEnum]
+
+
+export const MentorOfferStatusScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MentorOfferStatusScalarFieldEnum = (typeof MentorOfferStatusScalarFieldEnum)[keyof typeof MentorOfferStatusScalarFieldEnum]
 
 
 export const SortOrder = {

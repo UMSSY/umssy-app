@@ -476,7 +476,9 @@ export const ModelName = {
   RadarScoreSnapshot: 'RadarScoreSnapshot',
   RadarAuditEvent: 'RadarAuditEvent',
   RadarCvExtractionStatus: 'RadarCvExtractionStatus',
-  RadarCvReviewStatus: 'RadarCvReviewStatus'
+  RadarCvReviewStatus: 'RadarCvReviewStatus',
+  MentorParticipationStatus: 'MentorParticipationStatus',
+  MentorOfferStatus: 'MentorOfferStatus'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -492,7 +494,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "appointmentStatus" | "proposalStatus" | "eventModality" | "eventOrigin" | "eventStatus" | "registrationStatus" | "city" | "company" | "user" | "role" | "userRole" | "education" | "workExperience" | "radarArea" | "skill" | "jobOfferSkill" | "userSkill" | "certification" | "userCvFile" | "profileSkillProcessingState" | "technicalArea" | "orientationType" | "mentorTechnicalArea" | "mentorOrientationType" | "availabilityBlock" | "blockedDate" | "appointment" | "appointmentDocument" | "timeProposal" | "appointmentHistory" | "eventCategory" | "event" | "eventRegistration" | "eventAttendance" | "jobOffer" | "jobOfferModality" | "jobOfferContractType" | "jobOfferStatus" | "adminExportHistory" | "accessRequestStatus" | "accessRequestDocumentType" | "file" | "career" | "accessRequest" | "mentorParticipationRequest" | "mentorSlotOffer" | "activationOtp" | "messageStatus" | "connectionRequestStatus" | "attachmentType" | "conversation" | "conversationParticipant" | "message" | "messageAttachment" | "chatUserBlock" | "connectionRequest" | "userPresence" | "passwordResetOtp" | "mentorParticipationAttemptLimit" | "jobApplicationStatus" | "jobApplication" | "surveyStatus" | "surveyQuestionType" | "surveyTargetAudience" | "survey" | "surveyQuestion" | "surveyQuestionOption" | "surveyResponse" | "surveyAnswer" | "auditAction" | "auditEvent" | "documentValidation" | "mentorIntakeAttempt" | "mentorParticipationSanction" | "mentorIntakeOperation" | "radarCvEvidence" | "radarScoreSnapshot" | "radarAuditEvent" | "radarCvExtractionStatus" | "radarCvReviewStatus"
+    modelProps: "appointmentStatus" | "proposalStatus" | "eventModality" | "eventOrigin" | "eventStatus" | "registrationStatus" | "city" | "company" | "user" | "role" | "userRole" | "education" | "workExperience" | "radarArea" | "skill" | "jobOfferSkill" | "userSkill" | "certification" | "userCvFile" | "profileSkillProcessingState" | "technicalArea" | "orientationType" | "mentorTechnicalArea" | "mentorOrientationType" | "availabilityBlock" | "blockedDate" | "appointment" | "appointmentDocument" | "timeProposal" | "appointmentHistory" | "eventCategory" | "event" | "eventRegistration" | "eventAttendance" | "jobOffer" | "jobOfferModality" | "jobOfferContractType" | "jobOfferStatus" | "adminExportHistory" | "accessRequestStatus" | "accessRequestDocumentType" | "file" | "career" | "accessRequest" | "mentorParticipationRequest" | "mentorSlotOffer" | "activationOtp" | "messageStatus" | "connectionRequestStatus" | "attachmentType" | "conversation" | "conversationParticipant" | "message" | "messageAttachment" | "chatUserBlock" | "connectionRequest" | "userPresence" | "passwordResetOtp" | "mentorParticipationAttemptLimit" | "jobApplicationStatus" | "jobApplication" | "surveyStatus" | "surveyQuestionType" | "surveyTargetAudience" | "survey" | "surveyQuestion" | "surveyQuestionOption" | "surveyResponse" | "surveyAnswer" | "auditAction" | "auditEvent" | "documentValidation" | "mentorIntakeAttempt" | "mentorParticipationSanction" | "mentorIntakeOperation" | "radarCvEvidence" | "radarScoreSnapshot" | "radarAuditEvent" | "radarCvExtractionStatus" | "radarCvReviewStatus" | "mentorParticipationStatus" | "mentorOfferStatus"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -6416,6 +6418,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    MentorParticipationStatus: {
+      payload: Prisma.$MentorParticipationStatusPayload<ExtArgs>
+      fields: Prisma.MentorParticipationStatusFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MentorParticipationStatusFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorParticipationStatusPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MentorParticipationStatusFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorParticipationStatusPayload>
+        }
+        findFirst: {
+          args: Prisma.MentorParticipationStatusFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorParticipationStatusPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MentorParticipationStatusFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorParticipationStatusPayload>
+        }
+        findMany: {
+          args: Prisma.MentorParticipationStatusFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorParticipationStatusPayload>[]
+        }
+        create: {
+          args: Prisma.MentorParticipationStatusCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorParticipationStatusPayload>
+        }
+        createMany: {
+          args: Prisma.MentorParticipationStatusCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MentorParticipationStatusCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorParticipationStatusPayload>[]
+        }
+        delete: {
+          args: Prisma.MentorParticipationStatusDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorParticipationStatusPayload>
+        }
+        update: {
+          args: Prisma.MentorParticipationStatusUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorParticipationStatusPayload>
+        }
+        deleteMany: {
+          args: Prisma.MentorParticipationStatusDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MentorParticipationStatusUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MentorParticipationStatusUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorParticipationStatusPayload>[]
+        }
+        upsert: {
+          args: Prisma.MentorParticipationStatusUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorParticipationStatusPayload>
+        }
+        aggregate: {
+          args: Prisma.MentorParticipationStatusAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMentorParticipationStatus>
+        }
+        groupBy: {
+          args: Prisma.MentorParticipationStatusGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MentorParticipationStatusGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MentorParticipationStatusCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MentorParticipationStatusCountAggregateOutputType> | number
+        }
+      }
+    }
+    MentorOfferStatus: {
+      payload: Prisma.$MentorOfferStatusPayload<ExtArgs>
+      fields: Prisma.MentorOfferStatusFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MentorOfferStatusFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorOfferStatusPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MentorOfferStatusFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorOfferStatusPayload>
+        }
+        findFirst: {
+          args: Prisma.MentorOfferStatusFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorOfferStatusPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MentorOfferStatusFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorOfferStatusPayload>
+        }
+        findMany: {
+          args: Prisma.MentorOfferStatusFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorOfferStatusPayload>[]
+        }
+        create: {
+          args: Prisma.MentorOfferStatusCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorOfferStatusPayload>
+        }
+        createMany: {
+          args: Prisma.MentorOfferStatusCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MentorOfferStatusCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorOfferStatusPayload>[]
+        }
+        delete: {
+          args: Prisma.MentorOfferStatusDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorOfferStatusPayload>
+        }
+        update: {
+          args: Prisma.MentorOfferStatusUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorOfferStatusPayload>
+        }
+        deleteMany: {
+          args: Prisma.MentorOfferStatusDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MentorOfferStatusUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MentorOfferStatusUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorOfferStatusPayload>[]
+        }
+        upsert: {
+          args: Prisma.MentorOfferStatusUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorOfferStatusPayload>
+        }
+        aggregate: {
+          args: Prisma.MentorOfferStatusAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMentorOfferStatus>
+        }
+        groupBy: {
+          args: Prisma.MentorOfferStatusGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MentorOfferStatusGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MentorOfferStatusCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MentorOfferStatusCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -6687,7 +6837,9 @@ export const UserCvFileScalarFieldEnum = {
   userId: 'userId',
   cvFileName: 'cvFileName',
   cvUploadedAt: 'cvUploadedAt',
-  cvPdfData: 'cvPdfData'
+  cvPdfData: 'cvPdfData',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type UserCvFileScalarFieldEnum = (typeof UserCvFileScalarFieldEnum)[keyof typeof UserCvFileScalarFieldEnum]
@@ -6806,7 +6958,9 @@ export const AppointmentDocumentScalarFieldEnum = {
   mimeType: 'mimeType',
   sizeBytes: 'sizeBytes',
   data: 'data',
-  uploadedAt: 'uploadedAt'
+  uploadedAt: 'uploadedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type AppointmentDocumentScalarFieldEnum = (typeof AppointmentDocumentScalarFieldEnum)[keyof typeof AppointmentDocumentScalarFieldEnum]
@@ -7060,7 +7214,9 @@ export const MentorParticipationRequestScalarFieldEnum = {
   queuedAt: 'queuedAt',
   createdAt: 'createdAt',
   technicalAreaIds: 'technicalAreaIds',
-  orientationTypeIds: 'orientationTypeIds'
+  orientationTypeIds: 'orientationTypeIds',
+  updatedAt: 'updatedAt',
+  statusId: 'statusId'
 } as const
 
 export type MentorParticipationRequestScalarFieldEnum = (typeof MentorParticipationRequestScalarFieldEnum)[keyof typeof MentorParticipationRequestScalarFieldEnum]
@@ -7073,7 +7229,10 @@ export const MentorSlotOfferScalarFieldEnum = {
   offeredAt: 'offeredAt',
   expiresAt: 'expiresAt',
   requestId: 'requestId',
-  confirmedAt: 'confirmedAt'
+  confirmedAt: 'confirmedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  statusId: 'statusId'
 } as const
 
 export type MentorSlotOfferScalarFieldEnum = (typeof MentorSlotOfferScalarFieldEnum)[keyof typeof MentorSlotOfferScalarFieldEnum]
@@ -7527,6 +7686,28 @@ export const RadarCvReviewStatusScalarFieldEnum = {
 export type RadarCvReviewStatusScalarFieldEnum = (typeof RadarCvReviewStatusScalarFieldEnum)[keyof typeof RadarCvReviewStatusScalarFieldEnum]
 
 
+export const MentorParticipationStatusScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MentorParticipationStatusScalarFieldEnum = (typeof MentorParticipationStatusScalarFieldEnum)[keyof typeof MentorParticipationStatusScalarFieldEnum]
+
+
+export const MentorOfferStatusScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MentorOfferStatusScalarFieldEnum = (typeof MentorOfferStatusScalarFieldEnum)[keyof typeof MentorOfferStatusScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -7916,6 +8097,8 @@ export type GlobalOmitConfig = {
   radarAuditEvent?: Prisma.RadarAuditEventOmit
   radarCvExtractionStatus?: Prisma.RadarCvExtractionStatusOmit
   radarCvReviewStatus?: Prisma.RadarCvReviewStatusOmit
+  mentorParticipationStatus?: Prisma.MentorParticipationStatusOmit
+  mentorOfferStatus?: Prisma.MentorOfferStatusOmit
 }
 
 /* Types for Logging */
