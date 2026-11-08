@@ -2,8 +2,6 @@ import { createHmac, timingSafeEqual } from 'node:crypto';
 import { DOCUMENT_CORRECTION_TOKEN_PATTERN } from '../constants/document-correction.constants.js';
 import type { DocumentCorrectionContext } from '../types/document-correction.types.js';
 
-// La revisión de la fila y el documento vinculan el permiso a un ciclo de rechazo.
-// No hay vencimiento temporal: el cambio confirmado de la solicitud lo invalida.
 export function createDocumentCorrectionToken(context: DocumentCorrectionContext, secret: string): string {
   const snapshot = JSON.stringify([
     'umssy:access-request:document-correction:v1',
