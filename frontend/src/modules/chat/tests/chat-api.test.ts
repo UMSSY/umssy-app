@@ -415,7 +415,7 @@ it('debe retornar la pagina mas reciente del historial', async () => {
   });
 
   expect(apiClientMock.get).toHaveBeenCalledWith(
-    '/conversations/conv-1/messages',
+    '/chat/conversations/conv-1/messages',
     {
       params: {
         cursor: 'msg-1-21',
@@ -474,7 +474,7 @@ it('debe retornar la pagina mas reciente del historial', async () => {
   });
 
   expect(apiClientMock.get).toHaveBeenCalledWith(
-    '/conversations/conv-1/messages',
+    '/chat/conversations/conv-1/messages',
     {
       params: {
         cursor: 'msg-1-11',
@@ -565,7 +565,7 @@ it('debe retornar la pagina mas reciente del historial', async () => {
   ).rejects.toThrow('Cursor de mensajes no valido');
 
   expect(apiClientMock.get).toHaveBeenCalledWith(
-    '/conversations/conv-1/messages',
+    '/chat/conversations/conv-1/messages',
     {
       params: {
         cursor: 'cursor-inexistente',
@@ -576,7 +576,7 @@ it('debe retornar la pagina mas reciente del historial', async () => {
 
 });
 
-  it('debe llamar a GET /conversations/:conversationId/messages y retornar mensajes paginados mapeados', async () => {
+  it('debe llamar a GET /chat/conversations/:conversationId/messages y retornar mensajes paginados mapeados', async () => {
     apiClientMock.get.mockResolvedValueOnce({
       data: {
         statusCode: 200,
@@ -611,7 +611,7 @@ it('debe retornar la pagina mas reciente del historial', async () => {
     });
 
     expect(apiClientMock.get).toHaveBeenCalledWith(
-      '/conversations/conv-real-uuid/messages',
+      '/chat/conversations/conv-real-uuid/messages',
       {
         params: {
           cursor: undefined,
@@ -1103,7 +1103,7 @@ it('debe mantener guardado el estado leido (unreadCount: 0) al simular recarga d
   await markConversationAsRead('conv-1');
 
   expect(apiClientMock.patch).toHaveBeenCalledWith(
-    '/chat/messages/conv-1/read',
+    '/chat/conversations/conv-1/read-state',
   );
 
   const reloadedList = await getConversations();
@@ -1154,10 +1154,10 @@ it('debe marcar la conversacion como leida de forma persistente al enviar un men
 
 });
 
-  it('debe llamar a PATCH /chat/messages/:conversationId/read al marcar conversacion como leida', async () => {
+  it('debe llamar a PATCH /chat/conversations/:conversationId/read-state al marcar conversacion como leida', async () => {
     await markConversationAsRead('conv-1');
 
-    expect(apiClientMock.patch).toHaveBeenCalledWith('/chat/messages/conv-1/read');
+    expect(apiClientMock.patch).toHaveBeenCalledWith('/chat/conversations/conv-1/read-state');
 
   });
 

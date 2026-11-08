@@ -45,7 +45,7 @@ import type { AttachmentResponse } from '../responses/attachment.response.js';
 export class AttachmentController {
   constructor(private readonly attachmentService: AttachmentService) {}
 
-  @Post('messages/attachment')
+  @Post('attachments')
   @ApiOperation({ summary: 'Enviar mensaje con archivo adjunto (JPG, PNG o PDF)' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -88,25 +88,7 @@ export class AttachmentController {
     return this.attachmentService.uploadAndSend(userId, file, body);
   }
 
-  @Post('attachments')
-  @UseInterceptors(
-    AttachmentUploadInterceptor,
-    FileInterceptor('file', {
-      limits: {
-        fileSize: MAX_FILE_UPLOAD_SIZE_BYTES,
-      },
-    }),
-  )
-  uploadAndSendAlias(
-    @CurrentUserId() userId: string,
-    @UploadedFile() file: MulterFile | undefined,
-    @Body(new ZodValidationPipe(sendAttachmentMessageSchema))
-    body: SendAttachmentMessageDto,
-  ) {
-    return this.attachmentService.uploadAndSend(userId, file, body);
-  }
-
-  @Get('attachments/:id/download')
+  @Get('attachments/:id/file')
   @ApiOperation({ summary: 'Descargar archivo adjunto con control de acceso por conversación' })
   @ApiParam({ name: 'id', format: 'uuid', description: 'ID del archivo adjunto' })
   @ApiResponse({ status: 200, description: 'Stream binario del archivo' })

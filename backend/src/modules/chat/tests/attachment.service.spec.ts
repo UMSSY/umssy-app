@@ -43,7 +43,7 @@ describe('AttachmentService', () => {
         fileName: rec.fileName,
         mimeType: rec.mimeType,
         fileSize: rec.fileSize,
-        url: rec.url ?? `/api/chat/attachments/${rec.id}/download`,
+        url: rec.url ?? `/api/chat/attachments/${rec.id}/file`,
         thumbnailUrl: rec.thumbnailUrl ?? null,
         type: rec.type?.title ?? 'FILE',
         createdAt: rec.createdAt instanceof Date ? rec.createdAt.toISOString() : String(rec.createdAt),
@@ -64,7 +64,7 @@ describe('AttachmentService', () => {
           fileName: params.attachmentRecord.fileName,
           mimeType: params.attachmentRecord.mimeType,
           fileSize: params.attachmentRecord.fileSize,
-          url: params.attachmentRecord.url ?? `/api/chat/attachments/${params.attachmentRecord.id}/download`,
+          url: params.attachmentRecord.url ?? `/api/chat/attachments/${params.attachmentRecord.id}/file`,
           thumbnailUrl: params.attachmentRecord.thumbnailUrl ?? null,
           type: params.isImage ? 'IMAGE' : 'PDF',
           createdAt: params.attachmentRecord.createdAt instanceof Date ? params.attachmentRecord.createdAt.toISOString() : String(params.attachmentRecord.createdAt),
@@ -550,7 +550,7 @@ describe('AttachmentService', () => {
       const result = await service.getById('user-1', 'att-1');
       expect(result.id).toBe('att-1');
       expect(result.fileName).toBe('pic.png');
-      expect(result.url).toBe('/api/chat/attachments/att-1/download');
+      expect(result.url).toBe('/api/chat/attachments/att-1/file');
     });
   });
 

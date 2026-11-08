@@ -201,7 +201,7 @@ export class MessageService {
           fileSize: att.fileSize ?? 0,
           url:
             att.url ??
-            `/api/chat/attachments/${att.id}/download`,
+            `/api/chat/attachments/${att.id}/file`,
           thumbnailUrl: att.thumbnailUrl,
           type: att.type?.title ?? 'FILE',
           createdAt:

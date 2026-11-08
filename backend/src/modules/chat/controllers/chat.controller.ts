@@ -22,7 +22,7 @@ import { MessageService } from '../services/message.service.js';
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('titulado', 'estudiante', 'mentor', 'empresa')
-@Controller('conversations')
+@Controller('chat/conversations')
 export class ChatController {
   constructor(
     private readonly chatService: ChatService,

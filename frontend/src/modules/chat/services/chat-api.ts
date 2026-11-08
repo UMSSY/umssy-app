@@ -158,7 +158,7 @@ export async function getPaginatedMessages({
     const response = await apiClient.get<
       | StandardApiResponse<PaginatedMessagesResponse>
       | PaginatedMessagesResponse
-    >(`/conversations/${conversationId}/messages`, {
+    >(`/chat/conversations/${conversationId}/messages`, {
       ...(signal ? { signal } : {}),
       ...(requireServer ? { timeout: 15000 } : {}),
       params: {
@@ -208,7 +208,7 @@ export async function getPaginatedMessages({
               fileName: att.fileName,
               mimeType: att.mimeType || 'application/octet-stream',
               fileSize: att.fileSize || 0,
-              url: att.url || `/api/chat/attachments/${att.id}/download`,
+              url: att.url || `/api/chat/attachments/${att.id}/file`,
               thumbnailUrl: att.thumbnailUrl ?? null,
               type:
                 typeof att.type === 'object' && att.type !== null
@@ -454,7 +454,7 @@ export async function markConversationAsRead(
   markStoredConversationAsRead(conversationId);
  saveConversationReadAt(conversationId);
   try {
-    await apiClient.patch(`/chat/messages/${conversationId}/read`);
+    await apiClient.patch(`/chat/conversations/${conversationId}/read-state`);
   } catch {
 
   }
@@ -470,7 +470,7 @@ export async function downloadAttachment(
 
   try {
     const response = await apiClient.get(
-      `/chat/attachments/${attachmentId}/download`,
+      `/chat/attachments/${attachmentId}/file`,
       { responseType: 'blob' },
     );
 
@@ -527,7 +527,7 @@ export async function sendAttachmentMessage(
     const response = await apiClient.post<
       | StandardApiResponse<Message>
       | Message
-    >('/chat/messages/attachment', formData);
+    >('/chat/attachments', formData);
 
     const body = response?.data;
     const msg =
@@ -565,7 +565,7 @@ export async function sendAttachmentMessage(
         fileName: file.name,
         fileSize: file.size,
         mimeType: file.type,
-        url: `/api/chat/attachments/att-${msg.id}/download`,
+        url: `/api/chat/attachments/att-${msg.id}/file`,
         type: isImage ? 'IMAGE' : 'PDF',
       },
       attachments: msg.attachments,
