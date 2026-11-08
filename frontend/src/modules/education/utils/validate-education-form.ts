@@ -1,3 +1,4 @@
+import type { EducationDegreeCatalogEntry } from "../types/education-degree-catalog-entry.types";
 import { DATE_PATTERN } from "@/shared/constants/date-time.constants";
 import { EDUCATION_MIN_DATE, EDUCATION_DESCRIPTION_MAX_LENGTH, EDUCATION_VALIDATION_MESSAGES } from "../constants/education-validation.constants";
 import type { EducationFormErrors } from "../types/education-form-errors.types";
@@ -18,6 +19,7 @@ export function validateEducationForm(
   values: EducationFormValues,
   allowMissingEndDate = false,
   institutions: readonly EducationInstitution[] = [],
+  degrees: readonly EducationDegreeCatalogEntry[] = [],
 ): EducationFormErrors {
   const errors: EducationFormErrors = {};
   if ((values.description ?? "").length > EDUCATION_DESCRIPTION_MAX_LENGTH) {
@@ -30,8 +32,16 @@ export function validateEducationForm(
   }
   if (!(values.degree ?? "").trim()) {
     errors.degree = EDUCATION_VALIDATION_MESSAGES.degreeRequired;
-  } else if (!errors.institution && !resolveEducationDegree(values.degree,
-    getEducationDegrees(resolveEducationInstitution(values.institution, institutions) ?? ''))) {
+  } else if (
+    !errors.institution &&
+    !resolveEducationDegree(
+      values.degree,
+      getEducationDegrees(
+        resolveEducationInstitution(values.institution, institutions) ?? "",
+        degrees,
+      ),
+    )
+  ) {
     errors.degree = EDUCATION_VALIDATION_MESSAGES.degreeInvalid;
   }
   if (!values.startDate) {
