@@ -1,5 +1,6 @@
-
 "use client";
+
+import { BOLIVIA_TIME_ZONE } from "@/shared/constants/date-time.constants";
 
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -83,7 +84,7 @@ function formatDate(value?: string): string {
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
-    timeZone: "America/La_Paz",
+    timeZone: BOLIVIA_TIME_ZONE,
   }).format(date);
 }
 

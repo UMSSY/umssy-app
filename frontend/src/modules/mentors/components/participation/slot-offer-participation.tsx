@@ -1,5 +1,7 @@
 "use client";
 
+import { BOLIVIA_TIME_ZONE } from "@/shared/constants/date-time.constants";
+
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Bell, Check, Clock, Info } from "lucide-react";
@@ -45,7 +47,7 @@ export function SlotOfferParticipation({ request, onConfirmed, showHeading = tru
 
   const deadline = new Intl.DateTimeFormat("es-BO", {
     day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit",
-    hourCycle: "h23", timeZone: "America/La_Paz",
+    hourCycle: "h23", timeZone: BOLIVIA_TIME_ZONE,
   }).format(new Date(offer.expiresAt));
 
   async function confirm() {
