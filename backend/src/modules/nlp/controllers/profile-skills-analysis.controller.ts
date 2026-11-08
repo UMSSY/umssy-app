@@ -17,7 +17,7 @@ import { ProfileSkillsAnalysisService } from '../services/profile-skills-analysi
 export class ProfileSkillsAnalysisController {
   constructor(private readonly analysisService: ProfileSkillsAnalysisService) {}
 
-  @Get('skills-for-radar')
+  @Get('me/skills/analysis')
   @ApiOkResponse({ description: 'Verified skills of the authenticated user, as stored by the last analysis' })
   getSkillsForRadar(@CurrentUserId() userId: string): Promise<ProfileSkillsRadarResponse> {
     return this.analysisService.getRadarSnapshot(userId);
