@@ -1,3 +1,4 @@
+import { RECORD_NOT_FOUND_CODE, UNIQUE_CONSTRAINT_VIOLATION_CODE } from '../../../common/constants/prisma-errors.constants.js';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { Prisma } from '../../../prisma/client.js';
@@ -44,7 +45,7 @@ export class AccessRequestsRepository {
         select: ACCESS_REQUEST_SELECT,
       });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === RECORD_NOT_FOUND_CODE) {
         throw new AccessRequestCatalogMissingException();
       }
       throw error;
@@ -178,7 +179,7 @@ export class AccessRequestsRepository {
       });
       return true;
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === RECORD_NOT_FOUND_CODE) {
         return false;
       }
       throw error;
@@ -209,7 +210,7 @@ export class AccessRequestsRepository {
       else await apply(this.prisma);
       return true;
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === RECORD_NOT_FOUND_CODE) {
         return false;
       }
       throw error;
@@ -246,7 +247,7 @@ export class AccessRequestsRepository {
         select: ACCESS_REQUEST_SELECT,
       });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === RECORD_NOT_FOUND_CODE) {
         if (typeof error.meta?.model === 'string') {
           throw new AccessRequestCatalogMissingException();
         }
@@ -282,7 +283,7 @@ export class AccessRequestsRepository {
         return previous?.documentFileId ?? null;
       });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === RECORD_NOT_FOUND_CODE) {
         if (typeof error.meta?.model === 'string') {
           throw new AccessRequestCatalogMissingException();
         }
@@ -319,7 +320,7 @@ export class AccessRequestsRepository {
     try {
       return onSubmitted ? await this.prisma.$transaction(apply) : await apply(this.prisma);
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === RECORD_NOT_FOUND_CODE) {
         if (typeof error.meta?.model === 'string') {
           throw new AccessRequestCatalogMissingException();
         }
@@ -335,7 +336,7 @@ export class AccessRequestsRepository {
       try {
         return await this.submit(id, requestCode, onSubmitted);
       } catch (error) {
-        const isCollision = error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002';
+        const isCollision = error instanceof Prisma.PrismaClientKnownRequestError && error.code === UNIQUE_CONSTRAINT_VIOLATION_CODE;
         if (!isCollision) throw error;
         if (isSubmittedDuplicate(error.meta)) throw new ActiveAccessRequestExistsException();
       }
@@ -365,7 +366,7 @@ export class AccessRequestsRepository {
     try {
       await this.prisma.accessRequest.delete({ where: { id, status: { title: ACCESS_REQUEST_STATUS.DRAFT } } });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === RECORD_NOT_FOUND_CODE) {
         throw new AccessRequestNotFoundException();
       }
       throw error;

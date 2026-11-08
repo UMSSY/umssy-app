@@ -1,8 +1,9 @@
+import { DOCUMENT_TYPE_LABELS } from '../../../common/constants/document-type-labels.constants.js';
 import { SYSTEM_ACTOR_NAME } from '../../audit-events/constants/audit-events.constants.js';
 import { AUDIT_ACTION } from '../../audit-events/types/audit-action.enum.js';
 import { AUDIT_ACTOR_ROLE } from '../../audit-events/types/audit-actor-role.enum.js';
 import type { RecordAuditEventInput } from '../../audit-events/types/record-audit-event-input.types.js';
-import { DOCUMENT_TYPE_LABELS } from '../constants/document-type-labels.constants.js';
+
 import { maskEmail } from '../helpers/mask-email.js';
 import type { AccessRequestAuditSource } from '../types/access-request-audit.types.js';
 

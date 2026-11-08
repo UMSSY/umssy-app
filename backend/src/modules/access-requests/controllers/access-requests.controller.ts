@@ -1,3 +1,4 @@
+import { MAX_FILE_UPLOAD_SIZE_BYTES } from '../../../common/constants/file-upload.constants.js';
 import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, Query, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
@@ -10,7 +11,7 @@ import {
 } from '@nestjs/swagger';
 import { RequestValidationException } from '../../../common/exceptions/request-validation.exception.js';
 import { ZodValidationPipe } from '../../../common/pipes/zod-validation.pipe.js';
-import { MAX_FILE_SIZE_BYTES } from '../../files/constants/file-rules.constants.js';
+
 import { CurrentUser } from '../../../common/decorators/current-user.decorator.js';
 import { Roles } from '../../../common/decorators/roles.decorator.js';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
@@ -156,7 +157,7 @@ export class AccessRequestsController {
   }
 
   @Post(':id/document')
-  @UseInterceptors(DocumentUploadInterceptor, FileInterceptor('file', { limits: { fileSize: MAX_FILE_SIZE_BYTES } }))
+  @UseInterceptors(DocumentUploadInterceptor, FileInterceptor('file', { limits: { fileSize: MAX_FILE_UPLOAD_SIZE_BYTES } }))
   attachDocument(
     @Param('id', uuidPipe) id: string,
     @UploadedFile() file: UploadedDocumentFile | undefined,

@@ -1,3 +1,4 @@
+import { MAX_FILE_UPLOAD_SIZE_BYTES } from '../../../common/constants/file-upload.constants.js';
 import { Body, Controller, HttpCode, Post, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
@@ -13,7 +14,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { ZodValidationPipe } from '../../../common/pipes/zod-validation.pipe.js';
-import { MAX_FILE_SIZE_BYTES } from '../../files/constants/file-rules.constants.js';
+
 import { DocumentCorrectionUnauthorizedException } from '../exceptions/document-correction-unauthorized.exception.js';
 import { DocumentCorrectionGuard } from '../guards/document-correction.guard.js';
 import { DocumentUploadInterceptor } from '../interceptors/document-upload.interceptor.js';
@@ -30,7 +31,7 @@ export class DocumentCorrectionController {
   @Post(':code/resubmit')
   @HttpCode(200)
   @UseGuards(DocumentCorrectionGuard)
-  @UseInterceptors(DocumentUploadInterceptor, FileInterceptor('file', { limits: { fileSize: MAX_FILE_SIZE_BYTES } }))
+  @UseInterceptors(DocumentUploadInterceptor, FileInterceptor('file', { limits: { fileSize: MAX_FILE_UPLOAD_SIZE_BYTES } }))
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Reenviar el documento de una solicitud rechazada',

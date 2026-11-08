@@ -1,3 +1,4 @@
+import { RECORD_NOT_FOUND_CODE } from '../../../common/constants/prisma-errors.constants.js';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { Prisma } from '../../../prisma/client.js';
@@ -65,7 +66,7 @@ export class DocumentValidationRepository {
         return true;
       });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') return false;
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === RECORD_NOT_FOUND_CODE) return false;
       throw error;
     }
   }

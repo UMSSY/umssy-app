@@ -1,3 +1,4 @@
+import { RECORD_NOT_FOUND_CODE } from '../../../common/constants/prisma-errors.constants.js';
 import { Injectable, Logger } from '@nestjs/common';
 import { Prisma } from '../../../prisma/client.js';
 import { toBoliviaTime, toUtcIso } from '../../../common/utils/date-time.js';
@@ -22,7 +23,7 @@ import type { DocumentEvaluation } from '../types/document-validation.types.js';
 import { ActivationOtpService } from './activation-otp.service.js';
 import { RejectionNotificationService } from './rejection-notification.service.js';
 
-const isRecordNotFound = (error: unknown) => error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025';
+const isRecordNotFound = (error: unknown) => error instanceof Prisma.PrismaClientKnownRequestError && error.code === RECORD_NOT_FOUND_CODE;
 
 @Injectable()
 export class AutomaticValidationService {
