@@ -1,4 +1,5 @@
-import { ACCESS_TOKEN_STORAGE_KEY } from "@/shared/constants/auth.constants";
+import "@/shared/testing/indexed-db.mock";
+import { saveAccessToken, clearAccessToken } from "@/shared/services/storage/access-token-storage";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { apiClient } from "@/shared/services/api-client";
 
@@ -32,12 +33,12 @@ function wrapResponse<T>(data: T) {
 }
 
 describe("profileService", () => {
-  beforeEach(() => {
-    window.sessionStorage.setItem(ACCESS_TOKEN_STORAGE_KEY, "test-token");
+  beforeEach(async () => {
+    await saveAccessToken("test-token");
   });
 
   afterEach(() => {
-    window.sessionStorage.clear();
+    clearAccessToken();
     vi.clearAllMocks();
   });
 
