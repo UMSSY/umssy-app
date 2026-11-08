@@ -5,7 +5,10 @@ export const hasOverlapErrorCode = (error: unknown): boolean => {
 
   const candidate = error as {
     code?: unknown;
-    meta?: { code?: unknown; driverAdapterError?: { cause?: { code?: unknown } } };
+    meta?: {
+      code?: unknown;
+      driverAdapterError?: { cause?: { code?: unknown } };
+    };
     message?: unknown;
   };
 
@@ -22,5 +25,7 @@ export const hasOverlapErrorCode = (error: unknown): boolean => {
     }
   }
 
-  return typeof candidate.message === 'string' && candidate.message.includes('23P01');
+  return (
+    typeof candidate.message === 'string' && candidate.message.includes('23P01')
+  );
 };

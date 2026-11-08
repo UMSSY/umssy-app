@@ -47,7 +47,10 @@ describe('AttachmentController', () => {
   });
 
   it('should require chat roles (titulado, estudiante, mentor, empresa)', () => {
-    const roles = new Reflector().get<string[]>(ROLES_KEY, AttachmentController);
+    const roles = new Reflector().get<string[]>(
+      ROLES_KEY,
+      AttachmentController,
+    );
     expect(roles).toEqual(['titulado', 'estudiante', 'mentor', 'empresa']);
   });
 
@@ -96,7 +99,9 @@ describe('AttachmentController', () => {
   });
 
   it('exposes the upload operation at the canonical attachment resource', () => {
-    expect(Reflect.getMetadata('path', AttachmentController.prototype.uploadAndSend)).toBe('attachments');
+    expect(
+      Reflect.getMetadata('path', AttachmentController.prototype.uploadAndSend),
+    ).toBe('attachments');
   });
 
   it('download should return StreamableFile with proper disposition and mime type', async () => {

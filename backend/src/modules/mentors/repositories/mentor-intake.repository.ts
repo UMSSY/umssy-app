@@ -26,10 +26,21 @@ export abstract class MentorIntakeRepository {
     key: string,
   ): Promise<MentorCachedAttempt | undefined> {
     const cached = await tx.mentorIntakeAttempt.findUnique({
-      where: { userId_operation_idempotencyKey: { userId, operation, idempotencyKey: key } },
+      where: {
+        userId_operation_idempotencyKey: {
+          userId,
+          operation,
+          idempotencyKey: key,
+        },
+      },
       select: { payloadHash: true, responseData: true },
     });
-    return cached ? { payloadHash: cached.payloadHash, outcome: cached.responseData as unknown as MentorIntakeOutcome } : undefined;
+    return cached
+      ? {
+          payloadHash: cached.payloadHash,
+          outcome: cached.responseData as unknown as MentorIntakeOutcome,
+        }
+      : undefined;
   }
 
   async activeSanction(
@@ -37,16 +48,22 @@ export abstract class MentorIntakeRepository {
     userId: string,
     now: Date,
   ) {
-    return (await tx.mentorParticipationSanction.findFirst({
-      where: { userId, endsAt: { gt: now } },
-      orderBy: { endsAt: 'desc' },
-      select: { endsAt: true },
-    })) ?? undefined;
+    return (
+      (await tx.mentorParticipationSanction.findFirst({
+        where: { userId, endsAt: { gt: now } },
+        orderBy: { endsAt: 'desc' },
+        select: { endsAt: true },
+      })) ?? undefined
+    );
   }
 
   async attemptCount(tx: Prisma.TransactionClient, userId: string, now: Date) {
     return tx.mentorIntakeAttempt.count({
-      where: { userId, counted: true, occurredAt: { gt: new Date(now.getTime() - DAY_MS), lte: now } },
+      where: {
+        userId,
+        counted: true,
+        occurredAt: { gt: new Date(now.getTime() - DAY_MS), lte: now },
+      },
     });
   }
 
@@ -62,9 +79,21 @@ export abstract class MentorIntakeRepository {
     result: MentorIntakeOutcome,
   ) {
     const { count } = await tx.mentorIntakeAttempt.createMany({
-      data: [{ id, userId, operation, idempotencyKey: key, payloadHash, occurredAt: now,
-        counted, responseStatus: result.status,
-        responseData: JSON.parse(JSON.stringify(result)) as Prisma.InputJsonValue }],
+      data: [
+        {
+          id,
+          userId,
+          operation,
+          idempotencyKey: key,
+          payloadHash,
+          occurredAt: now,
+          counted,
+          responseStatus: result.status,
+          responseData: JSON.parse(
+            JSON.stringify(result),
+          ) as Prisma.InputJsonValue,
+        },
+      ],
     });
     return count;
   }

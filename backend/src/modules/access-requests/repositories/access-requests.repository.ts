@@ -1,4 +1,7 @@
-import { RECORD_NOT_FOUND_CODE, UNIQUE_CONSTRAINT_VIOLATION_CODE } from '../../../common/constants/prisma-errors.constants.js';
+import {
+  RECORD_NOT_FOUND_CODE,
+  UNIQUE_CONSTRAINT_VIOLATION_CODE,
+} from '../../../common/constants/prisma-errors.constants.js';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { Prisma } from '../../../prisma/client.js';
@@ -10,20 +13,34 @@ import {
 } from '../exceptions/index.js';
 import type { CreateAccessRequestDto } from '../requests/create-access-request.schema.js';
 import type { UpdateAccessRequestDto } from '../requests/update-access-request.schema.js';
-import { nextRequestCode, randomRetryDelayMs, requestCodePrefix, sleep } from '../helpers/request-code.js';
+import {
+  nextRequestCode,
+  randomRetryDelayMs,
+  requestCodePrefix,
+  sleep,
+} from '../helpers/request-code.js';
 
 import { isSubmittedDuplicate } from '../helpers/unique-violation.js';
 import { ACCESS_REQUEST_STATUS } from '../types/access-request.enum.js';
 import { ACCESS_REQUEST_SELECT } from '../constants/access-request-selects.constants.js';
-import { ACTIVE_STATUSES, LISTED_STATUSES } from '../constants/access-request-status-groups.constants.js';
+import {
+  ACTIVE_STATUSES,
+  LISTED_STATUSES,
+} from '../constants/access-request-status-groups.constants.js';
 
 import { DECIDED_STATUSES } from '../constants/inbox-summary.constants.js';
 import { escapeLikePattern } from '../helpers/escape-like-pattern.js';
 import { foldAccents } from '../helpers/fold-accents.js';
-import { ACCENT_FOLD_FROM, ACCENT_FOLD_TO } from '../constants/accent-folding.constants.js';
+import {
+  ACCENT_FOLD_FROM,
+  ACCENT_FOLD_TO,
+} from '../constants/accent-folding.constants.js';
 import { ACCESS_REQUEST_AUDIT_SELECT } from '../constants/access-request-audit-select.constants.js';
 import type { AccessRequestAuditHook } from '../types/access-request-audit.types.js';
-import { VALIDATION_DETAIL_SELECT, VALIDATION_SUMMARY_SELECT } from '../constants/document-validation-selects.constants.js';
+import {
+  VALIDATION_DETAIL_SELECT,
+  VALIDATION_SUMMARY_SELECT,
+} from '../constants/document-validation-selects.constants.js';
 import { buildValidationWhere } from '../helpers/build-validation-where.js';
 import type { ValidationResult } from '../types/document-validation.enum.js';
 
@@ -45,7 +62,10 @@ export class AccessRequestsRepository {
         select: ACCESS_REQUEST_SELECT,
       });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === RECORD_NOT_FOUND_CODE) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === RECORD_NOT_FOUND_CODE
+      ) {
         throw new AccessRequestCatalogMissingException();
       }
       throw error;
@@ -53,7 +73,8 @@ export class AccessRequestsRepository {
   }
 
   private async findIdsBySearch(terms: string[]): Promise<string[]> {
-    const folded = (column: Prisma.Sql) => Prisma.sql`lower(translate(${column}, ${ACCENT_FOLD_FROM}, ${ACCENT_FOLD_TO}))`;
+    const folded = (column: Prisma.Sql) =>
+      Prisma.sql`lower(translate(${column}, ${ACCENT_FOLD_FROM}, ${ACCENT_FOLD_TO}))`;
     const conditions = terms.map((term) => {
       const pattern = `%${escapeLikePattern(foldAccents(term))}%`;
       return Prisma.sql`(${folded(Prisma.sql`first_name`)} LIKE ${pattern} ESCAPE '\\'
@@ -77,11 +98,14 @@ export class AccessRequestsRepository {
     limit: number;
   }) {
     const terms = params.search?.split(/\s+/).filter(Boolean).slice(0, 5) ?? [];
-    const matchingIds = terms.length > 0 ? await this.findIdsBySearch(terms) : undefined;
+    const matchingIds =
+      terms.length > 0 ? await this.findIdsBySearch(terms) : undefined;
     const where: Prisma.AccessRequestWhereInput = {
       status: { title: params.status ?? { in: LISTED_STATUSES } },
       ...(params.career && { career: { title: params.career } }),
-      ...(params.submittedFrom && { submittedAt: { gte: params.submittedFrom } }),
+      ...(params.submittedFrom && {
+        submittedAt: { gte: params.submittedFrom },
+      }),
       ...(matchingIds && { id: { in: matchingIds } }),
       ...(params.validation && buildValidationWhere(params.validation)),
     };
@@ -110,19 +134,30 @@ export class AccessRequestsRepository {
     return { rows, total };
   }
 
-  countByStatus(status: string, filters: { submittedBefore?: Date; reviewedFrom?: Date } = {}) {
+  countByStatus(
+    status: string,
+    filters: { submittedBefore?: Date; reviewedFrom?: Date } = {},
+  ) {
     return this.prisma.accessRequest.count({
       where: {
         status: { title: status },
-        ...(filters.submittedBefore && { submittedAt: { lt: filters.submittedBefore } }),
-        ...(filters.reviewedFrom && { reviewedAt: { gte: filters.reviewedFrom } }),
+        ...(filters.submittedBefore && {
+          submittedAt: { lt: filters.submittedBefore },
+        }),
+        ...(filters.reviewedFrom && {
+          reviewedAt: { gte: filters.reviewedFrom },
+        }),
       },
     });
   }
 
   findReviewTimes(since: Date) {
     return this.prisma.accessRequest.findMany({
-      where: { status: { title: { in: DECIDED_STATUSES } }, reviewedAt: { gte: since }, submittedAt: { not: null } },
+      where: {
+        status: { title: { in: DECIDED_STATUSES } },
+        reviewedAt: { gte: since },
+        submittedAt: { not: null },
+      },
       select: { submittedAt: true, reviewedAt: true },
     });
   }
@@ -150,7 +185,9 @@ export class AccessRequestsRepository {
         status: { select: { title: true } },
         career: { select: { title: true } },
         documentType: { select: { title: true } },
-        documentFile: { select: { name: true, extension: true, mimeType: true, size: true } },
+        documentFile: {
+          select: { name: true, extension: true, mimeType: true, size: true },
+        },
         openedBy: { select: { firstName: true, lastName: true } },
         reviewedBy: { select: { firstName: true, lastName: true } },
         documentValidation: { select: VALIDATION_DETAIL_SELECT },
@@ -158,7 +195,11 @@ export class AccessRequestsRepository {
     });
   }
 
-  async markInReview(id: string, reviewerId: string, onOpened?: AccessRequestAuditHook): Promise<boolean> {
+  async markInReview(
+    id: string,
+    reviewerId: string,
+    onOpened?: AccessRequestAuditHook,
+  ): Promise<boolean> {
     const now = new Date();
     try {
       await this.prisma.$transaction(async (tx) => {
@@ -179,7 +220,10 @@ export class AccessRequestsRepository {
       });
       return true;
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === RECORD_NOT_FOUND_CODE) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === RECORD_NOT_FOUND_CODE
+      ) {
         return false;
       }
       throw error;
@@ -199,7 +243,9 @@ export class AccessRequestsRepository {
           status: { connect: { title: verdict.status } },
           reviewedBy: { connect: { id: reviewerId } },
           reviewedAt: new Date(),
-          ...(verdict.rejectionReason !== undefined && { rejectionReason: verdict.rejectionReason }),
+          ...(verdict.rejectionReason !== undefined && {
+            rejectionReason: verdict.rejectionReason,
+          }),
         },
         select: ACCESS_REQUEST_AUDIT_SELECT,
       });
@@ -210,7 +256,10 @@ export class AccessRequestsRepository {
       else await apply(this.prisma);
       return true;
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === RECORD_NOT_FOUND_CODE) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === RECORD_NOT_FOUND_CODE
+      ) {
         return false;
       }
       throw error;
@@ -218,13 +267,22 @@ export class AccessRequestsRepository {
   }
 
   findById(id: string) {
-    return this.prisma.accessRequest.findUnique({ where: { id }, select: ACCESS_REQUEST_SELECT });
+    return this.prisma.accessRequest.findUnique({
+      where: { id },
+      select: ACCESS_REQUEST_SELECT,
+    });
   }
 
-  findActiveDuplicates(fields: { email?: string; idCardNumber?: string; sisCode?: string; excludeId?: string }) {
+  findActiveDuplicates(fields: {
+    email?: string;
+    idCardNumber?: string;
+    sisCode?: string;
+    excludeId?: string;
+  }) {
     const { email, idCardNumber, sisCode, excludeId } = fields;
     const matches: Prisma.AccessRequestWhereInput[] = [];
-    if (email !== undefined) matches.push({ email: { equals: email, mode: 'insensitive' } });
+    if (email !== undefined)
+      matches.push({ email: { equals: email, mode: 'insensitive' } });
     if (idCardNumber !== undefined) matches.push({ idCardNumber });
     if (sisCode !== undefined) matches.push({ sisCode });
 
@@ -243,11 +301,19 @@ export class AccessRequestsRepository {
     try {
       return await this.prisma.accessRequest.update({
         where: { id, status: { title: ACCESS_REQUEST_STATUS.DRAFT } },
-        data: { ...rest, ...(career !== undefined && { career: { connect: { title: career } } }) },
+        data: {
+          ...rest,
+          ...(career !== undefined && {
+            career: { connect: { title: career } },
+          }),
+        },
         select: ACCESS_REQUEST_SELECT,
       });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === RECORD_NOT_FOUND_CODE) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === RECORD_NOT_FOUND_CODE
+      ) {
         if (typeof error.meta?.model === 'string') {
           throw new AccessRequestCatalogMissingException();
         }
@@ -265,10 +331,16 @@ export class AccessRequestsRepository {
   }
 
   clearDocument(id: string) {
-    return this.replaceDocument(id, { documentFile: { disconnect: true }, documentType: { disconnect: true } });
+    return this.replaceDocument(id, {
+      documentFile: { disconnect: true },
+      documentType: { disconnect: true },
+    });
   }
 
-  private async replaceDocument(id: string, data: Prisma.AccessRequestUpdateInput) {
+  private async replaceDocument(
+    id: string,
+    data: Prisma.AccessRequestUpdateInput,
+  ) {
     try {
       return await this.prisma.$transaction(async (tx) => {
         const previous = await tx.accessRequest.findFirst({
@@ -283,7 +355,10 @@ export class AccessRequestsRepository {
         return previous?.documentFileId ?? null;
       });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === RECORD_NOT_FOUND_CODE) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === RECORD_NOT_FOUND_CODE
+      ) {
         if (typeof error.meta?.model === 'string') {
           throw new AccessRequestCatalogMissingException();
         }
@@ -303,7 +378,11 @@ export class AccessRequestsRepository {
     return nextRequestCode(year, last?.requestCode);
   }
 
-  async submit(id: string, requestCode: string, onSubmitted?: AccessRequestAuditHook) {
+  async submit(
+    id: string,
+    requestCode: string,
+    onSubmitted?: AccessRequestAuditHook,
+  ) {
     const apply = async (client: Prisma.TransactionClient) => {
       const submitted = await client.accessRequest.update({
         where: { id, status: { title: ACCESS_REQUEST_STATUS.DRAFT } },
@@ -312,15 +391,29 @@ export class AccessRequestsRepository {
           submittedAt: new Date(),
           status: { connect: { title: ACCESS_REQUEST_STATUS.PENDING } },
         },
-        select: { ...ACCESS_REQUEST_AUDIT_SELECT, submittedAt: true, status: { select: { title: true } } },
+        select: {
+          ...ACCESS_REQUEST_AUDIT_SELECT,
+          submittedAt: true,
+          status: { select: { title: true } },
+        },
       });
       if (onSubmitted) await onSubmitted(submitted, client);
-      return { id: submitted.id, requestCode: submitted.requestCode, submittedAt: submitted.submittedAt, status: submitted.status };
+      return {
+        id: submitted.id,
+        requestCode: submitted.requestCode,
+        submittedAt: submitted.submittedAt,
+        status: submitted.status,
+      };
     };
     try {
-      return onSubmitted ? await this.prisma.$transaction(apply) : await apply(this.prisma);
+      return onSubmitted
+        ? await this.prisma.$transaction(apply)
+        : await apply(this.prisma);
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === RECORD_NOT_FOUND_CODE) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === RECORD_NOT_FOUND_CODE
+      ) {
         if (typeof error.meta?.model === 'string') {
           throw new AccessRequestCatalogMissingException();
         }
@@ -330,15 +423,21 @@ export class AccessRequestsRepository {
     }
   }
 
-  async submitWithGeneratedCode(id: string, onSubmitted?: AccessRequestAuditHook) {
+  async submitWithGeneratedCode(
+    id: string,
+    onSubmitted?: AccessRequestAuditHook,
+  ) {
     for (let attempt = 1; attempt <= 8; attempt++) {
       const requestCode = await this.generateRequestCode();
       try {
         return await this.submit(id, requestCode, onSubmitted);
       } catch (error) {
-        const isCollision = error instanceof Prisma.PrismaClientKnownRequestError && error.code === UNIQUE_CONSTRAINT_VIOLATION_CODE;
+        const isCollision =
+          error instanceof Prisma.PrismaClientKnownRequestError &&
+          error.code === UNIQUE_CONSTRAINT_VIOLATION_CODE;
         if (!isCollision) throw error;
-        if (isSubmittedDuplicate(error.meta)) throw new ActiveAccessRequestExistsException();
+        if (isSubmittedDuplicate(error.meta))
+          throw new ActiveAccessRequestExistsException();
       }
       if (attempt < 8) await this.retryPause(randomRetryDelayMs());
     }
@@ -364,9 +463,14 @@ export class AccessRequestsRepository {
 
   async deleteDraft(id: string) {
     try {
-      await this.prisma.accessRequest.delete({ where: { id, status: { title: ACCESS_REQUEST_STATUS.DRAFT } } });
+      await this.prisma.accessRequest.delete({
+        where: { id, status: { title: ACCESS_REQUEST_STATUS.DRAFT } },
+      });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === RECORD_NOT_FOUND_CODE) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === RECORD_NOT_FOUND_CODE
+      ) {
         throw new AccessRequestNotFoundException();
       }
       throw error;

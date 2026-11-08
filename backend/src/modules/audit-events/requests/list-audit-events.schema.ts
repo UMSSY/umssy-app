@@ -1,6 +1,10 @@
 import { z } from 'zod';
 
-import { auditEventsFiltersShape, hasValidPeriod, INVALID_PERIOD_ISSUE } from './audit-events-filters.schema.js';
+import {
+  auditEventsFiltersShape,
+  hasValidPeriod,
+  INVALID_PERIOD_ISSUE,
+} from './audit-events-filters.schema.js';
 
 export const listAuditEventsQuerySchema = z
   .object({

@@ -16,7 +16,9 @@ describe('AccessRequestsController', () => {
   it('delega la actualización al servicio con el id y el cuerpo', async () => {
     service.update.mockResolvedValue({ id: 'id-1' });
 
-    await expect(controller.update('id-1', { phone: '71234567' })).resolves.toEqual({ id: 'id-1' });
+    await expect(
+      controller.update('id-1', { phone: '71234567' }),
+    ).resolves.toEqual({ id: 'id-1' });
     expect(service.update).toHaveBeenCalledWith('id-1', { phone: '71234567' });
   });
 

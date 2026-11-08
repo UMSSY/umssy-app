@@ -1,10 +1,16 @@
-import { REPORT_USER_CSV_HEADERS, USER_TYPE_LABELS } from '../constants/report-user-csv.constants.js';
+import {
+  REPORT_USER_CSV_HEADERS,
+  USER_TYPE_LABELS,
+} from '../constants/report-user-csv.constants.js';
 import { Injectable } from '@nestjs/common';
 import type { PaginatedResult } from '../../../common/types/api-response.types.js';
 import { buildCsv } from '../../../common/utils/csv.js';
 import { buildExportFileName } from '../../../common/utils/file-name.js';
 import { paginate } from '../../../common/utils/pagination.js';
-import { toRegisteredUserCsvRow, toRejectedUserCsvRow } from '../mappers/report-user-csv.mapper.js';
+import {
+  toRegisteredUserCsvRow,
+  toRejectedUserCsvRow,
+} from '../mappers/report-user-csv.mapper.js';
 import {
   toRegisteredUserResponse,
   toRejectedUserResponse,

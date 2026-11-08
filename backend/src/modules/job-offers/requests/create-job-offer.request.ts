@@ -1,6 +1,13 @@
 import { z } from 'zod';
-import { JOB_OFFER_MAX_SKILLS, JOB_OFFER_TITLE_MAX_LENGTH, JOB_OFFER_VALIDATION_MESSAGES as MESSAGES } from '../constants/job-offer.constants.js';
-import { JobOfferContractType, JobOfferModality } from '../types/job-offer.enum.js';
+import {
+  JOB_OFFER_MAX_SKILLS,
+  JOB_OFFER_TITLE_MAX_LENGTH,
+  JOB_OFFER_VALIDATION_MESSAGES as MESSAGES,
+} from '../constants/job-offer.constants.js';
+import {
+  JobOfferContractType,
+  JobOfferModality,
+} from '../types/job-offer.enum.js';
 import type { SalaryFields } from '../types/salary-fields.type.js';
 
 const salarySchema = z
@@ -26,7 +33,9 @@ export const jobOfferFieldsSchema = z.object({
     .min(1, MESSAGES.REQUIRED_FIELD)
     .max(3000, MESSAGES.DESCRIPTION_TOO_LONG),
   modality: z.enum(JobOfferModality, { message: MESSAGES.INVALID_MODALITY }),
-  contractType: z.enum(JobOfferContractType, { message: MESSAGES.INVALID_CONTRACT_TYPE }),
+  contractType: z.enum(JobOfferContractType, {
+    message: MESSAGES.INVALID_CONTRACT_TYPE,
+  }),
   category: z
     .string()
     .trim()
@@ -69,17 +78,26 @@ export const jobOfferFieldsSchema = z.object({
 
 export const hasRequiredSalary = (data: SalaryFields): boolean =>
   data.salaryMin !== undefined ||
-  (data.contractType === JobOfferContractType.INTERNSHIP && data.salaryMax === undefined);
+  (data.contractType === JobOfferContractType.INTERNSHIP &&
+    data.salaryMax === undefined);
 
 export const hasValidSalaryRange = (data: SalaryFields): boolean =>
-  data.salaryMin === undefined || data.salaryMax === undefined || data.salaryMin <= data.salaryMax;
+  data.salaryMin === undefined ||
+  data.salaryMax === undefined ||
+  data.salaryMin <= data.salaryMax;
 
 export const createJobOfferSchema = jobOfferFieldsSchema
   .extend({
     requiredCareers: requirementListSchema.default([]),
     otherRequirements: requirementListSchema.default([]),
   })
-  .refine(hasRequiredSalary, { path: ['salaryMin'], message: MESSAGES.REQUIRED_FIELD })
-  .refine(hasValidSalaryRange, { path: ['salaryMin'], message: MESSAGES.SALARY_RANGE_INVALID });
+  .refine(hasRequiredSalary, {
+    path: ['salaryMin'],
+    message: MESSAGES.REQUIRED_FIELD,
+  })
+  .refine(hasValidSalaryRange, {
+    path: ['salaryMin'],
+    message: MESSAGES.SALARY_RANGE_INVALID,
+  });
 
 export type CreateJobOfferRequest = z.infer<typeof createJobOfferSchema>;

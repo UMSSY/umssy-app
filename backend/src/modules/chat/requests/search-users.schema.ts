@@ -10,10 +10,7 @@ export const searchUsersSchema = z
         MIN_SEARCH_CHARS,
         `El término de búsqueda debe tener al menos ${MIN_SEARCH_CHARS} caracteres`,
       )
-      .max(
-        100,
-        `El término de búsqueda no puede superar los 100 caracteres`,
-      ),
+      .max(100, `El término de búsqueda no puede superar los 100 caracteres`),
   })
   .strict();
 

@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { reviewKindSchema, reviewDecisionSchema } from '../requests/radar-review.request.js';
+import {
+  reviewKindSchema,
+  reviewDecisionSchema,
+} from '../requests/radar-review.request.js';
 
 describe('Contratos Zod de revisión del Radar', () => {
   it('admite únicamente los tipos de evidencia del flujo HU1-HU3', () => {
@@ -13,9 +16,14 @@ describe('Contratos Zod de revisión del Radar', () => {
     }
   });
   it('rechaza decisiones inválidas, cuerpos incompletos y campos adicionales', () => {
-    expect(reviewDecisionSchema.safeParse({ decision: 'hired' }).success).toBe(false);
+    expect(reviewDecisionSchema.safeParse({ decision: 'hired' }).success).toBe(
+      false,
+    );
     expect(reviewDecisionSchema.safeParse({}).success).toBe(false);
     expect(reviewDecisionSchema.safeParse(null).success).toBe(false);
-    expect(reviewDecisionSchema.safeParse({ decision: 'approved', companyId: 'x' }).success).toBe(false);
+    expect(
+      reviewDecisionSchema.safeParse({ decision: 'approved', companyId: 'x' })
+        .success,
+    ).toBe(false);
   });
 });

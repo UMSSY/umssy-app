@@ -160,10 +160,12 @@ export class MentorParticipationRepository extends MentorIntakeRepository {
 
   cancelRequest(userId: string) {
     return withMentorCapacityLock(this.prisma, async (tx) => {
-      const [request] = await tx.mentorParticipationRequest.updateManyAndReturn({
-        where: { userId, status: 'PENDING' },
-        data: { status: 'CANCELLED' },
-      });
+      const [request] = await tx.mentorParticipationRequest.updateManyAndReturn(
+        {
+          where: { userId, status: 'PENDING' },
+          data: { status: 'CANCELLED' },
+        },
+      );
       if (!request) return { result: 'NOT_FOUND' as const };
       return { result: 'CANCELLED' as const, request };
     });

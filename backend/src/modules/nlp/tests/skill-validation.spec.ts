@@ -130,7 +130,10 @@ describe('SkillValidationService', () => {
     const validation = service.validateDetected(
       [
         { name: 'HTML5', evidenceRefs: [{ type: 'education', id: 'e1' }] },
-        { name: 'html5', evidenceRefs: [{ type: 'work-experience', id: 'w1' }] },
+        {
+          name: 'html5',
+          evidenceRefs: [{ type: 'work-experience', id: 'w1' }],
+        },
       ],
       catalog,
     );
@@ -185,9 +188,9 @@ describe('SkillValidationService', () => {
       ],
     );
 
-    expect(
-      validation.accepted.map(({ id, name }) => [id, name]),
-    ).toEqual([['skill-power-automate', 'Power Automate']]);
+    expect(validation.accepted.map(({ id, name }) => [id, name])).toEqual([
+      ['skill-power-automate', 'Power Automate'],
+    ]);
 
     expect(validation.discarded).toEqual([]);
   });

@@ -17,7 +17,9 @@ describe('AttachmentRepository', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    repository = new AttachmentRepository(mockPrisma as unknown as PrismaService);
+    repository = new AttachmentRepository(
+      mockPrisma as unknown as PrismaService,
+    );
   });
 
   describe('create', () => {
@@ -115,7 +117,9 @@ describe('AttachmentRepository', () => {
         },
       };
 
-      mockPrisma.messageAttachment.findUnique.mockResolvedValueOnce(downloadRecord);
+      mockPrisma.messageAttachment.findUnique.mockResolvedValueOnce(
+        downloadRecord,
+      );
 
       const result = await repository.findDownloadById('att-1');
 

@@ -6,7 +6,8 @@ import {
 
 export const SEED_JOB_OFFER_MODALITIES = Object.values(JobOfferModality);
 
-export const SEED_JOB_OFFER_CONTRACT_TYPES = Object.values(JobOfferContractType);
+export const SEED_JOB_OFFER_CONTRACT_TYPES =
+  Object.values(JobOfferContractType);
 
 export const SEED_JOB_OFFER_STATUSES = Object.values(JobOfferStatus);
 
@@ -107,7 +108,8 @@ export const SEED_JOB_OFFERS = [
     id: 'b0000000-0000-4000-8000-000000000004',
     companyTitle: 'TechBolivia S.R.L.',
     title: 'Analista de Datos Medio Tiempo',
-    description: 'Apoyo en reportes y limpieza de datos para el área comercial.',
+    description:
+      'Apoyo en reportes y limpieza de datos para el área comercial.',
     category: 'Datos',
     modality: JobOfferModality.REMOTE,
     contractType: JobOfferContractType.PART_TIME,
@@ -123,11 +125,12 @@ export const SEED_JOB_OFFERS = [
     id: 'b0000000-0000-4000-8000-000000000005',
     companyTitle: 'TechBolivia S.R.L.',
     title: 'Desarrollador Fullstack Vue',
-    description: 'Mantenimiento y nuevas funcionalidades del sistema de ventas.',
+    description:
+      'Mantenimiento y nuevas funcionalidades del sistema de ventas.',
     category: 'Desarrollo de software',
     modality: JobOfferModality.HYBRID,
     contractType: JobOfferContractType.PART_TIME,
-        status: JobOfferStatus.CLOSED,
+    status: JobOfferStatus.CLOSED,
     positionsAvailable: 1,
     salaryMin: 4000,
     salaryMax: 5500,
@@ -139,7 +142,8 @@ export const SEED_JOB_OFFERS = [
     id: 'b0000000-0000-4000-8000-000000000006',
     companyTitle: 'TechBolivia S.R.L.',
     title: 'Soporte Técnico Linux',
-    description: 'Atención de incidencias de servidores y estaciones de trabajo.',
+    description:
+      'Atención de incidencias de servidores y estaciones de trabajo.',
     category: 'Infraestructura',
     modality: JobOfferModality.ON_SITE,
     contractType: JobOfferContractType.INTERNSHIP,
@@ -155,7 +159,8 @@ export const SEED_JOB_OFFERS = [
     id: 'b0000000-0000-4000-8000-000000000007',
     companyTitle: 'NovaSoft Bolivia',
     title: 'Desarrollador React Senior',
-    description: 'Desarrollo de aplicaciones web para clientes internacionales.',
+    description:
+      'Desarrollo de aplicaciones web para clientes internacionales.',
     category: 'Desarrollo de software',
     modality: JobOfferModality.REMOTE,
     contractType: JobOfferContractType.FULL_TIME,
@@ -171,7 +176,8 @@ export const SEED_JOB_OFFERS = [
     id: 'b0000000-0000-4000-8000-000000000008',
     companyTitle: 'Andes Data Labs',
     title: 'Científico de Datos Junior',
-    description: 'Modelos de aprendizaje automático para predicción de demanda.',
+    description:
+      'Modelos de aprendizaje automático para predicción de demanda.',
     category: 'Datos',
     modality: JobOfferModality.HYBRID,
     contractType: JobOfferContractType.FULL_TIME,

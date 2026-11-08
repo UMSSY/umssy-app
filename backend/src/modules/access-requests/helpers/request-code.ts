@@ -2,9 +2,14 @@ export function requestCodePrefix(year: number): string {
   return `SOL-${year}-`;
 }
 
-export function nextRequestCode(year: number, lastCode: string | null | undefined): string {
+export function nextRequestCode(
+  year: number,
+  lastCode: string | null | undefined,
+): string {
   const prefix = requestCodePrefix(year);
-  const lastNumber = lastCode?.startsWith(prefix) ? Number.parseInt(lastCode.slice(prefix.length), 10) : 0;
+  const lastNumber = lastCode?.startsWith(prefix)
+    ? Number.parseInt(lastCode.slice(prefix.length), 10)
+    : 0;
   const next = (Number.isNaN(lastNumber) ? 0 : lastNumber) + 1;
   return `${prefix}${String(next).padStart(4, '0')}`;
 }

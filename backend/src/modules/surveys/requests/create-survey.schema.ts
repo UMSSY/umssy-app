@@ -1,5 +1,9 @@
 import { z } from 'zod';
-import { SURVEY_ACADEMIC_PERIOD_PATTERN, SURVEY_ALL_CAREERS, SURVEY_VALIDATION_MESSAGES as MESSAGES } from '../constants/survey.constants.js';
+import {
+  SURVEY_ACADEMIC_PERIOD_PATTERN,
+  SURVEY_ALL_CAREERS,
+  SURVEY_VALIDATION_MESSAGES as MESSAGES,
+} from '../constants/survey.constants.js';
 import {
   SURVEY_QUESTION_TYPES,
   SURVEY_STATUSES,
@@ -20,7 +24,9 @@ const questionSchema = z.object({
     .string({ message: MESSAGES.STATEMENT_REQUIRED })
     .trim()
     .max(250, MESSAGES.STATEMENT_TOO_LONG),
-  type: z.enum(SURVEY_QUESTION_TYPES, { message: MESSAGES.INVALID_QUESTION_TYPE }),
+  type: z.enum(SURVEY_QUESTION_TYPES, {
+    message: MESSAGES.INVALID_QUESTION_TYPE,
+  }),
   isRequired: z.boolean().default(true),
   options: z.array(optionSchema).default([]),
 });
@@ -31,7 +37,10 @@ const optionalText = <TSchema extends z.ZodType<string>>(schema: TSchema) =>
     .optional()
     .transform((value) => (value ? value : undefined));
 
-const dateSchema = z.iso.datetime({ offset: true, message: MESSAGES.INVALID_DATE });
+const dateSchema = z.iso.datetime({
+  offset: true,
+  message: MESSAGES.INVALID_DATE,
+});
 
 export const createSurveySchema = z
   .object({
@@ -50,15 +59,24 @@ export const createSurveySchema = z
       z
         .string()
         .refine(
-          (value) => value === SURVEY_ALL_CAREERS || z.uuid().safeParse(value).success,
+          (value) =>
+            value === SURVEY_ALL_CAREERS || z.uuid().safeParse(value).success,
           MESSAGES.INVALID_CAREER_ID,
         ),
     ),
     academicPeriod: optionalText(
-      z.string().trim().regex(SURVEY_ACADEMIC_PERIOD_PATTERN, MESSAGES.INVALID_ACADEMIC_PERIOD),
+      z
+        .string()
+        .trim()
+        .regex(
+          SURVEY_ACADEMIC_PERIOD_PATTERN,
+          MESSAGES.INVALID_ACADEMIC_PERIOD,
+        ),
     ),
     targetAudience: z
-      .enum(SURVEY_TARGET_AUDIENCES, { message: MESSAGES.INVALID_TARGET_AUDIENCE })
+      .enum(SURVEY_TARGET_AUDIENCES, {
+        message: MESSAGES.INVALID_TARGET_AUDIENCE,
+      })
       .nullish()
       .transform((value) => value ?? undefined)
       .optional(),

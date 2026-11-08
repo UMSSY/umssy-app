@@ -9,10 +9,14 @@ import type { AccessRequestAuditSource } from '../types/access-request-audit.typ
 
 const ADMINISTRATIVE_FALLBACK_NAME = 'Personal administrativo';
 
-const fullName = (person: { firstName: string; lastName: string }) => `${person.firstName} ${person.lastName}`.trim();
+const fullName = (person: { firstName: string; lastName: string }) =>
+  `${person.firstName} ${person.lastName}`.trim();
 
 const documentLabel = (source: AccessRequestAuditSource) =>
-  source.documentType ? (DOCUMENT_TYPE_LABELS[source.documentType.title] ?? source.documentType.title) : null;
+  source.documentType
+    ? (DOCUMENT_TYPE_LABELS[source.documentType.title] ??
+      source.documentType.title)
+    : null;
 
 function baseEvent(source: AccessRequestAuditSource) {
   return {
@@ -27,22 +31,35 @@ function baseEvent(source: AccessRequestAuditSource) {
 function reviewer(source: AccessRequestAuditSource, reviewerId: string) {
   return {
     id: reviewerId,
-    name: source.reviewedBy ? fullName(source.reviewedBy) : ADMINISTRATIVE_FALLBACK_NAME,
+    name: source.reviewedBy
+      ? fullName(source.reviewedBy)
+      : ADMINISTRATIVE_FALLBACK_NAME,
     role: AUDIT_ACTOR_ROLE.ADMINISTRATIVE,
   };
 }
 
-export function toSubmittedAuditEvent(source: AccessRequestAuditSource): RecordAuditEventInput {
+export function toSubmittedAuditEvent(
+  source: AccessRequestAuditSource,
+): RecordAuditEventInput {
   const label = documentLabel(source);
   return {
     ...baseEvent(source),
     action: AUDIT_ACTION.SUBMITTED,
-    actor: { id: null, name: fullName(source), role: AUDIT_ACTOR_ROLE.GRADUATE },
-    detail: label ? `Solicitud enviada con ${label.toLowerCase()} adjunto.` : null,
+    actor: {
+      id: null,
+      name: fullName(source),
+      role: AUDIT_ACTOR_ROLE.GRADUATE,
+    },
+    detail: label
+      ? `Solicitud enviada con ${label.toLowerCase()} adjunto.`
+      : null,
   };
 }
 
-export function toOpenedAuditEvent(source: AccessRequestAuditSource, reviewerId: string): RecordAuditEventInput {
+export function toOpenedAuditEvent(
+  source: AccessRequestAuditSource,
+  reviewerId: string,
+): RecordAuditEventInput {
   return {
     ...baseEvent(source),
     action: AUDIT_ACTION.OPENED,
@@ -51,7 +68,10 @@ export function toOpenedAuditEvent(source: AccessRequestAuditSource, reviewerId:
   };
 }
 
-export function toApprovedAuditEvent(source: AccessRequestAuditSource, reviewerId: string): RecordAuditEventInput {
+export function toApprovedAuditEvent(
+  source: AccessRequestAuditSource,
+  reviewerId: string,
+): RecordAuditEventInput {
   const label = documentLabel(source);
   return {
     ...baseEvent(source),
@@ -61,7 +81,11 @@ export function toApprovedAuditEvent(source: AccessRequestAuditSource, reviewerI
   };
 }
 
-export function toRejectedAuditEvent(source: AccessRequestAuditSource, reviewerId: string, reason: string): RecordAuditEventInput {
+export function toRejectedAuditEvent(
+  source: AccessRequestAuditSource,
+  reviewerId: string,
+  reason: string,
+): RecordAuditEventInput {
   return {
     ...baseEvent(source),
     action: AUDIT_ACTION.REJECTED,
@@ -70,9 +94,16 @@ export function toRejectedAuditEvent(source: AccessRequestAuditSource, reviewerI
   };
 }
 
-const systemActor = () => ({ id: null, name: SYSTEM_ACTOR_NAME, role: AUDIT_ACTOR_ROLE.SYSTEM });
+const systemActor = () => ({
+  id: null,
+  name: SYSTEM_ACTOR_NAME,
+  role: AUDIT_ACTOR_ROLE.SYSTEM,
+});
 
-export function toOcrReadAuditEvent(source: AccessRequestAuditSource, matchScore: number): RecordAuditEventInput {
+export function toOcrReadAuditEvent(
+  source: AccessRequestAuditSource,
+  matchScore: number,
+): RecordAuditEventInput {
   return {
     ...baseEvent(source),
     action: AUDIT_ACTION.OCR_READ,
@@ -81,7 +112,10 @@ export function toOcrReadAuditEvent(source: AccessRequestAuditSource, matchScore
   };
 }
 
-export function toAutomaticApprovalAuditEvent(source: AccessRequestAuditSource, matchScore: number): RecordAuditEventInput {
+export function toAutomaticApprovalAuditEvent(
+  source: AccessRequestAuditSource,
+  matchScore: number,
+): RecordAuditEventInput {
   return {
     ...baseEvent(source),
     action: AUDIT_ACTION.APPROVED,
@@ -90,7 +124,10 @@ export function toAutomaticApprovalAuditEvent(source: AccessRequestAuditSource, 
   };
 }
 
-export function toAutomaticRejectionAuditEvent(source: AccessRequestAuditSource, reason: string): RecordAuditEventInput {
+export function toAutomaticRejectionAuditEvent(
+  source: AccessRequestAuditSource,
+  reason: string,
+): RecordAuditEventInput {
   return {
     ...baseEvent(source),
     action: AUDIT_ACTION.REJECTED,
@@ -99,7 +136,10 @@ export function toAutomaticRejectionAuditEvent(source: AccessRequestAuditSource,
   };
 }
 
-export function toManualReviewAuditEvent(source: AccessRequestAuditSource, reason: string): RecordAuditEventInput {
+export function toManualReviewAuditEvent(
+  source: AccessRequestAuditSource,
+  reason: string,
+): RecordAuditEventInput {
   return {
     ...baseEvent(source),
     action: AUDIT_ACTION.SENT_TO_MANUAL_REVIEW,
@@ -108,16 +148,23 @@ export function toManualReviewAuditEvent(source: AccessRequestAuditSource, reaso
   };
 }
 
-export function toApprovalRevertedAuditEvent(source: AccessRequestAuditSource, adminId: string): RecordAuditEventInput {
+export function toApprovalRevertedAuditEvent(
+  source: AccessRequestAuditSource,
+  adminId: string,
+): RecordAuditEventInput {
   return {
     ...baseEvent(source),
     action: AUDIT_ACTION.APPROVAL_REVERTED,
     actor: reviewer(source, adminId),
-    detail: 'La aprobación automática se revirtió y la solicitud volvió a revisión manual.',
+    detail:
+      'La aprobación automática se revirtió y la solicitud volvió a revisión manual.',
   };
 }
 
-export function toActivationCodeSentAuditEvent(source: AccessRequestAuditSource, email: string): RecordAuditEventInput {
+export function toActivationCodeSentAuditEvent(
+  source: AccessRequestAuditSource,
+  email: string,
+): RecordAuditEventInput {
   return {
     ...baseEvent(source),
     evidenceFileId: null,
@@ -129,11 +176,18 @@ export function toActivationCodeSentAuditEvent(source: AccessRequestAuditSource,
 
 // La evidencia apunta al archivo sustituido para conservarlo incluso si no había
 // eventos anteriores. El archivo nuevo queda asociado a la solicitud y su ID al evento.
-export function toDocumentReplacedAuditEvent(source: AccessRequestAuditSource, newFileId: string): RecordAuditEventInput {
+export function toDocumentReplacedAuditEvent(
+  source: AccessRequestAuditSource,
+  newFileId: string,
+): RecordAuditEventInput {
   return {
     ...baseEvent(source),
     action: AUDIT_ACTION.DOCUMENT_REPLACED,
-    actor: { id: null, name: fullName(source), role: AUDIT_ACTOR_ROLE.GRADUATE },
+    actor: {
+      id: null,
+      name: fullName(source),
+      role: AUDIT_ACTOR_ROLE.GRADUATE,
+    },
     detail: `Documento anterior sustituido. Nuevo documento: ${newFileId}.`,
   };
 }

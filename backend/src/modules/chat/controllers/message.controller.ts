@@ -56,8 +56,13 @@ export class MessageController {
 
   @Get('chat/conversations/:conversationId/messages/page')
   getPage(
-    @Param('conversationId', new ZodValidationPipe(conversationIdField)) conversationId: string,
-    @Query(new ZodValidationPipe(getMessagesQuerySchema.omit({ conversationId: true })))
+    @Param('conversationId', new ZodValidationPipe(conversationIdField))
+    conversationId: string,
+    @Query(
+      new ZodValidationPipe(
+        getMessagesQuerySchema.omit({ conversationId: true }),
+      ),
+    )
     query: Omit<GetMessagesQuery, 'conversationId'>,
     @CurrentUser() user: AuthenticatedUser,
   ) {

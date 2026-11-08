@@ -16,7 +16,9 @@ export function buildDatabaseConnectionString(
   }
 
   if (host && !LOCAL_HOSTS.has(host.toLowerCase())) {
-    params.push(purpose === 'migrations' ? 'sslmode=require' : 'sslmode=no-verify');
+    params.push(
+      purpose === 'migrations' ? 'sslmode=require' : 'sslmode=no-verify',
+    );
   }
 
   const baseUrl = `postgresql://${user}:${password}@${host}:${port}/${name}`;

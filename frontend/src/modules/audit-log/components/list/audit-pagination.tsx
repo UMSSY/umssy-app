@@ -11,7 +11,6 @@ const PAGE_CLASS = "size-9 rounded-md border-border bg-surface text-sm font-semi
 const CURRENT_PAGE_CLASS = "size-9 rounded-md border-transparent bg-accent text-sm font-semibold text-surface hover:bg-accent";
 const MOBILE_BUTTON_CLASS = "h-[34px] flex-1 rounded-lg border-border bg-surface px-3 text-sm font-semibold text-ink";
 
-// Escritorio: páginas numeradas. Móvil: Anterior y Siguiente
 export function AuditPagination({
   from,
   to,

@@ -46,7 +46,9 @@ export class AttachmentController {
   constructor(private readonly attachmentService: AttachmentService) {}
 
   @Post('attachments')
-  @ApiOperation({ summary: 'Enviar mensaje con archivo adjunto (JPG, PNG o PDF)' })
+  @ApiOperation({
+    summary: 'Enviar mensaje con archivo adjunto (JPG, PNG o PDF)',
+  })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
@@ -67,8 +69,14 @@ export class AttachmentController {
       required: ['file', 'conversationId'],
     },
   })
-  @ApiResponse({ status: 201, description: 'Mensaje con archivo adjunto enviado correctamente' })
-  @ApiResponse({ status: 400, description: 'Archivo inválido o tamaño excedido' })
+  @ApiResponse({
+    status: 201,
+    description: 'Mensaje con archivo adjunto enviado correctamente',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Archivo inválido o tamaño excedido',
+  })
   @ApiResponse({ status: 403, description: 'No pertenece a la conversación' })
   @ApiResponse({ status: 404, description: 'Conversación no encontrada' })
   @UseInterceptors(
@@ -89,10 +97,19 @@ export class AttachmentController {
   }
 
   @Get('attachments/:id/file')
-  @ApiOperation({ summary: 'Descargar archivo adjunto con control de acceso por conversación' })
-  @ApiParam({ name: 'id', format: 'uuid', description: 'ID del archivo adjunto' })
+  @ApiOperation({
+    summary: 'Descargar archivo adjunto con control de acceso por conversación',
+  })
+  @ApiParam({
+    name: 'id',
+    format: 'uuid',
+    description: 'ID del archivo adjunto',
+  })
   @ApiResponse({ status: 200, description: 'Stream binario del archivo' })
-  @ApiResponse({ status: 403, description: 'No pertenece a la conversación del archivo' })
+  @ApiResponse({
+    status: 403,
+    description: 'No pertenece a la conversación del archivo',
+  })
   @ApiResponse({ status: 404, description: 'Archivo adjunto no encontrado' })
   async download(
     @CurrentUserId() userId: string,
@@ -109,7 +126,11 @@ export class AttachmentController {
 
   @Get('attachments/:id')
   @ApiOperation({ summary: 'Obtener metadatos de un archivo adjunto' })
-  @ApiParam({ name: 'id', format: 'uuid', description: 'ID del archivo adjunto' })
+  @ApiParam({
+    name: 'id',
+    format: 'uuid',
+    description: 'ID del archivo adjunto',
+  })
   @ApiResponse({ status: 200, description: 'Metadatos del archivo adjunto' })
   @ApiResponse({ status: 404, description: 'Archivo adjunto no encontrado' })
   async getById(

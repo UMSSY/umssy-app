@@ -19,7 +19,6 @@ import {
   ConversationNotFoundException,
   NotConversationParticipantException,
   UserBlockedException,
-
 } from '../exceptions/index.js';
 
 describe('AttachmentService', () => {
@@ -46,7 +45,10 @@ describe('AttachmentService', () => {
         url: rec.url ?? `/api/chat/attachments/${rec.id}/file`,
         thumbnailUrl: rec.thumbnailUrl ?? null,
         type: rec.type?.title ?? 'FILE',
-        createdAt: rec.createdAt instanceof Date ? rec.createdAt.toISOString() : String(rec.createdAt),
+        createdAt:
+          rec.createdAt instanceof Date
+            ? rec.createdAt.toISOString()
+            : String(rec.createdAt),
       })),
       toMessageResponse: vi.fn().mockImplementation((params: any) => ({
         id: params.message.id,
@@ -64,10 +66,15 @@ describe('AttachmentService', () => {
           fileName: params.attachmentRecord.fileName,
           mimeType: params.attachmentRecord.mimeType,
           fileSize: params.attachmentRecord.fileSize,
-          url: params.attachmentRecord.url ?? `/api/chat/attachments/${params.attachmentRecord.id}/file`,
+          url:
+            params.attachmentRecord.url ??
+            `/api/chat/attachments/${params.attachmentRecord.id}/file`,
           thumbnailUrl: params.attachmentRecord.thumbnailUrl ?? null,
           type: params.isImage ? 'IMAGE' : 'PDF',
-          createdAt: params.attachmentRecord.createdAt instanceof Date ? params.attachmentRecord.createdAt.toISOString() : String(params.attachmentRecord.createdAt),
+          createdAt:
+            params.attachmentRecord.createdAt instanceof Date
+              ? params.attachmentRecord.createdAt.toISOString()
+              : String(params.attachmentRecord.createdAt),
         },
       })),
     } as unknown as AttachmentMapper;
@@ -163,7 +170,9 @@ describe('AttachmentService', () => {
         userAId: 'user-1',
         userBId: 'user-2',
       });
-      participantRepository.findByConversationAndUser.mockResolvedValue({ id: 'part-1' });
+      participantRepository.findByConversationAndUser.mockResolvedValue({
+        id: 'part-1',
+      });
       blockService.isBlockedBetween.mockResolvedValue(true);
       const file = {
         originalname: 'photo.png',
@@ -172,15 +181,24 @@ describe('AttachmentService', () => {
         buffer: Buffer.alloc(1024),
       } as MulterFile;
       await expect(
-      service.uploadAndSend('user-1', file, { conversationId: 'conv-1', content: '' }),
+        service.uploadAndSend('user-1', file, {
+          conversationId: 'conv-1',
+          content: '',
+        }),
       ).rejects.toThrow(UserBlockedException);
-      expect(blockService.isBlockedBetween).toHaveBeenCalledWith('user-1', 'user-2');
+      expect(blockService.isBlockedBetween).toHaveBeenCalledWith(
+        'user-1',
+        'user-2',
+      );
       expect(messageRepository.create).not.toHaveBeenCalled();
     });
     it('throws EmptyFileException if file is undefined or empty', async () => {
       const { service } = createMockService();
       await expect(
-        service.uploadAndSend('user-1', undefined, { conversationId: 'conv-1', content: '' }),
+        service.uploadAndSend('user-1', undefined, {
+          conversationId: 'conv-1',
+          content: '',
+        }),
       ).rejects.toThrow(EmptyFileException);
       await expect(
         service.uploadAndSend(
@@ -200,7 +218,10 @@ describe('AttachmentService', () => {
         buffer: Buffer.from('#!/bin/sh'),
       } as MulterFile;
       await expect(
-        service.uploadAndSend('user-1', file, { conversationId: 'conv-1', content: '' }),
+        service.uploadAndSend('user-1', file, {
+          conversationId: 'conv-1',
+          content: '',
+        }),
       ).rejects.toThrow(InvalidAttachmentTypeException);
     });
     it('throws AttachmentTooLargeException if image exceeds 5 MB', async () => {
@@ -213,7 +234,10 @@ describe('AttachmentService', () => {
         buffer: Buffer.alloc(5 * 1024 * 1024 + 1),
       } as MulterFile;
       await expect(
-        service.uploadAndSend('user-1', file, { conversationId: 'conv-1', content: '' }),
+        service.uploadAndSend('user-1', file, {
+          conversationId: 'conv-1',
+          content: '',
+        }),
       ).rejects.toThrow(AttachmentTooLargeException);
     });
     it('throws AttachmentTooLargeException if PDF exceeds 10 MB', async () => {
@@ -226,7 +250,10 @@ describe('AttachmentService', () => {
         buffer: Buffer.alloc(10 * 1024 * 1024 + 1),
       } as MulterFile;
       await expect(
-        service.uploadAndSend('user-1', file, { conversationId: 'conv-1', content: '' }),
+        service.uploadAndSend('user-1', file, {
+          conversationId: 'conv-1',
+          content: '',
+        }),
       ).rejects.toThrow(AttachmentTooLargeException);
     });
     it('throws ConversationNotFoundException if conversation does not exist', async () => {
@@ -247,7 +274,10 @@ describe('AttachmentService', () => {
         buffer: Buffer.alloc(1024),
       } as MulterFile;
       await expect(
-        service.uploadAndSend('user-1', file, { conversationId: 'conv-none', content: '' }),
+        service.uploadAndSend('user-1', file, {
+          conversationId: 'conv-none',
+          content: '',
+        }),
       ).rejects.toThrow(ConversationNotFoundException);
     });
     it('throws NotConversationParticipantException if user is not in the conversation', async () => {
@@ -273,7 +303,10 @@ describe('AttachmentService', () => {
         buffer: Buffer.alloc(1024),
       } as MulterFile;
       await expect(
-        service.uploadAndSend('user-intruder', file, { conversationId: 'conv-1', content: '' }),
+        service.uploadAndSend('user-intruder', file, {
+          conversationId: 'conv-1',
+          content: '',
+        }),
       ).rejects.toThrow(NotConversationParticipantException);
     });
     it('throws InvalidAttachmentTypeException if attachment type catalog is missing', async () => {
@@ -292,7 +325,9 @@ describe('AttachmentService', () => {
         buffer: Buffer.alloc(1024),
       });
       conversationRepository.findById.mockResolvedValue({ id: 'conv-1' });
-      participantRepository.findByConversationAndUser.mockResolvedValue({ id: 'part-1' });
+      participantRepository.findByConversationAndUser.mockResolvedValue({
+        id: 'part-1',
+      });
       attachmentRepository.findAttachmentTypeByTitle.mockResolvedValue(null);
       const file = {
         originalname: 'photo.png',
@@ -301,7 +336,10 @@ describe('AttachmentService', () => {
         buffer: Buffer.alloc(1024),
       } as MulterFile;
       await expect(
-        service.uploadAndSend('user-1', file, { conversationId: 'conv-1', content: '' }),
+        service.uploadAndSend('user-1', file, {
+          conversationId: 'conv-1',
+          content: '',
+        }),
       ).rejects.toThrow(InvalidAttachmentTypeException);
     });
     it('successfully uploads an image, creates message + attachment, and updates conversation state', async () => {
@@ -322,7 +360,9 @@ describe('AttachmentService', () => {
         buffer: imageBuffer,
       });
       conversationRepository.findById.mockResolvedValue({ id: 'conv-1' });
-      participantRepository.findByConversationAndUser.mockResolvedValue({ id: 'part-1' });
+      participantRepository.findByConversationAndUser.mockResolvedValue({
+        id: 'part-1',
+      });
       attachmentRepository.findAttachmentTypeByTitle.mockResolvedValue({
         id: 'type-img-id',
         title: 'IMAGE',
@@ -413,7 +453,9 @@ describe('AttachmentService', () => {
         buffer: pdfBuffer,
       });
       conversationRepository.findById.mockResolvedValue({ id: 'conv-1' });
-      participantRepository.findByConversationAndUser.mockResolvedValue({ id: 'part-1' });
+      participantRepository.findByConversationAndUser.mockResolvedValue({
+        id: 'part-1',
+      });
       attachmentRepository.findAttachmentTypeByTitle.mockResolvedValue({
         id: 'type-pdf-id',
         title: 'PDF',
@@ -493,10 +535,9 @@ describe('AttachmentService', () => {
       await expect(
         service.getDownload('user-intruder', 'att-1'),
       ).rejects.toThrow(NotConversationParticipantException);
-      expect(participantRepository.findByConversationAndUser).toHaveBeenCalledWith(
-        'conv-secret',
-        'user-intruder',
-      );
+      expect(
+        participantRepository.findByConversationAndUser,
+      ).toHaveBeenCalledWith('conv-secret', 'user-intruder');
     });
     it('returns downloadable file details with binary Buffer when authorized', async () => {
       const { service, attachmentRepository, participantRepository } =
@@ -553,5 +594,4 @@ describe('AttachmentService', () => {
       expect(result.url).toBe('/api/chat/attachments/att-1/file');
     });
   });
-
 });

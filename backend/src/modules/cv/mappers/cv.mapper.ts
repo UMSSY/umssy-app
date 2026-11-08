@@ -19,7 +19,11 @@ export class CvMapper {
   }
 
   toResponse(record: CvMetadataRecord): CvResponse | null {
-    if (record.id === null || record.sizeBytes === null || record.uploadedAt === null) {
+    if (
+      record.id === null ||
+      record.sizeBytes === null ||
+      record.uploadedAt === null
+    ) {
       return null;
     }
 

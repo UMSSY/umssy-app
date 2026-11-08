@@ -3,7 +3,11 @@ import { Injectable } from '@nestjs/common';
 import type { MulterFile } from '../../../common/types/multer-file.type.js';
 import { FileValidationService } from '../../../common/services/file-validation.service.js';
 import { EmptyFileException } from '../../../common/exceptions/empty-file.exception.js';
-import { MAX_IMAGE_SIZE_BYTES, ALLOWED_IMAGE_MIME_TYPES, ALLOWED_PDF_MIME_TYPES } from '../constants/attachment.constants.js';
+import {
+  MAX_IMAGE_SIZE_BYTES,
+  ALLOWED_IMAGE_MIME_TYPES,
+  ALLOWED_PDF_MIME_TYPES,
+} from '../constants/attachment.constants.js';
 import {
   AttachmentNotFoundException,
   AttachmentTooLargeException,
@@ -93,10 +97,7 @@ export class AttachmentService {
       throw new NotConversationParticipantException();
     }
 
-    const otherParticipantId = this.getOtherParticipantId(
-      conversation,
-      userId,
-    );
+    const otherParticipantId = this.getOtherParticipantId(conversation, userId);
     if (
       otherParticipantId &&
       (await this.blockService.isBlockedBetween(userId, otherParticipantId))
@@ -148,11 +149,7 @@ export class AttachmentService {
       now,
     );
 
-    await this.participantRepository.markRead(
-      dto.conversationId,
-      userId,
-      now,
-    );
+    await this.participantRepository.markRead(dto.conversationId, userId, now);
 
     return this.attachmentMapper.toMessageResponse({
       message,
@@ -165,9 +162,8 @@ export class AttachmentService {
     userId: string,
     attachmentId: string,
   ): Promise<AttachmentFileDownload> {
-    const record = await this.attachmentRepository.findDownloadById(
-      attachmentId,
-    );
+    const record =
+      await this.attachmentRepository.findDownloadById(attachmentId);
     if (!record || !record.fileData) {
       throw new AttachmentNotFoundException();
     }

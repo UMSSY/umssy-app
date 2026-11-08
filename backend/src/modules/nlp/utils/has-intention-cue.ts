@@ -1,6 +1,12 @@
-import { NLP_CLAUSE_BREAKERS, NLP_INTENTION_CUES } from '../constants/nlp-language.constants.js';
+import {
+  NLP_CLAUSE_BREAKERS,
+  NLP_INTENTION_CUES,
+} from '../constants/nlp-language.constants.js';
 
-export function hasIntentionCue(words: readonly string[], mentionStart: number): boolean {
+export function hasIntentionCue(
+  words: readonly string[],
+  mentionStart: number,
+): boolean {
   const firstIndex = Math.max(0, mentionStart - 3);
 
   for (let index = mentionStart - 1; index >= firstIndex; index -= 1) {

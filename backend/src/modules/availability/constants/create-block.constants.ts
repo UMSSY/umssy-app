@@ -11,7 +11,8 @@ export const CREATE_BLOCK_MESSAGES = {
   outOfRange: `El horario debe estar entre las ${String(BLOCK_MIN_HOUR).padStart(2, '0')}:00 y las ${String(BLOCK_MAX_HOUR).padStart(2, '0')}:00`,
   invalidStep: `Las horas deben ir en intervalos de ${BLOCK_STEP_MINUTES} minutos`,
   differentDays: 'El bloque debe empezar y terminar el mismo día',
-  invalidRepeatUntil: 'La fecha de fin de repetición debe tener formato YYYY-MM-DD',
+  invalidRepeatUntil:
+    'La fecha de fin de repetición debe tener formato YYYY-MM-DD',
   repeatUntilRequired: 'Elige hasta qué fecha se repite el bloque',
   repeatNotEnabled: 'La fecha de fin requiere activar la repetición semanal',
   repeatUntilOutOfRange: `La fecha límite debe estar dentro de las próximas ${MAX_REPEAT_WEEKS} semanas`,

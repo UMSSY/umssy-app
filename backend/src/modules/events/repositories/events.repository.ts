@@ -6,8 +6,18 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { escapePgWildcards } from '../../../common/utils/escape-pg-wildcards.js';
 import type { Prisma } from '../../../prisma/client.js';
-import type { FindEventsPayload, FindEventsResponse, EventWithRelations } from '../types/events.types.js';
-import { CATALOG_STATUS_TITLES, COMMUNITY_ORIGIN_TITLE, EXPIRED_STATUS_TITLE, PUBLISHED_STATUS_TITLE, VOTING_STATUS_TITLES } from '../constants/events.constants.js';
+import type {
+  FindEventsPayload,
+  FindEventsResponse,
+  EventWithRelations,
+} from '../types/events.types.js';
+import {
+  CATALOG_STATUS_TITLES,
+  COMMUNITY_ORIGIN_TITLE,
+  EXPIRED_STATUS_TITLE,
+  PUBLISHED_STATUS_TITLE,
+  VOTING_STATUS_TITLES,
+} from '../constants/events.constants.js';
 
 function buildSelect(userId?: string): Prisma.EventSelect {
   return {
@@ -77,15 +87,28 @@ export class EventsRepository {
   }
 
   async findAndCount(payload: FindEventsPayload): Promise<FindEventsResponse> {
-    const { categoryId, statusId, isPublishedOnly, search, userId, skip, take } =
-      payload;
+    const {
+      categoryId,
+      statusId,
+      isPublishedOnly,
+      search,
+      userId,
+      skip,
+      take,
+    } = payload;
 
     const where: Prisma.EventWhereInput = {
       ...(categoryId !== undefined && { categoryId }),
       ...(statusId !== undefined
         ? { statusId }
         : isPublishedOnly
-          ? { status: { title: payload.includeProposals ? { in: CATALOG_STATUS_TITLES } : PUBLISHED_STATUS_TITLE } }
+          ? {
+              status: {
+                title: payload.includeProposals
+                  ? { in: CATALOG_STATUS_TITLES }
+                  : PUBLISHED_STATUS_TITLE,
+              },
+            }
           : {}),
       ...(search !== undefined && {
         title: {
@@ -127,22 +150,30 @@ export class EventsRepository {
     });
 
     return event as unknown as
-      | (EventWithRelations & { modality: { id: string; title: string } })
-      | null;
+      (EventWithRelations & { modality: { id: string; title: string } }) | null;
   }
 
-  findScheduleConflict(tx: Prisma.TransactionClient, event: RegistrationScheduleEvent, registeredEventIds: string[]) {
+  findScheduleConflict(
+    tx: Prisma.TransactionClient,
+    event: RegistrationScheduleEvent,
+    registeredEventIds: string[],
+  ) {
     return tx.event.findFirst({
       where: {
         id: { in: registeredEventIds, not: event.id },
-        status: { title: PUBLISHED_STATUS_TITLE }, eventDate: event.eventDate,
-        startTime: { lt: event.endTime }, endTime: { gt: event.startTime },
+        status: { title: PUBLISHED_STATUS_TITLE },
+        eventDate: event.eventDate,
+        startTime: { lt: event.endTime },
+        endTime: { gt: event.startTime },
       },
       select: { id: true },
     });
   }
 
-  async findForRegistration(id: string, tx: Prisma.TransactionClient = this.prisma) {
+  async findForRegistration(
+    id: string,
+    tx: Prisma.TransactionClient = this.prisma,
+  ) {
     const event = await tx.event.findUnique({
       where: { id },
       select: {
@@ -156,12 +187,19 @@ export class EventsRepository {
     });
     return event;
   }
-  async lockEventRow(tx: Prisma.TransactionClient, eventId: string): Promise<void> {
+  async lockEventRow(
+    tx: Prisma.TransactionClient,
+    eventId: string,
+  ): Promise<void> {
     await tx.$queryRaw`SELECT id FROM events WHERE id = ${eventId}::uuid FOR UPDATE`;
   }
 
   publish(tx: Prisma.TransactionClient, eventId: string) {
-    return tx.event.update({ where: { id: eventId }, data: { status: { connect: { title: PUBLISHED_STATUS_TITLE } } }, select: { id: true } });
+    return tx.event.update({
+      where: { id: eventId },
+      data: { status: { connect: { title: PUBLISHED_STATUS_TITLE } } },
+      select: { id: true },
+    });
   }
 
   async loadSupportContext(

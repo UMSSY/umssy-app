@@ -15,16 +15,32 @@ describe('Fuentes de evidencia de publicacion', () => {
     const educationRead = vi.fn().mockResolvedValue([]);
     const certificationRead = vi.fn().mockResolvedValue([]);
     const service = new RadarPublicationEvidenceService(
-      { findApprovedPublicationSkills: skillRead } as unknown as SkillAnalysisService,
-      { findPublicationCvStates: cvRead } as unknown as RadarEvidenceSourcesService,
-      { findPublicationEvidenceIds: workRead } as unknown as WorkExperienceSourcesService,
-      { findPublicationEvidenceIds: educationRead } as unknown as EducationSourcesService,
-      { findPublicationEvidenceIds: certificationRead } as unknown as CertificationSourcesService,
+      {
+        findApprovedPublicationSkills: skillRead,
+      } as unknown as SkillAnalysisService,
+      {
+        findPublicationCvStates: cvRead,
+      } as unknown as RadarEvidenceSourcesService,
+      {
+        findPublicationEvidenceIds: workRead,
+      } as unknown as WorkExperienceSourcesService,
+      {
+        findPublicationEvidenceIds: educationRead,
+      } as unknown as EducationSourcesService,
+      {
+        findPublicationEvidenceIds: certificationRead,
+      } as unknown as CertificationSourcesService,
     );
     const context = { client: {} } as unknown as TransactionContext;
     const results = await service.read('owner', context);
     expect(results).toEqual([[], [], [], [], []]);
-    for (const mock of [skillRead, cvRead, workRead, educationRead, certificationRead]) {
+    for (const mock of [
+      skillRead,
+      cvRead,
+      workRead,
+      educationRead,
+      certificationRead,
+    ]) {
       expect(mock).toHaveBeenCalledWith('owner', context);
       expect(mock).toHaveBeenCalledTimes(1);
     }

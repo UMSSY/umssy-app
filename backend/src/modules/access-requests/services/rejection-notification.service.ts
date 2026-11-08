@@ -11,7 +11,11 @@ export class RejectionNotificationService {
     private readonly context: RejectionMailContextService,
   ) {}
 
-  async notify(email: string, reason: string, accessRequestId: string): Promise<boolean> {
+  async notify(
+    email: string,
+    reason: string,
+    accessRequestId: string,
+  ): Promise<boolean> {
     try {
       await this.context.run(accessRequestId, async () => {
         await this.mailSender.sendRejection(email, reason);
@@ -19,7 +23,9 @@ export class RejectionNotificationService {
       return true;
     } catch {
       // Los errores del transporte pueden incluir el destinatario o el enlace.
-      this.logger.error(`No se pudo enviar el correo de rechazo de la solicitud ${accessRequestId}`);
+      this.logger.error(
+        `No se pudo enviar el correo de rechazo de la solicitud ${accessRequestId}`,
+      );
       return false;
     }
   }

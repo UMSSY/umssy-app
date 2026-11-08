@@ -13,11 +13,20 @@ export class AuditEventsExportService {
   constructor(private readonly auditEventsRepository: AuditEventsRepository) {}
 
   // Exporta todo el conjunto filtrado por lotes, con el mismo filtro y orden del listado
-  async exportCsv(filters: AuditEventFilters, now: Date = new Date()): Promise<AuditCsvFile> {
+  async exportCsv(
+    filters: AuditEventFilters,
+    now: Date = new Date(),
+  ): Promise<AuditCsvFile> {
     const rows: string[][] = [];
     for (let skip = 0; ; skip += 500) {
-      const batch = await this.auditEventsRepository.findBatch({ filters, skip, take: 500 });
-      rows.push(...batch.map((row) => toAuditEventCsvRow(toAuditEventListItem(row))));
+      const batch = await this.auditEventsRepository.findBatch({
+        filters,
+        skip,
+        take: 500,
+      });
+      rows.push(
+        ...batch.map((row) => toAuditEventCsvRow(toAuditEventListItem(row))),
+      );
       if (batch.length < 500) break;
     }
     return {

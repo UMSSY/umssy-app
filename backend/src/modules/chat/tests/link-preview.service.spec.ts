@@ -30,9 +30,9 @@ describe('LinkPreviewService', () => {
       await expect(service.getPreview('javascript:alert(1)')).rejects.toThrow(
         InvalidLinkUrlException,
       );
-      await expect(service.getPreview('ftp://example.com/file')).rejects.toThrow(
-        InvalidLinkUrlException,
-      );
+      await expect(
+        service.getPreview('ftp://example.com/file'),
+      ).rejects.toThrow(InvalidLinkUrlException);
     });
 
     it('throws BlockedLinkUrlException for localhost and private IP targets', async () => {
@@ -179,4 +179,3 @@ describe('LinkPreviewService', () => {
     });
   });
 });
-

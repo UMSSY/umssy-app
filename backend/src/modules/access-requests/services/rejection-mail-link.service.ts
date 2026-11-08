@@ -17,19 +17,25 @@ export class RejectionMailLinkService {
 
   async forRecipient(to: string, reason: string): Promise<RejectionMailLink> {
     const context = this.context.getCurrent();
-    if (!context?.accessRequestId || !reason.trim()) throw new RejectionMailContextException();
+    if (!context?.accessRequestId || !reason.trim())
+      throw new RejectionMailContextException();
 
     const source = await this.repository.findById(context.accessRequestId);
     if (
-      !source || source.email.trim().toLowerCase() !== to.trim().toLowerCase() ||
-      source.rejectionReason !== reason || !(source.updatedAt instanceof Date) ||
+      !source ||
+      source.email.trim().toLowerCase() !== to.trim().toLowerCase() ||
+      source.rejectionReason !== reason ||
+      !(source.updatedAt instanceof Date) ||
       !Number.isFinite(source.updatedAt.getTime())
     ) {
       throw new RejectionMailContextException();
     }
 
     const grant = await this.authorization.issueFor(context.accessRequestId);
-    const authorized = await this.authorization.authorize(grant.requestCode, `${BEARER_PREFIX}${grant.token}`);
+    const authorized = await this.authorization.authorize(
+      grant.requestCode,
+      `${BEARER_PREFIX}${grant.token}`,
+    );
     // Impide enviar un permiso de una revisión posterior con el motivo anterior.
     if (
       authorized.accessRequestId !== context.accessRequestId ||

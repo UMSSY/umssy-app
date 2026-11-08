@@ -142,11 +142,7 @@ export class EducationsRepository {
   private async withSerializableWrite<T>(
     operation: (tx: Prisma.TransactionClient) => Promise<T>,
   ): Promise<T> {
-    for (
-      let attempt = 0;
-      attempt < 3;
-      attempt += 1
-    ) {
+    for (let attempt = 0; attempt < 3; attempt += 1) {
       try {
         return await this.prisma.$transaction(operation, {
           isolationLevel: 'Serializable',

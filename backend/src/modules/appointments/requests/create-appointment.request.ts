@@ -19,4 +19,6 @@ export const createAppointmentSchema = z.strictObject({
     }),
 });
 
-export class CreateAppointmentDto extends createZodDto(createAppointmentSchema) {}
+export class CreateAppointmentDto extends createZodDto(
+  createAppointmentSchema,
+) {}

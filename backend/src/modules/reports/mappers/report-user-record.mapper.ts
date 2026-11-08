@@ -10,9 +10,7 @@ import type {
 
 function toRoleName(name: string | undefined): RoleName {
   const normalized = name?.toLowerCase().trim();
-  return (
-    ROLE_NAMES.find((role) => role === normalized) ?? 'titulado'
-  );
+  return ROLE_NAMES.find((role) => role === normalized) ?? 'titulado';
 }
 
 function toFullName(firstName: string, lastName: string): string {

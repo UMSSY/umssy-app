@@ -30,8 +30,19 @@ import { DocumentCorrectionAuthorizationService } from './services/document-corr
 import { DocumentCorrectionService } from './services/document-correction.service.js';
 
 @Module({
-  imports: [ConfigModule, AuthModule, FilesModule, MailModule, AuditEventsModule],
-  controllers: [AccessRequestAutomationController, AccessRequestsController, AccountActivationController, DocumentCorrectionController],
+  imports: [
+    ConfigModule,
+    AuthModule,
+    FilesModule,
+    MailModule,
+    AuditEventsModule,
+  ],
+  controllers: [
+    AccessRequestAutomationController,
+    AccessRequestsController,
+    AccountActivationController,
+    DocumentCorrectionController,
+  ],
   providers: [
     AccessRequestsService,
     AccessRequestsRepository,
@@ -53,6 +64,10 @@ import { DocumentCorrectionService } from './services/document-correction.servic
     DocumentCorrectionGuard,
     { provide: MAIL_SENDER, useClass: MailServiceSender },
   ],
-  exports: [AccessRequestsService, AutomaticValidationService, DocumentCorrectionAuthorizationService],
+  exports: [
+    AccessRequestsService,
+    AutomaticValidationService,
+    DocumentCorrectionAuthorizationService,
+  ],
 })
 export class AccessRequestsModule {}

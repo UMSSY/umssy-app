@@ -18,7 +18,11 @@ export class RadarPublicationService {
   ) {}
 
   // Inmutable e idempotente por titular; no se publica un snapshot parcial.
-  async recalculate(userId: string, actorId: string | null, publication?: ProfileSkillsPublished) {
+  async recalculate(
+    userId: string,
+    actorId: string | null,
+    publication?: ProfileSkillsPublished,
+  ) {
     let revision = publication?.inputRevision ?? 0;
     let attemptStartedAt = new Date();
     try {
@@ -26,48 +30,110 @@ export class RadarPublicationService {
         attemptStartedAt = await store.lockPublication(userId);
         const state = await this.nlp.readLockedRevision(userId, context);
         revision = state?.input_revision ?? 0;
-        if (state && (state.status !== 'ready' || state.processed_revision !== revision)) {
+        if (
+          state &&
+          (state.status !== 'ready' || state.processed_revision !== revision)
+        ) {
           throw new RadarPublicationPendingAnalysisException();
         }
         if (publication && publication.inputRevision !== revision) return null;
 
-        const [rows, docs, experiences, educations, certifications] = await this.sources.read(userId, context);
-        const cvApproved = new Set(docs.filter(d => d.review_status === 'approved' && d.extraction_status === 'ready').map(d => d.cv_id));
+        const [rows, docs, experiences, educations, certifications] =
+          await this.sources.read(userId, context);
+        const cvApproved = new Set(
+          docs
+            .filter(
+              (d) =>
+                d.review_status === 'approved' &&
+                d.extraction_status === 'ready',
+            )
+            .map((d) => d.cv_id),
+        );
         const living: Record<string, Set<string>> = {
-          'work-experience': new Set(experiences.map(x => x.id)),
-          education: new Set(educations.map(x => x.id)),
-          certification: new Set(certifications.map(x => x.id)),
+          'work-experience': new Set(experiences.map((x) => x.id)),
+          education: new Set(educations.map((x) => x.id)),
+          certification: new Set(certifications.map((x) => x.id)),
           cv: cvApproved,
         };
-        const accepted: PublishedSkill[] = rows.flatMap(r => {
+        const accepted: PublishedSkill[] = rows.flatMap((r) => {
           const refs = Array.isArray(r.evidenceRefs) ? r.evidenceRefs : [];
-          const valid = refs.flatMap(entry => {
-            if (!entry || typeof entry !== 'object' || !('type' in entry) || !('id' in entry)) return [];
-            const type = entry.type;
-            const id = entry.id;
-            if (typeof type !== 'string' || typeof id !== 'string' || !living[type]?.has(id)) return [];
-            return [{ type, id }];
-          }).sort((a, b) => `${a.type}:${a.id}`.localeCompare(`${b.type}:${b.id}`));
+          const valid = refs
+            .flatMap((entry) => {
+              if (
+                !entry ||
+                typeof entry !== 'object' ||
+                !('type' in entry) ||
+                !('id' in entry)
+              )
+                return [];
+              const type = entry.type;
+              const id = entry.id;
+              if (
+                typeof type !== 'string' ||
+                typeof id !== 'string' ||
+                !living[type]?.has(id)
+              )
+                return [];
+              return [{ type, id }];
+            })
+            .sort((a, b) =>
+              `${a.type}:${a.id}`.localeCompare(`${b.type}:${b.id}`),
+            );
           if (r.source === 'nlp' && !valid.length) return [];
-          if (!AREA_IDS.some(id => id === r.skill.areaId)) return [];
-          return [{ id: r.skillId, name: r.skill.name, areaId: r.skill.areaId,
-            isHighRelevance: r.isHighRelevance && valid.length > 0, evidenceRefs: valid }];
+          if (!AREA_IDS.some((id) => id === r.skill.areaId)) return [];
+          return [
+            {
+              id: r.skillId,
+              name: r.skill.name,
+              areaId: r.skill.areaId,
+              isHighRelevance: r.isHighRelevance && valid.length > 0,
+              evidenceRefs: valid,
+            },
+          ];
         });
         const calculated = scoreVerifiedSkills(accepted);
         const last = await store.snapshots(userId, 1);
         if (last[0]?.fingerprint === calculated.fingerprint) {
-          await store.recordSynchronized(userId, actorId, last[0].version, revision, accepted);
-          return this.mapper.snapshotResponse({ ...last[0], source_revision: revision, skills: accepted });
+          await store.recordSynchronized(
+            userId,
+            actorId,
+            last[0].version,
+            revision,
+            accepted,
+          );
+          return this.mapper.snapshotResponse({
+            ...last[0],
+            source_revision: revision,
+            skills: accepted,
+          });
         }
         const version = (last[0]?.version ?? 0) + 1;
-        const inserted = await store.insertSnapshot(userId, version, calculated);
-        await store.recordPublished(userId, actorId, version, revision, accepted);
-        return this.mapper.snapshotResponse({ ...inserted[0], source_revision: revision, skills: accepted }, last[0]);
+        const inserted = await store.insertSnapshot(
+          userId,
+          version,
+          calculated,
+        );
+        await store.recordPublished(
+          userId,
+          actorId,
+          version,
+          revision,
+          accepted,
+        );
+        return this.mapper.snapshotResponse(
+          { ...inserted[0], source_revision: revision, skills: accepted },
+          last[0],
+        );
       });
     } catch (error) {
       // El snapshot se revierte; intentar registrar el error sin ocultar el error inicial.
       try {
-        await this.repository.recordFailure(userId, actorId, revision, attemptStartedAt);
+        await this.repository.recordFailure(
+          userId,
+          actorId,
+          revision,
+          attemptStartedAt,
+        );
       } catch {}
       throw error;
     }

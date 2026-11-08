@@ -4,11 +4,22 @@ import { seedEventRegistrationsFixtures } from '../seeds/event-registrations-fix
 
 describe('registration fixture QR tokens', () => {
   it('creates unique valid tokens while preserving duplicate registrations', async () => {
-    const context = new FixtureContext(new Date('2026-10-25T12:00:00Z'), 'admin');
+    const context = new FixtureContext(
+      new Date('2026-10-25T12:00:00Z'),
+      'admin',
+    );
     context.setReference('registration_statuses', 'Confirmada', 'confirmed');
     context.setReference('registration_statuses', 'Cancelada', 'cancelled');
     const createMany = vi.fn().mockResolvedValue({ count: 0 });
-    const count = await seedEventRegistrationsFixtures({ eventRegistration: { createMany, findMany: vi.fn().mockResolvedValue([]) } } as never, context);
+    const count = await seedEventRegistrationsFixtures(
+      {
+        eventRegistration: {
+          createMany,
+          findMany: vi.fn().mockResolvedValue([]),
+        },
+      } as never,
+      context,
+    );
     const { data, skipDuplicates } = createMany.mock.calls[0]![0];
     expect(skipDuplicates).toBe(true);
     expect(count).toBe(data.length);

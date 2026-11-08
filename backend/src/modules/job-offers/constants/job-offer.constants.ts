@@ -11,7 +11,8 @@ export const JOB_OFFER_MAX_SKILLS = 10;
 export const JOB_OFFER_VALIDATION_MESSAGES = {
   REQUIRED_FIELD: 'Este campo es obligatorio',
   TITLE_TOO_LONG: `El título del puesto no debe exceder los ${JOB_OFFER_TITLE_MAX_LENGTH} caracteres`,
-  TITLE_INVALID_CHARACTERS: 'Solo se permiten caracteres alfanuméricos y espacios',
+  TITLE_INVALID_CHARACTERS:
+    'Solo se permiten caracteres alfanuméricos y espacios',
   DESCRIPTION_TOO_LONG: `La descripción no debe exceder los 3000 caracteres`,
   INVALID_MODALITY: 'Modalidad inválida',
   INVALID_CONTRACT_TYPE: 'Tipo de contrato inválido',
@@ -20,7 +21,8 @@ export const JOB_OFFER_VALIDATION_MESSAGES = {
   POSITIONS_TOO_MANY: `El número máximo de vacantes por publicación es 500`,
   SALARY_NOT_POSITIVE: 'El salario debe ser mayor a 0',
   SALARY_TOO_HIGH: 'El salario no puede tener más de 9 dígitos',
-  SALARY_RANGE_INVALID: 'El salario mínimo no puede ser mayor al salario máximo',
+  SALARY_RANGE_INVALID:
+    'El salario mínimo no puede ser mayor al salario máximo',
   LANGUAGES_TOO_LONG: `Los idiomas no deben exceder los 100 caracteres`,
   INVALID_LOCATION_URL: 'Ingresa un enlace válido de Google Maps',
   LOCATION_URL_TOO_LONG: `El enlace no debe exceder los 2048 caracteres`,

@@ -14,7 +14,9 @@ import { validateSkillName } from '../utils/validate-skill-name.js';
 
 @Injectable()
 export class SkillValidationService {
-  private readonly dictionaryByName = new Map(NLP_SKILL_DICTIONARY.map((entry) => [entry.name, entry]));
+  private readonly dictionaryByName = new Map(
+    NLP_SKILL_DICTIONARY.map((entry) => [entry.name, entry]),
+  );
 
   validateSources(sources: readonly NlpTextSource[]): NlpSourceValidation {
     const validation: NlpSourceValidation = { accepted: [], rejected: [] };
@@ -37,22 +39,35 @@ export class SkillValidationService {
     candidates: readonly NlpSkillCandidate[],
     catalog: readonly NlpCatalogSkill[],
   ): NlpDetectionValidation {
-    const catalogByName = new Map(catalog.map((skill) => [normalizeTerm(skill.name), skill]));
-    const evidenceBySkill = new Map<string, { skill: NlpCatalogSkill; name: string; refs: NlpEvidenceRef[] }>();
+    const catalogByName = new Map(
+      catalog.map((skill) => [normalizeTerm(skill.name), skill]),
+    );
+    const evidenceBySkill = new Map<
+      string,
+      { skill: NlpCatalogSkill; name: string; refs: NlpEvidenceRef[] }
+    >();
     const validation: NlpDetectionValidation = { accepted: [], discarded: [] };
 
     for (const candidate of candidates) {
       const skill = this.findCatalogSkill(candidate.name, catalogByName);
       if (!skill) {
-        validation.discarded.push(this.discard(candidate.name, 'not-in-catalog'));
+        validation.discarded.push(
+          this.discard(candidate.name, 'not-in-catalog'),
+        );
         continue;
       }
       const nameCheck = validateSkillName(skill.name);
       if (!nameCheck.isValid) {
-        validation.discarded.push(this.discard(candidate.name, nameCheck.reason));
+        validation.discarded.push(
+          this.discard(candidate.name, nameCheck.reason),
+        );
         continue;
       }
-      const current = evidenceBySkill.get(skill.id) ?? { skill, name: nameCheck.name, refs: [] };
+      const current = evidenceBySkill.get(skill.id) ?? {
+        skill,
+        name: nameCheck.name,
+        refs: [],
+      };
       current.refs.push(...candidate.evidenceRefs);
       evidenceBySkill.set(skill.id, current);
     }
@@ -74,8 +89,14 @@ export class SkillValidationService {
     catalogByName: ReadonlyMap<string, NlpCatalogSkill>,
   ): NlpCatalogSkill | undefined {
     const entry = this.dictionaryByName.get(skillName);
-    const names = [skillName, ...(entry?.aliases ?? []), ...(entry?.ambiguousAliases ?? [])];
-    return names.map((name) => catalogByName.get(normalizeTerm(name))).find(Boolean);
+    const names = [
+      skillName,
+      ...(entry?.aliases ?? []),
+      ...(entry?.ambiguousAliases ?? []),
+    ];
+    return names
+      .map((name) => catalogByName.get(normalizeTerm(name)))
+      .find(Boolean);
   }
 
   private discard(name: string, reason: keyof typeof NLP_VALIDATION_MESSAGES) {

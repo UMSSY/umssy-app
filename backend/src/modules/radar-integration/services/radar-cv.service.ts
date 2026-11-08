@@ -13,40 +13,81 @@ export class RadarCvService {
   constructor(
     private readonly repository: RadarCvRepository,
     private readonly access: RadarAccessRepository,
-    private readonly nlp:ProfileSkillsAnalysisService,
-    private readonly publication:RadarPublicationService,
-    private readonly extractor:RadarPdfExtractionService,
+    private readonly nlp: ProfileSkillsAnalysisService,
+    private readonly publication: RadarPublicationService,
+    private readonly extractor: RadarPdfExtractionService,
     private readonly cvs: CvSourcesService,
-  ){}
-  private async audit(userId:string,actorId:string|null,event:string,targetId:string|null,details:object={}){
+  ) {}
+  private async audit(
+    userId: string,
+    actorId: string | null,
+    event: string,
+    targetId: string | null,
+    details: object = {},
+  ) {
     await this.access.recordAudit(userId, actorId, event, targetId, details);
   }
-  async ingestCv(userId:string,cvId:string,buffer:Buffer,reprocess=false){
-    const {extractedText,extractionStatus}=await this.extractor.extract(buffer);
-    const rows = await this.repository.upsertEvidence(userId, cvId, extractedText, extractionStatus);
-    if(!rows.length)throw new RadarCvOwnershipException();
-    await this.audit(userId,null,reprocess?'cv.reprocessed':'cv.submitted',cvId,{extractionStatus,textCharacters:extractedText.length});
+  async ingestCv(
+    userId: string,
+    cvId: string,
+    buffer: Buffer,
+    reprocess = false,
+  ) {
+    const { extractedText, extractionStatus } =
+      await this.extractor.extract(buffer);
+    const rows = await this.repository.upsertEvidence(
+      userId,
+      cvId,
+      extractedText,
+      extractionStatus,
+    );
+    if (!rows.length) throw new RadarCvOwnershipException();
+    await this.audit(
+      userId,
+      null,
+      reprocess ? 'cv.reprocessed' : 'cv.submitted',
+      cvId,
+      { extractionStatus, textCharacters: extractedText.length },
+    );
     await this.nlp.refreshAfterChange(userId);
-    await this.publication.recalculate(userId,null);
-    const nlp=await this.nlp.getRadarSnapshot(userId);
-    return {cvId,extractionStatus,extractedCharacters:extractedText.length,reviewStatus:rows[0].review_status,nlpStatus:nlp.status};
+    await this.publication.recalculate(userId, null);
+    const nlp = await this.nlp.getRadarSnapshot(userId);
+    return {
+      cvId,
+      extractionStatus,
+      extractedCharacters: extractedText.length,
+      reviewStatus: rows[0].review_status,
+      nlpStatus: nlp.status,
+    };
   }
-  async rescanCurrentCv(userId:string){
-    const cv=await this.cvs.currentCv(userId);
-    if(!cv?.cvPdfData)throw new RadarCvNotFoundException('No hay CV vigente para analizar');
-    return this.ingestCv(userId,cv.id,Buffer.from(cv.cvPdfData,'base64'),true);
+  async rescanCurrentCv(userId: string) {
+    const cv = await this.cvs.currentCv(userId);
+    if (!cv?.cvPdfData)
+      throw new RadarCvNotFoundException('No hay CV vigente para analizar');
+    return this.ingestCv(
+      userId,
+      cv.id,
+      Buffer.from(cv.cvPdfData, 'base64'),
+      true,
+    );
   }
-  async reprocessCv(adminId:string,cvId:string){
-    const cv=await this.cvs.cvById(cvId);
-    if(!cv?.cvPdfData)throw new RadarCvNotFoundException();
-    const result=await this.ingestCv(cv.userId,cvId,Buffer.from(cv.cvPdfData,'base64'),true);
-    await this.audit(cv.userId,adminId,'cv.admin_reprocessed',cvId,{extractionStatus:result.extractionStatus});
+  async reprocessCv(adminId: string, cvId: string) {
+    const cv = await this.cvs.cvById(cvId);
+    if (!cv?.cvPdfData) throw new RadarCvNotFoundException();
+    const result = await this.ingestCv(
+      cv.userId,
+      cvId,
+      Buffer.from(cv.cvPdfData, 'base64'),
+      true,
+    );
+    await this.audit(cv.userId, adminId, 'cv.admin_reprocessed', cvId, {
+      extractionStatus: result.extractionStatus,
+    });
     return result;
   }
-  async cvRemoved(userId:string,cvId:string){
-    await this.audit(userId,userId,'cv.removed',cvId);
+  async cvRemoved(userId: string, cvId: string) {
+    await this.audit(userId, userId, 'cv.removed', cvId);
     await this.nlp.refreshAfterChange(userId);
-    await this.publication.recalculate(userId,userId);
+    await this.publication.recalculate(userId, userId);
   }
-
 }

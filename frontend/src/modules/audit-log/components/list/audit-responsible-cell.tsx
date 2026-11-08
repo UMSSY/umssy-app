@@ -4,7 +4,6 @@ import { AUDIT_ROLE_LABELS } from "../../constants/audit-actions.constants";
 import { EMPTY_VALUE } from "../../constants/audit-log.constants";
 import type { AuditResponsibleCellProps } from "../../types/audit-responsible-cell-props.types";
 
-// Muestra a quien ejecutó el hecho según el evento, no al administrativo que consulta
 export function AuditResponsibleCell({
   responsible,
 }: AuditResponsibleCellProps) {
@@ -24,7 +23,7 @@ export function AuditResponsibleCell({
         )}
       </span>
       <div className="flex min-w-0 flex-col">
-        <span className="font-semibold break-words text-ink">{name}</span>
+        <span className="font-semibold wrap-break-word text-ink">{name}</span>
         <span className="text-[12.5px] text-text-secondary">
           {AUDIT_ROLE_LABELS[responsible.role] ?? EMPTY_VALUE}
         </span>

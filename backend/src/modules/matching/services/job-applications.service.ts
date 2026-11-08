@@ -34,8 +34,14 @@ export class JobApplicationsService {
       throw new JobOfferUnavailableException();
     }
 
-    const existing = await this.repository.findByUserAndOffer(userId, jobOfferId);
-    if (existing && existing.status.title !== JOB_APPLICATION_STATUS.WITHDRAWN) {
+    const existing = await this.repository.findByUserAndOffer(
+      userId,
+      jobOfferId,
+    );
+    if (
+      existing &&
+      existing.status.title !== JOB_APPLICATION_STATUS.WITHDRAWN
+    ) {
       throw new DuplicateJobApplicationException();
     }
 
@@ -48,7 +54,11 @@ export class JobApplicationsService {
 
     try {
       if (existing) {
-        const reactivated = await this.repository.reactivate(userId, jobOfferId, status.id);
+        const reactivated = await this.repository.reactivate(
+          userId,
+          jobOfferId,
+          status.id,
+        );
         if (!reactivated) throw new DuplicateJobApplicationException();
         return this.mapper.toResponse(reactivated);
       }

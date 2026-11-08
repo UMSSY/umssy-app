@@ -15,7 +15,6 @@ const LABEL_CLASS = "text-xs font-medium text-text-secondary";
 const TRIGGER_CLASS = "w-full gap-2 rounded-lg border-border bg-surface px-3 text-sm font-medium text-ink focus-visible:border-accent focus-visible:ring-interaction";
 const DATE_CLASS = "w-full min-w-36 rounded-lg border-border bg-surface text-sm text-ink";
 
-// Campos compartidos por la barra de escritorio y el panel móvil
 export function AuditFilterFields({
   idPrefix,
   values,

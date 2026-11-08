@@ -94,7 +94,9 @@ export async function seedUsers(
     const assignedRoleIds = [...new Set(definition.roles.map(roleIdOf))];
     const user = await upsertSeedUser(tx, definition, password);
     users[definition.key] = user;
-    assignments.push(...assignedRoleIds.map((roleId) => ({ userId: user.id, roleId })));
+    assignments.push(
+      ...assignedRoleIds.map((roleId) => ({ userId: user.id, roleId })),
+    );
   }
 
   const existing = await tx.userRole.findMany({
@@ -105,8 +107,12 @@ export async function seedUsers(
     },
     select: { userId: true, roleId: true },
   });
-  const activeAssignments = new Set(existing.map(({ userId, roleId }) => `${userId}:${roleId}`));
-  const missing = assignments.filter(({ userId, roleId }) => !activeAssignments.has(`${userId}:${roleId}`));
+  const activeAssignments = new Set(
+    existing.map(({ userId, roleId }) => `${userId}:${roleId}`),
+  );
+  const missing = assignments.filter(
+    ({ userId, roleId }) => !activeAssignments.has(`${userId}:${roleId}`),
+  );
   let userRoles = 0;
   if (missing.length > 0) {
     const result = await tx.userRole.createMany({ data: missing });

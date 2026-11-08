@@ -13,14 +13,17 @@ describe('AttachmentUploadInterceptor', () => {
       handle: () => of({ success: true, data: 'test' }),
     };
 
-    const result = await lastValueFrom(interceptor.intercept(mockContext, mockNext));
+    const result = await lastValueFrom(
+      interceptor.intercept(mockContext, mockNext),
+    );
     expect(result).toEqual({ success: true, data: 'test' });
   });
 
   it('converts PayloadTooLargeException to AttachmentTooLargeException', async () => {
     const mockContext = {} as any;
     const mockNext = {
-      handle: () => throwError(() => new PayloadTooLargeException('File too large')),
+      handle: () =>
+        throwError(() => new PayloadTooLargeException('File too large')),
     };
 
     await expect(

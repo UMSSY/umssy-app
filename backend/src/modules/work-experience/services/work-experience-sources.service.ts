@@ -11,7 +11,9 @@ export class WorkExperienceSourcesService {
     return this.repository.findPublicationEvidenceIds(userId, context);
   }
 
-  findAnalysisSources(userId: string): Promise<WorkExperienceAnalysisSourceResponse[]> {
+  findAnalysisSources(
+    userId: string,
+  ): Promise<WorkExperienceAnalysisSourceResponse[]> {
     return this.repository.findAnalysisSources(userId);
   }
 }

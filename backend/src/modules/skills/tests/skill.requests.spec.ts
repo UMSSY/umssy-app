@@ -11,21 +11,30 @@ const skillId = '33333333-3333-4333-8333-333333333333';
 
 describe('searchSkillsSchema', () => {
   it('trims the search term and allows it to be missing', () => {
-    expect(searchSkillsSchema.parse({ search: '  py ' })).toEqual({ search: 'py' });
+    expect(searchSkillsSchema.parse({ search: '  py ' })).toEqual({
+      search: 'py',
+    });
     expect(searchSkillsSchema.parse({})).toEqual({});
   });
 });
 
 describe('updateUserSkillsSchema', () => {
   it('accepts a list of skill ids, including an empty one', () => {
-    expect(updateUserSkillsSchema.parse({ skillIds: [skillId] })).toEqual({ skillIds: [skillId] });
-    expect(updateUserSkillsSchema.parse({ skillIds: [] })).toEqual({ skillIds: [] });
+    expect(updateUserSkillsSchema.parse({ skillIds: [skillId] })).toEqual({
+      skillIds: [skillId],
+    });
+    expect(updateUserSkillsSchema.parse({ skillIds: [] })).toEqual({
+      skillIds: [],
+    });
   });
 
   it.each([
     ['a missing list', {}],
     ['an id that is not a uuid', { skillIds: ['python'] }],
-    ['too many skills', { skillIds: Array.from({ length: 50 + 1 }, () => skillId) }],
+    [
+      'too many skills',
+      { skillIds: Array.from({ length: 50 + 1 }, () => skillId) },
+    ],
   ])('rejects %s', (_case, body) => {
     expect(updateUserSkillsSchema.safeParse(body).success).toBe(false);
   });
@@ -33,14 +42,26 @@ describe('updateUserSkillsSchema', () => {
 
 describe('createCustomSkillSchema', () => {
   it('trims the name', () => {
-    expect(createCustomSkillSchema.parse({ name: '  Kubernetes ' })).toEqual({ name: 'Kubernetes' });
+    expect(createCustomSkillSchema.parse({ name: '  Kubernetes ' })).toEqual({
+      name: 'Kubernetes',
+    });
   });
 
   it('removes extra spaces', () => {
-    expect(createCustomSkillSchema.parse({ name: '  spring    boot ' })).toEqual({ name: 'spring boot' });
+    expect(
+      createCustomSkillSchema.parse({ name: '  spring    boot ' }),
+    ).toEqual({ name: 'spring boot' });
   });
 
-  it.each(['C++', 'C#', '.NET', 'Node.js', 'CI/CD', 'Diseño UX', 'R&D (Investigación)'])('accepts the real skill name %s', (name) => {
+  it.each([
+    'C++',
+    'C#',
+    '.NET',
+    'Node.js',
+    'CI/CD',
+    'Diseño UX',
+    'R&D (Investigación)',
+  ])('accepts the real skill name %s', (name) => {
     expect(createCustomSkillSchema.parse({ name })).toEqual({ name });
   });
 
@@ -64,11 +85,18 @@ describe('createCustomSkillSchema', () => {
 
 describe('skill exceptions', () => {
   it.each([
-    [new DuplicateSkillException(), 409, 'The same skill cannot be added twice'],
+    [
+      new DuplicateSkillException(),
+      409,
+      'The same skill cannot be added twice',
+    ],
     [new SkillNotFoundException(), 404, 'Skill not found'],
-  ])('%o uses the expected status and English message', (exception, statusCode, message) => {
-    expect(exception).toBeInstanceOf(DomainException);
-    expect(exception.statusCode).toBe(statusCode);
-    expect(exception.message).toBe(message);
-  });
+  ])(
+    '%o uses the expected status and English message',
+    (exception, statusCode, message) => {
+      expect(exception).toBeInstanceOf(DomainException);
+      expect(exception.statusCode).toBe(statusCode);
+      expect(exception.message).toBe(message);
+    },
+  );
 });

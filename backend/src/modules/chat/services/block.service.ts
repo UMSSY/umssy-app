@@ -1,4 +1,7 @@
-import { RECORD_NOT_FOUND_CODE, UNIQUE_CONSTRAINT_VIOLATION_CODE } from '../../../common/constants/prisma-errors.constants.js';
+import {
+  RECORD_NOT_FOUND_CODE,
+  UNIQUE_CONSTRAINT_VIOLATION_CODE,
+} from '../../../common/constants/prisma-errors.constants.js';
 import { Injectable } from '@nestjs/common';
 import { z } from 'zod';
 import { ChatUserBlockRepository } from '../repositories/chat-user-block.repository.js';

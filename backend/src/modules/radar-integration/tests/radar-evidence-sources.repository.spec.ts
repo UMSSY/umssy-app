@@ -11,8 +11,10 @@ function build(current: unknown) {
 }
 
 const current = {
-  cvId: 'current-cv', extractedText: 'Texto vigente',
-  extractionState: { title: 'ready' }, reviewState: { title: 'pending' },
+  cvId: 'current-cv',
+  extractedText: 'Texto vigente',
+  extractionState: { title: 'ready' },
+  reviewState: { title: 'pending' },
 };
 
 describe('RadarEvidenceSourcesRepository', () => {
@@ -27,13 +29,18 @@ describe('RadarEvidenceSourcesRepository', () => {
     { ...current, extractionState: { title: 'failed' } },
     { ...current, reviewState: { title: 'rejected' } },
     null,
-  ])('no reutiliza un CV anterior cuando el vigente no es válido', async (row) => {
-    const { repository, findFirst } = build(row);
-    await expect(repository.findCurrentCvText('user')).resolves.toEqual([]);
-    expect(findFirst).toHaveBeenCalledOnce();
-    expect(findFirst).toHaveBeenCalledWith(expect.objectContaining({
-      where: { userId: 'user' },
-      orderBy: [{ submittedAt: 'desc' }, { cvId: 'desc' }],
-    }));
-  });
+  ])(
+    'no reutiliza un CV anterior cuando el vigente no es válido',
+    async (row) => {
+      const { repository, findFirst } = build(row);
+      await expect(repository.findCurrentCvText('user')).resolves.toEqual([]);
+      expect(findFirst).toHaveBeenCalledOnce();
+      expect(findFirst).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { userId: 'user' },
+          orderBy: [{ submittedAt: 'desc' }, { cvId: 'desc' }],
+        }),
+      );
+    },
+  );
 });

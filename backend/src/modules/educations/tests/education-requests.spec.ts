@@ -14,61 +14,132 @@ const input = {
 describe('Education requests', () => {
   it('accepts all 17 universities and canonicalizes their aliases', () => {
     expect(EDUCATION_INSTITUTIONS).toHaveLength(17);
-    expect(new Set(EDUCATION_INSTITUTIONS.map((item) => item.name)).size).toBe(17);
+    expect(new Set(EDUCATION_INSTITUTIONS.map((item) => item.name)).size).toBe(
+      17,
+    );
     for (const institution of EDUCATION_INSTITUTIONS) {
       for (const value of [institution.name, ...institution.aliases]) {
-        expect(createEducationSchema.parse({ ...input, institution: value }).institution).toBe(institution.name);
-        expect(updateEducationSchema.parse({ institution: value }).institution).toBe(institution.name);
+        expect(
+          createEducationSchema.parse({ ...input, institution: value })
+            .institution,
+        ).toBe(institution.name);
+        expect(
+          updateEducationSchema.parse({ institution: value }).institution,
+        ).toBe(institution.name);
       }
     }
-    expect(updateEducationSchema.parse({ institution: '  universidad mayor de san simon  ' }).institution)
-      .toBe('Universidad Mayor de San Simón (UMSS)');
+    expect(
+      updateEducationSchema.parse({
+        institution: '  universidad mayor de san simon  ',
+      }).institution,
+    ).toBe('Universidad Mayor de San Simón (UMSS)');
   });
 
-  it.each(['gggggg', 'Universidad inventada', 'UMSS extra', 'UNIPOL', 'Universidad'])('rejects unknown institution %s', (institution) => {
-    expect(createEducationSchema.safeParse({ ...input, institution }).success).toBe(false);
-    expect(updateEducationSchema.safeParse({ institution }).success).toBe(false);
+  it.each([
+    'gggggg',
+    'Universidad inventada',
+    'UMSS extra',
+    'UNIPOL',
+    'Universidad',
+  ])('rejects unknown institution %s', (institution) => {
+    expect(
+      createEducationSchema.safeParse({ ...input, institution }).success,
+    ).toBe(false);
+    expect(updateEducationSchema.safeParse({ institution }).success).toBe(
+      false,
+    );
   });
 
-  it.each(['UPAL', 'Universidad Privada Abierta Latinoamericana', 'Universidad Privada Abierta Latinoamericana (UPAL)', 'NUR', 'Universidad NUR', 'Universidad Pedagógica'])(
-    'rejects excluded institution %s in creates and updates', (institution) => {
-      for (const result of [createEducationSchema.safeParse({ ...input, institution }), updateEducationSchema.safeParse({ institution })]) {
+  it.each([
+    'UPAL',
+    'Universidad Privada Abierta Latinoamericana',
+    'Universidad Privada Abierta Latinoamericana (UPAL)',
+    'NUR',
+    'Universidad NUR',
+    'Universidad Pedagógica',
+  ])(
+    'rejects excluded institution %s in creates and updates',
+    (institution) => {
+      for (const result of [
+        createEducationSchema.safeParse({ ...input, institution }),
+        updateEducationSchema.safeParse({ institution }),
+      ]) {
         expect(result.success).toBe(false);
-        if (!result.success) expect(result.error.issues).toContainEqual(expect.objectContaining({ path: ['institution'] }));
+        if (!result.success)
+          expect(result.error.issues).toContainEqual(
+            expect.objectContaining({ path: ['institution'] }),
+          );
       }
     },
   );
 
-  it.each(['0001-01-01', '0201-02-01', '1899-12-31', '1939-12-31'])('rejects dates before 1940 in either field: %s', (date) => {
-    for (const field of ['startDate', 'endDate']) {
-      for (const result of [
-        createEducationSchema.safeParse({ ...input, [field]: date }),
-        updateEducationSchema.safeParse({ [field]: date }),
-      ]) {
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error.issues).toContainEqual(expect.objectContaining({ path: [field], message: 'Fecha inválida.' }));
+  it.each(['0001-01-01', '0201-02-01', '1899-12-31', '1939-12-31'])(
+    'rejects dates before 1940 in either field: %s',
+    (date) => {
+      for (const field of ['startDate', 'endDate']) {
+        for (const result of [
+          createEducationSchema.safeParse({ ...input, [field]: date }),
+          updateEducationSchema.safeParse({ [field]: date }),
+        ]) {
+          expect(result.success).toBe(false);
+          if (!result.success) {
+            expect(result.error.issues).toContainEqual(
+              expect.objectContaining({
+                path: [field],
+                message: 'Fecha inválida.',
+              }),
+            );
+          }
         }
       }
-    }
-  });
+    },
+  );
 
   it('accepts the minimum date and still rejects impossible dates', () => {
-    expect(createEducationSchema.safeParse({ ...input, startDate: '1940-01-01', endDate: '1940-01-01' }).success).toBe(true);
-    expect(updateEducationSchema.safeParse({ startDate: '1940-01-01', endDate: '1940-01-01' }).success).toBe(true);
-    expect(updateEducationSchema.safeParse({ startDate: '1940-02-29' }).success).toBe(true);
-    expect(updateEducationSchema.safeParse({ startDate: '1941-02-29' }).success).toBe(false);
+    expect(
+      createEducationSchema.safeParse({
+        ...input,
+        startDate: '1940-01-01',
+        endDate: '1940-01-01',
+      }).success,
+    ).toBe(true);
+    expect(
+      updateEducationSchema.safeParse({
+        startDate: '1940-01-01',
+        endDate: '1940-01-01',
+      }).success,
+    ).toBe(true);
+    expect(
+      updateEducationSchema.safeParse({ startDate: '1940-02-29' }).success,
+    ).toBe(true);
+    expect(
+      updateEducationSchema.safeParse({ startDate: '1941-02-29' }).success,
+    ).toBe(false);
   });
-  it.each([0, 400])('accepts descriptions of %i characters on creation and update', (length) => {
-    const description = 'a'.repeat(length);
-    expect(createEducationSchema.parse({ ...input, description }).description).toBe(description);
-    expect(updateEducationSchema.parse({ description }).description).toBe(description);
-  });
+  it.each([0, 400])(
+    'accepts descriptions of %i characters on creation and update',
+    (length) => {
+      const description = 'a'.repeat(length);
+      expect(
+        createEducationSchema.parse({ ...input, description }).description,
+      ).toBe(description);
+      expect(updateEducationSchema.parse({ description }).description).toBe(
+        description,
+      );
+    },
+  );
 
-  it.each(['a'.repeat(401), ' '.repeat(401)])('rejects oversized descriptions before trimming on creation and update', (description) => {
-    expect(createEducationSchema.safeParse({ ...input, description }).success).toBe(false);
-    expect(updateEducationSchema.safeParse({ description }).success).toBe(false);
-  });
+  it.each(['a'.repeat(401), ' '.repeat(401)])(
+    'rejects oversized descriptions before trimming on creation and update',
+    (description) => {
+      expect(
+        createEducationSchema.safeParse({ ...input, description }).success,
+      ).toBe(false);
+      expect(updateEducationSchema.safeParse({ description }).success).toBe(
+        false,
+      );
+    },
+  );
 
   it('trims required strings and converts a valid calendar date to UTC', () => {
     expect(createEducationSchema.parse(input)).toEqual({
@@ -152,16 +223,18 @@ describe('Education requests', () => {
     expect(updateEducationSchema.parse({ degree: ' Updated ' })).toEqual({
       degree: 'Updated',
     });
-    expect(
-      updateEducationSchema.parse({ description: null }),
-    ).toEqual({ description: null });
+    expect(updateEducationSchema.parse({ description: null })).toEqual({
+      description: null,
+    });
   });
 
   it.each(['institution', 'degree', 'startDate', 'endDate'] as const)(
     'rejects clearing %s in partial edits',
     (field) => {
       for (const value of [null, '', ' ']) {
-        expect(updateEducationSchema.safeParse({ [field]: value }).success).toBe(false);
+        expect(
+          updateEducationSchema.safeParse({ [field]: value }).success,
+        ).toBe(false);
       }
     },
   );

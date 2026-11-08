@@ -54,7 +54,10 @@ export function buildQuestionTrend({
   comparison,
 }: TrendInput): SurveyQuestionTrendResponse {
   if (totalSelections <= 0) {
-    return { text: 'Sin respuestas registradas en este periodo.', direction: 'neutral' };
+    return {
+      text: 'Sin respuestas registradas en este periodo.',
+      direction: 'neutral',
+    };
   }
 
   const maxCount = Math.max(...options.map((option) => option.count));

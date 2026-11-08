@@ -96,8 +96,7 @@ export class RadarReviewService {
   private async recalculateAfterDecision(userId: string, actorId: string) {
     try {
       await this.publication.recalculate(userId, actorId);
-    } catch {
-    }
+    } catch {}
     return this.publication.myRadar(userId);
   }
   async downloadForAdmin(adminId: string, cvId: string) {

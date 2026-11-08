@@ -4,21 +4,37 @@ import { ID_CARD_ISSUED_IN } from '../types/id-card-issued-in.enum.js';
 
 function isRealIsoDate(value: string): boolean {
   const date = new Date(`${value}T00:00:00.000Z`);
-  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
+  return (
+    !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value
+  );
 }
 
 export function isAdult(birthDate: Date, now = new Date()): boolean {
-  const cutoff = Date.UTC(now.getUTCFullYear() - 18, now.getUTCMonth(), now.getUTCDate());
+  const cutoff = Date.UTC(
+    now.getUTCFullYear() - 18,
+    now.getUTCMonth(),
+    now.getUTCDate(),
+  );
   return birthDate.getTime() <= cutoff;
 }
 
-export function isGraduationYearCoherent(graduationYear: number, birthDate: Date): boolean {
+export function isGraduationYearCoherent(
+  graduationYear: number,
+  birthDate: Date,
+): boolean {
   return graduationYear >= birthDate.getUTCFullYear() + 18;
 }
 
-export function hasGraduationYearConflict(data: { graduationYear?: unknown; birthDate?: unknown }): boolean {
+export function hasGraduationYearConflict(data: {
+  graduationYear?: unknown;
+  birthDate?: unknown;
+}): boolean {
   const { graduationYear, birthDate } = data;
-  if (typeof graduationYear !== 'number' || !(birthDate instanceof Date) || Number.isNaN(birthDate.getTime())) {
+  if (
+    typeof graduationYear !== 'number' ||
+    !(birthDate instanceof Date) ||
+    Number.isNaN(birthDate.getTime())
+  ) {
     return false;
   }
   return !isGraduationYearCoherent(graduationYear, birthDate);
@@ -30,7 +46,10 @@ const nameField = (label: string) =>
     .trim()
     .min(1, `${label} son obligatorios`)
     .max(100, `${label} no pueden superar los 100 caracteres`)
-    .regex(/^\p{L}[\p{L}\p{M}]*(?:[ '’-]\p{L}[\p{L}\p{M}]*)*$/u, `${label} solo pueden contener letras, espacios, guiones y apóstrofes`);
+    .regex(
+      /^\p{L}[\p{L}\p{M}]*(?:[ '’-]\p{L}[\p{L}\p{M}]*)*$/u,
+      `${label} solo pueden contener letras, espacios, guiones y apóstrofes`,
+    );
 
 const digitsField = (label: string) =>
   z
@@ -52,7 +71,9 @@ export const accessRequestFields = {
   firstName: nameField('Los nombres'),
   lastName: nameField('Los apellidos'),
   idCardNumber: idCardField,
-  idCardIssuedIn: z.enum(ID_CARD_ISSUED_IN, { error: 'El departamento de expedición no es válido' }),
+  idCardIssuedIn: z.enum(ID_CARD_ISSUED_IN, {
+    error: 'El departamento de expedición no es válido',
+  }),
   sisCode: sisCodeField,
   email: z
     .string({ error: 'El correo es obligatorio' })
@@ -67,13 +88,22 @@ export const accessRequestFields = {
     .optional(),
   birthDate: z
     .string({ error: 'La fecha de nacimiento es obligatoria' })
-    .regex(/^\d{4}-\d{2}-\d{2}$/, 'La fecha de nacimiento debe tener el formato AAAA-MM-DD')
+    .regex(
+      /^\d{4}-\d{2}-\d{2}$/,
+      'La fecha de nacimiento debe tener el formato AAAA-MM-DD',
+    )
     .refine(isRealIsoDate, 'La fecha de nacimiento no es válida')
     .transform((value) => new Date(`${value}T00:00:00.000Z`))
-    .refine((value) => Number.isNaN(value.getTime()) || isAdult(value), `Debes ser mayor de 18 años`),
+    .refine(
+      (value) => Number.isNaN(value.getTime()) || isAdult(value),
+      `Debes ser mayor de 18 años`,
+    ),
   career: z.enum(CAREER, { error: 'La carrera no es válida' }),
   graduationYear: z
     .number({ error: 'El año de titulación es obligatorio' })
     .int('El año de titulación debe ser un número entero')
-    .refine((value) => value <= new Date().getUTCFullYear(), 'El año de titulación no puede ser futuro'),
+    .refine(
+      (value) => value <= new Date().getUTCFullYear(),
+      'El año de titulación no puede ser futuro',
+    ),
 };

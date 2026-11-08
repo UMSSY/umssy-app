@@ -45,7 +45,10 @@ describe('LinkPreviewController', () => {
   });
 
   it('should require chat roles (titulado, estudiante, mentor, empresa)', () => {
-    const roles = new Reflector().get<string[]>(ROLES_KEY, LinkPreviewController);
+    const roles = new Reflector().get<string[]>(
+      ROLES_KEY,
+      LinkPreviewController,
+    );
     expect(roles).toEqual(['titulado', 'estudiante', 'mentor', 'empresa']);
   });
 
@@ -87,7 +90,9 @@ describe('LinkPreviewController', () => {
       url: 'https://plain-site.com',
     });
 
-    expect(mockService.getPreview).toHaveBeenCalledWith('https://plain-site.com');
+    expect(mockService.getPreview).toHaveBeenCalledWith(
+      'https://plain-site.com',
+    );
     expect(result.hasPreview).toBe(false);
   });
 
@@ -101,4 +106,3 @@ describe('LinkPreviewController', () => {
     ).rejects.toThrow(BlockedLinkUrlException);
   });
 });
-

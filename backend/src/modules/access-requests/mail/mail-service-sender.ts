@@ -14,9 +14,18 @@ export class MailServiceSender implements MailSender {
     private readonly rejectionLinks: RejectionMailLinkService,
   ) {}
 
-  async sendActivationCode(to: string, code: string, expiresAt: Date): Promise<void> {
-    const minutes = Math.max(1, Math.round((expiresAt.getTime() - Date.now()) / MINUTE_MS));
-    const activationUrl = buildFrontendUrl('/request-access/activation', { email: to });
+  async sendActivationCode(
+    to: string,
+    code: string,
+    expiresAt: Date,
+  ): Promise<void> {
+    const minutes = Math.max(
+      1,
+      Math.round((expiresAt.getTime() - Date.now()) / MINUTE_MS),
+    );
+    const activationUrl = buildFrontendUrl('/request-access/activation', {
+      email: to,
+    });
     await this.mailService.send({
       to,
       subject: 'Tu código de activación de UMSSY',
@@ -44,7 +53,11 @@ export class MailServiceSender implements MailSender {
       subject: 'Tu solicitud de acceso a UMSSY necesita otro documento',
       text: `Necesitamos otro documento. Código de solicitud: ${link.requestCode}.\n\nMotivo del rechazo:\n${reason}\n\nAbre Mi solicitud e ingresa el correo que registraste: ${link.url}\n\nEste enlace es personal. No lo compartas.`,
       mjml: await loadMailTemplate('access-request-rejection'),
-      values: { reason, requestCode: link.requestCode, requestStatusUrl: link.url },
+      values: {
+        reason,
+        requestCode: link.requestCode,
+        requestStatusUrl: link.url,
+      },
     });
   }
 }

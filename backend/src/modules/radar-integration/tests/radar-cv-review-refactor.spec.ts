@@ -34,12 +34,10 @@ function setupCv() {
   };
   const publication = { recalculate: vi.fn().mockResolvedValue({}) };
   const extractor = {
-    extract: vi
-      .fn()
-      .mockResolvedValue({
-        extractedText: 'Python',
-        extractionStatus: 'ready',
-      }),
+    extract: vi.fn().mockResolvedValue({
+      extractedText: 'Python',
+      extractionStatus: 'ready',
+    }),
   };
   const service = new RadarCvService(
     repository as unknown as RadarCvRepository,
@@ -89,7 +87,10 @@ function setupReview() {
 describe('Separación de CV y revisión', () => {
   it('rescans the current CV returned by its owner service', async () => {
     const { service, cvs } = setupCv();
-    cvs.currentCv.mockResolvedValue({ id: cvId, cvPdfData: Buffer.from('pdf').toString('base64') });
+    cvs.currentCv.mockResolvedValue({
+      id: cvId,
+      cvPdfData: Buffer.from('pdf').toString('base64'),
+    });
     const ingest = vi.spyOn(service, 'ingestCv').mockResolvedValue({} as never);
     await service.rescanCurrentCv(owner);
     expect(cvs.currentCv).toHaveBeenCalledWith(owner);
@@ -98,25 +99,41 @@ describe('Separación de CV y revisión', () => {
 
   it('uses the stored owner when an administrator reprocesses a CV', async () => {
     const { service, cvs, access } = setupCv();
-    cvs.cvById.mockResolvedValue({ id: cvId, userId: owner, cvPdfData: Buffer.from('pdf').toString('base64') });
-    const ingest = vi.spyOn(service, 'ingestCv').mockResolvedValue({ extractionStatus: 'ready' } as never);
+    cvs.cvById.mockResolvedValue({
+      id: cvId,
+      userId: owner,
+      cvPdfData: Buffer.from('pdf').toString('base64'),
+    });
+    const ingest = vi
+      .spyOn(service, 'ingestCv')
+      .mockResolvedValue({ extractionStatus: 'ready' } as never);
     await service.reprocessCv(admin, cvId);
     expect(cvs.cvById).toHaveBeenCalledWith(cvId);
     expect(ingest).toHaveBeenCalledWith(owner, cvId, Buffer.from('pdf'), true);
-    expect(access.recordAudit).toHaveBeenCalledWith(owner, admin, 'cv.admin_reprocessed', cvId, { extractionStatus: 'ready' });
+    expect(access.recordAudit).toHaveBeenCalledWith(
+      owner,
+      admin,
+      'cv.admin_reprocessed',
+      cvId,
+      { extractionStatus: 'ready' },
+    );
   });
 
   it('does not ingest a missing current CV', async () => {
     const { service, cvs, extractor } = setupCv();
     cvs.currentCv.mockResolvedValue(null);
-    await expect(service.rescanCurrentCv(owner)).rejects.toThrow('No hay CV vigente');
+    await expect(service.rescanCurrentCv(owner)).rejects.toThrow(
+      'No hay CV vigente',
+    );
     expect(extractor.extract).not.toHaveBeenCalled();
   });
 
   it('does not record a view for a missing administrative download', async () => {
     const { service, cvs, access } = setupReview();
     cvs.cvById.mockResolvedValue(null);
-    await expect(service.downloadForAdmin(admin, cvId)).rejects.toThrow('Archivo no encontrado');
+    await expect(service.downloadForAdmin(admin, cvId)).rejects.toThrow(
+      'Archivo no encontrado',
+    );
     expect(access.recordAudit).not.toHaveBeenCalled();
   });
 

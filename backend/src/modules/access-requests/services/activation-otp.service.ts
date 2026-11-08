@@ -19,13 +19,21 @@ export class ActivationOtpService {
     @Inject(MAIL_SENDER) private readonly mailSender: MailSender,
   ) {}
 
-  async issueFor(accessRequestId: string, email: string, now: Date = new Date()): Promise<boolean> {
+  async issueFor(
+    accessRequestId: string,
+    email: string,
+    now: Date = new Date(),
+  ): Promise<boolean> {
     let createdId: string | null = null;
     try {
       const code = generateOtpCode();
       const expiresAt = new Date(now.getTime() + OTP_TTL_MINUTES * MINUTE_MS);
       const codeHash = await bcrypt.hash(code, 10);
-      const created = await this.otpRepository.create({ accessRequestId, codeHash, expiresAt });
+      const created = await this.otpRepository.create({
+        accessRequestId,
+        codeHash,
+        expiresAt,
+      });
       createdId = created.id;
       await this.mailSender.sendActivationCode(email, code, expiresAt);
       await this.invalidatePrevious(accessRequestId, created.id, now);
@@ -41,7 +49,11 @@ export class ActivationOtpService {
   }
 
   // El código nuevo ya salió por correo: fallar aquí no debe invalidarlo
-  private async invalidatePrevious(accessRequestId: string, keepId: string, now: Date): Promise<void> {
+  private async invalidatePrevious(
+    accessRequestId: string,
+    keepId: string,
+    now: Date,
+  ): Promise<void> {
     try {
       await this.otpRepository.invalidateOthers(accessRequestId, keepId, now);
     } catch (error) {

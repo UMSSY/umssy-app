@@ -20,15 +20,23 @@ function build() {
 }
 
 const prismaError = (code: string, meta?: Record<string, unknown>) =>
-  new Prisma.PrismaClientKnownRequestError('boom', { code, clientVersion: 'test', meta });
+  new Prisma.PrismaClientKnownRequestError('boom', {
+    code,
+    clientVersion: 'test',
+    meta,
+  });
 
 describe('AccessRequestsRepository: envío y consulta de estado', () => {
   describe('generateRequestCode', () => {
     it('consulta por prefijo del año UTC en orden descendente y suma uno', async () => {
       const { accessRequest, repository } = build();
-      accessRequest.findFirst.mockResolvedValue({ requestCode: 'SOL-2026-0148' });
+      accessRequest.findFirst.mockResolvedValue({
+        requestCode: 'SOL-2026-0148',
+      });
 
-      await expect(repository.generateRequestCode(new Date('2026-10-05T12:00:00Z'))).resolves.toBe('SOL-2026-0149');
+      await expect(
+        repository.generateRequestCode(new Date('2026-10-05T12:00:00Z')),
+      ).resolves.toBe('SOL-2026-0149');
 
       expect(accessRequest.findFirst).toHaveBeenCalledWith({
         where: { requestCode: { startsWith: 'SOL-2026-' } },
@@ -41,15 +49,21 @@ describe('AccessRequestsRepository: envío y consulta de estado', () => {
       const { accessRequest, repository } = build();
       accessRequest.findFirst.mockResolvedValue(null);
 
-      await expect(repository.generateRequestCode(new Date('2027-01-01T00:00:00Z'))).resolves.toBe('SOL-2027-0001');
-      expect(accessRequest.findFirst.mock.calls[0][0].where.requestCode.startsWith).toBe('SOL-2027-');
+      await expect(
+        repository.generateRequestCode(new Date('2027-01-01T00:00:00Z')),
+      ).resolves.toBe('SOL-2027-0001');
+      expect(
+        accessRequest.findFirst.mock.calls[0][0].where.requestCode.startsWith,
+      ).toBe('SOL-2027-');
     });
 
     it('usa el año UTC (31 de diciembre al final del día sigue siendo el mismo año)', async () => {
       const { accessRequest, repository } = build();
       accessRequest.findFirst.mockResolvedValue(null);
 
-      await expect(repository.generateRequestCode(new Date('2026-12-31T23:59:59Z'))).resolves.toBe('SOL-2026-0001');
+      await expect(
+        repository.generateRequestCode(new Date('2026-12-31T23:59:59Z')),
+      ).resolves.toBe('SOL-2026-0001');
     });
   });
 
@@ -65,21 +79,31 @@ describe('AccessRequestsRepository: envío y consulta de estado', () => {
       expect(args.data.requestCode).toBe('SOL-2026-0001');
       expect(args.data.submittedAt).toBeInstanceOf(Date);
       expect(args.data.status).toEqual({ connect: { title: 'pending' } });
-      expect(args.select).toEqual({ ...ACCESS_REQUEST_AUDIT_SELECT, submittedAt: true, status: { select: { title: true } } });
+      expect(args.select).toEqual({
+        ...ACCESS_REQUEST_AUDIT_SELECT,
+        submittedAt: true,
+        status: { select: { title: true } },
+      });
     });
 
     it('P2025 sin meta.model lanza 404', async () => {
       const { accessRequest, repository } = build();
       accessRequest.update.mockRejectedValue(prismaError('P2025'));
 
-      await expect(repository.submit('id-1', 'SOL-2026-0001')).rejects.toBeInstanceOf(AccessRequestNotFoundException);
+      await expect(
+        repository.submit('id-1', 'SOL-2026-0001'),
+      ).rejects.toBeInstanceOf(AccessRequestNotFoundException);
     });
 
     it('P2025 con meta.model lanza catálogo faltante', async () => {
       const { accessRequest, repository } = build();
-      accessRequest.update.mockRejectedValue(prismaError('P2025', { model: 'AccessRequestStatus' }));
+      accessRequest.update.mockRejectedValue(
+        prismaError('P2025', { model: 'AccessRequestStatus' }),
+      );
 
-      await expect(repository.submit('id-1', 'SOL-2026-0001')).rejects.toBeInstanceOf(AccessRequestCatalogMissingException);
+      await expect(
+        repository.submit('id-1', 'SOL-2026-0001'),
+      ).rejects.toBeInstanceOf(AccessRequestCatalogMissingException);
     });
 
     it('relanza cualquier otro error igual', async () => {
@@ -87,51 +111,76 @@ describe('AccessRequestsRepository: envío y consulta de estado', () => {
       const boom = new Error('db caída');
       accessRequest.update.mockRejectedValue(boom);
 
-      await expect(repository.submit('id-1', 'SOL-2026-0001')).rejects.toBe(boom);
+      await expect(repository.submit('id-1', 'SOL-2026-0001')).rejects.toBe(
+        boom,
+      );
     });
   });
 
   describe('submitWithGeneratedCode', () => {
     it('envía con el código generado a la primera', async () => {
       const { accessRequest, repository } = build();
-      accessRequest.findFirst.mockResolvedValue({ requestCode: 'SOL-2026-0001' });
-      accessRequest.update.mockResolvedValue({ id: 'id-1', requestCode: 'SOL-2026-0002' });
+      accessRequest.findFirst.mockResolvedValue({
+        requestCode: 'SOL-2026-0001',
+      });
+      accessRequest.update.mockResolvedValue({
+        id: 'id-1',
+        requestCode: 'SOL-2026-0002',
+      });
 
       await repository.submitWithGeneratedCode('id-1');
 
       expect(accessRequest.update).toHaveBeenCalledTimes(1);
-      expect(accessRequest.update.mock.calls[0][0].data.requestCode).toMatch(/^SOL-\d{4}-0002$/);
+      expect(accessRequest.update.mock.calls[0][0].data.requestCode).toMatch(
+        /^SOL-\d{4}-0002$/,
+      );
     });
 
     it('define 8 intentos como máximo', () => {
       expect(8).toBe(8);
     });
 
-    it.each([2, 5, 8])('ante P2002 recalcula el código y tiene éxito en el intento %d', async (successAt) => {
-      const { accessRequest, pause, repository } = build();
-      accessRequest.findFirst.mockImplementation(async () => ({ requestCode: `SOL-2026-${String(accessRequest.findFirst.mock.calls.length).padStart(4, '0')}` }));
-      for (let attempt = 1; attempt < successAt; attempt++) {
-        accessRequest.update.mockRejectedValueOnce(prismaError('P2002', { target: ['request_code'] }));
-      }
-      accessRequest.update.mockResolvedValueOnce({ id: 'id-1', requestCode: 'SOL-2026-0099' });
+    it.each([2, 5, 8])(
+      'ante P2002 recalcula el código y tiene éxito en el intento %d',
+      async (successAt) => {
+        const { accessRequest, pause, repository } = build();
+        accessRequest.findFirst.mockImplementation(async () => ({
+          requestCode: `SOL-2026-${String(accessRequest.findFirst.mock.calls.length).padStart(4, '0')}`,
+        }));
+        for (let attempt = 1; attempt < successAt; attempt++) {
+          accessRequest.update.mockRejectedValueOnce(
+            prismaError('P2002', { target: ['request_code'] }),
+          );
+        }
+        accessRequest.update.mockResolvedValueOnce({
+          id: 'id-1',
+          requestCode: 'SOL-2026-0099',
+        });
 
-      await expect(repository.submitWithGeneratedCode('id-1')).resolves.toEqual({ id: 'id-1', requestCode: 'SOL-2026-0099' });
+        await expect(
+          repository.submitWithGeneratedCode('id-1'),
+        ).resolves.toEqual({ id: 'id-1', requestCode: 'SOL-2026-0099' });
 
-      expect(accessRequest.findFirst).toHaveBeenCalledTimes(successAt);
-      expect(accessRequest.update).toHaveBeenCalledTimes(successAt);
-      expect(pause).toHaveBeenCalledTimes(successAt - 1);
-    });
+        expect(accessRequest.findFirst).toHaveBeenCalledTimes(successAt);
+        expect(accessRequest.update).toHaveBeenCalledTimes(successAt);
+        expect(pause).toHaveBeenCalledTimes(successAt - 1);
+      },
+    );
 
     it('tras 8 intentos con P2002 lanza RequestCodeGenerationException (503) y pausa 7 veces', async () => {
       const { accessRequest, pause, repository } = build();
       accessRequest.findFirst.mockResolvedValue(null);
       accessRequest.update.mockRejectedValue(prismaError('P2002'));
 
-      const error = await repository.submitWithGeneratedCode('id-1').catch((e) => e);
+      const error = await repository
+        .submitWithGeneratedCode('id-1')
+        .catch((e) => e);
 
       expect(error).toBeInstanceOf(RequestCodeGenerationException);
       expect(error.statusCode).toBe(503);
-      expect(error.message).toBe('No se pudo generar el código de la solicitud. Inténtalo de nuevo.');
+      expect(error.message).toBe(
+        'No se pudo generar el código de la solicitud. Inténtalo de nuevo.',
+      );
       expect(accessRequest.update).toHaveBeenCalledTimes(8);
       expect(pause).toHaveBeenCalledTimes(7);
     });
@@ -153,32 +202,47 @@ describe('AccessRequestsRepository: envío y consulta de estado', () => {
       'uq_access_requests_email_submitted',
       'uq_access_requests_id_card_submitted',
       'uq_access_requests_sis_code_submitted',
-    ])('un P2002 del índice %s lanza ActiveAccessRequestExistsException (409) sin reintentar', async (index) => {
-      const { accessRequest, pause, repository } = build();
-      accessRequest.findFirst.mockResolvedValue(null);
-      accessRequest.update.mockRejectedValue(
-        prismaError('P2002', { driverAdapterError: { cause: { constraint: { index } } } }),
-      );
+    ])(
+      'un P2002 del índice %s lanza ActiveAccessRequestExistsException (409) sin reintentar',
+      async (index) => {
+        const { accessRequest, pause, repository } = build();
+        accessRequest.findFirst.mockResolvedValue(null);
+        accessRequest.update.mockRejectedValue(
+          prismaError('P2002', {
+            driverAdapterError: { cause: { constraint: { index } } },
+          }),
+        );
 
-      const error = await repository.submitWithGeneratedCode('id-1').catch((e) => e);
+        const error = await repository
+          .submitWithGeneratedCode('id-1')
+          .catch((e) => e);
 
-      expect(error).toBeInstanceOf(ActiveAccessRequestExistsException);
-      expect(error.statusCode).toBe(409);
-      expect(error.message).toBe('Ya tienes una solicitud activa');
-      expect(accessRequest.update).toHaveBeenCalledTimes(1);
-      expect(pause).not.toHaveBeenCalled();
-    });
+        expect(error).toBeInstanceOf(ActiveAccessRequestExistsException);
+        expect(error.statusCode).toBe(409);
+        expect(error.message).toBe('Ya tienes una solicitud activa');
+        expect(accessRequest.update).toHaveBeenCalledTimes(1);
+        expect(pause).not.toHaveBeenCalled();
+      },
+    );
 
     it('un P2002 de access_requests_request_code_key sí se reintenta', async () => {
       const { accessRequest, pause, repository } = build();
       accessRequest.findFirst.mockResolvedValue(null);
       accessRequest.update
         .mockRejectedValueOnce(
-          prismaError('P2002', { driverAdapterError: { cause: { constraint: { index: 'access_requests_request_code_key' } } } }),
+          prismaError('P2002', {
+            driverAdapterError: {
+              cause: {
+                constraint: { index: 'access_requests_request_code_key' },
+              },
+            },
+          }),
         )
         .mockResolvedValueOnce({ id: 'id-1', requestCode: 'SOL-2026-0001' });
 
-      await expect(repository.submitWithGeneratedCode('id-1')).resolves.toEqual({ id: 'id-1', requestCode: 'SOL-2026-0001' });
+      await expect(repository.submitWithGeneratedCode('id-1')).resolves.toEqual(
+        { id: 'id-1', requestCode: 'SOL-2026-0001' },
+      );
       expect(pause).toHaveBeenCalledTimes(1);
     });
 
@@ -187,7 +251,9 @@ describe('AccessRequestsRepository: envío y consulta de estado', () => {
       accessRequest.findFirst.mockResolvedValue(null);
       accessRequest.update.mockRejectedValue(prismaError('P2025'));
 
-      await expect(repository.submitWithGeneratedCode('id-1')).rejects.toBeInstanceOf(AccessRequestNotFoundException);
+      await expect(
+        repository.submitWithGeneratedCode('id-1'),
+      ).rejects.toBeInstanceOf(AccessRequestNotFoundException);
       expect(accessRequest.update).toHaveBeenCalledTimes(1);
       expect(pause).not.toHaveBeenCalled();
     });

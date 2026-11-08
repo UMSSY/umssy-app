@@ -36,7 +36,13 @@ describe('toAccessRequestListItem', () => {
   });
 
   it('tolera un documento y una fecha ausentes', () => {
-    expect(toAccessRequestListItem({ ...row, documentType: null, submittedAt: null } as never)).toMatchObject({
+    expect(
+      toAccessRequestListItem({
+        ...row,
+        documentType: null,
+        submittedAt: null,
+      } as never),
+    ).toMatchObject({
       documentType: null,
       submittedAt: null,
     });
@@ -45,14 +51,22 @@ describe('toAccessRequestListItem', () => {
 
 describe('AccessRequestsRepository.findPage', () => {
   function build() {
-    const accessRequest = { findMany: vi.fn().mockResolvedValue([row]), count: vi.fn().mockResolvedValue(25) };
-    return { accessRequest, repository: new AccessRequestsRepository({ accessRequest } as any) };
+    const accessRequest = {
+      findMany: vi.fn().mockResolvedValue([row]),
+      count: vi.fn().mockResolvedValue(25),
+    };
+    return {
+      accessRequest,
+      repository: new AccessRequestsRepository({ accessRequest } as any),
+    };
   }
 
   it('filtra por el estado indicado, ordena por envío descendente y pagina', async () => {
     const { accessRequest, repository } = build();
 
-    await expect(repository.findPage({ status: 'pending', page: 3, limit: 10 })).resolves.toEqual({ rows: [row], total: 25 });
+    await expect(
+      repository.findPage({ status: 'pending', page: 3, limit: 10 }),
+    ).resolves.toEqual({ rows: [row], total: 25 });
 
     const args = accessRequest.findMany.mock.calls[0][0];
     expect(args.where).toEqual({ status: { title: 'pending' } });
@@ -68,7 +82,12 @@ describe('AccessRequestsRepository.findPage', () => {
     await repository.findPage({ page: 1, limit: 10 });
 
     const { where, select } = accessRequest.findMany.mock.calls[0][0];
-    expect(where.status.title.in).toEqual(['pending', 'in_review', 'approved', 'rejected']);
+    expect(where.status.title.in).toEqual([
+      'pending',
+      'in_review',
+      'approved',
+      'rejected',
+    ]);
     expect(where.status.title.in).not.toContain('draft');
     expect(select.documentFile).toBeUndefined();
     expect(select.career).toEqual({ select: { title: true } });
@@ -78,8 +97,14 @@ describe('AccessRequestsRepository.findPage', () => {
 
 describe('AccessRequestsService.list y controller', () => {
   it('devuelve { data: { items, total }, page, offset } con el offset calculado', async () => {
-    const repository = { findPage: vi.fn().mockResolvedValue({ rows: [row], total: 11 }) };
-    const service = new AccessRequestsService(repository as any, {} as any, {} as any);
+    const repository = {
+      findPage: vi.fn().mockResolvedValue({ rows: [row], total: 11 }),
+    };
+    const service = new AccessRequestsService(
+      repository as any,
+      {} as any,
+      {} as any,
+    );
 
     const result = await service.list({ page: 2, limit: 10 });
 
@@ -89,11 +114,22 @@ describe('AccessRequestsService.list y controller', () => {
   });
 
   it('el controller delega el listado al servicio', async () => {
-    const service = { list: vi.fn().mockResolvedValue({ data: { items: [], total: 0 }, page: 1, offset: 0 }) };
+    const service = {
+      list: vi
+        .fn()
+        .mockResolvedValue({
+          data: { items: [], total: 0 },
+          page: 1,
+          offset: 0,
+        }),
+    };
     const controller = new AccessRequestsController(service as any);
     const query = { page: 1, limit: 10 };
 
-    await expect(controller.list(query)).resolves.toMatchObject({ page: 1, offset: 0 });
+    await expect(controller.list(query)).resolves.toMatchObject({
+      page: 1,
+      offset: 0,
+    });
     expect(service.list).toHaveBeenCalledWith(query);
   });
 });

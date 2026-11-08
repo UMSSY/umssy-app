@@ -36,17 +36,27 @@ describe('BlockService', () => {
     it('bloquea al usuario y devuelve { blockedUserId, createdAt }', async () => {
       const { service, blockRepository } = createService();
       const createdAt = new Date('2026-10-28T12:00:00.000Z');
-      blockRepository.createBlock.mockResolvedValue({ blockerId: ME, blockedId: OTHER, createdAt });
+      blockRepository.createBlock.mockResolvedValue({
+        blockerId: ME,
+        blockedId: OTHER,
+        createdAt,
+      });
 
       const result = await service.block(ME, OTHER);
 
       expect(blockRepository.createBlock).toHaveBeenCalledWith(ME, OTHER);
-      expect(result).toEqual({ blockedUserId: OTHER, createdAt: createdAt.toISOString() });
+      expect(result).toEqual({
+        blockedUserId: OTHER,
+        createdAt: createdAt.toISOString(),
+      });
     });
 
     it('normaliza mayúsculas del UUID', async () => {
       const { service, blockRepository } = createService();
-      blockRepository.createBlock.mockResolvedValue({ blockedId: OTHER, createdAt: new Date() });
+      blockRepository.createBlock.mockResolvedValue({
+        blockedId: OTHER,
+        createdAt: new Date(),
+      });
 
       await service.block(ME, OTHER.toUpperCase());
 
@@ -56,27 +66,35 @@ describe('BlockService', () => {
     it('rechaza bloquearse a sí mismo (400), incluso con distinto casing', async () => {
       const { service, blockRepository } = createService();
 
-      await expect(service.block(ME, ME.toUpperCase())).rejects.toThrow(CannotBlockSelfException);
+      await expect(service.block(ME, ME.toUpperCase())).rejects.toThrow(
+        CannotBlockSelfException,
+      );
       expect(blockRepository.createBlock).not.toHaveBeenCalled();
     });
 
     it('rechaza un id inválido (400)', async () => {
       const { service } = createService();
-      await expect(service.block(ME, 'no-es-uuid')).rejects.toThrow(InvalidBlockTargetException);
+      await expect(service.block(ME, 'no-es-uuid')).rejects.toThrow(
+        InvalidBlockTargetException,
+      );
     });
 
     it('usuario inexistente → 404', async () => {
       const { service, userLookupRepository } = createService();
       userLookupRepository.findById.mockResolvedValue(null);
 
-      await expect(service.block(ME, OTHER)).rejects.toThrow(UserNotFoundException);
+      await expect(service.block(ME, OTHER)).rejects.toThrow(
+        UserNotFoundException,
+      );
     });
 
     it('bloqueo duplicado → 409', async () => {
       const { service, blockRepository } = createService();
       blockRepository.findByUsers.mockResolvedValue({ id: 'block-1' });
 
-      await expect(service.block(ME, OTHER)).rejects.toThrow(UserAlreadyBlockedException);
+      await expect(service.block(ME, OTHER)).rejects.toThrow(
+        UserAlreadyBlockedException,
+      );
       expect(blockRepository.createBlock).not.toHaveBeenCalled();
     });
 
@@ -84,7 +102,9 @@ describe('BlockService', () => {
       const { service, blockRepository } = createService();
       blockRepository.createBlock.mockRejectedValue({ code: 'P2002' });
 
-      await expect(service.block(ME, OTHER)).rejects.toThrow(UserAlreadyBlockedException);
+      await expect(service.block(ME, OTHER)).rejects.toThrow(
+        UserAlreadyBlockedException,
+      );
     });
 
     it('otros errores se propagan', async () => {
@@ -108,12 +128,16 @@ describe('BlockService', () => {
       const { service, blockRepository } = createService();
       blockRepository.removeBlock.mockRejectedValue({ code: 'P2025' });
 
-      await expect(service.unblock(ME, OTHER)).rejects.toThrow(BlockNotFoundException);
+      await expect(service.unblock(ME, OTHER)).rejects.toThrow(
+        BlockNotFoundException,
+      );
     });
 
     it('id inválido → 400', async () => {
       const { service } = createService();
-      await expect(service.unblock(ME, 'x')).rejects.toThrow(InvalidBlockTargetException);
+      await expect(service.unblock(ME, 'x')).rejects.toThrow(
+        InvalidBlockTargetException,
+      );
     });
   });
 

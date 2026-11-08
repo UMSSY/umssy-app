@@ -26,7 +26,10 @@ export class AttachmentMapper {
       url: record.url ?? `/api/chat/attachments/${record.id}/file`,
       thumbnailUrl: record.thumbnailUrl,
       type: record.type?.title ?? 'FILE',
-      createdAt: record.createdAt instanceof Date ? record.createdAt.toISOString() : String(record.createdAt),
+      createdAt:
+        record.createdAt instanceof Date
+          ? record.createdAt.toISOString()
+          : String(record.createdAt),
     };
   }
 

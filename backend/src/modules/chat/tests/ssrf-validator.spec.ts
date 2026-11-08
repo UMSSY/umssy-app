@@ -99,7 +99,9 @@ describe('SSRF Validator', () => {
 
     it('rejects private and loopback IP URLs directly', async () => {
       expect(await validateSafeUrl('http://127.0.0.1/admin')).toBe(false);
-      expect(await validateSafeUrl('http://169.254.169.254/latest/meta-data')).toBe(false);
+      expect(
+        await validateSafeUrl('http://169.254.169.254/latest/meta-data'),
+      ).toBe(false);
       expect(await validateSafeUrl('http://192.168.1.10')).toBe(false);
       expect(await validateSafeUrl('http://10.0.0.1:8080')).toBe(false);
       expect(await validateSafeUrl('http://[::1]/status')).toBe(false);
@@ -111,7 +113,9 @@ describe('SSRF Validator', () => {
     });
 
     it('acepta un dominio que solo resuelve a direcciones públicas', async () => {
-      vi.mocked(lookup).mockResolvedValueOnce([{ address: '93.184.216.34', family: 4 }]);
+      vi.mocked(lookup).mockResolvedValueOnce([
+        { address: '93.184.216.34', family: 4 },
+      ]);
       expect(await validateSafeUrl('https://example.com')).toBe(true);
       expect(lookup).toHaveBeenCalledWith('example.com', { all: true });
     });
@@ -130,9 +134,12 @@ describe('SSRF Validator', () => {
     });
 
     it('rejects unresolvable domains safely', async () => {
-      vi.mocked(lookup).mockRejectedValueOnce(Object.assign(new Error('No resuelto'), { code: 'ENOTFOUND' }));
-      expect(await validateSafeUrl('http://non-existent-domain-xyz-12345.org')).toBe(false);
+      vi.mocked(lookup).mockRejectedValueOnce(
+        Object.assign(new Error('No resuelto'), { code: 'ENOTFOUND' }),
+      );
+      expect(
+        await validateSafeUrl('http://non-existent-domain-xyz-12345.org'),
+      ).toBe(false);
     });
   });
 });
-

@@ -34,7 +34,13 @@ export class RadarAccessRepository {
   ): Promise<void> {
     const client = context?.client ?? this.prisma;
     await client.radarAuditEvent.create({
-      data: { userId, actorId, eventType: event, targetId, details: JSON.parse(JSON.stringify(details)) as Prisma.InputJsonValue },
+      data: {
+        userId,
+        actorId,
+        eventType: event,
+        targetId,
+        details: JSON.parse(JSON.stringify(details)) as Prisma.InputJsonValue,
+      },
       select: { id: true },
     });
   }

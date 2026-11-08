@@ -19,7 +19,9 @@ describe('SkillMapper', () => {
   });
 
   it('maps a user skill record to the skill response', () => {
-    expect(mapper.toUserSkillResponse({ skill: { ...skill, isCustom: true } })).toEqual({
+    expect(
+      mapper.toUserSkillResponse({ skill: { ...skill, isCustom: true } }),
+    ).toEqual({
       id: '33333333-3333-4333-8333-333333333333',
       name: 'Python',
       isCustom: true,

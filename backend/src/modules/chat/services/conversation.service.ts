@@ -65,9 +65,8 @@ export class ConversationService {
       throw new SelfConversationException();
     }
 
-    const contact = await this.userLookupRepository.findById(
-      normalizedContactId,
-    );
+    const contact =
+      await this.userLookupRepository.findById(normalizedContactId);
 
     if (!contact) {
       throw new UserNotFoundException();
@@ -95,7 +94,7 @@ export class ConversationService {
       throw new UserBlockedException();
     }
 
-       await this.chatRolePolicyService.assertCanCommunicate(
+    await this.chatRolePolicyService.assertCanCommunicate(
       normalizedCurrentUserId,
       normalizedContactId,
     );
@@ -124,19 +123,18 @@ export class ConversationService {
         userBId,
       );
 
-     if (!acceptedRequest) {
+    if (!acceptedRequest) {
       throw new ForbiddenException(
         'Debes tener una solicitud de conexión aceptada para iniciar una conversación.',
       );
     }
 
     try {
-      const created =
-        await this.conversationRepository.createWithParticipants(
-          userAId,
-          userBId,
-          new Date(),
-        );
+      const created = await this.conversationRepository.createWithParticipants(
+        userAId,
+        userBId,
+        new Date(),
+      );
 
       const conversation = await this.toResponse(
         created,
@@ -160,10 +158,7 @@ export class ConversationService {
         err?.message?.includes('Unique constraint')
       ) {
         const concurrentExisting =
-          await this.conversationRepository.findByOrderedPair(
-            userAId,
-            userBId,
-          );
+          await this.conversationRepository.findByOrderedPair(userAId, userBId);
 
         if (concurrentExisting) {
           const conversation = await this.toResponse(
@@ -196,9 +191,7 @@ export class ConversationService {
     return participant !== null;
   }
 
-  async findAllForUser(
-    currentUserId: string,
-  ): Promise<ConversationResponse[]> {
+  async findAllForUser(currentUserId: string): Promise<ConversationResponse[]> {
     const [list, blockedIds] = await Promise.all([
       this.conversationRepository.findUserConversations(currentUserId),
       this.blockService.findBlockedIdsBy(currentUserId),
@@ -220,9 +213,7 @@ export class ConversationService {
       conversation.event?.id ||
       (!conversation.userAId && !conversation.userBId)
     ) {
-      return this.conversationMapper.toEventConversationResponse(
-        conversation,
-      );
+      return this.conversationMapper.toEventConversationResponse(conversation);
     }
 
     const contact =
@@ -259,7 +250,7 @@ export class ConversationService {
 
     const academicTitle = latestEducation
       ? `${latestEducation.degree} / ${latestEducation.institution}`
-      : contact.headline ?? null;
+      : (contact.headline ?? null);
 
     const skills = userSkills.map((skill) => skill.name);
 

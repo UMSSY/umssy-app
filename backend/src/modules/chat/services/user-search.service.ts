@@ -31,7 +31,10 @@ export class UserSearchService {
 
     for (const row of rows) {
       try {
-        await this.chatRolePolicyService.assertCanCommunicate(currentUserId, row.id);
+        await this.chatRolePolicyService.assertCanCommunicate(
+          currentUserId,
+          row.id,
+        );
 
         results.push({
           id: row.id,

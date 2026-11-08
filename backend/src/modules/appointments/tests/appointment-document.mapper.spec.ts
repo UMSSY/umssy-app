@@ -81,9 +81,7 @@ describe('AppointmentDocumentMapper', () => {
       validated(`${'a'.repeat(254)}😀.pdf`),
     ).fileName;
 
-    expect(Array.from(fileName)).toHaveLength(
-      255,
-    );
+    expect(Array.from(fileName)).toHaveLength(255);
     expect(fileName.endsWith('😀')).toBe(true);
     expect(() =>
       mapper.toDownload(createDocumentFileRecord({ fileName })),

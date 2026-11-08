@@ -39,9 +39,9 @@ export class RadarReviewRepository {
 
   async cvOwner(cvId: string, context: TransactionContext) {
     const row = await context.client.radarCvEvidence.findUnique({
-      where: { cvId }, select: { userId: true },
+      where: { cvId },
+      select: { userId: true },
     });
     return row ? [{ user_id: row.userId }] : [];
   }
-
 }

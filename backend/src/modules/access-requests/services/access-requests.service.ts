@@ -37,7 +37,10 @@ import { toRequestStatusResponse } from '../mappers/request-status.mapper.js';
 import { isGraduationYearCoherent } from '../requests/access-request-fields.js';
 import type { CreateAccessRequestDto } from '../requests/create-access-request.schema.js';
 import type { UpdateAccessRequestDto } from '../requests/update-access-request.schema.js';
-import { ACCESS_REQUEST_DOCUMENT_TYPE, ACCESS_REQUEST_STATUS } from '../types/access-request.enum.js';
+import {
+  ACCESS_REQUEST_DOCUMENT_TYPE,
+  ACCESS_REQUEST_STATUS,
+} from '../types/access-request.enum.js';
 import type { AttachDocumentInput } from '../types/uploaded-file.types.js';
 import { DUPLICATE_LABELS } from '../constants/duplicate-labels.constants.js';
 import { INBOX_PERIOD_DAYS } from '../constants/inbox-filters.constants.js';
@@ -62,7 +65,10 @@ export class AccessRequestsService {
 
   private readonly logger = new Logger(AccessRequestsService.name);
 
-  private async recordAfterCommit(accessRequestId: string, buildInput: () => RecordAuditEventInput) {
+  private async recordAfterCommit(
+    accessRequestId: string,
+    buildInput: () => RecordAuditEventInput,
+  ) {
     try {
       await this.auditEventRecorder.record(buildInput());
     } catch (error) {
@@ -106,7 +112,9 @@ export class AccessRequestsService {
       throw new AccessRequestNotFoundException();
     }
     if (current.status.title !== ACCESS_REQUEST_STATUS.DRAFT) {
-      throw new AccessRequestNotEditableException('La solicitud ya fue enviada y no se puede eliminar');
+      throw new AccessRequestNotEditableException(
+        'La solicitud ya fue enviada y no se puede eliminar',
+      );
     }
 
     await this.accessRequestsRepository.deleteDraft(id);
@@ -135,11 +143,18 @@ export class AccessRequestsService {
       throw new InvalidDocumentTypeException();
     }
 
-    const created = await this.filesService.create({ name: decodeUploadFileName(file.originalname), content: file.buffer });
+    const created = await this.filesService.create({
+      name: decodeUploadFileName(file.originalname),
+      content: file.buffer,
+    });
 
     let previousFileId: string | null;
     try {
-      previousFileId = await this.accessRequestsRepository.setDocument(id, created.id, documentType);
+      previousFileId = await this.accessRequestsRepository.setDocument(
+        id,
+        created.id,
+        documentType,
+      );
     } catch (error) {
       await this.discardFile(created.id);
       throw error;
@@ -158,7 +173,8 @@ export class AccessRequestsService {
       return { id, documentFileId: null };
     }
 
-    const previousFileId = await this.accessRequestsRepository.clearDocument(id);
+    const previousFileId =
+      await this.accessRequestsRepository.clearDocument(id);
     if (previousFileId) {
       await this.discardFile(previousFileId);
     }
@@ -173,22 +189,33 @@ export class AccessRequestsService {
     }
 
     if (await this.authService.existsByEmail(current.email)) {
-      throw new DuplicateAccessRequestDataException('El correo ya está registrado');
+      throw new DuplicateAccessRequestDataException(
+        'El correo ya está registrado',
+      );
     }
-    const duplicates = await this.accessRequestsRepository.findActiveDuplicates({
-      email: current.email,
-      idCardNumber: current.idCardNumber,
-      sisCode: current.sisCode,
-      excludeId: id,
-    });
+    const duplicates = await this.accessRequestsRepository.findActiveDuplicates(
+      {
+        email: current.email,
+        idCardNumber: current.idCardNumber,
+        sisCode: current.sisCode,
+        excludeId: id,
+      },
+    );
     if (duplicates.length > 0) {
       throw new ActiveAccessRequestExistsException();
     }
 
-    const submitted = await this.accessRequestsRepository.submitWithGeneratedCode(id, async (source, tx) => {
-      await this.auditEventRecorder.record(toSubmittedAuditEvent(source), tx);
-      await this.documentValidationRepository.queue(source.id, tx);
-    });
+    const submitted =
+      await this.accessRequestsRepository.submitWithGeneratedCode(
+        id,
+        async (source, tx) => {
+          await this.auditEventRecorder.record(
+            toSubmittedAuditEvent(source),
+            tx,
+          );
+          await this.documentValidationRepository.queue(source.id, tx);
+        },
+      );
     // Lectura OCR del documento real, fuera de la transacción para no demorar la respuesta (HU 1.5.1)
     this.documentReading.scheduleReading(submitted.id);
     return {
@@ -208,8 +235,14 @@ export class AccessRequestsService {
       return toAccessRequestDetail(current);
     }
 
-    await this.accessRequestsRepository.markInReview(id, reviewerId, (source, tx) =>
-      this.auditEventRecorder.record(toOpenedAuditEvent(source, reviewerId), tx),
+    await this.accessRequestsRepository.markInReview(
+      id,
+      reviewerId,
+      (source, tx) =>
+        this.auditEventRecorder.record(
+          toOpenedAuditEvent(source, reviewerId),
+          tx,
+        ),
     );
     const updated = await this.accessRequestsRepository.findDetailById(id);
     if (!updated) {
@@ -227,16 +260,28 @@ export class AccessRequestsService {
       throw new RequestNotInReviewException();
     }
 
-    const updated = await this.accessRequestsRepository.setVerdict(id, reviewerId, { status: ACCESS_REQUEST_STATUS.APPROVED }, (source, tx) =>
-      this.auditEventRecorder.record(toApprovedAuditEvent(source, reviewerId), tx),
+    const updated = await this.accessRequestsRepository.setVerdict(
+      id,
+      reviewerId,
+      { status: ACCESS_REQUEST_STATUS.APPROVED },
+      (source, tx) =>
+        this.auditEventRecorder.record(
+          toApprovedAuditEvent(source, reviewerId),
+          tx,
+        ),
     );
     if (!updated) {
       throw new RequestNotInReviewException();
     }
 
-    const activationCodeSent = await this.activationOtpService.issueFor(id, current.email);
+    const activationCodeSent = await this.activationOtpService.issueFor(
+      id,
+      current.email,
+    );
     if (activationCodeSent) {
-      await this.recordAfterCommit(id, () => toActivationCodeSentAuditEvent(current, current.email));
+      await this.recordAfterCommit(id, () =>
+        toActivationCodeSentAuditEvent(current, current.email),
+      );
     }
     return { id, status: ACCESS_REQUEST_STATUS.APPROVED, activationCodeSent };
   }
@@ -254,14 +299,27 @@ export class AccessRequestsService {
       id,
       reviewerId,
       { status: ACCESS_REQUEST_STATUS.REJECTED, rejectionReason: reason },
-      (source, tx) => this.auditEventRecorder.record(toRejectedAuditEvent(source, reviewerId, reason), tx),
+      (source, tx) =>
+        this.auditEventRecorder.record(
+          toRejectedAuditEvent(source, reviewerId, reason),
+          tx,
+        ),
     );
     if (!updated) {
       throw new RequestNotInReviewException();
     }
 
-    const notificationSent = await this.rejectionNotificationService.notify(current.email, reason, id);
-    return { id, status: ACCESS_REQUEST_STATUS.REJECTED, rejectionReason: reason, notificationSent };
+    const notificationSent = await this.rejectionNotificationService.notify(
+      current.email,
+      reason,
+      id,
+    );
+    return {
+      id,
+      status: ACCESS_REQUEST_STATUS.REJECTED,
+      rejectionReason: reason,
+      notificationSent,
+    };
   }
 
   async getDocument(id: string) {
@@ -278,8 +336,12 @@ export class AccessRequestsService {
   async list(query: ListAccessRequestsQuery, now: Date = new Date()) {
     const { period, ...filters } = query;
     const days = INBOX_PERIOD_DAYS[period];
-    const submittedFrom = days === undefined ? undefined : new Date(now.getTime() - days * DAY_MS);
-    const { rows, total } = await this.accessRequestsRepository.findPage({ ...filters, submittedFrom });
+    const submittedFrom =
+      days === undefined ? undefined : new Date(now.getTime() - days * DAY_MS);
+    const { rows, total } = await this.accessRequestsRepository.findPage({
+      ...filters,
+      submittedFrom,
+    });
     return {
       data: { items: rows.map(toAccessRequestListItem), total },
       page: query.page,
@@ -290,25 +352,48 @@ export class AccessRequestsService {
   async getSummary(now: Date = new Date()) {
     const { date: boliviaToday } = toBoliviaTime(now);
     const todayStart = new Date(toUtcIso(boliviaToday, '00:00'));
-    const monthStart = new Date(toUtcIso(`${boliviaToday.slice(0, 8)}01`, '00:00'));
+    const monthStart = new Date(
+      toUtcIso(`${boliviaToday.slice(0, 8)}01`, '00:00'),
+    );
     const windowStart = new Date(now.getTime() - 30 * DAY_MS);
     const alertCutoff = new Date(now.getTime() - 24 * HOUR_MS);
     const { PENDING, APPROVED, REJECTED } = ACCESS_REQUEST_STATUS;
 
-    const [pendingCount, pendingOver24hCount, approvedTodayCount, rejectedTodayCount, rejectedThisMonthCount, reviewTimes] =
-      await Promise.all([
-        this.accessRequestsRepository.countByStatus(PENDING),
-        this.accessRequestsRepository.countByStatus(PENDING, { submittedBefore: alertCutoff }),
-        this.accessRequestsRepository.countByStatus(APPROVED, { reviewedFrom: todayStart }),
-        this.accessRequestsRepository.countByStatus(REJECTED, { reviewedFrom: todayStart }),
-        this.accessRequestsRepository.countByStatus(REJECTED, { reviewedFrom: monthStart }),
-        this.accessRequestsRepository.findReviewTimes(windowStart),
-      ]);
+    const [
+      pendingCount,
+      pendingOver24hCount,
+      approvedTodayCount,
+      rejectedTodayCount,
+      rejectedThisMonthCount,
+      reviewTimes,
+    ] = await Promise.all([
+      this.accessRequestsRepository.countByStatus(PENDING),
+      this.accessRequestsRepository.countByStatus(PENDING, {
+        submittedBefore: alertCutoff,
+      }),
+      this.accessRequestsRepository.countByStatus(APPROVED, {
+        reviewedFrom: todayStart,
+      }),
+      this.accessRequestsRepository.countByStatus(REJECTED, {
+        reviewedFrom: todayStart,
+      }),
+      this.accessRequestsRepository.countByStatus(REJECTED, {
+        reviewedFrom: monthStart,
+      }),
+      this.accessRequestsRepository.findReviewTimes(windowStart),
+    ]);
 
     const hours = reviewTimes.flatMap((row) =>
-      row.submittedAt && row.reviewedAt ? [(row.reviewedAt.getTime() - row.submittedAt.getTime()) / HOUR_MS] : [],
+      row.submittedAt && row.reviewedAt
+        ? [(row.reviewedAt.getTime() - row.submittedAt.getTime()) / HOUR_MS]
+        : [],
     );
-    const averageReviewHours = hours.length === 0 ? null : Math.round(hours.reduce((sum, value) => sum + value, 0) / hours.length);
+    const averageReviewHours =
+      hours.length === 0
+        ? null
+        : Math.round(
+            hours.reduce((sum, value) => sum + value, 0) / hours.length,
+          );
 
     return {
       pendingCount,
@@ -324,7 +409,10 @@ export class AccessRequestsService {
   }
 
   async getStatus(requestCode: string, email: string) {
-    const found = await this.accessRequestsRepository.findByRequestCode(requestCode, email.trim().toLowerCase());
+    const found = await this.accessRequestsRepository.findByRequestCode(
+      requestCode,
+      email.trim().toLowerCase(),
+    );
     if (!found) {
       throw new AccessRequestNotFoundException();
     }
@@ -343,14 +431,15 @@ export class AccessRequestsService {
   }
 
   private isDocumentType(value: string | undefined): value is string {
-    return Object.values<string>(ACCESS_REQUEST_DOCUMENT_TYPE).includes(value as string);
+    return Object.values<string>(ACCESS_REQUEST_DOCUMENT_TYPE).includes(
+      value as string,
+    );
   }
 
   private async discardFile(fileId: string) {
     try {
       await this.filesService.delete(fileId);
-    } catch {
-    }
+    } catch {}
   }
 
   private async assertNoDuplicates(
@@ -358,7 +447,12 @@ export class AccessRequestsService {
     excludeId?: string,
   ) {
     const { email, idCardNumber, sisCode } = dto;
-    if (email === undefined && idCardNumber === undefined && sisCode === undefined) return;
+    if (
+      email === undefined &&
+      idCardNumber === undefined &&
+      sisCode === undefined
+    )
+      return;
 
     const duplicated = new Set<DuplicateField>();
 
@@ -366,11 +460,22 @@ export class AccessRequestsService {
       duplicated.add('email');
     }
 
-    const requests = await this.accessRequestsRepository.findActiveDuplicates({ email, idCardNumber, sisCode, excludeId });
+    const requests = await this.accessRequestsRepository.findActiveDuplicates({
+      email,
+      idCardNumber,
+      sisCode,
+      excludeId,
+    });
     for (const request of requests) {
-      if (email !== undefined && request.email.toLowerCase() === email.toLowerCase()) duplicated.add('email');
-      if (idCardNumber !== undefined && request.idCardNumber === idCardNumber) duplicated.add('idCardNumber');
-      if (sisCode !== undefined && request.sisCode === sisCode) duplicated.add('sisCode');
+      if (
+        email !== undefined &&
+        request.email.toLowerCase() === email.toLowerCase()
+      )
+        duplicated.add('email');
+      if (idCardNumber !== undefined && request.idCardNumber === idCardNumber)
+        duplicated.add('idCardNumber');
+      if (sisCode !== undefined && request.sisCode === sisCode)
+        duplicated.add('sisCode');
     }
 
     if (duplicated.size === 0) return;
@@ -378,7 +483,10 @@ export class AccessRequestsService {
     const labels = (Object.keys(DUPLICATE_LABELS) as DuplicateField[])
       .filter((field) => duplicated.has(field))
       .map((field) => DUPLICATE_LABELS[field]);
-    const list = labels.length > 1 ? `${labels.slice(0, -1).join(', ')} y ${labels.at(-1)}` : labels[0];
+    const list =
+      labels.length > 1
+        ? `${labels.slice(0, -1).join(', ')} y ${labels.at(-1)}`
+        : labels[0];
     const message = `${list.charAt(0).toUpperCase()}${list.slice(1)} ya ${labels.length > 1 ? 'están registrados' : 'está registrado'}`;
     throw new DuplicateAccessRequestDataException(message);
   }

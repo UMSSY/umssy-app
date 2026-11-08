@@ -76,8 +76,10 @@ export const CREATE_APPOINTMENT_DOCS = {
   summary: 'Solicita una cita en un horario libre y la devuelve confirmada',
   description:
     'Valida el bloque, la disponibilidad del mentor y la fecha, y crea la cita con estado CONFIRMED (201, horarios en UTC)',
-  blockDescription: 'Identificador (UUID) del bloque de disponibilidad a reservar',
-  topicDescription: 'Identificador (UUID) del tema de la sesión que ofrece el mentor',
+  blockDescription:
+    'Identificador (UUID) del bloque de disponibilidad a reservar',
+  topicDescription:
+    'Identificador (UUID) del tema de la sesión que ofrece el mentor',
   messageDescription: `Mensaje obligatorio para el mentor (de 1 a 300 caracteres, sin contar espacios al inicio y al final)`,
   createdDescription: 'Cita creada con estado CONFIRMED',
   badRequestDescription: `El cuerpo no es válido: tema ausente o no ofrecido por el mentor, o mensaje vacío o mayor a 300 caracteres`,

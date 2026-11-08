@@ -16,7 +16,11 @@ describe('CertificationDocumentsModule', () => {
 
   beforeEach(async () => {
     moduleRef = await Test.createTestingModule({
-      imports: [CertificationDocumentsModule, CertificationsModule, PrismaModule],
+      imports: [
+        CertificationDocumentsModule,
+        CertificationsModule,
+        PrismaModule,
+      ],
     })
       .overrideProvider(PrismaService)
       .useValue({})

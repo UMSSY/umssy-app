@@ -17,7 +17,10 @@ const newestFirst = Prisma.raw('cv_uploaded_at DESC, id DESC');
 export class CvMetadataRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findByIdForUser(userId: string, cvId: string): Promise<CvMetadataRecord | null> {
+  async findByIdForUser(
+    userId: string,
+    cvId: string,
+  ): Promise<CvMetadataRecord | null> {
     const rows = await this.prisma.$queryRaw<CvMetadataRecord[]>(Prisma.sql`
       SELECT
         c.id AS "id",
@@ -44,7 +47,15 @@ export class CvMetadataRepository {
   async countByUserId(userId: string): Promise<number | null> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: { _count: { select: { cvFiles: { where: { cvPdfData: { not: null }, cvUploadedAt: { not: null } } } } } },
+      select: {
+        _count: {
+          select: {
+            cvFiles: {
+              where: { cvPdfData: { not: null }, cvUploadedAt: { not: null } },
+            },
+          },
+        },
+      },
     });
     return user?._count.cvFiles ?? null;
   }

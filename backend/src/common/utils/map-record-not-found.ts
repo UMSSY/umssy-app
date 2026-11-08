@@ -1,7 +1,6 @@
 import { RECORD_NOT_FOUND_CODE } from '../constants/prisma-errors.constants.js';
 import { Prisma } from '../../prisma/client.js';
 
-
 export function isRecordNotFoundError(error: unknown): boolean {
   return (
     error instanceof Prisma.PrismaClientKnownRequestError &&

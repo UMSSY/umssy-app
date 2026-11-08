@@ -78,26 +78,94 @@ function fixture(
 
   const tx = {
     mentorIntakeAttempt: {
-      findUnique: vi.fn(async ({ where }: { where: { userId_operation_idempotencyKey: { userId: string; operation: string; idempotencyKey: string } } }) => {
-        const key = where.userId_operation_idempotencyKey;
-        const row = policyAttempts.find((item) => item.userId === key.userId && item.operation === key.operation && item.key === key.idempotencyKey);
-        return row ? { payloadHash: row.payloadHash, responseData: row.outcome } : null;
-      }),
-      count: vi.fn(async ({ where }: { where: { userId: string; occurredAt: { gt: Date; lte: Date } } }) =>
-        policyAttempts.filter((row) => row.userId === where.userId && row.counted && row.occurredAt > where.occurredAt.gt && row.occurredAt <= where.occurredAt.lte).length),
-      createMany: vi.fn(async ({ data }: { data: { id: string; userId: string; operation: string; idempotencyKey: string; payloadHash: string; occurredAt: Date; counted: boolean; responseData: unknown }[] }) => {
-        for (const row of data) policyAttempts.push({ ...row, key: row.idempotencyKey, outcome: row.responseData });
-        return { count: data.length };
-      }),
+      findUnique: vi.fn(
+        async ({
+          where,
+        }: {
+          where: {
+            userId_operation_idempotencyKey: {
+              userId: string;
+              operation: string;
+              idempotencyKey: string;
+            };
+          };
+        }) => {
+          const key = where.userId_operation_idempotencyKey;
+          const row = policyAttempts.find(
+            (item) =>
+              item.userId === key.userId &&
+              item.operation === key.operation &&
+              item.key === key.idempotencyKey,
+          );
+          return row
+            ? { payloadHash: row.payloadHash, responseData: row.outcome }
+            : null;
+        },
+      ),
+      count: vi.fn(
+        async ({
+          where,
+        }: {
+          where: { userId: string; occurredAt: { gt: Date; lte: Date } };
+        }) =>
+          policyAttempts.filter(
+            (row) =>
+              row.userId === where.userId &&
+              row.counted &&
+              row.occurredAt > where.occurredAt.gt &&
+              row.occurredAt <= where.occurredAt.lte,
+          ).length,
+      ),
+      createMany: vi.fn(
+        async ({
+          data,
+        }: {
+          data: {
+            id: string;
+            userId: string;
+            operation: string;
+            idempotencyKey: string;
+            payloadHash: string;
+            occurredAt: Date;
+            counted: boolean;
+            responseData: unknown;
+          }[];
+        }) => {
+          for (const row of data)
+            policyAttempts.push({
+              ...row,
+              key: row.idempotencyKey,
+              outcome: row.responseData,
+            });
+          return { count: data.length };
+        },
+      ),
     },
     mentorParticipationSanction: {
-      findFirst: vi.fn(async ({ where }: { where: { userId: string; endsAt: { gt: Date } } }) =>
-        policySanctions.filter((row) => row.userId === where.userId && row.endsAt > where.endsAt.gt).sort((a, b) => b.endsAt.getTime() - a.endsAt.getTime())[0] ?? null),
-      create: vi.fn(async ({ data }: { data: { userId: string; startedAt: Date; endsAt: Date } }) => {
-        const row = { id: randomUUID(), ...data };
-        policySanctions.push(row);
-        return { id: row.id };
-      }),
+      findFirst: vi.fn(
+        async ({
+          where,
+        }: {
+          where: { userId: string; endsAt: { gt: Date } };
+        }) =>
+          policySanctions
+            .filter(
+              (row) =>
+                row.userId === where.userId && row.endsAt > where.endsAt.gt,
+            )
+            .sort((a, b) => b.endsAt.getTime() - a.endsAt.getTime())[0] ?? null,
+      ),
+      create: vi.fn(
+        async ({
+          data,
+        }: {
+          data: { userId: string; startedAt: Date; endsAt: Date };
+        }) => {
+          const row = { id: randomUUID(), ...data };
+          policySanctions.push(row);
+          return { id: row.id };
+        },
+      ),
     },
     $executeRaw: vi.fn().mockResolvedValue(0),
     $queryRaw: vi.fn(
@@ -158,11 +226,20 @@ function fixture(
       findFirst,
       create,
       update,
-      updateManyAndReturn: vi.fn(async ({ where, data }: {
-        where: { userId: string; status: string };
-        data: { status: string };
-      }) => options.pending && where.userId === request.userId && where.status === request.status
-        ? [{ ...request, ...data }] : []),
+      updateManyAndReturn: vi.fn(
+        async ({
+          where,
+          data,
+        }: {
+          where: { userId: string; status: string };
+          data: { status: string };
+        }) =>
+          options.pending &&
+          where.userId === request.userId &&
+          where.status === request.status
+            ? [{ ...request, ...data }]
+            : [],
+      ),
     },
   };
 
@@ -297,7 +374,9 @@ describe('HU7-2: solicitudes de participacion FIFO', () => {
       createdAt: request.createdAt,
       ...preferences,
     });
-    expect(tx.mentorParticipationRequest.updateManyAndReturn).toHaveBeenCalledExactlyOnceWith({
+    expect(
+      tx.mentorParticipationRequest.updateManyAndReturn,
+    ).toHaveBeenCalledExactlyOnceWith({
       where: { userId: 'user-1', status: 'PENDING' },
       data: { status: 'CANCELLED' },
     });

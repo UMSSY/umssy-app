@@ -10,7 +10,6 @@ import { AuditEventDate } from "./audit-event-date";
 
 const SKELETON_CARDS = 3;
 
-// Versión móvil del listado: una tarjeta por evento, solo texto y enlaces de consulta
 export function AuditEventCards({
   items,
   isLoading = false,
@@ -45,11 +44,11 @@ export function AuditEventCards({
           <div>
             <AuditActionBadge action={event.action} />
           </div>
-          <p className="text-[13.5px] font-semibold break-words text-ink">
+          <p className="text-[13.5px] font-semibold wrap-break-word text-ink">
             {event.responsible.name.trim() || EMPTY_VALUE} ·{" "}
             {AUDIT_ROLE_LABELS[event.responsible.role] ?? EMPTY_VALUE}
           </p>
-          <p className="text-sm break-words text-ink">
+          <p className="text-sm wrap-break-word text-ink">
             {event.detail || EMPTY_VALUE}
           </p>
           <EvidenceButton
