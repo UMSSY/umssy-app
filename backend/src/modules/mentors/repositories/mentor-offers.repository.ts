@@ -55,7 +55,9 @@ export class MentorOffersRepository {
       await tx.mentorTechnicalArea.createMany({ data: offer.technicalAreaIds.map((technicalAreaId) => ({ mentorId: userId, technicalAreaId })) });
       await tx.mentorOrientationType.createMany({ data: offer.orientationTypeIds.map((orientationTypeId) => ({ mentorId: userId, orientationTypeId })) });
       await tx.user.update({ where: { id: userId }, data: { isAvailableForMentoring: true } });
-      await tx.$executeRaw`UPDATE mentor_participation_requests SET status = 'ACTIVE' WHERE id = ${offer.requestId}::uuid`;
+      if (offer.requestId) {
+        await tx.mentorParticipationRequest.updateMany({ where: { id: offer.requestId }, data: { status: 'ACTIVE' } });
+      }
       return { id: userId, status: 'ACTIVE', alreadyConfirmed: false };
     });
   }

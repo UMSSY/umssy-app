@@ -30,6 +30,7 @@ function fixture(options: { status?: string; requestStatus?: string; claimed?: n
     userRole: { create: createRole },
     mentorTechnicalArea: { deleteMany: vi.fn(), createMany: vi.fn() },
     mentorOrientationType: { deleteMany: vi.fn(), createMany: vi.fn() },
+    mentorParticipationRequest: { updateMany: vi.fn() },
     user: { update: vi.fn() },
   };
   const transaction = vi.fn(async (operation) => operation(tx));
