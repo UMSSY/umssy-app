@@ -1,3 +1,4 @@
+import { TRANSACTION_CONFLICT_CODE } from '../../../common/constants/prisma-errors.constants.js';
 import { Injectable } from '@nestjs/common';
 import type { EducationAnalysisSourceResponse } from '../responses/education-analysis-source.response.js';
 import type { Prisma } from '../../../prisma/client.js';
@@ -155,7 +156,7 @@ export class EducationsRepository {
           typeof error !== 'object' ||
           error === null ||
           !('code' in error) ||
-          error.code !== 'P2034'
+          error.code !== TRANSACTION_CONFLICT_CODE
         )
           throw error;
       }
