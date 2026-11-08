@@ -4,12 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { downloadFile } from "@/shared/utils/download-file";
 import { saveFile, selectCsvDestination } from "@/shared/utils/save-file";
-import {
-  EXPORT_ERROR_MESSAGE,
-  EXPORT_SUCCESS_MESSAGE,
-  EXPORT_SUCCESS_TOAST_DURATION_MS,
-  REPORT_ALERT_DURATION_MS,
-} from "../constants/reports.constants";
+import { REPORT_ALERT_DURATION_MS } from "../constants/reports.constants";
 import type { ExportedFile } from "../types/registered-user.types";
 
 export function useExportReportCsv(exportReport: () => Promise<ExportedFile>, suggestedFileName: string) {
@@ -23,7 +18,7 @@ export function useExportReportCsv(exportReport: () => Promise<ExportedFile>, su
       return;
     }
 
-    const timeoutId = setTimeout(() => setSuccessMessage(undefined), EXPORT_SUCCESS_TOAST_DURATION_MS);
+    const timeoutId = setTimeout(() => setSuccessMessage(undefined), 4000);
 
     return () => clearTimeout(timeoutId);
   }, [successMessage]);
@@ -54,10 +49,10 @@ export function useExportReportCsv(exportReport: () => Promise<ExportedFile>, su
       } else {
         downloadFile(file, fileName);
       }
-      setSuccessMessage(EXPORT_SUCCESS_MESSAGE);
+      setSuccessMessage("La exportación de la tabla ha sido un éxito");
     } catch {
-      setErrorMessage(EXPORT_ERROR_MESSAGE);
-      toast.error(EXPORT_ERROR_MESSAGE, {
+      setErrorMessage("No se pudo exportar el reporte. Inténtalo de nuevo.");
+      toast.error("No se pudo exportar el reporte. Inténtalo de nuevo.", {
         duration: REPORT_ALERT_DURATION_MS,
         closeButton: true,
         richColors: true,

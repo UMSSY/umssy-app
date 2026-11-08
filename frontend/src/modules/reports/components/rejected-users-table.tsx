@@ -8,17 +8,7 @@ import {
 } from "@/modules/request-review";
 import { EMPTY_DOCUMENT_LABEL, USER_TYPE_LABELS } from "../constants/registered-users.constants";
 import { EMAIL_SEARCH_NO_RESULTS_MESSAGE } from "../constants/reports.constants";
-import {
-  REJECTED_USERS_COLUMN_COUNT as COLUMN_COUNT,
-  REJECTION_BADGE_CLASSES,
-  REJECTION_REASON_SHORT_LABELS,
-  STICKY_CELL_CLASSES,
-  STICKY_HEAD_CLASSES,
-  TABLE_CELL_CLASSES as CELL_CLASSES,
-  TABLE_CONTAINER_CLASSES as CONTAINER_CLASSES,
-  REJECTED_USERS_TABLE_MIN_HEIGHT_CLASSES as MIN_HEIGHT_CLASSES,
-  USERS_TABLE_HEAD_CLASSES as HEAD_CLASSES,
-} from "../constants/report-table.constants";
+import { REJECTION_REASON_SHORT_LABELS, STICKY_CELL_CLASSES, STICKY_HEAD_CLASSES, TABLE_CELL_CLASSES as CELL_CLASSES, TABLE_CONTAINER_CLASSES as CONTAINER_CLASSES, USERS_TABLE_HEAD_CLASSES as HEAD_CLASSES } from "../constants/report-table.constants";
 import type { RejectedUsersTableProps } from "../types/rejected-users-table-props.types";
 import { TableScrollHint } from "./table-scroll-hint";
 import { TableMessageRow, TableNoResultsRow, TableSkeletonRows } from "./table-state-rows";
@@ -31,19 +21,19 @@ function getRejectionLabel(reason: string) {
 export function RejectedUsersTable({ users, isLoading, errorMessage, searchTerm = "" }: RejectedUsersTableProps) {
   const renderBody = () => {
     if (isLoading) {
-      return <TableSkeletonRows columnCount={COLUMN_COUNT} />;
+      return <TableSkeletonRows columnCount={6} />;
     }
 
     if (errorMessage) {
-      return <TableMessageRow columnCount={COLUMN_COUNT} message={errorMessage} />;
+      return <TableMessageRow columnCount={6} message={errorMessage} />;
     }
 
     if (users.length === 0 && searchTerm) {
-      return <TableNoResultsRow columnCount={COLUMN_COUNT} message={EMAIL_SEARCH_NO_RESULTS_MESSAGE} />;
+      return <TableNoResultsRow columnCount={6} message={EMAIL_SEARCH_NO_RESULTS_MESSAGE} />;
     }
 
     if (users.length === 0) {
-      return <TableMessageRow columnCount={COLUMN_COUNT} message="No hay usuarios rechazados." />;
+      return <TableMessageRow columnCount={6} message="No hay usuarios rechazados." />;
     }
 
     return users.map((user) => (
@@ -58,7 +48,7 @@ export function RejectedUsersTable({ users, isLoading, errorMessage, searchTerm 
             {user.documentType ? DOCUMENT_TYPE_LABELS[user.documentType] : EMPTY_DOCUMENT_LABEL}
           </span>
           {user.rejectionReason && (
-            <span title={user.rejectionReason} className={REJECTION_BADGE_CLASSES}>
+            <span title={user.rejectionReason} className={"mt-2 inline-flex items-center gap-1.5 py-0.5 text-xs font-semibold whitespace-nowrap text-danger"}>
               <X className="size-3.5" strokeWidth={1.75} aria-hidden="true" />
               {getRejectionLabel(user.rejectionReason)}
             </span>
@@ -72,7 +62,7 @@ export function RejectedUsersTable({ users, isLoading, errorMessage, searchTerm 
   return (
     <div className="flex flex-col gap-2">
       <TableScrollHint />
-      <div className={`${CONTAINER_CLASSES} ${MIN_HEIGHT_CLASSES}`}>
+      <div className={`${CONTAINER_CLASSES} min-h-[49rem]`}>
         <Table className="min-w-225 text-left text-base">
           <TableHeader className="bg-surface-soft">
             <TableRow className="border-border hover:bg-transparent">

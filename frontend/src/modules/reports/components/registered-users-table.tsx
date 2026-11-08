@@ -4,32 +4,26 @@ import { formatDate } from "@/shared/utils/date.utils";
 import { DOCUMENT_TYPE_LABELS } from "@/modules/request-review";
 import { EMPTY_DOCUMENT_LABEL, USER_TYPE_LABELS } from "../constants/registered-users.constants";
 import { EMAIL_SEARCH_NO_RESULTS_MESSAGE } from "../constants/reports.constants";
-import {
-  REGISTERED_USERS_COLUMN_COUNT as COLUMN_COUNT,
-  REGISTERED_USERS_TABLE_MIN_HEIGHT_CLASSES as MIN_HEIGHT_CLASSES,
-  TABLE_CELL_CLASSES as CELL_CLASSES,
-  TABLE_CONTAINER_CLASSES as CONTAINER_CLASSES,
-  USERS_TABLE_HEAD_CLASSES as HEAD_CLASSES,
-} from "../constants/report-table.constants";
+import { TABLE_CELL_CLASSES as CELL_CLASSES, TABLE_CONTAINER_CLASSES as CONTAINER_CLASSES, USERS_TABLE_HEAD_CLASSES as HEAD_CLASSES } from "../constants/report-table.constants";
 import type { RegisteredUsersTableProps } from "../types/registered-users-table-props.types";
 import { TableMessageRow, TableNoResultsRow, TableSkeletonRows } from "./table-state-rows";
 
 export function RegisteredUsersTable({ users, isLoading, errorMessage, searchTerm = "" }: RegisteredUsersTableProps) {
   const renderBody = () => {
     if (isLoading) {
-      return <TableSkeletonRows columnCount={COLUMN_COUNT} />;
+      return <TableSkeletonRows columnCount={6} />;
     }
 
     if (errorMessage) {
-      return <TableMessageRow columnCount={COLUMN_COUNT} message={errorMessage} />;
+      return <TableMessageRow columnCount={6} message={errorMessage} />;
     }
 
     if (users.length === 0 && searchTerm) {
-      return <TableNoResultsRow columnCount={COLUMN_COUNT} message={EMAIL_SEARCH_NO_RESULTS_MESSAGE} />;
+      return <TableNoResultsRow columnCount={6} message={EMAIL_SEARCH_NO_RESULTS_MESSAGE} />;
     }
 
     if (users.length === 0) {
-      return <TableMessageRow columnCount={COLUMN_COUNT} message="No hay usuarios registrados para este filtro." />;
+      return <TableMessageRow columnCount={6} message="No hay usuarios registrados para este filtro." />;
     }
 
     return users.map((user) => (
@@ -50,7 +44,7 @@ export function RegisteredUsersTable({ users, isLoading, errorMessage, searchTer
   };
 
   return (
-    <div className={`${CONTAINER_CLASSES} ${MIN_HEIGHT_CLASSES}`}>
+    <div className={`${CONTAINER_CLASSES} min-h-[31rem]`}>
       <Table className="min-w-225 text-left text-base">
         <TableHeader className="bg-surface-soft">
           <TableRow className="border-border hover:bg-transparent">
