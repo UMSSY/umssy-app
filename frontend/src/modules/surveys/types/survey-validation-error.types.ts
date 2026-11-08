@@ -4,5 +4,3 @@ export interface SurveyValidationError {
   message: string;
   summary: string;
 }
-
-export type SurveyErrorMap = Readonly<Record<string, string>>;

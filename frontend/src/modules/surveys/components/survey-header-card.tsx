@@ -16,7 +16,7 @@ import {
 } from "../constants/survey-builder.constants";
 import { SURVEY_FIELD_LABELS } from "../constants/survey-messages.constants";
 
-import type { SurveyHeaderCardProps } from "../types/survey-component-props.types";
+import type { SurveyHeaderCardProps } from "../types/survey-header-card-props.types";
 import { FieldErrorMessage } from "./field-error-message";
 import { RequiredMark } from "./required-mark";
 import { SurveyDateField } from "./survey-date-field";

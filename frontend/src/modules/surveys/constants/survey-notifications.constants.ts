@@ -1,4 +1,4 @@
-import type { SurveyNotificationStatus } from "../types/survey-notification.types";
+import type { SurveyNotificationStatus } from "../types/survey-notification-status.types";
 
 export const SURVEY_NOTIFICATIONS_PATH = "/surveys";
 export const SURVEY_NOTIFICATIONS_LABEL = "Notificaciones de encuestas";

@@ -1,11 +1,9 @@
 import { SURVEY_LIMITS } from "../constants/survey-builder.constants";
-import type {
-  BuilderOption,
-  BuilderQuestion,
-  SurveyBuilderAction,
-  SurveyBuilderState,
-  SurveyFieldName,
-} from "../types/survey-builder.types";
+import type { BuilderOption } from "../types/builder-option.types";
+import type { BuilderQuestion } from "../types/builder-question.types";
+import type { SurveyBuilderAction } from "../types/survey-builder-action.types";
+import type { SurveyBuilderState } from "../types/survey-builder-state.types";
+import type { SurveyFieldName } from "../types/survey-field-name.types";
 import { createId } from "./create-id";
 
 const FIELD_MAX_LENGTH: Partial<Record<SurveyFieldName, number>> = {

@@ -1,7 +1,9 @@
 import { SESSION_DRAFT_STORAGE_PREFIX } from "@/modules/auth";
 import { CircleDot, SquareCheck, SquareChevronDown } from "lucide-react";
 import type { QuestionTypeOption } from "../types/question-type-option.types";
-import type { QuestionType, SurveyDisplayStatus, SurveyTargetAudience } from "../types/survey.types";
+import type { QuestionType } from "../types/question-type.types";
+import type { SurveyDisplayStatus } from "../types/survey-display-status.types";
+import type { SurveyTargetAudience } from "../types/survey-target-audience.types";
 
 export const SURVEY_LIMITS = {
   titleMin: 5,
@@ -83,8 +85,10 @@ export const SURVEY_TEXT = {
   keepEditing: "Seguir editando",
   close: "Cerrar",
   optionPlaceholder: (position: number) => `Opción ${position}`,
-  optionsCount: (count: number) => `${count} ${count === 1 ? "opción" : "opciones"}`,
-  questionsSummary: (total: number, required: number) => `${total} (${required} ${required === 1 ? "obligatoria" : "obligatorias"})`,
+  optionsCount: (count: number) =>
+    `${count} ${count === 1 ? "opción" : "opciones"}`,
+  questionsSummary: (total: number, required: number) =>
+    `${total} (${required} ${required === 1 ? "obligatoria" : "obligatorias"})`,
   questionLabel: (position: number) => `Pregunta ${position}`,
 } as const;
 

@@ -2,7 +2,7 @@
 
 import { ReportFilterSelect } from "@/modules/reports";
 
-import type { SurveyPeriodFilterProps } from "../types/survey-component-props.types";
+import type { SurveyPeriodFilterProps } from "../types/survey-period-filter-props.types";
 
 export function SurveyPeriodFilter({ periods, value, onChange }: SurveyPeriodFilterProps) {
   return (

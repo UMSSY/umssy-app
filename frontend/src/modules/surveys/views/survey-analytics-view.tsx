@@ -17,13 +17,14 @@ import { SurveyStatisticsSummary } from "../components/survey-statistics-summary
 import { SURVEY_STATISTICS_TEXT } from "../constants/survey-statistics.constants";
 import { SURVEYS_PATH } from "../constants/survey-routes.constants";
 import { useSurveyStatistics } from "../hooks/use-survey-statistics";
-import { surveysService } from "../services/surveys.service";
-import type { SurveyAnalyticsViewProps } from "../types/survey-component-props.types";
+import { useExportSurveyReport } from "../hooks/use-export-survey-report";
+import type { SurveyAnalyticsViewProps } from "../types/survey-analytics-view-props.types";
 
 export function SurveyAnalyticsView({ id }: SurveyAnalyticsViewProps) {
   const [period, setPeriod] = useState<string | undefined>(undefined);
   const { statistics, availablePeriods, isLoading, isRefreshing, hasError, refetch } = useSurveyStatistics(id, period);
-  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const report = useExportSurveyReport(id, period);
+  const isGeneratingPdf = report.isPending;
   const [successMessage, setSuccessMessage] = useState<string | undefined>(undefined);
 
   useEffect(() => {
@@ -34,9 +35,8 @@ export function SurveyAnalyticsView({ id }: SurveyAnalyticsViewProps) {
 
   const handleGeneratePdf = async () => {
     if (isGeneratingPdf) return;
-    setIsGeneratingPdf(true);
     try {
-      const { file, fileName } = await surveysService.exportSurveyPdf(id, period);
+      const { file, fileName } = await report.mutateAsync();
       downloadFile(file, fileName);
       setSuccessMessage("PDF generado correctamente");
     } catch {
@@ -45,14 +45,14 @@ export function SurveyAnalyticsView({ id }: SurveyAnalyticsViewProps) {
         closeButton: true,
         richColors: true,
       });
-    } finally {
-      setIsGeneratingPdf(false);
     }
   };
 
   const careerName = statistics?.career?.title ?? "Todas las carreras";
   const questionCount = statistics?.questions.length ?? 0;
-  const title = statistics ? `Analíticas de ${statistics.title}` : SURVEY_STATISTICS_TEXT.pageTitle;
+  const title = statistics
+    ? `Analíticas de ${statistics.title}`
+    : SURVEY_STATISTICS_TEXT.pageTitle;
   const description = statistics
     ? `${questionCount === 1 ? "Resultados de 1 pregunta" : `Resultados de las ${questionCount} preguntas`}: ${careerName}`
     : SURVEY_STATISTICS_TEXT.loadingDescription;
@@ -77,27 +77,43 @@ export function SurveyAnalyticsView({ id }: SurveyAnalyticsViewProps) {
       <>
         <SurveyStatisticsSummary statistics={statistics} />
 
-        <section className="flex flex-col gap-4" aria-label="Resultados por pregunta">
+        <section
+          className="flex flex-col gap-4"
+          aria-label="Resultados por pregunta"
+        >
           <div className="flex items-center justify-between border-b border-border pb-3">
             <h2 className="flex items-center gap-2 text-lg font-bold text-ink">
               <BarChart3 className="size-5 text-primary" aria-hidden="true" />
               Resultados por pregunta
             </h2>
             <span className="text-xs text-text-secondary">
-              {questionCount} {questionCount === 1 ? "pregunta analizada" : "preguntas analizadas"}
+              {questionCount}{" "}
+              {questionCount === 1
+                ? "pregunta analizada"
+                : "preguntas analizadas"}
             </span>
           </div>
 
           {!statistics.hasData && (
-            <div role="status" className="flex flex-col items-center justify-center rounded-xl border border-border bg-surface p-8 text-center text-text-secondary">
-              <BarChart3 className="mb-2 size-9 stroke-[1.5] text-text-secondary/60" aria-hidden="true" />
+            <div
+              role="status"
+              className="flex flex-col items-center justify-center rounded-xl border border-border bg-surface p-8 text-center text-text-secondary"
+            >
+              <BarChart3
+                className="mb-2 size-9 stroke-[1.5] text-text-secondary/60"
+                aria-hidden="true"
+              />
               <p className="font-medium text-ink">
                 {statistics.period
-                  ? SURVEY_STATISTICS_TEXT.noResponsesInPeriod(statistics.period)
+                  ? SURVEY_STATISTICS_TEXT.noResponsesInPeriod(
+                      statistics.period,
+                    )
                   : SURVEY_STATISTICS_TEXT.noResponses}
               </p>
               <p className="mt-1 text-xs text-text-secondary">
-                {statistics.period ? SURVEY_STATISTICS_TEXT.noResponsesInPeriodHint : SURVEY_STATISTICS_TEXT.noResponsesHint}
+                {statistics.period
+                  ? SURVEY_STATISTICS_TEXT.noResponsesInPeriodHint
+                  : SURVEY_STATISTICS_TEXT.noResponsesHint}
               </p>
             </div>
           )}
@@ -127,7 +143,10 @@ export function SurveyAnalyticsView({ id }: SurveyAnalyticsViewProps) {
               disabled={isRefreshing}
               className="cursor-pointer gap-1.5 text-xs text-ink-soft hover:text-ink"
             >
-              <RefreshCw className={cn("size-3.5", isRefreshing && "animate-spin")} aria-hidden="true" />
+              <RefreshCw
+                className={cn("size-3.5", isRefreshing && "animate-spin")}
+                aria-hidden="true"
+              />
               Actualizar
             </Button>
             <Button
@@ -135,12 +154,19 @@ export function SurveyAnalyticsView({ id }: SurveyAnalyticsViewProps) {
               size="sm"
               onClick={handleGeneratePdf}
               disabled={!canExportPdf}
-              title={statistics && !statistics.hasData ? SURVEY_STATISTICS_TEXT.exportDisabled : undefined}
+              title={
+                statistics && !statistics.hasData
+                  ? SURVEY_STATISTICS_TEXT.exportDisabled
+                  : undefined
+              }
               className="cursor-pointer gap-1.5 text-xs font-semibold shadow-xs"
             >
               {isGeneratingPdf ? (
                 <>
-                  <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+                  <Loader2
+                    className="size-3.5 animate-spin"
+                    aria-hidden="true"
+                  />
                   Exportando PDF...
                 </>
               ) : (
@@ -161,13 +187,20 @@ export function SurveyAnalyticsView({ id }: SurveyAnalyticsViewProps) {
             className={buttonVariants({
               variant: "ghost",
               size: "sm",
-              className: "-ml-2 gap-1.5 text-xs text-text-secondary hover:text-ink",
+              className:
+                "-ml-2 gap-1.5 text-xs text-text-secondary hover:text-ink",
             })}
           >
             <ArrowLeft className="size-3.5" aria-hidden="true" />
             Volver a encuestas
           </Link>
-          {availablePeriods.length > 0 && <SurveyPeriodFilter periods={availablePeriods} value={period} onChange={setPeriod} />}
+          {availablePeriods.length > 0 && (
+            <SurveyPeriodFilter
+              periods={availablePeriods}
+              value={period}
+              onChange={setPeriod}
+            />
+          )}
         </div>
 
         {renderResults()}
