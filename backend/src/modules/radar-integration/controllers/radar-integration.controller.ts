@@ -9,22 +9,22 @@ import { RequestValidationPipe } from '../../../common/pipes/request-validation.
 import { toApiBody } from '../../../common/utils/to-api-body.js';
 import { reviewKindSchema, reviewDecisionSchema, type ReviewDecisionRequest, type ReviewKind } from '../requests/radar-review.request.js';
 
-@ApiTags('radar-integration')
+@ApiTags('radar')
 @ApiBearerAuth()
-@Controller('radar-integration')
+@Controller()
 @UseGuards(JwtAuthGuard)
 export class RadarIntegrationController {
   constructor(private readonly svc:RadarIntegrationService){}
-  @Get('me') me(@CurrentUserId() user:string){return this.svc.myRadar(user);}
-  @Post('me/cv-rescan') rescan(@CurrentUserId() user:string){return this.svc.rescanCurrentCv(user);}
-  @Post('me/recalculate') recalculate(@CurrentUserId() user:string){return this.svc.retry(user);}
+  @Get('profile/me/radar') me(@CurrentUserId() user:string){return this.svc.myRadar(user);}
+  @Post('profile/me/radar/cv-rescans') rescan(@CurrentUserId() user:string){return this.svc.rescanCurrentCv(user);}
+  @Post('profile/me/radar/recalculations') recalculate(@CurrentUserId() user:string){return this.svc.retry(user);}
   @UseGuards(RolesGuard)
   @Roles('administrativo')
-  @Get('admin/queue') queue(@CurrentUserId() admin:string){return this.svc.queue(admin);}
+  @Get('radar-reviews') queue(@CurrentUserId() admin:string){return this.svc.queue(admin);}
   @UseGuards(RolesGuard)
   @Roles('administrativo')
   @ApiBody(toApiBody(reviewDecisionSchema))
-  @Patch('admin/reviews/:kind/:id')
+  @Patch('radar-reviews/:kind/:id')
   decision(
     @CurrentUserId() admin: string,
     @Param('kind', new RequestValidationPipe(reviewKindSchema)) kind: ReviewKind,
@@ -35,12 +35,12 @@ export class RadarIntegrationController {
   }
   @UseGuards(RolesGuard)
   @Roles('administrativo')
-  @Post('admin/cv/:id/reprocess') reprocessCv(@CurrentUserId() admin:string,@Param('id',new ParseUUIDPipe()) id:string){
+  @Post('radar-reviews/cvs/:id/reprocessings') reprocessCv(@CurrentUserId() admin:string,@Param('id',new ParseUUIDPipe()) id:string){
     return this.svc.reprocessCv(admin,id);
   }
   @UseGuards(RolesGuard)
   @Roles('administrativo')
-  @Get('admin/cv/:id/file') async download(@CurrentUserId() admin:string,@Param('id',new ParseUUIDPipe()) id:string){
+  @Get('radar-reviews/cvs/:id/file') async download(@CurrentUserId() admin:string,@Param('id',new ParseUUIDPipe()) id:string){
     const f=await this.svc.downloadForAdmin(admin,id);
     return new StreamableFile(f.buffer,{type:'application/pdf',disposition:'inline; filename="documento.pdf"'});
   }
