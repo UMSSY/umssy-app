@@ -16,7 +16,7 @@ import type { CertificationDocumentDownload } from '../types/certification-docum
 import type { CertificationDocumentMetadata } from '../types/certification-document-metadata.type.js';
 
 import { TransactionService } from '../../../common/prisma/transaction.service.js';
-import { RadarAuditService } from '../../radar-integration/radar-audit.service.js';
+import { RadarAuditService } from '../../radar-integration/services/radar-audit.service.js';
 
 @Injectable()
 export class CertificationDocumentsService {
