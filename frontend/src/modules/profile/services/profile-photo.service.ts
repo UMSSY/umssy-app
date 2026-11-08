@@ -1,5 +1,5 @@
+import { NOT_FOUND_STATUS } from "@/shared/constants/http.constants";
 import { apiClient } from "@/shared/services/api-client";
-import { NOT_FOUND_STATUS } from "../constants/http-status.constants";
 
 import { getAuthHeaders } from "../utils/get-auth-headers";
 import { getHttpStatus } from "../utils/get-http-status";

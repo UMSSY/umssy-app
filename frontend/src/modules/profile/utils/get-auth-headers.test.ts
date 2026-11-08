@@ -1,5 +1,6 @@
+import { ACCESS_TOKEN_STORAGE_KEY } from "@/shared/constants/auth.constants";
 import { afterEach, describe, expect, it } from "vitest";
-import { ACCESS_TOKEN_STORAGE_KEY } from "../config/auth-storage.config";
+
 import { getAuthHeaders } from "./get-auth-headers";
 
 describe("getAuthHeaders", () => {
