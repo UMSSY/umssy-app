@@ -6,15 +6,12 @@ import type { TransactionContext } from '../../../common/types/transaction-conte
 export class RadarEvidenceSourcesRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  findPublicationCvStates(userId: string, context: TransactionContext) {
-    return context.client.$queryRaw<
-      { cv_id: string; review_status: string; extraction_status: string }[]
-    >`
-      SELECT e.cv_id, review.title AS review_status, extraction.title AS extraction_status
-      FROM radar_cv_evidence e
-      JOIN radar_cv_review_statuses review ON review.id=e.review_status_id
-      JOIN radar_cv_extraction_statuses extraction ON extraction.id=e.extraction_status_id
-      WHERE e.user_id=${userId}::uuid`;
+  async findPublicationCvStates(userId: string, context: TransactionContext) {
+    const rows = await context.client.radarCvEvidence.findMany({
+      where: { userId },
+      select: { cvId: true, reviewState: { select: { title: true } }, extractionState: { select: { title: true } } },
+    });
+    return rows.map((row) => ({ cv_id: row.cvId, review_status: row.reviewState.title, extraction_status: row.extractionState.title }));
   }
 
   async findCurrentCvText(
@@ -22,21 +19,12 @@ export class RadarEvidenceSourcesRepository {
   ): Promise<{ id: string; type: 'cv'; text: string }[]> {
     // Se elige primero el documento vigente para evitar reutilizar un CV anterior
     // cuando el reemplazo no se puede leer.
-    const rows = await this.prisma.$queryRaw<
-      { cv_id: string; extracted_text: string }[]
-    >`
-      SELECT cv_id,extracted_text FROM (
-        SELECT e.cv_id,e.extracted_text,extraction.title AS extraction_status,review.title AS review_status
-        FROM radar_cv_evidence e
-        JOIN radar_cv_review_statuses review ON review.id=e.review_status_id
-        JOIN radar_cv_extraction_statuses extraction ON extraction.id=e.extraction_status_id
-        WHERE e.user_id=${userId}::uuid
-        ORDER BY submitted_at DESC,cv_id DESC LIMIT 1
-      ) current_cv WHERE extraction_status='ready' AND review_status IN ('pending','approved')`;
-    return rows.map((row) => ({
-      id: row.cv_id,
-      type: 'cv',
-      text: row.extracted_text,
-    }));
+    const current = await this.prisma.radarCvEvidence.findFirst({
+      where: { userId },
+      orderBy: [{ submittedAt: 'desc' }, { cvId: 'desc' }],
+      select: { cvId: true, extractedText: true, extractionState: { select: { title: true } }, reviewState: { select: { title: true } } },
+    });
+    if (!current || current.extractionState.title !== 'ready' || !['pending', 'approved'].includes(current.reviewState.title)) return [];
+    return [{ id: current.cvId, type: 'cv', text: current.extractedText }];
   }
 }
