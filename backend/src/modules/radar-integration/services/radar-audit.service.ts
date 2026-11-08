@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import type { TransactionContext } from '../../common/types/transaction-context.types.js';
-import type { CertificationDocumentMetadata } from '../certification-documents/types/certification-document-metadata.type.js';
-import { RadarAuditRepository } from './radar-audit.repository.js';
+import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
+import type { CertificationDocumentMetadata } from '../../certification-documents/types/certification-document-metadata.type.js';
+import { RadarAuditRepository } from '../repositories/radar-audit.repository.js';
 
 @Injectable()
 export class RadarAuditService {

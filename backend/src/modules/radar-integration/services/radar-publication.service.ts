@@ -1,12 +1,12 @@
-import { ProfileSkillsAnalysisService } from '../nlp/services/profile-skills-analysis.service.js';
+import { ProfileSkillsAnalysisService } from '../../nlp/services/profile-skills-analysis.service.js';
 import { Injectable } from '@nestjs/common';
-import { RadarPublicationPendingAnalysisException } from './exceptions/radar-publication-pending-analysis.exception.js';
-import type { ProfileSkillsPublished } from '../../common/profile-skills/profile-skills-events.service.js';
-import { AREA_IDS, scoreVerifiedSkills } from './radar-scoring.js';
-import { RadarPublicationRepository } from './repositories/radar-publication.repository.js';
-import { RadarPublicationMapper } from './mappers/radar-publication.mapper.js';
-import { RadarPublicationEvidenceService } from './services/radar-publication-evidence.service.js';
-import type { PublishedSkill } from './types/radar-publication.types.js';
+import { RadarPublicationPendingAnalysisException } from '../exceptions/radar-publication-pending-analysis.exception.js';
+import type { ProfileSkillsPublished } from '../../../common/profile-skills/profile-skills-events.service.js';
+import { AREA_IDS, scoreVerifiedSkills } from '../utils/radar-scoring.js';
+import { RadarPublicationRepository } from '../repositories/radar-publication.repository.js';
+import { RadarPublicationMapper } from '../mappers/radar-publication.mapper.js';
+import { RadarPublicationEvidenceService } from './radar-publication-evidence.service.js';
+import type { PublishedSkill } from '../types/radar-publication.types.js';
 
 @Injectable()
 export class RadarPublicationService {

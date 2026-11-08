@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { AREA_IDS, emptyScores, RUBRIC_VERSION } from '../radar-scoring.js';
+import { AREA_IDS, emptyScores, RUBRIC_VERSION } from '../utils/radar-scoring.js';
 import type { RadarPublicationState, SnapshotRow } from '../types/radar-publication.types.js';
 
 @Injectable()

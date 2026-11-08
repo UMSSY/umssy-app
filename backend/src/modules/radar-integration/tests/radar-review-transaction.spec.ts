@@ -1,11 +1,11 @@
 import type { CvSourcesService } from '../../cv/services/cv-sources.service.js';
 import { describe, expect, it, vi } from 'vitest';
-import { RadarReviewService } from '../radar-review.service.js';
+import { RadarReviewService } from '../services/radar-review.service.js';
 import { RadarReviewMapper } from '../mappers/radar-review.mapper.js';
 import type { RadarReviewRepository } from '../repositories/radar-review.repository.js';
 import type { RadarAccessRepository } from '../repositories/radar-access.repository.js';
 import type { ProfileSkillsAnalysisService } from '../../nlp/services/profile-skills-analysis.service.js';
-import type { RadarPublicationService } from '../radar-publication.service.js';
+import type { RadarPublicationService } from '../services/radar-publication.service.js';
 import type { SkillAnalysisService } from '../../skills/services/skill-analysis.service.js';
 import { TransactionService } from '../../../common/prisma/transaction.service.js';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';

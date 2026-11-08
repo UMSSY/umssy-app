@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
-import { RadarPublicationEvidenceService } from './radar-publication-evidence.service.js';
+import { RadarPublicationEvidenceService } from '../services/radar-publication-evidence.service.js';
 import type { SkillAnalysisService } from '../../skills/services/skill-analysis.service.js';
 import type { WorkExperienceSourcesService } from '../../work-experience/services/work-experience-sources.service.js';
 import type { EducationSourcesService } from '../../educations/services/education-sources.service.js';
 import type { CertificationSourcesService } from '../../certifications/services/certification-sources.service.js';
-import type { RadarEvidenceSourcesService } from './radar-evidence-sources.service.js';
+import type { RadarEvidenceSourcesService } from '../services/radar-evidence-sources.service.js';
 import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
 
 describe('Fuentes de evidencia de publicacion', () => {

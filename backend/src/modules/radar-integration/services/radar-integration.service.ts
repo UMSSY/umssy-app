@@ -1,7 +1,7 @@
 import { Injectable, type OnModuleDestroy, type OnModuleInit } from '@nestjs/common';
-import { RadarAnalysisNotReadyException } from './exceptions/radar-analysis-not-ready.exception.js';
-import { ProfileSkillsEvents, type ProfileSkillsPublished } from '../../common/profile-skills/profile-skills-events.service.js';
-import { ProfileSkillsAnalysisService } from '../nlp/services/profile-skills-analysis.service.js';
+import { RadarAnalysisNotReadyException } from '../exceptions/radar-analysis-not-ready.exception.js';
+import { ProfileSkillsEvents, type ProfileSkillsPublished } from '../../../common/profile-skills/profile-skills-events.service.js';
+import { ProfileSkillsAnalysisService } from '../../nlp/services/profile-skills-analysis.service.js';
 import { RadarPublicationService } from './radar-publication.service.js';
 import { RadarCvService } from './radar-cv.service.js';
 import { RadarReviewService } from './radar-review.service.js';

@@ -1,15 +1,15 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { PrismaService } from '../../common/prisma/prisma.service.js';
-import { ProfileSkillsEvents } from '../../common/profile-skills/profile-skills-events.service.js';
-import type { ProfileSkillsAnalysisService } from '../nlp/services/profile-skills-analysis.service.js';
-import { RadarIntegrationService } from './radar-integration.service.js';
-import { RadarPublicationService } from './radar-publication.service.js';
-import { RadarPublicationMapper } from './mappers/radar-publication.mapper.js';
-import type { RadarPublicationEvidenceService } from './services/radar-publication-evidence.service.js';
-import { RadarPublicationRepository } from './repositories/radar-publication.repository.js';
-import type { RadarCvService } from './radar-cv.service.js';
-import type { RadarReviewService } from './radar-review.service.js';
-import { emptyScores, scoreVerifiedSkills } from './radar-scoring.js';
+import type { PrismaService } from '../../../common/prisma/prisma.service.js';
+import { ProfileSkillsEvents } from '../../../common/profile-skills/profile-skills-events.service.js';
+import type { ProfileSkillsAnalysisService } from '../../nlp/services/profile-skills-analysis.service.js';
+import { RadarIntegrationService } from '../services/radar-integration.service.js';
+import { RadarPublicationService } from '../services/radar-publication.service.js';
+import { RadarPublicationMapper } from '../mappers/radar-publication.mapper.js';
+import type { RadarPublicationEvidenceService } from '../services/radar-publication-evidence.service.js';
+import { RadarPublicationRepository } from '../repositories/radar-publication.repository.js';
+import type { RadarCvService } from '../services/radar-cv.service.js';
+import type { RadarReviewService } from '../services/radar-review.service.js';
+import { emptyScores, scoreVerifiedSkills } from '../utils/radar-scoring.js';
 
 const userId = '11111111-1111-4111-8111-111111111111';
 const skill = (id: string, source = 'nlp', evidenceRefs: unknown = [{ type: 'work-experience', id: 'own-experience' }], areaId: string | null = 'qa') => ({

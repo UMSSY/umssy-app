@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { AREA_IDS, emptyScores, matchRadar, scoreVerifiedSkills } from './radar-scoring.js';
+import { AREA_IDS, emptyScores, matchRadar, scoreVerifiedSkills } from '../utils/radar-scoring.js';
 
 describe('Épica 3 · rúbrica determinista provisional',()=>{
   it('crea seis ejes vacíos',()=>{const v=scoreVerifiedSkills([]);expect(Object.keys(v.scores)).toEqual([...AREA_IDS]);expect(v.average).toBe(0);});

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../common/prisma/prisma.service.js';
-import type { TransactionContext } from '../../common/types/transaction-context.types.js';
+import { PrismaService } from '../../../common/prisma/prisma.service.js';
+import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
 
 @Injectable()
 export class RadarEvidenceSourcesRepository {

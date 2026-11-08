@@ -1,16 +1,16 @@
-import { CvSourcesService } from '../cv/services/cv-sources.service.js';
+import { CvSourcesService } from '../../cv/services/cv-sources.service.js';
 import { Injectable } from '@nestjs/common';
-import { RadarReviewInvalidDecisionException } from './exceptions/radar-review-invalid-decision.exception.js';
-import { RadarReviewInvalidEvidenceException } from './exceptions/radar-review-invalid-evidence.exception.js';
-import { RadarReviewNotFoundException } from './exceptions/radar-review-not-found.exception.js';
-import { RadarReviewRepository } from './repositories/radar-review.repository.js';
-import { RadarAccessRepository } from './repositories/radar-access.repository.js';
-import { ProfileSkillsAnalysisService } from '../nlp/services/profile-skills-analysis.service.js';
+import { RadarReviewInvalidDecisionException } from '../exceptions/radar-review-invalid-decision.exception.js';
+import { RadarReviewInvalidEvidenceException } from '../exceptions/radar-review-invalid-evidence.exception.js';
+import { RadarReviewNotFoundException } from '../exceptions/radar-review-not-found.exception.js';
+import { RadarReviewRepository } from '../repositories/radar-review.repository.js';
+import { RadarAccessRepository } from '../repositories/radar-access.repository.js';
+import { ProfileSkillsAnalysisService } from '../../nlp/services/profile-skills-analysis.service.js';
 import { RadarPublicationService } from './radar-publication.service.js';
-import { RadarReviewMapper } from './mappers/radar-review.mapper.js';
+import { RadarReviewMapper } from '../mappers/radar-review.mapper.js';
 
-import { SkillAnalysisService } from '../skills/services/skill-analysis.service.js';
-import { TransactionService } from '../../common/prisma/transaction.service.js';
+import { SkillAnalysisService } from '../../skills/services/skill-analysis.service.js';
+import { TransactionService } from '../../../common/prisma/transaction.service.js';
 
 @Injectable()
 export class RadarReviewService {

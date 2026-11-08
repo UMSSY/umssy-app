@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { reviewKindSchema, reviewDecisionSchema } from './radar-review.request.js';
+import { reviewKindSchema, reviewDecisionSchema } from '../requests/radar-review.request.js';
 
 describe('Contratos Zod de revisión del Radar', () => {
   it('admite únicamente los tipos de evidencia del flujo HU1-HU3', () => {

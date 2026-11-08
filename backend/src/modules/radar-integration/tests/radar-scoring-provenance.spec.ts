@@ -1,5 +1,5 @@
 import {describe,expect,it} from 'vitest';
-import {scoreVerifiedSkills,emptyScores,matchRadar,AREA_IDS} from './radar-scoring.js';
+import {scoreVerifiedSkills,emptyScores,matchRadar,AREA_IDS} from '../utils/radar-scoring.js';
 
 describe('Épica 3 / trazabilidad de evidencias',()=>{
   const base={id:'skill-1',name:'TypeScript',areaId:'desarrollo',isHighRelevance:true};

@@ -1,10 +1,10 @@
-import { CvSourcesService } from '../cv/services/cv-sources.service.js';
+import { CvSourcesService } from '../../cv/services/cv-sources.service.js';
 import { Injectable } from '@nestjs/common';
-import { RadarCvOwnershipException } from './exceptions/radar-cv-ownership.exception.js';
-import { RadarCvNotFoundException } from './exceptions/radar-cv-not-found.exception.js';
-import { RadarCvRepository } from './repositories/radar-cv.repository.js';
-import { RadarAccessRepository } from './repositories/radar-access.repository.js';
-import { ProfileSkillsAnalysisService } from '../nlp/services/profile-skills-analysis.service.js';
+import { RadarCvOwnershipException } from '../exceptions/radar-cv-ownership.exception.js';
+import { RadarCvNotFoundException } from '../exceptions/radar-cv-not-found.exception.js';
+import { RadarCvRepository } from '../repositories/radar-cv.repository.js';
+import { RadarAccessRepository } from '../repositories/radar-access.repository.js';
+import { ProfileSkillsAnalysisService } from '../../nlp/services/profile-skills-analysis.service.js';
 import { RadarPublicationService } from './radar-publication.service.js';
 import { RadarPdfExtractionService } from './radar-pdf-extraction.service.js';
 

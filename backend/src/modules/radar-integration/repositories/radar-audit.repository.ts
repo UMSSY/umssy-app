@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../common/prisma/prisma.service.js';
-import { Prisma } from '../../prisma/client.js';
-import type { CertificationDocumentMetadata } from '../certification-documents/types/certification-document-metadata.type.js';
+import { PrismaService } from '../../../common/prisma/prisma.service.js';
+import { Prisma } from '../../../prisma/client.js';
+import type { CertificationDocumentMetadata } from '../../certification-documents/types/certification-document-metadata.type.js';
 
 type AuditClient = PrismaService | Prisma.TransactionClient;
 
