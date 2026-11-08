@@ -1,5 +1,5 @@
 import { apiClient } from "@/shared/services/api-client";
-import { EDUCATIONS_ENDPOINT, EDUCATION_INSTITUTIONS_ENDPOINT } from "../constants/education-api.constants";
+import { EDUCATION_INSTITUTIONS_ENDPOINT } from "../constants/education-api.constants";
 import { EDUCATION_INSTITUTION_TEXTS } from "../constants/education-institutions.constants";
 import type { EducationInstitution } from "../types/education-institution.types";
 import type { ApiResponse } from "@/modules/profile";
@@ -24,7 +24,7 @@ export const educationsService = {
   },
 
   getEducations: async (): Promise<EducationItem[]> => {
-    const response = await apiClient.get<ApiResponse<EducationItem[]>>(EDUCATIONS_ENDPOINT, {
+    const response = await apiClient.get<ApiResponse<EducationItem[]>>("/educations", {
       headers: getAuthHeaders(),
     });
     return response.data.data;
@@ -32,7 +32,7 @@ export const educationsService = {
 
   createEducation: async (payload: EducationPayload): Promise<EducationItem> => {
     const response = await apiClient.post<ApiResponse<EducationItem>>(
-      EDUCATIONS_ENDPOINT,
+      "/educations",
       payload,
       { headers: getAuthHeaders() },
     );
@@ -41,7 +41,7 @@ export const educationsService = {
 
   updateEducation: async (id: string, payload: UpdateEducationPayload): Promise<EducationItem> => {
     const response = await apiClient.patch<ApiResponse<EducationItem>>(
-      `${EDUCATIONS_ENDPOINT}/${id}`,
+      `/educations/${id}`,
       payload,
       { headers: getAuthHeaders() },
     );
@@ -49,6 +49,6 @@ export const educationsService = {
   },
 
   deleteEducation: async (id: string): Promise<void> => {
-    await apiClient.delete(`${EDUCATIONS_ENDPOINT}/${id}`, { headers: getAuthHeaders() });
+    await apiClient.delete(`/educations/${id}`, { headers: getAuthHeaders() });
   },
 };
