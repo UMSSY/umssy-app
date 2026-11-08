@@ -1,23 +1,7 @@
+import { MESSAGE_RELATIONS } from '../constants/message-relations.constants.js';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import type { Prisma } from '../../../prisma/client.js';
-
-const ATTACHMENT_METADATA_SELECT = {
-  select: {
-    id: true,
-    messageId: true,
-    typeId: true,
-    fileName: true,
-    mimeType: true,
-    fileSize: true,
-    url: true,
-    thumbnailUrl: true,
-    createdAt: true,
-    type: {
-      select: { title: true },
-    },
-  },
-} as const;
 
 @Injectable()
 export class MessageRepository {
@@ -63,15 +47,13 @@ export class MessageRepository {
       data: {
         ...messageData,
         content:
-          typeof messageData.content === 'string' && messageData.content.trim().length > 0
+          typeof messageData.content === 'string' &&
+          messageData.content.trim().length > 0
             ? messageData.content.trim()
             : null,
         attachments: attachmentCreateData,
       },
-      include: {
-        status: { select: { title: true } },
-        attachments: ATTACHMENT_METADATA_SELECT,
-      },
+      include: MESSAGE_RELATIONS,
     });
   }
 
@@ -84,10 +66,7 @@ export class MessageRepository {
 
     const rows = await this.prisma.message.findMany({
       where: { conversationId },
-      include: {
-        status: { select: { title: true } },
-        attachments: ATTACHMENT_METADATA_SELECT,
-      },
+      include: MESSAGE_RELATIONS,
       orderBy: { sentAt: 'desc' },
       take: limit + 1,
       ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
@@ -95,7 +74,8 @@ export class MessageRepository {
 
     const hasMore = rows.length > limit;
     const data = hasMore ? rows.slice(0, limit) : rows;
-    const nextCursor = hasMore && data.length > 0 ? data[data.length - 1].id : null;
+    const nextCursor =
+      hasMore && data.length > 0 ? data[data.length - 1].id : null;
     return { data, hasMore, nextCursor };
   }
 }
