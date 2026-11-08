@@ -1,16 +1,9 @@
 import { z } from 'zod';
-import {
-  WORK_EXPERIENCE_BUSINESS_TIMEZONE,
-  WORK_EXPERIENCE_COMPANY_NAME_MAX_LENGTH,
-  WORK_EXPERIENCE_DESCRIPTION_MAX_LENGTH,
-  WORK_EXPERIENCE_MIN_DATE,
-  WORK_EXPERIENCE_POSITION_MAX_LENGTH,
-  WORK_EXPERIENCE_VALIDATION_MESSAGES,
-} from '../constants/work-experience-validation.constants.js';
+import { WORK_EXPERIENCE_VALIDATION_MESSAGES } from '../constants/work-experience-validation.constants.js';
 
 function todayInBolivia(): string {
   return new Intl.DateTimeFormat('en-CA', {
-    timeZone: WORK_EXPERIENCE_BUSINESS_TIMEZONE,
+    timeZone: 'America/La_Paz',
   }).format(new Date());
 }
 
@@ -20,7 +13,7 @@ export const companyNameSchema = z
   .trim()
   .min(1)
   .max(
-    WORK_EXPERIENCE_COMPANY_NAME_MAX_LENGTH,
+    100,
     WORK_EXPERIENCE_VALIDATION_MESSAGES.companyNameTooLong,
   );
 export const positionSchema = z
@@ -28,12 +21,12 @@ export const positionSchema = z
   .trim()
   .min(1)
   .max(
-    WORK_EXPERIENCE_POSITION_MAX_LENGTH,
+    150,
     WORK_EXPERIENCE_VALIDATION_MESSAGES.positionTooLong,
   );
 export const workExperienceDateSchema = z.iso
   .date()
-  .refine((value) => value >= WORK_EXPERIENCE_MIN_DATE, {
+  .refine((value) => value >= '1950-01-01', {
     error: WORK_EXPERIENCE_VALIDATION_MESSAGES.dateBeforeMinimum,
     abort: true,
   })
@@ -48,6 +41,6 @@ export const workExperienceDescriptionSchema = z
   .trim()
   .min(1, WORK_EXPERIENCE_VALIDATION_MESSAGES.descriptionRequired)
   .max(
-    WORK_EXPERIENCE_DESCRIPTION_MAX_LENGTH,
+    5000,
     WORK_EXPERIENCE_VALIDATION_MESSAGES.descriptionTooLong,
   );
