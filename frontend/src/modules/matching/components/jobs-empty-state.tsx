@@ -1,11 +1,8 @@
+import type { JobsEmptyStateProps } from "../types/jobs-empty-state-props.types";
 import Link from "next/link";
 import { Briefcase } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button-variants";
 import { JOB_MATCHING_MESSAGES } from "../constants/job-matching.constants";
-
-interface JobsEmptyStateProps {
-  variant: "incomplete-profile" | "no-matches";
-}
 
 export function JobsEmptyState({ variant }: JobsEmptyStateProps) {
   const isIncompleteProfile = variant === "incomplete-profile";

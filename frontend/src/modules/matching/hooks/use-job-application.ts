@@ -7,7 +7,7 @@ import { useRef } from "react";
 import { isApiError } from "@/shared/services/api-client";
 import { JOB_APPLICATION_QUERY_KEYS } from "../constants/job-application.constants";
 import { jobApplicationService } from "../services/job-application.service";
-import type { MyJobApplication } from "../types/job-application.types";
+import type { MyJobApplication } from "../types/my-job-application.types";
 
 export function useJobApplication(jobOfferId: string) {
   const queryClient = useQueryClient();

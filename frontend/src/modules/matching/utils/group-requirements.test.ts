@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { CategorizedJobRequirement } from "../types/requirement-category.types";
+import type { CategorizedJobRequirement } from "../types/categorized-job-requirement.types";
 import { groupRequirements } from "./group-requirements";
 
 const skill = (name: string): CategorizedJobRequirement => ({

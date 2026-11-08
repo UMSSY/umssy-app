@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { CategorizedJobRequirement } from "../types/requirement-category.types";
+import type { CategorizedJobRequirement } from "../types/categorized-job-requirement.types";
 import { getMatchedSkillNames } from "./get-matched-skill-names";
 
 describe("getMatchedSkillNames", () => {

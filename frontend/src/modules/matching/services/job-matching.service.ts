@@ -1,7 +1,8 @@
 import { apiClient } from "@/shared/services/api-client";
 import type { ApiResponse } from "@/shared/types/api-response.types";
 import { getJobMatchEndpoint } from "../constants/job-matching.constants";
-import type { JobMatch, RecommendationsResult } from "../types/job-matching.types";
+import type { JobMatch } from "../types/job-match.types";
+import type { RecommendationsResult } from "../types/recommendations-result.types";
 
 export const jobMatchingService = {
   getRecommendations: async (): Promise<RecommendationsResult> => {

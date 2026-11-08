@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
 import { EMPTY_JOB_FEED_FILTERS } from "../constants/job-matching.constants";
-import type { RecommendedJob } from "../types/job-matching.types";
+import type { RecommendedJob } from "../types/recommended-job.types";
 import { filterRecommendedJobs, hasActiveFilters } from "./filter-recommended-jobs";
 
 function buildJob(overrides: Partial<RecommendedJob>): RecommendedJob {

@@ -1,4 +1,5 @@
 "use client";
+import type { JobFeedFiltersProps } from "../types/job-feed-filters-props.types";
 
 import { JOB_MODALITIES } from "@/shared/constants/job-offer.constants";
 
@@ -9,14 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { JOB_FEED_MESSAGES } from "../constants/job-matching.constants";
-import type { JobFeedFilters as JobFeedFiltersValue } from "../types/job-feed-filters.types";
-import { hasActiveFilters } from "../utils/filter-recommended-jobs";
 
-interface JobFeedFiltersProps {
-  filters: JobFeedFiltersValue;
-  onChange: (filters: JobFeedFiltersValue) => void;
-  onClear: () => void;
-}
+import { hasActiveFilters } from "../utils/filter-recommended-jobs";
 
 export function JobFeedFilters({ filters, onChange, onClear }: JobFeedFiltersProps) {
   return (

@@ -1,7 +1,4 @@
-export interface DetectedSkill {
-  id: string;
-  name: string;
-}
+import type { DetectedSkill } from "./detected-skill.types";
 
 export interface SkillsAnalysisResult {
   experienceId: string;
