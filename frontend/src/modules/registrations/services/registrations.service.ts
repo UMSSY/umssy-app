@@ -1,3 +1,4 @@
+import { BEARER_PREFIX } from "@/shared/constants/auth.constants";
 import { readRecord, readArray } from '@/shared/utils/response-validation';
 import { apiClient } from "@/shared/services/api-client";
 import { getAccessToken } from "@/shared/services/storage/access-token-storage";
@@ -12,7 +13,7 @@ import { REQUEST_TIMEOUT_MS } from '@/shared/constants/http.constants';
 export const registrationsService = {
   async create(eventId: string, accessToken = getAccessToken()): Promise<RegistrationResponse> {
     const response = await apiClient.post<unknown>(`/events/${encodeURIComponent(eventId)}/registrations`, undefined, {
-      headers: { Authorization: accessToken ? `Bearer ${accessToken}` : "" },
+      headers: { Authorization: accessToken ? `${BEARER_PREFIX}${accessToken}` : "" },
       timeout: REQUEST_TIMEOUT_MS,
     });
     return parseRegistrationResponse(response.data, 201);
@@ -21,7 +22,7 @@ export const registrationsService = {
   async getOwn(eventId: string, signal?: AbortSignal, accessToken = getAccessToken()): Promise<RegistrationResponse | null> {
     try {
       const response = await apiClient.get<unknown>(`/events/${encodeURIComponent(eventId)}/registrations/me`, {
-        headers: { Authorization: accessToken ? `Bearer ${accessToken}` : "" },
+        headers: { Authorization: accessToken ? `${BEARER_PREFIX}${accessToken}` : "" },
         signal,
         timeout: REQUEST_TIMEOUT_MS,
       });
@@ -35,7 +36,7 @@ export const registrationsService = {
 
   async cancel(registrationId: string, accessToken = getAccessToken()): Promise<RegistrationResponse> {
     const response = await apiClient.delete<unknown>(`/registrations/${encodeURIComponent(registrationId)}`, {
-      headers: { Authorization: accessToken ? `Bearer ${accessToken}` : "" },
+      headers: { Authorization: accessToken ? `${BEARER_PREFIX}${accessToken}` : "" },
       timeout: REQUEST_TIMEOUT_MS,
     });
     return parseRegistrationResponse(response.data, 200);
@@ -50,7 +51,7 @@ export const registrationsService = {
       throw new Error("La URL del backend no está configurada.");
     }
     const response = await apiClient.get<{ data: Registration[] }>("/event-registrations/me", {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `${BEARER_PREFIX}${token}` },
       signal,
       timeout: REQUEST_TIMEOUT_MS,
     });
