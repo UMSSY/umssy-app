@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { DomainException } from '../../../common/exceptions/domain.exception.js';
-import { MAX_USER_SKILLS, SKILL_NAME_MAX_LENGTH } from '../constants/skill.constants.js';
+
 import { DuplicateSkillException } from '../exceptions/duplicate-skill.exception.js';
 import { SkillNotFoundException } from '../exceptions/skill-not-found.exception.js';
 import { createCustomSkillSchema } from '../requests/create-custom-skill.request.js';
@@ -25,7 +25,7 @@ describe('updateUserSkillsSchema', () => {
   it.each([
     ['a missing list', {}],
     ['an id that is not a uuid', { skillIds: ['python'] }],
-    ['too many skills', { skillIds: Array.from({ length: MAX_USER_SKILLS + 1 }, () => skillId) }],
+    ['too many skills', { skillIds: Array.from({ length: 50 + 1 }, () => skillId) }],
   ])('rejects %s', (_case, body) => {
     expect(updateUserSkillsSchema.safeParse(body).success).toBe(false);
   });
@@ -45,14 +45,14 @@ describe('createCustomSkillSchema', () => {
   });
 
   it('accepts a name with the maximum length', () => {
-    const name = 'Ab'.repeat(SKILL_NAME_MAX_LENGTH / 2);
+    const name = 'Ab'.repeat(50 / 2);
     expect(createCustomSkillSchema.parse({ name })).toEqual({ name });
   });
 
   it.each([
     ['a missing name', {}],
     ['an empty name', { name: '   ' }],
-    ['a name that is too long', { name: 'a'.repeat(SKILL_NAME_MAX_LENGTH + 1) }],
+    ['a name that is too long', { name: 'a'.repeat(50 + 1) }],
     ['a name with invalid characters', { name: 'SJCKENN;ONCM;SNV' }],
     ['a name without letters', { name: '9999999' }],
     ['a name repeating the same character', { name: 'SSSSSSSS' }],
