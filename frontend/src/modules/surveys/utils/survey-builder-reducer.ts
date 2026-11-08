@@ -1,4 +1,4 @@
-import { DEFAULT_OPTION_COUNT, DEFAULT_QUESTION_TYPE, SURVEY_LIMITS } from "../constants/survey-builder.constants";
+import { SURVEY_LIMITS } from "../constants/survey-builder.constants";
 import type {
   BuilderOption,
   BuilderQuestion,
@@ -21,9 +21,9 @@ export function createQuestion(): BuilderQuestion {
   return {
     id: createId(),
     statement: "",
-    type: DEFAULT_QUESTION_TYPE,
+    type: "single_choice",
     isRequired: true,
-    options: Array.from({ length: DEFAULT_OPTION_COUNT }, () => createOption()),
+    options: Array.from({ length: 2 }, () => createOption()),
   };
 }
 

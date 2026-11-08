@@ -14,7 +14,7 @@ import { SurveyPeriodFilter } from "../components/survey-period-filter";
 import { SurveyQuestionResultCard } from "../components/survey-question-result-card";
 import { SurveyStatisticsSkeleton } from "../components/survey-statistics-skeleton";
 import { SurveyStatisticsSummary } from "../components/survey-statistics-summary";
-import { SURVEY_PDF_FEEDBACK_DURATION_MS, SURVEY_STATISTICS_TEXT } from "../constants/survey-statistics.constants";
+import { SURVEY_STATISTICS_TEXT } from "../constants/survey-statistics.constants";
 import { SURVEYS_PATH } from "../constants/survey-routes.constants";
 import { useSurveyStatistics } from "../hooks/use-survey-statistics";
 import { surveysService } from "../services/surveys.service";
@@ -28,7 +28,7 @@ export function SurveyAnalyticsView({ id }: SurveyAnalyticsViewProps) {
 
   useEffect(() => {
     if (!successMessage) return;
-    const timer = setTimeout(() => setSuccessMessage(undefined), SURVEY_PDF_FEEDBACK_DURATION_MS);
+    const timer = setTimeout(() => setSuccessMessage(undefined), 4000);
     return () => clearTimeout(timer);
   }, [successMessage]);
 
@@ -41,7 +41,7 @@ export function SurveyAnalyticsView({ id }: SurveyAnalyticsViewProps) {
       setSuccessMessage("PDF generado correctamente");
     } catch {
       toast.error("No se pudo generar el reporte en PDF. Inténtalo de nuevo.", {
-        duration: SURVEY_PDF_FEEDBACK_DURATION_MS,
+        duration: 4000,
         closeButton: true,
         richColors: true,
       });

@@ -2,11 +2,6 @@ import type { SurveyNotificationStatus } from "../types/survey-notification.type
 
 export const SURVEY_NOTIFICATIONS_PATH = "/surveys";
 export const SURVEY_NOTIFICATIONS_LABEL = "Notificaciones de encuestas";
-export const SURVEY_NOTIFICATIONS_DESCRIPTION = "Consulta los avisos de nuevas encuestas disponibles para ti.";
-export const SURVEY_NOTIFICATIONS_LOAD_ERROR_MESSAGE = "No se pudieron cargar tus encuestas. Intenta nuevamente.";
-export const SURVEY_NOTIFICATIONS_EMPTY_TITLE = "No hay encuestas disponibles";
-export const SURVEY_NOTIFICATIONS_EMPTY_DESCRIPTION = "Cuando tengas una nueva encuesta asignada, aparecerá aquí.";
-export const SURVEY_NOTIFICATIONS_SKELETON_ROWS = 3;
 
 export const EMPTY_STATE_RAY_CLASSES = [
   "-left-7 top-1/2 -translate-y-1/2",
@@ -38,7 +33,5 @@ export const SURVEY_STATUS_TONES: Record<SurveyNotificationStatus, string> = {
   expired: "bg-accent/10 text-accent",
   answered: "bg-availability text-availability-foreground",
 };
-
-export const ANSWER_SURVEY_LABEL = "Responder encuesta";
 
 export const SHORT_MONTHS_ES = ["ene.", "feb.", "mar.", "abr.", "may.", "jun.", "jul.", "ago.", "sep.", "oct.", "nov.", "dic."];

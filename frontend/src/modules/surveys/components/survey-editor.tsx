@@ -18,7 +18,7 @@ import { SurveyValidationAlert } from "./survey-validation-alert";
 import { ALL_CAREERS_LABEL, ALL_CAREERS_VALUE } from "../constants/survey-builder.constants";
 import { SURVEY_FIELD_ERROR_DEPENDENCIES, SURVEY_MESSAGES } from "../constants/survey-messages.constants";
 import { SURVEYS_PATH } from "../constants/survey-routes.constants";
-import { SURVEY_TOAST_DURATION_MS } from "../constants/surveys-query-keys.constants";
+
 import { useCareers } from "../hooks/use-careers";
 import { useSurveyBuilder } from "../hooks/use-survey-builder";
 import { useUnsavedChangesGuard } from "../hooks/use-unsaved-changes-guard";
@@ -98,7 +98,7 @@ export function SurveyEditor({ title, initialState, autosaveKey, isSaving, pendi
   const submit = async (status: SurveyStatus) => {
     if (typeof navigator !== "undefined" && !navigator.onLine) {
       setIsPublishDialogOpen(false);
-      toast.error(SURVEY_MESSAGES.offlineError, { duration: SURVEY_TOAST_DURATION_MS, closeButton: true, richColors: true });
+      toast.error(SURVEY_MESSAGES.offlineError, { duration: 7_000, closeButton: true, richColors: true });
       return;
     }
 
@@ -116,7 +116,7 @@ export function SurveyEditor({ title, initialState, autosaveKey, isSaving, pendi
       if (isConnectionError(error)) {
         const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
         toast.error(isOffline ? SURVEY_MESSAGES.offlineError : CONNECTION_ERROR_MESSAGE, {
-          duration: SURVEY_TOAST_DURATION_MS,
+          duration: 7_000,
           closeButton: true,
           richColors: true,
         });

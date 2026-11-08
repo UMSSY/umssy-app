@@ -15,11 +15,7 @@ import {
   SURVEY_TEXT,
 } from "../constants/survey-builder.constants";
 import { SURVEY_FIELD_LABELS } from "../constants/survey-messages.constants";
-import {
-  SURVEY_SELECT_CONTENT_CLASS,
-  SURVEY_SELECT_ITEM_CLASS,
-  SURVEY_SELECT_TRIGGER_CLASS,
-} from "../constants/survey-styles.constants";
+
 import type { SurveyHeaderCardProps } from "../types/survey-component-props.types";
 import { FieldErrorMessage } from "./field-error-message";
 import { RequiredMark } from "./required-mark";
@@ -95,13 +91,13 @@ export function SurveyHeaderCard({
               aria-required="true"
               aria-invalid={errors.careerId ? true : undefined}
               aria-describedby={errors.careerId || careersErrorMessage ? "survey-career-error" : undefined}
-              className={SURVEY_SELECT_TRIGGER_CLASS}
+              className={"h-10 w-full min-w-0 rounded-lg border-border-strong bg-surface px-3 text-sm text-ink data-[size=default]:h-10"}
             >
               <SelectValue placeholder={isLoadingCareers ? SURVEY_TEXT.loading : SURVEY_TEXT.selectCareer} />
             </SelectTrigger>
-            <SelectContent alignItemWithTrigger={false} className={SURVEY_SELECT_CONTENT_CLASS}>
+            <SelectContent alignItemWithTrigger={false} className={"w-auto max-w-[min(28rem,calc(100vw-2rem))] min-w-(--anchor-width) bg-surface"}>
               {careerItems.map((item) => (
-                <SelectItem key={item.value} value={item.value} variant="subtle" className={SURVEY_SELECT_ITEM_CLASS}>
+                <SelectItem key={item.value} value={item.value} variant="subtle" className={"*:first:shrink *:first:whitespace-normal"}>
                   {item.label}
                 </SelectItem>
               ))}
@@ -126,13 +122,13 @@ export function SurveyHeaderCard({
               aria-required="true"
               aria-invalid={errors.targetAudience ? true : undefined}
               aria-describedby={errors.targetAudience ? "survey-audience-error" : undefined}
-              className={SURVEY_SELECT_TRIGGER_CLASS}
+              className={"h-10 w-full min-w-0 rounded-lg border-border-strong bg-surface px-3 text-sm text-ink data-[size=default]:h-10"}
             >
               <SelectValue placeholder={SURVEY_TEXT.selectAudience} />
             </SelectTrigger>
-            <SelectContent alignItemWithTrigger={false} className={SURVEY_SELECT_CONTENT_CLASS}>
+            <SelectContent alignItemWithTrigger={false} className={"w-auto max-w-[min(28rem,calc(100vw-2rem))] min-w-(--anchor-width) bg-surface"}>
               {SURVEY_TARGET_AUDIENCE_ITEMS.map((item) => (
-                <SelectItem key={item.value} value={item.value} variant="subtle" className={SURVEY_SELECT_ITEM_CLASS}>
+                <SelectItem key={item.value} value={item.value} variant="subtle" className={"*:first:shrink *:first:whitespace-normal"}>
                   {item.label}
                 </SelectItem>
               ))}
@@ -157,13 +153,13 @@ export function SurveyHeaderCard({
               aria-required="true"
               aria-invalid={errors.academicPeriod ? true : undefined}
               aria-describedby={errors.academicPeriod ? "survey-period-error" : undefined}
-              className={SURVEY_SELECT_TRIGGER_CLASS}
+              className={"h-10 w-full min-w-0 rounded-lg border-border-strong bg-surface px-3 text-sm text-ink data-[size=default]:h-10"}
             >
               <SelectValue placeholder={SURVEY_TEXT.selectPeriod} />
             </SelectTrigger>
-            <SelectContent alignItemWithTrigger={false} className={SURVEY_SELECT_CONTENT_CLASS}>
+            <SelectContent alignItemWithTrigger={false} className={"w-auto max-w-[min(28rem,calc(100vw-2rem))] min-w-(--anchor-width) bg-surface"}>
               {periodItems.map((item) => (
-                <SelectItem key={item.value} value={item.value} variant="subtle" className={SURVEY_SELECT_ITEM_CLASS}>
+                <SelectItem key={item.value} value={item.value} variant="subtle" className={"*:first:shrink *:first:whitespace-normal"}>
                   {item.label}
                 </SelectItem>
               ))}

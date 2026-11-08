@@ -12,10 +12,6 @@ export const SURVEY_LIMITS = {
   minOptions: 2,
 } as const;
 
-export const DEFAULT_QUESTION_TYPE: QuestionType = "single_choice";
-export const DEFAULT_OPTION_COUNT = 2;
-
-export const FIRST_SURVEY_YEAR = 2020;
 export const ALL_ACADEMIC_PERIODS_VALUE = "Todas";
 export const ALL_ACADEMIC_PERIODS_OPTION_LABEL = "Todas";
 export const ALL_CAREERS_VALUE = "all";
