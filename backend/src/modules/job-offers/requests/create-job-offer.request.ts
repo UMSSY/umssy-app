@@ -1,18 +1,5 @@
 import { z } from 'zod';
-import {
-  JOB_OFFER_CATEGORY_MAX_LENGTH,
-  JOB_OFFER_DESCRIPTION_MAX_LENGTH,
-  JOB_OFFER_LANGUAGES_MAX_LENGTH,
-  JOB_OFFER_LOCATION_URL_MAX_LENGTH,
-  JOB_OFFER_MAX_EXPERIENCE_YEARS,
-  JOB_OFFER_MAX_POSITIONS,
-  JOB_OFFER_MAX_REQUIREMENTS,
-  JOB_OFFER_MAX_SALARY,
-  JOB_OFFER_MAX_SKILLS,
-  JOB_OFFER_REQUIREMENT_MAX_LENGTH,
-  JOB_OFFER_TITLE_MAX_LENGTH,
-  JOB_OFFER_VALIDATION_MESSAGES as MESSAGES,
-} from '../constants/job-offer.constants.js';
+import { JOB_OFFER_MAX_SKILLS, JOB_OFFER_TITLE_MAX_LENGTH, JOB_OFFER_VALIDATION_MESSAGES as MESSAGES } from '../constants/job-offer.constants.js';
 import { JobOfferContractType, JobOfferModality } from '../types/job-offer.enum.js';
 import type { SalaryFields } from '../types/salary-fields.type.js';
 
@@ -20,11 +7,11 @@ const salarySchema = z
   .number()
   .int()
   .min(1, MESSAGES.SALARY_NOT_POSITIVE)
-  .max(JOB_OFFER_MAX_SALARY, MESSAGES.SALARY_TOO_HIGH);
+  .max(999_999_999, MESSAGES.SALARY_TOO_HIGH);
 
 const requirementListSchema = z
-  .array(z.string().trim().min(1).max(JOB_OFFER_REQUIREMENT_MAX_LENGTH, MESSAGES.REQUIREMENT_TOO_LONG))
-  .max(JOB_OFFER_MAX_REQUIREMENTS, MESSAGES.REQUIREMENTS_TOO_MANY);
+  .array(z.string().trim().min(1).max(120, MESSAGES.REQUIREMENT_TOO_LONG))
+  .max(10, MESSAGES.REQUIREMENTS_TOO_MANY);
 
 export const jobOfferFieldsSchema = z.object({
   title: z
@@ -37,31 +24,31 @@ export const jobOfferFieldsSchema = z.object({
     .string()
     .trim()
     .min(1, MESSAGES.REQUIRED_FIELD)
-    .max(JOB_OFFER_DESCRIPTION_MAX_LENGTH, MESSAGES.DESCRIPTION_TOO_LONG),
+    .max(3000, MESSAGES.DESCRIPTION_TOO_LONG),
   modality: z.enum(JobOfferModality, { message: MESSAGES.INVALID_MODALITY }),
   contractType: z.enum(JobOfferContractType, { message: MESSAGES.INVALID_CONTRACT_TYPE }),
   category: z
     .string()
     .trim()
     .min(1, MESSAGES.REQUIRED_FIELD)
-    .max(JOB_OFFER_CATEGORY_MAX_LENGTH, MESSAGES.CATEGORY_TOO_LONG),
+    .max(100, MESSAGES.CATEGORY_TOO_LONG),
   positionsAvailable: z
     .number()
     .int(MESSAGES.POSITIONS_NOT_INTEGER)
     .min(1, MESSAGES.POSITIONS_TOO_FEW)
-    .max(JOB_OFFER_MAX_POSITIONS, MESSAGES.POSITIONS_TOO_MANY),
+    .max(500, MESSAGES.POSITIONS_TOO_MANY),
   salaryMin: salarySchema.optional(),
   salaryMax: salarySchema.optional(),
   languages: z
     .string()
     .trim()
     .min(1, MESSAGES.REQUIRED_FIELD)
-    .max(JOB_OFFER_LANGUAGES_MAX_LENGTH, MESSAGES.LANGUAGES_TOO_LONG),
+    .max(100, MESSAGES.LANGUAGES_TOO_LONG),
   locationUrl: z
     .string()
     .trim()
     .min(1, MESSAGES.REQUIRED_FIELD)
-    .max(JOB_OFFER_LOCATION_URL_MAX_LENGTH, MESSAGES.LOCATION_URL_TOO_LONG)
+    .max(2048, MESSAGES.LOCATION_URL_TOO_LONG)
     .regex(
       /^https:\/\/(?:maps\.app\.goo\.gl\/[\w-]+|goo\.gl\/maps\/[\w-]+|(?:www\.)?google\.com(?:\.[a-z]{2})?\/maps\/place\/[^/\s?#]+\/@-?\d+(?:\.\d+)?,-?\d+(?:\.\d+)?,\d+(?:\.\d+)?[zm])(?:[/?#]\S*)?$/,
       MESSAGES.INVALID_LOCATION_URL,
@@ -75,7 +62,7 @@ export const jobOfferFieldsSchema = z.object({
     .number()
     .int(MESSAGES.EXPERIENCE_NOT_INTEGER)
     .min(0, MESSAGES.EXPERIENCE_OUT_OF_RANGE)
-    .max(JOB_OFFER_MAX_EXPERIENCE_YEARS, MESSAGES.EXPERIENCE_OUT_OF_RANGE)
+    .max(40, MESSAGES.EXPERIENCE_OUT_OF_RANGE)
     .optional(),
   otherRequirements: requirementListSchema.optional(),
 });

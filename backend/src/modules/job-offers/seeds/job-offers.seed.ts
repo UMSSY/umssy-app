@@ -1,14 +1,6 @@
 import { DAY_MS } from '../../../common/constants/date-time.constants.js';
 import type { Prisma } from '../../../prisma/client.js';
-import {
-  SEED_JOB_OFFER_COMPANIES,
-  SEED_JOB_OFFER_CONTRACT_TYPES,
-  SEED_JOB_OFFER_LOCATION_URL,
-  SEED_JOB_OFFER_MODALITIES,
-  SEED_JOB_OFFER_SKILLS,
-  SEED_JOB_OFFER_STATUSES,
-  SEED_JOB_OFFERS,
-} from '../constants/seed-job-offers.constants.js';
+import { SEED_JOB_OFFER_COMPANIES, SEED_JOB_OFFER_CONTRACT_TYPES, SEED_JOB_OFFER_MODALITIES, SEED_JOB_OFFER_SKILLS, SEED_JOB_OFFER_STATUSES, SEED_JOB_OFFERS } from '../constants/seed-job-offers.constants.js';
 import { formatSalaryRange } from '../utils/format-salary-range.js';
 
 function idsByTitle(rows: { id: string; title: string }[]): Map<string, string> {
@@ -96,7 +88,7 @@ async function seedDemoJobOffers(
         positionsAvailable: offer.positionsAvailable,
         salaryRange: formatSalaryRange(offer.salaryMin, offer.salaryMax),
         languages: offer.languages,
-        locationUrl: SEED_JOB_OFFER_LOCATION_URL,
+        locationUrl: 'https://maps.app.goo.gl/UmssCochabamba',
         publishedAt: new Date(now.getTime() - offer.daysAgo * DAY_MS),
         createdAt: new Date(now.getTime() - offer.daysAgo * DAY_MS),
         skills: {

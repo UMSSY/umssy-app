@@ -51,7 +51,6 @@ export const SEED_JOB_OFFER_COMPANIES = [
   },
 ] as const;
 
-export const SEED_JOB_OFFER_LOCATION_URL = 'https://maps.app.goo.gl/UmssCochabamba';
 export const SEED_JOB_OFFERS = [
   {
     id: 'b0000000-0000-4000-8000-000000000001',
