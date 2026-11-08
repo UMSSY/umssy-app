@@ -1,3 +1,4 @@
+import { MAX_FILE_UPLOAD_SIZE_BYTES } from '../../../common/constants/file-upload.constants.js';
 import { Body, Controller, Param, ParseUUIDPipe, Patch, Post, StandardSchemaValidationPipe, UploadedFile, UseGuards, UseInterceptors, UsePipes } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
@@ -6,7 +7,7 @@ import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { ResponseInterceptor } from '../../../common/interceptors/response.interceptor.js';
 import type { MulterFile } from '../../../common/types/multer-file.type.js';
 import { buildRequestValidationException } from '../../../common/utils/build-request-validation-exception.js';
-import { CERTIFICATION_DOCUMENT_FIELD_NAME, CERTIFICATION_DOCUMENT_UPLOAD_LIMIT_BYTES } from '../../certification-documents/constants/certification-document.constants.js';
+import { CERTIFICATION_DOCUMENT_FIELD_NAME } from '../../certification-documents/constants/certification-document.constants.js';
 import { saveCertificationDocumentSchema, type SaveCertificationDocumentRequest } from '../requests/save-certification-document.request.js';
 import { CertificationsService } from '../services/certifications.service.js';
 
@@ -28,7 +29,7 @@ const saveBody: Parameters<typeof ApiBody>[0] = { schema: {
 @UseInterceptors(ResponseInterceptor)
 @UsePipes(new StandardSchemaValidationPipe({ exceptionFactory: buildRequestValidationException }))
 @ApiConsumes('multipart/form-data')
-@UseInterceptors(FileInterceptor(CERTIFICATION_DOCUMENT_FIELD_NAME, { limits: { fileSize: CERTIFICATION_DOCUMENT_UPLOAD_LIMIT_BYTES, files: 1 } }))
+@UseInterceptors(FileInterceptor(CERTIFICATION_DOCUMENT_FIELD_NAME, { limits: { fileSize: MAX_FILE_UPLOAD_SIZE_BYTES, files: 1 } }))
 export class CertificationSaveController {
   constructor(private readonly service: CertificationsService) {}
 
