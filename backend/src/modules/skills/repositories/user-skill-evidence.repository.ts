@@ -6,16 +6,8 @@ import { buildExperienceRef } from '../utils/build-experience-ref.js';
 import { readEvidenceRefs } from '../utils/read-evidence-refs.js';
 
 @Injectable()
-export class ExperienceSkillsRepository {
+export class UserSkillEvidenceRepository {
   constructor(private readonly prisma: PrismaService) {}
-
-  async belongsToUser(experienceId: string, userId: string): Promise<boolean> {
-    const experience = await this.prisma.workExperience.findFirst({
-      where: { id: experienceId, userId },
-      select: { id: true },
-    });
-    return experience !== null;
-  }
 
   async replaceDetected(
     userId: string,
@@ -51,7 +43,9 @@ export class ExperienceSkillsRepository {
         where: { userId, skillId: { in: skillIds } },
         select: { id: true, skillId: true, source: true, evidenceRefs: true },
       });
-      const existingBySkill = new Map(existing.map((row) => [row.skillId, row]));
+      const existingBySkill = new Map(
+        existing.map((row) => [row.skillId, row]),
+      );
 
       for (const skillId of skillIds) {
         const row = existingBySkill.get(skillId);

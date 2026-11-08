@@ -3,12 +3,12 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { JobMatchController } from '../controllers/job-match.controller.js';
 import { MatchingModule } from '../matching.module.js';
-import { JobMatchRepository } from '../repositories/job-match.repository.js';
+import { JobMatchSourceService } from '../services/job-match-source.service.js';
 import { JobMatchService } from '../services/job-match.service.js';
- 
+
 describe('MatchingModule: endpoint de afinidad por vacante', () => {
   let moduleRef: TestingModule;
- 
+
   beforeEach(async () => {
     moduleRef = await Test.createTestingModule({
       imports: [MatchingModule],
@@ -17,8 +17,8 @@ describe('MatchingModule: endpoint de afinidad por vacante', () => {
       .useValue({})
       .compile();
   });
- 
-  it.each([JobMatchController, JobMatchService, JobMatchRepository])(
+
+  it.each([JobMatchController, JobMatchService, JobMatchSourceService])(
     'resuelve %o',
     (provider) => {
       expect(moduleRef.get(provider)).toBeInstanceOf(provider);
