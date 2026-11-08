@@ -36,3 +36,8 @@ export const BOLIVIA_MONTH_SHORT_LABELS = [
   "nov",
   "dic",
 ] as const;
+
+export const BOLIVIA_MONTH_LABELS = [
+  "enero", "febrero", "marzo", "abril", "mayo", "junio",
+  "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
+] as const;
