@@ -1,3 +1,4 @@
+import "@/shared/testing/indexed-db.mock";
 import { act, cleanup, fireEvent, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { renderWithQuery } from '@/shared/testing/render-with-query';
@@ -7,7 +8,10 @@ import { PassDetail } from './pass-detail';
 
 vi.mock('../services/registrations.service', () => ({ registrationsService: { getPass: vi.fn() } }));
 const pass = { id: 'pass-1', eventName: 'React', date: '2026-11-20', startTime: '09:00', endTime: '12:00', location: 'Aula 1', status: 'Confirmada' };
-beforeEach(() => { vi.mocked(registrationsService.getPass).mockReset(); saveAccessToken('owner-token'); });
+beforeEach(async () => {
+  vi.mocked(registrationsService.getPass).mockReset();
+  await saveAccessToken("owner-token");
+});
 afterEach(() => { cleanup(); clearAccessToken(); });
 
 describe('Private pass detail', () => {
