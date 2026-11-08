@@ -3,7 +3,7 @@ import { CV_VALIDATION_RULES } from '../constants/cv.constants.js';
 import { CvNotFoundException } from '../exceptions/cv-not-found.exception.js';
 import { ProfileNotFoundException } from '../../profile/exceptions/profile-not-found.exception.js';
 import { CvMapper } from '../mappers/cv.mapper.js';
-import { RadarIntegrationService } from '../../radar-integration/radar-integration.service.js';
+import { RadarIntegrationService } from '../../radar-integration/services/radar-integration.service.js';
 import { CvMetadataRepository } from '../repositories/cv-metadata.repository.js';
 import type { ListCvsRequest } from '../requests/list-cvs.request.js';
 import type { CvResponse } from '../responses/cv.response.js';
