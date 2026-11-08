@@ -1,9 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
-import {
-  MANUAL_SKILL_SOURCE,
-  NLP_SKILL_SOURCE,
-} from '../constants/experience-skills.constants.js';
+
 import { appendEvidenceRef } from '../utils/append-evidence-ref.js';
 import { buildExperienceRef } from '../utils/build-experience-ref.js';
 import { readEvidenceRefs } from '../utils/read-evidence-refs.js';
@@ -38,7 +35,7 @@ export class ExperienceSkillsRepository {
         const refs = readEvidenceRefs(row.evidenceRefs).filter(
           (item) => item !== ref,
         );
-        if (refs.length === 0 && row.source === NLP_SKILL_SOURCE) {
+        if (refs.length === 0 && row.source === 'nlp') {
           await tx.userSkill.delete({ where: { id: row.id } });
         } else {
           await tx.userSkill.update({
@@ -63,19 +60,19 @@ export class ExperienceSkillsRepository {
             data: {
               userId,
               skillId,
-              source: MANUAL_SKILL_SOURCE,
+              source: 'manual',
               evidenceRefs: [ref],
             },
           });
           continue;
         }
-        const needsPromotion = row.source !== MANUAL_SKILL_SOURCE;
+        const needsPromotion = row.source !== 'manual';
         const needsRef = !readEvidenceRefs(row.evidenceRefs).includes(ref);
         if (!needsPromotion && !needsRef) continue;
         await tx.userSkill.update({
           where: { id: row.id },
           data: {
-            ...(needsPromotion ? { source: MANUAL_SKILL_SOURCE } : {}),
+            ...(needsPromotion ? { source: 'manual' } : {}),
             ...(needsRef
               ? { evidenceRefs: appendEvidenceRef(row.evidenceRefs, ref) }
               : {}),
