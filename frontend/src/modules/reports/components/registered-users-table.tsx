@@ -1,8 +1,9 @@
+import { ROLE_LABELS } from "@/shared/constants/roles.constants";
 import { FileText } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatDate } from "@/shared/utils/date.utils";
 import { DOCUMENT_TYPE_LABELS } from "@/modules/request-review";
-import { EMPTY_DOCUMENT_LABEL, USER_TYPE_LABELS } from "../constants/registered-users.constants";
+import { EMPTY_DOCUMENT_LABEL } from "../constants/registered-users.constants";
 import { EMAIL_SEARCH_NO_RESULTS_MESSAGE } from "../constants/reports.constants";
 import { TABLE_CELL_CLASSES as CELL_CLASSES, TABLE_CONTAINER_CLASSES as CONTAINER_CLASSES, USERS_TABLE_HEAD_CLASSES as HEAD_CLASSES } from "../constants/report-table.constants";
 import type { RegisteredUsersTableProps } from "../types/registered-users-table-props.types";
@@ -30,7 +31,7 @@ export function RegisteredUsersTable({ users, isLoading, errorMessage, searchTer
       <TableRow key={user.id} className="border-border hover:bg-surface-soft">
         <TableCell className={`${CELL_CLASSES} text-ink`}>{user.fullName}</TableCell>
         <TableCell className={CELL_CLASSES}>{user.email}</TableCell>
-        <TableCell className={CELL_CLASSES}>{USER_TYPE_LABELS[user.userType]}</TableCell>
+        <TableCell className={CELL_CLASSES}>{ROLE_LABELS[user.userType]}</TableCell>
         <TableCell className={`${CELL_CLASSES} tabular-nums`}>{user.identifier}</TableCell>
         <TableCell className={CELL_CLASSES}>
           <span className="flex items-center gap-2">
