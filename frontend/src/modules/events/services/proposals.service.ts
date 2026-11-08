@@ -1,3 +1,4 @@
+import { BEARER_PREFIX } from "@/shared/constants/auth.constants";
 import { apiClient } from '@/shared/services/api-client';
 
 import type { CreatedProposal, ProposalValues } from '../types/proposal.types';
@@ -9,7 +10,7 @@ export const proposalsService = {
     Object.entries(values).forEach(([key, value]) => payload.append(key, value.trim()));
     payload.append('cover', cover);
     const response = await apiClient.post<unknown>('/event-proposals', payload, {
-      headers: { 'Idempotency-Key': requestId, ...(accessToken !== undefined && { Authorization: accessToken ? `Bearer ${accessToken}` : '' }) },
+      headers: { 'Idempotency-Key': requestId, ...(accessToken !== undefined && { Authorization: accessToken ? `${BEARER_PREFIX}${accessToken}` : '' }) },
       timeout: 60000,
     });
     const data = readRecord(readRecord(response.data).data);

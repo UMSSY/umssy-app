@@ -1,3 +1,4 @@
+import { BEARER_PREFIX } from "@/shared/constants/auth.constants";
 import type { PassData } from '../types/pass-data.types';
 export type { PassData } from '../types/pass-data.types';
 import { registrationsService as registrationApi } from '@/modules/registrations';
@@ -23,7 +24,7 @@ export const registrationsService = {
       `/event-registrations/support/${encodeURIComponent(eventId)}`,
       undefined,
       {
-        headers: { Authorization: accessToken ? `Bearer ${accessToken}` : '' },
+        headers: { Authorization: accessToken ? `${BEARER_PREFIX}${accessToken}` : '' },
         timeout: REQUEST_TIMEOUT_MS,
       },
     );
@@ -41,7 +42,7 @@ export const registrationsService = {
     const response = await apiClient.get(
       `/event-registrations/passes/${registrationId}`,
       {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `${BEARER_PREFIX}${token}` },
         signal,
         timeout: REQUEST_TIMEOUT_MS,
       },
