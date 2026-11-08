@@ -1,6 +1,7 @@
+import { ACCESS_TOKEN_STORAGE_KEY } from "@/shared/constants/auth.constants";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { apiClient } from "@/shared/services/api-client";
-import { ACCESS_TOKEN_STORAGE_KEY } from "@/modules/profile/config/auth-storage.config";
+
 import { documentsService } from "./documents.service";
 
 vi.mock("@/shared/services/api-client", async (importOriginal) => ({
