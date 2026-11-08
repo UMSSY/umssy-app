@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { PHONE_MAX_DIGITS, PHONE_MIN_DIGITS } from '../constants/profile.constants.js';
 
 const countDigits = (value: string): number => value.replace(/\D/g, '').length;
 
@@ -14,9 +13,9 @@ export const phoneSchema = z
   .refine(
     (value) => {
       const digits = countDigits(value);
-      return digits >= PHONE_MIN_DIGITS && digits <= PHONE_MAX_DIGITS;
+      return digits >= 7 && digits <= 15;
     },
-    `Phone must have between ${PHONE_MIN_DIGITS} and ${PHONE_MAX_DIGITS} digits`,
+    `Phone must have between 7 and 15 digits`,
   );
 
 export const personalEmailSchema = z.string().trim().pipe(z.email());
