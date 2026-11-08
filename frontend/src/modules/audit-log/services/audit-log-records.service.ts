@@ -2,7 +2,8 @@ import { GENERIC_ERROR_MESSAGE, NETWORK_ERROR_MESSAGE } from "@/shared/constants
 import { apiClient } from "@/shared/services/api-client";
 
 import type { AuditApiResult } from "../types/audit-api-result.types";
-import type { AuditCsvFile, AuditResponsibleOption } from "../types/audit-log-records.types";
+import type { AuditCsvFile } from "../types/audit-csv-file.types";
+import type { AuditResponsibleOption } from "../types/audit-responsible-option.types";
 import type { AuditLogFilters } from "../types/audit-log-filters.types";
 import { isRecord, toAuditFailure } from "../utils/to-audit-failure";
 import { toFilterParams } from "./audit-log.service";

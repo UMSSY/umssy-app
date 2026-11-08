@@ -1,4 +1,4 @@
-import type { AuditAction } from "../types/audit-event.types";
+import type { AuditAction } from "../types/audit-action.types";
 import { AUDIT_ACTION_STYLES } from "./audit-actions.constants";
 
 // Valor de los selectores que significa "sin filtro"

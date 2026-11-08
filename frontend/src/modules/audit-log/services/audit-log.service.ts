@@ -2,7 +2,7 @@ import { GENERIC_ERROR_MESSAGE, NETWORK_ERROR_MESSAGE } from "@/shared/constants
 import { apiClient } from "@/shared/services/api-client";
 import { AUDIT_PAGE_SIZE } from "../constants/audit-log.constants";
 import type { AuditApiResult } from "../types/audit-api-result.types";
-import type { AuditEventPage } from "../types/audit-event.types";
+import type { AuditEventPage } from "../types/audit-event-page.types";
 import type { AuditLogFilters } from "../types/audit-log-filters.types";
 import { isRecord, toAuditFailure } from "../utils/to-audit-failure";
 
@@ -44,7 +44,10 @@ async function listEvents(page: number, filters: AuditLogFilters, limit: number 
 // Pide el archivo por el identificador del evento, nunca el documento actual de la solicitud
 async function getEvidenceBlob(eventId: string): Promise<AuditApiResult<Blob>> {
   try {
-    const response = await apiClient.get(`/audit-events/${eventId}/document`, { responseType: "blob", validateStatus: () => true });
+    const response = await apiClient.get(`/audit-events/${eventId}/document`, {
+      responseType: "blob",
+      validateStatus: () => true,
+    });
     if (response.status === 404) return { ok: false, status: 404, message: NO_EVIDENCE_MESSAGE };
     if (response.status === 410) return { ok: false, status: 410, message: EVIDENCE_GONE_MESSAGE };
     if (response.status < 200 || response.status >= 300) return toAuditFailure(response.status, null);

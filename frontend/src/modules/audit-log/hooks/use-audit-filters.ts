@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
 import { DEFAULT_AUDIT_FILTERS } from "../constants/audit-log.constants";
 
-import type { AuditAction } from "../types/audit-event.types";
+import type { AuditAction } from "../types/audit-action.types";
 import type { AuditLogFilters } from "../types/audit-log-filters.types";
 import { getCurrentMonthPeriod } from "../utils/get-current-month-period";
 
