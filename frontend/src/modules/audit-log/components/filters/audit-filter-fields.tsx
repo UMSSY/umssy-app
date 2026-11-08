@@ -1,5 +1,7 @@
 "use client";
 
+import { DATE_PATTERN } from "@/shared/constants/date-time.constants";
+
 import { Calendar, ListFilter, UserRound } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -12,7 +14,6 @@ import type { AuditFilterFieldsProps } from "../../types/audit-log-extras-props.
 const LABEL_CLASS = "text-xs font-medium text-text-secondary";
 const TRIGGER_CLASS = "w-full gap-2 rounded-lg border-border bg-surface px-3 text-sm font-medium text-ink focus-visible:border-accent focus-visible:ring-interaction";
 const DATE_CLASS = "w-full min-w-36 rounded-lg border-border bg-surface text-sm text-ink";
-const COMPLETE_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 // Campos compartidos por la barra de escritorio y el panel móvil
 export function AuditFilterFields({ idPrefix, values, responsibles, periodError, onActionChange, onResponsibleChange, onFromChange, onToChange }: AuditFilterFieldsProps) {
@@ -71,7 +72,7 @@ export function AuditFilterFields({ idPrefix, values, responsibles, periodError,
             <DateField
               id={`${idPrefix}-from`}
               value={values.from}
-              max={COMPLETE_DATE.test(values.to) ? values.to : undefined}
+              max={DATE_PATTERN.test(values.to) ? values.to : undefined}
               aria-invalid={Boolean(periodError)}
               onValueChange={onFromChange}
               className={DATE_CLASS}
@@ -84,7 +85,7 @@ export function AuditFilterFields({ idPrefix, values, responsibles, periodError,
             <DateField
               id={`${idPrefix}-to`}
               value={values.to}
-              min={COMPLETE_DATE.test(values.from) ? values.from : undefined}
+              min={DATE_PATTERN.test(values.from) ? values.from : undefined}
               aria-invalid={Boolean(periodError)}
               onValueChange={onToChange}
               className={DATE_CLASS}

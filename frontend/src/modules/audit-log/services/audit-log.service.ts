@@ -1,9 +1,10 @@
+import { GENERIC_ERROR_MESSAGE, NETWORK_ERROR_MESSAGE } from "@/shared/constants/error-messages.constants";
 import { apiClient } from "@/shared/services/api-client";
 import { AUDIT_PAGE_SIZE } from "../constants/audit-log.constants";
 import type { AuditApiResult } from "../types/audit-api-result.types";
 import type { AuditEventPage } from "../types/audit-event.types";
 import type { AuditLogFilters } from "../types/audit-log-filters.types";
-import { GENERIC_ERROR_MESSAGE, isRecord, NETWORK_ERROR_MESSAGE, toAuditFailure } from "../utils/to-audit-failure";
+import { isRecord, toAuditFailure } from "../utils/to-audit-failure";
 
 const NO_EVIDENCE_MESSAGE = "Este evento no tiene un documento asociado.";
 const EVIDENCE_GONE_MESSAGE = "El documento de este evento ya no está disponible.";

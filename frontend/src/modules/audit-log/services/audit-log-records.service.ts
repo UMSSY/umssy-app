@@ -1,9 +1,10 @@
+import { GENERIC_ERROR_MESSAGE, NETWORK_ERROR_MESSAGE } from "@/shared/constants/error-messages.constants";
 import { apiClient } from "@/shared/services/api-client";
 
 import type { AuditApiResult } from "../types/audit-api-result.types";
 import type { AuditCsvFile, AuditResponsibleOption } from "../types/audit-log-records.types";
 import type { AuditLogFilters } from "../types/audit-log-filters.types";
-import { GENERIC_ERROR_MESSAGE, isRecord, NETWORK_ERROR_MESSAGE, toAuditFailure } from "../utils/to-audit-failure";
+import { isRecord, toAuditFailure } from "../utils/to-audit-failure";
 import { toFilterParams } from "./audit-log.service";
 
 async function listResponsibles(): Promise<AuditApiResult<AuditResponsibleOption[]>> {
