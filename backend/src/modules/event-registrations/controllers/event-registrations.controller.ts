@@ -11,11 +11,9 @@ import { ZodValidationPipe } from '../../../common/pipes/zod-validation.pipe.js'
 import { ValidationException } from '../../../common/exceptions/validation.exception.js';
 import { EventRegistrationsService } from '../services/event-registrations.service.js';
 import { RegistrationResponses } from '../decorators/registration-responses.decorator.js';
-import { EVENT_REGISTRATION_PARAMS_SCHEMA, REGISTRATION_ID_SCHEMA, REGISTRATION_PARAMS_SCHEMA } from '../requests/registration-params.schema.js';
+import { EVENT_REGISTRATION_PARAMS_SCHEMA, REGISTRATION_ID_SCHEMA } from '../requests/registration-params.schema.js';
 import type { EventRegistrationParams } from '../types/event-registration-params.types.js';
 import type { RegistrationIdParam } from '../types/registration-id-param.types.js';
-import type { RegistrationParams } from '../types/registration-params.types.js';
-import { REGISTRATION_BODY_SCHEMA } from '../requests/registration-body.schema.js';
 import { CREATE_EVENT_REGISTRATION_BODY_SCHEMA } from '../requests/create-event-registration-body.schema.js';
 import type { CreateEventRegistrationBody } from '../types/create-event-registration-body.types.js';
 
@@ -26,21 +24,6 @@ import type { CreateEventRegistrationBody } from '../types/create-event-registra
 export class EventRegistrationsController {
   constructor(private readonly registrationsService: EventRegistrationsService) {}
 
-  @Post('events/:eventId/registrations')
-  @UseGuards(RolesGuard)
-  @Roles('titulado')
-  @HttpCode(201)
-  @ApiOperation({ summary: 'Inscribirse o reactivar una inscripción', description: 'Sin cuerpo de solicitud. El usuario se obtiene de la sesión.' })
-  @ApiParam({ name: 'eventId', format: 'uuid' })
-  @RegistrationResponses(201)
-  create(
-    @Param(new ZodValidationPipe(EVENT_REGISTRATION_PARAMS_SCHEMA, () => new ValidationException())) params: EventRegistrationParams,
-    @CurrentUserId() userId: string,
-    @Body(new ZodValidationPipe(REGISTRATION_BODY_SCHEMA, () => new ValidationException())) _body: unknown,
-  ) {
-    return this.registrationsService.create(params.eventId, userId);
-  }
-
   @Get('events/:eventId/registrations/me')
   @ApiOperation({ summary: 'Consultar la inscripción propia, incluida una inscripción cancelada' })
   @ApiParam({ name: 'eventId', format: 'uuid' })
@@ -50,18 +33,6 @@ export class EventRegistrationsController {
     @CurrentUserId() userId: string,
   ) {
     return this.registrationsService.findOwn(params.eventId, userId);
-  }
-
-  @Delete('registrations/:registrationId')
-  @HttpCode(200)
-  @ApiOperation({ summary: 'Cancelar una inscripción propia mediante baja lógica' })
-  @ApiParam({ name: 'registrationId', format: 'uuid' })
-  @RegistrationResponses(200)
-  cancel(
-    @Param(new ZodValidationPipe(REGISTRATION_PARAMS_SCHEMA, () => new ValidationException())) params: RegistrationParams,
-    @CurrentUserId() userId: string,
-  ) {
-    return this.registrationsService.cancel(params.registrationId, userId);
   }
 
   @Post('event-registrations')
@@ -93,7 +64,7 @@ export class EventRegistrationsController {
   findMine(@CurrentUser() user: AuthenticatedUser) {
     return this.registrationsService.findMine(user.id);
   }
-  @Post('event-registrations/support/:eventId')
+  @Post('events/:eventId/supports')
   @UseGuards(RolesGuard)
   @Roles('titulado')
   @ApiOperation({ summary: 'Apoyar una propuesta de taller con el usuario de la sesión' })
@@ -106,7 +77,7 @@ export class EventRegistrationsController {
     return this.registrationsService.support(eventId, userId);
   }
 
-  @Get('event-registrations/passes/:id')
+  @Get('event-registrations/:id/pass')
   @ApiOperation({ summary: 'Consultar el pase privado de una inscripción activa de un evento publicado' })
   @ApiParam({ name: 'id', format: 'uuid' })
   getPassById(

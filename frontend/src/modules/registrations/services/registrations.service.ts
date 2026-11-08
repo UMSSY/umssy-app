@@ -12,7 +12,7 @@ import { REQUEST_TIMEOUT_MS } from '@/shared/constants/http.constants';
 
 export const registrationsService = {
   async create(eventId: string, accessToken = getAccessToken()): Promise<RegistrationResponse> {
-    const response = await apiClient.post<unknown>(`/events/${encodeURIComponent(eventId)}/registrations`, undefined, {
+    const response = await apiClient.post<unknown>("/event-registrations", { eventId }, {
       headers: { Authorization: accessToken ? `${BEARER_PREFIX}${accessToken}` : "" },
       timeout: REQUEST_TIMEOUT_MS,
     });
@@ -35,7 +35,7 @@ export const registrationsService = {
   },
 
   async cancel(registrationId: string, accessToken = getAccessToken()): Promise<RegistrationResponse> {
-    const response = await apiClient.delete<unknown>(`/registrations/${encodeURIComponent(registrationId)}`, {
+    const response = await apiClient.delete<unknown>(`/event-registrations/${encodeURIComponent(registrationId)}`, {
       headers: { Authorization: accessToken ? `${BEARER_PREFIX}${accessToken}` : "" },
       timeout: REQUEST_TIMEOUT_MS,
     });

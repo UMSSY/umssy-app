@@ -21,7 +21,7 @@ export const registrationsService = {
       throw new Error('La URL del backend no está configurada.');
 
     const response = await apiClient.post<unknown>(
-      `/event-registrations/support/${encodeURIComponent(eventId)}`,
+      `/events/${encodeURIComponent(eventId)}/supports`,
       undefined,
       {
         headers: { Authorization: accessToken ? `${BEARER_PREFIX}${accessToken}` : '' },
@@ -40,7 +40,7 @@ export const registrationsService = {
       throw new Error('La URL del backend no está configurada.');
 
     const response = await apiClient.get(
-      `/event-registrations/passes/${registrationId}`,
+      `/event-registrations/${registrationId}/pass`,
       {
         headers: { Authorization: `${BEARER_PREFIX}${token}` },
         signal,
