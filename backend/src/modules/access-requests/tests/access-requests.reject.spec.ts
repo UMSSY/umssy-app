@@ -6,7 +6,7 @@ import { rejectAccessRequestSchema } from '../requests/reject-access-request.sch
 
 import { AccessRequestsService } from '../services/access-requests.service.js';
 import { RejectionNotificationService } from '../services/rejection-notification.service.js';
-import { RejectionMailContextService } from '../mail/rejection-mail-context.service.js';
+import { RejectionMailContextService } from '../services/rejection-mail-context.service.js';
 
 const messagesOf = (input: unknown) => {
   const result = rejectAccessRequestSchema.safeParse(input);

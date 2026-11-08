@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { RejectionMailContextService } from '../mail/rejection-mail-context.service.js';
+import { RejectionMailContextService } from '../services/rejection-mail-context.service.js';
 import { RejectionMailRepository } from '../repositories/rejection-mail.repository.js';
 import { DocumentCorrectionAuthorizationService } from '../services/document-correction-authorization.service.js';
 import { RejectionMailLinkService } from '../services/rejection-mail-link.service.js';

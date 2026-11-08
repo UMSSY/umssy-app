@@ -1,6 +1,6 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { MAIL_SENDER, type MailSender } from '../mail/mail-sender.js';
-import { RejectionMailContextService } from '../mail/rejection-mail-context.service.js';
+import { RejectionMailContextService } from './rejection-mail-context.service.js';
 
 @Injectable()
 export class RejectionNotificationService {

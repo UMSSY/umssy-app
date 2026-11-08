@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { BEARER_PREFIX } from '../../../common/constants/auth.constants.js';
 import { RejectionMailContextException } from '../exceptions/rejection-mail-context.exception.js';
 import { buildRejectionUrl } from '../mail/helpers/rejection-url.js';
-import { RejectionMailContextService } from '../mail/rejection-mail-context.service.js';
+import { RejectionMailContextService } from './rejection-mail-context.service.js';
 import { RejectionMailRepository } from '../repositories/rejection-mail.repository.js';
 import type { RejectionMailLink } from '../types/rejection-mail.types.js';
 import { DocumentCorrectionAuthorizationService } from './document-correction-authorization.service.js';

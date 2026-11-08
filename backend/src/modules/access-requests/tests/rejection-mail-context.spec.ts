@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { RejectionMailContextService } from '../mail/rejection-mail-context.service.js';
+import { RejectionMailContextService } from '../services/rejection-mail-context.service.js';
 
 describe('RejectionMailContextService', () => {
   it('solo expone el ID dentro de la ejecución y conserva el resultado', async () => {
