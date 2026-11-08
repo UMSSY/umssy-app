@@ -1,3 +1,4 @@
+import { ACCESS_TOKEN_STORAGE_KEY } from "@/shared/constants/auth.constants";
 import { readLocalStorage, writeLocalStorage } from "./browser-local-storage";
 import {
   readSessionStorage,
@@ -5,7 +6,6 @@ import {
   writeSessionStorage,
 } from "./browser-session-storage";
 
-const ACCESS_TOKEN_STORAGE_KEY = "accessToken";
 const LOGOUT_KEY = "umssy-session-logout";
 const SESSION_LOGOUT_KEY = "sessionLogoutVersion";
 
