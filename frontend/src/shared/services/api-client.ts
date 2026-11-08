@@ -1,13 +1,18 @@
 import { BEARER_PREFIX } from "@/shared/constants/auth.constants";
 import axios from "axios";
 import { ENV_CONFIG } from "@/shared/config/env.config";
-import { getAccessToken, clearAccessToken } from "@/shared/services/storage/access-token-storage";
+import {
+  getAccessToken,
+  clearAccessToken,
+  initializeAccessTokenStorage,
+} from "@/shared/services/storage/access-token-storage";
 
 export const apiClient = axios.create({
   baseURL: ENV_CONFIG.apiUrl,
 });
 
-apiClient.interceptors.request.use((config) => {
+apiClient.interceptors.request.use(async (config) => {
+  await initializeAccessTokenStorage();
   const accessToken = getAccessToken();
 
   if (accessToken && !config.headers.has("Authorization")) {
@@ -28,7 +33,8 @@ apiClient.interceptors.response.use(
       const token = getAccessToken();
       const authorization = error.config?.headers?.get?.("Authorization");
       // Una respuesta tardía de otra sesión no debe invalidar el token actual.
-      if (token && authorization === `${BEARER_PREFIX}${token}`) clearAccessToken();
+      if (token && authorization === `${BEARER_PREFIX}${token}`)
+        clearAccessToken();
     }
     return Promise.reject(error);
   },

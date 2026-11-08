@@ -4,7 +4,11 @@ import { createContext, useContext, useEffect, useSyncExternalStore } from "reac
 import { useQuery } from "@tanstack/react-query";
 import { isApiError } from "@/shared/services/api-client";
 import { authService, endSession, getSessionRoles } from "@/modules/auth";
-import { getAccessToken, subscribeAccessToken } from "@/shared/services/storage/access-token-storage";
+import {
+  getAccessToken,
+  subscribeAccessToken,
+  isAccessTokenReady,
+} from "@/shared/services/storage/access-token-storage";
 import type { AuthContextValue } from "@/shared/types/auth-context-value.types";
 import type { AuthProviderProps } from "@/shared/types/auth-provider-props.types";
 
@@ -13,6 +17,11 @@ const getServerToken = () => null;
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const accessToken = useSyncExternalStore(subscribeAccessToken, getAccessToken, getServerToken);
+  const isStorageReady = useSyncExternalStore(
+    subscribeAccessToken,
+    isAccessTokenReady,
+    () => false,
+  );
   const session = useQuery({
     queryKey: ["auth-session", accessToken],
     queryFn: () => authService.getSession(accessToken),
@@ -32,12 +41,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }
 
   return (
-    <AuthContext.Provider value={{
-      currentUserId: accessToken ? session.data?.id ?? null : null,
-      roles: accessToken ? session.data?.roles ?? getSessionRoles(accessToken) : [],
-      isLoading: Boolean(accessToken) && session.isPending,
-      refreshRoles,
-    }}>
+    <AuthContext.Provider
+      value={{
+        company: accessToken ? (session.data?.company ?? null) : null,
+        currentUserId: accessToken ? (session.data?.id ?? null) : null,
+        roles: accessToken
+          ? (session.data?.roles ?? getSessionRoles(accessToken))
+          : [],
+        isLoading:
+          !isStorageReady || (Boolean(accessToken) && session.isPending),
+        refreshRoles,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -46,10 +61,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
 export function useAuth(): AuthContextValue {
   const context = useContext(AuthContext);
   const accessToken = useSyncExternalStore(subscribeAccessToken, getAccessToken, getServerToken);
-  return context ?? {
-    currentUserId: null,
-    roles: getSessionRoles(accessToken),
-    isLoading: false,
-    refreshRoles: async () => {},
-  };
+  return (
+    context ?? {
+      currentUserId: null,
+      roles: getSessionRoles(accessToken),
+      isLoading: false,
+      refreshRoles: async () => {},
+    }
+  );
 }

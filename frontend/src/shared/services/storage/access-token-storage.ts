@@ -1,46 +1,110 @@
 import { ACCESS_TOKEN_STORAGE_KEY } from "@/shared/constants/auth.constants";
-import { readLocalStorage, writeLocalStorage } from "./browser-local-storage";
 import {
-  readSessionStorage,
-  removeSessionStorage,
-  writeSessionStorage,
-} from "./browser-session-storage";
+  readIndexedDb,
+  writeIndexedDb,
+  removeIndexedDb,
+} from "./browser-indexed-db";
 
-const LOGOUT_KEY = "umssy-session-logout";
-const SESSION_LOGOUT_KEY = "sessionLogoutVersion";
+let token: string | null = null;
+let ready = false;
+let revision = 0;
+let loading: Promise<void> | null = null;
+let writes: Promise<unknown> = Promise.resolve();
+const listeners = new Set<() => void>();
+let channel: BroadcastChannel | null = null;
+const emit = () => {
+  for (const listener of listeners) listener();
+};
 
-function logoutVersion(): string {
-  return readLocalStorage(LOGOUT_KEY) ?? '';
+export function isAccessTokenReady(): boolean {
+  return ready;
+}
+export function initializeAccessTokenStorage(): Promise<void> {
+  if (ready) return Promise.resolve();
+  if (loading) return loading;
+  const currentRevision = revision;
+  loading = readIndexedDb<unknown>(ACCESS_TOKEN_STORAGE_KEY)
+    .then((stored) => {
+      if (revision === currentRevision)
+        token = typeof stored === "string" ? stored : null;
+    })
+    .catch(() => {
+      if (revision === currentRevision) token = null;
+    })
+    .finally(() => {
+      if (revision !== currentRevision) return;
+      ready = true;
+      loading = null;
+      emit();
+    });
+  return loading;
 }
 
-export function saveAccessToken(accessToken: string): boolean {
-  const isSaved = writeSessionStorage(ACCESS_TOKEN_STORAGE_KEY, accessToken);
-  if (isSaved) writeSessionStorage(SESSION_LOGOUT_KEY, logoutVersion());
-  if (isSaved && typeof window !== "undefined") window.dispatchEvent(new Event("access-token-change"));
-  return isSaved;
+export async function saveAccessToken(value: string): Promise<boolean> {
+  const writeRevision = ++revision;
+  const operation = writes.then(() =>
+    writeIndexedDb(ACCESS_TOKEN_STORAGE_KEY, value),
+  );
+  writes = operation.catch(() => {});
+  try {
+    await operation;
+  } catch {
+    if (revision === writeRevision) {
+      ready = true;
+      loading = null;
+      emit();
+    }
+    return false;
+  }
+  if (revision !== writeRevision) return false;
+  token = value;
+  ready = true;
+  emit();
+  channel?.postMessage("changed");
+  return true;
 }
 
 export function getAccessToken(): string | null {
-  const token = readSessionStorage(ACCESS_TOKEN_STORAGE_KEY);
-  if (token && typeof window !== "undefined" && (readSessionStorage(SESSION_LOGOUT_KEY) ?? '') !== logoutVersion()) return null;
   return token;
 }
 
 export function clearAccessToken(): boolean {
-  const hadToken = Boolean(getAccessToken());
-  const isRemoved = removeSessionStorage(ACCESS_TOKEN_STORAGE_KEY);
-  if (hadToken && isRemoved && typeof window !== "undefined") {
-    try { writeLocalStorage(LOGOUT_KEY, crypto.randomUUID()); } catch { /* Logout must still finish if UUID generation is unavailable. */ }
-  }
-  if (isRemoved && typeof window !== "undefined") window.dispatchEvent(new Event("access-token-change"));
-  return isRemoved;
+  revision++;
+  token = null;
+  ready = true;
+  loading = null;
+  emit();
+  const operation = writes.then(() =>
+    removeIndexedDb(ACCESS_TOKEN_STORAGE_KEY),
+  );
+  writes = operation.catch(() => {});
+  void operation.then(() => channel?.postMessage("changed")).catch(() => {});
+  return true;
 }
 
 export function subscribeAccessToken(onChange: () => void): () => void {
-  window.addEventListener("access-token-change", onChange);
-  window.addEventListener("storage", onChange);
+  listeners.add(onChange);
+  if (
+    typeof window !== "undefined" &&
+    typeof BroadcastChannel !== "undefined" &&
+    !channel
+  ) {
+    channel = new BroadcastChannel("umssy-session");
+    channel.onmessage = () => {
+      revision++;
+      token = null;
+      ready = false;
+      loading = null;
+      emit();
+      void initializeAccessTokenStorage();
+    };
+  }
+  void initializeAccessTokenStorage();
   return () => {
-    window.removeEventListener("access-token-change", onChange);
-    window.removeEventListener("storage", onChange);
+    listeners.delete(onChange);
+    if (!listeners.size) {
+      channel?.close();
+      channel = null;
+    }
   };
 }
