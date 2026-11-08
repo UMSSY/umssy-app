@@ -12,7 +12,7 @@ import {
 } from '../exceptions/index.js';
 import { LOGIN_ROLE_PRIORITY } from '../constants/login-role-priority.constants.js';
 import { MailService } from '../../mail/services/mail.service.js';
-import { PASSWORD_RESET_EMAIL_MJML } from '../templates/password-reset-email.template.js';
+import { loadMailTemplate } from '../../mail/helpers/load-mail-template.js';
 import type { SessionResponse } from '../types/session-response.types.js';
 import type { LoginResponse } from '../types/login-response.types.js';
 import type { AuthenticatedUser } from '../../../common/types/authenticated-user.types.js';
@@ -94,7 +94,7 @@ export class AuthService {
       to: user.email,
       subject: `${code} es tu código de recuperación de contraseña - UMSSY`,
       text: `Hola, ${recipientName}: Tu código de recuperación es ${code}. Vence en ${OTP_EXPIRATION_MINUTES} minutos.`,
-      mjml: PASSWORD_RESET_EMAIL_MJML,
+      mjml: await loadMailTemplate('password-reset-email'),
       values: {
         recipientName,
         code,
