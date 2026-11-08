@@ -1,9 +1,10 @@
+import { MAX_FILE_UPLOAD_SIZE_BYTES } from '../../../common/constants/file-upload.constants.js';
 import { Injectable } from '@nestjs/common';
 import type { Prisma } from '../../../prisma/client.js';
 import { FilesRepository } from '../repositories/files.repository.js';
 import { EmptyFileException, FileNotFoundException, FileTooLargeException, InvalidFileTypeException } from '../exceptions/index.js';
 import { type FileTypeRule } from '../types/file-rules.js';
-import { FILE_TYPES, MAX_FILE_SIZE_BYTES } from '../constants/file-rules.constants.js';
+import { FILE_TYPES } from '../constants/file-rules.constants.js';
 import type { CreateFileInput, FileContent, FileMetadata } from '../types/file.types.js';
 import { EDGE_DOTS_AND_SPACES_REGEX } from '../constants/file-name.constants.js';
 
@@ -25,7 +26,7 @@ export class FilesService {
     if (content.length === 0) {
       throw new EmptyFileException();
     }
-    if (content.length > MAX_FILE_SIZE_BYTES) {
+    if (content.length > MAX_FILE_UPLOAD_SIZE_BYTES) {
       throw new FileTooLargeException();
     }
 

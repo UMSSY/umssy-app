@@ -1,3 +1,4 @@
+import { MAX_FILE_UPLOAD_SIZE_BYTES } from '../../../common/constants/file-upload.constants.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { FilesService } from '../services/files.service.js';
 import {
@@ -6,7 +7,6 @@ import {
   FileTooLargeException,
   InvalidFileTypeException,
 } from '../exceptions/index.js';
-import { MAX_FILE_SIZE_BYTES } from '../constants/file-rules.constants.js';
 
 const PDF = Buffer.from([0x25, 0x50, 0x44, 0x46, 0x2d, 0x31]);
 const PNG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00]);
@@ -53,10 +53,10 @@ describe('FilesService', () => {
   });
 
   it('rechaza más de 10 MB con 413 y acepta exactamente 10 MB', async () => {
-    const exact = Buffer.concat([PDF, Buffer.alloc(MAX_FILE_SIZE_BYTES - PDF.length)]);
+    const exact = Buffer.concat([PDF, Buffer.alloc(MAX_FILE_UPLOAD_SIZE_BYTES - PDF.length)]);
     await expect(service.create({ name: 'a', content: exact })).resolves.toBeDefined();
 
-    const big = Buffer.concat([PDF, Buffer.alloc(MAX_FILE_SIZE_BYTES - PDF.length + 1)]);
+    const big = Buffer.concat([PDF, Buffer.alloc(MAX_FILE_UPLOAD_SIZE_BYTES - PDF.length + 1)]);
     const error = await service.create({ name: 'a', content: big }).catch((e) => e);
     expect(error).toBeInstanceOf(FileTooLargeException);
     expect(error.statusCode).toBe(413);

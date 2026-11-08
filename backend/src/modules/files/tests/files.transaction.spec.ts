@@ -1,10 +1,10 @@
+import { MAX_FILE_UPLOAD_SIZE_BYTES } from '../../../common/constants/file-upload.constants.js';
 import { describe, expect, it, vi } from 'vitest';
 import { Prisma } from '../../../prisma/client.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { FilesRepository } from '../repositories/files.repository.js';
 import { FilesService } from '../services/files.service.js';
 import { EmptyFileException, FileTooLargeException, InvalidFileTypeException } from '../exceptions/index.js';
-import { MAX_FILE_SIZE_BYTES } from '../constants/file-rules.constants.js';
 
 describe('Almacenamiento documental dentro de una transacción', () => {
   it('FilesRepository usa el cliente recibido y no una escritura independiente', async () => {
@@ -27,7 +27,7 @@ describe('Almacenamiento documental dentro de una transacción', () => {
 
   it.each([
     { content: Buffer.alloc(0), exception: EmptyFileException },
-    { content: Buffer.alloc(MAX_FILE_SIZE_BYTES + 1), exception: FileTooLargeException },
+    { content: Buffer.alloc(MAX_FILE_UPLOAD_SIZE_BYTES + 1), exception: FileTooLargeException },
     { content: Buffer.from('MZ executable'), exception: InvalidFileTypeException },
   ])('rechaza datos inválidos sin insertar archivos en la transacción: $exception.name', async ({ content, exception }) => {
     const repository = { create: vi.fn() };
