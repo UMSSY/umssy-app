@@ -1,5 +1,3 @@
-import { OVERLAP_ERROR_CODE } from '../constants/create-block.constants.js';
-
 export const hasOverlapErrorCode = (error: unknown): boolean => {
   if (typeof error !== 'object' || error === null) {
     return false;
@@ -11,18 +9,18 @@ export const hasOverlapErrorCode = (error: unknown): boolean => {
     message?: unknown;
   };
 
-  if (candidate.code === OVERLAP_ERROR_CODE) {
+  if (candidate.code === '23P01') {
     return true;
   }
 
   if (typeof candidate.meta === 'object' && candidate.meta !== null) {
-    if (candidate.meta.code === OVERLAP_ERROR_CODE) {
+    if (candidate.meta.code === '23P01') {
       return true;
     }
-    if (candidate.meta.driverAdapterError?.cause?.code === OVERLAP_ERROR_CODE) {
+    if (candidate.meta.driverAdapterError?.cause?.code === '23P01') {
       return true;
     }
   }
 
-  return typeof candidate.message === 'string' && candidate.message.includes(OVERLAP_ERROR_CODE);
+  return typeof candidate.message === 'string' && candidate.message.includes('23P01');
 };

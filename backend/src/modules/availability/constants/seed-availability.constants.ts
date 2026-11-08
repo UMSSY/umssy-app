@@ -1,17 +1,8 @@
-import { BLOCK_STEP_MINUTES } from './create-block.constants.js';
-
-export const MS_PER_MINUTE = 60_000;
-export const MS_PER_DAY = 86_400_000;
-export const STEP_MS = BLOCK_STEP_MINUTES * MS_PER_MINUTE;
-
-export const PERFORMANCE_APPOINTMENTS = 50;
-export const PRIMARY_APPOINTMENTS = 3;
-export const SERIES_OCCURRENCES = 3;
 // Bloques sin cita de mentor.a: uno libre y uno bajo la fecha bloqueada.
 export const PRIMARY_FREE_BLOCKS = 2;
 
-const SEED_APPOINTMENT_COUNT = PRIMARY_APPOINTMENTS + PERFORMANCE_APPOINTMENTS;
-const SEED_BLOCK_COUNT = SEED_APPOINTMENT_COUNT + PRIMARY_FREE_BLOCKS + SERIES_OCCURRENCES;
+const SEED_APPOINTMENT_COUNT = 3 + 50;
+const SEED_BLOCK_COUNT = SEED_APPOINTMENT_COUNT + PRIMARY_FREE_BLOCKS + 3;
 
 // Identidades reservadas a B-08: no dependen de la fecha de ejecución.
 export const SEED_BLOCK_IDS = Array.from({ length: SEED_BLOCK_COUNT }, (_, index) =>
@@ -20,11 +11,7 @@ export const SEED_BLOCK_IDS = Array.from({ length: SEED_BLOCK_COUNT }, (_, index
 export const SEED_APPOINTMENT_IDS = Array.from({ length: SEED_APPOINTMENT_COUNT }, (_, index) =>
   `b0800001-0000-4000-8000-${String(index + 1).padStart(12, '0')}`,
 );
-export const SEED_BLOCKED_DATE_ID = 'b0800002-0000-4000-8000-000000000001';
-export const SEED_SERIES_ID = 'b0800003-0000-4000-8000-000000000001';
 
-export const SEED_APPOINTMENT_MESSAGE = 'Cita confirmada de prueba B-08 (seed de desarrollo)';
-export const SEED_BLOCKED_REASON = 'Compromiso académico (seed B-08)';
 // Mensajes con los que el seed anterior a B-08 identificaba sus citas.
 export const LEGACY_SEED_MESSAGES: string[] = [
   'Cita de prueba pendiente (seed de desarrollo)',

@@ -16,5 +16,3 @@ export const CREATE_BLOCK_MESSAGES = {
   repeatNotEnabled: 'La fecha de fin requiere activar la repetición semanal',
   repeatUntilOutOfRange: `La fecha límite debe estar dentro de las próximas ${MAX_REPEAT_WEEKS} semanas`,
 } as const;
-
-export const OVERLAP_ERROR_CODE = '23P01';
