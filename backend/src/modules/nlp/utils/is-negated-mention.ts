@@ -1,9 +1,4 @@
-import {
-  NLP_CLAUSE_BREAKERS,
-  NLP_NEGATION_CUES,
-  NLP_NEGATION_EXCEPTIONS,
-  NLP_NEGATION_WINDOW,
-} from '../constants/nlp-language.constants.js';
+import { NLP_CLAUSE_BREAKERS, NLP_NEGATION_CUES, NLP_NEGATION_EXCEPTIONS } from '../constants/nlp-language.constants.js';
 
 const WEAK_NEGATION_CUES: ReadonlySet<string> = new Set(['sin', 'without']);
 const KNOWLEDGE_WORDS: ReadonlySet<string> = new Set([
@@ -11,7 +6,7 @@ const KNOWLEDGE_WORDS: ReadonlySet<string> = new Set([
 ]);
 
 export function isNegatedMention(words: readonly string[], mentionStart: number): boolean {
-  const firstIndex = Math.max(0, mentionStart - NLP_NEGATION_WINDOW);
+  const firstIndex = Math.max(0, mentionStart - 4);
 
   for (let index = mentionStart - 1; index >= firstIndex; index -= 1) {
     const word = words[index];

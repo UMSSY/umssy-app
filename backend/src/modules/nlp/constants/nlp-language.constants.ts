@@ -30,6 +30,3 @@ export const NLP_TECH_CONTEXT_TERMS: ReadonlySet<string> = new Set([
   'servidor', 'servidores', 'codigo', 'software', 'aplicacion', 'aplicaciones', 'scripts', 'developer',
   'development', 'programming', 'language', 'server', 'code',
 ]);
-
-export const NLP_NEGATION_WINDOW = 4;
-export const NLP_INTENTION_WINDOW = 3;
