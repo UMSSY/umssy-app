@@ -1,9 +1,4 @@
-import {
-  LOGIN_EMAIL_INVALID_MESSAGE,
-  LOGIN_EMAIL_PATTERN,
-  LOGIN_EMAIL_REQUIRED_MESSAGE,
-  LOGIN_PASSWORD_REQUIRED_MESSAGE,
-} from "../constants/login-validation.constants";
+import { LOGIN_EMAIL_PATTERN } from "../constants/login-validation.constants";
 
 export type LoginFieldErrors = { email?: string; password?: string };
 
@@ -11,10 +6,10 @@ export function validateLoginFields(email: string, password: string): LoginField
   const errors: LoginFieldErrors = {};
   const trimmedEmail = email.trim();
 
-  if (!trimmedEmail) errors.email = LOGIN_EMAIL_REQUIRED_MESSAGE;
-  else if (!LOGIN_EMAIL_PATTERN.test(trimmedEmail)) errors.email = LOGIN_EMAIL_INVALID_MESSAGE;
+  if (!trimmedEmail) errors.email = "Ingresa tu correo electrónico";
+  else if (!LOGIN_EMAIL_PATTERN.test(trimmedEmail)) errors.email = "Ingresa un correo electrónico válido";
 
-  if (!password) errors.password = LOGIN_PASSWORD_REQUIRED_MESSAGE;
+  if (!password) errors.password = "Ingresa tu contraseña";
 
   return errors;
 }
