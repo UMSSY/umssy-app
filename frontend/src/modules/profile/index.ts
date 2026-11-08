@@ -26,7 +26,7 @@ export { getHttpStatus } from "./utils/get-http-status";
 export { SHORT_MONTH_LABELS } from "./config/short-month-labels.config";
 export { FILE_VALIDATION_MESSAGES } from "./config/file-validation-messages.config";
 export { validateFile } from "./utils/validate-file";
-export { BUSINESS_TIMEZONE, ISO_DATE_PATTERN } from "./constants/validation.constants";
+export { ISO_DATE_PATTERN } from "./constants/validation.constants";
 export type { HttpError } from "./types/http-error.types";
 
 export { useProfileSkillsRadar, PROFILE_SKILLS_RADAR_QUERY_KEY } from "./hooks/use-profile-skills-radar";
