@@ -28,4 +28,7 @@ export interface JobOfferResponse {
   applicantsCount: number;
 }
 
-export type PublishedJobOfferResponse = Omit<JobOfferResponse, 'applicantsCount'>;
+export type PublishedJobOfferResponse = Omit<
+  JobOfferResponse,
+  'applicantsCount'
+>;

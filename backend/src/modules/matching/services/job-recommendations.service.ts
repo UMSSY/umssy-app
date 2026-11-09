@@ -1,6 +1,6 @@
 import { JobOffersService } from '../../job-offers/services/job-offers.service.js';
 import { Injectable } from '@nestjs/common';
-import { JobMatchRepository } from '../repositories/job-match.repository.js';
+import { JobMatchSourceService } from '../services/job-match-source.service.js';
 import type { CandidateProfile } from '../types/gap-analysis.types.js';
 import type { JobMatchRecord } from '../types/job-match.types.js';
 import type {
@@ -14,7 +14,7 @@ import { VacancyScoringService } from './vacancy-scoring.service.js';
 export class JobRecommendationsService {
   constructor(
     private readonly jobOffers: JobOffersService,
-    private readonly jobMatchRepository: JobMatchRepository,
+    private readonly jobMatchSource: JobMatchSourceService,
     private readonly vacancyScoring: VacancyScoringService,
     private readonly ranking: VacancyRankingService,
   ) {}
@@ -37,7 +37,7 @@ export class JobRecommendationsService {
     const candidate = await this.vacancyScoring.getCandidate(userId);
     if (!candidate.skills.length)
       return { isProfileComplete: false, items: [] };
-    const vacancies = await this.jobMatchRepository.findPublished(new Date());
+    const vacancies = await this.jobMatchSource.findPublished(new Date());
 
     const evaluated = await Promise.all(
       vacancies.map((vacancy) => this.evaluate(vacancy, candidate)),

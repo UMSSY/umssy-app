@@ -10,7 +10,7 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ALL_ACADEMIC_PERIODS_VALUE } from "../constants/academic-period.constants";
+
 import type { ManagementMenuProps } from "../types/management-menu-props.types";
 import type { AcademicPeriod } from "../types/registered-user.types";
 import { getAcademicPeriods } from "../utils/academic-periods";
@@ -19,7 +19,7 @@ export function ManagementMenu({ value, onChange }: ManagementMenuProps) {
   const periods = useMemo(() => getAcademicPeriods(), []);
 
   const handleValueChange = (selectedValue: string) => {
-    onChange(selectedValue === ALL_ACADEMIC_PERIODS_VALUE ? undefined : (selectedValue as AcademicPeriod));
+    onChange(selectedValue === "ALL" ? undefined : (selectedValue as AcademicPeriod));
   };
 
   return (
@@ -41,10 +41,10 @@ export function ManagementMenu({ value, onChange }: ManagementMenuProps) {
         align="end"
         className="max-h-[min(18rem,var(--available-height))] w-40 overflow-y-auto rounded-md bg-surface py-1 text-ink-soft ring-border"
       >
-        <DropdownMenuRadioGroup value={value ?? ALL_ACADEMIC_PERIODS_VALUE} onValueChange={handleValueChange}>
+        <DropdownMenuRadioGroup value={value ?? "ALL"} onValueChange={handleValueChange}>
           <DropdownMenuRadioItem
             closeOnClick
-            value={ALL_ACADEMIC_PERIODS_VALUE}
+            value={"ALL"}
             className="rounded-none px-4 py-2 text-sm text-ink-soft focus:bg-surface-soft focus:text-ink"
           >
             Todas

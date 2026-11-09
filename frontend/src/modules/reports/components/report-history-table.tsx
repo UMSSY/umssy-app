@@ -1,18 +1,8 @@
 import { FileText } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatDateTime } from "@/shared/utils/date.utils";
-import {
-  FILE_NAME_SEARCH_NO_RESULTS_MESSAGE,
-  REPORT_HISTORY_EMPTY_MESSAGE,
-  REPORT_TYPE_LABELS,
-} from "../constants/generated-report.constants";
-import {
-  REPORT_HISTORY_COLUMN_COUNT as COLUMN_COUNT,
-  REPORT_HISTORY_HEAD_CLASSES as HEAD_CLASSES,
-  TABLE_CELL_CLASSES as CELL_CLASSES,
-  TABLE_CONTAINER_CLASSES as CONTAINER_CLASSES,
-  REPORT_HISTORY_TABLE_MIN_HEIGHT_CLASSES as MIN_HEIGHT_CLASSES,
-} from "../constants/report-table.constants";
+import { REPORT_TYPE_LABELS } from "../constants/generated-report.constants";
+import { TABLE_CELL_CLASSES as CELL_CLASSES, TABLE_CONTAINER_CLASSES as CONTAINER_CLASSES } from "../constants/report-table.constants";
 import type { ReportHistoryTableProps } from "../types/report-history-table-props.types";
 import { TableMessageRow, TableNoResultsRow, TableSkeletonRows } from "./table-state-rows";
 
@@ -36,27 +26,27 @@ export function ReportHistoryTable({
   reports,
   isLoading,
   errorMessage,
-  emptyMessage = REPORT_HISTORY_EMPTY_MESSAGE,
+  emptyMessage = "Aún no se generaron reportes.",
   searchTerm = "",
 }: ReportHistoryTableProps) {
-  const headClasses = `${HEAD_CLASSES} px-2 whitespace-normal md:px-4`;
+  const headClasses = `h-10 px-4 py-2 text-xs font-semibold text-text-secondary px-2 whitespace-normal md:px-4`;
   const cellClasses = `${CELL_CLASSES} px-2 py-3 whitespace-normal md:px-4 md:py-4`;
 
   const renderBody = () => {
     if (isLoading) {
-      return <TableSkeletonRows columnCount={COLUMN_COUNT} />;
+      return <TableSkeletonRows columnCount={3} />;
     }
 
     if (errorMessage) {
-      return <TableMessageRow columnCount={COLUMN_COUNT} message={errorMessage} />;
+      return <TableMessageRow columnCount={3} message={errorMessage} />;
     }
 
     if (reports.length === 0 && searchTerm) {
-      return <TableNoResultsRow columnCount={COLUMN_COUNT} message={FILE_NAME_SEARCH_NO_RESULTS_MESSAGE} />;
+      return <TableNoResultsRow columnCount={3} message={"No se encontraron reportes que coincidan con la búsqueda"} />;
     }
 
     if (reports.length === 0) {
-      return <TableMessageRow columnCount={COLUMN_COUNT} message={emptyMessage} />;
+      return <TableMessageRow columnCount={3} message={emptyMessage} />;
     }
 
     return reports.map((report) => (
@@ -74,7 +64,7 @@ export function ReportHistoryTable({
   };
 
   return (
-    <div className={`${CONTAINER_CLASSES} ${MIN_HEIGHT_CLASSES}`}>
+    <div className={`${CONTAINER_CLASSES} min-h-[31rem] md:min-h-[36rem]`}>
       <Table className="text-left text-xs sm:text-sm md:min-w-140 md:text-base">
         <TableHeader className="bg-surface-soft">
           <TableRow className="border-border hover:bg-transparent">

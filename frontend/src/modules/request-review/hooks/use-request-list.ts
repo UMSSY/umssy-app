@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
-import { ALL_CAREERS_VALUE, DEFAULT_PERIOD, MIN_SEARCH_LENGTH, SEARCH_DEBOUNCE_MS } from "../constants/inbox-filters.constants";
+
 import { REQUEST_REVIEW_QUERY_KEYS } from "../constants/request-review-query-keys.constants";
 import { REVIEW_PAGE_SIZE } from "../constants/request-review.constants";
 import { requestReviewService } from "../services/request-review.service";
@@ -16,12 +16,12 @@ import { unwrapReviewResult } from "../utils/unwrap-review-result";
 export function useRequestList() {
   const [status, setStatus] = useState<ReviewStatus>("pending");
   const [searchInput, setSearchInput] = useState("");
-  const [career, setCareer] = useState(ALL_CAREERS_VALUE);
-  const [period, setPeriod] = useState<InboxPeriod>(DEFAULT_PERIOD);
+  const [career, setCareer] = useState("all");
+  const [period, setPeriod] = useState<InboxPeriod>("all");
   const [validation, setValidation] = useState<string>(ALL_VALIDATIONS_VALUE);
-  const debouncedSearch = useDebouncedValue(searchInput.trim(), SEARCH_DEBOUNCE_MS);
-  const search = debouncedSearch.length >= MIN_SEARCH_LENGTH ? debouncedSearch : "";
-  const careerFilter = career === ALL_CAREERS_VALUE ? "" : career;
+  const debouncedSearch = useDebouncedValue(searchInput.trim(), 300);
+  const search = debouncedSearch.length >= 2 ? debouncedSearch : "";
+  const careerFilter = career === "all" ? "" : career;
   const validationFilter = validation === ALL_VALIDATIONS_VALUE ? undefined : (validation as ValidationResult);
 
   const filterKey = `${status}|${search}|${careerFilter}|${period}|${validationFilter ?? ""}`;
@@ -39,12 +39,12 @@ export function useRequestList() {
   const total = query.data?.total ?? 0;
   const error = query.error?.message ?? null;
   const hasActiveFilters =
-    searchInput.trim() !== "" || career !== ALL_CAREERS_VALUE || period !== DEFAULT_PERIOD || validation !== ALL_VALIDATIONS_VALUE;
+    searchInput.trim() !== "" || career !== "all" || period !== "all" || validation !== ALL_VALIDATIONS_VALUE;
 
   function clearFilters() {
     setSearchInput("");
-    setCareer(ALL_CAREERS_VALUE);
-    setPeriod(DEFAULT_PERIOD);
+    setCareer("all");
+    setPeriod("all");
     setValidation(ALL_VALIDATIONS_VALUE);
   }
 

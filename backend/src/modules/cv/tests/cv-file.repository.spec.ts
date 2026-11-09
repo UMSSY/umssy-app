@@ -22,7 +22,9 @@ describe('CvFileRepository', () => {
       deleteMany: vi.fn(),
       update: vi.fn(),
     };
-    repository = new CvFileRepository({ userCvFile } as unknown as PrismaService);
+    repository = new CvFileRepository({
+      userCvFile,
+    } as unknown as PrismaService);
   });
 
   describe('create', () => {
@@ -30,11 +32,18 @@ describe('CvFileRepository', () => {
       userCvFile.create.mockResolvedValue({ id: cvId });
       const before = Date.now();
 
-      await expect(repository.create(userId, content, 'resume.pdf')).resolves.toBe(cvId);
+      await expect(
+        repository.create(userId, content, 'resume.pdf'),
+      ).resolves.toBe(cvId);
 
       const [args] = userCvFile.create.mock.calls[0] as [
         {
-          data: { userId: string; cvFileName: string; cvPdfData: string; cvUploadedAt: Date };
+          data: {
+            userId: string;
+            cvFileName: string;
+            cvPdfData: string;
+            cvUploadedAt: Date;
+          };
           select: object;
         },
       ];
@@ -61,14 +70,18 @@ describe('CvFileRepository', () => {
 
       await repository.create(userId, content);
 
-      const [args] = userCvFile.create.mock.calls[0] as [{ data: { cvFileName: null } }];
+      const [args] = userCvFile.create.mock.calls[0] as [
+        { data: { cvFileName: null } },
+      ];
       expect(args.data.cvFileName).toBeNull();
     });
   });
 
   describe('readById', () => {
     it('reads only the pdf column of a cv owned by the user', async () => {
-      userCvFile.findFirst.mockResolvedValue({ cvPdfData: content.toString('base64') });
+      userCvFile.findFirst.mockResolvedValue({
+        cvPdfData: content.toString('base64'),
+      });
 
       const result = await repository.readById(userId, cvId);
 
@@ -98,7 +111,9 @@ describe('CvFileRepository', () => {
       userCvFile.deleteMany.mockResolvedValue({ count: 1 });
 
       await expect(repository.removeById(userId, cvId)).resolves.toBe(true);
-      expect(userCvFile.deleteMany).toHaveBeenCalledWith({ where: { id: cvId, userId } });
+      expect(userCvFile.deleteMany).toHaveBeenCalledWith({
+        where: { id: cvId, userId },
+      });
     });
 
     it('returns false when nothing was removed', async () => {

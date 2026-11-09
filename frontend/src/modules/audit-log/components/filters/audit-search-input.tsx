@@ -3,7 +3,7 @@
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { AuditSearchInputProps } from "../../types/audit-log-extras-props.types";
+import type { AuditSearchInputProps } from "../../types/audit-search-input-props.types";
 
 export function AuditSearchInput({ id, value, onChange }: AuditSearchInputProps) {
   return (

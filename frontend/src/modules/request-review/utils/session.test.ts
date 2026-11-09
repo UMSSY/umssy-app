@@ -1,3 +1,5 @@
+import "@/shared/testing/indexed-db.mock";
+import { saveAccessToken } from "@/shared/services/storage/access-token-storage";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { clearSession, getRoleTag, getSessionToken } from "./session";
 
@@ -9,8 +11,8 @@ describe("session", () => {
     vi.restoreAllMocks();
   });
 
-  it("lee y borra el token de sessionStorage", () => {
-    sessionStorage.setItem("accessToken", "abc");
+  it("lee y borra el token de sessionStorage", async () => {
+    await saveAccessToken("abc");
     expect(getSessionToken()).toBe("abc");
     clearSession();
     expect(getSessionToken()).toBeNull();

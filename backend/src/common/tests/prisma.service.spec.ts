@@ -12,8 +12,12 @@ beforeAll(() => {
 describe('PrismaService', () => {
   it('conecta y desconecta a traves de los hooks del ciclo de vida', async () => {
     const service = new PrismaService();
-    const connectSpy = vi.spyOn(service, '$connect').mockResolvedValue(undefined);
-    const disconnectSpy = vi.spyOn(service, '$disconnect').mockResolvedValue(undefined);
+    const connectSpy = vi
+      .spyOn(service, '$connect')
+      .mockResolvedValue(undefined);
+    const disconnectSpy = vi
+      .spyOn(service, '$disconnect')
+      .mockResolvedValue(undefined);
 
     await service.onModuleInit();
     await service.onModuleDestroy();

@@ -11,7 +11,9 @@ export const USER_ID = '11111111-1111-4111-8111-111111111111';
 export const REGISTRATION_ID = '44444444-4444-4444-8444-444444444444';
 export const NOW = new Date('2026-10-23T12:00:00.000Z');
 
-export function registrationRecord(overrides: Partial<RegistrationRecord> = {}): RegistrationRecord {
+export function registrationRecord(
+  overrides: Partial<RegistrationRecord> = {},
+): RegistrationRecord {
   return {
     id: REGISTRATION_ID,
     eventId: EVENT_ID,
@@ -41,12 +43,20 @@ export function registrationFixture() {
       findFirst: vi.fn().mockResolvedValue(null),
       findMany: vi.fn().mockResolvedValue([]),
       count: vi.fn().mockResolvedValue(0),
-      create: vi.fn().mockImplementation(({ data }) => Promise.resolve(registrationRecord({ qrToken: data.qrToken }))),
-      update: vi.fn().mockImplementation(({ data }) => Promise.resolve(registrationRecord({
-        qrToken: data.qrToken ?? 'a'.repeat(64),
-        status: { title: data.status.connect.title },
-        cancelledAt: data.cancelledAt,
-      }))),
+      create: vi
+        .fn()
+        .mockImplementation(({ data }) =>
+          Promise.resolve(registrationRecord({ qrToken: data.qrToken })),
+        ),
+      update: vi.fn().mockImplementation(({ data }) =>
+        Promise.resolve(
+          registrationRecord({
+            qrToken: data.qrToken ?? 'a'.repeat(64),
+            status: { title: data.status.connect.title },
+            cancelledAt: data.cancelledAt,
+          }),
+        ),
+      ),
     },
   };
   const prisma = {
@@ -54,7 +64,14 @@ export function registrationFixture() {
     $transaction: vi.fn().mockImplementation((operation) => operation(tx)),
   };
   const eventService = new EventsService(new EventsRepository(prisma as never));
-  const events = { findForRegistration: vi.fn().mockResolvedValue(event), lockEventRow: eventService.lockEventRow.bind(eventService), hasScheduleConflict: eventService.hasScheduleConflict.bind(eventService) };
-  const service = new EventRegistrationsService(new EventRegistrationsRepository(prisma as unknown as PrismaService), events as unknown as EventsService);
+  const events = {
+    findForRegistration: vi.fn().mockResolvedValue(event),
+    lockEventRow: eventService.lockEventRow.bind(eventService),
+    hasScheduleConflict: eventService.hasScheduleConflict.bind(eventService),
+  };
+  const service = new EventRegistrationsService(
+    new EventRegistrationsRepository(prisma as unknown as PrismaService),
+    events as unknown as EventsService,
+  );
   return { event, tx, prisma, events, service };
 }

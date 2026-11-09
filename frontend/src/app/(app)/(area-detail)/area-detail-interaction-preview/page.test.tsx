@@ -1,3 +1,5 @@
+import "@/shared/testing/indexed-db.mock";
+import { saveAccessToken } from "@/shared/services/storage/access-token-storage";
 import type { ReactNode } from "react";
 import {
   cleanup,
@@ -18,7 +20,9 @@ import AreaDetailInteractionPreviewPage from "./page";
 import AppLayout from "../../layout";
 
 vi.mock("@/shared/components/layout/app-shell", () => ({
-  AppShell: ({ children }: { children: ReactNode }) => <div data-testid="app-shell">{children}</div>,
+  AppShell: ({ children }: { children: ReactNode }) => (
+    <div data-testid="app-shell">{children}</div>
+  ),
 }));
 
 vi.mock("next/navigation", () => ({
@@ -27,7 +31,12 @@ vi.mock("next/navigation", () => ({
 }));
 
 describe("AreaDetailInteractionPreviewPage", () => {
-  beforeEach(() => sessionStorage.setItem("accessToken", `h.${btoa(JSON.stringify({ roleTag: "empresa" }))}.s`));
+  beforeEach(
+    async () =>
+      await saveAccessToken(
+        `h.${btoa(JSON.stringify({ roleTag: "empresa" }))}.s`,
+      ),
+  );
   afterEach(() => {
     cleanup();
     sessionStorage.clear();

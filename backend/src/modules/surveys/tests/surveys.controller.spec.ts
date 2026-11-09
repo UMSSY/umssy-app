@@ -191,12 +191,10 @@ describe('SurveysController', () => {
   });
 
   it('exporta el PDF del semestre consultado', async () => {
-    const spy = vi
-      .spyOn(surveysService, 'exportSurveyPdf')
-      .mockResolvedValue({
-        fileName: 'reporte.pdf',
-        buffer: Buffer.from('pdf'),
-      });
+    const spy = vi.spyOn(surveysService, 'exportSurveyPdf').mockResolvedValue({
+      fileName: 'reporte.pdf',
+      buffer: Buffer.from('pdf'),
+    });
 
     await surveysController.exportPdf(
       'survey-1',

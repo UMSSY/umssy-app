@@ -4,7 +4,9 @@ import { z } from 'zod';
 export const reviewKindSchema = z.enum(['cv', 'skill']);
 export type ReviewKind = z.infer<typeof reviewKindSchema>;
 
-export const reviewDecisionSchema = z.object({
-  decision: z.enum(['approved', 'rejected', 'revoked']),
-}).strict();
+export const reviewDecisionSchema = z
+  .object({
+    decision: z.enum(['approved', 'rejected', 'revoked']),
+  })
+  .strict();
 export type ReviewDecisionRequest = z.infer<typeof reviewDecisionSchema>;

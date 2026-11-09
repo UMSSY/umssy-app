@@ -1,0 +1,8 @@
+<mj-section padding="8px 24px">
+  <mj-column>
+    <mj-text mj-class="heading">Tu cuenta está activa</mj-text>
+    <mj-text>Hola {{ firstName }}, tu cuenta fue activada y ya formas parte de la comunidad. Inicia sesión con tu correo y la contraseña que creaste.</mj-text>
+    <mj-button href="{{ loginUrl }}">Iniciar sesión</mj-button>
+    <mj-text mj-class="secondary">Si no fuiste tú, comunícate con la carrera lo antes posible.</mj-text>
+  </mj-column>
+</mj-section>

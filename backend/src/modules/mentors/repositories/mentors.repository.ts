@@ -2,11 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Prisma } from '../../../prisma/client.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { MENTOR_ROLE_NAME } from '../constants/mentor.constants.js';
-import {
-  AlreadyMentorException,
-  MentorCapacityException,
-  MentorEligibilityException,
-} from '../exceptions/index.js';
+import {} from '../exceptions/index.js';
 import {
   readMentorCapacity,
   readMentorEligibility,
@@ -494,21 +490,19 @@ export class MentorsRepository extends MentorIntakeRepository {
     return readMentorCapacity(this.prisma);
   }
 
-  activate(
-    userId: string,
-    roleId: string,
-    technicalAreaIds: string[],
-    orientationTypeIds: string[],
-    tx?: Prisma.TransactionClient,
-  ) {
-    const activate = async (transaction: Prisma.TransactionClient) => {
-      await reconcileMentorOffers(transaction);
-      const eligibility = await readMentorEligibility(transaction, userId);
-      if (!eligibility.eligible) throw new MentorEligibilityException();
-      if (eligibility.alreadyMentor) throw new AlreadyMentorException();
-      const [intake] = await transaction.$queryRaw<
-        { hasPendingRequest: boolean; hasOffer: boolean }[]
-      >`
+  reconcileOffers(tx: Prisma.TransactionClient) {
+    return reconcileMentorOffers(tx);
+  }
+  readEligibility(userId: string, tx: Prisma.TransactionClient) {
+    return readMentorEligibility(tx, userId);
+  }
+  readCapacity(tx: Prisma.TransactionClient) {
+    return readMentorCapacity(tx);
+  }
+  async readIntake(userId: string, tx: Prisma.TransactionClient) {
+    const [intake] = await tx.$queryRaw<
+      { hasPendingRequest: boolean; hasOffer: boolean }[]
+    >`
         SELECT EXISTS (
           SELECT 1 FROM mentor_participation_requests
           WHERE user_id = ${userId}::uuid AND status IN ('PENDING', 'OFFERED')
@@ -517,12 +511,17 @@ export class MentorsRepository extends MentorIntakeRepository {
           WHERE user_id = ${userId}::uuid AND status = 'OFFERED'
             AND expires_at > clock_timestamp()
         ) AS "hasOffer"`;
-      if (intake.hasOffer) return { result: 'OFFER_EXISTS' as const };
-      if (intake.hasPendingRequest)
-        return { result: 'REQUEST_EXISTS' as const };
-      const capacity = await readMentorCapacity(transaction);
-      if (capacity.available < 1) throw new MentorCapacityException();
+    return intake;
+  }
 
+  activate(
+    userId: string,
+    roleId: string,
+    technicalAreaIds: string[],
+    orientationTypeIds: string[],
+    tx?: Prisma.TransactionClient,
+  ) {
+    const activate = async (transaction: Prisma.TransactionClient) => {
       await transaction.userRole.create({
         data: {
           userId,

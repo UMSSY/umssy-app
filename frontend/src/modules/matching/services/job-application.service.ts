@@ -4,7 +4,8 @@ import {
   getJobApplicationsEndpoint,
   getMyJobApplicationEndpoint,
 } from "../constants/job-application.constants";
-import type { JobApplication, MyJobApplication } from "../types/job-application.types";
+import type { JobApplication } from "../types/job-application.types";
+import type { MyJobApplication } from "../types/my-job-application.types";
 
 export const jobApplicationService = {
   apply: async (jobOfferId: string): Promise<JobApplication> => {

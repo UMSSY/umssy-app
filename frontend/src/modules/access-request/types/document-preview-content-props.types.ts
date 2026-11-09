@@ -1,4 +1,4 @@
-import type { DocumentState } from "./access-request-context.types";
+import type { DocumentState } from "./document-state.types";
 
 export interface DocumentPreviewContentProps {
   document: DocumentState;

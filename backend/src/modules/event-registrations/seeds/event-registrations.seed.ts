@@ -1,20 +1,20 @@
+import { REGISTRATION_STATUS_TITLES } from '../../../common/constants/registration-status.constants.js';
 import { repairSeededQrTokens } from './repair-seeded-qr-tokens.js';
 import { randomBytes } from 'node:crypto';
-import { REGISTRATION_STATUS_TITLES } from '../../../common/constants/registration-status.constants.js';
 import type { Prisma } from '../../../prisma/client.js';
 import { SEED_EVENTS } from '../../events/constants/seed-events.constants.js';
-import { CONFIRMED_REGISTRATION_TITLE } from '../constants/event-registrations.constants.js';
+
 export async function seedEventRegistrations(
   tx: Prisma.TransactionClient,
   userId: string,
 ): Promise<void> {
   await repairSeededQrTokens(tx);
   const regStatus = await tx.registrationStatus.upsert({
-    where: { title: CONFIRMED_REGISTRATION_TITLE },
+    where: { title: REGISTRATION_STATUS_TITLES.confirmed },
     update: {},
     create: {
       id: '22222222-2222-2222-2222-222222222225',
-      title: CONFIRMED_REGISTRATION_TITLE,
+      title: REGISTRATION_STATUS_TITLES.confirmed,
     },
   });
   await tx.registrationStatus.upsert({

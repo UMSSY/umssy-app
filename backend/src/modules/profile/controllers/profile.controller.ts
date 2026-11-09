@@ -8,7 +8,12 @@ import {
   UseInterceptors,
   UsePipes,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CurrentUserId } from '../../../common/decorators/current-user-id.decorator.js';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { ResponseInterceptor } from '../../../common/interceptors/response.interceptor.js';
@@ -54,7 +59,8 @@ export class ProfileController {
   @ApiOkResponse({ description: 'Updated profile' })
   updatePersonalInfo(
     @CurrentUserId() userId: string,
-    @Body({ schema: updatePersonalInfoSchema }) request: UpdatePersonalInfoRequest,
+    @Body({ schema: updatePersonalInfoSchema })
+    request: UpdatePersonalInfoRequest,
   ): Promise<ProfileResponse> {
     return this.profileService.updatePersonalInfo(userId, request);
   }
@@ -64,7 +70,8 @@ export class ProfileController {
   @ApiOkResponse({ description: 'Updated profile' })
   updatePresentation(
     @CurrentUserId() userId: string,
-    @Body({ schema: updatePresentationSchema }) request: UpdatePresentationRequest,
+    @Body({ schema: updatePresentationSchema })
+    request: UpdatePresentationRequest,
   ): Promise<ProfileResponse> {
     return this.profileService.updatePresentation(userId, request);
   }

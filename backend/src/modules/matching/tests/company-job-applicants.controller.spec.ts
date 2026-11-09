@@ -1,3 +1,4 @@
+import { CompanyOwnershipGuard } from '../../../common/guards/company-ownership.guard.js';
 import { GUARDS_METADATA } from '@nestjs/common/constants';
 import { describe, expect, it, vi } from 'vitest';
 import { ROLES_KEY } from '../../../common/constants/roles.constants.js';
@@ -13,7 +14,7 @@ describe('HU-02B - CompanyJobApplicantsController', () => {
   it('protege el controlador con JwtAuthGuard y RolesGuard', () => {
     expect(
       Reflect.getMetadata(GUARDS_METADATA, CompanyJobApplicantsController),
-    ).toEqual([JwtAuthGuard, RolesGuard]);
+    ).toEqual([JwtAuthGuard, RolesGuard, CompanyOwnershipGuard]);
   });
 
   it('sólo permite ver los postulantes al rol empresa', () => {

@@ -1,9 +1,6 @@
 import type { SeedUserDefinition } from '../types/seed-user-definition.types.js';
 import type { SeedUserKey } from '../types/seed-user-key.types.js';
 
-export const SEED_PASSWORD = 'Prueba123';
-export const BCRYPT_ROUNDS = 10;
-
 export const SEED_USERS: ReadonlyArray<
   SeedUserDefinition & { key: SeedUserKey }
 > = [

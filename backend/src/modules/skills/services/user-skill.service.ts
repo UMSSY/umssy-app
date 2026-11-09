@@ -1,7 +1,7 @@
+import { UserSkillEvidenceRepository } from '../repositories/user-skill-evidence.repository.js';
 import { Injectable } from '@nestjs/common';
 import { ProfileSkillsAnalysisService } from '../../nlp/services/profile-skills-analysis.service.js';
-import { ProfileNotFoundException } from '../../profile/exceptions/profile-not-found.exception.js';
-import { ProfileRepository } from '../../profile/repositories/profile.repository.js';
+import { ProfileService } from '../../profile/services/profile.service.js';
 import { DuplicateSkillException } from '../exceptions/duplicate-skill.exception.js';
 import { SkillNotFoundException } from '../exceptions/skill-not-found.exception.js';
 import { SkillMapper } from '../mappers/skill.mapper.js';
@@ -15,21 +15,34 @@ export class UserSkillService {
   constructor(
     private readonly userSkillRepository: UserSkillRepository,
     private readonly skillRepository: SkillRepository,
-    private readonly profileRepository: ProfileRepository,
+    private readonly profileService: ProfileService,
     private readonly skillMapper: SkillMapper,
     private readonly skillsAnalysis: ProfileSkillsAnalysisService,
+    private readonly evidence: UserSkillEvidenceRepository,
   ) {}
+
+  replaceExperienceEvidence(
+    userId: string,
+    experienceId: string,
+    skillIds: string[],
+  ) {
+    return this.evidence.replaceDetected(userId, experienceId, skillIds);
+  }
 
   async getProfessionalSkills(userId: string): Promise<SkillResponse[]> {
     const records = await this.userSkillRepository.findAllByUserId(userId);
-    return records.map((record) => this.skillMapper.toUserSkillResponse(record));
+    return records.map((record) =>
+      this.skillMapper.toUserSkillResponse(record),
+    );
   }
 
   async getUserSkills(userId: string): Promise<SkillResponse[]> {
     await this.ensureProfileExists(userId);
 
     const records = await this.userSkillRepository.findByUserId(userId);
-    return records.map((record) => this.skillMapper.toUserSkillResponse(record));
+    return records.map((record) =>
+      this.skillMapper.toUserSkillResponse(record),
+    );
   }
 
   async updateUserSkills(
@@ -50,16 +63,17 @@ export class UserSkillService {
       throw new SkillNotFoundException();
     }
 
-    const records = await this.userSkillRepository.replaceForUser(userId, skillIds);
+    const records = await this.userSkillRepository.replaceForUser(
+      userId,
+      skillIds,
+    );
     await this.skillsAnalysis.refreshAfterChange(userId);
-    return records.map((record) => this.skillMapper.toUserSkillResponse(record));
+    return records.map((record) =>
+      this.skillMapper.toUserSkillResponse(record),
+    );
   }
 
   private async ensureProfileExists(userId: string): Promise<void> {
-    const profile = await this.profileRepository.findByUserId(userId);
-
-    if (!profile) {
-      throw new ProfileNotFoundException();
-    }
+    await this.profileService.ensureProfileExists(userId);
   }
 }

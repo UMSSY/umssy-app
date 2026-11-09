@@ -90,7 +90,7 @@ vi.mock("../hooks/use-mentorship-catalogs", () => ({
   }),
 }));
 
-beforeEach(() => {
+beforeEach(async () => {
   drafts.clear();
   vi.restoreAllMocks();
   vi.clearAllMocks();
@@ -99,7 +99,7 @@ beforeEach(() => {
     capacity: 2,
     occupied: 1,
   });
-  saveAccessToken("mentor-token");
+  await saveAccessToken("mentor-token");
   vi.spyOn(mentorParticipationService, "getMyParticipation").mockResolvedValue({ status: "NEVER", areas: [], orientations: [] });
   vi.spyOn(mentorParticipationService, "getCurrent").mockResolvedValue(null);
   integrationMocks.isTechnicalAreasError = false;
@@ -147,7 +147,7 @@ async function openActivationDialog() {
 
 describe("MentorshipView", () => {
   it("reconoce al mentor activo sin ofrecer otra activación", async () => {
-    saveAccessToken("mentor-token");
+    await saveAccessToken("mentor-token");
     vi.spyOn(
       mentorParticipationService,
       "getMyParticipation",
@@ -924,7 +924,6 @@ describe("MentorshipView", () => {
     },
   );
 });
-
 
 describe("Issue #1858: protección del formulario", () => {
   const requestWithStatus = (status: string) => ({

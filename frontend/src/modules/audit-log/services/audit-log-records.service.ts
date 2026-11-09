@@ -1,9 +1,11 @@
+import { GENERIC_ERROR_MESSAGE, NETWORK_ERROR_MESSAGE } from "@/shared/constants/error-messages.constants";
 import { apiClient } from "@/shared/services/api-client";
-import { CSV_FALLBACK_FILE_NAME } from "../constants/audit-log-filters.constants";
+
 import type { AuditApiResult } from "../types/audit-api-result.types";
-import type { AuditCsvFile, AuditResponsibleOption } from "../types/audit-log-records.types";
+import type { AuditCsvFile } from "../types/audit-csv-file.types";
+import type { AuditResponsibleOption } from "../types/audit-responsible-option.types";
 import type { AuditLogFilters } from "../types/audit-log-filters.types";
-import { GENERIC_ERROR_MESSAGE, isRecord, NETWORK_ERROR_MESSAGE, toAuditFailure } from "../utils/to-audit-failure";
+import { isRecord, toAuditFailure } from "../utils/to-audit-failure";
 import { toFilterParams } from "./audit-log.service";
 
 async function listResponsibles(): Promise<AuditApiResult<AuditResponsibleOption[]>> {
@@ -20,9 +22,9 @@ async function listResponsibles(): Promise<AuditApiResult<AuditResponsibleOption
 }
 
 function readFileName(disposition: unknown): string {
-  if (typeof disposition !== "string") return CSV_FALLBACK_FILE_NAME;
+  if (typeof disposition !== "string") return "registro-auditoria.csv";
   const match = /filename="?([^";]+)"?/i.exec(disposition);
-  return match?.[1] ?? CSV_FALLBACK_FILE_NAME;
+  return match?.[1] ?? "registro-auditoria.csv";
 }
 
 async function readErrorBody(data: unknown): Promise<unknown> {

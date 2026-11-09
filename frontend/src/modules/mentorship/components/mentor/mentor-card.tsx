@@ -1,3 +1,4 @@
+import type { MentorCardProps } from "../../types/mentor-card-props.types";
 
 import Link from "next/link";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -10,16 +11,6 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
-import type { MentorDirectoryItem } from "../../types/mentor-directory.types";
-
-type MentorCardProps = {
-  mentor: MentorDirectoryItem;
-  isOwnProfile?: boolean;
-  returnTo?: string;
-  showAffinityBadge?: boolean;
-  selectedArea?: string;
-  highlightAvailability?: boolean;
-};
 
 function getSafeReturnTo(returnTo?: string): string | null {
   if (!returnTo) {
@@ -112,9 +103,7 @@ export function MentorCard({
             {mentor.isAvailable ? (
               <Badge
                 variant="outline"
-                aria-current={
-                  highlightAvailability ? "true" : undefined
-                }
+                aria-current={highlightAvailability ? "true" : undefined}
                 className={cn(
                   "border-border bg-surface-soft px-2.5 whitespace-nowrap text-ink",
                   highlightAvailability &&
@@ -128,19 +117,18 @@ export function MentorCard({
                 Disponible para mentoría
               </Badge>
             ) : null}
-            {showAffinityBadge &&
-              mentor.sharedInterestsCount !== undefined && (
-                <Badge variant="secondary" className="whitespace-nowrap">
-                  {mentor.sharedInterestsCount} {mentor.sharedInterestsCount === 1 ? "interés" : "intereses"} en común
-                </Badge>
-              )}
+            {showAffinityBadge && mentor.sharedInterestsCount !== undefined && (
+              <Badge variant="secondary" className="whitespace-nowrap">
+                {mentor.sharedInterestsCount}{" "}
+                {mentor.sharedInterestsCount === 1 ? "interés" : "intereses"} en
+                común
+              </Badge>
+            )}
           </div>
         </div>
 
         <div>
-          <p className="mb-2 text-sm font-semibold text-ink">
-            Áreas técnicas
-          </p>
+          <p className="mb-2 text-sm font-semibold text-ink">Áreas técnicas</p>
 
           {hasTechnicalAreas ? (
             <ul className="flex flex-wrap gap-2">
@@ -148,16 +136,19 @@ export function MentorCard({
                 <li
                   key={area}
                   aria-current={area === selectedArea ? "true" : undefined}
-                  className={cn("max-w-full min-w-0 rounded-md border bg-interaction px-2.5 py-1 text-xs [overflow-wrap:anywhere] text-accent", area === selectedArea ? "border-accent font-semibold ring-1 ring-accent" : "border-accent/15")}
+                  className={cn(
+                    "max-w-full min-w-0 rounded-md border bg-interaction px-2.5 py-1 text-xs [overflow-wrap:anywhere] text-accent",
+                    area === selectedArea
+                      ? "border-accent font-semibold ring-1 ring-accent"
+                      : "border-accent/15",
+                  )}
                 >
                   {area}
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="text-sm text-text-secondary">
-              Sin áreas registradas
-            </p>
+            <p className="text-sm text-text-secondary">Sin áreas registradas</p>
           )}
         </div>
 

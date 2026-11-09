@@ -1,9 +1,12 @@
-import { cleanup, fireEvent, screen } from "@testing-library/react";
+import { downloadFile } from "@/shared/utils/download-file";
+import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithQuery } from "@/shared/testing/render-with-query";
 import { surveysService } from "../services/surveys.service";
 import { apiResponse, SURVEY_SUMMARIES } from "../testing/survey-fixtures";
 import { SurveyAnalyticsView } from "./survey-analytics-view";
+
+vi.mock("@/shared/utils/download-file", () => ({ downloadFile: vi.fn() }));
 
 describe("Pantallas de encuestas", () => {
   beforeEach(() => {
@@ -64,7 +67,8 @@ describe("Pantallas de encuestas", () => {
 
     fireEvent.click(generatePdfButton);
 
-    expect(exportSpy).toHaveBeenCalledWith("survey-1", undefined);
+    await waitFor(() => expect(exportSpy).toHaveBeenCalledWith("survey-1", undefined));
     expect(await screen.findByText("PDF generado correctamente")).toBeInTheDocument();
+    expect(downloadFile).toHaveBeenCalledWith(expect.any(Blob), "reporte-encuesta-ia.pdf");
   });
 });

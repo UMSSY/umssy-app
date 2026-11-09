@@ -3,7 +3,7 @@
 import type { ChangeEvent } from "react";
 import { useAccessRequestForm } from "../contexts/access-request-context";
 import { DIGIT_ONLY_FIELDS } from "../constants/personal-data-rules.constants";
-import type { PersonalDataFieldName } from "../types/access-request.types";
+import type { PersonalDataFieldName } from "../types/personal-data-field-name.types";
 
 function isDigitOnly(field: PersonalDataFieldName): boolean {
   return (DIGIT_ONLY_FIELDS as readonly string[]).includes(field);

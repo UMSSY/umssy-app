@@ -1,4 +1,7 @@
-import { ACCENT_FOLD_FROM, ACCENT_FOLD_TO } from '../constants/accent-folding.constants.js';
+import {
+  ACCENT_FOLD_FROM,
+  ACCENT_FOLD_TO,
+} from '../constants/accent-folding.constants.js';
 
 export function foldAccents(text: string): string {
   return Array.from(text.normalize('NFC').toLowerCase(), (char) => {

@@ -7,7 +7,9 @@ import {
 } from '../mappers/events.mapper.js';
 import type { EventWithRelations } from '../types/events.types.js';
 
-function buildRecord(overrides: Partial<EventWithRelations> = {}): EventWithRelations {
+function buildRecord(
+  overrides: Partial<EventWithRelations> = {},
+): EventWithRelations {
   return {
     id: 'uuid-1',
     title: 'Evento de prueba',
@@ -32,11 +34,15 @@ function buildRecord(overrides: Partial<EventWithRelations> = {}): EventWithRela
 
 describe('formatUtcDate', () => {
   it('formatea una fecha UTC como YYYY-MM-DD', () => {
-    expect(formatUtcDate(new Date('2026-06-15T00:00:00.000Z'))).toBe('2026-06-15');
+    expect(formatUtcDate(new Date('2026-06-15T00:00:00.000Z'))).toBe(
+      '2026-06-15',
+    );
   });
 
   it('rellena con ceros el mes y dia', () => {
-    expect(formatUtcDate(new Date('2026-01-03T00:00:00.000Z'))).toBe('2026-01-03');
+    expect(formatUtcDate(new Date('2026-01-03T00:00:00.000Z'))).toBe(
+      '2026-01-03',
+    );
   });
 });
 
@@ -128,17 +134,29 @@ describe('mapEventsToListResponse', () => {
   });
 
   it('pone availableSpots null cuando capacity es null', () => {
-    const record = buildRecord({ capacity: null, _count: { registrations: 3 } });
+    const record = buildRecord({
+      capacity: null,
+      _count: { registrations: 3 },
+    });
     const result = mapEventsToListResponse([record], 1, 1, 10);
     expect(result.data.items[0].availableSpots).toBeNull();
   });
 });
 
 describe('mapEventToResponse - apoyos', () => {
-  it.each(['Votacion', 'En votación'])('preserves the HU4 response for status %s and the proposal cover', (title) => {
-    const record = buildRecord({ status: { title }, coverMimeType: 'image/png' });
-    expect(mapEventToResponse(record, 15)).toMatchObject({ status: 'voting', coverUrl: `/events/${record.id}/cover` });
-  });
+  it.each(['Votacion', 'En votación'])(
+    'preserves the HU4 response for status %s and the proposal cover',
+    (title) => {
+      const record = buildRecord({
+        status: { title },
+        coverMimeType: 'image/png',
+      });
+      expect(mapEventToResponse(record, 15)).toMatchObject({
+        status: 'voting',
+        coverUrl: `/events/${record.id}/cover`,
+      });
+    },
+  );
 
   it('calcula el progreso de una propuesta en votación', () => {
     const record = buildRecord({

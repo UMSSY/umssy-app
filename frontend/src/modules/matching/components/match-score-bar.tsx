@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
-import { MATCH_SCORE_LABEL } from "../constants/match-score.constants";
+
 import type { MatchScoreProps } from "../types/match-score.types";
 import { normalizeMatchScore } from "../utils/normalize-match-score";
 
@@ -19,13 +19,13 @@ export function MatchScoreBar({ score, showLabel = true, size = "md", className 
     <div className={cn("flex w-full flex-col gap-1.5", className)}>
       {showLabel && (
         <div className="flex items-center justify-between text-sm font-medium text-foreground">
-          <span>{MATCH_SCORE_LABEL}</span>
+          <span>{"Afinidad"}</span>
           <span className="font-semibold">{normalizedScore}%</span>
         </div>
       )}
       <Progress
         value={normalizedScore}
-        aria-label={MATCH_SCORE_LABEL}
+        aria-label={"Afinidad"}
         className={cn("w-full", SIZE_CLASSES[size])}
       />
     </div>

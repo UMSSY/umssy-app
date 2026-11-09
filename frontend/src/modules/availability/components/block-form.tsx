@@ -15,13 +15,7 @@ import { Input } from "@/components/ui/input";
 import { TimeSelect } from "./time-select";
 import { toBoliviaTime, toUtcIso } from "@/shared/utils/date-time";
 import { cn } from "cn";
-import {
-  FORM_TEXT,
-  MAX_REPEAT_WEEKS,
-  REPEAT_INTERVAL_DAYS,
-  REPEAT_WEEKLY_TEXT,
-  REQUIRED_MESSAGES,
-} from "../constants/availability.constants";
+import { FORM_TEXT, REPEAT_WEEKLY_TEXT, REQUIRED_MESSAGES } from "../constants/availability.constants";
 import type { BlockFormErrors } from "../types/block-form-errors.types";
 import type { BlockFormField } from "../types/block-form-field.types";
 import type { BlockFormProps } from "../types/block-form-props.types";
@@ -72,8 +66,8 @@ export function BlockForm({
   const text = FORM_TEXT[mode];
   const selectedDate = date ? toCalendarDate(date) : undefined;
   const timeLimits = { pastLimit: getPastTimeLimit(date), startTime, endTime };
-  const minRepeatUntil = date ? addDaysToDateString(date, REPEAT_INTERVAL_DAYS) : "";
-  const maxRepeatUntil = date ? addDaysToDateString(date, MAX_REPEAT_WEEKS * 7) : "";
+  const minRepeatUntil = date ? addDaysToDateString(date, 7) : "";
+  const maxRepeatUntil = date ? addDaysToDateString(date, 12 * 7) : "";
   const selectedRepeatUntil = repeatUntil ? toCalendarDate(repeatUntil) : undefined;
 
   const clearErrors = (...fields: BlockFormField[]) => {
@@ -91,8 +85,8 @@ export function BlockForm({
     setDate(nextDate);
     if (startTime && isStartTimeDisabled(startTime, { pastLimit, startTime: "", endTime: "" })) setStartTime("");
     if (endTime && isEndTimeDisabled(endTime, { pastLimit, startTime: "", endTime: "" })) setEndTime("");
-    const nextMinRepeatUntil = nextDate ? addDaysToDateString(nextDate, REPEAT_INTERVAL_DAYS) : "";
-    const nextMaxRepeatUntil = nextDate ? addDaysToDateString(nextDate, MAX_REPEAT_WEEKS * 7) : "";
+    const nextMinRepeatUntil = nextDate ? addDaysToDateString(nextDate, 7) : "";
+    const nextMaxRepeatUntil = nextDate ? addDaysToDateString(nextDate, 12 * 7) : "";
     if (repeatUntil && (repeatUntil < nextMinRepeatUntil || repeatUntil > nextMaxRepeatUntil)) {
       setRepeatUntil("");
     }

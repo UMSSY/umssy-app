@@ -1,3 +1,5 @@
+import "@/shared/testing/indexed-db.mock";
+import { saveAccessToken } from "@/shared/services/storage/access-token-storage";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { stubMatchMedia } from "@/shared/testing/stub-match-media";
@@ -22,9 +24,11 @@ vi.mock("@/modules/request-review/hooks/use-status-counts", () => ({
 }));
 
 describe("BackofficeLayout inside AppLayout", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     stubMatchMedia();
-    sessionStorage.setItem("accessToken", `h.${btoa(JSON.stringify({ roles: ["administrativo"] }))}.s`);
+    await saveAccessToken(
+      `h.${btoa(JSON.stringify({ roles: ["administrativo"] }))}.s`,
+    );
   });
   afterEach(() => {
     cleanup();
