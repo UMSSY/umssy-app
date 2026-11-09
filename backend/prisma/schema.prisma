@@ -1495,22 +1495,22 @@ model RadarJobApplication {
 }
 
 model MentorParticipationStatus {
-  id          String                       @id @default(uuid()) @db.Uuid
+  id          String                       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   title       String                       @unique @db.VarChar(20)
   description String?
   createdAt   DateTime                     @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt   DateTime                     @updatedAt @map("updated_at") @db.Timestamptz(6)
+  updatedAt   DateTime                     @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   records     MentorParticipationRequest[]
 
   @@map("mentor_request_statuses")
 }
 
 model MentorOfferStatus {
-  id          String            @id @default(uuid()) @db.Uuid
+  id          String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   title       String            @unique @db.VarChar(20)
   description String?
   createdAt   DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt   DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
+  updatedAt   DateTime          @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   records     MentorSlotOffer[]
 
   @@map("mentor_offer_statuses")
