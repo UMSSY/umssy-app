@@ -15,7 +15,3 @@ export const PHOTO_ALLOWED_TYPES = ["image/png", "image/jpeg"];
 export const PHOTO_ALLOWED_EXTENSIONS = [".png", ".jpg", ".jpeg"];
 
 export const PHOTO_ACCEPT = PHOTO_ALLOWED_EXTENSIONS.join(",");
-
-export const CERTIFICATE_ALLOWED_TYPES = ["application/pdf", "image/png", "image/jpeg"];
-
-export const CERTIFICATE_ALLOWED_EXTENSIONS = [".pdf", ".png", ".jpg", ".jpeg"];

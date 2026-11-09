@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { SurveyBuilderState } from "../types/survey-builder.types";
+import type { SurveyBuilderState } from "../types/survey-builder-state.types";
 import { readSurveyDraft } from "../utils/read-survey-draft";
 
 export function useSurveyDraft(storageKey: string) {

@@ -4,8 +4,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import { JOB_MATCHING_QUERY_KEYS } from "../constants/job-matching.constants";
 import { jobMatchingService } from "../services/job-matching.service";
-import type { JobMatch } from "../types/job-matching.types";
-import type { CategorizedJobRequirement } from "../types/requirement-category.types";
+import type { JobMatch } from "../types/job-match.types";
+import type { CategorizedJobRequirement } from "../types/categorized-job-requirement.types";
 import { JobMatchDetailView } from "./job-match-detail-view";
 
 vi.mock("next/link", () => ({

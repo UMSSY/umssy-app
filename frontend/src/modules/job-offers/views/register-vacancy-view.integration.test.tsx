@@ -1,3 +1,5 @@
+import "@/shared/testing/indexed-db.mock";
+import "@/modules/job-offers/testing/current-company.mock";
 import { AxiosError, type AxiosResponse } from "axios";
 import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { toast } from "sonner";
@@ -14,13 +16,36 @@ vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 vi.mock("@/shared/services/api-client", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/shared/services/api-client")>()), apiClient: { get: vi.fn(), post: vi.fn(), put: vi.fn() } }));
 vi.mock("@/components/ui/select", () => ({
-  Select: ({ children, onValueChange }: { children: React.ReactNode; onValueChange?: (value: string) => void }) => (
-    <div data-testid="select" onClick={() => onValueChange?.("Tiempo completo")}>{children}</div>
+  Select: ({
+    children,
+    onValueChange,
+  }: {
+    children: React.ReactNode;
+    onValueChange?: (value: string) => void;
+  }) => (
+    <div
+      data-testid="select"
+      onClick={() => onValueChange?.("Tiempo completo")}
+    >
+      {children}
+    </div>
   ),
-  SelectTrigger: ({ children, id }: { children: React.ReactNode; id?: string }) => <div id={id}>{children}</div>,
-  SelectValue: ({ placeholder }: { placeholder?: string }) => <span>{placeholder}</span>,
-  SelectContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  SelectItem: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  SelectTrigger: ({
+    children,
+    id,
+  }: {
+    children: React.ReactNode;
+    id?: string;
+  }) => <div id={id}>{children}</div>,
+  SelectValue: ({ placeholder }: { placeholder?: string }) => (
+    <span>{placeholder}</span>
+  ),
+  SelectContent: ({ children }: { children: React.ReactNode }) => (
+    <div>{children}</div>
+  ),
+  SelectItem: ({ children }: { children: React.ReactNode }) => (
+    <div>{children}</div>
+  ),
 }));
 
 const EXPECTED_PAYLOAD = {
@@ -78,11 +103,11 @@ async function goToPreview() {
 }
 
 describe("Registrar vacante: wizard completo conectado al backend", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     Element.prototype.scrollIntoView = vi.fn();
     window.history.pushState({}, "", "/vacancies/register");
     vi.stubEnv("NEXT_PUBLIC_DEMO_COMPANY_ID", COMPANY_ID);
-    saveAccessToken(buildSessionToken("empresa"));
+    await saveAccessToken(buildSessionToken("empresa"));
     vi.mocked(apiClient.get).mockResolvedValue({
       data: { statusCode: 200, ok: true, detail: "", data: [PYTHON, DOCKER, KUBERNETES] },
     });
@@ -108,7 +133,10 @@ describe("Registrar vacante: wizard completo conectado al backend", () => {
     expect(await screen.findByText("Vacante publicada")).toBeInTheDocument();
     expect(apiClient.get).toHaveBeenCalledWith("/job-offers/skills");
     expect(apiClient.post).toHaveBeenCalledTimes(1);
-    expect(apiClient.post).toHaveBeenCalledWith(`/companies/${COMPANY_ID}/job-offers`, EXPECTED_PAYLOAD);
+    expect(apiClient.post).toHaveBeenCalledWith(
+      `/companies/${COMPANY_ID}/job-offers`,
+      EXPECTED_PAYLOAD,
+    );
 
     click("Publicar otra vacante");
     await waitFor(() => expect(byId("title")).toBeInTheDocument());
@@ -173,7 +201,7 @@ describe("Registrar vacante: wizard completo conectado al backend", () => {
   });
 
   it("no llama al backend si la sesión no es de empresa", async () => {
-    saveAccessToken(buildSessionToken("titulado"));
+    await saveAccessToken(buildSessionToken("titulado"));
     renderWithQuery(<RegisterVacancyView />);
     await goToPreview();
 
@@ -253,7 +281,9 @@ describe("Registrar vacante: wizard completo conectado al backend", () => {
     renderWithQuery(<RegisterVacancyView jobOfferId="offer-1" />);
 
     await screen.findByText("Editar vacante");
-    expect(apiClient.get).toHaveBeenCalledWith(`/companies/${COMPANY_ID}/job-offers/offer-1`);
+    expect(apiClient.get).toHaveBeenCalledWith(
+      `/companies/${COMPANY_ID}/job-offers/offer-1`,
+    );
     expect(byId("title").value).toBe("DevOps Senior");
     click("Continuar");
     await screen.findByRole("button", { name: "Docker" });
@@ -266,7 +296,10 @@ describe("Registrar vacante: wizard completo conectado al backend", () => {
       position: "top-center",
       duration: 5000,
     });
-    expect(apiClient.put).toHaveBeenCalledWith(`/companies/${COMPANY_ID}/job-offers/offer-1`, EXPECTED_PAYLOAD);
+    expect(apiClient.put).toHaveBeenCalledWith(
+      `/companies/${COMPANY_ID}/job-offers/offer-1`,
+      EXPECTED_PAYLOAD,
+    );
     expect(apiClient.post).not.toHaveBeenCalled();
   });
 

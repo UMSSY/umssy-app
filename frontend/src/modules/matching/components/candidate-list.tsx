@@ -1,16 +1,9 @@
 "use client";
+import type { CandidateListProps } from "../types/candidate-list-props.types";
 
 import { Input } from "@/components/ui/input";
-import type { CandidateWithMatch } from "../types/matching-types";
-import { CandidateListItem } from "./candidate-list-item";
 
-interface CandidateListProps {
-  query: string;
-  onQueryChange: (query: string) => void;
-  candidates: CandidateWithMatch[];
-  selectedCandidateId: string | null;
-  onSelectCandidate: (id: string) => void;
-}
+import { CandidateListItem } from "./candidate-list-item";
 
 export function CandidateList({
   query,

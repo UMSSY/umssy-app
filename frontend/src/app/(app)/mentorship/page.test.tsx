@@ -27,8 +27,8 @@ vi.mock("@/modules/mentorship/services/orientation-type.service", () => ({
 }));
 
 describe("MentorshipPage", () => {
-  beforeEach(() => {
-    saveAccessToken("mentor-token");
+  beforeEach(async () => {
+    await saveAccessToken("mentor-token");
     vi.spyOn(mentorParticipationService, "getMyParticipation").mockResolvedValue({
       status: "NEVER",
       areas: [],

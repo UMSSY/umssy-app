@@ -1,7 +1,5 @@
 export const APPOINTMENT_MESSAGE_MAX_LENGTH = 300;
 
-export const APPOINTMENT_CONFLICT_STATUS = 409;
-
 export const REQUEST_APPOINTMENT_TEXT = {
   topicLabel: "Tema de la sesión",
   topicPlaceholder: "Selecciona un tema",

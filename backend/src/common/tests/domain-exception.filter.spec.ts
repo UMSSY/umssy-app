@@ -26,17 +26,24 @@ function buildHost() {
 describe('DomainExceptionFilter', () => {
   it('normalizes Zod validation errors without losing field messages or nested paths', () => {
     const { host, status, json } = buildHost();
-    const result = z.object({
-      email: z.string().min(1, 'Email required'),
-      contacts: z.array(z.object({ name: z.string().min(1, 'Name required') })),
-    }).safeParse({ email: '', contacts: [{ name: '' }] });
+    const result = z
+      .object({
+        email: z.string().min(1, 'Email required'),
+        contacts: z.array(
+          z.object({ name: z.string().min(1, 'Name required') }),
+        ),
+      })
+      .safeParse({ email: '', contacts: [{ name: '' }] });
     if (result.success) throw new Error('Expected invalid fixture');
     const errors = [
       { field: 'email', message: 'Email required' },
       { field: 'contacts.0.name', message: 'Name required' },
     ];
 
-    new DomainExceptionFilter().catch(new ZodValidationException(result.error), host);
+    new DomainExceptionFilter().catch(
+      new ZodValidationException(result.error),
+      host,
+    );
 
     expect(status).toHaveBeenCalledWith(400);
     expect(json).toHaveBeenCalledWith({
@@ -68,7 +75,10 @@ describe('DomainExceptionFilter', () => {
     const { host, status, json } = buildHost();
     const errors = [{ field: 'email', message: 'Invalid email' }];
 
-    new DomainExceptionFilter().catch(new RequestValidationException(errors), host);
+    new DomainExceptionFilter().catch(
+      new RequestValidationException(errors),
+      host,
+    );
 
     expect(status).toHaveBeenCalledWith(400);
     expect(json).toHaveBeenCalledWith({

@@ -1,8 +1,9 @@
+import "@/shared/testing/indexed-db.mock";
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import { act, cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { clearAccessToken, saveAccessToken } from "@/shared/services/storage/access-token-storage";
-import { buildLoginUrl } from "@/modules/auth/utils/safe-next-path";
+import { buildLoginUrl } from "@/modules/auth";
 import { registrationsService as registrationApi } from "@/modules/registrations";
 import { toast } from "sonner";
 import { useEvent } from "../hooks/use-event";
@@ -448,12 +449,14 @@ describe("EventsView proposal support", () => {
     expect(screen.getByText("Inicia sesión para apoyar esta propuesta.")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Preinscribirme/Apoyar propuesta" }));
 
-    expect(push).toHaveBeenCalledWith(buildLoginUrl(`/events?proposal=${PROPOSAL.id}`));
+    expect(push).toHaveBeenCalledWith(
+      buildLoginUrl(`/events?proposal=${PROPOSAL.id}`),
+    );
     expect(supportRequest).not.toHaveBeenCalled();
   });
 
-  it("blocks accounts without the Titulado role before sending a request", () => {
-    saveAccessToken(tokenWithRoles(["estudiante"]));
+  it("blocks accounts without the Titulado role before sending a request", async () => {
+    await saveAccessToken(tokenWithRoles(["estudiante"]));
     showProposal();
     const supportRequest = vi.spyOn(registrationsService, "supportProposal");
     render(<EventsView initialProposalId={PROPOSAL.id} />);
@@ -465,7 +468,7 @@ describe("EventsView proposal support", () => {
 
   it("submits once, shows pending state, and reflects a registered support", async () => {
     const token = tokenWithRoles(["titulado"]);
-    saveAccessToken(token);
+    await saveAccessToken(token);
     showProposal();
     let resolve!: (value: ProposalSupportResponse) => void;
     const supportRequest = vi.spyOn(registrationsService, "supportProposal")
@@ -484,7 +487,7 @@ describe("EventsView proposal support", () => {
   });
 
   it("keeps the action blocked after an already supported response", async () => {
-    saveAccessToken(tokenWithRoles(["titulado"]));
+    await saveAccessToken(tokenWithRoles(["titulado"]));
     showProposal();
     vi.spyOn(registrationsService, "supportProposal").mockRejectedValue({
       isAxiosError: true,
@@ -494,8 +497,13 @@ describe("EventsView proposal support", () => {
     fireEvent.click(screen.getByRole("button", { name: "Preinscribirme/Apoyar propuesta" }));
 
     await waitFor(() => expect(screen.getByRole("button", { name: "Ya apoyaste esta propuesta" })).toBeDisabled());
-    expect(screen.getByRole("complementary", { name: `Detalle de ${PROPOSAL.title}` }))
-      .toHaveTextContent("Tu apoyo ya fue registrado. No puedes preinscribirte dos veces.");
+    expect(
+      screen.getByRole("complementary", {
+        name: `Detalle de ${PROPOSAL.title}`,
+      }),
+    ).toHaveTextContent(
+      "Tu apoyo ya fue registrado. No puedes preinscribirte dos veces.",
+    );
     expect(within(screen.getByRole("region", { name: "Listado de talleres" }))
       .getByRole("button", { name: /desarrollo web con react/i }))
       .toHaveTextContent("Tu apoyo ya fue registrado. No puedes preinscribirte dos veces.");
@@ -504,7 +512,7 @@ describe("EventsView proposal support", () => {
   });
 
   it("offers a retry after a network failure", async () => {
-    saveAccessToken(tokenWithRoles(["titulado"]));
+    await saveAccessToken(tokenWithRoles(["titulado"]));
     showProposal();
     const supportRequest = vi.spyOn(registrationsService, "supportProposal")
       .mockRejectedValueOnce(new Error("offline"))
@@ -519,7 +527,7 @@ describe("EventsView proposal support", () => {
   });
 
   it("replaces a proposal that expired during the open detail", async () => {
-    saveAccessToken(tokenWithRoles(["titulado"]));
+    await saveAccessToken(tokenWithRoles(["titulado"]));
     showProposal();
     vi.spyOn(registrationsService, "supportProposal").mockRejectedValue({
       isAxiosError: true,
@@ -534,13 +542,18 @@ describe("EventsView proposal support", () => {
     mockUseEvents.mockReturnValue({ events: [expired], error: null, hasMore: false, isLoading: false, isLoadingMore: false, loadMore: vi.fn(), retry: vi.fn() });
     rerender(<EventsView initialProposalId={PROPOSAL.id} />);
 
-    expect(within(screen.getByRole("complementary", { name: `Detalle de ${PROPOSAL.title}` }))
-      .getByText("Fecha límite superada · vencida automáticamente")).toBeInTheDocument();
+    expect(
+      within(
+        screen.getByRole("complementary", {
+          name: `Detalle de ${PROPOSAL.title}`,
+        }),
+      ).getByText("Fecha límite superada · vencida automáticamente"),
+    ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Preinscribirme/Apoyar propuesta" })).toBeDisabled();
   });
 
   it("offers normal registration if another support published the proposal", async () => {
-    saveAccessToken(tokenWithRoles(["titulado"]));
+    await saveAccessToken(tokenWithRoles(["titulado"]));
     showProposal();
     vi.spyOn(registrationApi, "getOwn").mockResolvedValue(null);
     vi.spyOn(registrationsService, "supportProposal").mockRejectedValue({
@@ -561,7 +574,7 @@ describe("EventsView proposal support", () => {
   });
 
   it("shows publication and the confirmed registration after reaching the threshold", async () => {
-    saveAccessToken(tokenWithRoles(["titulado"]));
+    await saveAccessToken(tokenWithRoles(["titulado"]));
     showProposal();
     vi.spyOn(registrationApi, "getOwn").mockResolvedValue(null);
     vi.spyOn(registrationsService, "supportProposal").mockResolvedValue({
@@ -582,7 +595,7 @@ describe("EventsView proposal support", () => {
     ["AUTH_REQUIRED", 401],
     ["EVENT_NOT_FOUND", 404],
   ])("handles %s after an attempted support", async (code, status) => {
-    saveAccessToken(tokenWithRoles(["titulado"]));
+    await saveAccessToken(tokenWithRoles(["titulado"]));
     showProposal();
     vi.spyOn(registrationsService, "supportProposal").mockRejectedValue({
       isAxiosError: true,
@@ -592,10 +605,20 @@ describe("EventsView proposal support", () => {
     fireEvent.click(screen.getByRole("button", { name: "Preinscribirme/Apoyar propuesta" }));
 
     if (code === "AUTH_REQUIRED") {
-      await waitFor(() => expect(push).toHaveBeenCalledWith(buildLoginUrl(`/events?proposal=${PROPOSAL.id}`)));
+      await waitFor(() =>
+        expect(push).toHaveBeenCalledWith(
+          buildLoginUrl(`/events?proposal=${PROPOSAL.id}`),
+        ),
+      );
       expect(toast.info).toHaveBeenCalledWith("Debes iniciar sesión para apoyar una propuesta.");
     } else {
-      await waitFor(() => expect(screen.queryByRole("complementary", { name: `Detalle de ${PROPOSAL.title}` })).not.toBeInTheDocument());
+      await waitFor(() =>
+        expect(
+          screen.queryByRole("complementary", {
+            name: `Detalle de ${PROPOSAL.title}`,
+          }),
+        ).not.toBeInTheDocument(),
+      );
       expect(toast.error).toHaveBeenCalledWith("No encontramos la propuesta solicitada.");
     }
   });

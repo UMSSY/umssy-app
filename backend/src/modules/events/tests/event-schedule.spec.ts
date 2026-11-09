@@ -11,16 +11,27 @@ const event = {
 };
 
 describe('schedule conflict lookup through the events domain', () => {
-  it.each([null, { id: 'other-event' }])('keeps the lookup inside the supplied transaction: %j', async (record) => {
-    const outsideTransaction = vi.fn();
-    const findFirst = vi.fn().mockResolvedValue(record);
-    const tx = { event: { findFirst } } as unknown as Prisma.TransactionClient;
-    const service = new EventsService(new EventsRepository({ event: { findFirst: outsideTransaction } } as never));
+  it.each([null, { id: 'other-event' }])(
+    'keeps the lookup inside the supplied transaction: %j',
+    async (record) => {
+      const outsideTransaction = vi.fn();
+      const findFirst = vi.fn().mockResolvedValue(record);
+      const tx = {
+        event: { findFirst },
+      } as unknown as Prisma.TransactionClient;
+      const service = new EventsService(
+        new EventsRepository({
+          event: { findFirst: outsideTransaction },
+        } as never),
+      );
 
-    expect(await service.hasScheduleConflict(tx, event, ['other-event'])).toBe(Boolean(record));
-    expect(findFirst).toHaveBeenCalledOnce();
-    expect(outsideTransaction).not.toHaveBeenCalled();
-  });
+      expect(
+        await service.hasScheduleConflict(tx, event, ['other-event']),
+      ).toBe(Boolean(record));
+      expect(findFirst).toHaveBeenCalledOnce();
+      expect(outsideTransaction).not.toHaveBeenCalled();
+    },
+  );
 
   it('does not query events when the user has no confirmed registrations', async () => {
     const findFirst = vi.fn();

@@ -1,4 +1,8 @@
-import type { FieldResult, ValidationField, ValidationResult } from './document-validation.enum.js';
+import type {
+  FieldResult,
+  ValidationField,
+  ValidationResult,
+} from './document-validation.enum.js';
 
 export interface ValidationFieldOutcome {
   field: ValidationField;

@@ -28,10 +28,15 @@ describe('CityRepository', () => {
   });
 
   it('tells whether a city exists', async () => {
-    city.findUnique.mockResolvedValueOnce({ id: cityId }).mockResolvedValueOnce(null);
+    city.findUnique
+      .mockResolvedValueOnce({ id: cityId })
+      .mockResolvedValueOnce(null);
 
     await expect(repository.exists(cityId)).resolves.toBe(true);
     await expect(repository.exists(cityId)).resolves.toBe(false);
-    expect(city.findUnique).toHaveBeenCalledWith({ where: { id: cityId }, select: { id: true } });
+    expect(city.findUnique).toHaveBeenCalledWith({
+      where: { id: cityId },
+      select: { id: true },
+    });
   });
 });

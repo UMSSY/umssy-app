@@ -11,11 +11,7 @@ import {
   DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  GOOGLE_MAPS_LINK_REGEX,
-  NOT_SPECIFIED_TEXT,
-  TOAST_OPTIONS,
-} from "../constants/job-offers.constants";
+import { GOOGLE_MAPS_LINK_REGEX, TOAST_OPTIONS } from "../constants/job-offers.constants";
 import { useJobOfferDetails } from "../hooks/use-job-offer-details";
 import type { JobOfferDetailsDialogProps } from "../types/job-offer-details-dialog-props.types";
 import { formatVacancyCount } from "../utils/format-vacancy-count";
@@ -81,7 +77,7 @@ export function JobOfferDetailsDialog({
                 </h3>
                 <DialogDescription>{offer.company.name}</DialogDescription>
                 <p className="mt-1 text-sm font-bold break-words text-ink-soft">
-                  {offer.category || NOT_SPECIFIED_TEXT}
+                  {offer.category || "No especificado"}
                 </p>
               </div>
 
@@ -89,7 +85,7 @@ export function JobOfferDetailsDialog({
                 modality={offer.modality}
                 contractType={offer.contractType}
                 vacancies={formatVacancyCount(offer.positionsAvailable)}
-                salary={offer.salaryRange || NOT_SPECIFIED_TEXT}
+                salary={offer.salaryRange || "No especificado"}
               />
 
               <p className="text-sm leading-relaxed break-words whitespace-pre-line text-ink-soft">
@@ -99,7 +95,7 @@ export function JobOfferDetailsDialog({
               <section className="border-t border-border pt-4">
                 <h4 className={SECTION_TITLE_CLASSES}>Idiomas</h4>
                 <p className="text-sm break-words text-text-secondary">
-                  {offer.languages || NOT_SPECIFIED_TEXT}
+                  {offer.languages || "No especificado"}
                 </p>
               </section>
 
@@ -120,7 +116,7 @@ export function JobOfferDetailsDialog({
                     <p className="text-sm text-text-secondary">Enlace no disponible</p>
                   )
                 ) : (
-                  <p className="text-sm text-text-secondary">{NOT_SPECIFIED_TEXT}</p>
+                  <p className="text-sm text-text-secondary">{"No especificado"}</p>
                 )}
               </section>
 

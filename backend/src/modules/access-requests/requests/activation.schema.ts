@@ -7,8 +7,10 @@ const emailField = accessRequestFields.email;
 const codeField = z
   .string({ error: 'El código es obligatorio' })
   .trim()
-  .regex(new RegExp(`^\\d{${OTP_DIGITS}}$`), `El código debe tener ${OTP_DIGITS} dígitos`);
-
+  .regex(
+    new RegExp(`^\\d{${OTP_DIGITS}}$`),
+    `El código debe tener ${OTP_DIGITS} dígitos`,
+  );
 
 const passwordField = z
   .string({ error: 'La contraseña es obligatoria' })
@@ -19,13 +21,24 @@ const passwordField = z
 
 export const activationStatusQuerySchema = z.object({ email: emailField });
 
-export const verifyActivationCodeSchema = z.object({ email: emailField, code: codeField });
+export const verifyActivationCodeSchema = z.object({
+  email: emailField,
+  code: codeField,
+});
 
-export const activateAccountSchema = z.object({ email: emailField, code: codeField, password: passwordField });
+export const activateAccountSchema = z.object({
+  email: emailField,
+  code: codeField,
+  password: passwordField,
+});
 
 export const resendActivationCodeSchema = z.object({ email: emailField });
 
 export type ActivationStatusQuery = z.infer<typeof activationStatusQuerySchema>;
-export type VerifyActivationCodeDto = z.infer<typeof verifyActivationCodeSchema>;
+export type VerifyActivationCodeDto = z.infer<
+  typeof verifyActivationCodeSchema
+>;
 export type ActivateAccountDto = z.infer<typeof activateAccountSchema>;
-export type ResendActivationCodeDto = z.infer<typeof resendActivationCodeSchema>;
+export type ResendActivationCodeDto = z.infer<
+  typeof resendActivationCodeSchema
+>;

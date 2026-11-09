@@ -1,10 +1,11 @@
+import { NOT_FOUND_STATUS } from "@/shared/constants/http.constants";
 import { apiClient } from "@/shared/services/api-client";
 import {
   CERTIFICATION_DOCUMENT_FIELD_NAME,
   CERTIFICATIONS_ENDPOINT,
   getCertificationDocumentEndpoint,
 } from "../config/certification-api.config";
-import { NOT_FOUND_STATUS } from "@/modules/profile";
+
 import type { ApiResponse } from "@/modules/profile";
 import type { Certification } from "../types/certification.types";
 import type { CreateCertificationDto } from "../types/create-certification-dto.types";

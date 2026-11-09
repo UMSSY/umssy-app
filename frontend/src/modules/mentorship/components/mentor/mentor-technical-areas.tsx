@@ -1,3 +1,4 @@
+import type { MentorTechnicalAreasProps } from "../../types/mentor-technical-areas-props.types";
 import { Terminal } from "lucide-react";
 import {
   Card,
@@ -5,11 +6,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import type { MentorProfile } from "../../types/mentor-profile.types";
-
-type MentorTechnicalAreasProps = {
-  areas: MentorProfile["technicalAreas"];
-};
 
 export function MentorTechnicalAreas({ areas }: MentorTechnicalAreasProps) {
   return (

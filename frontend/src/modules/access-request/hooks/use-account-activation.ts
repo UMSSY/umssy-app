@@ -1,15 +1,18 @@
 "use client";
+import type { Busy } from "../types/busy.types";
+import type { Feedback } from "../types/feedback.types";
+import type { StatusData } from "../types/status-data.types";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { startSession } from "@/modules/auth";
-import { OTP_MAX_ATTEMPTS } from "../constants/account-activation.constants";
-import { accountActivationService } from "../services/account-activation.service";
-import type { ActivationFailure, ActivationResult, ActivationSession, ActivationStatus, ActivationStep } from "../types/account-activation.types";
 
-type Busy = "loading" | "verifying" | "activating" | "resending" | null;
-interface Feedback { code?: string; password?: string; general?: string; info?: string }
-interface StatusData { result: ActivationResult<ActivationStatus>; offsetMs: number }
+import { accountActivationService } from "../services/account-activation.service";
+import type { ActivationFailure } from "../types/activation-failure.types";
+
+import type { ActivationSession } from "../types/activation-session.types";
+
+import type { ActivationStep } from "../types/activation-step.types";
 
 function clockOffset(serverTime: string): number {
   const parsed = Date.parse(serverTime);
@@ -70,13 +73,15 @@ export function useAccountActivation(email: string) {
     } finally { verifyMutation.reset(); }
   };
 
-  const activate = async (password: string): Promise<ActivationSession | null> => {
+  const activate = async (
+    password: string,
+  ): Promise<ActivationSession | null> => {
     setFeedback({});
     try {
       const result = await activateMutation.mutateAsync({ code: verifiedCode, password });
       if (!alive.current) return null;
       if (result.ok) {
-        startSession(result.data.accessToken);
+        await startSession(result.data.accessToken);
         setSession(result.data);
         setVerifiedCode("");
         return result.data;
@@ -88,7 +93,9 @@ export function useAccountActivation(email: string) {
     } catch {
       if (alive.current) setFeedback({ general: "No se pudo completar la operación. Inténtalo de nuevo." });
       return null;
-    } finally { activateMutation.reset(); }
+    } finally {
+      activateMutation.reset();
+    }
   };
 
   const resend = async () => {
@@ -100,7 +107,7 @@ export function useAccountActivation(email: string) {
         const data = result.data;
         client.setQueryData<StatusData>(key, {
           offsetMs: clockOffset(data.serverTime),
-          result: { ok: true, data: { state: "ready", ...data, remainingAttempts: OTP_MAX_ATTEMPTS } },
+          result: { ok: true, data: { state: "ready", ...data, remainingAttempts: 5 } },
         });
         setStep("code"); setVerifiedCode("");
         setFeedback({ info: "Te enviamos un nuevo código. Revisa tu correo." });

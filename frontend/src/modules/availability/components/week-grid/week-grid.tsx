@@ -4,20 +4,7 @@ import { Button } from "@/components/ui/button";
 import { formatBlockRange, toBoliviaTime } from "@/shared/utils/date-time";
 import { cn } from "cn";
 import { BLOCKED_DATE_TEXT } from "../../constants/blocked-date.constants";
-import {
-  BLOCK_STATE_TEXT,
-  DAY_LABELS,
-  HOUR_HEIGHT_PX,
-  STICKY_GAP_PX,
-  SELECTED_BLOCK_CLASSES,
-  SELECTED_LEGEND_LABEL,
-  STATE_BUTTON_CLASSES,
-  STATE_BUTTON_VARIANT,
-  STATE_LABELS_ES,
-  WEEK_GRID_END_HOUR,
-  WEEK_GRID_LEGEND,
-  WEEK_GRID_START_HOUR,
-} from "../../constants/week-grid.constants";
+import { BLOCK_STATE_TEXT, DAY_LABELS, HOUR_HEIGHT_PX, SELECTED_BLOCK_CLASSES, STATE_BUTTON_CLASSES, STATE_BUTTON_VARIANT, STATE_LABELS_ES, WEEK_GRID_LEGEND } from "../../constants/week-grid.constants";
 import type { AvailabilityBlock } from "../../types/availability-block.types";
 import type { WeekGridProps } from "../../types/week-grid-props.types";
 import {
@@ -33,8 +20,8 @@ export function WeekGrid({
   blocks,
   weekRange,
   variant,
-  startHour = WEEK_GRID_START_HOUR,
-  endHour = WEEK_GRID_END_HOUR,
+  startHour = 7,
+  endHour = 22,
   blockedDates = [],
   onSelectDate,
   selectedBlockId,
@@ -44,7 +31,7 @@ export function WeekGrid({
 }: WeekGridProps) {
   const hours = Array.from({ length: endHour - startHour }, (_, i) => startHour + i);
   const gridHeightPx = hours.length * HOUR_HEIGHT_PX;
-  const stickyTop = { top: `calc(var(--spacing-app-header) + ${STICKY_GAP_PX + stickyOffset}px)` };
+  const stickyTop = { top: `calc(var(--spacing-app-header) + ${16 + stickyOffset}px)` };
 
   const dayDates = getWeekDayDates(weekRange);
   const blocksByDay: AvailabilityBlock[][] = Array.from({ length: 7 }, () => []);
@@ -190,7 +177,7 @@ export function WeekGrid({
               aria-hidden="true"
               className={cn("inline-block h-3 w-4 rounded-sm", SELECTED_BLOCK_CLASSES)}
             />
-            {SELECTED_LEGEND_LABEL}
+            {"Tu selección"}
           </li>
         ) : (
           <li className="flex items-center gap-2">

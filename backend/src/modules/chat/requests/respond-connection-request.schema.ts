@@ -1,4 +1,3 @@
-
 import { z } from 'zod';
 
 export const respondConnectionRequestSchema = z
@@ -9,4 +8,6 @@ export const respondConnectionRequestSchema = z
   })
   .strict();
 
-export type RespondConnectionRequestDto = z.infer<typeof respondConnectionRequestSchema>;
+export type RespondConnectionRequestDto = z.infer<
+  typeof respondConnectionRequestSchema
+>;

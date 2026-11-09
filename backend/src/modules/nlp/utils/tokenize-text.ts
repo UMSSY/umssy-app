@@ -1,12 +1,16 @@
 import type { NlpToken } from '../types/nlp-token.type.js';
 import { normalizeTerm } from './normalize-term.js';
 
-const TOKEN_PATTERN = /\.?[\p{L}\p{N}][\p{L}\p{N}+#.\-_]*|[.,;:!?()[\]{}"«»¿¡|•·\n]/gu;
+const TOKEN_PATTERN =
+  /\.?[\p{L}\p{N}][\p{L}\p{N}+#.\-_]*|[.,;:!?()[\]{}"«»¿¡|•·\n]/gu;
 const BOUNDARY_PATTERN = /^[.,;:!?()[\]{}"«»¿¡|•·\n]$/u;
 const TRAILING_SEPARATORS = /[.\-_]+$/u;
 
 export function tokenizeText(text: string): NlpToken[] {
-  const normalized = (text ?? '').normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
+  const normalized = (text ?? '')
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+    .toLowerCase();
   const tokens: NlpToken[] = [];
 
   for (const [match] of normalized.matchAll(TOKEN_PATTERN)) {

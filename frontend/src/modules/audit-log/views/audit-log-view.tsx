@@ -9,7 +9,7 @@ import { AuditEventCards } from "../components/list/audit-event-cards";
 import { AuditEventTable } from "../components/list/audit-event-table";
 import { AuditLogStatus } from "../components/list/audit-log-status";
 import { AuditPagination } from "../components/list/audit-pagination";
-import { AUDIT_PAGE_DESCRIPTION, AUDIT_PAGE_TITLE } from "../constants/audit-log.constants";
+
 import { useAuditCsvExport } from "../hooks/use-audit-csv-export";
 import { useAuditEvents } from "../hooks/use-audit-events";
 import { useAuditFilters } from "../hooks/use-audit-filters";
@@ -33,8 +33,8 @@ export function AuditLogView() {
 
   return (
     <WorkspacePage
-      title={AUDIT_PAGE_TITLE}
-      description={AUDIT_PAGE_DESCRIPTION}
+      title={"Registro de auditoría"}
+      description={"Historial de cada solicitud: quién hizo cada acción, cuándo y con qué documento."}
       className="min-w-0 [contain:inline-size]"
       actions={
         <ExportCsvButton

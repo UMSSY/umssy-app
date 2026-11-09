@@ -12,7 +12,9 @@ describe('SkillAnalysisService', () => {
     findProfileSkillRows: vi.fn(),
     applyReconciliation: vi.fn(),
   };
-  const service = new SkillAnalysisService(repository as unknown as SkillAnalysisRepository);
+  const service = new SkillAnalysisService(
+    repository as unknown as SkillAnalysisRepository,
+  );
 
   beforeEach(() => {
     vi.resetAllMocks();
@@ -52,36 +54,62 @@ describe('SkillAnalysisService', () => {
       },
     ]);
 
-    await expect(service.reconcileDetected(userId, [
-      { id: 'manual', name: 'Python', evidenceRefs },
-      { id: 'new', name: 'TypeScript', evidenceRefs },
-    ], context)).resolves.toBe(true);
+    await expect(
+      service.reconcileDetected(
+        userId,
+        [
+          { id: 'manual', name: 'Python', evidenceRefs },
+          { id: 'new', name: 'TypeScript', evidenceRefs },
+        ],
+        context,
+      ),
+    ).resolves.toBe(true);
 
-    expect(repository.findProfileSkillRows).toHaveBeenCalledWith(userId, context);
-    expect(repository.applyReconciliation).toHaveBeenCalledWith(userId, {
-      creates: [{ skillId: 'new', evidenceRefs }],
-      updates: [
-        { id: 'manual-row', evidenceRefs, isHighRelevance: true },
-        { id: 'approved-row', evidenceRefs: [], isHighRelevance: false },
-      ],
-      deleteIds: ['obsolete-row'],
-    }, context);
+    expect(repository.findProfileSkillRows).toHaveBeenCalledWith(
+      userId,
+      context,
+    );
+    expect(repository.applyReconciliation).toHaveBeenCalledWith(
+      userId,
+      {
+        creates: [{ skillId: 'new', evidenceRefs }],
+        updates: [
+          { id: 'manual-row', evidenceRefs, isHighRelevance: true },
+          { id: 'approved-row', evidenceRefs: [], isHighRelevance: false },
+        ],
+        deleteIds: ['obsolete-row'],
+      },
+      context,
+    );
   });
 
   it('reports no change for an identical detection', async () => {
     const evidenceRefs = [{ type: 'education' as const, id: 'e1' }];
     repository.findProfileSkillRows.mockResolvedValue([
-      { id: 'row', skillId: 's1', source: 'nlp', verificationStatus: 'pending', isHighRelevance: true, evidenceRefs },
+      {
+        id: 'row',
+        skillId: 's1',
+        source: 'nlp',
+        verificationStatus: 'pending',
+        isHighRelevance: true,
+        evidenceRefs,
+      },
     ]);
 
-    await expect(service.reconcileDetected(userId, [
-      { id: 's1', name: 'Python', evidenceRefs },
-    ], context)).resolves.toBe(false);
+    await expect(
+      service.reconcileDetected(
+        userId,
+        [{ id: 's1', name: 'Python', evidenceRefs }],
+        context,
+      ),
+    ).resolves.toBe(false);
   });
 
   it('propagates write failures so the publishing transaction rolls back', async () => {
     repository.applyReconciliation.mockRejectedValue(new Error('write failed'));
 
-    await expect(service.reconcileDetected(userId, [], context)).rejects.toThrow('write failed');
+    await expect(
+      service.reconcileDetected(userId, [], context),
+    ).rejects.toThrow('write failed');
   });
 });

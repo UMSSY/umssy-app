@@ -13,8 +13,8 @@ import { RequestStatusDetails } from "../components/request-status/request-statu
 import { RequestStatusForm } from "../components/request-status/request-status-form";
 import { DocumentCorrectionForm } from "../components/request-status/document-correction-form";
 import { useDocumentCorrectionGrant } from "../hooks/use-document-correction-grant";
-import type { RequestStatusResponse } from "../types/access-request.types";
-import type { DocumentCorrectionResponse } from "../types/document-correction.types";
+import type { RequestStatusResponse } from "../types/request-status-response.types";
+import type { DocumentCorrectionResponse } from "../types/document-correction-response.types";
 import { useRequestStatus } from "../hooks/use-request-status";
 import type { MyRequestViewProps } from "../types/my-request-view-props.types";
 import { getRequestCodeFromLink } from "../utils/get-request-code-from-link";

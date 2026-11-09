@@ -1,3 +1,4 @@
+import { DOCUMENT_VALIDATION_RULES } from '../../../common/constants/file-upload.constants.js';
 import { Injectable } from '@nestjs/common';
 import { FileValidationService } from '../../../common/services/file-validation.service.js';
 import type { MulterFile } from '../../../common/types/multer-file.type.js';
@@ -6,7 +7,7 @@ import { CertificationMapper } from '../../certifications/mappers/certification.
 import { CertificationRecordsService } from '../../certifications/services/certification-records.service.js';
 import type { CertificationRecord } from '../../certifications/types/certification-record.type.js';
 import type { CertificationResponse } from '../../certifications/types/certification-response.type.js';
-import { CERTIFICATION_DOCUMENT_VALIDATION_RULES } from '../constants/certification-document.constants.js';
+
 import { CertificationDocumentNotFoundException } from '../exceptions/certification-document-not-found.exception.js';
 import { CertificationDocumentMapper } from '../mappers/certification-document.mapper.js';
 import { CertificationDocumentsRepository } from '../repositories/certification-documents.repository.js';
@@ -15,7 +16,7 @@ import type { CertificationDocumentDownload } from '../types/certification-docum
 import type { CertificationDocumentMetadata } from '../types/certification-document-metadata.type.js';
 
 import { TransactionService } from '../../../common/prisma/transaction.service.js';
-import { RadarAuditService } from '../../radar-integration/radar-audit.service.js';
+import { RadarAuditService } from '../../radar-integration/services/radar-audit.service.js';
 
 @Injectable()
 export class CertificationDocumentsService {
@@ -44,7 +45,7 @@ export class CertificationDocumentsService {
   } {
     const validated = this.fileValidationService.validate(
       file ? this.documentMapper.toUploadedFile(file) : undefined,
-      CERTIFICATION_DOCUMENT_VALIDATION_RULES,
+      DOCUMENT_VALIDATION_RULES,
     );
     return {
       content: validated.buffer,

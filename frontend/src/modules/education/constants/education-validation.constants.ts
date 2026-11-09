@@ -13,5 +13,3 @@ export const EDUCATION_VALIDATION_MESSAGES = {
   invalidDate: "Ingresa una fecha válida.",
   invalidDateRange: "La fecha de fin no puede ser anterior a la fecha de inicio.",
 };
-
-export const EDUCATION_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;

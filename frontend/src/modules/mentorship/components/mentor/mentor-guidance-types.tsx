@@ -1,4 +1,5 @@
 "use client";
+import type { MentorGuidanceTypesProps } from "../../types/mentor-guidance-types-props.types";
 
 import { useState } from "react";
 import { Compass } from "lucide-react";
@@ -8,12 +9,6 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@/components/ui/toggle-group";
-
-import type { OrientationTypeResponse } from "../../types/orientation-type-response.types";
-
-type MentorGuidanceTypesProps = {
-  orientationTypes: OrientationTypeResponse[];
-};
 
 export function MentorGuidanceTypes({
   orientationTypes,
