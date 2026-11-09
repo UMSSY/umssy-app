@@ -1,10 +1,12 @@
 "use client";
 
+import { DOCUMENT_FILE_ACCEPT } from "@/shared/constants/file-upload.constants";
+
 import { useRef, type ChangeEvent } from "react";
 import { FileText, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CERTIFICATE_FILE_ACCEPT } from "../config/certification-document.config";
+
 import type { CertificationDocumentFieldProps } from "../types/certification-document-field-props.types";
 import { formatFileSize } from "@/modules/profile";
 import { getFieldErrorProps } from "@/modules/profile";
@@ -75,7 +77,7 @@ export function CertificationDocumentField({
         ref={fileInputRef}
         id={id}
         type="file"
-        accept={CERTIFICATE_FILE_ACCEPT}
+        accept={DOCUMENT_FILE_ACCEPT}
         className="hidden"
         disabled={disabled}
         onChange={handleFileChange}

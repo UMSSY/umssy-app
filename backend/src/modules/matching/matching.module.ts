@@ -18,9 +18,9 @@ import { SkillsClassifierService } from './services/skills-classifier.service.js
 import { VacancyRankingService } from './services/vacancy-ranking.service.js';
 import { WeightedScoreService } from './services/weighted-score.service.js';
 import { ActiveJobOffersService } from './services/active-job-offers.service.js';
-import { ExperienceSkillsRepository } from './repositories/experience-skills.repository.js';
+import { ExperienceSkillsService } from './services/experience-skills.service.js';
 import { JobMatchController } from './controllers/job-match.controller.js';
-import { JobMatchRepository } from './repositories/job-match.repository.js';
+import { JobMatchSourceService } from './services/job-match-source.service.js';
 import { JobMatchService } from './services/job-match.service.js';
 import { VacancyScoringService } from './services/vacancy-scoring.service.js';
 import { CandidateProfileService } from './services/candidate-profile.service.js';
@@ -56,8 +56,8 @@ import { JobRecommendationsService } from './services/job-recommendations.servic
     SkillsClassifierService,
     VacancyRankingService,
     WeightedScoreService,
-    ExperienceSkillsRepository,
-    JobMatchRepository,
+    ExperienceSkillsService,
+    JobMatchSourceService,
     VacancyScoringService,
     JobMatchService,
     CandidateProfileService,

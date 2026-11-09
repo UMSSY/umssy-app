@@ -2,7 +2,7 @@ import { act, cleanup, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useAccessRequestForm } from "../../contexts/access-request-context";
 import { accessRequestService } from "../../services/access-request.service";
-import type { RequestStatusResponse } from "../../types/access-request.types";
+import type { RequestStatusResponse } from "../../types/request-status-response.types";
 import {
   failure,
   makeFile,

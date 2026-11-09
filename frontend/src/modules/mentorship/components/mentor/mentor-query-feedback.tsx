@@ -1,18 +1,11 @@
 "use client";
+import type { MentorQueryFeedbackProps } from "../../types/mentor-query-feedback-props.types";
 
 import Link from "next/link";
 import { AlertCircle, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button-variants";
 import { Card, CardContent } from "@/components/ui/card";
-
-type MentorQueryFeedbackProps = {
-  title: string;
-  description: string;
-  onRetry?: () => void;
-  onClearFilters?: () => void;
-  showDirectoryLink?: boolean;
-};
 
 export function MentorQueryFeedback({
   title,

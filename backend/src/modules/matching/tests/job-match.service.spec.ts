@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { UserSkillService } from '../../skills/services/user-skill.service.js';
 import { JOB_OFFER_NOT_AVAILABLE_MESSAGE } from '../constants/job-match.constants.js';
 import { JobOfferNotAvailableException } from '../exceptions/job-offer-not-available.exception.js';
-import type { JobMatchRepository } from '../repositories/job-match.repository.js';
+import type { JobMatchSourceService } from '../services/job-match-source.service.js';
 import { ProfileNotFoundException } from '../../profile/exceptions/profile-not-found.exception.js';
 import type { RequirementTermsService } from '../services/requirement-terms.service.js';
 import { VacancyScoringService } from '../services/vacancy-scoring.service.js';
@@ -55,7 +55,7 @@ describe('JobMatchService', () => {
     userSkillService = { getUserSkills: vi.fn().mockResolvedValue([]) };
 
     service = new JobMatchService(
-      repository as unknown as JobMatchRepository,
+      repository as unknown as JobMatchSourceService,
       new VacancyScoringService(
         userSkillService as unknown as UserSkillService,
         candidateProfile as unknown as CandidateProfileService,
@@ -195,9 +195,13 @@ describe('JobMatchService', () => {
 
   it('calcula la afinidad de un usuario sin perfil en lugar de responder 404', async () => {
     repository.findPublishedById.mockResolvedValue(vacancyRecord(['Docker']));
-    userSkillService.getUserSkills.mockRejectedValue(new ProfileNotFoundException());
+    userSkillService.getUserSkills.mockRejectedValue(
+      new ProfileNotFoundException(),
+    );
 
-    await expect(service.getMatch(USER_ID, JOB_OFFER_ID)).resolves.toMatchObject({
+    await expect(
+      service.getMatch(USER_ID, JOB_OFFER_ID),
+    ).resolves.toMatchObject({
       score: 0,
       hasPendingRequirements: true,
     });
@@ -233,7 +237,10 @@ describe('JobMatchService', () => {
     });
 
     it('el resultado es el mismo con cualquier carrera y cualquier cantidad de años', async () => {
-      const resultFor = async (career: string | null, experienceYears: number) => {
+      const resultFor = async (
+        career: string | null,
+        experienceYears: number,
+      ) => {
         candidateProfile.findCandidateProfile.mockResolvedValue({
           career,
           experienceYears,

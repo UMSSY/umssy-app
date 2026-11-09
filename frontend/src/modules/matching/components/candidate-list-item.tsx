@@ -1,15 +1,9 @@
 "use client";
+import type { CandidateListItemProps } from "../types/candidate-list-item-props.types";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { getInitials } from "@/shared/utils/get-initials";
-import type { CandidateWithMatch } from "../types/matching-types";
-
-interface CandidateListItemProps {
-  candidate: CandidateWithMatch;
-  selected: boolean;
-  onSelect: (id: string) => void;
-}
 
 export function CandidateListItem({ candidate, selected, onSelect }: CandidateListItemProps) {
   const isDiscarded = candidate.status === "discarded";

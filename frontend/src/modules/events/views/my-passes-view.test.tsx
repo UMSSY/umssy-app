@@ -1,3 +1,4 @@
+import "@/shared/testing/indexed-db.mock";
 import { saveAccessToken, clearAccessToken } from '@/shared/services/storage/access-token-storage';
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import { act, cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
@@ -8,10 +9,10 @@ import { MyPassesView } from './my-passes-view';
 vi.mock('../services/registrations.service', () => ({ registrationsService: { getMine: vi.fn(), getPass: vi.fn() } }));
 const getMine = vi.mocked(registrationsService.getMine);
 const pass = { id: 'reg-1', eventName: 'React', date: '2026-10-20T00:00:00Z', startTime: '1970-01-01T09:00:00Z', endTime: '1970-01-01T12:00:00Z', location: 'Aula 101', status: 'Confirmada' };
-beforeEach(() => {
+beforeEach(async () => {
   vi.useFakeTimers({ now: new Date("2026-10-19T12:00:00Z"), toFake: ["Date"] });
   getMine.mockReset();
-  saveAccessToken('session');
+  await saveAccessToken("session");
   vi.mocked(registrationsService.getPass).mockImplementation(async (id) => {
     const rows = await getMine.mock.results.at(-1)?.value;
     const row = rows?.find((item: typeof pass) => item.id === id);
@@ -21,7 +22,7 @@ beforeEach(() => {
 });
 afterEach(() => { cleanup(); clearAccessToken(); vi.useRealTimers(); });
 
-describe('Mis pases', () => {
+describe("Mis pases", () => {
   it('preserves different workshops with identical names and dates', async () => {
     getMine.mockResolvedValue([{ ...pass, eventId: 'event-1' }, { ...pass, id: 'reg-2', eventId: 'event-2' }]);
     render(<MyPassesView />);
@@ -135,17 +136,20 @@ describe('Mis pases', () => {
     expect(screen.queryByText('ID Inscripción')).not.toBeInTheDocument();
   });
 
-  it.each([true, false])('cancela la consulta al desmontar sin actualizar la vista: %s', async (success) => {
-    let resolve!: (items: typeof pass[]) => void;
-    let reject!: (cause: unknown) => void;
-    getMine.mockReturnValue(new Promise((res, rej) => { resolve = res; reject = rej; }));
-    const { unmount } = render(<MyPassesView />);
-    const signal = getMine.mock.calls[0][0];
-    unmount();
-    expect(signal?.aborted).toBe(true);
-    await act(async () => { if (success) resolve([pass]); else reject(new Error('cancelled')); });
-    await waitFor(() => expect(screen.queryByText('React')).not.toBeInTheDocument());
-  });
+  it.each([true, false])(
+    "cancela la consulta al desmontar sin actualizar la vista: %s",
+    async (success) => {
+      let resolve!: (items: (typeof pass)[]) => void;
+      let reject!: (cause: unknown) => void;
+      getMine.mockReturnValue(new Promise((res, rej) => { resolve = res; reject = rej; }));
+      const { unmount } = render(<MyPassesView />);
+      const signal = getMine.mock.calls[0][0];
+      unmount();
+      expect(signal?.aborted).toBe(true);
+      await act(async () => { if (success) resolve([pass]); else reject(new Error('cancelled')); });
+      await waitFor(() => expect(screen.queryByText('React')).not.toBeInTheDocument());
+    },
+  );
 
   it('shows the location in the list and the registration ID in the selected detail', async () => {
     const longPass = { ...pass, date: '2099-10-20T00:00:00Z', id: '123e4567-e89b-12d3-a456-426614174000', eventName: 'Taller'.repeat(80), location: 'Ubicación'.repeat(80) };

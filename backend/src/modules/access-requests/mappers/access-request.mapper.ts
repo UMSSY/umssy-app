@@ -1,6 +1,8 @@
 import type { AccessRequestsRepository } from '../repositories/access-requests.repository.js';
 
-type AccessRequestRow = NonNullable<Awaited<ReturnType<AccessRequestsRepository['findById']>>>;
+type AccessRequestRow = NonNullable<
+  Awaited<ReturnType<AccessRequestsRepository['findById']>>
+>;
 
 export function toAccessRequestResponse(row: AccessRequestRow) {
   return {

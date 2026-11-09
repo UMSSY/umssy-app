@@ -1,9 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import type { MulterFile } from '../../../common/types/multer-file.type.js';
 import type { UploadedFile } from '../../../common/types/uploaded-file.type.js';
-import {
-  CERTIFICATION_DOCUMENT_EXTENSION_BY_MIME_TYPE,
-} from '../constants/certification-document.constants.js';
+import { CERTIFICATION_DOCUMENT_EXTENSION_BY_MIME_TYPE } from '../constants/certification-document.constants.js';
 import type { CertificationDocumentDownload } from '../types/certification-document-download.type.js';
 
 @Injectable()
@@ -24,8 +22,7 @@ export class CertificationDocumentMapper {
   ): CertificationDocumentDownload {
     const resolvedMimeType = mimeType ?? 'application/octet-stream';
     const extension =
-      CERTIFICATION_DOCUMENT_EXTENSION_BY_MIME_TYPE[resolvedMimeType] ??
-      'bin';
+      CERTIFICATION_DOCUMENT_EXTENSION_BY_MIME_TYPE[resolvedMimeType] ?? 'bin';
 
     return {
       content,

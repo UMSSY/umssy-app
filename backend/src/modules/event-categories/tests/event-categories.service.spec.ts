@@ -2,7 +2,9 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { EventCategoriesService } from '../services/event-categories.service.js';
 import type { EventCategoryWithFields } from '../types/event-categories.types.js';
 
-function buildRecord(overrides: Partial<EventCategoryWithFields> = {}): EventCategoryWithFields {
+function buildRecord(
+  overrides: Partial<EventCategoryWithFields> = {},
+): EventCategoryWithFields {
   return {
     id: 'cat-uuid-1',
     name: 'Tecnologia',
@@ -32,7 +34,10 @@ describe('EventCategoriesService', () => {
     expect(result.offset).toBe(0);
     expect(result.data.total).toBe(1);
     expect(result.data.totalPages).toBe(1);
-    expect(result.data.items[0]).toEqual({ id: 'cat-uuid-1', name: 'Tecnologia' });
+    expect(result.data.items[0]).toEqual({
+      id: 'cat-uuid-1',
+      name: 'Tecnologia',
+    });
   });
 
   it('calculates totalPages as 0 when total is 0', async () => {

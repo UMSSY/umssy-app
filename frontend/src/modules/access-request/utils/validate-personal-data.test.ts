@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { PersonalDataValues } from "../types/access-request.types";
+import type { PersonalDataValues } from "../types/personal-data-values.types";
 import { validatePersonalData } from "./validate-personal-data";
 
 const NOW = new Date("2026-10-05T12:00:00Z");
@@ -88,9 +88,14 @@ describe("validatePersonalData", () => {
     ["code0156@gma.con", "@gma.com"],
     ["code0156@gbail.com", "@gmail.com"],
     ["ana@hotmial.com", "@hotmail.com"],
-  ])("rechaza el correo %s por una errata evidente del dominio", (email, suggestion) => {
-    expect(errorsOf({ email }).email).toBe(`Revisa el dominio del correo. ¿Quisiste decir ${suggestion}?`);
-  });
+  ])(
+    "rechaza el correo %s por una errata evidente del dominio",
+    (email, suggestion) => {
+      expect(errorsOf({ email }).email).toBe(
+        `Revisa el dominio del correo. ¿Quisiste decir ${suggestion}?`,
+      );
+    },
+  );
 
   it("valida el departamento de expedición", () => {
     expect(errorsOf({ idCardIssuedIn: "XX" }).idCardIssuedIn).toBe("El departamento de expedición no es válido");
@@ -103,7 +108,9 @@ describe("validatePersonalData", () => {
   it("valida el correo", () => {
     expect(errorsOf({ email: "" }).email).toBe("El correo es obligatorio");
     expect(errorsOf({ email: "no-es-correo" }).email).toBe("El correo no tiene un formato válido");
-    expect(errorsOf({ email: `${"a".repeat(150)}@umss.edu.bo` }).email).toBe("El correo no puede superar los 150 caracteres");
+    expect(errorsOf({ email: `${"a".repeat(150)}@umss.edu.bo` }).email).toBe(
+      "El correo no puede superar los 150 caracteres",
+    );
   });
 
   it.each(["12345", "123456789", "abcdefgh", "1234 567"])("rechaza el teléfono %j", (phone) => {

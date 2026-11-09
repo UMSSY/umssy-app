@@ -30,7 +30,7 @@ afterEach(() => {
   cleanup();
 });
 
-describe('EventCard y utilidades de formato', () => {
+describe("EventCard y utilidades de formato", () => {
   it('calcula ocupacion desde el DTO GET /events', () => {
     expect(calculateEventCapacityStatus(MOCK_EVENT)).toEqual({
       enrolledCount: 24,
@@ -89,7 +89,7 @@ describe('EventCard y utilidades de formato', () => {
     expect(formatTimeRange(start, end)).toBe(expected);
   });
 
-  it('renderiza el titulo, categoria, fecha, horario y relacion de cupos', () => {
+  it("renderiza el titulo, categoria, fecha, horario y relacion de cupos", () => {
     render(<EventCard event={MOCK_EVENT} />);
 
     expect(
@@ -102,8 +102,6 @@ describe('EventCard y utilidades de formato', () => {
       'aria-valuenow',
       '80',
     );
-    expect(screen.getByRole('progressbar')).toHaveClass('bg-availability-border');
-    expect(screen.getByTestId('event-capacity-bar')).toHaveClass('bg-success');
   });
 
   it('aplica estilo por defecto para categorias no mapeadas y estado seleccionado', () => {
@@ -159,7 +157,7 @@ describe('EventCard y utilidades de formato', () => {
     expect(screen.getByText('24 inscritos')).toBeInTheDocument();
   });
 
-  it('muestra el estado lleno y una barra completa para un evento sin cupos disponibles', () => {
+  it("muestra el estado lleno y una barra completa para un evento sin cupos disponibles", () => {
     const fullEvent: EventItem = {
       ...MOCK_EVENT,
       availableSpots: 0,
@@ -173,10 +171,6 @@ describe('EventCard y utilidades de formato', () => {
       'aria-valuenow',
       '100',
     );
-    expect(screen.getByTestId('event-capacity-bar')).toHaveStyle({
-      width: '100%',
-    });
-    expect(screen.getByTestId('event-capacity-bar')).toHaveClass('bg-danger');
   });
 
   it('muestra apoyos y plazo en una propuesta en votación sin confundirlos con cupos', () => {

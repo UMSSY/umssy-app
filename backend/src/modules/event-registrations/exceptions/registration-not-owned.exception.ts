@@ -3,6 +3,10 @@ import { REGISTRATION_ERRORS } from '../constants/registration-errors.constants.
 
 export class RegistrationNotOwnedException extends DomainException {
   constructor() {
-    super(REGISTRATION_ERRORS.REGISTRATION_NOT_OWNED.detail, REGISTRATION_ERRORS.REGISTRATION_NOT_OWNED.statusCode, 'REGISTRATION_NOT_OWNED');
+    super(
+      REGISTRATION_ERRORS.REGISTRATION_NOT_OWNED.detail,
+      REGISTRATION_ERRORS.REGISTRATION_NOT_OWNED.statusCode,
+      'REGISTRATION_NOT_OWNED',
+    );
   }
 }

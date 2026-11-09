@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { ProfileMapper } from '../mappers/profile.mapper.js';
 import type { ProfileRecord } from '../types/profile-record.type.js';
 
-const buildRecord = (overrides: Partial<ProfileRecord> = {}): ProfileRecord => ({
+const buildRecord = (
+  overrides: Partial<ProfileRecord> = {},
+): ProfileRecord => ({
   id: '11111111-1111-4111-8111-111111111111',
   firstName: 'Valeria',
   lastName: 'Quispe',
@@ -56,7 +58,10 @@ describe('ProfileMapper', () => {
 
   it('maps a city record to the city response', () => {
     expect(
-      mapper.toCityResponse({ id: '22222222-2222-4222-8222-222222222222', title: 'La Paz' }),
+      mapper.toCityResponse({
+        id: '22222222-2222-4222-8222-222222222222',
+        title: 'La Paz',
+      }),
     ).toEqual({ id: '22222222-2222-4222-8222-222222222222', title: 'La Paz' });
   });
 });

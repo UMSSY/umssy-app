@@ -1,7 +1,9 @@
 import type { AccessRequestsRepository } from '../repositories/access-requests.repository.js';
 import { toValidationDetail } from './document-validation.mapper.js';
 
-type DetailRow = NonNullable<Awaited<ReturnType<AccessRequestsRepository['findDetailById']>>>;
+type DetailRow = NonNullable<
+  Awaited<ReturnType<AccessRequestsRepository['findDetailById']>>
+>;
 
 export function toAccessRequestDetail(row: DetailRow) {
   return {
@@ -31,9 +33,13 @@ export function toAccessRequestDetail(row: DetailRow) {
     history: {
       submittedAt: row.submittedAt?.toISOString() ?? null,
       openedAt: row.openedAt?.toISOString() ?? null,
-      openedBy: row.openedBy ? `${row.openedBy.firstName} ${row.openedBy.lastName}`.trim() : null,
+      openedBy: row.openedBy
+        ? `${row.openedBy.firstName} ${row.openedBy.lastName}`.trim()
+        : null,
       reviewedAt: row.reviewedAt?.toISOString() ?? null,
-      reviewedBy: row.reviewedBy ? `${row.reviewedBy.firstName} ${row.reviewedBy.lastName}`.trim() : null,
+      reviewedBy: row.reviewedBy
+        ? `${row.reviewedBy.firstName} ${row.reviewedBy.lastName}`.trim()
+        : null,
       rejectionReason: row.rejectionReason,
     },
     validation: toValidationDetail(row.documentValidation, {

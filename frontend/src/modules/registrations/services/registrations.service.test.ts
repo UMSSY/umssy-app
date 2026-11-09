@@ -29,10 +29,10 @@ const error = (code: string, statusCode = 404) => ({
 afterEach(() => vi.restoreAllMocks());
 
 describe("registrations service", () => {
-  it("posts without a body through the shared client and captures the session", async () => {
+  it("posts the event identifier through the shared client and captures the session", async () => {
     const post = vi.spyOn(apiClient, "post").mockResolvedValue({ data: envelope(201) });
     await expect(registrationsService.create("event/1", "captured-token")).resolves.toEqual(registration);
-    expect(post).toHaveBeenCalledWith("/events/event%2F1/registrations", undefined, {
+    expect(post).toHaveBeenCalledWith("/event-registrations", { eventId: "event/1" }, {
       headers: { Authorization: "Bearer captured-token" },
       timeout: 10000,
     });
@@ -68,7 +68,7 @@ describe("registrations service", () => {
     const cancelled = { ...registration, status: "cancelled" as const, cancelledAt: registration.registeredAt };
     const remove = vi.spyOn(apiClient, "delete").mockResolvedValue({ data: { ...envelope(), data: cancelled } });
     await expect(registrationsService.cancel("registration/1", null)).resolves.toEqual(cancelled);
-    expect(remove).toHaveBeenCalledWith("/registrations/registration%2F1", {
+    expect(remove).toHaveBeenCalledWith("/event-registrations/registration%2F1", {
       headers: { Authorization: "" },
       timeout: 10000,
     });

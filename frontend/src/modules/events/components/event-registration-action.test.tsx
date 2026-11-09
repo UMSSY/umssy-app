@@ -1,3 +1,4 @@
+import "@/shared/testing/indexed-db.mock";
 import { act, cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithQuery } from "@/shared/testing/render-with-query";
@@ -39,9 +40,9 @@ const confirmed: RegistrationResponse = {
   cancelledAt: null,
 };
 
-beforeEach(() => {
+beforeEach(async () => {
   vi.useFakeTimers({ now: new Date("2026-10-26T12:00:00Z"), toFake: ["Date"] });
-  saveAccessToken("token-a");
+  await saveAccessToken("token-a");
   vi.spyOn(registrationsService, "getOwn").mockResolvedValue(null);
 });
 

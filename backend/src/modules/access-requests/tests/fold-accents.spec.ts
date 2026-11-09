@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { ACCENT_FOLD_FROM, ACCENT_FOLD_TO } from '../constants/accent-folding.constants.js';
+import {
+  ACCENT_FOLD_FROM,
+  ACCENT_FOLD_TO,
+} from '../constants/accent-folding.constants.js';
 import { foldAccents } from '../helpers/fold-accents.js';
 
 describe('foldAccents', () => {

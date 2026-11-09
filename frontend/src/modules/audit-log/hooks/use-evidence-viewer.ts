@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { auditLogService } from "../services/audit-log.service";
 import type { AuditEvent } from "../types/audit-event.types";
-import type { OpenEvidence } from "../types/audit-log-component-props.types";
+import type { OpenEvidence } from "../types/open-evidence.types";
 
 // Descarga la evidencia del evento como URL de objeto y la libera al cerrar o desmontar
 export function useEvidenceViewer() {

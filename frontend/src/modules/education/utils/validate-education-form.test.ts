@@ -1,9 +1,14 @@
+import { DEGREE_CATALOG_FIXTURE } from "@/modules/education/testing/degree-catalog.fixture";
 import { describe, expect, it } from "vitest";
 import type { EducationFormValues } from "../types/education-form-values.types";
 import { validateEducationForm as validate } from "./validate-education-form";
 
 const INSTITUTIONS = [{ name: 'Universidad Mayor de San Simón (UMSS)', aliases: ['UMSS', 'Universidad Mayor de San Simón'] }];
-const validateEducationForm = (values: EducationFormValues, allowMissingEndDate = false) => validate(values, allowMissingEndDate, INSTITUTIONS);
+const validateEducationForm = (
+  values: EducationFormValues,
+  allowMissingEndDate = false,
+) =>
+  validate(values, allowMissingEndDate, INSTITUTIONS, DEGREE_CATALOG_FIXTURE);
 
 const VALUES: EducationFormValues = {
   institution: "Universidad Mayor de San Simón (UMSS)",

@@ -18,7 +18,9 @@ export async function seedConversationsFixtures(
     }),
   );
   for (const row of data)
-    [row.userAId, row.userBId] = [row.userAId, row.userBId].sort((a, b) => (a || '').localeCompare(b || ''));
+    [row.userAId, row.userBId] = [row.userAId, row.userBId].sort((a, b) =>
+      (a || '').localeCompare(b || ''),
+    );
   await tx.conversation.createMany({ data, skipDuplicates: true });
   return data.length;
 }

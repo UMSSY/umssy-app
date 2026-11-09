@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { SESSION_COOKIE_NAME } from "../constants/session.constants";
+
 import { clearSessionMarker, hasSessionMarker, setSessionMarker } from "./session-cookie";
 
 describe("cookie marcadora de sesión", () => {
@@ -9,14 +9,14 @@ describe("cookie marcadora de sesión", () => {
     expect(hasSessionMarker()).toBe(false);
     setSessionMarker();
     expect(hasSessionMarker()).toBe(true);
-    expect(document.cookie).toBe(`${SESSION_COOKIE_NAME}=1`);
+    expect(document.cookie).toBe(`umssy_session=1`);
   });
 
   it("se borra", () => {
     setSessionMarker();
     clearSessionMarker();
     expect(hasSessionMarker()).toBe(false);
-    expect(document.cookie).not.toContain(SESSION_COOKIE_NAME);
+    expect(document.cookie).not.toContain("umssy_session");
   });
 
   it("no lleva el token ni datos: solo el valor 1", () => {
@@ -32,7 +32,7 @@ describe("cookie marcadora de sesión", () => {
     Object.defineProperty(document, "cookie", { configurable: true, get: () => "", set: (value: string) => void writes.push(value) });
     try {
       setSessionMarker();
-      expect(writes[0]).toBe(`${SESSION_COOKIE_NAME}=1; Path=/; SameSite=Lax`);
+      expect(writes[0]).toBe(`umssy_session=1; Path=/; SameSite=Lax`);
       expect(writes[0]).not.toMatch(/expires|max-age/i);
     } finally {
       delete (document as unknown as { cookie?: string }).cookie;

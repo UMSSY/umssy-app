@@ -5,7 +5,3 @@ export const SURVEYS_QUERY_KEYS = {
   detail: (id: string) => ["surveys", "detail", id] as const,
   statistics: (id: string, period?: string) => ["surveys", "statistics", id, period ?? "ALL"] as const,
 };
-
-export const SURVEY_TOAST_DURATION_MS = 7_000;
-export const SURVEY_SAVE_TIMEOUT_MS = 15_000;
-export const CAREERS_STALE_TIME_MS = 5 * 60_000;

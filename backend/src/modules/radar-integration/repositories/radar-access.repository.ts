@@ -1,3 +1,4 @@
+import type { Prisma } from '../../../prisma/client.js';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 
@@ -32,8 +33,15 @@ export class RadarAccessRepository {
     context?: TransactionContext,
   ): Promise<void> {
     const client = context?.client ?? this.prisma;
-    await client.$executeRaw`
-      INSERT INTO radar_audit_events (user_id,actor_id,event_type,target_id,details)
-      VALUES (${userId}::uuid,${actorId}::uuid,${event},${targetId}::uuid,${JSON.stringify(details)}::jsonb)`;
+    await client.radarAuditEvent.create({
+      data: {
+        userId,
+        actorId,
+        eventType: event,
+        targetId,
+        details: JSON.parse(JSON.stringify(details)) as Prisma.InputJsonValue,
+      },
+      select: { id: true },
+    });
   }
 }

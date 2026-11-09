@@ -1,13 +1,13 @@
 import { removeLocalStorage } from "@/shared/services/storage/browser-local-storage";
 import { readIndexedDb, writeIndexedDb, removeIndexedDb } from "@/shared/services/storage/browser-indexed-db";
-import { MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY } from "../constants/mentorship-wizard.constants";
+
 import type { MentorshipWizardState } from "../types/mentorship-wizard-state.types";
 
 const pendingOperations = new Map<string, Promise<unknown>>();
 
 export function getMentorshipWizardDraftStorageKey(userId: string): string {
   if (!userId) throw new Error("Se requiere un identificador de usuario.");
-  return `${MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY}:${encodeURIComponent(userId)}`;
+  return `umssy-mentorship-wizard-draft:${encodeURIComponent(userId)}`;
 }
 
 function enqueueStorageOperation<T>(
@@ -26,8 +26,8 @@ function enqueueStorageOperation<T>(
 }
 
 async function discardUnownedLegacyDraft(): Promise<void> {
-  removeLocalStorage(MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY);
-  await removeIndexedDb(MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY);
+  removeLocalStorage("umssy-mentorship-wizard-draft");
+  await removeIndexedDb("umssy-mentorship-wizard-draft");
 }
 
 function isMentorshipWizardState(value: unknown): value is MentorshipWizardState {

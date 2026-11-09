@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SURVEY_ANSWER_TEXT } from "../constants/survey-answer.constants";
-import type { SurveyQuestionFieldProps } from "../types/survey-component-props.types";
+import type { SurveyQuestionFieldProps } from "../types/survey-question-field-props.types";
 import { RequiredMark } from "./required-mark";
 
 export function SurveyQuestionField({
@@ -53,13 +53,23 @@ export function SurveyQuestionField({
     >
       <legend
         id={`${baseId}-legend`}
-        className={cn("float-left mb-3 w-full font-semibold text-ink", isPlain ? "text-sm" : "text-base")}
+        className={cn(
+          "float-left mb-3 w-full font-semibold text-ink",
+          isPlain ? "text-sm" : "text-base",
+        )}
       >
-        <span className={isPlain ? undefined : "text-primary"}>{index + 1}.</span> {question.statement}
+        <span className={isPlain ? undefined : "text-primary"}>
+          {index + 1}.
+        </span>{" "}
+        {question.statement}
         {question.isRequired && <RequiredMark className="ml-1" />}
       </legend>
 
-      {hint && <p className="clear-both mb-4 text-xs font-normal text-text-secondary">{hint}</p>}
+      {hint && (
+        <p className="clear-both mb-4 text-xs font-normal text-text-secondary">
+          {hint}
+        </p>
+      )}
 
       {question.type === "dropdown" ? (
         <div className="clear-both">
@@ -67,15 +77,23 @@ export function SurveyQuestionField({
             items={options.map(({ id, label }) => ({ value: id, label }))}
             disabled={isReadOnly}
             {...(isControlled && { value: selected[0] ?? null })}
-            onValueChange={(value) => onChange?.(typeof value === "string" ? [value] : [])}
+            onValueChange={(value) =>
+              onChange?.(typeof value === "string" ? [value] : [])
+            }
           >
             <SelectTrigger
               id={`${baseId}-select`}
               aria-labelledby={`${baseId}-legend`}
               aria-invalid={isInvalid}
-              className={cn("w-full", isPlain && "sm:max-w-md", error && "border-danger")}
+              className={cn(
+                "w-full",
+                isPlain && "sm:max-w-md",
+                error && "border-danger",
+              )}
             >
-              <SelectValue placeholder={SURVEY_ANSWER_TEXT.dropdownPlaceholder} />
+              <SelectValue
+                placeholder={SURVEY_ANSWER_TEXT.dropdownPlaceholder}
+              />
             </SelectTrigger>
             <SelectContent>
               {options.map((option) => (
@@ -95,14 +113,20 @@ export function SurveyQuestionField({
           className="clear-both flex flex-col gap-2.5"
         >
           {options.map((option) => (
-            <div key={option.id} className={optionClasses(selected[0] === option.id)}>
+            <div
+              key={option.id}
+              className={optionClasses(selected[0] === option.id)}
+            >
               <RadioGroupItem
                 id={`${baseId}-${option.id}`}
                 value={option.id}
                 aria-invalid={isInvalid}
                 className={cn(error && "border-danger")}
               />
-              <Label htmlFor={`${baseId}-${option.id}`} className="flex-1 cursor-pointer text-sm font-medium">
+              <Label
+                htmlFor={`${baseId}-${option.id}`}
+                className="flex-1 cursor-pointer text-sm font-medium"
+              >
                 {option.label}
               </Label>
             </div>
@@ -120,9 +144,14 @@ export function SurveyQuestionField({
                   aria-invalid={isInvalid}
                   className={cn(error && "border-danger")}
                   {...(isControlled && { checked: isChecked })}
-                  onCheckedChange={(checked) => toggleOption(option.id, Boolean(checked))}
+                  onCheckedChange={(checked) =>
+                    toggleOption(option.id, Boolean(checked))
+                  }
                 />
-                <Label htmlFor={`${baseId}-${option.id}`} className="flex-1 cursor-pointer text-sm font-medium">
+                <Label
+                  htmlFor={`${baseId}-${option.id}`}
+                  className="flex-1 cursor-pointer text-sm font-medium"
+                >
                   {option.label}
                 </Label>
               </div>

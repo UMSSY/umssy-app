@@ -9,7 +9,11 @@ import { EventsModule } from '../events/index.js';
 @Module({
   imports: [AuthModule, EventsModule],
   controllers: [EventRegistrationsController],
-  providers: [EventRegistrationsRepository, EventRegistrationsService, RolesGuard],
+  providers: [
+    EventRegistrationsRepository,
+    EventRegistrationsService,
+    RolesGuard,
+  ],
   exports: [EventRegistrationsService],
 })
 export class EventRegistrationsModule {}

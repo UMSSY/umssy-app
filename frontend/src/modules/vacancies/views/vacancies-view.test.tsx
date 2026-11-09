@@ -1,3 +1,5 @@
+import "@/shared/testing/indexed-db.mock";
+import { saveAccessToken } from "@/shared/services/storage/access-token-storage";
 import { cleanup, fireEvent, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { jobApplicationService } from "@/modules/matching/services/job-application.service";
@@ -22,8 +24,8 @@ const VACANCIES = [
   buildVacancy({ id: "7c3e9a10-1d2b-4f5a-9c8e-2b4d6f8a0c11", title: "Analista de Datos", companyName: "Datos SRL", requirements: ["SQL"] }),
 ];
 
-function setRole(roleTag: string) {
-  sessionStorage.setItem("accessToken", `h.${btoa(JSON.stringify({ roleTag }))}.s`);
+async function setRole(roleTag: string) {
+  await saveAccessToken(`h.${btoa(JSON.stringify({ roleTag }))}.s`);
 }
 
 beforeEach(() => {
@@ -41,10 +43,11 @@ describe("VacanciesView", () => {
   it("lista las vacantes publicadas que devuelve la API", async () => {
     renderWithQuery(<VacanciesView />);
 
-    expect(await screen.findByRole("link", { name: "Ver detalles de Desarrollador Full Stack" })).toHaveAttribute(
-      "href",
-      `/vacancies/${VACANCIES[0].id}`,
-    );
+    expect(
+      await screen.findByRole("link", {
+        name: "Ver detalles de Desarrollador Full Stack",
+      }),
+    ).toHaveAttribute("href", `/vacancies/${VACANCIES[0].id}`);
     expect(screen.getByRole("status")).toHaveTextContent("2 vacantes encontradas");
     expect(listPublished).toHaveBeenCalledTimes(1);
   });
@@ -100,7 +103,7 @@ describe("VacanciesView", () => {
   });
 
   it("muestra el botón de postular a titulados y estudiantes en el detalle", async () => {
-    setRole("estudiante");
+    await setRole("estudiante");
     renderWithQuery(<VacanciesView initialVacancyId={VACANCIES[0].id} />);
 
     const dialog = await screen.findByRole("dialog");
@@ -110,7 +113,7 @@ describe("VacanciesView", () => {
   });
 
   it("no muestra el botón de postular a un mentor", async () => {
-    setRole("mentor");
+    await setRole("mentor");
     renderWithQuery(<VacanciesView initialVacancyId={VACANCIES[0].id} />);
 
     const dialog = await screen.findByRole("dialog");

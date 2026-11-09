@@ -1,1 +1,2 @@
-export type NlpSourceType = 'work-experience' | 'education' | 'certification' | 'cv';
+export type NlpSourceType =
+  'work-experience' | 'education' | 'certification' | 'cv';
