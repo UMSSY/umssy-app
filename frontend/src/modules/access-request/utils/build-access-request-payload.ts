@@ -1,6 +1,7 @@
 import type { Career } from "../constants/careers.constants";
 import type { IdCardIssuedIn } from "../constants/id-card-issued-in.constants";
-import type { AccessRequestPayload, PersonalDataValues } from "../types/access-request.types";
+import type { AccessRequestPayload } from "../types/access-request-payload.types";
+import type { PersonalDataValues } from "../types/personal-data-values.types";
 
 // Se asume que los valores ya pasaron validatePersonalData
 export function buildAccessRequestPayload(

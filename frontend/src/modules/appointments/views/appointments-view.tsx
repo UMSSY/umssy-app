@@ -14,10 +14,7 @@ import { WorkspacePage } from "@/shared/components/layout";
 import { useAuth } from "@/shared/contexts/auth-context";
 import { AppointmentCard } from "../components/appointment-card";
 import { AppointmentDetailDialog } from "../components/appointment-detail-dialog";
-import {
-  APPOINTMENTS_EYEBROW,
-  APPOINTMENTS_TEXT,
-} from "../constants/appointments.constants";
+import { APPOINTMENTS_TEXT } from "../constants/appointments.constants";
 import { useAppointments } from "../hooks/use-appointments";
 import type { AppointmentScope } from "../types/appointment-scope.types";
 
@@ -44,7 +41,7 @@ export function AppointmentsView() {
   return (
     <WorkspacePage
       title={APPOINTMENTS_TEXT.title}
-      description={APPOINTMENTS_EYEBROW}
+      description={"Mentorías"}
       className="min-w-0"
     >
       <Tabs

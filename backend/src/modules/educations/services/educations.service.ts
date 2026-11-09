@@ -35,7 +35,10 @@ export class EducationsService {
     request: CreateEducationRequest,
   ): Promise<EducationResponse> {
     this.validateDateRange(request.startDate, request.endDate);
-    const degree = this.catalogService.validateDegree(request.institution, request.degree);
+    const degree = this.catalogService.validateDegree(
+      request.institution,
+      request.degree,
+    );
     const record = await this.repository.create(userId, { ...request, degree });
     await this.skillsAnalysis.refreshAfterChange(userId);
     return this.mapper.toResponse(record);
@@ -59,8 +62,10 @@ export class EducationsService {
       request.institution ?? record.institution,
       request.degree ?? record.degree,
     );
-    const changes = request.degree !== undefined || request.institution !== undefined
-      ? { ...request, degree } : request;
+    const changes =
+      request.degree !== undefined || request.institution !== undefined
+        ? { ...request, degree }
+        : request;
     const updated = await this.repository.update(id, userId, changes, {
       startDate: record.startDate,
       endDate: record.endDate,

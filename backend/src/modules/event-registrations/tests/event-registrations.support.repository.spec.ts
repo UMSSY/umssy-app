@@ -16,8 +16,12 @@ function buildEventRow(
     origin: string;
   }> = {},
 ) {
-  const { supportThreshold = 20, registrations = 14, status = 'Votacion', origin = 'Comunidad' } =
-    overrides;
+  const {
+    supportThreshold = 20,
+    registrations = 14,
+    status = 'Votacion',
+    origin = 'Comunidad',
+  } = overrides;
   return {
     id: 'event-1',
     votingDeadline: VOTING_DEADLINE,
@@ -58,7 +62,10 @@ describe('EventRegistrationsService.registerSupport', () => {
         callback(tx),
       ),
     };
-    repository = new EventRegistrationsService(new EventRegistrationsRepository(prismaMock as never), new EventsService(new EventsRepository(prismaMock as never)));
+    repository = new EventRegistrationsService(
+      new EventRegistrationsRepository(prismaMock as never),
+      new EventsService(new EventsRepository(prismaMock as never)),
+    );
   });
 
   it('lee el estado previo, bloquea la fila y vuelve a leer el estado confirmado', async () => {
@@ -67,8 +74,12 @@ describe('EventRegistrationsService.registerSupport', () => {
     await repository.registerSupport('event-1', 'user-1', assertSupportable);
 
     expect(tx.event.findUnique).toHaveBeenCalledTimes(2);
-    expect(tx.event.findUnique.mock.invocationCallOrder[0]).toBeLessThan(tx.$queryRaw.mock.invocationCallOrder[0]);
-    expect(tx.$queryRaw.mock.invocationCallOrder[0]).toBeLessThan(tx.event.findUnique.mock.invocationCallOrder[1]);
+    expect(tx.event.findUnique.mock.invocationCallOrder[0]).toBeLessThan(
+      tx.$queryRaw.mock.invocationCallOrder[0],
+    );
+    expect(tx.$queryRaw.mock.invocationCallOrder[0]).toBeLessThan(
+      tx.event.findUnique.mock.invocationCallOrder[1],
+    );
   });
 
   it('devuelve null y no crea nada si el evento no existe', async () => {
@@ -133,44 +144,71 @@ describe('EventRegistrationsService.registerSupport', () => {
   it('reconoce el apoyo duplicado aunque la propuesta se haya publicado mientras esperaba', async () => {
     tx.event.findUnique
       .mockResolvedValueOnce(buildEventRow({ registrations: 19 }))
-      .mockResolvedValueOnce(buildEventRow({ registrations: 20, status: 'Publicado' }));
+      .mockResolvedValueOnce(
+        buildEventRow({ registrations: 20, status: 'Publicado' }),
+      );
     tx.eventRegistration.findUnique.mockResolvedValue({ id: 'reg-0' });
 
-    await expect(repository.registerSupport('event-1', 'user-1', assertSupportable))
-      .resolves.toMatchObject({ created: false, supportCount: 20 });
+    await expect(
+      repository.registerSupport('event-1', 'user-1', assertSupportable),
+    ).resolves.toMatchObject({ created: false, supportCount: 20 });
 
     expect(assertSupportable).not.toHaveBeenCalled();
     expect(tx.eventRegistration.create).not.toHaveBeenCalled();
   });
 
   it('devuelve ALREADY_SUPPORTED al reintentar después de publicar', async () => {
-    tx.event.findUnique.mockResolvedValue(buildEventRow({ registrations: 20, status: 'Publicado' }));
+    tx.event.findUnique.mockResolvedValue(
+      buildEventRow({ registrations: 20, status: 'Publicado' }),
+    );
     tx.eventRegistration.findUnique.mockResolvedValue({ id: 'reg-0' });
 
-    await expect(repository.support('event-1', 'user-1')).rejects.toBeInstanceOf(AlreadySupportedException);
+    await expect(
+      repository.support('event-1', 'user-1'),
+    ).rejects.toBeInstanceOf(AlreadySupportedException);
     expect(tx.eventRegistration.create).not.toHaveBeenCalled();
   });
 
   it('confirma al segundo titulado simultáneo sin volver a publicar', async () => {
     tx.event.findUnique
       .mockResolvedValueOnce(buildEventRow({ registrations: 19 }))
-      .mockResolvedValueOnce(buildEventRow({ registrations: 20, status: 'Publicado' }));
+      .mockResolvedValueOnce(
+        buildEventRow({ registrations: 20, status: 'Publicado' }),
+      );
 
-    const result = await repository.registerSupport('event-1', 'user-2', assertSupportable);
+    const result = await repository.registerSupport(
+      'event-1',
+      'user-2',
+      assertSupportable,
+    );
 
-    expect(assertSupportable).toHaveBeenCalledWith(expect.objectContaining({ statusTitle: 'Votacion', supportCount: 19 }));
+    expect(assertSupportable).toHaveBeenCalledWith(
+      expect.objectContaining({ statusTitle: 'Votacion', supportCount: 19 }),
+    );
     expect(tx.eventRegistration.create).toHaveBeenCalledTimes(1);
     expect(tx.event.update).not.toHaveBeenCalled();
-    expect(result).toMatchObject({ created: true, supportCount: 21, published: true });
+    expect(result).toMatchObject({
+      created: true,
+      supportCount: 21,
+      published: true,
+    });
   });
 
   it('responde Publicado al segundo titulado que comenzó mientras seguía en votación', async () => {
     tx.event.findUnique
       .mockResolvedValueOnce(buildEventRow({ registrations: 19 }))
-      .mockResolvedValueOnce(buildEventRow({ registrations: 20, status: 'Publicado' }));
+      .mockResolvedValueOnce(
+        buildEventRow({ registrations: 20, status: 'Publicado' }),
+      );
 
-    await expect(repository.support('event-1', 'user-2')).resolves.toMatchObject({
-      status: 'Publicado', supportCount: 21, supportsRemaining: 0, progressPercent: 100, hasSupported: true,
+    await expect(
+      repository.support('event-1', 'user-2'),
+    ).resolves.toMatchObject({
+      status: 'Publicado',
+      supportCount: 21,
+      supportsRemaining: 0,
+      progressPercent: 100,
+      hasSupported: true,
     });
     expect(tx.event.update).not.toHaveBeenCalled();
   });
@@ -181,8 +219,12 @@ describe('EventRegistrationsService.registerSupport', () => {
     let firstReads = 0;
     let releaseReads!: () => void;
     let releaseFirst!: () => void;
-    const bothRead = new Promise<void>((resolve) => { releaseReads = resolve; });
-    const firstCommitted = new Promise<void>((resolve) => { releaseFirst = resolve; });
+    const bothRead = new Promise<void>((resolve) => {
+      releaseReads = resolve;
+    });
+    const firstCommitted = new Promise<void>((resolve) => {
+      releaseFirst = resolve;
+    });
     const create = vi.fn().mockImplementation(async () => {
       supportCount += 1;
       return { id: `reg-${supportCount}` };
@@ -211,20 +253,31 @@ describe('EventRegistrationsService.registerSupport', () => {
           }),
           update,
         },
-        eventRegistration: { findUnique: vi.fn().mockResolvedValue(null), create },
+        eventRegistration: {
+          findUnique: vi.fn().mockResolvedValue(null),
+          create,
+        },
       };
     }
     const first = transactionClient(false);
     const second = transactionClient(true);
     let attempts = 0;
     const prismaMock = {
-      $transaction: vi.fn(async (callback: (client: typeof first) => Promise<unknown>) => {
-        const client = attempts++ === 0 ? first : second;
-        try { return await callback(client); }
-        finally { if (client === first) releaseFirst(); }
-      }),
+      $transaction: vi.fn(
+        async (callback: (client: typeof first) => Promise<unknown>) => {
+          const client = attempts++ === 0 ? first : second;
+          try {
+            return await callback(client);
+          } finally {
+            if (client === first) releaseFirst();
+          }
+        },
+      ),
     };
-    const concurrent = new EventRegistrationsService(new EventRegistrationsRepository(prismaMock as never), new EventsService(new EventsRepository(prismaMock as never)));
+    const concurrent = new EventRegistrationsService(
+      new EventRegistrationsRepository(prismaMock as never),
+      new EventsService(new EventsRepository(prismaMock as never)),
+    );
 
     const responses = await Promise.all([
       concurrent.support('event-1', 'user-1'),
@@ -241,21 +294,28 @@ describe('EventRegistrationsService.registerSupport', () => {
   });
 
   it('rechaza un apoyo nuevo enviado después de la publicación', async () => {
-    tx.event.findUnique.mockResolvedValue(buildEventRow({ registrations: 20, status: 'Publicado' }));
+    tx.event.findUnique.mockResolvedValue(
+      buildEventRow({ registrations: 20, status: 'Publicado' }),
+    );
     const rejectPublished = vi.fn((event: { statusTitle: string }) => {
       if (event.statusTitle === 'Publicado') throw new Error('no apoyable');
     });
 
-    await expect(repository.registerSupport('event-1', 'user-2', rejectPublished))
-      .rejects.toThrow('no apoyable');
+    await expect(
+      repository.registerSupport('event-1', 'user-2', rejectPublished),
+    ).rejects.toThrow('no apoyable');
 
     expect(tx.eventRegistration.create).not.toHaveBeenCalled();
   });
 
   it('mantiene EVENT_NOT_SUPPORTABLE si el apoyo comienza tras la publicación', async () => {
-    tx.event.findUnique.mockResolvedValue(buildEventRow({ registrations: 20, status: 'Publicado' }));
+    tx.event.findUnique.mockResolvedValue(
+      buildEventRow({ registrations: 20, status: 'Publicado' }),
+    );
 
-    await expect(repository.support('event-1', 'user-2')).rejects.toBeInstanceOf(EventNotSupportableException);
+    await expect(
+      repository.support('event-1', 'user-2'),
+    ).rejects.toBeInstanceOf(EventNotSupportableException);
     expect(tx.eventRegistration.create).not.toHaveBeenCalled();
   });
 

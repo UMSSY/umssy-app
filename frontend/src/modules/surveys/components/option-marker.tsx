@@ -1,5 +1,5 @@
 import { cn } from "cn";
-import type { OptionMarkerProps } from "../types/survey-component-props.types";
+import type { OptionMarkerProps } from "../types/option-marker-props.types";
 
 export function OptionMarker({ questionType, className }: OptionMarkerProps) {
   return (

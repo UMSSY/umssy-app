@@ -1,5 +1,5 @@
-
 "use client";
+import type { MentorDirectoryViewProps } from "../types/mentor-directory-view-props.types";
 
 import { useEffect, useMemo } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -22,24 +22,13 @@ import { MentorQuerySkeleton } from "../components/mentor/mentor-query-skeleton"
 import { useCurrentUserId } from "../hooks/use-current-user-id";
 import { useMentorDirectory } from "../hooks/use-mentor-directory";
 import { useMentorshipCatalogs } from "../hooks/use-mentorship-catalogs";
-import type {
-  DirectoryPage,
-  MentorSort,
-} from "../types/mentor-directory.types";
+import type { MentorSort } from "../types/mentor-directory.types";
 import {
   MENTOR_DIRECTORY_DEFAULTS,
   normalizeMentorDirectoryParams,
   parseMentorDirectoryState,
   updateMentorDirectoryParams,
 } from "../utils/mentor-directory-navigation";
-
-type MentorDirectoryViewProps = {
-  directoryState?: Pick<
-    DirectoryPage,
-    "effectiveSort" | "affinityStatus"
-  > &
-    Partial<Pick<DirectoryPage, "totalPages">>;
-};
 
 export function MentorDirectoryView({
   directoryState,
@@ -89,9 +78,9 @@ export function MentorDirectoryView({
   const effectiveSort: MentorSort =
     sortBy !== "affinity"
       ? sortBy
-      : directory?.effectiveSort ??
+      : (directory?.effectiveSort ??
         directoryState?.effectiveSort ??
-        "default";
+        "default");
 
   const affinityStatus =
     directory?.affinityStatus ?? directoryState?.affinityStatus;
@@ -113,10 +102,9 @@ export function MentorDirectoryView({
     ).toString();
 
     if (normalized !== queryString) {
-      router.replace(
-        normalized ? `${pathname}?${normalized}` : pathname,
-        { scroll: false },
-      );
+      router.replace(normalized ? `${pathname}?${normalized}` : pathname, {
+        scroll: false,
+      });
     }
   }, [
     directory,
@@ -153,10 +141,9 @@ export function MentorDirectoryView({
 
     const query = next.toString();
 
-    router.replace(
-      query ? `${pathname}?${query}` : pathname,
-      { scroll: false },
-    );
+    router.replace(query ? `${pathname}?${query}` : pathname, {
+      scroll: false,
+    });
   }
 
   function handleClearFilters() {

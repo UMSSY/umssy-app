@@ -18,14 +18,14 @@ import { SurveyValidationAlert } from "./survey-validation-alert";
 import { ALL_CAREERS_LABEL, ALL_CAREERS_VALUE } from "../constants/survey-builder.constants";
 import { SURVEY_FIELD_ERROR_DEPENDENCIES, SURVEY_MESSAGES } from "../constants/survey-messages.constants";
 import { SURVEYS_PATH } from "../constants/survey-routes.constants";
-import { SURVEY_TOAST_DURATION_MS } from "../constants/surveys-query-keys.constants";
+
 import { useCareers } from "../hooks/use-careers";
 import { useSurveyBuilder } from "../hooks/use-survey-builder";
 import { useUnsavedChangesGuard } from "../hooks/use-unsaved-changes-guard";
-import type { SurveyFieldName } from "../types/survey-builder.types";
-import type { SurveyEditorProps } from "../types/survey-component-props.types";
-import type { SurveyValidationError } from "../types/survey-validation.types";
-import type { SurveyStatus } from "../types/survey.types";
+import type { SurveyFieldName } from "../types/survey-field-name.types";
+import type { SurveyEditorProps } from "../types/survey-editor-props.types";
+import type { SurveyValidationError } from "../types/survey-validation-error.types";
+import type { SurveyStatus } from "../types/survey-status.types";
 import { getErrorQuestionId, getErrorTargetId, revealElement } from "../utils/get-error-target-id";
 import { mapApiErrors } from "../utils/map-api-errors";
 import { getSurveyYears } from "../utils/survey-academic-periods";
@@ -33,7 +33,15 @@ import { getBoliviaTodayValue, toCalendarDate } from "../utils/survey-dates";
 import { toCreateSurveyPayload } from "../utils/to-create-survey-payload";
 import { toErrorMap, validateDraft, validateSurvey } from "../utils/validate-survey";
 
-export function SurveyEditor({ title, initialState, autosaveKey, isSaving, pendingStatus, draftSavedMessage, onSave }: SurveyEditorProps) {
+export function SurveyEditor({
+  title,
+  initialState,
+  autosaveKey,
+  isSaving,
+  pendingStatus,
+  draftSavedMessage,
+  onSave,
+}: SurveyEditorProps) {
   const router = useRouter();
   const builder = useSurveyBuilder(initialState);
   const { state } = builder;
@@ -74,7 +82,11 @@ export function SurveyEditor({ title, initialState, autosaveKey, isSaving, pendi
   const questions = state.questions ?? [];
 
   const dismissSubmitErrors = (matches: (path: string) => boolean) => {
-    setSubmitErrors((current) => (current.some(({ path }) => matches(path)) ? current.filter(({ path }) => !matches(path)) : current));
+    setSubmitErrors((current) =>
+      current.some(({ path }) => matches(path))
+        ? current.filter(({ path }) => !matches(path))
+        : current,
+    );
   };
 
   const revealError = (error: SurveyValidationError | undefined) => {
@@ -98,7 +110,7 @@ export function SurveyEditor({ title, initialState, autosaveKey, isSaving, pendi
   const submit = async (status: SurveyStatus) => {
     if (typeof navigator !== "undefined" && !navigator.onLine) {
       setIsPublishDialogOpen(false);
-      toast.error(SURVEY_MESSAGES.offlineError, { duration: SURVEY_TOAST_DURATION_MS, closeButton: true, richColors: true });
+      toast.error(SURVEY_MESSAGES.offlineError, { duration: 7_000, closeButton: true, richColors: true });
       return;
     }
 
@@ -116,7 +128,7 @@ export function SurveyEditor({ title, initialState, autosaveKey, isSaving, pendi
       if (isConnectionError(error)) {
         const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
         toast.error(isOffline ? SURVEY_MESSAGES.offlineError : CONNECTION_ERROR_MESSAGE, {
-          duration: SURVEY_TOAST_DURATION_MS,
+          duration: 7_000,
           closeButton: true,
           richColors: true,
         });
@@ -202,13 +214,17 @@ export function SurveyEditor({ title, initialState, autosaveKey, isSaving, pendi
       />
 
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-3 pt-5 pb-28">
-        {hasAttemptedPublish && <SurveyValidationAlert errors={visibleErrors} />}
+        {hasAttemptedPublish && (
+          <SurveyValidationAlert errors={visibleErrors} />
+        )}
 
         <SurveyHeaderCard
           values={state}
           careers={careers}
           isLoadingCareers={isLoadingCareers}
-          careersErrorMessage={hasCareersError ? SURVEY_MESSAGES.careersLoadError : undefined}
+          careersErrorMessage={
+            hasCareersError ? SURVEY_MESSAGES.careersLoadError : undefined
+          }
           academicPeriods={academicPeriods}
           minDate={minDate}
           errors={errorMap}
@@ -223,8 +239,15 @@ export function SurveyEditor({ title, initialState, autosaveKey, isSaving, pendi
             isActive={state.activeQuestionId === question.id}
             isDragging={draggedIndex === index}
             isDropTarget={dropIndex === index && draggedIndex !== null}
-            shouldFocusStatement={state.pendingFocus?.questionId === question.id && !state.pendingFocus.optionId}
-            focusOptionId={state.pendingFocus?.questionId === question.id ? state.pendingFocus.optionId : undefined}
+            shouldFocusStatement={
+              state.pendingFocus?.questionId === question.id &&
+              !state.pendingFocus.optionId
+            }
+            focusOptionId={
+              state.pendingFocus?.questionId === question.id
+                ? state.pendingFocus.optionId
+                : undefined
+            }
             errors={errorMap}
             canMoveUp={index > 0}
             canMoveDown={index < questions.length - 1}
@@ -248,7 +271,9 @@ export function SurveyEditor({ title, initialState, autosaveKey, isSaving, pendi
           />
         ))}
 
-        <AddQuestionButton onClick={() => withQuestionChange(builder.addQuestion)()} />
+        <AddQuestionButton
+          onClick={() => withQuestionChange(builder.addQuestion)()}
+        />
       </div>
 
       <PublishSurveyDialog
@@ -259,7 +284,12 @@ export function SurveyEditor({ title, initialState, autosaveKey, isSaving, pendi
         onOpenChange={setIsPublishDialogOpen}
         onConfirm={() => void submit("published")}
       />
-      <SurveyPreviewDialog open={isPreviewOpen} survey={state} careerTitle={careerTitle} onOpenChange={setIsPreviewOpen} />
+      <SurveyPreviewDialog
+        open={isPreviewOpen}
+        survey={state}
+        careerTitle={careerTitle}
+        onOpenChange={setIsPreviewOpen}
+      />
       <DiscardChangesDialog
         open={isDiscardDialogOpen || pendingHref !== null}
         onOpenChange={handleDiscardOpenChange}

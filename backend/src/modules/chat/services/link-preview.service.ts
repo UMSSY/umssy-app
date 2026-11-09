@@ -119,13 +119,16 @@ export class LinkPreviewService {
       // Extract Open Graph & HTML metadata
       const ogTitle = extractMetaTag(html, 'og:title');
       const standardTitle = extractTitleTag(html);
-      const title = (ogTitle ?? standardTitle)?.slice(0, MAX_TITLE_LENGTH) ?? null;
+      const title =
+        (ogTitle ?? standardTitle)?.slice(0, MAX_TITLE_LENGTH) ?? null;
 
       const ogDescription = extractMetaTag(html, 'og:description');
       const standardDescription = extractMetaTag(html, 'description');
       const description =
-        (ogDescription ?? standardDescription)?.slice(0, MAX_DESCRIPTION_LENGTH) ??
-        null;
+        (ogDescription ?? standardDescription)?.slice(
+          0,
+          MAX_DESCRIPTION_LENGTH,
+        ) ?? null;
 
       const rawOgImage = extractMetaTag(html, 'og:image');
       let imageUrl: string | null = null;
@@ -160,4 +163,3 @@ export class LinkPreviewService {
     }
   }
 }
-

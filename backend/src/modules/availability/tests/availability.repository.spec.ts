@@ -13,7 +13,13 @@ describe('AvailabilityRepository', () => {
   const deleteBlock = vi.fn();
   const create = vi.fn();
   const prisma = {
-    availabilityBlock: { findMany, findUnique, update, delete: deleteBlock, create },
+    availabilityBlock: {
+      findMany,
+      findUnique,
+      update,
+      delete: deleteBlock,
+      create,
+    },
   };
   let repository: AvailabilityRepository;
 
@@ -28,16 +34,31 @@ describe('AvailabilityRepository', () => {
 
     it('guarda un bloque individual sin datos de serie', async () => {
       await repository.create('mentor-1', startAt, endAt);
-      expect(create).toHaveBeenCalledWith({ data: { mentorId: 'mentor-1', startAt, endAt } });
+      expect(create).toHaveBeenCalledWith({
+        data: { mentorId: 'mentor-1', startAt, endAt },
+      });
     });
 
     it('persiste los metadatos de serie dentro del cliente transaccional', async () => {
       const txCreate = vi.fn().mockResolvedValue({ id: 'block-1' });
-      const series = { seriesId: '11111111-1111-4111-8111-111111111111', repeatUntil: new Date('2026-11-23') };
-      await expect(repository.create('mentor-1', startAt, endAt, {
-        availabilityBlock: { create: txCreate },
-      } as never, series)).resolves.toEqual({ id: 'block-1' });
-      expect(txCreate).toHaveBeenCalledWith({ data: { mentorId: 'mentor-1', startAt, endAt, ...series } });
+      const series = {
+        seriesId: '11111111-1111-4111-8111-111111111111',
+        repeatUntil: new Date('2026-11-23'),
+      };
+      await expect(
+        repository.create(
+          'mentor-1',
+          startAt,
+          endAt,
+          {
+            availabilityBlock: { create: txCreate },
+          } as never,
+          series,
+        ),
+      ).resolves.toEqual({ id: 'block-1' });
+      expect(txCreate).toHaveBeenCalledWith({
+        data: { mentorId: 'mentor-1', startAt, endAt, ...series },
+      });
       expect(create).not.toHaveBeenCalled();
     });
   });
@@ -73,13 +94,19 @@ describe('AvailabilityRepository', () => {
       const rows = [{ id: 'block-1' }];
       findMany.mockResolvedValue(rows);
 
-      await expect(repository.findMentorBlocksInRange('mentor-1', new Date(), new Date())).resolves.toBe(rows);
+      await expect(
+        repository.findMentorBlocksInRange('mentor-1', new Date(), new Date()),
+      ).resolves.toBe(rows);
     });
   });
 
   describe('findMentorFreeBlocksInRange', () => {
     it('ocupa el bloque con citas confirmadas y heredadas, nunca con canceladas ni completadas', () => {
-      expect(ACTIVE_APPOINTMENT_STATUSES).toEqual(['CONFIRMED', 'CONFIRMADA', 'PENDIENTE']);
+      expect(ACTIVE_APPOINTMENT_STATUSES).toEqual([
+        'CONFIRMED',
+        'CONFIRMADA',
+        'PENDIENTE',
+      ]);
     });
     it('busca solo los bloques sin cita confirmada dentro del rango', async () => {
       const from = new Date('2026-10-05T04:00:00.000Z');
@@ -92,7 +119,9 @@ describe('AvailabilityRepository', () => {
         where: {
           mentorId: 'mentor-1',
           startAt: { gte: from, lt: to },
-          appointments: { none: { status: { title: { in: ACTIVE_APPOINTMENT_STATUSES } } } },
+          appointments: {
+            none: { status: { title: { in: ACTIVE_APPOINTMENT_STATUSES } } },
+          },
         },
         orderBy: { startAt: 'asc' },
         include: BLOCK_WITH_ACTIVE_APPOINTMENTS_INCLUDE,
@@ -127,7 +156,10 @@ describe('AvailabilityRepository', () => {
   });
 
   describe('update', () => {
-    const data = { startAt: new Date('2026-10-10T14:00:00Z'), endAt: new Date('2026-10-10T14:30:00Z') };
+    const data = {
+      startAt: new Date('2026-10-10T14:00:00Z'),
+      endAt: new Date('2026-10-10T14:30:00Z'),
+    };
 
     it('actualiza el bloque incluyendo solo citas activas', async () => {
       const updated = { id: 'block-1', ...data };
@@ -145,7 +177,9 @@ describe('AvailabilityRepository', () => {
     // igual que en create: el repository solo persiste y deja que el error
     // de Prisma suba tal cual.
     it('relanza cualquier error de Prisma tal cual, sin traducirlo', async () => {
-      const dbError = new Error('conflicting key value violates exclusion constraint');
+      const dbError = new Error(
+        'conflicting key value violates exclusion constraint',
+      );
       update.mockRejectedValue(dbError);
 
       await expect(repository.update('block-1', data)).rejects.toBe(dbError);
@@ -154,13 +188,25 @@ describe('AvailabilityRepository', () => {
 
   describe('con el cliente de una transacción', () => {
     const tx = { availabilityBlock: { create: vi.fn(), update: vi.fn() } };
-    const data = { startAt: new Date('2026-10-10T14:00:00Z'), endAt: new Date('2026-10-10T14:30:00Z') };
+    const data = {
+      startAt: new Date('2026-10-10T14:00:00Z'),
+      endAt: new Date('2026-10-10T14:30:00Z'),
+    };
 
     it('crea el bloque con la transacción que recibe', async () => {
-      await repository.create('mentor-1', data.startAt, data.endAt, tx as never);
+      await repository.create(
+        'mentor-1',
+        data.startAt,
+        data.endAt,
+        tx as never,
+      );
 
       expect(tx.availabilityBlock.create).toHaveBeenCalledWith({
-        data: { mentorId: 'mentor-1', startAt: data.startAt, endAt: data.endAt },
+        data: {
+          mentorId: 'mentor-1',
+          startAt: data.startAt,
+          endAt: data.endAt,
+        },
       });
     });
 

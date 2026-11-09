@@ -1,18 +1,10 @@
-import {
-  PDF_BOLD_CHAR_WIDTH_RATIO,
-  PDF_DEFAULT_FONT_SIZE,
-  PDF_DEFAULT_TEXT_COLOR,
-  PDF_PAGE_HEIGHT,
-  PDF_PAGE_WIDTH,
-  PDF_REGULAR_CHAR_WIDTH_RATIO,
-} from '../constants/survey-pdf.constants.js';
 import type { PdfTextOptions } from '../types/pdf-text-options.type.js';
 
 export class SimplePdfDocument {
   private pages: string[][] = [[]];
   private curPage = 0;
-  readonly pageW = PDF_PAGE_WIDTH;
-  readonly pageH = PDF_PAGE_HEIGHT;
+  readonly pageW = 595.28;
+  readonly pageH = 841.89;
 
   addPage() {
     this.pages.push([]);
@@ -34,7 +26,11 @@ export class SimplePdfDocument {
     const r = parseInt(clean.substring(0, 2), 16) / 255;
     const g = parseInt(clean.substring(2, 4), 16) / 255;
     const b = parseInt(clean.substring(4, 6), 16) / 255;
-    return [Math.round(r * 1000) / 1000, Math.round(g * 1000) / 1000, Math.round(b * 1000) / 1000];
+    return [
+      Math.round(r * 1000) / 1000,
+      Math.round(g * 1000) / 1000,
+      Math.round(b * 1000) / 1000,
+    ];
   }
 
   private escapeWinAnsi(text: string): string {
@@ -51,7 +47,11 @@ export class SimplePdfDocument {
         res += '\\' + code.toString(8).padStart(3, '0');
       } else {
         const norm = ch.normalize('NFD').replace(/[̀-ͯ]/g, '');
-        if (norm.length === 1 && norm.charCodeAt(0) >= 32 && norm.charCodeAt(0) <= 126) {
+        if (
+          norm.length === 1 &&
+          norm.charCodeAt(0) >= 32 &&
+          norm.charCodeAt(0) <= 126
+        ) {
           res += norm;
         } else {
           res += '?';
@@ -62,10 +62,18 @@ export class SimplePdfDocument {
   }
 
   private charWidth(fontSize: number, isBold: boolean): number {
-    return fontSize * (isBold ? PDF_BOLD_CHAR_WIDTH_RATIO : PDF_REGULAR_CHAR_WIDTH_RATIO);
+    return fontSize * (isBold ? 0.58 : 0.52);
   }
 
-  rect(x: number, y: number, w: number, h: number, fillHex?: string, strokeHex?: string, strokeW = 0.5) {
+  rect(
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    fillHex?: string,
+    strokeHex?: string,
+    strokeW = 0.5,
+  ) {
     const pdfY = this.pageH - y - h;
     let cmd = 'q ';
     if (fillHex) {
@@ -86,14 +94,15 @@ export class SimplePdfDocument {
   }
 
   text(str: string, x: number, y: number, opts: PdfTextOptions = {}) {
-    const fontSize = opts.fontSize ?? PDF_DEFAULT_FONT_SIZE;
+    const fontSize = opts.fontSize ?? 8;
     const font = opts.font ?? 'Helvetica';
     const fontRef = font === 'Helvetica-Bold' ? '/F2' : '/F1';
-    const [r, g, b] = this.hexToRgb(opts.color ?? PDF_DEFAULT_TEXT_COLOR);
+    const [r, g, b] = this.hexToRgb(opts.color ?? '#000000');
     const safeStr = this.escapeWinAnsi(str);
 
     let drawX = x;
-    const textW = str.length * this.charWidth(fontSize, font === 'Helvetica-Bold');
+    const textW =
+      str.length * this.charWidth(fontSize, font === 'Helvetica-Bold');
 
     if (opts.align === 'right' && opts.width) {
       drawX = x + opts.width - textW;
@@ -104,7 +113,12 @@ export class SimplePdfDocument {
     this.pages[this.curPage].push(cmd);
   }
 
-  wrapText(text: string, maxWidth: number, fontSize: number, isBold = false): string[] {
+  wrapText(
+    text: string,
+    maxWidth: number,
+    fontSize: number,
+    isBold = false,
+  ): string[] {
     const approxCharW = this.charWidth(fontSize, isBold);
     const words = text.split(/\s+/);
     const lines: string[] = [];
@@ -132,14 +146,20 @@ export class SimplePdfDocument {
 
     addObj('<< /Type /Catalog /Pages 2 0 R >>');
     addObj('');
-    addObj('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>');
-    addObj('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>');
+    addObj(
+      '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>',
+    );
+    addObj(
+      '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>',
+    );
 
     const pageObjIds: number[] = [];
     for (const pageOps of this.pages) {
       const streamContent = pageOps.join('');
       const streamLen = Buffer.byteLength(streamContent, 'utf-8');
-      const streamObjId = addObj(`<< /Length ${streamLen} >>\nstream\n${streamContent}endstream`);
+      const streamObjId = addObj(
+        `<< /Length ${streamLen} >>\nstream\n${streamContent}endstream`,
+      );
       const pageObjId = addObj(
         `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${this.pageW} ${this.pageH}] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents ${streamObjId} 0 R >>`,
       );

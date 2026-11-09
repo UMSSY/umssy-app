@@ -23,7 +23,7 @@ export const profileSkillsRadarService = {
   getSkills: async (): Promise<ProfileSkillsRadarResponse> => {
     const response = await apiClient.get<
       ApiResponse<ProfileSkillsRadarResponse>
-    >("/profile/skills-for-radar", {
+    >("/profile/me/skills/analysis", {
       headers: getAuthHeaders(),
     });
 

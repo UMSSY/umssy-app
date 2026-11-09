@@ -16,7 +16,10 @@ function firstIssue(query: Record<string, unknown>) {
 
 describe('listCompanyJobOffersSchema', () => {
   it('sin filtros ordena por fecha de la más reciente a la más antigua', () => {
-    expect(listCompanyJobOffersSchema.parse({})).toEqual({ sortBy: 'publishedAt', order: 'desc' });
+    expect(listCompanyJobOffersSchema.parse({})).toEqual({
+      sortBy: 'publishedAt',
+      order: 'desc',
+    });
   });
 
   it('acepta todos los filtros válidos a la vez', () => {
@@ -41,9 +44,12 @@ describe('listCompanyJobOffersSchema', () => {
     });
   });
 
-  it.each(['Presencial', 'Remoto', 'Híbrido'])('acepta la modalidad %s', (modality) => {
-    expect(parse({ modality }).success).toBe(true);
-  });
+  it.each(['Presencial', 'Remoto', 'Híbrido'])(
+    'acepta la modalidad %s',
+    (modality) => {
+      expect(parse({ modality }).success).toBe(true);
+    },
+  );
 
   it('rechaza una modalidad fuera del catálogo', () => {
     expect(firstIssue({ modality: 'Volador' })).toMatchObject({
@@ -77,7 +83,9 @@ describe('listCompanyJobOffersSchema', () => {
   );
 
   it('acepta un rango donde ambas fechas son el mismo día', () => {
-    expect(parse({ dateFrom: '2026-10-21', dateTo: '2026-10-21' }).success).toBe(true);
+    expect(
+      parse({ dateFrom: '2026-10-21', dateTo: '2026-10-21' }).success,
+    ).toBe(true);
   });
 
   it('acepta solo una de las dos fechas', () => {
@@ -86,7 +94,9 @@ describe('listCompanyJobOffersSchema', () => {
   });
 
   it('rechaza un rango con la fecha inicial mayor a la final', () => {
-    expect(firstIssue({ dateFrom: '2026-10-31', dateTo: '2026-10-01' })).toMatchObject({
+    expect(
+      firstIssue({ dateFrom: '2026-10-31', dateTo: '2026-10-01' }),
+    ).toMatchObject({
       path: ['dateFrom'],
       message: MESSAGES.DATE_RANGE_INVALID,
     });
@@ -107,11 +117,15 @@ describe('listCompanyJobOffersSchema', () => {
   });
 
   it('recorta los espacios de la búsqueda', () => {
-    expect(listCompanyJobOffersSchema.parse({ search: '  backend  ' }).search).toBe('backend');
+    expect(
+      listCompanyJobOffersSchema.parse({ search: '  backend  ' }).search,
+    ).toBe('backend');
   });
 
   it('rechaza una búsqueda más larga que el título del puesto', () => {
-    expect(firstIssue({ search: 'a'.repeat(JOB_OFFER_TITLE_MAX_LENGTH + 1) })).toMatchObject({
+    expect(
+      firstIssue({ search: 'a'.repeat(JOB_OFFER_TITLE_MAX_LENGTH + 1) }),
+    ).toMatchObject({
       path: ['search'],
       message: MESSAGES.SEARCH_TOO_LONG,
     });

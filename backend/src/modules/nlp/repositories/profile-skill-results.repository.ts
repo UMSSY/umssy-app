@@ -1,3 +1,4 @@
+import { UNIQUE_CONSTRAINT_VIOLATION_CODE } from '../../../common/constants/prisma-errors.constants.js';
 import { Injectable } from '@nestjs/common';
 import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
@@ -5,8 +6,6 @@ import { NLP_PROCESSING_STATUSES } from '../constants/nlp-processing.constants.j
 import type { NlpPublishResult } from '../types/nlp-publish-result.type.js';
 import type { ProfileSkillProcessingState } from '../types/profile-skill-processing-state.type.js';
 import { toErrorCode } from '../utils/to-error-code.js';
-
-const UNIQUE_CONSTRAINT_VIOLATION = 'P2002';
 
 export const processingStateSelect = {
   userId: true,
@@ -42,18 +41,30 @@ export class ProfileSkillResultsRepository {
     });
   }
 
-  async registerSourceChange(userId: string, now: Date): Promise<ProfileSkillProcessingState> {
+  async registerSourceChange(
+    userId: string,
+    now: Date,
+  ): Promise<ProfileSkillProcessingState> {
     const upsert = () =>
       this.prisma.profileSkillProcessingState.upsert({
         where: { userId },
-        create: { userId, status: NLP_PROCESSING_STATUSES.pending, inputRevision: 1, updatedAt: now },
-        update: { status: NLP_PROCESSING_STATUSES.pending, inputRevision: { increment: 1 }, updatedAt: now },
+        create: {
+          userId,
+          status: NLP_PROCESSING_STATUSES.pending,
+          inputRevision: 1,
+          updatedAt: now,
+        },
+        update: {
+          status: NLP_PROCESSING_STATUSES.pending,
+          inputRevision: { increment: 1 },
+          updatedAt: now,
+        },
         select: processingStateSelect,
       });
     try {
       return await upsert();
     } catch (error) {
-      if (toErrorCode(error) !== UNIQUE_CONSTRAINT_VIOLATION) throw error;
+      if (toErrorCode(error) !== UNIQUE_CONSTRAINT_VIOLATION_CODE) throw error;
       return upsert();
     }
   }
@@ -61,7 +72,12 @@ export class ProfileSkillResultsRepository {
   ensureState(userId: string, now: Date): Promise<ProfileSkillProcessingState> {
     return this.prisma.profileSkillProcessingState.upsert({
       where: { userId },
-      create: { userId, status: NLP_PROCESSING_STATUSES.pending, inputRevision: 0, updatedAt: now },
+      create: {
+        userId,
+        status: NLP_PROCESSING_STATUSES.pending,
+        inputRevision: 0,
+        updatedAt: now,
+      },
       update: {},
       select: processingStateSelect,
     });
@@ -101,7 +117,9 @@ export class ProfileSkillResultsRepository {
           processedRevision: revision,
           dictionaryVersion,
           updatedAt: now,
-          ...(changed || isFirstResult ? { resultVersion: { increment: 1 } } : {}),
+          ...(changed || isFirstResult
+            ? { resultVersion: { increment: 1 } }
+            : {}),
         },
         select: processingStateSelect,
       });

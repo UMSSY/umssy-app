@@ -1,13 +1,7 @@
 "use client";
+import type { StepTechnicalAreasProps } from "../../types/step-technical-areas-props.types";
 
-import type { TechnicalAreaResponse } from "../../types/technical-area-response.types";
 import { TechnicalAreaCard } from "./technical-area-card";
-
-type StepTechnicalAreasProps = {
-  technicalAreas: TechnicalAreaResponse[];
-  selectedIds: string[];
-  onToggle: (id: string) => void;
-};
 
 export function StepTechnicalAreas({
   technicalAreas,

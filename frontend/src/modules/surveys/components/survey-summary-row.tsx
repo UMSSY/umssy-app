@@ -1,4 +1,4 @@
-import type { SurveySummaryRowProps } from "../types/survey-component-props.types";
+import type { SurveySummaryRowProps } from "../types/survey-summary-row-props.types";
 
 export function SurveySummaryRow({ label, children }: SurveySummaryRowProps) {
   return (

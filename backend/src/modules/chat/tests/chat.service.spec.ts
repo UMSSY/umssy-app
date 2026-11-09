@@ -6,10 +6,12 @@ import type { ConversationRepository } from '../repositories/conversation.reposi
 
 describe('ChatService', () => {
   it('includes event room conversations in the active ids used by conversation:join', async () => {
-    const findUserConversations = vi.fn().mockResolvedValue([
-      { id: 'direct-conversation' },
-      { id: 'event-conversation' },
-    ]);
+    const findUserConversations = vi
+      .fn()
+      .mockResolvedValue([
+        { id: 'direct-conversation' },
+        { id: 'event-conversation' },
+      ]);
 
     const service = new ChatService(
       {} as ChatRepository,

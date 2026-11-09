@@ -1,3 +1,4 @@
+import { BEARER_PREFIX } from "@/shared/constants/auth.constants";
 import { ROLE_TAGS } from "@/shared/constants/roles.constants";
 import { apiClient } from "@/shared/services/api-client";
 import type { ApiResponse } from "@/shared/types/api-response.types";
@@ -40,7 +41,7 @@ function extractApiError(err: unknown, fallback: string): never {
 export const authService = {
   getSession: async (accessToken?: string | null): Promise<SessionResponse> => {
     const response = await apiClient.get<ApiResponse<SessionResponse>>("/auth/session", {
-      headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
+      headers: accessToken ? { Authorization: `${BEARER_PREFIX}${accessToken}` } : undefined,
     });
     return response.data.data;
   },

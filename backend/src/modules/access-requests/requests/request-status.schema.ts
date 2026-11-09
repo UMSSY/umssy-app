@@ -1,7 +1,9 @@
 import { z } from 'zod';
 
 export const requestStatusParamsSchema = z.object({
-  code: z.string({ error: 'El código de solicitud es obligatorio' }).regex(/^SOL-\d{4}-\d{4,}$/, 'El código de solicitud no es válido'),
+  code: z
+    .string({ error: 'El código de solicitud es obligatorio' })
+    .regex(/^SOL-\d{4}-\d{4,}$/, 'El código de solicitud no es válido'),
 });
 
 export const requestStatusQuerySchema = z.object({

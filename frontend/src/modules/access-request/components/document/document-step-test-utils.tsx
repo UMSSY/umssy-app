@@ -5,14 +5,15 @@ import { vi } from "vitest";
 import type { DocumentType } from "../../constants/document-types.constants";
 import { AccessRequestProvider, useAccessRequestForm } from "../../contexts/access-request-context";
 import { accessRequestService } from "../../services/access-request.service";
-import type { AccessRequestContextValue } from "../../types/access-request-context.types";
-import type { ApiResult } from "../../types/access-request.types";
+import type { AccessRequestContextValue } from "../../types/access-request-context-value.types";
+import type { ApiResult } from "../../types/api-result.types";
 
 // Utilidades solo para pruebas del paso 2: el servicio debe estar mockeado con vi.mock en cada archivo de prueba
 
 export const DRAFT_ID = "draft-1";
 
 type ContextRef = { current: AccessRequestContextValue | null };
+type Ctx = ReturnType<typeof renderWithContext>["ctx"];
 
 function Capture({ onValue }: { onValue: (value: AccessRequestContextValue) => void }) {
   const value = useAccessRequestForm();
@@ -43,8 +44,6 @@ export function renderWithContext(ui: ReactElement) {
   };
   return { ...utils, ctx };
 }
-
-type Ctx = ReturnType<typeof renderWithContext>["ctx"];
 
 // Deja el Context en el paso 2: datos válidos guardados con un borrador y, si se pide, el tipo elegido
 export async function reachStep2(ctx: Ctx, documentType?: DocumentType) {
@@ -91,7 +90,9 @@ export const failure = (status: number, message: string): ApiResult<never> => ({
 // jsdom no implementa las URL de objeto
 export function stubObjectUrls() {
   let counter = 0;
-  const create = vi.fn<(file: unknown) => string>(() => `blob:preview-${++counter}`);
+  const create = vi.fn<(file: unknown) => string>(
+    () => `blob:preview-${++counter}`,
+  );
   const revoke = vi.fn<(url: string) => void>();
   vi.stubGlobal("URL", Object.assign(URL, { createObjectURL: create, revokeObjectURL: revoke }));
   return { create, revoke };

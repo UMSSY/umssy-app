@@ -1,3 +1,4 @@
+import { BOLIVIA_TIME_ZONE } from "@/shared/constants/date-time.constants";
 const pad = (value: number): string => String(value).padStart(2, '0');
 
 
@@ -92,7 +93,6 @@ export function formatMessageDateSeparator(isoString?: string | null): string {
     .toUpperCase();
 }
 
-export const BOLIVIA_TIME_ZONE = 'America/La_Paz';
 
 /**
  * Formatea la fecha de creación de la sala de evento como dd/mm/aa

@@ -1,5 +1,3 @@
-export const APPOINTMENT_MESSAGE_MAX_LENGTH = 300;
-
 export const APPOINTMENT_MESSAGES = {
   invalidId: 'El id de la cita no es válido',
   invalidScope: 'El alcance debe ser upcoming o past',
@@ -7,7 +5,7 @@ export const APPOINTMENT_MESSAGES = {
   missingTopic: 'Selecciona el tema de la sesión',
   invalidTopic: 'El tema de la sesión no es válido',
   missingMessage: 'Escribe un mensaje para el mentor',
-  messageTooLong: `El mensaje no puede superar los ${APPOINTMENT_MESSAGE_MAX_LENGTH} caracteres`,
+  messageTooLong: `El mensaje no puede superar los 300 caracteres`,
   unauthorizedSession: 'La sesión es requerida o no es válida',
   forbiddenAccess: 'El usuario no tiene acceso a las citas solicitadas',
 } as const;
@@ -67,7 +65,7 @@ export const APPOINTMENT_RESPONSE_SCHEMA = {
     message: {
       type: 'string' as const,
       nullable: true,
-      maxLength: APPOINTMENT_MESSAGE_MAX_LENGTH,
+      maxLength: 300,
     },
     requestedAt: { type: 'string' as const, format: 'date-time' },
     document: { ...APPOINTMENT_DOCUMENT_RESPONSE_SCHEMA, nullable: true },
@@ -78,11 +76,13 @@ export const CREATE_APPOINTMENT_DOCS = {
   summary: 'Solicita una cita en un horario libre y la devuelve confirmada',
   description:
     'Valida el bloque, la disponibilidad del mentor y la fecha, y crea la cita con estado CONFIRMED (201, horarios en UTC)',
-  blockDescription: 'Identificador (UUID) del bloque de disponibilidad a reservar',
-  topicDescription: 'Identificador (UUID) del tema de la sesión que ofrece el mentor',
-  messageDescription: `Mensaje obligatorio para el mentor (de 1 a ${APPOINTMENT_MESSAGE_MAX_LENGTH} caracteres, sin contar espacios al inicio y al final)`,
+  blockDescription:
+    'Identificador (UUID) del bloque de disponibilidad a reservar',
+  topicDescription:
+    'Identificador (UUID) del tema de la sesión que ofrece el mentor',
+  messageDescription: `Mensaje obligatorio para el mentor (de 1 a 300 caracteres, sin contar espacios al inicio y al final)`,
   createdDescription: 'Cita creada con estado CONFIRMED',
-  badRequestDescription: `El cuerpo no es válido: tema ausente o no ofrecido por el mentor, o mensaje vacío o mayor a ${APPOINTMENT_MESSAGE_MAX_LENGTH} caracteres`,
+  badRequestDescription: `El cuerpo no es válido: tema ausente o no ofrecido por el mentor, o mensaje vacío o mayor a 300 caracteres`,
   notFoundDescription: 'El bloque de disponibilidad o el mentor no existen',
   conflictDescription: 'El horario ya fue reservado o el día está bloqueado',
 } as const;

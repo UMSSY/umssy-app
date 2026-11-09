@@ -82,7 +82,9 @@ export class AttachmentRepository {
     });
   }
 
-  async findAttachmentTypeByTitle(title: string): Promise<{ id: string; title: string } | null> {
+  async findAttachmentTypeByTitle(
+    title: string,
+  ): Promise<{ id: string; title: string } | null> {
     return this.prisma.attachmentType.findFirst({
       where: { title },
       select: { id: true, title: true },

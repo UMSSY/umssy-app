@@ -22,7 +22,12 @@ function draft(overrides: Record<string, unknown> = {}) {
 }
 
 describe('AccessRequestsService: envío y consulta de estado', () => {
-  const repository = { findById: vi.fn(), findActiveDuplicates: vi.fn(), submitWithGeneratedCode: vi.fn(), findByRequestCode: vi.fn() };
+  const repository = {
+    findById: vi.fn(),
+    findActiveDuplicates: vi.fn(),
+    submitWithGeneratedCode: vi.fn(),
+    findByRequestCode: vi.fn(),
+  };
   const authService = { existsByEmail: vi.fn() };
   const filesService = { delete: vi.fn() };
   const documentReading = { scheduleReading: vi.fn() };
@@ -30,7 +35,16 @@ describe('AccessRequestsService: envío y consulta de estado', () => {
 
   beforeEach(() => {
     vi.resetAllMocks();
-    service = new AccessRequestsService(repository as any, authService as any, filesService as any, {} as any, {} as any, {} as any, {} as any, documentReading as any);
+    service = new AccessRequestsService(
+      repository as any,
+      authService as any,
+      filesService as any,
+      {} as any,
+      {} as any,
+      {} as any,
+      {} as any,
+      documentReading as any,
+    );
     repository.findById.mockResolvedValue(draft());
     authService.existsByEmail.mockResolvedValue(false);
     repository.findActiveDuplicates.mockResolvedValue([]);
@@ -46,7 +60,10 @@ describe('AccessRequestsService: envío y consulta de estado', () => {
     it('envía el borrador y devuelve id, código, estado pending y fecha ISO', async () => {
       const result = await service.submit('id-1');
 
-      expect(repository.submitWithGeneratedCode).toHaveBeenCalledWith('id-1', expect.any(Function));
+      expect(repository.submitWithGeneratedCode).toHaveBeenCalledWith(
+        'id-1',
+        expect.any(Function),
+      );
       expect(result).toEqual({
         id: 'id-1',
         requestCode: 'SOL-2026-0001',
@@ -69,16 +86,25 @@ describe('AccessRequestsService: envío y consulta de estado', () => {
     it('lanza 404 si la solicitud no existe', async () => {
       repository.findById.mockResolvedValue(null);
 
-      await expect(service.submit('id-1')).rejects.toBeInstanceOf(AccessRequestNotFoundException);
+      await expect(service.submit('id-1')).rejects.toBeInstanceOf(
+        AccessRequestNotFoundException,
+      );
       expect(repository.submitWithGeneratedCode).not.toHaveBeenCalled();
     });
 
-    it.each(['pending', 'in_review', 'approved', 'rejected'])('lanza 409 si el estado es %s', async (status) => {
-      repository.findById.mockResolvedValue(draft({ status: { title: status } }));
+    it.each(['pending', 'in_review', 'approved', 'rejected'])(
+      'lanza 409 si el estado es %s',
+      async (status) => {
+        repository.findById.mockResolvedValue(
+          draft({ status: { title: status } }),
+        );
 
-      await expect(service.submit('id-1')).rejects.toBeInstanceOf(AccessRequestNotEditableException);
-      expect(repository.submitWithGeneratedCode).not.toHaveBeenCalled();
-    });
+        await expect(service.submit('id-1')).rejects.toBeInstanceOf(
+          AccessRequestNotEditableException,
+        );
+        expect(repository.submitWithGeneratedCode).not.toHaveBeenCalled();
+      },
+    );
 
     it.each([
       ['sin archivo', { documentFileId: null }],
@@ -108,36 +134,61 @@ describe('AccessRequestsService: envío y consulta de estado', () => {
     });
 
     it.each([
-      ['correo', { email: 'ana@umss.edu.bo', idCardNumber: '999', sisCode: '999' }],
-      ['C.I.', { email: 'otro@umss.edu.bo', idCardNumber: '123', sisCode: '999' }],
-      ['SIS', { email: 'otro@umss.edu.bo', idCardNumber: '999', sisCode: '456' }],
-    ])('lanza 409 de solicitud activa si otra comparte el %s (pending, in_review o approved)', async (_name, other) => {
-      repository.findActiveDuplicates.mockResolvedValue([other]);
+      [
+        'correo',
+        { email: 'ana@umss.edu.bo', idCardNumber: '999', sisCode: '999' },
+      ],
+      [
+        'C.I.',
+        { email: 'otro@umss.edu.bo', idCardNumber: '123', sisCode: '999' },
+      ],
+      [
+        'SIS',
+        { email: 'otro@umss.edu.bo', idCardNumber: '999', sisCode: '456' },
+      ],
+    ])(
+      'lanza 409 de solicitud activa si otra comparte el %s (pending, in_review o approved)',
+      async (_name, other) => {
+        repository.findActiveDuplicates.mockResolvedValue([other]);
 
-      const error = await service.submit('id-1').catch((e) => e);
+        const error = await service.submit('id-1').catch((e) => e);
 
-      expect(error).toBeInstanceOf(ActiveAccessRequestExistsException);
-      expect(error.statusCode).toBe(409);
-      expect(error.message).toBe('Ya tienes una solicitud activa');
-      expect(repository.submitWithGeneratedCode).not.toHaveBeenCalled();
-    });
+        expect(error).toBeInstanceOf(ActiveAccessRequestExistsException);
+        expect(error.statusCode).toBe(409);
+        expect(error.message).toBe('Ya tienes una solicitud activa');
+        expect(repository.submitWithGeneratedCode).not.toHaveBeenCalled();
+      },
+    );
 
     it('si el repository no devuelve coincidencias (borradores y rechazadas no cuentan) envía', async () => {
       repository.findActiveDuplicates.mockResolvedValue([]);
 
-      await expect(service.submit('id-1')).resolves.toMatchObject({ status: 'pending' });
+      await expect(service.submit('id-1')).resolves.toMatchObject({
+        status: 'pending',
+      });
     });
 
     it('propaga el 404 del repository si la solicitud cambió de estado entre la lectura y el envío', async () => {
-      repository.submitWithGeneratedCode.mockRejectedValue(new AccessRequestNotFoundException());
+      repository.submitWithGeneratedCode.mockRejectedValue(
+        new AccessRequestNotFoundException(),
+      );
 
-      await expect(service.submit('id-1')).rejects.toBeInstanceOf(AccessRequestNotFoundException);
+      await expect(service.submit('id-1')).rejects.toBeInstanceOf(
+        AccessRequestNotFoundException,
+      );
     });
 
     it('devuelve submittedAt nulo si el repository no lo informa', async () => {
-      repository.submitWithGeneratedCode.mockResolvedValue({ id: 'id-1', requestCode: 'SOL-2026-0001', submittedAt: null, status: { title: 'pending' } });
+      repository.submitWithGeneratedCode.mockResolvedValue({
+        id: 'id-1',
+        requestCode: 'SOL-2026-0001',
+        submittedAt: null,
+        status: { title: 'pending' },
+      });
 
-      await expect(service.submit('id-1')).resolves.toMatchObject({ submittedAt: null });
+      await expect(service.submit('id-1')).resolves.toMatchObject({
+        submittedAt: null,
+      });
     });
   });
 
@@ -157,7 +208,10 @@ describe('AccessRequestsService: envío y consulta de estado', () => {
     it('conserva el contrato de una solicitud pendiente sin devolver el nombre', async () => {
       repository.findByRequestCode.mockResolvedValue(found);
 
-      const result = await service.getStatus('SOL-2026-0001', 'ana@umss.edu.bo');
+      const result = await service.getStatus(
+        'SOL-2026-0001',
+        'ana@umss.edu.bo',
+      );
 
       expect(result).toEqual({
         requestCode: 'SOL-2026-0001',
@@ -165,7 +219,11 @@ describe('AccessRequestsService: envío y consulta de estado', () => {
         submittedAt: '2026-10-05T15:00:00.000Z',
         reviewedAt: null,
         rejectionReason: null,
-        document: { type: 'national_title', size: 2048, mimeType: 'application/pdf' },
+        document: {
+          type: 'national_title',
+          size: 2048,
+          mimeType: 'application/pdf',
+        },
       });
     });
 
@@ -177,7 +235,10 @@ describe('AccessRequestsService: envío y consulta de estado', () => {
         rejectionReason: 'Documento ilegible',
       });
 
-      const result = await service.getStatus('SOL-2026-0001', 'ana@umss.edu.bo');
+      const result = await service.getStatus(
+        'SOL-2026-0001',
+        'ana@umss.edu.bo',
+      );
 
       expect(result).toEqual({
         requestCode: 'SOL-2026-0001',
@@ -186,7 +247,11 @@ describe('AccessRequestsService: envío y consulta de estado', () => {
         submittedAt: '2026-10-05T15:00:00.000Z',
         reviewedAt: '2026-10-06T10:00:00.000Z',
         rejectionReason: 'Documento ilegible',
-        document: { type: 'national_title', size: 2048, mimeType: 'application/pdf' },
+        document: {
+          type: 'national_title',
+          size: 2048,
+          mimeType: 'application/pdf',
+        },
       });
     });
 
@@ -198,7 +263,10 @@ describe('AccessRequestsService: envío y consulta de estado', () => {
           status: { title: status },
         });
 
-        const result = await service.getStatus('SOL-2026-0001', 'ana@umss.edu.bo');
+        const result = await service.getStatus(
+          'SOL-2026-0001',
+          'ana@umss.edu.bo',
+        );
 
         expect(result).not.toHaveProperty('fullName');
         expect(result).not.toHaveProperty('firstName');
@@ -212,7 +280,10 @@ describe('AccessRequestsService: envío y consulta de estado', () => {
         status: { title: 'rejected' },
       });
 
-      const result = await service.getStatus('SOL-2026-0001', 'ana@umss.edu.bo');
+      const result = await service.getStatus(
+        'SOL-2026-0001',
+        'ana@umss.edu.bo',
+      );
 
       for (const forbidden of [
         'firstName',
@@ -234,19 +305,19 @@ describe('AccessRequestsService: envío y consulta de estado', () => {
       });
     });
 
-    it.each([
-      { documentFile: null },
-      { documentType: null },
-    ])('document es null si falta archivo o tipo: %j', async (overrides) => {
-      repository.findByRequestCode.mockResolvedValue({
-        ...found,
-        ...overrides,
-      });
+    it.each([{ documentFile: null }, { documentType: null }])(
+      'document es null si falta archivo o tipo: %j',
+      async (overrides) => {
+        repository.findByRequestCode.mockResolvedValue({
+          ...found,
+          ...overrides,
+        });
 
-      await expect(
-        service.getStatus('SOL-2026-0001', 'ana@umss.edu.bo'),
-      ).resolves.toMatchObject({ document: null });
-    });
+        await expect(
+          service.getStatus('SOL-2026-0001', 'ana@umss.edu.bo'),
+        ).resolves.toMatchObject({ document: null });
+      },
+    );
 
     it('normaliza el correo a minúsculas y elimina espacios externos', async () => {
       repository.findByRequestCode.mockResolvedValue(found);

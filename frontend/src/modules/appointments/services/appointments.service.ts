@@ -1,12 +1,7 @@
 import { apiClient, isApiError } from "@/shared/services/api-client";
 import type { ApiResponse } from "@/shared/types/api-response.types";
-import {
-  APPOINTMENT_DOCUMENT_FIELD_NAME,
-  getAppointmentDocumentEndpoint,
-  getAppointmentEndpoint,
-  getCounterpartPhotoEndpoint,
-} from "../constants/appointment-document.constants";
-import { NOT_FOUND_STATUS } from "../constants/appointments.constants";
+import { getAppointmentDocumentEndpoint, getAppointmentEndpoint, getCounterpartPhotoEndpoint } from "../constants/appointment-document.constants";
+
 import type { Appointment } from "../types/appointment.types";
 import type { AppointmentDocument } from "../types/appointment-document.types";
 import type { AppointmentScope } from "../types/appointment-scope.types";
@@ -34,7 +29,7 @@ export const appointmentsApi = {
       });
       return response.data;
     } catch (error) {
-      if (isApiError(error) && error.response?.status === NOT_FOUND_STATUS) return null;
+      if (isApiError(error) && error.response?.status === 404) return null;
       throw error;
     }
   },
@@ -53,7 +48,7 @@ export const appointmentsApi = {
 
   uploadDocument: async (appointmentId: string, file: File): Promise<AppointmentDocument> => {
     const formData = new FormData();
-    formData.append(APPOINTMENT_DOCUMENT_FIELD_NAME, file);
+    formData.append("file", file);
     const response = await apiClient.post<ApiResponse<AppointmentDocument>>(
       getAppointmentDocumentEndpoint(appointmentId),
       formData,

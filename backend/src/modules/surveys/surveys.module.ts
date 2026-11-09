@@ -13,7 +13,11 @@ import { SurveysService } from './services/surveys.service.js';
 
 @Module({
   imports: [JwtAuthModule, ReportsModule],
-  controllers: [SurveyNotificationsController, SurveysController, CareersController],
+  controllers: [
+    SurveyNotificationsController,
+    SurveysController,
+    CareersController,
+  ],
   providers: [
     SurveysService,
     CareersService,

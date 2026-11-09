@@ -9,7 +9,10 @@ describe('cv requests', () => {
     });
 
     it('coerces the query string values to numbers', () => {
-      expect(listCvsSchema.parse({ page: '3', limit: '20' })).toEqual({ page: 3, limit: 20 });
+      expect(listCvsSchema.parse({ page: '3', limit: '20' })).toEqual({
+        page: 3,
+        limit: 20,
+      });
     });
 
     it.each([
@@ -25,7 +28,9 @@ describe('cv requests', () => {
 
   describe('cvIdSchema', () => {
     it('accepts a uuid', () => {
-      expect(cvIdSchema.safeParse('22222222-2222-4222-8222-222222222222').success).toBe(true);
+      expect(
+        cvIdSchema.safeParse('22222222-2222-4222-8222-222222222222').success,
+      ).toBe(true);
     });
 
     it('rejects a value that is not a uuid', () => {

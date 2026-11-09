@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import type { PersonalInfoErrors } from "../types/personal-info-errors.types";
 import type { PersonalInfoFormProps } from "../types/personal-info-form-props.types";
 import type { PersonalInfoValues } from "../types/personal-info-values.types";
-import { PHONE_HINT, PHONE_HINT_ID } from "../constants/profile-validation.constants";
+import { PHONE_HINT } from "../constants/profile-validation.constants";
 import { getFieldErrorId, getFieldErrorProps } from "../utils/get-field-error-props";
 import { sanitizeNameInput } from "../utils/sanitize-name-input";
 import { sanitizePhoneInput } from "../utils/sanitize-phone-input";
@@ -147,11 +147,11 @@ export function PersonalInfoForm({
               onChange={handleChange}
               className="h-11"
               {...getFieldErrorProps("phone", errors.phone)}
-              aria-describedby={[PHONE_HINT_ID, errors.phone ? getFieldErrorId("phone") : null]
+              aria-describedby={["phone-hint", errors.phone ? getFieldErrorId("phone") : null]
                 .filter(Boolean)
                 .join(" ")}
             />
-            <p id={PHONE_HINT_ID} className="text-sm text-text-secondary">
+            <p id={"phone-hint"} className="text-sm text-text-secondary">
               {PHONE_HINT}
             </p>
           </FormField>

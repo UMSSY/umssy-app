@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import type { Prisma as PrismaTypes } from '../../../prisma/client.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
-import { RUBRIC_VERSION, scoreVerifiedSkills } from '../radar-scoring.js';
+import { RUBRIC_VERSION, scoreVerifiedSkills } from '../utils/radar-scoring.js';
 import type {
   PublishedSkill,
   SnapshotRow,

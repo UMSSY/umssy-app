@@ -1,3 +1,4 @@
+import { MAX_FILE_UPLOAD_SIZE_BYTES } from '../../../common/constants/file-upload.constants.js';
 import {
   Controller,
   Delete,
@@ -31,20 +32,21 @@ import { ResponseInterceptor } from '../../../common/interceptors/response.inter
 import type { PaginatedResult } from '../../../common/types/api-response.types.js';
 import type { MulterFile } from '../../../common/types/multer-file.type.js';
 import { buildRequestValidationException } from '../../../common/utils/build-request-validation-exception.js';
-import {
-  CV_DEFAULT_PAGE_SIZE,
-  CV_FIELD_NAME,
-  CV_UPLOAD_LIMIT_BYTES,
-} from '../constants/cv.constants.js';
+import { CV_DEFAULT_PAGE_SIZE } from '../constants/cv.constants.js';
 import { cvIdSchema } from '../requests/cv-id.request.js';
-import { listCvsSchema, type ListCvsRequest } from '../requests/list-cvs.request.js';
+import {
+  listCvsSchema,
+  type ListCvsRequest,
+} from '../requests/list-cvs.request.js';
 import type { CvResponse } from '../responses/cv.response.js';
 import { CvService } from '../services/cv.service.js';
 
 @ApiTags('profile')
 @ApiBearerAuth()
 @ApiUnauthorizedResponse({ description: 'A valid access token is required' })
-@ApiBadRequestResponse({ description: 'Invalid pagination, identifier or file' })
+@ApiBadRequestResponse({
+  description: 'Invalid pagination, identifier or file',
+})
 @UseGuards(JwtAuthGuard)
 @UseInterceptors(ResponseInterceptor)
 @UsePipes(
@@ -58,8 +60,15 @@ export class CvHistoryController {
 
   @Get()
   @ApiQuery({ name: 'page', required: false, type: Number })
-  @ApiQuery({ name: 'limit', required: false, type: Number, example: CV_DEFAULT_PAGE_SIZE })
-  @ApiOkResponse({ description: 'CVs of the authenticated user, newest first, without content' })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    example: CV_DEFAULT_PAGE_SIZE,
+  })
+  @ApiOkResponse({
+    description: 'CVs of the authenticated user, newest first, without content',
+  })
   list(
     @CurrentUserId() userId: string,
     @Query({ schema: listCvsSchema }) request: ListCvsRequest,
@@ -69,21 +78,23 @@ export class CvHistoryController {
 
   @Post()
   @UseInterceptors(
-    FileInterceptor(CV_FIELD_NAME, {
-      limits: { fileSize: CV_UPLOAD_LIMIT_BYTES, files: 1 },
+    FileInterceptor('file', {
+      limits: { fileSize: MAX_FILE_UPLOAD_SIZE_BYTES, files: 1 },
     }),
   )
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
       type: 'object',
-      required: [CV_FIELD_NAME],
+      required: ['file'],
       properties: {
-        [CV_FIELD_NAME]: { type: 'string', format: 'binary' },
+        ['file']: { type: 'string', format: 'binary' },
       },
     },
   })
-  @ApiCreatedResponse({ description: 'Uploaded CV, which becomes the current one' })
+  @ApiCreatedResponse({
+    description: 'Uploaded CV, which becomes the current one',
+  })
   upload(
     @CurrentUserId() userId: string,
     @UploadedFile() file: MulterFile | undefined,
