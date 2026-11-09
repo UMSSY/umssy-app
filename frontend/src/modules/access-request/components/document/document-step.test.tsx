@@ -4,7 +4,7 @@ import { act, cleanup, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { accessRequestService } from "../../services/access-request.service";
-import type { ApiResult } from "../../types/access-request.types";
+import type { ApiResult } from "../../types/api-result.types";
 import { DocumentStep } from "./document-step";
 import {
   failure,

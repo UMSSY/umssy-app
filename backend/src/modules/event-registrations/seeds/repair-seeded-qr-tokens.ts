@@ -7,7 +7,12 @@ export async function repairSeededQrTokens(
   tx: Pick<Prisma.TransactionClient, 'eventRegistration'>,
 ): Promise<number> {
   const registrations = await tx.eventRegistration.findMany({
-    where: { OR: [{ qrToken: { startsWith: 'qr-seed-' } }, { qrToken: { startsWith: 'seed-' } }] },
+    where: {
+      OR: [
+        { qrToken: { startsWith: 'qr-seed-' } },
+        { qrToken: { startsWith: 'seed-' } },
+      ],
+    },
     select: { id: true, qrToken: true },
   });
   let repaired = 0;
@@ -21,12 +26,21 @@ export async function repairSeededQrTokens(
   return repaired;
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (
+  process.argv[1] &&
+  import.meta.url === pathToFileURL(process.argv[1]).href
+) {
   const prisma = createSeedClient();
   try {
-    console.log('Tokens QR de prueba reparados:', await repairSeededQrTokens(prisma));
+    console.log(
+      'Tokens QR de prueba reparados:',
+      await repairSeededQrTokens(prisma),
+    );
   } catch (error: unknown) {
-    console.error('No se pudieron reparar los tokens QR:', error instanceof Error ? error.message : String(error));
+    console.error(
+      'No se pudieron reparar los tokens QR:',
+      error instanceof Error ? error.message : String(error),
+    );
     process.exitCode = 1;
   } finally {
     await prisma.$disconnect();

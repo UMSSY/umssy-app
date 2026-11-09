@@ -167,7 +167,11 @@ export class JobOffersRepository {
     });
   }
 
-  reopen(jobOfferId: string, statusId: string, publishedAt: Date): Promise<JobOfferRecord> {
+  reopen(
+    jobOfferId: string,
+    statusId: string,
+    publishedAt: Date,
+  ): Promise<JobOfferRecord> {
     return this.updateExisting(jobOfferId, { statusId, publishedAt });
   }
 

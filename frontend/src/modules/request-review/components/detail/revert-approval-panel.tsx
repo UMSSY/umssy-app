@@ -13,7 +13,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { REVERT_SUCCESS_MESSAGE } from "../../constants/automatic-validation.constants";
+
 import { useRevertApproval } from "../../hooks/use-revert-approval";
 import type { RevertApprovalPanelProps } from "../../types/automatic-validation-props.types";
 
@@ -24,7 +24,7 @@ export function RevertApprovalPanel({ detail }: RevertApprovalPanelProps) {
   if (isSuccess) {
     return (
       <p role="status" className="rounded-lg border border-border bg-surface p-4 text-sm text-ink">
-        {REVERT_SUCCESS_MESSAGE}
+        {"La aprobación se revirtió. La solicitud volvió a revisión manual."}
       </p>
     );
   }

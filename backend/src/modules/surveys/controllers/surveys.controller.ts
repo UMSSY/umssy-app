@@ -166,7 +166,7 @@ export class SurveysController {
     return this.surveysService.getStatistics(id, period);
   }
 
-  @Get(':id/export-pdf')
+  @Get(':id/report')
   @ApiOperation({
     summary: 'Exporta el informe estadístico de una encuesta en formato PDF',
   })

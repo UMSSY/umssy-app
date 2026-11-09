@@ -4,12 +4,19 @@ import type { DocumentCorrectionRequest } from '../types/document-correction-req
 
 @Injectable()
 export class DocumentCorrectionGuard implements CanActivate {
-  constructor(private readonly authorization: DocumentCorrectionAuthorizationService) {}
+  constructor(
+    private readonly authorization: DocumentCorrectionAuthorizationService,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest<DocumentCorrectionRequest>();
+    const request = context
+      .switchToHttp()
+      .getRequest<DocumentCorrectionRequest>();
     delete request.documentCorrection;
-    request.documentCorrection = await this.authorization.authorize(request.params.code, request.headers.authorization);
+    request.documentCorrection = await this.authorization.authorize(
+      request.params.code,
+      request.headers.authorization,
+    );
     return true;
   }
 }

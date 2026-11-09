@@ -1,4 +1,4 @@
-import type { Scores } from '../radar-scoring.js';
+import type { Scores } from '../utils/radar-scoring.js';
 import type { PublishedSkill } from './published-skill.type.js';
 
 export type SnapshotRow = {

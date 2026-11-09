@@ -29,10 +29,18 @@ describe('CvHistoryController', () => {
   });
 
   it('lists the cvs of the current user with the requested page', async () => {
-    const page = { items: [response], totalItems: 1, totalPages: 1, page: 1, limit: 5 };
+    const page = {
+      items: [response],
+      totalItems: 1,
+      totalPages: 1,
+      page: 1,
+      limit: 5,
+    };
     service.list.mockResolvedValue(page);
 
-    await expect(controller.list(userId, { page: 1, limit: 5 })).resolves.toBe(page);
+    await expect(controller.list(userId, { page: 1, limit: 5 })).resolves.toBe(
+      page,
+    );
     expect(service.list).toHaveBeenCalledWith(userId, { page: 1, limit: 5 });
   });
 
@@ -59,6 +67,8 @@ describe('CvHistoryController', () => {
   it('propagates the not found error of another user cv', async () => {
     service.removeById.mockRejectedValue(new CvNotFoundException());
 
-    await expect(controller.remove(userId, cvId)).rejects.toBeInstanceOf(CvNotFoundException);
+    await expect(controller.remove(userId, cvId)).rejects.toBeInstanceOf(
+      CvNotFoundException,
+    );
   });
 });

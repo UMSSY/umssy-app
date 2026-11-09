@@ -1,5 +1,4 @@
 import { ShieldCheck } from "lucide-react";
-import { BOLIVIA_TIME_LABEL } from "../../constants/audit-log.constants";
 
 export function AuditReadOnlyNotice() {
   return (
@@ -8,7 +7,7 @@ export function AuditReadOnlyNotice() {
       <div className="flex flex-col gap-0.5">
         <p className="text-sm font-semibold">Registro de solo lectura</p>
         <p className="text-[13px]">
-          Los eventos se guardan automáticamente y no pueden editarse ni borrarse. Las horas están en {BOLIVIA_TIME_LABEL}.
+          Los eventos se guardan automáticamente y no pueden editarse ni borrarse. Las horas están en {"hora de Bolivia (UTC-4)"}.
         </p>
       </div>
     </div>

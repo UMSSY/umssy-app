@@ -1,6 +1,6 @@
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import { cleanup, fireEvent,  screen, waitFor } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { saveAccessToken } from "@/shared/services/storage/access-token-storage";
 import { useLogin } from "../hooks/use-login";
 import { LoginView } from "./login-view";
@@ -26,6 +26,9 @@ vi.mock("@/shared/contexts/auth-context", () => ({
 }));
 
 describe("LoginView", () => {
+  beforeEach(() => {
+    vi.mocked(saveAccessToken).mockResolvedValue(true);
+  });
   afterEach(() => {
     authState = { roles: [], isLoading: false };
     cleanup();
@@ -61,15 +64,22 @@ describe("LoginView", () => {
   });
 
   it("navigates once after signing in even though the session now has roles", async () => {
-    vi.mocked(saveAccessToken).mockImplementation(() => {
+    vi.mocked(saveAccessToken).mockImplementation(async () => {
       authState = { roles: ["titulado"], isLoading: false };
       return true;
     });
-    const login = vi.fn().mockResolvedValue({ accessToken: "returned-token", roleTag: "titulado" });
+    const login = vi.fn().mockResolvedValue({
+      accessToken: "returned-token",
+      roleTag: "titulado",
+    });
     vi.mocked(useLogin).mockReturnValue({ login, isLoading: false, error: null });
     render(<LoginView />);
-    fireEvent.change(screen.getByPlaceholderText("nombre@ejemplo.com"), { target: { value: "person@example.com" } });
-    fireEvent.change(screen.getByPlaceholderText("Tu contraseña"), { target: { value: "secret" } });
+    fireEvent.change(screen.getByPlaceholderText("nombre@ejemplo.com"), {
+      target: { value: "person@example.com" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Tu contraseña"), {
+      target: { value: "secret" },
+    });
     fireEvent.submit(screen.getByRole("button", { name: "Iniciar sesión" }).closest("form")!);
 
     await waitFor(() => expect(push).toHaveBeenCalledTimes(1));
@@ -280,5 +290,4 @@ describe("LoginView", () => {
     expect(input).toHaveAttribute("type","password");
     expect(login).not.toHaveBeenCalled();
   });
-
 });

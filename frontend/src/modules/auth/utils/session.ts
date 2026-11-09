@@ -2,9 +2,10 @@ import { clearAccessToken, saveAccessToken } from "@/shared/services/storage/acc
 import { clearSessionDrafts } from "./clear-session-drafts";
 import { clearSessionMarker, setSessionMarker } from "./session-cookie";
 
-export function startSession(accessToken: string): void {
+export async function startSession(accessToken: string): Promise<void> {
   void clearSessionDrafts();
-  saveAccessToken(accessToken);
+  if (!(await saveAccessToken(accessToken)))
+    throw new Error("No se pudo guardar la sesión en este navegador");
   setSessionMarker();
 }
 

@@ -1,13 +1,6 @@
+import { ROLE_LABELS } from "@/shared/constants/roles.constants";
 import { getSessionRoles } from "./get-session-roles";
 import type { RoleTag } from "../types/auth-types";
-
-const ROLE_LABELS: Record<RoleTag, string> = {
-  titulado: "Titulado",
-  estudiante: "Estudiante",
-  mentor: "Mentor",
-  empresa: "Empresa",
-  administrativo: "Administrativo",
-};
 
 export function getSessionRoleLabel(accessToken: string): string {
   const roles = getSessionRoles(accessToken);

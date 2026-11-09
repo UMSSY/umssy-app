@@ -11,14 +11,14 @@ import { CvService } from './services/cv.service.js';
 import { RadarIntegrationModule } from '../radar-integration/radar-integration.module.js';
 
 @Module({
-  imports: [CvSourcesModule, PrismaModule, JwtAuthModule, RadarIntegrationModule],
-  controllers: [CvHistoryController, CvFileController],
-  providers: [
-    CvService,
-    CvMetadataRepository,
-    CvMapper,
-    FileValidationService,
+  imports: [
+    CvSourcesModule,
+    PrismaModule,
+    JwtAuthModule,
+    RadarIntegrationModule,
   ],
+  controllers: [CvHistoryController, CvFileController],
+  providers: [CvService, CvMetadataRepository, CvMapper, FileValidationService],
   exports: [CvService],
 })
 export class CvModule {}

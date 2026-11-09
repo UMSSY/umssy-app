@@ -1,7 +1,7 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { JobRecommendationCard } from "./job-recommendation-card";
-import type { RecommendedJob } from "../types/job-matching.types";
+import type { RecommendedJob } from "../types/recommended-job.types";
 
 const job: RecommendedJob = {
   jobOfferId: "123",

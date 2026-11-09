@@ -81,7 +81,11 @@ describe('HU-02B T2.8 - JobApplicationsService', () => {
     });
 
     await expect(service.apply(USER_ID, OFFER_ID)).resolves.toEqual(RESPONSE);
-    expect(repository.reactivate).toHaveBeenCalledWith(USER_ID, OFFER_ID, 'status-in-review');
+    expect(repository.reactivate).toHaveBeenCalledWith(
+      USER_ID,
+      OFFER_ID,
+      'status-in-review',
+    );
     expect(repository.create).not.toHaveBeenCalled();
   });
 

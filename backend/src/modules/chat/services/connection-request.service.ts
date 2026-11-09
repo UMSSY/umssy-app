@@ -28,9 +28,7 @@ export class ConnectionRequestService {
       );
     }
 
-    const receiver = await this.userLookupRepository.findActiveById(
-      receiverId,
-    );
+    const receiver = await this.userLookupRepository.findActiveById(receiverId);
 
     if (!receiver) {
       throw new NotFoundException(
@@ -118,13 +116,10 @@ export class ConnectionRequestService {
     currentUserId: string,
     statusTitle: 'ACCEPTED' | 'REJECTED',
   ) {
-    const request =
-      await this.connectionRequestRepository.findById(requestId);
+    const request = await this.connectionRequestRepository.findById(requestId);
 
     if (!request) {
-      throw new NotFoundException(
-        'La solicitud de conexión no existe.',
-      );
+      throw new NotFoundException('La solicitud de conexión no existe.');
     }
 
     if (request.receiverId !== currentUserId) {
@@ -134,15 +129,11 @@ export class ConnectionRequestService {
     }
 
     if (request.status.title !== 'PENDING') {
-      throw new ConflictException(
-        'La solicitud de conexión ya fue procesada.',
-      );
+      throw new ConflictException('La solicitud de conexión ya fue procesada.');
     }
 
     const status =
-      await this.connectionRequestRepository.findStatusByTitle(
-        statusTitle,
-      );
+      await this.connectionRequestRepository.findStatusByTitle(statusTitle);
 
     if (!status) {
       throw new InternalServerErrorException(
@@ -150,16 +141,13 @@ export class ConnectionRequestService {
       );
     }
 
-    const result =
-      await this.connectionRequestRepository.updatePendingStatus(
-        requestId,
-        status.id,
-      );
+    const result = await this.connectionRequestRepository.updatePendingStatus(
+      requestId,
+      status.id,
+    );
 
     if (result.count === 0) {
-      throw new ConflictException(
-        'La solicitud de conexión ya fue procesada.',
-      );
+      throw new ConflictException('La solicitud de conexión ya fue procesada.');
     }
 
     const updatedRequest =

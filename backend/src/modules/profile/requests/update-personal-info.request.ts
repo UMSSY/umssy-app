@@ -14,4 +14,6 @@ export const updatePersonalInfoSchema = z.object({
   personalEmail: personalEmailSchema,
 });
 
-export type UpdatePersonalInfoRequest = z.infer<typeof updatePersonalInfoSchema>;
+export type UpdatePersonalInfoRequest = z.infer<
+  typeof updatePersonalInfoSchema
+>;

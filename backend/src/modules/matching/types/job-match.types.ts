@@ -1,10 +1,6 @@
-import type { Prisma } from '../../../prisma/client.js';
-import type { JOB_MATCH_SELECT } from '../constants/job-match.constants.js';
 import type { CategorizedRequirement } from './gap-analysis.types.js';
 
-export type JobMatchRecord = Prisma.JobOfferGetPayload<{
-  select: typeof JOB_MATCH_SELECT;
-}>;
+export type { JobOfferMatchRecord as JobMatchRecord } from '../../job-offers/types/job-match-record.types.js';
 
 export interface CandidateProfileRecord {
   career: string | null;

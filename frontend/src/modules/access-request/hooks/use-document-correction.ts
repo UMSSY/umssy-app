@@ -9,8 +9,9 @@ import {
   CORRECTION_RETRY_MESSAGE,
 } from "../constants/document-correction.constants";
 import { accessRequestService } from "../services/access-request.service";
-import type { DocumentState } from "../types/access-request-context.types";
-import type { DocumentCorrectionFormProps, DocumentCorrectionSelection } from "../types/document-correction.types";
+import type { DocumentState } from "../types/document-state.types";
+import type { DocumentCorrectionFormProps } from "../types/document-correction-form-props.types";
+import type { DocumentCorrectionSelection } from "../types/document-correction-selection.types";
 import { isDocumentCorrectionToken } from "../utils/document-correction-link";
 import { validateDocumentFile } from "../utils/validate-document-file";
 

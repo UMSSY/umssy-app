@@ -21,13 +21,10 @@ export const DOCUMENT_TYPE_LABELS: Record<string, string> = {
   national_title: "Título en provisión nacional",
 };
 
-export const BACKOFFICE_ROLE = "administrativo";
-export const SESSION_TOKEN_KEY = "accessToken";
-export const LOGIN_PATH = "/login";
 export const INBOX_PATH = "/backoffice/solicitudes";
 
 export const REJECTION_MAX_LENGTH = 500;
-export const REJECTION_REASON_SEPARATOR = ". ";
+
 export const OTHER_REJECTION_REASON = "Otro motivo";
 export const REJECTION_REASONS = [
   "Documento ilegible",
@@ -36,6 +33,3 @@ export const REJECTION_REASONS = [
   "El documento no corresponde a la carrera",
   OTHER_REJECTION_REASON,
 ] as const;
-
-export const BACKOFFICE_USER_FALLBACK_NAME = "Personal administrativo";
-export const BACKOFFICE_USER_LOADING_NAME = "Cargando usuario…";

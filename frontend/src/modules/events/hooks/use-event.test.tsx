@@ -1,3 +1,4 @@
+import "@/shared/testing/indexed-db.mock";
 import { renderHookWithQuery as renderHook } from "@/shared/testing/render-hook-with-query";
 import { act, cleanup, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -83,20 +84,20 @@ describe("useEvent", () => {
     expect(result.current.isLoading).toBe(false);
   });
 
-  it('loads a fresh personalized detail when the session changes', async () => {
+  it("loads a fresh personalized detail when the session changes", async () => {
     vi.mocked(eventsService.getEvent).mockImplementation(async (
       id,
       _signal,
       token,
     ) => ({ ...event, id, hasSupported: token === 'token-a' }));
 
-    const { result } = renderHook(() => useEvent('a'));
+    const { result } = renderHook(() => useEvent("a"));
     await waitFor(() => expect(result.current.event?.hasSupported).toBe(false));
 
-    act(() => saveAccessToken('token-a'));
+    await act(async () => await saveAccessToken("token-a"));
     await waitFor(() => expect(result.current.event?.hasSupported).toBe(true));
 
-    act(() => saveAccessToken('token-b'));
+    await act(async () => await saveAccessToken("token-b"));
     await waitFor(() => expect(result.current.event?.hasSupported).toBe(false));
 
     act(() => clearAccessToken());

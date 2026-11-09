@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { SURVEY_TEXT } from "../constants/survey-builder.constants";
 import { SURVEY_MESSAGES } from "../constants/survey-messages.constants";
-import type { DiscardChangesDialogProps } from "../types/survey-component-props.types";
+import type { DiscardChangesDialogProps } from "../types/discard-changes-dialog-props.types";
 
 export function DiscardChangesDialog({ open, onOpenChange, onConfirm }: DiscardChangesDialogProps) {
   return (

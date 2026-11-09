@@ -1,3 +1,4 @@
+import { DEGREE_CATALOG_FIXTURE } from "../testing/degree-catalog.fixture";
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import { act, cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -11,6 +12,7 @@ import { EducationView } from "./education-view";
 vi.mock("../services/educations.service", () => ({
   educationsService: {
     getInstitutions: vi.fn(),
+    getDegrees: vi.fn(),
     getEducations: vi.fn(),
     createEducation: vi.fn(),
     updateEducation: vi.fn(),
@@ -79,6 +81,7 @@ async function fillForm(user: ReturnType<typeof userEvent.setup>, values: Partia
 
 describe("EducationView", () => {
   beforeEach(() => {
+    vi.mocked(educationsService.getDegrees).mockResolvedValue(DEGREE_CATALOG_FIXTURE);
     vi.mocked(educationsService.getInstitutions).mockResolvedValue([
       { name: 'Universidad Mayor de San Simón (UMSS)', aliases: ['UMSS', 'Universidad Mayor de San Simón'] },
       { name: 'Universidad Privada Boliviana (UPB)', aliases: ['UPB'] },

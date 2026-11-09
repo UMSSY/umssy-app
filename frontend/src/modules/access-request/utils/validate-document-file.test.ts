@@ -1,17 +1,12 @@
+import { MAX_FILE_UPLOAD_SIZE_BYTES } from "@/shared/constants/file-upload.constants";
 import { describe, expect, it } from "vitest";
-import {
-  EMPTY_FILE_MESSAGE,
-  FILE_TOO_LARGE_MESSAGE,
-  INVALID_FORMAT_MESSAGE,
-  MAX_DOCUMENT_SIZE_BYTES,
-  validateDocumentFile,
-} from "./validate-document-file";
+import { EMPTY_FILE_MESSAGE, FILE_TOO_LARGE_MESSAGE, INVALID_FORMAT_MESSAGE, validateDocumentFile } from "./validate-document-file";
 
 const MB = 1024 * 1024;
 
 describe("validateDocumentFile", () => {
   it("define el máximo en 10 MB", () => {
-    expect(MAX_DOCUMENT_SIZE_BYTES).toBe(10 * MB);
+    expect(MAX_FILE_UPLOAD_SIZE_BYTES).toBe(10 * MB);
   });
 
   it.each([

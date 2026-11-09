@@ -1,3 +1,5 @@
+import type { ParticipationOverviewProps } from "../../types/participation-overview-props.types";
+import type { ParticipationPreferencesProps } from "../../types/participation-preferences-props.types";
 import Link from "next/link";
 import { CircleX, FileText, Pencil, UsersRound } from "lucide-react";
 
@@ -6,41 +8,47 @@ import { buttonVariants } from "@/components/ui/button-variants";
 import { cn } from "@/lib/utils";
 import { PageHeading } from "@/shared/components/layout";
 
-type ParticipationOverviewProps = {
-  isActive: boolean;
-  areas: string[];
-  orientations: string[];
-  onAction: () => void;
-  actionEnabled?: boolean;
-};
-
-type ParticipationPreferencesProps = {
-  title: string;
-  editHref: string;
-  editLabel: string;
-  items: string[];
-  isEditable: boolean;
-  showIcon?: boolean;
-};
-
-function ParticipationPreferences({ title, editHref, editLabel, items, isEditable, showIcon }: ParticipationPreferencesProps) {
+function ParticipationPreferences({
+  title,
+  editHref,
+  editLabel,
+  items,
+  isEditable,
+  showIcon,
+}: ParticipationPreferencesProps) {
   return (
     <section className="space-y-3 border-t border-border pt-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="font-bold text-ink">{title}</h2>
         {isEditable && (
-          <Link href={editHref} className={buttonVariants({ variant: "outline", className: "h-auto min-h-10 gap-2 bg-interaction px-3 py-2 text-availability-foreground whitespace-normal" })}>
-            <Pencil aria-hidden="true" className="size-4" />{editLabel}
+          <Link
+            href={editHref}
+            className={buttonVariants({
+              variant: "outline",
+              className:
+                "h-auto min-h-10 gap-2 bg-interaction px-3 py-2 text-availability-foreground whitespace-normal",
+            })}
+          >
+            <Pencil aria-hidden="true" className="size-4" />
+            {editLabel}
           </Link>
         )}
       </div>
       <div className="flex flex-wrap gap-2">
         {items.map((item) => (
-          <span key={item} className="inline-flex max-w-full items-center gap-2 rounded-md bg-interaction px-3 py-2 text-sm break-words text-availability-foreground">
-            {showIcon && <FileText aria-hidden="true" className="size-4 shrink-0" />}{item}
+          <span
+            key={item}
+            className="inline-flex max-w-full items-center gap-2 rounded-md bg-interaction px-3 py-2 text-sm break-words text-availability-foreground"
+          >
+            {showIcon && (
+              <FileText aria-hidden="true" className="size-4 shrink-0" />
+            )}
+            {item}
           </span>
         ))}
-        {items.length === 0 && <span className="text-sm text-text-secondary">Sin configuración</span>}
+        {items.length === 0 && (
+          <span className="text-sm text-text-secondary">Sin configuración</span>
+        )}
       </div>
     </section>
   );

@@ -1,17 +1,10 @@
+import type { ActivationNoticeProps } from "../../types/activation-notice-props.types";
 import Link from "next/link";
 import { CircleAlert } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button-variants";
 import { cn } from "cn";
-
-interface ActivationNoticeProps {
-  title: string;
-  message: string;
-  actionLabel?: string;
-  onAction?: () => void;
-  disabled?: boolean;
-}
 
 export function ActivationNotice({ title, message, actionLabel, onAction, disabled }: ActivationNoticeProps) {
   return (

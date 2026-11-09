@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useMemo } from "react";
@@ -151,11 +150,7 @@ export function useConversations() {
   const selectedConversation = useMemo(() => {
     if (!selectedId) return null;
 
-    return (
-      conversationsData.find(
-        (item) => item.id === selectedId,
-      ) || null
-    );
+    return conversationsData.find((item) => item.id === selectedId) || null;
   }, [conversationsData, selectedId]);
 
   const hasMore =
@@ -224,9 +219,8 @@ export function useConversations() {
             ? 0
             : item.unreadCount + 1;
 
-        setStoredConversationUnreadCount(
-          conversationId,
-          newUnread,
+        void setStoredConversationUnreadCount(conversationId, newUnread).catch(
+          () => {},
         );
 
         return {
@@ -235,7 +229,7 @@ export function useConversations() {
           unreadCount: newUnread,
           lastMessage: {
             id: `msg-${Date.now()}`,
-            senderId: item.contact?.id ?? '',
+            senderId: item.contact?.id ?? "",
             content: newContent,
             isAttachment: false,
             createdAt: timestamp,

@@ -1,4 +1,4 @@
 export interface BlockResponse {
-    blockedUserId: string;
-    createdAt: string;
+  blockedUserId: string;
+  createdAt: string;
 }

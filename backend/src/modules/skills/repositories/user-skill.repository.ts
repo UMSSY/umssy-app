@@ -6,7 +6,12 @@ import { planManualSkillChanges } from '../utils/plan-manual-skill-changes.js';
 import { skillSelect } from './skill.repository.js';
 
 const userSkillSelect = { skill: { select: skillSelect } } as const;
-const sourceRowSelect = { id: true, skillId: true, source: true, evidenceRefs: true } as const;
+const sourceRowSelect = {
+  id: true,
+  skillId: true,
+  source: true,
+  evidenceRefs: true,
+} as const;
 
 @Injectable()
 export class UserSkillRepository {
@@ -24,13 +29,21 @@ export class UserSkillRepository {
     });
   }
 
-  async replaceForUser(userId: string, skillIds: string[]): Promise<UserSkillRecord[]> {
+  async replaceForUser(
+    userId: string,
+    skillIds: string[],
+  ): Promise<UserSkillRecord[]> {
     await this.prisma.$transaction(async (tx) => {
-      const rows = await tx.userSkill.findMany({ where: { userId }, select: sourceRowSelect });
+      const rows = await tx.userSkill.findMany({
+        where: { userId },
+        select: sourceRowSelect,
+      });
       const changes = planManualSkillChanges(rows, skillIds);
 
       if (changes.deleteIds.length > 0) {
-        await tx.userSkill.deleteMany({ where: { userId, id: { in: changes.deleteIds } } });
+        await tx.userSkill.deleteMany({
+          where: { userId, id: { in: changes.deleteIds } },
+        });
       }
       if (changes.toDetectedIds.length > 0) {
         await tx.userSkill.updateMany({

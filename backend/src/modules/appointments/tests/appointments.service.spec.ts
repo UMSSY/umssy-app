@@ -179,7 +179,9 @@ describe('AppointmentsService', () => {
 
   it('propagates 404 when the counterpart has no photo', async () => {
     repository.findById.mockResolvedValue(createAppointmentRecord());
-    profilePhotoService.getPhoto.mockRejectedValue(new PhotoNotFoundException());
+    profilePhotoService.getPhoto.mockRejectedValue(
+      new PhotoNotFoundException(),
+    );
 
     await expect(
       service.getCounterpartPhoto(STUDENT_ID, APPOINTMENT_ID),

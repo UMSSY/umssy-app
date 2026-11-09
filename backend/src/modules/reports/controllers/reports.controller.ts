@@ -28,7 +28,7 @@ import {
   reportHistoryQuerySchema,
   type ReportHistoryQuery,
 } from '../requests/report-history.schema.js';
-import { REPORTS_ROLE } from '../constants/reports-access.constants.js';
+
 import { ReportHistoryService } from '../services/report-history.service.js';
 import { ReportsService } from '../services/reports.service.js';
 import type { ReportCsvFile } from '../types/report-user.types.js';
@@ -43,7 +43,7 @@ function toCsvFile({ fileName, content }: ReportCsvFile): StreamableFile {
 @ApiTags('Reportes')
 @Controller('reports')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(REPORTS_ROLE)
+@Roles('administrativo')
 export class ReportsController {
   constructor(
     private readonly reportsService: ReportsService,
