@@ -65,12 +65,18 @@ export class AppointmentsController {
     summary: CREATE_APPOINTMENT_DOCS.summary,
     description: CREATE_APPOINTMENT_DOCS.description,
   })
-  @ApiCreatedResponse({ description: CREATE_APPOINTMENT_DOCS.createdDescription })
+  @ApiCreatedResponse({
+    description: CREATE_APPOINTMENT_DOCS.createdDescription,
+  })
   @ApiBadRequestResponse({
     description: CREATE_APPOINTMENT_DOCS.badRequestDescription,
   })
-  @ApiNotFoundResponse({ description: CREATE_APPOINTMENT_DOCS.notFoundDescription })
-  @ApiConflictResponse({ description: CREATE_APPOINTMENT_DOCS.conflictDescription })
+  @ApiNotFoundResponse({
+    description: CREATE_APPOINTMENT_DOCS.notFoundDescription,
+  })
+  @ApiConflictResponse({
+    description: CREATE_APPOINTMENT_DOCS.conflictDescription,
+  })
   create(
     @CurrentUser() user: AuthenticatedUser,
     @Body() body: CreateAppointmentDto,
@@ -171,7 +177,10 @@ export class AppointmentsController {
     @CurrentUserId() userId: string,
     @Param('id', new RequestValidationPipe(appointmentIdSchema)) id: string,
   ): Promise<StreamableFile> {
-    const photo = await this.appointmentsService.getCounterpartPhoto(userId, id);
+    const photo = await this.appointmentsService.getCounterpartPhoto(
+      userId,
+      id,
+    );
 
     return new StreamableFile(photo.content, {
       type: photo.mimeType,

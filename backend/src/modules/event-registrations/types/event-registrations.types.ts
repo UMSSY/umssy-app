@@ -17,7 +17,6 @@ export interface CreateEventRegistrationPayload {
   statusId: string;
 }
 
-export interface PersistEventRegistrationPayload
-  extends CreateEventRegistrationPayload {
+export interface PersistEventRegistrationPayload extends CreateEventRegistrationPayload {
   qrToken: string;
 }

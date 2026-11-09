@@ -1,3 +1,4 @@
+import type { MentorDirectoryPaginationProps } from "../../types/mentor-directory-pagination-props.types";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -5,14 +6,6 @@ import {
   PaginationContent,
   PaginationItem,
 } from "@/components/ui/pagination";
-
-interface MentorDirectoryPaginationProps {
-  page: number;
-  pageSize: number;
-  totalItems: number;
-  totalPages: number;
-  onPageChange: (page: number) => void;
-}
 
 export function MentorDirectoryPagination({
   page,

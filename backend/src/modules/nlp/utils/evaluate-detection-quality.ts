@@ -1,4 +1,3 @@
-
 import { SkillDetectionService } from '../services/skill-detection.service.js';
 import type { NlpDetectionMetrics } from '../types/nlp-detection-metrics.type.js';
 import type { NlpLabelledProfile } from '../types/nlp-labelled-profile.type.js';

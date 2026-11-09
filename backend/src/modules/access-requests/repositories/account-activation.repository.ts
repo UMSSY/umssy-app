@@ -1,7 +1,8 @@
+import { UNIQUE_CONSTRAINT_VIOLATION_CODE } from '../../../common/constants/prisma-errors.constants.js';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { Prisma } from '../../../prisma/client.js';
-import { ACTIVATION_ROLE } from '../constants/activation.constants.js';
+
 import { ACCESS_REQUEST_STATUS } from '../types/access-request.enum.js';
 
 export interface NewActivatedUser {
@@ -21,7 +22,13 @@ export class AccountActivationRepository {
     return this.prisma.accessRequest.findFirst({
       where: { email, status: { title: ACCESS_REQUEST_STATUS.APPROVED } },
       orderBy: { reviewedAt: { sort: 'desc', nulls: 'last' } },
-      select: { id: true, firstName: true, lastName: true, email: true, phone: true },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        phone: true,
+      },
     });
   }
 
@@ -33,7 +40,11 @@ export class AccountActivationRepository {
     return user !== null;
   }
 
-  async createUserAndConsumeOtp(otpId: string, user: NewActivatedUser, now: Date): Promise<'created' | 'already_used'> {
+  async createUserAndConsumeOtp(
+    otpId: string,
+    user: NewActivatedUser,
+    now: Date,
+  ): Promise<'created' | 'already_used'> {
     try {
       return await this.prisma.$transaction(async (tx) => {
         const consumed = await tx.activationOtp.updateMany({
@@ -49,7 +60,7 @@ export class AccountActivationRepository {
             phone: user.phone,
             password: user.passwordHash,
             isActive: true,
-            roles: { create: { role: { connect: { name: ACTIVATION_ROLE } } } },
+            roles: { create: { role: { connect: { name: 'titulado' } } } },
           },
           select: { id: true },
         });
@@ -60,7 +71,10 @@ export class AccountActivationRepository {
         return 'created' as const;
       });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === UNIQUE_CONSTRAINT_VIOLATION_CODE
+      ) {
         return 'already_used';
       }
       throw error;

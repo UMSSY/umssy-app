@@ -1,4 +1,5 @@
-import type { RoleName } from '../../../common/enums/roles.enum.js';
+import { USER_TYPE_LABELS } from '../constants/report-user-csv.constants.js';
+import { DOCUMENT_TYPE_LABELS } from '../../../common/constants/document-type-labels.constants.js';
 import { toBoliviaTime } from '../../../common/utils/date-time.js';
 import type {
   RegisteredUserResponse,
@@ -6,38 +7,7 @@ import type {
   ReportDocumentType,
 } from '../types/report-user.types.js';
 
-export const USER_TYPE_LABELS: Record<RoleName, string> = {
-  titulado: 'Titulado',
-  estudiante: 'Estudiante',
-  mentor: 'Mentor',
-  empresa: 'Empresa',
-  administrativo: 'Administrativo',
-};
-
-const DOCUMENT_TYPE_LABELS: Record<ReportDocumentType, string> = {
-  academic_diploma: 'Diploma académico',
-  national_title: 'Título en provisión nacional',
-};
-
 const EMPTY_VALUE = '-';
-
-export const REGISTERED_USERS_CSV_HEADERS = [
-  'Usuario',
-  'Correo',
-  'Tipo de Usuario',
-  'Identificador',
-  'Documento',
-  'Fecha de Registro',
-] as const;
-
-export const REJECTED_USERS_CSV_HEADERS = [
-  'Usuario',
-  'Correo',
-  'Tipo de Usuario',
-  'Identificador',
-  'Documento',
-  'Fecha de Registro',
-] as const;
 
 export function formatReportDate(isoDate: string): string {
   if (Number.isNaN(new Date(isoDate).getTime())) {

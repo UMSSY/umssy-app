@@ -1,3 +1,4 @@
+import "@/modules/education/testing/degree-catalog.mock";
 import { renderHookWithQuery as renderHook } from "@/shared/testing/render-hook-with-query";
 import { act, cleanup, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';

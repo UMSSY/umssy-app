@@ -1,4 +1,6 @@
 "use client";
+import type { InlineAction } from "../types/inline-action.types";
+import type { CandidateDetailPanelProps } from "../types/candidate-detail-panel-props.types";
 
 import { useState } from "react";
 import { AreaDetailPanel } from "@/modules/radar-chart";
@@ -17,21 +19,6 @@ import { getInitials } from "@/shared/utils/get-initials";
 import { RadarChart } from "./radar-chart";
 import { GapBreakdownList } from "./gap-breakdown-list";
 import { ConfirmDiscardDialog } from "./confirm-discard-dialog";
-import type { AffinityAxis, CandidateWithMatch, Vacancy } from "../types/matching-types";
-
-type InlineAction = "contact" | "schedule" | null;
-
-interface CandidateDetailPanelProps {
-  candidate: CandidateWithMatch | null;
-  vacancy: Vacancy | null;
-  axes: AffinityAxis[];
-  pendingDiscardId: string | null;
-  onRequestDiscard: (id: string) => void;
-  onConfirmDiscard: () => void;
-  onCancelDiscard: () => void;
-  onConfirmSchedule: (name: string, date: string, time: string) => void;
-  actionFeedback: string | null;
-}
 
 export function CandidateDetailPanel({
   candidate,
@@ -89,7 +76,9 @@ export function CandidateDetailPanel({
             <p className="text-xs tracking-wide text-muted-foreground uppercase">
               Compatibilidad vs. {vacancy.title}
             </p>
-            <p className="text-2xl font-semibold text-foreground">{candidate.matchPercent}%</p>
+            <p className="text-2xl font-semibold text-foreground">
+              {candidate.matchPercent}%
+            </p>
           </div>
         </div>
       </CardHeader>
@@ -117,9 +106,14 @@ export function CandidateDetailPanel({
         <GapBreakdownList axes={axes} gaps={candidate.gaps} />
 
         {selectedAreaId && (
-          <div className="flex min-w-0 flex-col gap-2" role="region" aria-label={`Evidencias de ${candidate.name}`}>
+          <div
+            className="flex min-w-0 flex-col gap-2"
+            role="region"
+            aria-label={`Evidencias de ${candidate.name}`}
+          >
             <p className="text-xs text-muted-foreground">
-              Información ilustrativa de {candidate.name}; cursos, certificaciones y experiencias de demostración.
+              Información ilustrativa de {candidate.name}; cursos,
+              certificaciones y experiencias de demostración.
             </p>
             <AreaDetailPanel
               area={getCandidateAreaDetail(candidate, selectedAreaId)}
@@ -140,12 +134,17 @@ export function CandidateDetailPanel({
               Este perfil fue descartado.
             </p>
           ) : (
-            <div className="grid grid-cols-3 items-stretch gap-3" aria-label="Acciones del candidato">
+            <div
+              className="grid grid-cols-3 items-stretch gap-3"
+              aria-label="Acciones del candidato"
+            >
               <Button
                 type="button"
                 className="h-auto min-h-10 w-full whitespace-normal"
                 aria-expanded={inlineAction === "contact"}
-                onClick={() => setInlineAction(inlineAction === "contact" ? null : "contact")}
+                onClick={() =>
+                  setInlineAction(inlineAction === "contact" ? null : "contact")
+                }
               >
                 Contactar candidato
               </Button>
@@ -154,7 +153,11 @@ export function CandidateDetailPanel({
                 variant="outline"
                 className="h-auto min-h-10 w-full border-accent whitespace-normal text-accent hover:bg-interaction hover:text-accent"
                 aria-expanded={inlineAction === "schedule"}
-                onClick={() => setInlineAction(inlineAction === "schedule" ? null : "schedule")}
+                onClick={() =>
+                  setInlineAction(
+                    inlineAction === "schedule" ? null : "schedule",
+                  )
+                }
               >
                 Agendar entrevista
               </Button>
@@ -180,18 +183,26 @@ export function CandidateDetailPanel({
             <div className="rounded-lg border border-border bg-muted/50 p-3 text-sm">
               <p className="font-medium text-foreground">Datos de contacto</p>
               <p className="mt-1 text-muted-foreground">
-                {candidate.name.toLowerCase().replace(/\s+/g, ".")}@umss-egresados.bo
+                {candidate.name.toLowerCase().replace(/\s+/g, ".")}
+                @umss-egresados.bo
               </p>
-              <p className="text-muted-foreground" aria-label="Teléfono de demostración">
+              <p
+                className="text-muted-foreground"
+                aria-label="Teléfono de demostración"
+              >
                 {candidate.demoPhone}
               </p>
-              <p className="mt-1 text-xs text-muted-foreground">Datos ficticios: no utilizar para contactar.</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Datos ficticios: no utilizar para contactar.
+              </p>
             </div>
           )}
 
           {inlineAction === "schedule" && !isDiscarded && (
             <div className="flex flex-col gap-2 rounded-lg border border-border bg-muted/50 p-3">
-              <p className="text-sm font-medium text-foreground">Proponer entrevista</p>
+              <p className="text-sm font-medium text-foreground">
+                Proponer entrevista
+              </p>
               <div className="flex gap-2">
                 <DateField
                   value={scheduleDate}

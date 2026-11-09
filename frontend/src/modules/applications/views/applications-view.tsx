@@ -11,7 +11,7 @@ import { ApplicationsStatusTabs } from "../components/applications-status-tabs";
 import { ApplicationsTable } from "../components/applications-table";
 import { ShowWithdrawnSwitch } from "../components/show-withdrawn-switch";
 import { WithdrawApplicationDialog } from "../components/withdraw-application-dialog";
-import { APPLICATION_MESSAGES, VACANCIES_ROUTE, WITHDRAWN_STATUS } from "../constants/application.constants";
+import { APPLICATION_MESSAGES, WITHDRAWN_STATUS } from "../constants/application.constants";
 import { useMyApplications } from "../hooks/use-my-applications";
 import { useWithdrawApplication } from "../hooks/use-withdraw-application";
 import type { Application } from "../types/application.types";
@@ -78,7 +78,7 @@ export function ApplicationsView() {
       {data && data.length === 0 && (
         <div className="flex max-w-xl flex-col items-center gap-3 rounded-xl border border-dashed border-border-strong bg-surface px-6 py-10 text-center">
           <p className="text-sm text-text-secondary">{APPLICATION_MESSAGES.emptyTitle}</p>
-          <Link href={VACANCIES_ROUTE} className={buttonVariants({ size: "lg" })}>
+          <Link href={"/vacancies"} className={buttonVariants({ size: "lg" })}>
             {APPLICATION_MESSAGES.exploreVacancies}
           </Link>
         </div>

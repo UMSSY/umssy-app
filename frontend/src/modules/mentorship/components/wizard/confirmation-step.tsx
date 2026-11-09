@@ -1,3 +1,6 @@
+"use client";
+import type { ConfirmationStepProps } from "../../types/confirmation-step-props.types";
+
 import { useState } from "react";
 import { ActivationConfirmDialog } from "./activation-confirm-dialog";
 import { Button } from "@/components/ui/button";
@@ -8,19 +11,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import type { OrientationTypeResponse } from "../../types/orientation-type-response.types";
-import type { TechnicalAreaResponse } from "../../types/technical-area-response.types";
-
-type ConfirmationStepProps = {
-  wantsToParticipate: boolean;
-  selectedTechnicalAreas: TechnicalAreaResponse[];
-  selectedOrientationTypes: OrientationTypeResponse[];
-  isActivating: boolean;
-  activationError: string | null;
-  onEditTechnicalAreas: () => void;
-  onEditOrientationTypes: () => void;
-  onActivate: () => void | Promise<void>;
-};
 
 export function ConfirmationStep({
   wantsToParticipate,

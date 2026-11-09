@@ -1,3 +1,4 @@
+import { MAX_FILE_UPLOAD_SIZE_BYTES } from '../../../common/constants/file-upload.constants.js';
 import {
   Controller,
   Delete,
@@ -20,10 +21,7 @@ import { CurrentUserId } from '../../../common/decorators/current-user-id.decora
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { ResponseInterceptor } from '../../../common/interceptors/response.interceptor.js';
 import type { MulterFile } from '../../../common/types/multer-file.type.js';
-import {
-  CERTIFICATION_DOCUMENT_FIELD_NAME,
-  CERTIFICATION_DOCUMENT_UPLOAD_LIMIT_BYTES,
-} from '../constants/certification-document.constants.js';
+import { CERTIFICATION_DOCUMENT_FIELD_NAME } from '../constants/certification-document.constants.js';
 import { CertificationDocumentsService } from '../services/certification-documents.service.js';
 import type { CertificationResponse } from '../../certifications/types/certification-response.type.js';
 
@@ -42,7 +40,7 @@ export class CertificationDocumentsController {
   @UseInterceptors(
     FileInterceptor(CERTIFICATION_DOCUMENT_FIELD_NAME, {
       limits: {
-        fileSize: CERTIFICATION_DOCUMENT_UPLOAD_LIMIT_BYTES,
+        fileSize: MAX_FILE_UPLOAD_SIZE_BYTES,
         files: 1,
       },
     }),

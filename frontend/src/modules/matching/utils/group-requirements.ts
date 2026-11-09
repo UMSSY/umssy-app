@@ -1,8 +1,6 @@
 import { REQUIREMENT_GROUP_ORDER } from "../constants/requirement-display.constants";
-import type {
-  CategorizedJobRequirement,
-  RequirementGroup,
-} from "../types/requirement-category.types";
+import type { CategorizedJobRequirement } from "../types/categorized-job-requirement.types";
+import type { RequirementGroup } from "../types/requirement-group.types";
 
 function hasKnownCategory({ category }: CategorizedJobRequirement): boolean {
   return category !== undefined && REQUIREMENT_GROUP_ORDER.includes(category);

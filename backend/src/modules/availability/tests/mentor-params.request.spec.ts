@@ -10,12 +10,14 @@ describe('mentorParamsSchema', () => {
 
   it('rechaza un id que no es UUID', () => {
     const result = mentorParamsSchema.safeParse({ id: 'mentor-1' });
-    expect(result.success ? [] : result.error.issues.map((issue) => issue.message)).toEqual([
-      'El identificador del mentor no es válido',
-    ]);
+    expect(
+      result.success ? [] : result.error.issues.map((issue) => issue.message),
+    ).toEqual(['El identificador del mentor no es válido']);
   });
 
   it('rechaza parámetros desconocidos', () => {
-    expect(mentorParamsSchema.safeParse({ id: MENTOR_ID, extra: 'x' }).success).toBe(false);
+    expect(
+      mentorParamsSchema.safeParse({ id: MENTOR_ID, extra: 'x' }).success,
+    ).toBe(false);
   });
 });

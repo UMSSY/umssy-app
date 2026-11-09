@@ -2,8 +2,6 @@ import type { ApplicationStatus } from "../types/application.types";
 import type { ApplicationSortKey } from "../types/application-sort-key.types";
 import type { ApplicationStatusFilter } from "../types/application-status-filter.types";
 
-export const APPLICATIONS_ENDPOINT = "/applications/me";
-
 export function getWithdrawApplicationEndpoint(applicationId: string): string {
   return `/applications/${applicationId}/withdraw`;
 }
@@ -11,8 +9,6 @@ export function getWithdrawApplicationEndpoint(applicationId: string): string {
 export const APPLICATION_QUERY_KEYS = {
   mine: ["applications", "mine"] as const,
 };
-
-export const VACANCIES_ROUTE = "/vacancies";
 
 export const WITHDRAWABLE_STATUSES: readonly ApplicationStatus[] = ["En revisión", "Entrevista"];
 

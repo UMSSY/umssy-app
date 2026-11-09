@@ -46,9 +46,10 @@ export class MentorExitRepository {
         UPDATE user_roles ur SET deleted_at = clock_timestamp()
         FROM roles r WHERE r.id = ur.role_id AND r.name = 'mentor'
           AND ur.user_id = ${userId}::uuid AND ur.deleted_at IS NULL`;
-      await tx.$executeRaw`
-        UPDATE mentor_participation_requests SET status = 'ENDED'
-        WHERE user_id = ${userId}::uuid AND status = 'ACTIVE'`;
+      await tx.mentorParticipationRequest.updateMany({
+        where: { userId, status: 'ACTIVE' },
+        data: { status: 'ENDED' },
+      });
       await tx.user.update({
         where: { id: userId },
         data: { isAvailableForMentoring: false },

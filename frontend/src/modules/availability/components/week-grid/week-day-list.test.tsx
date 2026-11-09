@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, fireEvent, cleanup } from "@testing-library/react";
 import { WeekDayList } from "./week-day-list";
-import { EMPTY_DAY_LABEL } from "../../constants/week-grid.constants";
+
 import type { AvailabilityBlock } from "../../types/availability-block.types";
 
 const DAY_DATES = [
@@ -72,7 +72,7 @@ describe("WeekDayList", () => {
       />
     );
 
-    expect(screen.getAllByText(EMPTY_DAY_LABEL)).toHaveLength(6);
+    expect(screen.getAllByText("Sin bloques")).toHaveLength(6);
   });
 
   it("solo permite clic en los bloques libres según la variante", () => {

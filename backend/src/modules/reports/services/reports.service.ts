@@ -1,14 +1,15 @@
+import {
+  REPORT_USER_CSV_HEADERS,
+  USER_TYPE_LABELS,
+} from '../constants/report-user-csv.constants.js';
 import { Injectable } from '@nestjs/common';
 import type { PaginatedResult } from '../../../common/types/api-response.types.js';
 import { buildCsv } from '../../../common/utils/csv.js';
 import { buildExportFileName } from '../../../common/utils/file-name.js';
 import { paginate } from '../../../common/utils/pagination.js';
 import {
-  REGISTERED_USERS_CSV_HEADERS,
-  REJECTED_USERS_CSV_HEADERS,
   toRegisteredUserCsvRow,
   toRejectedUserCsvRow,
-  USER_TYPE_LABELS,
 } from '../mappers/report-user-csv.mapper.js';
 import {
   toRegisteredUserResponse,
@@ -93,7 +94,7 @@ export class ReportsService {
         filters.period ?? ALL_PERIODS_FILE_NAME_SUFFIX,
         CSV_EXTENSION,
       ),
-      content: buildCsv(REGISTERED_USERS_CSV_HEADERS, rows),
+      content: buildCsv(REPORT_USER_CSV_HEADERS, rows),
     };
   }
 
@@ -120,7 +121,7 @@ export class ReportsService {
         filters.period ?? todayIsoDate(),
         CSV_EXTENSION,
       ),
-      content: buildCsv(REJECTED_USERS_CSV_HEADERS, rows),
+      content: buildCsv(REPORT_USER_CSV_HEADERS, rows),
     };
   }
 

@@ -30,7 +30,10 @@ function issues(overrides: Record<string, unknown>) {
   const result = parse(overrides);
   return result.success
     ? []
-    : result.error.issues.map(({ path, message }) => ({ path: path.join('.'), message }));
+    : result.error.issues.map(({ path, message }) => ({
+        path: path.join('.'),
+        message,
+      }));
 }
 
 describe('createSurveySchema', () => {
@@ -42,7 +45,10 @@ describe('createSurveySchema', () => {
   });
 
   it('acepta un borrador que solo tiene título', () => {
-    const result = createSurveySchema.safeParse({ title: 'Borrador inicial', status: 'draft' });
+    const result = createSurveySchema.safeParse({
+      title: 'Borrador inicial',
+      status: 'draft',
+    });
 
     expect(result.success).toBe(true);
     expect(result.data?.title).toBe('Borrador inicial');
@@ -71,7 +77,9 @@ describe('createSurveySchema', () => {
   it('recorta los espacios del título y de las opciones', () => {
     const result = parse({
       title: '   Encuesta 2026   ',
-      questions: [{ ...VALID_QUESTION, options: [{ label: '  Sí ' }, { label: 'No' }] }],
+      questions: [
+        { ...VALID_QUESTION, options: [{ label: '  Sí ' }, { label: 'No' }] },
+      ],
     });
 
     expect(result.data?.title).toBe('Encuesta 2026');
@@ -124,9 +132,12 @@ describe('createSurveySchema', () => {
     expect(result.data?.careerId).toBe('all');
   });
 
-  it.each(['all', 'graduates', 'students', 'mentors'])('acepta el público objetivo %s', (targetAudience) => {
-    expect(parse({ targetAudience }).success).toBe(true);
-  });
+  it.each(['all', 'graduates', 'students', 'mentors'])(
+    'acepta el público objetivo %s',
+    (targetAudience) => {
+      expect(parse({ targetAudience }).success).toBe(true);
+    },
+  );
 
   it('rechaza un público objetivo desconocido', () => {
     expect(issues({ targetAudience: 'empresas' })).toContainEqual({
@@ -147,12 +158,15 @@ describe('createSurveySchema', () => {
     expect(parse({ academicPeriod }).success).toBe(true);
   });
 
-  it.each(['II-2026', '2-2026', '26', 'todas', '20266'])('rechaza la gestión %s', (academicPeriod) => {
-    expect(issues({ academicPeriod })).toContainEqual({
-      path: 'academicPeriod',
-      message: MESSAGES.INVALID_ACADEMIC_PERIOD,
-    });
-  });
+  it.each(['II-2026', '2-2026', '26', 'todas', '20266'])(
+    'rechaza la gestión %s',
+    (academicPeriod) => {
+      expect(issues({ academicPeriod })).toContainEqual({
+        path: 'academicPeriod',
+        message: MESSAGES.INVALID_ACADEMIC_PERIOD,
+      });
+    },
+  );
 
   it('rechaza fechas que no están en formato ISO', () => {
     expect(issues({ opensAt: '03/11/2026' })).toContainEqual({
@@ -187,7 +201,12 @@ describe('createSurveySchema', () => {
   });
 
   it('exige el enunciado de cada pregunta al publicar con la ruta exacta', () => {
-    const questions = [VALID_QUESTION, VALID_QUESTION, VALID_QUESTION, { ...VALID_QUESTION, statement: '  ' }];
+    const questions = [
+      VALID_QUESTION,
+      VALID_QUESTION,
+      VALID_QUESTION,
+      { ...VALID_QUESTION, statement: '  ' },
+    ];
 
     expect(issues({ questions })).toContainEqual({
       path: 'questions.3.statement',
@@ -205,7 +224,9 @@ describe('createSurveySchema', () => {
   });
 
   it('rechaza opciones repetidas sin distinguir mayúsculas ni espacios', () => {
-    const questions = [{ ...VALID_QUESTION, options: [{ label: 'Sí' }, { label: '  sí ' }] }];
+    const questions = [
+      { ...VALID_QUESTION, options: [{ label: 'Sí' }, { label: '  sí ' }] },
+    ];
 
     expect(issues({ questions })).toContainEqual({
       path: 'questions.0.options',
@@ -217,7 +238,13 @@ describe('createSurveySchema', () => {
     const result = createSurveySchema.safeParse({
       title: 'Borrador con preguntas',
       status: 'draft',
-      questions: [{ ...VALID_QUESTION, statement: '', options: [{ label: 'Sí' }, { label: 'sí' }] }],
+      questions: [
+        {
+          ...VALID_QUESTION,
+          statement: '',
+          options: [{ label: 'Sí' }, { label: 'sí' }],
+        },
+      ],
     });
 
     expect(result.success).toBe(true);
@@ -225,19 +252,28 @@ describe('createSurveySchema', () => {
 
   it('rechaza enunciados de más de 250 caracteres y opciones de más de 100', () => {
     const questions = [
-      { ...VALID_QUESTION, statement: 'a'.repeat(251), options: [{ label: 'b'.repeat(101) }, { label: 'c' }] },
+      {
+        ...VALID_QUESTION,
+        statement: 'a'.repeat(251),
+        options: [{ label: 'b'.repeat(101) }, { label: 'c' }],
+      },
     ];
 
     expect(issues({ questions })).toEqual(
       expect.arrayContaining([
         { path: 'questions.0.statement', message: MESSAGES.STATEMENT_TOO_LONG },
-        { path: 'questions.0.options.0.label', message: MESSAGES.OPTION_TOO_LONG },
+        {
+          path: 'questions.0.options.0.label',
+          message: MESSAGES.OPTION_TOO_LONG,
+        },
       ]),
     );
   });
 
   it('rechaza opciones vacías', () => {
-    const questions = [{ ...VALID_QUESTION, options: [{ label: ' ' }, { label: 'No' }] }];
+    const questions = [
+      { ...VALID_QUESTION, options: [{ label: ' ' }, { label: 'No' }] },
+    ];
 
     expect(issues({ questions })).toContainEqual({
       path: 'questions.0.options.0.label',

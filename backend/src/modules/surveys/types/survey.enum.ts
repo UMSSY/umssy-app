@@ -2,7 +2,11 @@ export const SURVEY_STATUSES = ['draft', 'published'] as const;
 
 export type SurveyStatusValue = (typeof SURVEY_STATUSES)[number];
 
-export const SURVEY_DISPLAY_STATUSES = ['draft', 'published', 'closed'] as const;
+export const SURVEY_DISPLAY_STATUSES = [
+  'draft',
+  'published',
+  'closed',
+] as const;
 
 export type SurveyDisplayStatusValue = (typeof SURVEY_DISPLAY_STATUSES)[number];
 
@@ -21,7 +25,8 @@ export const SURVEY_TARGET_AUDIENCES = [
   'mentors',
 ] as const;
 
-export type SurveyTargetAudienceValue = (typeof SURVEY_TARGET_AUDIENCES)[number];
+export type SurveyTargetAudienceValue =
+  (typeof SURVEY_TARGET_AUDIENCES)[number];
 
 export const SurveyStatus = {
   DRAFT: 'draft',

@@ -1,11 +1,7 @@
+import type { GapBreakdownListProps } from "../types/gap-breakdown-list-props.types";
 import { cn } from "@/lib/utils";
-import type { AffinityAxis, AxisScores } from "../types/matching-types";
-import { AXIS_MAX_SCORE } from "../data/matching.data";
 
-interface GapBreakdownListProps {
-  axes: AffinityAxis[];
-  gaps: AxisScores;
-}
+import { AXIS_MAX_SCORE } from "../data/matching.data";
 
 function formatDelta(value: number) {
   const sign = value > 0 ? "+" : "";
@@ -17,7 +13,8 @@ export function GapBreakdownList({ axes, gaps }: GapBreakdownListProps) {
     <div>
       <h3 className="text-sm font-semibold text-foreground">Brecha por área</h3>
       <p className="mt-0.5 text-xs text-muted-foreground">
-        Candidato frente al perfil objetivo de la vacante (escala 0-{AXIS_MAX_SCORE}).
+        Candidato frente al perfil objetivo de la vacante (escala 0-
+        {AXIS_MAX_SCORE}).
       </p>
 
       <ul className="mt-3 flex flex-col gap-2">
@@ -25,20 +22,30 @@ export function GapBreakdownList({ axes, gaps }: GapBreakdownListProps) {
           const delta = gaps[axis.id];
           const isGap = delta < 0;
           return (
-            <li key={axis.id} className="grid grid-cols-[minmax(0,8.5rem)_minmax(0,1fr)_3rem] items-center gap-3 text-sm">
+            <li
+              key={axis.id}
+              className="grid grid-cols-[minmax(0,8.5rem)_minmax(0,1fr)_3rem] items-center gap-3 text-sm"
+            >
               <span className="min-w-0 text-foreground">{axis.label}</span>
               <div className="min-w-0">
                 <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
                   <div
-                    className={cn("h-full rounded-full", isGap ? "bg-ink-soft/50" : "border border-notice-border bg-gold")}
-                    style={{ width: `${Math.min(100, (Math.abs(delta) / AXIS_MAX_SCORE) * 100 * 2.5)}%` }}
+                    className={cn(
+                      "h-full rounded-full",
+                      isGap
+                        ? "bg-ink-soft/50"
+                        : "border border-notice-border bg-gold",
+                    )}
+                    style={{
+                      width: `${Math.min(100, (Math.abs(delta) / AXIS_MAX_SCORE) * 100 * 2.5)}%`,
+                    }}
                   />
                 </div>
               </div>
               <span
                 className={cn(
                   "text-right font-medium tabular-nums",
-                  isGap ? "text-ink-soft" : "font-semibold text-ink"
+                  isGap ? "text-ink-soft" : "font-semibold text-ink",
                 )}
               >
                 {formatDelta(delta)}

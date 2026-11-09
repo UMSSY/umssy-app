@@ -1,3 +1,4 @@
+import "@/shared/testing/indexed-db.mock";
 import { act, cleanup, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderHookWithQuery } from "@/shared/testing/render-hook-with-query";
@@ -19,8 +20,8 @@ const registration: RegistrationResponse = {
   cancelledAt: null,
 };
 
-beforeEach(() => {
-  saveAccessToken("token-a");
+beforeEach(async () => {
+  await saveAccessToken("token-a");
 });
 afterEach(() => {
   cleanup();
@@ -111,8 +112,8 @@ describe("useRegistrationActions", () => {
       result.current.register();
     });
     await waitFor(() => expect(registrationsService.create).toHaveBeenCalled());
-    act(() => {
-      saveAccessToken("token-b");
+    await act(async () => {
+      await saveAccessToken("token-b");
     });
     await act(async () => {
       resolve(registration);

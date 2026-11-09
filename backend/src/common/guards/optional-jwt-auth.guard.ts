@@ -1,4 +1,3 @@
-
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { BEARER_PREFIX } from '../constants/auth.constants.js';
 import type { AuthenticatedRequest } from '../types/authenticated-request.types.js';

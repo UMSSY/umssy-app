@@ -1,20 +1,9 @@
+import type { MentorDirectoryParams } from "../types/mentor-directory-params.types";
 
 import { apiClient } from "@/shared/services/api-client";
 import type { ApiResponse } from "@/shared/types/api-response.types";
-import type {
-  DirectoryPage,
-  MentorSort,
-} from "../types/mentor-directory.types";
+import type { DirectoryPage } from "../types/mentor-directory.types";
 import { resolveMentorPhotoUrl } from "../utils/resolve-mentor-photo-url";
-
-export interface MentorDirectoryParams {
-  page: number;
-  search: string;
-  area: string;
-  orientation?: string;
-  available: boolean;
-  sort: MentorSort;
-}
 
 export async function getMentorDirectory(
   params: MentorDirectoryParams,

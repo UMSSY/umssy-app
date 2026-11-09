@@ -2,14 +2,24 @@ import * as bcrypt from 'bcrypt';
 import { Logger } from '@nestjs/common';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Prisma } from '../../../prisma/client.js';
-import { OTP_DIGITS, OTP_MAX_ATTEMPTS, OTP_TTL_MINUTES } from '../constants/otp.constants.js';
+import {
+  OTP_DIGITS,
+  OTP_MAX_ATTEMPTS,
+  OTP_TTL_MINUTES,
+} from '../constants/otp.constants.js';
 import { AccessRequestsController } from '../controllers/access-requests.controller.js';
-import { AccessRequestNotFoundException, RequestNotInReviewException } from '../exceptions/index.js';
+import {
+  AccessRequestNotFoundException,
+  RequestNotInReviewException,
+} from '../exceptions/index.js';
 import { ConsoleMailSender } from '../mail/console-mail-sender.js';
 import { AccessRequestsRepository } from '../repositories/access-requests.repository.js';
 import { ActivationOtpRepository } from '../repositories/activation-otp.repository.js';
 import { AccessRequestsService } from '../services/access-requests.service.js';
-import { ActivationOtpService, generateOtpCode } from '../services/activation-otp.service.js';
+import {
+  ActivationOtpService,
+  generateOtpCode,
+} from '../services/activation-otp.service.js';
 
 describe('generateOtpCode', () => {
   it('genera siempre 6 dígitos numéricos, con ceros a la izquierda', () => {
@@ -30,8 +40,15 @@ describe('ActivationOtpService', () => {
       invalidateOthers: vi.fn().mockResolvedValue(undefined),
       remove: vi.fn().mockResolvedValue(undefined),
     };
-    const mail = { sendActivationCode: vi.fn().mockResolvedValue(undefined), sendRejection: vi.fn() };
-    return { repository, mail, service: new ActivationOtpService(repository as any, mail as any) };
+    const mail = {
+      sendActivationCode: vi.fn().mockResolvedValue(undefined),
+      sendRejection: vi.fn(),
+    };
+    return {
+      repository,
+      mail,
+      service: new ActivationOtpService(repository as any, mail as any),
+    };
   };
 
   afterEach(() => vi.restoreAllMocks());
@@ -39,7 +56,9 @@ describe('ActivationOtpService', () => {
   it('guarda solo el hash bcrypt con 10 minutos de vigencia y envía el código en texto al correo', async () => {
     const { repository, mail, service } = build();
 
-    await expect(service.issueFor('req-1', 'ana@umss.test', NOW)).resolves.toBe(true);
+    await expect(service.issueFor('req-1', 'ana@umss.test', NOW)).resolves.toBe(
+      true,
+    );
 
     const stored = repository.create.mock.calls[0][0];
     const [to, code, expiresAt] = mail.sendActivationCode.mock.calls[0];
@@ -56,15 +75,21 @@ describe('ActivationOtpService', () => {
   it('usa la fecha actual por defecto', async () => {
     const { repository, service } = build();
     await service.issueFor('req-1', 'ana@umss.test');
-    expect(repository.create.mock.calls[0][0].expiresAt.getTime()).toBeGreaterThan(Date.now());
+    expect(
+      repository.create.mock.calls[0][0].expiresAt.getTime(),
+    ).toBeGreaterThan(Date.now());
   });
 
   it('si el envío falla registra el error y devuelve false sin lanzar', async () => {
     const { mail, service } = build();
-    const logError = vi.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
+    const logError = vi
+      .spyOn(Logger.prototype, 'error')
+      .mockImplementation(() => undefined);
     mail.sendActivationCode.mockRejectedValue(new Error('smtp caído'));
 
-    await expect(service.issueFor('req-1', 'ana@umss.test', NOW)).resolves.toBe(false);
+    await expect(service.issueFor('req-1', 'ana@umss.test', NOW)).resolves.toBe(
+      false,
+    );
     expect(logError).toHaveBeenCalledOnce();
     expect(String(logError.mock.calls[0][0])).not.toMatch(/\d{6}/);
   });
@@ -74,16 +99,22 @@ describe('ActivationOtpService', () => {
     vi.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
     repository.create.mockRejectedValue('fallo de base');
 
-    await expect(service.issueFor('req-1', 'ana@umss.test', NOW)).resolves.toBe(false);
+    await expect(service.issueFor('req-1', 'ana@umss.test', NOW)).resolves.toBe(
+      false,
+    );
     expect(mail.sendActivationCode).not.toHaveBeenCalled();
   });
 
-    it('invalida los códigos anteriores de la solicitud solo después de enviar el nuevo', async () => {
+  it('invalida los códigos anteriores de la solicitud solo después de enviar el nuevo', async () => {
     const { repository, mail, service } = build();
 
     await service.issueFor('req-1', 'ana@umss.test', NOW);
 
-    expect(repository.invalidateOthers).toHaveBeenCalledWith('req-1', 'otp-1', NOW);
+    expect(repository.invalidateOthers).toHaveBeenCalledWith(
+      'req-1',
+      'otp-1',
+      NOW,
+    );
     expect(mail.sendActivationCode.mock.invocationCallOrder[0]).toBeLessThan(
       repository.invalidateOthers.mock.invocationCallOrder[0],
     );
@@ -94,17 +125,23 @@ describe('ActivationOtpService', () => {
     vi.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
     mail.sendActivationCode.mockRejectedValue(new Error('smtp caído'));
 
-    await expect(service.issueFor('req-1', 'ana@umss.test', NOW)).resolves.toBe(false);
+    await expect(service.issueFor('req-1', 'ana@umss.test', NOW)).resolves.toBe(
+      false,
+    );
     expect(repository.remove).toHaveBeenCalledWith('otp-1');
     expect(repository.invalidateOthers).not.toHaveBeenCalled();
   });
 
   it('si no logra invalidar los anteriores igual devuelve true porque el código nuevo ya salió', async () => {
     const { repository, service } = build();
-    const warn = vi.spyOn(Logger.prototype, 'warn').mockImplementation(() => undefined);
+    const warn = vi
+      .spyOn(Logger.prototype, 'warn')
+      .mockImplementation(() => undefined);
     repository.invalidateOthers.mockRejectedValue(new Error('base caída'));
 
-    await expect(service.issueFor('req-1', 'ana@umss.test', NOW)).resolves.toBe(true);
+    await expect(service.issueFor('req-1', 'ana@umss.test', NOW)).resolves.toBe(
+      true,
+    );
     expect(repository.remove).not.toHaveBeenCalled();
     expect(warn).toHaveBeenCalledOnce();
   });
@@ -116,19 +153,30 @@ describe('ActivationOtpService', () => {
     mail.sendActivationCode.mockRejectedValue(new Error('smtp caído'));
     repository.remove.mockRejectedValue(new Error('base caída'));
 
-    await expect(service.issueFor('req-1', 'ana@umss.test', NOW)).resolves.toBe(false);
+    await expect(service.issueFor('req-1', 'ana@umss.test', NOW)).resolves.toBe(
+      false,
+    );
   });
 });
 
 describe('ActivationOtpRepository', () => {
   it('crea el registro con el hash y la expiración', async () => {
-    const activationOtp = { create: vi.fn().mockResolvedValue({ id: 'otp-1' }) };
+    const activationOtp = {
+      create: vi.fn().mockResolvedValue({ id: 'otp-1' }),
+    };
     const repository = new ActivationOtpRepository({ activationOtp } as any);
-    const data = { accessRequestId: 'req-1', codeHash: '$2b$hash', expiresAt: new Date() };
+    const data = {
+      accessRequestId: 'req-1',
+      codeHash: '$2b$hash',
+      expiresAt: new Date(),
+    };
 
     await repository.create(data);
 
-    expect(activationOtp.create).toHaveBeenCalledWith({ data, select: { id: true, expiresAt: true } });
+    expect(activationOtp.create).toHaveBeenCalledWith({
+      data,
+      select: { id: true, expiresAt: true },
+    });
   });
 });
 
@@ -140,44 +188,70 @@ describe('ConsoleMailSender', () => {
   });
 
   it('fuera de producción registra el destinatario y el código', async () => {
-    const log = vi.spyOn(Logger.prototype, 'log').mockImplementation(() => undefined);
+    const log = vi
+      .spyOn(Logger.prototype, 'log')
+      .mockImplementation(() => undefined);
     process.env.NODE_ENV = 'development';
 
-    await new ConsoleMailSender().sendActivationCode('ana@umss.test', '123456', new Date('2026-10-06T00:00:00Z'));
+    await new ConsoleMailSender().sendActivationCode(
+      'ana@umss.test',
+      '123456',
+      new Date('2026-10-06T00:00:00Z'),
+    );
 
     expect(String(log.mock.calls[0][0])).toContain('ana@umss.test');
     expect(String(log.mock.calls[0][0])).toContain('123456');
   });
 
   it('en producción no registra el código', async () => {
-    const log = vi.spyOn(Logger.prototype, 'log').mockImplementation(() => undefined);
+    const log = vi
+      .spyOn(Logger.prototype, 'log')
+      .mockImplementation(() => undefined);
     process.env.NODE_ENV = 'production';
 
-    await new ConsoleMailSender().sendActivationCode('ana@umss.test', '123456', new Date());
+    await new ConsoleMailSender().sendActivationCode(
+      'ana@umss.test',
+      '123456',
+      new Date(),
+    );
 
     expect(String(log.mock.calls[0][0])).toContain('ana@umss.test');
     expect(String(log.mock.calls[0][0])).not.toContain('123456');
   });
 
   it('el correo de rechazo registra el destinatario y el motivo', async () => {
-    const log = vi.spyOn(Logger.prototype, 'log').mockImplementation(() => undefined);
-    await new ConsoleMailSender().sendRejection('ana@umss.test', 'Documento ilegible');
+    const log = vi
+      .spyOn(Logger.prototype, 'log')
+      .mockImplementation(() => undefined);
+    await new ConsoleMailSender().sendRejection(
+      'ana@umss.test',
+      'Documento ilegible',
+    );
     expect(String(log.mock.calls[0][0])).toContain('Documento ilegible');
   });
 });
 
 describe('AccessRequestsRepository.setVerdict', () => {
-  const prismaError = (code: string) => new Prisma.PrismaClientKnownRequestError('boom', { code, clientVersion: 'test' });
+  const prismaError = (code: string) =>
+    new Prisma.PrismaClientKnownRequestError('boom', {
+      code,
+      clientVersion: 'test',
+    });
   const build = () => {
     const accessRequest = { update: vi.fn() };
-    return { accessRequest, repository: new AccessRequestsRepository({ accessRequest } as any) };
+    return {
+      accessRequest,
+      repository: new AccessRequestsRepository({ accessRequest } as any),
+    };
   };
 
   it('actualiza de forma condicional por estado in_review y registra quién y cuándo', async () => {
     const { accessRequest, repository } = build();
     accessRequest.update.mockResolvedValue({ id: 'id-1' });
 
-    await expect(repository.setVerdict('id-1', 'admin-1', { status: 'approved' })).resolves.toBe(true);
+    await expect(
+      repository.setVerdict('id-1', 'admin-1', { status: 'approved' }),
+    ).resolves.toBe(true);
 
     const args = accessRequest.update.mock.calls[0][0];
     expect(args.where).toEqual({ id: 'id-1', status: { title: 'in_review' } });
@@ -191,7 +265,10 @@ describe('AccessRequestsRepository.setVerdict', () => {
     const { accessRequest, repository } = build();
     accessRequest.update.mockResolvedValue({ id: 'id-1' });
 
-    await repository.setVerdict('id-1', 'admin-2', { status: 'rejected', rejectionReason: 'Documento ilegible' });
+    await repository.setVerdict('id-1', 'admin-2', {
+      status: 'rejected',
+      rejectionReason: 'Documento ilegible',
+    });
 
     const { data } = accessRequest.update.mock.calls[0][0];
     expect(data).not.toHaveProperty('openedAt');
@@ -203,36 +280,71 @@ describe('AccessRequestsRepository.setVerdict', () => {
     const { accessRequest, repository } = build();
     accessRequest.update.mockResolvedValue({ id: 'id-1' });
 
-    await repository.setVerdict('id-1', 'admin-1', { status: 'rejected', rejectionReason: 'Documento ilegible' });
+    await repository.setVerdict('id-1', 'admin-1', {
+      status: 'rejected',
+      rejectionReason: 'Documento ilegible',
+    });
 
-    expect(accessRequest.update.mock.calls[0][0].data.rejectionReason).toBe('Documento ilegible');
+    expect(accessRequest.update.mock.calls[0][0].data.rejectionReason).toBe(
+      'Documento ilegible',
+    );
   });
 
   it('devuelve false ante P2025 y relanza otros errores', async () => {
     const { accessRequest, repository } = build();
     accessRequest.update.mockRejectedValueOnce(prismaError('P2025'));
-    await expect(repository.setVerdict('id-1', 'a', { status: 'approved' })).resolves.toBe(false);
+    await expect(
+      repository.setVerdict('id-1', 'a', { status: 'approved' }),
+    ).resolves.toBe(false);
 
     const boom = prismaError('P2002');
     accessRequest.update.mockRejectedValueOnce(boom);
-    await expect(repository.setVerdict('id-1', 'a', { status: 'approved' })).rejects.toBe(boom);
+    await expect(
+      repository.setVerdict('id-1', 'a', { status: 'approved' }),
+    ).rejects.toBe(boom);
   });
 });
 
 describe('AccessRequestsService.approve', () => {
-  const row = (status: string) => ({ id: 'id-1', email: 'ana@umss.test', status: { title: status } });
+  const row = (status: string) => ({
+    id: 'id-1',
+    email: 'ana@umss.test',
+    status: { title: status },
+  });
   const build = () => {
-    const repository = { findDetailById: vi.fn(), setVerdict: vi.fn().mockResolvedValue(true) };
+    const repository = {
+      findDetailById: vi.fn(),
+      setVerdict: vi.fn().mockResolvedValue(true),
+    };
     const otp = { issueFor: vi.fn().mockResolvedValue(true) };
-    return { repository, otp, service: new AccessRequestsService(repository as any, {} as any, {} as any, otp as any, {} as any) };
+    return {
+      repository,
+      otp,
+      service: new AccessRequestsService(
+        repository as any,
+        {} as any,
+        {} as any,
+        otp as any,
+        {} as any,
+      ),
+    };
   };
 
   it('una solicitud en revisión pasa a aprobada y emite el código de activación', async () => {
     const { repository, otp, service } = build();
     repository.findDetailById.mockResolvedValue(row('in_review'));
 
-    await expect(service.approve('id-1', 'admin-1')).resolves.toEqual({ id: 'id-1', status: 'approved', activationCodeSent: true });
-    expect(repository.setVerdict).toHaveBeenCalledWith('id-1', 'admin-1', { status: 'approved' }, expect.any(Function));
+    await expect(service.approve('id-1', 'admin-1')).resolves.toEqual({
+      id: 'id-1',
+      status: 'approved',
+      activationCodeSent: true,
+    });
+    expect(repository.setVerdict).toHaveBeenCalledWith(
+      'id-1',
+      'admin-1',
+      { status: 'approved' },
+      expect.any(Function),
+    );
     expect(otp.issueFor).toHaveBeenCalledWith('id-1', 'ana@umss.test');
   });
 
@@ -241,28 +353,38 @@ describe('AccessRequestsService.approve', () => {
     repository.findDetailById.mockResolvedValue(row('in_review'));
     otp.issueFor.mockResolvedValue(false);
 
-    await expect(service.approve('id-1', 'admin-1')).resolves.toMatchObject({ status: 'approved', activationCodeSent: false });
+    await expect(service.approve('id-1', 'admin-1')).resolves.toMatchObject({
+      status: 'approved',
+      activationCodeSent: false,
+    });
   });
 
-  it.each(['pending', 'approved', 'rejected'])('responde 409 si la solicitud está %s', async (status) => {
-    const { repository, otp, service } = build();
-    repository.findDetailById.mockResolvedValue(row(status));
+  it.each(['pending', 'approved', 'rejected'])(
+    'responde 409 si la solicitud está %s',
+    async (status) => {
+      const { repository, otp, service } = build();
+      repository.findDetailById.mockResolvedValue(row(status));
 
-    const error = await service.approve('id-1', 'admin-1').catch((e) => e);
+      const error = await service.approve('id-1', 'admin-1').catch((e) => e);
 
-    expect(error).toBeInstanceOf(RequestNotInReviewException);
-    expect(error.statusCode).toBe(409);
-    expect(error.message).toBe('La solicitud no está en revisión');
-    expect(repository.setVerdict).not.toHaveBeenCalled();
-    expect(otp.issueFor).not.toHaveBeenCalled();
-  });
+      expect(error).toBeInstanceOf(RequestNotInReviewException);
+      expect(error.statusCode).toBe(409);
+      expect(error.message).toBe('La solicitud no está en revisión');
+      expect(repository.setVerdict).not.toHaveBeenCalled();
+      expect(otp.issueFor).not.toHaveBeenCalled();
+    },
+  );
 
   it('responde 404 si no existe o es un borrador', async () => {
     const { repository, service } = build();
     repository.findDetailById.mockResolvedValueOnce(null);
-    await expect(service.approve('x', 'a')).rejects.toBeInstanceOf(AccessRequestNotFoundException);
+    await expect(service.approve('x', 'a')).rejects.toBeInstanceOf(
+      AccessRequestNotFoundException,
+    );
     repository.findDetailById.mockResolvedValueOnce(row('draft'));
-    await expect(service.approve('x', 'a')).rejects.toBeInstanceOf(AccessRequestNotFoundException);
+    await expect(service.approve('x', 'a')).rejects.toBeInstanceOf(
+      AccessRequestNotFoundException,
+    );
   });
 
   it('responde 409 y no emite código si otra persona dictaminó entre la lectura y la actualización', async () => {
@@ -270,7 +392,9 @@ describe('AccessRequestsService.approve', () => {
     repository.findDetailById.mockResolvedValue(row('in_review'));
     repository.setVerdict.mockResolvedValue(false);
 
-    await expect(service.approve('id-1', 'admin-1')).rejects.toBeInstanceOf(RequestNotInReviewException);
+    await expect(service.approve('id-1', 'admin-1')).rejects.toBeInstanceOf(
+      RequestNotInReviewException,
+    );
     expect(otp.issueFor).not.toHaveBeenCalled();
   });
 
@@ -278,7 +402,11 @@ describe('AccessRequestsService.approve', () => {
     const service = { approve: vi.fn().mockResolvedValue({ id: 'id-1' }) };
     const controller = new AccessRequestsController(service as any);
 
-    await controller.approve('id-1', { id: 'admin-1', email: 'a@b.co', roles: ['administrativo'] });
+    await controller.approve('id-1', {
+      id: 'admin-1',
+      email: 'a@b.co',
+      roles: ['administrativo'],
+    });
 
     expect(service.approve).toHaveBeenCalledWith('id-1', 'admin-1');
   });

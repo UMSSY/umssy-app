@@ -1,4 +1,6 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import "@/shared/testing/indexed-db.mock";
+import { clearAccessToken } from "@/shared/services/storage/access-token-storage";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import PublicLayout from "./layout";
 import AppLayout from "../(app)/layout";
@@ -12,7 +14,7 @@ vi.mock("next/navigation", () => ({
 describe("Authentication by route group", () => {
   afterEach(() => {
     cleanup();
-    sessionStorage.clear();
+    clearAccessToken();
     window.history.replaceState({}, "", "/");
     replace.mockReset();
   });
@@ -25,11 +27,11 @@ describe("Authentication by route group", () => {
     expect(replace).not.toHaveBeenCalled();
   });
 
-  it("requires a session when that page is wrapped in the app layout", () => {
+  it("requires a session when that page is wrapped in the app layout", async () => {
     window.history.replaceState({}, "", "/future-page");
     render(<AppLayout><p>Contenido privado</p></AppLayout>);
 
     expect(screen.queryByText("Contenido privado")).toBeNull();
-    expect(replace).toHaveBeenCalledWith("/login?next=%2Ffuture-page");
+    await waitFor(() => expect(replace).toHaveBeenCalledWith("/login?next=%2Ffuture-page"));
   });
 });

@@ -6,7 +6,7 @@ import { LoaderCircle, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
-import { CUSTOM_SKILL_HINT, CUSTOM_SKILL_HINT_ID, SKILL_NAME_MAX_LENGTH, SKILLS_UI_TEXTS } from "../constants/skills.constants";
+import { CUSTOM_SKILL_HINT, SKILL_NAME_MAX_LENGTH, SKILLS_UI_TEXTS } from "../constants/skills.constants";
 import type { SkillsSelectorProps } from "../types/skills-selector-props.types";
 import { getFieldErrorId, getFieldErrorProps } from "@/modules/profile";
 import { formatSkillName } from "../utils/format-skill-name";
@@ -141,7 +141,7 @@ export function SkillsSelector({
                   }}
                   className="h-11"
                   {...getFieldErrorProps("custom-skill", customSkillError)}
-                  aria-describedby={[CUSTOM_SKILL_HINT_ID, customSkillError ? getFieldErrorId("custom-skill") : null]
+                  aria-describedby={["custom-skill-hint", customSkillError ? getFieldErrorId("custom-skill") : null]
                     .filter(Boolean)
                     .join(" ")}
                 />
@@ -155,7 +155,7 @@ export function SkillsSelector({
                   {SKILLS_UI_TEXTS.addButton}
                 </Button>
               </div>
-              <p id={CUSTOM_SKILL_HINT_ID} className="text-sm text-text-secondary">
+              <p id={"custom-skill-hint"} className="text-sm text-text-secondary">
                 {CUSTOM_SKILL_HINT}
               </p>
             </FormField>

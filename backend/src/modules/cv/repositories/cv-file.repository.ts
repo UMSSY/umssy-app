@@ -10,7 +10,11 @@ const cvIdSelect = { id: true } as const;
 export class CvFileRepository implements CvFileStorage {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(userId: string, content: Buffer, fileName?: string): Promise<string> {
+  async create(
+    userId: string,
+    content: Buffer,
+    fileName?: string,
+  ): Promise<string> {
     const cv = await this.prisma.userCvFile.create({
       data: {
         userId,

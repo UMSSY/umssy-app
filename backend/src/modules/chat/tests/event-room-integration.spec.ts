@@ -32,7 +32,9 @@ describe('EventRoomService — Integration Tests', () => {
 
   describe('validación de inscripción', () => {
     it('should throw NotRegisteredForEventException when the registration does not exist', async () => {
-      registrationsService.getPassById.mockRejectedValue(new Error('not found'));
+      registrationsService.getPassById.mockRejectedValue(
+        new Error('not found'),
+      );
 
       await expect(
         service.joinEventRoom('user-1', 'registration-1'),
@@ -40,7 +42,9 @@ describe('EventRoomService — Integration Tests', () => {
     });
 
     it('should throw NotRegisteredForEventException when the registration is cancelled', async () => {
-      registrationsService.getPassById.mockRejectedValue(new Error('not found'));
+      registrationsService.getPassById.mockRejectedValue(
+        new Error('not found'),
+      );
 
       await expect(
         service.joinEventRoom('user-1', 'registration-1'),
@@ -55,9 +59,14 @@ describe('EventRoomService — Integration Tests', () => {
         id: 'conv-group-1',
         createdAt: new Date('2026-11-01T10:00:00Z'),
       });
-      conversationRepository.findParticipantsByConversationId.mockResolvedValue([
-        { userId: 'user-1', user: { firstName: 'Maria', lastName: 'Fernandez' } },
-      ]);
+      conversationRepository.findParticipantsByConversationId.mockResolvedValue(
+        [
+          {
+            userId: 'user-1',
+            user: { firstName: 'Maria', lastName: 'Fernandez' },
+          },
+        ],
+      );
 
       const result = await service.joinEventRoom('user-1', 'registration-1');
 
@@ -83,9 +92,14 @@ describe('EventRoomService — Integration Tests', () => {
         id: 'conv-group-1',
         createdAt: new Date('2026-11-01T10:00:00Z'),
       });
-      conversationRepository.findParticipantsByConversationId.mockResolvedValue([
-        { userId: 'user-1', user: { firstName: 'Maria', lastName: 'Fernandez' } },
-      ]);
+      conversationRepository.findParticipantsByConversationId.mockResolvedValue(
+        [
+          {
+            userId: 'user-1',
+            user: { firstName: 'Maria', lastName: 'Fernandez' },
+          },
+        ],
+      );
 
       const result1 = await service.joinEventRoom('user-1', 'registration-1');
       const result2 = await service.joinEventRoom('user-1', 'registration-1');
@@ -96,16 +110,25 @@ describe('EventRoomService — Integration Tests', () => {
 
     it('should resolve different registrations of the same event to the same room', async () => {
       registrationsService.getPassById
-        .mockResolvedValueOnce({ event: { id: 'event-1', title: 'Taller de React' } })
-        .mockResolvedValueOnce({ event: { id: 'event-1', title: 'Taller de React' } });
+        .mockResolvedValueOnce({
+          event: { id: 'event-1', title: 'Taller de React' },
+        })
+        .mockResolvedValueOnce({
+          event: { id: 'event-1', title: 'Taller de React' },
+        });
       conversationRepository.upsertByEventId.mockResolvedValue('conv-event-1');
       conversationRepository.findById.mockResolvedValue({
         id: 'conv-event-1',
         createdAt: new Date('2026-11-01T10:00:00Z'),
       });
-      conversationRepository.findParticipantsByConversationId.mockResolvedValue([
-        { userId: 'user-1', user: { firstName: 'Maria', lastName: 'Fernandez' } },
-      ]);
+      conversationRepository.findParticipantsByConversationId.mockResolvedValue(
+        [
+          {
+            userId: 'user-1',
+            user: { firstName: 'Maria', lastName: 'Fernandez' },
+          },
+        ],
+      );
 
       const result1 = await service.joinEventRoom('user-1', 'registration-1');
       const result2 = await service.joinEventRoom('user-2', 'registration-2');
@@ -127,8 +150,12 @@ describe('EventRoomService — Integration Tests', () => {
 
     it('should allow the same user in different events', async () => {
       registrationsService.getPassById
-        .mockResolvedValueOnce({ event: { id: 'event-1', title: 'Taller de React' } })
-        .mockResolvedValueOnce({ event: { id: 'event-2', title: 'Taller de Node' } });
+        .mockResolvedValueOnce({
+          event: { id: 'event-1', title: 'Taller de React' },
+        })
+        .mockResolvedValueOnce({
+          event: { id: 'event-2', title: 'Taller de Node' },
+        });
       conversationRepository.upsertByEventId
         .mockResolvedValueOnce('conv-event-1')
         .mockResolvedValueOnce('conv-event-2');
@@ -136,9 +163,14 @@ describe('EventRoomService — Integration Tests', () => {
         id: 'conv-event-1',
         createdAt: new Date('2026-11-01T10:00:00Z'),
       });
-      conversationRepository.findParticipantsByConversationId.mockResolvedValue([
-        { userId: 'user-1', user: { firstName: 'Maria', lastName: 'Fernandez' } },
-      ]);
+      conversationRepository.findParticipantsByConversationId.mockResolvedValue(
+        [
+          {
+            userId: 'user-1',
+            user: { firstName: 'Maria', lastName: 'Fernandez' },
+          },
+        ],
+      );
 
       const result1 = await service.joinEventRoom('user-1', 'registration-1');
       const result2 = await service.joinEventRoom('user-1', 'registration-2');
@@ -153,13 +185,15 @@ describe('EventRoomService — Integration Tests', () => {
         new Error('invalid registration'),
       );
 
-      await expect(
-        service.joinEventRoom('user-1', 'not-uuid'),
-      ).rejects.toThrow(NotRegisteredForEventException);
+      await expect(service.joinEventRoom('user-1', 'not-uuid')).rejects.toThrow(
+        NotRegisteredForEventException,
+      );
     });
 
     it('should reject a user who does not own the registration', async () => {
-      registrationsService.getPassById.mockRejectedValue(new Error('not registered'));
+      registrationsService.getPassById.mockRejectedValue(
+        new Error('not registered'),
+      );
 
       await expect(
         service.joinEventRoom('stranger-1', 'registration-1'),

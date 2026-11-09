@@ -2,7 +2,7 @@
 
 import { useId } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ALL_USER_TYPES_VALUE as ALL_FILTER_VALUE } from "../constants/registered-users.constants";
+
 import type { ReportFilterSelectProps } from "../types/report-filter-select-props.types";
 
 export function ReportFilterSelect<TValue extends string>({
@@ -14,11 +14,11 @@ export function ReportFilterSelect<TValue extends string>({
   onChange,
 }: ReportFilterSelectProps<TValue>) {
   const labelId = useId();
-  const items = allLabel ? [{ value: ALL_FILTER_VALUE, label: allLabel }, ...options] : options;
-  const selectedValue = value ?? (allLabel ? ALL_FILTER_VALUE : null);
+  const items = allLabel ? [{ value: "ALL", label: allLabel }, ...options] : options;
+  const selectedValue = value ?? (allLabel ? "ALL" : null);
 
   const handleValueChange = (selectedValue: string | null) => {
-    onChange(!selectedValue || selectedValue === ALL_FILTER_VALUE ? undefined : (selectedValue as TValue));
+    onChange(!selectedValue || selectedValue === "ALL" ? undefined : (selectedValue as TValue));
   };
 
   return (

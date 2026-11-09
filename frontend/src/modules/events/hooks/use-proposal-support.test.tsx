@@ -1,3 +1,4 @@
+import "@/shared/testing/indexed-db.mock";
 import { act, cleanup, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { InfiniteData } from "@tanstack/react-query";
@@ -60,8 +61,8 @@ function listWith(...pages: EventItem[][]): InfiniteData<EventsListResponse> {
   };
 }
 
-beforeEach(() => {
-  saveAccessToken("token-a");
+beforeEach(async () => {
+  await saveAccessToken("token-a");
 });
 
 afterEach(() => {
@@ -209,7 +210,9 @@ describe("useProposalSupport", () => {
     const invalidate = vi.spyOn(client, "invalidateQueries");
     act(() => { void result.current.support(); });
     await waitFor(() => expect(registrationsService.supportProposal).toHaveBeenCalledTimes(1));
-    act(() => { saveAccessToken("token-b"); });
+    await act(async () => {
+      await saveAccessToken("token-b");
+    });
 
     await act(async () => { resolve(votingResponse); });
 

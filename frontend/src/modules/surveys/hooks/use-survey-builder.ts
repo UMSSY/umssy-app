@@ -1,8 +1,9 @@
 "use client";
 
 import { useReducer } from "react";
-import type { QuestionType } from "../types/survey.types";
-import type { SurveyBuilderState, SurveyFieldName } from "../types/survey-builder.types";
+import type { QuestionType } from "../types/question-type.types";
+import type { SurveyBuilderState } from "../types/survey-builder-state.types";
+import type { SurveyFieldName } from "../types/survey-field-name.types";
 import { createInitialSurveyState, surveyBuilderReducer } from "../utils/survey-builder-reducer";
 
 export function useSurveyBuilder(initialState?: SurveyBuilderState) {

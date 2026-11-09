@@ -1,10 +1,3 @@
-export const PDF_PAGE_WIDTH = 595.28;
-export const PDF_PAGE_HEIGHT = 841.89;
-export const PDF_DEFAULT_FONT_SIZE = 8;
-export const PDF_DEFAULT_TEXT_COLOR = '#000000';
-export const PDF_REGULAR_CHAR_WIDTH_RATIO = 0.52;
-export const PDF_BOLD_CHAR_WIDTH_RATIO = 0.58;
-
 export const SURVEY_PDF_COLORS = {
   navy: '#0F2D59',
   crimson: '#A31D1D',

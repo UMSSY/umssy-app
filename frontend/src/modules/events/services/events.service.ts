@@ -1,3 +1,4 @@
+import { BEARER_PREFIX } from "@/shared/constants/auth.constants";
 import { parseEventItem, parseEventDetail } from '../utils/event-response';
 import { readRecord, readArray, readCount } from '../utils/response-validation';
 import { apiClient } from '@/shared/services/api-client';
@@ -23,7 +24,7 @@ export const eventsService = {
     const response = await apiClient.get<{ data: EventDetail }>(
       `/events/${encodeURIComponent(id)}`,
       {
-        headers: { Authorization: accessToken ? `Bearer ${accessToken}` : '' },
+        headers: { Authorization: accessToken ? `${BEARER_PREFIX}${accessToken}` : '' },
         signal,
         timeout: REQUEST_TIMEOUT_MS,
       },
@@ -44,7 +45,7 @@ export const eventsService = {
       page: number;
       offset: number;
     }>('/events', {
-      headers: { Authorization: accessToken ? `Bearer ${accessToken}` : '' },
+      headers: { Authorization: accessToken ? `${BEARER_PREFIX}${accessToken}` : '' },
       params,
       signal,
       timeout: REQUEST_TIMEOUT_MS,

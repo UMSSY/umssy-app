@@ -19,7 +19,10 @@ const getBoliviaParts = (date: Date) => {
   };
 };
 
-const isoDateTime = z.iso.datetime({ offset: true, error: CREATE_BLOCK_MESSAGES.invalidDate });
+const isoDateTime = z.iso.datetime({
+  offset: true,
+  error: CREATE_BLOCK_MESSAGES.invalidDate,
+});
 
 const blockInstant = isoDateTime.transform((value) => new Date(value));
 
@@ -95,4 +98,3 @@ export const buildBlockTimeSchema = (getNow: () => Date = () => new Date()) =>
         });
       }
     });
-

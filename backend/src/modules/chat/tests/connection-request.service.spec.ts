@@ -59,12 +59,10 @@ describe('ConnectionRequestService', () => {
     repository.findPendingRequest.mockResolvedValue(null);
     repository.findAcceptedRequest.mockResolvedValue(null);
 
-    repository.findStatusByTitle.mockImplementation(
-      async (title: string) => ({
-        id: `${title.toLowerCase()}-status-id`,
-        title,
-      }),
-    );
+    repository.findStatusByTitle.mockImplementation(async (title: string) => ({
+      id: `${title.toLowerCase()}-status-id`,
+      title,
+    }));
 
     repository.create.mockResolvedValue({
       id: requestId,
@@ -106,9 +104,9 @@ describe('ConnectionRequestService', () => {
   });
 
   it('impide enviarse una solicitud a sí mismo', async () => {
-    await expect(
-      service.send(senderId, senderId),
-    ).rejects.toBeInstanceOf(BadRequestException);
+    await expect(service.send(senderId, senderId)).rejects.toBeInstanceOf(
+      BadRequestException,
+    );
 
     expect(repository.create).not.toHaveBeenCalled();
   });
@@ -116,17 +114,17 @@ describe('ConnectionRequestService', () => {
   it('rechaza destinatarios inexistentes o inactivos', async () => {
     userRepository.findActiveById.mockResolvedValue(null);
 
-    await expect(
-      service.send(senderId, receiverId),
-    ).rejects.toBeInstanceOf(NotFoundException);
+    await expect(service.send(senderId, receiverId)).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
   });
 
   it('impide enviar solicitudes cuando existe un bloqueo', async () => {
     blockRepository.isBlockedBetween.mockResolvedValue(true);
 
-    await expect(
-      service.send(senderId, receiverId),
-    ).rejects.toBeInstanceOf(ConflictException);
+    await expect(service.send(senderId, receiverId)).rejects.toBeInstanceOf(
+      ConflictException,
+    );
 
     expect(repository.create).not.toHaveBeenCalled();
   });
@@ -136,9 +134,9 @@ describe('ConnectionRequestService', () => {
       id: 'existing-request',
     });
 
-    await expect(
-      service.send(senderId, receiverId),
-    ).rejects.toBeInstanceOf(ConflictException);
+    await expect(service.send(senderId, receiverId)).rejects.toBeInstanceOf(
+      ConflictException,
+    );
 
     expect(repository.create).not.toHaveBeenCalled();
   });
@@ -148,9 +146,9 @@ describe('ConnectionRequestService', () => {
       id: 'accepted-request',
     });
 
-    await expect(
-      service.send(senderId, receiverId),
-    ).rejects.toBeInstanceOf(ConflictException);
+    await expect(service.send(senderId, receiverId)).rejects.toBeInstanceOf(
+      ConflictException,
+    );
 
     expect(repository.create).not.toHaveBeenCalled();
   });
@@ -158,9 +156,9 @@ describe('ConnectionRequestService', () => {
   it('reporta cuando no existe el estado PENDING', async () => {
     repository.findStatusByTitle.mockResolvedValue(null);
 
-    await expect(
-      service.send(senderId, receiverId),
-    ).rejects.toBeInstanceOf(InternalServerErrorException);
+    await expect(service.send(senderId, receiverId)).rejects.toBeInstanceOf(
+      InternalServerErrorException,
+    );
   });
 
   it('consulta las solicitudes enviadas por el usuario', async () => {
@@ -186,9 +184,7 @@ describe('ConnectionRequestService', () => {
 
     expect(repository.findById).toHaveBeenCalledWith(requestId);
 
-    expect(repository.findStatusByTitle).toHaveBeenCalledWith(
-      'ACCEPTED',
-    );
+    expect(repository.findStatusByTitle).toHaveBeenCalledWith('ACCEPTED');
 
     expect(repository.updatePendingStatus).toHaveBeenCalledWith(
       requestId,
@@ -206,9 +202,7 @@ describe('ConnectionRequestService', () => {
   it('permite al destinatario rechazar una solicitud pendiente', async () => {
     const result = await service.reject(requestId, receiverId);
 
-    expect(repository.findStatusByTitle).toHaveBeenCalledWith(
-      'REJECTED',
-    );
+    expect(repository.findStatusByTitle).toHaveBeenCalledWith('REJECTED');
 
     expect(repository.updatePendingStatus).toHaveBeenCalledWith(
       requestId,
@@ -224,17 +218,17 @@ describe('ConnectionRequestService', () => {
   });
 
   it('impide al remitente aceptar su propia solicitud enviada', async () => {
-    await expect(
-      service.accept(requestId, senderId),
-    ).rejects.toBeInstanceOf(ForbiddenException);
+    await expect(service.accept(requestId, senderId)).rejects.toBeInstanceOf(
+      ForbiddenException,
+    );
 
     expect(repository.updatePendingStatus).not.toHaveBeenCalled();
   });
 
   it('impide al remitente rechazar su propia solicitud enviada', async () => {
-    await expect(
-      service.reject(requestId, senderId),
-    ).rejects.toBeInstanceOf(ForbiddenException);
+    await expect(service.reject(requestId, senderId)).rejects.toBeInstanceOf(
+      ForbiddenException,
+    );
 
     expect(repository.updatePendingStatus).not.toHaveBeenCalled();
   });
@@ -242,9 +236,9 @@ describe('ConnectionRequestService', () => {
   it('devuelve error cuando la solicitud no existe', async () => {
     repository.findById.mockResolvedValue(null);
 
-    await expect(
-      service.accept(requestId, receiverId),
-    ).rejects.toBeInstanceOf(NotFoundException);
+    await expect(service.accept(requestId, receiverId)).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
 
     expect(repository.updatePendingStatus).not.toHaveBeenCalled();
   });
@@ -257,9 +251,9 @@ describe('ConnectionRequestService', () => {
       status: { title: 'ACCEPTED' },
     });
 
-    await expect(
-      service.accept(requestId, receiverId),
-    ).rejects.toBeInstanceOf(ConflictException);
+    await expect(service.accept(requestId, receiverId)).rejects.toBeInstanceOf(
+      ConflictException,
+    );
 
     expect(repository.updatePendingStatus).not.toHaveBeenCalled();
   });
@@ -272,9 +266,9 @@ describe('ConnectionRequestService', () => {
       status: { title: 'REJECTED' },
     });
 
-    await expect(
-      service.reject(requestId, receiverId),
-    ).rejects.toBeInstanceOf(ConflictException);
+    await expect(service.reject(requestId, receiverId)).rejects.toBeInstanceOf(
+      ConflictException,
+    );
 
     expect(repository.updatePendingStatus).not.toHaveBeenCalled();
   });
@@ -282,17 +276,17 @@ describe('ConnectionRequestService', () => {
   it('reporta cuando no existe el estado ACCEPTED', async () => {
     repository.findStatusByTitle.mockResolvedValue(null);
 
-    await expect(
-      service.accept(requestId, receiverId),
-    ).rejects.toBeInstanceOf(InternalServerErrorException);
+    await expect(service.accept(requestId, receiverId)).rejects.toBeInstanceOf(
+      InternalServerErrorException,
+    );
   });
 
   it('reporta cuando no existe el estado REJECTED', async () => {
     repository.findStatusByTitle.mockResolvedValue(null);
 
-    await expect(
-      service.reject(requestId, receiverId),
-    ).rejects.toBeInstanceOf(InternalServerErrorException);
+    await expect(service.reject(requestId, receiverId)).rejects.toBeInstanceOf(
+      InternalServerErrorException,
+    );
   });
 
   it('impide procesar una solicitud modificada concurrentemente', async () => {
@@ -300,32 +294,32 @@ describe('ConnectionRequestService', () => {
       count: 0,
     });
 
-    await expect(
-      service.accept(requestId, receiverId),
-    ).rejects.toBeInstanceOf(ConflictException);
+    await expect(service.accept(requestId, receiverId)).rejects.toBeInstanceOf(
+      ConflictException,
+    );
   });
 
   it('consulta las conexiones aceptadas del usuario', async () => {
-  const acceptedConnections = [
-    {
-      id: 'accepted-request-1',
-      senderId,
-      receiverId,
-      status: { title: 'ACCEPTED' },
-    },
-    {
-      id: 'accepted-request-2',
-      senderId: receiverId,
-      receiverId: senderId,
-      status: { title: 'ACCEPTED' },
-    },
-  ];
+    const acceptedConnections = [
+      {
+        id: 'accepted-request-1',
+        senderId,
+        receiverId,
+        status: { title: 'ACCEPTED' },
+      },
+      {
+        id: 'accepted-request-2',
+        senderId: receiverId,
+        receiverId: senderId,
+        status: { title: 'ACCEPTED' },
+      },
+    ];
 
-  repository.findAcceptedByUser.mockResolvedValue(acceptedConnections);
+    repository.findAcceptedByUser.mockResolvedValue(acceptedConnections);
 
-  const result = await service.findAccepted(senderId);
+    const result = await service.findAccepted(senderId);
 
-  expect(repository.findAcceptedByUser).toHaveBeenCalledWith(senderId);
-  expect(result).toEqual(acceptedConnections);
-});
+    expect(repository.findAcceptedByUser).toHaveBeenCalledWith(senderId);
+    expect(result).toEqual(acceptedConnections);
+  });
 });

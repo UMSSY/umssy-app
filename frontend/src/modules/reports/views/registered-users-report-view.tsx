@@ -5,16 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { WorkspacePage } from "@/shared/components/layout/workspace-page";
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
-import {
-  CONNECTION_ERROR_MESSAGE,
-  EMAIL_SEARCH_LABEL,
-  REGISTERED_USERS_CONNECTION_TOAST_ID,
-  REGISTERED_USERS_PAGE_SIZE,
-  REGISTERED_USERS_SLOW_TOAST_ID,
-  REPORT_ALERT_DURATION_MS,
-  SEARCH_DEBOUNCE_MS,
-  SLOW_REQUEST_MESSAGE,
-} from "../constants/reports.constants";
+import { CONNECTION_ERROR_MESSAGE, EMAIL_SEARCH_LABEL, REGISTERED_USERS_PAGE_SIZE, REPORT_ALERT_DURATION_MS, SEARCH_DEBOUNCE_MS, SLOW_REQUEST_MESSAGE } from "../constants/reports.constants";
 import { ExportSuccessToast } from "../components/export-success-toast";
 import { RegisteredUsersTable } from "../components/registered-users-table";
 import { ReportActions } from "../components/report-actions";
@@ -43,26 +34,26 @@ export function RegisteredUsersReportView() {
   useEffect(() => {
     if (isSlow) {
       toast.warning(SLOW_REQUEST_MESSAGE, {
-        id: REGISTERED_USERS_SLOW_TOAST_ID,
+        id: "registered-users-slow-request",
         duration: Infinity,
         closeButton: true,
         richColors: true,
       });
     } else {
-      toast.dismiss(REGISTERED_USERS_SLOW_TOAST_ID);
+      toast.dismiss("registered-users-slow-request");
     }
   }, [isSlow]);
 
   useEffect(() => {
     if (hasConnectionError) {
       toast.error(CONNECTION_ERROR_MESSAGE, {
-        id: REGISTERED_USERS_CONNECTION_TOAST_ID,
+        id: "registered-users-connection-error",
         duration: REPORT_ALERT_DURATION_MS,
         closeButton: true,
         richColors: true,
       });
     } else {
-      toast.dismiss(REGISTERED_USERS_CONNECTION_TOAST_ID);
+      toast.dismiss("registered-users-connection-error");
     }
   }, [hasConnectionError]);
 

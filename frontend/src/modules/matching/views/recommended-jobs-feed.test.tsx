@@ -1,7 +1,7 @@
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useRecommendedJobs } from "../hooks/use-recommended-jobs";
-import type { RecommendedJob } from "../types/job-matching.types";
+import type { RecommendedJob } from "../types/recommended-job.types";
 import { RecommendedJobsView } from "./recommended-jobs-view";
 
 vi.mock("../hooks/use-recommended-jobs", () => ({

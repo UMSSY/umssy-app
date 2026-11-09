@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { PersonalDataValues } from "../types/access-request.types";
+import type { PersonalDataValues } from "../types/personal-data-values.types";
 import { buildAccessRequestPayload } from "./build-access-request-payload";
 
 const values: PersonalDataValues = {

@@ -4,8 +4,6 @@ export const CUSTOM_SKILL_ENDPOINT = "/skills/custom";
 
 export const MY_SKILLS_ENDPOINT = "/profile/me/skills";
 
-
-
 export const DETECTED_SKILLS_QUERY_KEY = ["skills", "detected"] as const;
 
 export const SKILLS_ANALYSIS_MUTATION_KEY = ["skills", "analysis"] as const;
@@ -32,8 +30,6 @@ export const SKILL_NAME_ALLOWED_CHARACTERS_REGEX = /^[\p{L}\p{N} +#.\-_/&()]+$/u
 export const SKILL_NAME_LETTER_REGEX = /\p{L}/u;
 
 export const SKILL_NAME_REPEATED_CHARACTER_REGEX = /(.)\1{3,}/iu;
-
-export const CUSTOM_SKILL_HINT_ID = "custom-skill-hint";
 
 export const CUSTOM_SKILL_HINT = `Máximo ${SKILL_NAME_MAX_LENGTH} caracteres.`;
 
