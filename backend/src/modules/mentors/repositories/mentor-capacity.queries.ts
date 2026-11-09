@@ -23,8 +23,13 @@ export async function readMentorCapacity(tx: Prisma.TransactionClient) {
   return mentorCapacity(counts);
 }
 
-export async function readMentorEligibility(tx: Prisma.TransactionClient, userId: string) {
-  const [eligibility] = await tx.$queryRaw<{ eligible: boolean; alreadyMentor: boolean }[]>`
+export async function readMentorEligibility(
+  tx: Prisma.TransactionClient,
+  userId: string,
+) {
+  const [eligibility] = await tx.$queryRaw<
+    { eligible: boolean; alreadyMentor: boolean }[]
+  >`
     SELECT EXISTS (
       SELECT 1 FROM users u WHERE u.id = ${userId}::uuid AND u.is_active = true
         AND EXISTS (SELECT 1 FROM user_roles ur JOIN roles r ON r.id = ur.role_id

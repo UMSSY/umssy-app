@@ -1,13 +1,7 @@
 import { cleanup, render } from "@testing-library/react";
 import { toast } from "sonner";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  CONNECTION_ERROR_MESSAGE,
-  REGISTERED_USERS_CONNECTION_TOAST_ID,
-  REGISTERED_USERS_SLOW_TOAST_ID,
-  REPORT_ALERT_DURATION_MS,
-  SLOW_REQUEST_MESSAGE,
-} from "../constants/reports.constants";
+import { CONNECTION_ERROR_MESSAGE, REPORT_ALERT_DURATION_MS, SLOW_REQUEST_MESSAGE } from "../constants/reports.constants";
 import { useExportRegisteredUsersCsv } from "../hooks/use-export-registered-users-csv";
 import { useRegisteredUsers } from "../hooks/use-registered-users";
 import { RegisteredUsersReportView } from "./registered-users-report-view";
@@ -52,7 +46,7 @@ describe("RegisteredUsersReportView: avisos con Sonner", () => {
 
     expect(toast.warning).toHaveBeenCalledWith(
       SLOW_REQUEST_MESSAGE,
-      expect.objectContaining({ id: REGISTERED_USERS_SLOW_TOAST_ID, closeButton: true, richColors: true }),
+      expect.objectContaining({ id: "registered-users-slow-request", closeButton: true, richColors: true }),
     );
   });
 
@@ -63,7 +57,7 @@ describe("RegisteredUsersReportView: avisos con Sonner", () => {
 
     expect(toast.error).toHaveBeenCalledWith(
       CONNECTION_ERROR_MESSAGE,
-      expect.objectContaining({ id: REGISTERED_USERS_CONNECTION_TOAST_ID, duration: REPORT_ALERT_DURATION_MS }),
+      expect.objectContaining({ id: "registered-users-connection-error", duration: REPORT_ALERT_DURATION_MS }),
     );
   });
 
@@ -74,8 +68,8 @@ describe("RegisteredUsersReportView: avisos con Sonner", () => {
     mockRegisteredUsers({});
     rerender(<RegisteredUsersReportView />);
 
-    expect(toast.dismiss).toHaveBeenCalledWith(REGISTERED_USERS_SLOW_TOAST_ID);
-    expect(toast.dismiss).toHaveBeenCalledWith(REGISTERED_USERS_CONNECTION_TOAST_ID);
+    expect(toast.dismiss).toHaveBeenCalledWith("registered-users-slow-request");
+    expect(toast.dismiss).toHaveBeenCalledWith("registered-users-connection-error");
   });
 
   it("no muestra avisos si la carga va bien", () => {

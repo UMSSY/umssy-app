@@ -2,7 +2,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import { accessRequestService } from "../services/access-request.service";
-import type { RequestStatusResponse } from "../types/access-request.types";
+import type { RequestStatusResponse } from "../types/request-status-response.types";
 
 const FALLBACK_ERROR_MESSAGE =
   "No se pudo consultar la solicitud. Inténtalo de nuevo.";

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { JobOfferNotAvailableException } from '../exceptions/job-offer-not-available.exception.js';
-import { JobMatchRepository } from '../repositories/job-match.repository.js';
+import { JobMatchSourceService } from '../services/job-match-source.service.js';
 import type { JobMatchResponse } from '../types/job-match.types.js';
 import {
   hasPendingRequirements,
@@ -11,7 +11,7 @@ import { VacancyScoringService } from './vacancy-scoring.service.js';
 @Injectable()
 export class JobMatchService {
   constructor(
-    private readonly jobMatchRepository: JobMatchRepository,
+    private readonly jobMatchSource: JobMatchSourceService,
     private readonly vacancyScoring: VacancyScoringService,
   ) {}
 
@@ -19,7 +19,7 @@ export class JobMatchService {
     userId: string,
     jobOfferId: string,
   ): Promise<JobMatchResponse> {
-    const vacancy = await this.jobMatchRepository.findPublishedById(
+    const vacancy = await this.jobMatchSource.findPublishedById(
       jobOfferId,
       new Date(),
     );

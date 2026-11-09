@@ -3,12 +3,8 @@
 import { useState } from "react";
 import { WorkspacePage } from "@/shared/components/layout/workspace-page";
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
-import { REPORT_HISTORY_EMPTY_TYPE_MESSAGE } from "../constants/generated-report.constants";
-import {
-  FILE_NAME_SEARCH_LABEL,
-  REPORT_HISTORY_PAGE_SIZE,
-  SEARCH_DEBOUNCE_MS,
-} from "../constants/reports.constants";
+
+import { REPORT_HISTORY_PAGE_SIZE, SEARCH_DEBOUNCE_MS } from "../constants/reports.constants";
 import { ReportHistoryTable } from "../components/report-history-table";
 import { ReportSearchInput } from "../components/report-search-input";
 import { ReportTableFooter } from "../components/report-table-footer";
@@ -44,14 +40,14 @@ export function ReportHistoryView() {
 
       <div className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-4 min-[560px]:flex-row min-[560px]:items-center">
         <ReportTypeFilter value={reportType} onChange={handleReportTypeChange} />
-        <ReportSearchInput value={searchInput} onChange={handleSearchChange} label={FILE_NAME_SEARCH_LABEL} />
+        <ReportSearchInput value={searchInput} onChange={handleSearchChange} label={"Buscar por nombre del archivo"} />
       </div>
 
       <ReportHistoryTable
         reports={reports}
         isLoading={isLoading}
         errorMessage={errorMessage}
-        emptyMessage={reportType ? REPORT_HISTORY_EMPTY_TYPE_MESSAGE : undefined}
+        emptyMessage={reportType ? "No hay reportes generados de este tipo." : undefined}
         searchTerm={search}
       />
 

@@ -1,43 +1,13 @@
+import type { MentorParticipationRequest } from "../types/mentor-participation-request.types";
+import type { MentorCapacity } from "../types/mentor-capacity.types";
+import type { MentorParticipationPreferences } from "../types/mentor-participation-preferences.types";
+import type { MyMentorParticipation } from "../types/my-mentor-participation.types";
 import {
   clearMentorIntakeIntentions,
   withMentorIntakeKey,
 } from "@/shared/services/mentor-intake-idempotency";
 import { apiClient } from "@/shared/services/api-client";
 import type { ApiResponse } from "@/shared/types/api-response.types";
-
-export type MentorParticipationRequest = {
-  id: string;
-  userId: string;
-  status: string;
-  queuedAt: string;
-  createdAt: string;
-  technicalAreaIds: string[];
-  orientationTypeIds: string[];
-  email?: string;
-  offer?: {
-    id: string;
-    status: string;
-    offeredAt: string;
-    expiresAt: string;
-  } | null;
-};
-
-export type MentorCapacity = {
-  available: number;
-  capacity: number;
-  occupied: number;
-};
-
-export type MentorParticipationPreferences = {
-  technicalAreaIds: string[];
-  orientationTypeIds: string[];
-};
-
-export type MyMentorParticipation = {
-  status: "ACTIVE" | "DEACTIVATED" | "NEVER";
-  areas: { id: string; name: string }[];
-  orientations: { id: string; name: string }[];
-};
 
 const BASE_PATH = "/mentor-participation/requests";
 

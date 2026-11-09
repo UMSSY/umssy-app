@@ -1,3 +1,5 @@
+import "@/shared/testing/indexed-db.mock";
+import "@/modules/job-offers/testing/current-company.mock";
 import { AxiosError } from "axios";
 import { onlineManager, QueryClient } from "@tanstack/react-query";
 import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
@@ -19,9 +21,9 @@ function renderPublishHook() {
 }
 
 describe("usePublishJobOffer", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.stubEnv("NEXT_PUBLIC_DEMO_COMPANY_ID", COMPANY_ID);
-    saveAccessToken(buildSessionToken("empresa"));
+    await saveAccessToken(buildSessionToken("empresa"));
   });
 
   afterEach(() => {
@@ -100,7 +102,7 @@ describe("usePublishJobOffer", () => {
   });
 
   it("no llama al backend si no hay empresa asociada a la sesión", async () => {
-    saveAccessToken(buildSessionToken("titulado"));
+    await saveAccessToken(buildSessionToken("titulado"));
     const { result } = renderPublishHook();
 
     await act(() => result.current.submit(VALID_CONDITIONS));

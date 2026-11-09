@@ -1,5 +1,5 @@
 import { EMPTY_VALUE } from "../../constants/audit-log.constants";
-import type { AuditEventDateProps } from "../../types/audit-log-component-props.types";
+import type { AuditEventDateProps } from "../../types/audit-event-date-props.types";
 import { formatBoliviaDateTime } from "../../utils/format-bolivia-date-time";
 
 export function AuditEventDate({ occurredAt, inline = false }: AuditEventDateProps) {

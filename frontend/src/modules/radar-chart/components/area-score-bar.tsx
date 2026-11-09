@@ -1,7 +1,6 @@
+import { MAX_SCORE } from "@/modules/radar-chart/constants/radar-score.constants";
 import type { AreaScoreBarProps } from "../types/area-detail-components.types";
 import { formatDecimal } from "../utils/format-decimal";
-
-const MAX_SCORE = 10;
 
 function toPercent(value: number): string {
   return `${Math.min(Math.max(value / MAX_SCORE, 0), 1) * 100}%`;

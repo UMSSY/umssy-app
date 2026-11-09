@@ -65,10 +65,10 @@ export class MentorParticipationRepository extends MentorIntakeRepository {
         return { result: 'NOT_ELIGIBLE' as const };
       // Atiende la cola existente y vence ofertas antes de admitir otra solicitud.
       await reconcileMentorOffers(tx);
-      const [existing] = await tx.$queryRaw<MentorParticipationRequest[]>`
-        SELECT ${fields} FROM mentor_participation_requests
-        WHERE user_id = ${userId}::uuid AND status IN ('PENDING', 'OFFERED')
-        ORDER BY queued_at, id LIMIT 1`;
+      const existing = await tx.mentorParticipationRequest.findFirst({
+        where: { userId, status: { in: ['PENDING', 'OFFERED'] } },
+        orderBy: [{ queuedAt: 'asc' }, { id: 'asc' }],
+      });
       if (existing)
         return { result: 'ALREADY_EXISTS' as const, request: existing };
       const [offer] = await tx.$queryRaw<{ exists: boolean }[]>`
@@ -103,8 +103,7 @@ export class MentorParticipationRepository extends MentorIntakeRepository {
   }
 
   findMyRequest(userId: string) {
-    return withMentorCapacityLock(this.prisma, async (tx) => {
-      await reconcileMentorOffers(tx);
+    return this.prisma.$transaction(async (tx) => {
       const request = await tx.mentorParticipationRequest.findFirst({
         where: { userId },
         orderBy: [{ queuedAt: 'desc' }, { id: 'desc' }],
@@ -126,11 +125,9 @@ export class MentorParticipationRepository extends MentorIntakeRepository {
   }
 
   findMyHistory(userId: string) {
-    return this.prisma.$transaction(async (tx) => {
-      await tx.$executeRaw`SET LOCAL TIME ZONE 'UTC'`;
-      return tx.$queryRaw<MentorParticipationRequest[]>`
-        SELECT ${fields} FROM mentor_participation_requests WHERE user_id = ${userId}::uuid
-        ORDER BY queued_at DESC, id DESC`;
+    return this.prisma.mentorParticipationRequest.findMany({
+      where: { userId },
+      orderBy: [{ queuedAt: 'desc' }, { id: 'desc' }],
     });
   }
 
@@ -153,20 +150,22 @@ export class MentorParticipationRepository extends MentorIntakeRepository {
       ) {
         return { result: 'INVALID_PREFERENCES' as const };
       }
-      const [request] = await tx.$queryRaw<MentorParticipationRequest[]>`
-        UPDATE mentor_participation_requests
-        SET technical_area_ids = ARRAY[${Prisma.join(technicalAreaIds)}]::uuid[],
-          orientation_type_ids = ARRAY[${Prisma.join(orientationTypeIds)}]::uuid[]
-        WHERE id = ${pending.id}::uuid RETURNING ${fields}`;
+      const request = await tx.mentorParticipationRequest.update({
+        where: { id: pending.id },
+        data: { technicalAreaIds, orientationTypeIds },
+      });
       return { result: 'UPDATED' as const, request };
     });
   }
 
   cancelRequest(userId: string) {
     return withMentorCapacityLock(this.prisma, async (tx) => {
-      const [request] = await tx.$queryRaw<MentorParticipationRequest[]>`
-        UPDATE mentor_participation_requests SET status = 'CANCELLED'
-        WHERE user_id = ${userId}::uuid AND status = 'PENDING' RETURNING ${fields}`;
+      const [request] = await tx.mentorParticipationRequest.updateManyAndReturn(
+        {
+          where: { userId, status: 'PENDING' },
+          data: { status: 'CANCELLED' },
+        },
+      );
       if (!request) return { result: 'NOT_FOUND' as const };
       return { result: 'CANCELLED' as const, request };
     });

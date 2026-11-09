@@ -1,15 +1,14 @@
 "use client";
 
+import { DOCUMENT_FILE_ACCEPT } from "@/shared/constants/file-upload.constants";
+
 import { useRef, type ChangeEvent } from "react";
 import { Paperclip, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { formatFileSize } from "@/modules/profile";
-import {
-  APPOINTMENT_DOCUMENT_ACCEPT,
-  APPOINTMENT_DOCUMENT_TEXT,
-} from "../../constants/appointment-document.constants";
+import { APPOINTMENT_DOCUMENT_TEXT } from "../../constants/appointment-document.constants";
 import type { AppointmentDocumentFieldProps } from "../../types/appointment-document-field-props.types";
 import { getAppointmentDocumentTypeLabel } from "../../utils/appointment-document.utils";
 
@@ -41,7 +40,7 @@ export function AppointmentDocumentField({
         ref={inputRef}
         id={FIELD_ID}
         type="file"
-        accept={APPOINTMENT_DOCUMENT_ACCEPT}
+        accept={DOCUMENT_FILE_ACCEPT}
         className="hidden"
         disabled={disabled}
         onChange={handleChange}

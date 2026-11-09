@@ -24,7 +24,9 @@ const INSTITUTIONAL_PATTERNS: readonly RegExp[] = [
   .map((phrase) => {
     const words = phrase
       .split(' ')
-      .map((word) => word.replace(/[aeiou]/g, (vowel) => ACCENT_CLASSES[vowel]));
+      .map((word) =>
+        word.replace(/[aeiou]/g, (vowel) => ACCENT_CLASSES[vowel]),
+      );
 
     return new RegExp(
       `(?<![\\p{L}\\p{N}_])${words.join('\\s+')}(?![\\p{L}\\p{N}_])`,
@@ -35,12 +37,54 @@ const INSTITUTIONAL_PATTERNS: readonly RegExp[] = [
 @Injectable()
 export class NlpService {
   private static readonly STOPWORDS = new Set([
-    'a', 'al', 'con', 'de', 'del', 'el', 'en', 'la', 'las', 'los',
-    'para', 'por', 'un', 'una', 'y', 'e', 'o', 'u', 'lo', 'le',
-    'les', 'se', 'su', 'sus', 'que', 'sin', 'sobre', 'como', 'muy',
-    'unas', 'unos', 'es', 'son', 'ser', 'ha', 'han',
-    'the', 'and', 'or', 'of', 'in', 'on', 'to', 'for', 'with',
-    'an', 'is', 'are',
+    'a',
+    'al',
+    'con',
+    'de',
+    'del',
+    'el',
+    'en',
+    'la',
+    'las',
+    'los',
+    'para',
+    'por',
+    'un',
+    'una',
+    'y',
+    'e',
+    'o',
+    'u',
+    'lo',
+    'le',
+    'les',
+    'se',
+    'su',
+    'sus',
+    'que',
+    'sin',
+    'sobre',
+    'como',
+    'muy',
+    'unas',
+    'unos',
+    'es',
+    'son',
+    'ser',
+    'ha',
+    'han',
+    'the',
+    'and',
+    'or',
+    'of',
+    'in',
+    'on',
+    'to',
+    'for',
+    'with',
+    'an',
+    'is',
+    'are',
   ]);
 
   private static readonly TECH_ALIASES = [
@@ -110,9 +154,7 @@ export class NlpService {
     if (!matches) return [];
 
     return matches.filter(
-      (token) =>
-        token.length > 0 &&
-        !NlpService.STOPWORDS.has(token),
+      (token) => token.length > 0 && !NlpService.STOPWORDS.has(token),
     );
   }
 
@@ -127,9 +169,7 @@ export class NlpService {
       ngrams.push(`${tokens[i]}_${tokens[i + 1]}`);
 
       if (i < len - 2) {
-        ngrams.push(
-          `${tokens[i]}_${tokens[i + 1]}_${tokens[i + 2]}`,
-        );
+        ngrams.push(`${tokens[i]}_${tokens[i + 1]}_${tokens[i + 2]}`);
       }
     }
 

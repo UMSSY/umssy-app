@@ -13,24 +13,16 @@ import { InformationStep } from "../components/information-step";
 import { PreviewStep } from "../components/preview-step";
 import { RequirementsStep } from "../components/requirements-step";
 import { VacancyStepper } from "../components/vacancy-stepper";
-import {
-  DISCARD_DIALOG_TEXT,
-  EDIT_DISCARD_DIALOG_TEXT,
-  EDIT_LEAVE_DIALOG_TEXT,
-  EDIT_MESSAGES,
-  LEAVE_DIALOG_TEXT,
-  RECRUITERS_HOME_ROUTE,
-  TOAST_OPTIONS,
-} from "../constants/job-offers.constants";
+import { DISCARD_DIALOG_TEXT, EDIT_DISCARD_DIALOG_TEXT, EDIT_LEAVE_DIALOG_TEXT, EDIT_MESSAGES, LEAVE_DIALOG_TEXT, TOAST_OPTIONS } from "../constants/job-offers.constants";
 import { useJobOfferForm } from "../hooks/use-job-offer-form";
 import { useLeaveGuard } from "../hooks/use-leave-guard";
 import { usePublishJobOffer } from "../hooks/use-publish-job-offer";
 import type { RegisterVacancyViewProps } from "../types/register-vacancy-view-props.types";
-import { getCurrentCompany } from "../utils/get-current-company";
+import { useCurrentCompany } from "../hooks/use-current-company";
 
 export function RegisterVacancyView({ jobOfferId }: RegisterVacancyViewProps) {
   const isEditMode = !!jobOfferId;
-  const company = getCurrentCompany();
+  const company = useCurrentCompany();
   const router = useRouter();
   const discardText = isEditMode ? EDIT_DISCARD_DIALOG_TEXT : DISCARD_DIALOG_TEXT;
   const leaveText = isEditMode ? EDIT_LEAVE_DIALOG_TEXT : LEAVE_DIALOG_TEXT;
@@ -55,7 +47,7 @@ export function RegisterVacancyView({ jobOfferId }: RegisterVacancyViewProps) {
     onSuccess: isEditMode
       ? () => {
           toast.success(EDIT_MESSAGES.success, TOAST_OPTIONS);
-          router.push(RECRUITERS_HOME_ROUTE);
+          router.push("/recruiters");
         }
       : undefined,
   });
@@ -66,7 +58,7 @@ export function RegisterVacancyView({ jobOfferId }: RegisterVacancyViewProps) {
     if (hasUnsavedChanges) {
       setIsDiscardDialogOpen(true);
     } else {
-      router.push(RECRUITERS_HOME_ROUTE);
+      router.push("/recruiters");
     }
   };
 
@@ -74,7 +66,7 @@ export function RegisterVacancyView({ jobOfferId }: RegisterVacancyViewProps) {
     setIsDiscardDialogOpen(false);
     publication.reset();
     reset();
-    router.push(RECRUITERS_HOME_ROUTE);
+    router.push("/recruiters");
   };
 
   const handleFinish = () => {
@@ -95,7 +87,7 @@ export function RegisterVacancyView({ jobOfferId }: RegisterVacancyViewProps) {
     return (
       <main className="mx-auto w-full max-w-7xl space-y-4 py-10" role="alert">
         <p className="text-sm text-ink">{loadError}</p>
-        <Link href={RECRUITERS_HOME_ROUTE} className={buttonVariants({ variant: "outline" })}>
+        <Link href={"/recruiters"} className={buttonVariants({ variant: "outline" })}>
           Volver a mi empresa
         </Link>
       </main>
@@ -110,7 +102,7 @@ export function RegisterVacancyView({ jobOfferId }: RegisterVacancyViewProps) {
           <h2 className="text-lg font-semibold">{conditions.title}</h2>
           <p className="mt-2 text-sm text-text-secondary">{conditions.modality} · {conditions.contractType}</p>
           <div className="mt-6 flex gap-3 border-t border-border pt-5">
-            <Link href={RECRUITERS_HOME_ROUTE} className={buttonVariants()}>Volver a mi empresa</Link>
+            <Link href={"/recruiters"} className={buttonVariants()}>Volver a mi empresa</Link>
             <Button variant="outline" onClick={handleFinish}>Publicar otra vacante</Button>
           </div>
         </section>

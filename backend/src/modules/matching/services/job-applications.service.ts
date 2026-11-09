@@ -1,9 +1,7 @@
+import { UNIQUE_CONSTRAINT_VIOLATION_CODE } from '../../../common/constants/prisma-errors.constants.js';
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '../../../prisma/client.js';
-import {
-  JOB_APPLICATION_STATUS,
-  UNIQUE_VIOLATION_CODE,
-} from '../constants/job-application.constants.js';
+import { JOB_APPLICATION_STATUS } from '../constants/job-application.constants.js';
 import { DuplicateJobApplicationException } from '../exceptions/duplicate-job-application.exception.js';
 import { JobApplicationStatusMissingException } from '../exceptions/job-application-status-missing.exception.js';
 import { JobOfferUnavailableException } from '../exceptions/job-offer-unavailable.exception.js';
@@ -17,7 +15,7 @@ import type {
 function isUniqueViolation(error: unknown): boolean {
   return (
     error instanceof Prisma.PrismaClientKnownRequestError &&
-    error.code === UNIQUE_VIOLATION_CODE
+    error.code === UNIQUE_CONSTRAINT_VIOLATION_CODE
   );
 }
 
@@ -36,8 +34,14 @@ export class JobApplicationsService {
       throw new JobOfferUnavailableException();
     }
 
-    const existing = await this.repository.findByUserAndOffer(userId, jobOfferId);
-    if (existing && existing.status.title !== JOB_APPLICATION_STATUS.WITHDRAWN) {
+    const existing = await this.repository.findByUserAndOffer(
+      userId,
+      jobOfferId,
+    );
+    if (
+      existing &&
+      existing.status.title !== JOB_APPLICATION_STATUS.WITHDRAWN
+    ) {
       throw new DuplicateJobApplicationException();
     }
 
@@ -50,7 +54,11 @@ export class JobApplicationsService {
 
     try {
       if (existing) {
-        const reactivated = await this.repository.reactivate(userId, jobOfferId, status.id);
+        const reactivated = await this.repository.reactivate(
+          userId,
+          jobOfferId,
+          status.id,
+        );
         if (!reactivated) throw new DuplicateJobApplicationException();
         return this.mapper.toResponse(reactivated);
       }

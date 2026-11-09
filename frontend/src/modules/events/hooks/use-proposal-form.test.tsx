@@ -1,3 +1,4 @@
+import "@/shared/testing/indexed-db.mock";
 import { act, cleanup, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createQueryWrapper } from '@/shared/testing/create-query-wrapper';
@@ -10,7 +11,13 @@ vi.mock('@/modules/profile', () => ({ profileService: { getProfile: vi.fn().mock
 vi.mock('@/modules/event-categories', () => ({ useEventCategories: () => ({ categories: [{ id: 'cat', name: 'Tecnología' }], isLoading: false, error: null, retry: vi.fn() }) }));
 vi.mock('../services/proposals.service', () => ({ proposalsService: { create: vi.fn() } }));
 const resultData = { id: 'id', status: 'voting' as const, coverUrl: '/cover.png', supportThreshold: 15, votingDeadline: '2026-11-01T16:00:00Z' };
-beforeEach(() => { vi.useFakeTimers({ toFake: ['Date'] }); vi.setSystemTime(new Date('2026-10-24T12:00:00Z')); vi.clearAllMocks(); saveAccessToken('session'); URL.revokeObjectURL = vi.fn(); });
+beforeEach(async () => {
+  vi.useFakeTimers({ toFake: ['Date'] });
+  vi.setSystemTime(new Date('2026-10-24T12:00:00Z'));
+  vi.clearAllMocks();
+  await saveAccessToken("session");
+  URL.revokeObjectURL = vi.fn();
+});
 afterEach(() => { cleanup(); clearAccessToken(); vi.useRealTimers(); });
 
 async function setup() {

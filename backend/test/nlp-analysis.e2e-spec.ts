@@ -1,4 +1,3 @@
-
 import { randomUUID } from 'node:crypto';
 import type { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
@@ -43,11 +42,11 @@ describeDatabase('NLP: análisis y persistencia con PostgreSQL real', () => {
     app = moduleRef.createNestApplication();
     await app.init();
 
-   const database = app.get(PrismaService);
-prisma = database;
-analysis = app.get(ProfileSkillsAnalysisService);
+    const database = app.get(PrismaService);
+    prisma = database;
+    analysis = app.get(ProfileSkillsAnalysisService);
 
-const [identity] = await database.$queryRaw<Array<{ database: string }>>`
+    const [identity] = await database.$queryRaw<Array<{ database: string }>>`
   SELECT current_database() AS database
 `;
     if (identity?.database !== expectedDatabase) {
@@ -55,7 +54,9 @@ const [identity] = await database.$queryRaw<Array<{ database: string }>>`
       app = undefined;
       prisma = undefined;
       analysis = undefined;
-      throw new Error('NLP E2E detectó una conexión a una base de datos inesperada.');
+      throw new Error(
+        'NLP E2E detectó una conexión a una base de datos inesperada.',
+      );
     }
   }, 30_000);
 

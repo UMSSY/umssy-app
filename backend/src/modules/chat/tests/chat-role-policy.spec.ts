@@ -1,3 +1,4 @@
+import { MessageMapper } from '../mappers/message.mapper.js';
 import { describe, expect, it, vi } from 'vitest';
 
 import { ChatRolePolicyService } from '../services/chat-role-policy.service.js';
@@ -71,7 +72,9 @@ function setup(rolesA: string[], rolesB: string[]) {
   };
 
   const presence = { mapOnlineStatus: vi.fn().mockResolvedValue(new Map()) };
-  const connections = { findAcceptedRequest: vi.fn().mockResolvedValue({ id: 'accepted' }) };
+  const connections = {
+    findAcceptedRequest: vi.fn().mockResolvedValue({ id: 'accepted' }),
+  };
   const blocks = {
     isBlockedBetween: vi.fn().mockResolvedValue(false),
     findBlockedIdsBy: vi.fn().mockResolvedValue(new Set<string>()),
@@ -97,8 +100,9 @@ function setup(rolesA: string[], rolesB: string[]) {
   const mapper = {
     toUploadedFile: vi.fn().mockReturnValue({}),
     toResponse: vi.fn().mockReturnValue({ id: 'attachment-1' }),
-    toMessageResponse: vi.fn().mockImplementation(
-      ({ message, attachmentRecord, isImage }) => ({
+    toMessageResponse: vi
+      .fn()
+      .mockImplementation(({ message, attachmentRecord, isImage }) => ({
         id: message.id,
         conversationId: message.conversationId,
         senderId: message.senderId,
@@ -109,8 +113,7 @@ function setup(rolesA: string[], rolesB: string[]) {
         isAttachment: true,
         attachmentType: isImage ? 'image' : 'file',
         attachment: { id: attachmentRecord.id },
-      }),
-    ),
+      })),
   };
 
   const fileValidation = {
@@ -149,6 +152,7 @@ function setup(rolesA: string[], rolesB: string[]) {
       statuses,
       blocks,
       policy,
+      new MessageMapper(),
     ] as unknown as ConstructorParameters<typeof MessageService>),
   );
 
@@ -317,9 +321,7 @@ describe('HU8 tarea 3: roles permitidos', () => {
       }),
     ).rejects.toBeInstanceOf(UserBlockedException);
 
-    expect(
-      context.conversations.createWithParticipants,
-    ).not.toHaveBeenCalled();
+    expect(context.conversations.createWithParticipants).not.toHaveBeenCalled();
 
     expect(context.messages.create).not.toHaveBeenCalled();
     expect(context.attachments.create).not.toHaveBeenCalled();

@@ -1,4 +1,9 @@
-import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleDestroy,
+  OnModuleInit,
+} from '@nestjs/common';
 import { MentorOffersService } from './mentor-offers.service.js';
 
 @Injectable()
@@ -11,7 +16,9 @@ export class MentorOffersWorker implements OnModuleInit, OnModuleDestroy {
 
   onModuleInit() {
     if (process.env.NODE_ENV === 'test') return;
-    this.timer = setInterval(() => { void this.tick(); }, 15_000);
+    this.timer = setInterval(() => {
+      void this.tick();
+    }, 15_000);
     this.timer.unref();
     void this.tick();
   }
@@ -26,8 +33,10 @@ export class MentorOffersWorker implements OnModuleInit, OnModuleDestroy {
     try {
       await this.offers.reconcile();
     } catch (error) {
-      this.logger.error('No se pudieron vencer y reasignar las ofertas de mentoría',
-        error instanceof Error ? error.stack : String(error));
+      this.logger.error(
+        'No se pudieron vencer y reasignar las ofertas de mentoría',
+        error instanceof Error ? error.stack : String(error),
+      );
     } finally {
       this.running = false;
     }

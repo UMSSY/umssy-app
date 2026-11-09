@@ -10,7 +10,9 @@ describe('FilesModule', () => {
   let moduleRef: TestingModule;
 
   beforeEach(async () => {
-    moduleRef = await Test.createTestingModule({ imports: [FilesModule, PrismaModule] })
+    moduleRef = await Test.createTestingModule({
+      imports: [FilesModule, PrismaModule],
+    })
       .overrideProvider(PrismaService)
       .useValue({})
       .compile();

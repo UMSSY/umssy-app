@@ -1,3 +1,4 @@
+import { JobOfferMatchRepository } from '../repositories/job-offer-match.repository.js';
 import { Injectable } from '@nestjs/common';
 import {
   CompanyNotFoundException,
@@ -30,7 +31,15 @@ export class JobOffersService {
     private readonly jobOffersRepository: JobOffersRepository,
     private readonly jobOfferSkillsService: JobOfferSkillsService,
     private readonly jobOfferMapper: JobOfferMapper,
+    private readonly matchSource: JobOfferMatchRepository,
   ) {}
+
+  findPublishedMatchById(id: string, now: Date) {
+    return this.matchSource.findPublishedById(id, now);
+  }
+  findPublishedMatches(now: Date) {
+    return this.matchSource.findPublished(now);
+  }
 
   async create(
     companyId: string,
@@ -63,7 +72,9 @@ export class JobOffersService {
 
   async listPublished(): Promise<PublishedJobOfferResponse[]> {
     const records = await this.jobOffersRepository.findPublished(new Date());
-    return records.map((record) => this.jobOfferMapper.toPublishedResponse(record));
+    return records.map((record) =>
+      this.jobOfferMapper.toPublishedResponse(record),
+    );
   }
   async listByCompany(
     companyId: string,
@@ -74,7 +85,9 @@ export class JobOffersService {
       companyId,
       filters,
     );
-    const responses = records.map((record) => this.jobOfferMapper.toResponse(record));
+    const responses = records.map((record) =>
+      this.jobOfferMapper.toResponse(record),
+    );
     if (filters.sortBy !== 'applicants') return responses;
 
     const direction = filters.order === 'asc' ? 1 : -1;
@@ -139,7 +152,9 @@ export class JobOffersService {
       throw new JobOfferNotFoundException();
     }
 
-    const statusId = await this.jobOffersRepository.findStatusId(JobOfferStatus.DELETED);
+    const statusId = await this.jobOffersRepository.findStatusId(
+      JobOfferStatus.DELETED,
+    );
     if (!statusId) {
       throw new JobOfferCatalogNotFoundException('estado');
     }
@@ -147,16 +162,29 @@ export class JobOffersService {
     await this.jobOffersRepository.updateStatus(jobOfferId, statusId);
   }
 
-  async reopen(companyId: string, jobOfferId: string): Promise<JobOfferResponse> {
+  async reopen(
+    companyId: string,
+    jobOfferId: string,
+  ): Promise<JobOfferResponse> {
     await this.ensureCompanyExists(companyId);
-    const existing = await this.jobOffersRepository.findByCompanyAndId(companyId, jobOfferId);
+    const existing = await this.jobOffersRepository.findByCompanyAndId(
+      companyId,
+      jobOfferId,
+    );
     if (!existing) throw new JobOfferNotFoundException();
-    if (existing.status.title !== JobOfferStatus.CLOSED) throw new JobOfferNotReopenableException();
+    if (existing.status.title !== JobOfferStatus.CLOSED)
+      throw new JobOfferNotReopenableException();
 
-    const statusId = await this.jobOffersRepository.findStatusId(JobOfferStatus.PUBLISHED);
+    const statusId = await this.jobOffersRepository.findStatusId(
+      JobOfferStatus.PUBLISHED,
+    );
     if (!statusId) throw new JobOfferCatalogNotFoundException('estado');
 
-    const record = await this.jobOffersRepository.reopen(jobOfferId, statusId, new Date());
+    const record = await this.jobOffersRepository.reopen(
+      jobOfferId,
+      statusId,
+      new Date(),
+    );
     return this.jobOfferMapper.toResponse(record);
   }
 
@@ -186,7 +214,9 @@ export class JobOffersService {
   ): Omit<UpdateJobOfferData, 'modalityId' | 'contractTypeId'> {
     return {
       ...this.toBaseFields(request),
-      ...(request.requiredCareers !== undefined && { requiredCareers: request.requiredCareers }),
+      ...(request.requiredCareers !== undefined && {
+        requiredCareers: request.requiredCareers,
+      }),
       ...(request.minExperienceYears !== undefined && {
         minExperienceYears: request.minExperienceYears,
       }),

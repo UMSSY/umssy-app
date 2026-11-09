@@ -1,3 +1,4 @@
+import { DEGREE_CATALOG_FIXTURE } from "@/modules/education/testing/degree-catalog.fixture";
 import { Button as TestButton } from "@/components/ui/button";
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import { useState } from 'react';
@@ -9,9 +10,22 @@ import { EducationDegreeCombobox } from './education-degree-combobox';
 
 function Field({ disabled = false }: { disabled?: boolean }) {
   const [value, setValue] = useState('');
-  return <><label htmlFor="degree">Título o carrera</label><EducationDegreeCombobox id="degree" value={value}
-    degrees={getEducationDegrees('Universidad Mayor de San Simón (UMSS)')} disabled={disabled} onChange={setValue} />
-    <TestButton type="button">Outside</TestButton></>;
+  return (
+    <>
+      <label htmlFor="degree">Título o carrera</label>
+      <EducationDegreeCombobox
+        id="degree"
+        value={value}
+        degrees={getEducationDegrees(
+          "Universidad Mayor de San Simón (UMSS)",
+          DEGREE_CATALOG_FIXTURE,
+        )}
+        disabled={disabled}
+        onChange={setValue}
+      />
+      <TestButton type="button">Outside</TestButton>
+    </>
+  );
 }
 
 describe('EducationDegreeCombobox', () => {

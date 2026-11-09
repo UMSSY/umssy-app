@@ -7,12 +7,14 @@ import { updateBlockSchema } from '../requests/update-block.request.js';
 // mismo dia, etc.) ya estan cubiertas a fondo en create-block.request.spec.ts.
 describe('updateBlockSchema', () => {
   it('rechaza campos de repetición al editar un bloque individual', () => {
-    expect(updateBlockSchema.safeParse({
-      startAt: '2099-10-10T19:00:00Z',
-      endAt: '2099-10-10T20:00:00Z',
-      repeatWeekly: true,
-      repeatUntil: '2099-10-31',
-    }).success).toBe(false);
+    expect(
+      updateBlockSchema.safeParse({
+        startAt: '2099-10-10T19:00:00Z',
+        endAt: '2099-10-10T20:00:00Z',
+        repeatWeekly: true,
+        repeatUntil: '2099-10-31',
+      }).success,
+    ).toBe(false);
   });
   it('acepta un bloque futuro válido, igual que al crear', () => {
     const result = updateBlockSchema.safeParse({
@@ -28,9 +30,9 @@ describe('updateBlockSchema', () => {
       endAt: '2099-10-10T19:00:00Z',
     });
     expect(result.success).toBe(false);
-    expect(result.success ? [] : result.error.issues.map((i) => i.message)).toEqual([
-      MSG.endBeforeStart,
-    ]);
+    expect(
+      result.success ? [] : result.error.issues.map((i) => i.message),
+    ).toEqual([MSG.endBeforeStart]);
   });
 
   it('rechaza horas fuera de pasos de 30 minutos', () => {

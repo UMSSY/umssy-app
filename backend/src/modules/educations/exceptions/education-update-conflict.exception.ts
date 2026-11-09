@@ -6,6 +6,10 @@ import {
 
 export class EducationUpdateConflictException extends DomainException {
   constructor() {
-    super(EDUCATION_CONFLICT_MESSAGE, EDUCATION_CONFLICT_STATUS, 'EDUCATION_UPDATE_CONFLICT');
+    super(
+      EDUCATION_CONFLICT_MESSAGE,
+      EDUCATION_CONFLICT_STATUS,
+      'EDUCATION_UPDATE_CONFLICT',
+    );
   }
 }

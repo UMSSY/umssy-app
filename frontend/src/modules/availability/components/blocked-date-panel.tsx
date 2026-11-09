@@ -5,12 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toBoliviaTime } from "@/shared/utils/date-time";
-import {
-  BLOCKED_DATE_PAST_ERROR,
-  BLOCKED_DATE_REASON_ERROR,
-  BLOCKED_DATE_REASON_MAX_LENGTH,
-  BLOCKED_DATE_TEXT,
-} from "../constants/blocked-date.constants";
+import { BLOCKED_DATE_REASON_ERROR, BLOCKED_DATE_TEXT } from "../constants/blocked-date.constants";
 import { useBlockDate } from "../hooks/use-block-date";
 import { useUnblockDate } from "../hooks/use-unblock-date";
 import type { BlockedDatePanelProps } from "../types/blocked-date-panel-props.types";
@@ -25,7 +20,7 @@ export function BlockedDatePanel({ date, blockedDate, onClose }: BlockedDatePane
   const unblock = useUnblockDate();
   const isBusy = block.isBlocking || unblock.isUnblocking;
   const isPast = date < toBoliviaTime(new Date()).date;
-  const reasonTooLong = reason.length > BLOCKED_DATE_REASON_MAX_LENGTH;
+  const reasonTooLong = reason.length > 100;
   const error = validationError ?? (reasonTooLong ? BLOCKED_DATE_REASON_ERROR : null);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -33,7 +28,7 @@ export function BlockedDatePanel({ date, blockedDate, onClose }: BlockedDatePane
     if (submitting.current || isBusy) return;
     if (!blockedDate) {
       if (date < toBoliviaTime(new Date()).date) {
-        setValidationError(BLOCKED_DATE_PAST_ERROR);
+        setValidationError("No se pueden bloquear fechas pasadas");
         return;
       }
       if (reasonTooLong) {
@@ -85,7 +80,7 @@ export function BlockedDatePanel({ date, blockedDate, onClose }: BlockedDatePane
             <p className="text-sm">{BLOCKED_DATE_TEXT.blockHint}</p>
             {isPast && (
               <p role="alert" className="text-sm text-destructive">
-                {BLOCKED_DATE_PAST_ERROR}
+                {"No se pueden bloquear fechas pasadas"}
               </p>
             )}
             <div className="space-y-2">
@@ -105,7 +100,7 @@ export function BlockedDatePanel({ date, blockedDate, onClose }: BlockedDatePane
                 id={`${reasonId}-count`}
                 className="text-sm text-muted-foreground"
               >
-                {reason.length}/{BLOCKED_DATE_REASON_MAX_LENGTH} {BLOCKED_DATE_TEXT.charactersUnit}
+                {reason.length}/{100} {BLOCKED_DATE_TEXT.charactersUnit}
               </p>
               {error && (
                 <p

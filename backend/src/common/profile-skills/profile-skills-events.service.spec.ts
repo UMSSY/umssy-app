@@ -11,9 +11,16 @@ describe('ProfileSkillsEvents', () => {
     const events = new ProfileSkillsEvents();
     let release!: () => void;
     let complete = false;
-    const ready = new Promise<void>(resolve => { release = resolve; });
-    events.subscribe(async value => { expect(value).toEqual(publication); await ready; });
-    const pending = events.published(publication).then(() => { complete = true; });
+    const ready = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    events.subscribe(async (value) => {
+      expect(value).toEqual(publication);
+      await ready;
+    });
+    const pending = events.published(publication).then(() => {
+      complete = true;
+    });
     await Promise.resolve();
     expect(complete).toBe(false);
     release();
@@ -25,7 +32,9 @@ describe('ProfileSkillsEvents', () => {
     vi.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
     const events = new ProfileSkillsEvents();
     const other = vi.fn().mockResolvedValue(undefined);
-    events.subscribe(async () => { throw new Error('database unavailable'); });
+    events.subscribe(async () => {
+      throw new Error('database unavailable');
+    });
     events.subscribe(other);
     await expect(events.published(publication)).resolves.toBeUndefined();
     expect(other).toHaveBeenCalledWith(publication);

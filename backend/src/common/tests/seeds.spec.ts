@@ -109,7 +109,11 @@ describe('runSeed', () => {
     expect(seedEventRegistrations).toHaveBeenCalledWith(tx, 'e1');
     expect(seedAvailability).toHaveBeenCalledWith(
       tx,
-      expect.objectContaining({ mentorId: 'm1', performanceMentorId: 'm2', graduateId: 'g1' }),
+      expect.objectContaining({
+        mentorId: 'm1',
+        performanceMentorId: 'm2',
+        graduateId: 'g1',
+      }),
       expect.any(Date),
     );
     expect(seedAccessRequests).toHaveBeenCalledWith(tx);

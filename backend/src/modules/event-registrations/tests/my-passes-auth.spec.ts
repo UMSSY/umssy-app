@@ -60,7 +60,9 @@ describe('identidad en Mis pases', () => {
     'rejects a missing, inactive or roleless account before reading passes: %s',
     async (user) => {
       const findMany = vi.fn();
-      const moduleRef = await Test.createTestingModule({ imports: [EventRegistrationsModule] })
+      const moduleRef = await Test.createTestingModule({
+        imports: [EventRegistrationsModule],
+      })
         .overrideProvider(PrismaService)
         .useValue({
           eventRegistration: { findMany },
@@ -69,7 +71,8 @@ describe('identidad en Mis pases', () => {
         .compile();
       try {
         vi.spyOn(moduleRef.get(JwtService), 'verifyAsync').mockResolvedValue({
-          sub: 'user-1', roleTag: 'titulado',
+          sub: 'user-1',
+          roleTag: 'titulado',
         });
         const request = {
           headers: { authorization: 'Bearer valid-token' },
@@ -77,8 +80,9 @@ describe('identidad en Mis pases', () => {
         const context = {
           switchToHttp: () => ({ getRequest: () => request }),
         } as unknown as ExecutionContext;
-        await expect(moduleRef.get(JwtAuthGuard).canActivate(context))
-          .rejects.toMatchObject({ statusCode: 401 });
+        await expect(
+          moduleRef.get(JwtAuthGuard).canActivate(context),
+        ).rejects.toMatchObject({ statusCode: 401 });
         expect(request.user).toBeUndefined();
         expect(findMany).not.toHaveBeenCalled();
       } finally {
@@ -86,5 +90,4 @@ describe('identidad en Mis pases', () => {
       }
     },
   );
-
 });

@@ -1,12 +1,10 @@
+import { MAX_FILE_UPLOAD_SIZE_BYTES } from "@/shared/constants/file-upload.constants";
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import { screen, fireEvent, cleanup } from "@testing-library/react";
 import { toast } from "sonner";
 import { MessageInputBar } from '../components/message-input-bar';
-import {
-  MAX_IMAGE_SIZE_BYTES,
-  MAX_PDF_SIZE_BYTES,
-} from '../constants/attachment.constants';
+import { MAX_IMAGE_SIZE_BYTES } from '../constants/attachment.constants';
 
 vi.mock("sonner", () => ({
   toast: {
@@ -131,7 +129,7 @@ describe('MessageInputBar - File Attachment & Validation Toasts (HU-11 Task 3)',
     );
 
     const fileInput = screen.getByTestId('file-input');
-    const largePdf = createFile('documento-grande.pdf', MAX_PDF_SIZE_BYTES + 1, 'application/pdf');
+    const largePdf = createFile('documento-grande.pdf', MAX_FILE_UPLOAD_SIZE_BYTES + 1, 'application/pdf');
 
     fireEvent.change(fileInput, { target: { files: [largePdf] } });
 
@@ -225,4 +223,3 @@ describe('MessageInputBar - File Attachment & Validation Toasts (HU-11 Task 3)',
     expect(onSend).toHaveBeenCalledTimes(1);
   });
 });
-

@@ -11,7 +11,9 @@ export class EducationSourcesService {
     return this.repository.findPublicationEvidenceIds(userId, context);
   }
 
-  findAnalysisSources(userId: string): Promise<EducationAnalysisSourceResponse[]> {
+  findAnalysisSources(
+    userId: string,
+  ): Promise<EducationAnalysisSourceResponse[]> {
     return this.repository.findAnalysisSources(userId);
   }
 }

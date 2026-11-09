@@ -3,6 +3,10 @@ import { REGISTRATION_ERRORS } from '../constants/registration-errors.constants.
 
 export class EventFullException extends DomainException {
   constructor() {
-    super(REGISTRATION_ERRORS.EVENT_FULL.detail, REGISTRATION_ERRORS.EVENT_FULL.statusCode, 'EVENT_FULL');
+    super(
+      REGISTRATION_ERRORS.EVENT_FULL.detail,
+      REGISTRATION_ERRORS.EVENT_FULL.statusCode,
+      'EVENT_FULL',
+    );
   }
 }

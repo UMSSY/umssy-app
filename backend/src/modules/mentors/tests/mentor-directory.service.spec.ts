@@ -6,7 +6,9 @@ import type { MentorDirectoryQuery } from '../requests/mentor-directory-query.sc
 import type { MentorAffinityService } from '../services/mentor-affinity.service.js';
 import type { UserSkillService } from '../../skills/services/user-skill.service.js';
 
-const userSkillService = { getProfessionalSkills: vi.fn() } as unknown as UserSkillService;
+const userSkillService = {
+  getProfessionalSkills: vi.fn(),
+} as unknown as UserSkillService;
 
 describe('MentorsService directory pagination', () => {
   const baseQuery: MentorDirectoryQuery = {
@@ -61,7 +63,11 @@ describe('MentorsService directory pagination', () => {
     } as unknown as MentorsRepository;
 
     return {
-      service: new MentorsService(repository, new MentorMapper(), userSkillService),
+      service: new MentorsService(
+        repository,
+        new MentorMapper(),
+        userSkillService,
+      ),
       countDirectoryMentors,
       findDirectoryPage,
       findActiveMentors,
@@ -294,7 +300,11 @@ describe('MentorsService directory pagination', () => {
       findActiveMentors: vi.fn().mockResolvedValue([]),
     } as unknown as MentorsRepository;
 
-    const service = new MentorsService(repository, new MentorMapper(), userSkillService);
+    const service = new MentorsService(
+      repository,
+      new MentorMapper(),
+      userSkillService,
+    );
     const received: Array<{ id: string; fullName: string }> = [];
     const totalPages = Math.ceil(totalItems / 6);
 
@@ -369,7 +379,11 @@ describe('MentorsService directory pagination', () => {
       findActiveMentors: vi.fn().mockResolvedValue([]),
     } as unknown as MentorsRepository;
 
-    const service = new MentorsService(repository, new MentorMapper(), userSkillService);
+    const service = new MentorsService(
+      repository,
+      new MentorMapper(),
+      userSkillService,
+    );
     const received: Array<{ id: string; fullName: string }> = [];
     const totalPages = Math.ceil(allMentors.length / 6);
 

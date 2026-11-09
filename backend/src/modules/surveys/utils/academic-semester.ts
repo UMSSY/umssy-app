@@ -3,7 +3,7 @@ import {
   ACADEMIC_PERIOD_PATTERN,
   getAcademicPeriod,
 } from '../../reports/utils/academic-period.js';
-import { MAX_LISTED_SEMESTERS } from '../constants/survey-statistics.constants.js';
+
 import type { SemesterRange } from '../types/semester-range.type.js';
 import type {
   AcademicSemester,
@@ -47,7 +47,7 @@ export function listSemesters(from: Date, to: Date): string[] {
   if (!current || !last) return [];
 
   const semesters = [current];
-  while (current !== last && semesters.length < MAX_LISTED_SEMESTERS) {
+  while (current !== last && semesters.length < 40) {
     const parsed = parsePeriod(current);
     if (!parsed) break;
     current =
