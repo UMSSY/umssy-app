@@ -10,6 +10,13 @@ const { push, publishOptions } = vi.hoisted(() => ({
   publishOptions: { current: undefined as { onSuccess?: () => void } | undefined },
 }));
 
+vi.mock("../hooks/use-current-company", () => ({
+  useCurrentCompany: () => ({
+    id: "company-1",
+    name: "TechBolivia S.R.L.",
+    initials: "TB",
+  }),
+}));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 
@@ -56,7 +63,9 @@ vi.mock("../hooks/use-publish-job-offer", () => ({
 }));
 vi.mock("../hooks/use-leave-guard", () => ({ useLeaveGuard: (isActive: boolean) => useLeaveGuard(isActive) }));
 vi.mock("../components/vacancy-stepper", () => ({
-  VacancyStepper: ({ currentStep }: { currentStep: number }) => <div data-testid="stepper">Paso {currentStep}</div>,
+  VacancyStepper: ({ currentStep }: { currentStep: number }) => (
+    <div data-testid="stepper">Paso {currentStep}</div>
+  ),
 }));
 vi.mock("../components/information-step", () => ({
   InformationStep: ({ onCancel, onContinue }: { onCancel: () => void; onContinue: () => void }) => (

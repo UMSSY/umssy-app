@@ -9,12 +9,17 @@ describe('AccountActivationController', () => {
       activate: vi.fn().mockResolvedValue({ accessToken: 'jwt' }),
       resend: vi.fn().mockResolvedValue({ resendsRemaining: 2 }),
     };
-    return { service, controller: new AccountActivationController(service as any) };
+    return {
+      service,
+      controller: new AccountActivationController(service as any),
+    };
   }
 
   it('consulta el estado con el correo recibido', async () => {
     const { controller, service } = build();
-    await expect(controller.getStatus({ email: 'ana@umss.test' })).resolves.toEqual({ state: 'ready' });
+    await expect(
+      controller.getStatus({ email: 'ana@umss.test' }),
+    ).resolves.toEqual({ state: 'ready' });
     expect(service.getStatus).toHaveBeenCalledWith('ana@umss.test');
   });
 
@@ -26,10 +31,20 @@ describe('AccountActivationController', () => {
 
   it('activa la cuenta con correo, código y contraseña', async () => {
     const { controller, service } = build();
-    await expect(controller.activate({ email: 'ana@umss.test', code: '482719', password: 'Jackson2026' })).resolves.toEqual({
+    await expect(
+      controller.activate({
+        email: 'ana@umss.test',
+        code: '482719',
+        password: 'Jackson2026',
+      }),
+    ).resolves.toEqual({
       accessToken: 'jwt',
     });
-    expect(service.activate).toHaveBeenCalledWith('ana@umss.test', '482719', 'Jackson2026');
+    expect(service.activate).toHaveBeenCalledWith(
+      'ana@umss.test',
+      '482719',
+      'Jackson2026',
+    );
   });
 
   it('reenvía el código al correo recibido', async () => {
@@ -39,8 +54,17 @@ describe('AccountActivationController', () => {
   });
 
   it('expone rutas públicas bajo /account-activation, sin guards de sesión', () => {
-    expect(Reflect.getMetadata('path', AccountActivationController)).toBe('account-activation');
-    expect(Reflect.getMetadata('__guards__', AccountActivationController)).toBeUndefined();
-    expect(Reflect.getMetadata('__guards__', AccountActivationController.prototype.activate)).toBeUndefined();
+    expect(Reflect.getMetadata('path', AccountActivationController)).toBe(
+      'account-activation',
+    );
+    expect(
+      Reflect.getMetadata('__guards__', AccountActivationController),
+    ).toBeUndefined();
+    expect(
+      Reflect.getMetadata(
+        '__guards__',
+        AccountActivationController.prototype.activate,
+      ),
+    ).toBeUndefined();
   });
 });

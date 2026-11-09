@@ -1,3 +1,4 @@
+import "@/shared/testing/indexed-db.mock";
 import { cleanup, screen, waitFor } from "@testing-library/react";
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import userEvent from "@testing-library/user-event";

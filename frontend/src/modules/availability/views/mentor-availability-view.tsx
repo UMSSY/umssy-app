@@ -8,10 +8,7 @@ import { BOLIVIA_TIME_LABEL } from "@/shared/constants/date-time.constants";
 import { addWeeks, getWeekRange } from "@/shared/utils/date-time";
 import { cn } from "cn";
 import { BLOCKED_DATE_TEXT } from "../constants/blocked-date.constants";
-import {
-  MY_AVAILABILITY_EYEBROW,
-  MY_AVAILABILITY_TEXT,
-} from "../constants/my-availability.constants";
+import { MY_AVAILABILITY_TEXT } from "../constants/my-availability.constants";
 import { AvailabilityLoading } from "../components/availability-loading";
 import { BlockForm } from "../components/block-form";
 import { BlockedDatePanel } from "../components/blocked-date-panel";
@@ -101,7 +98,7 @@ export function MentorAvailabilityView({
       <header>
         <PageHeading
           title={MY_AVAILABILITY_TEXT.title}
-          description={`${MY_AVAILABILITY_EYEBROW}. ${BLOCKED_DATE_TEXT.viewHint}`}
+          description={`Mentorías. ${BLOCKED_DATE_TEXT.viewHint}`}
           actions={<ReceiveRequestsSwitch />}
         />
       </header>

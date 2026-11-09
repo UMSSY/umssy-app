@@ -1,4 +1,4 @@
-import { BOLIVIA_TIME_ZONE } from "../constants/audit-log.constants";
+import { BOLIVIA_TIME_ZONE } from "@/shared/constants/date-time.constants";
 
 // en-CA da la fecha como AAAA-MM-DD
 const BOLIVIA_DATE = new Intl.DateTimeFormat("en-CA", { timeZone: BOLIVIA_TIME_ZONE, year: "numeric", month: "2-digit", day: "2-digit" });

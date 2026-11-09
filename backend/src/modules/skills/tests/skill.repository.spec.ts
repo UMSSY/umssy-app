@@ -47,7 +47,9 @@ describe('SkillRepository', () => {
     const skills = [{ id: skillId, name: 'Python', isCustom: false }];
     skill.findMany.mockResolvedValue(skills);
 
-    await expect(repository.findByIds([skillId, otherSkillId])).resolves.toBe(skills);
+    await expect(repository.findByIds([skillId, otherSkillId])).resolves.toBe(
+      skills,
+    );
     expect(skill.findMany).toHaveBeenCalledWith({
       where: { id: { in: [skillId, otherSkillId] } },
       select,

@@ -1,6 +1,5 @@
-export const NETWORK_ERROR_MESSAGE = "No se pudo conectar con el servidor. Inténtalo de nuevo.";
-export const GENERIC_ERROR_MESSAGE = "No se pudo completar la operación. Inténtalo de nuevo.";
-export const SESSION_EXPIRED_MESSAGE = "Tu sesión expiró. Inicia sesión de nuevo.";
+import { GENERIC_ERROR_MESSAGE, SESSION_EXPIRED_MESSAGE } from "@/shared/constants/error-messages.constants";
+
 export const FORBIDDEN_MESSAGE = "No tienes permiso para ver el registro de auditoría.";
 
 export function isRecord(value: unknown): value is Record<string, unknown> {

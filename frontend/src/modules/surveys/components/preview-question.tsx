@@ -1,7 +1,7 @@
 "use client";
 
 import { SURVEY_TEXT } from "../constants/survey-builder.constants";
-import type { PreviewQuestionProps } from "../types/survey-component-props.types";
+import type { PreviewQuestionProps } from "../types/preview-question-props.types";
 import { SurveyQuestionField } from "./survey-question-field";
 
 export function PreviewQuestion({ question, index, isReadOnly = false }: PreviewQuestionProps) {

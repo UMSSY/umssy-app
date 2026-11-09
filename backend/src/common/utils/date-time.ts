@@ -1,4 +1,8 @@
-import { BOLIVIA_OFFSET_MS, DAY_MS, WEEK_MS } from '../constants/date-time.constants.js';
+import {
+  BOLIVIA_OFFSET_MS,
+  DAY_MS,
+  WEEK_MS,
+} from '../constants/date-time.constants.js';
 import type { BoliviaDateTime } from '../types/bolivia-date-time.types.js';
 import type { DateInput } from '../types/date-input.types.js';
 import type { WeekRange } from '../types/week-range.types.js';

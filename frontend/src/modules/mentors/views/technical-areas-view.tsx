@@ -1,5 +1,6 @@
 "use client";
 
+import { toast as notify } from "sonner";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -18,7 +19,7 @@ import {
 import { WorkspacePage } from "@/shared/components/layout/workspace-page";
 import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button-variants";
-import { cn } from "@/lib/utils";
+
 import { TechnicalAreaCard } from "../components/technical-area-card";
 import { useTechnicalAreas } from "../hooks/use-technical-areas";
 
@@ -29,7 +30,6 @@ export function TechnicalAreasView() {
   const [draftIds, setSelectedIds] = useState<string[] | null>(null);
   const selectedIds = draftIds ?? savedIds;
   const [isDiscardModalOpen, setIsDiscardModalOpen] = useState(false);
-  const [toast, setToast] = useState<{ isError: boolean; text: string } | null>(null);
 
   const hasChanges =
     selectedIds.length !== savedIds.length ||
@@ -44,8 +44,8 @@ export function TechnicalAreasView() {
     );
 
   const showToast = (isError: boolean, text: string) => {
-    setToast({ isError, text });
-    setTimeout(() => setToast(null), 3500);
+    if (isError) notify.error(text);
+    else notify.success(text);
   };
 
   const handleSubmit = async () => {
@@ -69,7 +69,10 @@ export function TechnicalAreasView() {
   };
 
   return (
-    <WorkspacePage title="Editar áreas técnicas" description="Indica las áreas en las que puedes brindar orientación.">
+    <WorkspacePage
+      title="Editar áreas técnicas"
+      description="Indica las áreas en las que puedes brindar orientación."
+    >
       {!isLoading &&
         !hasLoadError &&
         !hasAccessError &&
@@ -104,7 +107,23 @@ export function TechnicalAreasView() {
         </Alert>
       )}
 
-      {hasAccessError && <Alert className="space-y-3 rounded-lg border border-border bg-surface-soft p-4 text-ink"><p>Necesitas una participación activa como mentor para editar áreas técnicas.</p><Link href="/mentors/participation" className={buttonVariants({ variant: "outline" })}>Revisar mi participación</Link><Link href="/mentorship" className={buttonVariants()}>Iniciar incorporación</Link></Alert>}
+      {hasAccessError && (
+        <Alert className="space-y-3 rounded-lg border border-border bg-surface-soft p-4 text-ink">
+          <p>
+            Necesitas una participación activa como mentor para editar áreas
+            técnicas.
+          </p>
+          <Link
+            href="/mentors/participation"
+            className={buttonVariants({ variant: "outline" })}
+          >
+            Revisar mi participación
+          </Link>
+          <Link href="/mentorship" className={buttonVariants()}>
+            Iniciar incorporación
+          </Link>
+        </Alert>
+      )}
 
       {!isLoading && !hasLoadError && !hasAccessError && (
         <fieldset
@@ -133,7 +152,13 @@ export function TechnicalAreasView() {
         <Button
           type="button"
           onClick={handleSubmit}
-          disabled={hasNoSelection || isSaving || isLoading || hasLoadError || hasAccessError}
+          disabled={
+            hasNoSelection ||
+            isSaving ||
+            isLoading ||
+            hasLoadError ||
+            hasAccessError
+          }
           className="h-auto gap-2 rounded-lg bg-primary px-6 py-2 font-medium text-primary-foreground hover:bg-brand-hover active:translate-y-0 disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isSaving ? (
@@ -145,14 +170,6 @@ export function TechnicalAreasView() {
           )}
         </Button>
       </div>
-
-      {toast && (
-        <Alert
-          className={cn("fixed right-4 bottom-4 w-auto rounded-lg border-0 px-4 py-3 text-white shadow-none", toast.isError ? "bg-danger" : "bg-ink-soft")}
-        >
-          {toast.text}
-        </Alert>
-      )}
 
       <AlertDialog
         open={isDiscardModalOpen}

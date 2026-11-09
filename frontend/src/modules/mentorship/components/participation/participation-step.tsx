@@ -1,11 +1,8 @@
 "use client";
+import type { ParticipationStepProps } from "../../types/participation-step-props.types";
 
+import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-
-type ParticipationStepProps = {
-  isParticipating: boolean;
-  onParticipationChange: (value: boolean) => void;
-};
 
 export function ParticipationStep({
   isParticipating,
@@ -14,16 +11,14 @@ export function ParticipationStep({
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h2 className="text-lg font-semibold text-ink">
-          Participación
-        </h2>
+        <h2 className="text-lg font-semibold text-ink">Participación</h2>
 
         <p className="mt-2 text-sm text-text-secondary">
           Configura tu participación como mentor.
         </p>
       </div>
 
-      <label className="flex cursor-pointer items-start gap-3 rounded-md border border-border bg-surface p-4">
+      <Label className="flex cursor-pointer items-start gap-3 rounded-md border border-border bg-surface p-4">
         <Checkbox
           checked={isParticipating}
           onCheckedChange={onParticipationChange}
@@ -43,7 +38,7 @@ export function ParticipationStep({
             Activa esta opción para continuar con la configuración de mentoría.
           </p>
         </div>
-      </label>
+      </Label>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import type { RequestStatusResponse } from "./access-request.types";
+import type { RequestStatusResponse } from "./request-status-response.types";
 
 export interface RequestStatusDetailsProps
   extends Pick<

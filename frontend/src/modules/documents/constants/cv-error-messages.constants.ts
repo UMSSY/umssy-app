@@ -17,8 +17,4 @@ export const CV_ERROR_MESSAGES_BY_STATUS: Record<number, string> = {
   415: FILE_VALIDATION_MESSAGES.invalidCvType,
 };
 
-export const CV_CORRUPTED_FILE_ERROR_CODE = "CORRUPTED_FILE";
-
-export const CV_CORRUPTED_FILE_MESSAGE = "El archivo está dañado o incompleto. Selecciona otro PDF.";
-
 export const CV_FILE_REJECTION_STATUSES: readonly number[] = [400, 413, 415];

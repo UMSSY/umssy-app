@@ -1,4 +1,3 @@
-
 import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { renderWithQuery } from "@/shared/testing/render-with-query";
@@ -20,15 +19,16 @@ vi.mock("@/modules/mentorship/hooks/use-mentorship-catalogs", () => ({
   }),
 }));
 
-const pendingRequest: participationService.MentorParticipationRequest = {
-  id: "request-1",
-  userId: "user-1",
-  status: "PENDING",
-  queuedAt: "2026-10-26T15:00:00.000Z",
-  createdAt: "2026-10-26T15:00:00.000Z",
-  technicalAreaIds: ["area-backend"],
-  orientationTypeIds: ["orientation-technical"],
-};
+const pendingRequest: import("../../types/mentor-participation-request.types").MentorParticipationRequest =
+  {
+    id: "request-1",
+    userId: "user-1",
+    status: "PENDING",
+    queuedAt: "2026-10-26T15:00:00.000Z",
+    createdAt: "2026-10-26T15:00:00.000Z",
+    technicalAreaIds: ["area-backend"],
+    orientationTypeIds: ["orientation-technical"],
+  };
 
 afterEach(() => {
   cleanup();

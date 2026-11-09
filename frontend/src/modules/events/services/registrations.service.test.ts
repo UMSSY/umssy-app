@@ -105,7 +105,7 @@ describe('Proposal support API contract', () => {
 
     await expect(registrationsService.supportProposal('proposal-1')).resolves.toEqual(support);
     expect(apiClient.post).toHaveBeenCalledExactlyOnceWith(
-      '/event-registrations/support/proposal-1',
+      '/events/proposal-1/supports',
       undefined,
       {
         headers: { Authorization: 'Bearer signed-token' },
@@ -129,7 +129,7 @@ describe('Proposal support API contract', () => {
     await expect(registrationsService.supportProposal('proposal-1', 'other-token'))
       .resolves.toEqual(published);
     expect(apiClient.post).toHaveBeenCalledWith(
-      '/event-registrations/support/proposal-1',
+      '/events/proposal-1/supports',
       undefined,
       expect.objectContaining({ headers: { Authorization: 'Bearer other-token' } }),
     );

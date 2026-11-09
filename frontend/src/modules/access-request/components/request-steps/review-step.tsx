@@ -6,7 +6,8 @@ import { cn } from "cn";
 import { PageHeading } from "@/shared/components/layout/page-heading";
 import { useAccessRequestForm } from "../../contexts/access-request-context";
 import { formatSubmissionDate } from "../../utils/format-submission-date";
-import type { StageState, Stage } from "../../types/review-step.types";
+import type { StageState } from "../../types/stage-state.types";
+import type { Stage } from "../../types/stage.types";
 import { RequestStatusDetails } from "../request-status/request-status-details";
 
 const STATE_TEXT: Record<StageState, string> = {
@@ -132,8 +133,7 @@ export function ReviewStep() {
                 <span
                   className={cn(
                     "flex size-7 shrink-0 items-center justify-center rounded-full border",
-                    stage.state === "done" &&
-                      "border-ink bg-ink text-surface",
+                    stage.state === "done" && "border-ink bg-ink text-surface",
                     stage.state === "current" &&
                       "border-accent bg-surface text-accent",
                     stage.state === "pending" &&
@@ -161,9 +161,7 @@ export function ReviewStep() {
                 <p
                   className={cn(
                     "text-sm font-semibold",
-                    stage.state === "current"
-                      ? "text-ink"
-                      : "text-ink-soft",
+                    stage.state === "current" ? "text-ink" : "text-ink-soft",
                   )}
                 >
                   {stage.label}
@@ -172,9 +170,7 @@ export function ReviewStep() {
                   </span>
                 </p>
 
-                <p className="text-xs text-text-secondary">
-                  {stage.detail}
-                </p>
+                <p className="text-xs text-text-secondary">{stage.detail}</p>
               </div>
             </li>
           ))}

@@ -57,7 +57,7 @@ export function ChatImageThumbnail({
       endpoint = endpoint.replace(/^\/api/, "");
     }
     if (!endpoint.startsWith("/chat/attachments/") && attachment.id) {
-      endpoint = `/chat/attachments/${attachment.id}/download`;
+      endpoint = `/chat/attachments/${attachment.id}/file`;
     }
 
     apiClient

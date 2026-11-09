@@ -9,9 +9,12 @@ describe('EventRegistrationsService', () => {
 
   beforeEach(() => {
     findMany.mockReset();
-    repository = new EventRegistrationsService(new EventRegistrationsRepository({
-      eventRegistration: { findMany },
-    } as unknown as PrismaService), {} as never);
+    repository = new EventRegistrationsService(
+      new EventRegistrationsRepository({
+        eventRegistration: { findMany },
+      } as unknown as PrismaService),
+      {} as never,
+    );
   });
 
   it('consulta por userId con el select y orden esperados', async () => {

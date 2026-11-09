@@ -2,8 +2,9 @@ import { act, cleanup, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { stubObjectUrls } from "../components/document/document-step-test-utils";
 import { accessRequestService } from "../services/access-request.service";
-import type { ApiResult } from "../types/access-request.types";
-import type { DocumentCorrectionFormProps, DocumentCorrectionResponse } from "../types/document-correction.types";
+import type { ApiResult } from "../types/api-result.types";
+import type { DocumentCorrectionFormProps } from "../types/document-correction-form-props.types";
+import type { DocumentCorrectionResponse } from "../types/document-correction-response.types";
 import { useDocumentCorrection } from "./use-document-correction";
 
 vi.mock("../services/access-request.service", () => ({ accessRequestService: { resubmitDocument: vi.fn() } }));

@@ -73,10 +73,11 @@ export class AppointmentsService {
       block.mentorId,
       block.startAt,
       async (tx) => {
-        const current = await this.availabilityService.findBlockWithAppointments(
-          payload.blockId,
-          tx,
-        );
+        const current =
+          await this.availabilityService.findBlockWithAppointments(
+            payload.blockId,
+            tx,
+          );
 
         if (!current) {
           throw new BlockNotFoundException();
@@ -90,20 +91,19 @@ export class AppointmentsService {
           tx,
         );
 
-        const appointment =
-          await this.appointmentsRepository.createAppointment(
-            {
-              blockId: current.id,
-              mentorId: current.mentorId,
-              studentId: user.id,
-              startAt: current.startAt,
-              endAt: current.endAt,
-              statusId,
-              orientationTypeId: payload.orientationTypeId,
-              message: payload.message,
-            },
-            tx,
-          );
+        const appointment = await this.appointmentsRepository.createAppointment(
+          {
+            blockId: current.id,
+            mentorId: current.mentorId,
+            studentId: user.id,
+            startAt: current.startAt,
+            endAt: current.endAt,
+            statusId,
+            orientationTypeId: payload.orientationTypeId,
+            message: payload.message,
+          },
+          tx,
+        );
 
         await this.appointmentsRepository.createAppointmentHistory(
           {

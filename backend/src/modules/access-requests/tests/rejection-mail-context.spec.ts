@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { RejectionMailContextService } from '../mail/rejection-mail-context.service.js';
+import { RejectionMailContextService } from '../services/rejection-mail-context.service.js';
 
 describe('RejectionMailContextService', () => {
   it('solo expone el ID dentro de la ejecución y conserva el resultado', async () => {
@@ -18,7 +18,9 @@ describe('RejectionMailContextService', () => {
   it('aísla notificaciones concurrentes aunque terminen en orden inverso', async () => {
     const context = new RejectionMailContextService();
     let releaseFirst!: () => void;
-    const gate = new Promise<void>((resolve) => { releaseFirst = resolve; });
+    const gate = new Promise<void>((resolve) => {
+      releaseFirst = resolve;
+    });
     const first = context.run('first', async () => {
       await gate;
       return context.getCurrent()?.accessRequestId;
@@ -36,7 +38,9 @@ describe('RejectionMailContextService', () => {
   it('restaura el contexto exterior después de una ejecución anidada', () => {
     const context = new RejectionMailContextService();
     context.run('outer', () => {
-      context.run('inner', () => expect(context.getCurrent()?.accessRequestId).toBe('inner'));
+      context.run('inner', () =>
+        expect(context.getCurrent()?.accessRequestId).toBe('inner'),
+      );
       expect(context.getCurrent()?.accessRequestId).toBe('outer');
     });
     expect(context.getCurrent()).toBeUndefined();
@@ -44,10 +48,12 @@ describe('RejectionMailContextService', () => {
 
   it('no conserva contexto después de un fallo asíncrono', async () => {
     const context = new RejectionMailContextService();
-    await expect(context.run('failed', async () => {
-      await Promise.resolve();
-      throw new Error('simulado');
-    })).rejects.toThrow('simulado');
+    await expect(
+      context.run('failed', async () => {
+        await Promise.resolve();
+        throw new Error('simulado');
+      }),
+    ).rejects.toThrow('simulado');
     expect(context.getCurrent()).toBeUndefined();
   });
 });

@@ -53,9 +53,7 @@ export function planSkillReconciliation(
   const consumedSkillIds = new Set<string>();
 
   for (const row of rows) {
-    const nameKey = row.skill?.name
-      ? row.skill.name.toLowerCase().trim()
-      : '';
+    const nameKey = row.skill?.name ? row.skill.name.toLowerCase().trim() : '';
 
     const detection =
       detectedById.get(row.skillId) ??
