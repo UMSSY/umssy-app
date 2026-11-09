@@ -1,7 +1,6 @@
 import type { Prisma } from '../../../prisma/client.js';
 import { readMentorCapacity } from './mentor-capacity.queries.js';
 
-// Invocar dentro del bloqueo compartido con las altas directas de HU-7-1.
 export async function reconcileMentorOffers(tx: Prisma.TransactionClient) {
   await tx.$executeRaw`
     WITH expired AS (

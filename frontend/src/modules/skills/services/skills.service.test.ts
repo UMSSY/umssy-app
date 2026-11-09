@@ -1,3 +1,6 @@
+import "@/shared/testing/indexed-db.mock";
+import { clearAccessToken } from "@/shared/services/storage/access-token-storage";
+import { saveAccessToken } from "@/shared/services/storage/access-token-storage";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { apiClient } from "@/shared/services/api-client";
 import { skillsService } from "./skills.service";
@@ -20,12 +23,12 @@ function wrapResponse<T>(data: T) {
 }
 
 describe("skillsService", () => {
-  beforeEach(() => {
-    sessionStorage.setItem("accessToken", "test-access-token");
+  beforeEach(async () => {
+    await saveAccessToken("test-access-token");
   });
 
   afterEach(() => {
-    sessionStorage.clear();
+    clearAccessToken();
     vi.clearAllMocks();
   });
 
@@ -70,7 +73,7 @@ describe("skillsService", () => {
   });
 
   it("does not include bearer token when user has no active session", async () => {
-    sessionStorage.clear();
+    clearAccessToken();
     vi.mocked(apiClient.get).mockResolvedValue(wrapResponse([]));
 
     await skillsService.getMySkills();

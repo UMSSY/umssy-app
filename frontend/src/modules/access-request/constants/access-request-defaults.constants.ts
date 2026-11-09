@@ -1,5 +1,5 @@
-import type { DocumentState } from "../types/access-request-context.types";
-import type { PersonalDataValues } from "../types/access-request.types";
+import type { DocumentState } from "../types/document-state.types";
+import type { PersonalDataValues } from "../types/personal-data-values.types";
 
 export const EMPTY_VALUES: PersonalDataValues = {
   firstName: "",

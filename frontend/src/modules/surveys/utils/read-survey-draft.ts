@@ -1,5 +1,5 @@
 import { readSurveyStorage } from "./survey-draft-storage";
-import type { SurveyBuilderState } from "../types/survey-builder.types";
+import type { SurveyBuilderState } from "../types/survey-builder-state.types";
 
 export async function readSurveyDraft(storageKey: string): Promise<SurveyBuilderState | undefined> {
   const draft = await readSurveyStorage<SurveyBuilderState>(storageKey);

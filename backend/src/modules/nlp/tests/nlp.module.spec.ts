@@ -17,7 +17,14 @@ describe('NlpModule', () => {
   let moduleRef: TestingModule;
 
   beforeEach(async () => {
-    moduleRef = await Test.createTestingModule({ imports: [NlpModule, EducationsModule, WorkExperienceModule, SkillsModule] })
+    moduleRef = await Test.createTestingModule({
+      imports: [
+        NlpModule,
+        EducationsModule,
+        WorkExperienceModule,
+        SkillsModule,
+      ],
+    })
       .overrideProvider(PrismaService)
       .useValue({})
       .compile();

@@ -1,1 +1,0 @@
-export const MAX_REJECTION_REASON_LENGTH = 500;

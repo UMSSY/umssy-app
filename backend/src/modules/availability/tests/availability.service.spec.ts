@@ -14,7 +14,10 @@ import { AvailabilityService } from '../services/availability.service.js';
 import { MentorNotFoundException } from '../../mentors/exceptions/mentor-not-found.exception.js';
 import type { CreateBlockDto } from '../requests/create-block.request.js';
 
-const QUERY = { from: '2026-10-05T04:00:00.000Z', to: '2026-10-12T03:59:59.999Z' };
+const QUERY = {
+  from: '2026-10-05T04:00:00.000Z',
+  to: '2026-10-12T03:59:59.999Z',
+};
 
 const UPDATE_PAYLOAD = {
   startAt: new Date('2026-10-10T14:00:00.000Z'),
@@ -71,10 +74,12 @@ describe('AvailabilityService', () => {
     availabilityRepository.create.mockResolvedValue(savedBlock);
     blockedDatesService.assertDayNotBlocked.mockResolvedValue(undefined);
     blockedDatesService.findBlockedDays.mockResolvedValue(new Set());
-    blockedDatesService.runOnUnblockedDay.mockImplementation(async (mentor, startAt, work) => {
-      await blockedDatesService.assertDayNotBlocked(mentor, startAt, TX);
-      return work(TX);
-    });
+    blockedDatesService.runOnUnblockedDay.mockImplementation(
+      async (mentor, startAt, work) => {
+        await blockedDatesService.assertDayNotBlocked(mentor, startAt, TX);
+        return work(TX);
+      },
+    );
     service = new AvailabilityService(
       availabilityRepository as never,
       new AvailabilityMapper(),
@@ -88,15 +93,25 @@ describe('AvailabilityService', () => {
       const stored = block('block-1', [AppointmentStatusTitle.CONFIRMED]);
       availabilityRepository.findById.mockResolvedValue(stored);
 
-      await expect(service.findBlockWithAppointments('block-1', TX as never)).resolves.toBe(stored);
-      expect(availabilityRepository.findById).toHaveBeenCalledExactlyOnceWith('block-1', TX);
+      await expect(
+        service.findBlockWithAppointments('block-1', TX as never),
+      ).resolves.toBe(stored);
+      expect(availabilityRepository.findById).toHaveBeenCalledExactlyOnceWith(
+        'block-1',
+        TX,
+      );
     });
 
     it('devuelve null si el bloque no existe', async () => {
       availabilityRepository.findById.mockResolvedValue(null);
 
-      await expect(service.findBlockWithAppointments('missing')).resolves.toBeNull();
-      expect(availabilityRepository.findById).toHaveBeenCalledExactlyOnceWith('missing', undefined);
+      await expect(
+        service.findBlockWithAppointments('missing'),
+      ).resolves.toBeNull();
+      expect(availabilityRepository.findById).toHaveBeenCalledExactlyOnceWith(
+        'missing',
+        undefined,
+      );
     });
   });
 
@@ -104,7 +119,9 @@ describe('AvailabilityService', () => {
     it('consulta solo los bloques del mentor en sesión dentro del rango pedido', async () => {
       await service.findMyBlocks('mentor-1', QUERY);
 
-      expect(availabilityRepository.findMentorBlocksInRange).toHaveBeenCalledWith(
+      expect(
+        availabilityRepository.findMentorBlocksInRange,
+      ).toHaveBeenCalledWith(
         'mentor-1',
         new Date(QUERY.from),
         new Date(QUERY.to),
@@ -120,7 +137,11 @@ describe('AvailabilityService', () => {
             {
               id: 'appointment-1',
               status: { title: AppointmentStatusTitle.CONFIRMED },
-              student: { id: 'student-1', firstName: 'Luis', lastName: 'Flores' },
+              student: {
+                id: 'student-1',
+                firstName: 'Luis',
+                lastName: 'Flores',
+              },
               orientationType: null,
             },
           ],
@@ -144,8 +165,15 @@ describe('AvailabilityService', () => {
             {
               id: 'appointment-1',
               status: { title: AppointmentStatusTitle.CONFIRMED },
-              student: { id: 'student-1', firstName: 'Luis', lastName: 'Flores' },
-              orientationType: { id: 'orientation-1', name: 'Orientación profesional' },
+              student: {
+                id: 'student-1',
+                firstName: 'Luis',
+                lastName: 'Flores',
+              },
+              orientationType: {
+                id: 'orientation-1',
+                name: 'Orientación profesional',
+              },
             },
           ],
         },
@@ -157,14 +185,23 @@ describe('AvailabilityService', () => {
         null,
         {
           id: 'appointment-1',
-          counterpart: { id: 'student-1', fullName: 'Luis Flores', role: 'student' },
-          orientationType: { id: 'orientation-1', name: 'Orientación profesional' },
+          counterpart: {
+            id: 'student-1',
+            fullName: 'Luis Flores',
+            role: 'student',
+          },
+          orientationType: {
+            id: 'orientation-1',
+            name: 'Orientación profesional',
+          },
         },
       ]);
     });
 
     it('devuelve una lista vacía si el mentor no tiene bloques en la semana', async () => {
-      await expect(service.findMyBlocks('mentor-1', QUERY)).resolves.toEqual([]);
+      await expect(service.findMyBlocks('mentor-1', QUERY)).resolves.toEqual(
+        [],
+      );
     });
   });
 
@@ -172,27 +209,31 @@ describe('AvailabilityService', () => {
     it('responde 404 si el bloque no existe', async () => {
       availabilityRepository.findById.mockResolvedValue(null);
 
-      await expect(service.updateBlock('mentor-1', 'block-1', UPDATE_PAYLOAD)).rejects.toThrow(
-        BlockNotFoundException,
-      );
+      await expect(
+        service.updateBlock('mentor-1', 'block-1', UPDATE_PAYLOAD),
+      ).rejects.toThrow(BlockNotFoundException);
       expect(availabilityRepository.update).not.toHaveBeenCalled();
     });
 
     it('responde 403 y no toca nada si el bloque es de otro mentor', async () => {
-      availabilityRepository.findById.mockResolvedValue(block('block-1', [], 'otro-mentor'));
-
-      await expect(service.updateBlock('mentor-1', 'block-1', UPDATE_PAYLOAD)).rejects.toThrow(
-        BlockNotOwnedException,
+      availabilityRepository.findById.mockResolvedValue(
+        block('block-1', [], 'otro-mentor'),
       );
+
+      await expect(
+        service.updateBlock('mentor-1', 'block-1', UPDATE_PAYLOAD),
+      ).rejects.toThrow(BlockNotOwnedException);
       expect(availabilityRepository.update).not.toHaveBeenCalled();
     });
 
     it('responde 409 si el bloque tiene una cita confirmada', async () => {
-      availabilityRepository.findById.mockResolvedValue(block('block-1', [AppointmentStatusTitle.CONFIRMED]));
-
-      await expect(service.updateBlock('mentor-1', 'block-1', UPDATE_PAYLOAD)).rejects.toThrow(
-        BlockHasAppointmentException,
+      availabilityRepository.findById.mockResolvedValue(
+        block('block-1', [AppointmentStatusTitle.CONFIRMED]),
       );
+
+      await expect(
+        service.updateBlock('mentor-1', 'block-1', UPDATE_PAYLOAD),
+      ).rejects.toThrow(BlockHasAppointmentException);
       expect(availabilityRepository.update).not.toHaveBeenCalled();
     });
 
@@ -202,7 +243,11 @@ describe('AvailabilityService', () => {
         block('block-1', [], 'mentor-1'),
       );
 
-      const result = await service.updateBlock('mentor-1', 'block-1', UPDATE_PAYLOAD);
+      const result = await service.updateBlock(
+        'mentor-1',
+        'block-1',
+        UPDATE_PAYLOAD,
+      );
 
       expect(availabilityRepository.update).toHaveBeenCalledWith(
         'block-1',
@@ -219,7 +264,9 @@ describe('AvailabilityService', () => {
 
       await service.updateBlock('mentor-1', 'block-1', UPDATE_PAYLOAD);
 
-      expect(toBoliviaTime(block('block-1').startAt).date).not.toBe(toBoliviaTime(UPDATE_PAYLOAD.startAt).date);
+      expect(toBoliviaTime(block('block-1').startAt).date).not.toBe(
+        toBoliviaTime(UPDATE_PAYLOAD.startAt).date,
+      );
       expect(blockedDatesService.runOnUnblockedDay).toHaveBeenCalledWith(
         'mentor-1',
         UPDATE_PAYLOAD.startAt,
@@ -234,11 +281,13 @@ describe('AvailabilityService', () => {
 
     it('responde 409 y no mueve el bloque si el día de destino está bloqueado', async () => {
       availabilityRepository.findById.mockResolvedValue(block('block-1'));
-      blockedDatesService.assertDayNotBlocked.mockRejectedValue(new DayBlockedException());
-
-      await expect(service.updateBlock('mentor-1', 'block-1', UPDATE_PAYLOAD)).rejects.toBeInstanceOf(
-        DayBlockedException,
+      blockedDatesService.assertDayNotBlocked.mockRejectedValue(
+        new DayBlockedException(),
       );
+
+      await expect(
+        service.updateBlock('mentor-1', 'block-1', UPDATE_PAYLOAD),
+      ).rejects.toBeInstanceOf(DayBlockedException);
       expect(availabilityRepository.update).not.toHaveBeenCalled();
     });
 
@@ -250,7 +299,9 @@ describe('AvailabilityService', () => {
       };
       availabilityRepository.findById.mockResolvedValue(sameDay);
       availabilityRepository.update.mockResolvedValue(sameDay);
-      blockedDatesService.assertDayNotBlocked.mockRejectedValue(new DayBlockedException());
+      blockedDatesService.assertDayNotBlocked.mockRejectedValue(
+        new DayBlockedException(),
+      );
 
       await service.updateBlock('mentor-1', 'block-1', UPDATE_PAYLOAD);
 
@@ -266,9 +317,9 @@ describe('AvailabilityService', () => {
       availabilityRepository.findById.mockResolvedValue(block('block-1'));
       availabilityRepository.update.mockRejectedValue({ code: '23P01' });
 
-      await expect(service.updateBlock('mentor-1', 'block-1', UPDATE_PAYLOAD)).rejects.toThrow(
-        BlockOverlapException,
-      );
+      await expect(
+        service.updateBlock('mentor-1', 'block-1', UPDATE_PAYLOAD),
+      ).rejects.toThrow(BlockOverlapException);
     });
 
     it('relanza el error original cuando no es de solapamiento', async () => {
@@ -276,21 +327,33 @@ describe('AvailabilityService', () => {
       const databaseError = new Error('connection refused');
       availabilityRepository.update.mockRejectedValue(databaseError);
 
-      await expect(service.updateBlock('mentor-1', 'block-1', UPDATE_PAYLOAD)).rejects.toBe(databaseError);
+      await expect(
+        service.updateBlock('mentor-1', 'block-1', UPDATE_PAYLOAD),
+      ).rejects.toBe(databaseError);
     });
   });
 
   describe('create', () => {
     it('crea cuatro bloques con el mismo UUID de serie y fin de repetición', async () => {
-      const result = await service.create(mentorId, { ...payload, repeatWeekly: true, repeatUntil: '2026-11-24' });
+      const result = await service.create(mentorId, {
+        ...payload,
+        repeatWeekly: true,
+        repeatUntil: '2026-11-24',
+      });
       expect(result).toEqual({ created: 4, skipped: [] });
       const calls = availabilityRepository.create.mock.calls;
       expect(calls).toHaveLength(4);
       const series = calls[0][4];
-      expect(series).toEqual({ seriesId: expect.stringMatching(/^[\da-f-]{36}$/), repeatUntil: new Date('2026-11-24') });
+      expect(series).toEqual({
+        seriesId: expect.stringMatching(/^[\da-f-]{36}$/),
+        repeatUntil: new Date('2026-11-24'),
+      });
       expect(new Set(calls.map((call) => call[4].seriesId)).size).toBe(1);
       expect(calls.map((call) => toBoliviaTime(call[1]).date)).toEqual([
-        '2026-11-03', '2026-11-10', '2026-11-17', '2026-11-24',
+        '2026-11-03',
+        '2026-11-10',
+        '2026-11-17',
+        '2026-11-24',
       ]);
       for (const call of calls) {
         expect(call[0]).toBe(mentorId);
@@ -301,42 +364,67 @@ describe('AvailabilityService', () => {
 
     it('omite conflictos sin interrumpir las siguientes semanas', async () => {
       availabilityRepository.create.mockRejectedValueOnce({ code: '23P01' });
-      blockedDatesService.assertDayNotBlocked.mockResolvedValueOnce(undefined)
+      blockedDatesService.assertDayNotBlocked
+        .mockResolvedValueOnce(undefined)
         .mockRejectedValueOnce(new DayBlockedException());
-      await expect(service.create(mentorId, {
-        ...payload, repeatWeekly: true, repeatUntil: '2026-11-24',
-      })).resolves.toEqual({ created: 2, skipped: ['2026-11-03', '2026-11-10'] });
+      await expect(
+        service.create(mentorId, {
+          ...payload,
+          repeatWeekly: true,
+          repeatUntil: '2026-11-24',
+        }),
+      ).resolves.toEqual({ created: 2, skipped: ['2026-11-03', '2026-11-10'] });
     });
 
     it('informa todas las fechas si todas se omiten', async () => {
       availabilityRepository.create.mockRejectedValue({ code: '23P01' });
-      await expect(service.create(mentorId, {
-        ...payload, repeatWeekly: true, repeatUntil: '2026-11-10',
-      })).resolves.toEqual({ created: 0, skipped: ['2026-11-03', '2026-11-10'] });
+      await expect(
+        service.create(mentorId, {
+          ...payload,
+          repeatWeekly: true,
+          repeatUntil: '2026-11-10',
+        }),
+      ).resolves.toEqual({ created: 0, skipped: ['2026-11-03', '2026-11-10'] });
     });
 
     it('no convierte errores inesperados en omisiones', async () => {
       const error = new Error('database unavailable');
       availabilityRepository.create.mockRejectedValue(error);
-      await expect(service.create(mentorId, {
-        ...payload, repeatWeekly: true, repeatUntil: '2026-11-10',
-      })).rejects.toBe(error);
+      await expect(
+        service.create(mentorId, {
+          ...payload,
+          repeatWeekly: true,
+          repeatUntil: '2026-11-10',
+        }),
+      ).rejects.toBe(error);
     });
 
     it('mantiene la respuesta individual si repeatWeekly es false', async () => {
-      await expect(service.create(mentorId, { ...payload, repeatWeekly: false })).resolves.toMatchObject({ id: savedBlock.id });
+      await expect(
+        service.create(mentorId, { ...payload, repeatWeekly: false }),
+      ).resolves.toMatchObject({ id: savedBlock.id });
       expect(availabilityRepository.create).toHaveBeenCalledTimes(1);
     });
 
     it('responde 409 sin guardar el bloque si el día está bloqueado', async () => {
-      blockedDatesService.assertDayNotBlocked.mockRejectedValue(new DayBlockedException());
+      blockedDatesService.assertDayNotBlocked.mockRejectedValue(
+        new DayBlockedException(),
+      );
 
       await expect(service.create(mentorId, payload)).rejects.toMatchObject({
         statusCode: 409,
         message: 'Ese día está bloqueado',
       });
-      expect(blockedDatesService.runOnUnblockedDay).toHaveBeenCalledWith(mentorId, payload.startAt, expect.any(Function));
-      expect(blockedDatesService.assertDayNotBlocked).toHaveBeenCalledWith(mentorId, payload.startAt, TX);
+      expect(blockedDatesService.runOnUnblockedDay).toHaveBeenCalledWith(
+        mentorId,
+        payload.startAt,
+        expect.any(Function),
+      );
+      expect(blockedDatesService.assertDayNotBlocked).toHaveBeenCalledWith(
+        mentorId,
+        payload.startAt,
+        TX,
+      );
       expect(availabilityRepository.create).not.toHaveBeenCalled();
     });
 
@@ -371,12 +459,25 @@ describe('AvailabilityService', () => {
       ['meta', { meta: { code: '23P01' } }],
       ['message', { message: 'Query failed: conflicting key 23P01' }],
       // Shape real verificado contra Postgres: ver utils/overlap-error.ts.
-      ['driverAdapterError', { code: 'P2039', meta: { driverAdapterError: { cause: { code: '23P01' } } } }],
-    ])('lanza BlockOverlapException cuando el 23P01 viene en %s', async (_source, errorShape) => {
-      availabilityRepository.create.mockRejectedValue(Object.assign(new Error('db'), errorShape));
+      [
+        'driverAdapterError',
+        {
+          code: 'P2039',
+          meta: { driverAdapterError: { cause: { code: '23P01' } } },
+        },
+      ],
+    ])(
+      'lanza BlockOverlapException cuando el 23P01 viene en %s',
+      async (_source, errorShape) => {
+        availabilityRepository.create.mockRejectedValue(
+          Object.assign(new Error('db'), errorShape),
+        );
 
-      await expect(service.create(mentorId, payload)).rejects.toBeInstanceOf(BlockOverlapException);
-    });
+        await expect(service.create(mentorId, payload)).rejects.toBeInstanceOf(
+          BlockOverlapException,
+        );
+      },
+    );
 
     it('responde 409 con el mensaje de la historia de usuario', async () => {
       availabilityRepository.create.mockRejectedValue({ code: '23P01' });
@@ -391,7 +492,9 @@ describe('AvailabilityService', () => {
       const databaseError = new Error('connection refused');
       availabilityRepository.create.mockRejectedValue(databaseError);
 
-      await expect(service.create(mentorId, payload)).rejects.toBe(databaseError);
+      await expect(service.create(mentorId, payload)).rejects.toBe(
+        databaseError,
+      );
     });
   });
 
@@ -412,21 +515,29 @@ describe('AvailabilityService', () => {
     it('lanza 404 si el bloque no existe', async () => {
       repository.findById.mockResolvedValue(null);
 
-      await expect(removeService.remove('mentor-1', 'block-x')).rejects.toThrow(BlockNotFoundException);
+      await expect(removeService.remove('mentor-1', 'block-x')).rejects.toThrow(
+        BlockNotFoundException,
+      );
       expect(repository.delete).not.toHaveBeenCalled();
     });
 
     it('lanza 403 si el bloque pertenece a otro mentor', async () => {
       repository.findById.mockResolvedValue(block('block-x'));
 
-      await expect(removeService.remove('otro-mentor', 'block-x')).rejects.toThrow(BlockNotOwnedException);
+      await expect(
+        removeService.remove('otro-mentor', 'block-x'),
+      ).rejects.toThrow(BlockNotOwnedException);
       expect(repository.delete).not.toHaveBeenCalled();
     });
 
     it('lanza 409 si el bloque tiene citas activas', async () => {
-      repository.findById.mockResolvedValue(block('block-x', [AppointmentStatusTitle.CONFIRMED]));
+      repository.findById.mockResolvedValue(
+        block('block-x', [AppointmentStatusTitle.CONFIRMED]),
+      );
 
-      await expect(removeService.remove('mentor-1', 'block-x')).rejects.toThrow(BlockHasAppointmentException);
+      await expect(removeService.remove('mentor-1', 'block-x')).rejects.toThrow(
+        BlockHasAppointmentException,
+      );
       expect(repository.delete).not.toHaveBeenCalled();
     });
 
@@ -435,7 +546,9 @@ describe('AvailabilityService', () => {
       repository.findById.mockResolvedValue(target);
       repository.delete.mockResolvedValue(target);
 
-      await expect(removeService.remove('mentor-1', 'block-x')).resolves.toEqual({ id: 'block-x' });
+      await expect(
+        removeService.remove('mentor-1', 'block-x'),
+      ).resolves.toEqual({ id: 'block-x' });
       expect(repository.delete).toHaveBeenCalledWith('block-x');
     });
   });
@@ -452,11 +565,13 @@ describe('AvailabilityService', () => {
     it('responde 404 sin consultar bloques si el mentor no existe o no está activo', async () => {
       mentorsService.findOne.mockRejectedValue(new MentorNotFoundException());
 
-      await expect(service.findMentorFreeBlocks('mentor-1', QUERY)).rejects.toBeInstanceOf(
-        MentorNotFoundException,
-      );
+      await expect(
+        service.findMentorFreeBlocks('mentor-1', QUERY),
+      ).rejects.toBeInstanceOf(MentorNotFoundException);
       expect(mentorsService.findOne).toHaveBeenCalledWith('mentor-1');
-      expect(availabilityRepository.findMentorFreeBlocksInRange).not.toHaveBeenCalled();
+      expect(
+        availabilityRepository.findMentorFreeBlocksInRange,
+      ).not.toHaveBeenCalled();
     });
 
     it('consulta desde el inicio del rango cuando todavía no empezó', async () => {
@@ -465,7 +580,9 @@ describe('AvailabilityService', () => {
 
       await service.findMentorFreeBlocks('mentor-1', QUERY);
 
-      expect(availabilityRepository.findMentorFreeBlocksInRange).toHaveBeenCalledWith(
+      expect(
+        availabilityRepository.findMentorFreeBlocksInRange,
+      ).toHaveBeenCalledWith(
         'mentor-1',
         new Date(QUERY.from),
         new Date(QUERY.to),
@@ -479,18 +596,20 @@ describe('AvailabilityService', () => {
 
       await service.findMentorFreeBlocks('mentor-1', QUERY);
 
-      expect(availabilityRepository.findMentorFreeBlocksInRange).toHaveBeenCalledWith(
-        'mentor-1',
-        now,
-        new Date(QUERY.to),
-      );
+      expect(
+        availabilityRepository.findMentorFreeBlocksInRange,
+      ).toHaveBeenCalledWith('mentor-1', now, new Date(QUERY.to));
     });
 
     it('devuelve una lista vacía sin consultar si todo el rango ya pasó', async () => {
       vi.useFakeTimers({ now: new Date('2026-10-20T12:00:00.000Z') });
 
-      await expect(service.findMentorFreeBlocks('mentor-1', QUERY)).resolves.toEqual([]);
-      expect(availabilityRepository.findMentorFreeBlocksInRange).not.toHaveBeenCalled();
+      await expect(
+        service.findMentorFreeBlocks('mentor-1', QUERY),
+      ).resolves.toEqual([]);
+      expect(
+        availabilityRepository.findMentorFreeBlocksInRange,
+      ).not.toHaveBeenCalled();
     });
 
     it('no ofrece los bloques de los días bloqueados, según el día de Bolivia', async () => {
@@ -508,7 +627,9 @@ describe('AvailabilityService', () => {
           endAt: new Date('2026-10-08T15:00:00.000Z'),
         },
       ]);
-      blockedDatesService.findBlockedDays.mockResolvedValue(new Set(['2026-10-07']));
+      blockedDatesService.findBlockedDays.mockResolvedValue(
+        new Set(['2026-10-07']),
+      );
 
       const result = await service.findMentorFreeBlocks('mentor-1', QUERY);
 
@@ -522,7 +643,9 @@ describe('AvailabilityService', () => {
 
     it('devuelve los bloques libres mapeados sin datos de citas', async () => {
       vi.useFakeTimers({ now: new Date('2026-10-01T12:00:00.000Z') });
-      availabilityRepository.findMentorFreeBlocksInRange.mockResolvedValue([block('block-1')]);
+      availabilityRepository.findMentorFreeBlocksInRange.mockResolvedValue([
+        block('block-1'),
+      ]);
 
       const [result] = await service.findMentorFreeBlocks('mentor-1', QUERY);
 
@@ -533,32 +656,53 @@ describe('AvailabilityService', () => {
 
   describe('findMyAvailabilityStatus', () => {
     it('lee el estado con el servicio de mentores de Epic 6', async () => {
-      mentorsService.findOne.mockResolvedValue({ id: mentorId, isAvailable: false });
+      mentorsService.findOne.mockResolvedValue({
+        id: mentorId,
+        isAvailable: false,
+      });
 
-      await expect(service.findMyAvailabilityStatus(mentorId)).resolves.toEqual({ mentorId, isAvailable: false });
+      await expect(service.findMyAvailabilityStatus(mentorId)).resolves.toEqual(
+        { mentorId, isAvailable: false },
+      );
       expect(mentorsService.findOne).toHaveBeenCalledWith(mentorId);
     });
 
     it('propaga el 404 si el usuario no es un mentor activo', async () => {
       mentorsService.findOne.mockRejectedValue(new MentorNotFoundException());
 
-      await expect(service.findMyAvailabilityStatus(mentorId)).rejects.toBeInstanceOf(MentorNotFoundException);
+      await expect(
+        service.findMyAvailabilityStatus(mentorId),
+      ).rejects.toBeInstanceOf(MentorNotFoundException);
     });
   });
 
   describe('updateAvailabilityStatus', () => {
-    it.each([true, false])('guarda isAvailable=%s con el servicio de Epic 6', async (isAvailable) => {
-      mentorsService.updateAvailability.mockResolvedValue({ id: mentorId, isAvailableForMentoring: isAvailable });
+    it.each([true, false])(
+      'guarda isAvailable=%s con el servicio de Epic 6',
+      async (isAvailable) => {
+        mentorsService.updateAvailability.mockResolvedValue({
+          id: mentorId,
+          isAvailableForMentoring: isAvailable,
+        });
 
-      await expect(service.updateAvailabilityStatus(mentorId, mentorId, isAvailable)).resolves.toEqual({
-        mentorId,
-        isAvailable,
-      });
-      expect(mentorsService.updateAvailability).toHaveBeenCalledWith(mentorId, isAvailable);
-    });
+        await expect(
+          service.updateAvailabilityStatus(mentorId, mentorId, isAvailable),
+        ).resolves.toEqual({
+          mentorId,
+          isAvailable,
+        });
+        expect(mentorsService.updateAvailability).toHaveBeenCalledWith(
+          mentorId,
+          isAvailable,
+        );
+      },
+    );
 
     it('no toca bloques, citas ni fechas bloqueadas al pausar', async () => {
-      mentorsService.updateAvailability.mockResolvedValue({ id: mentorId, isAvailableForMentoring: false });
+      mentorsService.updateAvailability.mockResolvedValue({
+        id: mentorId,
+        isAvailableForMentoring: false,
+      });
 
       await service.updateAvailabilityStatus(mentorId, mentorId, false);
 
@@ -568,9 +712,9 @@ describe('AvailabilityService', () => {
     });
 
     it('rechaza con 403 cambiar la disponibilidad de otro mentor', async () => {
-      await expect(service.updateAvailabilityStatus(mentorId, 'otro-mentor', false)).rejects.toBeInstanceOf(
-        MentorAvailabilityNotOwnedException,
-      );
+      await expect(
+        service.updateAvailabilityStatus(mentorId, 'otro-mentor', false),
+      ).rejects.toBeInstanceOf(MentorAvailabilityNotOwnedException);
       expect(mentorsService.updateAvailability).not.toHaveBeenCalled();
     });
   });

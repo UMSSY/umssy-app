@@ -1,3 +1,5 @@
+import "@/shared/testing/indexed-db.mock";
+import { saveAccessToken } from "@/shared/services/storage/access-token-storage";
 import { cloneElement, type ReactElement } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
@@ -78,8 +80,10 @@ describe("Radar personal integrado con Épica 2", () => {
     expect(screen.queryByTestId("radar-dot-qa")).not.toBeInTheDocument();
   });
 
-  it("mantiene una sola navegación dentro del layout de la aplicación", () => {
-    sessionStorage.setItem("accessToken", `h.${btoa(JSON.stringify({ roleTag: "titulado" }))}.s`);
+  it("mantiene una sola navegación dentro del layout de la aplicación", async () => {
+    await saveAccessToken(
+      `h.${btoa(JSON.stringify({ roleTag: "titulado" }))}.s`,
+    );
     renderWithQuery(<AppLayout><RadarProfileView /></AppLayout>);
     expect(screen.getAllByRole("navigation", { name: "Menú principal" })).toHaveLength(1);
   });

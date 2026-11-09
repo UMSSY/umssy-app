@@ -1,4 +1,3 @@
-
 import { Injectable } from '@nestjs/common';
 
 import { UserNotFoundException } from '../exceptions/index.js';
@@ -64,9 +63,7 @@ export class ConversationMapper {
       createdAt: (
         conversation.createdAt ?? conversation.updatedAt
       ).toISOString(),
-      participants: this.toEventParticipants(
-        conversation.participants ?? [],
-      ),
+      participants: this.toEventParticipants(conversation.participants ?? []),
       lastMessage: this.toLastMessage(conversation.messages[0]),
       unreadCount: 0,
       isBlockedByMe: false,

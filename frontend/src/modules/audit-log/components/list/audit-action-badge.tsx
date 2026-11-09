@@ -1,7 +1,7 @@
 import { CircleHelp } from "lucide-react";
 import { cn } from "cn";
 import { AUDIT_ACTION_STYLES } from "../../constants/audit-actions.constants";
-import type { AuditActionBadgeProps } from "../../types/audit-log-component-props.types";
+import type { AuditActionBadgeProps } from "../../types/audit-action-badge-props.types";
 
 export function AuditActionBadge({ action }: AuditActionBadgeProps) {
   const style = AUDIT_ACTION_STYLES[action];

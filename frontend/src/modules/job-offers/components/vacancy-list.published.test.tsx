@@ -1,3 +1,5 @@
+import "@/shared/testing/indexed-db.mock";
+import "@/modules/job-offers/testing/current-company.mock";
 import { cleanup, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { toast } from "sonner";
@@ -21,9 +23,9 @@ function mockOffers(offers = OFFERS) {
 }
 
 describe("VacancyList en el portal de empresa", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.stubEnv("NEXT_PUBLIC_DEMO_COMPANY_ID", COMPANY_ID);
-    saveAccessToken(buildSessionToken("empresa"));
+    await saveAccessToken(buildSessionToken("empresa"));
   });
 
   afterEach(() => {
@@ -102,7 +104,10 @@ describe("VacancyList en el portal de empresa", () => {
     const user = userEvent.setup();
     mockOffers(
       Array.from({ length: 23 }, (_, index) =>
-        buildJobOffer({ id: `offer-${index + 1}`, title: `Vacante ${index + 1}` }),
+        buildJobOffer({
+          id: `offer-${index + 1}`,
+          title: `Vacante ${index + 1}`,
+        }),
       ),
     );
     renderWithQuery(<VacancyList />);

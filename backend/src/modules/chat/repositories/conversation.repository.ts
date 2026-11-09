@@ -76,7 +76,7 @@ export class ConversationRepository {
   }
 
   async upsertByEventId(eventId: string, userId: string, now: Date) {
-    return this.prisma.$transaction(async tx => {
+    return this.prisma.$transaction(async (tx) => {
       const conversation = await tx.conversation.upsert({
         where: { eventId },
         update: {},
@@ -91,7 +91,9 @@ export class ConversationRepository {
       });
 
       await tx.conversationParticipant.upsert({
-        where: { conversationId_userId: { conversationId: conversation.id, userId } },
+        where: {
+          conversationId_userId: { conversationId: conversation.id, userId },
+        },
         update: { lastReadAt: now },
         create: { conversationId: conversation.id, userId, lastReadAt: now },
       });
@@ -126,10 +128,7 @@ export class ConversationRepository {
         OR: [
           {
             eventId: null,
-            OR: [
-              { userAId: userId },
-              { userBId: userId },
-            ],
+            OR: [{ userAId: userId }, { userBId: userId }],
           },
           {
             eventId: { not: null },

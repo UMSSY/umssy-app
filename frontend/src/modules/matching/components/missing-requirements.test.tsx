@@ -1,7 +1,7 @@
 import { cleanup, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { JOB_MATCHING_MESSAGES } from "../constants/job-matching.constants";
-import type { CategorizedJobRequirement } from "../types/requirement-category.types";
+import type { CategorizedJobRequirement } from "../types/categorized-job-requirement.types";
 import { MissingRequirements } from "./missing-requirements";
 
 const NO_PENDING = "Para esta oportunidad no tienes habilidades pendientes";

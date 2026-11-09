@@ -1,7 +1,15 @@
+import {
+  TRANSACTION_CONFLICT_CODE,
+  UNIQUE_CONSTRAINT_VIOLATION_CODE,
+} from '../../../common/constants/prisma-errors.constants.js';
 import { RegistrationScheduleConflictException } from '../exceptions/registration-schedule-conflict.exception.js';
 import { PassNotFoundException } from '../exceptions/pass-not-found.exception.js';
 import type { SupportTransactionResult } from '../types/support-transaction-result.types.js';
-import { COMMUNITY_ORIGIN_TITLE, EXPIRED_STATUS_TITLE, VOTING_STATUS_TITLES } from '../../events/index.js';
+import {
+  COMMUNITY_ORIGIN_TITLE,
+  EXPIRED_STATUS_TITLE,
+  VOTING_STATUS_TITLES,
+} from '../../events/index.js';
 import { EventNotFoundException } from '../../events/index.js';
 import { AlreadySupportedException } from '../exceptions/already-supported.exception.js';
 import { EventNotSupportableException } from '../exceptions/event-not-supportable.exception.js';
@@ -9,7 +17,10 @@ import { ProposalExpiredException } from '../exceptions/proposal-expired.excepti
 import type { EventSupportContext } from '../types/event-support-context.types.js';
 import type { SupportResponse } from '../types/support-response.types.js';
 import { EventRegistrationsMapper } from '../mappers/event-registrations.mapper.js';
-import type { CreateEventRegistrationPayload, MyRegistrationResponse } from '../types/event-registrations.types.js';
+import type {
+  CreateEventRegistrationPayload,
+  MyRegistrationResponse,
+} from '../types/event-registrations.types.js';
 import { Injectable } from '@nestjs/common';
 import { randomBytes } from 'node:crypto';
 import { EventRegistrationsRepository } from '../repositories/event-registrations.repository.js';
@@ -22,7 +33,7 @@ import { EventNotOpenException } from '../exceptions/event-not-open.exception.js
 import { RegistrationAlreadyCancelledException } from '../exceptions/registration-already-cancelled.exception.js';
 import { RegistrationNotFoundException } from '../exceptions/registration-not-found.exception.js';
 import { RegistrationNotOwnedException } from '../exceptions/registration-not-owned.exception.js';
-import { REGISTRATION_TRANSACTION_ATTEMPTS } from '../constants/registrations.constants.js';
+
 import { mapRegistration } from '../mappers/registration.mapper.js';
 import { assertRegistrationOpen } from '../utils/assert-registration-open.js';
 import type { RegistrationResponse } from '../types/registration-response.types.js';
@@ -56,10 +67,20 @@ export class EventRegistrationsService {
       if (existing && mapRegistration(existing).status === 'confirmed') {
         return mapRegistration(existing);
       }
-      if (event.status.title !== PUBLISHED_STATUS_TITLE) throw new EventNotOpenException();
+      if (event.status.title !== PUBLISHED_STATUS_TITLE)
+        throw new EventNotOpenException();
       assertRegistrationOpen(event);
-      const registeredEventIds = await this.repository.findConfirmedEventIds(tx, userId);
-      if (await this.eventsService.hasScheduleConflict(tx, event, registeredEventIds)) {
+      const registeredEventIds = await this.repository.findConfirmedEventIds(
+        tx,
+        userId,
+      );
+      if (
+        await this.eventsService.hasScheduleConflict(
+          tx,
+          event,
+          registeredEventIds,
+        )
+      ) {
         throw new RegistrationScheduleConflictException();
       }
       if (event.capacity !== null) {
@@ -74,34 +95,57 @@ export class EventRegistrationsService {
     });
   }
 
-  async findOwn(eventId: string, userId: string): Promise<RegistrationResponse> {
+  async findOwn(
+    eventId: string,
+    userId: string,
+  ): Promise<RegistrationResponse> {
     await this.eventsService.findForRegistration(eventId);
     const registration = await this.repository.findOwn(eventId, userId);
     if (!registration) throw new RegistrationNotFoundException();
     return mapRegistration(registration);
   }
 
-  async cancel(registrationId: string, userId: string): Promise<RegistrationResponse> {
+  async cancel(
+    registrationId: string,
+    userId: string,
+  ): Promise<RegistrationResponse> {
     return this.transact(async (tx) => {
       const registration = await this.repository.findById(registrationId, tx);
       if (!registration) throw new RegistrationNotFoundException();
-      if (registration.userId !== userId) throw new RegistrationNotOwnedException();
+      if (registration.userId !== userId)
+        throw new RegistrationNotOwnedException();
       if (mapRegistration(registration).status === 'cancelled') {
         throw new RegistrationAlreadyCancelledException();
       }
       await this.lockEventRow(tx, registration.eventId);
-      const event = await this.eventsService.findForRegistration(registration.eventId, tx);
+      const event = await this.eventsService.findForRegistration(
+        registration.eventId,
+        tx,
+      );
       assertRegistrationOpen(event);
-      return mapRegistration(await this.repository.cancel(tx, registrationId, new Date()));
+      return mapRegistration(
+        await this.repository.cancel(tx, registrationId, new Date()),
+      );
     });
   }
 
-  private async transact<T>(operation: (tx: Prisma.TransactionClient) => Promise<T>): Promise<T> {
-    for (let attempt = 0; attempt < REGISTRATION_TRANSACTION_ATTEMPTS; attempt += 1) {
+  private async transact<T>(
+    operation: (tx: Prisma.TransactionClient) => Promise<T>,
+  ): Promise<T> {
+    for (let attempt = 0; attempt < 3; attempt += 1) {
       try {
-        return await this.repository.transaction(operation, Prisma.TransactionIsolationLevel.Serializable);
+        return await this.repository.transaction(
+          operation,
+          Prisma.TransactionIsolationLevel.Serializable,
+        );
       } catch (error) {
-        if (!(error instanceof Prisma.PrismaClientKnownRequestError) || !['P2034', 'P2002'].includes(error.code)) {
+        if (
+          !(error instanceof Prisma.PrismaClientKnownRequestError) ||
+          ![
+            TRANSACTION_CONFLICT_CODE,
+            UNIQUE_CONSTRAINT_VIOLATION_CODE,
+          ].includes(error.code)
+        ) {
           throw error;
         }
       }
@@ -109,22 +153,25 @@ export class EventRegistrationsService {
     throw new InternalException();
   }
 
-  private lockEventRow(tx: Prisma.TransactionClient, eventId: string): Promise<void> {
+  private lockEventRow(
+    tx: Prisma.TransactionClient,
+    eventId: string,
+  ): Promise<void> {
     return this.eventsService.lockEventRow(tx, eventId);
   }
 
   async findMine(userId: string): Promise<MyRegistrationResponse[]> {
-    return EventRegistrationsMapper.toMyRegistrationList(await this.findByUserId(userId));
+    return EventRegistrationsMapper.toMyRegistrationList(
+      await this.findByUserId(userId),
+    );
   }
 
   findByUserId(userId: string) {
     return this.repository.findByUserId(userId);
   }
   async support(eventId: string, userId: string): Promise<SupportResponse> {
-    const result = await this.registerSupport(
-      eventId,
-      userId,
-      (event) => this.assertSupportable(event),
+    const result = await this.registerSupport(eventId, userId, (event) =>
+      this.assertSupportable(event),
     );
 
     if (!result) {
@@ -190,7 +237,12 @@ export class EventRegistrationsService {
 
       assertSupportable(publishedWhileWaiting ? beforeLock : event);
 
-      await this.repository.createSupport(tx, eventId, userId, this.generateQrToken());
+      await this.repository.createSupport(
+        tx,
+        eventId,
+        userId,
+        this.generateQrToken(),
+      );
 
       const supportCount = event.supportCount + 1;
       const threshold = event.supportThreshold;
@@ -211,7 +263,10 @@ export class EventRegistrationsService {
     });
   }
 
-  private loadSupportContext(tx: Prisma.TransactionClient, eventId: string): Promise<EventSupportContext | null> {
+  private loadSupportContext(
+    tx: Prisma.TransactionClient,
+    eventId: string,
+  ): Promise<EventSupportContext | null> {
     return this.eventsService.loadSupportContext(tx, eventId);
   }
 }

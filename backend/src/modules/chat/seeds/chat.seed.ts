@@ -1,3 +1,4 @@
+import { MINUTE_MS } from '../../../common/constants/date-time.constants.js';
 import type { Prisma } from '../../../prisma/client.js';
 import {
   SEED_CONVERSATIONS,
@@ -5,8 +6,6 @@ import {
   SEED_USER_PRESENCES,
 } from '../constants/seed-chat.constants.js';
 import type { ChatSeedResult } from '../types/chat-seed-result.types.js';
-
-const MS_PER_MINUTE = 60_000;
 
 async function seedMessageStatuses(
   tx: Prisma.TransactionClient,
@@ -35,7 +34,7 @@ async function seedUserPresences(
     const lastSeenAt =
       presence.minutesAgo === undefined
         ? new Date(now)
-        : new Date(now - presence.minutesAgo * MS_PER_MINUTE);
+        : new Date(now - presence.minutesAgo * MINUTE_MS);
 
     await tx.userPresence.upsert({
       where: { userId: user.id },
@@ -60,7 +59,7 @@ function resolveLastReadAt(
 ): Date {
   return spec === 'now'
     ? new Date(now)
-    : new Date(now - spec.minutesAgo * MS_PER_MINUTE);
+    : new Date(now - spec.minutesAgo * MINUTE_MS);
 }
 
 async function seedConversations(
@@ -83,43 +82,43 @@ async function seedConversations(
 
     const [userAId, userBId] =
       userA.id < userB.id ? [userA.id, userB.id] : [userB.id, userA.id];
- 
+
     const isEventConversation = definition.eventId != null;
 
-const existing = isEventConversation
-  ? await tx.conversation.findFirst({
-      where: { eventId: definition.eventId },
-      select: { id: true },
-    })
-  : await tx.conversation.findUnique({
-      where: { userAId_userBId: { userAId, userBId } },
-      select: { id: true },
-    });
+    const existing = isEventConversation
+      ? await tx.conversation.findFirst({
+          where: { eventId: definition.eventId },
+          select: { id: true },
+        })
+      : await tx.conversation.findUnique({
+          where: { userAId_userBId: { userAId, userBId } },
+          select: { id: true },
+        });
 
-if (existing) continue;
+    if (existing) continue;
 
     const conversation = await tx.conversation.create({
-  data: {
-    ...(isEventConversation
-      ? { eventId: definition.eventId }
-      : { userAId, userBId }),
-    participants: {
-      createMany: {
-        data: [
-          {
-            userId: userA.id,
-            lastReadAt: resolveLastReadAt(definition.lastReadAtByA, now),
+      data: {
+        ...(isEventConversation
+          ? { eventId: definition.eventId }
+          : { userAId, userBId }),
+        participants: {
+          createMany: {
+            data: [
+              {
+                userId: userA.id,
+                lastReadAt: resolveLastReadAt(definition.lastReadAtByA, now),
+              },
+              {
+                userId: userB.id,
+                lastReadAt: resolveLastReadAt(definition.lastReadAtByB, now),
+              },
+            ],
           },
-          {
-            userId: userB.id,
-            lastReadAt: resolveLastReadAt(definition.lastReadAtByB, now),
-          },
-        ],
+        },
       },
-    },
-  },
-  select: { id: true },
-});
+      select: { id: true },
+    });
 
     conversations += 1;
 
@@ -128,7 +127,7 @@ if (existing) continue;
 
     for (const message of definition.messages) {
       const senderId = message.fromA ? userA.id : userB.id;
-      const sentAt = new Date(now - message.minutesAgo * MS_PER_MINUTE);
+      const sentAt = new Date(now - message.minutesAgo * MINUTE_MS);
       const statusId = statusIdByTitle.get(message.status);
       if (!statusId) {
         throw new Error(

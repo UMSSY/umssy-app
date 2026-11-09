@@ -1,6 +1,8 @@
+import "@/shared/testing/indexed-db.mock";
+import { saveAccessToken, clearAccessToken } from "@/shared/services/storage/access-token-storage";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { apiClient } from "@/shared/services/api-client";
-import { ACCESS_TOKEN_STORAGE_KEY } from "@/modules/profile/config/auth-storage.config";
+
 import { documentsService } from "./documents.service";
 
 vi.mock("@/shared/services/api-client", async (importOriginal) => ({
@@ -37,12 +39,12 @@ function wrapResponse<T>(data: T) {
 }
 
 describe("documentsService", () => {
-  beforeEach(() => {
-    window.sessionStorage.setItem(ACCESS_TOKEN_STORAGE_KEY, "token-123");
+  beforeEach(async () => {
+    await saveAccessToken("token-123");
   });
 
   afterEach(() => {
-    window.sessionStorage.clear();
+    clearAccessToken();
     vi.clearAllMocks();
   });
 
@@ -75,7 +77,7 @@ describe("documentsService", () => {
   });
 
   it("sends no authorization header when there is no saved token", async () => {
-    window.sessionStorage.clear();
+    clearAccessToken();
     vi.mocked(apiClient.get).mockResolvedValue(wrapResponse(null));
 
     await documentsService.getCvs(2, 10);

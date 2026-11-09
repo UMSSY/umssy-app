@@ -14,23 +14,17 @@ import { PageHeading } from "@/shared/components/layout/page-heading";
 import { getApiErrorDetail } from "@/shared/utils/api-error-detail";
 import { readSurveyStorage, removeSurveyStorage, writeSurveyStorage } from "../utils/survey-draft-storage";
 import { SurveyQuestionField } from "../components/survey-question-field";
-import {
-  SURVEY_ANSWER_BREADCRUMB,
-  SURVEY_ANSWER_HINTS,
-  SURVEY_ANSWER_QUESTION_ID_PREFIX,
-  SURVEY_ANSWER_REDIRECT_DELAY_MS,
-  SURVEY_ANSWER_TEXT,
-  SURVEY_ANSWERS_STORAGE_KEY,
-} from "../constants/survey-answer.constants";
+import { SURVEY_ANSWER_BREADCRUMB, SURVEY_ANSWER_HINTS, SURVEY_ANSWER_TEXT, SURVEY_ANSWERS_STORAGE_KEY } from "../constants/survey-answer.constants";
 import { SURVEY_NOTIFICATIONS_PATH } from "../constants/survey-notifications.constants";
 import { useSurveyDetail } from "../hooks/use-survey-detail";
-import { surveysService } from "../services/surveys.service";
-import type { AnswerSurveyViewProps } from "../types/survey-component-props.types";
+import { useSubmitSurveyAnswers } from "../hooks/use-submit-survey-answers";
+import type { AnswerSurveyViewProps } from "../types/answer-survey-view-props.types";
 
 export function AnswerSurveyView({ id }: AnswerSurveyViewProps) {
   const router = useRouter();
   const { survey, isLoading, errorMessage } = useSurveyDetail(id);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const submitAnswers = useSubmitSurveyAnswers(id);
+  const isSubmitting = submitAnswers.isPending;
   const storageKey = SURVEY_ANSWERS_STORAGE_KEY(id);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string[]>>({});
   const [isDraftRestored, setIsDraftRestored] = useState(false);
@@ -80,25 +74,24 @@ export function AnswerSurveyView({ id }: AnswerSurveyViewProps) {
       setValidationErrors(errors);
       toast.error(SURVEY_ANSWER_TEXT.missingAnswers);
       const [firstInvalidId] = Object.keys(errors);
-      document.getElementById(`${SURVEY_ANSWER_QUESTION_ID_PREFIX}-${firstInvalidId}-card`)?.scrollIntoView?.({ behavior: "smooth", block: "center" });
+      document
+        .getElementById(`question-${firstInvalidId}-card`)
+        ?.scrollIntoView?.({ behavior: "smooth", block: "center" });
       return;
     }
 
     try {
-      setIsSubmitting(true);
       const answers = Object.entries(selectedAnswers)
         .filter(([, optionIds]) => optionIds.length > 0)
         .map(([questionId, optionIds]) => ({ questionId, optionIds }));
 
-      await surveysService.submitAnswers(id, { answers });
+      await submitAnswers.mutateAsync({ answers });
       void removeSurveyStorage(storageKey);
       setIsSubmittedSuccess(true);
       toast.success(SURVEY_ANSWER_TEXT.submitSuccess);
-      setTimeout(() => router.push(SURVEY_NOTIFICATIONS_PATH), SURVEY_ANSWER_REDIRECT_DELAY_MS);
+      setTimeout(() => router.push(SURVEY_NOTIFICATIONS_PATH), 1500);
     } catch (error: unknown) {
       toast.error(getApiErrorDetail(error) ?? (error instanceof Error ? error.message : SURVEY_ANSWER_TEXT.submitError));
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -187,7 +180,7 @@ export function AnswerSurveyView({ id }: AnswerSurveyViewProps) {
               <SurveyQuestionField
                 key={question.id}
                 variant="plain"
-                idPrefix={SURVEY_ANSWER_QUESTION_ID_PREFIX}
+                idPrefix={"question"}
                 question={question}
                 index={index}
                 hint={question.type === "multiple_choice" ? SURVEY_ANSWER_HINTS.multiple_choice : undefined}
