@@ -1,10 +1,6 @@
 import type { AppointmentCounterpart } from "../types/appointment-counterpart.types";
 import type { AppointmentStatus } from "../types/appointment-status.types";
 
-export const NOT_FOUND_STATUS = 404;
-
-export const APPOINTMENTS_EYEBROW = "Mentorías";
-
 export const APPOINTMENTS_TEXT = {
   title: "Mis citas",
   tabsLabel: "Listado de citas",
@@ -66,19 +62,4 @@ export const APPOINTMENT_WEEKDAY_LABELS = [
   "Viernes",
   "Sábado",
   "Domingo",
-] as const;
-
-export const APPOINTMENT_MONTH_LABELS = [
-  "enero",
-  "febrero",
-  "marzo",
-  "abril",
-  "mayo",
-  "junio",
-  "julio",
-  "agosto",
-  "septiembre",
-  "octubre",
-  "noviembre",
-  "diciembre",
 ] as const;

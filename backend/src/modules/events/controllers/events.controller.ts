@@ -21,7 +21,6 @@ import type { AuthenticatedRequest } from '../../../common/types/authenticated-r
 @ApiTags('Events')
 @Controller('events')
 @UseGuards(OptionalJwtAuthGuard)
-
 export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
 
@@ -75,7 +74,7 @@ export class EventsController {
   ) {
     return this.eventsService.findAll(query, req.user?.id);
   }
-  
+
   @Get(':id')
   @ApiOperation({
     summary: 'Obtener un evento por ID',
@@ -93,4 +92,3 @@ export class EventsController {
     return this.eventsService.findOne(id, req.user?.id);
   }
 }
-

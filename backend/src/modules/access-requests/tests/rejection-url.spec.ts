@@ -15,7 +15,9 @@ describe('buildRejectionUrl', () => {
     expect(url.origin).toBe('https://umssy.test');
     expect(url.pathname).toBe('/request-access/status');
     expect([...url.searchParams]).toEqual([['code', GRANT.requestCode]]);
-    expect(new URLSearchParams(url.hash.slice(1)).get('correctionToken')).toBe(GRANT.token);
+    expect(new URLSearchParams(url.hash.slice(1)).get('correctionToken')).toBe(
+      GRANT.token,
+    );
     expect(url.search).not.toContain(GRANT.token);
     expect(url.toString()).not.toContain('email');
   });
@@ -28,7 +30,9 @@ describe('buildRejectionUrl', () => {
 
   it('permite el entorno local existente', () => {
     vi.stubEnv('FRONTEND_URL', undefined);
-    expect(new URL(buildRejectionUrl(GRANT)).origin).toBe('http://localhost:3000');
+    expect(new URL(buildRejectionUrl(GRANT)).origin).toBe(
+      'http://localhost:3000',
+    );
   });
 
   it('codifica el valor del código sin permitir añadir otros parámetros', () => {
@@ -36,19 +40,28 @@ describe('buildRejectionUrl', () => {
     const url = new URL(buildRejectionUrl({ ...GRANT, requestCode: code }));
     expect(url.searchParams.get('code')).toBe(code);
     expect(url.searchParams.has('email')).toBe(false);
-    expect(new URLSearchParams(url.hash.slice(1)).get('correctionToken')).toBe(GRANT.token);
+    expect(new URLSearchParams(url.hash.slice(1)).get('correctionToken')).toBe(
+      GRANT.token,
+    );
   });
 
-  it.each(['ftp://umssy.test', 'javascript:alert(1)', 'mailto:ana@example.com', 'https://user:password@umssy.test', 'no-es-url'])(
-    'rechaza un origen no admitido: %s', (origin) => {
-      vi.stubEnv('FRONTEND_URL', origin);
-      expect(() => buildRejectionUrl(GRANT)).toThrow();
+  it.each([
+    'ftp://umssy.test',
+    'javascript:alert(1)',
+    'mailto:ana@example.com',
+    'https://user:password@umssy.test',
+    'no-es-url',
+  ])('rechaza un origen no admitido: %s', (origin) => {
+    vi.stubEnv('FRONTEND_URL', origin);
+    expect(() => buildRejectionUrl(GRANT)).toThrow();
+  });
+
+  it.each(['', 'session.jwt', 'dcr1.short', `${GRANT.token}\n`])(
+    'rechaza un permiso inválido: %j',
+    (token) => {
+      expect(() => buildRejectionUrl({ ...GRANT, token })).toThrow();
     },
   );
-
-  it.each(['', 'session.jwt', 'dcr1.short', `${GRANT.token}\n`])('rechaza un permiso inválido: %j', (token) => {
-    expect(() => buildRejectionUrl({ ...GRANT, token })).toThrow();
-  });
 
   it('no genera un enlace sin código de solicitud', () => {
     expect(() => buildRejectionUrl({ ...GRANT, requestCode: '' })).toThrow();

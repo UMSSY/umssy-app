@@ -17,6 +17,9 @@ export class SessionService {
     return {
       id: user.id,
       email: user.email,
+      company: user.company
+        ? { id: user.company.id, name: user.company.title }
+        : null,
       roles: [...new Set(user.roles.map((item) => item.role.name))],
     };
   }

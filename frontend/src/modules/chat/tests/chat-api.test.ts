@@ -1,3 +1,5 @@
+import "@/shared/testing/indexed-db.mock";
+import { saveAccessToken } from "@/shared/services/storage/access-token-storage";
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 vi.mock("@/shared/services/api-client", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/shared/services/api-client")>()),
@@ -28,9 +30,11 @@ import {
 
 const apiClientMock = vi.mocked(apiClient);
 
-beforeEach(() => {
+beforeEach(async () => {
   vi.resetAllMocks();
-
+  await saveAccessToken(
+    `header.${btoa(JSON.stringify({ sub: "user-1" }))}.signature`,
+  );
 });
 
 describe('chat-api', () => {
@@ -328,26 +332,23 @@ describe('chat-api — getMessages', () => {
 
 });
 
-describe('chat-api — getPaginatedMessages', () => {
-it('debe retornar la pagina mas reciente del historial', async () => {
-  clearStoredMessages();
+describe("chat-api — getPaginatedMessages", () => {
+  it("debe retornar la pagina mas reciente del historial", async () => {
+    clearStoredMessages();
 
-  const messages = Array.from({ length: 10 }, (_, index) => {
-    const number = index + 21;
+    const messages = Array.from({ length: 10 }, (_, index) => {
+      const number = index + 21;
 
-    return {
-      id: `msg-1-${number}`,
-      conversationId: 'conv-1',
-      senderId: 'user-101',
-      content: `Mensaje ${number}`,
-      createdAt: new Date(
-        Date.UTC(2026, 9, 14, 10, number),
-      ).toISOString(),
-    };
+      return {
+        id: `msg-1-${number}`,
+        conversationId: "conv-1",
+        senderId: "user-101",
+        content: `Mensaje ${number}`,
+        createdAt: new Date(Date.UTC(2026, 9, 14, 10, number)).toISOString(),
+      };
+    });
 
-  });
-
-  apiClientMock.get.mockResolvedValueOnce({
+    apiClientMock.get.mockResolvedValueOnce({
     data: {
       statusCode: 200,
       ok: true,
@@ -360,42 +361,38 @@ it('debe retornar la pagina mas reciente del historial', async () => {
     },
   } as never);
 
-  const result = await getPaginatedMessages({
+    const result = await getPaginatedMessages({
     conversationId: 'conv-1',
     limit: 10,
   });
 
-  expect(result.data).toHaveLength(10);
+    expect(result.data).toHaveLength(10);
 
-  expect(result.data[0].id).toBe('msg-1-21');
+    expect(result.data[0].id).toBe('msg-1-21');
 
-  expect(result.data[9].id).toBe('msg-1-30');
+    expect(result.data[9].id).toBe('msg-1-30');
 
-  expect(result.hasMore).toBe(true);
+    expect(result.hasMore).toBe(true);
 
-  expect(result.nextCursor).toBe('msg-1-21');
-
-});
-
-  it('debe cargar la pagina anterior utilizando el cursor', async () => {
-  clearStoredMessages();
-
-  const messages = Array.from({ length: 10 }, (_, index) => {
-    const number = index + 11;
-
-    return {
-      id: `msg-1-${number}`,
-      conversationId: 'conv-1',
-      senderId: 'user-101',
-      content: `Mensaje ${number}`,
-      createdAt: new Date(
-        Date.UTC(2026, 9, 14, 10, number),
-      ).toISOString(),
-    };
-
+    expect(result.nextCursor).toBe('msg-1-21');
   });
 
-  apiClientMock.get.mockResolvedValueOnce({
+  it("debe cargar la pagina anterior utilizando el cursor", async () => {
+    clearStoredMessages();
+
+    const messages = Array.from({ length: 10 }, (_, index) => {
+      const number = index + 11;
+
+      return {
+        id: `msg-1-${number}`,
+        conversationId: "conv-1",
+        senderId: "user-101",
+        content: `Mensaje ${number}`,
+        createdAt: new Date(Date.UTC(2026, 9, 14, 10, number)).toISOString(),
+      };
+    });
+
+    apiClientMock.get.mockResolvedValueOnce({
     data: {
       statusCode: 200,
       ok: true,
@@ -408,14 +405,14 @@ it('debe retornar la pagina mas reciente del historial', async () => {
     },
   } as never);
 
-  const result = await getPaginatedMessages({
+    const result = await getPaginatedMessages({
     conversationId: 'conv-1',
     cursor: 'msg-1-21',
     limit: 10,
   });
 
-  expect(apiClientMock.get).toHaveBeenCalledWith(
-    '/conversations/conv-1/messages',
+    expect(apiClientMock.get).toHaveBeenCalledWith(
+    '/chat/conversations/conv-1/messages',
     {
       params: {
         cursor: 'msg-1-21',
@@ -424,37 +421,33 @@ it('debe retornar la pagina mas reciente del historial', async () => {
     },
   );
 
-  expect(result.data).toHaveLength(10);
+    expect(result.data).toHaveLength(10);
 
-  expect(result.data[0].id).toBe('msg-1-11');
+    expect(result.data[0].id).toBe('msg-1-11');
 
-  expect(result.data[9].id).toBe('msg-1-20');
+    expect(result.data[9].id).toBe('msg-1-20');
 
-  expect(result.hasMore).toBe(true);
+    expect(result.hasMore).toBe(true);
 
-  expect(result.nextCursor).toBe('msg-1-11');
-
-});
-
-  it('debe indicar cuando se alcanza el inicio del historial', async () => {
-  clearStoredMessages();
-
-  const messages = Array.from({ length: 10 }, (_, index) => {
-    const number = index + 1;
-
-    return {
-      id: `msg-1-${String(number).padStart(2, '0')}`,
-      conversationId: 'conv-1',
-      senderId: 'user-101',
-      content: `Mensaje ${number}`,
-      createdAt: new Date(
-        Date.UTC(2026, 9, 14, 10, number),
-      ).toISOString(),
-    };
-
+    expect(result.nextCursor).toBe('msg-1-11');
   });
 
-  apiClientMock.get.mockResolvedValueOnce({
+  it("debe indicar cuando se alcanza el inicio del historial", async () => {
+    clearStoredMessages();
+
+    const messages = Array.from({ length: 10 }, (_, index) => {
+      const number = index + 1;
+
+      return {
+        id: `msg-1-${String(number).padStart(2, "0")}`,
+        conversationId: "conv-1",
+        senderId: "user-101",
+        content: `Mensaje ${number}`,
+        createdAt: new Date(Date.UTC(2026, 9, 14, 10, number)).toISOString(),
+      };
+    });
+
+    apiClientMock.get.mockResolvedValueOnce({
     data: {
       statusCode: 200,
       ok: true,
@@ -467,14 +460,14 @@ it('debe retornar la pagina mas reciente del historial', async () => {
     },
   } as never);
 
-  const result = await getPaginatedMessages({
+    const result = await getPaginatedMessages({
     conversationId: 'conv-1',
     cursor: 'msg-1-11',
     limit: 10,
   });
 
-  expect(apiClientMock.get).toHaveBeenCalledWith(
-    '/conversations/conv-1/messages',
+    expect(apiClientMock.get).toHaveBeenCalledWith(
+    '/chat/conversations/conv-1/messages',
     {
       params: {
         cursor: 'msg-1-11',
@@ -483,17 +476,16 @@ it('debe retornar la pagina mas reciente del historial', async () => {
     },
   );
 
-  expect(result.data).toHaveLength(10);
+    expect(result.data).toHaveLength(10);
 
-  expect(result.data[0].id).toBe('msg-1-01');
+    expect(result.data[0].id).toBe('msg-1-01');
 
-  expect(result.data[9].id).toBe('msg-1-10');
+    expect(result.data[9].id).toBe('msg-1-10');
 
-  expect(result.hasMore).toBe(false);
+    expect(result.hasMore).toBe(false);
 
-  expect(result.nextCursor).toBeNull();
-
-});
+    expect(result.nextCursor).toBeNull();
+  });
 
   it('debe retornar una pagina vacia si la conversacion no tiene mensajes', async () => {
     const result = await getPaginatedMessages({
@@ -565,7 +557,7 @@ it('debe retornar la pagina mas reciente del historial', async () => {
   ).rejects.toThrow('Cursor de mensajes no valido');
 
   expect(apiClientMock.get).toHaveBeenCalledWith(
-    '/conversations/conv-1/messages',
+    '/chat/conversations/conv-1/messages',
     {
       params: {
         cursor: 'cursor-inexistente',
@@ -576,7 +568,7 @@ it('debe retornar la pagina mas reciente del historial', async () => {
 
 });
 
-  it('debe llamar a GET /conversations/:conversationId/messages y retornar mensajes paginados mapeados', async () => {
+  it('debe llamar a GET /chat/conversations/:conversationId/messages y retornar mensajes paginados mapeados', async () => {
     apiClientMock.get.mockResolvedValueOnce({
       data: {
         statusCode: 200,
@@ -611,7 +603,7 @@ it('debe retornar la pagina mas reciente del historial', async () => {
     });
 
     expect(apiClientMock.get).toHaveBeenCalledWith(
-      '/conversations/conv-real-uuid/messages',
+      '/chat/conversations/conv-real-uuid/messages',
       {
         params: {
           cursor: undefined,
@@ -637,7 +629,6 @@ it('debe retornar la pagina mas reciente del historial', async () => {
     expect(result.nextCursor).toBeNull();
 
   });
-
 });
 
 describe('chat-api — getOrCreateConversation ', () => {
@@ -738,44 +729,44 @@ describe('chat-api — getOrCreateConversation ', () => {
 
 });
 
-describe('chat-api — sendMessage (HU-03 Tarea 2)', () => {
+describe("chat-api — sendMessage (HU-03 Tarea 2)", () => {
   beforeEach(() => {
     window.localStorage.clear();
     clearStoredMessages();
     vi.restoreAllMocks();
 
-    apiClientMock.post.mockImplementation(async (url: string, data: unknown) => {
-      if (url === '/chat/messages') {
-        const payload = data as { conversationId: string; content: string };
+    apiClientMock.post.mockImplementation(
+      async (url: string, data: unknown) => {
+        if (url === "/chat/messages") {
+          const payload = data as { conversationId: string; content: string };
 
-        const now = new Date().toISOString();
+          const now = new Date().toISOString();
 
-        return {
-          data: {
-            statusCode: 201,
-            ok: true,
-            detail: 'Mensaje enviado exitosamente',
+          return {
             data: {
-              id: `msg-${Date.now()}`,
-              conversationId: payload.conversationId,
-              senderId: 'current-user',
-              content: payload.content,
-              timestamp: now,
-              createdAt: now,
-              status: 'sent',
-              isAttachment: false,
-              attachmentType: null,
+              statusCode: 201,
+              ok: true,
+              detail: "Mensaje enviado exitosamente",
+              data: {
+                id: `msg-${Date.now()}`,
+                conversationId: payload.conversationId,
+                senderId: "current-user",
+                content: payload.content,
+                timestamp: now,
+                createdAt: now,
+                status: "sent",
+                isAttachment: false,
+                attachmentType: null,
+              },
             },
-          },
-        } as never;
-      }
+          } as never;
+        }
 
-      return { data: {} } as never;
-
-    });
+        return { data: {} } as never;
+      },
+    );
 
     apiClientMock.patch.mockResolvedValue({ data: {} } as never);
-
   });
 
   it('debe responder dentro del umbral esperado (< 2 segundos)', async () => {
@@ -853,7 +844,7 @@ describe('chat-api — sendMessage (HU-03 Tarea 2)', () => {
 
   });
 
-  it('debe persistir el mensaje enviado en el almacenamiento local', async () => {
+  it("debe persistir el mensaje enviado en el almacenamiento local", async () => {
     const response = await sendMessage(
       {
         conversationId: 'conv-2',
@@ -865,8 +856,7 @@ describe('chat-api — sendMessage (HU-03 Tarea 2)', () => {
       },
     );
 
-    const stored =
-      getStoredMessages();
+    const stored = await getStoredMessages();
 
     const found = stored.find(
       (message) =>
@@ -878,7 +868,6 @@ describe('chat-api — sendMessage (HU-03 Tarea 2)', () => {
     expect(found?.content).toBe(
       'Mensaje persistido via sendMessage',
     );
-
   });
 
   it('debe rechazar la promesa ante simulacion de caida de red (forceOffline)', async () => {
@@ -1035,42 +1024,43 @@ describe('chat-api — sendMessage (HU-03 Tarea 2)', () => {
     ).rejects.toThrow('Error del servidor al procesar el mensaje');
 
   });
-
 });
 
-describe('chat-api — persistencia de estado leido y no redisparo de alertas tras recarga', () => {
+describe("chat-api — persistencia de estado leido y no redisparo de alertas tras recarga", () => {
   beforeEach(() => {
     window.localStorage.clear();
     clearStoredMessages();
-    apiClientMock.post.mockImplementation(async (url: string, data: unknown) => {
-      if (url === '/chat/messages') {
-        const payload = data as { conversationId: string; content: string };
-        const now = new Date().toISOString();
-        return {
-          data: {
-            statusCode: 201,
-            ok: true,
-            detail: 'Mensaje enviado exitosamente',
+    apiClientMock.post.mockImplementation(
+      async (url: string, data: unknown) => {
+        if (url === "/chat/messages") {
+          const payload = data as { conversationId: string; content: string };
+          const now = new Date().toISOString();
+          return {
             data: {
-              id: `msg-${Date.now()}`,
-              conversationId: payload.conversationId,
-              senderId: 'current-user',
-              content: payload.content,
-              timestamp: now,
-              createdAt: now,
-              status: 'sent',
-              isAttachment: false,
-              attachmentType: null,
+              statusCode: 201,
+              ok: true,
+              detail: "Mensaje enviado exitosamente",
+              data: {
+                id: `msg-${Date.now()}`,
+                conversationId: payload.conversationId,
+                senderId: "current-user",
+                content: payload.content,
+                timestamp: now,
+                createdAt: now,
+                status: "sent",
+                isAttachment: false,
+                attachmentType: null,
+              },
             },
-          },
-        } as never;
-      }
-      return { data: {} } as never;
-    });
+          } as never;
+        }
+        return { data: {} } as never;
+      },
+    );
     apiClientMock.patch.mockResolvedValue({ data: {} } as never);
   });
 
-it('debe mantener guardado el estado leido (unreadCount: 0) al simular recarga de pagina tras marcar conversacion como leida', async () => {
+  it('debe mantener guardado el estado leido (unreadCount: 0) al simular recarga de pagina tras marcar conversacion como leida', async () => {
   const initialConversations = [
     {
       id: 'conv-1',
@@ -1103,7 +1093,7 @@ it('debe mantener guardado el estado leido (unreadCount: 0) al simular recarga d
   await markConversationAsRead('conv-1');
 
   expect(apiClientMock.patch).toHaveBeenCalledWith(
-    '/chat/messages/conv-1/read',
+    '/chat/conversations/conv-1/read-state',
   );
 
   const reloadedList = await getConversations();
@@ -1116,7 +1106,7 @@ it('debe mantener guardado el estado leido (unreadCount: 0) al simular recarga d
 
 });
 
-it('debe marcar la conversacion como leida de forma persistente al enviar un mensaje y conservarlo tras recargar', async () => {
+  it('debe marcar la conversacion como leida de forma persistente al enviar un mensaje y conservarlo tras recargar', async () => {
   apiClientMock.get
     .mockResolvedValueOnce({
       data: [
@@ -1154,16 +1144,14 @@ it('debe marcar la conversacion como leida de forma persistente al enviar un men
 
 });
 
-  it('debe llamar a PATCH /chat/messages/:conversationId/read al marcar conversacion como leida', async () => {
+  it('debe llamar a PATCH /chat/conversations/:conversationId/read-state al marcar conversacion como leida', async () => {
     await markConversationAsRead('conv-1');
 
-    expect(apiClientMock.patch).toHaveBeenCalledWith('/chat/messages/conv-1/read');
+    expect(apiClientMock.patch).toHaveBeenCalledWith('/chat/conversations/conv-1/read-state');
 
   });
+});
 
-  });
-
-  
 describe('chat-api — estado leído con datos de la BD (HU-1)', () => {
   const buildConversation = (lastMessageAt: string, unreadCount: number) => ({
     id: 'conv-bd',
@@ -1215,7 +1203,7 @@ describe('chat-api — estado leído con datos de la BD (HU-1)', () => {
   });
 });
 
-describe('chat-api · bloqueo de usuarios', () => {
+describe("chat-api · bloqueo de usuarios", () => {
   const CONTACT_ID = '22222222-2222-4222-8222-222222222222';
 
   it('getConversations mapea isBlockedByMe y usa false si el backend no lo envía', async () => {
@@ -1258,12 +1246,14 @@ describe('chat-api · bloqueo de usuarios', () => {
     await expect(blockUser(CONTACT_ID)).rejects.toThrow('Network Error');
   });
 
-  it('unblockUser llama a DELETE /chat/blocks/:userId', async () => {
+  it("unblockUser llama a DELETE /chat/blocks/:userId", async () => {
     apiClientMock.delete.mockResolvedValueOnce({ data: '' } as never);
 
     await expect(unblockUser(CONTACT_ID)).resolves.toBeUndefined();
 
-    expect(apiClientMock.delete).toHaveBeenCalledWith(`/chat/blocks/${CONTACT_ID}`);
+    expect(apiClientMock.delete).toHaveBeenCalledWith(
+      `/chat/blocks/${CONTACT_ID}`,
+    );
   });
 
   it('unblockUser propaga el error de red', async () => {

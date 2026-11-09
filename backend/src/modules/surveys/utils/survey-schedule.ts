@@ -12,10 +12,16 @@ export function getScheduleError(
   const today = toBoliviaTime(now).date;
 
   if (openDate < today) {
-    return { field: 'opensAt', message: SURVEY_ERROR_MESSAGES.OPENS_IN_THE_PAST };
+    return {
+      field: 'opensAt',
+      message: SURVEY_ERROR_MESSAGES.OPENS_IN_THE_PAST,
+    };
   }
   if (closeDate <= openDate) {
-    return { field: 'closesAt', message: SURVEY_ERROR_MESSAGES.CLOSES_BEFORE_OPENS };
+    return {
+      field: 'closesAt',
+      message: SURVEY_ERROR_MESSAGES.CLOSES_BEFORE_OPENS,
+    };
   }
   return null;
 }

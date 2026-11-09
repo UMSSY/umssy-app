@@ -1,19 +1,23 @@
+import { DATE_PATTERN } from "@/shared/constants/date-time.constants";
 import { CAREERS } from "../constants/careers.constants";
 import { ID_CARD_ISSUED_IN } from "../constants/id-card-issued-in.constants";
-import { ID_CARD_MAX_LENGTH, ID_CARD_MIN_LENGTH, SIS_CODE_LENGTH } from "../constants/personal-data-rules.constants";
-import type { FieldErrors, PersonalDataValues } from "../types/access-request.types";
+import { ID_CARD_MAX_LENGTH, SIS_CODE_LENGTH } from "../constants/personal-data-rules.constants";
+import type { FieldErrors } from "../types/field-errors.types";
+import type { PersonalDataValues } from "../types/personal-data-values.types";
 import { detectEmailTypo } from "./detect-email-typo";
 
 export const MIN_AGE = 18;
 
 const NAME_REGEX = /^\p{L}[\p{L}\p{M}]*(?:[ '’-]\p{L}[\p{L}\p{M}]*)*$/u;
 const DIGITS_REGEX = /^\d+$/;
-const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+
 const EMAIL_REGEX = /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)*\.[a-z]{2,}$/;
 
 function isRealIsoDate(value: string): boolean {
   const date = new Date(`${value}T00:00:00.000Z`);
-  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
+  return (
+    !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value
+  );
 }
 
 function isAdult(birthDate: string, now: Date): boolean {
@@ -38,8 +42,8 @@ function validateIdCard(value: string): string | undefined {
   const digitsError = validateDigits(value, "El carnet de identidad");
   if (digitsError) return digitsError;
   const length = value.trim().length;
-  if (length < ID_CARD_MIN_LENGTH || length > ID_CARD_MAX_LENGTH) {
-    return `El carnet de identidad debe tener entre ${ID_CARD_MIN_LENGTH} y ${ID_CARD_MAX_LENGTH} dígitos`;
+  if (length < 6 || length > ID_CARD_MAX_LENGTH) {
+    return `El carnet de identidad debe tener entre 6 y ${ID_CARD_MAX_LENGTH} dígitos`;
   }
 }
 
@@ -61,7 +65,7 @@ function validateEmail(value: string): string | undefined {
 function validateBirthDate(value: string, now: Date): string | undefined {
   const text = value.trim();
   if (text.length === 0) return "La fecha de nacimiento es obligatoria";
-  if (!ISO_DATE_REGEX.test(text)) return "La fecha de nacimiento debe tener el formato AAAA-MM-DD";
+  if (!DATE_PATTERN.test(text)) return "La fecha de nacimiento debe tener el formato AAAA-MM-DD";
   if (!isRealIsoDate(text)) return "La fecha de nacimiento no es válida";
   if (!isAdult(text, now)) return `Debes ser mayor de ${MIN_AGE} años`;
 }

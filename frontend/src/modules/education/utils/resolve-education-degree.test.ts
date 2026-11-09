@@ -1,9 +1,16 @@
+import { DEGREE_CATALOG_FIXTURE } from "@/modules/education/testing/degree-catalog.fixture";
 import { describe, expect, it } from 'vitest';
 import { getEducationDegrees, resolveEducationDegree } from './resolve-education-degree';
 
-describe('Education degrees by institution', () => {
-  const umss = getEducationDegrees('Universidad Mayor de San Simón (UMSS)');
-  const upb = getEducationDegrees('Universidad Privada Boliviana (UPB)');
+describe("Education degrees by institution", () => {
+  const umss = getEducationDegrees(
+    "Universidad Mayor de San Simón (UMSS)",
+    DEGREE_CATALOG_FIXTURE,
+  );
+  const upb = getEducationDegrees(
+    "Universidad Privada Boliviana (UPB)",
+    DEGREE_CATALOG_FIXTURE,
+  );
 
   it('resolves full names and aliases, ignoring case, diacritics and extra whitespace', () => {
     expect(resolveEducationDegree('  ingenieria   en informatica ', umss)).toBe('Ingeniería Informática');

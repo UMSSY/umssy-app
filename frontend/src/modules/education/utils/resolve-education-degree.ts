@@ -1,10 +1,16 @@
-import { EDUCATION_DEGREES } from '../constants/education-degrees.constants';
+import type { EducationDegreeCatalogEntry } from "../types/education-degree-catalog-entry.types";
 import type { EducationDegree } from '../types/education-degree.types';
 import { normalizeEducationText } from './normalize-education-text';
 
-export function getEducationDegrees(institution: string): readonly EducationDegree[] {
+export function getEducationDegrees(
+  institution: string,
+  catalog: readonly EducationDegreeCatalogEntry[] = [],
+): readonly EducationDegree[] {
   const name = normalizeEducationText(institution);
-  return EDUCATION_DEGREES.find((entry) => normalizeEducationText(entry.institution) === name)?.degrees ?? [];
+  return (
+    catalog.find((entry) => normalizeEducationText(entry.institution) === name)
+      ?.degrees ?? []
+  );
 }
 
 export function resolveEducationDegree(value: string, degrees: readonly EducationDegree[]): string | undefined {

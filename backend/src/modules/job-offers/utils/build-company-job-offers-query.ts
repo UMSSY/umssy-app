@@ -4,7 +4,8 @@ import type { Prisma } from '../../../prisma/client.js';
 import type { ListCompanyJobOffersRequest } from '../requests/list-company-job-offers.request.js';
 import type { CompanyJobOffersQuery } from '../types/company-job-offers-query.type.js';
 
-const startOfBoliviaDay = (date: string): Date => new Date(toUtcIso(date, '00:00'));
+const startOfBoliviaDay = (date: string): Date =>
+  new Date(toUtcIso(date, '00:00'));
 
 function buildPublishedAtFilter(
   dateFrom: string | undefined,
@@ -14,7 +15,9 @@ function buildPublishedAtFilter(
 
   return {
     ...(dateFrom && { gte: startOfBoliviaDay(dateFrom) }),
-    ...(dateTo && { lt: new Date(startOfBoliviaDay(dateTo).getTime() + DAY_MS) }),
+    ...(dateTo && {
+      lt: new Date(startOfBoliviaDay(dateTo).getTime() + DAY_MS),
+    }),
   };
 }
 
@@ -27,7 +30,9 @@ export function buildCompanyJobOffersQuery(
   const where: Prisma.JobOfferWhereInput = {
     companyId,
     ...(filters.modality && { modality: { title: filters.modality } }),
-    ...(filters.contractType && { contractType: { title: filters.contractType } }),
+    ...(filters.contractType && {
+      contractType: { title: filters.contractType },
+    }),
     ...(publishedAt && { publishedAt }),
     ...(filters.search && {
       title: { contains: filters.search, mode: 'insensitive' },

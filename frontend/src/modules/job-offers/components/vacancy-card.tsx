@@ -4,20 +4,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button-variants";
 import { cn } from "@/lib/utils";
-import {
-  CLOSED_STATUS,
-  DELETED_STATUS,
-  PUBLISHED_STATUS,
-  STATUS_BADGE_CLASSES,
-  STATUS_LABELS,
-} from "../constants/job-offers.constants";
+import { PUBLISHED_STATUS, STATUS_BADGE_CLASSES, STATUS_LABELS } from "../constants/job-offers.constants";
 import type { VacancyCardProps } from "../types/vacancy-card-props.types";
 import { formatPublicationDate } from "../utils/format-publication-date";
 
 export function VacancyCard({ offer, onDetails, showStatus = false, onReopen, onDelete }: VacancyCardProps) {
   const isPublished = offer.status === PUBLISHED_STATUS;
-  const isClosed = offer.status === CLOSED_STATUS;
-  const isDeleted = offer.status === DELETED_STATUS;
+  const isClosed = offer.status === "Cerrada";
+  const isDeleted = offer.status === "Eliminada";
 
   return (
     <li

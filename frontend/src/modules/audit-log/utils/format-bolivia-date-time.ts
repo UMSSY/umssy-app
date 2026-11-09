@@ -1,4 +1,4 @@
-import { BOLIVIA_TIME_ZONE } from "../constants/audit-log.constants";
+import { BOLIVIA_TIME_ZONE } from "@/shared/constants/date-time.constants";
 
 const DATE_FORMAT = new Intl.DateTimeFormat("es-BO", { timeZone: BOLIVIA_TIME_ZONE, day: "2-digit", month: "2-digit", year: "numeric" });
 const TIME_FORMAT = new Intl.DateTimeFormat("es-BO", { timeZone: BOLIVIA_TIME_ZONE, hour: "2-digit", minute: "2-digit", hourCycle: "h23" });

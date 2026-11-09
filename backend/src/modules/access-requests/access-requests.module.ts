@@ -16,7 +16,7 @@ import { RejectionNotificationService } from './services/rejection-notification.
 import { ActivationOtpService } from './services/activation-otp.service.js';
 import { MailServiceSender } from './mail/mail-service-sender.js';
 import { MAIL_SENDER } from './mail/mail-sender.js';
-import { RejectionMailContextService } from './mail/rejection-mail-context.service.js';
+import { RejectionMailContextService } from './services/rejection-mail-context.service.js';
 import { RejectionMailLinkService } from './services/rejection-mail-link.service.js';
 import { RejectionMailRepository } from './repositories/rejection-mail.repository.js';
 import { DocumentValidationRepository } from './repositories/document-validation.repository.js';
@@ -30,8 +30,19 @@ import { DocumentCorrectionAuthorizationService } from './services/document-corr
 import { DocumentCorrectionService } from './services/document-correction.service.js';
 
 @Module({
-  imports: [ConfigModule, AuthModule, FilesModule, MailModule, AuditEventsModule],
-  controllers: [AccessRequestAutomationController, AccessRequestsController, AccountActivationController, DocumentCorrectionController],
+  imports: [
+    ConfigModule,
+    AuthModule,
+    FilesModule,
+    MailModule,
+    AuditEventsModule,
+  ],
+  controllers: [
+    AccessRequestAutomationController,
+    AccessRequestsController,
+    AccountActivationController,
+    DocumentCorrectionController,
+  ],
   providers: [
     AccessRequestsService,
     AccessRequestsRepository,
@@ -53,6 +64,10 @@ import { DocumentCorrectionService } from './services/document-correction.servic
     DocumentCorrectionGuard,
     { provide: MAIL_SENDER, useClass: MailServiceSender },
   ],
-  exports: [AccessRequestsService, AutomaticValidationService, DocumentCorrectionAuthorizationService],
+  exports: [
+    AccessRequestsService,
+    AutomaticValidationService,
+    DocumentCorrectionAuthorizationService,
+  ],
 })
 export class AccessRequestsModule {}

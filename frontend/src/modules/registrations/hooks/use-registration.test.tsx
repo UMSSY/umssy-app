@@ -1,3 +1,4 @@
+import "@/shared/testing/indexed-db.mock";
 import { act, cleanup, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { renderHookWithQuery } from "@/shared/testing/render-hook-with-query";
@@ -31,14 +32,14 @@ describe("useRegistration", () => {
     expect(result.current.isLoading).toBe(false);
     expect(registrationsService.getOwn).not.toHaveBeenCalled();
     rerender({ eventId: null });
-    act(() => {
-      saveAccessToken("token-a");
+    await act(async () => {
+      await saveAccessToken("token-a");
     });
     expect(registrationsService.getOwn).not.toHaveBeenCalled();
   });
 
   it("loads a typed own registration with the captured token", async () => {
-    saveAccessToken("token-a");
+    await saveAccessToken("token-a");
     vi.mocked(registrationsService.getOwn).mockResolvedValue(registration);
     const { result } = renderHookWithQuery(() => useRegistration("e1"));
     await waitFor(() => expect(result.current.registration).toEqual(registration));
@@ -47,7 +48,7 @@ describe("useRegistration", () => {
   });
 
   it("exposes absence without treating it as a failed request", async () => {
-    saveAccessToken("token-a");
+    await saveAccessToken("token-a");
     vi.mocked(registrationsService.getOwn).mockResolvedValue(null);
     const { result } = renderHookWithQuery(() => useRegistration("e1"));
     await waitFor(() => expect(registrationsService.getOwn).toHaveBeenCalled());
@@ -57,7 +58,7 @@ describe("useRegistration", () => {
   });
 
   it("translates errors without automatic retries", async () => {
-    saveAccessToken("token-a");
+    await saveAccessToken("token-a");
     vi.mocked(registrationsService.getOwn).mockRejectedValue({
       isAxiosError: true,
       response: {
@@ -77,15 +78,15 @@ describe("useRegistration", () => {
   });
 
   it("does not expose another session's cached or late response", async () => {
-    saveAccessToken("token-a");
+    await saveAccessToken("token-a");
     let resolveOld!: (value: RegistrationResponse) => void;
     vi.mocked(registrationsService.getOwn)
       .mockImplementationOnce(() => new Promise((resolve) => { resolveOld = resolve; }))
       .mockResolvedValueOnce(null);
     const { result } = renderHookWithQuery(() => useRegistration("e1"));
     await waitFor(() => expect(registrationsService.getOwn).toHaveBeenCalledTimes(1));
-    act(() => {
-      saveAccessToken("token-b");
+    await act(async () => {
+      await saveAccessToken("token-b");
     });
     await waitFor(() => expect(registrationsService.getOwn).toHaveBeenCalledTimes(2));
     await act(async () => {

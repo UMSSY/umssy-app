@@ -2,11 +2,7 @@
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
-import {
-  DESCRIPTION_PREVIEW_CHARS,
-  INTERNSHIP_CONTRACT_TYPE,
-  SALARY_TO_BE_AGREED,
-} from "../constants/job-offers.constants";
+import { INTERNSHIP_CONTRACT_TYPE, SALARY_TO_BE_AGREED } from "../constants/job-offers.constants";
 import { ExpandableText } from "./expandable-text";
 import { JobOfferHighlights } from "./job-offer-highlights";
 import { StepActions } from "./step-actions";
@@ -66,7 +62,7 @@ export function PreviewStep({
 
         <ExpandableText
           text={conditions.description}
-          maxChars={DESCRIPTION_PREVIEW_CHARS}
+          maxChars={125}
           className="mb-6 text-sm leading-relaxed whitespace-pre-line text-text-secondary"
         />
 

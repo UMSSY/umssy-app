@@ -6,9 +6,13 @@ import { WorkExperienceSourcesService } from '../services/work-experience-source
 describe('WorkExperienceSourcesService', () => {
   it('reads only the analysis fields of the requested owner', async () => {
     const userId = '11111111-1111-4111-8111-111111111111';
-    const records = [{ id: 'source-1', position: 'Desarrollo', description: null }];
+    const records = [
+      { id: 'source-1', position: 'Desarrollo', description: null },
+    ];
     const findMany = vi.fn().mockResolvedValue(records);
-    const repository = new WorkExperienceRepository({ workExperience: { findMany } } as unknown as PrismaService);
+    const repository = new WorkExperienceRepository({
+      workExperience: { findMany },
+    } as unknown as PrismaService);
     const service = new WorkExperienceSourcesService(repository);
 
     await expect(service.findAnalysisSources(userId)).resolves.toBe(records);

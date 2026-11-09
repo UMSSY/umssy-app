@@ -3,7 +3,6 @@ import type { Prisma } from '../../../prisma/client.js';
 import {
   SEED_JOB_OFFER_COMPANIES,
   SEED_JOB_OFFER_CONTRACT_TYPES,
-  SEED_JOB_OFFER_LOCATION_URL,
   SEED_JOB_OFFER_MODALITIES,
   SEED_JOB_OFFER_SKILLS,
   SEED_JOB_OFFER_STATUSES,
@@ -11,13 +10,20 @@ import {
 } from '../constants/seed-job-offers.constants.js';
 import { formatSalaryRange } from '../utils/format-salary-range.js';
 
-function idsByTitle(rows: { id: string; title: string }[]): Map<string, string> {
+function idsByTitle(
+  rows: { id: string; title: string }[],
+): Map<string, string> {
   return new Map(rows.map((row) => [row.title, row.id]));
 }
 
-function requireId(ids: Map<string, string>, key: string, catalog: string): string {
+function requireId(
+  ids: Map<string, string>,
+  key: string,
+  catalog: string,
+): string {
   const id = ids.get(key);
-  if (!id) throw new Error(`Seed de vacantes: no existe "${key}" en ${catalog}`);
+  if (!id)
+    throw new Error(`Seed de vacantes: no existe "${key}" en ${catalog}`);
   return id;
 }
 
@@ -54,7 +60,11 @@ export async function seedJobOffers(
     const saved = await tx.company.upsert({
       where: { title: company.title },
       update: { description: company.description },
-      create: { id: company.id, title: company.title, description: company.description },
+      create: {
+        id: company.id,
+        title: company.title,
+        description: company.description,
+      },
     });
     companyIds.set(company.title, saved.id);
   }
@@ -88,7 +98,11 @@ async function seedDemoJobOffers(
         id: offer.id,
         companyId: requireId(companyIds, offer.companyTitle, 'empresas'),
         modalityId: requireId(modalityIds, offer.modality, 'modalidades'),
-        contractTypeId: requireId(contractTypeIds, offer.contractType, 'tipos de contrato'),
+        contractTypeId: requireId(
+          contractTypeIds,
+          offer.contractType,
+          'tipos de contrato',
+        ),
         statusId: requireId(statusIds, offer.status, 'estados'),
         title: offer.title,
         description: offer.description,
@@ -96,11 +110,13 @@ async function seedDemoJobOffers(
         positionsAvailable: offer.positionsAvailable,
         salaryRange: formatSalaryRange(offer.salaryMin, offer.salaryMax),
         languages: offer.languages,
-        locationUrl: SEED_JOB_OFFER_LOCATION_URL,
+        locationUrl: 'https://maps.app.goo.gl/UmssCochabamba',
         publishedAt: new Date(now.getTime() - offer.daysAgo * DAY_MS),
         createdAt: new Date(now.getTime() - offer.daysAgo * DAY_MS),
         skills: {
-          create: offer.skills.map((name) => ({ skillId: requireId(skillIds, name, 'tecnologías') })),
+          create: offer.skills.map((name) => ({
+            skillId: requireId(skillIds, name, 'tecnologías'),
+          })),
         },
       },
     });

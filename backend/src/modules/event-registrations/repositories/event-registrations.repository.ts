@@ -10,64 +10,122 @@ import type { CreateEventRegistrationPayload } from '../types/event-registration
 export class EventRegistrationsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  transaction<T>(operation: (tx: Prisma.TransactionClient) => Promise<T>, isolationLevel?: Prisma.TransactionIsolationLevel): Promise<T> {
+  transaction<T>(
+    operation: (tx: Prisma.TransactionClient) => Promise<T>,
+    isolationLevel?: Prisma.TransactionIsolationLevel,
+  ): Promise<T> {
     return isolationLevel === undefined
       ? this.prisma.$transaction(operation)
       : this.prisma.$transaction(operation, { isolationLevel });
   }
 
-
-  findOwn(eventId: string, userId: string, tx: Prisma.TransactionClient = this.prisma) {
-    return tx.eventRegistration.findUnique({ where: { eventId_userId: { eventId, userId } }, select: REGISTRATION_SELECT });
+  findOwn(
+    eventId: string,
+    userId: string,
+    tx: Prisma.TransactionClient = this.prisma,
+  ) {
+    return tx.eventRegistration.findUnique({
+      where: { eventId_userId: { eventId, userId } },
+      select: REGISTRATION_SELECT,
+    });
   }
 
   findById(id: string, tx: Prisma.TransactionClient) {
-    return tx.eventRegistration.findUnique({ where: { id }, select: REGISTRATION_SELECT });
+    return tx.eventRegistration.findUnique({
+      where: { id },
+      select: REGISTRATION_SELECT,
+    });
   }
 
-  async findConfirmedEventIds(tx: Prisma.TransactionClient, userId: string): Promise<string[]> {
+  async findConfirmedEventIds(
+    tx: Prisma.TransactionClient,
+    userId: string,
+  ): Promise<string[]> {
     const registrations = await tx.eventRegistration.findMany({
-      where: { userId, cancelledAt: null, status: { title: REGISTRATION_STATUS_TITLES.confirmed } },
+      where: {
+        userId,
+        cancelledAt: null,
+        status: { title: REGISTRATION_STATUS_TITLES.confirmed },
+      },
       select: { eventId: true },
     });
-    return registrations.map(registration => registration.eventId);
+    return registrations.map((registration) => registration.eventId);
   }
 
   countConfirmed(tx: Prisma.TransactionClient, eventId: string) {
-    return tx.eventRegistration.count({ where: { eventId, cancelledAt: null, status: { title: REGISTRATION_STATUS_TITLES.confirmed } } });
+    return tx.eventRegistration.count({
+      where: {
+        eventId,
+        cancelledAt: null,
+        status: { title: REGISTRATION_STATUS_TITLES.confirmed },
+      },
+    });
   }
 
-  createConfirmed(tx: Prisma.TransactionClient, eventId: string, userId: string, qrToken: string) {
+  createConfirmed(
+    tx: Prisma.TransactionClient,
+    eventId: string,
+    userId: string,
+    qrToken: string,
+  ) {
     return tx.eventRegistration.create({
-      data: { status: { connect: { title: REGISTRATION_STATUS_TITLES.confirmed } }, cancelledAt: null, qrToken,
-        event: { connect: { id: eventId } }, user: { connect: { id: userId } } },
+      data: {
+        status: { connect: { title: REGISTRATION_STATUS_TITLES.confirmed } },
+        cancelledAt: null,
+        qrToken,
+        event: { connect: { id: eventId } },
+        user: { connect: { id: userId } },
+      },
       select: REGISTRATION_SELECT,
     });
   }
 
   reactivate(tx: Prisma.TransactionClient, id: string, qrToken: string) {
-    return tx.eventRegistration.update({ where: { id }, data: {
-      status: { connect: { title: REGISTRATION_STATUS_TITLES.confirmed } }, cancelledAt: null, qrToken,
-    }, select: REGISTRATION_SELECT });
+    return tx.eventRegistration.update({
+      where: { id },
+      data: {
+        status: { connect: { title: REGISTRATION_STATUS_TITLES.confirmed } },
+        cancelledAt: null,
+        qrToken,
+      },
+      select: REGISTRATION_SELECT,
+    });
   }
 
   cancel(tx: Prisma.TransactionClient, id: string, cancelledAt: Date) {
-    return tx.eventRegistration.update({ where: { id }, data: {
-      cancelledAt, status: { connect: { title: REGISTRATION_STATUS_TITLES.cancelled } },
-    }, select: REGISTRATION_SELECT });
+    return tx.eventRegistration.update({
+      where: { id },
+      data: {
+        cancelledAt,
+        status: { connect: { title: REGISTRATION_STATUS_TITLES.cancelled } },
+      },
+      select: REGISTRATION_SELECT,
+    });
   }
 
   findSupport(tx: Prisma.TransactionClient, eventId: string, userId: string) {
-    return tx.eventRegistration.findUnique({ where: { eventId_userId: { eventId, userId } }, select: { id: true } });
+    return tx.eventRegistration.findUnique({
+      where: { eventId_userId: { eventId, userId } },
+      select: { id: true },
+    });
   }
 
-  createSupport(tx: Prisma.TransactionClient, eventId: string, userId: string, qrToken: string) {
-    return tx.eventRegistration.create({ data: {
-      event: { connect: { id: eventId } }, user: { connect: { id: userId } },
-      status: { connect: { title: REGISTRATION_STATUS_TITLES.confirmed } }, qrToken,
-    }, select: { id: true } });
+  createSupport(
+    tx: Prisma.TransactionClient,
+    eventId: string,
+    userId: string,
+    qrToken: string,
+  ) {
+    return tx.eventRegistration.create({
+      data: {
+        event: { connect: { id: eventId } },
+        user: { connect: { id: userId } },
+        status: { connect: { title: REGISTRATION_STATUS_TITLES.confirmed } },
+        qrToken,
+      },
+      select: { id: true },
+    });
   }
-
 
   async getPassById(id: string, userId: string) {
     const pass = await this.prisma.eventRegistration.findFirst({
@@ -83,17 +141,38 @@ export class EventRegistrationsRepository {
         qrToken: true,
         createdAt: true,
         status: { select: { title: true } },
-        event: { select: { id: true, title: true, eventDate: true, startTime: true, endTime: true, location: true, description: true } },
-        user: { select: { id: true, firstName: true, lastName: true, email: true } },
+        event: {
+          select: {
+            id: true,
+            title: true,
+            eventDate: true,
+            startTime: true,
+            endTime: true,
+            location: true,
+            description: true,
+          },
+        },
+        user: {
+          select: { id: true, firstName: true, lastName: true, email: true },
+        },
       },
     });
     return pass;
   }
 
-  async createWithQrToken(payload: CreateEventRegistrationPayload, qrToken: string) {
+  async createWithQrToken(
+    payload: CreateEventRegistrationPayload,
+    qrToken: string,
+  ) {
     return this.prisma.eventRegistration.create({
       data: { ...payload, qrToken: qrToken },
-      select: { id: true, eventId: true, userId: true, statusId: true, qrToken: true },
+      select: {
+        id: true,
+        eventId: true,
+        userId: true,
+        statusId: true,
+        qrToken: true,
+      },
     });
   }
 
@@ -124,5 +203,4 @@ export class EventRegistrationsRepository {
       orderBy: { event: { eventDate: 'asc' } },
     });
   }
-
 }

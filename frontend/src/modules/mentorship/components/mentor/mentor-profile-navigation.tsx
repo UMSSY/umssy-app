@@ -1,11 +1,7 @@
+import type { MentorProfileNavigationProps } from "../../types/mentor-profile-navigation-props.types";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button-variants";
-
-interface MentorProfileNavigationProps {
-  mentorName: string;
-  returnTo?: string;
-}
 
 function getSafeReturnTo(returnTo?: string): string {
   const fallback = "/mentorship/mentors";
@@ -36,10 +32,7 @@ export function MentorProfileNavigation({
   const safeReturnTo = getSafeReturnTo(returnTo);
 
   return (
-    <nav
-      aria-label={`Navegación del perfil de ${mentorName}`}
-      className="mb-5"
-    >
+    <nav aria-label={`Navegación del perfil de ${mentorName}`} className="mb-5">
       <Link
         href={safeReturnTo}
         className={buttonVariants({

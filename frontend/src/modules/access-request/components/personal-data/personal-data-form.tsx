@@ -7,7 +7,7 @@ import { Mail } from "lucide-react";
 import { useAccessRequestForm } from "../../contexts/access-request-context";
 import { SIS_CODE_LENGTH } from "../../constants/personal-data-rules.constants";
 import { usePersonalDataBind } from "../../hooks/use-personal-data-bind";
-import type { PersonalDataFieldName } from "../../types/access-request.types";
+import type { PersonalDataFieldName } from "../../types/personal-data-field-name.types";
 import { getLatestBirthDate } from "../../utils/get-latest-birth-date";
 import { CareerSelect } from "./career-select";
 import { IdCardField } from "./id-card-field";
@@ -55,95 +55,105 @@ export function PersonalDataForm() {
     <div className="flex w-full flex-col gap-5">
       <PersonalDataIntro />
 
-      <form noValidate onSubmit={handleSubmit} className="space-y-6 rounded-lg border border-border bg-surface p-6">
-        <FormFieldset title="Identidad"><div className="grid gap-5 md:grid-cols-2">
-        <PersonalDataField
-          id="firstName"
-          {...bind("firstName")}
-          label="Nombres"
-          isRequired
-          autoComplete="given-name"
-          placeholder="Ingresa tus nombres"
-        />
+      <form
+        noValidate
+        onSubmit={handleSubmit}
+        className="space-y-6 rounded-lg border border-border bg-surface p-6"
+      >
+        <FormFieldset title="Identidad">
+          <div className="grid gap-5 md:grid-cols-2">
+            <PersonalDataField
+              id="firstName"
+              {...bind("firstName")}
+              label="Nombres"
+              isRequired
+              autoComplete="given-name"
+              placeholder="Ingresa tus nombres"
+            />
 
-        <PersonalDataField
-          id="lastName"
-          {...bind("lastName")}
-          label="Apellidos"
-          isRequired
-          autoComplete="family-name"
-          placeholder="Ingresa tus apellidos"
-        />
+            <PersonalDataField
+              id="lastName"
+              {...bind("lastName")}
+              label="Apellidos"
+              isRequired
+              autoComplete="family-name"
+              placeholder="Ingresa tus apellidos"
+            />
 
-        <IdCardField />
+            <IdCardField />
 
-        <PersonalDataField
-          id="sisCode"
-          {...bind("sisCode")}
-          label="Código SIS"
-          isRequired
-          help="Figura en tu carnet universitario o en tu kárdex."
-          inputMode="numeric"
-          maxLength={SIS_CODE_LENGTH}
-          placeholder="Ej. 201904512"
-        />
+            <PersonalDataField
+              id="sisCode"
+              {...bind("sisCode")}
+              label="Código SIS"
+              isRequired
+              help="Figura en tu carnet universitario o en tu kárdex."
+              inputMode="numeric"
+              maxLength={SIS_CODE_LENGTH}
+              placeholder="Ej. 201904512"
+            />
+          </div>
+        </FormFieldset>
+        <FormFieldset title="Contacto">
+          <div className="grid gap-5 md:grid-cols-2">
+            <PersonalDataField
+              id="email"
+              {...bind("email")}
+              label="Correo electrónico"
+              isRequired
+              help="Aquí te enviaremos el resultado y el código de activación."
+              icon={<Mail aria-hidden="true" className="size-4" />}
+              type="email"
+              autoComplete="email"
+              placeholder="correo@ejemplo.com"
+            />
 
-        </div></FormFieldset>
-        <FormFieldset title="Contacto"><div className="grid gap-5 md:grid-cols-2">
-        <PersonalDataField
-          id="email"
-          {...bind("email")}
-          label="Correo electrónico"
-          isRequired
-          help="Aquí te enviaremos el resultado y el código de activación."
-          icon={<Mail aria-hidden="true" className="size-4" />}
-          type="email"
-          autoComplete="email"
-          placeholder="correo@ejemplo.com"
-        />
+            <PersonalDataField
+              id="phone"
+              {...bind("phone")}
+              label={
+                <>
+                  Teléfono{" "}
+                  <span className="font-normal text-text-secondary">
+                    (opcional)
+                  </span>
+                </>
+              }
+              type="tel"
+              inputMode="tel"
+              maxLength={8}
+              autoComplete="tel"
+              placeholder="Ej. 70712345"
+            />
+          </div>
+        </FormFieldset>
+        <FormFieldset title="Datos complementarios">
+          <div className="grid gap-5 md:grid-cols-2">
+            <PersonalDataField
+              id="birthDate"
+              value={values.birthDate}
+              error={fieldErrors.birthDate}
+              onValueChange={(value) => setValue("birthDate", value)}
+              label="Fecha de nacimiento"
+              isRequired
+              type="date"
+              max={getLatestBirthDate()}
+              autoComplete="bday"
+            />
 
-        <PersonalDataField
-          id="phone"
-          {...bind("phone")}
-          label={
-            <>
-              Teléfono <span className="font-normal text-text-secondary">(opcional)</span>
-            </>
-          }
-          type="tel"
-          inputMode="tel"
-          maxLength={8}
-          autoComplete="tel"
-          placeholder="Ej. 70712345"
-        />
+            <PersonalDataField
+              id="graduationYear"
+              {...bind("graduationYear")}
+              label="Año de titulación"
+              isRequired
+              inputMode="numeric"
+              maxLength={4}
+              placeholder="Ej. 2024"
+            />
 
-        </div></FormFieldset>
-        <FormFieldset title="Datos complementarios"><div className="grid gap-5 md:grid-cols-2">
-        <PersonalDataField
-          id="birthDate"
-          value={values.birthDate}
-          error={fieldErrors.birthDate}
-          onValueChange={(value) => setValue("birthDate", value)}
-          label="Fecha de nacimiento"
-          isRequired
-          type="date"
-          max={getLatestBirthDate()}
-          autoComplete="bday"
-        />
-
-        <PersonalDataField
-          id="graduationYear"
-          {...bind("graduationYear")}
-          label="Año de titulación"
-          isRequired
-          inputMode="numeric"
-          maxLength={4}
-          placeholder="Ej. 2024"
-        />
-
-        <CareerSelect />
-
-        </div></FormFieldset>
+            <CareerSelect />
+          </div>
+        </FormFieldset>
         <PersonalDataFormActions />
       </form>
     </div>

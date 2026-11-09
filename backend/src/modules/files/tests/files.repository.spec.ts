@@ -8,7 +8,13 @@ function build() {
   return { file, repository: new FilesRepository({ file } as any) };
 }
 
-const newFile = { name: 'a', extension: 'pdf', mimeType: 'application/pdf', size: 3, content: Buffer.from([1, 2, 3]) };
+const newFile = {
+  name: 'a',
+  extension: 'pdf',
+  mimeType: 'application/pdf',
+  size: 3,
+  content: Buffer.from([1, 2, 3]),
+};
 
 describe('FilesRepository', () => {
   it('create guarda los bytes pero no los devuelve', async () => {
@@ -47,14 +53,24 @@ describe('FilesRepository', () => {
     file.delete.mockResolvedValue({});
 
     await expect(repository.delete('f-1')).resolves.toBeUndefined();
-    expect(file.delete).toHaveBeenCalledWith({ where: { id: 'f-1' }, select: { id: true } });
+    expect(file.delete).toHaveBeenCalledWith({
+      where: { id: 'f-1' },
+      select: { id: true },
+    });
   });
 
   it('convierte P2025 en 404 de dominio', async () => {
     const { file, repository } = build();
-    file.delete.mockRejectedValue(new Prisma.PrismaClientKnownRequestError('no record', { code: 'P2025', clientVersion: 'test' }));
+    file.delete.mockRejectedValue(
+      new Prisma.PrismaClientKnownRequestError('no record', {
+        code: 'P2025',
+        clientVersion: 'test',
+      }),
+    );
 
-    await expect(repository.delete('f-1')).rejects.toBeInstanceOf(FileNotFoundException);
+    await expect(repository.delete('f-1')).rejects.toBeInstanceOf(
+      FileNotFoundException,
+    );
   });
 
   it('propaga cualquier otro error', async () => {

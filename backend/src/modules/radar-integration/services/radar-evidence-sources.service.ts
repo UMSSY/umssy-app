@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
-import { RadarEvidenceSourcesRepository } from '../radar-evidence-sources.repository.js';
+import { RadarEvidenceSourcesRepository } from '../repositories/radar-evidence-sources.repository.js';
 
 @Injectable()
 export class RadarEvidenceSourcesService {

@@ -35,14 +35,25 @@ describe('createJobOfferSchema', () => {
   });
 
   it('recorta los espacios de los textos', () => {
-    const result = createJobOfferSchema.parse({ ...VALID_REQUEST, title: '  DevOps  ' });
+    const result = createJobOfferSchema.parse({
+      ...VALID_REQUEST,
+      title: '  DevOps  ',
+    });
 
     expect(result.title).toBe('DevOps');
   });
 
   it('exige los textos obligatorios aunque solo tengan espacios', () => {
-    for (const field of ['title', 'description', 'category', 'languages', 'locationUrl']) {
-      expect(firstMessage({ [field]: '   ' })).toBe('Este campo es obligatorio');
+    for (const field of [
+      'title',
+      'description',
+      'category',
+      'languages',
+      'locationUrl',
+    ]) {
+      expect(firstMessage({ [field]: '   ' })).toBe(
+        'Este campo es obligatorio',
+      );
     }
   });
 
@@ -66,40 +77,59 @@ describe('createJobOfferSchema', () => {
 
   it('limita el enlace de Google Maps a 2048 caracteres', () => {
     const base = 'https://maps.app.goo.gl/';
-    expect(parse({ locationUrl: `${base}${'a'.repeat(2048 - base.length)}` }).success).toBe(true);
-    expect(firstMessage({ locationUrl: `${base}${'a'.repeat(2049 - base.length)}` })).toBe(
-      'El enlace no debe exceder los 2048 caracteres',
-    );
+    expect(
+      parse({ locationUrl: `${base}${'a'.repeat(2048 - base.length)}` })
+        .success,
+    ).toBe(true);
+    expect(
+      firstMessage({ locationUrl: `${base}${'a'.repeat(2049 - base.length)}` }),
+    ).toBe('El enlace no debe exceder los 2048 caracteres');
   });
 
   it('solo acepta las modalidades y tipos de contrato del catálogo', () => {
     expect(firstMessage({ modality: 'Hibrido' })).toBe('Modalidad inválida');
-    expect(firstMessage({ contractType: 'Pasantia' })).toBe('Tipo de contrato inválido');
-    expect(parse({ modality: 'Remoto', contractType: 'Pasantía' }).success).toBe(true);
+    expect(firstMessage({ contractType: 'Pasantia' })).toBe(
+      'Tipo de contrato inválido',
+    );
+    expect(
+      parse({ modality: 'Remoto', contractType: 'Pasantía' }).success,
+    ).toBe(true);
   });
 
   it('exige entre 1 y 500 vacantes enteras', () => {
     expect(firstMessage({ positionsAvailable: 0 })).toBe('Debe ser al menos 1');
     expect(firstMessage({ positionsAvailable: 501 })).toMatch(/500/);
-    expect(firstMessage({ positionsAvailable: 1.5 })).toBe('Debe ser un número entero');
+    expect(firstMessage({ positionsAvailable: 1.5 })).toBe(
+      'Debe ser un número entero',
+    );
   });
 
   it('exige un salario mayor a 0 y un rango ordenado', () => {
-    expect(firstMessage({ salaryMin: 0 })).toBe('El salario debe ser mayor a 0');
-    expect(firstMessage({ salaryMax: 1_000_000_000 })).toBe('El salario no puede tener más de 9 dígitos');
+    expect(firstMessage({ salaryMin: 0 })).toBe(
+      'El salario debe ser mayor a 0',
+    );
+    expect(firstMessage({ salaryMax: 1_000_000_000 })).toBe(
+      'El salario no puede tener más de 9 dígitos',
+    );
     expect(firstMessage({ salaryMin: 9000, salaryMax: 8000 })).toBe(
       'El salario mínimo no puede ser mayor al salario máximo',
     );
   });
 
   it('exige salario salvo en pasantías, donde es opcional', () => {
-    expect(firstMessage({ salaryMin: undefined, salaryMax: undefined })).toBe('Este campo es obligatorio');
-    expect(
-      parse({ contractType: 'Pasantía', salaryMin: undefined, salaryMax: undefined }).success,
-    ).toBe(true);
-    expect(firstMessage({ contractType: 'Pasantía', salaryMin: undefined })).toBe(
+    expect(firstMessage({ salaryMin: undefined, salaryMax: undefined })).toBe(
       'Este campo es obligatorio',
     );
+    expect(
+      parse({
+        contractType: 'Pasantía',
+        salaryMin: undefined,
+        salaryMax: undefined,
+      }).success,
+    ).toBe(true);
+    expect(
+      firstMessage({ contractType: 'Pasantía', salaryMin: undefined }),
+    ).toBe('Este campo es obligatorio');
   });
 
   it('acepta los enlaces oficiales de Google Maps y rechaza otros', () => {
@@ -118,14 +148,24 @@ describe('createJobOfferSchema', () => {
       'https://www.google.com/maps/place/x',
       'https://maps.app.goo.gl.evil.com/x',
     ]) {
-      expect(firstMessage({ locationUrl })).toBe('Ingresa un enlace válido de Google Maps');
+      expect(firstMessage({ locationUrl })).toBe(
+        'Ingresa un enlace válido de Google Maps',
+      );
     }
   });
 
   it('exige entre 1 y 10 habilidades con identificadores válidos', () => {
-    expect(firstMessage({ skillIds: [] })).toBe('Debes seleccionar al menos una habilidad requerida');
-    expect(firstMessage({ skillIds: Array.from({ length: 11 }, () => randomUUID()) })).toMatch(/10/);
-    expect(firstMessage({ skillIds: ['Docker'] })).toBe('El identificador de la habilidad no es válido');
+    expect(firstMessage({ skillIds: [] })).toBe(
+      'Debes seleccionar al menos una habilidad requerida',
+    );
+    expect(
+      firstMessage({
+        skillIds: Array.from({ length: 11 }, () => randomUUID()),
+      }),
+    ).toMatch(/10/);
+    expect(firstMessage({ skillIds: ['Docker'] })).toBe(
+      'El identificador de la habilidad no es válido',
+    );
   });
 
   it('los requisitos de carrera, experiencia y otros son opcionales', () => {
@@ -151,14 +191,25 @@ describe('createJobOfferSchema', () => {
 
   it('valida los años mínimos de experiencia: entero entre 0 y 40', () => {
     expect(parse({ minExperienceYears: 0 }).success).toBe(true);
-    expect(firstMessage({ minExperienceYears: 1.5 })).toBe('Los años de experiencia deben ser un número entero');
+    expect(firstMessage({ minExperienceYears: 1.5 })).toBe(
+      'Los años de experiencia deben ser un número entero',
+    );
     expect(firstMessage({ minExperienceYears: -1 })).toMatch(/entre 0 y 40/);
     expect(firstMessage({ minExperienceYears: 41 })).toMatch(/entre 0 y 40/);
   });
 
   it('limita la cantidad y la longitud de los requisitos', () => {
-    expect(firstMessage({ requiredCareers: Array.from({ length: 11 }, (_, index) => `Carrera ${index}`) })).toMatch(/10/);
-    expect(firstMessage({ otherRequirements: ['a'.repeat(121)] })).toMatch(/120/);
+    expect(
+      firstMessage({
+        requiredCareers: Array.from(
+          { length: 11 },
+          (_, index) => `Carrera ${index}`,
+        ),
+      }),
+    ).toMatch(/10/);
+    expect(firstMessage({ otherRequirements: ['a'.repeat(121)] })).toMatch(
+      /120/,
+    );
     expect(parse({ requiredCareers: [''] }).success).toBe(false);
   });
 });

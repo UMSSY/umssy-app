@@ -1,3 +1,5 @@
+import "@/shared/testing/indexed-db.mock";
+import { saveAccessToken } from "@/shared/services/storage/access-token-storage";
 import { cleanup, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -32,22 +34,35 @@ beforeEach(() => {
 afterEach(() => { cleanup(); sessionStorage.clear(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
 describe("shared app shell across roles and routes", () => {
-  it.each(ROUTES)("keeps the same chrome and red logout for %s at %s", async (role, pathname) => {
-    route.pathname = pathname;
-    sessionStorage.setItem("accessToken", `h.${btoa(JSON.stringify({ sub: "user", roleTag: role }))}.s`);
-    const content = <main>Contenido de la vista</main>;
-    const { container } = renderWithQuery(<AppRouteLayout>{pathname.startsWith("/backoffice") ? <BackofficeShell>{content}</BackofficeShell> : content}</AppRouteLayout>);
-    await screen.findByText("Ana Pérez");
-    expect(container.querySelectorAll("[data-app-shell='true']")).toHaveLength(1);
-    expect(screen.getAllByRole("navigation", { name: "Menú principal" })).toHaveLength(1);
-    expect(screen.getAllByRole("banner")).toHaveLength(1);
-    expect(screen.getAllByRole("main")).toHaveLength(1);
-    expect(screen.getByRole("main").parentElement).toHaveClass("px-4", "py-6", "lg:px-12", "lg:py-10");
-    expect(screen.getByRole("button", { name: "Cerrar barra lateral" })).toBeVisible();
-    expect(screen.getByRole("button", { name: "Cerrar sesión" })).toHaveClass("text-brand-red", "hover:bg-brand-soft");
-    const user = userEvent.setup();
-    await user.click(screen.getByRole("button", { name: "Mi cuenta" }));
-    const menu = await screen.findByRole("menu");
-    expect(within(menu).getByRole("menuitem", { name: "Cerrar sesión" })).toHaveClass("text-brand-red");
-  });
+  it.each(ROUTES)(
+    "keeps the same chrome and red logout for %s at %s",
+    async (role, pathname) => {
+      route.pathname = pathname;
+      await saveAccessToken(
+        `h.${btoa(JSON.stringify({ sub: "user", roleTag: role }))}.s`,
+      );
+      const content = <main>Contenido de la vista</main>;
+      const { container } = renderWithQuery(
+        <AppRouteLayout>
+          {pathname.startsWith("/backoffice") ? (
+            <BackofficeShell>{content}</BackofficeShell>
+          ) : (
+            content
+          )}
+        </AppRouteLayout>,
+      );
+      await screen.findByText("Ana Pérez");
+      expect(container.querySelectorAll("[data-app-shell='true']")).toHaveLength(1);
+      expect(screen.getAllByRole("navigation", { name: "Menú principal" })).toHaveLength(1);
+      expect(screen.getAllByRole("banner")).toHaveLength(1);
+      expect(screen.getAllByRole("main")).toHaveLength(1);
+      expect(screen.getByRole("main").parentElement).toHaveClass("px-4", "py-6", "lg:px-12", "lg:py-10");
+      expect(screen.getByRole("button", { name: "Cerrar barra lateral" })).toBeVisible();
+      expect(screen.getByRole("button", { name: "Cerrar sesión" })).toHaveClass("text-brand-red", "hover:bg-brand-soft");
+      const user = userEvent.setup();
+      await user.click(screen.getByRole("button", { name: "Mi cuenta" }));
+      const menu = await screen.findByRole("menu");
+      expect(within(menu).getByRole("menuitem", { name: "Cerrar sesión" })).toHaveClass("text-brand-red");
+    },
+  );
 });

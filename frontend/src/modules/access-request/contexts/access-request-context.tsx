@@ -4,16 +4,16 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { EMPTY_DOCUMENT, EMPTY_VALUES } from "../constants/access-request-defaults.constants";
 import type { DocumentType } from "../constants/document-types.constants";
 import { accessRequestService } from "../services/access-request.service";
-import type {
-  AccessRequestContextValue,
-  ClearResult,
-  DocumentState,
-  FormNotice,
-  RequestStep,
-  SubmitStatus,
-  Submission,
-} from "../types/access-request-context.types";
-import type { FieldErrors, PersonalDataFieldName, PersonalDataValues } from "../types/access-request.types";
+import type { AccessRequestContextValue } from "../types/access-request-context-value.types";
+import type { ClearResult } from "../types/clear-result.types";
+import type { DocumentState } from "../types/document-state.types";
+import type { FormNotice } from "../types/form-notice.types";
+import type { RequestStep } from "../types/request-step.types";
+import type { SubmitStatus } from "../types/submit-status.types";
+import type { Submission } from "../types/submission.types";
+import type { FieldErrors } from "../types/field-errors.types";
+import type { PersonalDataFieldName } from "../types/personal-data-field-name.types";
+import type { PersonalDataValues } from "../types/personal-data-values.types";
 import { buildAccessRequestPayload } from "../utils/build-access-request-payload";
 import { validateDocumentFile } from "../utils/validate-document-file";
 import { validatePersonalData } from "../utils/validate-personal-data";
@@ -27,7 +27,9 @@ const ALREADY_SENT_MESSAGE = "La solicitud ya fue enviada.";
 const AccessRequestContext = createContext<AccessRequestContextValue | null>(null);
 
 // Estado del flujo solo en memoria: recargar la página pierde el borrador (no se guarda nada en el navegador)
-export function AccessRequestProvider({ children }: AccessRequestProviderProps) {
+export function AccessRequestProvider({
+  children,
+}: AccessRequestProviderProps) {
   const [values, setValues] = useState<PersonalDataValues>(EMPTY_VALUES);
   const [draftId, setDraftId] = useState<string | null>(null);
   const [status, setStatus] = useState<SubmitStatus>("idle");
@@ -363,7 +365,11 @@ export function AccessRequestProvider({ children }: AccessRequestProviderProps) 
     ],
   );
 
-  return <AccessRequestContext.Provider value={value}>{children}</AccessRequestContext.Provider>;
+  return (
+    <AccessRequestContext.Provider value={value}>
+      {children}
+    </AccessRequestContext.Provider>
+  );
 }
 
 export function useAccessRequestForm(): AccessRequestContextValue {

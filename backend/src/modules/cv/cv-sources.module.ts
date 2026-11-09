@@ -6,7 +6,11 @@ import { CvSourcesService } from './services/cv-sources.service.js';
 
 @Module({
   imports: [PrismaModule],
-  providers: [CvFileRepository, CvSourcesService, { provide: CvFileStorage, useExisting: CvFileRepository }],
+  providers: [
+    CvFileRepository,
+    CvSourcesService,
+    { provide: CvFileStorage, useExisting: CvFileRepository },
+  ],
   exports: [CvSourcesService, CvFileStorage],
 })
 export class CvSourcesModule {}

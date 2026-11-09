@@ -101,7 +101,11 @@ describe('ResponseInterceptor', () => {
   });
 
   it('propaga la excepcion original para que la procese el filtro existente', async () => {
-    const exception = new TestDomainException('Conflicto de dominio', 409, 'TEST_ERROR');
+    const exception = new TestDomainException(
+      'Conflicto de dominio',
+      409,
+      'TEST_ERROR',
+    );
 
     await expect(
       firstValueFrom(

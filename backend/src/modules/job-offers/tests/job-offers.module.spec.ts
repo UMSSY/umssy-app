@@ -10,7 +10,10 @@ import { JobOffersService } from '../services/job-offers.service.js';
 describe('JobOffersModule', () => {
   it('resuelve todas sus dependencias al compilar', async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [ConfigModule.forRoot({ isGlobal: true, ignoreEnvFile: true }), JobOffersModule],
+      imports: [
+        ConfigModule.forRoot({ isGlobal: true, ignoreEnvFile: true }),
+        JobOffersModule,
+      ],
     })
       .overrideProvider(PrismaService)
       .useValue({})
