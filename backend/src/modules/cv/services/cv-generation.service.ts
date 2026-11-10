@@ -11,6 +11,16 @@ import type { GenerateCvRequest } from "../requests/generate-cv.request.js";
 import type { CvDocumentData } from "../types/cv-document-data.type.js";
 import type { CvFileDownload } from "../types/cv-file-download.type.js";
 
+function formatDateField(value: unknown): string | null {
+  if (!value) {
+    return null;
+  }
+  if (value instanceof Date) {
+    return value.toISOString().substring(0, 10);
+  }
+  return String(value).substring(0, 10);
+}
+
 @Injectable()
 export class CvGenerationService {
   constructor(
@@ -50,31 +60,17 @@ export class CvGenerationService {
       summary: profile.aboutMe ?? undefined,
       workExperiences: experiences.map((exp) => ({
         jobTitle: exp.position,
-        company: exp.company.title,
-        startDate:
-          exp.startDate instanceof Date
-            ? exp.startDate.toISOString().substring(0, 10)
-            : String(exp.startDate),
-        endDate: exp.endDate
-          ? exp.endDate instanceof Date
-            ? exp.endDate.toISOString().substring(0, 10)
-            : String(exp.endDate)
-          : null,
+        company: exp.companyName,
+        startDate: formatDateField(exp.startDate) ?? "",
+        endDate: formatDateField(exp.endDate),
         isCurrent: exp.isCurrent,
         description: exp.description ?? undefined,
       })),
       educations: educations.map((edu) => ({
         degree: edu.degree,
         institution: edu.institution,
-        startDate:
-          edu.startDate instanceof Date
-            ? edu.startDate.toISOString().substring(0, 10)
-            : String(edu.startDate),
-        endDate: edu.endDate
-          ? edu.endDate instanceof Date
-            ? edu.endDate.toISOString().substring(0, 10)
-            : String(edu.endDate)
-          : null,
+        startDate: formatDateField(edu.startDate) ?? "",
+        endDate: formatDateField(edu.endDate),
         description: edu.description ?? undefined,
       })),
       skills: skills.map((s) => ({
@@ -83,10 +79,7 @@ export class CvGenerationService {
       certifications: certifications.map((c) => ({
         title: c.name,
         issuingOrganization: c.issuingOrganization,
-        issueDate:
-          c.issueDate instanceof Date
-            ? c.issueDate.toISOString().substring(0, 10)
-            : String(c.issueDate),
+        issueDate: formatDateField(c.issueDate) ?? "",
       })),
     };
 

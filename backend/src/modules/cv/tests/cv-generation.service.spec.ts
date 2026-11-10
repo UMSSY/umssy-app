@@ -74,7 +74,7 @@ describe("CvGenerationService", () => {
       {
         id: "exp-1",
         position: "Desarrollador Frontend",
-        company: { id: "comp-1", title: "Tech Co" },
+        companyName: "Tech Co",
         startDate: new Date("2023-01-01"),
         endDate: null,
         isCurrent: true,
