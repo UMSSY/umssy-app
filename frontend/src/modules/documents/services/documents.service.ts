@@ -36,6 +36,18 @@ export const documentsService = {
     return response.data;
   },
 
+  generateCv: async (): Promise<Blob> => {
+    const response = await apiClient.post<Blob>(
+      "/profile/cv/generate",
+      {},
+      {
+        headers: getAuthHeaders(),
+        responseType: "blob",
+      },
+    );
+    return response.data;
+  },
+
   deleteCv: async (cvId: string): Promise<void> => {
     await apiClient.delete(`/profile/me/cvs/${encodeURIComponent(cvId)}`, {
       headers: getAuthHeaders(),

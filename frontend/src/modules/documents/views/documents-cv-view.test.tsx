@@ -20,6 +20,12 @@ vi.mock("../services/documents.service", () => ({
   },
 }));
 
+vi.mock("@/modules/profile/services/profile.service", () => ({
+  profileService: {
+    getProfile: vi.fn().mockResolvedValue(null),
+  },
+}));
+
 const PDF_TYPE = "application/pdf";
 const CV_SIZE_IN_BYTES = 1258291;
 const UPLOAD_DATE = new Date(2026, 8, 20);
@@ -118,6 +124,15 @@ describe("DocumentsCvView", () => {
     cleanup();
     vi.restoreAllMocks();
     vi.clearAllMocks();
+  });
+
+it("offers to generate a cv from the profile data", async () => {
+    render(<DocumentsCvView />);
+
+    expect(
+      await screen.findByRole("region", { name: "Generar CV con los datos del perfil" }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Generar CV" })).toBeInTheDocument();
   });
 
   it("renders the cv title once in the main heading", async () => {
