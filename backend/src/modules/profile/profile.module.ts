@@ -12,12 +12,30 @@ import { ProfileRepository } from './repositories/profile.repository.js';
 import { ProfilePhotoService } from './services/profile-photo.service.js';
 import { ProfileService } from './services/profile.service.js';
 import { CityCatalogService } from './services/city-catalog.service.js';
+import { EducationSourcesModule } from '../educations/education-sources.module.js';
+import { WorkExperienceSourcesModule } from '../work-experience/work-experience-sources.module.js';
+import { SkillAnalysisModule } from '../skills/skill-analysis.module.js';
+import { CertificationSourcesModule } from '../certifications/certification-sources.module.js';
+import { ProfileCompletenessController } from './controllers/profile-completeness.controller.js';
+import { ProfileCompletenessService } from './services/profile-completeness.service.js';
 
 @Module({
-  imports: [PrismaModule, JwtAuthModule],
-  controllers: [ProfileController, ProfilePhotoController],
+  imports: [
+    PrismaModule,
+    JwtAuthModule,
+    EducationSourcesModule,
+    WorkExperienceSourcesModule,
+    SkillAnalysisModule,
+    CertificationSourcesModule,
+  ],
+  controllers: [
+    ProfileController,
+    ProfilePhotoController,
+    ProfileCompletenessController,
+  ],
   providers: [
     ProfileService,
+    ProfileCompletenessService,
     CityCatalogService,
     ProfileRepository,
     CityRepository,
