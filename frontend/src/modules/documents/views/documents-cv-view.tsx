@@ -4,6 +4,7 @@ import { useRef, useState, type ChangeEvent } from "react";
 import { Input } from "@/components/ui/input";
 import { FeedbackMessage } from "@/modules/profile";
 import { ProfilePageLayout } from "@/modules/profile";
+import { CvGenerateCard } from "../components/cv-generate-card";
 import { CvHistoryDialog } from "../components/cv-history-dialog";
 import { CvUploadCard } from "../components/cv-upload-card";
 import { CvViewerDialog } from "../components/cv-viewer-dialog";
@@ -160,15 +161,18 @@ export function DocumentsCvView() {
         onChange={handleFileChange}
       />
       <div className="grid grid-cols-2 items-start gap-6">
-        <CvUploadCard
-          selectedFile={selectedFile}
-          hasSavedCv={currentCv !== null}
-          isLoading={isLoading}
-          isUploading={isUploading}
-          isBusy={isBusy}
-          onSelectFile={openFilePicker}
-          onConfirmUpload={handleConfirmUpload}
-        />
+        <div className="flex flex-col gap-6">
+          <CvUploadCard
+            selectedFile={selectedFile}
+            hasSavedCv={currentCv !== null}
+            isLoading={isLoading}
+            isUploading={isUploading}
+            isBusy={isBusy}
+            onSelectFile={openFilePicker}
+            onConfirmUpload={handleConfirmUpload}
+          />
+          <CvGenerateCard />
+        </div>
         <SavedCvCard
           cvs={recentCvs}
           totalCvs={totalCvs}

@@ -7,6 +7,7 @@ export const CV_ERROR_MESSAGES = {
   download: "No se pudo descargar el CV. Intenta de nuevo.",
   upload: "No se pudo subir tu CV. Intenta de nuevo.",
   delete: "No se pudo eliminar tu CV. Intenta de nuevo.",
+  generate: "No se pudo generar tu CV. Intenta de nuevo.",
 };
 
 export const CV_ERROR_MESSAGES_BY_STATUS: Record<number, string> = {
