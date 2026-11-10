@@ -7,6 +7,7 @@ import { CvHistoryController } from './controllers/cv-history.controller.js';
 import { CvMapper } from './mappers/cv.mapper.js';
 import { CvSourcesModule } from './cv-sources.module.js';
 import { CvMetadataRepository } from './repositories/cv-metadata.repository.js';
+import { CvPdfGeneratorService } from './services/cv-pdf-generator.service.js';
 import { CvService } from './services/cv.service.js';
 import { RadarIntegrationModule } from '../radar-integration/radar-integration.module.js';
 
@@ -18,7 +19,13 @@ import { RadarIntegrationModule } from '../radar-integration/radar-integration.m
     RadarIntegrationModule,
   ],
   controllers: [CvHistoryController, CvFileController],
-  providers: [CvService, CvMetadataRepository, CvMapper, FileValidationService],
-  exports: [CvService],
+  providers: [
+    CvService,
+    CvMetadataRepository,
+    CvMapper,
+    FileValidationService,
+    CvPdfGeneratorService,
+  ],
+  exports: [CvService, CvPdfGeneratorService],
 })
 export class CvModule {}
