@@ -186,6 +186,8 @@ model User {
   radarCompanyAccess   RadarCompanyAccess[]      @ignore
   radarApplications    RadarJobApplication[]     @relation("RadarApplicant") @ignore
   radarDecisions       RadarJobApplication[]     @relation("RadarDecision") @ignore
+  socialAccounts       UserSocialAccount[]
+  portfolioProjects    UserPortfolioProject[]
 
   @@index([cityId])
   @@index([companyId])
@@ -1514,4 +1516,46 @@ model MentorOfferStatus {
   records     MentorSlotOffer[]
 
   @@map("mentor_offer_statuses")
+}
+
+model UserSocialAccount {
+  id                String                 @id @default(uuid()) @db.Uuid
+  userId            String                 @map("user_id") @db.Uuid
+  provider          String                 @db.VarChar(20)
+  externalId        String                 @map("external_id") @db.VarChar(100)
+  username          String                 @db.VarChar(100)
+  profileUrl        String?                @map("profile_url") @db.VarChar(500)
+  accessToken       String                 @map("access_token") @db.Text
+  createdAt         DateTime               @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime               @updatedAt @map("updated_at") @db.Timestamptz(6)
+  user              User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  portfolioProjects UserPortfolioProject[]
+
+  @@unique([userId, provider])
+  @@unique([provider, externalId])
+  @@index([userId])
+  @@map("user_social_accounts")
+}
+
+model UserPortfolioProject {
+  id              String             @id @default(uuid()) @db.Uuid
+  userId          String             @map("user_id") @db.Uuid
+  socialAccountId String?            @map("social_account_id") @db.Uuid
+  provider        String             @db.VarChar(20)
+  repoName        String             @map("repo_name") @db.VarChar(150)
+  repoUrl         String             @map("repo_url") @db.VarChar(500)
+  description     String?            @db.Text
+  language        String?            @db.VarChar(60)
+  starsCount      Int                @default(0) @map("stars_count")
+  isOwner         Boolean            @default(true) @map("is_owner")
+  displayOrder    Int                @default(0) @map("display_order") @db.SmallInt
+  createdAt       DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime           @updatedAt @map("updated_at") @db.Timestamptz(6)
+  user            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  socialAccount   UserSocialAccount? @relation(fields: [socialAccountId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, provider, repoName])
+  @@index([userId, displayOrder])
+  @@index([socialAccountId])
+  @@map("user_portfolio_projects")
 }
