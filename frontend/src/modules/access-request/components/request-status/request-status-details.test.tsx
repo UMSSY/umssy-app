@@ -1,7 +1,7 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { RequestStatusResponse } from "../../types/access-request.types";
+import type { RequestStatusResponse } from "../../types/request-status-response.types";
 import { RequestStatusDetails } from "./request-status-details";
 
 const REJECTED_REQUEST: RequestStatusResponse = {
@@ -58,9 +58,7 @@ describe("RequestStatusDetails", () => {
         />,
       );
 
-      expect(screen.getByRole("status")).toHaveTextContent(
-        `Estado: ${label}`,
-      );
+      expect(screen.getByRole("status")).toHaveTextContent(`Estado: ${label}`);
 
       expect(
         screen.queryByText("Ana Pérez"),

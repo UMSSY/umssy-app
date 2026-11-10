@@ -20,9 +20,13 @@ import { SURVEY_TEXT } from "../constants/survey-builder.constants";
 import { SURVEY_MESSAGES } from "../constants/survey-messages.constants";
 import { SURVEY_ROW_ACTION_LABELS } from "../constants/survey-routes.constants";
 import { useUnpublishSurvey } from "../hooks/use-unpublish-survey";
-import type { UnpublishSurveyActionProps } from "../types/survey-component-props.types";
+import type { UnpublishSurveyActionProps } from "../types/unpublish-survey-action-props.types";
 
-export function UnpublishSurveyAction({ survey, compact = false, className }: UnpublishSurveyActionProps) {
+export function UnpublishSurveyAction({
+  survey,
+  compact = false,
+  className,
+}: UnpublishSurveyActionProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { unpublishSurvey, isUnpublishing } = useUnpublishSurvey();
   const hasResponses = (survey.responseCount ?? 0) > 0;
@@ -62,19 +66,31 @@ export function UnpublishSurveyAction({ survey, compact = false, className }: Un
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-lg font-bold text-ink">{SURVEY_MESSAGES.unpublishDialogTitle}</AlertDialogTitle>
-            <AlertDialogDescription className="text-left">{SURVEY_MESSAGES.unpublishDialogDescription}</AlertDialogDescription>
+            <AlertDialogTitle className="text-lg font-bold text-ink">
+              {SURVEY_MESSAGES.unpublishDialogTitle}
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-left">
+              {SURVEY_MESSAGES.unpublishDialogDescription}
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isUnpublishing}>{SURVEY_TEXT.cancel}</AlertDialogCancel>
+            <AlertDialogCancel disabled={isUnpublishing}>
+              {SURVEY_TEXT.cancel}
+            </AlertDialogCancel>
             <AlertDialogAction
               variant="destructive"
               onClick={() => void handleConfirm()}
               disabled={isUnpublishing}
               aria-busy={isUnpublishing}
             >
-              {isUnpublishing ? <Loader2 aria-hidden="true" className="animate-spin" /> : <EyeOff aria-hidden="true" />}
-              {isUnpublishing ? SURVEY_TEXT.unpublishing : SURVEY_TEXT.unpublish}
+              {isUnpublishing ? (
+                <Loader2 aria-hidden="true" className="animate-spin" />
+              ) : (
+                <EyeOff aria-hidden="true" />
+              )}
+              {isUnpublishing
+                ? SURVEY_TEXT.unpublishing
+                : SURVEY_TEXT.unpublish}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

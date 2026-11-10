@@ -6,7 +6,9 @@ export interface ProfileSkillsPublished {
   resultVersion: number;
 }
 
-type PublicationListener = (publication: ProfileSkillsPublished) => Promise<void>;
+type PublicationListener = (
+  publication: ProfileSkillsPublished,
+) => Promise<void>;
 
 @Injectable()
 export class ProfileSkillsEvents {
@@ -21,10 +23,19 @@ export class ProfileSkillsEvents {
   // Se espera a los consumidores dentro de la petición para evitar tareas sueltas en serverless.
   // Un fallo del consumidor no debe invalidar un resultado de NLP ya confirmado.
   async published(publication: ProfileSkillsPublished): Promise<void> {
-    const results = await Promise.allSettled([...this.listeners].map(listener => Promise.resolve().then(() => listener(publication))));
+    const results = await Promise.allSettled(
+      [...this.listeners].map((listener) =>
+        Promise.resolve().then(() => listener(publication)),
+      ),
+    );
     for (const result of results) {
       if (result.status === 'rejected') {
-        this.logger.error(JSON.stringify({ event: 'profile.skills.consumer_failed', ...publication }));
+        this.logger.error(
+          JSON.stringify({
+            event: 'profile.skills.consumer_failed',
+            ...publication,
+          }),
+        );
       }
     }
   }

@@ -1,10 +1,6 @@
 import { ClipboardCheck } from "lucide-react";
 import { cn } from "cn";
-import {
-  EMPTY_STATE_RAY_CLASSES,
-  SURVEY_NOTIFICATIONS_EMPTY_DESCRIPTION,
-  SURVEY_NOTIFICATIONS_EMPTY_TITLE,
-} from "../constants/survey-notifications.constants";
+import { EMPTY_STATE_RAY_CLASSES } from "../constants/survey-notifications.constants";
 
 export function SurveyNotificationsEmpty() {
   return (
@@ -15,8 +11,8 @@ export function SurveyNotificationsEmpty() {
           <span key={rayClasses} className={cn("absolute h-0.5 w-3 rounded-full bg-accent/40", rayClasses)} />
         ))}
       </div>
-      <h3 className="font-tight text-lg font-bold text-ink">{SURVEY_NOTIFICATIONS_EMPTY_TITLE}</h3>
-      <p className="mt-2 text-sm text-text-secondary">{SURVEY_NOTIFICATIONS_EMPTY_DESCRIPTION}</p>
+      <h3 className="font-tight text-lg font-bold text-ink">{"No hay encuestas disponibles"}</h3>
+      <p className="mt-2 text-sm text-text-secondary">{"Cuando tengas una nueva encuesta asignada, aparecerá aquí."}</p>
     </div>
   );
 }

@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { JobOffersService } from '../../job-offers/services/job-offers.service.js';
 import { ProfileNotFoundException } from '../../profile/exceptions/profile-not-found.exception.js';
 import type { UserSkillService } from '../../skills/services/user-skill.service.js';
-import type { JobMatchRepository } from '../repositories/job-match.repository.js';
+import type { JobMatchSourceService } from '../services/job-match-source.service.js';
 import type { CandidateProfileService } from '../services/candidate-profile.service.js';
 import { JobMatchService } from '../services/job-match.service.js';
 import { JobRecommendationsService } from '../services/job-recommendations.service.js';
@@ -18,6 +18,7 @@ const DOCKER = { id: 'skill-docker', name: 'Docker' };
 function offer(skills: string[], description: string): JobMatchRecord {
   return {
     id: 'offer-1',
+    createdAt: new Date('2026-11-01T00:00:00Z'),
     title: 'DevOps',
     description,
     locationUrl: 'https://maps.google.com/?q=x',
@@ -39,7 +40,10 @@ describe('VacancyScoringService', () => {
   beforeEach(() => {
     vi.resetAllMocks();
     getUserSkills.mockResolvedValue([{ name: 'Python' }]);
-    findCandidateProfile.mockResolvedValue({ career: null, experienceYears: 0 });
+    findCandidateProfile.mockResolvedValue({
+      career: null,
+      experienceYears: 0,
+    });
     extractAndMatchRequirements.mockImplementation((text: string) =>
       Promise.resolve(text.includes('Docker') ? [DOCKER] : []),
     );
@@ -57,7 +61,9 @@ describe('VacancyScoringService', () => {
       { skills: [] },
     );
 
-    expect(requirements.skills).toEqual([{ name: 'docker', status: 'Pendiente' }]);
+    expect(requirements.skills).toEqual([
+      { name: 'docker', status: 'Pendiente' },
+    ]);
   });
 
   it('trata a un usuario sin perfil como candidato sin habilidades', async () => {
@@ -81,7 +87,7 @@ describe('VacancyScoringService', () => {
     const jobMatchRepository = {
       findPublished: vi.fn().mockResolvedValue([vacancy]),
       findPublishedById: vi.fn().mockResolvedValue(vacancy),
-    } as unknown as JobMatchRepository;
+    } as unknown as JobMatchSourceService;
 
     const detail = await new JobMatchService(
       jobMatchRepository,

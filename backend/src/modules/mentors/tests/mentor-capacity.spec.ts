@@ -1,6 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { MentorsRepository } from '../repositories/mentors.repository.js';
+import { MentorsService } from '../services/mentors.service.js';
+import { MentorMapper } from '../mappers/mentor.mapper.js';
+import type { UserSkillService } from '../../skills/services/user-skill.service.js';
 import { mentorCapacity } from '../utils/mentor-capacity.js';
 
 vi.mock('../repositories/mentor-offers.queries.js', () => ({
@@ -90,13 +93,32 @@ describe('capacidad HU-7-1', () => {
         }
       },
     } as unknown as PrismaService;
-    return { repository: new MentorsRepository(prisma), writes, queries };
+    const repository = new MentorsRepository(prisma);
+    vi.spyOn(repository, 'findMentorRole').mockResolvedValue({
+      id: 'mentor-role',
+    });
+    vi.spyOn(repository, 'findActiveUserRole').mockResolvedValue(null);
+    vi.spyOn(repository, 'findTechnicalAreas').mockResolvedValue([
+      { id: 'area' },
+    ]);
+    vi.spyOn(repository, 'findActiveOrientationTypes').mockResolvedValue([
+      { id: 'orientation' },
+    ]);
+    const service = new MentorsService(
+      repository,
+      new MentorMapper(),
+      {} as UserSkillService,
+    );
+    return { service, writes, queries };
   }
 
   it('rechaza la cuenta no elegible sin crear registros', async () => {
-    const { repository, writes } = fixture(false);
+    const { service, writes } = fixture(false);
     await expect(
-      repository.activate('user-1', 'mentor-role', ['area'], ['orientation']),
+      service.activate('user-1', {
+        technicalAreaIds: ['area'],
+        orientationTypeIds: ['orientation'],
+      }),
     ).rejects.toMatchObject({ statusCode: 403 });
     expect(writes).not.toHaveBeenCalled();
   });
@@ -104,22 +126,23 @@ describe('capacidad HU-7-1', () => {
   it('rechaza el rol ya activo y la capacidad reservada sin crear registros', async () => {
     for (const context of [fixture(true, true), fixture(true, false, 1)]) {
       await expect(
-        context.repository.activate(
-          'user-1',
-          'mentor-role',
-          ['area'],
-          ['orientation'],
-        ),
+        context.service.activate('user-1', {
+          technicalAreaIds: ['area'],
+          orientationTypeIds: ['orientation'],
+        }),
       ).rejects.toMatchObject({ statusCode: 409 });
       expect(context.writes).not.toHaveBeenCalled();
     }
   });
 
   it('reconsulta dentro del bloqueo y solo permite una alta para el último cupo', async () => {
-    const { repository, writes, queries } = fixture();
+    const { service, writes, queries } = fixture();
     const results = await Promise.allSettled(
       ['user-1', 'user-2'].map((userId) =>
-        repository.activate(userId, 'mentor-role', ['area'], ['orientation']),
+        service.activate(userId, {
+          technicalAreaIds: ['area'],
+          orientationTypeIds: ['orientation'],
+        }),
       ),
     );
     expect(

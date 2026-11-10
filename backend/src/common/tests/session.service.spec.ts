@@ -15,14 +15,40 @@ describe('SessionService', () => {
       id: 'user-1',
       email: 'user@test.com',
       isActive: true,
-      roles: ['titulado', 'mentor', 'mentor'].map((name) => ({ role: { name } })),
+      roles: ['titulado', 'mentor', 'mentor'].map((name) => ({
+        role: { name },
+      })),
     });
     await expect(service.getAuthenticatedUser('user-1')).resolves.toEqual({
       id: 'user-1',
       email: 'user@test.com',
       roles: ['titulado', 'mentor'],
+      company: null,
     });
     expect(findUserById).toHaveBeenCalledExactlyOnceWith('user-1');
+  });
+
+  it('loads the company relationship from the current database record', async () => {
+    const { service, findUserById } = createService();
+    findUserById.mockResolvedValue({
+      id: 'user-1',
+      email: 'company@test.com',
+      isActive: true,
+      company: { id: 'real-company', title: 'Empresa real' },
+      roles: [{ role: { name: 'empresa' } }],
+    });
+    expect((await service.getAuthenticatedUser('user-1')).company).toEqual({
+      id: 'real-company',
+      name: 'Empresa real',
+    });
+    findUserById.mockResolvedValue({
+      id: 'user-1',
+      email: 'company@test.com',
+      isActive: true,
+      company: null,
+      roles: [{ role: { name: 'empresa' } }],
+    });
+    expect((await service.getAuthenticatedUser('user-1')).company).toBeNull();
   });
 
   it('rejects nonexistent users with unauthorized session', async () => {

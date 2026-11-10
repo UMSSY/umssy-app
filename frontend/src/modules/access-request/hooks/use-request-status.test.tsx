@@ -1,10 +1,8 @@
 import { act, cleanup, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { accessRequestService } from "../services/access-request.service";
-import type {
-  ApiResult,
-  RequestStatusResponse,
-} from "../types/access-request.types";
+import type { ApiResult } from "../types/api-result.types";
+import type { RequestStatusResponse } from "../types/request-status-response.types";
 import { useRequestStatus } from "./use-request-status";
 
 vi.mock("../services/access-request.service", () => ({

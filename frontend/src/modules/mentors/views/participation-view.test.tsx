@@ -1,3 +1,4 @@
+import { saveAccessToken } from "@/shared/services/storage/access-token-storage";
 import { StrictMode } from "react";
 import { toast } from "sonner";
 import {
@@ -13,10 +14,8 @@ import {
   loadMentorshipWizardDraft,
   saveMentorshipWizardDraft,
 } from "@/modules/mentorship/services/mentorship-wizard-draft.service";
-import {
-  mentorParticipationService,
-  type MyMentorParticipation,
-} from "../services/mentor-participation.service";
+import { mentorParticipationService } from "../services/mentor-participation.service";
+import { type MyMentorParticipation } from "../types/my-mentor-participation.types";
 import { ParticipationView } from "./participation-view";
 import { writeIndexedDb } from "@/shared/services/storage/browser-indexed-db";
 
@@ -56,11 +55,11 @@ const active: MyMentorParticipation = {
 const deactivated: MyMentorParticipation = { ...active, status: "DEACTIVATED" };
 
 describe("ParticipationView HU-MEN-06", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.mocked(toast.success).mockClear();
     window.history.replaceState(null, "", "/mentors/participation");
     vi.spyOn(mentorParticipationService, "capacity").mockResolvedValue({ available: 1, capacity: 1, occupied: 0 });
-    sessionStorage.setItem("accessToken", "test-token");
+    await saveAccessToken("test-token");
     vi.spyOn(mentorParticipationService, "getCurrent").mockResolvedValue(null);
     vi.spyOn(
       mentorParticipationService,
@@ -406,5 +405,4 @@ describe("ParticipationView HU-MEN-06", () => {
     await waitFor(() => expect(mentorParticipationService.getCurrent).toHaveBeenCalled());
     expect(toast.success).toHaveBeenCalledTimes(1);
   });
-
 });

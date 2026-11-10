@@ -30,14 +30,21 @@ describe('AuthRepository', () => {
   it.each([
     [{ id: 'u-1' }, true],
     [null, false],
-  ])('existsByEmail busca sin distinguir mayúsculas (%o -> %s)', async (found, expected) => {
-    const { user, repository } = build();
-    user.findFirst.mockResolvedValue(found);
+  ])(
+    'existsByEmail busca sin distinguir mayúsculas (%o -> %s)',
+    async (found, expected) => {
+      const { user, repository } = build();
+      user.findFirst.mockResolvedValue(found);
 
-    await expect(repository.existsByEmail('Ana@umss.edu.bo')).resolves.toBe(expected);
+      await expect(repository.existsByEmail('Ana@umss.edu.bo')).resolves.toBe(
+        expected,
+      );
 
-    const args = user.findFirst.mock.calls[0][0];
-    expect(args.where).toEqual({ email: { equals: 'Ana@umss.edu.bo', mode: 'insensitive' } });
-    expect(args.select).toEqual({ id: true });
-  });
+      const args = user.findFirst.mock.calls[0][0];
+      expect(args.where).toEqual({
+        email: { equals: 'Ana@umss.edu.bo', mode: 'insensitive' },
+      });
+      expect(args.select).toEqual({ id: true });
+    },
+  );
 });

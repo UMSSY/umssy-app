@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { mapEventCategoriesToListResponse } from '../mappers/event-categories.mapper.js';
 import type { EventCategoryWithFields } from '../types/event-categories.types.js';
 
-function buildRecord(overrides: Partial<EventCategoryWithFields> = {}): EventCategoryWithFields {
+function buildRecord(
+  overrides: Partial<EventCategoryWithFields> = {},
+): EventCategoryWithFields {
   return {
     id: 'cat-uuid-1',
     name: 'Tecnologia',
@@ -12,7 +14,10 @@ function buildRecord(overrides: Partial<EventCategoryWithFields> = {}): EventCat
 
 describe('mapEventCategoriesToListResponse', () => {
   it('returns items mapped with id and name', () => {
-    const records = [buildRecord(), buildRecord({ id: 'cat-uuid-2', name: 'Negocios' })];
+    const records = [
+      buildRecord(),
+      buildRecord({ id: 'cat-uuid-2', name: 'Negocios' }),
+    ];
     const result = mapEventCategoriesToListResponse(records, 2, 1, 10);
 
     expect(result.data.items).toEqual([

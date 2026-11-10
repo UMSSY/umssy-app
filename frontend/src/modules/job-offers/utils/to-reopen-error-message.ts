@@ -1,7 +1,6 @@
+import { CONFLICT_STATUS } from "@/shared/constants/http.constants";
 import { isApiError } from "@/shared/services/api-client";
 import { REOPEN_JOB_OFFER_TEXT } from "../constants/job-offers.constants";
-
-const CONFLICT_STATUS = 409;
 
 export function toReopenErrorMessage(error: unknown): string {
   if (isApiError(error) && error.response?.status === CONFLICT_STATUS) {

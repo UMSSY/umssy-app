@@ -1,5 +1,7 @@
 import { seedTechnicalAreasCatalog } from '../../modules/technical-areas/seeds/technical-areas-catalog.seed.js';
 import { seedOrientationTypesCatalog } from '../../modules/orientation-types/seeds/orientation-types-catalog.seed.js';
+import { seedMentorParticipationStatusesCatalog } from '../../modules/mentors/seeds/mentor-participation-statuses-catalog.seed.js';
+import { seedMentorOfferStatusesCatalog } from '../../modules/mentors/seeds/mentor-offer-statuses-catalog.seed.js';
 import { seedAppointmentStatusesCatalog } from '../../modules/availability/seeds/appointment-statuses-catalog.seed.js';
 import { seedProposalStatusesCatalog } from '../../modules/availability/seeds/proposal-statuses-catalog.seed.js';
 import { seedEventCategoriesCatalog } from '../../modules/event-categories/seeds/event-categories-catalog.seed.js';
@@ -26,6 +28,8 @@ export async function seedCatalogStages(
 ): Promise<void> {
   await seedTechnicalAreasCatalog(tx);
   await seedOrientationTypesCatalog(tx);
+  await seedMentorParticipationStatusesCatalog(tx);
+  await seedMentorOfferStatusesCatalog(tx);
   await seedAppointmentStatusesCatalog(tx);
   await seedProposalStatusesCatalog(tx);
   await seedEventCategoriesCatalog(tx);

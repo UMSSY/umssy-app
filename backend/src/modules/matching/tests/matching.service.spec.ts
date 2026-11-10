@@ -4,7 +4,7 @@ import { SkillDictionaryService } from '../../job-connect/services/skill-diction
 import { SkillsClassifierService } from '../services/skills-classifier.service.js';
 import type { SkillCatalogService } from '../../skills/services/skill-catalog.service.js';
 import { NlpService } from '../services/nlp.service.js';
-import type { ExperienceSkillsRepository } from '../repositories/experience-skills.repository.js';
+import type { ExperienceSkillsService } from '../services/experience-skills.service.js';
 import { WorkExperienceNotFoundException } from '../../work-experience/exceptions/work-experience-not-found.exception.js';
 
 interface RequirementGapResult {
@@ -17,10 +17,10 @@ interface RequirementGapResult {
 
 function analyzeRequirementsGap(
   requiredSkills: string[],
-  candidateSkills: string[]
+  candidateSkills: string[],
 ): RequirementGapResult {
   const missingSkills: string[] = requiredSkills.filter(
-    (skill) => !candidateSkills.includes(skill)
+    (skill) => !candidateSkills.includes(skill),
   );
 
   const gapCount = missingSkills.length;
@@ -43,7 +43,7 @@ function evaluateCareerMatch(params: {
 }): boolean {
   const normalizedCandidate = params.candidateCareer.trim().toLowerCase();
   return params.requiredCareers.some(
-    (career) => career.trim().toLowerCase() === normalizedCandidate
+    (career) => career.trim().toLowerCase() === normalizedCandidate,
   );
 }
 
@@ -90,7 +90,7 @@ describe('MatchingService', () => {
       new SkillsClassifierService(),
       skillCatalog as unknown as SkillCatalogService,
       new NlpService(),
-      repository as unknown as ExperienceSkillsRepository,
+      repository as unknown as ExperienceSkillsService,
     );
   });
 
@@ -106,7 +106,7 @@ describe('MatchingService', () => {
     ]);
   });
 
-    it('genera una vista previa de habilidades sin persistir asociaciones', async () => {
+  it('genera una vista previa de habilidades sin persistir asociaciones', async () => {
     const result = await service.previewExperience(USER_ID, {
       experienceId: EXPERIENCE_ID,
       text: 'Desarrolle aplicaciones con Python y Docker',
@@ -153,7 +153,10 @@ describe('MatchingService', () => {
   it('detecta habilidades del catalogo que no estan en el diccionario (AC-01.2)', async () => {
     const result = await analyze('Desplegue contenedores con Docker y Python');
 
-    expect(result.skills.map((skill) => skill.name)).toEqual(['Python', 'Docker']);
+    expect(result.skills.map((skill) => skill.name)).toEqual([
+      'Python',
+      'Docker',
+    ]);
   });
 
   it('une los terminos compuestos como un solo termino clave (AC-01.5)', async () => {
@@ -169,7 +172,9 @@ describe('MatchingService', () => {
   });
 
   it('no agrega adjetivos ni palabras comunes como habilidades (AC-01.7)', async () => {
-    const result = await analyze('Persona proactiva, puntual y responsable con mucha iniciativa');
+    const result = await analyze(
+      'Persona proactiva, puntual y responsable con mucha iniciativa',
+    );
 
     expect(result.skills).toEqual([]);
   });
@@ -182,9 +187,16 @@ describe('MatchingService', () => {
   });
 
   it('reconoce C++, C#, Node.js y .NET con las claves del catalogo', async () => {
-    const result = await analyze('Desarrolle servicios en C++, C#, Node.js y .NET');
+    const result = await analyze(
+      'Desarrolle servicios en C++, C#, Node.js y .NET',
+    );
 
-    expect(result.skills.map((skill) => skill.name)).toEqual(['C++', 'C#', '.NET', 'Node.js']);
+    expect(result.skills.map((skill) => skill.name)).toEqual([
+      'C++',
+      'C#',
+      '.NET',
+      'Node.js',
+    ]);
   });
 
   it('no expone campos internos del catalogo en la respuesta', async () => {
@@ -231,20 +243,35 @@ describe('MatchingService', () => {
     const result = await analyze('texto sin habilidades reconocibles');
 
     expect(result.skills).toEqual([]);
-    expect(repository.replaceDetected).toHaveBeenCalledWith(USER_ID, EXPERIENCE_ID, []);
+    expect(repository.replaceDetected).toHaveBeenCalledWith(
+      USER_ID,
+      EXPERIENCE_ID,
+      [],
+    );
   });
 
   it('vincula las habilidades detectadas a la experiencia de la persona autenticada (AC-01.2)', async () => {
     await analyze('Python y Scrum');
 
-    expect(repository.belongsToUser).toHaveBeenCalledWith(EXPERIENCE_ID, USER_ID);
-    expect(repository.replaceDetected).toHaveBeenCalledWith(USER_ID, EXPERIENCE_ID, ['a1', 'b2']);
+    expect(repository.belongsToUser).toHaveBeenCalledWith(
+      EXPERIENCE_ID,
+      USER_ID,
+    );
+    expect(repository.replaceDetected).toHaveBeenCalledWith(
+      USER_ID,
+      EXPERIENCE_ID,
+      ['a1', 'b2'],
+    );
   });
 
   it('limpia los vinculos anteriores cuando la descripcion queda vacia', async () => {
     await analyze(null);
 
-    expect(repository.replaceDetected).toHaveBeenCalledWith(USER_ID, EXPERIENCE_ID, []);
+    expect(repository.replaceDetected).toHaveBeenCalledWith(
+      USER_ID,
+      EXPERIENCE_ID,
+      [],
+    );
   });
 
   it('lanza 404 y no analiza ni guarda cuando la experiencia es de otra persona', async () => {
@@ -267,28 +294,41 @@ describe('MatchingService', () => {
   });
 
   it('procesa un texto de 5000 caracteres en menos de 2 segundos (AC-01.1)', async () => {
-    const text = 'Desarrollo con Python, Docker y Scrum en equipos agiles. '.repeat(100).slice(0, 5000);
+    const text = 'Desarrollo con Python, Docker y Scrum en equipos agiles. '
+      .repeat(100)
+      .slice(0, 5000);
 
     const result = await analyze(text);
 
     expect(result.processingTimeMs).toBeLessThan(2000);
-    expect(result.skills.map((skill) => skill.name)).toEqual(['Python', 'Scrum', 'Docker']);
+    expect(result.skills.map((skill) => skill.name)).toEqual([
+      'Python',
+      'Scrum',
+      'Docker',
+    ]);
   });
 });
 
 describe('Matching Gap Analysis QA Suite - Zero Gap UI Behavior', () => {
   it('debe validar que cuando la brecha es igual a cero, se genere el mensaje explícito para la UI', () => {
     const requiredSkills: string[] = ['TypeScript', 'NestJS', 'PostgreSQL'];
-    const candidateSkills: string[] = ['TypeScript', 'NestJS', 'PostgreSQL', 'Docker'];
+    const candidateSkills: string[] = [
+      'TypeScript',
+      'NestJS',
+      'PostgreSQL',
+      'Docker',
+    ];
 
     const result: RequirementGapResult = analyzeRequirementsGap(
       requiredSkills,
-      candidateSkills
+      candidateSkills,
     );
 
     expect(result.gapCount).toBe(0);
     expect(result.isZeroGap).toBe(true);
-    expect(result.message).toBe('El perfil cubre la totalidad de los requisitos.');
+    expect(result.message).toBe(
+      'El perfil cubre la totalidad de los requisitos.',
+    );
   });
 });
 

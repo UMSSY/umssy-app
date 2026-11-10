@@ -42,7 +42,10 @@ export class ProfileSkillsAnalysisService {
       const state = await this.results.registerSourceChange(userId, new Date());
       await this.process(userId, state.inputRevision);
     } catch (error) {
-      this.write('error', NLP_LOG_EVENTS.triggerFailed, { userId, code: toErrorCode(error) });
+      this.write('error', NLP_LOG_EVENTS.triggerFailed, {
+        userId,
+        code: toErrorCode(error),
+      });
     }
   }
 
@@ -50,7 +53,10 @@ export class ProfileSkillsAnalysisService {
     await this.sources.ensureProfileExists(userId);
     const state = await this.results.ensureState(userId, new Date());
     const outcome = await this.process(userId, state.inputRevision);
-    return this.mapper.toAnalysisResponse(await this.readSnapshot(userId), outcome);
+    return this.mapper.toAnalysisResponse(
+      await this.readSnapshot(userId),
+      outcome,
+    );
   }
 
   async getRadarSnapshot(userId: string): Promise<ProfileSkillsRadarResponse> {
@@ -58,11 +64,22 @@ export class ProfileSkillsAnalysisService {
     return this.readSnapshot(userId);
   }
 
-  private async process(userId: string, revision: number): Promise<NlpAnalysisOutcome> {
+  private async process(
+    userId: string,
+    revision: number,
+  ): Promise<NlpAnalysisOutcome> {
     const correlationId = randomUUID();
     const startedAt = performance.now();
-    const outcome: NlpAnalysisOutcome = { status: 'error', discarded: [], rejectedSources: [] };
-    this.write('log', NLP_LOG_EVENTS.started, { correlationId, userId, revision });
+    const outcome: NlpAnalysisOutcome = {
+      status: 'error',
+      discarded: [],
+      rejectedSources: [],
+    };
+    this.write('log', NLP_LOG_EVENTS.started, {
+      correlationId,
+      userId,
+      revision,
+    });
 
     try {
       const [textSources, catalog] = await Promise.all([
@@ -83,7 +100,8 @@ export class ProfileSkillsAnalysisService {
         revision,
         NLP_DICTIONARY_VERSION,
         new Date(),
-        (context) => this.skills.reconcileDetected(userId, detection.accepted, context),
+        (context) =>
+          this.skills.reconcileDetected(userId, detection.accepted, context),
       );
       outcome.status = published ? 'ready' : 'stale';
       if (published) {
@@ -93,19 +111,23 @@ export class ProfileSkillsAnalysisService {
           resultVersion: published.state.resultVersion,
         });
       }
-      this.write('log', published ? NLP_LOG_EVENTS.finished : NLP_LOG_EVENTS.stale, {
-        correlationId,
-        userId,
-        revision,
-        durationMs: Math.round(performance.now() - startedAt),
-        sources: textSources.length,
-        rejectedSources: sources.rejected.length,
-        detected: candidates.length,
-        accepted: detection.accepted.length,
-        discarded: detection.discarded.length,
-        resultVersion: published?.state.resultVersion ?? null,
-        changed: published?.changed ?? false,
-      });
+      this.write(
+        'log',
+        published ? NLP_LOG_EVENTS.finished : NLP_LOG_EVENTS.stale,
+        {
+          correlationId,
+          userId,
+          revision,
+          durationMs: Math.round(performance.now() - startedAt),
+          sources: textSources.length,
+          rejectedSources: sources.rejected.length,
+          detected: candidates.length,
+          accepted: detection.accepted.length,
+          discarded: detection.discarded.length,
+          resultVersion: published?.state.resultVersion ?? null,
+          changed: published?.changed ?? false,
+        },
+      );
     } catch (error) {
       await this.markError(userId, revision);
       this.write('error', NLP_LOG_EVENTS.failed, {
@@ -123,11 +145,17 @@ export class ProfileSkillsAnalysisService {
     try {
       await this.results.markError(userId, revision, new Date());
     } catch (error) {
-      this.write('error', NLP_LOG_EVENTS.markErrorFailed, { userId, revision, code: toErrorCode(error) });
+      this.write('error', NLP_LOG_EVENTS.markErrorFailed, {
+        userId,
+        revision,
+        code: toErrorCode(error),
+      });
     }
   }
 
-  private async readSnapshot(userId: string): Promise<ProfileSkillsRadarResponse> {
+  private async readSnapshot(
+    userId: string,
+  ): Promise<ProfileSkillsRadarResponse> {
     const [state, rows] = await Promise.all([
       this.results.findState(userId),
       this.skills.findProfileSkillRows(userId),
@@ -135,7 +163,11 @@ export class ProfileSkillsAnalysisService {
     return this.mapper.toRadarResponse(userId, state, rows);
   }
 
-  private write(level: 'log' | 'error', event: string, fields: Record<string, unknown>): void {
+  private write(
+    level: 'log' | 'error',
+    event: string,
+    fields: Record<string, unknown>,
+  ): void {
     this.logger[level](JSON.stringify({ event, ...fields }));
   }
 }

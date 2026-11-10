@@ -1,8 +1,5 @@
 import { z } from 'zod';
-import {
-  MIN_SEARCH_CHARS,
-  MAX_SEARCH_QUERY_LENGTH,
-} from '../constants/chat.constants.js';
+import { MIN_SEARCH_CHARS } from '../constants/chat.constants.js';
 
 export const searchUsersSchema = z
   .object({
@@ -13,10 +10,7 @@ export const searchUsersSchema = z
         MIN_SEARCH_CHARS,
         `El término de búsqueda debe tener al menos ${MIN_SEARCH_CHARS} caracteres`,
       )
-      .max(
-        MAX_SEARCH_QUERY_LENGTH,
-        `El término de búsqueda no puede superar los ${MAX_SEARCH_QUERY_LENGTH} caracteres`,
-      ),
+      .max(100, `El término de búsqueda no puede superar los 100 caracteres`),
   })
   .strict();
 

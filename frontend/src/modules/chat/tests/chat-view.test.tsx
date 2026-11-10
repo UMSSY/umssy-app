@@ -1,3 +1,5 @@
+import "@/shared/testing/indexed-db.mock";
+import { saveAccessToken } from "@/shared/services/storage/access-token-storage";
 
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 
@@ -219,48 +221,44 @@ describe("ChatView & ChatPage", () => {
     },
   );
 
-  it(
-    "debe renderizar la página de chat con una sola navegación principal",
-    async () => {
-      stubMatchMedia();
+  it("debe renderizar la página de chat con una sola navegación principal", async () => {
+    stubMatchMedia();
 
-      sessionStorage.setItem(
-        "accessToken",
-        `h.${btoa(
-          JSON.stringify({
-            roleTag: "titulado",
-          }),
-        )}.s`,
-      );
+    await saveAccessToken(
+      `h.${btoa(
+        JSON.stringify({
+          roleTag: "titulado",
+        }),
+      )}.s`,
+    );
 
-      vi.spyOn(chatApi, "getConversations")
+    vi.spyOn(chatApi, "getConversations")
         .mockResolvedValue(testConversations);
 
-      renderWithQueryClient(
+    renderWithQueryClient(
         <AppLayout>
           <ChatPage />
         </AppLayout>,
       );
 
-      expect(
+    expect(
         screen.getByText("Chats"),
       ).toBeDefined();
 
-      expect(
+    expect(
         screen.getAllByRole("navigation", {
           name: "Menú principal",
         }),
       ).toHaveLength(1);
 
-      expect(
+    expect(
         screen.getByRole("link", {
           name: /Chat|Mensajes/i,
         }),
       ).toHaveAttribute("href", "/chat");
 
-      expect(
+    expect(
         await screen.findByText("Usuario de Prueba 1"),
       ).toBeDefined();
-    },
-  );
+  });
 });

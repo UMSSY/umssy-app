@@ -9,6 +9,7 @@ import { EMPTY_EDUCATION_FORM_VALUES } from "../constants/education-form-default
 import { EDUCATION_UI_TEXTS } from "../constants/education-ui.constants";
 import { EDUCATION_DESCRIPTION_MAX_LENGTH, EDUCATION_MIN_DATE } from "../constants/education-validation.constants";
 import { EDUCATION_INSTITUTION_TEXTS } from "../constants/education-institutions.constants";
+import { useEducationDegrees } from "../hooks/use-education-degrees";
 import { useEducationInstitutions } from "../hooks/use-education-institutions";
 import { resolveEducationInstitution } from "../utils/resolve-education-institution";
 import { EducationInstitutionCombobox } from "./education-institution-combobox";
@@ -33,17 +34,26 @@ export function EducationForm({
   onValuesChange,
 }: EducationFormProps) {
   const { institutions, isLoading: loadingInstitutions, error: institutionsError, reload: reloadInstitutions } = useEducationInstitutions();
-  const catalogUnavailable = loadingInstitutions || !!institutionsError || !institutions.length;
+  const degreeCatalog = useEducationDegrees();
+  const catalog = degreeCatalog.data ?? [];
+  const catalogUnavailable =
+    degreeCatalog.isPending ||
+    degreeCatalog.isError ||
+    loadingInstitutions ||
+    !!institutionsError ||
+    !institutions.length;
   const [values, setValues] = useState<EducationFormValues>(
     initialValues ?? EMPTY_EDUCATION_FORM_VALUES,
   );
   const title = initialValues ? EDUCATION_UI_TEXTS.editTitle : EDUCATION_UI_TEXTS.createTitle;
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const selectedInstitution = resolveEducationInstitution(values.institution, institutions);
-  const degrees = getEducationDegrees(selectedInstitution ?? '');
+  const degrees = getEducationDegrees(selectedInstitution ?? "", catalog);
   const degreeHint = !selectedInstitution ? EDUCATION_DEGREE_TEXTS.selectInstitution
     : !degrees.length ? EDUCATION_DEGREE_TEXTS.noDegrees : null;
-  const errors = hasSubmitted ? validateEducationForm(values, allowMissingEndDate, institutions) : {};
+  const errors = hasSubmitted
+    ? validateEducationForm(values, allowMissingEndDate, institutions, catalog)
+    : {};
 
   const handleInstitutionChange = (institution: string) => {
     onValuesChange?.();
@@ -51,7 +61,10 @@ export function EducationForm({
       const previous = resolveEducationInstitution(current.institution, institutions);
       const next = resolveEducationInstitution(institution, institutions);
       if (!next || previous === next) return { ...current, institution };
-      const degree = resolveEducationDegree(current.degree, getEducationDegrees(next ?? ''));
+      const degree = resolveEducationDegree(
+        current.degree,
+        getEducationDegrees(next ?? "", catalog),
+      );
       return { ...current, institution, degree: degree ?? '' };
     });
   };
@@ -66,103 +79,198 @@ export function EducationForm({
     event.preventDefault();
     if (isPending || catalogUnavailable) return;
     setHasSubmitted(true);
-    if (Object.keys(validateEducationForm(values, allowMissingEndDate, institutions)).length > 0) return;
+    if (
+      Object.keys(
+        validateEducationForm(
+          values,
+          allowMissingEndDate,
+          institutions,
+          catalog,
+        ),
+      ).length > 0
+    )
+      return;
     const institution = resolveEducationInstitution(values.institution, institutions);
     if (!institution) return;
-    const degree = resolveEducationDegree(values.degree, getEducationDegrees(institution));
+    const degree = resolveEducationDegree(
+      values.degree,
+      getEducationDegrees(institution, catalog),
+    );
     if (!degree) return;
     await onSubmit({ ...values, institution, degree });
   };
 
   return (
     <div className="min-w-0">
-      <form aria-label={title} aria-busy={isPending} noValidate onSubmit={handleSubmit} className="flex flex-col gap-5">
+      <form
+        aria-label={title}
+        aria-busy={isPending}
+        noValidate
+        onSubmit={handleSubmit}
+        className="flex flex-col gap-5"
+      >
         <FormFieldset title="Estudio">
-        <FormField id="education-institution" label={EDUCATION_UI_TEXTS.institutionLabel} isRequired error={errors.institution}>
-          <EducationInstitutionCombobox
+          <FormField
             id="education-institution"
+            label={EDUCATION_UI_TEXTS.institutionLabel}
+            isRequired
             error={errors.institution}
-            value={values.institution}
-            institutions={institutions}
-            disabled={isPending || catalogUnavailable}
-            onChange={handleInstitutionChange}
-          />
-          {loadingInstitutions ? <p role="status" className="text-sm text-text-secondary">{EDUCATION_INSTITUTION_TEXTS.loading}</p> : null}
-          {institutionsError ? (
-            <div className="flex flex-wrap items-center gap-2">
-              <p role="alert" className="text-sm text-accent">{institutionsError}</p>
-              <Button type="button" variant="outline" onClick={reloadInstitutions} disabled={isPending}>
-                <RotateCw aria-hidden="true" />{EDUCATION_INSTITUTION_TEXTS.retry}
+          >
+            <EducationInstitutionCombobox
+              id="education-institution"
+              error={errors.institution}
+              value={values.institution}
+              institutions={institutions}
+              disabled={isPending || catalogUnavailable}
+              onChange={handleInstitutionChange}
+            />
+            {loadingInstitutions ? (
+              <p role="status" className="text-sm text-text-secondary">
+                {EDUCATION_INSTITUTION_TEXTS.loading}
+              </p>
+            ) : null}
+            {institutionsError ? (
+              <div className="flex flex-wrap items-center gap-2">
+                <p role="alert" className="text-sm text-accent">
+                  {institutionsError}
+                </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={reloadInstitutions}
+                  disabled={isPending}
+                >
+                  <RotateCw aria-hidden="true" />
+                  {EDUCATION_INSTITUTION_TEXTS.retry}
+                </Button>
+              </div>
+            ) : null}
+          </FormField>
+          {degreeCatalog.isError ? (
+            <div className="flex items-center gap-2">
+              <p role="alert" className="text-sm text-destructive">
+                No se pudo cargar el catálogo de grados académicos.
+              </p>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => void degreeCatalog.refetch()}
+              >
+                Reintentar
               </Button>
             </div>
           ) : null}
-        </FormField>
-        <FormField id="education-degree" label={EDUCATION_UI_TEXTS.degreeLabel} isRequired error={errors.degree}>
-          <EducationDegreeCombobox
-            key={selectedInstitution ?? ''}
+          <FormField
             id="education-degree"
+            label={EDUCATION_UI_TEXTS.degreeLabel}
+            isRequired
             error={errors.degree}
-            describedBy={degreeHint ? 'education-degree-hint' : undefined}
-            value={values.degree}
-            degrees={degrees}
-            disabled={isPending || catalogUnavailable || !selectedInstitution || !degrees.length}
-            onChange={(degree) => { onValuesChange?.(); setValues((current) => ({ ...current, degree })); }}
-          />
-          {degreeHint ? <p id="education-degree-hint" role="status" className="text-sm text-text-secondary">{degreeHint}</p> : null}
-        </FormField>
+          >
+            <EducationDegreeCombobox
+              key={selectedInstitution ?? ""}
+              id="education-degree"
+              error={errors.degree}
+              describedBy={degreeHint ? "education-degree-hint" : undefined}
+              value={values.degree}
+              degrees={degrees}
+              disabled={
+                isPending ||
+                catalogUnavailable ||
+                !selectedInstitution ||
+                !degrees.length
+              }
+              onChange={(degree) => {
+                onValuesChange?.();
+                setValues((current) => ({ ...current, degree }));
+              }}
+            />
+            {degreeHint ? (
+              <p
+                id="education-degree-hint"
+                role="status"
+                className="text-sm text-text-secondary"
+              >
+                {degreeHint}
+              </p>
+            ) : null}
+          </FormField>
         </FormFieldset>
         <FormFieldset title="Periodo y detalle">
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-          <FormField id="education-startDate" label={EDUCATION_UI_TEXTS.startDateLabel} isRequired error={errors.startDate}>
-            <DateField
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <FormField
               id="education-startDate"
-              {...getFieldErrorProps("education-startDate", errors.startDate)}
-              name="startDate"
+              label={EDUCATION_UI_TEXTS.startDateLabel}
+              isRequired
+              error={errors.startDate}
+            >
+              <DateField
+                id="education-startDate"
+                {...getFieldErrorProps("education-startDate", errors.startDate)}
+                name="startDate"
 
-              min={EDUCATION_MIN_DATE}
-              required
-              value={values.startDate}
-              disabled={isPending}
-              onValueChange={(value) => handleValueChange("startDate", value)}
-              className="h-11"
-            />
-          </FormField>
-          <FormField id="education-endDate" label={EDUCATION_UI_TEXTS.endDateLabel} isRequired={!allowMissingEndDate} error={errors.endDate}>
-            <DateField
+                min={EDUCATION_MIN_DATE}
+                required
+                value={values.startDate}
+                disabled={isPending}
+                onValueChange={(value) => handleValueChange("startDate", value)}
+                className="h-11"
+              />
+            </FormField>
+            <FormField
               id="education-endDate"
-              {...getFieldErrorProps("education-endDate", errors.endDate)}
-              name="endDate"
+              label={EDUCATION_UI_TEXTS.endDateLabel}
+              isRequired={!allowMissingEndDate}
+              error={errors.endDate}
+            >
+              <DateField
+                id="education-endDate"
+                {...getFieldErrorProps("education-endDate", errors.endDate)}
+                name="endDate"
 
-              min={EDUCATION_MIN_DATE}
-              required={!allowMissingEndDate}
-              value={values.endDate}
-              disabled={isPending}
-              onValueChange={(value) => handleValueChange("endDate", value)}
-              className="h-11"
-            />
-          </FormField>
-        </div>
-        <FormField id="education-description" label={EDUCATION_UI_TEXTS.descriptionLabel} error={errors.description}>
-          <div className="relative">
-            <Textarea
-              id="education-description"
-              {...getFieldErrorProps("education-description", errors.description)}
-              aria-describedby={errors.description ? "education-description-error education-description-count" : "education-description-count"}
-              name="description"
-              rows={3}
-              maxLength={EDUCATION_DESCRIPTION_MAX_LENGTH}
-              placeholder={EDUCATION_UI_TEXTS.descriptionPlaceholder}
-              value={values.description ?? ""}
-              disabled={isPending}
-              onChange={handleChange}
-              className="field-sizing-fixed min-h-36 resize-y pb-9 text-sm"
-            />
-            <span id="education-description-count" className="pointer-events-none absolute right-6 bottom-3 text-xs text-text-secondary">
-              {(values.description ?? "").length}/{EDUCATION_DESCRIPTION_MAX_LENGTH}
-            </span>
+                min={EDUCATION_MIN_DATE}
+                required={!allowMissingEndDate}
+                value={values.endDate}
+                disabled={isPending}
+                onValueChange={(value) => handleValueChange("endDate", value)}
+                className="h-11"
+              />
+            </FormField>
           </div>
-        </FormField>
-
+          <FormField
+            id="education-description"
+            label={EDUCATION_UI_TEXTS.descriptionLabel}
+            error={errors.description}
+          >
+            <div className="relative">
+              <Textarea
+                id="education-description"
+                {...getFieldErrorProps(
+                  "education-description",
+                  errors.description,
+                )}
+                aria-describedby={
+                  errors.description
+                    ? "education-description-error education-description-count"
+                    : "education-description-count"
+                }
+                name="description"
+                rows={3}
+                maxLength={EDUCATION_DESCRIPTION_MAX_LENGTH}
+                placeholder={EDUCATION_UI_TEXTS.descriptionPlaceholder}
+                value={values.description ?? ""}
+                disabled={isPending}
+                onChange={handleChange}
+                className="field-sizing-fixed min-h-36 resize-y pb-9 text-sm"
+              />
+              <span
+                id="education-description-count"
+                className="pointer-events-none absolute right-6 bottom-3 text-xs text-text-secondary"
+              >
+                {(values.description ?? "").length}/
+                {EDUCATION_DESCRIPTION_MAX_LENGTH}
+              </span>
+            </div>
+          </FormField>
         </FormFieldset>
         <FeedbackMessage feedback={feedback} />
         <div className="flex flex-wrap justify-end gap-3 border-t border-border pt-5">
@@ -180,8 +288,12 @@ export function EducationForm({
             className="h-10 min-w-40 bg-primary px-4 text-sm text-primary-foreground hover:bg-brand-hover"
             disabled={isPending || catalogUnavailable}
           >
-            {isPending ? <Loader2 aria-hidden="true" className="size-4 animate-spin" /> : null}
-            {isPending ? EDUCATION_UI_TEXTS.savingButton : EDUCATION_UI_TEXTS.saveButton}
+            {isPending ? (
+              <Loader2 aria-hidden="true" className="size-4 animate-spin" />
+            ) : null}
+            {isPending
+              ? EDUCATION_UI_TEXTS.savingButton
+              : EDUCATION_UI_TEXTS.saveButton}
           </Button>
         </div>
       </form>

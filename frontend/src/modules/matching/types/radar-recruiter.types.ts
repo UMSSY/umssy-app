@@ -1,4 +1,5 @@
-import type { AffinityAxisId, AxisScores } from "./matching-types";
+import type { AffinityAxisId } from "./affinity-axis-id.types";
+import type { AxisScores } from "./axis-scores.types";
 
 export type RadarAxisId = AffinityAxisId;
 

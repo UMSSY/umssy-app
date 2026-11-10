@@ -54,7 +54,6 @@ export class UserLookupRepository {
     const escaped = normalizedQuery.replace(/[%_\\]/g, '\\$&');
     const pattern = `%${escaped}%`;
 
-
     return this.prisma.$queryRaw<SearchUserRow[]>`
       SELECT
         u.id,

@@ -8,7 +8,7 @@ import { jobOffersService } from "../services/job-offers.service";
 import type { PublishError } from "../types/publish-error.types";
 import type { PublishVariables } from "../types/publish-variables.types";
 import type { VacancyConditions } from "../types/vacancy-conditions.types";
-import { getCurrentCompany } from "../utils/get-current-company";
+import { useCurrentCompany } from "./use-current-company";
 import { toJobOfferPayload } from "../utils/to-job-offer-payload";
 import { toPublishError } from "../utils/to-publish-error";
 import { validateInformation, validateRequirements } from "../utils/validate-vacancy";
@@ -20,7 +20,11 @@ function hasErrors(conditions: VacancyConditions): boolean {
   return Object.keys(found).length > 0;
 }
 
-export function usePublishJobOffer(jobOfferId?: string, options: UsePublishJobOfferOptions = {}) {
+export function usePublishJobOffer(
+  jobOfferId?: string,
+  options: UsePublishJobOfferOptions = {},
+) {
+  const company = useCurrentCompany();
   const [localError, setLocalError] = useState<PublishError | null>(null);
   const queryClient = useQueryClient();
 
@@ -47,7 +51,6 @@ export function usePublishJobOffer(jobOfferId?: string, options: UsePublishJobOf
       return;
     }
 
-    const company = getCurrentCompany();
     if (!company.id) {
       setLocalError({ kind: "company", message: PUBLISH_MESSAGES.noCompany, details: [] });
       return;

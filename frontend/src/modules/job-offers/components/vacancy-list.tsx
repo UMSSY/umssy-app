@@ -8,14 +8,7 @@ import { buttonVariants } from "@/components/ui/button-variants";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import {
-  DELETE_JOB_OFFER_TEXT,
-  HISTORY_SKELETON_ROWS,
-  JOB_OFFERS_PAGE_SIZE,
-  NEW_JOB_OFFER_ROUTE,
-  REOPEN_JOB_OFFER_TEXT,
-  VACANCY_LIST_TEXT,
-} from "../constants/job-offers.constants";
+import { DELETE_JOB_OFFER_TEXT, REOPEN_JOB_OFFER_TEXT, VACANCY_LIST_TEXT } from "../constants/job-offers.constants";
 import { useCompanyJobOffers } from "../hooks/use-company-job-offers";
 import { useDeleteJobOffer } from "../hooks/use-delete-job-offer";
 import { useReopenJobOffer } from "../hooks/use-reopen-job-offer";
@@ -54,11 +47,11 @@ export function VacancyList({ scope = "published" }: VacancyListProps) {
     (isHistory && filters.status !== "");
   const hasFilters = hasSearch || hasOtherFilters;
 
-  const totalPages = Math.max(1, Math.ceil(offers.length / JOB_OFFERS_PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(offers.length / 10));
   const currentPage = Math.min(page, totalPages);
   const pageOffers = offers.slice(
-    (currentPage - 1) * JOB_OFFERS_PAGE_SIZE,
-    currentPage * JOB_OFFERS_PAGE_SIZE,
+    (currentPage - 1) * 10,
+    currentPage * 10,
   );
 
   const update = <K extends keyof JobOfferFilters>(key: K, value: JobOfferFilters[K]) => {
@@ -114,7 +107,7 @@ export function VacancyList({ scope = "published" }: VacancyListProps) {
   if (status === "loading") {
     return (
       <div role="status" aria-label={text.loading} className="space-y-4">
-        {Array.from({ length: HISTORY_SKELETON_ROWS }, (_, index) => (
+        {Array.from({ length: 3 }, (_, index) => (
           <div key={index} className="space-y-3 rounded-lg border border-border bg-surface p-5">
             <Skeleton className="h-5 w-1/3" />
             <Skeleton className="h-4 w-2/3" />
@@ -162,7 +155,7 @@ export function VacancyList({ scope = "published" }: VacancyListProps) {
         />
         {isEmptyWithoutFilters ? null : (
           <Link
-            href={NEW_JOB_OFFER_ROUTE}
+            href={"/recruiters/job-offers/new"}
             className={cn(buttonVariants({ variant: "outline" }), CREATE_LINK_CLASSES)}
           >
             <Plus aria-hidden="true" />
@@ -181,7 +174,7 @@ export function VacancyList({ scope = "published" }: VacancyListProps) {
         >
           <p className="text-sm text-text-secondary">{emptyMessage}</p>
           {isEmptyWithoutFilters ? (
-            <Link href={NEW_JOB_OFFER_ROUTE} className={cn(buttonVariants(), CREATE_LINK_CLASSES)}>
+            <Link href={"/recruiters/job-offers/new"} className={cn(buttonVariants(), CREATE_LINK_CLASSES)}>
               <Plus aria-hidden="true" />
               Crear nueva vacante
             </Link>

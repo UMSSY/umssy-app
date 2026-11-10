@@ -1,5 +1,13 @@
+vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
+import { toast } from "sonner";
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
-import { act, cleanup, fireEvent, screen } from "@testing-library/react";
+import {
+  act,
+  cleanup,
+  fireEvent,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   getMentorTechnicalAreas,
@@ -83,9 +91,11 @@ describe("TechnicalAreasView", () => {
     fireEvent.click(card(/QA/));
     fireEvent.click(button(/Guardar cambios/));
 
-    expect(
-      await screen.findByText("Áreas técnicas actualizadas correctamente"),
-    ).toBeInTheDocument();
+    await waitFor(() =>
+      expect(toast.success).toHaveBeenCalledWith(
+        "Áreas técnicas actualizadas correctamente",
+      ),
+    );
     expect(updateMentorTechnicalAreas).toHaveBeenCalledWith([
       catalog[0].id,
       catalog[2].id,
@@ -103,11 +113,7 @@ describe("TechnicalAreasView", () => {
     fireEvent.click(card(/QA/));
     fireEvent.click(button(/Guardar cambios/));
 
-    expect(
-      await screen.findByText(
-        "No se pudieron guardar los cambios. Intente nuevamente.",
-      ),
-    ).toBeInTheDocument();
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith("No se pudieron guardar los cambios. Intente nuevamente."));
     expect(card(/QA/)).toHaveAttribute("aria-checked", "true");
     expect(screen.getByText("3 seleccionadas")).toBeInTheDocument();
   });

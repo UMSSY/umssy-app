@@ -50,11 +50,11 @@ describe('updateJobOfferSchema', () => {
       salaryMax: undefined,
     });
 
-    expect(invertedRange.success ? undefined : invertedRange.error.issues[0].message).toBe(
-      'El salario mínimo no puede ser mayor al salario máximo',
-    );
-    expect(missingSalary.success ? undefined : missingSalary.error.issues[0].message).toBe(
-      'Este campo es obligatorio',
-    );
+    expect(
+      invertedRange.success ? undefined : invertedRange.error.issues[0].message,
+    ).toBe('El salario mínimo no puede ser mayor al salario máximo');
+    expect(
+      missingSalary.success ? undefined : missingSalary.error.issues[0].message,
+    ).toBe('Este campo es obligatorio');
   });
 });
