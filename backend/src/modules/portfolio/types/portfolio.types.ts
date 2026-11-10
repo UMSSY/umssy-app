@@ -49,22 +49,3 @@ export interface NormalizedPortfolioProject {
   isOwner: boolean;
   displayOrder: number;
 }
-
-export interface PortfolioProjectDelegate {
-  findMany(args: {
-    where: { userId: string };
-    orderBy: { displayOrder: 'asc' | 'desc' };
-  }): Promise<PortfolioProjectEntity[]>;
-  deleteMany(args: { where: { userId: string } }): Promise<unknown>;
-  create(args: {
-    data: NormalizedPortfolioProject & { userId: string };
-  }): Promise<PortfolioProjectEntity>;
-}
-
-export interface PortfolioPersistenceClient {
-  portfolioProject?: PortfolioProjectDelegate;
-  $transaction?: <T>(
-    callback: (tx: PortfolioPersistenceClient) => Promise<T>,
-  ) => Promise<T>;
-}
-

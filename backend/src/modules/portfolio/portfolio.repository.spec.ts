@@ -1,18 +1,16 @@
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PrismaService } from '../../common/prisma/prisma.service.js';
 import { PortfolioRepository } from './portfolio.repository.js';
 import type {
   NormalizedPortfolioProject,
-  PortfolioPersistenceClient,
   PortfolioProjectEntity,
 } from './types/portfolio.types.js';
 
 const userId = '11111111-1111-4111-8111-111111111111';
-const otherUserId = '99999999-9999-4999-8999-999999999999';
 
 function buildNormalized(displayOrder: number): NormalizedPortfolioProject {
   return {
-    provider: 'github',
+    provider: displayOrder % 2 === 0 ? 'github' : 'gitlab',
     repoName: `owner/repo-${displayOrder}`,
     repoUrl: `https://github.com/owner/repo-${displayOrder}`,
     description: 'Project description',
@@ -23,104 +21,116 @@ function buildNormalized(displayOrder: number): NormalizedPortfolioProject {
   };
 }
 
+function buildEntity(displayOrder: number): PortfolioProjectEntity {
+  return {
+    id: `22222222-2222-4222-8222-22222222222${displayOrder}`,
+    userId,
+    ...buildNormalized(displayOrder),
+  };
+}
+
 describe('PortfolioRepository', () => {
-  it('uses safe fallback persistence per user when Prisma delegate is not generated yet', async () => {
-    const repository = new PortfolioRepository({} as PrismaService);
+  let repository: PortfolioRepository;
+  let userPortfolioProject: {
+    findMany: ReturnType<typeof vi.fn>;
+    deleteMany: ReturnType<typeof vi.fn>;
+    createMany: ReturnType<typeof vi.fn>;
+  };
+  let prisma: {
+    userPortfolioProject: typeof userPortfolioProject;
+    $transaction: ReturnType<typeof vi.fn>;
+  };
 
-    expect(await repository.findByUserId(userId)).toEqual([]);
-
-    const saved = await repository.replaceForUser(userId, [
-      buildNormalized(1),
-      buildNormalized(0),
-    ]);
-
-    expect(saved).toHaveLength(2);
-    expect(saved[0]?.displayOrder).toBe(0);
-    expect(saved[1]?.displayOrder).toBe(1);
-    expect(saved[0]?.id).toMatch(
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
-    );
-    expect(await repository.findByUserId(userId)).toEqual(saved);
-    expect(await repository.findByUserId(otherUserId)).toEqual([]);
-
-    const replaced = await repository.replaceForUser(userId, [
-      buildNormalized(0),
-    ]);
-    expect(replaced).toHaveLength(1);
-    expect(await repository.findByUserId(userId)).toEqual(replaced);
-  });
-
-  it('uses Prisma delegate and $transaction atomically when available', async () => {
-    const entityOne: PortfolioProjectEntity = {
-      id: '22222222-2222-4222-8222-222222222222',
-      userId,
-      ...buildNormalized(0),
+  beforeEach(() => {
+    userPortfolioProject = {
+      findMany: vi.fn(),
+      deleteMany: vi.fn(),
+      createMany: vi.fn(),
     };
-    const delegate = {
-      findMany: vi.fn().mockResolvedValue([entityOne]),
-      deleteMany: vi.fn().mockResolvedValue({ count: 1 }),
-      create: vi.fn().mockResolvedValue(entityOne),
-    };
-    const prismaClient: PortfolioPersistenceClient = {
-      portfolioProject: delegate,
+    prisma = {
+      userPortfolioProject,
       $transaction: vi.fn(
-        (callback: (tx: PortfolioPersistenceClient) => Promise<unknown>) =>
-          callback({ portfolioProject: delegate }),
+        (callback: (tx: { userPortfolioProject: typeof userPortfolioProject }) => Promise<unknown>) =>
+          callback({ userPortfolioProject }),
       ),
     };
-    const repository = new PortfolioRepository(
-      prismaClient as unknown as PrismaService,
-    );
+    repository = new PortfolioRepository(prisma as unknown as PrismaService);
+  });
 
-    const found = await repository.findByUserId(userId);
-    expect(found).toEqual([entityOne]);
-    expect(delegate.findMany).toHaveBeenCalledWith({
+  it('finds portfolio projects for a user ordered ascending by displayOrder', async () => {
+    const entities = [buildEntity(0), buildEntity(1)];
+    userPortfolioProject.findMany.mockResolvedValue(entities);
+
+    const result = await repository.findByUserId(userId);
+
+    expect(userPortfolioProject.findMany).toHaveBeenCalledWith({
       where: { userId },
       orderBy: { displayOrder: 'asc' },
+      select: {
+        id: true,
+        userId: true,
+        provider: true,
+        repoName: true,
+        repoUrl: true,
+        description: true,
+        language: true,
+        starsCount: true,
+        isOwner: true,
+        displayOrder: true,
+      },
     });
-
-    const saved = await repository.replaceForUser(userId, [buildNormalized(0)]);
-    expect(prismaClient.$transaction).toHaveBeenCalledTimes(1);
-    expect(delegate.deleteMany).toHaveBeenCalledWith({ where: { userId } });
-    expect(delegate.create).toHaveBeenCalledWith({
-      data: { userId, ...buildNormalized(0) },
-    });
-    expect(saved).toEqual([entityOne]);
+    expect(result).toEqual(entities);
   });
 
-  it('uses delegate directly when $transaction is absent and handles tx without delegate', async () => {
-    const entity: PortfolioProjectEntity = {
-      id: '33333333-3333-4333-8333-333333333333',
-      userId,
-      ...buildNormalized(0),
-    };
-    const delegate = {
-      findMany: vi.fn().mockResolvedValue([entity]),
-      deleteMany: vi.fn().mockResolvedValue({ count: 0 }),
-      create: vi.fn().mockResolvedValue(entity),
-    };
+  it('replaces user portfolio projects atomically inside a Prisma transaction', async () => {
+    const inputs = [buildNormalized(0), buildNormalized(1)];
+    const persisted = [buildEntity(0), buildEntity(1)];
+    userPortfolioProject.deleteMany.mockResolvedValue({ count: 1 });
+    userPortfolioProject.createMany.mockResolvedValue({ count: 2 });
+    userPortfolioProject.findMany.mockResolvedValue(persisted);
 
-    const repoWithoutTx = new PortfolioRepository({
-      portfolioProject: delegate,
-    } as unknown as PrismaService);
+    const result = await repository.replaceForUser(userId, inputs);
 
-    expect(
-      await repoWithoutTx.replaceForUser(userId, [buildNormalized(0)]),
-    ).toEqual([entity]);
-    expect(delegate.deleteMany).toHaveBeenCalledTimes(1);
+    expect(prisma.$transaction).toHaveBeenCalledTimes(1);
+    expect(userPortfolioProject.deleteMany).toHaveBeenCalledWith({
+      where: { userId },
+    });
+    expect(userPortfolioProject.createMany).toHaveBeenCalledWith({
+      data: [
+        { userId, ...inputs[0] },
+        { userId, ...inputs[1] },
+      ],
+    });
+    expect(userPortfolioProject.findMany).toHaveBeenCalledWith({
+      where: { userId },
+      orderBy: { displayOrder: 'asc' },
+      select: {
+        id: true,
+        userId: true,
+        provider: true,
+        repoName: true,
+        repoUrl: true,
+        description: true,
+        language: true,
+        starsCount: true,
+        isOwner: true,
+        displayOrder: true,
+      },
+    });
+    expect(result).toEqual(persisted);
+  });
 
-    const repoWithEmptyTx = new PortfolioRepository({
-      portfolioProject: delegate,
-      $transaction: vi.fn(
-        (callback: (tx: PortfolioPersistenceClient) => Promise<unknown>) =>
-          callback({}),
-      ),
-    } as unknown as PrismaService);
+  it('deletes existing projects without calling createMany when replacing with an empty list', async () => {
+    userPortfolioProject.deleteMany.mockResolvedValue({ count: 2 });
+    userPortfolioProject.findMany.mockResolvedValue([]);
 
-    expect(
-      await repoWithEmptyTx.replaceForUser(userId, [buildNormalized(0)]),
-    ).toEqual([entity]);
-    expect(delegate.deleteMany).toHaveBeenCalledTimes(2);
+    const result = await repository.replaceForUser(userId, []);
+
+    expect(prisma.$transaction).toHaveBeenCalledTimes(1);
+    expect(userPortfolioProject.deleteMany).toHaveBeenCalledWith({
+      where: { userId },
+    });
+    expect(userPortfolioProject.createMany).not.toHaveBeenCalled();
+    expect(result).toEqual([]);
   });
 });
-

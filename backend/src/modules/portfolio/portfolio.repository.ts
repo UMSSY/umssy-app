@@ -1,101 +1,88 @@
-import { randomUUID } from 'node:crypto';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
 import type {
   NormalizedPortfolioProject,
-  PortfolioPersistenceClient,
-  PortfolioProjectDelegate,
   PortfolioProjectEntity,
+  PortfolioProvider,
 } from './types/portfolio.types.js';
+
+const portfolioProjectSelect = {
+  id: true,
+  userId: true,
+  provider: true,
+  repoName: true,
+  repoUrl: true,
+  description: true,
+  language: true,
+  starsCount: true,
+  isOwner: true,
+  displayOrder: true,
+} as const;
+
+type PortfolioProjectRow = {
+  id: string;
+  userId: string;
+  provider: string;
+  repoName: string;
+  repoUrl: string;
+  description: string | null;
+  language: string | null;
+  starsCount: number;
+  isOwner: boolean;
+  displayOrder: number;
+};
 
 @Injectable()
 export class PortfolioRepository {
-  private readonly fallbackStore = new Map<string, PortfolioProjectEntity[]>();
-
   constructor(private readonly prisma: PrismaService) {}
 
   async findByUserId(userId: string): Promise<PortfolioProjectEntity[]> {
-    const client = this.getPersistenceClient();
+    const rows = await this.prisma.userPortfolioProject.findMany({
+      where: { userId },
+      orderBy: { displayOrder: 'asc' },
+      select: portfolioProjectSelect,
+    });
 
-    if (client.portfolioProject) {
-      const rows = await client.portfolioProject.findMany({
-        where: { userId },
-        orderBy: { displayOrder: 'asc' },
-      });
-      return this.sortByDisplayOrder(rows);
-    }
-
-    const stored = this.fallbackStore.get(userId) ?? [];
-    return this.sortByDisplayOrder(stored.map((item) => ({ ...item })));
+    return rows.map((row) => this.toEntity(row));
   }
 
   async replaceForUser(
     userId: string,
     projects: readonly NormalizedPortfolioProject[],
   ): Promise<PortfolioProjectEntity[]> {
-    const client = this.getPersistenceClient();
+    const rows = await this.prisma.$transaction(async (tx) => {
+      await tx.userPortfolioProject.deleteMany({ where: { userId } });
 
-    if (client.portfolioProject && client.$transaction) {
-      return client.$transaction(async (tx) => {
-        const delegate = tx.portfolioProject ?? client.portfolioProject;
-        if (!delegate) {
-          return this.replaceInFallback(userId, projects);
-        }
-        return this.replaceWithDelegate(delegate, userId, projects);
+      if (projects.length > 0) {
+        await tx.userPortfolioProject.createMany({
+          data: projects.map((project) => ({
+            userId,
+            provider: project.provider,
+            repoName: project.repoName,
+            repoUrl: project.repoUrl,
+            description: project.description,
+            language: project.language,
+            starsCount: project.starsCount,
+            isOwner: project.isOwner,
+            displayOrder: project.displayOrder,
+          })),
+        });
+      }
+
+      return tx.userPortfolioProject.findMany({
+        where: { userId },
+        orderBy: { displayOrder: 'asc' },
+        select: portfolioProjectSelect,
       });
-    }
+    });
 
-    if (client.portfolioProject) {
-      return this.replaceWithDelegate(client.portfolioProject, userId, projects);
-    }
-
-    return this.replaceInFallback(userId, projects);
+    return rows.map((row) => this.toEntity(row));
   }
 
-  private getPersistenceClient(): PortfolioPersistenceClient {
-    return this.prisma as unknown as PortfolioPersistenceClient;
-  }
-
-  private async replaceWithDelegate(
-    delegate: PortfolioProjectDelegate,
-    userId: string,
-    projects: readonly NormalizedPortfolioProject[],
-  ): Promise<PortfolioProjectEntity[]> {
-    await delegate.deleteMany({ where: { userId } });
-
-    const created: PortfolioProjectEntity[] = [];
-    for (const project of projects) {
-      const entity = await delegate.create({
-        data: {
-          userId,
-          ...project,
-        },
-      });
-      created.push(entity);
-    }
-
-    return this.sortByDisplayOrder(created);
-  }
-
-  private replaceInFallback(
-    userId: string,
-    projects: readonly NormalizedPortfolioProject[],
-  ): PortfolioProjectEntity[] {
-    const saved = projects.map((project) => ({
-      id: randomUUID(),
-      userId,
-      ...project,
-    }));
-    this.fallbackStore.set(userId, saved);
-    return this.sortByDisplayOrder(saved.map((item) => ({ ...item })));
-  }
-
-  private sortByDisplayOrder(
-    entities: readonly PortfolioProjectEntity[],
-  ): PortfolioProjectEntity[] {
-    return [...entities].sort(
-      (first, second) => first.displayOrder - second.displayOrder,
-    );
+  private toEntity(row: PortfolioProjectRow): PortfolioProjectEntity {
+    return {
+      ...row,
+      provider: row.provider as PortfolioProvider,
+    };
   }
 }
-
