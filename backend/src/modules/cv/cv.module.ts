@@ -2,12 +2,15 @@ import { Module } from '@nestjs/common';
 import { JwtAuthModule } from '../../common/guards/jwt-auth.module.js';
 import { PrismaModule } from '../../common/prisma/prisma.module.js';
 import { FileValidationService } from '../../common/services/file-validation.service.js';
+import { CvExtractionController } from './controllers/cv-extraction.controller.js';
 import { CvFileController } from './controllers/cv-file.controller.js';
 import { CvGenerateController } from './controllers/cv-generate.controller.js';
 import { CvHistoryController } from './controllers/cv-history.controller.js';
+import { CvExtractionMapper } from './mappers/cv-extraction.mapper.js';
 import { CvMapper } from './mappers/cv.mapper.js';
 import { CvSourcesModule } from './cv-sources.module.js';
 import { CvMetadataRepository } from './repositories/cv-metadata.repository.js';
+import { CvExtractionService } from './services/cv-extraction.service.js';
 import { CvGenerationService } from './services/cv-generation.service.js';
 import { CvPdfGeneratorService } from './services/cv-pdf-generator.service.js';
 import { CvService } from './services/cv.service.js';
@@ -30,7 +33,12 @@ import { CertificationSourcesModule } from '../certifications/certification-sour
     SkillsModule,
     CertificationSourcesModule,
   ],
-  controllers: [CvHistoryController, CvFileController, CvGenerateController],
+  controllers: [
+    CvHistoryController,
+    CvFileController,
+    CvGenerateController,
+    CvExtractionController,
+  ],
   providers: [
     CvService,
     CvMetadataRepository,
@@ -38,6 +46,8 @@ import { CertificationSourcesModule } from '../certifications/certification-sour
     FileValidationService,
     CvPdfGeneratorService,
     CvGenerationService,
+    CvExtractionService,
+    CvExtractionMapper,
   ],
   exports: [CvService, CvPdfGeneratorService, CvGenerationService],
 })
