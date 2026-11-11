@@ -1,6 +1,7 @@
 import type { DocumentType } from "@/modules/access-request";
 import type { RoleTag } from "@/modules/auth";
 import type { PaginatedData } from "@/shared/types/api-response.types";
+import type { ReportExportFormat } from "./report-export.types";
 
 export interface RegisteredUser {
   id: string;
@@ -23,7 +24,8 @@ export interface RegisteredUsersParams {
   snapshotAt?: string;
 }
 
-export type RegisteredUsersExportParams = Pick<RegisteredUsersParams, "userType" | "period" | "search">;
+export type RegisteredUsersExportParams = Pick<RegisteredUsersParams, "userType" | "period" | "search"> &
+  Partial<Pick<RegisteredUsersParams, "page" | "limit" | "snapshotAt">> & { format?: ReportExportFormat };
 
 export interface ExportedFile {
   file: Blob;
@@ -33,6 +35,7 @@ export interface ExportedFile {
 export interface RegisteredUsersState {
   requestKey: string;
   result?: PaginatedData<RegisteredUser>;
+  snapshotAt?: string;
   errorMessage?: string;
   hasConnectionError?: boolean;
 }

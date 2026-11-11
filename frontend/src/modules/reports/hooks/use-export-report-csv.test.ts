@@ -2,6 +2,7 @@ import { act, cleanup, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { SaveFileHandle } from "@/shared/types/save-file.types";
 import * as downloadFileModule from "@/shared/utils/download-file";
+import * as reportPdfModule from "../utils/report-pdf.util";
 
 import { useExportReportCsv } from "./use-export-report-csv";
 
@@ -152,6 +153,21 @@ describe("useExportReportCsv", () => {
     expect(result.current.errorMessage).toBeUndefined();
     await act(async () => { await vi.advanceTimersByTimeAsync(4000); });
     expect(result.current.successMessage).toBeUndefined();
+  });
+
+  it("convierte el CSV de la página elegida en PDF sin abrir el selector CSV", async () => {
+    const pdfFile = new Blob(["PDF"], { type: "application/pdf" });
+    const pdfSpy = vi.spyOn(reportPdfModule, "createReportPdf").mockResolvedValue({ file: pdfFile, fileName: "usuarios.pdf" });
+    const exportReport = vi.fn().mockResolvedValue(EXPORTED_FILE);
+    const { result } = renderHook(() => useExportReportCsv(exportReport, "usuarios.csv", "Usuarios aceptados"));
+
+    await act(async () => { await result.current.exportCsv("pdf", "page"); });
+
+    expect(picker).not.toHaveBeenCalled();
+    expect(exportReport).toHaveBeenCalledWith("page", "pdf");
+    expect(pdfSpy).toHaveBeenCalledWith(EXPORTED_FILE.file, EXPORTED_FILE.fileName, "Usuarios aceptados");
+    expect(downloadFileModule.downloadFile).toHaveBeenCalledWith(pdfFile, "usuarios.pdf");
+    expect(result.current.successMessage).toBe("La exportación de la tabla ha sido un éxito");
   });
 
   it("no muestra éxito si falla la generación del CSV", async () => {

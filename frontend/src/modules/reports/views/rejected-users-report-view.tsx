@@ -26,7 +26,7 @@ export function RejectedUsersReportView() {
   const [period, setPeriod] = useState<AcademicPeriod | undefined>(undefined);
   const [searchInput, setSearchInput] = useState("");
   const search = useDebouncedValue(searchInput.trim(), SEARCH_DEBOUNCE_MS);
-  const { users, totalItems, totalPages, isLoading, errorMessage, refresh } = useRejectedUsers(
+  const { users, totalItems, totalPages, isLoading, errorMessage, refresh, snapshotAt } = useRejectedUsers(
     currentPage,
     userType,
     period,
@@ -36,7 +36,7 @@ export function RejectedUsersReportView() {
     exportCsv,
     isExporting,
     successMessage: exportSuccessMessage,
-  } = useExportRejectedUsersCsv(userType, period, search);
+  } = useExportRejectedUsersCsv(userType, period, search, currentPage, REJECTED_USERS_PAGE_SIZE, snapshotAt);
 
   const handleUserTypeChange = (selectedUserType?: RoleTag) => {
     if (selectedUserType === userType) return;
@@ -70,7 +70,13 @@ export function RejectedUsersReportView() {
           <UserTypeFilter value={userType} onChange={handleUserTypeChange} />
           <ReportSearchInput value={searchInput} onChange={handleSearchChange} label={EMAIL_SEARCH_LABEL} />
         </div>
-        <ReportActions onExport={exportCsv} isExporting={isExporting} period={period} onPeriodChange={handlePeriodChange} />
+        <ReportActions
+          onExport={exportCsv}
+          isExporting={isExporting}
+          hasResults={users.length > 0 && !isLoading && !errorMessage && searchInput.trim() === search}
+          period={period}
+          onPeriodChange={handlePeriodChange}
+        />
       </div>
 
       <RejectedUsersTable
