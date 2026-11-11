@@ -283,7 +283,7 @@ it("offers to generate a cv from the profile data", async () => {
     await user.click(screen.getByRole("button", { name: "Confirmar carga" }));
 
     expect(await screen.findByRole("status")).toHaveTextContent("Tu CV se cargó correctamente.");
-    expect(documentsService.uploadCv).toHaveBeenCalledWith(file);
+    expect(documentsService.uploadCv).toHaveBeenCalledWith(file, expect.any(Function));
     expect(within(getRecentItems()[0]).getByText("Vigente")).toBeInTheDocument();
     expect(screen.getByText("CV_Valeria_Quispe.pdf")).toBeInTheDocument();
     expect(screen.getByText("Ya tienes un CV vigente")).toBeInTheDocument();
@@ -449,7 +449,7 @@ it("offers to generate a cv from the profile data", async () => {
     await user.click(await screen.findByRole("button", { name: "Subir" }));
 
     await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
-    expect(documentsService.uploadCv).toHaveBeenCalledWith(file);
+    expect(documentsService.uploadCv).toHaveBeenCalledWith(file, expect.any(Function));
     expect(screen.getByRole("status")).toHaveTextContent(
       "Tu nueva versión del CV se cargó correctamente.",
     );
