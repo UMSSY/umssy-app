@@ -98,7 +98,21 @@ describe("documentsService", () => {
     expect(url).toBe("/profile/me/cvs");
     expect(body).toBeInstanceOf(FormData);
     expect((body as FormData).get("file")).toBe(file);
-    expect(config).toEqual({ headers: AUTH_HEADERS });
+    expect(config).toEqual({ headers: AUTH_HEADERS, onUploadProgress: expect.any(Function) });
+  });
+
+  it("reports the upload progress as a percentage", async () => {
+    const onProgress = vi.fn();
+    vi.mocked(apiClient.post).mockImplementation((_url, _body, config) => {
+      config?.onUploadProgress?.({ loaded: 256, total: 1024, bytes: 256, lengthComputable: true });
+      config?.onUploadProgress?.({ loaded: 256, total: undefined, bytes: 0, lengthComputable: false });
+      return Promise.resolve(wrapResponse(CV_RESPONSE));
+    });
+
+    await documentsService.uploadCv(new File(["%PDF"], "resume.pdf", { type: "application/pdf" }), onProgress);
+
+    expect(onProgress).toHaveBeenCalledTimes(1);
+    expect(onProgress).toHaveBeenCalledWith(25);
   });
 
   it("returns null when the upload response has no cv", async () => {

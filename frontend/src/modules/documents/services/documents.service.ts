@@ -8,6 +8,7 @@ import type { SavedCv } from "../types/saved-cv.types";
 import { getAuthHeaders } from "@/modules/profile";
 import { toCvPage } from "../utils/to-cv-page";
 import { toSavedCv } from "../utils/to-saved-cv";
+import { toUploadPercent } from "../utils/to-upload-percent";
 
 export const documentsService = {
   getCvs: async (page: number, limit: number): Promise<CvPage> => {
@@ -18,11 +19,15 @@ export const documentsService = {
     return toCvPage(response.data.data);
   },
 
-  uploadCv: async (file: File): Promise<SavedCv | null> => {
+  uploadCv: async (file: File, onProgress?: (percent: number) => void): Promise<SavedCv | null> => {
     const formData = new FormData();
     formData.append("file", file);
     const response = await apiClient.post<ApiResponse<CvResponse | null>>("/profile/me/cvs", formData, {
       headers: getAuthHeaders(),
+      onUploadProgress: (event) => {
+        const percent = toUploadPercent(event.loaded, event.total);
+        if (onProgress && percent !== null) onProgress(percent);
+      },
     });
     const cv = response.data.data;
     return cv ? toSavedCv(cv) : null;
