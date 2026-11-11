@@ -4,8 +4,10 @@ import { detectCvSectionHeading } from './detect-cv-section-heading.js';
 
 const EMPTY_SECTIONS: CvTextSections = {
   header: [],
+  presentation: [],
   education: [],
   experience: [],
+  skills: [],
   other: [],
 };
 

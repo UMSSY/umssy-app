@@ -26,9 +26,12 @@ describe('CvExtractionController', () => {
         email: null,
         phone: null,
         location: null,
+        cityId: null,
       },
+      presentation: null,
       educations: [],
       workExperiences: [],
+      skills: [],
     };
     service.extract.mockResolvedValue(extraction);
 

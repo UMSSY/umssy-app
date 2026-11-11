@@ -28,11 +28,18 @@ const cvText = [
   'TypeScript, SQL',
 ].join('\n');
 
+const cities = [
+  { id: 'city-lpz', title: 'La Paz' },
+  { id: 'city-cbba', title: 'Cochabamba' },
+];
+
+const skills = [{ skillId: 'skill-ts', name: 'TypeScript' }];
+
 describe('CvExtractionMapper', () => {
   const mapper = new CvExtractionMapper();
 
-  it('structures contact data, education and work experience', () => {
-    expect(mapper.toResponse(cvId, cvText)).toEqual({
+  it('structures contact, presentation, education, experience and skills', () => {
+    expect(mapper.toResponse(cvId, cvText, { skills, cities })).toEqual({
       cvId,
       contact: {
         firstName: 'Carlos Andrés',
@@ -40,7 +47,9 @@ describe('CvExtractionMapper', () => {
         email: 'carlos.mamani@gmail.com',
         phone: '71234567',
         location: 'Cochabamba, Bolivia',
+        cityId: 'city-cbba',
       },
+      presentation: 'Ingeniero de sistemas con experiencia en desarrollo web.',
       educations: [
         {
           institution: 'Universidad Mayor de San Simón (UMSS)',
@@ -69,11 +78,12 @@ describe('CvExtractionMapper', () => {
           description: 'Soporte técnico',
         },
       ],
+      skills,
     });
   });
 
   it('returns empty data for text without recognizable content', () => {
-    expect(mapper.toResponse(cvId, '12345')).toEqual({
+    expect(mapper.toResponse(cvId, '12345', { skills: [], cities })).toEqual({
       cvId,
       contact: {
         firstName: null,
@@ -81,9 +91,26 @@ describe('CvExtractionMapper', () => {
         email: null,
         phone: null,
         location: null,
+        cityId: null,
       },
+      presentation: null,
       educations: [],
       workExperiences: [],
+      skills: [],
     });
+  });
+
+  it('joins the presentation lines without bullets and limits its length', () => {
+    const longLine = 'a'.repeat(2100);
+    const response = mapper.toResponse(
+      cvId,
+      ['Ana Rojas', 'SOBRE MÍ', '• Desarrolladora web', longLine].join('\n'),
+      { skills: [], cities },
+    );
+
+    expect(response.presentation?.startsWith('Desarrolladora web a')).toBe(
+      true,
+    );
+    expect(response.presentation).toHaveLength(2000);
   });
 });

@@ -2,7 +2,7 @@
 
 import { useRef, useState, type ChangeEvent } from "react";
 import { Input } from "@/components/ui/input";
-import { FeedbackMessage } from "@/modules/profile";
+import { FeedbackMessage, useProfile } from "@/modules/profile";
 import { ProfilePageLayout } from "@/modules/profile";
 import { CvExtractionDialog } from "../components/cv-extraction-dialog";
 import { CvGenerateCard } from "../components/cv-generate-card";
@@ -39,7 +39,8 @@ export function DocumentsCvView() {
     deleteCv,
   } = useCvDocument();
   const { preview, openingCvId, openCv, closeCv } = useCvViewer();
-  const cvExtraction = useCvExtraction();
+  const { profile } = useProfile();
+  const cvExtraction = useCvExtraction({ currentHeadline: profile?.headline });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [pendingReplacement, setPendingReplacement] = useState<File | null>(null);
@@ -87,10 +88,9 @@ export function DocumentsCvView() {
     setFeedback(null);
 
     try {
-      const uploadedCv = await uploadCv(file);
+      await uploadCv(file);
       setSelectedFile(null);
       setFeedback({ type: "success", message: "Tu CV se cargó correctamente." });
-      if (uploadedCv) cvExtraction.startExtraction(uploadedCv.id);
     } catch (error) {
       if (isCvFileRejection(error)) {
         setSelectedFile(null);
@@ -108,10 +108,9 @@ export function DocumentsCvView() {
     setReplaceError(null);
 
     try {
-      const uploadedCv = await uploadCv(file);
+      await uploadCv(file);
       closeReplaceDialog();
       setFeedback({ type: "success", message: "Tu nueva versión del CV se cargó correctamente." });
-      if (uploadedCv) cvExtraction.startExtraction(uploadedCv.id);
     } catch (error) {
       const message = getCvErrorMessage(error, CV_ERROR_MESSAGES.upload);
 
@@ -228,11 +227,15 @@ export function DocumentsCvView() {
         isOpen={cvExtraction.isOpen}
         isExtracting={cvExtraction.isExtracting}
         extraction={cvExtraction.extraction}
+        available={cvExtraction.available}
         selection={cvExtraction.selection}
         errorMessage={cvExtraction.errorMessage}
-        onToggleContactField={cvExtraction.toggleContactField}
-        onToggleEducation={cvExtraction.toggleEducation}
-        onToggleWorkExperience={cvExtraction.toggleWorkExperience}
+        onToggleItem={cvExtraction.toggleItem}
+        onToggleSection={cvExtraction.toggleSection}
+        onContactChange={cvExtraction.updateContact}
+        onPresentationChange={cvExtraction.updatePresentation}
+        onEducationChange={cvExtraction.updateEducation}
+        onWorkExperienceChange={cvExtraction.updateWorkExperience}
         onApply={cvExtraction.close}
         onClose={cvExtraction.close}
       />
