@@ -16,3 +16,9 @@ export function isProfessionalDescriptionMissing(
 ): boolean {
   return normalizeProfileText(aboutMe).length === 0;
 }
+
+export function isMentorSpecialtyMissing(
+  technicalAreas: MentorProfileEvaluation['mentorTechnicalAreas'],
+): boolean {
+  return technicalAreas.length === 0;
+}
