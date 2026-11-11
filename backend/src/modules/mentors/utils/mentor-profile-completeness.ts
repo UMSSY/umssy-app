@@ -10,3 +10,9 @@ export function isProfilePhotoMissing(
 ): boolean {
   return photoUrl === null || photoUrl.length === 0;
 }
+
+export function isProfessionalDescriptionMissing(
+  aboutMe: MentorProfileEvaluation['aboutMe'],
+): boolean {
+  return normalizeProfileText(aboutMe).length === 0;
+}
