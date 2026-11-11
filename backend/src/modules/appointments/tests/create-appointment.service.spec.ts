@@ -7,6 +7,7 @@ import {
 } from '../../availability/exceptions/index.js';
 import { MentorNotFoundException } from '../../mentors/exceptions/mentor-not-found.exception.js';
 import {
+  AppointmentOverlapException,
   BlockAlreadyBookedException,
   BlockInPastException,
   InvalidOrientationTypeException,
@@ -49,6 +50,8 @@ describe('AppointmentsService', () => {
     findStatusIdByTitle: vi.fn(),
     createAppointment: vi.fn(),
     createAppointmentHistory: vi.fn(),
+    lockParticipants: vi.fn(),
+    hasOverlappingAppointment: vi.fn(),
   };
   const availabilityService = { findBlockWithAppointments: vi.fn() };
   const blockedDatesService = { runOnUnblockedDay: vi.fn() };
@@ -83,6 +86,7 @@ describe('AppointmentsService', () => {
       ) => work(TX),
     );
     appointmentsRepository.findStatusIdByTitle.mockResolvedValue(STATUS_ID);
+    appointmentsRepository.hasOverlappingAppointment.mockResolvedValue(false);
     appointmentsRepository.createAppointment.mockResolvedValue(
       createAppointmentRecord(),
     );
@@ -304,6 +308,59 @@ describe('AppointmentsService', () => {
       BlockNotFoundException,
     );
     expect(appointmentsRepository.createAppointment).not.toHaveBeenCalled();
+  });
+
+  it('toma el candado de quien reserva y del mentor antes de releer el bloque', async () => {
+    await service.create(user, payload);
+
+    expect(appointmentsRepository.lockParticipants).toHaveBeenCalledWith(
+      [STUDENT_ID, MENTOR_ID],
+      TX,
+    );
+    expect(
+      appointmentsRepository.lockParticipants.mock.invocationCallOrder[0],
+    ).toBeLessThan(
+      availabilityService.findBlockWithAppointments.mock.invocationCallOrder[1],
+    );
+  });
+
+  it('revisa los cruces de quien reserva con el horario del bloque', async () => {
+    const createdBlock = block();
+    availabilityService.findBlockWithAppointments
+      .mockResolvedValueOnce(createdBlock)
+      .mockResolvedValueOnce(createdBlock);
+
+    await service.create(user, payload);
+
+    expect(
+      appointmentsRepository.hasOverlappingAppointment,
+    ).toHaveBeenCalledWith(
+      STUDENT_ID,
+      createdBlock.startAt,
+      createdBlock.endAt,
+      TX,
+    );
+  });
+
+  it('responde 409 sin crear la cita cuando quien reserva ya tiene una cita que se cruza', async () => {
+    appointmentsRepository.hasOverlappingAppointment.mockResolvedValue(true);
+
+    await expect(service.create(user, payload)).rejects.toThrow(
+      AppointmentOverlapException,
+    );
+    expect(appointmentsRepository.createAppointment).not.toHaveBeenCalled();
+    expect(
+      appointmentsRepository.createAppointmentHistory,
+    ).not.toHaveBeenCalled();
+  });
+
+  it('usa el texto del HU para la cita que se cruza', () => {
+    const error = new AppointmentOverlapException();
+
+    expect(error.message).toBe(
+      'Ya tienes una cita en ese horario. Elige otro horario.',
+    );
+    expect(error.statusCode).toBe(409);
   });
 
   it('usa el texto del HU para la reserva ya tomada', () => {

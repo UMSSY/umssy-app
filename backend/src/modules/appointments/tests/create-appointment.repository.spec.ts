@@ -116,4 +116,63 @@ describe('AppointmentsRepository', () => {
       data: historyData,
     });
   });
+
+  it('toma un candado por participante, sin repetir y en orden estable', async () => {
+    const tx = { $executeRaw: vi.fn() };
+    const repository = new AppointmentsRepository({} as never);
+
+    await repository.lockParticipants(
+      [DATA.studentId, DATA.mentorId, DATA.studentId],
+      tx as never,
+    );
+
+    expect(tx.$executeRaw).toHaveBeenCalledTimes(2);
+    expect(tx.$executeRaw.mock.calls.map((call) => call[1])).toEqual([
+      `appointment-participant:${DATA.mentorId}`,
+      `appointment-participant:${DATA.studentId}`,
+    ]);
+  });
+
+  it('busca citas activas de la persona que empiezan antes del fin y terminan después del inicio', async () => {
+    const tx = { appointment: { count: vi.fn().mockResolvedValue(1) } };
+    const repository = new AppointmentsRepository({} as never);
+
+    await expect(
+      repository.hasOverlappingAppointment(
+        DATA.studentId,
+        DATA.startAt,
+        DATA.endAt,
+        tx as never,
+      ),
+    ).resolves.toBe(true);
+
+    expect(tx.appointment.count).toHaveBeenCalledWith({
+      where: {
+        OR: [{ mentorId: DATA.studentId }, { studentId: DATA.studentId }],
+        startAt: { lt: DATA.endAt },
+        endAt: { gt: DATA.startAt },
+        status: {
+          title: {
+            in: [
+              AppointmentStatusTitle.CONFIRMED,
+              AppointmentStatusTitle.LEGACY_CONFIRMED,
+            ],
+          },
+        },
+      },
+    });
+  });
+
+  it('responde que no hay cruce cuando no encuentra citas activas', async () => {
+    const prisma = { appointment: { count: vi.fn().mockResolvedValue(0) } };
+    const repository = new AppointmentsRepository(prisma as never);
+
+    await expect(
+      repository.hasOverlappingAppointment(
+        DATA.studentId,
+        DATA.startAt,
+        DATA.endAt,
+      ),
+    ).resolves.toBe(false);
+  });
 });
