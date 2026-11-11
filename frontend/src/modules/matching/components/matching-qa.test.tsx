@@ -2,7 +2,10 @@ import type { ReactNode } from "react";
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { AFFINITY_AXES } from "../data/matching.data";
-import { getCandidatesForVacancy, getVacancyById } from "../services/matching.service";
+import {
+  getCandidatesForVacancy,
+  getVacancyById,
+} from "../services/matching-demo.service";
 import { GapBreakdownList } from "./gap-breakdown-list";
 import { CandidateList } from "./candidate-list";
 import { CandidateDetailPanel } from "./candidate-detail-panel";
@@ -11,14 +14,34 @@ import { RadarChart } from "./radar-chart";
 const radarMock = vi.hoisted(() => vi.fn(() => null));
 
 vi.mock("recharts", () => ({
-  ResponsiveContainer: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  ResponsiveContainer: ({ children }: { children: ReactNode }) => (
+    <div>{children}</div>
+  ),
   RadarChart: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-  PolarAngleAxis: ({ tick }: { tick: (props: { x: number; y: number; textAnchor: string; verticalAnchor: string; index: number }) => ReactNode }) => (
-    <svg>{AFFINITY_AXES.map((axis, index) => (
-      <g key={axis.id}>
-        {tick({ x: 50, y: 50, textAnchor: "middle", verticalAnchor: "middle", index })}
-      </g>
-    ))}</svg>
+  PolarAngleAxis: ({
+    tick,
+  }: {
+    tick: (props: {
+      x: number;
+      y: number;
+      textAnchor: string;
+      verticalAnchor: string;
+      index: number;
+    }) => ReactNode;
+  }) => (
+    <svg>
+      {AFFINITY_AXES.map((axis, index) => (
+        <g key={axis.id}>
+          {tick({
+            x: 50,
+            y: 50,
+            textAnchor: "middle",
+            verticalAnchor: "middle",
+            index,
+          })}
+        </g>
+      ))}
+    </svg>
   ),
   PolarGrid: () => null,
   PolarRadiusAxis: () => null,
@@ -123,5 +146,4 @@ describe("QA HU3 y conexión HU4", () => {
     expect(actions[1]).toHaveClass("text-accent");
     expect(actions[2]).toHaveClass("text-danger");
   });
-
 });

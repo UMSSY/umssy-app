@@ -1,3 +1,4 @@
+import type { MentorAboutProps } from "../../types/mentor-about-props.types";
 import { Badge } from "lucide-react";
 import {
   Card,
@@ -5,10 +6,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
-type MentorAboutProps = {
-  description: string;
-};
 
 export function MentorAbout({ description }: MentorAboutProps) {
   return (

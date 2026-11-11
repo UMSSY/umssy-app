@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { TransactionService } from '../../../common/prisma/transaction.service.js';
 import { CertificationsRepository } from '../repositories/certifications.repository.js';
 import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
-import { RadarAuditService } from '../../radar-integration/radar-audit.service.js';
+import { RadarAuditService } from '../../radar-integration/services/radar-audit.service.js';
 import type { CreateCertificationRequest } from '../requests/create-certification.request.js';
 import type { UpdateCertificationRequest } from '../requests/update-certification.request.js';
 import type { CertificationRecord } from '../types/certification-record.type.js';

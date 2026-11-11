@@ -11,7 +11,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AccessRequestProvider } from "../../contexts/access-request-context";
 import { accessRequestService } from "../../services/access-request.service";
-import type { ApiResult } from "../../types/access-request.types";
+import type { ApiResult } from "../../types/api-result.types";
 import { PersonalDataForm } from "../personal-data/personal-data-form";
 import { PublicHeader } from "./public-header";
 

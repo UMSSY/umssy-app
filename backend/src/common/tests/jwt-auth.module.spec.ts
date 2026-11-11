@@ -21,13 +21,20 @@ describe('JwtAuthModule', () => {
   });
 
   it('verifies tokens signed with JWT_SECRET, the same secret used by the login', async () => {
-    const moduleRef = await Test.createTestingModule({ imports: [JwtAuthModule] })
+    const moduleRef = await Test.createTestingModule({
+      imports: [JwtAuthModule],
+    })
       .overrideProvider(PrismaService)
-      .useValue({ user: { findFirst: vi.fn().mockResolvedValue({
-        id: userId,
-        email: 'user@test.com',
-        roles: [{ role: { name: 'titulado' } }],
-      }) } })
+      .useValue({
+        user: {
+          findFirst: vi.fn().mockResolvedValue({
+            id: userId,
+            email: 'user@test.com',
+            company: null,
+            roles: [{ role: { name: 'titulado' } }],
+          }),
+        },
+      })
       .compile();
     const guard = moduleRef.get(JwtAuthGuard);
     const loginToken = new JwtService({ secret: 'module-test-secret' }).sign({
@@ -42,6 +49,11 @@ describe('JwtAuthModule', () => {
     } as unknown as ExecutionContext;
 
     await expect(guard.canActivate(context)).resolves.toBe(true);
-    expect(request.user).toEqual({ id: userId, email: 'user@test.com', roles: ['titulado'] });
+    expect(request.user).toEqual({
+      id: userId,
+      email: 'user@test.com',
+      company: null,
+      roles: ['titulado'],
+    });
   });
 });

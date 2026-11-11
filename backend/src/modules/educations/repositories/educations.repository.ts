@@ -1,9 +1,10 @@
+import { TRANSACTION_CONFLICT_CODE } from '../../../common/constants/prisma-errors.constants.js';
 import { Injectable } from '@nestjs/common';
 import type { EducationAnalysisSourceResponse } from '../responses/education-analysis-source.response.js';
 import type { Prisma } from '../../../prisma/client.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
-import { EDUCATION_TRANSACTION_ATTEMPTS } from '../constants/education-conflict.constants.js';
+
 import { DuplicateEducationException } from '../exceptions/duplicate-education.exception.js';
 import { EducationWriteConflictException } from '../exceptions/education-write-conflict.exception.js';
 import { normalizeEducationText } from '../utils/normalize-education-text.js';
@@ -141,11 +142,7 @@ export class EducationsRepository {
   private async withSerializableWrite<T>(
     operation: (tx: Prisma.TransactionClient) => Promise<T>,
   ): Promise<T> {
-    for (
-      let attempt = 0;
-      attempt < EDUCATION_TRANSACTION_ATTEMPTS;
-      attempt += 1
-    ) {
+    for (let attempt = 0; attempt < 3; attempt += 1) {
       try {
         return await this.prisma.$transaction(operation, {
           isolationLevel: 'Serializable',
@@ -155,7 +152,7 @@ export class EducationsRepository {
           typeof error !== 'object' ||
           error === null ||
           !('code' in error) ||
-          error.code !== 'P2034'
+          error.code !== TRANSACTION_CONFLICT_CODE
         )
           throw error;
       }

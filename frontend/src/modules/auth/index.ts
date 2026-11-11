@@ -16,3 +16,4 @@ export { SessionLogoutMenuItem } from "./components/session-logout-menu-item";
 export { LogoutConfirmDialog } from "./components/logout-confirm-dialog";
 export { resolvePostLoginPath } from "./utils/resolve-post-login-path";
 
+export { getSafeNextPath } from "./utils/safe-next-path";

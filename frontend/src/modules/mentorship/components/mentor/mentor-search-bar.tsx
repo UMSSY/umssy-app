@@ -1,13 +1,9 @@
 "use client";
+import type { MentorSearchBarProps } from "../../types/mentor-search-bar-props.types";
 
 import { useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
-
-type MentorSearchBarProps = {
-  value: string;
-  onSearchChange: (value: string) => void;
-};
 
 const SEARCH_DEBOUNCE_MS = 300;
 

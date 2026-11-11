@@ -1,30 +1,6 @@
-export type AuditAction =
-  | "submitted"
-  | "opened"
-  | "approved"
-  | "rejected"
-  | "activation_code_sent"
-  | "account_activated"
-  | "document_replaced"
-  | "ocr_read"
-  | "sent_to_manual_review"
-  | "approval_reverted";
-
-export type AuditActorRole = "administrativo" | "titulado" | "sistema";
-
-export interface AuditResponsible {
-  id: string | null;
-  name: string;
-  role: AuditActorRole;
-}
-
-export interface AuditEvidence {
-  name: string;
-  extension: string;
-  mimeType: string;
-  size: number;
-}
-
+import type { AuditAction } from "./audit-action.types";
+import type { AuditResponsible } from "./audit-responsible.types";
+import type { AuditEvidence } from "./audit-evidence.types";
 export interface AuditEvent {
   id: string;
   code: string;
@@ -36,10 +12,9 @@ export interface AuditEvent {
   detail: string | null;
   evidence: AuditEvidence | null;
 }
+export type { AuditAction } from "./audit-action.types";
+export type { AuditActorRole } from "./audit-actor-role.types";
+export type { AuditResponsible } from "./audit-responsible.types";
+export type { AuditEvidence } from "./audit-evidence.types";
 
-export interface AuditEventPage {
-  items: AuditEvent[];
-  total: number;
-  page: number;
-  limit: number;
-}
+export type { AuditEventPage } from "./audit-event-page.types";

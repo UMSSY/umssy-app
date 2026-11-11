@@ -4,7 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { CircleAlert, SearchX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { buildLoginUrl, endSession } from "@/modules/auth";
-import type { AuditLogStatusProps } from "../../types/audit-log-component-props.types";
+import type { AuditLogStatusProps } from "../../types/audit-log-status-props.types";
 
 const BUTTON_CLASS = "h-[34px] rounded-lg px-4 text-sm font-semibold";
 

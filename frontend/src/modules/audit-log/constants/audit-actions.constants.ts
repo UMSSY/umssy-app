@@ -1,5 +1,6 @@
 import { Check, ClipboardList, Eye, KeyRound, RefreshCw, ScanText, Send, Undo2, UserCheck, X, type LucideIcon } from "lucide-react";
-import type { AuditAction, AuditActorRole } from "../types/audit-event.types";
+import type { AuditAction } from "../types/audit-action.types";
+import type { AuditActorRole } from "../types/audit-actor-role.types";
 
 export const AUDIT_ACTION_STYLES: Record<AuditAction, { label: string; icon: LucideIcon; className: string }> = {
   submitted: { label: "Solicitud enviada", icon: Send, className: "border-border-strong bg-surface text-ink" },

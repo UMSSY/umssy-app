@@ -55,7 +55,7 @@ export function MessageItem({
         fileName: cleanedName || (isImage ? "imagen.png" : "documento.pdf"),
         mimeType: isImage ? "image/png" : "application/pdf",
         fileSize: 245 * 1024,
-        url: `/api/chat/attachments/${message.id}/download`,
+        url: `/api/chat/attachments/${message.id}/file`,
         type: isImage ? "IMAGE" : "PDF",
       };
     }

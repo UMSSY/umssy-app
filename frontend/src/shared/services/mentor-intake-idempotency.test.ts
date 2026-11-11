@@ -1,3 +1,7 @@
+import {
+  saveAccessToken,
+  getAccessToken,
+} from "@/shared/services/storage/access-token-storage";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { withMentorIntakeKey } from "./mentor-intake-idempotency";
 import { updateIndexedDb } from "@/shared/services/storage/browser-indexed-db";
@@ -25,11 +29,10 @@ const preferences = { technicalAreaIds: ["a", "b"], orientationTypeIds: ["o"] };
 const networkFailure = { isAxiosError: true };
 const serverFailure = { isAxiosError: true, response: { status: 503 } };
 
-beforeEach(() => {
+beforeEach(async () => {
   records.clear();
   sessionStorage.clear();
-  sessionStorage.setItem(
-    "accessToken",
+  await saveAccessToken(
     `header.${btoa(JSON.stringify({ sub: crypto.randomUUID() }))}.signature`,
   );
 });
@@ -46,9 +49,7 @@ describe("UUID para intenciones de participación", () => {
     expect(submit).not.toHaveBeenCalled();
   });
   it("migra el UUID previo a IndexedDB sin duplicar la intención y lo retira al completarla", async () => {
-    const subject = JSON.parse(
-      atob(sessionStorage.getItem("accessToken")!.split(".")[1]),
-    ).sub;
+    const subject = JSON.parse(atob(getAccessToken()!.split(".")[1])).sub;
     const key = crypto.randomUUID();
     sessionStorage.setItem(
       "hu7:intake:request",
@@ -72,7 +73,7 @@ describe("UUID para intenciones de participación", () => {
       await reloaded.withMentorIntakeKey("request", preferences, retry),
     ).toBe(key);
     expect(sessionStorage.getItem("hu7:intake:request")).toBeNull();
-    expect(records.size).toBe(0);
+    expect([...records.keys()].filter((name) => name.startsWith("hu7:intake:"))).toEqual([]);
   });
 
   it("no reutiliza ni elimina una intención anterior perteneciente a otro usuario", async () => {
@@ -116,7 +117,7 @@ describe("UUID para intenciones de participación", () => {
       submit,
     );
     expect(new Set(keys).size).toBe(1);
-    expect(records.size).toBe(0);
+    expect([...records.keys()].filter((name) => name.startsWith("hu7:intake:"))).toEqual([]);
     await withMentorIntakeKey("request", preferences, submit);
     expect(keys[3]).not.toBe(keys[0]);
   });
@@ -153,8 +154,7 @@ describe("UUID para intenciones de participación", () => {
     await call("request");
     await call("request", { ...preferences, technicalAreaIds: ["c"] });
     await call("activate");
-    sessionStorage.setItem(
-      "accessToken",
+    await saveAccessToken(
       `header.${btoa(JSON.stringify({ sub: "another-user" }))}.signature`,
     );
     await call("request");

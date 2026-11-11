@@ -3,7 +3,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { SURVEYS_QUERY_KEYS } from "../constants/surveys-query-keys.constants";
 import { surveysService } from "../services/surveys.service";
-import type { CreateSurveyPayload } from "../types/survey.types";
+import type { CreateSurveyPayload } from "../types/create-survey-payload.types";
 
 export function useUpdateSurvey(id: string) {
   const queryClient = useQueryClient();

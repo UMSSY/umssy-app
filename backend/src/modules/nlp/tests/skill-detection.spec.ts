@@ -1,4 +1,3 @@
-
 import { describe, expect, it } from 'vitest';
 import {
   NLP_DICTIONARY_VERSION,
@@ -21,9 +20,14 @@ describe('skill dictionary', () => {
     const owners = new Map<string, string>();
 
     for (const entry of NLP_SKILL_DICTIONARY) {
-      for (const alias of [...entry.aliases, ...(entry.ambiguousAliases ?? [])]) {
+      for (const alias of [
+        ...entry.aliases,
+        ...(entry.ambiguousAliases ?? []),
+      ]) {
         const key = toContentWords(alias).join(' ');
-        expect(owners.get(key) ?? entry.name, `alias "${alias}"`).toBe(entry.name);
+        expect(owners.get(key) ?? entry.name, `alias "${alias}"`).toBe(
+          entry.name,
+        );
         owners.set(key, entry.name);
       }
     }
@@ -37,61 +41,65 @@ describe('skill dictionary', () => {
 
 describe('buildAliasIndex', () => {
   it('tries the longest alias first', () => {
-    const lengths = (index.get('react') ?? []).map((pattern) => pattern.tokens.length);
-    expect(lengths).toEqual([...lengths].sort((first, second) => second - first));
+    const lengths = (index.get('react') ?? []).map(
+      (pattern) => pattern.tokens.length,
+    );
+    expect(lengths).toEqual(
+      [...lengths].sort((first, second) => second - first),
+    );
     expect(index.get('react')?.at(-1)?.tokens).toEqual(['react']);
   });
 
   it('skips aliases made only of stopwords', () => {
-    const emptyIndex = buildAliasIndex([{ name: 'Nothing', aliases: ['de la'] }]);
+    const emptyIndex = buildAliasIndex([
+      { name: 'Nothing', aliases: ['de la'] },
+    ]);
     expect(emptyIndex.size).toBe(0);
   });
 });
 
 describe('detectSkillMentions', () => {
   it('detects canonical skills in a work description', () => {
-    expect(detect('Desarrollé microservicios con Node.js, Docker y PostgreSQL.')).toEqual([
-      'Node.js',
-      'Docker',
-      'PostgreSQL',
-    ]);
+    expect(
+      detect('Desarrollé microservicios con Node.js, Docker y PostgreSQL.'),
+    ).toEqual(['Node.js', 'Docker', 'PostgreSQL']);
   });
 
   it('keeps technical symbols and multiword names', () => {
-    expect(detect('Programé en C++ y C#; también usé .NET Core y Spring Boot.')).toEqual([
-      'C++',
-      'C#',
-      '.NET',
-      'Spring Boot',
-    ]);
+    expect(
+      detect('Programé en C++ y C#; también usé .NET Core y Spring Boot.'),
+    ).toEqual(['C++', 'C#', '.NET', 'Spring Boot']);
   });
 
   it('tells Java and JavaScript apart and prefers the longest alias', () => {
-    expect(detect('Java en el backend y JavaScript con React Native en el móvil.')).toEqual([
-      'Java',
-      'JavaScript',
-      'React Native',
-    ]);
+    expect(
+      detect('Java en el backend y JavaScript con React Native en el móvil.'),
+    ).toEqual(['Java', 'JavaScript', 'React Native']);
   });
 
   it('counts a repeated mention once', () => {
-    expect(detect('Python, python y PYTHON3 en todos los proyectos')).toEqual(['Python']);
-  });
-
-  it('matches aliases written with spaces or accents', () => {
-    expect(detect('Usé node js y vue js; aprendizaje automático con TensorFlow')).toEqual([
-      'Node.js',
-      'Vue.js',
-      'Machine Learning',
-      'TensorFlow',
+    expect(detect('Python, python y PYTHON3 en todos los proyectos')).toEqual([
+      'Python',
     ]);
   });
 
+  it('matches aliases written with spaces or accents', () => {
+    expect(
+      detect('Usé node js y vue js; aprendizaje automático con TensorFlow'),
+    ).toEqual(['Node.js', 'Vue.js', 'Machine Learning', 'TensorFlow']);
+  });
+
   it('ignores negated mentions only inside their clause', () => {
-    expect(detect('No tengo experiencia con Java, pero sí con Python.')).toEqual(['Python']);
+    expect(
+      detect('No tengo experiencia con Java, pero sí con Python.'),
+    ).toEqual(['Python']);
     expect(detect('No uso Java ni Docker')).toEqual([]);
-    expect(detect('Sin experiencia en Docker. Uso Linux a diario.')).toEqual(['Linux']);
-    expect(detect('Nunca trabajé con Angular aunque usé React')).toEqual(['React']);
+    expect(detect('Sin experiencia en Docker. Uso Linux a diario.')).toEqual([
+      'Linux',
+    ]);
+    expect(detect('Nunca trabajé con Angular aunque usé React')).toEqual([
+      'React',
+    ]);
   });
 
   it('does not read "no solo" or "sin embargo" as negations', () => {
@@ -99,33 +107,47 @@ describe('detectSkillMentions', () => {
       'Java',
       'Spring Boot',
     ]);
-    expect(detect('Sin embargo, desarrollé APIs con FastAPI')).toEqual(['FastAPI']);
+    expect(detect('Sin embargo, desarrollé APIs con FastAPI')).toEqual([
+      'FastAPI',
+    ]);
   });
 
   it('keeps "sin" only for knowledge or a skill right after it', () => {
     expect(detect('Implementé pruebas sin errores con Jest')).toEqual(['Jest']);
-    expect(detect('Un despliegue sin Docker, solo con Kubernetes')).toEqual(['Kubernetes']);
+    expect(detect('Un despliegue sin Docker, solo con Kubernetes')).toEqual([
+      'Kubernetes',
+    ]);
     expect(detect('without experience in Rust')).toEqual([]);
   });
 
   it('ignores the wish to learn a technology', () => {
     expect(detect('Quiero aprender Kubernetes el próximo año.')).toEqual([]);
-    expect(detect('Me gustaría aprender más sobre Terraform; uso Ansible')).toEqual([
-      'Ansible',
-    ]);
+    expect(
+      detect('Me gustaría aprender más sobre Terraform; uso Ansible'),
+    ).toEqual(['Ansible']);
     expect(detect('Aprendí Python en la universidad')).toEqual(['Python']);
   });
 
   it('needs a technical context for ambiguous aliases', () => {
-    expect(detect('Transferencias SWIFT y conciliaciones bancarias.')).toEqual([]);
+    expect(detect('Transferencias SWIFT y conciliaciones bancarias.')).toEqual(
+      [],
+    );
     expect(detect('Fotografía de pandas en el zoológico')).toEqual([]);
     expect(detect('Desarrollo backend en Go')).toEqual(['Go']);
-    expect(detect('Análisis con Pandas y Python')).toEqual(['Pandas', 'Python']);
+    expect(detect('Análisis con Pandas y Python')).toEqual([
+      'Pandas',
+      'Python',
+    ]);
   });
 
   it('respects the terms that block an alias', () => {
-    expect(detect('La piedra angular del proyecto de software fue el equipo.')).toEqual([]);
-    expect(detect('Frontend con Angular y Vue.js')).toEqual(['Angular', 'Vue.js']);
+    expect(
+      detect('La piedra angular del proyecto de software fue el equipo.'),
+    ).toEqual([]);
+    expect(detect('Frontend con Angular y Vue.js')).toEqual([
+      'Angular',
+      'Vue.js',
+    ]);
   });
 
   it('never joins words across punctuation', () => {
@@ -133,7 +155,9 @@ describe('detectSkillMentions', () => {
   });
 
   it('returns nothing for texts without technical skills', () => {
-    expect(detect('Atención al cliente, liderazgo y trabajo en equipo.')).toEqual([]);
+    expect(
+      detect('Atención al cliente, liderazgo y trabajo en equipo.'),
+    ).toEqual([]);
     expect(detect('')).toEqual([]);
   });
 });
@@ -145,8 +169,16 @@ describe('SkillDetectionService', () => {
     const candidates = service.detect({
       userId: 'user-1',
       sources: [
-        { id: 'experience-1', type: 'work-experience', text: 'APIs en Node.js con Docker' },
-        { id: 'education-1', type: 'education', text: 'Proyecto de grado con Docker y Python' },
+        {
+          id: 'experience-1',
+          type: 'work-experience',
+          text: 'APIs en Node.js con Docker',
+        },
+        {
+          id: 'education-1',
+          type: 'education',
+          text: 'Proyecto de grado con Docker y Python',
+        },
       ],
     });
 

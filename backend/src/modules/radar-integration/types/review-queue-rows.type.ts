@@ -6,4 +6,3 @@ export type ReviewQueueRows = [
   Awaited<ReturnType<RadarReviewRepository['listReviewQueue']>>,
   Awaited<ReturnType<SkillAnalysisService['listReviewQueue']>>,
 ];
-

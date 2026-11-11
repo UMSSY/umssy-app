@@ -3,8 +3,9 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { stubObjectUrls } from "../components/document/document-step-test-utils";
 import { accessRequestService } from "../services/access-request.service";
-import type { ApiResult, RequestStatusResponse } from "../types/access-request.types";
-import type { DocumentCorrectionResponse } from "../types/document-correction.types";
+import type { ApiResult } from "../types/api-result.types";
+import type { RequestStatusResponse } from "../types/request-status-response.types";
+import type { DocumentCorrectionResponse } from "../types/document-correction-response.types";
 import { MyRequestView } from "./my-request-view";
 
 vi.mock("../services/access-request.service", () => ({
@@ -39,7 +40,11 @@ describe("F2 desde Mi solicitud", () => {
   beforeEach(() => {
     vi.resetAllMocks();
     stubObjectUrls();
-    window.history.replaceState({}, "", `/request-access/status?code=${CODE}#correctionToken=${TOKEN}`);
+    window.history.replaceState(
+      {},
+      "",
+      `/request-access/status?code=${CODE}#correctionToken=${TOKEN}`,
+    );
     getStatus.mockResolvedValue({ ok: true, data: REJECTED });
     send.mockResolvedValue(RESPONSE);
   });
@@ -151,9 +156,18 @@ describe("F2 desde Mi solicitud", () => {
     expect(await screen.findByText("Documento enviado correctamente")).toBeInTheDocument();
   });
 
-  it.each(["", "#correctionToken=session.jwt", `#correctionToken=${TOKEN}&correctionToken=${TOKEN}`])(
-    "conserva la consulta de rechazo sin ofrecer escritura con permiso ausente o inválido: %s", async (hash) => {
-      window.history.replaceState({}, "", `/request-access/status?code=${CODE}${hash}`);
+  it.each([
+    "",
+    "#correctionToken=session.jwt",
+    `#correctionToken=${TOKEN}&correctionToken=${TOKEN}`,
+  ])(
+    "conserva la consulta de rechazo sin ofrecer escritura con permiso ausente o inválido: %s",
+    async (hash) => {
+      window.history.replaceState(
+        {},
+        "",
+        `/request-access/status?code=${CODE}${hash}`,
+      );
       render(<MyRequestView requestCode={CODE} />);
       const user = userEvent.setup();
       await user.type(screen.getByLabelText("Correo electrónico"), "ana@example.com");
@@ -165,7 +179,11 @@ describe("F2 desde Mi solicitud", () => {
   );
 
   it("no toma el permiso desde parámetros de consulta", async () => {
-    window.history.replaceState({}, "", `/request-access/status?code=${CODE}&correctionToken=${TOKEN}`);
+    window.history.replaceState(
+      {},
+      "",
+      `/request-access/status?code=${CODE}&correctionToken=${TOKEN}`,
+    );
     render(<MyRequestView requestCode={CODE} />);
     const user = userEvent.setup();
     await user.type(screen.getByLabelText("Correo electrónico"), "ana@example.com");
@@ -191,7 +209,11 @@ describe("F2 desde Mi solicitud", () => {
     await user.upload(screen.getByLabelText("Archivo del documento"), file());
     await user.click(screen.getByRole("button", { name: "Enviar documento" }));
     act(() => {
-      window.history.replaceState({}, "", `/request-access/status?code=${CODE}#correctionToken=dcr1.${"y".repeat(43)}`);
+      window.history.replaceState(
+        {},
+        "",
+        `/request-access/status?code=${CODE}#correctionToken=dcr1.${"y".repeat(43)}`,
+      );
       window.dispatchEvent(new Event("hashchange"));
     });
     expect(await screen.findByRole("heading", { name: "Necesitamos otro documento" })).toBeInTheDocument();

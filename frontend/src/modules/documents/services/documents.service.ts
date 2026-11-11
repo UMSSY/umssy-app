@@ -1,5 +1,5 @@
 import { apiClient } from "@/shared/services/api-client";
-import { CV_ENDPOINT, CV_UPLOAD_FIELD_NAME } from "../constants/cv-api.constants";
+
 import type { ApiResponse } from "@/modules/profile";
 import type { CvPage } from "../types/cv-page.types";
 import type { CvPageResponse } from "../types/cv-page-response.types";
@@ -11,7 +11,7 @@ import { toSavedCv } from "../utils/to-saved-cv";
 
 export const documentsService = {
   getCvs: async (page: number, limit: number): Promise<CvPage> => {
-    const response = await apiClient.get<ApiResponse<CvPageResponse | null>>(CV_ENDPOINT, {
+    const response = await apiClient.get<ApiResponse<CvPageResponse | null>>("/profile/me/cvs", {
       headers: getAuthHeaders(),
       params: { page, limit },
     });
@@ -20,8 +20,8 @@ export const documentsService = {
 
   uploadCv: async (file: File): Promise<SavedCv | null> => {
     const formData = new FormData();
-    formData.append(CV_UPLOAD_FIELD_NAME, file);
-    const response = await apiClient.post<ApiResponse<CvResponse | null>>(CV_ENDPOINT, formData, {
+    formData.append("file", file);
+    const response = await apiClient.post<ApiResponse<CvResponse | null>>("/profile/me/cvs", formData, {
       headers: getAuthHeaders(),
     });
     const cv = response.data.data;
@@ -29,7 +29,7 @@ export const documentsService = {
   },
 
   getCvFile: async (cvId: string): Promise<Blob> => {
-    const response = await apiClient.get<Blob>(`${CV_ENDPOINT}/${encodeURIComponent(cvId)}/file`, {
+    const response = await apiClient.get<Blob>(`/profile/me/cvs/${encodeURIComponent(cvId)}/file`, {
       headers: getAuthHeaders(),
       responseType: "blob",
     });
@@ -37,7 +37,7 @@ export const documentsService = {
   },
 
   deleteCv: async (cvId: string): Promise<void> => {
-    await apiClient.delete(`${CV_ENDPOINT}/${encodeURIComponent(cvId)}`, {
+    await apiClient.delete(`/profile/me/cvs/${encodeURIComponent(cvId)}`, {
       headers: getAuthHeaders(),
     });
   },
