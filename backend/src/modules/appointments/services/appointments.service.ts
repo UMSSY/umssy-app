@@ -8,6 +8,7 @@ import { MentorsService } from '../../mentors/services/mentors.service.js';
 import { ProfilePhotoService } from '../../profile/services/profile-photo.service.js';
 import type { PhotoFileDownload } from '../../profile/types/photo-file-download.type.js';
 import {
+  AppointmentOverlapException,
   BlockAlreadyBookedException,
   BlockInPastException,
   InvalidOrientationTypeException,
@@ -73,6 +74,11 @@ export class AppointmentsService {
       block.mentorId,
       block.startAt,
       async (tx) => {
+        await this.appointmentsRepository.lockParticipants(
+          [user.id, block.mentorId],
+          tx,
+        );
+
         const current =
           await this.availabilityService.findBlockWithAppointments(
             payload.blockId,
@@ -84,6 +90,18 @@ export class AppointmentsService {
         }
         if (current.appointments.length > 0) {
           throw new BlockAlreadyBookedException();
+        }
+
+        const overlaps =
+          await this.appointmentsRepository.hasOverlappingAppointment(
+            user.id,
+            current.startAt,
+            current.endAt,
+            tx,
+          );
+
+        if (overlaps) {
+          throw new AppointmentOverlapException();
         }
 
         const statusId = await this.appointmentsRepository.findStatusIdByTitle(
