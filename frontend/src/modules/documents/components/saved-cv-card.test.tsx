@@ -23,6 +23,7 @@ function renderCard(props: Partial<Parameters<typeof SavedCvCard>[0]> = {}) {
   const onDelete = vi.fn();
   const onOpenHistory = vi.fn();
   const onRetry = vi.fn();
+  const onAutofill = vi.fn();
   render(
     <SavedCvCard
       cvs={CVS}
@@ -31,10 +32,11 @@ function renderCard(props: Partial<Parameters<typeof SavedCvCard>[0]> = {}) {
       onDelete={onDelete}
       onOpenHistory={onOpenHistory}
       onRetry={onRetry}
+      onAutofill={onAutofill}
       {...props}
     />,
   );
-  return { onView, onDelete, onOpenHistory, onRetry, user: userEvent.setup() };
+  return { onView, onDelete, onOpenHistory, onRetry, onAutofill, user: userEvent.setup() };
 }
 
 describe("SavedCvCard", () => {
@@ -156,5 +158,25 @@ describe("SavedCvCard", () => {
     for (const button of screen.getAllByRole("button", { name: /^Eliminar / })) {
       expect(button).toBeDisabled();
     }
+  });
+
+  it("offers to autofill the profile from the current cv", async () => {
+    const { onAutofill, user } = renderCard();
+
+    await user.click(screen.getByRole("button", { name: "Autocompletar perfil" }));
+
+    expect(onAutofill).toHaveBeenCalledTimes(1);
+  });
+
+  it("hides the autofill action without a current cv", () => {
+    renderCard({ cvs: [buildCv(2), buildCv(3)] });
+
+    expect(screen.queryByRole("button", { name: "Autocompletar perfil" })).not.toBeInTheDocument();
+  });
+
+  it("disables the autofill action while reading the cv", () => {
+    renderCard({ isAutofilling: true });
+
+    expect(screen.getByRole("button", { name: "Autocompletar perfil" })).toBeDisabled();
   });
 });

@@ -6,6 +6,7 @@ import { CV_FILE_QUERY_KEY, CV_QUERY_KEY, CV_RECENT_LIMIT } from "../constants/c
 import { CV_ERROR_MESSAGES } from "../constants/cv-error-messages.constants";
 import { CV_UPLOAD_PROGRESS } from "../constants/cv-upload.constants";
 import { documentsService } from "../services/documents.service";
+import type { SavedCv } from "../types/saved-cv.types";
 import { getCvErrorMessage } from "../utils/get-cv-error-message";
 
 export function useCvDocument() {
@@ -52,9 +53,7 @@ export function useCvDocument() {
     reloadCvs: async (): Promise<void> => {
       await query.refetch();
     },
-    uploadCv: async (file: File): Promise<void> => {
-      await uploadMutation.mutateAsync(file);
-    },
+    uploadCv: (file: File): Promise<SavedCv | null> => uploadMutation.mutateAsync(file),
     deleteCv: async (cvId: string): Promise<void> => {
       await deleteMutation.mutateAsync(cvId);
     },
