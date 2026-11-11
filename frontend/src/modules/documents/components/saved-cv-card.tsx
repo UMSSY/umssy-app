@@ -1,4 +1,4 @@
-import { History, LoaderCircle, RotateCw } from "lucide-react";
+import { History, LoaderCircle, RotateCw, WandSparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SectionCard } from "@/modules/profile";
@@ -14,10 +14,12 @@ export function SavedCvCard({
   isReloading = false,
   isBusy = false,
   openingCvId = null,
+  isAutofilling = false,
   onView,
   onDelete,
   onOpenHistory,
   onRetry,
+  onAutofill,
 }: SavedCvCardProps) {
   const items = cvs ?? [];
 
@@ -86,6 +88,27 @@ export function SavedCvCard({
           />
         ))}
       </ul>
+      {items.some((cv) => cv.isCurrent) ? (
+        <div className="mt-5 flex flex-col items-start gap-2 border-t border-border pt-5">
+          <p className="text-sm text-text-secondary">
+            Usa tu CV vigente para precargar tus datos de contacto, educación y experiencia.
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            className="h-10 border-border-strong px-4 text-sm text-ink hover:bg-surface-soft"
+            disabled={isBusy || isAutofilling}
+            onClick={onAutofill}
+          >
+            {isAutofilling ? (
+              <LoaderCircle aria-hidden="true" className="size-4 animate-spin" />
+            ) : (
+              <WandSparkles aria-hidden="true" className="size-4" />
+            )}
+            Autocompletar perfil
+          </Button>
+        </div>
+      ) : null}
       {totalCvs > CV_RECENT_LIMIT ? (
         <div className="mt-5 border-t border-border pt-5">
           <Button

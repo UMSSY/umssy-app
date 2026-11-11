@@ -106,7 +106,7 @@ describe("useCvDocument", () => {
     vi.mocked(documentsService.getCvs).mockResolvedValue(buildPage([CURRENT_CV]));
 
     await act(async () => {
-      await result.current.uploadCv(file);
+      await expect(result.current.uploadCv(file)).resolves.toEqual(CURRENT_CV);
     });
 
     expect(documentsService.uploadCv).toHaveBeenCalledWith(file, expect.any(Function));
@@ -126,7 +126,7 @@ describe("useCvDocument", () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.uploadProgress).toBe(0);
 
-    let upload: Promise<void> = Promise.resolve();
+    let upload: Promise<SavedCv | null> = Promise.resolve(null);
     act(() => {
       upload = result.current.uploadCv(new File(["%PDF"], "CV.pdf", { type: "application/pdf" }));
     });
@@ -246,7 +246,7 @@ describe("useCvDocument", () => {
     const { result } = renderHook(() => useCvDocument());
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    let upload: Promise<void> = Promise.resolve();
+    let upload: Promise<SavedCv | null> = Promise.resolve(null);
     act(() => {
       upload = result.current.uploadCv(new File(["%PDF"], "CV.pdf", { type: "application/pdf" }));
     });
