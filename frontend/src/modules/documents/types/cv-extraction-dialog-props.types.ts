@@ -1,3 +1,4 @@
+import type { CvApplyReport } from "./cv-apply-report.types";
 import type { CvExtractedContact } from "./cv-extracted-contact.types";
 import type { CvExtractedEducation } from "./cv-extracted-education.types";
 import type { CvExtractedPresentation } from "./cv-extracted-presentation.types";
@@ -13,6 +14,8 @@ export interface CvExtractionDialogProps {
   available: CvExtractionSelection;
   selection: CvExtractionSelection;
   errorMessage?: string | null;
+  isApplying?: boolean;
+  applyReport?: CvApplyReport | null;
   onToggleItem: <K extends CvExtractionSection>(section: K, item: CvExtractionSelection[K][number]) => void;
   onToggleSection: (section: CvExtractionSection) => void;
   onContactChange: (changes: Partial<CvExtractedContact>) => void;

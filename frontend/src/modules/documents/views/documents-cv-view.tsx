@@ -12,9 +12,11 @@ import { CvViewerDialog } from "../components/cv-viewer-dialog";
 import { DeleteCvDialog } from "../components/delete-cv-dialog";
 import { ReplaceCvDialog } from "../components/replace-cv-dialog";
 import { SavedCvCard } from "../components/saved-cv-card";
+import { CV_APPLY_TEXTS } from "../constants/cv-apply.constants";
 import { CV_ERROR_MESSAGES } from "../constants/cv-error-messages.constants";
 import { CV_FILE_INPUT_ACCEPT } from "../constants/cv-upload.constants";
 import { useCvDocument } from "../hooks/use-cv-document";
+import { useApplyCvExtraction } from "../hooks/use-apply-cv-extraction";
 import { useCvExtraction } from "../hooks/use-cv-extraction";
 import { useCvFeedback } from "../hooks/use-cv-feedback";
 import { useCvViewer } from "../hooks/use-cv-viewer";
@@ -41,6 +43,7 @@ export function DocumentsCvView() {
   const { preview, openingCvId, openCv, closeCv } = useCvViewer();
   const { profile } = useProfile();
   const cvExtraction = useCvExtraction({ currentHeadline: profile?.headline });
+  const cvApply = useApplyCvExtraction();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [pendingReplacement, setPendingReplacement] = useState<File | null>(null);
@@ -123,6 +126,30 @@ export function DocumentsCvView() {
     }
   };
 
+  const startCvExtraction = (cvId: string) => {
+    cvApply.reset();
+    cvExtraction.startExtraction(cvId);
+  };
+
+  const closeCvExtraction = () => {
+    cvApply.reset();
+    cvExtraction.close();
+  };
+
+  const applyCvExtraction = async () => {
+    const { extraction, selection } = cvExtraction;
+    if (!extraction) return;
+    const results = await cvApply.apply(extraction, selection, profile);
+
+    if (results.every(({ isApplied }) => isApplied)) {
+      closeCvExtraction();
+      setFeedback({ type: "success", message: CV_APPLY_TEXTS.success });
+      return;
+    }
+
+    cvExtraction.removeApplied(results);
+  };
+
   const viewCv = async (cv: SavedCv) => {
     setFeedback(null);
     const openError = await openCv(cv);
@@ -196,7 +223,7 @@ export function DocumentsCvView() {
           onRetry={() => void reloadCvs()}
           isAutofilling={cvExtraction.isExtracting}
           onAutofill={() => {
-            if (currentCv) cvExtraction.startExtraction(currentCv.id);
+            if (currentCv) startCvExtraction(currentCv.id);
           }}
         />
       </div>
@@ -230,14 +257,16 @@ export function DocumentsCvView() {
         available={cvExtraction.available}
         selection={cvExtraction.selection}
         errorMessage={cvExtraction.errorMessage}
+        isApplying={cvApply.isApplying}
+        applyReport={cvApply.report}
         onToggleItem={cvExtraction.toggleItem}
         onToggleSection={cvExtraction.toggleSection}
         onContactChange={cvExtraction.updateContact}
         onPresentationChange={cvExtraction.updatePresentation}
         onEducationChange={cvExtraction.updateEducation}
         onWorkExperienceChange={cvExtraction.updateWorkExperience}
-        onApply={cvExtraction.close}
-        onClose={cvExtraction.close}
+        onApply={() => void applyCvExtraction()}
+        onClose={closeCvExtraction}
       />
     </ProfilePageLayout>
   );
