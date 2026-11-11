@@ -51,6 +51,6 @@ import { RadarIntegrationService } from './services/radar-integration.service.js
     RadarReviewMapper,
     RadarPdfExtractionService,
   ],
-  exports: [RadarIntegrationService],
+  exports: [RadarIntegrationService, RadarPdfExtractionService],
 })
 export class RadarIntegrationModule {}

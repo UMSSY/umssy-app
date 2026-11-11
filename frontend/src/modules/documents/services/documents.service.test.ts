@@ -98,7 +98,21 @@ describe("documentsService", () => {
     expect(url).toBe("/profile/me/cvs");
     expect(body).toBeInstanceOf(FormData);
     expect((body as FormData).get("file")).toBe(file);
-    expect(config).toEqual({ headers: AUTH_HEADERS });
+    expect(config).toEqual({ headers: AUTH_HEADERS, onUploadProgress: expect.any(Function) });
+  });
+
+  it("reports the upload progress as a percentage", async () => {
+    const onProgress = vi.fn();
+    vi.mocked(apiClient.post).mockImplementation((_url, _body, config) => {
+      config?.onUploadProgress?.({ loaded: 256, total: 1024, bytes: 256, lengthComputable: true });
+      config?.onUploadProgress?.({ loaded: 256, total: undefined, bytes: 0, lengthComputable: false });
+      return Promise.resolve(wrapResponse(CV_RESPONSE));
+    });
+
+    await documentsService.uploadCv(new File(["%PDF"], "resume.pdf", { type: "application/pdf" }), onProgress);
+
+    expect(onProgress).toHaveBeenCalledTimes(1);
+    expect(onProgress).toHaveBeenCalledWith(25);
   });
 
   it("returns null when the upload response has no cv", async () => {
@@ -151,5 +165,26 @@ describe("documentsService", () => {
     await expect(
       documentsService.uploadCv(new File(["x"], "photo.pdf", { type: "application/pdf" })),
     ).rejects.toBe(error);
+  });
+
+  it("requests the extraction of a cv and fills the missing data", async () => {
+    vi.mocked(apiClient.post).mockResolvedValue(
+      wrapResponse({ cvId: "cv-1", contact: { email: "ana@mail.com" }, educations: null }),
+    );
+
+    await expect(documentsService.extractCvData("cv-1")).resolves.toEqual({
+      cvId: "cv-1",
+      contact: { firstName: null, lastName: null, email: "ana@mail.com", phone: null, location: null },
+      educations: [],
+      workExperiences: [],
+    });
+    expect(apiClient.post).toHaveBeenCalledWith("/profile/me/cvs/cv-1/extraction", {}, { headers: AUTH_HEADERS });
+  });
+
+  it("propagates the extraction error to the caller", async () => {
+    const error = { response: { status: 422, data: { code: "CV_UNREADABLE" } } };
+    vi.mocked(apiClient.post).mockRejectedValue(error);
+
+    await expect(documentsService.extractCvData("cv-1")).rejects.toBe(error);
   });
 });
