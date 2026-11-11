@@ -4,6 +4,7 @@ export const APPOINTMENT_ERROR_CODES = {
   appointmentDocumentUploadForbidden: 'APPOINTMENT_DOCUMENT_UPLOAD_FORBIDDEN',
   appointmentNotFound: 'APPOINTMENT_NOT_FOUND',
   appointmentNotOwned: 'APPOINTMENT_NOT_OWNED',
+  appointmentOverlap: 'APPOINTMENT_OVERLAP',
   blockAlreadyBooked: 'BLOCK_ALREADY_BOOKED',
   blockInPast: 'BLOCK_IN_PAST',
   invalidOrientationType: 'INVALID_ORIENTATION_TYPE',
