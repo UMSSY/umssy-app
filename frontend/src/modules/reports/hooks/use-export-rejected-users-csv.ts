@@ -1,11 +1,12 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { REJECTED_USERS_CSV_FALLBACK_NAME, REJECTED_USERS_PAGE_SIZE } from "../constants/reports.constants";
 import { reportsService } from "../services/reports.service";
 import type { AcademicPeriod } from "../types/registered-user.types";
 import type { ReportExportFormat, ReportExportScope } from "../types/report-export.types";
 import type { RoleTag } from "@/modules/auth";
+import { buildReportPdfFilters } from "../utils/report-pdf-filters.util";
 import { useExportReportCsv } from "./use-export-report-csv";
 
 export function useExportRejectedUsersCsv(
@@ -27,5 +28,12 @@ export function useExportRejectedUsersCsv(
     [userType, period, search, page, limit, snapshotAt],
   );
 
-  return useExportReportCsv(exportReport, REJECTED_USERS_CSV_FALLBACK_NAME, "Usuarios rechazados");
+  const pdfOptions = useMemo(() => ({
+    title: "Reporte de usuarios rechazados",
+    subtitle: "Personas con solicitud de acceso rechazada",
+    dateColumnLabel: "Fecha de rechazo",
+    filters: buildReportPdfFilters("Rechazados desde", userType, period, search),
+  }), [userType, period, search]);
+
+  return useExportReportCsv(exportReport, REJECTED_USERS_CSV_FALLBACK_NAME, pdfOptions);
 }

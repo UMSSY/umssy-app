@@ -1,7 +1,21 @@
 import { Resvg } from "@resvg/resvg-js";
 import { PDFDocument } from "pdf-lib";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { createReportPdf, parseReportCsv } from "./report-pdf.util";
+import type { ReportPdfMetadata } from "../types/report-pdf.types";
+import { createReportPdf, formatReportDateTime, parseReportCsv, toReportTableRows } from "./report-pdf.util";
+
+const METADATA: ReportPdfMetadata = {
+  title: "Reporte de usuarios aceptados",
+  subtitle: "Personas con acceso aprobado a la plataforma",
+  dateColumnLabel: "Fecha de aprobación",
+  generatedBy: "Ana Pérez (Administrativo)",
+  generatedAt: new Date("2026-11-11T23:35:00.000Z"),
+  filters: [
+    { label: "Tipo de usuario", value: "Todos" },
+    { label: "Aprobados desde", value: "01/07/2026" },
+    { label: "Búsqueda", value: "ninguna" },
+  ],
+};
 
 describe("parseReportCsv", () => {
   it("preserva comas, comillas escapadas y saltos de línea en celdas CSV", () => {
@@ -46,6 +60,32 @@ function mockReportLogos() {
   return context;
 }
 
+describe("toReportTableRows", () => {
+  it("ordena las columnas del CSV en Nombre, Correo, Tipo de usuario, Carrera y Fecha", () => {
+    const rows = toReportTableRows([
+      ["Usuario", "Correo", "Tipo de Usuario", "Identificador", "Documento", "Fecha de Registro"],
+      ["Ana Pérez", "ana@example.com", "Estudiante", "201900", "Diploma", "01/10/2026"],
+    ]);
+
+    expect(rows).toEqual([["Ana Pérez", "ana@example.com", "Estudiante", "-", "01/10/2026"]]);
+  });
+
+  it("usa la columna Carrera cuando el CSV la incluye", () => {
+    const rows = toReportTableRows([
+      ["Nombre", "Carrera", "Correo", "Tipo de usuario", "Fecha de aprobación"],
+      ["Luis", "Ingeniería de Sistemas", "luis@example.com", "Titulado", ""],
+    ]);
+
+    expect(rows).toEqual([["Luis", "luis@example.com", "Titulado", "Ingeniería de Sistemas", "-"]]);
+  });
+});
+
+describe("formatReportDateTime", () => {
+  it("formatea la fecha de generación en hora de Bolivia", () => {
+    expect(formatReportDateTime(new Date("2026-11-11T23:35:00.000Z"))).toBe("11/11/2026 - 19:35");
+  });
+});
+
 describe("createReportPdf", () => {
   afterEach(() => {
     vi.restoreAllMocks();
@@ -58,7 +98,7 @@ describe("createReportPdf", () => {
     const result = await createReportPdf(
       new Blob(["\uFEFFUsuario,Correo\r\nAna Pérez,ana@example.com\r\n"], { type: "text/csv" }),
       "usuarios-registrados.csv",
-      "Usuarios aceptados",
+      METADATA,
     );
 
     expect(result.file.type).toBe("application/pdf");
@@ -73,7 +113,7 @@ describe("createReportPdf", () => {
     );
     const csv = ["Usuario,Correo,Tipo de Usuario,Identificador,Documento,Fecha de Registro", ...rows].join("\r\n");
 
-    const result = await createReportPdf(new Blob([csv]), "usuarios.csv", "Usuarios aceptados");
+    const result = await createReportPdf(new Blob([csv]), "usuarios.csv", METADATA);
     const pdf = await PDFDocument.load(await result.file.arrayBuffer());
 
     expect(pdf.getPageCount()).toBeGreaterThan(1);
@@ -84,7 +124,7 @@ describe("createReportPdf", () => {
     const result = await createReportPdf(
       new Blob(["Usuario,Correo\r\n李,li@example.com\r\n"]),
       "usuarios.csv",
-      "Usuarios aceptados",
+      METADATA,
     );
 
     expect(context.fillText).toHaveBeenCalledWith("李", expect.any(Number), 0);
@@ -94,7 +134,7 @@ describe("createReportPdf", () => {
   it("informa un error si no se pueden cargar los logotipos institucionales", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false }));
 
-    await expect(createReportPdf(new Blob(["Usuario\r\nAna"]), "usuarios.csv", "Usuarios aceptados"))
+    await expect(createReportPdf(new Blob(["Usuario\r\nAna"]), "usuarios.csv", METADATA))
       .rejects.toThrow("No se pudo cargar el logotipo institucional.");
   });
 });
