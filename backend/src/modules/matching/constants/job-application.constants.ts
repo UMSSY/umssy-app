@@ -1,14 +1,13 @@
-import { ApplicationStatus } from '../../applications/types/applications.types.js';
-
-export const ACTIVE_JOB_APPLICATION_WHERE = {
-  status: { title: { not: ApplicationStatus.WITHDRAWN } },
-} as const;
-
 export const JOB_APPLICATION_STATUS = {
   IN_REVIEW: 'En revisión',
   INTERVIEW: 'Entrevista',
   ACCEPTED: 'Aceptada',
   REJECTED: 'No seleccionado',
+  WITHDRAWN: 'Retirada',
+} as const;
+
+export const ACTIVE_JOB_APPLICATION_WHERE = {
+  status: { title: { not: JOB_APPLICATION_STATUS.WITHDRAWN } },
 } as const;
 
 export const JOB_APPLICATION_MESSAGES = {
@@ -16,5 +15,3 @@ export const JOB_APPLICATION_MESSAGES = {
   DUPLICATE: 'Ya te postulaste a esta vacante.',
   STATUS_MISSING: 'No se encontró el estado inicial de la postulación.',
 } as const;
-
-export const UNIQUE_VIOLATION_CODE = 'P2002';

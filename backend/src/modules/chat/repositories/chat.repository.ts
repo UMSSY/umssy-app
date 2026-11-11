@@ -1,4 +1,3 @@
-
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 
@@ -6,18 +5,11 @@ import { PrismaService } from '../../../common/prisma/prisma.service.js';
 export class ChatRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findConversation(
-    conversationId: string,
-    userId: string,
-  ) {
+  async findConversation(conversationId: string, userId: string) {
     return this.prisma.conversation.findFirst({
       where: {
         id: conversationId,
-        OR: [
-          { userAId: userId },
-          { userBId: userId },
-        ],
-        // Validar particiapción en participants (válido para 1:1 y grupales)
+        OR: [{ userAId: userId }, { userBId: userId }],
         participants: {
           some: {
             conversationId,
@@ -26,8 +18,12 @@ export class ChatRepository {
         },
       },
       include: {
-        userA: { select: { id: true, firstName: true, lastName: true, photoUrl: true } },
-        userB: { select: { id: true, firstName: true, lastName: true, photoUrl: true } },
+        userA: {
+          select: { id: true, firstName: true, lastName: true, photoUrl: true },
+        },
+        userB: {
+          select: { id: true, firstName: true, lastName: true, photoUrl: true },
+        },
         event: { select: { id: true, title: true } },
         messages: {
           orderBy: { sentAt: 'desc' },
@@ -38,11 +34,7 @@ export class ChatRepository {
     });
   }
 
-  async findMessages(
-    conversationId: string,
-    limit: number,
-    cursor?: string,
-  ) {
+  async findMessages(conversationId: string, limit: number, cursor?: string) {
     return this.prisma.message.findMany({
       where: {
         conversationId,
@@ -54,26 +46,19 @@ export class ChatRepository {
             cursor: { id: cursor },
           }
         : {}),
-      orderBy: [
-        { sentAt: 'desc' },
-        { id: 'desc' },
-      ],
+      orderBy: [{ sentAt: 'desc' }, { id: 'desc' }],
     });
   }
 
-async findMessageCursor(
-  conversationId: string,
-  messageId: string,
-) {
-  return this.prisma.message.findFirst({
-    where: {
-      id: messageId,
-      conversationId,
-    },
-    select: {
-      id: true,
-    },
-  });
-}
-
+  async findMessageCursor(conversationId: string, messageId: string) {
+    return this.prisma.message.findFirst({
+      where: {
+        id: messageId,
+        conversationId,
+      },
+      select: {
+        id: true,
+      },
+    });
+  }
 }

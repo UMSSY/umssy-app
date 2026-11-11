@@ -45,7 +45,10 @@ describe('AppointmentsRepository', () => {
     const repository = new AppointmentsRepository({} as never);
 
     await expect(
-      repository.findStatusIdByTitle(AppointmentStatusTitle.CONFIRMED, tx as never),
+      repository.findStatusIdByTitle(
+        AppointmentStatusTitle.CONFIRMED,
+        tx as never,
+      ),
     ).resolves.toBe(STATUS_ID);
 
     expect(tx.appointmentStatus.findUniqueOrThrow).toHaveBeenCalled();
@@ -58,9 +61,9 @@ describe('AppointmentsRepository', () => {
     };
     const repository = new AppointmentsRepository({} as never);
 
-    await expect(
-      repository.createAppointment(DATA, tx as never),
-    ).resolves.toBe(record);
+    await expect(repository.createAppointment(DATA, tx as never)).resolves.toBe(
+      record,
+    );
 
     expect(tx.appointment.create).toHaveBeenCalledWith({
       data: DATA,

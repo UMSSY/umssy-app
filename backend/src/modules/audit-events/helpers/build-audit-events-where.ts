@@ -5,7 +5,9 @@ import type { AuditEventFilters } from '../types/audit-event-filters.types.js';
 import { toBoliviaDayRange } from './to-bolivia-day-range.js';
 
 // Misma construcción para el listado y la exportación: ambos deben devolver el mismo conjunto
-export function buildAuditEventsWhere(filters: AuditEventFilters): Prisma.AuditEventWhereInput {
+export function buildAuditEventsWhere(
+  filters: AuditEventFilters,
+): Prisma.AuditEventWhereInput {
   const conditions: Prisma.AuditEventWhereInput[] = [];
 
   if (filters.search) {
@@ -25,7 +27,9 @@ export function buildAuditEventsWhere(filters: AuditEventFilters): Prisma.AuditE
     conditions.push({ actorId: filters.responsibleId });
   }
   if (filters.from || filters.to) {
-    conditions.push({ occurredAt: toBoliviaDayRange(filters.from, filters.to) });
+    conditions.push({
+      occurredAt: toBoliviaDayRange(filters.from, filters.to),
+    });
   }
 
   return conditions.length > 0 ? { AND: conditions } : {};

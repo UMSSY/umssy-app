@@ -7,4 +7,6 @@ export const findApplicationsQuerySchema = z.object({
   sortOrder: z.enum(['asc', 'desc']).optional().default('desc'),
 });
 
-export type FindApplicationsQueryDto = z.infer<typeof findApplicationsQuerySchema>;
+export type FindApplicationsQueryDto = z.infer<
+  typeof findApplicationsQuerySchema
+>;

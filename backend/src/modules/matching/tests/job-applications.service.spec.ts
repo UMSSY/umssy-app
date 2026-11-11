@@ -37,6 +37,7 @@ describe('HU-02B T2.8 - JobApplicationsService', () => {
     findStatusId: vi.fn(),
     findByUserAndOffer: vi.fn(),
     create: vi.fn(),
+    reactivate: vi.fn(),
   };
   let service: JobApplicationsService;
 
@@ -46,6 +47,7 @@ describe('HU-02B T2.8 - JobApplicationsService', () => {
     repository.findByUserAndOffer.mockResolvedValue(null);
     repository.findStatusId.mockResolvedValue({ id: 'status-in-review' });
     repository.create.mockResolvedValue(RECORD);
+    repository.reactivate.mockResolvedValue(RECORD);
     service = new JobApplicationsService(
       repository as unknown as JobApplicationsRepository,
       new JobApplicationMapper(),
@@ -70,6 +72,33 @@ describe('HU-02B T2.8 - JobApplicationsService', () => {
       DuplicateJobApplicationException,
     );
     expect(repository.create).not.toHaveBeenCalled();
+  });
+
+  it('permite volver a postular cuando la postulación fue retirada', async () => {
+    repository.findByUserAndOffer.mockResolvedValue({
+      ...RECORD,
+      status: { title: 'Retirada' },
+    });
+
+    await expect(service.apply(USER_ID, OFFER_ID)).resolves.toEqual(RESPONSE);
+    expect(repository.reactivate).toHaveBeenCalledWith(
+      USER_ID,
+      OFFER_ID,
+      'status-in-review',
+    );
+    expect(repository.create).not.toHaveBeenCalled();
+  });
+
+  it('rechaza la reactivación si otra operación cambió el estado', async () => {
+    repository.findByUserAndOffer.mockResolvedValue({
+      ...RECORD,
+      status: { title: 'Retirada' },
+    });
+    repository.reactivate.mockResolvedValue(null);
+
+    await expect(service.apply(USER_ID, OFFER_ID)).rejects.toBeInstanceOf(
+      DuplicateJobApplicationException,
+    );
   });
 
   it('AC-02.8: convierte la violación de unicidad de dos clics simultáneos en duplicado', async () => {
@@ -115,6 +144,18 @@ describe('HU-02B T2.8 - JobApplicationsService', () => {
     await expect(service.findMine(USER_ID, OFFER_ID)).resolves.toEqual({
       hasApplied: true,
       application: RESPONSE,
+    });
+  });
+
+  it('permite mostrar el botón si la postulación está retirada', async () => {
+    repository.findByUserAndOffer.mockResolvedValue({
+      ...RECORD,
+      status: { title: 'Retirada' },
+    });
+
+    await expect(service.findMine(USER_ID, OFFER_ID)).resolves.toEqual({
+      hasApplied: false,
+      application: null,
     });
   });
 

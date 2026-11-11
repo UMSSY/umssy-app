@@ -1,3 +1,6 @@
+import "@/shared/testing/indexed-db.mock";
+import { clearAccessToken } from "@/shared/services/storage/access-token-storage";
+import { saveAccessToken } from "@/shared/services/storage/access-token-storage";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { apiClient } from "@/shared/services/api-client";
 import type { EducationItem } from "../types/education-item.types";
@@ -20,12 +23,12 @@ const EDUCATION: EducationItem = {
 };
 
 describe("educationsService", () => {
-  beforeEach(() => {
-    sessionStorage.setItem("accessToken", "test-access-token");
+  beforeEach(async () => {
+    await saveAccessToken("test-access-token");
   });
 
   afterEach(() => {
-    sessionStorage.clear();
+    clearAccessToken();
     vi.resetAllMocks();
   });
 
@@ -67,7 +70,7 @@ describe("educationsService", () => {
   it("reads the current token on every request", async () => {
     vi.mocked(apiClient.get).mockResolvedValue({ data: { data: [] } });
     await educationsService.getEducations();
-    sessionStorage.setItem("accessToken", "new-access-token");
+    await saveAccessToken("new-access-token");
     await educationsService.getEducations();
 
     expect(apiClient.get).toHaveBeenLastCalledWith("/educations", {
@@ -76,7 +79,7 @@ describe("educationsService", () => {
   });
 
   it("does not invent credentials when the login token is missing", async () => {
-    sessionStorage.clear();
+    clearAccessToken();
     const error = { response: { status: 401 } };
     vi.mocked(apiClient.get).mockRejectedValue(error);
 
@@ -121,7 +124,11 @@ describe("educationsService", () => {
       await expect(educationsService.updateEducation(EDUCATION.id, PAYLOAD)).resolves.toEqual(
         EDUCATION,
       );
-      expect(apiClient.patch).toHaveBeenCalledWith(`/educations/${EDUCATION.id}`, PAYLOAD, HEADERS);
+      expect(apiClient.patch).toHaveBeenCalledWith(
+        `/educations/${EDUCATION.id}`,
+        PAYLOAD,
+        HEADERS,
+      );
     });
 
     it("sends a legacy edit without introducing a missing end date", async () => {
@@ -133,7 +140,11 @@ describe("educationsService", () => {
       };
       vi.mocked(apiClient.patch).mockResolvedValue({ data: { data: { ...EDUCATION, endDate: null } } });
       await educationsService.updateEducation(EDUCATION.id, payload);
-      expect(apiClient.patch).toHaveBeenCalledWith(`/educations/${EDUCATION.id}`, payload, HEADERS);
+      expect(apiClient.patch).toHaveBeenCalledWith(
+        `/educations/${EDUCATION.id}`,
+        payload,
+        HEADERS,
+      );
       expect(vi.mocked(apiClient.patch).mock.calls[0][1]).not.toHaveProperty("endDate");
     });
 
@@ -149,7 +160,10 @@ describe("educationsService", () => {
 
       await educationsService.deleteEducation(EDUCATION.id);
 
-      expect(apiClient.delete).toHaveBeenCalledWith(`/educations/${EDUCATION.id}`, HEADERS);
+      expect(apiClient.delete).toHaveBeenCalledWith(
+        `/educations/${EDUCATION.id}`,
+        HEADERS,
+      );
     });
 
     it("propagates mutation errors without local data", async () => {

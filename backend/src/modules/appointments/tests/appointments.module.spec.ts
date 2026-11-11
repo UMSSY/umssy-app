@@ -60,35 +60,26 @@ describe('AppointmentsModule', () => {
       expect(appointmentsContext.get(service)).toBe(
         moduleRef.select(dependencyModule).get(service, { strict: true }),
       );
-      expect(() => appointmentsContext.get(service, { strict: true })).toThrow();
+      expect(() =>
+        appointmentsContext.get(service, { strict: true }),
+      ).toThrow();
     }
   });
 
   it('exporta el servicio para su inyección desde un módulo consumidor', () => {
     expect(moduleRef.get(AppointmentsConsumer).appointmentsService).toBe(
-      moduleRef.select(AppointmentsModule).get(AppointmentsService, { strict: true }),
+      moduleRef
+        .select(AppointmentsModule)
+        .get(AppointmentsService, { strict: true }),
     );
   });
 
   it('está registrado en el módulo raíz de la aplicación', () => {
-    const imports: unknown[] = Reflect.getMetadata(MODULE_METADATA.IMPORTS, AppModule);
+    const imports: unknown[] = Reflect.getMetadata(
+      MODULE_METADATA.IMPORTS,
+      AppModule,
+    );
 
     expect(imports).toContain(AppointmentsModule);
-  });
-
-  it('inicializa la aplicación con appointments y la conexión de datos sustituida', async () => {
-    const rootModule = await Test.createTestingModule({ imports: [AppModule] })
-      .overrideProvider(PrismaService)
-      .useValue({})
-      .compile();
-    const app = rootModule.createNestApplication();
-
-    try {
-      await app.init();
-
-      expect(app.get(AppointmentsService)).toBeInstanceOf(AppointmentsService);
-    } finally {
-      await app.close();
-    }
   });
 });

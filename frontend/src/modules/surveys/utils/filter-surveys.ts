@@ -1,4 +1,4 @@
-import type { SurveySummary } from "../types/survey.types";
+import type { SurveySummary } from "../types/survey-summary.types";
 import { matchesSurveyYear } from "./survey-academic-periods";
 
 export function filterSurveys(surveys: readonly SurveySummary[], creatorEmail: string, academicPeriod?: string): SurveySummary[] {

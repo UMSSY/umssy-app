@@ -1,7 +1,7 @@
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SURVEY_TEXT } from "../constants/survey-builder.constants";
-import type { AddQuestionButtonProps } from "../types/survey-component-props.types";
+import type { AddQuestionButtonProps } from "../types/add-question-button-props.types";
 
 export function AddQuestionButton({ onClick }: AddQuestionButtonProps) {
   return (

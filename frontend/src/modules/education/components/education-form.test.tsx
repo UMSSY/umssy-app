@@ -1,3 +1,4 @@
+import "@/modules/education/testing/degree-catalog.mock";
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import { cleanup, fireEvent, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";

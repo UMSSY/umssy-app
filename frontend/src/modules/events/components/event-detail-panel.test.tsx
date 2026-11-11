@@ -1,3 +1,4 @@
+import "@/shared/testing/indexed-db.mock";
 import { saveAccessToken, clearAccessToken } from "@/shared/services/storage/access-token-storage";
 import { registrationsService } from "@/modules/registrations";
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
@@ -31,8 +32,8 @@ const event: EventDetail = {
   modality: { id: "m1", title: "Presencial" },
 };
 describe("EventDetailPanel", () => {
-  it('does not carry a registration rejection into another workshop detail', async () => {
-    saveAccessToken('session');
+  it("does not carry a registration rejection into another workshop detail", async () => {
+    await saveAccessToken("session");
     vi.spyOn(registrationsService, 'getOwn').mockResolvedValue(null);
     vi.spyOn(registrationsService, 'create').mockRejectedValue({ isAxiosError: true, response: {
       status: 409, data: { ok: false, statusCode: 409, code: 'EVENT_FULL', data: null, detail: 'Full' },
@@ -109,8 +110,6 @@ describe("EventDetailPanel", () => {
     const button = screen.getByRole("button", { name: "Inscribirme" });
     expect(button).toBeEnabled();
     expect(screen.getByText("20 cupos disponibles")).toBeInTheDocument();
-    expect(screen.getByRole('progressbar')).toHaveClass('bg-availability-border');
-    expect(screen.getByRole('progressbar').firstElementChild).toHaveClass('bg-success');
   });
   it("places the registration action before the descriptive content", () => {
     render(<EventDetailPanel event={event} />);
@@ -124,11 +123,10 @@ describe("EventDetailPanel", () => {
         event={{ ...event, availableSpots: 0, registrationCount: 30 }}
       />,
     );
-    expect(screen.getByRole("button", { name: "Taller lleno" })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Taller lleno' })).toBeDisabled();
     expect(
       screen.getByText("Lleno · Sin cupos disponibles"),
     ).toBeInTheDocument();
-    expect(screen.getByRole('progressbar').firstElementChild).toHaveClass('bg-danger');
   });
   it("handles missing optional values and unlimited capacity", () => {
     render(

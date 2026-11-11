@@ -1,4 +1,4 @@
-
+import { UNIQUE_CONSTRAINT_VIOLATION_CODE } from '../../../common/constants/prisma-errors.constants.js';
 import { ForbiddenException, Injectable } from '@nestjs/common';
 
 import { ConversationRepository } from '../repositories/conversation.repository.js';
@@ -65,9 +65,8 @@ export class ConversationService {
       throw new SelfConversationException();
     }
 
-    const contact = await this.userLookupRepository.findById(
-      normalizedContactId,
-    );
+    const contact =
+      await this.userLookupRepository.findById(normalizedContactId);
 
     if (!contact) {
       throw new UserNotFoundException();
@@ -154,15 +153,12 @@ export class ConversationService {
       };
 
       if (
-        err?.code === 'P2002' ||
-        err?.message?.includes('P2002') ||
+        err?.code === UNIQUE_CONSTRAINT_VIOLATION_CODE ||
+        err?.message?.includes(UNIQUE_CONSTRAINT_VIOLATION_CODE) ||
         err?.message?.includes('Unique constraint')
       ) {
         const concurrentExisting =
-          await this.conversationRepository.findByOrderedPair(
-            userAId,
-            userBId,
-          );
+          await this.conversationRepository.findByOrderedPair(userAId, userBId);
 
         if (concurrentExisting) {
           const conversation = await this.toResponse(
@@ -195,9 +191,7 @@ export class ConversationService {
     return participant !== null;
   }
 
-  async findAllForUser(
-    currentUserId: string,
-  ): Promise<ConversationResponse[]> {
+  async findAllForUser(currentUserId: string): Promise<ConversationResponse[]> {
     const [list, blockedIds] = await Promise.all([
       this.conversationRepository.findUserConversations(currentUserId),
       this.blockService.findBlockedIdsBy(currentUserId),
@@ -256,7 +250,7 @@ export class ConversationService {
 
     const academicTitle = latestEducation
       ? `${latestEducation.degree} / ${latestEducation.institution}`
-      : contact.headline ?? null;
+      : (contact.headline ?? null);
 
     const skills = userSkills.map((skill) => skill.name);
 

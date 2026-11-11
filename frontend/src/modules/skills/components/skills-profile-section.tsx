@@ -1,5 +1,6 @@
 "use client";
 
+import { DetectedSkillsPanel } from "./detected-skills-panel";
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -94,6 +95,7 @@ export function SkillsProfileSection() {
         {!isAdding ? (
           <FeedbackMessage feedback={skills.feedback} />
         ) : null}
+        <DetectedSkillsPanel />
       </SectionCard>
 
       {isAdding ? (

@@ -1,5 +1,18 @@
-import { Body, Controller, Get, Param, Patch, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator.js';
 import { Roles } from '../../../common/decorators/roles.decorator.js';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
@@ -26,21 +39,33 @@ export class MentorAvailabilityController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('mentor')
   @ApiOperation({ summary: FIND_MY_AVAILABILITY_STATUS_DOCS.summary })
-  findMyAvailabilityStatus(@CurrentUser() user: AuthenticatedUser): Promise<MentorAvailabilityStatusResponse> {
+  findMyAvailabilityStatus(
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<MentorAvailabilityStatusResponse> {
     return this.availabilityService.findMyAvailabilityStatus(user.id);
   }
 
   @Patch(':id/availability')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('mentor')
-  @ApiOperation({ summary: UPDATE_AVAILABILITY_STATUS_DOCS.summary, description: UPDATE_AVAILABILITY_STATUS_DOCS.description })
-  @ApiParam({ name: 'id', description: UPDATE_AVAILABILITY_STATUS_DOCS.idDescription })
+  @ApiOperation({
+    summary: UPDATE_AVAILABILITY_STATUS_DOCS.summary,
+    description: UPDATE_AVAILABILITY_STATUS_DOCS.description,
+  })
+  @ApiParam({
+    name: 'id',
+    description: UPDATE_AVAILABILITY_STATUS_DOCS.idDescription,
+  })
   updateAvailabilityStatus(
     @CurrentUser() user: AuthenticatedUser,
     @Param() params: MentorParamsDto,
     @Body() body: UpdateMentorAvailabilityDto,
   ): Promise<MentorAvailabilityStatusResponse> {
-    return this.availabilityService.updateAvailabilityStatus(user.id, params.id, body.isAvailable);
+    return this.availabilityService.updateAvailabilityStatus(
+      user.id,
+      params.id,
+      body.isAvailable,
+    );
   }
 
   @Get(':id/free-blocks')
@@ -50,9 +75,18 @@ export class MentorAvailabilityController {
     summary: FIND_MENTOR_FREE_BLOCKS_DOCS.summary,
     description: FIND_MENTOR_FREE_BLOCKS_DOCS.description,
   })
-  @ApiParam({ name: 'id', description: FIND_MENTOR_FREE_BLOCKS_DOCS.idDescription })
-  @ApiQuery({ name: 'from', description: FIND_MENTOR_FREE_BLOCKS_DOCS.fromDescription })
-  @ApiQuery({ name: 'to', description: FIND_MENTOR_FREE_BLOCKS_DOCS.toDescription })
+  @ApiParam({
+    name: 'id',
+    description: FIND_MENTOR_FREE_BLOCKS_DOCS.idDescription,
+  })
+  @ApiQuery({
+    name: 'from',
+    description: FIND_MENTOR_FREE_BLOCKS_DOCS.fromDescription,
+  })
+  @ApiQuery({
+    name: 'to',
+    description: FIND_MENTOR_FREE_BLOCKS_DOCS.toDescription,
+  })
   findMentorFreeBlocks(
     @Param() params: MentorParamsDto,
     @Query() query: WeekQueryDto,

@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
 import { EducationsRepository } from '../repositories/educations.repository.js';
 import type { EducationAnalysisSourceResponse } from '../responses/education-analysis-source.response.js';
 
@@ -6,7 +7,13 @@ import type { EducationAnalysisSourceResponse } from '../responses/education-ana
 export class EducationSourcesService {
   constructor(private readonly repository: EducationsRepository) {}
 
-  findAnalysisSources(userId: string): Promise<EducationAnalysisSourceResponse[]> {
+  findPublicationEvidenceIds(userId: string, context: TransactionContext) {
+    return this.repository.findPublicationEvidenceIds(userId, context);
+  }
+
+  findAnalysisSources(
+    userId: string,
+  ): Promise<EducationAnalysisSourceResponse[]> {
     return this.repository.findAnalysisSources(userId);
   }
 }

@@ -1,3 +1,4 @@
+import { EDUCATION_DEGREES } from '../constants/education-degrees.constants.js';
 import { Injectable } from '@nestjs/common';
 import { EDUCATION_INSTITUTIONS } from '../constants/education-institutions.constants.js';
 import type { EducationInstitution } from '../types/education-institution.type.js';
@@ -7,6 +8,10 @@ import { validateEducationDegree } from '../utils/validate-education-degree.js';
 export class EducationCatalogService {
   getInstitutions(): readonly EducationInstitution[] {
     return EDUCATION_INSTITUTIONS;
+  }
+
+  getDegrees() {
+    return EDUCATION_DEGREES;
   }
 
   validateDegree(institution: string, degree: string): string {

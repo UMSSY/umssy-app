@@ -2,7 +2,7 @@ import type { JobOffersService } from '../../job-offers/services/job-offers.serv
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ProfileNotFoundException } from '../../profile/exceptions/profile-not-found.exception.js';
 import type { UserSkillService } from '../../skills/services/user-skill.service.js';
-import type { JobMatchRepository } from '../repositories/job-match.repository.js';
+import type { JobMatchSourceService } from '../services/job-match-source.service.js';
 import { VacancyScoringService } from '../services/vacancy-scoring.service.js';
 import type { CandidateProfileService } from '../services/candidate-profile.service.js';
 import { JobRecommendationsService } from '../services/job-recommendations.service.js';
@@ -68,7 +68,7 @@ describe('HU-06 recommendations contract', () => {
     } as unknown as RequirementTermsService;
     service = new JobRecommendationsService(
       { findScoringOffers } as unknown as JobOffersService,
-      { findPublished } as unknown as JobMatchRepository,
+      { findPublished } as unknown as JobMatchSourceService,
       new VacancyScoringService(
         { getUserSkills } as unknown as UserSkillService,
         { findCandidateProfile } as unknown as CandidateProfileService,
@@ -171,7 +171,10 @@ describe('HU-06 recommendations contract', () => {
   });
 
   it('AC-02.5: returns an empty list when no offer has affinity above 0 %', async () => {
-    findPublished.mockResolvedValue([offer('java', ['Java']), offer('go', ['Go'])]);
+    findPublished.mockResolvedValue([
+      offer('java', ['Java']),
+      offer('go', ['Go']),
+    ]);
 
     await expect(service.recommendations('user')).resolves.toEqual({
       isProfileComplete: true,

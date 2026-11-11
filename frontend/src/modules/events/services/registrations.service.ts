@@ -1,3 +1,4 @@
+import { BEARER_PREFIX } from "@/shared/constants/auth.constants";
 import type { PassData } from '../types/pass-data.types';
 export type { PassData } from '../types/pass-data.types';
 import { registrationsService as registrationApi } from '@/modules/registrations';
@@ -20,10 +21,10 @@ export const registrationsService = {
       throw new Error('La URL del backend no está configurada.');
 
     const response = await apiClient.post<unknown>(
-      `/event-registrations/support/${encodeURIComponent(eventId)}`,
+      `/events/${encodeURIComponent(eventId)}/supports`,
       undefined,
       {
-        headers: { Authorization: accessToken ? `Bearer ${accessToken}` : '' },
+        headers: { Authorization: accessToken ? `${BEARER_PREFIX}${accessToken}` : '' },
         timeout: REQUEST_TIMEOUT_MS,
       },
     );
@@ -39,9 +40,9 @@ export const registrationsService = {
       throw new Error('La URL del backend no está configurada.');
 
     const response = await apiClient.get(
-      `/event-registrations/passes/${registrationId}`,
+      `/event-registrations/${registrationId}/pass`,
       {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `${BEARER_PREFIX}${token}` },
         signal,
         timeout: REQUEST_TIMEOUT_MS,
       },

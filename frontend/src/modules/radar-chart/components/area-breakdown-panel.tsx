@@ -1,3 +1,4 @@
+import { MAX_SCORE } from "@/modules/radar-chart/constants/radar-score.constants";
 import { useId } from "react";
 import { cn } from "@/lib/utils";
 import type { AreaLevel } from "../types/area-detail.types";
@@ -6,8 +7,6 @@ import { formatDecimal } from "../utils/format-decimal";
 import { getAreaLevel } from "../utils/get-area-level";
 import { AreaLevelBadge } from "./area-level-badge";
 import { RadarCard } from "./radar-card";
-
-const MAX_SCORE = 10;
 
 const BAR_CLASS: Record<AreaLevel, string> = {
   Bajo: "bg-border-strong",
@@ -28,7 +27,7 @@ export function AreaBreakdownPanel({ areas, average, className }: AreaBreakdownP
       <h2 id={titleId} className="font-heading text-lg font-semibold tracking-tight text-ink">
         Desglose por área
       </h2>
-      <p className="mt-1 text-xs text-text-secondary">Puntuaciones NLP tokenizadas</p>
+      <p className="mt-1 text-xs text-text-secondary">Puntuaciones de habilidades aprobadas</p>
 
       <ul className="mt-5 flex flex-col gap-4">
         {areas.map((area) => {

@@ -1,3 +1,4 @@
+import { MessageMapper } from './mappers/message.mapper.js';
 
 import { Module } from '@nestjs/common';
 import { PrismaModule } from '../../common/prisma/prisma.module.js';
@@ -69,6 +70,7 @@ import { ChatGateway } from './gateways/chat.gateway.js';
     BlockController,
   ],
   providers: [
+    MessageMapper,
     UserSearchService,
     ConversationService,
     MessageService,
@@ -108,6 +110,7 @@ import { ChatGateway } from './gateways/chat.gateway.js';
     AttachmentService,
     AttachmentRepository,
     EventRoomService,
+    ConversationMapper,
     BlockService,
   ],
 })

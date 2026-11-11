@@ -1,25 +1,22 @@
 export { MatchingView } from "./views/matching-view";
-export { useMatching } from "./hooks/use-matching";
-export type {
-  AffinityAxis,
-  AffinityAxisId,
-  AxisScores,
-  Candidate,
-  CandidateStatus,
-  CandidateWithMatch,
-  Vacancy,
-} from "./types/matching-types";
+export type { AffinityAxis } from "./types/affinity-axis.types";
+export type { AffinityAxisId } from "./types/affinity-axis-id.types";
+export type { AxisScores } from "./types/axis-scores.types";
+export type { Candidate } from "./types/candidate.types";
+export type { CandidateStatus } from "./types/candidate-status.types";
+export type { CandidateWithMatch } from "./types/candidate-with-match.types";
+export type { Vacancy } from "./types/vacancy.types";
 export * from "./types/match-score.types";
 
 export { RecommendedJobsView } from "./views/recommended-jobs-view";
 export { JobMatchDetailView } from "./views/job-match-detail-view";
 export { JobApplicationAction } from "./components/job-application-action";
-export type {
-  JobMatch,
-  JobRequirement,
-  RecommendationsResult,
-  RecommendedJob,
-  RequirementStatus,
-} from "./types/job-matching.types";
+export { JOB_APPLICATION_QUERY_KEYS } from "./constants/job-application.constants";
+export type { JobMatch } from "./types/job-match.types";
+export type { JobRequirement } from "./types/job-requirement.types";
+export type { RecommendationsResult } from "./types/recommendations-result.types";
+export type { RecommendedJob } from "./types/recommended-job.types";
+export type { RequirementStatus } from "./types/requirement-status.types";
 export { skillsAnalysisService } from "./services/skills-analysis.service";
-export type { DetectedSkill, SkillsAnalysisResult } from "./types/skills-analysis.types";
+export type { DetectedSkill } from "./types/detected-skill.types";
+export type { SkillsAnalysisResult } from "./types/skills-analysis-result.types";

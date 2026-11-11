@@ -1,10 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import {
-  SURVEY_NOTIFICATIONS_LOAD_ERROR_MESSAGE,
-  SURVEY_NOTIFICATIONS_QUERY_KEYS,
-} from "../constants/survey-notifications.constants";
+import { SURVEY_NOTIFICATIONS_QUERY_KEYS } from "../constants/survey-notifications.constants";
 import { surveyNotificationsService } from "../services/survey-notifications.service";
 import { countPendingSurveys } from "../utils/count-pending-surveys";
 
@@ -19,6 +16,6 @@ export function useSurveyNotifications() {
     notifications,
     pendingCount: countPendingSurveys(notifications),
     isLoading: query.isPending,
-    errorMessage: query.isError ? SURVEY_NOTIFICATIONS_LOAD_ERROR_MESSAGE : undefined,
+    errorMessage: query.isError ? "No se pudieron cargar tus encuestas. Intenta nuevamente." : undefined,
   };
 }

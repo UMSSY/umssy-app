@@ -6,12 +6,18 @@ import { skillsService } from "../services/skills.service";
 import { SkillsProfileSection } from "./skills-profile-section";
 
 vi.mock("../services/skills.service", () => ({ skillsService: { getCatalog: vi.fn(), getMySkills: vi.fn(), createCustomSkill: vi.fn(), saveMySkills: vi.fn() } }));
+vi.mock("./detected-skills-panel", () => ({ DetectedSkillsPanel: () => <div data-testid="detected-skills-panel" /> }));
 const PYTHON = { id: "python", name: "Python" };
 const SQL = { id: "sql", name: "SQL" };
 beforeEach(() => { vi.mocked(skillsService.getCatalog).mockResolvedValue([PYTHON, SQL]); vi.mocked(skillsService.getMySkills).mockResolvedValue([PYTHON]); });
 afterEach(() => { cleanup(); vi.clearAllMocks(); });
 
 describe("SkillsProfileSection", () => {
+  it("renders exactly one detected skills panel", () => {
+    render(<SkillsProfileSection />);
+    expect(screen.getAllByTestId("detected-skills-panel")).toHaveLength(1);
+  });
+
   it("adds an existing skill directly and closes the small picker", async () => {
     const user = userEvent.setup();
     vi.mocked(skillsService.saveMySkills).mockResolvedValue([PYTHON, SQL]);

@@ -1,8 +1,5 @@
 import type { FieldResult, TimelineActorRole, ValidationField, ValidationResult } from "../types/automatic-validation.types";
 
-export const AUTO_APPROVAL_THRESHOLD = 90;
-export const LOW_MATCH_THRESHOLD = 50;
-
 export const ALL_VALIDATIONS_VALUE = "all";
 export const VALIDATION_FILTER_OPTIONS: ReadonlyArray<{ value: ValidationResult | typeof ALL_VALIDATIONS_VALUE; label: string }> = [
   { value: ALL_VALIDATIONS_VALUE, label: "Todas" },
@@ -20,7 +17,6 @@ export const AUTOMATION_LABELS = {
 } as const;
 
 export const QUEUED_DESCRIPTION = "En cola de lectura OCR";
-export const NOT_VALIDATED_LABEL = "Sin validar";
 
 export const VALIDATION_FIELD_ORDER: readonly ValidationField[] = ["fullName", "career", "graduationYear", "idCardNumber", "sisCode"];
 
@@ -56,5 +52,3 @@ export const TIMELINE_ACTOR_LABELS: Record<TimelineActorRole, string> = {
   sistema: "Sistema",
   administrativo: "Administrativo",
 };
-
-export const REVERT_SUCCESS_MESSAGE = "La aprobación se revirtió. La solicitud volvió a revisión manual.";

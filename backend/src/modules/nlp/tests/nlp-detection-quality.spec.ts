@@ -8,28 +8,42 @@ import { evaluateDetectionQuality } from '../utils/evaluate-detection-quality.js
 const TARGET_PRECISION = 0.85;
 
 const loadProfiles = (fileName: string): NlpLabelledProfile[] =>
-  JSON.parse(readFileSync(new URL(`./fixtures/${fileName}`, import.meta.url), 'utf8')) as NlpLabelledProfile[];
+  JSON.parse(
+    readFileSync(new URL(`./fixtures/${fileName}`, import.meta.url), 'utf8'),
+  ) as NlpLabelledProfile[];
 
 const development = loadProfiles('nlp-development-profiles.json');
 const evaluation = loadProfiles('nlp-evaluation-profiles.json');
 
 describe('labelled profiles', () => {
   it('keep the development and the reserved evaluation profiles apart', () => {
-    const texts = (profiles: readonly NlpLabelledProfile[]) => profiles.flatMap((profile) => profile.sources.map((source) => source.text));
+    const texts = (profiles: readonly NlpLabelledProfile[]) =>
+      profiles.flatMap((profile) =>
+        profile.sources.map((source) => source.text),
+      );
     const evaluationTexts = new Set(texts(evaluation));
-    expect(texts(development).filter((text) => evaluationTexts.has(text))).toEqual([]);
-    expect(new Set([...development, ...evaluation].map((profile) => profile.id)).size).toBe(development.length + evaluation.length);
+    expect(
+      texts(development).filter((text) => evaluationTexts.has(text)),
+    ).toEqual([]);
+    expect(
+      new Set([...development, ...evaluation].map((profile) => profile.id))
+        .size,
+    ).toBe(development.length + evaluation.length);
   });
 
   it('only use labels from the dictionary taxonomy', () => {
     const names = new Set(NLP_SKILL_DICTIONARY.map((entry) => entry.name));
-    const labels = [...development, ...evaluation].flatMap((profile) => profile.expectedSkills);
+    const labels = [...development, ...evaluation].flatMap(
+      (profile) => profile.expectedSkills,
+    );
     expect(labels.filter((label) => !names.has(label))).toEqual([]);
   });
 
   it('give the evaluation enough profiles and positive relations', () => {
     expect(evaluation.length).toBeGreaterThanOrEqual(20);
-    expect(evaluation.flatMap((profile) => profile.expectedSkills).length).toBeGreaterThanOrEqual(100);
+    expect(
+      evaluation.flatMap((profile) => profile.expectedSkills).length,
+    ).toBeGreaterThanOrEqual(100);
   });
 });
 
@@ -55,7 +69,10 @@ describe('computeDetectionMetrics', () => {
   it('counts each skill of a sample once', () => {
     expect(
       computeDetectionMetrics([
-        { expected: ['Python', 'Docker'], predicted: ['Python', 'Python', 'Java'] },
+        {
+          expected: ['Python', 'Docker'],
+          predicted: ['Python', 'Python', 'Java'],
+        },
         { expected: ['SQL'], predicted: [] },
       ]),
     ).toEqual({
@@ -70,7 +87,9 @@ describe('computeDetectionMetrics', () => {
   });
 
   it('does not report a precision without predictions', () => {
-    expect(computeDetectionMetrics([{ expected: ['Python'], predicted: [] }])).toMatchObject({
+    expect(
+      computeDetectionMetrics([{ expected: ['Python'], predicted: [] }]),
+    ).toMatchObject({
       precision: null,
       recall: 0,
       f1: null,
@@ -78,7 +97,9 @@ describe('computeDetectionMetrics', () => {
   });
 
   it('does not report a recall without expected skills', () => {
-    expect(computeDetectionMetrics([{ expected: [], predicted: ['Python'] }])).toMatchObject({
+    expect(
+      computeDetectionMetrics([{ expected: [], predicted: ['Python'] }]),
+    ).toMatchObject({
       precision: 0,
       recall: null,
       f1: null,
@@ -98,6 +119,9 @@ describe('computeDetectionMetrics', () => {
   });
 
   it('reports a zero F1 as not computable when nothing is right', () => {
-    expect(computeDetectionMetrics([{ expected: ['Python'], predicted: ['Java'] }]).f1).toBeNull();
+    expect(
+      computeDetectionMetrics([{ expected: ['Python'], predicted: ['Java'] }])
+        .f1,
+    ).toBeNull();
   });
 });

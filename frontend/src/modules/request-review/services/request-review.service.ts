@@ -1,3 +1,6 @@
+import { NOT_FOUND_MESSAGE } from "@/modules/request-review/constants/request-review-errors.constants";
+import { BEARER_PREFIX } from "@/shared/constants/auth.constants";
+import { GENERIC_ERROR_MESSAGE, NETWORK_ERROR_MESSAGE, SESSION_EXPIRED_MESSAGE } from "@/shared/constants/error-messages.constants";
 import { apiClient } from "@/shared/services/api-client";
 import { REVIEW_PAGE_SIZE } from "../constants/request-review.constants";
 import type { InboxFilters } from "../types/inbox-filters.types";
@@ -5,9 +8,6 @@ import type { InboxSummary } from "../types/inbox-summary.types";
 import type { ApproveResult, RejectResult, ReviewApiResult, ReviewDetail, ReviewListResult, ReviewStatus } from "../types/request-review.types";
 import { getSessionToken } from "../utils/session";
 
-const NETWORK_ERROR_MESSAGE = "No se pudo conectar con el servidor. Inténtalo de nuevo.";
-const GENERIC_ERROR_MESSAGE = "No se pudo completar la operación. Inténtalo de nuevo.";
-const SESSION_EXPIRED_MESSAGE = "Tu sesión expiró. Inicia sesión de nuevo.";
 const FORBIDDEN_MESSAGE = "No tienes permiso para ver las solicitudes.";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -25,7 +25,7 @@ export function failureOf(status: number, body: unknown): ReviewApiResult<never>
 
 export function authHeaders(): Record<string, string> {
   const token = getSessionToken();
-  return token ? { Authorization: `Bearer ${token}` } : {};
+  return token ? { Authorization: `${BEARER_PREFIX}${token}` } : {};
 }
 
 async function listRequests(
@@ -106,7 +106,6 @@ async function getSummary(): Promise<ReviewApiResult<InboxSummary>> {
   }
 }
 
-const NOT_FOUND_MESSAGE = "La solicitud no existe.";
 const NO_DOCUMENT_MESSAGE = "La solicitud no tiene un documento adjunto.";
 
 async function getRequestDetail(id: string): Promise<ReviewApiResult<ReviewDetail>> {

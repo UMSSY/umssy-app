@@ -17,6 +17,8 @@ import { CurrentUser } from '../../../common/decorators/current-user.decorator.j
 import { ResponseInterceptor } from '../../../common/interceptors/index.js';
 import type { AuthenticatedUser } from '../../../common/types/authenticated-user.types.js';
 import { MessageService } from '../services/message.service.js';
+import { conversationIdField } from '../requests/chat-fields.schema.js';
+import { ChatGateway } from '../gateways/chat.gateway.js';
 import {
   sendMessageSchema,
   type SendMessageDto,
@@ -26,40 +28,53 @@ import {
   type GetMessagesQuery,
 } from '../requests/get-messages.schema.js';
 
-@Controller('chat/messages')
+@Controller()
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('titulado', 'estudiante', 'mentor', 'empresa')
 @UseInterceptors(ResponseInterceptor)
 export class MessageController {
-  constructor(private readonly messageService: MessageService) {}
+  constructor(
+    private readonly messageService: MessageService,
+    private readonly chatGateway: ChatGateway,
+  ) {}
 
-  @Post()
-  send(
+  @Post('chat/messages')
+  async send(
     @Body(new ZodValidationPipe(sendMessageSchema)) body: SendMessageDto,
     @CurrentUser() user: AuthenticatedUser,
   ) {
-    return this.messageService.send({
+    const message = await this.messageService.send({
       conversationId: body.conversationId,
       senderId: user.id,
       content: body.content,
     });
+
+    this.chatGateway.broadcastMessage(message);
+
+    return message;
   }
 
-  @Get()
+  @Get('chat/conversations/:conversationId/messages/page')
   getPage(
-    @Query(new ZodValidationPipe(getMessagesQuerySchema))
-    query: GetMessagesQuery,
+    @Param('conversationId', new ZodValidationPipe(conversationIdField))
+    conversationId: string,
+    @Query(
+      new ZodValidationPipe(
+        getMessagesQuerySchema.omit({ conversationId: true }),
+      ),
+    )
+    query: Omit<GetMessagesQuery, 'conversationId'>,
     @CurrentUser() user: AuthenticatedUser,
   ) {
     return this.messageService.getPage({
-      conversationId: query.conversationId,
+      conversationId,
       userId: user.id,
       cursor: query.cursor ?? null,
       limit: query.limit,
     });
   }
 
-  @Patch(':conversationId/read')
+  @Patch('chat/conversations/:conversationId/read-state')
   async markRead(
     @Param('conversationId') conversationId: string,
     @CurrentUser() user: AuthenticatedUser,

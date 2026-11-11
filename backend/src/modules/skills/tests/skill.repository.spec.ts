@@ -47,7 +47,9 @@ describe('SkillRepository', () => {
     const skills = [{ id: skillId, name: 'Python', isCustom: false }];
     skill.findMany.mockResolvedValue(skills);
 
-    await expect(repository.findByIds([skillId, otherSkillId])).resolves.toBe(skills);
+    await expect(repository.findByIds([skillId, otherSkillId])).resolves.toBe(
+      skills,
+    );
     expect(skill.findMany).toHaveBeenCalledWith({
       where: { id: { in: [skillId, otherSkillId] } },
       select,
@@ -76,6 +78,17 @@ describe('SkillRepository', () => {
       create: { name: 'Kubernetes', isCustom: true },
       update: {},
       select,
+    });
+  });
+
+  it('lists skills for NLP catalog', async () => {
+    const records = [{ id: skillId, name: 'Docker', areaId: 'cloud' }];
+    skill.findMany.mockResolvedValue(records);
+
+    await expect(repository.findNlpCatalog()).resolves.toBe(records);
+    expect(skill.findMany).toHaveBeenCalledWith({
+      where: { isCustom: false },
+      select: { id: true, name: true, areaId: true },
     });
   });
 });

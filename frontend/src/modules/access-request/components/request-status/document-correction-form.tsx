@@ -4,7 +4,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useDocumentCorrection } from "../../hooks/use-document-correction";
-import type { DocumentCorrectionFormProps } from "../../types/document-correction.types";
+import type { DocumentCorrectionFormProps } from "../../types/document-correction-form-props.types";
 import { DocumentDropzoneContent } from "../document/document-dropzone-content";
 import { DocumentPreviewContent } from "../document/document-preview-content";
 import { DocumentTypeField } from "../document/document-type-field";

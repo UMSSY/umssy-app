@@ -8,7 +8,7 @@ import { ImagePlus, Upload, X, Expand, FileImage, HardDrive, Ratio } from 'lucid
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogClose, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { PROPOSAL_COVER_ACCEPT } from '../constants/proposal.constants';
+
 import { readProposalCover } from '../utils/read-proposal-cover';
 import { ProposalField } from './proposal-field';
 
@@ -98,7 +98,7 @@ export function ProposalCoverField({ value, onChange, error, disabled, onBusyCha
             <span className="hidden text-xs text-text-secondary @min-[36rem]:block">o arrastra y suelta una imagen aquí</span>
           </div>
 
-          <Input ref={input} id="proposal-cover" type="file" accept={PROPOSAL_COVER_ACCEPT} className="sr-only" tabIndex={-1} disabled={disabled || busy}
+          <Input ref={input} id="proposal-cover" type="file" accept={'image/jpeg,image/png'} className="sr-only" tabIndex={-1} disabled={disabled || busy}
             onChange={(event) => { const files = Array.from(event.target.files ?? []); event.target.value = ''; if (files.length) void selectFiles(files); }} />
         </div>
         </div>

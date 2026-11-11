@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { apiClient } from "@/shared/services/api-client";
-import type { AccessRequestPayload } from "../types/access-request.types";
+import type { AccessRequestPayload } from "../types/access-request-payload.types";
 import { accessRequestService } from "./access-request.service";
 
 vi.mock("@/shared/services/api-client", async (importOriginal) => ({

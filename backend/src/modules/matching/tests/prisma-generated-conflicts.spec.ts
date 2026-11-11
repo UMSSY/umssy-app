@@ -7,7 +7,9 @@ function sourceFiles(directory: string): string[] {
     const path = join(directory, entry.name);
     return entry.isDirectory()
       ? sourceFiles(path)
-      : entry.name.endsWith('.ts') ? [path] : [];
+      : entry.name.endsWith('.ts')
+        ? [path]
+        : [];
   });
 }
 
@@ -16,7 +18,9 @@ describe('Generated Prisma client regression (#1116)', () => {
     const files = sourceFiles(join(process.cwd(), 'src', 'prisma'));
     expect(files.length).toBeGreaterThan(0);
     const conflicts = files.filter((path) =>
-      /^(?:<{7}(?:\s|$)|={7}\s*$|>{7}(?:\s|$)|\|{7}(?:\s|$))/m.test(readFileSync(path, 'utf8')),
+      /^(?:<{7}(?:\s|$)|={7}\s*$|>{7}(?:\s|$)|\|{7}(?:\s|$))/m.test(
+        readFileSync(path, 'utf8'),
+      ),
     );
     expect(conflicts).toEqual([]);
   });

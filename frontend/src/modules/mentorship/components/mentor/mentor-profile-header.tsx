@@ -1,4 +1,5 @@
 "use client";
+import type { MentorProfileHeaderProps } from "../../types/mentor-profile-header-props.types";
 
 import { GraduationCap, UserPlus } from "lucide-react";
 import {
@@ -12,13 +13,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { REQUEST_MENTORSHIP_TEXT, useRequestMentorship } from "@/modules/availability";
-
-import type { MentorProfile } from "../../types/mentor-profile.types";
-
-type MentorProfileHeaderProps = {
-  mentor: MentorProfile;
-  showRequestAction?: boolean;
-};
 
 function getInitials(name: string) {
   return name
@@ -60,13 +54,23 @@ export function MentorProfileHeader({
               </h1>
               <Badge
                 variant="outline"
-                className={cn("gap-1.5 px-2.5", mentor.isAvailable ? "border-transparent text-ink-soft" : "border-transparent text-text-secondary")}
+                className={cn(
+                  "gap-1.5 px-2.5",
+                  mentor.isAvailable
+                    ? "border-transparent text-ink-soft"
+                    : "border-transparent text-text-secondary",
+                )}
               >
                 <span
                   aria-hidden="true"
-                  className={cn("size-1.5 shrink-0 rounded-full", mentor.isAvailable ? "bg-ink-soft" : "bg-text-secondary")}
+                  className={cn(
+                    "size-1.5 shrink-0 rounded-full",
+                    mentor.isAvailable ? "bg-ink-soft" : "bg-text-secondary",
+                  )}
                 />
-                {mentor.isAvailable ? "Disponible para mentoría" : "No disponible"}
+                {mentor.isAvailable
+                  ? "Disponible para mentoría"
+                  : "No disponible"}
               </Badge>
             </div>
 
@@ -74,20 +78,31 @@ export function MentorProfileHeader({
               <p className="mt-1 text-lg font-semibold [overflow-wrap:anywhere] text-text-secondary">
                 {mentor.headline}
               </p>
-            ) : <p className="mt-1 text-sm text-text-secondary">Especialidad no registrada</p>}
-
-            {primaryEducation && (primaryEducation.degree?.trim() || primaryEducation.institution?.trim()) && (
-              <div className="mt-3 flex items-start gap-2 text-sm text-text-secondary">
-                <GraduationCap
-                  size={18}
-                  className="mt-0.5 shrink-0 text-ink-soft"
-                />
-
-                <p className="min-w-0 [overflow-wrap:anywhere]">
-                  {[primaryEducation.degree?.trim(), primaryEducation.institution?.trim()].filter(Boolean).join(" · ")}
-                </p>
-              </div>
+            ) : (
+              <p className="mt-1 text-sm text-text-secondary">
+                Especialidad no registrada
+              </p>
             )}
+
+            {primaryEducation &&
+              (primaryEducation.degree?.trim() ||
+                primaryEducation.institution?.trim()) && (
+                <div className="mt-3 flex items-start gap-2 text-sm text-text-secondary">
+                  <GraduationCap
+                    size={18}
+                    className="mt-0.5 shrink-0 text-ink-soft"
+                  />
+
+                  <p className="min-w-0 [overflow-wrap:anywhere]">
+                    {[
+                      primaryEducation.degree?.trim(),
+                      primaryEducation.institution?.trim(),
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </p>
+                </div>
+              )}
           </div>
         </div>
 
@@ -98,7 +113,7 @@ export function MentorProfileHeader({
                 type="button"
                 onClick={requestMentorship}
                 disabled={isChecking}
-                className="h-auto w-full gap-2 rounded-lg border-0 bg-accent px-4 py-3 text-sm font-semibold text-white transition hover:brightness-90 active:translate-y-0 sm:px-6 sm:text-base xl:w-auto"
+                className="h-auto w-full gap-2 rounded-lg border-0 bg-accent px-4 py-3 text-sm font-semibold text-accent-foreground transition hover:brightness-90 active:translate-y-0 sm:px-6 sm:text-base xl:w-auto"
               >
                 <UserPlus className="size-5" />
                 Solicitar mentoría

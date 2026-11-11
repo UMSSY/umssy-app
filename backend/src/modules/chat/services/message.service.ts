@@ -1,3 +1,4 @@
+import { MessageMapper } from '../mappers/message.mapper.js';
 
 import { Injectable } from '@nestjs/common';
 import { MessageRepository } from '../repositories/message.repository.js';
@@ -25,6 +26,7 @@ export class MessageService {
     private readonly messageStatusService: MessageStatusService,
     private readonly blockService: BlockService,
     private readonly chatRolePolicyService: ChatRolePolicyService,
+    private readonly messageMapper: MessageMapper,
   ) {}
 
   async send(params: {
@@ -32,7 +34,6 @@ export class MessageService {
     senderId: string;
     content: string;
   }): Promise<MessageResponse> {
-
     const conversation = await this.conversationRepository.findById(
       params.conversationId,
     );
@@ -111,17 +112,7 @@ export class MessageService {
       now,
     );
 
-    return {
-      id: created.id,
-      conversationId: created.conversationId,
-      senderId: created.senderId,
-      content: created.content ?? '',
-      timestamp: created.sentAt.toISOString(),
-      createdAt: created.createdAt.toISOString(),
-      status: 'sent',
-      isAttachment: false,
-      attachmentType: null,
-    };
+    return this.messageMapper.toResponse(created);
   }
 
   async getPage(params: {
@@ -130,7 +121,6 @@ export class MessageService {
     cursor: string | null;
     limit: number;
   }) {
-
     const participant =
       await this.participantRepository.findByConversationAndUser(
         params.conversationId,
@@ -148,92 +138,13 @@ export class MessageService {
     });
 
     return {
-      data: page.data.map((m) => {
-        const rawContent = m.content ?? '';
-
-        const rawAttachments = (m as {
-          attachments?: Array<{
-            id: string;
-            messageId: string;
-            typeId: string;
-            fileName: string;
-            mimeType: string | null;
-            fileSize: number | null;
-            url: string | null;
-            thumbnailUrl: string | null;
-            createdAt: Date;
-            type?: { title: string } | null;
-          }>;
-        }).attachments;
-
-        const firstAttachment = rawAttachments?.[0];
-
-        const isAttachment = Boolean(
-          firstAttachment || rawContent.startsWith('[Archivo] '),
-        );
-
-        const content = rawContent.startsWith('[Archivo] ')
-          ? rawContent.slice(10)
-          : rawContent;
-
-        const attachmentType = firstAttachment
-          ? firstAttachment.type?.title?.toLowerCase() === 'image'
-            ? ('image' as const)
-            : ('file' as const)
-          : isAttachment
-            ? ('file' as const)
-            : null;
-
-        const statusTitle = (
-          m as { status?: { title?: string } }
-        ).status?.title?.toLowerCase();
-
-        const status =
-          statusTitle === 'read'
-            ? ('read' as const)
-            : ('sent' as const);
-
-        const mappedAttachments = rawAttachments?.map((att) => ({
-          id: att.id,
-          messageId: att.messageId,
-          fileName: att.fileName,
-          mimeType: att.mimeType ?? 'application/octet-stream',
-          fileSize: att.fileSize ?? 0,
-          url:
-            att.url ??
-            `/api/chat/attachments/${att.id}/download`,
-          thumbnailUrl: att.thumbnailUrl,
-          type: att.type?.title ?? 'FILE',
-          createdAt:
-            att.createdAt instanceof Date
-              ? att.createdAt.toISOString()
-              : String(att.createdAt),
-        }));
-
-        return {
-          id: m.id,
-          conversationId: m.conversationId,
-          senderId: m.senderId,
-          content,
-          timestamp: m.sentAt.toISOString(),
-          createdAt: m.createdAt.toISOString(),
-          status,
-          isAttachment,
-          attachmentType,
-          attachments: mappedAttachments,
-          attachment: mappedAttachments?.[0],
-        };
-      }),
+      data: page.data.map((record) => this.messageMapper.toResponse(record)),
       hasMore: page.hasMore,
       nextCursor: page.nextCursor,
     };
   }
 
-  async markRead(
-    conversationId: string,
-    userId: string,
-  ): Promise<void> {
-
+  async markRead(conversationId: string, userId: string): Promise<void> {
     const participant =
       await this.participantRepository.findByConversationAndUser(
         conversationId,
@@ -266,13 +177,10 @@ export class MessageService {
 
     const sender = senderId.trim().toLowerCase();
 
-    return userAId.toLowerCase() === sender
-      ? userBId
-      : userAId;
+    return userAId.toLowerCase() === sender ? userBId : userAId;
   }
 
   private sanitize(raw: string): string {
-
     const cleaned = raw
       .split('')
       .filter((char) => {

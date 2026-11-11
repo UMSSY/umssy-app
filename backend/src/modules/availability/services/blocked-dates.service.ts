@@ -32,7 +32,10 @@ export class BlockedDatesService {
     private readonly blockedDateMapper: BlockedDateMapper,
   ) {}
 
-  async blockDate(mentorId: string, payload: BlockDateDto): Promise<BlockedDateResponse> {
+  async blockDate(
+    mentorId: string,
+    payload: BlockDateDto,
+  ): Promise<BlockedDateResponse> {
     const { blockedOn: day, reason } = payload;
     if (day < getBoliviaToday()) {
       throw new BlockedDateInPastException();
@@ -42,23 +45,46 @@ export class BlockedDatesService {
     const { startAt, endAt } = getBoliviaDayRange(day);
 
     return this.inDayLock(mentorId, day, async (tx) => {
-      const existing = await this.blockedDatesRepository.findByDay(mentorId, blockedOn, tx);
+      const existing = await this.blockedDatesRepository.findByDay(
+        mentorId,
+        blockedOn,
+        tx,
+      );
       if (existing) {
         const current =
           reason && reason !== existing.reason
-            ? await this.blockedDatesRepository.updateReason(existing.id, reason, tx)
+            ? await this.blockedDatesRepository.updateReason(
+                existing.id,
+                reason,
+                tx,
+              )
             : existing;
         return this.blockedDateMapper.toResponse(current);
       }
-      if (await this.blockedDatesRepository.hasActiveAppointmentBetween(mentorId, startAt, endAt, tx)) {
+      if (
+        await this.blockedDatesRepository.hasActiveAppointmentBetween(
+          mentorId,
+          startAt,
+          endAt,
+          tx,
+        )
+      ) {
         throw new BlockedDateHasAppointmentException();
       }
-      const created = await this.blockedDatesRepository.create(mentorId, blockedOn, reason, tx);
+      const created = await this.blockedDatesRepository.create(
+        mentorId,
+        blockedOn,
+        reason,
+        tx,
+      );
       return this.blockedDateMapper.toResponse(created);
     });
   }
 
-  async unblockDate(mentorId: string, id: string): Promise<DeletedBlockedDateResponse> {
+  async unblockDate(
+    mentorId: string,
+    id: string,
+  ): Promise<DeletedBlockedDateResponse> {
     const blockedDate = await this.blockedDatesRepository.findById(id);
     if (!blockedDate) {
       throw new BlockedDateNotFoundException();
@@ -73,9 +99,16 @@ export class BlockedDatesService {
     return this.blockedDateMapper.toDeletedResponse(blockedDate);
   }
 
-  async findBlockedDates(mentorId: string, query: BlockedDatesQueryDto): Promise<BlockedDateResponse[]> {
+  async findBlockedDates(
+    mentorId: string,
+    query: BlockedDatesQueryDto,
+  ): Promise<BlockedDateResponse[]> {
     const blockedDates = query.to
-      ? await this.findInRange(mentorId, new Date(query.from), new Date(query.to))
+      ? await this.findInRange(
+          mentorId,
+          new Date(query.from),
+          new Date(query.to),
+        )
       : await this.blockedDatesRepository.findInRange(
           mentorId,
           toCalendarDate(toBoliviaTime(query.from).date),
@@ -83,9 +116,15 @@ export class BlockedDatesService {
     return this.blockedDateMapper.toResponseList(blockedDates);
   }
 
-  async findBlockedDays(mentorId: string, from: Date, to: Date): Promise<Set<string>> {
+  async findBlockedDays(
+    mentorId: string,
+    from: Date,
+    to: Date,
+  ): Promise<Set<string>> {
     const blockedDates = await this.findInRange(mentorId, from, to);
-    return new Set(blockedDates.map((blockedDate) => toDayString(blockedDate.blockedOn)));
+    return new Set(
+      blockedDates.map((blockedDate) => toDayString(blockedDate.blockedOn)),
+    );
   }
 
   runOnUnblockedDay<T>(

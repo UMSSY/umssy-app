@@ -10,7 +10,7 @@ const VALID_VALUES: WorkExperienceFormValues = {
   startDate: "2024-07-01",
   endDate: "2024-12-31",
   isCurrent: false,
-  description: "",
+  description: "Desarrollo de interfaces con React",
 };
 
 describe("validateWorkExperience", () => {
@@ -36,6 +36,12 @@ describe("validateWorkExperience", () => {
       position: WORK_EXPERIENCE_VALIDATION_MESSAGES.required,
       startDate: WORK_EXPERIENCE_VALIDATION_MESSAGES.required,
       endDate: WORK_EXPERIENCE_VALIDATION_MESSAGES.endDateRequired,
+    });
+  });
+
+  it.each(["", "   "])("requires a description when it is %j", (description) => {
+    expect(validateWorkExperience({ ...VALID_VALUES, description })).toEqual({
+      description: WORK_EXPERIENCE_VALIDATION_MESSAGES.required,
     });
   });
 
@@ -84,5 +90,14 @@ describe("validateWorkExperience", () => {
       position: WORK_EXPERIENCE_VALIDATION_MESSAGES.positionTooLong,
       description: WORK_EXPERIENCE_VALIDATION_MESSAGES.descriptionTooLong,
     });
+  });
+
+  it("accepts a description of exactly 5000 characters (AC-01.1)", () => {
+    expect(
+      validateWorkExperience({
+        ...VALID_VALUES,
+        description: "b".repeat(5000),
+      }),
+    ).toEqual({});
   });
 });

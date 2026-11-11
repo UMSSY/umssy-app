@@ -10,12 +10,36 @@ import { planSkillReconciliation } from '../utils/plan-skill-reconciliation.js';
 export class SkillAnalysisService {
   constructor(private readonly repository: SkillAnalysisRepository) {}
 
+  listReviewQueue() {
+    return this.repository.listReviewQueue();
+  }
+
+  skillForDecision(skillId: string, context: TransactionContext) {
+    return this.repository.skillForDecision(skillId, context);
+  }
+
+  changeSkillDecision(
+    skillId: string,
+    action: string,
+    context: TransactionContext,
+  ) {
+    return this.repository.changeSkillDecision(skillId, action, context);
+  }
+
   findCatalog(): Promise<SkillAnalysisCatalogResponse[]> {
     return this.repository.findCatalog();
   }
 
+  countPendingPublicationSkills(userId: string): Promise<number> {
+    return this.repository.countPendingPublicationSkills(userId);
+  }
+
   findProfileSkillRows(userId: string): Promise<ProfileSkillRowResponse[]> {
     return this.repository.findProfileSkillRows(userId);
+  }
+
+  findApprovedPublicationSkills(userId: string, context: TransactionContext) {
+    return this.repository.findApprovedPublicationSkills(userId, context);
   }
 
   async reconcileDetected(
@@ -30,10 +54,7 @@ export class SkillAnalysisService {
     await this.repository.applyReconciliation(userId, plan, context);
 
     return (
-      plan.creates.length +
-        plan.updates.length +
-        plan.deleteIds.length >
-      0
+      plan.creates.length + plan.updates.length + plan.deleteIds.length > 0
     );
   }
 }

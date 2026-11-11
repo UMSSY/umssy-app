@@ -9,7 +9,7 @@ import type {
 import { SkillDictionaryService } from '../../job-connect/services/skill-dictionary.service.js';
 import { SkillCatalogService } from '../../skills/services/skill-catalog.service.js';
 import { WorkExperienceNotFoundException } from '../../work-experience/exceptions/work-experience-not-found.exception.js';
-import { ExperienceSkillsRepository } from '../repositories/experience-skills.repository.js';
+import { ExperienceSkillsService } from '../services/experience-skills.service.js';
 import { SkillsClassifierService } from './skills-classifier.service.js';
 import { NlpService } from './nlp.service.js';
 
@@ -20,7 +20,7 @@ export class MatchingService {
     private readonly skillsClassifierService: SkillsClassifierService,
     private readonly skillCatalogService: SkillCatalogService,
     private readonly nlpService: NlpService,
-    private readonly experienceSkillsRepository: ExperienceSkillsRepository,
+    private readonly experienceSkills: ExperienceSkillsService,
   ) {}
 
   async analyzeExperience(
@@ -28,10 +28,7 @@ export class MatchingService {
     input: AnalyzeExperienceInput,
   ): Promise<AnalyzeExperienceResponse> {
     if (
-      !(await this.experienceSkillsRepository.belongsToUser(
-        input.experienceId,
-        userId,
-      ))
+      !(await this.experienceSkills.belongsToUser(input.experienceId, userId))
     ) {
       throw new WorkExperienceNotFoundException();
     }
@@ -40,11 +37,28 @@ export class MatchingService {
     const skills = await this.detectSkills(input.text ?? '');
     const processingTimeMs = Math.round(performance.now() - startedAt);
 
-    await this.experienceSkillsRepository.replaceDetected(
+    await this.experienceSkills.replaceDetected(
       userId,
       input.experienceId,
       skills.map(({ id }) => id),
     );
+
+    return { experienceId: input.experienceId, skills, processingTimeMs };
+  }
+
+  async previewExperience(
+    userId: string,
+    input: AnalyzeExperienceInput,
+  ): Promise<AnalyzeExperienceResponse> {
+    if (
+      !(await this.experienceSkills.belongsToUser(input.experienceId, userId))
+    ) {
+      throw new WorkExperienceNotFoundException();
+    }
+
+    const startedAt = performance.now();
+    const skills = await this.detectSkills(input.text ?? '');
+    const processingTimeMs = Math.round(performance.now() - startedAt);
 
     return { experienceId: input.experienceId, skills, processingTimeMs };
   }
@@ -56,6 +70,7 @@ export class MatchingService {
       ...this.skillDictionaryService.extract(text).skills,
       ...this.nlpService.extractRequirementTerms(text),
     ];
+
     return candidates.length > 0 ? this.detectCatalogSkills(candidates) : [];
   }
 
@@ -65,6 +80,7 @@ export class MatchingService {
     const catalog = (await this.skillCatalogService.listCatalog({})).map(
       ({ id, name }) => ({ id, name }),
     );
+
     return this.skillsClassifierService.classify(candidates, catalog);
   }
 

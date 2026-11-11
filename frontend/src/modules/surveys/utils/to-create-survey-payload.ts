@@ -1,5 +1,7 @@
-import type { SurveyBuilderState } from "../types/survey-builder.types";
-import type { CreateSurveyPayload, SurveyStatus, SurveyTargetAudience } from "../types/survey.types";
+import type { SurveyBuilderState } from "../types/survey-builder-state.types";
+import type { CreateSurveyPayload } from "../types/create-survey-payload.types";
+import type { SurveyStatus } from "../types/survey-status.types";
+import type { SurveyTargetAudience } from "../types/survey-target-audience.types";
 import { toClosesAtIso, toCompleteDateValue, toOpensAtIso } from "./survey-dates";
 
 export function toCreateSurveyPayload(survey: SurveyBuilderState, status: SurveyStatus): CreateSurveyPayload {

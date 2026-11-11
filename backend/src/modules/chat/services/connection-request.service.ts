@@ -1,4 +1,3 @@
-
 import {
   BadRequestException,
   ConflictException,
@@ -11,6 +10,7 @@ import {
 import { ConnectionRequestRepository } from '../repositories/connection-request.repository.js';
 import { ChatUserBlockRepository } from '../repositories/chat-user-block.repository.js';
 import { UserLookupRepository } from '../repositories/user-lookup.repository.js';
+import { ChatGateway } from '../gateways/chat.gateway.js';
 
 @Injectable()
 export class ConnectionRequestService {
@@ -18,6 +18,7 @@ export class ConnectionRequestService {
     private readonly connectionRequestRepository: ConnectionRequestRepository,
     private readonly chatUserBlockRepository: ChatUserBlockRepository,
     private readonly userLookupRepository: UserLookupRepository,
+    private readonly chatGateway: ChatGateway,
   ) {}
 
   async send(senderId: string, receiverId: string) {
@@ -27,9 +28,7 @@ export class ConnectionRequestService {
       );
     }
 
-    const receiver = await this.userLookupRepository.findActiveById(
-      receiverId,
-    );
+    const receiver = await this.userLookupRepository.findActiveById(receiverId);
 
     if (!receiver) {
       throw new NotFoundException(
@@ -81,11 +80,15 @@ export class ConnectionRequestService {
       );
     }
 
-    return this.connectionRequestRepository.create(
+    const request = await this.connectionRequestRepository.create(
       senderId,
       receiverId,
       pendingStatus.id,
     );
+
+    this.chatGateway.notifyUser(receiverId, 'connection_request:new', request);
+
+    return request;
   }
 
   async findSent(userId: string) {
@@ -96,68 +99,66 @@ export class ConnectionRequestService {
     return this.connectionRequestRepository.findReceivedByUser(userId);
   }
 
-async accept(requestId: string, currentUserId: string) {
-  return this.respond(requestId, currentUserId, 'ACCEPTED');
-}
-
-async reject(requestId: string, currentUserId: string) {
-  return this.respond(requestId, currentUserId, 'REJECTED');
-}
-
-async findAccepted(userId: string) {
-  return this.connectionRequestRepository.findAcceptedByUser(userId);
-}
-
-private async respond(
-  requestId: string,
-  currentUserId: string,
-  statusTitle: 'ACCEPTED' | 'REJECTED',
-) {
-  const request =
-    await this.connectionRequestRepository.findById(requestId);
-
-  if (!request) {
-    throw new NotFoundException(
-      'La solicitud de conexión no existe.',
-    );
+  async accept(requestId: string, currentUserId: string) {
+    return this.respond(requestId, currentUserId, 'ACCEPTED');
   }
 
-  if (request.receiverId !== currentUserId) {
-    throw new ForbiddenException(
-      'No tienes permiso para responder esta solicitud.',
-    );
+  async reject(requestId: string, currentUserId: string) {
+    return this.respond(requestId, currentUserId, 'REJECTED');
   }
 
-  if (request.status.title !== 'PENDING') {
-    throw new ConflictException(
-      'La solicitud de conexión ya fue procesada.',
-    );
+  async findAccepted(userId: string) {
+    return this.connectionRequestRepository.findAcceptedByUser(userId);
   }
 
-  const status =
-    await this.connectionRequestRepository.findStatusByTitle(
-      statusTitle,
-    );
+  private async respond(
+    requestId: string,
+    currentUserId: string,
+    statusTitle: 'ACCEPTED' | 'REJECTED',
+  ) {
+    const request = await this.connectionRequestRepository.findById(requestId);
 
-  if (!status) {
-    throw new InternalServerErrorException(
-      'El estado de solicitud no está configurado.',
-    );
-  }
+    if (!request) {
+      throw new NotFoundException('La solicitud de conexión no existe.');
+    }
 
-  const result =
-    await this.connectionRequestRepository.updatePendingStatus(
+    if (request.receiverId !== currentUserId) {
+      throw new ForbiddenException(
+        'No tienes permiso para responder esta solicitud.',
+      );
+    }
+
+    if (request.status.title !== 'PENDING') {
+      throw new ConflictException('La solicitud de conexión ya fue procesada.');
+    }
+
+    const status =
+      await this.connectionRequestRepository.findStatusByTitle(statusTitle);
+
+    if (!status) {
+      throw new InternalServerErrorException(
+        'El estado de solicitud no está configurado.',
+      );
+    }
+
+    const result = await this.connectionRequestRepository.updatePendingStatus(
       requestId,
       status.id,
     );
 
-  if (result.count === 0) {
-    throw new ConflictException(
-      'La solicitud de conexión ya fue procesada.',
+    if (result.count === 0) {
+      throw new ConflictException('La solicitud de conexión ya fue procesada.');
+    }
+
+    const updatedRequest =
+      await this.connectionRequestRepository.findById(requestId);
+
+    this.chatGateway.notifyUser(
+      request.senderId,
+      'connection_request:updated',
+      updatedRequest,
     );
+
+    return updatedRequest;
   }
-
-  return this.connectionRequestRepository.findById(requestId);
-}
-
 }

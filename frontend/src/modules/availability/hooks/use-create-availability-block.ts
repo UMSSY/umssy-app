@@ -3,7 +3,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { getApiErrorDetail } from "@/shared/utils/api-error-detail";
-import { CREATE_BLOCK_ERROR } from "../constants/availability.constants";
+
 import { AVAILABILITY_QUERY_KEYS } from "../constants/availability-query-keys.constants";
 import { AVAILABILITY_TOAST_TEXT } from "../constants/availability-toast.constants";
 import { availabilityApi } from "../services/availability.service";
@@ -32,7 +32,7 @@ export function useCreateAvailabilityBlock() {
       return queryClient.invalidateQueries({ queryKey: AVAILABILITY_QUERY_KEYS.all });
     },
     onError: (error) => {
-      toast.error(getApiErrorDetail(error) ?? CREATE_BLOCK_ERROR);
+      toast.error(getApiErrorDetail(error) ?? "Error al crear el bloque de disponibilidad");
     },
   });
 

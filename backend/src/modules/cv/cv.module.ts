@@ -5,22 +5,20 @@ import { FileValidationService } from '../../common/services/file-validation.ser
 import { CvFileController } from './controllers/cv-file.controller.js';
 import { CvHistoryController } from './controllers/cv-history.controller.js';
 import { CvMapper } from './mappers/cv.mapper.js';
-import { CvFileRepository } from './repositories/cv-file.repository.js';
+import { CvSourcesModule } from './cv-sources.module.js';
 import { CvMetadataRepository } from './repositories/cv-metadata.repository.js';
 import { CvService } from './services/cv.service.js';
-import { CvFileStorage } from './types/cv-file-storage.type.js';
+import { RadarIntegrationModule } from '../radar-integration/radar-integration.module.js';
 
 @Module({
-  imports: [PrismaModule, JwtAuthModule],
-  controllers: [CvHistoryController, CvFileController],
-  providers: [
-    CvService,
-    CvMetadataRepository,
-    CvMapper,
-    FileValidationService,
-    CvFileRepository,
-    { provide: CvFileStorage, useExisting: CvFileRepository },
+  imports: [
+    CvSourcesModule,
+    PrismaModule,
+    JwtAuthModule,
+    RadarIntegrationModule,
   ],
+  controllers: [CvHistoryController, CvFileController],
+  providers: [CvService, CvMetadataRepository, CvMapper, FileValidationService],
   exports: [CvService],
 })
 export class CvModule {}

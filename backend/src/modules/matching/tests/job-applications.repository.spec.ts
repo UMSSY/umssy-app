@@ -15,7 +15,12 @@ describe('HU-02B T2.8 - JobApplicationsRepository', () => {
   const prisma = {
     jobOffer: { findFirst: vi.fn() },
     jobApplicationStatus: { findUnique: vi.fn() },
-    jobApplication: { findUnique: vi.fn(), create: vi.fn(), findMany: vi.fn() },
+    jobApplication: {
+      findUnique: vi.fn(),
+      create: vi.fn(),
+      findMany: vi.fn(),
+      updateMany: vi.fn(),
+    },
   };
   let repository: JobApplicationsRepository;
 
@@ -83,6 +88,31 @@ describe('HU-02B T2.8 - JobApplicationsRepository', () => {
       data: { userId: 'user-1', jobOfferId: 'offer-1', statusId: 'status-1' },
       select: SELECT,
     });
+  });
+
+  it('reactiva únicamente una postulación retirada', async () => {
+    prisma.jobApplication.updateMany.mockResolvedValue({ count: 1 });
+    prisma.jobApplication.findUnique.mockResolvedValue({ id: 'application-1' });
+
+    await expect(
+      repository.reactivate('user-1', 'offer-1', 'status-1'),
+    ).resolves.toEqual({ id: 'application-1' });
+    expect(prisma.jobApplication.updateMany).toHaveBeenCalledWith({
+      where: {
+        userId: 'user-1',
+        jobOfferId: 'offer-1',
+        status: { title: 'Retirada' },
+      },
+      data: { statusId: 'status-1', appliedAt: expect.any(Date) },
+    });
+  });
+
+  it('no reactiva si la postulación dejó de estar retirada', async () => {
+    prisma.jobApplication.updateMany.mockResolvedValue({ count: 0 });
+    await expect(
+      repository.reactivate('user-1', 'offer-1', 'status-1'),
+    ).resolves.toBeNull();
+    expect(prisma.jobApplication.findUnique).not.toHaveBeenCalled();
   });
 
   it('no lista a la empresa las postulaciones retiradas', async () => {

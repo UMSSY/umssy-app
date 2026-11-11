@@ -1,3 +1,8 @@
+import "@/shared/testing/indexed-db.mock";
+import { clearAccessToken } from "@/shared/services/storage/access-token-storage";
+import { saveAccessToken } from "@/shared/services/storage/access-token-storage";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { createQueryClient } from "@/shared/services/query-client";
 import { cleanup, render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -5,11 +10,19 @@ import AppLayout from "@/app/(app)/layout";
 import { ReviewQueueView } from "@/modules/radar-chart";
 
 const { route } = vi.hoisted(() => ({ route: { pathname: "/profile" } }));
-
 const replace = vi.fn();
+
 vi.mock("next/navigation", () => ({
   usePathname: () => route.pathname,
   useRouter: () => ({ replace }),
+}));
+
+vi.mock("@/modules/radar-chart/services/radar-integration.service", () => ({
+  radarIntegrationApi: {
+    reviews: vi.fn().mockResolvedValue([]),
+    decision: vi.fn(),
+    adminReprocessCv: vi.fn(),
+  },
 }));
 
 vi.mock("./app-shell", () => ({
@@ -19,8 +32,10 @@ vi.mock("./app-shell", () => ({
 }));
 
 describe("AppRouteLayout", () => {
-  it("muestra el camino de incorporación al titulado sin rol mentor", () => {
-    sessionStorage.setItem("accessToken", `h.${btoa(JSON.stringify({ roleTag: "titulado", roles: ["titulado"] }))}.s`);
+  it("muestra el camino de incorporación al titulado sin rol mentor", async () => {
+    await saveAccessToken(
+      `h.${btoa(JSON.stringify({ roleTag: "titulado", roles: ["titulado"] }))}.s`,
+    );
     route.pathname = "/mentors/participation/technical-areas";
     render(<AppLayout><p>editor de áreas</p></AppLayout>);
     expect(screen.queryByText("editor de áreas")).not.toBeInTheDocument();
@@ -28,10 +43,15 @@ describe("AppRouteLayout", () => {
     expect(screen.getByRole("link", { name: "Iniciar incorporación" })).toHaveAttribute("href", "/mentorship");
   });
 
-  beforeEach(() => sessionStorage.setItem("accessToken", `h.${btoa(JSON.stringify({ roleTag: "titulado", roles: ["titulado", "mentor", "empresa", "administrativo", "estudiante"] }))}.s`));
+  beforeEach(
+    async () =>
+      await saveAccessToken(
+        `h.${btoa(JSON.stringify({ roleTag: "titulado", roles: ["titulado", "mentor", "empresa", "administrativo", "estudiante"] }))}.s`,
+      ),
+  );
   afterEach(() => {
     cleanup();
-    sessionStorage.clear();
+    clearAccessToken();
     window.history.replaceState({}, "", "/");
     replace.mockReset();
     route.pathname = "/profile";
@@ -80,22 +100,36 @@ describe("AppRouteLayout", () => {
 
   it("renders the review queue inside exactly one shell", () => {
     route.pathname = "/affinity-radar/review-queue";
-    render(<AppLayout><ReviewQueueView /></AppLayout>);
+    render(<QueryClientProvider client={createQueryClient()}>
+      <AppLayout>
+        <ReviewQueueView />
+       </AppLayout>
+      </QueryClientProvider>,
+    );
 
     expect(screen.getAllByTestId("app-shell")).toHaveLength(1);
     expect(screen.getByTestId("app-shell")).toContainElement(
-      screen.getByRole("heading", { name: "Revisión de radares" }),
+      screen.getByRole("heading", { name: "Revisión documental y de radares" }),
     );
   });
 
-  it.each(["/chat", "/vacancies", "/vacancies/1", "/vacancies/vacancies", "/area-detail-preview", "/area-detail-interaction-preview"])("requires a session on %s", (pathname) => {
-    sessionStorage.clear();
+  it.each([
+    "/chat",
+    "/vacancies",
+    "/vacancies/1",
+    "/vacancies/vacancies",
+    "/area-detail-preview",
+    "/area-detail-interaction-preview",
+  ])("requires a session on %s", (pathname) => {
+    clearAccessToken();
     route.pathname = pathname;
     window.history.replaceState({}, "", pathname);
     render(<AppLayout><p>private-content</p></AppLayout>);
 
     expect(screen.queryByText("private-content")).toBeNull();
-    expect(replace).toHaveBeenCalledWith(`/login?next=${encodeURIComponent(pathname)}`);
+    expect(replace).toHaveBeenCalledWith(
+      `/login?next=${encodeURIComponent(pathname)}`,
+    );
   });
 
   it.each([
@@ -104,8 +138,10 @@ describe("AppRouteLayout", () => {
     [["empresa", "titulado"], true],
     [["administrativo", "mentor"], true],
     [["estudiante"], true],
-  ])("checks chat permissions for roles %s", (roles, isAllowed) => {
-    sessionStorage.setItem("accessToken", `h.${btoa(JSON.stringify({ roleTag: roles[0], roles }))}.s`);
+  ])("checks chat permissions for roles %s", async (roles, isAllowed) => {
+    await saveAccessToken(
+      `h.${btoa(JSON.stringify({ roleTag: roles[0], roles }))}.s`,
+    );
     route.pathname = "/chat";
     render(<AppLayout><p>chat-content</p></AppLayout>);
 
@@ -133,13 +169,18 @@ describe("AppRouteLayout", () => {
     ["/profile", ["empresa"], true],
     ["/profile/personal-info", ["empresa"], true],
     ["/profile/radar", ["empresa"], false],
-  ])("checks direct access to %s for roles %s", (pathname, roles, isAllowed) => {
-    sessionStorage.setItem("accessToken", `h.${btoa(JSON.stringify({ roleTag: roles[0], roles }))}.s`);
-    route.pathname = pathname;
-    render(<AppLayout><p>restricted-content</p></AppLayout>);
-    if (isAllowed) expect(screen.getByText("restricted-content")).toBeInTheDocument();
+  ])(
+    "checks direct access to %s for roles %s",
+    async (pathname, roles, isAllowed) => {
+      await saveAccessToken(
+        `h.${btoa(JSON.stringify({ roleTag: roles[0], roles }))}.s`,
+      );
+      route.pathname = pathname;
+      render(<AppLayout><p>restricted-content</p></AppLayout>);
+      if (isAllowed) expect(screen.getByText("restricted-content")).toBeInTheDocument();
     else expect(screen.queryByText("restricted-content")).toBeNull();
-  });
+    },
+  );
 
   it("does not treat a backoffice prefix as an administrative route", () => {
     route.pathname = "/backofficex";
@@ -149,7 +190,7 @@ describe("AppRouteLayout", () => {
   });
 
   it("sin sesión no muestra la página privada y lleva al login con la ruta pedida", () => {
-    sessionStorage.clear();
+    clearAccessToken();
     window.history.replaceState({}, "", "/profile?tab=cv");
     render(<AppLayout><p>page-content</p></AppLayout>);
 
@@ -158,7 +199,7 @@ describe("AppRouteLayout", () => {
   });
 
   it("Mis pases sin sesión no se muestra y lleva al login con la ruta pedida", () => {
-    sessionStorage.clear();
+    clearAccessToken();
     route.pathname = "/events/my-passes";
     window.history.replaceState({}, "", "/events/my-passes");
     render(<AppLayout><p>event-content</p></AppLayout>);

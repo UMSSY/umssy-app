@@ -5,7 +5,7 @@ import { renderWithQuery } from "@/shared/testing/render-with-query";
 import { SURVEY_ANSWERS_STORAGE_KEY } from "../constants/survey-answer.constants";
 import { surveysService } from "../services/surveys.service";
 import { apiResponse } from "../testing/survey-fixtures";
-import type { SurveyDetail } from "../types/survey.types";
+import type { SurveyDetail } from "../types/survey-detail.types";
 import { removeSurveyStorage } from "../utils/survey-draft-storage";
 import { AnswerSurveyView } from "./answer-survey-view";
 
@@ -207,4 +207,3 @@ describe("AnswerSurveyView", () => {
     });
   });
 });
-

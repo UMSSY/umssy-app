@@ -76,7 +76,7 @@ export class ConversationRepository {
   }
 
   async upsertByEventId(eventId: string, userId: string, now: Date) {
-    return this.prisma.$transaction(async tx => {
+    return this.prisma.$transaction(async (tx) => {
       const conversation = await tx.conversation.upsert({
         where: { eventId },
         update: {},
@@ -91,12 +91,23 @@ export class ConversationRepository {
       });
 
       await tx.conversationParticipant.upsert({
-        where: { conversationId_userId: { conversationId: conversation.id, userId } },
+        where: {
+          conversationId_userId: { conversationId: conversation.id, userId },
+        },
         update: { lastReadAt: now },
         create: { conversationId: conversation.id, userId, lastReadAt: now },
       });
 
       return conversation.id;
+    });
+  }
+
+  async findParticipantsByConversationId(conversationId: string) {
+    return this.prisma.conversationParticipant.findMany({
+      where: { conversationId },
+      include: {
+        user: { select: { id: true, firstName: true, lastName: true } },
+      },
     });
   }
 
@@ -114,15 +125,16 @@ export class ConversationRepository {
   async findUserConversations(userId: string) {
     return this.prisma.conversation.findMany({
       where: {
-        AND: [
-          {
-            OR: [
-              { userAId: userId },
-              { userBId: userId },
-            ],
-          },
+        OR: [
           {
             eventId: null,
+            OR: [{ userAId: userId }, { userBId: userId }],
+          },
+          {
+            eventId: { not: null },
+            participants: {
+              some: { userId },
+            },
           },
         ],
       },
@@ -130,6 +142,11 @@ export class ConversationRepository {
         userA: CONTACT_USER_SELECT,
         userB: CONTACT_USER_SELECT,
         event: { select: { id: true, title: true } },
+        participants: {
+          include: {
+            user: { select: { id: true, firstName: true, lastName: true } },
+          },
+        },
         messages: {
           orderBy: { sentAt: 'desc' },
           take: 1,
