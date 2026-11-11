@@ -91,7 +91,7 @@ export function SavedCvCard({
       {items.some((cv) => cv.isCurrent) ? (
         <div className="mt-5 flex flex-col items-start gap-2 border-t border-border pt-5">
           <p className="text-sm text-text-secondary">
-            Usa tu CV vigente para precargar tus datos de contacto, educación y experiencia.
+            Usa tu CV vigente para revisar y aplicar a tu perfil tus datos de contacto, presentación, formación, experiencia y habilidades.
           </p>
           <Button
             type="button"
@@ -105,7 +105,7 @@ export function SavedCvCard({
             ) : (
               <WandSparkles aria-hidden="true" className="size-4" />
             )}
-            Autocompletar perfil
+            Autollenar perfil
           </Button>
         </div>
       ) : null}

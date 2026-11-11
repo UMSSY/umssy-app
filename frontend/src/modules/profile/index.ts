@@ -30,6 +30,7 @@ export { validateFile } from "./utils/validate-file";
 export type { HttpError } from "./types/http-error.types";
 
 export { useProfile } from "./hooks/use-profile";
+export { useCities } from "./hooks/use-cities";
 export { useProfileSkillsRadar, PROFILE_SKILLS_RADAR_QUERY_KEY } from "./hooks/use-profile-skills-radar";
 export { profileSkillsRadarService } from "./services/profile-skills-radar.service";
 export { useInvalidateProfileCompleteness } from "./hooks/use-invalidate-profile-completeness";
