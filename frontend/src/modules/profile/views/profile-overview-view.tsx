@@ -32,6 +32,7 @@ export function ProfileOverviewView() {
       description="Tu información y trayectoria profesional, en un solo lugar."
       actions={profile ? <CvExportButton /> : undefined}
     >
+      <ProfileCompletenessProgress />
       {isLoading ? (
         <p role="status" className="text-sm text-text-secondary">
           {PROFILE_FEEDBACK_MESSAGES.loading}
@@ -46,7 +47,6 @@ export function ProfileOverviewView() {
 
       {summary ? (
         <div className="flex flex-col gap-6">
-          <ProfileCompletenessProgress />
           <ProfilePhotoFeedback error={photoLoadError} isLoading={isPhotoLoading} onRetry={() => void reloadPhoto()} />
           {isProfileComplete(summary) ? null : <ProfileCompletionBanner hasContactInfo={[summary.fullName, summary.city, summary.phone, summary.personalEmail].every((value) => value.trim().length > 0)} />}
           <ProfileSurface>
