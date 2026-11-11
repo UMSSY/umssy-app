@@ -18,6 +18,7 @@ import { SkillAnalysisModule } from '../skills/skill-analysis.module.js';
 import { CertificationSourcesModule } from '../certifications/certification-sources.module.js';
 import { ProfileCompletenessController } from './controllers/profile-completeness.controller.js';
 import { ProfileCompletenessService } from './services/profile-completeness.service.js';
+import { PortfolioModule } from '../portfolio/portfolio.module.js';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { ProfileCompletenessService } from './services/profile-completeness.serv
     WorkExperienceSourcesModule,
     SkillAnalysisModule,
     CertificationSourcesModule,
+    PortfolioModule,
   ],
   controllers: [
     ProfileController,
@@ -50,6 +52,7 @@ import { ProfileCompletenessService } from './services/profile-completeness.serv
     ProfileService,
     CityCatalogService,
     ProfilePhotoService,
+    PortfolioModule,
   ],
 })
 export class ProfileModule {}
