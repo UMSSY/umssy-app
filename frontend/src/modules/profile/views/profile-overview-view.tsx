@@ -6,6 +6,7 @@ import { ContactInfoCard } from "../components/contact-info-card";
 import { FeedbackMessage } from "../components/feedback-message";
 import { PresentationSummaryCard } from "../components/presentation-summary-card";
 import { ProfileCompletionBanner } from "../components/profile-completion-banner";
+import { ProfileCompletenessProgress } from "../components/profile-completeness-progress";
 import { ProfilePageLayout } from "../components/profile-page-layout";
 import { ProfilePhotoFeedback } from "../components/profile-photo-feedback";
 import { PROFILE_FEEDBACK_MESSAGES } from "../constants/profile-feedback.constants";
@@ -45,6 +46,7 @@ export function ProfileOverviewView() {
 
       {summary ? (
         <div className="flex flex-col gap-6">
+          <ProfileCompletenessProgress />
           <ProfilePhotoFeedback error={photoLoadError} isLoading={isPhotoLoading} onRetry={() => void reloadPhoto()} />
           {isProfileComplete(summary) ? null : <ProfileCompletionBanner hasContactInfo={[summary.fullName, summary.city, summary.phone, summary.personalEmail].every((value) => value.trim().length > 0)} />}
           <ProfileSurface>

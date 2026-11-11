@@ -9,6 +9,7 @@ import {
 } from "../constants/skills.constants";
 import { skillsService } from "../services/skills.service";
 import type { Feedback } from "@/modules/profile";
+import { useInvalidateProfileCompleteness } from "@/modules/profile";
 import type { SkillItem } from "../types/skill-item.types";
 import type { SkillsProfileResponse } from "../types/skills-profile-response.types";
 import type { UseSkillsResult } from "../types/use-skills-result.types";
@@ -16,6 +17,7 @@ import { getSkillsErrorMessage } from "../utils/get-skills-error-message";
 
 export function useSkills(): UseSkillsResult {
   const queryClient = useQueryClient();
+  const invalidateCompleteness = useInvalidateProfileCompleteness();
   const savingRef = useRef(false);
   const customRequestsRef = useRef(new Map<string, Promise<SkillItem>>());
   function resolveSkill(skill: SkillItem): Promise<SkillItem> {
@@ -49,7 +51,7 @@ export function useSkills(): UseSkillsResult {
     const resolvedSkills = await Promise.all(selection.map(resolveSkill));
     const skillIds = [...new Set(resolvedSkills.map(({ id }) => id))];
     return skillsService.saveMySkills(skillIds);
-  } });
+  }, onSuccess: invalidateCompleteness });
   const isSaving = mutation.isPending;
   async function reload(): Promise<void> {
     setSelectedSkills(null);
