@@ -22,3 +22,9 @@ export function isMentorSpecialtyMissing(
 ): boolean {
   return technicalAreas.length === 0;
 }
+
+export function isWorkExperienceMissing(
+  workExperiences: MentorProfileEvaluation['workExperiences'],
+): boolean {
+  return workExperiences.length === 0;
+}
