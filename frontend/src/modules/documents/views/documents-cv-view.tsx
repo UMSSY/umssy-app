@@ -4,6 +4,8 @@ import { useRef, useState, type ChangeEvent } from "react";
 import { Input } from "@/components/ui/input";
 import { FeedbackMessage } from "@/modules/profile";
 import { ProfilePageLayout } from "@/modules/profile";
+import { CvExtractionDialog } from "../components/cv-extraction-dialog";
+import { CvGenerateCard } from "../components/cv-generate-card";
 import { CvHistoryDialog } from "../components/cv-history-dialog";
 import { CvUploadCard } from "../components/cv-upload-card";
 import { CvViewerDialog } from "../components/cv-viewer-dialog";
@@ -13,6 +15,7 @@ import { SavedCvCard } from "../components/saved-cv-card";
 import { CV_ERROR_MESSAGES } from "../constants/cv-error-messages.constants";
 import { CV_FILE_INPUT_ACCEPT } from "../constants/cv-upload.constants";
 import { useCvDocument } from "../hooks/use-cv-document";
+import { useCvExtraction } from "../hooks/use-cv-extraction";
 import { useCvFeedback } from "../hooks/use-cv-feedback";
 import { useCvViewer } from "../hooks/use-cv-viewer";
 import type { SavedCv } from "../types/saved-cv.types";
@@ -28,6 +31,7 @@ export function DocumentsCvView() {
     isLoading,
     isReloading,
     isUploading,
+    uploadProgress,
     isDeleting,
     loadError,
     reloadCvs,
@@ -35,6 +39,7 @@ export function DocumentsCvView() {
     deleteCv,
   } = useCvDocument();
   const { preview, openingCvId, openCv, closeCv } = useCvViewer();
+  const cvExtraction = useCvExtraction();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [pendingReplacement, setPendingReplacement] = useState<File | null>(null);
@@ -49,14 +54,7 @@ export function DocumentsCvView() {
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    event.target.value = "";
-
-    if (!file) {
-      return;
-    }
-
+  const selectFile = (file: File) => {
     const validationError = validateCvFile(file);
 
     if (validationError) {
@@ -76,13 +74,23 @@ export function DocumentsCvView() {
     setSelectedFile(file);
   };
 
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+
+    if (file) {
+      selectFile(file);
+    }
+  };
+
   const handleConfirmUpload = async (file: File) => {
     setFeedback(null);
 
     try {
-      await uploadCv(file);
+      const uploadedCv = await uploadCv(file);
       setSelectedFile(null);
       setFeedback({ type: "success", message: "Tu CV se cargó correctamente." });
+      if (uploadedCv) cvExtraction.startExtraction(uploadedCv.id);
     } catch (error) {
       if (isCvFileRejection(error)) {
         setSelectedFile(null);
@@ -100,9 +108,10 @@ export function DocumentsCvView() {
     setReplaceError(null);
 
     try {
-      await uploadCv(file);
+      const uploadedCv = await uploadCv(file);
       closeReplaceDialog();
       setFeedback({ type: "success", message: "Tu nueva versión del CV se cargó correctamente." });
+      if (uploadedCv) cvExtraction.startExtraction(uploadedCv.id);
     } catch (error) {
       const message = getCvErrorMessage(error, CV_ERROR_MESSAGES.upload);
 
@@ -160,15 +169,20 @@ export function DocumentsCvView() {
         onChange={handleFileChange}
       />
       <div className="grid grid-cols-2 items-start gap-6">
-        <CvUploadCard
-          selectedFile={selectedFile}
-          hasSavedCv={currentCv !== null}
-          isLoading={isLoading}
-          isUploading={isUploading}
-          isBusy={isBusy}
-          onSelectFile={openFilePicker}
-          onConfirmUpload={handleConfirmUpload}
-        />
+        <div className="flex flex-col gap-6">
+          <CvUploadCard
+            selectedFile={selectedFile}
+            hasSavedCv={currentCv !== null}
+            isLoading={isLoading}
+            isUploading={isUploading}
+            isBusy={isBusy}
+            uploadProgress={uploadProgress}
+            onSelectFile={openFilePicker}
+            onFileDropped={selectFile}
+            onConfirmUpload={handleConfirmUpload}
+          />
+          <CvGenerateCard />
+        </div>
         <SavedCvCard
           cvs={recentCvs}
           totalCvs={totalCvs}
@@ -181,12 +195,17 @@ export function DocumentsCvView() {
           onDelete={openDeleteDialog}
           onOpenHistory={() => setIsHistoryOpen(true)}
           onRetry={() => void reloadCvs()}
+          isAutofilling={cvExtraction.isExtracting}
+          onAutofill={() => {
+            if (currentCv) cvExtraction.startExtraction(currentCv.id);
+          }}
         />
       </div>
       <ReplaceCvDialog
         file={pendingReplacement}
         currentFileName={currentCv?.fileName}
         isReplacing={isUploading}
+        uploadProgress={uploadProgress}
         errorMessage={replaceError}
         onConfirm={handleConfirmReplace}
         onCancel={closeReplaceDialog}
@@ -205,6 +224,18 @@ export function DocumentsCvView() {
         onClose={() => setIsHistoryOpen(false)}
       />
       <CvViewerDialog preview={preview} onClose={closeCv} />
+      <CvExtractionDialog
+        isOpen={cvExtraction.isOpen}
+        isExtracting={cvExtraction.isExtracting}
+        extraction={cvExtraction.extraction}
+        selection={cvExtraction.selection}
+        errorMessage={cvExtraction.errorMessage}
+        onToggleContactField={cvExtraction.toggleContactField}
+        onToggleEducation={cvExtraction.toggleEducation}
+        onToggleWorkExperience={cvExtraction.toggleWorkExperience}
+        onApply={cvExtraction.close}
+        onClose={cvExtraction.close}
+      />
     </ProfilePageLayout>
   );
 }

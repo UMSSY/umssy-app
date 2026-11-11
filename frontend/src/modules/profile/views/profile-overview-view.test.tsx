@@ -141,6 +141,21 @@ describe("ProfileOverviewView", () => {
     expect(screen.queryByRole("navigation", { name: "Recorrido del perfil" })).not.toBeInTheDocument();
   });
 
+  it("offers the cv export in the page actions once the profile is loaded", async () => {
+    render(<ProfileOverviewView />);
+
+    expect(await screen.findByRole("button", { name: "Descargar CV en PDF" })).toBeInTheDocument();
+  });
+
+  it("hides the cv export when the profile cannot be loaded", async () => {
+    vi.mocked(profileService.getProfile).mockRejectedValue({ response: { status: 401 } });
+
+    render(<ProfileOverviewView />);
+
+    await screen.findByRole("alert");
+    expect(screen.queryByRole("button", { name: /Descargar CV/ })).not.toBeInTheDocument();
+  });
+
   it("suggests presentation when contact information is already complete", async () => {
     vi.mocked(profileService.getProfile).mockResolvedValue({ ...COMPLETE_PROFILE, aboutMe: null });
     render(<ProfileOverviewView />);
@@ -165,3 +180,5 @@ vi.mock("@/modules/work-experience", () => ({ WorkExperienceProfileSection: () =
 vi.mock("@/modules/skills", () => ({ SkillsProfileSection: () => <section aria-label="Habilidades"><h2>Habilidades</h2></section> }));
 
 vi.mock("@/modules/certifications", () => ({ CertificationProfileSection: () => <section aria-label="Certificaciones"><h2>Certificaciones</h2></section> }));
+
+vi.mock("@/modules/documents", () => ({ CvExportButton: () => <button type="button">Descargar CV en PDF</button> }));

@@ -8,6 +8,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MAX_FILE_SIZE_BYTES } from "@/modules/profile/config/file-upload.config";
 import { documentsService } from "../services/documents.service";
 import type { CvPage } from "../types/cv-page.types";
+import type { CvExtraction } from "../types/cv-extraction.types";
 import type { SavedCv } from "../types/saved-cv.types";
 import { DocumentsCvView } from "./documents-cv-view";
 
@@ -17,10 +18,23 @@ vi.mock("../services/documents.service", () => ({
     getCvFile: vi.fn(),
     uploadCv: vi.fn(),
     deleteCv: vi.fn(),
+    extractCvData: vi.fn(),
+  },
+}));
+
+vi.mock("@/modules/profile/services/profile.service", () => ({
+  profileService: {
+    getProfile: vi.fn().mockResolvedValue(null),
   },
 }));
 
 const PDF_TYPE = "application/pdf";
+const EMPTY_EXTRACTION: CvExtraction = {
+  cvId: "",
+  contact: { firstName: null, lastName: null, email: null, phone: null, location: null },
+  educations: [],
+  workExperiences: [],
+};
 const CV_SIZE_IN_BYTES = 1258291;
 const UPLOAD_DATE = new Date(2026, 8, 20);
 
@@ -85,6 +99,13 @@ async function renderView() {
   await waitFor(() => expect(screen.queryByText("Cargando tu CV...")).not.toBeInTheDocument());
 }
 
+async function dismissCvExtraction(user: ReturnType<typeof userEvent.setup>) {
+  const dismiss = await screen.findByRole("button", { name: "Ahora no" });
+  await waitFor(() => expect(dismiss).toBeEnabled());
+  await user.click(dismiss);
+  await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+}
+
 async function chooseAndConfirm(user: ReturnType<typeof userEvent.setup>, file: File) {
   await user.upload(getFileInput(), file);
   await user.click(screen.getByRole("button", { name: "Confirmar carga" }));
@@ -103,6 +124,9 @@ describe("DocumentsCvView", () => {
     vi.mocked(documentsService.getCvFile).mockResolvedValue(
       new Blob(["%PDF"], { type: PDF_TYPE }),
     );
+    vi.mocked(documentsService.extractCvData).mockImplementation((cvId: string) =>
+      Promise.resolve({ ...EMPTY_EXTRACTION, cvId }),
+    );
     vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:cv");
     vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => undefined);
     vi.mocked(documentsService.deleteCv).mockImplementation((cvId: string) => {
@@ -118,6 +142,15 @@ describe("DocumentsCvView", () => {
     cleanup();
     vi.restoreAllMocks();
     vi.clearAllMocks();
+  });
+
+it("offers to generate a cv from the profile data", async () => {
+    render(<DocumentsCvView />);
+
+    expect(
+      await screen.findByRole("region", { name: "Generar CV con los datos del perfil" }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Generar CV" })).toBeInTheDocument();
   });
 
   it("renders the cv title once in the main heading", async () => {
@@ -232,6 +265,7 @@ describe("DocumentsCvView", () => {
     await renderView();
 
     await chooseAndConfirm(user, createFile("CV_Valeria_Quispe.pdf"));
+    await dismissCvExtraction(user);
     expect(await screen.findByRole("status")).toHaveTextContent("Tu CV se cargó correctamente.");
 
     act(() => vi.advanceTimersByTime(5000));
@@ -243,6 +277,101 @@ describe("DocumentsCvView", () => {
 
     expect(screen.getByRole("alert")).toHaveTextContent("El CV debe estar en formato PDF.");
     vi.useRealTimers();
+  });
+
+  it("selects a pdf dropped on the upload zone and uploads it on confirm", async () => {
+    const user = userEvent.setup();
+    await renderView();
+    const file = createFile("CV_Valeria_Quispe.pdf");
+
+    fireEvent.drop(screen.getByText("Selecciona tu CV en formato PDF"), { dataTransfer: { files: [file] } });
+
+    expect(screen.getByText("CV_Valeria_Quispe.pdf · 1.2 MB")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Confirmar carga" }));
+
+    await dismissCvExtraction(user);
+    expect(await screen.findByRole("status")).toHaveTextContent("Tu CV se cargó correctamente.");
+    expect(documentsService.uploadCv).toHaveBeenCalledWith(file, expect.any(Function));
+  });
+
+  it("rejects a dropped file that is not a pdf", async () => {
+    await renderView();
+
+    fireEvent.drop(screen.getByText("Selecciona tu CV en formato PDF"), {
+      dataTransfer: { files: [createFile("foto.png", "image/png")] },
+    });
+
+    expect(screen.getByRole("alert")).toHaveTextContent("El CV debe estar en formato PDF.");
+    expect(screen.getByRole("button", { name: "Confirmar carga" })).toBeDisabled();
+  });
+
+  it("asks before replacing the current cv with a dropped pdf", async () => {
+    storeCv(buildCv("CV_Valeria_Quispe.pdf", CV_SIZE_IN_BYTES));
+    await renderView();
+
+    fireEvent.drop(screen.getByText("Ya tienes un CV vigente"), {
+      dataTransfer: { files: [createFile("CV_Nuevo.pdf")] },
+    });
+
+    expect(await screen.findByText("¿Subir una nueva versión?")).toBeInTheDocument();
+    expect(documentsService.uploadCv).not.toHaveBeenCalled();
+  });
+
+  it("reads the uploaded cv and shows the extracted data to choose from", async () => {
+    const user = userEvent.setup();
+    vi.mocked(documentsService.extractCvData).mockImplementation((cvId: string) =>
+      Promise.resolve({
+        ...EMPTY_EXTRACTION,
+        cvId,
+        contact: { ...EMPTY_EXTRACTION.contact, email: "valeria@mail.com" },
+        workExperiences: [
+          {
+            companyName: "Empresa SRL",
+            position: "Desarrolladora",
+            startDate: "2021-03-01",
+            endDate: null,
+            isCurrent: true,
+            description: "APIs REST",
+          },
+        ],
+      }),
+    );
+    await renderView();
+
+    await chooseAndConfirm(user, createFile("CV_Valeria_Quispe.pdf"));
+
+    const dialog = await screen.findByRole("dialog");
+    expect(documentsService.extractCvData).toHaveBeenCalledWith("cv-1");
+    expect(await within(dialog).findByText("valeria@mail.com")).toBeInTheDocument();
+    expect(within(dialog).getByRole("tab", { name: "Experiencia (1)" })).toBeInTheDocument();
+    expect(within(dialog).getByRole("button", { name: "Usar datos seleccionados" })).toBeEnabled();
+  });
+
+  it("reads the current cv again from Autocompletar perfil", async () => {
+    const user = userEvent.setup();
+    seedCvs("CV_Valeria_Quispe.pdf");
+    await renderView();
+
+    await user.click(screen.getByRole("button", { name: "Autocompletar perfil" }));
+
+    expect(await screen.findByRole("dialog")).toBeInTheDocument();
+    expect(documentsService.extractCvData).toHaveBeenCalledWith(serverCvs[0].id);
+  });
+
+  it("keeps the uploaded cv when the extraction fails", async () => {
+    const user = userEvent.setup();
+    vi.mocked(documentsService.extractCvData).mockRejectedValue({ response: { status: 500 } });
+    await renderView();
+
+    await chooseAndConfirm(user, createFile("CV_Valeria_Quispe.pdf"));
+
+    const dialog = await screen.findByRole("dialog");
+    expect(await within(dialog).findByRole("alert")).toHaveTextContent(
+      "No se pudieron leer los datos de tu CV. Intenta de nuevo.",
+    );
+    await dismissCvExtraction(user);
+    expect(screen.getByText("Ya tienes un CV vigente")).toBeInTheDocument();
   });
 
   it("opens the file picker from Seleccionar PDF", async () => {
@@ -267,8 +396,9 @@ describe("DocumentsCvView", () => {
 
     await user.click(screen.getByRole("button", { name: "Confirmar carga" }));
 
+    await dismissCvExtraction(user);
     expect(await screen.findByRole("status")).toHaveTextContent("Tu CV se cargó correctamente.");
-    expect(documentsService.uploadCv).toHaveBeenCalledWith(file);
+    expect(documentsService.uploadCv).toHaveBeenCalledWith(file, expect.any(Function));
     expect(within(getRecentItems()[0]).getByText("Vigente")).toBeInTheDocument();
     expect(screen.getByText("CV_Valeria_Quispe.pdf")).toBeInTheDocument();
     expect(screen.getByText("Ya tienes un CV vigente")).toBeInTheDocument();
@@ -318,6 +448,7 @@ describe("DocumentsCvView", () => {
     await user.click(screen.getByRole("button", { name: "Confirmar carga" }));
 
     expect(documentsService.uploadCv).toHaveBeenCalledTimes(2);
+    await dismissCvExtraction(user);
     expect(await screen.findByRole("status")).toHaveTextContent("Tu CV se cargó correctamente.");
   });
 
@@ -399,6 +530,7 @@ describe("DocumentsCvView", () => {
       pendingUpload.resolve(cv);
     });
 
+    await dismissCvExtraction(user);
     expect(await screen.findByRole("status")).toHaveTextContent("Tu CV se cargó correctamente.");
     expect(screen.getByText("CV_Nuevo.pdf")).toBeInTheDocument();
   });
@@ -434,7 +566,8 @@ describe("DocumentsCvView", () => {
     await user.click(await screen.findByRole("button", { name: "Subir" }));
 
     await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
-    expect(documentsService.uploadCv).toHaveBeenCalledWith(file);
+    expect(documentsService.uploadCv).toHaveBeenCalledWith(file, expect.any(Function));
+    await dismissCvExtraction(user);
     expect(screen.getByRole("status")).toHaveTextContent(
       "Tu nueva versión del CV se cargó correctamente.",
     );
@@ -491,6 +624,7 @@ describe("DocumentsCvView", () => {
       pendingUpload.resolve(cv);
     });
 
+    await dismissCvExtraction(user);
     expect(await screen.findByRole("status")).toHaveTextContent(
       "Tu nueva versión del CV se cargó correctamente.",
     );
