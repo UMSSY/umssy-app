@@ -14,9 +14,14 @@ import { useLiveRadar } from "../hooks/use-live-radar";
 const DATE_FORMAT: Intl.DateTimeFormatOptions = { dateStyle: "medium", timeStyle: "short" };
 
 export function RadarProfileView() {
-  const { data, loading, error, variation, retry, retrying } = useLiveRadar();
+  const { data, loading, error, variation, previous, retry, retrying } = useLiveRadar();
   const [selectedArea, setSelectedArea] = useState<AreaId | null>(null);
+  const [comparing, setComparing] = useState(false);
+  const comparison = comparing ? previous : null;
   const areas = data?.areas ?? [];
+  const selected = areas.find(area => area.id === selectedArea);
+  const previousScore = selectedArea ? comparison?.scores[selectedArea] : undefined;
+  const delta = selected && previousScore !== undefined ? Number((selected.score - previousScore).toFixed(2)) : 0;
 
   return (
     <main className="mx-auto flex w-full max-w-7xl flex-col gap-6 font-sans">
@@ -53,14 +58,31 @@ export function RadarProfileView() {
             <div className="rounded-lg border border-border bg-surface p-5"><b className="text-2xl">{data.keywordCount}</b><p className="text-xs">Habilidades aprobadas</p><p className="text-xs text-text-secondary">{data.highRelevanceCount} de alta relevancia</p></div>
             <div className="rounded-lg border border-border bg-surface p-5"><b className="text-2xl">{data.pendingCount}</b><p className="text-xs">Habilidades pendientes</p></div>
           </div>
-          {data.approved.length === 0 && areas.every(area => area.score === 0) ? (
+          {data.version > 0 && data.approved.length === 0 && areas.every(area => area.score === 0) ? (
             <p className="rounded-lg border border-border bg-surface-soft p-4 text-sm text-text-secondary">Todavía no tienes habilidades aprobadas. El radar conserva sus seis ejes en 0/10. <Link href="/profile/documents" className="underline">Completar documentación y CV</Link>.</p>
           ) : null}
+          {data.version === 0 ? <p role="status">Aún no tienes publicaciones. Tu radar está sin datos.</p> : previous ? (
+            <section aria-label="Comparación de publicaciones" className="rounded-lg border border-border bg-surface p-5">
+              <Button type="button" variant="outline" aria-pressed={comparing} onClick={() => setComparing(!comparing)}>{comparing ? "Ocultar comparación" : "Comparar mis dos últimos radares"}</Button>
+              {comparison ? <>
+                <p>Actual (línea continua): {data.updatedAt ? new Date(data.updatedAt).toLocaleString("es-BO", DATE_FORMAT) : "Sin fecha"}</p>
+                <p>Anterior (línea discontinua): {new Date(comparison.updatedAt).toLocaleString("es-BO", DATE_FORMAT)}</p>
+                {data.processingStatus === "pending" ? <p role="status">Hay un recálculo pendiente. Se comparan las dos últimas publicaciones disponibles.</p> : null}
+                <div className="flex flex-wrap gap-2">{areas.map(area => <Button key={area.id} type="button" variant="outline" onClick={() => setSelectedArea(area.id)}>{area.name}</Button>)}</div>
+                {selectedArea ? <div role="status" className="mt-3">
+                  <p>{selected?.name}</p>
+                  <p>Puntaje anterior: {previousScore} / 10</p>
+                  <p>Puntaje actual: {selected?.score} / 10</p>
+                  <p>{delta === 0 ? "Sin cambio" : `${delta > 0 ? "Subió" : "Bajó"} ${Math.abs(delta).toLocaleString("es-BO")} puntos`}</p>
+                </div> : null}
+              </> : null}
+            </section>
+          ) : <p role="status">Tienes una publicación. Podrás compararla cuando se publique la próxima versión de tu radar.</p>}
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
-            <AffinityRadarChart areas={areas} average={data.average} onAreaClick={setSelectedArea} />
+            <AffinityRadarChart previousScores={comparison?.scores} areas={data.version === 0 ? [] : areas} average={data.average} onAreaClick={setSelectedArea} />
             <AreaBreakdownPanel areas={areas} average={data.average} />
           </div>
-          {selectedArea ? (
+          {selectedArea && !comparison ? (
             <RadarEvidencePanel key={`${data.userId}:${selectedArea}`} selected={selectedArea} radar={data} onClose={() => setSelectedArea(null)} />
           ) : null}
           <p className="text-xs text-text-secondary">Las puntuaciones reflejan las habilidades aprobadas y sus evidencias.</p>
