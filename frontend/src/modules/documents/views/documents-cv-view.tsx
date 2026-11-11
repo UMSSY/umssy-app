@@ -29,6 +29,7 @@ export function DocumentsCvView() {
     isLoading,
     isReloading,
     isUploading,
+    uploadProgress,
     isDeleting,
     loadError,
     reloadCvs,
@@ -50,14 +51,7 @@ export function DocumentsCvView() {
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    event.target.value = "";
-
-    if (!file) {
-      return;
-    }
-
+  const selectFile = (file: File) => {
     const validationError = validateCvFile(file);
 
     if (validationError) {
@@ -75,6 +69,15 @@ export function DocumentsCvView() {
     }
 
     setSelectedFile(file);
+  };
+
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+
+    if (file) {
+      selectFile(file);
+    }
   };
 
   const handleConfirmUpload = async (file: File) => {
@@ -168,7 +171,9 @@ export function DocumentsCvView() {
             isLoading={isLoading}
             isUploading={isUploading}
             isBusy={isBusy}
+            uploadProgress={uploadProgress}
             onSelectFile={openFilePicker}
+            onFileDropped={selectFile}
             onConfirmUpload={handleConfirmUpload}
           />
           <CvGenerateCard />
@@ -191,6 +196,7 @@ export function DocumentsCvView() {
         file={pendingReplacement}
         currentFileName={currentCv?.fileName}
         isReplacing={isUploading}
+        uploadProgress={uploadProgress}
         errorMessage={replaceError}
         onConfirm={handleConfirmReplace}
         onCancel={closeReplaceDialog}

@@ -260,6 +260,44 @@ it("offers to generate a cv from the profile data", async () => {
     vi.useRealTimers();
   });
 
+  it("selects a pdf dropped on the upload zone and uploads it on confirm", async () => {
+    const user = userEvent.setup();
+    await renderView();
+    const file = createFile("CV_Valeria_Quispe.pdf");
+
+    fireEvent.drop(screen.getByText("Selecciona tu CV en formato PDF"), { dataTransfer: { files: [file] } });
+
+    expect(screen.getByText("CV_Valeria_Quispe.pdf · 1.2 MB")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Confirmar carga" }));
+
+    expect(await screen.findByRole("status")).toHaveTextContent("Tu CV se cargó correctamente.");
+    expect(documentsService.uploadCv).toHaveBeenCalledWith(file, expect.any(Function));
+  });
+
+  it("rejects a dropped file that is not a pdf", async () => {
+    await renderView();
+
+    fireEvent.drop(screen.getByText("Selecciona tu CV en formato PDF"), {
+      dataTransfer: { files: [createFile("foto.png", "image/png")] },
+    });
+
+    expect(screen.getByRole("alert")).toHaveTextContent("El CV debe estar en formato PDF.");
+    expect(screen.getByRole("button", { name: "Confirmar carga" })).toBeDisabled();
+  });
+
+  it("asks before replacing the current cv with a dropped pdf", async () => {
+    storeCv(buildCv("CV_Valeria_Quispe.pdf", CV_SIZE_IN_BYTES));
+    await renderView();
+
+    fireEvent.drop(screen.getByText("Ya tienes un CV vigente"), {
+      dataTransfer: { files: [createFile("CV_Nuevo.pdf")] },
+    });
+
+    expect(await screen.findByText("¿Subir una nueva versión?")).toBeInTheDocument();
+    expect(documentsService.uploadCv).not.toHaveBeenCalled();
+  });
+
   it("opens the file picker from Seleccionar PDF", async () => {
     const user = userEvent.setup();
     await renderView();
