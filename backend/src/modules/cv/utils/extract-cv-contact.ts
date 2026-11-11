@@ -78,7 +78,7 @@ function findLocation(
 export function extractCvContact(
   headerLines: readonly string[],
   lines: readonly string[],
-): CvExtractedContactResponse {
+): Omit<CvExtractedContactResponse, 'cityId'> {
   const fullName = headerLines
     .map((line) => line.replace(CV_NAME_LABEL_PATTERN, '').trim())
     .find(isPersonNameLine);

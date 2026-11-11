@@ -22,7 +22,9 @@ describe('detectCvSectionHeading', () => {
     ['EXPERIENCIA LABORAL', 'experience'],
     ['Formación Académica:', 'education'],
     ['Datos personales', 'header'],
-    ['Habilidades', 'other'],
+    ['Habilidades técnicas', 'skills'],
+    ['PRESENTACIÓN PROFESIONAL', 'presentation'],
+    ['Idiomas', 'other'],
   ])('maps "%s" to %s', (line, key) => {
     expect(detectCvSectionHeading(line)).toBe(key);
   });
@@ -37,17 +39,23 @@ describe('splitCvSections', () => {
     expect(
       splitCvSections([
         'Juan Pérez',
+        'PERFIL',
+        'Ingeniero de sistemas',
         'EDUCACIÓN',
         'UMSS',
         'EXPERIENCIA',
         'Empresa SRL',
+        'HABILIDADES',
+        'TypeScript',
         'IDIOMAS',
         'Inglés',
       ]),
     ).toEqual({
       header: ['Juan Pérez'],
+      presentation: ['Ingeniero de sistemas'],
       education: ['UMSS'],
       experience: ['Empresa SRL'],
+      skills: ['TypeScript'],
       other: ['Inglés'],
     });
   });
