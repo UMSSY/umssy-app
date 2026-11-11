@@ -15,13 +15,13 @@ import { ResponseInterceptor } from '../../../common/interceptors/index.js';
 import { ZodValidationPipe } from '../../../common/pipes/zod-validation.pipe.js';
 import { toRegisteredUsersReportType } from '../mappers/generated-report.mapper.js';
 import {
-  registeredUsersFiltersSchema,
+  registeredUsersExportQuerySchema,
   registeredUsersQuerySchema,
-  rejectedUsersFiltersSchema,
+  rejectedUsersExportQuerySchema,
   rejectedUsersQuerySchema,
-  type RegisteredUsersFilters,
+  type RegisteredUsersExportQuery,
   type RegisteredUsersQuery,
-  type RejectedUsersFilters,
+  type RejectedUsersExportQuery,
   type RejectedUsersQuery,
 } from '../requests/report-users.schema.js';
 import {
@@ -62,13 +62,13 @@ export class ReportsController {
   @Get('registered-users/export')
   @ApiProduces('text/csv')
   async exportRegisteredUsersCsv(
-    @Query(new ZodValidationPipe(registeredUsersFiltersSchema))
-    filters: RegisteredUsersFilters,
+    @Query(new ZodValidationPipe(registeredUsersExportQuerySchema))
+    filters: RegisteredUsersExportQuery,
     @CurrentUserId() userId: string,
   ): Promise<StreamableFile> {
     const file = await this.reportsService.exportRegisteredUsersCsv(filters);
     await this.reportHistoryService.registerGeneratedReport(userId, {
-      fileName: file.fileName,
+      fileName: filters.format === 'pdf' ? file.fileName.replace(/\.csv$/i, '.pdf') : file.fileName,
       reportType: toRegisteredUsersReportType(filters.userType),
     });
     return toCsvFile(file);
@@ -86,13 +86,13 @@ export class ReportsController {
   @Get('rejected-users/export')
   @ApiProduces('text/csv')
   async exportRejectedUsersCsv(
-    @Query(new ZodValidationPipe(rejectedUsersFiltersSchema))
-    filters: RejectedUsersFilters,
+    @Query(new ZodValidationPipe(rejectedUsersExportQuerySchema))
+    filters: RejectedUsersExportQuery,
     @CurrentUserId() userId: string,
   ): Promise<StreamableFile> {
     const file = await this.reportsService.exportRejectedUsersCsv(filters);
     await this.reportHistoryService.registerGeneratedReport(userId, {
-      fileName: file.fileName,
+      fileName: filters.format === 'pdf' ? file.fileName.replace(/\.csv$/i, '.pdf') : file.fileName,
       reportType: 'REJECTED_USERS',
     });
     return toCsvFile(file);
