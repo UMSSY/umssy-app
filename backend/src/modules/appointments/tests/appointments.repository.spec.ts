@@ -128,7 +128,8 @@ describe('AppointmentsRepository', () => {
       const failure = new Error('Database unavailable');
       findMany.mockRejectedValue(failure);
 
-      await expect(repository.findMine(MENTOR_ID, scope, NOW)).rejects.toBe(
+      await expect(repository.findMine(MENTOR_ID, scope, NOW, 1, 10),
+      ).rejects.toBe(
         failure,
       );
     },
