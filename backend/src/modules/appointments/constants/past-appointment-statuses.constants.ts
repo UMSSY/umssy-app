@@ -4,4 +4,5 @@ import { ACTIVE_APPOINTMENT_STATUS_TITLES } from './active-appointment-statuses.
 export const PAST_APPOINTMENT_STATUS_TITLES = [
   ...ACTIVE_APPOINTMENT_STATUS_TITLES,
   AppointmentStatusTitle.COMPLETED,
+  AppointmentStatusTitle.LEGACY_COMPLETED,
 ];
