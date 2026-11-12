@@ -24,6 +24,7 @@ import { MentorMapper } from '../mappers/mentor.mapper.js';
 import type { MentorsRepository } from '../repositories/mentors.repository.js';
 import type { UserSkillService } from '../../skills/services/user-skill.service.js';
 import { buildEmptyMentorProfile } from './fixtures/mentor-profile.fixture.js';
+import { createMentorProfileEditingFixture } from './fixtures/mentor-profile-editing.fixture.js';
 
 describe('GET /api/mentors/me/profile-suggestions', () => {
   const path = '/api/mentors/me/profile-suggestions';
@@ -279,4 +280,52 @@ describe('GET /api/mentors/me/profile-suggestions', () => {
       'private database details',
     );
   });
+
+  it.each([
+    { field: 'photoUrl', code: 'MISSING_PROFILE_PHOTO' },
+    { field: 'aboutMe', code: 'MISSING_PROFESSIONAL_DESCRIPTION' },
+    { field: 'mentorTechnicalAreas', code: 'MISSING_SPECIALTY' },
+    { field: 'workExperiences', code: 'MISSING_WORK_EXPERIENCE' },
+  ] as const)(
+    'refreshes only $code after saving $field through its existing service with the same JWT (simulated repositories)',
+    async ({ field, code }) => {
+      const editing = createMentorProfileEditingFixture('mentor-a');
+      findActiveMentorById.mockImplementation(editing.read);
+      const authorization = token();
+      const before = await request(app.getHttpServer())
+        .get(path)
+        .auth(authorization, { type: 'bearer' })
+        .expect(200);
+      expect(before.body.data.pendingCount).toBe(4);
+      const storedBefore = editing.snapshot();
+
+      await editing.save[field]();
+
+      const after = await request(app.getHttpServer())
+        .get(path)
+        .auth(authorization, { type: 'bearer' })
+        .expect(200);
+      expect(after.body.data.suggestions).toEqual(
+        before.body.data.suggestions.filter(
+          (item: { code: string }) => item.code !== code,
+        ),
+      );
+      expect(after.body.data.pendingCount).toBe(3);
+      expect(after.body.data.pendingCount).toBe(
+        after.body.data.suggestions.length,
+      );
+      expect(editing.snapshot()[field]).not.toEqual(storedBefore[field]);
+      expect(
+        Object.values(editing.writes).reduce(
+          (count, write) => count + write.mock.calls.length,
+          0,
+        ),
+      ).toBe(1);
+      expect(findUserById.mock.calls).toEqual([['mentor-a'], ['mentor-a']]);
+      expect(findActiveMentorById.mock.calls.map(([id]) => id)).toEqual([
+        'mentor-a',
+        'mentor-a',
+      ]);
+    },
+  );
 });
