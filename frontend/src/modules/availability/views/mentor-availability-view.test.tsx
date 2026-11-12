@@ -37,6 +37,7 @@ describe("MentorAvailabilityView", () => {
   afterEach(() => {
     cleanup()
     vi.useRealTimers()
+    window.localStorage.clear()
   })
 
   it("muestra el skeleton mientras carga", () => {
@@ -97,6 +98,21 @@ describe("MentorAvailabilityView", () => {
     fireEvent.click(screen.getByRole("button", { name: "Semana anterior" }))
     expect(screen.getByText("28 de septiembre – 4 de octubre de 2026")).toBeInTheDocument()
     await waitFor(() => expect(lastRequestedRange()?.from).toBe("2026-09-28T04:00:00.000Z"))
+  })
+
+  it("muestra el selector de densidad y se mantiene al recargar", async () => {
+    vi.spyOn(availabilityApi, "getAvailabilityBlocks").mockResolvedValue([])
+    const user = userEvent.setup({ delay: null })
+    const { unmount } = renderWithQuery(<MentorAvailabilityView />)
+
+    expect(screen.getByRole("button", { name: "Normal" })).toHaveAttribute("aria-pressed", "true")
+
+    await user.click(screen.getByRole("button", { name: "Compacta" }))
+    expect(screen.getByRole("button", { name: "Compacta" })).toHaveAttribute("aria-pressed", "true")
+
+    unmount()
+    renderWithQuery(<MentorAvailabilityView />)
+    expect(screen.getByRole("button", { name: "Compacta" })).toHaveAttribute("aria-pressed", "true")
   })
 
   it("Hoy vuelve a la semana actual", async () => {
