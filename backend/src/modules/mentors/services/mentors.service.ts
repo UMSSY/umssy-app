@@ -18,6 +18,7 @@ import type { UpdateMentorOrientationTypesDto } from '../requests/update-mentor-
 import { MentorMapper } from '../mappers/mentor.mapper.js';
 import type { MentorDirectoryQuery } from '../requests/mentor-directory-query.schema.js';
 import { MentorAffinityService } from './mentor-affinity.service.js';
+import { MentorProfileSuggestionsService } from './mentor-profile-suggestions.service.js';
 import type { Prisma } from '../../../prisma/client.js';
 
 const DIRECTORY_PAGE_SIZE = 6 as const;
@@ -42,8 +43,15 @@ export class MentorsService {
     private readonly mentorsRepository: MentorsRepository,
     private readonly mentorMapper: MentorMapper,
     private readonly userSkillService: UserSkillService,
+    private readonly mentorProfileSuggestionsService: MentorProfileSuggestionsService,
     private readonly mentorAffinityService?: MentorAffinityService,
   ) {}
+
+  async findMyProfileSuggestions(userId: string) {
+    const suggestions =
+      await this.mentorProfileSuggestionsService.findSuggestions(userId);
+    return this.mentorMapper.toProfileSuggestionsResponse(suggestions);
+  }
 
   async findAll() {
     const now = new Date();

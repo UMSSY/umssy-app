@@ -1,3 +1,4 @@
+import type { MentorProfileSuggestionsService } from '../services/mentor-profile-suggestions.service.js';
 import { describe, expect, it, vi } from 'vitest';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { MentorsRepository } from '../repositories/mentors.repository.js';
@@ -108,6 +109,7 @@ describe('capacidad HU-7-1', () => {
       repository,
       new MentorMapper(),
       {} as UserSkillService,
+      {} as MentorProfileSuggestionsService,
     );
     return { service, writes, queries };
   }
