@@ -2,18 +2,12 @@ import { getRolesLabel, getSessionRoles } from "@/modules/auth";
 import { profileService } from "@/modules/profile";
 import { getAccessToken } from "@/shared/services/storage/access-token-storage";
 
-const FALLBACK_AUTHOR_NAME = "Administrador";
-
 export async function resolveReportAuthor(): Promise<string> {
   const roleLabel = getRolesLabel(getSessionRoles(getAccessToken()));
-  let fullName = "";
+  const profile = await profileService.getProfile();
+  const fullName = [profile?.firstName, profile?.lastName].filter(Boolean).join(" ").trim();
 
-  try {
-    const profile = await profileService.getProfile();
-    fullName = [profile?.firstName, profile?.lastName].filter(Boolean).join(" ").trim();
-  } catch {
-    fullName = "";
-  }
+  if (!fullName) throw new Error("No se pudo identificar al administrador que genera el reporte.");
 
-  return `${fullName || FALLBACK_AUTHOR_NAME} (${roleLabel})`;
+  return `${fullName} (${roleLabel})`;
 }
