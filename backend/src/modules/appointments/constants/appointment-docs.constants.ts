@@ -3,6 +3,7 @@ export const APPOINTMENT_MESSAGES = {
   invalidScope: 'El alcance debe ser upcoming o past',
   invalidPage: 'La página debe ser un número entero mayor o igual a 1',
   invalidPageSize: 'El tamaño de página debe ser un número entero entre 1 y 50',
+  invalidSearch: 'La búsqueda no puede superar los 100 caracteres',
   invalidBlockId: 'El bloque de disponibilidad no es válido',
   missingTopic: 'Selecciona el tema de la sesión',
   invalidTopic: 'El tema de la sesión no es válido',
@@ -99,6 +100,8 @@ export const FIND_MY_APPOINTMENTS_DOCS = {
   invalidQueryDescription: 'Los parámetros de consulta no son válidos',
   pageDescription: 'Número de página, desde 1; por defecto 1',
   pageSizeDescription: 'Citas por página, entre 1 y 50; por defecto 10',
+  searchDescription:
+    'Nombre o parte del nombre de la otra persona, sin distinguir mayúsculas ni tildes; máximo 100 caracteres',
   responseDescription:
     'Página de citas propias con horarios UTC, nombre de la contraparte y total',
 } as const;

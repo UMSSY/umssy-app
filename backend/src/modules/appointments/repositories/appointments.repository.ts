@@ -5,6 +5,10 @@ import { AppointmentStatusTitle } from '../../availability/enums/appointment-sta
 import { ACTIVE_APPOINTMENT_STATUS_TITLES } from '../constants/active-appointment-statuses.constants.js';
 import { APPOINTMENT_PARTICIPANT_LOCK_PREFIX } from '../constants/appointment-lock.constants.js';
 import { APPOINTMENT_SELECT } from '../constants/appointment-select.constants.js';
+import {
+  ACCENTED_SEARCH_CHARACTERS,
+  UNACCENTED_SEARCH_CHARACTERS,
+} from '../constants/my-appointments-search.constants.js';
 import { DAILY_APPOINTMENT_LIMIT_STATUS_TITLES } from '../constants/daily-appointment-limit-statuses.constants.js';
 import type { BoliviaDayRange } from '../types/bolivia-day-range.types.js';
 import type { AppointmentRecord } from '../types/appointment-record.types.js';
@@ -88,13 +92,37 @@ export class AppointmentsRepository {
     return reservations > 0;
   }
 
+  async findCounterpartIdsByName(
+    userId: string,
+    normalizedName: string,
+  ): Promise<string[]> {
+    const pattern = `%${normalizedName.replace(/[%_\\]/g, '\\$&')}%`;
+    const rows = await this.prisma.$queryRaw<{ id: string }[]>`
+      SELECT DISTINCT u.id
+      FROM appointments a
+      JOIN users u ON u.id = CASE
+        WHEN a.mentor_id = ${userId}::uuid THEN a.student_id
+        ELSE a.mentor_id
+      END
+      WHERE (a.mentor_id = ${userId}::uuid OR a.student_id = ${userId}::uuid)
+        AND translate(
+          lower(u.first_name || ' ' || u.last_name),
+          ${ACCENTED_SEARCH_CHARACTERS},
+          ${UNACCENTED_SEARCH_CHARACTERS}
+        ) LIKE ${pattern} ESCAPE '\\'
+    `;
+
+    return rows.map((row) => row.id);
+  }
+
   countMine(
     userId: string,
     scope: MyAppointmentsQuery['scope'],
     now: Date,
+    counterpartIds?: string[],
   ): Promise<number> {
     return this.prisma.appointment.count({
-      where: this.myAppointmentsWhere(userId, scope, now),
+      where: this.myAppointmentsWhere(userId, scope, now, counterpartIds),
     });
   }
 
@@ -104,9 +132,10 @@ export class AppointmentsRepository {
     now: Date,
     page: number,
     pageSize: number,
+    counterpartIds?: string[],
   ): Promise<AppointmentRecord[]> {
     return this.prisma.appointment.findMany({
-      where: this.myAppointmentsWhere(userId, scope, now),
+      where: this.myAppointmentsWhere(userId, scope, now, counterpartIds),
       orderBy:
         scope === 'upcoming'
           ? [{ startAt: 'asc' }, { id: 'asc' }]
@@ -121,9 +150,15 @@ export class AppointmentsRepository {
     userId: string,
     scope: MyAppointmentsQuery['scope'],
     now: Date,
+    counterpartIds?: string[],
   ) {
     return {
-      OR: [{ mentorId: userId }, { studentId: userId }],
+      OR: counterpartIds
+        ? [
+            { mentorId: userId, studentId: { in: counterpartIds } },
+            { studentId: userId, mentorId: { in: counterpartIds } },
+          ]
+        : [{ mentorId: userId }, { studentId: userId }],
       endAt: scope === 'upcoming' ? { gt: now } : { lte: now },
       status: { title: { in: ACTIVE_APPOINTMENT_STATUS_TITLES } },
     };

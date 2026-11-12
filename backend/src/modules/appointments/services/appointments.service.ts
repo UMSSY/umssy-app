@@ -152,10 +152,17 @@ export class AppointmentsService {
     query: MyAppointmentsQuery,
   ): Promise<MyAppointmentsPageResponse> {
     const now = new Date();
+    const counterpartIds = query.q
+      ? await this.appointmentsRepository.findCounterpartIdsByName(
+          userId,
+          this.normalizeSearchText(query.q),
+        )
+      : undefined;
     const total = await this.appointmentsRepository.countMine(
       userId,
       query.scope,
       now,
+      counterpartIds,
     );
     const lastPage = Math.max(1, Math.ceil(total / query.pageSize));
     const page = Math.min(query.page, lastPage);
@@ -165,6 +172,7 @@ export class AppointmentsService {
       now,
       page,
       query.pageSize,
+      counterpartIds,
     );
 
     return {
@@ -209,6 +217,14 @@ export class AppointmentsService {
     if (!offersTopic) {
       throw new InvalidOrientationTypeException();
     }
+  }
+
+  private normalizeSearchText(text: string): string {
+    return text
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/\s+/g, ' ');
   }
 
   private async findParticipatedAppointment(
