@@ -20,9 +20,11 @@ import { AppointmentNotOwnedException } from '../exceptions/appointment-not-owne
 import { AppointmentMapper } from '../mappers/appointment.mapper.js';
 import { AppointmentsRepository } from '../repositories/appointments.repository.js';
 import type { CreateAppointmentDto } from '../requests/create-appointment.request.js';
+import type { AppointmentDetailResponse } from '../types/appointment-detail-response.types.js';
 import type { AppointmentRecord } from '../types/appointment-record.types.js';
 import type { MyAppointmentResponse } from '../types/my-appointment-response.types.js';
 import type { MyAppointmentsQuery } from '../types/my-appointments-query.types.js';
+import { buildMeetingUrl, canShareMeetingUrl } from '../utils/meeting-url.js';
 
 @Injectable()
 export class AppointmentsService {
@@ -119,6 +121,7 @@ export class AppointmentsService {
             statusId,
             orientationTypeId: payload.orientationTypeId,
             message: payload.message,
+            meetingUrl: buildMeetingUrl(),
           },
           tx,
         );
@@ -151,9 +154,17 @@ export class AppointmentsService {
     return this.appointmentMapper.toResponseList(appointments, userId);
   }
 
-  async findOne(userId: string, id: string): Promise<MyAppointmentResponse> {
+  async findOne(
+    userId: string,
+    id: string,
+  ): Promise<AppointmentDetailResponse> {
     const appointment = await this.findParticipatedAppointment(userId, id);
-    return this.appointmentMapper.toResponse(appointment, userId);
+    const meetingUrl = await this.resolveMeetingUrl(appointment);
+    return this.appointmentMapper.toDetailResponse(
+      appointment,
+      userId,
+      meetingUrl,
+    );
   }
 
   async getCounterpartPhoto(
@@ -166,6 +177,27 @@ export class AppointmentsService {
         ? appointment.studentId
         : appointment.mentorId;
     return this.profilePhotoService.getPhoto(counterpartId);
+  }
+
+  private async resolveMeetingUrl(
+    appointment: AppointmentRecord,
+  ): Promise<string | null> {
+    if (
+      !canShareMeetingUrl(
+        appointment.status.title,
+        appointment.endAt,
+        new Date(),
+      )
+    ) {
+      return null;
+    }
+    if (appointment.meetingUrl) {
+      return appointment.meetingUrl;
+    }
+    return this.appointmentsRepository.assignMeetingUrl(
+      appointment.id,
+      buildMeetingUrl(),
+    );
   }
 
   private async findParticipatedAppointment(
