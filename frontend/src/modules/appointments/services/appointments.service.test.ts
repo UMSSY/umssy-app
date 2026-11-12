@@ -11,9 +11,11 @@ describe("getMyAppointments", () => {
     vi.restoreAllMocks()
   })
 
-  it("pide las citas del usuario con el alcance elegido", async () => {
+  it("pide las citas del usuario con el alcance elegido y devuelve las de la página", async () => {
     const appointments = [{ id: "a1" }]
-    const get = vi.spyOn(apiClient, "get").mockResolvedValue(envelope(appointments))
+    const get = vi
+      .spyOn(apiClient, "get")
+      .mockResolvedValue(envelope({ items: appointments, total: 1, page: 1, pageSize: 10 }))
 
     const result = await appointmentsApi.getMyAppointments("past")
 
