@@ -17,17 +17,17 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { CurrentUserId } from '../../common/decorators/current-user-id.decorator.js';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
-import { ResponseInterceptor } from '../../common/interceptors/response.interceptor.js';
-import { buildRequestValidationException } from '../../common/utils/build-request-validation-exception.js';
-import { toApiBody } from '../../common/utils/to-api-body.js';
-import { PortfolioService } from './portfolio.service.js';
+import { CurrentUserId } from '../../../common/decorators/current-user-id.decorator.js';
+import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
+import { ResponseInterceptor } from '../../../common/interceptors/response.interceptor.js';
+import { buildRequestValidationException } from '../../../common/utils/build-request-validation-exception.js';
+import { toApiBody } from '../../../common/utils/to-api-body.js';
 import {
   updatePortfolioProjectsSchema,
   type UpdatePortfolioProjectsRequest,
-} from './requests/update-portfolio-projects.schema.js';
-import type { PortfolioProjectDto } from './types/portfolio.types.js';
+} from '../requests/update-portfolio-projects.schema.js';
+import type { PortfolioProjectResponse } from '../responses/portfolio-project.response.js';
+import { PortfolioService } from '../services/portfolio.service.js';
 
 @ApiTags('profile')
 @ApiBearerAuth()
@@ -53,7 +53,7 @@ export class PortfolioController {
   })
   getProjects(
     @CurrentUserId() userId: string,
-  ): Promise<PortfolioProjectDto[]> {
+  ): Promise<PortfolioProjectResponse[]> {
     return this.portfolioService.getProjects(userId);
   }
 
@@ -73,8 +73,7 @@ export class PortfolioController {
     @CurrentUserId() userId: string,
     @Body({ schema: updatePortfolioProjectsSchema })
     request: UpdatePortfolioProjectsRequest,
-  ): Promise<PortfolioProjectDto[]> {
+  ): Promise<PortfolioProjectResponse[]> {
     return this.portfolioService.updateProjects(userId, request.projects);
   }
 }
-

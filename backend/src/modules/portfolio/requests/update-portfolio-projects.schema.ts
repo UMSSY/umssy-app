@@ -1,8 +1,6 @@
 import { z } from 'zod';
-import {
-  MAX_PORTFOLIO_PROJECTS,
-  PORTFOLIO_PROVIDERS,
-} from '../types/portfolio.types.js';
+import { MAX_PORTFOLIO_PROJECTS } from '../constants/portfolio.constants.js';
+import { PORTFOLIO_PROVIDERS } from '../enums/portfolio-provider.enum.js';
 
 export const portfolioProjectItemSchema = z.object({
   provider: z.enum(PORTFOLIO_PROVIDERS),
@@ -33,4 +31,3 @@ export type PortfolioProjectItemRequest = z.infer<
 export type UpdatePortfolioProjectsRequest = z.infer<
   typeof updatePortfolioProjectsSchema
 >;
-

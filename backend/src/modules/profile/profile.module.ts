@@ -52,7 +52,6 @@ import { PortfolioModule } from '../portfolio/portfolio.module.js';
     ProfileService,
     CityCatalogService,
     ProfilePhotoService,
-    PortfolioModule,
   ],
 })
 export class ProfileModule {}

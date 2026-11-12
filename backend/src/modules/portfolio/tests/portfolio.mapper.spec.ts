@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { PortfolioProjectMapper } from './mappers/portfolio-project.mapper.js';
-import type { PortfolioProjectEntity } from './types/portfolio.types.js';
+import { PortfolioProjectMapper } from '../mappers/portfolio-project.mapper.js';
+import type { PortfolioProjectEntity } from '../types/portfolio-project-entity.type.js';
 
 const userId = '11111111-1111-4111-8111-111111111111';
 
 describe('PortfolioProjectMapper', () => {
   const mapper = new PortfolioProjectMapper();
 
-  it('transforms a portfolio project entity into a standardized DTO', () => {
+  it('transforms a portfolio project entity into a standardized Response DTO', () => {
     const entity: PortfolioProjectEntity = {
       id: '22222222-2222-4222-8222-222222222222',
       userId,
@@ -21,7 +21,7 @@ describe('PortfolioProjectMapper', () => {
       displayOrder: 0,
     };
 
-    expect(mapper.toDto(entity)).toEqual({
+    expect(mapper.toResponse(entity)).toEqual({
       id: '22222222-2222-4222-8222-222222222222',
       provider: 'github',
       repoName: 'umssy/umssy-app',
@@ -60,11 +60,10 @@ describe('PortfolioProjectMapper', () => {
       displayOrder: 1,
     };
 
-    const result = mapper.toDtoList([second, first]);
+    const result = mapper.toResponseList([second, first]);
 
     expect(result.map((item) => item.id)).toEqual([first.id, second.id]);
     expect(result[1]?.description).toBeNull();
     expect(result[1]?.language).toBeNull();
   });
 });
-
