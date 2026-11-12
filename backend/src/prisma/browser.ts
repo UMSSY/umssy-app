@@ -428,6 +428,11 @@ export type MentorParticipationStatus = Prisma.MentorParticipationStatusModel
  */
 export type MentorOfferStatus = Prisma.MentorOfferStatusModel
 /**
+ * Model PortfolioProvider
+ * 
+ */
+export type PortfolioProvider = Prisma.PortfolioProviderModel
+/**
  * Model UserSocialAccount
  * 
  */

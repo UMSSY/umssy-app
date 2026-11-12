@@ -133,6 +133,7 @@ export const ModelName = {
   RadarCvReviewStatus: 'RadarCvReviewStatus',
   MentorParticipationStatus: 'MentorParticipationStatus',
   MentorOfferStatus: 'MentorOfferStatus',
+  PortfolioProvider: 'PortfolioProvider',
   UserSocialAccount: 'UserSocialAccount',
   UserPortfolioProject: 'UserPortfolioProject'
 } as const
@@ -1256,14 +1257,24 @@ export const MentorOfferStatusScalarFieldEnum = {
 export type MentorOfferStatusScalarFieldEnum = (typeof MentorOfferStatusScalarFieldEnum)[keyof typeof MentorOfferStatusScalarFieldEnum]
 
 
+export const PortfolioProviderScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PortfolioProviderScalarFieldEnum = (typeof PortfolioProviderScalarFieldEnum)[keyof typeof PortfolioProviderScalarFieldEnum]
+
+
 export const UserSocialAccountScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
-  provider: 'provider',
+  providerId: 'providerId',
   externalId: 'externalId',
   username: 'username',
   profileUrl: 'profileUrl',
-  accessToken: 'accessToken',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1275,7 +1286,7 @@ export const UserPortfolioProjectScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   socialAccountId: 'socialAccountId',
-  provider: 'provider',
+  providerId: 'providerId',
   repoName: 'repoName',
   repoUrl: 'repoUrl',
   description: 'description',

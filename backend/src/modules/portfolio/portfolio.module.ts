@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { JwtAuthModule } from '../../common/guards/jwt-auth.module.js';
 import { PrismaModule } from '../../common/prisma/prisma.module.js';
+import { PortfolioController } from './controllers/portfolio.controller.js';
 import { PortfolioProjectMapper } from './mappers/portfolio-project.mapper.js';
-import { PortfolioController } from './portfolio.controller.js';
-import { PortfolioRepository } from './portfolio.repository.js';
-import { PortfolioService } from './portfolio.service.js';
+import { PortfolioRepository } from './repositories/portfolio.repository.js';
+import { PortfolioService } from './services/portfolio.service.js';
 
 @Module({
   imports: [PrismaModule, JwtAuthModule],
@@ -14,7 +14,6 @@ import { PortfolioService } from './portfolio.service.js';
     PortfolioRepository,
     PortfolioProjectMapper,
   ],
-  exports: [PortfolioService, PortfolioRepository, PortfolioProjectMapper],
+  exports: [PortfolioService],
 })
 export class PortfolioModule {}
-

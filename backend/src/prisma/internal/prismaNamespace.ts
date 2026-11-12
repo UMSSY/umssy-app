@@ -479,6 +479,7 @@ export const ModelName = {
   RadarCvReviewStatus: 'RadarCvReviewStatus',
   MentorParticipationStatus: 'MentorParticipationStatus',
   MentorOfferStatus: 'MentorOfferStatus',
+  PortfolioProvider: 'PortfolioProvider',
   UserSocialAccount: 'UserSocialAccount',
   UserPortfolioProject: 'UserPortfolioProject'
 } as const
@@ -496,7 +497,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "appointmentStatus" | "proposalStatus" | "eventModality" | "eventOrigin" | "eventStatus" | "registrationStatus" | "city" | "company" | "user" | "role" | "userRole" | "education" | "workExperience" | "radarArea" | "skill" | "jobOfferSkill" | "userSkill" | "certification" | "userCvFile" | "profileSkillProcessingState" | "technicalArea" | "orientationType" | "mentorTechnicalArea" | "mentorOrientationType" | "availabilityBlock" | "blockedDate" | "appointment" | "appointmentDocument" | "timeProposal" | "appointmentHistory" | "eventCategory" | "event" | "eventRegistration" | "eventAttendance" | "jobOffer" | "jobOfferModality" | "jobOfferContractType" | "jobOfferStatus" | "adminExportHistory" | "accessRequestStatus" | "accessRequestDocumentType" | "file" | "career" | "accessRequest" | "mentorParticipationRequest" | "mentorSlotOffer" | "activationOtp" | "messageStatus" | "connectionRequestStatus" | "attachmentType" | "conversation" | "conversationParticipant" | "message" | "messageAttachment" | "chatUserBlock" | "connectionRequest" | "userPresence" | "passwordResetOtp" | "mentorParticipationAttemptLimit" | "jobApplicationStatus" | "jobApplication" | "surveyStatus" | "surveyQuestionType" | "surveyTargetAudience" | "survey" | "surveyQuestion" | "surveyQuestionOption" | "surveyResponse" | "surveyAnswer" | "auditAction" | "auditEvent" | "documentValidation" | "mentorIntakeAttempt" | "mentorParticipationSanction" | "mentorIntakeOperation" | "radarCvEvidence" | "radarScoreSnapshot" | "radarAuditEvent" | "radarCvExtractionStatus" | "radarCvReviewStatus" | "mentorParticipationStatus" | "mentorOfferStatus" | "userSocialAccount" | "userPortfolioProject"
+    modelProps: "appointmentStatus" | "proposalStatus" | "eventModality" | "eventOrigin" | "eventStatus" | "registrationStatus" | "city" | "company" | "user" | "role" | "userRole" | "education" | "workExperience" | "radarArea" | "skill" | "jobOfferSkill" | "userSkill" | "certification" | "userCvFile" | "profileSkillProcessingState" | "technicalArea" | "orientationType" | "mentorTechnicalArea" | "mentorOrientationType" | "availabilityBlock" | "blockedDate" | "appointment" | "appointmentDocument" | "timeProposal" | "appointmentHistory" | "eventCategory" | "event" | "eventRegistration" | "eventAttendance" | "jobOffer" | "jobOfferModality" | "jobOfferContractType" | "jobOfferStatus" | "adminExportHistory" | "accessRequestStatus" | "accessRequestDocumentType" | "file" | "career" | "accessRequest" | "mentorParticipationRequest" | "mentorSlotOffer" | "activationOtp" | "messageStatus" | "connectionRequestStatus" | "attachmentType" | "conversation" | "conversationParticipant" | "message" | "messageAttachment" | "chatUserBlock" | "connectionRequest" | "userPresence" | "passwordResetOtp" | "mentorParticipationAttemptLimit" | "jobApplicationStatus" | "jobApplication" | "surveyStatus" | "surveyQuestionType" | "surveyTargetAudience" | "survey" | "surveyQuestion" | "surveyQuestionOption" | "surveyResponse" | "surveyAnswer" | "auditAction" | "auditEvent" | "documentValidation" | "mentorIntakeAttempt" | "mentorParticipationSanction" | "mentorIntakeOperation" | "radarCvEvidence" | "radarScoreSnapshot" | "radarAuditEvent" | "radarCvExtractionStatus" | "radarCvReviewStatus" | "mentorParticipationStatus" | "mentorOfferStatus" | "portfolioProvider" | "userSocialAccount" | "userPortfolioProject"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -6568,6 +6569,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    PortfolioProvider: {
+      payload: Prisma.$PortfolioProviderPayload<ExtArgs>
+      fields: Prisma.PortfolioProviderFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PortfolioProviderFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortfolioProviderPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PortfolioProviderFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortfolioProviderPayload>
+        }
+        findFirst: {
+          args: Prisma.PortfolioProviderFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortfolioProviderPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PortfolioProviderFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortfolioProviderPayload>
+        }
+        findMany: {
+          args: Prisma.PortfolioProviderFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortfolioProviderPayload>[]
+        }
+        create: {
+          args: Prisma.PortfolioProviderCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortfolioProviderPayload>
+        }
+        createMany: {
+          args: Prisma.PortfolioProviderCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PortfolioProviderCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortfolioProviderPayload>[]
+        }
+        delete: {
+          args: Prisma.PortfolioProviderDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortfolioProviderPayload>
+        }
+        update: {
+          args: Prisma.PortfolioProviderUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortfolioProviderPayload>
+        }
+        deleteMany: {
+          args: Prisma.PortfolioProviderDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PortfolioProviderUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PortfolioProviderUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortfolioProviderPayload>[]
+        }
+        upsert: {
+          args: Prisma.PortfolioProviderUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortfolioProviderPayload>
+        }
+        aggregate: {
+          args: Prisma.PortfolioProviderAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePortfolioProvider>
+        }
+        groupBy: {
+          args: Prisma.PortfolioProviderGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PortfolioProviderGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PortfolioProviderCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PortfolioProviderCountAggregateOutputType> | number
+        }
+      }
+    }
     UserSocialAccount: {
       payload: Prisma.$UserSocialAccountPayload<ExtArgs>
       fields: Prisma.UserSocialAccountFieldRefs
@@ -7858,14 +7933,24 @@ export const MentorOfferStatusScalarFieldEnum = {
 export type MentorOfferStatusScalarFieldEnum = (typeof MentorOfferStatusScalarFieldEnum)[keyof typeof MentorOfferStatusScalarFieldEnum]
 
 
+export const PortfolioProviderScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PortfolioProviderScalarFieldEnum = (typeof PortfolioProviderScalarFieldEnum)[keyof typeof PortfolioProviderScalarFieldEnum]
+
+
 export const UserSocialAccountScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
-  provider: 'provider',
+  providerId: 'providerId',
   externalId: 'externalId',
   username: 'username',
   profileUrl: 'profileUrl',
-  accessToken: 'accessToken',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -7877,7 +7962,7 @@ export const UserPortfolioProjectScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   socialAccountId: 'socialAccountId',
-  provider: 'provider',
+  providerId: 'providerId',
   repoName: 'repoName',
   repoUrl: 'repoUrl',
   description: 'description',
@@ -8283,6 +8368,7 @@ export type GlobalOmitConfig = {
   radarCvReviewStatus?: Prisma.RadarCvReviewStatusOmit
   mentorParticipationStatus?: Prisma.MentorParticipationStatusOmit
   mentorOfferStatus?: Prisma.MentorOfferStatusOmit
+  portfolioProvider?: Prisma.PortfolioProviderOmit
   userSocialAccount?: Prisma.UserSocialAccountOmit
   userPortfolioProject?: Prisma.UserPortfolioProjectOmit
 }

@@ -12,16 +12,14 @@ import {
   it,
   vi,
 } from 'vitest';
-import { DomainExceptionFilter } from '../../common/filters/domain-exception.filter.js';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
-import type { SessionService } from '../../common/services/session.service.js';
-import {
-  DuplicatePortfolioProjectException,
-  MaxPortfolioProjectsExceededException,
-} from './exceptions/portfolio.exceptions.js';
-import { PortfolioController } from './portfolio.controller.js';
-import { PortfolioService } from './portfolio.service.js';
-import type { PortfolioProjectDto } from './types/portfolio.types.js';
+import { DomainExceptionFilter } from '../../../common/filters/domain-exception.filter.js';
+import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
+import type { SessionService } from '../../../common/services/session.service.js';
+import { PortfolioController } from '../controllers/portfolio.controller.js';
+import { DuplicatePortfolioProjectException } from '../exceptions/duplicate-portfolio-project.exception.js';
+import { MaxPortfolioProjectsExceededException } from '../exceptions/max-portfolio-projects-exceeded.exception.js';
+import type { PortfolioProjectResponse } from '../responses/portfolio-project.response.js';
+import { PortfolioService } from '../services/portfolio.service.js';
 
 const userId = '11111111-1111-4111-8111-111111111111';
 const jwt = new JwtService({ secret: 'portfolio-controller-test-secret' });
@@ -31,7 +29,7 @@ const token = jwt.sign({
   roles: ['titulado'],
 });
 
-const sampleDto: PortfolioProjectDto = {
+const sampleDto: PortfolioProjectResponse = {
   id: '22222222-2222-4222-8222-222222222222',
   provider: 'github',
   repoName: 'umssy/umssy-app',
@@ -241,4 +239,3 @@ describe('PortfolioController', () => {
     expect(pathItem?.put?.responses).toHaveProperty('400');
   });
 });
-
