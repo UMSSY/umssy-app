@@ -1,5 +1,5 @@
 import { toBoliviaTime } from "@/shared/utils/date-time";
-import { BLOCK_MESSAGES } from "../constants/availability.constants";
+import { BLOCK_DURATION_MINUTES, BLOCK_MESSAGES } from "../constants/availability.constants";
 import type { BlockValidationErrors } from "../types/block-validation-errors.types";
 import type { CreateAvailabilityBlockInput } from "../types/create-availability-block-input.types";
 
@@ -23,6 +23,10 @@ export function validateBlock(
 
   if (endTime <= startTime) {
     return { endAt: BLOCK_MESSAGES.endBeforeStart };
+  }
+
+  if ((endTime - startTime) % (BLOCK_DURATION_MINUTES * 60_000) !== 0) {
+    errors.endAt = BLOCK_MESSAGES.invalidDuration;
   }
 
   if (startTime <= now.getTime()) {
