@@ -3,6 +3,7 @@ import { cleanup, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { profileService } from "../services/profile.service";
 import { profileCompletenessService } from "../services/profile-completeness.service";
+import { createProfileCompleteness } from "../testing/profile-completeness.fixture";
 import type { ProfileResponse } from "../types/profile-response.types";
 import { ProfileOverviewView } from "./profile-overview-view";
 
@@ -52,7 +53,7 @@ const COMPLETE_PROFILE: ProfileResponse = {
 describe("ProfileOverviewView", () => {
   beforeEach(() => {
     vi.mocked(profileService.getProfile).mockResolvedValue(COMPLETE_PROFILE);
-    vi.mocked(profileCompletenessService.getCompleteness).mockResolvedValue({ percentage: 35, sections: [] });
+    vi.mocked(profileCompletenessService.getCompleteness).mockResolvedValue(createProfileCompleteness(["contact", "presentation"]));
   });
 
   afterEach(() => {
@@ -70,10 +71,33 @@ describe("ProfileOverviewView", () => {
 
   it("shows a loading message while the profile is requested", () => {
     vi.mocked(profileService.getProfile).mockReturnValue(new Promise(() => {}));
+    vi.mocked(profileCompletenessService.getCompleteness).mockReturnValue(new Promise(() => {}));
 
     render(<ProfileOverviewView />);
 
-    expect(screen.getByRole("status")).toHaveTextContent("Cargando tu perfil...");
+    expect(screen.getByText("Cargando tu perfil...")).toHaveAttribute("role", "status");
+    expect(screen.getByText("Cargando el progreso de tu perfil...")).toBeVisible();
+    expect(profileService.getProfile).toHaveBeenCalledOnce();
+    expect(profileCompletenessService.getCompleteness).toHaveBeenCalledOnce();
+  });
+
+  it("shows completeness without waiting for the profile request to finish", async () => {
+    vi.mocked(profileService.getProfile).mockReturnValue(new Promise(() => {}));
+    render(<ProfileOverviewView />);
+
+    expect(await screen.findByRole("progressbar", { name: "Completitud del perfil" })).toHaveAttribute("aria-valuenow", "35");
+    expect(screen.getByRole("region", { name: "Secciones del perfil" })).toBeVisible();
+    expect(screen.getByText("Cargando tu perfil...")).toBeVisible();
+    expect(screen.queryByText("Valeria Quispe")).not.toBeInTheDocument();
+  });
+
+  it("keeps profile data available while completeness is still loading", async () => {
+    vi.mocked(profileCompletenessService.getCompleteness).mockReturnValue(new Promise(() => {}));
+    render(<ProfileOverviewView />);
+
+    expect(await screen.findByText("Valeria Quispe")).toBeVisible();
+    expect(screen.getByText("Cargando el progreso de tu perfil...")).toBeVisible();
+    expect(screen.getByRole("link", { name: "Editar datos personales" })).toBeVisible();
   });
 
   it("invites the user to complete a new profile", async () => {
