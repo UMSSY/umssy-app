@@ -3,39 +3,67 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { PROFILE_SKILLS_RADAR_QUERY_KEY } from "@/modules/profile";
+import type { Feedback } from "@/modules/profile";
 import { WORK_EXPERIENCE_FEEDBACK_MESSAGES } from "../config/work-experience-feedback.config";
 import { workExperienceService } from "../services/work-experience.service";
-import type { Feedback } from "@/modules/profile";
 import type { WorkExperienceItem } from "../types/work-experience-item.types";
 
-export function useDeleteWorkExperience(onDeleted: (experience: WorkExperienceItem) => void) {
+const SKILLS_PROFILE_QUERY_KEY = ["skills", "profile"] as const;
+
+export function useDeleteWorkExperience(
+  onDeleted: (experience: WorkExperienceItem) => void,
+) {
   const queryClient = useQueryClient();
-  const mutation = useMutation({ mutationFn: (request: () => Promise<void>) => request() });
+
+  const mutation = useMutation({
+    mutationFn: (experience: WorkExperienceItem) =>
+      workExperienceService.deleteWorkExperience(experience.id),
+  });
+
   const [isDeleting, setIsDeleting] = useState(false);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
 
-  async function deleteWorkExperience(experience: WorkExperienceItem): Promise<void> {
+  async function deleteWorkExperience(
+    experience: WorkExperienceItem,
+  ): Promise<void> {
     setIsDeleting(true);
     setFeedback(null);
-    try {
-      await mutation.mutateAsync(() => workExperienceService.deleteWorkExperience(experience.id));
 
-      await queryClient.invalidateQueries({
-        queryKey: PROFILE_SKILLS_RADAR_QUERY_KEY,
+    try {
+      await mutation.mutateAsync(experience);
+
+      setFeedback({
+        type: "success",
+        message: WORK_EXPERIENCE_FEEDBACK_MESSAGES.deleteSuccess,
       });
 
-      setFeedback({ type: "success", message: WORK_EXPERIENCE_FEEDBACK_MESSAGES.deleteSuccess });
       onDeleted(experience);
+
+      void queryClient.invalidateQueries({
+        queryKey: SKILLS_PROFILE_QUERY_KEY,
+      });
+
+      void queryClient.invalidateQueries({
+        queryKey: PROFILE_SKILLS_RADAR_QUERY_KEY,
+      });
     } catch {
-      setFeedback({ type: "error", message: WORK_EXPERIENCE_FEEDBACK_MESSAGES.deleteError });
+      setFeedback({
+        type: "error",
+        message: WORK_EXPERIENCE_FEEDBACK_MESSAGES.deleteError,
+      });
     } finally {
       setIsDeleting(false);
     }
   }
 
-  function clearFeedback() {
+  function clearFeedback(): void {
     setFeedback(null);
   }
 
-  return { deleteWorkExperience, isDeleting, feedback, clearFeedback };
+  return {
+    deleteWorkExperience,
+    isDeleting,
+    feedback,
+    clearFeedback,
+  };
 }

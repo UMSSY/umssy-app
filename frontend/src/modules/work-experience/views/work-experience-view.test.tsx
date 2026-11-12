@@ -59,8 +59,8 @@ describe("WorkExperienceView", () => {
     expect(screen.getByRole("heading", { level: 1, name: "Experiencia laboral" })).toBeInTheDocument();
     expect(screen.getByText("Cargando experiencia laboral...")).toBeInTheDocument();
     expect(await screen.findByText("Desarrolladora web junior")).toBeInTheDocument();
-    expect(screen.getByText(/Mar 2025 – Actualidad/)).toBeInTheDocument();
-    expect(screen.getByText(/Mar 2023 – Dic 2024/)).toBeInTheDocument();
+    expect(screen.getAllByText(/Mar 2025 – Actualidad/)).toHaveLength(2);
+    expect(screen.getAllByText(/Mar 2023 – Dic 2024/)).toHaveLength(2);
   });
 
   it("shows the empty message when there are no experiences", async () => {
