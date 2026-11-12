@@ -1,195 +1,43 @@
-# HU-MEN-13 — Detección de información incompleta del mentor
+# HU-MEN-13 — Sugerencias de perfil del mentor
 
-Issue backend: https://github.com/UMSSY/umssy-app/issues/2072
+## Alcance y dependencia
 
-Historia completa y criterios: https://github.com/UMSSY/umssy-app/issues/2070
+Issue #2130: API autenticada de recomendaciones. Reutiliza los 13 commits de
+#2072 y sus cuatro reglas de detección sin modificarlas. La implementación
+está en `feature/grupo-6-hu13-suggestions-api`. No cambia frontend, esquema
+Prisma, migraciones, CI/CD, cupos, ofertas, solicitudes ni participación.
 
-## Objetivo y alcance
+## Arquitectura implementada
 
-Identificar apartados profesionales pendientes de un mentor activo y generar
-recomendaciones específicas, independientes y opcionales. El servicio no obliga
-a completar campos ni interviene en las funciones de mentoría.
+`MentorsController.findMyProfileSuggestions` recibe la identidad mediante
+`CurrentUser`, después de `JwtAuthGuard`. Delega a
+`MentorsService.findMyProfileSuggestions(user.id)`, que coordina
+`MentorProfileSuggestionsService.findSuggestions` y
+`MentorMapper.toProfileSuggestionsResponse`. El evaluador reutiliza
+`MentorsRepository.findActiveMentorById`; solo el repositorio accede a Prisma.
+El mapper añade metadatos y calcula el contador. El interceptor global
+`ResponseInterceptor` genera el envoltorio; `DomainExceptionFilter` maneja errores.
 
-No se modifican Prisma, migraciones, frontend, controladores, endpoints ni reglas
-de cupos, solicitudes, ofertas o participación. Las recomendaciones no se guardan.
+No hay consultas nuevas, lógica de detección duplicada, caché ni persistencia
+de recomendaciones. Los imports y providers existentes de `MentorsModule`
+resuelven la nueva dependencia de `MentorsService`. El mapper solo utiliza el
+tipo del repositorio para los métodos preexistentes; no inyecta Prisma.
 
-## Fuentes existentes y reglas
+## Endpoint, identidad y contrato
 
-El mentor es un `User` con un `UserRole` asociado al rol `mentor`.
-`MentorsRepository.findActiveMentorById(userId, now)` proporciona el registro.
-
-| Apartado                | Representación real                         | Se considera incompleto cuando                 |
-| ----------------------- | ------------------------------------------- | ---------------------------------------------- |
-| Fotografía              | `User.photoUrl: Bytes?`, binario, no URL    | Es `null` o tiene longitud cero                |
-| Descripción profesional | `User.aboutMe: String?`                     | Es `null`, vacío o solo espacios tras `trim()` |
-| Especialidad            | `User.mentorTechnicalAreas → TechnicalArea` | No hay áreas técnicas asociadas                |
-| Experiencia laboral     | `User.workExperiences → WorkExperience`     | No hay registros laborales                     |
-
-`headline` es el titular profesional y no sustituye las áreas técnicas.
-No se exige descripción laboral opcional ni fecha final para empleos actuales.
-La fotografía se evalúa por presencia de bytes; no se revalida el formato de imagen.
-La normalización de descripción solo ocurre en memoria, sin actualizar el perfil.
-
-## Participación activa
-
-La consulta existente requiere `User.isActive = true` y un rol `mentor` con
-`deletedAt = null` y `startAt <= now`. El evaluador reutiliza estos filtros sin
-modificarlos. `isAvailableForMentoring = false` no excluye a un mentor activo.
-Una solicitud pendiente o una oferta no sustituye el rol activo.
-
-Si la consulta no encuentra un mentor activo (incluido un usuario inexistente),
-el servicio devuelve `[]`. Los errores de lectura se propagan: no se transforman
-en un resultado vacío que pueda confundirse con un perfil completo.
-
-## Contrato del servicio
-
-`MentorProfileSuggestionsService.findSuggestions(userId)` devuelve
-`Promise<MentorProfileSuggestion[]>`. Está registrado y exportado en
-`MentorsModule` y depende únicamente de `MentorsRepository`.
-
-Cada elemento contiene `code`, `field` y `message`. El contrato discriminado de
-TypeScript vincula cada código a su campo correspondiente.
-
-| Orden | Código estable                     | Campo                  | Mensaje                                            |
-| ----- | ---------------------------------- | ---------------------- | -------------------------------------------------- |
-| 1     | `MISSING_PROFILE_PHOTO`            | `photoUrl`             | Agrega una fotografía a tu perfil.                 |
-| 2     | `MISSING_PROFESSIONAL_DESCRIPTION` | `aboutMe`              | Completa tu descripción profesional.               |
-| 3     | `MISSING_SPECIALTY`                | `mentorTechnicalAreas` | Agrega al menos un área técnica como especialidad. |
-| 4     | `MISSING_WORK_EXPERIENCE`          | `workExperiences`      | Registra tu experiencia laboral.                   |
-
-Solo se añaden los elementos correspondientes a apartados incompletos, una vez
-por apartado y en el orden indicado. Un perfil completo devuelve `[]`.
-
-Ejemplo: mentor con fotografía y especialidad, pero sin descripción ni experiencia:
-
-```json
-[
-  {
-    "code": "MISSING_PROFESSIONAL_DESCRIPTION",
-    "field": "aboutMe",
-    "message": "Completa tu descripción profesional."
-  },
-  {
-    "code": "MISSING_WORK_EXPERIENCE",
-    "field": "workExperiences",
-    "message": "Registra tu experiencia laboral."
-  }
-]
+```http
+GET /api/mentors/me/profile-suggestions
+Authorization: Bearer <token>
 ```
 
-Un perfil totalmente incompleto devuelve los cuatro elementos de la tabla.
-No se incluyen campos sensibles, fotografías binarias ni datos laborales en la respuesta.
+El guard verifica firma y expiración del JWT y `SessionService` vuelve a cargar
+al usuario. La consulta usa únicamente `user.id`; ruta, query y body no permiten
+elegir otro mentor. Se mantienen las excepciones compartidas y los permisos de
+las rutas existentes. Una sesión válida sin participación activa recibe cero
+pendientes; una cuenta inactiva recibe 403. Sin sesión válida se responde 401.
+Una sesión sin ningún rol válido también se rechaza según la protección existente.
 
-## Actualización y solo lectura
-
-Cada llamada vuelve a consultar el perfil; no hay caché ni persistencia de
-sugerencias. Después de guardar un apartado con los servicios existentes, una
-nueva evaluación deja de devolver su recomendación y conserva las restantes.
-El servicio no guarda el apartado por sí mismo ni ejecuta invalidaciones de UI.
-
-`ProfileService`, `ProfilePhotoService` y `WorkExperienceService` conservan sus
-responsabilidades de edición. El evaluador no llama operaciones de escritura,
-transacciones, procesos de cupos ni reconciliación de ofertas. Construye un array
-nuevo y nuevos objetos de sugerencia en cada llamada.
-
-## Matriz de cobertura y criterios de aceptación
-
-Archivos relativos a `backend/src/modules/mentors/tests/`:
-
-| Escenario                                                                  | Archivo                                        | Criterios          |
-| -------------------------------------------------------------------------- | ---------------------------------------------- | ------------------ |
-| Normalización y valores vacíos                                             | `mentor-profile-completeness.spec.ts`          | CA2                |
-| Fotografía nula, vacía y presente                                          | `mentor-profile-photo-rule.spec.ts`            | CA2                |
-| Descripción nula, vacía, espacios y válida                                 | `mentor-profile-description-rule.spec.ts`      | CA2                |
-| Áreas técnicas sin sustitución por titular                                 | `mentor-profile-specialty-rule.spec.ts`        | CA2                |
-| Experiencia ausente/presente y opcionales                                  | `mentor-profile-work-experience-rule.spec.ts`  | CA2, CA6           |
-| Perfil completo/vacío, actividad, disponibilidad, orden, mensajes, errores | `mentor-profile-suggestions.service.spec.ts`   | CA1, CA2, CA5, CA6 |
-| Las 16 combinaciones, códigos/campos, orden y unicidad                     | `mentor-profile-combinations.spec.ts`          | CA2, CA5           |
-| Completar cada apartado y volver a consultar                               | `mentor-profile-suggestions-updates.spec.ts`   | CA4 (backend), CA5 |
-| Datos anidados intactos y solo `user.findFirst` con Prisma simulado        | `mentor-profile-suggestions-read-only.spec.ts` | CA6                |
-| Providers, exports, imports y controladores existentes                     | `mentor-profile-suggestions.module.spec.ts`    | Integración        |
-
-| Criterio de HU-13                         | Aporte de #2072                                                    | Pendiente fuera de este issue                              |
-| ----------------------------------------- | ------------------------------------------------------------------ | ---------------------------------------------------------- |
-| CA1: revisar al entrar a Mi participación | Consulta restringida a mentor activo                               | Invocación autenticada y presentación en la pantalla       |
-| CA2: recomendaciones específicas          | Detección de los cuatro apartados y contrato estable               | Presentación visual                                        |
-| CA3: dirigir a edición                    | Códigos y campos identifican el apartado                           | Navegación y acciones en frontend                          |
-| CA4: desaparecer tras actualizar          | Nueva evaluación refleja el perfil actualizado                     | Refresco de datos al regresar a Mi participación           |
-| CA5: no recomendar apartados completos    | `[]` si está completo; únicamente pendientes en perfiles parciales | Renderizado de ausencia de recomendaciones                 |
-| CA6: permitir continuar sin completar     | Evaluación opcional y de solo lectura, sin nuevas validaciones     | Interfaz que mantenga las acciones de mentoría disponibles |
-
-CA1, CA3, CA4 y CA6 incluyen comportamiento de interfaz que no queda certificado
-por pruebas unitarias backend. Las pruebas de persistencia usan mocks de Prisma;
-no sustituyen una prueba contra PostgreSQL real. La prueba de módulo verifica
-metadatos de configuración; no inicia la aplicación completa.
-
-## Validación y siguiente issue
-
-Las comprobaciones incluyen la suite de mentorías, los tests específicos
-`mentor-profile*.spec.ts`, ESLint y oxlint del módulo, Prettier de archivos HU-13,
-TypeScript de producción, `pnpm run build` y `git diff --check`.
-
-El siguiente issue podrá importar `MentorsModule` e inyectar
-`MentorProfileSuggestionsService`. Requiere definir autenticación/autorización,
-identidad del usuario, transporte HTTP y pruebas del endpoint. El frontend deberá
-resolver navegación a edición y refresco de sugerencias; no están implementados
-ni se define aquí una ruta HTTP. No se necesita migración ni un catálogo nuevo.
-
-La consulta reutilizada recupera el perfil completo, incluida la fotografía
-binaria. Se conserva por compatibilidad; una optimización futura requeriría
-medición y pruebas sin cambiar las reglas de participación.
-
-## Resultado de validación del cierre (2026-11-11)
-
-- Suite completa de mentorías: 281 pruebas aprobadas en 28 archivos.
-- Suite específica HU-13: 79 pruebas aprobadas en 10 archivos (incluidas en las 281).
-- ESLint del módulo: aprobado.
-- Oxlint del módulo: sin errores; dos advertencias preexistentes en
-  `mentor-participation.spec.ts` (parámetro sin uso) y `mentors.controller.spec.ts`
-  (método sin enlazar). Ninguno de esos archivos se modificó en este issue.
-- Prettier de los archivos HU-13 y TypeScript de producción: aprobados.
-- `pnpm run build` abortó con `ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY`
-  durante una reinstalación automática intentada por el gestor, antes de compilar.
-  Los pasos exactos del script se ejecutaron directamente y aprobaron:
-  `./node_modules/.bin/tsc.cmd -p tsconfig.build.json` y
-  `node scripts/copy-mail-templates.ts`. No se reinstalaron dependencias.
-- `git diff --check`: sin errores.
-
-Los commits del bloque 4 usan una excepción temporal `core.hooksPath` por comando
-para evitar que lint-staged genere respaldos de stash. Se ejecutaron directamente
-ESLint, oxlint y el validador de mensajes. No se cambió la configuración permanente
-de hooks ni se aplicaron o modificaron stashes.
-
-## API propuesta — Issue #2130, Bloque 1
-
-Estado actualizado en el Bloque 2: endpoint HTTP implementado con los contratos
-y metadatos definidos en el Bloque 1. Las secciones siguientes conservan el diseño
-del contrato; el controlador delega en `MentorsService`, el evaluador de #2072 y
-`MentorMapper`. Las pruebas HTTP usan JWT firmados, el guard y el servicio de sesión
-reales con repositorios simulados; no certifican persistencia en PostgreSQL.
-
-### Transporte y responsabilidades
-
-Se implementa `GET /api/mentors/me/profile-suggestions` con autenticación
-`Authorization: Bearer <token>`. Se reutilizarán `JwtAuthGuard`, `SessionService`
-y `CurrentUser`; la identidad procederá exclusivamente de `user.id`. No se
-aceptará un ID alternativo de mentor por ruta, query o body.
-
-El controlador delega en `MentorsService`, que reutiliza
-`MentorProfileSuggestionsService.findSuggestions(user.id)` y `MentorMapper`.
-Las consultas permanecen en el repositorio existente. El Bloque 2 no altera
-consultas, reglas o participación de #2072.
-
-### Contrato de respuesta
-
-`MentorProfileSuggestionsResponse` representa únicamente `data`. Cada elemento
-reutiliza `MentorProfileSuggestion` (`code`, `field`, `message`) y añade `title`,
-`benefitDescription` y `editReference`. Los tipos vinculan código, campo y sección.
-El mapper calculará `pendingCount` como la longitud del array final devuelto.
-El interceptor global generará el envoltorio; no se duplicará manualmente.
-Actualmente esta ruta contiene `/profile`, por lo que el interceptor usa `OK`.
-
-Ejemplo propuesto para un perfil parcial:
+Ejemplo de perfil parcial:
 
 ```json
 {
@@ -212,65 +60,187 @@ Ejemplo propuesto para un perfil parcial:
 }
 ```
 
-Un perfil completo devolverá el mismo envoltorio con
-`data: { "suggestions": [], "pendingCount": 0 }`. Un perfil totalmente incompleto
-incluirá las cuatro recomendaciones existentes en orden estable y contador 4.
-Los errores de lectura se propagarán al `DomainExceptionFilter`, nunca se
-convertirán en lista vacía. La autenticación conservará las excepciones existentes
-del guard y de sesión. La respuesta no incluirá datos privados ni binarios.
+Para un perfil completo, `data` es `{ "suggestions": [], "pendingCount": 0 }`.
+Para uno totalmente incompleto hay cuatro recomendaciones. El contador es
+exactamente la longitud del array final. El contrato de `responses/` solo
+representa `data`; no duplica el envoltorio. El `detail` de éxito es `OK` porque
+el interceptor existente reconoce `/profile` dentro de la ruta.
 
-### Metadatos de presentación
+Los errores de repositorio o sesión producen un error 500 mediante el filtro
+compartido, con `ok: false`, `data: null`, `code: "INTERNAL_ERROR"` y un mensaje
+público genérico. Nunca se convierten en lista vacía ni exponen detalles de datos.
 
-La fuente será `MENTOR_PROFILE_SUGGESTION_PRESENTATION`.
+## Reglas, identificadores y metadatos
 
-| Código                             | Título                              | Beneficio                                                              | Sección                |
-| ---------------------------------- | ----------------------------------- | ---------------------------------------------------------------------- | ---------------------- |
-| `MISSING_PROFILE_PHOTO`            | Agrega tu fotografía                | Ayuda a los estudiantes a reconocerte y conocer tu perfil.             | `photoUrl`             |
-| `MISSING_PROFESSIONAL_DESCRIPTION` | Completa tu descripción profesional | Presenta tu trayectoria y lo que puedes aportar como mentor.           | `aboutMe`              |
-| `MISSING_SPECIALTY`                | Completa tus áreas técnicas         | Ayuda a los estudiantes a identificar tus especialidades.              | `mentorTechnicalAreas` |
-| `MISSING_WORK_EXPERIENCE`          | Registra tu experiencia laboral     | Muestra la experiencia práctica que puedes compartir en las mentorías. | `workExperiences`      |
+El orden es estable: fotografía, descripción, especialidad y experiencia.
+Solo se incluyen apartados pendientes, una vez por código.
 
-Todas las referencias tienen `action: "edit"`; identifican apartados, no rutas
-de frontend. No se añade recomendación por orientaciones vacías. CA8 y CA15
-mantienen áreas técnicas independientes de los tipos de orientación registrados.
+| Código                             | Campo y sección de edición | Condición de ausencia                     | Mensaje                                            |
+| ---------------------------------- | -------------------------- | ----------------------------------------- | -------------------------------------------------- |
+| `MISSING_PROFILE_PHOTO`            | `photoUrl`                 | Bytes nulos o longitud cero               | Agrega una fotografía a tu perfil.                 |
+| `MISSING_PROFESSIONAL_DESCRIPTION` | `aboutMe`                  | Nulo, vacío o solo espacios tras `trim()` | Completa tu descripción profesional.               |
+| `MISSING_SPECIALTY`                | `mentorTechnicalAreas`     | Colección vacía                           | Agrega al menos un área técnica como especialidad. |
+| `MISSING_WORK_EXPERIENCE`          | `workExperiences`          | Colección vacía                           | Registra tu experiencia laboral.                   |
 
-### Actualización, frontend y CA12
+| Código                             | Título                              | Beneficio                                                              |
+| ---------------------------------- | ----------------------------------- | ---------------------------------------------------------------------- |
+| `MISSING_PROFILE_PHOTO`            | Agrega tu fotografía                | Ayuda a los estudiantes a reconocerte y conocer tu perfil.             |
+| `MISSING_PROFESSIONAL_DESCRIPTION` | Completa tu descripción profesional | Presenta tu trayectoria y lo que puedes aportar como mentor.           |
+| `MISSING_SPECIALTY`                | Completa tus áreas técnicas         | Ayuda a los estudiantes a identificar tus especialidades.              |
+| `MISSING_WORK_EXPERIENCE`          | Registra tu experiencia laboral     | Muestra la experiencia práctica que puedes compartir en las mentorías. |
 
-Cada nueva consulta evaluará datos guardados actuales, con el mismo token válido,
-sin caché ni persistencia de recomendaciones. Descartar cambios sin guardarlos
-no alterará el resultado. CA7 y CA11 exigen contador igual a pendientes devueltos.
-CA9 mantiene las recomendaciones opcionales, sin bloquear funciones de mentoría.
+`MENTOR_PROFILE_SUGGESTION_PRESENTATION` es la fuente de metadatos.
+`editReference.action` siempre es `edit`; las secciones son referencias semánticas,
+no rutas de frontend. El contrato discriminado reutiliza códigos, campos y mensajes
+de #2072 y vincula cada código con su sección. `headline` no sustituye especialidad.
+No se añade una recomendación por tipos de orientación vacíos. Tener orientaciones
+registradas no compensa áreas técnicas vacías (CA8 y CA15).
 
-El frontend deberá invocar y refrescar la consulta, mostrar contador y contenido,
-resolver referencias a navegación real y permitir continuar sin completar el
-perfil. Este bloque no implementa interfaz ni certifica las partes visuales de
-CA1, CA3, CA4, CA9 y CA10.
+## Actualización y participación
 
-CA12 sigue pendiente de definición. Actualmente un mentor con rol activo recibe
-sugerencias aunque `isAvailableForMentoring` sea `false`; sin rol activo recibe
-`[]`. El guard rechaza usuarios inactivos. No se equipara indisponibilidad con
-participación desactivada ni se crea un estado `PAUSED`. Se propone conservar
-este comportamiento hasta definir el criterio, sin modificar ningún estado.
+Cada llamada consulta datos actuales. Después de guardar mediante los servicios
+existentes de perfil, fotografía, áreas técnicas o experiencia, una nueva consulta
+con el mismo JWT elimina únicamente el pendiente resuelto y actualiza el contador.
+Un borrador descartado sin escritura no altera datos ni recomendaciones.
+El evaluador solo lee: no bloquea funciones de mentoría ni exige completar campos.
 
-El Bloque 4 verifica por HTTP los filtros del repositorio existente para rol
-desactivado (`deletedAt` no nulo), rol eliminado y rol con inicio futuro: una
-sesión válida que conserve otro rol recibe lista vacía y contador cero. Un mentor
-con rol activo y disponibilidad desactivada conserva sus recomendaciones. Un
-usuario inactivo sigue siendo rechazado por la protección de sesión existente.
-Estas pruebas simulan Prisma; no certifican filtrado contra PostgreSQL real.
+La consulta requiere usuario activo y rol mentor con `deletedAt = null` y
+`startAt <= now`. Disponibilidad desactivada (`isAvailableForMentoring = false`)
+no excluye a un mentor con rol activo. Rol desactivado, eliminado o con inicio
+futuro no constituye participación activa. Una solicitud pendiente u oferta no
+sustituye ese rol.
 
-### Estándares y límites de validación
+**CA12 sigue pendiente de definición de negocio.** No existe una regla oficial
+accesible que equipare indisponibilidad con participación pausada. No se creó
+`PAUSED`, no se alteraron estados y se conserva el comportamiento anterior.
 
-No estuvieron disponibles `especificacion GENERAL proyecto IS.pdf` ni
-`PR-REVIEW-PROMPT-TEMP.md`; la revisión contra esos documentos queda pendiente.
-Se verificaron las convenciones locales: carpetas `responses` y `constants`,
-archivos kebab-case, tipos PascalCase, variables camelCase o UPPER_CASE, imports
-ESM y responsabilidades existentes de servicios, repositorios y mappers. No se
-modifican frontend, Prisma, migraciones, CI/CD ni DevOps.
+## Integración y pruebas
 
-Vitest configura un mínimo global del 80% en líneas, funciones, sentencias y ramas.
-La cobertura debe medirse, no deducirse del número de pruebas. Este bloque añade
-contratos estáticos y metadatos tipados; las pruebas HTTP y del mapper se reservan
-para su implementación posterior. La consulta existente recupera binarios del
-perfil; su optimización permanece pendiente sin duplicar consultas de dominios
-ni cambiar las reglas de evaluación.
+| Evidencia                                 | Alcance                                                                                                           |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Reglas de #2072                           | Nulos, vacíos, espacios, bytes, especialidad y experiencia                                                        |
+| `mentor-profile-combinations.spec.ts`     | Las 16 combinaciones, orden, unicidad y contador final                                                            |
+| Mapper y coordinación                     | Metadatos, referencias independientes, delegación y errores                                                       |
+| `mentor-profile-suggestions.http.spec.ts` | 26 casos HTTP con guard real, JWT firmados y repositorios simulados                                               |
+| Guardados                                 | Cuatro servicios de actualización reales sobre repositorios simulados con estado compartido                       |
+| Descartes                                 | Cuatro borradores sin guardar; ninguna escritura y respuesta intacta                                              |
+| Participación                             | Mentor activo/no disponible, rol desactivado/eliminado/futuro y cuenta inactiva                                   |
+| Seguridad                                 | Dos mentores con pendientes distintos; query/body no cambian identidad; JWT inválido/vencido/sin firma válida     |
+| CA15                                      | Las cuatro combinaciones de áreas y orientaciones                                                                 |
+| Integración de módulo                     | Compila con TypeScript e inicia `MentorsModule` con metadata de producción en otro proceso; solo sustituye Prisma |
+
+La prueba de integración resuelve el grafo real de imports/providers, inicia una
+aplicación Nest y comprueba respuestas 401 y 200 sin sustituir el guard. El ciclo
+preexistente Skills/NLP utiliza `forwardRef`; HU-13 no agrega ciclos. La prueba
+compila `dist` y tarda más que una prueba unitaria. Los workers usan el modo test.
+
+Estos resultados no certifican persistencia ni filtrado contra PostgreSQL real.
+El proceso compilado de integración no aporta instrumentación V8 al proceso padre;
+las demás pruebas ejercitan el código fuente para medir cobertura. Tampoco se
+prueban navegación, renderizado o abandono de formularios en navegador.
+
+## Estado de los 15 criterios
+
+La matriz usa la descripción de criterios suministrada para este trabajo; el
+texto oficial completo actualizado no estuvo disponible. No certifica aspectos
+visuales ni reemplaza la aceptación del producto.
+
+| Criterio | Estado backend y pendiente                                                                                         |
+| -------- | ------------------------------------------------------------------------------------------------------------------ |
+| CA1      | Consulta autenticada implementada; invocación al entrar a Mi participación pendiente de frontend                   |
+| CA2      | Cuatro recomendaciones específicas verificadas; presentación visual pendiente                                      |
+| CA3      | Referencias semánticas disponibles; navegación real pendiente de frontend                                          |
+| CA4      | Refresco tras guardar verificado con mismo JWT y repositorios simulados; refresco visual pendiente                 |
+| CA5      | Perfil completo devuelve lista vacía; solo se incluyen pendientes                                                  |
+| CA6      | Evaluación de solo lectura sin nuevas restricciones; continuidad visual pendiente                                  |
+| CA7      | Contador coincide con array final en las 16 combinaciones                                                          |
+| CA8      | Apartados independientes, incluidas áreas y orientaciones                                                          |
+| CA9      | Backend no bloquea mentorías por recomendaciones; interacción opcional pendiente de frontend                       |
+| CA10     | Código, apartado, mensaje, título, beneficio y referencia verificados; visualización pendiente                     |
+| CA11     | Guardar elimina solo el pendiente resuelto y reduce contador en pruebas con repositorios simulados                 |
+| CA12     | Pendiente de decisión de negocio; se conserva disponibilidad y participación existentes                            |
+| CA13     | Sin guardar no cambian datos ni respuesta; navegación de descarte pendiente de frontend                            |
+| CA14     | Datos actualizados con el mismo JWT; persistencia real y refresco visual pendientes                                |
+| CA15     | Áreas vacías con orientaciones registradas producen `MISSING_SPECIALTY`; sin recomendación nueva por orientaciones |
+
+## Rendimiento: consulta compartida y alternativa
+
+`findActiveMentorById` recupera identificación/nombres, titular, descripción,
+disponibilidad, fotografía binaria, ciudad, educación, experiencia completa,
+certificaciones con `documentUrl` binario, áreas técnicas y orientaciones.
+HU-13 necesita solo presencia de fotografía no vacía, descripción y existencia
+de áreas técnicas y experiencias, además de los filtros actuales de identidad/rol.
+
+Una proyección específica podría usar longitud de bytes en PostgreSQL y existencia
+o conteo de relaciones para evitar transferir binarios y registros detallados.
+La mejora sería menor transferencia y materialización; no se midió latencia ni
+volumen, por lo que no se afirma una mejora cuantitativa. `PhotoFileRepository.exists`
+no es equivalente: acepta bytes de longitud cero. La consulta del directorio ya
+filtra fotos nulas/vacías sin leer bytes, pero no cubre todo el perfil requerido.
+
+Una implementación futura afectaría `mentors.repository.ts`, el tipo de evaluación,
+el evaluador y sus pruebas/fixtures; podría exigir adaptar la entrada de la regla
+de foto sin duplicarla. Debe conservar los filtros de actividad y la semántica de
+bytes vacíos. No debe modificar la consulta compartida usada por el detalle y
+`MentorMapper.toProfileResponse`, ni introducir consultas de otros dominios.
+Si se usan varias lecturas, debe evaluarse su consistencia frente a escrituras
+concurrentes. Se documenta esta alternativa sin introducir consultas ni cambios
+arquitectónicos en #2130; el riesgo de lectura innecesaria permanece.
+
+## Estándares verificados y limitaciones
+
+No se encontraron `especificacion GENERAL proyecto IS.pdf` ni
+`PR-REVIEW-PROMPT-TEMP.md` en el repositorio o adjuntos accesibles. Se contrastaron
+las convenciones locales y `eslint.config.mjs`: kebab-case, sufijos `.response.ts`,
+`.constants.ts`, `.spec.ts`, tipos/clases PascalCase, funciones camelCase, constantes
+UPPER_CASE, imports ESM y textos visibles en español. No se añadieron mensajes de
+depuración, infraestructura compartida o lógica ajena a HU-13. Las dos advertencias
+preexistentes de Oxlint son parámetro sin uso en `mentor-participation.spec.ts` y
+método sin enlazar en `mentors.controller.spec.ts`.
+
+Los hooks se exceptúan únicamente por comando al registrar commits para evitar
+respaldos de stash; sus analizadores y el validador de mensajes se ejecutan de forma
+directa. No se cambia configuración permanente ni se manipulan stashes.
+
+## Validación final y cobertura
+
+Medición global con `vitest run --coverage` y la configuración original:
+**3.680 pruebas aprobadas en 385 archivos**. Todos los umbrales globales del 80%
+se cumplen, sin cambiar configuración, umbrales ni exclusiones.
+
+| Alcance/archivo                           | Sentencias | Ramas  | Funciones | Líneas |
+| ----------------------------------------- | ---------- | ------ | --------- | ------ |
+| Backend global                            | 91,80%     | 84,89% | 87,64%    | 92,19% |
+| `mentors.controller.ts`                   | 92,30%     | 100%   | 91,66%    | 92,30% |
+| `mentors.service.ts`                      | 93,85%     | 85,48% | 84,21%    | 95,37% |
+| `mentor-profile-suggestions.service.ts`   | 100%       | 91,66% | 100%      | 100%   |
+| `mentors.repository.ts`                   | 98,88%     | 90,24% | 97,77%    | 98,83% |
+| `mentor.mapper.ts`                        | 100%       | 100%   | 100%      | 100%   |
+| `mentor-profile-completeness.ts`          | 100%       | 100%   | 100%      | 100%   |
+| `mentor-profile-suggestions.constants.ts` | 100%       | 100%   | 100%      | 100%   |
+
+Los porcentajes por archivo incluyen métodos preexistentes; no representan una
+medición aislada de las líneas añadidas por #2130. Los contratos exclusivamente
+de tipos no tienen lógica ejecutable que medir. No se añade un commit artificial
+de ramas restantes porque el mínimo se cumple y las brechas relevantes de
+integración ya fueron cubiertas.
+
+La suite específica de HU-13 aprobó 113 pruebas en 14 archivos. El build aprobó
+ejecutando los pasos existentes `tsc -p tsconfig.build.json` y
+`node scripts/copy-mail-templates.ts` con las dependencias instaladas; no se
+ejecutó el wrapper `pnpm run build` ni se reinstalaron paquetes. TypeScript de
+producción sin emisión, ESLint, Prettier y `git diff --check` aprobaron. Oxlint
+terminó sin errores y con las dos advertencias preexistentes descritas arriba.
+
+Una ejecución de mentorías simultánea con la cobertura global y otros procesos
+sufrió timeouts en la compilación de integración y el arranque HTTP. No se
+ampliaron timeouts ni se cambió configuración. La repetición aislada aprobó
+**317 pruebas en 32 archivos de mentorías**, incluida la integración compilada.
+Los reportes detallados se generan localmente en `backend/coverage/`
+y no se incluyen en commits.
+
+El backend de #2130 está listo para revisión técnica con estas limitaciones
+declaradas: CA12 sin definición, documentos oficiales no disponibles, pruebas
+de PostgreSQL y frontend pendientes, y lectura compartida de binarios sin
+optimizar. Esto no certifica aceptación completa de la historia ni autoriza
+publicación, merge o creación de PR.
