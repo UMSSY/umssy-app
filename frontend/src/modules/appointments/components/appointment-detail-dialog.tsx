@@ -31,6 +31,7 @@ import {
 import { useAppointment } from "../hooks/use-appointment";
 import { useCounterpartPhoto } from "../hooks/use-counterpart-photo";
 import { useDownloadAppointmentDocument } from "../hooks/use-download-appointment-document";
+import { JoinMeetingButton } from "./join-meeting-button";
 import type { AppointmentDetailDialogProps } from "../types/appointment-detail-dialog-props.types";
 import {
   formatAppointmentDate,
@@ -163,6 +164,9 @@ export function AppointmentDetailDialog({ appointmentId, onClose }: AppointmentD
               <DialogClose render={<Button variant="outline" />}>
                 {APPOINTMENT_DETAIL_TEXT.close}
               </DialogClose>
+              {appointment.status === "CONFIRMED" ? (
+                <JoinMeetingButton meetingUrl={appointment.meetingUrl} />
+              ) : null}
               {appointment.counterpart.role === "mentor" ? (
                 <Link
                   href={`/mentors/${appointment.counterpart.id}`}

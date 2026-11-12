@@ -54,6 +54,11 @@ export const APPOINTMENT_DETAIL_TEXT = {
   photoAlt: "Foto de perfil de",
 } as const;
 
+export const JOIN_MEETING_TEXT = {
+  join: "Unirse a la reunión",
+  unavailable: "No se pudo abrir la reunión. Intenta nuevamente.",
+} as const;
+
 export const APPOINTMENT_WEEKDAY_LABELS = [
   "Lunes",
   "Martes",
