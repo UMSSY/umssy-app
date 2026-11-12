@@ -19,9 +19,20 @@ import {
   STUDENT_ID,
 } from './fixtures/appointment-record.fixture.js';
 
+const MEETING_URL =
+  'https://meet.jit.si/umssy-99999999-9999-4999-8999-999999999999';
+
 describe('AppointmentsService', () => {
-  const repository = { findMine: vi.fn(), findById: vi.fn() };
-  const mapper = { toResponse: vi.fn(), toResponseList: vi.fn() };
+  const repository = {
+    findMine: vi.fn(),
+    findById: vi.fn(),
+    assignMeetingUrl: vi.fn(),
+  };
+  const mapper = {
+    toResponse: vi.fn(),
+    toDetailResponse: vi.fn(),
+    toResponseList: vi.fn(),
+  };
   const profilePhotoService = { getPhoto: vi.fn() };
   let moduleRef: TestingModule;
   let service: AppointmentsService;
@@ -98,10 +109,10 @@ describe('AppointmentsService', () => {
   it.each([MENTOR_ID, STUDENT_ID])(
     'allows participant %s to read the same appointment',
     async (userId) => {
-      const record = createAppointmentRecord();
+      const record = createAppointmentRecord({ meetingUrl: MEETING_URL });
       const response = { id: APPOINTMENT_ID };
       repository.findById.mockResolvedValue(record);
-      mapper.toResponse.mockReturnValue(response);
+      mapper.toDetailResponse.mockReturnValue(response);
 
       await expect(service.findOne(userId, APPOINTMENT_ID)).resolves.toBe(
         response,
@@ -109,7 +120,12 @@ describe('AppointmentsService', () => {
       expect(repository.findById).toHaveBeenCalledExactlyOnceWith(
         APPOINTMENT_ID,
       );
-      expect(mapper.toResponse).toHaveBeenCalledExactlyOnceWith(record, userId);
+      expect(mapper.toDetailResponse).toHaveBeenCalledExactlyOnceWith(
+        record,
+        userId,
+        MEETING_URL,
+      );
+      expect(repository.assignMeetingUrl).not.toHaveBeenCalled();
     },
   );
 
@@ -119,7 +135,8 @@ describe('AppointmentsService', () => {
 
     await expect(result).rejects.toBeInstanceOf(AppointmentNotFoundException);
     await expect(result).rejects.toMatchObject({ statusCode: 404, data: null });
-    expect(mapper.toResponse).not.toHaveBeenCalled();
+    expect(mapper.toDetailResponse).not.toHaveBeenCalled();
+    expect(repository.assignMeetingUrl).not.toHaveBeenCalled();
   });
 
   it('throws 403 with no appointment data for another user before mapping', async () => {
@@ -128,7 +145,8 @@ describe('AppointmentsService', () => {
 
     await expect(result).rejects.toBeInstanceOf(AppointmentNotOwnedException);
     await expect(result).rejects.toMatchObject({ statusCode: 403, data: null });
-    expect(mapper.toResponse).not.toHaveBeenCalled();
+    expect(mapper.toDetailResponse).not.toHaveBeenCalled();
+    expect(repository.assignMeetingUrl).not.toHaveBeenCalled();
   });
 
   it('propagates a failed detail query', async () => {
@@ -138,8 +156,65 @@ describe('AppointmentsService', () => {
     await expect(service.findOne(MENTOR_ID, APPOINTMENT_ID)).rejects.toBe(
       failure,
     );
-    expect(mapper.toResponse).not.toHaveBeenCalled();
+    expect(mapper.toDetailResponse).not.toHaveBeenCalled();
+    expect(repository.assignMeetingUrl).not.toHaveBeenCalled();
   });
+
+  it('assigns a meeting url the first time a confirmed appointment without one is read', async () => {
+    const record = createAppointmentRecord();
+    repository.findById.mockResolvedValue(record);
+    repository.assignMeetingUrl.mockResolvedValue(MEETING_URL);
+
+    await service.findOne(STUDENT_ID, APPOINTMENT_ID);
+
+    expect(repository.assignMeetingUrl).toHaveBeenCalledExactlyOnceWith(
+      APPOINTMENT_ID,
+      expect.stringMatching(/^https:\/\/meet\.jit\.si\/umssy-[0-9a-f-]{36}$/),
+    );
+    expect(mapper.toDetailResponse).toHaveBeenCalledExactlyOnceWith(
+      record,
+      STUDENT_ID,
+      MEETING_URL,
+    );
+  });
+
+  it.each([
+    [
+      'cancelled',
+      createAppointmentRecord({
+        status: { title: 'CANCELLED' },
+        meetingUrl: 'https://meet.jit.si/umssy-old',
+      }),
+    ],
+    [
+      'completed',
+      createAppointmentRecord({
+        status: { title: 'COMPLETED' },
+        meetingUrl: 'https://meet.jit.si/umssy-old',
+      }),
+    ],
+    [
+      'ended',
+      createAppointmentRecord({
+        endAt: NOW,
+        meetingUrl: 'https://meet.jit.si/umssy-old',
+      }),
+    ],
+  ])(
+    'hides the meeting url of a %s appointment without assigning one',
+    async (_case, record) => {
+      repository.findById.mockResolvedValue(record);
+
+      await service.findOne(MENTOR_ID, APPOINTMENT_ID);
+
+      expect(mapper.toDetailResponse).toHaveBeenCalledExactlyOnceWith(
+        record,
+        MENTOR_ID,
+        null,
+      );
+      expect(repository.assignMeetingUrl).not.toHaveBeenCalled();
+    },
+  );
 
   it.each([
     [MENTOR_ID, STUDENT_ID],
