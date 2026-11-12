@@ -50,6 +50,16 @@ describe('resolveAppointmentStatus', () => {
     ).toBe(AppointmentStatusTitle.COMPLETED);
   });
 
+  it('normaliza la completada heredada a COMPLETED', () => {
+    expect(
+      resolveAppointmentStatus(
+        AppointmentStatusTitle.LEGACY_COMPLETED,
+        END_AT,
+        millisecondsFromEnd(60_000),
+      ),
+    ).toBe(AppointmentStatusTitle.COMPLETED);
+  });
+
   it.each([
     AppointmentStatusTitle.CANCELLED,
     AppointmentStatusTitle.COMPLETED,
