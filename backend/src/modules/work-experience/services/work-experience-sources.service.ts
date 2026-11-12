@@ -7,6 +7,10 @@ import type { WorkExperienceAnalysisSourceResponse } from '../responses/work-exp
 export class WorkExperienceSourcesService {
   constructor(private readonly repository: WorkExperienceRepository) {}
 
+  hasByUserId(userId: string): Promise<boolean> {
+    return this.repository.hasByUserId(userId);
+  }
+
   findPublicationEvidenceIds(userId: string, context: TransactionContext) {
     return this.repository.findPublicationEvidenceIds(userId, context);
   }
