@@ -2,7 +2,6 @@ import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import { cleanup, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { profileService } from "@/modules/profile";
 import { documentsService } from "../services/documents.service";
 import { CvExportDialog } from "./cv-export-dialog";
 
@@ -12,30 +11,11 @@ vi.mock("@/shared/utils/download-file", () => ({
   downloadFile: downloadFileMock,
 }));
 
-vi.mock("@/modules/profile/services/profile.service", () => ({
-  profileService: {
-    getProfile: vi.fn(),
-  },
-}));
-
 vi.mock("../services/documents.service", () => ({
   documentsService: {
     generateCv: vi.fn(),
   },
 }));
-
-const PROFILE = {
-  id: "11111111-1111-4111-8111-111111111111",
-  firstName: "Valeria",
-  lastName: "Quispe",
-  institutionalEmail: "valeria.quispe@umss.edu.bo",
-  personalEmail: null,
-  phone: null,
-  city: null,
-  headline: null,
-  aboutMe: null,
-  updatedAt: "2026-10-04T12:00:00.000Z",
-};
 
 const PDF = new Blob(["%PDF"], { type: "application/pdf" });
 const FILE_URL = "blob:generated-cv";
@@ -57,8 +37,7 @@ describe("CvExportDialog", () => {
   beforeEach(() => {
     vi.spyOn(URL, "createObjectURL").mockReturnValue(FILE_URL);
     vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => undefined);
-    vi.mocked(profileService.getProfile).mockResolvedValue(PROFILE);
-    vi.mocked(documentsService.generateCv).mockResolvedValue(PDF);
+    vi.mocked(documentsService.generateCv).mockResolvedValue({ file: PDF, fileName: FILE_NAME });
   });
 
   afterEach(() => {
@@ -112,8 +91,8 @@ describe("CvExportDialog", () => {
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
-  it("uses a generic file name when the profile is not available", async () => {
-    vi.mocked(profileService.getProfile).mockRejectedValue(new Error("Network Error"));
+  it("uses the fallback file name when returned by the service", async () => {
+    vi.mocked(documentsService.generateCv).mockResolvedValueOnce({ file: PDF, fileName: "CV.pdf" });
     const { user } = await renderDialog();
 
     await user.click(screen.getByRole("button", { name: "Descargar CV en PDF" }));

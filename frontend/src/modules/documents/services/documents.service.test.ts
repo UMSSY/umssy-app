@@ -134,11 +134,17 @@ describe("documentsService", () => {
     });
   });
 
-  it("requests the cv generated from the profile as a blob", async () => {
+  it("requests the cv generated from the profile and extracts the filename from content-disposition", async () => {
     const pdf = new Blob(["%PDF"], { type: "application/pdf" });
-    vi.mocked(apiClient.post).mockResolvedValue({ data: pdf });
+    vi.mocked(apiClient.post).mockResolvedValue({
+      data: pdf,
+      headers: { "content-disposition": 'attachment; filename="CV_Juan_Perez.pdf"' },
+    });
 
-    await expect(documentsService.generateCv()).resolves.toBe(pdf);
+    await expect(documentsService.generateCv()).resolves.toEqual({
+      file: pdf,
+      fileName: "CV_Juan_Perez.pdf",
+    });
     expect(apiClient.post).toHaveBeenCalledWith(
       "/profile/cv/generate",
       {},
@@ -147,6 +153,19 @@ describe("documentsService", () => {
         responseType: "blob",
       },
     );
+  });
+
+  it("falls back to CV.pdf when content-disposition header is absent", async () => {
+    const pdf = new Blob(["%PDF"], { type: "application/pdf" });
+    vi.mocked(apiClient.post).mockResolvedValue({
+      data: pdf,
+      headers: {},
+    });
+
+    await expect(documentsService.generateCv()).resolves.toEqual({
+      file: pdf,
+      fileName: "CV.pdf",
+    });
   });
 
   it("deletes the chosen cv by its id", async () => {
