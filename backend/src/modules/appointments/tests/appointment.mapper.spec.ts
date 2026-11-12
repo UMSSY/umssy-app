@@ -33,6 +33,7 @@ describe('AppointmentMapper', () => {
       message: null,
       requestedAt: '2026-10-22T13:00:00.000Z',
       document: null,
+      cancellation: null,
     });
   });
 
