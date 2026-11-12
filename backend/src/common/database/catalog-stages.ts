@@ -4,6 +4,9 @@ import { seedMentorParticipationStatusesCatalog } from '../../modules/mentors/se
 import { seedMentorOfferStatusesCatalog } from '../../modules/mentors/seeds/mentor-offer-statuses-catalog.seed.js';
 import { seedAppointmentStatusesCatalog } from '../../modules/availability/seeds/appointment-statuses-catalog.seed.js';
 import { seedProposalStatusesCatalog } from '../../modules/availability/seeds/proposal-statuses-catalog.seed.js';
+import { seedAppointmentNotificationEventsCatalog } from '../../modules/appointments/seeds/appointment-notification-events-catalog.seed.js';
+import { seedAppointmentNotificationChannelsCatalog } from '../../modules/appointments/seeds/appointment-notification-channels-catalog.seed.js';
+import { seedAppointmentNotificationStatusesCatalog } from '../../modules/appointments/seeds/appointment-notification-statuses-catalog.seed.js';
 import { seedEventCategoriesCatalog } from '../../modules/event-categories/seeds/event-categories-catalog.seed.js';
 import { seedEventModalitiesCatalog } from '../../modules/events/seeds/event-modalities-catalog.seed.js';
 import { seedEventOriginsCatalog } from '../../modules/events/seeds/event-origins-catalog.seed.js';
@@ -32,6 +35,9 @@ export async function seedCatalogStages(
   await seedMentorOfferStatusesCatalog(tx);
   await seedAppointmentStatusesCatalog(tx);
   await seedProposalStatusesCatalog(tx);
+  await seedAppointmentNotificationEventsCatalog(tx);
+  await seedAppointmentNotificationChannelsCatalog(tx);
+  await seedAppointmentNotificationStatusesCatalog(tx);
   await seedEventCategoriesCatalog(tx);
   await seedEventModalitiesCatalog(tx);
   await seedEventOriginsCatalog(tx);

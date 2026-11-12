@@ -4,6 +4,7 @@ import { AppointmentMapper } from '../mappers/appointment.mapper.js';
 import {
   createAppointmentRecord,
   MENTOR_ID,
+  NOW,
   OTHER_USER_ID,
   STUDENT_ID,
 } from './fixtures/appointment-record.fixture.js';
@@ -21,7 +22,7 @@ describe('AppointmentMapper', () => {
       endAt: new Date('2026-10-23T10:30:00-04:00'),
     });
 
-    expect(mapper.toResponse(record, MENTOR_ID)).toEqual({
+    expect(mapper.toResponse(record, MENTOR_ID, NOW)).toEqual({
       id: record.id,
       blockId: record.blockId,
       startAt: '2026-10-23T14:00:00.000Z',
@@ -48,7 +49,7 @@ describe('AppointmentMapper', () => {
       document,
     });
 
-    expect(mapper.toResponse(record, MENTOR_ID)).toMatchObject({
+    expect(mapper.toResponse(record, MENTOR_ID, NOW)).toMatchObject({
       message: 'Quiero revisar mi CV',
       requestedAt: '2026-10-22T13:15:00.000Z',
       document: {
@@ -62,14 +63,14 @@ describe('AppointmentMapper', () => {
 
   it('returns null message and document when the appointment has none', () => {
     expect(
-      mapper.toResponse(createAppointmentRecord(), STUDENT_ID),
+      mapper.toResponse(createAppointmentRecord(), STUDENT_ID, NOW),
     ).toMatchObject({ message: null, document: null });
   });
 
   it('returns the same appointment data for both participants, changing only the counterpart', () => {
     const record = createAppointmentRecord();
-    const mentorResponse = mapper.toResponse(record, MENTOR_ID);
-    const studentResponse = mapper.toResponse(record, STUDENT_ID);
+    const mentorResponse = mapper.toResponse(record, MENTOR_ID, NOW);
+    const studentResponse = mapper.toResponse(record, STUDENT_ID, NOW);
     const { counterpart: mentorCounterpart, ...mentorData } = mentorResponse;
     const { counterpart: studentCounterpart, ...studentData } = studentResponse;
 
@@ -92,7 +93,7 @@ describe('AppointmentMapper', () => {
       orientationType: null,
     });
 
-    expect(mapper.toResponse(record, STUDENT_ID)).toMatchObject({
+    expect(mapper.toResponse(record, STUDENT_ID, NOW)).toMatchObject({
       blockId: null,
       orientationType: null,
       startAt: record.startAt.toISOString(),
@@ -105,6 +106,7 @@ describe('AppointmentMapper', () => {
       mapper.toResponse(
         createAppointmentRecord({ status: { title: 'CONFIRMADA' } }),
         MENTOR_ID,
+        NOW,
       ).status,
     ).toBe('CONFIRMED');
   });
@@ -116,6 +118,7 @@ describe('AppointmentMapper', () => {
         mapper.toResponse(
           createAppointmentRecord({ status: { title } }),
           MENTOR_ID,
+          NOW,
         ).status,
       ).toBe(title);
     },
@@ -132,7 +135,7 @@ describe('AppointmentMapper', () => {
 
     expect(
       mapper
-        .toResponseList([asMentor, asStudent], MENTOR_ID)
+        .toResponseList([asMentor, asStudent], MENTOR_ID, NOW)
         .map((row) => row.counterpart),
     ).toEqual([
       { id: STUDENT_ID, fullName: 'Luis Flores', role: 'student' },
@@ -141,6 +144,67 @@ describe('AppointmentMapper', () => {
   });
 
   it('maps an empty result to an empty list', () => {
-    expect(mapper.toResponseList([], MENTOR_ID)).toEqual([]);
+    expect(mapper.toResponseList([], MENTOR_ID, NOW)).toEqual([]);
+  });
+
+  it('returns COMPLETED for a confirmed appointment from its exact end time', () => {
+    const record = createAppointmentRecord();
+
+    expect(mapper.toResponse(record, MENTOR_ID, record.endAt).status).toBe(
+      'COMPLETED',
+    );
+    expect(
+      mapper.toResponse(record, MENTOR_ID, new Date(record.endAt.getTime() - 1))
+        .status,
+    ).toBe('CONFIRMED');
+  });
+
+  it('keeps a cancelled appointment CANCELLED after its end time', () => {
+    const record = createAppointmentRecord({ status: { title: 'CANCELLED' } });
+
+    expect(
+      mapper.toResponse(
+        record,
+        STUDENT_ID,
+        new Date('2026-12-01T00:00:00.000Z'),
+      ).status,
+    ).toBe('CANCELLED');
+  });
+
+  it('classifies every appointment of a list with the same instant', () => {
+    const ended = createAppointmentRecord({
+      endAt: new Date(NOW.getTime() - 60_000),
+    });
+    const upcoming = createAppointmentRecord();
+
+    expect(
+      mapper
+        .toResponseList([ended, upcoming], MENTOR_ID, NOW)
+        .map((row) => row.status),
+    ).toEqual(['COMPLETED', 'CONFIRMED']);
+  });
+
+  it('adds the meeting url only to the appointment detail', () => {
+    const record = createAppointmentRecord({
+      meetingUrl: 'https://meet.jit.si/umssy-stored',
+    });
+    const meetingUrl = 'https://meet.jit.si/umssy-shared';
+
+    expect(
+      mapper.toDetailResponse(record, STUDENT_ID, meetingUrl, NOW),
+    ).toEqual({
+      ...mapper.toResponse(record, STUDENT_ID, NOW),
+      meetingUrl,
+    });
+    expect(mapper.toResponse(record, STUDENT_ID, NOW)).not.toHaveProperty(
+      'meetingUrl',
+    );
+  });
+
+  it('returns a null meeting url when it must not be shared', () => {
+    expect(
+      mapper.toDetailResponse(createAppointmentRecord(), MENTOR_ID, null, NOW)
+        .meetingUrl,
+    ).toBeNull();
   });
 });

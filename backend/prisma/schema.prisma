@@ -145,10 +145,11 @@ model User {
   availabilityBlocks     AvailabilityBlock[]
   blockedDates           BlockedDate[]
 
-  mentorAppointments    Appointment[]        @relation("AppointmentMentor")
-  studentAppointments   Appointment[]        @relation("AppointmentStudent")
-  cancelledAppointments Appointment[]        @relation("AppointmentCancelledBy")
-  appointmentChanges    AppointmentHistory[]
+  mentorAppointments       Appointment[]             @relation("AppointmentMentor")
+  studentAppointments      Appointment[]             @relation("AppointmentStudent")
+  cancelledAppointments    Appointment[]             @relation("AppointmentCancelledBy")
+  appointmentChanges       AppointmentHistory[]
+  appointmentNotifications AppointmentNotification[]
 
   createdEvents        Event[]             @relation("EventCreatedBy")
   moderatedEvents      Event[]             @relation("EventModeratedBy")
@@ -482,9 +483,10 @@ model Appointment {
   orientationType OrientationType?   @relation(fields: [orientationTypeId], references: [id], onDelete: SetNull)
   cancelledBy     User?              @relation("AppointmentCancelledBy", fields: [cancelledById], references: [id], onDelete: SetNull)
 
-  proposals TimeProposal[]
-  history   AppointmentHistory[]
-  document  AppointmentDocument?
+  proposals     TimeProposal[]
+  history       AppointmentHistory[]
+  document      AppointmentDocument?
+  notifications AppointmentNotification[]
 
   @@index([mentorId, startAt])
   @@index([studentId, startAt])
@@ -551,6 +553,69 @@ model AppointmentHistory {
   @@index([newStatusId])
   @@index([changedById])
   @@map("appointment_histories")
+}
+
+model AppointmentNotificationEvent {
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String   @unique @db.VarChar(100)
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  notifications AppointmentNotification[]
+
+  @@map("appointment_notification_events")
+}
+
+model AppointmentNotificationChannel {
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String   @unique @db.VarChar(100)
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  notifications AppointmentNotification[]
+
+  @@map("appointment_notification_channels")
+}
+
+model AppointmentNotificationStatus {
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String   @unique @db.VarChar(100)
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  notifications AppointmentNotification[]
+
+  @@map("appointment_notification_statuses")
+}
+
+model AppointmentNotification {
+  id            String    @id @default(uuid()) @db.Uuid
+  appointmentId String    @map("appointment_id") @db.Uuid
+  recipientId   String    @map("recipient_id") @db.Uuid
+  eventId       String    @map("event_id") @db.Uuid
+  channelId     String    @map("channel_id") @db.Uuid
+  statusId      String    @map("status_id") @db.Uuid
+  attempts      Int       @default(0)
+  lastError     String?   @map("last_error")
+  sentAt        DateTime? @map("sent_at") @db.Timestamptz(6)
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  appointment Appointment                    @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  recipient   User                           @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+  event       AppointmentNotificationEvent   @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  channel     AppointmentNotificationChannel @relation(fields: [channelId], references: [id], onDelete: Restrict)
+  status      AppointmentNotificationStatus  @relation(fields: [statusId], references: [id], onDelete: Restrict)
+
+  @@unique([appointmentId, recipientId, eventId, channelId])
+  @@index([recipientId])
+  @@index([eventId])
+  @@index([channelId])
+  @@index([statusId])
+  @@map("appointment_notifications")
 }
 
 model EventCategory {

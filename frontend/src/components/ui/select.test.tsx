@@ -64,4 +64,15 @@ describe("Select", () => {
 
     expect(screen.getByRole("combobox", { name: "Ciudad" })).toHaveTextContent("lp")
   })
+
+  it("resalta la opción con texto oscuro, no blanco", async () => {
+    const user = userEvent.setup()
+    renderSelect()
+
+    await user.click(screen.getByRole("combobox", { name: "Ciudad" }))
+    const option = await screen.findByRole("option", { name: "La Paz" })
+
+    expect(option).toHaveClass("focus:bg-interaction", "focus:text-ink")
+    expect(option.className).not.toContain("text-accent-foreground")
+  })
 })

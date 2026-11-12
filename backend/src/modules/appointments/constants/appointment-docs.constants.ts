@@ -63,7 +63,12 @@ export const APPOINTMENT_RESPONSE_SCHEMA = {
         role: { type: 'string' as const, enum: ['mentor', 'student'] },
       },
     },
-    status: { type: 'string' as const, example: 'CONFIRMED' },
+    status: {
+      type: 'string' as const,
+      example: 'CONFIRMED',
+      description:
+        'CONFIRMED hasta la hora de fin; COMPLETED desde la hora de fin (calculado, no se guarda); CANCELLED se conserva',
+    },
     message: {
       type: 'string' as const,
       nullable: true,
@@ -71,6 +76,22 @@ export const APPOINTMENT_RESPONSE_SCHEMA = {
     },
     requestedAt: { type: 'string' as const, format: 'date-time' },
     document: { ...APPOINTMENT_DOCUMENT_RESPONSE_SCHEMA, nullable: true },
+  },
+};
+
+export const APPOINTMENT_DETAIL_RESPONSE_SCHEMA = {
+  ...APPOINTMENT_RESPONSE_SCHEMA,
+  required: [...APPOINTMENT_RESPONSE_SCHEMA.required, 'meetingUrl'],
+  properties: {
+    ...APPOINTMENT_RESPONSE_SCHEMA.properties,
+    meetingUrl: {
+      type: 'string' as const,
+      format: 'uri',
+      nullable: true,
+      example: 'https://meet.jit.si/umssy-3f9c1a2e-5b7d-4c1e-9a2b-1c2d3e4f5a6b',
+      description:
+        'Enlace de la videollamada; solo para los participantes y mientras la cita está confirmada y no terminó',
+    },
   },
 };
 
@@ -93,7 +114,7 @@ export const CREATE_APPOINTMENT_DOCS = {
 export const FIND_MY_APPOINTMENTS_DOCS = {
   summary: 'Consulta las citas propias próximas o pasadas',
   description:
-    'Incluye citas confirmadas y confirmaciones heredadas, normalizadas a CONFIRMED',
+    'Incluye citas confirmadas y confirmaciones heredadas, normalizadas a CONFIRMED; past incluye además las completadas. Una cita confirmada se devuelve COMPLETED desde su hora de fin',
   scopeDescription:
     'Por defecto upcoming; la clasificación utiliza la hora de fin de la cita',
   invalidQueryDescription: 'Los parámetros de consulta no son válidos',
@@ -105,6 +126,8 @@ export const FIND_MY_APPOINTMENTS_DOCS = {
 
 export const FIND_APPOINTMENT_DOCS = {
   summary: 'Consulta una cita únicamente si el usuario participa en ella',
+  description:
+    'Incluye el enlace de la videollamada de una cita confirmada que no terminó; si aún no tiene enlace, se genera en esta consulta',
   idDescription: 'Identificador de la cita',
   invalidIdDescription: 'El identificador de la cita no es válido',
   notFoundDescription: 'La cita no existe',

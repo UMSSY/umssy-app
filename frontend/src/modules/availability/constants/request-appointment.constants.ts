@@ -1,5 +1,10 @@
 export const APPOINTMENT_MESSAGE_MAX_LENGTH = 300;
 
+export const APPOINTMENT_REQUEST_ERROR_CODES = {
+  overlap: "APPOINTMENT_OVERLAP",
+  dailyLimit: "DAILY_APPOINTMENT_LIMIT",
+} as const;
+
 export const REQUEST_APPOINTMENT_TEXT = {
   topicLabel: "Tema de la sesión",
   topicPlaceholder: "Selecciona un tema",
@@ -11,6 +16,8 @@ export const REQUEST_APPOINTMENT_TEXT = {
   missingMessage: "Escribe un mensaje para el mentor",
   messageTooLong: `El mensaje no puede superar los ${APPOINTMENT_MESSAGE_MAX_LENGTH} caracteres`,
   confirmed: "Cita confirmada",
+  overlap: "Ya tienes una cita en ese horario. Elige otro horario.",
+  dailyLimit: "Ya tienes una cita reservada ese día. Elige otro día.",
   alreadyBooked: "Este horario ya fue reservado",
   createError: "No se pudo solicitar la cita. Intenta de nuevo.",
 } as const;

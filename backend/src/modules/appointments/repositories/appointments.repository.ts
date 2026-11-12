@@ -3,6 +3,7 @@ import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import type { TransactionClient } from '../../../common/types/transaction-client.types.js';
 import { AppointmentStatusTitle } from '../../availability/enums/appointment-status-title.enum.js';
 import { ACTIVE_APPOINTMENT_STATUS_TITLES } from '../constants/active-appointment-statuses.constants.js';
+import { PAST_APPOINTMENT_STATUS_TITLES } from '../constants/past-appointment-statuses.constants.js';
 import { APPOINTMENT_PARTICIPANT_LOCK_PREFIX } from '../constants/appointment-lock.constants.js';
 import { APPOINTMENT_SELECT } from '../constants/appointment-select.constants.js';
 import { DAILY_APPOINTMENT_LIMIT_STATUS_TITLES } from '../constants/daily-appointment-limit-statuses.constants.js';
@@ -117,6 +118,22 @@ export class AppointmentsRepository {
     });
   }
 
+  async assignMeetingUrl(
+    id: string,
+    meetingUrl: string,
+  ): Promise<string | null> {
+    await this.prisma.appointment.updateMany({
+      where: { id, meetingUrl: null },
+      data: { meetingUrl },
+    });
+    const appointment = await this.prisma.appointment.findUnique({
+      where: { id },
+      select: { meetingUrl: true },
+    });
+
+    return appointment?.meetingUrl ?? null;
+  }
+
   private myAppointmentsWhere(
     userId: string,
     scope: MyAppointmentsQuery['scope'],
@@ -125,7 +142,14 @@ export class AppointmentsRepository {
     return {
       OR: [{ mentorId: userId }, { studentId: userId }],
       endAt: scope === 'upcoming' ? { gt: now } : { lte: now },
-      status: { title: { in: ACTIVE_APPOINTMENT_STATUS_TITLES } },
+      status: {
+        title: {
+          in:
+            scope === 'upcoming'
+              ? ACTIVE_APPOINTMENT_STATUS_TITLES
+              : PAST_APPOINTMENT_STATUS_TITLES,
+        },
+      },
     };
   }
 

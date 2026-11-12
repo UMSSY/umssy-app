@@ -19,6 +19,7 @@ export function BlockSelection({
   weekRange,
   fetchFreeBlocks,
   stickyOffset,
+  density,
 }: BlockSelectionProps) {
   const {
     selectedBlock,
@@ -32,16 +33,18 @@ export function BlockSelection({
   } = useBlockSelection(fetchFreeBlocks);
   const mentorProfile = useMentorProfile(mentorId);
   const [isFormDirty, setIsFormDirty] = useState(false);
-  const { createAppointment, isSubmitting } = useCreateAppointment((block) => {
-    setIsFormDirty(false);
-    markUnavailable(block);
-  });
-  const leaveGuard = useLeaveGuard(isFormDirty && selectedBlock !== null);
+  const [formVersion, setFormVersion] = useState(0);
+  const [reservationError, setReservationError] = useState<string | null>(null);
+  const { createAppointment, isSubmitting } = useCreateAppointment(
+    markUnavailable,
+    setReservationError,
+  );
+  const leaveGuard = useLeaveGuard(isFormDirty);
 
   const selectableBlocks = blocks.filter((block) => !unavailableBlockIds.includes(block.id));
 
   const handleSelectBlock = (block: AvailabilityBlock) => {
-    setIsFormDirty(false);
+    setReservationError(null);
     selectBlock(block);
   };
 
@@ -51,6 +54,7 @@ export function BlockSelection({
     if (created) {
       setIsFormDirty(false);
       clearSelection();
+      setFormVersion((version) => version + 1);
     }
   };
 
@@ -64,15 +68,16 @@ export function BlockSelection({
           selectedBlockId={selectedBlock?.id}
           onSelectBlock={handleSelectBlock}
           stickyOffset={stickyOffset}
+          density={density}
         />
         <BlockSelectionPanel
           selectedBlock={selectedBlock}
           unavailableBlock={unavailableBlock}
           isChecking={isChecking}
-          error={error}
+          error={reservationError ?? error}
         >
           <RequestAppointmentForm
-            key={selectedBlock?.id}
+            key={formVersion}
             orientationTypes={mentorProfile.data?.orientationTypes ?? []}
             isLoadingTopics={mentorProfile.isPending}
             isSubmitting={isSubmitting}

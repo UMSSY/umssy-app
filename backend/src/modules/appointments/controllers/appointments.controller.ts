@@ -31,6 +31,7 @@ import { RolesGuard } from '../../../common/guards/roles.guard.js';
 import { RequestValidationPipe } from '../../../common/pipes/request-validation.pipe.js';
 import type { AuthenticatedUser } from '../../../common/types/authenticated-user.types.js';
 import {
+  APPOINTMENT_DETAIL_RESPONSE_SCHEMA,
   APPOINTMENT_MESSAGES,
   APPOINTMENT_RESPONSE_SCHEMA,
   CREATE_APPOINTMENT_DOCS,
@@ -47,6 +48,7 @@ import { CreateAppointmentDto } from '../requests/create-appointment.request.js'
 import { appointmentIdSchema } from '../requests/appointment-id.request.js';
 import { myAppointmentsQuerySchema } from '../requests/my-appointments-query.request.js';
 import { AppointmentsService } from '../services/appointments.service.js';
+import type { AppointmentDetailResponse } from '../types/appointment-detail-response.types.js';
 import type { MyAppointmentResponse } from '../types/my-appointment-response.types.js';
 import type { MyAppointmentsPageResponse } from '../types/my-appointments-page-response.types.js';
 import type { MyAppointmentsQuery } from '../types/my-appointments-query.types.js';
@@ -160,6 +162,7 @@ export class AppointmentsController {
   @Get(':id')
   @ApiOperation({
     summary: FIND_APPOINTMENT_DOCS.summary,
+    description: FIND_APPOINTMENT_DOCS.description,
   })
   @ApiParam({
     name: 'id',
@@ -180,14 +183,14 @@ export class AppointmentsController {
         statusCode: { type: 'integer', example: 200 },
         ok: { type: 'boolean', example: true },
         detail: { type: 'string' },
-        data: APPOINTMENT_RESPONSE_SCHEMA,
+        data: APPOINTMENT_DETAIL_RESPONSE_SCHEMA,
       },
     },
   })
   findOne(
     @CurrentUserId() userId: string,
     @Param('id', new RequestValidationPipe(appointmentIdSchema)) id: string,
-  ): Promise<MyAppointmentResponse> {
+  ): Promise<AppointmentDetailResponse> {
     return this.appointmentsService.findOne(userId, id);
   }
 

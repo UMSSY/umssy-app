@@ -22,11 +22,13 @@ import { AppointmentNotOwnedException } from '../exceptions/appointment-not-owne
 import { AppointmentMapper } from '../mappers/appointment.mapper.js';
 import { AppointmentsRepository } from '../repositories/appointments.repository.js';
 import type { CreateAppointmentDto } from '../requests/create-appointment.request.js';
+import type { AppointmentDetailResponse } from '../types/appointment-detail-response.types.js';
 import type { AppointmentRecord } from '../types/appointment-record.types.js';
 import type { MyAppointmentResponse } from '../types/my-appointment-response.types.js';
 import type { MyAppointmentsPageResponse } from '../types/my-appointments-page-response.types.js';
 import type { MyAppointmentsQuery } from '../types/my-appointments-query.types.js';
 import { getBoliviaDayRange } from '../utils/bolivia-day.js';
+import { buildMeetingUrl, canShareMeetingUrl } from '../utils/meeting-url.js';
 
 @Injectable()
 export class AppointmentsService {
@@ -123,6 +125,7 @@ export class AppointmentsService {
             statusId,
             orientationTypeId: payload.orientationTypeId,
             message: payload.message,
+            meetingUrl: buildMeetingUrl(),
           },
           tx,
         );
@@ -137,7 +140,11 @@ export class AppointmentsService {
           tx,
         );
 
-        return this.appointmentMapper.toResponse(appointment, user.id);
+        return this.appointmentMapper.toResponse(
+          appointment,
+          user.id,
+          new Date(),
+        );
       })
       .catch((error: unknown) => {
         if (error instanceof DayBlockedException) {
@@ -168,16 +175,26 @@ export class AppointmentsService {
     );
 
     return {
-      items: this.appointmentMapper.toResponseList(appointments, userId),
+      items: this.appointmentMapper.toResponseList(appointments, userId, now),
       total,
       page,
       pageSize: query.pageSize,
     };
   }
 
-  async findOne(userId: string, id: string): Promise<MyAppointmentResponse> {
+  async findOne(
+    userId: string,
+    id: string,
+  ): Promise<AppointmentDetailResponse> {
     const appointment = await this.findParticipatedAppointment(userId, id);
-    return this.appointmentMapper.toResponse(appointment, userId);
+    const now = new Date();
+    const meetingUrl = await this.resolveMeetingUrl(appointment, now);
+    return this.appointmentMapper.toDetailResponse(
+      appointment,
+      userId,
+      meetingUrl,
+      now,
+    );
   }
 
   async getCounterpartPhoto(
@@ -190,6 +207,22 @@ export class AppointmentsService {
         ? appointment.studentId
         : appointment.mentorId;
     return this.profilePhotoService.getPhoto(counterpartId);
+  }
+
+  private async resolveMeetingUrl(
+    appointment: AppointmentRecord,
+    now: Date,
+  ): Promise<string | null> {
+    if (!canShareMeetingUrl(appointment.status.title, appointment.endAt, now)) {
+      return null;
+    }
+    if (appointment.meetingUrl) {
+      return appointment.meetingUrl;
+    }
+    return this.appointmentsRepository.assignMeetingUrl(
+      appointment.id,
+      buildMeetingUrl(),
+    );
   }
 
   private async assertMentorAcceptsTopic(
