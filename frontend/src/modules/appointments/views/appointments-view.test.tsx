@@ -298,7 +298,7 @@ describe("AppointmentsView", () => {
   it("abre el detalle al tocar una cita y lo cierra", async () => {
     const user = userEvent.setup();
     vi.mocked(appointmentsApi.getMyAppointments).mockResolvedValue([makeAppointment()]);
-    const getById = vi.spyOn(appointmentsApi, "getById").mockResolvedValue(makeAppointment());
+    const getById = vi.spyOn(appointmentsApi, "getById").mockResolvedValue({ ...makeAppointment(), meetingUrl: null });
     vi.spyOn(appointmentsApi, "getCounterpartPhoto").mockResolvedValue(null);
 
     renderWithQuery(<AppointmentsView />);
@@ -319,7 +319,7 @@ describe("AppointmentsView", () => {
   it("abre el detalle con el teclado", async () => {
     const user = userEvent.setup();
     vi.mocked(appointmentsApi.getMyAppointments).mockResolvedValue([makeAppointment()]);
-    vi.spyOn(appointmentsApi, "getById").mockResolvedValue(makeAppointment());
+    vi.spyOn(appointmentsApi, "getById").mockResolvedValue({ ...makeAppointment(), meetingUrl: null });
     vi.spyOn(appointmentsApi, "getCounterpartPhoto").mockResolvedValue(null);
 
     renderWithQuery(<AppointmentsView />);
