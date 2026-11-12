@@ -23,7 +23,10 @@ import { MentorProfileSuggestionsService } from '../services/mentor-profile-sugg
 import { MentorMapper } from '../mappers/mentor.mapper.js';
 import type { MentorsRepository } from '../repositories/mentors.repository.js';
 import type { UserSkillService } from '../../skills/services/user-skill.service.js';
-import { buildEmptyMentorProfile } from './fixtures/mentor-profile.fixture.js';
+import {
+  buildEmptyMentorProfile,
+  buildMentorProfile,
+} from './fixtures/mentor-profile.fixture.js';
 import { createMentorProfileEditingFixture } from './fixtures/mentor-profile-editing.fixture.js';
 
 describe('GET /api/mentors/me/profile-suggestions', () => {
@@ -322,6 +325,50 @@ describe('GET /api/mentors/me/profile-suggestions', () => {
         ),
       ).toBe(1);
       expect(findUserById.mock.calls).toEqual([['mentor-a'], ['mentor-a']]);
+      expect(findActiveMentorById.mock.calls.map(([id]) => id)).toEqual([
+        'mentor-a',
+        'mentor-a',
+      ]);
+    },
+  );
+
+  it.each([
+    'photoUrl',
+    'aboutMe',
+    'mentorTechnicalAreas',
+    'workExperiences',
+  ] as const)(
+    'preserves suggestions after discarding a %s draft without saving (simulated repositories)',
+    async (field) => {
+      const editing = createMentorProfileEditingFixture('mentor-a');
+      findActiveMentorById.mockImplementation(editing.read);
+      const authorization = token();
+      const before = await request(app.getHttpServer())
+        .get(path)
+        .auth(authorization, { type: 'bearer' })
+        .expect(200);
+      const storedBefore = editing.snapshot();
+
+      {
+        const draft = editing.snapshot();
+        Object.assign(draft, {
+          [field]: structuredClone(buildMentorProfile()[field]),
+        });
+        expect(draft[field]).not.toEqual(storedBefore[field]);
+      }
+
+      const after = await request(app.getHttpServer())
+        .get(path)
+        .auth(authorization, { type: 'bearer' })
+        .expect(200);
+      expect(after.body).toEqual(before.body);
+      expect(after.body.data.pendingCount).toBe(4);
+      expect(after.body.data.pendingCount).toBe(
+        after.body.data.suggestions.length,
+      );
+      expect(editing.snapshot()).toEqual(storedBefore);
+      for (const write of Object.values(editing.writes))
+        expect(write).not.toHaveBeenCalled();
       expect(findActiveMentorById.mock.calls.map(([id]) => id)).toEqual([
         'mentor-a',
         'mentor-a',

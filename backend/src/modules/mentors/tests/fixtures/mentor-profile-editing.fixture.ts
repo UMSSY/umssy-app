@@ -150,7 +150,7 @@ export function createMentorProfileEditingFixture(userId: string) {
         }),
       aboutMe: () =>
         profileService.updatePresentation(userId, {
-          headline: null,
+          headline: 'Ingeniera de software',
           aboutMe: 'Comparto mi experiencia en ingeniería de software.',
         }),
       mentorTechnicalAreas: () =>
@@ -166,7 +166,7 @@ export function createMentorProfileEditingFixture(userId: string) {
           startDate: new Date('2024-01-01T00:00:00.000Z'),
           endDate: null,
           isCurrent: true,
-          description: null,
+          description: 'Desarrollo de aplicaciones y acompañamiento técnico.',
         }),
     },
   };
