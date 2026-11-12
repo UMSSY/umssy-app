@@ -238,13 +238,45 @@ describe("CvExtractionDialog", () => {
     expect(screen.getByRole("button", { name: "Aplicar a mi perfil" })).toBeDisabled();
   });
 
-  it("shows the real error message", async () => {
-    renderDialog({ extraction: null, errorMessage: "No se pudieron leer los datos de tu CV. Intenta de nuevo." });
+  it("shows the real error message without a retry when it is not transient", async () => {
+    renderDialog({ extraction: null, errorMessage: "Tu PDF no tiene texto seleccionable.", onRetry: vi.fn() });
 
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      "No se pudieron leer los datos de tu CV. Intenta de nuevo.",
-    );
+    expect(await screen.findByRole("alert")).toHaveTextContent("Tu PDF no tiene texto seleccionable.");
     expect(screen.queryByRole("tab")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Reintentar" })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Llenar mi perfil a mano" })).toHaveAttribute("href", "/profile");
+    expect(screen.getByRole("button", { name: "Aplicar a mi perfil" })).toBeDisabled();
+  });
+
+  it("retries a transient error", async () => {
+    const onRetry = vi.fn();
+    const { user } = renderDialog({ extraction: null, errorMessage: "Revisa tu conexión", canRetry: true, onRetry });
+
+    await user.click(await screen.findByRole("button", { name: "Reintentar" }));
+
+    expect(onRetry).toHaveBeenCalledTimes(1);
+  });
+
+  it("closes the review to fill the profile by hand", async () => {
+    const { onClose, user } = renderDialog({ extraction: null, errorMessage: "Tu PDF no tiene texto seleccionable." });
+
+    await user.click(await screen.findByRole("link", { name: "Llenar mi perfil a mano" }));
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("tells the user when no data was detected in the cv", async () => {
+    renderDialog({
+      extraction: { ...EXTRACTION, contact: { ...EXTRACTION.contact, firstName: null }, skills: [] },
+      available: CV_EMPTY_EXTRACTION_SELECTION,
+      selection: CV_EMPTY_EXTRACTION_SELECTION,
+    });
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("No detectamos datos en tu CV");
+    expect(screen.queryByRole("tab")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Reintentar" })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Llenar mi perfil a mano" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Aplicar a mi perfil" })).toBeDisabled();
   });
 
   it("shows what was applied and what was not after a partial failure", async () => {

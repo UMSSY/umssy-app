@@ -426,6 +426,54 @@ it("offers to generate a cv from the profile data", async () => {
     expect(screen.getByText("Ya tienes un CV vigente")).toBeInTheDocument();
   });
 
+  it("retries the extraction after a network error and shows the review", async () => {
+    const user = userEvent.setup();
+    seedCvs("CV_Valeria_Quispe.pdf");
+    vi.mocked(documentsService.extractCvData)
+      .mockRejectedValueOnce(new Error("Network Error"))
+      .mockResolvedValueOnce(REVIEW_EXTRACTION);
+    await renderView();
+
+    await user.click(screen.getByRole("button", { name: "Autollenar perfil" }));
+    const dialog = await screen.findByRole("dialog");
+    expect(await within(dialog).findByRole("alert")).toHaveTextContent("Revisa tu conexión");
+
+    await user.click(within(dialog).getByRole("button", { name: "Reintentar" }));
+
+    expect(await within(dialog).findByRole("tab", { name: "Contacto (2)" })).toBeInTheDocument();
+    expect(within(dialog).queryByRole("alert")).not.toBeInTheDocument();
+  });
+
+  it("offers only the manual fill when the cv is a scanned pdf", async () => {
+    const user = userEvent.setup();
+    seedCvs("CV_Valeria_Quispe.pdf");
+    vi.mocked(documentsService.extractCvData).mockRejectedValue({
+      response: { status: 422, data: { code: "CV_UNREADABLE" } },
+    });
+    await renderView();
+
+    await user.click(screen.getByRole("button", { name: "Autollenar perfil" }));
+    const dialog = await screen.findByRole("dialog");
+
+    expect(await within(dialog).findByRole("alert")).toHaveTextContent("no tiene texto seleccionable");
+    expect(within(dialog).queryByRole("button", { name: "Reintentar" })).not.toBeInTheDocument();
+    expect(within(dialog).getByRole("link", { name: "Llenar mi perfil a mano" })).toHaveAttribute("href", "/profile");
+    expect(screen.getByText("Ya tienes un CV vigente")).toBeInTheDocument();
+  });
+
+  it("tells the user when nothing was detected in the cv", async () => {
+    const user = userEvent.setup();
+    seedCvs("CV_Valeria_Quispe.pdf");
+    vi.mocked(documentsService.extractCvData).mockResolvedValue({ ...EMPTY_EXTRACTION, cvId: "cv-1" });
+    await renderView();
+
+    await user.click(screen.getByRole("button", { name: "Autollenar perfil" }));
+    const dialog = await screen.findByRole("dialog");
+
+    expect(await within(dialog).findByRole("alert")).toHaveTextContent("No detectamos datos en tu CV");
+    expect(within(dialog).getByRole("button", { name: "Aplicar a mi perfil" })).toBeDisabled();
+  });
+
   it("applies only the selected and corrected data to the profile", async () => {
     const user = userEvent.setup();
     seedCvs("CV_Valeria_Quispe.pdf");
