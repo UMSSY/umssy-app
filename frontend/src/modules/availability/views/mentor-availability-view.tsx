@@ -16,10 +16,12 @@ import { BlockedDatesList } from "../components/blocked-dates-list";
 import { EditBlockPanel } from "../components/edit-block-panel";
 import { ReceiveRequestsSwitch } from "../components/receive-requests-switch";
 import { WeekGrid } from "../components/week-grid/week-grid";
+import { WeekGridDensityToggle } from "../components/week-grid/week-grid-density-toggle";
 import { useCreateAvailabilityBlock } from "../hooks/use-create-availability-block";
 import { useElementHeight } from "../hooks/use-element-height";
 import { useBlockedDates } from "../hooks/use-blocked-dates";
 import { useMyBlocks } from "../hooks/use-my-blocks";
+import { useWeekGridDensity } from "../hooks/use-week-grid-density";
 import type { AvailabilityBlock } from "../types/availability-block.types";
 import type { CreateAvailabilityBlockInput } from "../types/create-availability-block-input.types";
 import type { MentorAvailabilityViewProps } from "../types/mentor-availability-view-props.types";
@@ -36,6 +38,7 @@ export function MentorAvailabilityView({
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [formKey, setFormKey] = useState(0);
   const { ref: weekNavRef, height: weekNavHeight } = useElementHeight<HTMLElement>();
+  const { density, setDensity } = useWeekGridDensity();
 
   const {
     blocks,
@@ -136,6 +139,7 @@ export function MentorAvailabilityView({
             >
               {MY_AVAILABILITY_TEXT.today}
             </Button>
+            <WeekGridDensityToggle density={density} onDensityChange={setDensity} />
             <p className="ml-auto text-sm text-muted-foreground">
               {BOLIVIA_TIME_LABEL}
             </p>
@@ -166,6 +170,7 @@ export function MentorAvailabilityView({
                 onEditBlock={handleEditBlock}
                 blockedDates={blockedDates}
                 onSelectDate={handleSelectDate}
+                density={density}
               />
             </>
           )}
