@@ -365,30 +365,58 @@ describe('GET /api/mentors/me/profile-suggestions', () => {
     },
   );
 
-  it('uses each validated subject and ignores arbitrary query and body identities', async () => {
+  it('isolates distinct active mentor profiles despite arbitrary query and body identities', async () => {
+    const profiles = new Map([
+      ['mentor-a', buildMentorProfile({ id: 'mentor-a', aboutMe: null })],
+      [
+        'mentor-b',
+        buildMentorProfile({
+          id: 'mentor-b',
+          photoUrl: null,
+          workExperiences: [],
+        }),
+      ],
+    ]);
     findActiveMentorById.mockImplementation(async (id) =>
-      id === 'mentor-a' ? buildEmptyMentorProfile() : null,
+      structuredClone(profiles.get(id) ?? null),
     );
     const first = await request(app.getHttpServer())
       .get(`${path}?userId=mentor-b&mentorId=mentor-b`)
       .auth(token(), { type: 'bearer' })
       .send({ userId: 'mentor-b', id: 'mentor-b' })
       .expect(200);
-    expect(first.body.data.pendingCount).toBe(4);
+    expect(
+      first.body.data.suggestions.map((item: { code: string }) => item.code),
+    ).toEqual(['MISSING_PROFESSIONAL_DESCRIPTION']);
+    expect(first.body.data.pendingCount).toBe(1);
     const second = await request(app.getHttpServer())
       .get(`${path}?userId=mentor-a`)
       .auth(token('mentor-b'), { type: 'bearer' })
       .expect(200);
-    expect(second.body.data.pendingCount).toBe(0);
+    expect(
+      second.body.data.suggestions.map((item: { code: string }) => item.code),
+    ).toEqual(['MISSING_PROFILE_PHOTO', 'MISSING_WORK_EXPERIENCE']);
+    expect(second.body.data.pendingCount).toBe(2);
+    const again = await request(app.getHttpServer())
+      .get(`${path}?mentorId=mentor-b`)
+      .auth(token(), { type: 'bearer' })
+      .expect(200);
+    expect(again.body).toEqual(first.body);
+    expect(findUserById.mock.calls).toEqual([
+      ['mentor-a'],
+      ['mentor-b'],
+      ['mentor-a'],
+    ]);
     expect(findActiveMentorById.mock.calls.map(([id]) => id)).toEqual([
       'mentor-a',
       'mentor-b',
+      'mentor-a',
     ]);
     await request(app.getHttpServer())
       .get('/api/mentors/mentor-b/profile-suggestions')
       .auth(token(), { type: 'bearer' })
       .expect(404);
-    expect(findActiveMentorById).toHaveBeenCalledTimes(2);
+    expect(findActiveMentorById).toHaveBeenCalledTimes(3);
   });
 
   it('propagates repository failures through the shared filter without exposing their details', async () => {
