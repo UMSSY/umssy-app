@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { formatBlockRange, toBoliviaTime } from "@/shared/utils/date-time";
 import { cn } from "cn";
 import { BLOCKED_DATE_TEXT } from "../../constants/blocked-date.constants";
-import { BLOCK_STATE_TEXT, DAY_LABELS, HOUR_HEIGHT_PX, SELECTED_BLOCK_CLASSES, STATE_BUTTON_CLASSES, STATE_BUTTON_VARIANT, STATE_LABELS_ES, WEEK_GRID_LEGEND } from "../../constants/week-grid.constants";
+import { BLOCK_STATE_TEXT, DAY_LABELS, HOUR_HEIGHT_PX_BY_DENSITY, SELECTED_BLOCK_CLASSES, STATE_BUTTON_CLASSES, STATE_BUTTON_VARIANT, STATE_LABELS_ES, WEEK_GRID_LEGEND } from "../../constants/week-grid.constants";
 import type { AvailabilityBlock } from "../../types/availability-block.types";
 import type { WeekGridProps } from "../../types/week-grid-props.types";
 import {
@@ -28,9 +28,11 @@ export function WeekGrid({
   onSelectBlock,
   onEditBlock,
   stickyOffset = 0,
+  density = "normal",
 }: WeekGridProps) {
+  const hourHeightPx = HOUR_HEIGHT_PX_BY_DENSITY[density];
   const hours = Array.from({ length: endHour - startHour }, (_, i) => startHour + i);
-  const gridHeightPx = hours.length * HOUR_HEIGHT_PX;
+  const gridHeightPx = hours.length * hourHeightPx;
   const stickyTop = { top: `calc(var(--spacing-app-header) + ${16 + stickyOffset}px)` };
 
   const dayDates = getWeekDayDates(weekRange);
@@ -61,7 +63,7 @@ export function WeekGrid({
               <li
                 key={h}
                 className="absolute right-2 text-xs text-muted-foreground"
-                style={{ top: (h - startHour) * HOUR_HEIGHT_PX + 4 }}
+                style={{ top: (h - startHour) * hourHeightPx + 4 }}
               >
                 <time dateTime={`${String(h).padStart(2, "0")}:00`}>
                   {String(h).padStart(2, "0")}:00
@@ -92,7 +94,7 @@ export function WeekGrid({
                     key={h}
                     aria-hidden="true"
                     className="absolute w-full border-t border-border"
-                    style={{ top: (h - startHour) * HOUR_HEIGHT_PX }}
+                    style={{ top: (h - startHour) * hourHeightPx }}
                   />
                 ))}
 
@@ -108,7 +110,8 @@ export function WeekGrid({
                       block.startAt,
                       block.endAt,
                       startHour,
-                      endHour
+                      endHour,
+                      hourHeightPx
                     );
                     if (heightPx <= 0) return null;
 
@@ -137,7 +140,9 @@ export function WeekGrid({
                           aria-label={`${stateLabel}, ${timeRange}`}
                           title={`${BLOCK_STATE_TEXT[block.state]} · ${formatBlockRange(block.startAt, block.endAt)}`}
                         >
-                          <span className="w-full truncate">{BLOCK_STATE_TEXT[block.state]}</span>
+                          {density === "normal" && (
+                            <span className="w-full truncate">{BLOCK_STATE_TEXT[block.state]}</span>
+                          )}
                           <span className="w-full truncate font-normal">{startTime}</span>
                         </Button>
                       </li>
