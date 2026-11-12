@@ -3,6 +3,7 @@ import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import type { TransactionClient } from '../../../common/types/transaction-client.types.js';
 import { AppointmentStatusTitle } from '../../availability/enums/appointment-status-title.enum.js';
 import { ACTIVE_APPOINTMENT_STATUS_TITLES } from '../constants/active-appointment-statuses.constants.js';
+import { PAST_APPOINTMENT_STATUS_TITLES } from '../constants/past-appointment-statuses.constants.js';
 import { APPOINTMENT_PARTICIPANT_LOCK_PREFIX } from '../constants/appointment-lock.constants.js';
 import { APPOINTMENT_SELECT } from '../constants/appointment-select.constants.js';
 import type { AppointmentRecord } from '../types/appointment-record.types.js';
@@ -79,7 +80,14 @@ export class AppointmentsRepository {
       where: {
         OR: [{ mentorId: userId }, { studentId: userId }],
         endAt: scope === 'upcoming' ? { gt: now } : { lte: now },
-        status: { title: { in: ACTIVE_APPOINTMENT_STATUS_TITLES } },
+        status: {
+          title: {
+            in:
+              scope === 'upcoming'
+                ? ACTIVE_APPOINTMENT_STATUS_TITLES
+                : PAST_APPOINTMENT_STATUS_TITLES,
+          },
+        },
       },
       orderBy:
         scope === 'upcoming'
