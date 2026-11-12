@@ -197,4 +197,26 @@ describe('PortfolioRepository', () => {
     expect(userPortfolioProject.createMany).not.toHaveBeenCalled();
     expect(result).toEqual([]);
   });
+
+  it('throws an error when repository encounters an unsupported portfolio provider', async () => {
+    userPortfolioProject.findMany.mockResolvedValue([
+      {
+        id: '22222222-2222-4222-8222-222222222220',
+        userId,
+        providerId: '11111111-0000-0000-0000-000000000001',
+        provider: { name: 'bitbucket' },
+        repoName: 'owner/repo-0',
+        repoUrl: 'https://bitbucket.org/owner/repo-0',
+        description: null,
+        language: null,
+        starsCount: 0,
+        isOwner: true,
+        displayOrder: 0,
+      },
+    ]);
+
+    await expect(repository.findByUserId(userId)).rejects.toThrow(
+      'Unsupported portfolio provider: bitbucket',
+    );
+  });
 });

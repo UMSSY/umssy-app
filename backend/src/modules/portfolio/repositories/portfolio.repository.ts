@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
-import type { PortfolioProvider } from '../enums/portfolio-provider.enum.js';
+import type { Prisma } from '../../../prisma/client.js';
+import { parsePortfolioProvider } from '../enums/portfolio-provider.enum.js';
 import type { NormalizedPortfolioProject } from '../types/normalized-portfolio-project.type.js';
 import type { PortfolioProjectEntity } from '../types/portfolio-project-entity.type.js';
 
@@ -21,32 +22,16 @@ const portfolioProjectSelect = {
   },
 } as const;
 
-type PortfolioProjectSelectedRow = {
-  id: string;
-  userId: string;
-  repoName: string;
-  repoUrl: string;
-  description: string | null;
-  language: string | null;
-  starsCount: number;
-  isOwner: boolean;
-  displayOrder: number;
-  provider: {
-    name: string;
-  };
-};
+type PortfolioProjectRecord = Prisma.UserPortfolioProjectGetPayload<{
+  select: typeof portfolioProjectSelect;
+}>;
 
 @Injectable()
 export class PortfolioRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async findByUserId(userId: string): Promise<PortfolioProjectEntity[]> {
-    const rows = await this.prisma.userPortfolioProject.findMany({
-      where: { userId },
-      orderBy: { displayOrder: 'asc' },
-      select: portfolioProjectSelect,
-    });
-
+    const rows = await this.queryProjectsByUserId(this.prisma, userId);
     return rows.map((row) => this.toEntity(row));
   }
 
@@ -84,21 +69,28 @@ export class PortfolioRepository {
         });
       }
 
-      return tx.userPortfolioProject.findMany({
-        where: { userId },
-        orderBy: { displayOrder: 'asc' },
-        select: portfolioProjectSelect,
-      });
+      return this.queryProjectsByUserId(tx, userId);
     });
 
     return rows.map((row) => this.toEntity(row));
   }
 
-  private toEntity(row: PortfolioProjectSelectedRow): PortfolioProjectEntity {
+  private queryProjectsByUserId(
+    client: Pick<PrismaService, 'userPortfolioProject'>,
+    userId: string,
+  ): Promise<PortfolioProjectRecord[]> {
+    return client.userPortfolioProject.findMany({
+      where: { userId },
+      orderBy: { displayOrder: 'asc' },
+      select: portfolioProjectSelect,
+    });
+  }
+
+  private toEntity(row: PortfolioProjectRecord): PortfolioProjectEntity {
     return {
       id: row.id,
       userId: row.userId,
-      provider: row.provider.name as PortfolioProvider,
+      provider: parsePortfolioProvider(row.provider.name),
       repoName: row.repoName,
       repoUrl: row.repoUrl,
       description: row.description,
@@ -109,3 +101,4 @@ export class PortfolioRepository {
     };
   }
 }
+
