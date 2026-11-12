@@ -80,9 +80,9 @@ const toWorkExperienceTask = (experience: CvExtractedWorkExperience, index: numb
 });
 
 async function addSkillsToProfile(skills: readonly CvExtractedSkill[]): Promise<unknown> {
-  const current = await skillsService.getMySkills();
-  const skillIds = [...new Set([...(current ?? []).map(({ id }) => id), ...skills.map(({ skillId }) => skillId)])];
-  return skillsService.saveMySkills(skillIds);
+  const skillIds = [...new Set(skills.map(({ skillId }) => skillId))];
+  if (skillIds.length === 0) return;
+  return skillsService.addSkills(skillIds);
 }
 
 function buildSkillsTask(extraction: CvExtraction, selection: CvExtractionSelection): CvApplyTask[] {

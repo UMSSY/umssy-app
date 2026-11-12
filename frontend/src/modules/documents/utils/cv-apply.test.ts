@@ -23,7 +23,7 @@ vi.mock("@/modules/work-experience/services/work-experience.service", () => ({
   workExperienceService: { createWorkExperience: vi.fn() },
 }));
 vi.mock("@/modules/skills/services/skills.service", () => ({
-  skillsService: { getMySkills: vi.fn(), saveMySkills: vi.fn() },
+  skillsService: { getMySkills: vi.fn(), saveMySkills: vi.fn(), addSkills: vi.fn() },
 }));
 
 const PROFILE: ProfileResponse = {
@@ -124,6 +124,7 @@ describe("buildCvApplyTasks", () => {
     vi.mocked(workExperienceService.createWorkExperience).mockResolvedValue({ id: "exp-1", ...WORK_ITEM });
     vi.mocked(skillsService.getMySkills).mockResolvedValue([{ id: "skill-ts", name: "TypeScript" }]);
     vi.mocked(skillsService.saveMySkills).mockResolvedValue([]);
+    vi.mocked(skillsService.addSkills).mockResolvedValue([]);
   });
 
   afterEach(() => {
@@ -160,7 +161,7 @@ describe("buildCvApplyTasks", () => {
       isCurrent: true,
       description: "APIs",
     });
-    expect(skillsService.saveMySkills).toHaveBeenCalledWith(["skill-ts", "skill-sql"]);
+    expect(skillsService.addSkills).toHaveBeenCalledWith(["skill-sql"]);
   });
 
   it("creates no task for unselected sections", () => {

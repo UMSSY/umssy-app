@@ -36,7 +36,7 @@ vi.mock("@/modules/profile/services/profile.service", () => ({
 }));
 
 vi.mock("@/modules/skills/services/skills.service", () => ({
-  skillsService: { getMySkills: vi.fn(), saveMySkills: vi.fn() },
+  skillsService: { getMySkills: vi.fn(), saveMySkills: vi.fn(), addSkills: vi.fn() },
 }));
 
 vi.mock("@/modules/education/services/educations.service", () => ({
@@ -168,6 +168,7 @@ describe("DocumentsCvView", () => {
     vi.mocked(educationsService.getDegrees).mockResolvedValue([]);
     vi.mocked(skillsService.getMySkills).mockResolvedValue([{ id: "skill-sql", name: "SQL" }]);
     vi.mocked(skillsService.saveMySkills).mockResolvedValue([]);
+    vi.mocked(skillsService.addSkills).mockResolvedValue([]);
     vi.mocked(documentsService.extractCvData).mockImplementation((cvId: string) =>
       Promise.resolve({ ...EMPTY_EXTRACTION, cvId }),
     );
@@ -455,7 +456,7 @@ it("offers to generate a cv from the profile data", async () => {
       aboutMe: "Desarrolladora web",
     });
     expect(educationsService.createEducation).not.toHaveBeenCalled();
-    expect(skillsService.saveMySkills).toHaveBeenCalledWith(["skill-sql", "skill-ts"]);
+    expect(skillsService.addSkills).toHaveBeenCalledWith(["skill-ts"]);
     expect(screen.getByRole("status")).toHaveTextContent("Se aplicaron los datos seleccionados a tu perfil.");
   });
 
@@ -492,7 +493,7 @@ it("offers to generate a cv from the profile data", async () => {
     expect(profileService.updatePersonalInfo).not.toHaveBeenCalled();
     expect(profileService.updatePresentation).not.toHaveBeenCalled();
     expect(educationsService.createEducation).not.toHaveBeenCalled();
-    expect(skillsService.saveMySkills).not.toHaveBeenCalled();
+    expect(skillsService.addSkills).not.toHaveBeenCalled();
   });
 
   it("opens the file picker from Seleccionar PDF", async () => {
