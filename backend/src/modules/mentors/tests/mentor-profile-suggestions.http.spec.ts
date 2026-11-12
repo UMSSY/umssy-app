@@ -314,6 +314,57 @@ describe('GET /api/mentors/me/profile-suggestions', () => {
     },
   );
 
+  it.each([
+    { technicalAreas: false, orientations: true },
+    { technicalAreas: true, orientations: false },
+    { technicalAreas: false, orientations: false },
+    { technicalAreas: true, orientations: true },
+  ])(
+    'keeps technical areas independent from orientations over HTTP (areas=$technicalAreas, orientations=$orientations)',
+    async ({ technicalAreas, orientations }) => {
+      const complete = buildMentorProfile();
+      findActiveMentorById.mockResolvedValueOnce(
+        buildMentorProfile({
+          id: 'mentor-a',
+          mentorTechnicalAreas: technicalAreas
+            ? complete.mentorTechnicalAreas
+            : [],
+          mentorOrientationTypes: orientations
+            ? [
+                {
+                  orientationType: {
+                    id: 'orientation-1',
+                    name: 'Orientación técnica',
+                    description: null,
+                  },
+                },
+              ]
+            : [],
+        }),
+      );
+      const response = await request(app.getHttpServer())
+        .get(path)
+        .auth(token(), { type: 'bearer' })
+        .expect(200);
+      expect(
+        response.body.data.suggestions.map(
+          (item: { code: string }) => item.code,
+        ),
+      ).toEqual(technicalAreas ? [] : ['MISSING_SPECIALTY']);
+      expect(response.body.data.pendingCount).toBe(technicalAreas ? 0 : 1);
+      expect(response.body.data.pendingCount).toBe(
+        response.body.data.suggestions.length,
+      );
+      if (technicalAreas)
+        expect(response.body).toEqual({
+          statusCode: 200,
+          ok: true,
+          detail: 'OK',
+          data: { suggestions: [], pendingCount: 0 },
+        });
+    },
+  );
+
   it('uses each validated subject and ignores arbitrary query and body identities', async () => {
     findActiveMentorById.mockImplementation(async (id) =>
       id === 'mentor-a' ? buildEmptyMentorProfile() : null,
