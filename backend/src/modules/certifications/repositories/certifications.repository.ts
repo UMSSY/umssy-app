@@ -86,4 +86,16 @@ export class CertificationsRepository {
       () => new CertificationNotFoundException(),
     );
   }
+
+  findRecruitmentEvidence(userId: string, ids: string[]) {
+    return this.prisma.certification.findMany({
+      where: { userId, id: { in: ids } },
+      select: {
+        id: true,
+        name: true,
+        issuingOrganization: true,
+        issueDate: true,
+      },
+    });
+  }
 }

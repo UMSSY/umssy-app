@@ -3,20 +3,13 @@
 import { useMemo, useState } from "react";
 import { PageHeading } from "@/shared/components/layout";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   useRecruiterApplicants,
   useRecruiterVacancies,
 } from "../hooks/use-radar-recruiter";
-import {
-  RADAR_AXES,
-  type RecruiterApplicant,
-} from "../types/radar-recruiter.types";
+import { RADAR_AXES } from "../constants/radar-axes.constants";
+import type { RecruiterApplicant } from "../types/recruiter-applicant.types";
 import { RecruiterCandidateList } from "../components/recruiter-candidate-list";
 import { RecruiterCandidatePanel } from "../components/recruiter-candidate-panel";
 import { VacancyTabs } from "../components/vacancy-tabs";
@@ -40,7 +33,9 @@ export function RecruiterRadarView() {
   >(null);
 
   const activeVacancy =
-    vacancies.find((vacancy) => vacancy.id === vacancyId) ?? vacancies[0] ?? null;
+    vacancies.find((vacancy) => vacancy.id === vacancyId) ??
+    vacancies[0] ??
+    null;
 
   const applicantsQuery = useRecruiterApplicants(activeVacancy?.id ?? "");
   const target = applicantsQuery.data?.vacancy ?? null;
@@ -144,7 +139,9 @@ export function RecruiterRadarView() {
                   query={query}
                   onQueryChange={setQuery}
                   candidates={filteredCandidates}
-                  selectedApplicationId={selectedCandidate?.applicationId ?? null}
+                  selectedApplicationId={
+                    selectedCandidate?.applicationId ?? null
+                  }
                   onSelectCandidate={setSelectedApplicationId}
                 />
               )}
@@ -171,6 +168,19 @@ export function RecruiterRadarView() {
         description="Compara la afinidad de los postulantes con el perfil de cada vacante publicada por tu empresa."
       />
 
+      <p className="text-sm text-text-secondary">
+        La pestaña Postulaciones muestra todas las postulaciones recibidas por
+        tu empresa. El radar compara únicamente perfiles publicados con
+        autorización de visibilidad.
+      </p>
+      {applicantsQuery.data && (
+        <p role="status" className="text-sm text-text-secondary">
+          {applicantsQuery.data.totalApplications ??
+            applicantsQuery.data.applicants.length}{" "}
+          postulaciones recibidas · {applicantsQuery.data.applicants.length}{" "}
+          perfiles comparables.
+        </p>
+      )}
       {renderVacancies()}
     </main>
   );

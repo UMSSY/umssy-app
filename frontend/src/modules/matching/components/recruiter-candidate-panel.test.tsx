@@ -2,12 +2,10 @@ import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithQuery } from "@/shared/testing/render-with-query";
 import { radarRecruiterApi } from "../services/radar-recruiter.service";
-import {
-  RADAR_AXES,
-  type AreaEvidence,
-  type RecruiterApplicant,
-  type RecruiterTarget,
-} from "../types/radar-recruiter.types";
+import { RADAR_AXES } from "../constants/radar-axes.constants";
+import type { AreaEvidence } from "../types/area-evidence.types";
+import type { RecruiterApplicant } from "../types/recruiter-applicant.types";
+import type { RecruiterTarget } from "../types/recruiter-target.types";
 import { RecruiterCandidatePanel } from "./recruiter-candidate-panel";
 
 vi.mock("@/modules/matching/components/radar-chart", () => ({
@@ -157,8 +155,14 @@ describe("RecruiterCandidatePanel", () => {
     expect(screen.getByText("Brecha por área")).toBeInTheDocument();
     expect(screen.getByText("carlos@example.com")).toBeInTheDocument();
     expect(screen.getByText("+591 7000 0001")).toBeInTheDocument();
+    const contact = screen.getByText("Datos de contacto autorizados");
+    const reviewCv = screen.getByRole("button", { name: "Revisar CV" });
     expect(
-      screen.getByRole("button", { name: "Ver CV autorizado" }),
+      contact.compareDocumentPosition(reviewCv) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(
+      screen.getByRole("button", { name: "Revisar CV" }),
     ).toBeInTheDocument();
   });
 
@@ -174,7 +178,7 @@ describe("RecruiterCandidatePanel", () => {
       screen.getByText("El candidato no autorizó compartir su CV."),
     ).toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: "Ver CV autorizado" }),
+      screen.queryByRole("button", { name: "Revisar CV" }),
     ).not.toBeInTheDocument();
   });
 
@@ -232,9 +236,7 @@ describe("RecruiterCandidatePanel", () => {
   it("abre el CV autorizado como blob", async () => {
     renderPanel(CARLOS);
 
-    fireEvent.click(
-      screen.getByRole("button", { name: "Ver CV autorizado" }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Revisar CV" }));
 
     await waitFor(() => {
       expect(radarRecruiterApi.recruiterCv).toHaveBeenCalledWith("app-carlos");
@@ -252,9 +254,7 @@ describe("RecruiterCandidatePanel", () => {
     );
     renderPanel(CARLOS);
 
-    fireEvent.click(
-      screen.getByRole("button", { name: "Ver CV autorizado" }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Revisar CV" }));
 
     expect(
       await screen.findByText(

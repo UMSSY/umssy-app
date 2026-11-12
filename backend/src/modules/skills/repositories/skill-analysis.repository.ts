@@ -133,4 +133,11 @@ export class SkillAnalysisRepository {
       });
     }
   }
+
+  findApprovedRecruitmentReferences(userId: string, ids: string[]) {
+    return this.prisma.userSkill.findMany({
+      where: { userId, verificationStatus: 'approved', skillId: { in: ids } },
+      select: { skillId: true, evidenceRefs: true },
+    });
+  }
 }

@@ -11,9 +11,9 @@ export type CompanyAccessRequest = z.infer<typeof companyAccessSchema>;
 export const applicationRequestSchema = z
   .object({
     jobOfferId: z.uuid(),
-    consent: z.boolean().default(false),
-    consentCv: z.boolean().default(false),
-    consentContact: z.boolean().default(false),
+    consent: z.literal(true),
+    consentCv: z.literal(true),
+    consentContact: z.literal(true),
   })
   .strict();
 export type ApplicationRequest = z.infer<typeof applicationRequestSchema>;
