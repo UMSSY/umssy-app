@@ -162,19 +162,23 @@ de hooks ni se aplicaron o modificaron stashes.
 
 ## API propuesta — Issue #2130, Bloque 1
 
-Estado: contratos y metadatos definidos; el endpoint HTTP todavía no existe.
+Estado actualizado en el Bloque 2: endpoint HTTP implementado con los contratos
+y metadatos definidos en el Bloque 1. Las secciones siguientes conservan el diseño
+del contrato; el controlador delega en `MentorsService`, el evaluador de #2072 y
+`MentorMapper`. Las pruebas HTTP usan JWT firmados, el guard y el servicio de sesión
+reales con repositorios simulados; no certifican persistencia en PostgreSQL.
 
 ### Transporte y responsabilidades
 
-Se propone `GET /api/mentors/me/profile-suggestions` con autenticación
+Se implementa `GET /api/mentors/me/profile-suggestions` con autenticación
 `Authorization: Bearer <token>`. Se reutilizarán `JwtAuthGuard`, `SessionService`
 y `CurrentUser`; la identidad procederá exclusivamente de `user.id`. No se
 aceptará un ID alternativo de mentor por ruta, query o body.
 
-El controlador delegará en `MentorsService`, que reutilizará
+El controlador delega en `MentorsService`, que reutiliza
 `MentorProfileSuggestionsService.findSuggestions(user.id)` y `MentorMapper`.
-Las consultas seguirán en el repositorio existente. Este bloque no implementa
-esos métodos ni altera consultas, reglas o participación de #2072.
+Las consultas permanecen en el repositorio existente. El Bloque 2 no altera
+consultas, reglas o participación de #2072.
 
 ### Contrato de respuesta
 
