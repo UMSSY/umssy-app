@@ -42,6 +42,7 @@ import { CreateAppointmentDto } from '../requests/create-appointment.request.js'
 import { appointmentIdSchema } from '../requests/appointment-id.request.js';
 import { myAppointmentsQuerySchema } from '../requests/my-appointments-query.request.js';
 import { AppointmentsService } from '../services/appointments.service.js';
+import type { AppointmentDetailResponse } from '../types/appointment-detail-response.types.js';
 import type { MyAppointmentResponse } from '../types/my-appointment-response.types.js';
 import type { MyAppointmentsQuery } from '../types/my-appointments-query.types.js';
 
@@ -149,7 +150,7 @@ export class AppointmentsController {
   findOne(
     @CurrentUserId() userId: string,
     @Param('id', new RequestValidationPipe(appointmentIdSchema)) id: string,
-  ): Promise<MyAppointmentResponse> {
+  ): Promise<AppointmentDetailResponse> {
     return this.appointmentsService.findOne(userId, id);
   }
 
