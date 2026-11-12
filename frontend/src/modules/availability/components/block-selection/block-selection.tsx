@@ -35,9 +35,10 @@ export function BlockSelection({
   const [isFormDirty, setIsFormDirty] = useState(false);
   const [formVersion, setFormVersion] = useState(0);
   const [reservationError, setReservationError] = useState<string | null>(null);
-  const { createAppointment, isSubmitting } = useCreateAppointment(
+  const { createAppointment, isSubmitting, availabilityError, canRetry, resetAvailabilityError } = useCreateAppointment(
     markUnavailable,
     setReservationError,
+    clearSelection,
   );
   const leaveGuard = useLeaveGuard(isFormDirty);
 
@@ -45,11 +46,13 @@ export function BlockSelection({
 
   const handleSelectBlock = (block: AvailabilityBlock) => {
     setReservationError(null);
+    resetAvailabilityError();
     selectBlock(block);
   };
 
   const handleSubmit = async (values: AppointmentRequestValues) => {
     if (!selectedBlock) return;
+    setReservationError(null);
     const created = await createAppointment({ block: selectedBlock, values });
     if (created) {
       setIsFormDirty(false);
@@ -74,13 +77,14 @@ export function BlockSelection({
           selectedBlock={selectedBlock}
           unavailableBlock={unavailableBlock}
           isChecking={isChecking}
-          error={reservationError ?? error}
+          error={availabilityError ?? reservationError ?? error}
         >
           <RequestAppointmentForm
             key={formVersion}
             orientationTypes={mentorProfile.data?.orientationTypes ?? []}
             isLoadingTopics={mentorProfile.isPending}
             isSubmitting={isSubmitting}
+            canRetry={canRetry}
             onSubmit={handleSubmit}
             onDirtyChange={setIsFormDirty}
           />

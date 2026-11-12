@@ -71,27 +71,30 @@ export function MentorFreeBlocksView({ mentorId }: MentorFreeBlocksViewProps) {
         <AvailabilityLoading />
       ) : error ? (
         <p className="text-center text-destructive">{error}</p>
-      ) : blocks.length === 0 ? (
-        <section
-          className={cn(
-            "flex flex-col items-center gap-3 rounded-lg",
-            "border border-dashed border-border p-8 text-center",
-          )}
-        >
-          <p className="text-muted-foreground">{MENTOR_FREE_BLOCKS_TEXT.empty}</p>
-          <Button type="button" variant="outline" onClick={goToNextWeek}>
-            {MENTOR_FREE_BLOCKS_TEXT.nextWeekFromEmpty}
-          </Button>
-        </section>
       ) : (
-        <BlockSelection
-          mentorId={mentorId}
-          blocks={blocks}
-          weekRange={weekRange}
-          fetchFreeBlocks={() => availabilityApi.getMentorFreeBlocks(mentorId, weekRange)}
-          stickyOffset={weekNavHeight}
-          density={density}
-        />
+        <>
+          {blocks.length === 0 && (
+            <section
+              className={cn(
+                "flex flex-col items-center gap-3 rounded-lg",
+                "border border-dashed border-border p-8 text-center",
+              )}
+            >
+              <p className="text-muted-foreground">{MENTOR_FREE_BLOCKS_TEXT.empty}</p>
+              <Button type="button" variant="outline" onClick={goToNextWeek}>
+                {MENTOR_FREE_BLOCKS_TEXT.nextWeekFromEmpty}
+              </Button>
+            </section>
+          )}
+          <BlockSelection
+            mentorId={mentorId}
+            blocks={blocks}
+            weekRange={weekRange}
+            fetchFreeBlocks={() => availabilityApi.getMentorFreeBlocks(mentorId, weekRange)}
+            stickyOffset={weekNavHeight}
+            density={density}
+          />
+        </>
       )}
     </div>
   );

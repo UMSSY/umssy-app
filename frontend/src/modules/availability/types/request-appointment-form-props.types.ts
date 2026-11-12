@@ -5,6 +5,7 @@ export interface RequestAppointmentFormProps {
   orientationTypes: OrientationTypeResponse[];
   isLoadingTopics: boolean;
   isSubmitting: boolean;
+  canRetry?: boolean;
   onSubmit: (values: AppointmentRequestValues) => void;
   onDirtyChange: (isDirty: boolean) => void;
 }
