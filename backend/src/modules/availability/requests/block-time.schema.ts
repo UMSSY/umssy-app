@@ -1,6 +1,8 @@
 import { z } from 'zod';
 import { toBoliviaTime } from '../../../common/utils/date-time.js';
+import type { BlockDurationRule } from '../types/block-duration-rule.types.js';
 import {
+  BLOCK_DURATION_MINUTES,
   BLOCK_MAX_HOUR,
   BLOCK_MIN_HOUR,
   BLOCK_STEP_MINUTES,
@@ -26,7 +28,21 @@ const isoDateTime = z.iso.datetime({
 
 const blockInstant = isoDateTime.transform((value) => new Date(value));
 
-export const buildBlockTimeSchema = (getNow: () => Date = () => new Date()) =>
+const hasValidDuration = (
+  startAt: Date,
+  endAt: Date,
+  rule: BlockDurationRule,
+): boolean => {
+  const minutes = (endAt.getTime() - startAt.getTime()) / 60_000;
+  return rule === 'exact'
+    ? minutes === BLOCK_DURATION_MINUTES
+    : minutes % BLOCK_DURATION_MINUTES === 0;
+};
+
+export const buildBlockTimeSchema = (
+  getNow: () => Date = () => new Date(),
+  durationRule: BlockDurationRule = 'multiple',
+) =>
   z
     .strictObject({
       startAt: blockInstant,
@@ -46,6 +62,17 @@ export const buildBlockTimeSchema = (getNow: () => Date = () => new Date()) =>
           message: CREATE_BLOCK_MESSAGES.endBeforeStart,
         });
         return;
+      }
+
+      if (!hasValidDuration(startAt, endAt, durationRule)) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['endAt'],
+          message:
+            durationRule === 'exact'
+              ? CREATE_BLOCK_MESSAGES.invalidBlockDuration
+              : CREATE_BLOCK_MESSAGES.invalidRangeDuration,
+        });
       }
 
       if (startAt.getTime() <= getNow().getTime()) {
