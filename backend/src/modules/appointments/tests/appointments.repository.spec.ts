@@ -67,6 +67,7 @@ describe('AppointmentsRepository', () => {
       endAt: true,
       message: true,
       requestedAt: true,
+      meetingUrl: true,
       mentor: { select: { id: true, firstName: true, lastName: true } },
       student: { select: { id: true, firstName: true, lastName: true } },
       orientationType: { select: { id: true, name: true } },
