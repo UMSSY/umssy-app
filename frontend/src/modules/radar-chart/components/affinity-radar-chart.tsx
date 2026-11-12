@@ -23,6 +23,7 @@ const SERIES_LABEL = "Puntaje de afinidad del perfil";
 
 export function AffinityRadarChart({
   areas,
+  previousScores,
   average,
   onAreaClick,
   className,
@@ -58,7 +59,7 @@ export function AffinityRadarChart({
         <>
           <div className="mt-2 h-[360px] w-full sm:h-[440px] [&_.recharts-surface]:outline-none">
             <ResponsiveContainer width="100%" height="100%" onResize={width => setRadius(width < 280 ? '30%' : width < 360 ? '50%' : '68%')}>
-              <RadarChart data={areas} outerRadius={radius} accessibilityLayer={false}>
+              <RadarChart data={areas.map(area => ({ ...area, previousScore: previousScores?.[area.id] }))} outerRadius={radius} accessibilityLayer={false}>
                 <PolarGrid stroke="var(--color-border)" />
                 <PolarAngleAxis
                   dataKey="name"
@@ -82,6 +83,7 @@ export function AffinityRadarChart({
                   axisLine={false}
                   tick={{ fill: "var(--color-text-secondary)", fontSize: 10 }}
                 />
+                {previousScores ? <Radar name="Publicación anterior" dataKey="previousScore" stroke="#d97706" strokeDasharray="6 4" fill="#d97706" fillOpacity={0.08} isAnimationActive={false} /> : null}
                 <Radar
                   name={SERIES_LABEL}
                   dataKey="score"
