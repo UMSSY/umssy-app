@@ -5,6 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import { CV_EMPTY_EXTRACTION_SELECTION } from "../constants/cv-extraction.constants";
 import { CV_ERROR_MESSAGES } from "../constants/cv-error-messages.constants";
 import { documentsService } from "../services/documents.service";
+import type { CvApplyResult } from "../types/cv-apply-result.types";
 import type { CvExtractedContact } from "../types/cv-extracted-contact.types";
 import type { CvExtractedEducation } from "../types/cv-extracted-education.types";
 import type { CvExtractedPresentation } from "../types/cv-extracted-presentation.types";
@@ -15,6 +16,7 @@ import type { CvExtractionSelection } from "../types/cv-extraction-selection.typ
 import type { UseCvExtractionOptions } from "../types/use-cv-extraction-options.types";
 import { buildDefaultCvSelection } from "../utils/build-default-cv-selection";
 import { getCvErrorMessage } from "../utils/get-cv-error-message";
+import { removeAppliedCvSelection } from "../utils/remove-applied-cv-selection";
 import { toggleCvSection } from "../utils/toggle-cv-section";
 import { toggleCvSelectionItem } from "../utils/toggle-cv-selection-item";
 import { updateListItem } from "../utils/update-list-item";
@@ -70,6 +72,8 @@ export function useCvExtraction({ currentHeadline = null }: UseCvExtractionOptio
         ...current,
         workExperiences: updateListItem(current.workExperiences, index, changes),
       })),
+    removeApplied: (results: readonly CvApplyResult[]) =>
+      setSelection((current) => removeAppliedCvSelection(current, results)),
     close,
   };
 }

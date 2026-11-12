@@ -10,3 +10,4 @@ export {
   WORK_EXPERIENCE_MIN_DATE,
   WORK_EXPERIENCE_POSITION_MAX_LENGTH,
 } from "./constants/work-experience-validation.constants";
+export { workExperienceService } from "./services/work-experience.service";

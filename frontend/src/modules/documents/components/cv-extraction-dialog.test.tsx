@@ -246,4 +246,23 @@ describe("CvExtractionDialog", () => {
     );
     expect(screen.queryByRole("tab")).not.toBeInTheDocument();
   });
+
+  it("shows what was applied and what was not after a partial failure", async () => {
+    renderDialog({
+      applyReport: { applied: ["Contacto"], failed: ["Formación académica: Licenciatura"] },
+    });
+
+    const alert = await screen.findByRole("alert");
+
+    expect(alert).toHaveTextContent("Algunos datos no se pudieron aplicar");
+    expect(alert).toHaveTextContent("Se aplicó: Contacto.");
+    expect(alert).toHaveTextContent("No se aplicó: Formación académica: Licenciatura.");
+  });
+
+  it("blocks both actions while applying", async () => {
+    renderDialog({ isApplying: true });
+
+    expect(await screen.findByRole("button", { name: "Aplicando..." })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Cancelar" })).toBeDisabled();
+  });
 });
