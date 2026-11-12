@@ -11,6 +11,7 @@ import { BLOCKED_DATE_TEXT } from "../constants/blocked-date.constants";
 import { MY_AVAILABILITY_TEXT } from "../constants/my-availability.constants";
 import { AvailabilityLoading } from "../components/availability-loading";
 import { BlockForm } from "../components/block-form";
+import { splitDraft } from "../utils/block-range";
 import { BlockedDatePanel } from "../components/blocked-date-panel";
 import { BlockedDatesList } from "../components/blocked-dates-list";
 import { EditBlockPanel } from "../components/edit-block-panel";
@@ -35,6 +36,7 @@ export function MentorAvailabilityView({
   const [editBlockId, setEditBlockId] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [formKey, setFormKey] = useState(0);
+  const [draft, setDraft] = useState<CreateAvailabilityBlockInput | null>(null);
   const { ref: weekNavRef, height: weekNavHeight } = useElementHeight<HTMLElement>();
 
   const {
@@ -166,6 +168,7 @@ export function MentorAvailabilityView({
                 onEditBlock={handleEditBlock}
                 blockedDates={blockedDates}
                 onSelectDate={handleSelectDate}
+                draftBlocks={showBlockedPanel || showEditPanel ? [] : splitDraft(draft)}
               />
             </>
           )}
@@ -204,6 +207,7 @@ export function MentorAvailabilityView({
               isSubmitting={isSubmitting}
               onSubmit={handleCreate}
               onCancel={handleCancelCreate}
+              onDraftChange={setDraft}
             />
           </div>
           <BlockedDatesList />
