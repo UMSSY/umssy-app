@@ -3,7 +3,7 @@ import type { ProfileResponse } from '../../profile/responses/profile.response.j
 import type { EducationResponse } from '../../educations/responses/education.response.js';
 import type { WorkExperienceResponse } from '../../work-experience/responses/work-experience.response.js';
 import type { SkillResponse } from '../../skills/responses/skill.response.js';
-import type { CertificationResponse } from '../../certifications/responses/certification.response.js';
+import type { CertificationRecord } from '../../certifications/types/certification-record.type.js';
 import type { CvDocumentData } from '../types/cv-document-data.type.js';
 import { formatCvDate } from '../utils/format-cv-date.util.js';
 
@@ -14,7 +14,7 @@ export class CvGenerationMapper {
     educations: readonly EducationResponse[];
     experiences: readonly WorkExperienceResponse[];
     skills: readonly SkillResponse[];
-    certifications: readonly CertificationResponse[];
+    certifications: readonly CertificationRecord[];
   }): CvDocumentData {
     const { profile, educations, experiences, skills, certifications } = params;
 

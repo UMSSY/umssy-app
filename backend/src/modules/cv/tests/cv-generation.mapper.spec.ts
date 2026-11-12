@@ -43,9 +43,12 @@ describe("CvGenerationMapper", () => {
       certifications: [
         {
           id: "cert-1",
+          userId: "user-1",
           name: "NestJS Expert",
           issuingOrganization: "Trilon",
-          issueDate: "2024-06-01",
+          issueDate: new Date("2024-06-01T00:00:00.000Z"),
+          createdAt: new Date("2024-06-01T00:00:00.000Z"),
+          updatedAt: new Date("2024-06-01T00:00:00.000Z"),
         },
       ],
     });
