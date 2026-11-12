@@ -207,4 +207,53 @@ describe('AppointmentMapper', () => {
         .meetingUrl,
     ).toBeNull();
   });
+
+  describe('completed status seen by each participant', () => {
+    const MINUTE = 60_000;
+    const scenarios: Array<[string, string, string, number, number]> = [
+      ['COMPLETED', 'an ended confirmed appointment', 'CONFIRMED', -90, -60],
+      ['CONFIRMED', 'an appointment in progress', 'CONFIRMED', -10, 20],
+      [
+        'COMPLETED',
+        'an appointment ending at this exact minute',
+        'CONFIRMED',
+        -30,
+        0,
+      ],
+      [
+        'CANCELLED',
+        'a cancelled appointment that already passed',
+        'CANCELLED',
+        -90,
+        -60,
+      ],
+    ];
+    const viewers = [
+      ['mentor', MENTOR_ID],
+      ['student', STUDENT_ID],
+    ] as const;
+
+    it.each(
+      scenarios.flatMap((scenario) =>
+        viewers.map(([viewer, userId]) => {
+          const [expected, description, ...rest] = scenario;
+          return [expected, description, viewer, ...rest, userId] as const;
+        }),
+      ),
+    )(
+      'returns %s for %s to the %s',
+      (expected, _case, _viewer, title, startOffset, endOffset, userId) => {
+        const record = createAppointmentRecord({
+          status: { title },
+          startAt: new Date(NOW.getTime() + startOffset * MINUTE),
+          endAt: new Date(NOW.getTime() + endOffset * MINUTE),
+        });
+
+        expect(mapper.toResponse(record, userId, NOW).status).toBe(expected);
+        expect(mapper.toDetailResponse(record, userId, null, NOW).status).toBe(
+          expected,
+        );
+      },
+    );
+  });
 });
