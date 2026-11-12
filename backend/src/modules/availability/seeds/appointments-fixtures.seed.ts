@@ -57,9 +57,7 @@ export function buildAppointmentFixtures(context: FixtureContext) {
           status === 'RECHAZADA'
             ? 'Tema fuera del alcance de esta sesión ficticia.'
             : null,
-        meetingUrl: ['COMPLETADA', 'CONFIRMADA'].includes(status)
-          ? `https://meet.example.invalid/seed/${plan.mentorNumber}-${index}`
-          : null,
+        meetingUrl: null,
         cancelledById: isCancelled
           ? context.getId(isMentorCancellation ? mentor.key : plan.studentKey)
           : null,

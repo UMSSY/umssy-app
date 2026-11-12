@@ -15,11 +15,12 @@ import {
 import { MentorFreeBlocksView } from "./mentor-free-blocks-view";
 import { useMentorFreeBlocks } from "../hooks/use-mentor-free-blocks";
 import type { AvailabilityBlock } from "../types/availability-block.types";
+import type { WeekGridDensity } from "../types/week-grid-density.types";
 
 vi.mock("../hooks/use-mentor-free-blocks");
 vi.mock("../components/block-selection/block-selection", () => ({
-  BlockSelection: (props: { blocks: AvailabilityBlock[] }) => (
-    <div data-testid="block-selection" data-blocks={props.blocks.length} />
+  BlockSelection: (props: { blocks: AvailabilityBlock[]; density?: WeekGridDensity }) => (
+    <div data-testid="block-selection" data-blocks={props.blocks.length} data-density={props.density} />
   ),
 }));
 vi.mock("../components/availability-loading", () => ({
@@ -46,6 +47,7 @@ describe("MentorFreeBlocksView", () => {
   afterEach(() => {
     cleanup();
     vi.clearAllMocks();
+    window.localStorage.clear();
   });
 
   it("muestra el loading mientras carga", () => {
@@ -90,6 +92,17 @@ describe("MentorFreeBlocksView", () => {
     mockedUseMentorFreeBlocks.mockReturnValue({ blocks: [freeBlock], isLoading: false, error: null });
     render(<MentorFreeBlocksView mentorId="m1" />);
     expect(screen.getByTestId("block-selection")).toHaveAttribute("data-blocks", "1");
+  });
+
+  it("muestra el selector de densidad y lo propaga a BlockSelection", () => {
+    mockedUseMentorFreeBlocks.mockReturnValue({ blocks: [freeBlock], isLoading: false, error: null });
+    render(<MentorFreeBlocksView mentorId="m1" />);
+
+    expect(screen.getByTestId("block-selection")).toHaveAttribute("data-density", "normal");
+
+    fireEvent.click(screen.getByRole("button", { name: "Compacta" }));
+
+    expect(screen.getByTestId("block-selection")).toHaveAttribute("data-density", "compact");
   });
 
   it("al presionar 'Semana siguiente', vuelve a pedir una semana más adelante", () => {

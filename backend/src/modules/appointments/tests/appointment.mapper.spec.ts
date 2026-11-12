@@ -154,11 +154,8 @@ describe('AppointmentMapper', () => {
       'COMPLETED',
     );
     expect(
-      mapper.toResponse(
-        record,
-        MENTOR_ID,
-        new Date(record.endAt.getTime() - 1),
-      ).status,
+      mapper.toResponse(record, MENTOR_ID, new Date(record.endAt.getTime() - 1))
+        .status,
     ).toBe('CONFIRMED');
   });
 
@@ -166,8 +163,11 @@ describe('AppointmentMapper', () => {
     const record = createAppointmentRecord({ status: { title: 'CANCELLED' } });
 
     expect(
-      mapper.toResponse(record, STUDENT_ID, new Date('2026-12-01T00:00:00.000Z'))
-        .status,
+      mapper.toResponse(
+        record,
+        STUDENT_ID,
+        new Date('2026-12-01T00:00:00.000Z'),
+      ).status,
     ).toBe('CANCELLED');
   });
 
@@ -182,5 +182,29 @@ describe('AppointmentMapper', () => {
         .toResponseList([ended, upcoming], MENTOR_ID, NOW)
         .map((row) => row.status),
     ).toEqual(['COMPLETED', 'CONFIRMED']);
+  });
+
+  it('adds the meeting url only to the appointment detail', () => {
+    const record = createAppointmentRecord({
+      meetingUrl: 'https://meet.jit.si/umssy-stored',
+    });
+    const meetingUrl = 'https://meet.jit.si/umssy-shared';
+
+    expect(
+      mapper.toDetailResponse(record, STUDENT_ID, meetingUrl, NOW),
+    ).toEqual({
+      ...mapper.toResponse(record, STUDENT_ID, NOW),
+      meetingUrl,
+    });
+    expect(mapper.toResponse(record, STUDENT_ID, NOW)).not.toHaveProperty(
+      'meetingUrl',
+    );
+  });
+
+  it('returns a null meeting url when it must not be shared', () => {
+    expect(
+      mapper.toDetailResponse(createAppointmentRecord(), MENTOR_ID, null, NOW)
+        .meetingUrl,
+    ).toBeNull();
   });
 });
