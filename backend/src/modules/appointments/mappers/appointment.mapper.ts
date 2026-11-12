@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { AppointmentStatusTitle } from '../../availability/enums/appointment-status-title.enum.js';
 import { AppointmentDocumentMapper } from './appointment-document.mapper.js';
+import type { AppointmentDetailResponse } from '../types/appointment-detail-response.types.js';
 import type { AppointmentRecord } from '../types/appointment-record.types.js';
 import type { MyAppointmentResponse } from '../types/my-appointment-response.types.js';
 
@@ -38,6 +39,14 @@ export class AppointmentMapper {
         ? this.documentMapper.toResponse(appointment.document)
         : null,
     };
+  }
+
+  toDetailResponse(
+    appointment: AppointmentRecord,
+    userId: string,
+    meetingUrl: string | null,
+  ): AppointmentDetailResponse {
+    return { ...this.toResponse(appointment, userId), meetingUrl };
   }
 
   toResponseList(

@@ -133,6 +133,7 @@ export class InMemoryOverlapSeed {
           requestedAt: appointment.requestedAt,
           statusId: appointment.statusId,
           orientationTypeId: appointment.orientationTypeId,
+          meetingUrl: appointment.meetingUrl,
         }),
       );
     }
@@ -323,6 +324,7 @@ export class InMemoryOverlapSeed {
       requestedAt: new Date(),
       statusId: data.statusId,
       orientationTypeId: data.orientationTypeId,
+      meetingUrl: data.meetingUrl,
     });
     this.appointments.push(record);
     return record;
@@ -339,6 +341,7 @@ export class InMemoryOverlapSeed {
     requestedAt: Date;
     statusId: string;
     orientationTypeId: string;
+    meetingUrl?: string | null;
   }): AppointmentRecord {
     return {
       id: input.id,
@@ -349,6 +352,7 @@ export class InMemoryOverlapSeed {
       endAt: input.endAt,
       message: input.message,
       requestedAt: input.requestedAt,
+      meetingUrl: input.meetingUrl ?? null,
       mentor: this.userBrief(input.mentorId),
       student: this.userBrief(input.studentId),
       orientationType: {

@@ -133,6 +133,9 @@ describe('AppointmentsService', () => {
         statusId: STATUS_ID,
         orientationTypeId: TOPIC_ID,
         message: payload.message,
+        meetingUrl: expect.stringMatching(
+          /^https:\/\/meet\.jit\.si\/umssy-[0-9a-f-]{36}$/,
+        ),
       },
       TX,
     );
@@ -519,5 +522,22 @@ describe('AppointmentsService', () => {
     expect(new BlockAlreadyBookedException().message).toBe(
       'Este horario ya fue reservado',
     );
+  });
+
+  it('guarda una sala distinta de videollamada en cada cita confirmada', async () => {
+    await service.create(user, payload);
+    await service.create(user, payload);
+
+    const [first, second] =
+      appointmentsRepository.createAppointment.mock.calls.map(
+        ([data]) => (data as { meetingUrl: string }).meetingUrl,
+      );
+    expect(first).not.toBe(second);
+  });
+
+  it('no devuelve el enlace en la respuesta de la reserva', async () => {
+    const result = await service.create(user, payload);
+
+    expect(result).not.toHaveProperty('meetingUrl');
   });
 });

@@ -143,4 +143,26 @@ describe('AppointmentMapper', () => {
   it('maps an empty result to an empty list', () => {
     expect(mapper.toResponseList([], MENTOR_ID)).toEqual([]);
   });
+
+  it('adds the meeting url only to the appointment detail', () => {
+    const record = createAppointmentRecord({
+      meetingUrl: 'https://meet.jit.si/umssy-stored',
+    });
+    const meetingUrl = 'https://meet.jit.si/umssy-shared';
+
+    expect(mapper.toDetailResponse(record, STUDENT_ID, meetingUrl)).toEqual({
+      ...mapper.toResponse(record, STUDENT_ID),
+      meetingUrl,
+    });
+    expect(mapper.toResponse(record, STUDENT_ID)).not.toHaveProperty(
+      'meetingUrl',
+    );
+  });
+
+  it('returns a null meeting url when it must not be shared', () => {
+    expect(
+      mapper.toDetailResponse(createAppointmentRecord(), MENTOR_ID, null)
+        .meetingUrl,
+    ).toBeNull();
+  });
 });
