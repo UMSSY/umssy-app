@@ -133,7 +133,11 @@ export class AppointmentsService {
           tx,
         );
 
-        return this.appointmentMapper.toResponse(appointment, user.id);
+        return this.appointmentMapper.toResponse(
+          appointment,
+          user.id,
+          new Date(),
+        );
       },
     );
   }
@@ -148,12 +152,12 @@ export class AppointmentsService {
       query.scope,
       now,
     );
-    return this.appointmentMapper.toResponseList(appointments, userId);
+    return this.appointmentMapper.toResponseList(appointments, userId, now);
   }
 
   async findOne(userId: string, id: string): Promise<MyAppointmentResponse> {
     const appointment = await this.findParticipatedAppointment(userId, id);
-    return this.appointmentMapper.toResponse(appointment, userId);
+    return this.appointmentMapper.toResponse(appointment, userId, new Date());
   }
 
   async getCounterpartPhoto(
