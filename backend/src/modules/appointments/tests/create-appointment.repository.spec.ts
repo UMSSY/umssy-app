@@ -15,6 +15,7 @@ const DATA = {
   statusId: STATUS_ID,
   orientationTypeId: '66666666-6666-4666-8666-666666666666',
   message: 'Hola',
+  meetingUrl: 'https://meet.jit.si/umssy-44444444-4444-4444-8444-444444444444',
 };
 
 describe('AppointmentsRepository', () => {
