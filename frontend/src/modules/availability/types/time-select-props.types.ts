@@ -6,4 +6,5 @@ export interface TimeSelectProps {
   describedBy?: string;
   disabled?: boolean;
   isOptionHidden?: (time: string) => boolean;
+  getOptionHint?: (time: string) => string | undefined;
 }

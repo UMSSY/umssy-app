@@ -2,6 +2,7 @@ import type { BlockedDate } from "./blocked-date.types";
 import type { WeekRange } from "@/shared/types/week-range.types";
 import type { AvailabilityBlock } from "./availability-block.types";
 import type { WeekGridDensity } from "./week-grid-density.types";
+import type { BlockDraftSlot } from "./block-draft-slot.types";
 import type { WeekGridVariant } from "./week-grid-variant.types";
 
 export interface WeekGridProps {
@@ -17,4 +18,5 @@ export interface WeekGridProps {
   onEditBlock?: (block: AvailabilityBlock) => void;
   stickyOffset?: number;
   density?: WeekGridDensity;
+  draftBlocks?: BlockDraftSlot[];
 }

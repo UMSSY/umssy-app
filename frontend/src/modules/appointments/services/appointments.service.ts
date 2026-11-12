@@ -6,13 +6,14 @@ import type { Appointment } from "../types/appointment.types";
 import type { AppointmentDocument } from "../types/appointment-document.types";
 import type { AppointmentScope } from "../types/appointment-scope.types";
 import type { CreateAppointmentInput } from "../types/create-appointment-input.types";
+import type { MyAppointmentsPage } from "../types/my-appointments-page.types";
 
 export const appointmentsApi = {
   getMyAppointments: async (scope: AppointmentScope): Promise<Appointment[]> => {
-    const response = await apiClient.get<ApiResponse<Appointment[]>>("/appointments/me", {
+    const response = await apiClient.get<ApiResponse<MyAppointmentsPage>>("/appointments/me", {
       params: { scope },
     });
-    return response.data.data;
+    return response.data.data.items;
   },
 
   getById: async (appointmentId: string): Promise<Appointment> => {

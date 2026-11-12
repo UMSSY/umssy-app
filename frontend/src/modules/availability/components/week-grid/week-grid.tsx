@@ -6,6 +6,8 @@ import { cn } from "cn";
 import { BLOCKED_DATE_TEXT } from "../../constants/blocked-date.constants";
 import { BLOCK_STATE_TEXT, DAY_LABELS, HOUR_HEIGHT_PX_BY_DENSITY, SELECTED_BLOCK_CLASSES, STATE_BUTTON_CLASSES, STATE_BUTTON_VARIANT, STATE_LABELS_ES, WEEK_GRID_LEGEND } from "../../constants/week-grid.constants";
 import type { AvailabilityBlock } from "../../types/availability-block.types";
+import type { BlockDraftSlot } from "../../types/block-draft-slot.types";
+import { BLOCK_RANGE_TEXT } from "../../constants/availability.constants";
 import type { WeekGridProps } from "../../types/week-grid-props.types";
 import {
   getBlockVerticalPosition,
@@ -29,6 +31,7 @@ export function WeekGrid({
   onEditBlock,
   stickyOffset = 0,
   density = "normal",
+  draftBlocks = [],
 }: WeekGridProps) {
   const hourHeightPx = HOUR_HEIGHT_PX_BY_DENSITY[density];
   const hours = Array.from({ length: endHour - startHour }, (_, i) => startHour + i);
@@ -40,6 +43,11 @@ export function WeekGrid({
   for (const block of blocks) {
     const dayIndex = getWeekDayIndex(block.startAt, weekRange);
     if (dayIndex !== null) blocksByDay[dayIndex].push(block);
+  }
+  const draftsByDay: BlockDraftSlot[][] = Array.from({ length: 7 }, () => []);
+  for (const draft of draftBlocks) {
+    const dayIndex = getWeekDayIndex(draft.startAt, weekRange);
+    if (dayIndex !== null) draftsByDay[dayIndex].push(draft);
   }
 
   function handleBlockClick(block: AvailabilityBlock) {
@@ -145,6 +153,23 @@ export function WeekGrid({
                           )}
                           <span className="w-full truncate font-normal">{startTime}</span>
                         </Button>
+                      </li>
+                    );
+                  })}
+                  {draftsByDay[dayIndex].map((draft) => {
+                    const { topPx, heightPx } = getBlockVerticalPosition(draft.startAt, draft.endAt, startHour, endHour);
+                    const draftRange = `${toBoliviaTime(draft.startAt).time} – ${toBoliviaTime(draft.endAt).time}`;
+                    return (
+                      <li
+                        key={`draft-${draft.startAt}`}
+                        data-testid="draft-block"
+                        className="pointer-events-none absolute inset-x-1 py-px"
+                        style={{ top: topPx, height: heightPx }}
+                      >
+                        <div className="size-full overflow-hidden rounded-md border border-dashed border-primary bg-primary/10 px-1.5 py-0.5 text-xs leading-[15px] text-primary">
+                          <p className="truncate font-bold">{draftRange}</p>
+                          <p className="truncate font-medium">{BLOCK_RANGE_TEXT.draftLabel}</p>
+                        </div>
                       </li>
                     );
                   })}

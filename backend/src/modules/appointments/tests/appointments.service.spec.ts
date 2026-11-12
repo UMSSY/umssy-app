@@ -20,7 +20,11 @@ import {
 } from './fixtures/appointment-record.fixture.js';
 
 describe('AppointmentsService', () => {
-  const repository = { findMine: vi.fn(), findById: vi.fn() };
+  const repository = {
+    findMine: vi.fn(),
+    countMine: vi.fn(),
+    findById: vi.fn(),
+  };
   const mapper = { toResponse: vi.fn(), toResponseList: vi.fn() };
   const profilePhotoService = { getPhoto: vi.fn() };
   let moduleRef: TestingModule;
@@ -54,19 +58,32 @@ describe('AppointmentsService', () => {
     async (scope) => {
       const records = [createAppointmentRecord()];
       const response = [{ id: APPOINTMENT_ID }];
+      repository.countMine.mockResolvedValue(1);
       repository.findMine.mockImplementation(async () => {
         vi.setSystemTime(new Date('2026-10-22T15:01:00.000Z'));
         return records;
       });
       mapper.toResponseList.mockReturnValue(response);
 
-      await expect(service.findMine(MENTOR_ID, { scope })).resolves.toBe(
-        response,
+      await expect(
+        service.findMine(MENTOR_ID, { scope, page: 1, pageSize: 10 }),
+      ).resolves.toEqual({
+        items: response,
+        total: 1,
+        page: 1,
+        pageSize: 10,
+      });
+      expect(repository.countMine).toHaveBeenCalledExactlyOnceWith(
+        MENTOR_ID,
+        scope,
+        NOW,
       );
       expect(repository.findMine).toHaveBeenCalledExactlyOnceWith(
         MENTOR_ID,
         scope,
         NOW,
+        1,
+        10,
       );
       expect(mapper.toResponseList).toHaveBeenCalledExactlyOnceWith(
         records,
@@ -75,22 +92,86 @@ describe('AppointmentsService', () => {
     },
   );
 
-  it('returns an empty list for a genuinely empty query', async () => {
+  it('returns an empty page for a genuinely empty query', async () => {
+    repository.countMine.mockResolvedValue(0);
     repository.findMine.mockResolvedValue([]);
     mapper.toResponseList.mockReturnValue([]);
 
     await expect(
-      service.findMine(STUDENT_ID, { scope: 'upcoming' }),
-    ).resolves.toEqual([]);
+      service.findMine(STUDENT_ID, { scope: 'upcoming', page: 1, pageSize: 10 }),
+    ).resolves.toEqual({ items: [], total: 0, page: 1, pageSize: 10 });
     expect(mapper.toResponseList).toHaveBeenCalledWith([], STUDENT_ID);
   });
 
-  it('does not turn a failed database query into an empty list', async () => {
+  it('keeps the first page when there are no appointments at all', async () => {
+    repository.countMine.mockResolvedValue(0);
+    repository.findMine.mockResolvedValue([]);
+    mapper.toResponseList.mockReturnValue([]);
+
+    await service.findMine(STUDENT_ID, {
+      scope: 'upcoming',
+      page: 7,
+      pageSize: 10,
+    });
+
+    expect(repository.findMine).toHaveBeenCalledExactlyOnceWith(
+      STUDENT_ID,
+      'upcoming',
+      NOW,
+      1,
+      10,
+    );
+  });
+
+  it('does not advance past the last page when more pages are requested', async () => {
+    repository.countMine.mockResolvedValue(48);
+    repository.findMine.mockResolvedValue([]);
+    mapper.toResponseList.mockReturnValue([]);
+
+    const page = await service.findMine(STUDENT_ID, {
+      scope: 'upcoming',
+      page: 99,
+      pageSize: 10,
+    });
+
+    expect(page).toEqual({ items: [], total: 48, page: 5, pageSize: 10 });
+    expect(repository.findMine).toHaveBeenCalledExactlyOnceWith(
+      STUDENT_ID,
+      'upcoming',
+      NOW,
+      5,
+      10,
+    );
+  });
+
+  it('serves the requested page when it exists', async () => {
+    repository.countMine.mockResolvedValue(11);
+    repository.findMine.mockResolvedValue([]);
+    mapper.toResponseList.mockReturnValue([]);
+
+    const page = await service.findMine(STUDENT_ID, {
+      scope: 'past',
+      page: 2,
+      pageSize: 10,
+    });
+
+    expect(page).toEqual({ items: [], total: 11, page: 2, pageSize: 10 });
+    expect(repository.findMine).toHaveBeenCalledExactlyOnceWith(
+      STUDENT_ID,
+      'past',
+      NOW,
+      2,
+      10,
+    );
+  });
+
+  it('does not turn a failed database query into an empty page', async () => {
     const failure = new Error('Database unavailable');
+    repository.countMine.mockResolvedValue(1);
     repository.findMine.mockRejectedValue(failure);
 
     await expect(
-      service.findMine(STUDENT_ID, { scope: 'upcoming' }),
+      service.findMine(STUDENT_ID, { scope: 'upcoming', page: 1, pageSize: 10 }),
     ).rejects.toBe(failure);
     expect(mapper.toResponseList).not.toHaveBeenCalled();
   });

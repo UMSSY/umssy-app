@@ -38,11 +38,17 @@ import {
   FIND_COUNTERPART_PHOTO_DOCS,
   FIND_MY_APPOINTMENTS_DOCS,
 } from '../constants/appointment-docs.constants.js';
+import {
+  DEFAULT_MY_APPOINTMENTS_PAGE,
+  DEFAULT_MY_APPOINTMENTS_PAGE_SIZE,
+  MAX_MY_APPOINTMENTS_PAGE_SIZE,
+} from '../constants/my-appointments-pagination.constants.js';
 import { CreateAppointmentDto } from '../requests/create-appointment.request.js';
 import { appointmentIdSchema } from '../requests/appointment-id.request.js';
 import { myAppointmentsQuerySchema } from '../requests/my-appointments-query.request.js';
 import { AppointmentsService } from '../services/appointments.service.js';
 import type { MyAppointmentResponse } from '../types/my-appointment-response.types.js';
+import type { MyAppointmentsPageResponse } from '../types/my-appointments-page-response.types.js';
 import type { MyAppointmentsQuery } from '../types/my-appointments-query.types.js';
 
 @Controller('appointments')
@@ -96,6 +102,27 @@ export class AppointmentsController {
     description: FIND_MY_APPOINTMENTS_DOCS.scopeDescription,
     schema: { default: 'upcoming' },
   })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: FIND_MY_APPOINTMENTS_DOCS.pageDescription,
+    schema: {
+      type: 'integer',
+      minimum: 1,
+      default: DEFAULT_MY_APPOINTMENTS_PAGE,
+    },
+  })
+  @ApiQuery({
+    name: 'pageSize',
+    required: false,
+    description: FIND_MY_APPOINTMENTS_DOCS.pageSizeDescription,
+    schema: {
+      type: 'integer',
+      minimum: 1,
+      maximum: MAX_MY_APPOINTMENTS_PAGE_SIZE,
+      default: DEFAULT_MY_APPOINTMENTS_PAGE_SIZE,
+    },
+  })
   @ApiBadRequestResponse({
     description: FIND_MY_APPOINTMENTS_DOCS.invalidQueryDescription,
   })
@@ -107,7 +134,18 @@ export class AppointmentsController {
         statusCode: { type: 'integer', example: 200 },
         ok: { type: 'boolean', example: true },
         detail: { type: 'string' },
-        data: { type: 'array', items: APPOINTMENT_RESPONSE_SCHEMA },
+        data: {
+          type: 'object',
+          properties: {
+            items: { type: 'array', items: APPOINTMENT_RESPONSE_SCHEMA },
+            total: { type: 'integer', example: 48 },
+            page: { type: 'integer', example: 1 },
+            pageSize: {
+              type: 'integer',
+              example: DEFAULT_MY_APPOINTMENTS_PAGE_SIZE,
+            },
+          },
+        },
       },
     },
   })
@@ -115,7 +153,7 @@ export class AppointmentsController {
     @CurrentUserId() userId: string,
     @Query(new RequestValidationPipe(myAppointmentsQuerySchema))
     query: MyAppointmentsQuery,
-  ): Promise<MyAppointmentResponse[]> {
+  ): Promise<MyAppointmentsPageResponse> {
     return this.appointmentsService.findMine(userId, query);
   }
 

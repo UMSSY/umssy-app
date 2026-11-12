@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { TIME_OPTIONS } from "../constants/availability.constants";
 import type { TimeSelectProps } from "../types/time-select-props.types";
 
-export function TimeSelect({ id, value, onValueChange, invalid, describedBy, disabled, isOptionHidden }: TimeSelectProps) {
+export function TimeSelect({ id, value, onValueChange, invalid, describedBy, disabled, isOptionHidden, getOptionHint }: TimeSelectProps) {
   return (
     <Select name={id} value={value || null} disabled={disabled} onValueChange={(nextValue) => onValueChange(nextValue ?? "")}>
       <SelectTrigger id={id} aria-invalid={invalid || undefined} aria-describedby={describedBy} className="h-10 w-full">
@@ -12,7 +12,12 @@ export function TimeSelect({ id, value, onValueChange, invalid, describedBy, dis
       </SelectTrigger>
       <SelectContent alignItemWithTrigger={false} className="max-h-[min(200px,var(--available-height))]">
         {TIME_OPTIONS.filter((time) => time === value || !isOptionHidden?.(time)).map((time) => (
-          <SelectItem key={time} value={time}>{time}</SelectItem>
+          <SelectItem key={time} value={time}>
+            {time}
+            {getOptionHint?.(time) && (
+              <span className="ml-auto pl-3 text-xs text-muted-foreground">{getOptionHint(time)}</span>
+            )}
+          </SelectItem>
         ))}
       </SelectContent>
     </Select>

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import type { AuthenticatedUser } from '../../../common/types/authenticated-user.types.js';
 import { AppointmentStatusTitle } from '../../availability/enums/appointment-status-title.enum.js';
-import { BlockNotFoundException } from '../../availability/exceptions/index.js';
+import { DayBlockedException } from '../../availability/exceptions/index.js';
 import { AvailabilityService } from '../../availability/services/availability.service.js';
 import { BlockedDatesService } from '../../availability/services/blocked-dates.service.js';
 import { MentorsService } from '../../mentors/services/mentors.service.js';
@@ -11,9 +11,11 @@ import {
   AppointmentOverlapException,
   BlockAlreadyBookedException,
   BlockInPastException,
+  DailyAppointmentLimitException,
   InvalidOrientationTypeException,
   MentorUnavailableException,
   OwnBlockException,
+  SlotUnavailableException,
 } from '../exceptions/index.js';
 import { AppointmentNotFoundException } from '../exceptions/appointment-not-found.exception.js';
 import { AppointmentNotOwnedException } from '../exceptions/appointment-not-owned.exception.js';
@@ -22,7 +24,9 @@ import { AppointmentsRepository } from '../repositories/appointments.repository.
 import type { CreateAppointmentDto } from '../requests/create-appointment.request.js';
 import type { AppointmentRecord } from '../types/appointment-record.types.js';
 import type { MyAppointmentResponse } from '../types/my-appointment-response.types.js';
+import type { MyAppointmentsPageResponse } from '../types/my-appointments-page-response.types.js';
 import type { MyAppointmentsQuery } from '../types/my-appointments-query.types.js';
+import { getBoliviaDayRange } from '../utils/bolivia-day.js';
 
 @Injectable()
 export class AppointmentsService {
@@ -44,7 +48,7 @@ export class AppointmentsService {
     );
 
     if (!block) {
-      throw new BlockNotFoundException();
+      throw new SlotUnavailableException();
     }
     if (block.startAt.getTime() <= Date.now()) {
       throw new BlockInPastException();
@@ -56,24 +60,8 @@ export class AppointmentsService {
       throw new BlockAlreadyBookedException();
     }
 
-    const mentor = await this.mentorsService.findOne(block.mentorId);
-
-    if (!mentor.isAvailable) {
-      throw new MentorUnavailableException();
-    }
-
-    const offersTopic = mentor.orientationTypes.some(
-      (orientation) => orientation.id === payload.orientationTypeId,
-    );
-
-    if (!offersTopic) {
-      throw new InvalidOrientationTypeException();
-    }
-
-    return this.blockedDatesService.runOnUnblockedDay(
-      block.mentorId,
-      block.startAt,
-      async (tx) => {
+    return this.blockedDatesService
+      .runOnUnblockedDay(block.mentorId, block.startAt, async (tx) => {
         await this.appointmentsRepository.lockParticipants(
           [user.id, block.mentorId],
           tx,
@@ -86,11 +74,16 @@ export class AppointmentsService {
           );
 
         if (!current) {
-          throw new BlockNotFoundException();
+          throw new SlotUnavailableException();
         }
         if (current.appointments.length > 0) {
           throw new BlockAlreadyBookedException();
         }
+
+        await this.assertMentorAcceptsTopic(
+          current.mentorId,
+          payload.orientationTypeId,
+        );
 
         const overlaps =
           await this.appointmentsRepository.hasOverlappingAppointment(
@@ -102,6 +95,17 @@ export class AppointmentsService {
 
         if (overlaps) {
           throw new AppointmentOverlapException();
+        }
+
+        const reservedThatDay =
+          await this.appointmentsRepository.hasReservationOnDay(
+            user.id,
+            getBoliviaDayRange(current.startAt),
+            tx,
+          );
+
+        if (reservedThatDay) {
+          throw new DailyAppointmentLimitException();
         }
 
         const statusId = await this.appointmentsRepository.findStatusIdByTitle(
@@ -134,21 +138,41 @@ export class AppointmentsService {
         );
 
         return this.appointmentMapper.toResponse(appointment, user.id);
-      },
-    );
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DayBlockedException) {
+          throw new SlotUnavailableException();
+        }
+        throw error;
+      });
   }
 
   async findMine(
     userId: string,
     query: MyAppointmentsQuery,
-  ): Promise<MyAppointmentResponse[]> {
+  ): Promise<MyAppointmentsPageResponse> {
     const now = new Date();
-    const appointments = await this.appointmentsRepository.findMine(
+    const total = await this.appointmentsRepository.countMine(
       userId,
       query.scope,
       now,
     );
-    return this.appointmentMapper.toResponseList(appointments, userId);
+    const lastPage = Math.max(1, Math.ceil(total / query.pageSize));
+    const page = Math.min(query.page, lastPage);
+    const appointments = await this.appointmentsRepository.findMine(
+      userId,
+      query.scope,
+      now,
+      page,
+      query.pageSize,
+    );
+
+    return {
+      items: this.appointmentMapper.toResponseList(appointments, userId),
+      total,
+      page,
+      pageSize: query.pageSize,
+    };
   }
 
   async findOne(userId: string, id: string): Promise<MyAppointmentResponse> {
@@ -166,6 +190,25 @@ export class AppointmentsService {
         ? appointment.studentId
         : appointment.mentorId;
     return this.profilePhotoService.getPhoto(counterpartId);
+  }
+
+  private async assertMentorAcceptsTopic(
+    mentorId: string,
+    orientationTypeId: string,
+  ): Promise<void> {
+    const mentor = await this.mentorsService.findOne(mentorId);
+
+    if (!mentor.isAvailable) {
+      throw new MentorUnavailableException();
+    }
+
+    const offersTopic = mentor.orientationTypes.some(
+      (orientation) => orientation.id === orientationTypeId,
+    );
+
+    if (!offersTopic) {
+      throw new InvalidOrientationTypeException();
+    }
   }
 
   private async findParticipatedAppointment(
