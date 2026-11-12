@@ -9,6 +9,7 @@ import {
   AppointmentOverlapException,
   BlockAlreadyBookedException,
   BlockInPastException,
+  DailyAppointmentLimitException,
   InvalidOrientationTypeException,
   MentorUnavailableException,
   OwnBlockException,
@@ -52,6 +53,7 @@ describe('AppointmentsService', () => {
     createAppointmentHistory: vi.fn(),
     lockParticipants: vi.fn(),
     hasOverlappingAppointment: vi.fn(),
+    hasReservationOnDay: vi.fn(),
   };
   const availabilityService = { findBlockWithAppointments: vi.fn() };
   const blockedDatesService = { runOnUnblockedDay: vi.fn() };
@@ -87,6 +89,7 @@ describe('AppointmentsService', () => {
     );
     appointmentsRepository.findStatusIdByTitle.mockResolvedValue(STATUS_ID);
     appointmentsRepository.hasOverlappingAppointment.mockResolvedValue(false);
+    appointmentsRepository.hasReservationOnDay.mockResolvedValue(false);
     appointmentsRepository.createAppointment.mockResolvedValue(
       createAppointmentRecord(),
     );
@@ -340,9 +343,7 @@ describe('AppointmentsService', () => {
     await service.create(user, payload);
 
     expect(mentorsService.findOne).toHaveBeenCalledExactlyOnceWith(MENTOR_ID);
-    expect(
-      mentorsService.findOne.mock.invocationCallOrder[0],
-    ).toBeGreaterThan(
+    expect(mentorsService.findOne.mock.invocationCallOrder[0]).toBeGreaterThan(
       availabilityService.findBlockWithAppointments.mock.invocationCallOrder[1],
     );
   });
@@ -442,6 +443,67 @@ describe('AppointmentsService', () => {
     expect(
       appointmentsRepository.createAppointmentHistory,
     ).not.toHaveBeenCalled();
+  });
+
+  it('revisa las reservas de quien reserva en el día del bloque, en hora de Bolivia', async () => {
+    const createdBlock = block({
+      startAt: new Date('2026-11-17T02:30:00.000Z'),
+      endAt: new Date('2026-11-17T04:00:00.000Z'),
+    });
+    vi.useFakeTimers({
+      toFake: ['Date'],
+      now: new Date('2026-11-16T12:00:00.000Z'),
+    });
+    availabilityService.findBlockWithAppointments.mockResolvedValue(
+      createdBlock,
+    );
+
+    try {
+      await service.create(user, payload);
+    } finally {
+      vi.useRealTimers();
+    }
+
+    expect(appointmentsRepository.hasReservationOnDay).toHaveBeenCalledWith(
+      STUDENT_ID,
+      {
+        start: new Date('2026-11-16T04:00:00.000Z'),
+        end: new Date('2026-11-17T04:00:00.000Z'),
+      },
+      TX,
+    );
+  });
+
+  it('responde 409 sin crear la cita cuando quien reserva ya tiene una cita ese día', async () => {
+    appointmentsRepository.hasReservationOnDay.mockResolvedValue(true);
+
+    await expect(service.create(user, payload)).rejects.toThrow(
+      DailyAppointmentLimitException,
+    );
+    expect(appointmentsRepository.createAppointment).not.toHaveBeenCalled();
+    expect(
+      appointmentsRepository.createAppointmentHistory,
+    ).not.toHaveBeenCalled();
+  });
+
+  it('informa primero el cruce de horario antes que el límite diario', async () => {
+    appointmentsRepository.hasOverlappingAppointment.mockResolvedValue(true);
+    appointmentsRepository.hasReservationOnDay.mockResolvedValue(true);
+
+    await expect(service.create(user, payload)).rejects.toThrow(
+      AppointmentOverlapException,
+    );
+    expect(appointmentsRepository.hasReservationOnDay).not.toHaveBeenCalled();
+  });
+
+  it('usa el texto del HU para el límite de una cita por día', () => {
+    const error = new DailyAppointmentLimitException();
+
+    expect(error.message).toBe(
+      'Ya tienes una cita reservada ese día. Elige otro día.',
+    );
+    expect(error.statusCode).toBe(409);
+    expect(error.code).toBe('DAILY_APPOINTMENT_LIMIT');
   });
 
   it('usa el texto del HU para la cita que se cruza', () => {
