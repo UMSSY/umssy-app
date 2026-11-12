@@ -159,3 +159,107 @@ Los commits del bloque 4 usan una excepción temporal `core.hooksPath` por coman
 para evitar que lint-staged genere respaldos de stash. Se ejecutaron directamente
 ESLint, oxlint y el validador de mensajes. No se cambió la configuración permanente
 de hooks ni se aplicaron o modificaron stashes.
+
+## API propuesta — Issue #2130, Bloque 1
+
+Estado: contratos y metadatos definidos; el endpoint HTTP todavía no existe.
+
+### Transporte y responsabilidades
+
+Se propone `GET /api/mentors/me/profile-suggestions` con autenticación
+`Authorization: Bearer <token>`. Se reutilizarán `JwtAuthGuard`, `SessionService`
+y `CurrentUser`; la identidad procederá exclusivamente de `user.id`. No se
+aceptará un ID alternativo de mentor por ruta, query o body.
+
+El controlador delegará en `MentorsService`, que reutilizará
+`MentorProfileSuggestionsService.findSuggestions(user.id)` y `MentorMapper`.
+Las consultas seguirán en el repositorio existente. Este bloque no implementa
+esos métodos ni altera consultas, reglas o participación de #2072.
+
+### Contrato de respuesta
+
+`MentorProfileSuggestionsResponse` representa únicamente `data`. Cada elemento
+reutiliza `MentorProfileSuggestion` (`code`, `field`, `message`) y añade `title`,
+`benefitDescription` y `editReference`. Los tipos vinculan código, campo y sección.
+El mapper calculará `pendingCount` como la longitud del array final devuelto.
+El interceptor global generará el envoltorio; no se duplicará manualmente.
+Actualmente esta ruta contiene `/profile`, por lo que el interceptor usa `OK`.
+
+Ejemplo propuesto para un perfil parcial:
+
+```json
+{
+  "statusCode": 200,
+  "ok": true,
+  "detail": "OK",
+  "data": {
+    "suggestions": [
+      {
+        "code": "MISSING_SPECIALTY",
+        "field": "mentorTechnicalAreas",
+        "message": "Agrega al menos un área técnica como especialidad.",
+        "title": "Completa tus áreas técnicas",
+        "benefitDescription": "Ayuda a los estudiantes a identificar tus especialidades.",
+        "editReference": { "section": "mentorTechnicalAreas", "action": "edit" }
+      }
+    ],
+    "pendingCount": 1
+  }
+}
+```
+
+Un perfil completo devolverá el mismo envoltorio con
+`data: { "suggestions": [], "pendingCount": 0 }`. Un perfil totalmente incompleto
+incluirá las cuatro recomendaciones existentes en orden estable y contador 4.
+Los errores de lectura se propagarán al `DomainExceptionFilter`, nunca se
+convertirán en lista vacía. La autenticación conservará las excepciones existentes
+del guard y de sesión. La respuesta no incluirá datos privados ni binarios.
+
+### Metadatos de presentación
+
+La fuente será `MENTOR_PROFILE_SUGGESTION_PRESENTATION`.
+
+| Código                             | Título                              | Beneficio                                                              | Sección                |
+| ---------------------------------- | ----------------------------------- | ---------------------------------------------------------------------- | ---------------------- |
+| `MISSING_PROFILE_PHOTO`            | Agrega tu fotografía                | Ayuda a los estudiantes a reconocerte y conocer tu perfil.             | `photoUrl`             |
+| `MISSING_PROFESSIONAL_DESCRIPTION` | Completa tu descripción profesional | Presenta tu trayectoria y lo que puedes aportar como mentor.           | `aboutMe`              |
+| `MISSING_SPECIALTY`                | Completa tus áreas técnicas         | Ayuda a los estudiantes a identificar tus especialidades.              | `mentorTechnicalAreas` |
+| `MISSING_WORK_EXPERIENCE`          | Registra tu experiencia laboral     | Muestra la experiencia práctica que puedes compartir en las mentorías. | `workExperiences`      |
+
+Todas las referencias tienen `action: "edit"`; identifican apartados, no rutas
+de frontend. No se añade recomendación por orientaciones vacías. CA8 y CA15
+mantienen áreas técnicas independientes de los tipos de orientación registrados.
+
+### Actualización, frontend y CA12
+
+Cada nueva consulta evaluará datos guardados actuales, con el mismo token válido,
+sin caché ni persistencia de recomendaciones. Descartar cambios sin guardarlos
+no alterará el resultado. CA7 y CA11 exigen contador igual a pendientes devueltos.
+CA9 mantiene las recomendaciones opcionales, sin bloquear funciones de mentoría.
+
+El frontend deberá invocar y refrescar la consulta, mostrar contador y contenido,
+resolver referencias a navegación real y permitir continuar sin completar el
+perfil. Este bloque no implementa interfaz ni certifica las partes visuales de
+CA1, CA3, CA4, CA9 y CA10.
+
+CA12 sigue pendiente de definición. Actualmente un mentor con rol activo recibe
+sugerencias aunque `isAvailableForMentoring` sea `false`; sin rol activo recibe
+`[]`. El guard rechaza usuarios inactivos. No se equipara indisponibilidad con
+participación desactivada ni se crea un estado `PAUSED`. Se propone conservar
+este comportamiento hasta definir el criterio, sin modificar ningún estado.
+
+### Estándares y límites de validación
+
+No estuvieron disponibles `especificacion GENERAL proyecto IS.pdf` ni
+`PR-REVIEW-PROMPT-TEMP.md`; la revisión contra esos documentos queda pendiente.
+Se verificaron las convenciones locales: carpetas `responses` y `constants`,
+archivos kebab-case, tipos PascalCase, variables camelCase o UPPER_CASE, imports
+ESM y responsabilidades existentes de servicios, repositorios y mappers. No se
+modifican frontend, Prisma, migraciones, CI/CD ni DevOps.
+
+Vitest configura un mínimo global del 80% en líneas, funciones, sentencias y ramas.
+La cobertura debe medirse, no deducirse del número de pruebas. Este bloque añade
+contratos estáticos y metadatos tipados; las pruebas HTTP y del mapper se reservan
+para su implementación posterior. La consulta existente recupera binarios del
+perfil; su optimización permanece pendiente sin duplicar consultas de dominios
+ni cambiar las reglas de evaluación.
