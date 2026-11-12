@@ -1,21 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import {
-  DuplicatePortfolioProjectException,
-  MaxPortfolioProjectsExceededException,
-} from './exceptions/portfolio.exceptions.js';
-import { PortfolioProjectMapper } from './mappers/portfolio-project.mapper.js';
-import type { PortfolioRepository } from './portfolio.repository.js';
-import { PortfolioService } from './portfolio.service.js';
-import type {
-  PortfolioProjectEntity,
-  PortfolioProjectInput,
-} from './types/portfolio.types.js';
+import { DuplicatePortfolioProjectException } from '../exceptions/duplicate-portfolio-project.exception.js';
+import { MaxPortfolioProjectsExceededException } from '../exceptions/max-portfolio-projects-exceeded.exception.js';
+import { PortfolioProjectMapper } from '../mappers/portfolio-project.mapper.js';
+import type { PortfolioRepository } from '../repositories/portfolio.repository.js';
+import type { PortfolioProjectItemRequest } from '../requests/update-portfolio-projects.schema.js';
+import { PortfolioService } from '../services/portfolio.service.js';
+import type { PortfolioProjectEntity } from '../types/portfolio-project-entity.type.js';
 
 const userId = '11111111-1111-4111-8111-111111111111';
 
 function buildInput(
-  overrides: Partial<PortfolioProjectInput> = {},
-): PortfolioProjectInput {
+  overrides: Partial<PortfolioProjectItemRequest> = {},
+): PortfolioProjectItemRequest {
   return {
     provider: 'github',
     repoName: 'umssy/umssy-app',
@@ -84,7 +80,7 @@ describe('PortfolioService', () => {
   });
 
   it('saves up to 6 projects, normalizes fields, and assigns displayOrder 0 to 5', async () => {
-    const inputs: PortfolioProjectInput[] = Array.from(
+    const inputs: PortfolioProjectItemRequest[] = Array.from(
       { length: 6 },
       (_, index) =>
         buildInput({
@@ -102,7 +98,7 @@ describe('PortfolioService', () => {
       (
         _uid: string,
         normalized: Array<
-          PortfolioProjectInput & {
+          PortfolioProjectItemRequest & {
             description: string | null;
             language: string | null;
             displayOrder: number;
@@ -215,4 +211,3 @@ describe('PortfolioService', () => {
     expect(repository.replaceForUser).toHaveBeenCalledTimes(1);
   });
 });
-

@@ -1,18 +1,16 @@
 import { Test } from '@nestjs/testing';
 import { describe, expect, it } from 'vitest';
-import { DomainException } from '../../common/exceptions/domain.exception.js';
-import { PrismaModule } from '../../common/prisma/prisma.module.js';
-import { PrismaService } from '../../common/prisma/prisma.service.js';
-import {
-  DuplicatePortfolioProjectException,
-  MaxPortfolioProjectsExceededException,
-} from './exceptions/portfolio.exceptions.js';
-import { PortfolioProjectMapper } from './mappers/portfolio-project.mapper.js';
-import { PortfolioController } from './portfolio.controller.js';
-import { PortfolioModule } from './portfolio.module.js';
-import { PortfolioRepository } from './portfolio.repository.js';
-import { PortfolioService } from './portfolio.service.js';
-import { updatePortfolioProjectsSchema } from './requests/update-portfolio-projects.schema.js';
+import { DomainException } from '../../../common/exceptions/domain.exception.js';
+import { PrismaModule } from '../../../common/prisma/prisma.module.js';
+import { PrismaService } from '../../../common/prisma/prisma.service.js';
+import { PortfolioController } from '../controllers/portfolio.controller.js';
+import { DuplicatePortfolioProjectException } from '../exceptions/duplicate-portfolio-project.exception.js';
+import { MaxPortfolioProjectsExceededException } from '../exceptions/max-portfolio-projects-exceeded.exception.js';
+import { PortfolioProjectMapper } from '../mappers/portfolio-project.mapper.js';
+import { PortfolioModule } from '../portfolio.module.js';
+import { PortfolioRepository } from '../repositories/portfolio.repository.js';
+import { updatePortfolioProjectsSchema } from '../requests/update-portfolio-projects.schema.js';
+import { PortfolioService } from '../services/portfolio.service.js';
 
 const validProject = {
   provider: 'github' as const,
@@ -54,7 +52,7 @@ describe('updatePortfolioProjectsSchema', () => {
     ['invalid provider', { projects: [{ ...validProject, provider: 'bitbucket' }] }],
     ['empty repoName', { projects: [{ ...validProject, repoName: '   ' }] }],
     ['repoName over 150 chars', { projects: [{ ...validProject, repoName: 'a'.repeat(151) }] }],
-    ['invalid repoUrl', { projects: [{ ...validProject, repoUrl: 'invalid-url' }] }],
+    ['invalid repoUrl', { projects: [{ ...validProject, repoUrl: 'not-a-url' }] }],
     ['non-http repoUrl', { projects: [{ ...validProject, repoUrl: 'ftp://github.com/a/b' }] }],
     ['repoUrl over 500 chars', { projects: [{ ...validProject, repoUrl: `https://github.com/${'a'.repeat(490)}` }] }],
     ['language over 60 chars', { projects: [{ ...validProject, language: 'a'.repeat(61) }] }],
@@ -96,4 +94,3 @@ describe('PortfolioModule', () => {
     expect(moduleRef.get(PortfolioProjectMapper)).toBeDefined();
   });
 });
-

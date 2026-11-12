@@ -27,11 +27,10 @@ export type AggregateUserSocialAccount = {
 export type UserSocialAccountMinAggregateOutputType = {
   id: string | null
   userId: string | null
-  provider: string | null
+  providerId: string | null
   externalId: string | null
   username: string | null
   profileUrl: string | null
-  accessToken: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -39,11 +38,10 @@ export type UserSocialAccountMinAggregateOutputType = {
 export type UserSocialAccountMaxAggregateOutputType = {
   id: string | null
   userId: string | null
-  provider: string | null
+  providerId: string | null
   externalId: string | null
   username: string | null
   profileUrl: string | null
-  accessToken: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -51,11 +49,10 @@ export type UserSocialAccountMaxAggregateOutputType = {
 export type UserSocialAccountCountAggregateOutputType = {
   id: number
   userId: number
-  provider: number
+  providerId: number
   externalId: number
   username: number
   profileUrl: number
-  accessToken: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -65,11 +62,10 @@ export type UserSocialAccountCountAggregateOutputType = {
 export type UserSocialAccountMinAggregateInputType = {
   id?: true
   userId?: true
-  provider?: true
+  providerId?: true
   externalId?: true
   username?: true
   profileUrl?: true
-  accessToken?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -77,11 +73,10 @@ export type UserSocialAccountMinAggregateInputType = {
 export type UserSocialAccountMaxAggregateInputType = {
   id?: true
   userId?: true
-  provider?: true
+  providerId?: true
   externalId?: true
   username?: true
   profileUrl?: true
-  accessToken?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -89,11 +84,10 @@ export type UserSocialAccountMaxAggregateInputType = {
 export type UserSocialAccountCountAggregateInputType = {
   id?: true
   userId?: true
-  provider?: true
+  providerId?: true
   externalId?: true
   username?: true
   profileUrl?: true
-  accessToken?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -174,11 +168,10 @@ export type UserSocialAccountGroupByArgs<ExtArgs extends runtime.Types.Extension
 export type UserSocialAccountGroupByOutputType = {
   id: string
   userId: string
-  provider: string
+  providerId: string
   externalId: string
   username: string
   profileUrl: string | null
-  accessToken: string
   createdAt: Date
   updatedAt: Date
   _count: UserSocialAccountCountAggregateOutputType | null
@@ -207,58 +200,57 @@ export type UserSocialAccountWhereInput = {
   NOT?: Prisma.UserSocialAccountWhereInput | Prisma.UserSocialAccountWhereInput[]
   id?: Prisma.UuidFilter<"UserSocialAccount"> | string
   userId?: Prisma.UuidFilter<"UserSocialAccount"> | string
-  provider?: Prisma.StringFilter<"UserSocialAccount"> | string
+  providerId?: Prisma.UuidFilter<"UserSocialAccount"> | string
   externalId?: Prisma.StringFilter<"UserSocialAccount"> | string
   username?: Prisma.StringFilter<"UserSocialAccount"> | string
   profileUrl?: Prisma.StringNullableFilter<"UserSocialAccount"> | string | null
-  accessToken?: Prisma.StringFilter<"UserSocialAccount"> | string
   createdAt?: Prisma.DateTimeFilter<"UserSocialAccount"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"UserSocialAccount"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  provider?: Prisma.XOR<Prisma.PortfolioProviderScalarRelationFilter, Prisma.PortfolioProviderWhereInput>
   portfolioProjects?: Prisma.UserPortfolioProjectListRelationFilter
 }
 
 export type UserSocialAccountOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  provider?: Prisma.SortOrder
+  providerId?: Prisma.SortOrder
   externalId?: Prisma.SortOrder
   username?: Prisma.SortOrder
   profileUrl?: Prisma.SortOrderInput | Prisma.SortOrder
-  accessToken?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
+  provider?: Prisma.PortfolioProviderOrderByWithRelationInput
   portfolioProjects?: Prisma.UserPortfolioProjectOrderByRelationAggregateInput
 }
 
 export type UserSocialAccountWhereUniqueInput = Prisma.AtLeast<{
   id?: string
-  userId_provider?: Prisma.UserSocialAccountUserIdProviderCompoundUniqueInput
-  provider_externalId?: Prisma.UserSocialAccountProviderExternalIdCompoundUniqueInput
+  userId_providerId?: Prisma.UserSocialAccountUserIdProviderIdCompoundUniqueInput
+  providerId_externalId?: Prisma.UserSocialAccountProviderIdExternalIdCompoundUniqueInput
   AND?: Prisma.UserSocialAccountWhereInput | Prisma.UserSocialAccountWhereInput[]
   OR?: Prisma.UserSocialAccountWhereInput[]
   NOT?: Prisma.UserSocialAccountWhereInput | Prisma.UserSocialAccountWhereInput[]
   userId?: Prisma.UuidFilter<"UserSocialAccount"> | string
-  provider?: Prisma.StringFilter<"UserSocialAccount"> | string
+  providerId?: Prisma.UuidFilter<"UserSocialAccount"> | string
   externalId?: Prisma.StringFilter<"UserSocialAccount"> | string
   username?: Prisma.StringFilter<"UserSocialAccount"> | string
   profileUrl?: Prisma.StringNullableFilter<"UserSocialAccount"> | string | null
-  accessToken?: Prisma.StringFilter<"UserSocialAccount"> | string
   createdAt?: Prisma.DateTimeFilter<"UserSocialAccount"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"UserSocialAccount"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  provider?: Prisma.XOR<Prisma.PortfolioProviderScalarRelationFilter, Prisma.PortfolioProviderWhereInput>
   portfolioProjects?: Prisma.UserPortfolioProjectListRelationFilter
-}, "id" | "userId_provider" | "provider_externalId">
+}, "id" | "userId_providerId" | "providerId_externalId">
 
 export type UserSocialAccountOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  provider?: Prisma.SortOrder
+  providerId?: Prisma.SortOrder
   externalId?: Prisma.SortOrder
   username?: Prisma.SortOrder
   profileUrl?: Prisma.SortOrderInput | Prisma.SortOrder
-  accessToken?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.UserSocialAccountCountOrderByAggregateInput
@@ -272,36 +264,33 @@ export type UserSocialAccountScalarWhereWithAggregatesInput = {
   NOT?: Prisma.UserSocialAccountScalarWhereWithAggregatesInput | Prisma.UserSocialAccountScalarWhereWithAggregatesInput[]
   id?: Prisma.UuidWithAggregatesFilter<"UserSocialAccount"> | string
   userId?: Prisma.UuidWithAggregatesFilter<"UserSocialAccount"> | string
-  provider?: Prisma.StringWithAggregatesFilter<"UserSocialAccount"> | string
+  providerId?: Prisma.UuidWithAggregatesFilter<"UserSocialAccount"> | string
   externalId?: Prisma.StringWithAggregatesFilter<"UserSocialAccount"> | string
   username?: Prisma.StringWithAggregatesFilter<"UserSocialAccount"> | string
   profileUrl?: Prisma.StringNullableWithAggregatesFilter<"UserSocialAccount"> | string | null
-  accessToken?: Prisma.StringWithAggregatesFilter<"UserSocialAccount"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"UserSocialAccount"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"UserSocialAccount"> | Date | string
 }
 
 export type UserSocialAccountCreateInput = {
   id?: string
-  provider: string
   externalId: string
   username: string
   profileUrl?: string | null
-  accessToken: string
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutSocialAccountsInput
+  provider: Prisma.PortfolioProviderCreateNestedOneWithoutSocialAccountsInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutSocialAccountInput
 }
 
 export type UserSocialAccountUncheckedCreateInput = {
   id?: string
   userId: string
-  provider: string
+  providerId: string
   externalId: string
   username: string
   profileUrl?: string | null
-  accessToken: string
   createdAt?: Date | string
   updatedAt?: Date | string
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutSocialAccountInput
@@ -309,25 +298,23 @@ export type UserSocialAccountUncheckedCreateInput = {
 
 export type UserSocialAccountUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  provider?: Prisma.StringFieldUpdateOperationsInput | string
   externalId?: Prisma.StringFieldUpdateOperationsInput | string
   username?: Prisma.StringFieldUpdateOperationsInput | string
   profileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  accessToken?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutSocialAccountsNestedInput
+  provider?: Prisma.PortfolioProviderUpdateOneRequiredWithoutSocialAccountsNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutSocialAccountNestedInput
 }
 
 export type UserSocialAccountUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  provider?: Prisma.StringFieldUpdateOperationsInput | string
+  providerId?: Prisma.StringFieldUpdateOperationsInput | string
   externalId?: Prisma.StringFieldUpdateOperationsInput | string
   username?: Prisma.StringFieldUpdateOperationsInput | string
   profileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  accessToken?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutSocialAccountNestedInput
@@ -336,22 +323,19 @@ export type UserSocialAccountUncheckedUpdateInput = {
 export type UserSocialAccountCreateManyInput = {
   id?: string
   userId: string
-  provider: string
+  providerId: string
   externalId: string
   username: string
   profileUrl?: string | null
-  accessToken: string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
 
 export type UserSocialAccountUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  provider?: Prisma.StringFieldUpdateOperationsInput | string
   externalId?: Prisma.StringFieldUpdateOperationsInput | string
   username?: Prisma.StringFieldUpdateOperationsInput | string
   profileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  accessToken?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -359,11 +343,10 @@ export type UserSocialAccountUpdateManyMutationInput = {
 export type UserSocialAccountUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  provider?: Prisma.StringFieldUpdateOperationsInput | string
+  providerId?: Prisma.StringFieldUpdateOperationsInput | string
   externalId?: Prisma.StringFieldUpdateOperationsInput | string
   username?: Prisma.StringFieldUpdateOperationsInput | string
   profileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  accessToken?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -378,24 +361,23 @@ export type UserSocialAccountOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
-export type UserSocialAccountUserIdProviderCompoundUniqueInput = {
+export type UserSocialAccountUserIdProviderIdCompoundUniqueInput = {
   userId: string
-  provider: string
+  providerId: string
 }
 
-export type UserSocialAccountProviderExternalIdCompoundUniqueInput = {
-  provider: string
+export type UserSocialAccountProviderIdExternalIdCompoundUniqueInput = {
+  providerId: string
   externalId: string
 }
 
 export type UserSocialAccountCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  provider?: Prisma.SortOrder
+  providerId?: Prisma.SortOrder
   externalId?: Prisma.SortOrder
   username?: Prisma.SortOrder
   profileUrl?: Prisma.SortOrder
-  accessToken?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -403,11 +385,10 @@ export type UserSocialAccountCountOrderByAggregateInput = {
 export type UserSocialAccountMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  provider?: Prisma.SortOrder
+  providerId?: Prisma.SortOrder
   externalId?: Prisma.SortOrder
   username?: Prisma.SortOrder
   profileUrl?: Prisma.SortOrder
-  accessToken?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -415,11 +396,10 @@ export type UserSocialAccountMaxOrderByAggregateInput = {
 export type UserSocialAccountMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  provider?: Prisma.SortOrder
+  providerId?: Prisma.SortOrder
   externalId?: Prisma.SortOrder
   username?: Prisma.SortOrder
   profileUrl?: Prisma.SortOrder
-  accessToken?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -471,6 +451,48 @@ export type UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput = {
   deleteMany?: Prisma.UserSocialAccountScalarWhereInput | Prisma.UserSocialAccountScalarWhereInput[]
 }
 
+export type UserSocialAccountCreateNestedManyWithoutProviderInput = {
+  create?: Prisma.XOR<Prisma.UserSocialAccountCreateWithoutProviderInput, Prisma.UserSocialAccountUncheckedCreateWithoutProviderInput> | Prisma.UserSocialAccountCreateWithoutProviderInput[] | Prisma.UserSocialAccountUncheckedCreateWithoutProviderInput[]
+  connectOrCreate?: Prisma.UserSocialAccountCreateOrConnectWithoutProviderInput | Prisma.UserSocialAccountCreateOrConnectWithoutProviderInput[]
+  createMany?: Prisma.UserSocialAccountCreateManyProviderInputEnvelope
+  connect?: Prisma.UserSocialAccountWhereUniqueInput | Prisma.UserSocialAccountWhereUniqueInput[]
+}
+
+export type UserSocialAccountUncheckedCreateNestedManyWithoutProviderInput = {
+  create?: Prisma.XOR<Prisma.UserSocialAccountCreateWithoutProviderInput, Prisma.UserSocialAccountUncheckedCreateWithoutProviderInput> | Prisma.UserSocialAccountCreateWithoutProviderInput[] | Prisma.UserSocialAccountUncheckedCreateWithoutProviderInput[]
+  connectOrCreate?: Prisma.UserSocialAccountCreateOrConnectWithoutProviderInput | Prisma.UserSocialAccountCreateOrConnectWithoutProviderInput[]
+  createMany?: Prisma.UserSocialAccountCreateManyProviderInputEnvelope
+  connect?: Prisma.UserSocialAccountWhereUniqueInput | Prisma.UserSocialAccountWhereUniqueInput[]
+}
+
+export type UserSocialAccountUpdateManyWithoutProviderNestedInput = {
+  create?: Prisma.XOR<Prisma.UserSocialAccountCreateWithoutProviderInput, Prisma.UserSocialAccountUncheckedCreateWithoutProviderInput> | Prisma.UserSocialAccountCreateWithoutProviderInput[] | Prisma.UserSocialAccountUncheckedCreateWithoutProviderInput[]
+  connectOrCreate?: Prisma.UserSocialAccountCreateOrConnectWithoutProviderInput | Prisma.UserSocialAccountCreateOrConnectWithoutProviderInput[]
+  upsert?: Prisma.UserSocialAccountUpsertWithWhereUniqueWithoutProviderInput | Prisma.UserSocialAccountUpsertWithWhereUniqueWithoutProviderInput[]
+  createMany?: Prisma.UserSocialAccountCreateManyProviderInputEnvelope
+  set?: Prisma.UserSocialAccountWhereUniqueInput | Prisma.UserSocialAccountWhereUniqueInput[]
+  disconnect?: Prisma.UserSocialAccountWhereUniqueInput | Prisma.UserSocialAccountWhereUniqueInput[]
+  delete?: Prisma.UserSocialAccountWhereUniqueInput | Prisma.UserSocialAccountWhereUniqueInput[]
+  connect?: Prisma.UserSocialAccountWhereUniqueInput | Prisma.UserSocialAccountWhereUniqueInput[]
+  update?: Prisma.UserSocialAccountUpdateWithWhereUniqueWithoutProviderInput | Prisma.UserSocialAccountUpdateWithWhereUniqueWithoutProviderInput[]
+  updateMany?: Prisma.UserSocialAccountUpdateManyWithWhereWithoutProviderInput | Prisma.UserSocialAccountUpdateManyWithWhereWithoutProviderInput[]
+  deleteMany?: Prisma.UserSocialAccountScalarWhereInput | Prisma.UserSocialAccountScalarWhereInput[]
+}
+
+export type UserSocialAccountUncheckedUpdateManyWithoutProviderNestedInput = {
+  create?: Prisma.XOR<Prisma.UserSocialAccountCreateWithoutProviderInput, Prisma.UserSocialAccountUncheckedCreateWithoutProviderInput> | Prisma.UserSocialAccountCreateWithoutProviderInput[] | Prisma.UserSocialAccountUncheckedCreateWithoutProviderInput[]
+  connectOrCreate?: Prisma.UserSocialAccountCreateOrConnectWithoutProviderInput | Prisma.UserSocialAccountCreateOrConnectWithoutProviderInput[]
+  upsert?: Prisma.UserSocialAccountUpsertWithWhereUniqueWithoutProviderInput | Prisma.UserSocialAccountUpsertWithWhereUniqueWithoutProviderInput[]
+  createMany?: Prisma.UserSocialAccountCreateManyProviderInputEnvelope
+  set?: Prisma.UserSocialAccountWhereUniqueInput | Prisma.UserSocialAccountWhereUniqueInput[]
+  disconnect?: Prisma.UserSocialAccountWhereUniqueInput | Prisma.UserSocialAccountWhereUniqueInput[]
+  delete?: Prisma.UserSocialAccountWhereUniqueInput | Prisma.UserSocialAccountWhereUniqueInput[]
+  connect?: Prisma.UserSocialAccountWhereUniqueInput | Prisma.UserSocialAccountWhereUniqueInput[]
+  update?: Prisma.UserSocialAccountUpdateWithWhereUniqueWithoutProviderInput | Prisma.UserSocialAccountUpdateWithWhereUniqueWithoutProviderInput[]
+  updateMany?: Prisma.UserSocialAccountUpdateManyWithWhereWithoutProviderInput | Prisma.UserSocialAccountUpdateManyWithWhereWithoutProviderInput[]
+  deleteMany?: Prisma.UserSocialAccountScalarWhereInput | Prisma.UserSocialAccountScalarWhereInput[]
+}
+
 export type UserSocialAccountCreateNestedOneWithoutPortfolioProjectsInput = {
   create?: Prisma.XOR<Prisma.UserSocialAccountCreateWithoutPortfolioProjectsInput, Prisma.UserSocialAccountUncheckedCreateWithoutPortfolioProjectsInput>
   connectOrCreate?: Prisma.UserSocialAccountCreateOrConnectWithoutPortfolioProjectsInput
@@ -489,23 +511,21 @@ export type UserSocialAccountUpdateOneWithoutPortfolioProjectsNestedInput = {
 
 export type UserSocialAccountCreateWithoutUserInput = {
   id?: string
-  provider: string
   externalId: string
   username: string
   profileUrl?: string | null
-  accessToken: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  provider: Prisma.PortfolioProviderCreateNestedOneWithoutSocialAccountsInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutSocialAccountInput
 }
 
 export type UserSocialAccountUncheckedCreateWithoutUserInput = {
   id?: string
-  provider: string
+  providerId: string
   externalId: string
   username: string
   profileUrl?: string | null
-  accessToken: string
   createdAt?: Date | string
   updatedAt?: Date | string
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutSocialAccountInput
@@ -543,35 +563,80 @@ export type UserSocialAccountScalarWhereInput = {
   NOT?: Prisma.UserSocialAccountScalarWhereInput | Prisma.UserSocialAccountScalarWhereInput[]
   id?: Prisma.UuidFilter<"UserSocialAccount"> | string
   userId?: Prisma.UuidFilter<"UserSocialAccount"> | string
-  provider?: Prisma.StringFilter<"UserSocialAccount"> | string
+  providerId?: Prisma.UuidFilter<"UserSocialAccount"> | string
   externalId?: Prisma.StringFilter<"UserSocialAccount"> | string
   username?: Prisma.StringFilter<"UserSocialAccount"> | string
   profileUrl?: Prisma.StringNullableFilter<"UserSocialAccount"> | string | null
-  accessToken?: Prisma.StringFilter<"UserSocialAccount"> | string
   createdAt?: Prisma.DateTimeFilter<"UserSocialAccount"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"UserSocialAccount"> | Date | string
 }
 
-export type UserSocialAccountCreateWithoutPortfolioProjectsInput = {
+export type UserSocialAccountCreateWithoutProviderInput = {
   id?: string
-  provider: string
   externalId: string
   username: string
   profileUrl?: string | null
-  accessToken: string
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutSocialAccountsInput
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutSocialAccountInput
+}
+
+export type UserSocialAccountUncheckedCreateWithoutProviderInput = {
+  id?: string
+  userId: string
+  externalId: string
+  username: string
+  profileUrl?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutSocialAccountInput
+}
+
+export type UserSocialAccountCreateOrConnectWithoutProviderInput = {
+  where: Prisma.UserSocialAccountWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserSocialAccountCreateWithoutProviderInput, Prisma.UserSocialAccountUncheckedCreateWithoutProviderInput>
+}
+
+export type UserSocialAccountCreateManyProviderInputEnvelope = {
+  data: Prisma.UserSocialAccountCreateManyProviderInput | Prisma.UserSocialAccountCreateManyProviderInput[]
+  skipDuplicates?: boolean
+}
+
+export type UserSocialAccountUpsertWithWhereUniqueWithoutProviderInput = {
+  where: Prisma.UserSocialAccountWhereUniqueInput
+  update: Prisma.XOR<Prisma.UserSocialAccountUpdateWithoutProviderInput, Prisma.UserSocialAccountUncheckedUpdateWithoutProviderInput>
+  create: Prisma.XOR<Prisma.UserSocialAccountCreateWithoutProviderInput, Prisma.UserSocialAccountUncheckedCreateWithoutProviderInput>
+}
+
+export type UserSocialAccountUpdateWithWhereUniqueWithoutProviderInput = {
+  where: Prisma.UserSocialAccountWhereUniqueInput
+  data: Prisma.XOR<Prisma.UserSocialAccountUpdateWithoutProviderInput, Prisma.UserSocialAccountUncheckedUpdateWithoutProviderInput>
+}
+
+export type UserSocialAccountUpdateManyWithWhereWithoutProviderInput = {
+  where: Prisma.UserSocialAccountScalarWhereInput
+  data: Prisma.XOR<Prisma.UserSocialAccountUpdateManyMutationInput, Prisma.UserSocialAccountUncheckedUpdateManyWithoutProviderInput>
+}
+
+export type UserSocialAccountCreateWithoutPortfolioProjectsInput = {
+  id?: string
+  externalId: string
+  username: string
+  profileUrl?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutSocialAccountsInput
+  provider: Prisma.PortfolioProviderCreateNestedOneWithoutSocialAccountsInput
 }
 
 export type UserSocialAccountUncheckedCreateWithoutPortfolioProjectsInput = {
   id?: string
   userId: string
-  provider: string
+  providerId: string
   externalId: string
   username: string
   profileUrl?: string | null
-  accessToken: string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -594,58 +659,53 @@ export type UserSocialAccountUpdateToOneWithWhereWithoutPortfolioProjectsInput =
 
 export type UserSocialAccountUpdateWithoutPortfolioProjectsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  provider?: Prisma.StringFieldUpdateOperationsInput | string
   externalId?: Prisma.StringFieldUpdateOperationsInput | string
   username?: Prisma.StringFieldUpdateOperationsInput | string
   profileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  accessToken?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutSocialAccountsNestedInput
+  provider?: Prisma.PortfolioProviderUpdateOneRequiredWithoutSocialAccountsNestedInput
 }
 
 export type UserSocialAccountUncheckedUpdateWithoutPortfolioProjectsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  provider?: Prisma.StringFieldUpdateOperationsInput | string
+  providerId?: Prisma.StringFieldUpdateOperationsInput | string
   externalId?: Prisma.StringFieldUpdateOperationsInput | string
   username?: Prisma.StringFieldUpdateOperationsInput | string
   profileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  accessToken?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type UserSocialAccountCreateManyUserInput = {
   id?: string
-  provider: string
+  providerId: string
   externalId: string
   username: string
   profileUrl?: string | null
-  accessToken: string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
 
 export type UserSocialAccountUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  provider?: Prisma.StringFieldUpdateOperationsInput | string
   externalId?: Prisma.StringFieldUpdateOperationsInput | string
   username?: Prisma.StringFieldUpdateOperationsInput | string
   profileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  accessToken?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  provider?: Prisma.PortfolioProviderUpdateOneRequiredWithoutSocialAccountsNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutSocialAccountNestedInput
 }
 
 export type UserSocialAccountUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  provider?: Prisma.StringFieldUpdateOperationsInput | string
+  providerId?: Prisma.StringFieldUpdateOperationsInput | string
   externalId?: Prisma.StringFieldUpdateOperationsInput | string
   username?: Prisma.StringFieldUpdateOperationsInput | string
   profileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  accessToken?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutSocialAccountNestedInput
@@ -653,11 +713,52 @@ export type UserSocialAccountUncheckedUpdateWithoutUserInput = {
 
 export type UserSocialAccountUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  provider?: Prisma.StringFieldUpdateOperationsInput | string
+  providerId?: Prisma.StringFieldUpdateOperationsInput | string
   externalId?: Prisma.StringFieldUpdateOperationsInput | string
   username?: Prisma.StringFieldUpdateOperationsInput | string
   profileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  accessToken?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type UserSocialAccountCreateManyProviderInput = {
+  id?: string
+  userId: string
+  externalId: string
+  username: string
+  profileUrl?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type UserSocialAccountUpdateWithoutProviderInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  externalId?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  profileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutSocialAccountsNestedInput
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutSocialAccountNestedInput
+}
+
+export type UserSocialAccountUncheckedUpdateWithoutProviderInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  externalId?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  profileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutSocialAccountNestedInput
+}
+
+export type UserSocialAccountUncheckedUpdateManyWithoutProviderInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  externalId?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  profileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -696,14 +797,14 @@ export type UserSocialAccountCountOutputTypeCountPortfolioProjectsArgs<ExtArgs e
 export type UserSocialAccountSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
-  provider?: boolean
+  providerId?: boolean
   externalId?: boolean
   username?: boolean
   profileUrl?: boolean
-  accessToken?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  provider?: boolean | Prisma.PortfolioProviderDefaultArgs<ExtArgs>
   portfolioProjects?: boolean | Prisma.UserSocialAccount$portfolioProjectsArgs<ExtArgs>
   _count?: boolean | Prisma.UserSocialAccountCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["userSocialAccount"]>
@@ -711,68 +812,70 @@ export type UserSocialAccountSelect<ExtArgs extends runtime.Types.Extensions.Int
 export type UserSocialAccountSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
-  provider?: boolean
+  providerId?: boolean
   externalId?: boolean
   username?: boolean
   profileUrl?: boolean
-  accessToken?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  provider?: boolean | Prisma.PortfolioProviderDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["userSocialAccount"]>
 
 export type UserSocialAccountSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
-  provider?: boolean
+  providerId?: boolean
   externalId?: boolean
   username?: boolean
   profileUrl?: boolean
-  accessToken?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  provider?: boolean | Prisma.PortfolioProviderDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["userSocialAccount"]>
 
 export type UserSocialAccountSelectScalar = {
   id?: boolean
   userId?: boolean
-  provider?: boolean
+  providerId?: boolean
   externalId?: boolean
   username?: boolean
   profileUrl?: boolean
-  accessToken?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type UserSocialAccountOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "provider" | "externalId" | "username" | "profileUrl" | "accessToken" | "createdAt" | "updatedAt", ExtArgs["result"]["userSocialAccount"]>
+export type UserSocialAccountOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "providerId" | "externalId" | "username" | "profileUrl" | "createdAt" | "updatedAt", ExtArgs["result"]["userSocialAccount"]>
 export type UserSocialAccountInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  provider?: boolean | Prisma.PortfolioProviderDefaultArgs<ExtArgs>
   portfolioProjects?: boolean | Prisma.UserSocialAccount$portfolioProjectsArgs<ExtArgs>
   _count?: boolean | Prisma.UserSocialAccountCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserSocialAccountIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  provider?: boolean | Prisma.PortfolioProviderDefaultArgs<ExtArgs>
 }
 export type UserSocialAccountIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  provider?: boolean | Prisma.PortfolioProviderDefaultArgs<ExtArgs>
 }
 
 export type $UserSocialAccountPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "UserSocialAccount"
   objects: {
     user: Prisma.$UserPayload<ExtArgs>
+    provider: Prisma.$PortfolioProviderPayload<ExtArgs>
     portfolioProjects: Prisma.$UserPortfolioProjectPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     userId: string
-    provider: string
+    providerId: string
     externalId: string
     username: string
     profileUrl: string | null
-    accessToken: string
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["userSocialAccount"]>
@@ -1170,6 +1273,7 @@ readonly fields: UserSocialAccountFieldRefs;
 export interface Prisma__UserSocialAccountClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  provider<T extends Prisma.PortfolioProviderDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PortfolioProviderDefaultArgs<ExtArgs>>): Prisma.Prisma__PortfolioProviderClient<runtime.Types.Result.GetResult<Prisma.$PortfolioProviderPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   portfolioProjects<T extends Prisma.UserSocialAccount$portfolioProjectsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserSocialAccount$portfolioProjectsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserPortfolioProjectPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1202,11 +1306,10 @@ export interface Prisma__UserSocialAccountClient<T, Null = never, ExtArgs extend
 export interface UserSocialAccountFieldRefs {
   readonly id: Prisma.FieldRef<"UserSocialAccount", 'String'>
   readonly userId: Prisma.FieldRef<"UserSocialAccount", 'String'>
-  readonly provider: Prisma.FieldRef<"UserSocialAccount", 'String'>
+  readonly providerId: Prisma.FieldRef<"UserSocialAccount", 'String'>
   readonly externalId: Prisma.FieldRef<"UserSocialAccount", 'String'>
   readonly username: Prisma.FieldRef<"UserSocialAccount", 'String'>
   readonly profileUrl: Prisma.FieldRef<"UserSocialAccount", 'String'>
-  readonly accessToken: Prisma.FieldRef<"UserSocialAccount", 'String'>
   readonly createdAt: Prisma.FieldRef<"UserSocialAccount", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"UserSocialAccount", 'DateTime'>
 }

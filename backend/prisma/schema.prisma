@@ -1518,22 +1518,35 @@ model MentorOfferStatus {
   @@map("mentor_offer_statuses")
 }
 
+model PortfolioProvider {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @unique @db.VarChar(50)
+  description String?  @db.VarChar(150)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  socialAccounts    UserSocialAccount[]
+  portfolioProjects UserPortfolioProject[]
+
+  @@map("portfolio_providers")
+}
+
 model UserSocialAccount {
   id                String                 @id @default(uuid()) @db.Uuid
   userId            String                 @map("user_id") @db.Uuid
-  provider          String                 @db.VarChar(20)
+  providerId        String                 @map("provider_id") @db.Uuid
   externalId        String                 @map("external_id") @db.VarChar(100)
   username          String                 @db.VarChar(100)
   profileUrl        String?                @map("profile_url") @db.VarChar(500)
-  accessToken       String                 @map("access_token") @db.Text
   createdAt         DateTime               @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt         DateTime               @updatedAt @map("updated_at") @db.Timestamptz(6)
   user              User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider          PortfolioProvider      @relation(fields: [providerId], references: [id], onDelete: Restrict)
   portfolioProjects UserPortfolioProject[]
 
-  @@unique([userId, provider])
-  @@unique([provider, externalId])
-  @@index([userId])
+  @@unique([userId, providerId])
+  @@unique([providerId, externalId])
+  @@index([providerId])
   @@map("user_social_accounts")
 }
 
@@ -1541,7 +1554,7 @@ model UserPortfolioProject {
   id              String             @id @default(uuid()) @db.Uuid
   userId          String             @map("user_id") @db.Uuid
   socialAccountId String?            @map("social_account_id") @db.Uuid
-  provider        String             @db.VarChar(20)
+  providerId      String             @map("provider_id") @db.Uuid
   repoName        String             @map("repo_name") @db.VarChar(150)
   repoUrl         String             @map("repo_url") @db.VarChar(500)
   description     String?            @db.Text
@@ -1553,9 +1566,11 @@ model UserPortfolioProject {
   updatedAt       DateTime           @updatedAt @map("updated_at") @db.Timestamptz(6)
   user            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   socialAccount   UserSocialAccount? @relation(fields: [socialAccountId], references: [id], onDelete: SetNull)
+  provider        PortfolioProvider  @relation(fields: [providerId], references: [id], onDelete: Restrict)
 
-  @@unique([userId, provider, repoName])
+  @@unique([userId, providerId, repoName])
   @@index([userId, displayOrder])
   @@index([socialAccountId])
+  @@index([providerId])
   @@map("user_portfolio_projects")
 }

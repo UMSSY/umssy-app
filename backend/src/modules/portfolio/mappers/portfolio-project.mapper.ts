@@ -1,12 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import type {
-  PortfolioProjectDto,
-  PortfolioProjectEntity,
-} from '../types/portfolio.types.js';
+import type { PortfolioProjectEntity } from '../types/portfolio-project-entity.type.js';
+import type { PortfolioProjectResponse } from '../responses/portfolio-project.response.js';
 
 @Injectable()
 export class PortfolioProjectMapper {
-  toDto(entity: PortfolioProjectEntity): PortfolioProjectDto {
+  toResponse(entity: PortfolioProjectEntity): PortfolioProjectResponse {
     return {
       id: entity.id,
       provider: entity.provider,
@@ -20,10 +18,9 @@ export class PortfolioProjectMapper {
     };
   }
 
-  toDtoList(entities: readonly PortfolioProjectEntity[]): PortfolioProjectDto[] {
+  toResponseList(entities: readonly PortfolioProjectEntity[]): PortfolioProjectResponse[] {
     return [...entities]
       .sort((first, second) => first.displayOrder - second.displayOrder)
-      .map((entity) => this.toDto(entity));
+      .map((entity) => this.toResponse(entity));
   }
 }
-

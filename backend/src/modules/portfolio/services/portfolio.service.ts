@@ -1,16 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import {
-  DuplicatePortfolioProjectException,
-  MaxPortfolioProjectsExceededException,
-} from './exceptions/portfolio.exceptions.js';
-import { PortfolioProjectMapper } from './mappers/portfolio-project.mapper.js';
-import { PortfolioRepository } from './portfolio.repository.js';
-import {
-  MAX_PORTFOLIO_PROJECTS,
-  type NormalizedPortfolioProject,
-  type PortfolioProjectDto,
-  type PortfolioProjectInput,
-} from './types/portfolio.types.js';
+import { MAX_PORTFOLIO_PROJECTS } from '../constants/portfolio.constants.js';
+import { DuplicatePortfolioProjectException } from '../exceptions/duplicate-portfolio-project.exception.js';
+import { MaxPortfolioProjectsExceededException } from '../exceptions/max-portfolio-projects-exceeded.exception.js';
+import { PortfolioProjectMapper } from '../mappers/portfolio-project.mapper.js';
+import { PortfolioRepository } from '../repositories/portfolio.repository.js';
+import type { PortfolioProjectItemRequest } from '../requests/update-portfolio-projects.schema.js';
+import type { PortfolioProjectResponse } from '../responses/portfolio-project.response.js';
+import type { NormalizedPortfolioProject } from '../types/normalized-portfolio-project.type.js';
 
 @Injectable()
 export class PortfolioService {
@@ -19,15 +15,15 @@ export class PortfolioService {
     private readonly portfolioProjectMapper: PortfolioProjectMapper,
   ) {}
 
-  async getProjects(userId: string): Promise<PortfolioProjectDto[]> {
+  async getProjects(userId: string): Promise<PortfolioProjectResponse[]> {
     const entities = await this.portfolioRepository.findByUserId(userId);
-    return this.portfolioProjectMapper.toDtoList(entities);
+    return this.portfolioProjectMapper.toResponseList(entities);
   }
 
   async updateProjects(
     userId: string,
-    projects: readonly PortfolioProjectInput[],
-  ): Promise<PortfolioProjectDto[]> {
+    projects: readonly PortfolioProjectItemRequest[],
+  ): Promise<PortfolioProjectResponse[]> {
     if (projects.length > MAX_PORTFOLIO_PROJECTS) {
       throw new MaxPortfolioProjectsExceededException();
     }
@@ -38,11 +34,11 @@ export class PortfolioService {
       normalized,
     );
 
-    return this.portfolioProjectMapper.toDtoList(saved);
+    return this.portfolioProjectMapper.toResponseList(saved);
   }
 
   private normalizeAndValidate(
-    projects: readonly PortfolioProjectInput[],
+    projects: readonly PortfolioProjectItemRequest[],
   ): NormalizedPortfolioProject[] {
     const seenKeys = new Set<string>();
 
@@ -73,4 +69,3 @@ export class PortfolioService {
     return trimmed ? trimmed : null;
   }
 }
-

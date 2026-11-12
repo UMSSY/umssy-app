@@ -40,7 +40,7 @@ export type UserPortfolioProjectMinAggregateOutputType = {
   id: string | null
   userId: string | null
   socialAccountId: string | null
-  provider: string | null
+  providerId: string | null
   repoName: string | null
   repoUrl: string | null
   description: string | null
@@ -56,7 +56,7 @@ export type UserPortfolioProjectMaxAggregateOutputType = {
   id: string | null
   userId: string | null
   socialAccountId: string | null
-  provider: string | null
+  providerId: string | null
   repoName: string | null
   repoUrl: string | null
   description: string | null
@@ -72,7 +72,7 @@ export type UserPortfolioProjectCountAggregateOutputType = {
   id: number
   userId: number
   socialAccountId: number
-  provider: number
+  providerId: number
   repoName: number
   repoUrl: number
   description: number
@@ -100,7 +100,7 @@ export type UserPortfolioProjectMinAggregateInputType = {
   id?: true
   userId?: true
   socialAccountId?: true
-  provider?: true
+  providerId?: true
   repoName?: true
   repoUrl?: true
   description?: true
@@ -116,7 +116,7 @@ export type UserPortfolioProjectMaxAggregateInputType = {
   id?: true
   userId?: true
   socialAccountId?: true
-  provider?: true
+  providerId?: true
   repoName?: true
   repoUrl?: true
   description?: true
@@ -132,7 +132,7 @@ export type UserPortfolioProjectCountAggregateInputType = {
   id?: true
   userId?: true
   socialAccountId?: true
-  provider?: true
+  providerId?: true
   repoName?: true
   repoUrl?: true
   description?: true
@@ -235,7 +235,7 @@ export type UserPortfolioProjectGroupByOutputType = {
   id: string
   userId: string
   socialAccountId: string | null
-  provider: string
+  providerId: string
   repoName: string
   repoUrl: string
   description: string | null
@@ -274,7 +274,7 @@ export type UserPortfolioProjectWhereInput = {
   id?: Prisma.UuidFilter<"UserPortfolioProject"> | string
   userId?: Prisma.UuidFilter<"UserPortfolioProject"> | string
   socialAccountId?: Prisma.UuidNullableFilter<"UserPortfolioProject"> | string | null
-  provider?: Prisma.StringFilter<"UserPortfolioProject"> | string
+  providerId?: Prisma.UuidFilter<"UserPortfolioProject"> | string
   repoName?: Prisma.StringFilter<"UserPortfolioProject"> | string
   repoUrl?: Prisma.StringFilter<"UserPortfolioProject"> | string
   description?: Prisma.StringNullableFilter<"UserPortfolioProject"> | string | null
@@ -286,13 +286,14 @@ export type UserPortfolioProjectWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"UserPortfolioProject"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   socialAccount?: Prisma.XOR<Prisma.UserSocialAccountNullableScalarRelationFilter, Prisma.UserSocialAccountWhereInput> | null
+  provider?: Prisma.XOR<Prisma.PortfolioProviderScalarRelationFilter, Prisma.PortfolioProviderWhereInput>
 }
 
 export type UserPortfolioProjectOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   socialAccountId?: Prisma.SortOrderInput | Prisma.SortOrder
-  provider?: Prisma.SortOrder
+  providerId?: Prisma.SortOrder
   repoName?: Prisma.SortOrder
   repoUrl?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -304,17 +305,18 @@ export type UserPortfolioProjectOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
   socialAccount?: Prisma.UserSocialAccountOrderByWithRelationInput
+  provider?: Prisma.PortfolioProviderOrderByWithRelationInput
 }
 
 export type UserPortfolioProjectWhereUniqueInput = Prisma.AtLeast<{
   id?: string
-  userId_provider_repoName?: Prisma.UserPortfolioProjectUserIdProviderRepoNameCompoundUniqueInput
+  userId_providerId_repoName?: Prisma.UserPortfolioProjectUserIdProviderIdRepoNameCompoundUniqueInput
   AND?: Prisma.UserPortfolioProjectWhereInput | Prisma.UserPortfolioProjectWhereInput[]
   OR?: Prisma.UserPortfolioProjectWhereInput[]
   NOT?: Prisma.UserPortfolioProjectWhereInput | Prisma.UserPortfolioProjectWhereInput[]
   userId?: Prisma.UuidFilter<"UserPortfolioProject"> | string
   socialAccountId?: Prisma.UuidNullableFilter<"UserPortfolioProject"> | string | null
-  provider?: Prisma.StringFilter<"UserPortfolioProject"> | string
+  providerId?: Prisma.UuidFilter<"UserPortfolioProject"> | string
   repoName?: Prisma.StringFilter<"UserPortfolioProject"> | string
   repoUrl?: Prisma.StringFilter<"UserPortfolioProject"> | string
   description?: Prisma.StringNullableFilter<"UserPortfolioProject"> | string | null
@@ -326,13 +328,14 @@ export type UserPortfolioProjectWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"UserPortfolioProject"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   socialAccount?: Prisma.XOR<Prisma.UserSocialAccountNullableScalarRelationFilter, Prisma.UserSocialAccountWhereInput> | null
-}, "id" | "userId_provider_repoName">
+  provider?: Prisma.XOR<Prisma.PortfolioProviderScalarRelationFilter, Prisma.PortfolioProviderWhereInput>
+}, "id" | "userId_providerId_repoName">
 
 export type UserPortfolioProjectOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   socialAccountId?: Prisma.SortOrderInput | Prisma.SortOrder
-  provider?: Prisma.SortOrder
+  providerId?: Prisma.SortOrder
   repoName?: Prisma.SortOrder
   repoUrl?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -356,7 +359,7 @@ export type UserPortfolioProjectScalarWhereWithAggregatesInput = {
   id?: Prisma.UuidWithAggregatesFilter<"UserPortfolioProject"> | string
   userId?: Prisma.UuidWithAggregatesFilter<"UserPortfolioProject"> | string
   socialAccountId?: Prisma.UuidNullableWithAggregatesFilter<"UserPortfolioProject"> | string | null
-  provider?: Prisma.StringWithAggregatesFilter<"UserPortfolioProject"> | string
+  providerId?: Prisma.UuidWithAggregatesFilter<"UserPortfolioProject"> | string
   repoName?: Prisma.StringWithAggregatesFilter<"UserPortfolioProject"> | string
   repoUrl?: Prisma.StringWithAggregatesFilter<"UserPortfolioProject"> | string
   description?: Prisma.StringNullableWithAggregatesFilter<"UserPortfolioProject"> | string | null
@@ -370,7 +373,6 @@ export type UserPortfolioProjectScalarWhereWithAggregatesInput = {
 
 export type UserPortfolioProjectCreateInput = {
   id?: string
-  provider: string
   repoName: string
   repoUrl: string
   description?: string | null
@@ -382,13 +384,14 @@ export type UserPortfolioProjectCreateInput = {
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutPortfolioProjectsInput
   socialAccount?: Prisma.UserSocialAccountCreateNestedOneWithoutPortfolioProjectsInput
+  provider: Prisma.PortfolioProviderCreateNestedOneWithoutPortfolioProjectsInput
 }
 
 export type UserPortfolioProjectUncheckedCreateInput = {
   id?: string
   userId: string
   socialAccountId?: string | null
-  provider: string
+  providerId: string
   repoName: string
   repoUrl: string
   description?: string | null
@@ -402,7 +405,6 @@ export type UserPortfolioProjectUncheckedCreateInput = {
 
 export type UserPortfolioProjectUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  provider?: Prisma.StringFieldUpdateOperationsInput | string
   repoName?: Prisma.StringFieldUpdateOperationsInput | string
   repoUrl?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -414,13 +416,14 @@ export type UserPortfolioProjectUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutPortfolioProjectsNestedInput
   socialAccount?: Prisma.UserSocialAccountUpdateOneWithoutPortfolioProjectsNestedInput
+  provider?: Prisma.PortfolioProviderUpdateOneRequiredWithoutPortfolioProjectsNestedInput
 }
 
 export type UserPortfolioProjectUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   socialAccountId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  provider?: Prisma.StringFieldUpdateOperationsInput | string
+  providerId?: Prisma.StringFieldUpdateOperationsInput | string
   repoName?: Prisma.StringFieldUpdateOperationsInput | string
   repoUrl?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -436,7 +439,7 @@ export type UserPortfolioProjectCreateManyInput = {
   id?: string
   userId: string
   socialAccountId?: string | null
-  provider: string
+  providerId: string
   repoName: string
   repoUrl: string
   description?: string | null
@@ -450,7 +453,6 @@ export type UserPortfolioProjectCreateManyInput = {
 
 export type UserPortfolioProjectUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  provider?: Prisma.StringFieldUpdateOperationsInput | string
   repoName?: Prisma.StringFieldUpdateOperationsInput | string
   repoUrl?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -466,7 +468,7 @@ export type UserPortfolioProjectUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   socialAccountId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  provider?: Prisma.StringFieldUpdateOperationsInput | string
+  providerId?: Prisma.StringFieldUpdateOperationsInput | string
   repoName?: Prisma.StringFieldUpdateOperationsInput | string
   repoUrl?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -488,9 +490,9 @@ export type UserPortfolioProjectOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
-export type UserPortfolioProjectUserIdProviderRepoNameCompoundUniqueInput = {
+export type UserPortfolioProjectUserIdProviderIdRepoNameCompoundUniqueInput = {
   userId: string
-  provider: string
+  providerId: string
   repoName: string
 }
 
@@ -498,7 +500,7 @@ export type UserPortfolioProjectCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   socialAccountId?: Prisma.SortOrder
-  provider?: Prisma.SortOrder
+  providerId?: Prisma.SortOrder
   repoName?: Prisma.SortOrder
   repoUrl?: Prisma.SortOrder
   description?: Prisma.SortOrder
@@ -519,7 +521,7 @@ export type UserPortfolioProjectMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   socialAccountId?: Prisma.SortOrder
-  provider?: Prisma.SortOrder
+  providerId?: Prisma.SortOrder
   repoName?: Prisma.SortOrder
   repoUrl?: Prisma.SortOrder
   description?: Prisma.SortOrder
@@ -535,7 +537,7 @@ export type UserPortfolioProjectMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   socialAccountId?: Prisma.SortOrder
-  provider?: Prisma.SortOrder
+  providerId?: Prisma.SortOrder
   repoName?: Prisma.SortOrder
   repoUrl?: Prisma.SortOrder
   description?: Prisma.SortOrder
@@ -594,6 +596,48 @@ export type UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput = {
   deleteMany?: Prisma.UserPortfolioProjectScalarWhereInput | Prisma.UserPortfolioProjectScalarWhereInput[]
 }
 
+export type UserPortfolioProjectCreateNestedManyWithoutProviderInput = {
+  create?: Prisma.XOR<Prisma.UserPortfolioProjectCreateWithoutProviderInput, Prisma.UserPortfolioProjectUncheckedCreateWithoutProviderInput> | Prisma.UserPortfolioProjectCreateWithoutProviderInput[] | Prisma.UserPortfolioProjectUncheckedCreateWithoutProviderInput[]
+  connectOrCreate?: Prisma.UserPortfolioProjectCreateOrConnectWithoutProviderInput | Prisma.UserPortfolioProjectCreateOrConnectWithoutProviderInput[]
+  createMany?: Prisma.UserPortfolioProjectCreateManyProviderInputEnvelope
+  connect?: Prisma.UserPortfolioProjectWhereUniqueInput | Prisma.UserPortfolioProjectWhereUniqueInput[]
+}
+
+export type UserPortfolioProjectUncheckedCreateNestedManyWithoutProviderInput = {
+  create?: Prisma.XOR<Prisma.UserPortfolioProjectCreateWithoutProviderInput, Prisma.UserPortfolioProjectUncheckedCreateWithoutProviderInput> | Prisma.UserPortfolioProjectCreateWithoutProviderInput[] | Prisma.UserPortfolioProjectUncheckedCreateWithoutProviderInput[]
+  connectOrCreate?: Prisma.UserPortfolioProjectCreateOrConnectWithoutProviderInput | Prisma.UserPortfolioProjectCreateOrConnectWithoutProviderInput[]
+  createMany?: Prisma.UserPortfolioProjectCreateManyProviderInputEnvelope
+  connect?: Prisma.UserPortfolioProjectWhereUniqueInput | Prisma.UserPortfolioProjectWhereUniqueInput[]
+}
+
+export type UserPortfolioProjectUpdateManyWithoutProviderNestedInput = {
+  create?: Prisma.XOR<Prisma.UserPortfolioProjectCreateWithoutProviderInput, Prisma.UserPortfolioProjectUncheckedCreateWithoutProviderInput> | Prisma.UserPortfolioProjectCreateWithoutProviderInput[] | Prisma.UserPortfolioProjectUncheckedCreateWithoutProviderInput[]
+  connectOrCreate?: Prisma.UserPortfolioProjectCreateOrConnectWithoutProviderInput | Prisma.UserPortfolioProjectCreateOrConnectWithoutProviderInput[]
+  upsert?: Prisma.UserPortfolioProjectUpsertWithWhereUniqueWithoutProviderInput | Prisma.UserPortfolioProjectUpsertWithWhereUniqueWithoutProviderInput[]
+  createMany?: Prisma.UserPortfolioProjectCreateManyProviderInputEnvelope
+  set?: Prisma.UserPortfolioProjectWhereUniqueInput | Prisma.UserPortfolioProjectWhereUniqueInput[]
+  disconnect?: Prisma.UserPortfolioProjectWhereUniqueInput | Prisma.UserPortfolioProjectWhereUniqueInput[]
+  delete?: Prisma.UserPortfolioProjectWhereUniqueInput | Prisma.UserPortfolioProjectWhereUniqueInput[]
+  connect?: Prisma.UserPortfolioProjectWhereUniqueInput | Prisma.UserPortfolioProjectWhereUniqueInput[]
+  update?: Prisma.UserPortfolioProjectUpdateWithWhereUniqueWithoutProviderInput | Prisma.UserPortfolioProjectUpdateWithWhereUniqueWithoutProviderInput[]
+  updateMany?: Prisma.UserPortfolioProjectUpdateManyWithWhereWithoutProviderInput | Prisma.UserPortfolioProjectUpdateManyWithWhereWithoutProviderInput[]
+  deleteMany?: Prisma.UserPortfolioProjectScalarWhereInput | Prisma.UserPortfolioProjectScalarWhereInput[]
+}
+
+export type UserPortfolioProjectUncheckedUpdateManyWithoutProviderNestedInput = {
+  create?: Prisma.XOR<Prisma.UserPortfolioProjectCreateWithoutProviderInput, Prisma.UserPortfolioProjectUncheckedCreateWithoutProviderInput> | Prisma.UserPortfolioProjectCreateWithoutProviderInput[] | Prisma.UserPortfolioProjectUncheckedCreateWithoutProviderInput[]
+  connectOrCreate?: Prisma.UserPortfolioProjectCreateOrConnectWithoutProviderInput | Prisma.UserPortfolioProjectCreateOrConnectWithoutProviderInput[]
+  upsert?: Prisma.UserPortfolioProjectUpsertWithWhereUniqueWithoutProviderInput | Prisma.UserPortfolioProjectUpsertWithWhereUniqueWithoutProviderInput[]
+  createMany?: Prisma.UserPortfolioProjectCreateManyProviderInputEnvelope
+  set?: Prisma.UserPortfolioProjectWhereUniqueInput | Prisma.UserPortfolioProjectWhereUniqueInput[]
+  disconnect?: Prisma.UserPortfolioProjectWhereUniqueInput | Prisma.UserPortfolioProjectWhereUniqueInput[]
+  delete?: Prisma.UserPortfolioProjectWhereUniqueInput | Prisma.UserPortfolioProjectWhereUniqueInput[]
+  connect?: Prisma.UserPortfolioProjectWhereUniqueInput | Prisma.UserPortfolioProjectWhereUniqueInput[]
+  update?: Prisma.UserPortfolioProjectUpdateWithWhereUniqueWithoutProviderInput | Prisma.UserPortfolioProjectUpdateWithWhereUniqueWithoutProviderInput[]
+  updateMany?: Prisma.UserPortfolioProjectUpdateManyWithWhereWithoutProviderInput | Prisma.UserPortfolioProjectUpdateManyWithWhereWithoutProviderInput[]
+  deleteMany?: Prisma.UserPortfolioProjectScalarWhereInput | Prisma.UserPortfolioProjectScalarWhereInput[]
+}
+
 export type UserPortfolioProjectCreateNestedManyWithoutSocialAccountInput = {
   create?: Prisma.XOR<Prisma.UserPortfolioProjectCreateWithoutSocialAccountInput, Prisma.UserPortfolioProjectUncheckedCreateWithoutSocialAccountInput> | Prisma.UserPortfolioProjectCreateWithoutSocialAccountInput[] | Prisma.UserPortfolioProjectUncheckedCreateWithoutSocialAccountInput[]
   connectOrCreate?: Prisma.UserPortfolioProjectCreateOrConnectWithoutSocialAccountInput | Prisma.UserPortfolioProjectCreateOrConnectWithoutSocialAccountInput[]
@@ -638,7 +682,6 @@ export type UserPortfolioProjectUncheckedUpdateManyWithoutSocialAccountNestedInp
 
 export type UserPortfolioProjectCreateWithoutUserInput = {
   id?: string
-  provider: string
   repoName: string
   repoUrl: string
   description?: string | null
@@ -649,12 +692,13 @@ export type UserPortfolioProjectCreateWithoutUserInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   socialAccount?: Prisma.UserSocialAccountCreateNestedOneWithoutPortfolioProjectsInput
+  provider: Prisma.PortfolioProviderCreateNestedOneWithoutPortfolioProjectsInput
 }
 
 export type UserPortfolioProjectUncheckedCreateWithoutUserInput = {
   id?: string
   socialAccountId?: string | null
-  provider: string
+  providerId: string
   repoName: string
   repoUrl: string
   description?: string | null
@@ -699,7 +743,7 @@ export type UserPortfolioProjectScalarWhereInput = {
   id?: Prisma.UuidFilter<"UserPortfolioProject"> | string
   userId?: Prisma.UuidFilter<"UserPortfolioProject"> | string
   socialAccountId?: Prisma.UuidNullableFilter<"UserPortfolioProject"> | string | null
-  provider?: Prisma.StringFilter<"UserPortfolioProject"> | string
+  providerId?: Prisma.UuidFilter<"UserPortfolioProject"> | string
   repoName?: Prisma.StringFilter<"UserPortfolioProject"> | string
   repoUrl?: Prisma.StringFilter<"UserPortfolioProject"> | string
   description?: Prisma.StringNullableFilter<"UserPortfolioProject"> | string | null
@@ -711,9 +755,8 @@ export type UserPortfolioProjectScalarWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"UserPortfolioProject"> | Date | string
 }
 
-export type UserPortfolioProjectCreateWithoutSocialAccountInput = {
+export type UserPortfolioProjectCreateWithoutProviderInput = {
   id?: string
-  provider: string
   repoName: string
   repoUrl: string
   description?: string | null
@@ -724,12 +767,69 @@ export type UserPortfolioProjectCreateWithoutSocialAccountInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutPortfolioProjectsInput
+  socialAccount?: Prisma.UserSocialAccountCreateNestedOneWithoutPortfolioProjectsInput
+}
+
+export type UserPortfolioProjectUncheckedCreateWithoutProviderInput = {
+  id?: string
+  userId: string
+  socialAccountId?: string | null
+  repoName: string
+  repoUrl: string
+  description?: string | null
+  language?: string | null
+  starsCount?: number
+  isOwner?: boolean
+  displayOrder?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type UserPortfolioProjectCreateOrConnectWithoutProviderInput = {
+  where: Prisma.UserPortfolioProjectWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserPortfolioProjectCreateWithoutProviderInput, Prisma.UserPortfolioProjectUncheckedCreateWithoutProviderInput>
+}
+
+export type UserPortfolioProjectCreateManyProviderInputEnvelope = {
+  data: Prisma.UserPortfolioProjectCreateManyProviderInput | Prisma.UserPortfolioProjectCreateManyProviderInput[]
+  skipDuplicates?: boolean
+}
+
+export type UserPortfolioProjectUpsertWithWhereUniqueWithoutProviderInput = {
+  where: Prisma.UserPortfolioProjectWhereUniqueInput
+  update: Prisma.XOR<Prisma.UserPortfolioProjectUpdateWithoutProviderInput, Prisma.UserPortfolioProjectUncheckedUpdateWithoutProviderInput>
+  create: Prisma.XOR<Prisma.UserPortfolioProjectCreateWithoutProviderInput, Prisma.UserPortfolioProjectUncheckedCreateWithoutProviderInput>
+}
+
+export type UserPortfolioProjectUpdateWithWhereUniqueWithoutProviderInput = {
+  where: Prisma.UserPortfolioProjectWhereUniqueInput
+  data: Prisma.XOR<Prisma.UserPortfolioProjectUpdateWithoutProviderInput, Prisma.UserPortfolioProjectUncheckedUpdateWithoutProviderInput>
+}
+
+export type UserPortfolioProjectUpdateManyWithWhereWithoutProviderInput = {
+  where: Prisma.UserPortfolioProjectScalarWhereInput
+  data: Prisma.XOR<Prisma.UserPortfolioProjectUpdateManyMutationInput, Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutProviderInput>
+}
+
+export type UserPortfolioProjectCreateWithoutSocialAccountInput = {
+  id?: string
+  repoName: string
+  repoUrl: string
+  description?: string | null
+  language?: string | null
+  starsCount?: number
+  isOwner?: boolean
+  displayOrder?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutPortfolioProjectsInput
+  provider: Prisma.PortfolioProviderCreateNestedOneWithoutPortfolioProjectsInput
 }
 
 export type UserPortfolioProjectUncheckedCreateWithoutSocialAccountInput = {
   id?: string
   userId: string
-  provider: string
+  providerId: string
   repoName: string
   repoUrl: string
   description?: string | null
@@ -770,7 +870,7 @@ export type UserPortfolioProjectUpdateManyWithWhereWithoutSocialAccountInput = {
 export type UserPortfolioProjectCreateManyUserInput = {
   id?: string
   socialAccountId?: string | null
-  provider: string
+  providerId: string
   repoName: string
   repoUrl: string
   description?: string | null
@@ -784,7 +884,6 @@ export type UserPortfolioProjectCreateManyUserInput = {
 
 export type UserPortfolioProjectUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  provider?: Prisma.StringFieldUpdateOperationsInput | string
   repoName?: Prisma.StringFieldUpdateOperationsInput | string
   repoUrl?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -795,12 +894,13 @@ export type UserPortfolioProjectUpdateWithoutUserInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   socialAccount?: Prisma.UserSocialAccountUpdateOneWithoutPortfolioProjectsNestedInput
+  provider?: Prisma.PortfolioProviderUpdateOneRequiredWithoutPortfolioProjectsNestedInput
 }
 
 export type UserPortfolioProjectUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   socialAccountId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  provider?: Prisma.StringFieldUpdateOperationsInput | string
+  providerId?: Prisma.StringFieldUpdateOperationsInput | string
   repoName?: Prisma.StringFieldUpdateOperationsInput | string
   repoUrl?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -815,7 +915,67 @@ export type UserPortfolioProjectUncheckedUpdateWithoutUserInput = {
 export type UserPortfolioProjectUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   socialAccountId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  provider?: Prisma.StringFieldUpdateOperationsInput | string
+  providerId?: Prisma.StringFieldUpdateOperationsInput | string
+  repoName?: Prisma.StringFieldUpdateOperationsInput | string
+  repoUrl?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  starsCount?: Prisma.IntFieldUpdateOperationsInput | number
+  isOwner?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  displayOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type UserPortfolioProjectCreateManyProviderInput = {
+  id?: string
+  userId: string
+  socialAccountId?: string | null
+  repoName: string
+  repoUrl: string
+  description?: string | null
+  language?: string | null
+  starsCount?: number
+  isOwner?: boolean
+  displayOrder?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type UserPortfolioProjectUpdateWithoutProviderInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  repoName?: Prisma.StringFieldUpdateOperationsInput | string
+  repoUrl?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  starsCount?: Prisma.IntFieldUpdateOperationsInput | number
+  isOwner?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  displayOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutPortfolioProjectsNestedInput
+  socialAccount?: Prisma.UserSocialAccountUpdateOneWithoutPortfolioProjectsNestedInput
+}
+
+export type UserPortfolioProjectUncheckedUpdateWithoutProviderInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  socialAccountId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  repoName?: Prisma.StringFieldUpdateOperationsInput | string
+  repoUrl?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  starsCount?: Prisma.IntFieldUpdateOperationsInput | number
+  isOwner?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  displayOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type UserPortfolioProjectUncheckedUpdateManyWithoutProviderInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  socialAccountId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   repoName?: Prisma.StringFieldUpdateOperationsInput | string
   repoUrl?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -830,7 +990,7 @@ export type UserPortfolioProjectUncheckedUpdateManyWithoutUserInput = {
 export type UserPortfolioProjectCreateManySocialAccountInput = {
   id?: string
   userId: string
-  provider: string
+  providerId: string
   repoName: string
   repoUrl: string
   description?: string | null
@@ -844,7 +1004,6 @@ export type UserPortfolioProjectCreateManySocialAccountInput = {
 
 export type UserPortfolioProjectUpdateWithoutSocialAccountInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  provider?: Prisma.StringFieldUpdateOperationsInput | string
   repoName?: Prisma.StringFieldUpdateOperationsInput | string
   repoUrl?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -855,12 +1014,13 @@ export type UserPortfolioProjectUpdateWithoutSocialAccountInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutPortfolioProjectsNestedInput
+  provider?: Prisma.PortfolioProviderUpdateOneRequiredWithoutPortfolioProjectsNestedInput
 }
 
 export type UserPortfolioProjectUncheckedUpdateWithoutSocialAccountInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  provider?: Prisma.StringFieldUpdateOperationsInput | string
+  providerId?: Prisma.StringFieldUpdateOperationsInput | string
   repoName?: Prisma.StringFieldUpdateOperationsInput | string
   repoUrl?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -875,7 +1035,7 @@ export type UserPortfolioProjectUncheckedUpdateWithoutSocialAccountInput = {
 export type UserPortfolioProjectUncheckedUpdateManyWithoutSocialAccountInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  provider?: Prisma.StringFieldUpdateOperationsInput | string
+  providerId?: Prisma.StringFieldUpdateOperationsInput | string
   repoName?: Prisma.StringFieldUpdateOperationsInput | string
   repoUrl?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -893,7 +1053,7 @@ export type UserPortfolioProjectSelect<ExtArgs extends runtime.Types.Extensions.
   id?: boolean
   userId?: boolean
   socialAccountId?: boolean
-  provider?: boolean
+  providerId?: boolean
   repoName?: boolean
   repoUrl?: boolean
   description?: boolean
@@ -905,13 +1065,14 @@ export type UserPortfolioProjectSelect<ExtArgs extends runtime.Types.Extensions.
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   socialAccount?: boolean | Prisma.UserPortfolioProject$socialAccountArgs<ExtArgs>
+  provider?: boolean | Prisma.PortfolioProviderDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["userPortfolioProject"]>
 
 export type UserPortfolioProjectSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
   socialAccountId?: boolean
-  provider?: boolean
+  providerId?: boolean
   repoName?: boolean
   repoUrl?: boolean
   description?: boolean
@@ -923,13 +1084,14 @@ export type UserPortfolioProjectSelectCreateManyAndReturn<ExtArgs extends runtim
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   socialAccount?: boolean | Prisma.UserPortfolioProject$socialAccountArgs<ExtArgs>
+  provider?: boolean | Prisma.PortfolioProviderDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["userPortfolioProject"]>
 
 export type UserPortfolioProjectSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
   socialAccountId?: boolean
-  provider?: boolean
+  providerId?: boolean
   repoName?: boolean
   repoUrl?: boolean
   description?: boolean
@@ -941,13 +1103,14 @@ export type UserPortfolioProjectSelectUpdateManyAndReturn<ExtArgs extends runtim
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   socialAccount?: boolean | Prisma.UserPortfolioProject$socialAccountArgs<ExtArgs>
+  provider?: boolean | Prisma.PortfolioProviderDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["userPortfolioProject"]>
 
 export type UserPortfolioProjectSelectScalar = {
   id?: boolean
   userId?: boolean
   socialAccountId?: boolean
-  provider?: boolean
+  providerId?: boolean
   repoName?: boolean
   repoUrl?: boolean
   description?: boolean
@@ -959,18 +1122,21 @@ export type UserPortfolioProjectSelectScalar = {
   updatedAt?: boolean
 }
 
-export type UserPortfolioProjectOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "socialAccountId" | "provider" | "repoName" | "repoUrl" | "description" | "language" | "starsCount" | "isOwner" | "displayOrder" | "createdAt" | "updatedAt", ExtArgs["result"]["userPortfolioProject"]>
+export type UserPortfolioProjectOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "socialAccountId" | "providerId" | "repoName" | "repoUrl" | "description" | "language" | "starsCount" | "isOwner" | "displayOrder" | "createdAt" | "updatedAt", ExtArgs["result"]["userPortfolioProject"]>
 export type UserPortfolioProjectInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   socialAccount?: boolean | Prisma.UserPortfolioProject$socialAccountArgs<ExtArgs>
+  provider?: boolean | Prisma.PortfolioProviderDefaultArgs<ExtArgs>
 }
 export type UserPortfolioProjectIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   socialAccount?: boolean | Prisma.UserPortfolioProject$socialAccountArgs<ExtArgs>
+  provider?: boolean | Prisma.PortfolioProviderDefaultArgs<ExtArgs>
 }
 export type UserPortfolioProjectIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   socialAccount?: boolean | Prisma.UserPortfolioProject$socialAccountArgs<ExtArgs>
+  provider?: boolean | Prisma.PortfolioProviderDefaultArgs<ExtArgs>
 }
 
 export type $UserPortfolioProjectPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -978,12 +1144,13 @@ export type $UserPortfolioProjectPayload<ExtArgs extends runtime.Types.Extension
   objects: {
     user: Prisma.$UserPayload<ExtArgs>
     socialAccount: Prisma.$UserSocialAccountPayload<ExtArgs> | null
+    provider: Prisma.$PortfolioProviderPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     userId: string
     socialAccountId: string | null
-    provider: string
+    providerId: string
     repoName: string
     repoUrl: string
     description: string | null
@@ -1389,6 +1556,7 @@ export interface Prisma__UserPortfolioProjectClient<T, Null = never, ExtArgs ext
   readonly [Symbol.toStringTag]: "PrismaPromise"
   user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   socialAccount<T extends Prisma.UserPortfolioProject$socialAccountArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserPortfolioProject$socialAccountArgs<ExtArgs>>): Prisma.Prisma__UserSocialAccountClient<runtime.Types.Result.GetResult<Prisma.$UserSocialAccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  provider<T extends Prisma.PortfolioProviderDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PortfolioProviderDefaultArgs<ExtArgs>>): Prisma.Prisma__PortfolioProviderClient<runtime.Types.Result.GetResult<Prisma.$PortfolioProviderPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1421,7 +1589,7 @@ export interface UserPortfolioProjectFieldRefs {
   readonly id: Prisma.FieldRef<"UserPortfolioProject", 'String'>
   readonly userId: Prisma.FieldRef<"UserPortfolioProject", 'String'>
   readonly socialAccountId: Prisma.FieldRef<"UserPortfolioProject", 'String'>
-  readonly provider: Prisma.FieldRef<"UserPortfolioProject", 'String'>
+  readonly providerId: Prisma.FieldRef<"UserPortfolioProject", 'String'>
   readonly repoName: Prisma.FieldRef<"UserPortfolioProject", 'String'>
   readonly repoUrl: Prisma.FieldRef<"UserPortfolioProject", 'String'>
   readonly description: Prisma.FieldRef<"UserPortfolioProject", 'String'>
