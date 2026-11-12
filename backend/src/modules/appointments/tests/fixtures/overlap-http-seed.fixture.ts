@@ -13,10 +13,12 @@ import {
 } from '../../../users/constants/seed-fixture-users.constants.js';
 import { ACTIVE_APPOINTMENT_STATUS_TITLES } from '../../constants/active-appointment-statuses.constants.js';
 import { DAILY_APPOINTMENT_LIMIT_STATUS_TITLES } from '../../constants/daily-appointment-limit-statuses.constants.js';
+import { PAST_APPOINTMENT_STATUS_TITLES } from '../../constants/past-appointment-statuses.constants.js';
 import type { BoliviaDayRange } from '../../types/bolivia-day-range.types.js';
 import type { AppointmentRecord } from '../../types/appointment-record.types.js';
 import type { CreateAppointmentData } from '../../types/create-appointment-data.types.js';
 import type { CreateAppointmentHistoryData } from '../../types/create-appointment-history-data.types.js';
+import type { MyAppointmentsQuery } from '../../types/my-appointments-query.types.js';
 
 export const OVERLAP_HTTP_ANCHOR = new Date('2026-11-16T15:00:00.000Z');
 
@@ -244,6 +246,37 @@ export class InMemoryOverlapSeed {
         Promise.resolve(this.hasOverlapping(userId, startAt, endAt)),
       hasReservationOnDay: (userId: string, day: BoliviaDayRange) =>
         Promise.resolve(this.hasReservationOnDay(userId, day)),
+      countMine: (
+        userId: string,
+        scope: MyAppointmentsQuery['scope'],
+        now: Date,
+      ) => Promise.resolve(this.mine(userId, scope, now).length),
+      findMine: (
+        userId: string,
+        scope: MyAppointmentsQuery['scope'],
+        now: Date,
+        page: number,
+        pageSize: number,
+      ) =>
+        Promise.resolve(
+          this.mine(userId, scope, now).slice(
+            (page - 1) * pageSize,
+            page * pageSize,
+          ),
+        ),
+      findById: (id: string) =>
+        Promise.resolve(
+          this.appointments.find((appointment) => appointment.id === id) ??
+            null,
+        ),
+      assignMeetingUrl: (id: string, meetingUrl: string) => {
+        const appointment = this.appointments.find((item) => item.id === id);
+        if (!appointment) {
+          return Promise.resolve(null);
+        }
+        appointment.meetingUrl ??= meetingUrl;
+        return Promise.resolve(appointment.meetingUrl);
+      },
     };
   }
 
@@ -392,6 +425,38 @@ export class InMemoryOverlapSeed {
           appointment.status.title as AppointmentStatusTitle,
         ),
     );
+  }
+
+  private mine(
+    userId: string,
+    scope: MyAppointmentsQuery['scope'],
+    now: Date,
+  ): AppointmentRecord[] {
+    const titles: readonly string[] =
+      scope === 'upcoming'
+        ? ACTIVE_APPOINTMENT_STATUS_TITLES
+        : PAST_APPOINTMENT_STATUS_TITLES;
+    const byTime = (appointment: AppointmentRecord) =>
+      scope === 'upcoming'
+        ? appointment.endAt.getTime() > now.getTime()
+        : appointment.endAt.getTime() <= now.getTime();
+
+    return this.appointments
+      .filter(
+        (appointment) =>
+          (appointment.mentorId === userId ||
+            appointment.studentId === userId) &&
+          titles.includes(appointment.status.title) &&
+          byTime(appointment),
+      )
+      .sort((a, b) =>
+        scope === 'upcoming'
+          ? a.startAt.getTime() - b.startAt.getTime() ||
+            a.id.localeCompare(b.id)
+          : b.endAt.getTime() - a.endAt.getTime() ||
+            b.startAt.getTime() - a.startAt.getTime() ||
+            a.id.localeCompare(b.id),
+      );
   }
 
   private hasOverlapping(userId: string, startAt: Date, endAt: Date): boolean {
