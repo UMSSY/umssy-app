@@ -4,14 +4,16 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { toast } from "sonner"
 import { renderWithQuery } from "@/shared/testing/render-with-query"
 import * as downloadModule from "@/shared/utils/download-file"
-import { APPOINTMENT_DETAIL_TEXT, APPOINTMENTS_TEXT } from "../constants/appointments.constants"
+import { APPOINTMENT_DETAIL_TEXT, APPOINTMENTS_TEXT, JOIN_MEETING_TEXT } from "../constants/appointments.constants"
 import { appointmentsApi } from "../services/appointments.service"
-import type { Appointment } from "../types/appointment.types"
+import type { AppointmentDetail } from "../types/appointment-detail.types"
 import { AppointmentDetailDialog } from "./appointment-detail-dialog"
 
 vi.mock("sonner", () => ({ toast: { error: vi.fn() } }))
 
-function makeAppointment(overrides: Partial<Appointment> = {}): Appointment {
+const MEETING_URL = "https://meet.jit.si/umssy-3f9c1a2e-5b7d-4c1e-9a2b-1c2d3e4f5a6b"
+
+function makeAppointment(overrides: Partial<AppointmentDetail> = {}): AppointmentDetail {
   return {
     id: "a1",
     blockId: "b1",
@@ -28,6 +30,7 @@ function makeAppointment(overrides: Partial<Appointment> = {}): Appointment {
       sizeBytes: 2.4 * 1024 * 1024,
       uploadedAt: "2026-10-08T22:43:00.000Z",
     },
+    meetingUrl: MEETING_URL,
     ...overrides,
   }
 }
@@ -238,6 +241,44 @@ describe("AppointmentDetailDialog: foto, tema y descarga", () => {
       expect(toast.error).toHaveBeenCalledWith(APPOINTMENT_DETAIL_TEXT.downloadError),
     )
     expect(screen.getByRole("button", { name: APPOINTMENT_DETAIL_TEXT.download })).toBeEnabled()
+  })
+
+  it("en una cita confirmada muestra «Unirse a la reunión», que abre la sala en una pestaña nueva", async () => {
+    renderDialog()
+
+    const join = await screen.findByRole("link", { name: JOIN_MEETING_TEXT.join })
+    expect(join).toHaveAttribute("href", MEETING_URL)
+    expect(join).toHaveAttribute("target", "_blank")
+    expect(join).toHaveAttribute("rel", "noopener noreferrer")
+  })
+
+  it.each(["CANCELLED", "COMPLETED"] as const)("en una cita %s no muestra «Unirse a la reunión»", async (status) => {
+    vi.mocked(appointmentsApi.getById).mockResolvedValue(makeAppointment({ status, meetingUrl: null }))
+
+    renderDialog()
+
+    await screen.findByRole("heading", { name: "Cita con Ana Rojas" })
+    expect(screen.queryByText(JOIN_MEETING_TEXT.join)).not.toBeInTheDocument()
+  })
+
+  it("si la cita confirmada no tiene enlace, avisa que no se pudo abrir la reunión y conserva su estado", async () => {
+    vi.mocked(appointmentsApi.getById).mockResolvedValue(makeAppointment({ meetingUrl: null }))
+    const { user } = renderDialog()
+
+    await user.click(await screen.findByRole("button", { name: JOIN_MEETING_TEXT.join }))
+
+    expect(screen.getByRole("alert")).toHaveTextContent(JOIN_MEETING_TEXT.unavailable)
+    expect(screen.getByText("Confirmada")).toBeInTheDocument()
+  })
+
+  it("el mentor también ve «Unirse a la reunión»", async () => {
+    vi.mocked(appointmentsApi.getById).mockResolvedValue(
+      makeAppointment({ counterpart: { id: "student-1", fullName: "Luis Pérez", role: "student" } }),
+    )
+
+    renderDialog()
+
+    expect(await screen.findByRole("link", { name: JOIN_MEETING_TEXT.join })).toHaveAttribute("href", MEETING_URL)
   })
 
   it("se cierra con la tecla Escape", async () => {

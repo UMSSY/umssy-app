@@ -5,7 +5,7 @@ import { createQueryWrapper } from "@/shared/testing/create-query-wrapper"
 import * as downloadModule from "@/shared/utils/download-file"
 import { APPOINTMENT_DETAIL_TEXT } from "../constants/appointments.constants"
 import { appointmentsApi } from "../services/appointments.service"
-import type { Appointment } from "../types/appointment.types"
+import type { AppointmentDetail } from "../types/appointment-detail.types"
 import { useAppointment } from "./use-appointment"
 import { useCounterpartPhoto } from "./use-counterpart-photo"
 import { useDownloadAppointmentDocument } from "./use-download-appointment-document"
@@ -27,7 +27,7 @@ describe("useAppointment", () => {
   })
 
   it("carga el detalle de la cita elegida", async () => {
-    vi.spyOn(appointmentsApi, "getById").mockResolvedValue({ id: "a1" } as Appointment)
+    vi.spyOn(appointmentsApi, "getById").mockResolvedValue({ id: "a1" } as AppointmentDetail)
 
     const { result } = renderHook(() => useAppointment("a1"), createQueryWrapper())
 

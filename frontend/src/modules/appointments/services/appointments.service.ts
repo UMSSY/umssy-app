@@ -3,6 +3,7 @@ import type { ApiResponse } from "@/shared/types/api-response.types";
 import { getAppointmentDocumentEndpoint, getAppointmentEndpoint, getCounterpartPhotoEndpoint } from "../constants/appointment-document.constants";
 
 import type { Appointment } from "../types/appointment.types";
+import type { AppointmentDetail } from "../types/appointment-detail.types";
 import type { AppointmentDocument } from "../types/appointment-document.types";
 import type { AppointmentScope } from "../types/appointment-scope.types";
 import type { CreateAppointmentInput } from "../types/create-appointment-input.types";
@@ -16,8 +17,8 @@ export const appointmentsApi = {
     return response.data.data.items;
   },
 
-  getById: async (appointmentId: string): Promise<Appointment> => {
-    const response = await apiClient.get<ApiResponse<Appointment>>(
+  getById: async (appointmentId: string): Promise<AppointmentDetail> => {
+    const response = await apiClient.get<ApiResponse<AppointmentDetail>>(
       getAppointmentEndpoint(appointmentId),
     );
     return response.data.data;
