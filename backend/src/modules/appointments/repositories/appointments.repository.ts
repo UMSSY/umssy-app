@@ -89,6 +89,22 @@ export class AppointmentsRepository {
     });
   }
 
+  async assignMeetingUrl(
+    id: string,
+    meetingUrl: string,
+  ): Promise<string | null> {
+    await this.prisma.appointment.updateMany({
+      where: { id, meetingUrl: null },
+      data: { meetingUrl },
+    });
+    const appointment = await this.prisma.appointment.findUnique({
+      where: { id },
+      select: { meetingUrl: true },
+    });
+
+    return appointment?.meetingUrl ?? null;
+  }
+
   findById(id: string): Promise<AppointmentRecord | null> {
     return this.prisma.appointment.findUnique({
       where: { id },
