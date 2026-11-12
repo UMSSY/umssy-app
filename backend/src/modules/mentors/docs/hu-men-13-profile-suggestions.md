@@ -252,6 +252,13 @@ sugerencias aunque `isAvailableForMentoring` sea `false`; sin rol activo recibe
 participación desactivada ni se crea un estado `PAUSED`. Se propone conservar
 este comportamiento hasta definir el criterio, sin modificar ningún estado.
 
+El Bloque 4 verifica por HTTP los filtros del repositorio existente para rol
+desactivado (`deletedAt` no nulo), rol eliminado y rol con inicio futuro: una
+sesión válida que conserve otro rol recibe lista vacía y contador cero. Un mentor
+con rol activo y disponibilidad desactivada conserva sus recomendaciones. Un
+usuario inactivo sigue siendo rechazado por la protección de sesión existente.
+Estas pruebas simulan Prisma; no certifican filtrado contra PostgreSQL real.
+
 ### Estándares y límites de validación
 
 No estuvieron disponibles `especificacion GENERAL proyecto IS.pdf` ni

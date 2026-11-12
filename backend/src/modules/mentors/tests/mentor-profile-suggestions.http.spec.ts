@@ -21,7 +21,8 @@ import { MentorsController } from '../controllers/mentors.controller.js';
 import { MentorsService } from '../services/mentors.service.js';
 import { MentorProfileSuggestionsService } from '../services/mentor-profile-suggestions.service.js';
 import { MentorMapper } from '../mappers/mentor.mapper.js';
-import type { MentorsRepository } from '../repositories/mentors.repository.js';
+import { MentorsRepository } from '../repositories/mentors.repository.js';
+import type { PrismaService } from '../../../common/prisma/prisma.service.js';
 import type { UserSkillService } from '../../skills/services/user-skill.service.js';
 import {
   buildEmptyMentorProfile,
@@ -239,6 +240,79 @@ describe('GET /api/mentors/me/profile-suggestions', () => {
       .expect(200);
     expect(response.body.data).toEqual({ suggestions: [], pendingCount: 0 });
   });
+
+  it.each([
+    {
+      state: 'active mentor with availability disabled',
+      roles: [{ deletedAt: null, startAt: new Date(0) }],
+      pendingCount: 4,
+    },
+    {
+      state: 'deactivated participation with a soft-deleted mentor role',
+      roles: [{ deletedAt: new Date(0), startAt: new Date(0) }],
+      pendingCount: 0,
+    },
+    { state: 'removed mentor role', roles: [], pendingCount: 0 },
+    {
+      state: 'future-starting mentor role',
+      roles: [{ deletedAt: null, startAt: new Date('2099-01-01') }],
+      pendingCount: 0,
+    },
+  ])(
+    'preserves the repository participation filters over HTTP for $state',
+    async ({ roles, pendingCount }) => {
+      const profile = {
+        ...buildEmptyMentorProfile(),
+        id: 'mentor-a',
+        isAvailableForMentoring: false,
+      };
+      const findFirst = vi.fn().mockImplementation(async ({ where }) => {
+        expect(where).toEqual({
+          id: 'mentor-a',
+          isActive: true,
+          roles: {
+            some: {
+              deletedAt: null,
+              startAt: { lte: expect.any(Date) },
+              role: { name: 'mentor' },
+            },
+          },
+        });
+        return roles.some(
+          (role) =>
+            role.deletedAt === null &&
+            role.startAt <= where.roles.some.startAt.lte,
+        )
+          ? profile
+          : null;
+      });
+      const repository = new MentorsRepository({
+        user: { findFirst },
+      } as unknown as PrismaService);
+      findActiveMentorById.mockImplementation((id, now) =>
+        repository.findActiveMentorById(id, now),
+      );
+      findUserById.mockResolvedValueOnce({
+        id: 'mentor-a',
+        email: 'mentor@test.com',
+        isActive: true,
+        company: null,
+        roles: [{ role: { name: pendingCount > 0 ? 'mentor' : 'titulado' } }],
+      });
+      const response = await request(app.getHttpServer())
+        .get(path)
+        .auth(token(), { type: 'bearer' })
+        .expect(200);
+      expect(response.body.data.pendingCount).toBe(pendingCount);
+      expect(response.body.data.suggestions).toHaveLength(pendingCount);
+      expect(findFirst).toHaveBeenCalledTimes(1);
+      if (pendingCount === 0)
+        expect(response.body.data).toEqual({
+          suggestions: [],
+          pendingCount: 0,
+        });
+    },
+  );
 
   it('uses each validated subject and ignores arbitrary query and body identities', async () => {
     findActiveMentorById.mockImplementation(async (id) =>
