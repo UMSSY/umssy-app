@@ -7,6 +7,7 @@ import { CvFileController } from './controllers/cv-file.controller.js';
 import { CvGenerateController } from './controllers/cv-generate.controller.js';
 import { CvHistoryController } from './controllers/cv-history.controller.js';
 import { CvExtractionMapper } from './mappers/cv-extraction.mapper.js';
+import { CvGenerationMapper } from './mappers/cv-generation.mapper.js';
 import { CvMapper } from './mappers/cv.mapper.js';
 import { CvSourcesModule } from './cv-sources.module.js';
 import { CvMetadataRepository } from './repositories/cv-metadata.repository.js';
@@ -50,6 +51,7 @@ import { SkillAnalysisModule } from '../skills/skill-analysis.module.js';
     FileValidationService,
     CvPdfGeneratorService,
     CvGenerationService,
+    CvGenerationMapper,
     CvExtractionService,
     CvExtractionMapper,
   ],

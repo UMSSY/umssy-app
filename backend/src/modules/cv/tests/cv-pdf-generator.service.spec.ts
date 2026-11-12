@@ -116,7 +116,6 @@ describe("CvPdfGeneratorService", () => {
     const firstPage = doc.loadPage(0);
     const textJson = firstPage.toStructuredText().asJSON();
 
-    // Verify accented letters are preserved in text representation
     expect(textJson).toContain("Ingeniero");
     expect(textJson).toContain("Simón");
     expect(textJson).toContain("PRESENTACIÓN PROFESIONAL");
@@ -163,7 +162,6 @@ describe("CvPdfGeneratorService", () => {
   });
 
   it("should support multi-page documents and add correct footers and continuation headers", () => {
-    // Generate data with many items to force multi-page
     const longExperiences = Array.from({ length: 8 }, (_, idx) => ({
       jobTitle: `Cargo de Especialista Senior Nro ${idx + 1}`,
       company: `Corporación de Software y Tecnología Avanzada ${idx + 1}`,
@@ -183,9 +181,8 @@ describe("CvPdfGeneratorService", () => {
     const buffer = service.generate(multiPageData);
     const doc = new mupdf.PDFDocument(buffer);
 
-    expect(doc.countPages()).toBeGreaterThan(1);
+    expect(doc.countPages()).toBeGreaterThanOrEqual(2);
 
-    // Check page 2 continuation header
     const page2 = doc.loadPage(1);
     const page2Text = page2.toStructuredText().asJSON();
     expect(page2Text).toContain("Romario Vía Orozco");
@@ -194,7 +191,7 @@ describe("CvPdfGeneratorService", () => {
   });
 
   it("should properly escape parentheses, backslashes and special symbols in text", () => {
-    const escaped = service.escapePdfText("Test (parentheses) and \\ backslash and • bullet");
+    const escaped = (service as any).escapePdfText("Test (parentheses) and \\ backslash and • bullet");
     expect(escaped).toContain("\\(");
     expect(escaped).toContain("\\)");
     expect(escaped).toContain("\\\\");
