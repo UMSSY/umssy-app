@@ -3,7 +3,7 @@ import type { WeekGridDensity } from "../types/week-grid-density.types";
 
 export const HOUR_HEIGHT_PX = 72;
 
-export const COMPACT_HOUR_HEIGHT_PX = 44;
+export const COMPACT_HOUR_HEIGHT_PX = 20;
 
 export const HOUR_HEIGHT_PX_BY_DENSITY: Record<WeekGridDensity, number> = {
   normal: HOUR_HEIGHT_PX,
