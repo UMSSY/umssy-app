@@ -208,4 +208,74 @@ describe('AppointmentMapper', () => {
         .meetingUrl,
     ).toBeNull();
   });
+
+  it('returns who cancelled, whether it was the viewer and the reason only for cancelled appointments', () => {
+    const record = createAppointmentRecord({
+      status: { title: 'CANCELLED' },
+      cancelledById: MENTOR_ID,
+      cancellationReason: 'Tengo una reunión imprevista',
+      cancelledAt: new Date('2026-10-22T10:00:00-04:00'),
+    });
+
+    expect(mapper.toResponse(record, MENTOR_ID, NOW).cancellation).toEqual({
+      cancelledBy: 'MENTOR',
+      cancelledByMe: true,
+      reason: 'Tengo una reunión imprevista',
+      cancelledAt: '2026-10-22T14:00:00.000Z',
+    });
+    expect(mapper.toResponse(record, STUDENT_ID, NOW).cancellation).toEqual({
+      cancelledBy: 'MENTOR',
+      cancelledByMe: false,
+      reason: 'Tengo una reunión imprevista',
+      cancelledAt: '2026-10-22T14:00:00.000Z',
+    });
+  });
+
+  it('returns the cancellation of a legacy cancelled appointment that already ended', () => {
+    const record = createAppointmentRecord({
+      status: { title: 'CANCELADA' },
+      endAt: new Date(NOW.getTime() - 60_000),
+      cancelledById: STUDENT_ID,
+      cancelledAt: NOW,
+    });
+
+    expect(mapper.toResponse(record, STUDENT_ID, NOW)).toMatchObject({
+      status: 'CANCELLED',
+      cancellation: { cancelledBy: 'STUDENT', cancelledByMe: true },
+    });
+  });
+
+  it.each([
+    ['CONFIRMED', NOW],
+    ['COMPLETED', null],
+  ])(
+    'returns a null cancellation for a %s appointment even with stale cancellation data',
+    (title, cancelledAt) => {
+      const record = createAppointmentRecord({
+        status: { title },
+        cancelledById: MENTOR_ID,
+        cancellationReason: 'Motivo antiguo',
+        cancelledAt,
+      });
+
+      expect(mapper.toResponse(record, MENTOR_ID, NOW).cancellation).toBeNull();
+    },
+  );
+
+  it('includes the cancellation in the appointment detail', () => {
+    const record = createAppointmentRecord({
+      status: { title: 'CANCELLED' },
+      cancelledById: STUDENT_ID,
+      cancelledAt: NOW,
+    });
+
+    expect(
+      mapper.toDetailResponse(record, MENTOR_ID, null, NOW).cancellation,
+    ).toEqual({
+      cancelledBy: 'STUDENT',
+      cancelledByMe: false,
+      reason: null,
+      cancelledAt: NOW.toISOString(),
+    });
+  });
 });
