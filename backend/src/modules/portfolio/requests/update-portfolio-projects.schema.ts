@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { MAX_PORTFOLIO_PROJECTS } from '../constants/portfolio.constants.js';
-import { PORTFOLIO_PROVIDERS } from '../enums/portfolio-provider.enum.js';
+import { PORTFOLIO_PROVIDERS } from '../constants/portfolio-provider.constants.js';
 
 export const portfolioProjectItemSchema = z.object({
   provider: z.enum(PORTFOLIO_PROVIDERS),

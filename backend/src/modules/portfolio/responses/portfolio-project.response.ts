@@ -1,4 +1,4 @@
-import type { PortfolioProvider } from '../enums/portfolio-provider.enum.js';
+import type { PortfolioProvider } from '../types/portfolio-provider.type.js';
 
 export interface PortfolioProjectResponse {
   id: string;

@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Post,
   Put,
   StandardSchemaValidationPipe,
   UseGuards,
@@ -53,5 +54,15 @@ export class UserSkillController {
     @Body({ schema: updateUserSkillsSchema }) request: UpdateUserSkillsRequest,
   ): Promise<SkillResponse[]> {
     return this.userSkillService.updateUserSkills(userId, request);
+  }
+
+  @Post()
+  @ApiBody(toApiBody(updateUserSkillsSchema))
+  @ApiOkResponse({ description: 'Added skills of the authenticated user' })
+  addSkills(
+    @CurrentUserId() userId: string,
+    @Body({ schema: updateUserSkillsSchema }) request: UpdateUserSkillsRequest,
+  ): Promise<SkillResponse[]> {
+    return this.userSkillService.addSkills(userId, request);
   }
 }

@@ -11,13 +11,14 @@ vi.mock("../services/documents.service", () => ({
 }));
 
 const PDF = new Blob(["%PDF"], { type: "application/pdf" });
+const FILE_NAME = "CV_Test.pdf";
 const FILE_URL = "blob:generated-cv";
 
 describe("useCvExport", () => {
   beforeEach(() => {
     vi.spyOn(URL, "createObjectURL").mockReturnValue(FILE_URL);
     vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => undefined);
-    vi.mocked(documentsService.generateCv).mockResolvedValue(PDF);
+    vi.mocked(documentsService.generateCv).mockResolvedValue({ file: PDF, fileName: FILE_NAME });
   });
 
   afterEach(() => {
@@ -42,16 +43,16 @@ describe("useCvExport", () => {
       returnedCv = await result.current.generateCv();
     });
 
-    expect(returnedCv).toEqual({ file: PDF, previewUrl: FILE_URL });
+    expect(returnedCv).toEqual({ file: PDF, previewUrl: FILE_URL, fileName: FILE_NAME });
     expect(documentsService.generateCv).toHaveBeenCalledTimes(1);
     expect(URL.createObjectURL).toHaveBeenCalledWith(PDF);
-    expect(result.current.generatedCv).toEqual({ file: PDF, previewUrl: FILE_URL });
+    expect(result.current.generatedCv).toEqual({ file: PDF, previewUrl: FILE_URL, fileName: FILE_NAME });
     expect(result.current.error).toBeNull();
     await waitFor(() => expect(result.current.isGenerating).toBe(false));
   });
 
   it("flags the generation while the request is pending", async () => {
-    let resolveFile: (file: Blob) => void = () => undefined;
+    let resolveFile: (result: { file: Blob; fileName: string }) => void = () => undefined;
     vi.mocked(documentsService.generateCv).mockReturnValueOnce(
       new Promise((resolve) => (resolveFile = resolve)),
     );
@@ -64,7 +65,7 @@ describe("useCvExport", () => {
 
     await waitFor(() => expect(result.current.isGenerating).toBe(true));
     await act(async () => {
-      resolveFile(PDF);
+      resolveFile({ file: PDF, fileName: FILE_NAME });
       await generation;
     });
     await waitFor(() => expect(result.current.isGenerating).toBe(false));
@@ -110,7 +111,7 @@ describe("useCvExport", () => {
     });
 
     expect(result.current.error).toBeNull();
-    expect(result.current.generatedCv).toEqual({ file: PDF, previewUrl: FILE_URL });
+    expect(result.current.generatedCv).toEqual({ file: PDF, previewUrl: FILE_URL, fileName: FILE_NAME });
   });
 
   it("releases the previous url when generating again", async () => {
@@ -129,7 +130,7 @@ describe("useCvExport", () => {
   });
 
   it("ignores a cv that arrives after unmounting", async () => {
-    let resolveFile: (file: Blob) => void = () => undefined;
+    let resolveFile: (result: { file: Blob; fileName: string }) => void = () => undefined;
     vi.mocked(documentsService.generateCv).mockReturnValueOnce(
       new Promise((resolve) => (resolveFile = resolve)),
     );
@@ -140,7 +141,7 @@ describe("useCvExport", () => {
       generation = result.current.generateCv();
     });
     unmount();
-    resolveFile(PDF);
+    resolveFile({ file: PDF, fileName: FILE_NAME });
 
     await expect(generation).resolves.toBeNull();
     expect(URL.createObjectURL).not.toHaveBeenCalled();

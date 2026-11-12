@@ -1,4 +1,4 @@
-import type { PortfolioProvider } from '../enums/portfolio-provider.enum.js';
+import type { PortfolioProvider } from './portfolio-provider.type.js';
 
 export interface NormalizedPortfolioProject {
   provider: PortfolioProvider;

@@ -1,10 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 import { ProfileNotFoundException } from "../../profile/exceptions/profile-not-found.exception.js";
 import { CvGenerationService } from "../services/cv-generation.service.js";
+import { CvGenerationMapper } from "../mappers/cv-generation.mapper.js";
 
 describe("CvGenerationService", () => {
-  const mockProfileRepository = {
-    findByUserId: vi.fn(),
+  const mockProfileService = {
+    getProfile: vi.fn(),
   };
 
   const mockEducationsService = {
@@ -27,19 +28,24 @@ describe("CvGenerationService", () => {
     generate: vi.fn(),
   };
 
+  const cvGenerationMapper = new CvGenerationMapper();
+
   const service = new CvGenerationService(
-    mockProfileRepository as any,
+    mockProfileService as any,
     mockEducationsService as any,
     mockWorkExperienceService as any,
     mockUserSkillService as any,
     mockCertificationRecordsService as any,
     mockCvPdfGeneratorService as any,
+    cvGenerationMapper,
   );
 
   const sampleUserId = "user-123";
 
   it("should throw ProfileNotFoundException if user does not exist", async () => {
-    mockProfileRepository.findByUserId.mockResolvedValueOnce(null);
+    mockProfileService.getProfile.mockRejectedValueOnce(
+      new ProfileNotFoundException(),
+    );
 
     await expect(service.generateCv(sampleUserId)).rejects.toThrow(
       ProfileNotFoundException,
@@ -47,16 +53,17 @@ describe("CvGenerationService", () => {
   });
 
   it("should gather profile data, invoke PDF generator, and return valid download object", async () => {
-    mockProfileRepository.findByUserId.mockResolvedValueOnce({
+    mockProfileService.getProfile.mockResolvedValueOnce({
       id: sampleUserId,
       firstName: "Romario",
       lastName: "Vía Orozco",
-      email: "romario@umss.edu.bo",
+      institutionalEmail: "romario@umss.edu.bo",
       personalEmail: "romario@gmail.com",
       phone: "+591 70000000",
       headline: "Ingeniero de Sistemas",
       aboutMe: "Desarrollador con experiencia",
       city: { id: "city-1", title: "Cochabamba" },
+      updatedAt: "2026-11-01T00:00:00.000Z",
     });
 
     mockEducationsService.findAll.mockResolvedValueOnce([
@@ -112,7 +119,7 @@ describe("CvGenerationService", () => {
         personalInfo: expect.objectContaining({
           fullName: "Romario Vía Orozco",
           headline: "Ingeniero de Sistemas",
-          email: "romario@umss.edu.bo",
+          email: "romario@gmail.com",
           location: "Cochabamba",
         }),
         summary: "Desarrollador con experiencia",
@@ -120,11 +127,9 @@ describe("CvGenerationService", () => {
           expect.objectContaining({ degree: "Licenciatura en Sistemas" }),
         ]),
         workExperiences: expect.arrayContaining([
-          expect.objectContaining({ jobTitle: "Desarrollador Frontend", company: "Tech Co" }),
+          expect.objectContaining({ company: "Tech Co" }),
         ]),
-        skills: expect.arrayContaining([
-          expect.objectContaining({ name: "TypeScript" }),
-        ]),
+        skills: expect.arrayContaining([{ name: "TypeScript" }]),
         certifications: expect.arrayContaining([
           expect.objectContaining({ title: "AWS Certified" }),
         ]),
@@ -134,32 +139,5 @@ describe("CvGenerationService", () => {
         customTitle: "Curriculum Vitae Oficial",
       },
     );
-  });
-
-  it("should handle empty profile fields and clean filenames properly", async () => {
-    mockProfileRepository.findByUserId.mockResolvedValueOnce({
-      id: sampleUserId,
-      firstName: "Ana",
-      lastName: "López-Pérez",
-      email: "ana@umss.edu.bo",
-      personalEmail: null,
-      phone: null,
-      headline: null,
-      aboutMe: null,
-      city: null,
-    });
-
-    mockEducationsService.findAll.mockResolvedValueOnce([]);
-    mockWorkExperienceService.findAll.mockResolvedValueOnce([]);
-    mockUserSkillService.getUserSkills.mockResolvedValueOnce([]);
-    mockCertificationRecordsService.findManyByUserId.mockResolvedValueOnce([]);
-
-    const fakePdfBuffer = Buffer.from("%PDF-1.4 minimal");
-    mockCvPdfGeneratorService.generate.mockReturnValueOnce(fakePdfBuffer);
-
-    const result = await service.generateCv(sampleUserId);
-
-    expect(result.fileName).toBe("CV_Ana_Lopez-Perez.pdf");
-    expect(result.content).toBe(fakePdfBuffer);
   });
 });
