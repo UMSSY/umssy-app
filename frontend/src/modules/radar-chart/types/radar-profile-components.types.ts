@@ -19,6 +19,10 @@ export interface KpiCardsProps {
 
 export interface AffinityRadarChartProps {
   previousScores?: Partial<Record<AreaId, number>>;
+  comparisonEnabled?: boolean;
+  onComparisonChange?: (enabled: boolean) => void;
+  previousPublishedAt?: string;
+  publishedAt?: string | null;
   areas: RadarAreaScore[];
   average?: number;
   onAreaClick?: (areaId: AreaId) => void;

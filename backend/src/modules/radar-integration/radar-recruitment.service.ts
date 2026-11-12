@@ -1,3 +1,10 @@
+import { JobApplicationConsentRequiredException } from '../matching/exceptions/job-application-consent-required.exception.js';
+import {
+  mapRecruiterCandidate,
+  mapRecruiterAreaEvidence,
+} from './mappers/radar-recruitment.mapper.js';
+import { ApplicationsService } from '../applications/services/applications.service.js';
+import { RadarRecruitmentSourcesService } from './services/radar-recruitment-sources.service.js';
 import { Injectable } from '@nestjs/common';
 import { ForbiddenRoleException } from '../../common/exceptions/forbidden-role.exception.js';
 import { DuplicateJobApplicationException } from '../matching/exceptions/duplicate-job-application.exception.js';
@@ -11,22 +18,29 @@ import { RadarCvNotSharedException } from './exceptions/radar-cv-not-shared.exce
 import { RadarRecruiterDecisionInvalidException } from './exceptions/radar-recruiter-decision-invalid.exception.js';
 import { RadarVacancyUnavailableException } from './exceptions/radar-vacancy-unavailable.exception.js';
 import { RadarAccessRepository } from './repositories/radar-access.repository.js';
-import { RadarApplicationsRepository } from './repositories/radar-applications.repository.js';
+import { RadarApplicationsService } from './services/radar-applications.service.js';
 import { RadarRecruitmentRepository } from './repositories/radar-recruitment.repository.js';
 import {
   mapApplicationStatus,
   mapApplicationSummary,
 } from './mappers/radar-applications.mapper.js';
 import { recruiterContactProjection } from './recruiter-consent.js';
-import { AREA_IDS, emptyScores, matchRadar, type Scores } from './radar-scoring.js';
+import {
+  AREA_IDS,
+  emptyScores,
+  matchRadar,
+  type Scores,
+} from './radar-scoring.js';
 
 @Injectable()
 export class RadarRecruitmentService {
   constructor(
     private readonly repository: RadarRecruitmentRepository,
     private readonly access: RadarAccessRepository,
-    private readonly applications: RadarApplicationsRepository,
+    private readonly applications: RadarApplicationsService,
     private readonly jobApplications: JobApplicationsService,
+    private readonly sources: RadarRecruitmentSourcesService,
+    private readonly applicationActions: ApplicationsService,
   ) {}
 
   private async requireApplicantRole(userId: string): Promise<void> {
@@ -57,23 +71,24 @@ export class RadarRecruitmentService {
   async grantCompany(adminId: string, userId: string, companyId: string) {
     await this.requireRole(adminId, 'administrativo');
     await this.requireRole(userId, 'empresa');
-    if (!(await this.repository.companyExists(companyId))) {
+    if (!(await this.sources.companyExists(companyId))) {
       throw new RadarCompanyNotFoundException();
     }
+    await this.sources.assignCompany(userId, companyId);
     await this.repository.grantCompany(userId, companyId);
     return { userId, companyId };
   }
 
   private async allowedCompany(userId: string, companyId: string) {
     await this.requireRole(userId, 'empresa');
-    const rows = await this.repository.allowedCompany(userId, companyId);
-    if (!rows.length) {
+    const assignedCompanyId = await this.sources.recruiterCompanyId(userId);
+    if (assignedCompanyId !== companyId) {
       throw new RadarCompanyNotLinkedException();
     }
   }
 
   async activeVacancies() {
-    const jobs = await this.repository.activeVacancies();
+    const jobs = await this.sources.activeVacancies();
     return jobs.map((job) => ({
       id: job.id,
       companyId: job.companyId,
@@ -92,6 +107,8 @@ export class RadarRecruitmentService {
     consentContact = false,
   ) {
     await this.requireApplicantRole(userId);
+    if (!consent || !consentCv || !consentContact)
+      throw new JobApplicationConsentRequiredException();
 
     // Reutiliza las reglas de postulación del Epic (vacante abierta, estado
     // inicial, duplicados). Si ya existe, sólo se actualizan consentimientos.
@@ -99,7 +116,11 @@ export class RadarRecruitmentService {
       .application;
     if (!application) {
       try {
-        application = await this.jobApplications.apply(userId, jobId);
+        application = await this.jobApplications.apply(userId, jobId, {
+          consent: true,
+          consentCv: true,
+          consentContact: true,
+        });
       } catch (error) {
         if (!(error instanceof DuplicateJobApplicationException)) throw error;
         // Otra solicitud pudo crear la postulación concurrentemente.
@@ -194,22 +215,18 @@ export class RadarRecruitmentService {
 
   async withdrawMyApplication(userId: string, applicationId: string) {
     await this.requireApplicantRole(userId);
-    const rows = await this.applications.withdraw(userId, applicationId);
-    if (!rows.length) {
-      throw new RadarApplicationConflictException(
-        'Sólo puedes retirar una postulación en revisión o entrevista',
-      );
-    }
+    await this.applicationActions.withdrawApplication(applicationId, userId);
+    await this.applications.revokeConsents(applicationId);
     await this.audit(userId, userId, 'application.withdrawn', applicationId);
-    return { id: rows[0].id, state: 'withdrawn' as const };
+    return { id: applicationId, state: 'withdrawn' as const };
   }
 
   async recruiterVacancies(userId: string) {
     await this.requireRole(userId, 'empresa');
-    const rows = await this.repository.linkedCompanies(userId);
-    if (!rows.length) return [];
-    const companyIds = rows.map((row) => row.company_id);
-    const offers = await this.repository.recruiterVacancies(companyIds);
+    const companyId = await this.sources.recruiterCompanyId(userId);
+    if (!companyId) return [];
+    const companyIds = [companyId];
+    const offers = await this.sources.recruiterVacancies(companyIds);
     return offers.map((offer) => ({
       id: offer.id,
       title: offer.title,
@@ -227,7 +244,7 @@ export class RadarRecruitmentService {
     );
 
     // Reglas transparentes de términos del catálogo, no NLP probabilístico.
-    const catalog = await this.repository.catalogSkills();
+    const catalog = await this.sources.catalogSkills();
     const text = description.normalize('NFKC').toLocaleLowerCase();
     for (const skill of catalog) {
       const term = skill.name.normalize('NFKC').toLocaleLowerCase();
@@ -250,7 +267,7 @@ export class RadarRecruitmentService {
   }
 
   async recruiterApplicants(userId: string, jobId: string) {
-    const job = await this.repository.publishedJob(jobId);
+    const job = await this.sources.publishedJob(jobId);
     if (!job) throw new RadarVacancyUnavailableException();
     await this.allowedCompany(userId, job.companyId);
 
@@ -262,14 +279,15 @@ export class RadarRecruitmentService {
         // radar publicado. Sin consentimiento o sin radar no hay porcentaje.
         if (!application.consent_to_recruiter) return null;
         const [user, snapshots] = await Promise.all([
-          this.repository.candidate(application.user_id),
+          this.sources.candidate(application.user_id),
           this.repository.latestSnapshot(application.user_id),
         ]);
         if (!user) return null;
 
         const latest = snapshots[0];
         const hasPublishedRadar =
-          latest && AREA_IDS.some((areaId) => Number(latest.scores[areaId]) > 0);
+          latest &&
+          AREA_IDS.some((areaId) => Number(latest.scores[areaId]) > 0);
         if (!latest || !hasPublishedRadar) return null;
 
         const comparison = matchRadar(latest.scores, target);
@@ -278,33 +296,23 @@ export class RadarRecruitmentService {
           user.email,
           user.phone,
         );
-        return {
-          applicationId: application.id,
-          userId: application.user_id,
-          name: `${user.firstName} ${user.lastName}`,
-          headline: user.headline ?? '',
-          email: sharedContact.email,
-          phone: sharedContact.phone,
-          appliedAt: application.applied_at,
-          state: mapApplicationStatus(application.status_title),
-          canViewCv: application.consent_to_cv,
-          version: latest.version,
-          average: Number(latest.average_score),
-          scores: latest.scores,
-          evidence: latest.evidence ?? {},
+        return mapRecruiterCandidate({
+          application,
+          user,
+          latest,
           comparison,
-          skills: Object.values(latest.evidence ?? {})
-            .flat()
-            .map((item) => item.name)
-            .slice(0, 8),
-        };
+          sharedContact,
+        });
       }),
     );
 
     return {
       vacancy: { id: job.id, title: job.title, target },
+      totalApplications: applications.length,
       applicants: profiles
-        .filter((profile): profile is NonNullable<typeof profile> => profile !== null)
+        .filter(
+          (profile): profile is NonNullable<typeof profile> => profile !== null,
+        )
         .sort((left, right) => right.comparison.match - left.comparison.match),
     };
   }
@@ -330,11 +338,16 @@ export class RadarRecruitmentService {
 
     const snapshots = await this.repository.latestSnapshot(application.user_id);
     const publishedSkills = snapshots[0]?.evidence?.[areaId] ?? [];
-    const empty = { education: [], certifications: [], experiences: [], tags: [] };
+    const empty = {
+      education: [],
+      certifications: [],
+      experiences: [],
+      tags: [],
+    };
     if (!publishedSkills.length) return empty;
 
     const ids = publishedSkills.map((item) => item.id);
-    const approved = await this.repository.approvedSkillReferences(
+    const approved = await this.sources.approvedSkillReferences(
       application.user_id,
       ids,
     );
@@ -348,7 +361,12 @@ export class RadarRecruitmentService {
     for (const row of approved) {
       if (!Array.isArray(row.evidenceRefs)) continue;
       for (const ref of row.evidenceRefs) {
-        if (!ref || typeof ref !== 'object' || !('type' in ref) || !('id' in ref)) {
+        if (
+          !ref ||
+          typeof ref !== 'object' ||
+          !('type' in ref) ||
+          !('id' in ref)
+        ) {
           continue;
         }
         const type = ref.type;
@@ -360,59 +378,25 @@ export class RadarRecruitmentService {
     }
 
     const [education, certifications, experiences] = await Promise.all([
-      this.repository.ownedEducation(application.user_id, [
+      this.sources.ownedEducation(application.user_id, [
         ...(refs.get('education') ?? []),
       ]),
-      this.repository.ownedCertifications(application.user_id, [
+      this.sources.ownedCertifications(application.user_id, [
         ...(refs.get('certification') ?? []),
       ]),
-      this.repository.ownedExperiences(application.user_id, [
+      this.sources.ownedExperiences(application.user_id, [
         ...(refs.get('work-experience') ?? []),
       ]),
     ]);
 
-    const duration = (start: Date, end: Date | null) => {
-      const months = Math.max(
-        0,
-        Math.round(
-          ((end ?? new Date()).getTime() - start.getTime()) /
-            (1000 * 60 * 60 * 24 * 30.4375),
-        ),
-      );
-      return months >= 12
-        ? `${(months / 12).toLocaleString('es-BO', { maximumFractionDigits: 1 })} año(s)`
-        : `${months} mes(es)`;
-    };
-
-    return {
-      education: education.map((item) => ({
-        id: item.id,
-        degree: item.degree,
-        institution: item.institution,
-        year: item.startDate.getUTCFullYear(),
-        description: item.description,
-      })),
-      certifications: certifications.map((item) => ({
-        id: item.id,
-        name: item.name,
-        issuer: item.issuingOrganization,
-        year: item.issueDate.getUTCFullYear(),
-      })),
-      experiences: experiences.map((item) => ({
-        id: item.id,
-        position: item.position,
-        companyName: item.company.title,
-        duration: duration(item.startDate, item.endDate),
-        description: item.description,
-      })),
-      tags: [
-        ...new Set(
-          publishedSkills
-            .filter((item) => allowedIds.has(item.id))
-            .map((item) => item.name),
-        ),
-      ],
-    };
+    return mapRecruiterAreaEvidence({
+      education,
+      certifications,
+      experiences,
+      publishedSkills: publishedSkills.filter((item) =>
+        allowedIds.has(item.id),
+      ),
+    });
   }
 
   async recruiterCv(recruiterId: string, applicationId: string) {
@@ -428,9 +412,9 @@ export class RadarRecruitmentService {
       );
     }
 
-    const cv = (await this.repository.approvedCv(application.user_id))[0];
+    const cv = (await this.sources.currentCv(application.user_id))[0];
     if (!cv?.cv_pdf_data) {
-      throw new RadarCvNotSharedException('No hay CV aprobado autorizado');
+      throw new RadarCvNotSharedException('No hay CV actual disponible');
     }
 
     await this.audit(

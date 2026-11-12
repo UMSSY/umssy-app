@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { radarRecruiterApi } from "../services/radar-recruiter.service";
-import type { RadarAxisId } from "../types/radar-recruiter.types";
+import type { RadarAxisId } from "../types/radar-axis-id.types";
 
 export const radarRecruiterQueryKeys = {
   all: ["radar-recruiter"] as const,

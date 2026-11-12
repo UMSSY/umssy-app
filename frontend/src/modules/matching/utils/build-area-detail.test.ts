@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { RadarAxisId } from "../types/radar-recruiter.types";
+import type { RadarAxisId } from "../types/radar-axis-id.types";
 import { buildAreaDetail, parseDurationYears } from "./build-area-detail";
 
 describe("parseDurationYears", () => {

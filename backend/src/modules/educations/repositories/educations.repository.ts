@@ -166,4 +166,17 @@ export class EducationsRepository {
     });
     return result.count > 0;
   }
+
+  findRecruitmentEvidence(userId: string, ids: string[]) {
+    return this.prisma.education.findMany({
+      where: { userId, id: { in: ids } },
+      select: {
+        id: true,
+        degree: true,
+        institution: true,
+        startDate: true,
+        description: true,
+      },
+    });
+  }
 }

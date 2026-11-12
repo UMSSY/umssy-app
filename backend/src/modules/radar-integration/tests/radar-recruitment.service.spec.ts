@@ -1,3 +1,6 @@
+import type { ApplicationsService } from '../../applications/services/applications.service.js';
+import type { RadarRecruitmentSourcesService } from '../services/radar-recruitment-sources.service.js';
+import { ApplicationNotWithdrawableException } from '../../applications/exceptions/application-not-withdrawable.exception.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ForbiddenRoleException } from '../../../common/exceptions/forbidden-role.exception.js';
 import { DuplicateJobApplicationException } from '../../matching/exceptions/duplicate-job-application.exception.js';
@@ -13,7 +16,7 @@ import { RadarRecruiterDecisionInvalidException } from '../exceptions/radar-recr
 import { RadarVacancyUnavailableException } from '../exceptions/radar-vacancy-unavailable.exception.js';
 import { RadarRecruitmentService } from '../radar-recruitment.service.js';
 import type { RadarAccessRepository } from '../repositories/radar-access.repository.js';
-import type { RadarApplicationsRepository } from '../repositories/radar-applications.repository.js';
+import type { RadarApplicationsService } from '../services/radar-applications.service.js';
 import type { RadarRecruitmentRepository } from '../repositories/radar-recruitment.repository.js';
 import { emptyScores } from '../radar-scoring.js';
 
@@ -25,23 +28,21 @@ function makeAccess() {
   };
 }
 
-function makeRecruitment() {
+function makeSources() {
   return {
     companyExists: vi.fn(),
-    grantCompany: vi.fn(),
-    allowedCompany: vi.fn(),
-    linkedCompanies: vi.fn(),
+    recruiterCompanyId: vi.fn(),
+    assignCompany: vi.fn(),
     activeVacancies: vi.fn(),
     recruiterVacancies: vi.fn(),
     publishedJob: vi.fn(),
     catalogSkills: vi.fn(),
     candidate: vi.fn(),
-    latestSnapshot: vi.fn(),
     approvedSkillReferences: vi.fn(),
     ownedEducation: vi.fn(),
     ownedCertifications: vi.fn(),
     ownedExperiences: vi.fn(),
-    approvedCv: vi.fn(),
+    currentCv: vi.fn(),
   };
 }
 
@@ -50,7 +51,7 @@ function makeApplications() {
     setConsents: vi.fn(),
     myApplications: vi.fn(),
     updateConsents: vi.fn(),
-    withdraw: vi.fn(),
+    revokeConsents: vi.fn(),
     applicants: vi.fn(),
     companyForEvidence: vi.fn(),
     companyForCv: vi.fn(),
@@ -68,16 +69,33 @@ function makeJobApplications() {
 
 function setup() {
   const access = makeAccess();
-  const repository = makeRecruitment();
+  const sources = makeSources();
+  const repository = {
+    grantCompany: vi.fn(),
+    allowedCompany: vi.fn(),
+    linkedCompanies: vi.fn(),
+    latestSnapshot: vi.fn(),
+  };
+  const applicationActions = { withdrawApplication: vi.fn() };
   const applications = makeApplications();
   const jobApplications = makeJobApplications();
   const service = new RadarRecruitmentService(
     repository as unknown as RadarRecruitmentRepository,
     access as unknown as RadarAccessRepository,
-    applications as unknown as RadarApplicationsRepository,
+    applications as unknown as RadarApplicationsService,
     jobApplications as unknown as JobApplicationsService,
+    sources as unknown as RadarRecruitmentSourcesService,
+    applicationActions as unknown as ApplicationsService,
   );
-  return { access, repository, applications, jobApplications, service };
+  return {
+    access,
+    repository,
+    sources,
+    applications,
+    jobApplications,
+    applicationActions,
+    service,
+  };
 }
 
 const mine = (application: unknown) => ({
@@ -117,9 +135,9 @@ describe('RadarRecruitmentService', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('asigna una empresa a un usuario empresa siendo administrador', async () => {
-    const { access, repository, service } = setup();
+    const { access, repository, sources, service } = setup();
     access.hasRole.mockResolvedValue(true);
-    repository.companyExists.mockResolvedValue({ id: 'company' });
+    sources.companyExists.mockResolvedValue({ id: 'company' });
     repository.grantCompany.mockResolvedValue(undefined);
 
     await expect(
@@ -144,9 +162,9 @@ describe('RadarRecruitmentService', () => {
   });
 
   it('rechaza asignar una empresa inexistente', async () => {
-    const { access, repository, service } = setup();
+    const { access, sources, service } = setup();
     access.hasRole.mockResolvedValue(true);
-    repository.companyExists.mockResolvedValue(null);
+    sources.companyExists.mockResolvedValue(null);
 
     await expect(
       service.grantCompany('admin', 'company-user', 'company'),
@@ -177,7 +195,11 @@ describe('RadarRecruitmentService', () => {
       consentCv: true,
       consentContact: true,
     });
-    expect(jobApplications.apply).toHaveBeenCalledWith('user', 'job');
+    expect(jobApplications.apply).toHaveBeenCalledWith('user', 'job', {
+      consent: true,
+      consentCv: true,
+      consentContact: true,
+    });
     expect(applications.setConsents).toHaveBeenCalledWith(
       'app',
       true,
@@ -191,21 +213,19 @@ describe('RadarRecruitmentService', () => {
     access.hasAnyRole.mockResolvedValue(true);
     jobApplications.findMine
       .mockResolvedValueOnce(mine(null))
-      .mockResolvedValueOnce(
-        mine({ id: 'app', status: 'En revisión' }),
-      );
+      .mockResolvedValueOnce(mine({ id: 'app', status: 'En revisión' }));
     jobApplications.apply.mockRejectedValue(
       new DuplicateJobApplicationException(),
     );
     applications.setConsents.mockResolvedValue([{ id: 'app' }]);
 
-    await expect(service.apply('user', 'job', true, false)).resolves.toMatchObject(
-      {
-        id: 'app',
-        consentCv: false,
-        consentContact: false,
-      },
-    );
+    await expect(
+      service.apply('user', 'job', true, true, true),
+    ).resolves.toMatchObject({
+      id: 'app',
+      consentCv: true,
+      consentContact: true,
+    });
     expect(jobApplications.apply).toHaveBeenCalledTimes(1);
   });
 
@@ -217,13 +237,13 @@ describe('RadarRecruitmentService', () => {
       new JobOfferUnavailableException(),
     );
     await expect(
-      closed.service.apply('user', 'job', true, false),
+      closed.service.apply('user', 'job', true, true, true),
     ).rejects.toBeInstanceOf(JobOfferUnavailableException);
 
     const withoutRole = setup();
     withoutRole.access.hasAnyRole.mockResolvedValue(false);
     await expect(
-      withoutRole.service.apply('user', 'job', true, false),
+      withoutRole.service.apply('user', 'job', true, true, true),
     ).rejects.toBeInstanceOf(ForbiddenRoleException);
   });
 
@@ -235,7 +255,7 @@ describe('RadarRecruitmentService', () => {
     );
 
     await expect(
-      service.apply('user', 'job', true, false),
+      service.apply('user', 'job', true, true, true),
     ).rejects.toBeInstanceOf(RadarApplicationConflictException);
   });
 
@@ -264,28 +284,35 @@ describe('RadarRecruitmentService', () => {
   });
 
   it('permite retirar sólo postulaciones abiertas', async () => {
-    const { access, applications, service } = setup();
+    const { access, applications, applicationActions, service } = setup();
     access.hasAnyRole.mockResolvedValue(true);
-    applications.withdraw.mockResolvedValue([{ id: 'app' }]);
+    applicationActions.withdrawApplication.mockResolvedValue(undefined);
 
+    await expect(service.withdrawMyApplication('user', 'app')).resolves.toEqual(
+      {
+        id: 'app',
+        state: 'withdrawn',
+      },
+    );
+
+    expect(applicationActions.withdrawApplication).toHaveBeenCalledWith(
+      'app',
+      'user',
+    );
+    expect(applications.revokeConsents).toHaveBeenCalledWith('app');
+    applicationActions.withdrawApplication.mockRejectedValue(
+      new ApplicationNotWithdrawableException(),
+    );
     await expect(
       service.withdrawMyApplication('user', 'app'),
-    ).resolves.toEqual({
-      id: 'app',
-      state: 'withdrawn',
-    });
-
-    applications.withdraw.mockResolvedValue([]);
-    await expect(
-      service.withdrawMyApplication('user', 'app'),
-    ).rejects.toBeInstanceOf(RadarApplicationConflictException);
+    ).rejects.toBeInstanceOf(ApplicationNotWithdrawableException);
   });
 
   it('lista sólo vacantes de las empresas vinculadas al reclutador', async () => {
-    const { access, repository, service } = setup();
+    const { access, sources, service } = setup();
     access.hasRole.mockResolvedValue(true);
-    repository.linkedCompanies.mockResolvedValue([{ company_id: 'company' }]);
-    repository.recruiterVacancies.mockResolvedValue([
+    sources.recruiterCompanyId.mockResolvedValue('company');
+    sources.recruiterVacancies.mockResolvedValue([
       { id: 'job', title: 'Vacante', companyId: 'company' },
     ]);
 
@@ -293,22 +320,22 @@ describe('RadarRecruitmentService', () => {
       { id: 'job', title: 'Vacante', companyId: 'company' },
     ]);
 
-    repository.linkedCompanies.mockResolvedValue([]);
+    sources.recruiterCompanyId.mockResolvedValue(null);
     await expect(service.recruiterVacancies('user')).resolves.toEqual([]);
   });
 
   it('compara la vacante con radares publicados y oculta postulantes sin consentimiento o sin radar', async () => {
-    const { access, repository, applications, service } = setup();
+    const { access, repository, sources, applications, service } = setup();
     access.hasRole.mockResolvedValue(true);
-    repository.publishedJob.mockResolvedValue({
+    sources.publishedJob.mockResolvedValue({
       id: 'job',
       title: 'Full Stack',
       companyId: 'company',
       description: 'Buscamos Python y React',
       skills: [{ skill: { areaId: 'desarrollo', name: 'React' } }],
     });
-    repository.allowedCompany.mockResolvedValue([{ company_id: 'company' }]);
-    repository.catalogSkills.mockResolvedValue([
+    sources.recruiterCompanyId.mockResolvedValue('company');
+    sources.catalogSkills.mockResolvedValue([
       { name: 'React', areaId: 'desarrollo' },
       { name: 'Python', areaId: 'data-ai' },
       { name: 'xx', areaId: null },
@@ -337,7 +364,7 @@ describe('RadarRecruitmentService', () => {
     scoresB['data-ai'] = 10;
     const empty = emptyScores();
 
-    repository.candidate.mockImplementation(async (id: string) => ({
+    sources.candidate.mockImplementation(async (id: string) => ({
       firstName: id,
       lastName: 'Pérez',
       headline: 'Perfil',
@@ -372,21 +399,21 @@ describe('RadarRecruitmentService', () => {
   });
 
   it('oculta el contacto cuando no fue autorizado', async () => {
-    const { access, repository, applications, service } = setup();
+    const { access, repository, sources, applications, service } = setup();
     access.hasRole.mockResolvedValue(true);
-    repository.publishedJob.mockResolvedValue({
+    sources.publishedJob.mockResolvedValue({
       id: 'job',
       title: 'Vacante',
       companyId: 'company',
       description: '',
       skills: [],
     });
-    repository.allowedCompany.mockResolvedValue([{ company_id: 'company' }]);
-    repository.catalogSkills.mockResolvedValue([]);
+    sources.recruiterCompanyId.mockResolvedValue('company');
+    sources.catalogSkills.mockResolvedValue([]);
     applications.applicants.mockResolvedValue([
       applicationRow({ consent_to_contact: false }),
     ]);
-    repository.candidate.mockResolvedValue({
+    sources.candidate.mockResolvedValue({
       firstName: 'Ana',
       lastName: 'Quispe',
       headline: null,
@@ -407,15 +434,15 @@ describe('RadarRecruitmentService', () => {
   });
 
   it('rechaza consultar postulantes de una empresa no vinculada', async () => {
-    const { access, repository, service } = setup();
+    const { access, sources, service } = setup();
     access.hasRole.mockResolvedValue(true);
-    repository.publishedJob.mockResolvedValue({
+    sources.publishedJob.mockResolvedValue({
       id: 'job',
       companyId: 'company',
       description: '',
       skills: [],
     });
-    repository.allowedCompany.mockResolvedValue([]);
+    sources.recruiterCompanyId.mockResolvedValue(null);
 
     await expect(
       service.recruiterApplicants('recruiter', 'job'),
@@ -423,23 +450,40 @@ describe('RadarRecruitmentService', () => {
   });
 
   it('rechaza una vacante inexistente', async () => {
-    const { repository, service } = setup();
-    repository.publishedJob.mockResolvedValue(null);
+    const { sources, service } = setup();
+    sources.publishedJob.mockResolvedValue(null);
 
     await expect(
       service.recruiterApplicants('recruiter', 'job'),
     ).rejects.toBeInstanceOf(RadarVacancyUnavailableException);
   });
 
+  it('rechaza vacantes ajenas aunque exista un acceso antiguo del radar', async () => {
+    const { access, repository, sources, service, applications } = setup();
+    access.hasRole.mockResolvedValue(true);
+    sources.recruiterCompanyId.mockResolvedValue('own-company');
+    repository.allowedCompany.mockResolvedValue([
+      { company_id: 'other-company' },
+    ]);
+    sources.publishedJob.mockResolvedValue({
+      id: 'job',
+      companyId: 'other-company',
+    });
+    await expect(
+      service.recruiterApplicants('recruiter', 'job'),
+    ).rejects.toBeInstanceOf(RadarCompanyNotLinkedException);
+    expect(applications.applicants).not.toHaveBeenCalled();
+  });
+
   it('autoriza evidencias sólo por área válida y postulación consentida', async () => {
-    const { access, repository, applications, service } = setup();
+    const { access, repository, sources, applications, service } = setup();
     access.hasRole.mockResolvedValue(true);
     applications.companyForEvidence.mockResolvedValue([
       { user_id: 'user', company_id: 'company' },
     ]);
-    repository.allowedCompany.mockResolvedValue([{ company_id: 'company' }]);
+    sources.recruiterCompanyId.mockResolvedValue('company');
     repository.latestSnapshot.mockResolvedValue([snapshot(emptyScores())]);
-    repository.approvedSkillReferences.mockResolvedValue([
+    sources.approvedSkillReferences.mockResolvedValue([
       {
         skillId: 'skill-react',
         evidenceRefs: [
@@ -450,7 +494,7 @@ describe('RadarRecruitmentService', () => {
         ],
       },
     ]);
-    repository.ownedEducation.mockResolvedValue([
+    sources.ownedEducation.mockResolvedValue([
       {
         id: 'edu',
         degree: 'Ingeniería',
@@ -459,7 +503,7 @@ describe('RadarRecruitmentService', () => {
         description: 'Formación',
       },
     ]);
-    repository.ownedCertifications.mockResolvedValue([
+    sources.ownedCertifications.mockResolvedValue([
       {
         id: 'cert',
         name: 'Certificación',
@@ -467,7 +511,7 @@ describe('RadarRecruitmentService', () => {
         issueDate: new Date('2024-01-01'),
       },
     ]);
-    repository.ownedExperiences.mockResolvedValue([
+    sources.ownedExperiences.mockResolvedValue([
       {
         id: 'exp',
         position: 'Desarrolladora',
@@ -481,7 +525,9 @@ describe('RadarRecruitmentService', () => {
     await expect(
       service.recruiterAreaEvidence('recruiter', 'app', 'desarrollo'),
     ).resolves.toMatchObject({
-      education: [expect.objectContaining({ degree: 'Ingeniería', year: 2018 })],
+      education: [
+        expect.objectContaining({ degree: 'Ingeniería', year: 2018 }),
+      ],
       certifications: [
         expect.objectContaining({ name: 'Certificación', year: 2024 }),
       ],
@@ -500,12 +546,12 @@ describe('RadarRecruitmentService', () => {
   });
 
   it('devuelve evidencias vacías cuando el área no tiene habilidades publicadas', async () => {
-    const { access, repository, applications, service } = setup();
+    const { access, repository, applications, service, sources } = setup();
     access.hasRole.mockResolvedValue(true);
     applications.companyForEvidence.mockResolvedValue([
       { user_id: 'user', company_id: 'company' },
     ]);
-    repository.allowedCompany.mockResolvedValue([{ company_id: 'company' }]);
+    sources.recruiterCompanyId.mockResolvedValue('company');
     repository.latestSnapshot.mockResolvedValue([]);
 
     await expect(
@@ -519,13 +565,13 @@ describe('RadarRecruitmentService', () => {
   });
 
   it('entrega el CV aprobado sólo con consentimiento y archivo disponible', async () => {
-    const { access, repository, applications, service } = setup();
+    const { access, sources, applications, service } = setup();
     access.hasRole.mockResolvedValue(true);
     applications.companyForCv.mockResolvedValue([
       { user_id: 'user', company_id: 'company', consent_to_cv: true },
     ]);
-    repository.allowedCompany.mockResolvedValue([{ company_id: 'company' }]);
-    repository.approvedCv.mockResolvedValue([
+    sources.recruiterCompanyId.mockResolvedValue('company');
+    sources.currentCv.mockResolvedValue([
       { cv_pdf_data: Buffer.from([37, 80, 68, 70]).toString('base64') },
     ]);
 
@@ -540,28 +586,28 @@ describe('RadarRecruitmentService', () => {
       { applicationId: 'app' },
     );
 
-    repository.approvedCv.mockResolvedValue([]);
-    await expect(service.recruiterCv('recruiter', 'app')).rejects.toBeInstanceOf(
-      RadarCvNotSharedException,
-    );
+    sources.currentCv.mockResolvedValue([]);
+    await expect(
+      service.recruiterCv('recruiter', 'app'),
+    ).rejects.toBeInstanceOf(RadarCvNotSharedException);
 
     applications.companyForCv.mockResolvedValue([
       { user_id: 'user', company_id: 'company', consent_to_cv: false },
     ]);
-    await expect(service.recruiterCv('recruiter', 'app')).rejects.toBeInstanceOf(
-      RadarCvNotSharedException,
-    );
+    await expect(
+      service.recruiterCv('recruiter', 'app'),
+    ).rejects.toBeInstanceOf(RadarCvNotSharedException);
 
     applications.companyForCv.mockResolvedValue([]);
-    await expect(service.recruiterCv('recruiter', 'app')).rejects.toBeInstanceOf(
-      RadarApplicationNotFoundException,
-    );
+    await expect(
+      service.recruiterCv('recruiter', 'app'),
+    ).rejects.toBeInstanceOf(RadarApplicationNotFoundException);
   });
 
   it('registra decisiones de contratación o rechazo', async () => {
-    const { access, repository, applications, service } = setup();
+    const { access, applications, service, sources } = setup();
     access.hasRole.mockResolvedValue(true);
-    repository.allowedCompany.mockResolvedValue([{ company_id: 'company' }]);
+    sources.recruiterCompanyId.mockResolvedValue('company');
     applications.companyForDecision.mockResolvedValue([
       { user_id: 'user', company_id: 'company' },
     ]);
@@ -595,8 +641,8 @@ describe('RadarRecruitmentService', () => {
   });
 
   it('lista vacantes activas para el egresado', async () => {
-    const { repository, service } = setup();
-    repository.activeVacancies.mockResolvedValue([
+    const { sources, service } = setup();
+    sources.activeVacancies.mockResolvedValue([
       {
         id: 'job',
         companyId: 'company',

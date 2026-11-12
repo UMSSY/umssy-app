@@ -1,3 +1,9 @@
+import { Body } from '@nestjs/common';
+import { RequestValidationPipe } from '../../../common/pipes/request-validation.pipe.js';
+import {
+  jobApplicationConsentsSchema,
+  type JobApplicationConsentsRequest,
+} from '../requests/job-application-consents.request.js';
 import {
   Controller,
   Get,
@@ -9,6 +15,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import {
+  ApiBody,
   ApiBearerAuth,
   ApiConflictResponse,
   ApiCreatedResponse,
@@ -28,6 +35,7 @@ import type {
   JobApplicationResponse,
   MyJobApplicationResponse,
 } from '../types/job-application.types.js';
+import { toApiBody } from '../../../common/utils/to-api-body.js';
 
 const jobOfferIdPipe = new ParseUUIDPipe({
   exceptionFactory: () => new JobOfferUnavailableException(),
@@ -45,6 +53,7 @@ export class JobApplicationsController {
   ) {}
 
   @Post()
+  @ApiBody(toApiBody(jobApplicationConsentsSchema))
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Postula al usuario autenticado a una vacante publicada',
@@ -61,8 +70,10 @@ export class JobApplicationsController {
   apply(
     @Param('id', jobOfferIdPipe) jobOfferId: string,
     @CurrentUserId() userId: string,
+    @Body(new RequestValidationPipe(jobApplicationConsentsSchema))
+    consents: JobApplicationConsentsRequest,
   ): Promise<JobApplicationResponse> {
-    return this.jobApplicationsService.apply(userId, jobOfferId);
+    return this.jobApplicationsService.apply(userId, jobOfferId, consents);
   }
 
   @Get('me')

@@ -1,3 +1,9 @@
+import { RadarConsentsModule } from './radar-consents.module.js';
+import { RadarApplicationsService } from './services/radar-applications.service.js';
+import { JobOffersModule } from '../job-offers/job-offers.module.js';
+import { UsersModule } from '../users/users.module.js';
+import { ApplicationsModule } from '../applications/applications.module.js';
+import { RadarRecruitmentSourcesService } from './services/radar-recruitment-sources.service.js';
 import { CvSourcesModule } from '../cv/cv-sources.module.js';
 import { Module } from '@nestjs/common';
 import { PrismaModule } from '../../common/prisma/prisma.module.js';
@@ -27,10 +33,13 @@ import { MatchingModule } from '../matching/matching.module.js';
 import { RadarRecruitmentController } from './controllers/radar-recruitment.controller.js';
 import { RadarRecruitmentService } from './radar-recruitment.service.js';
 import { RadarRecruitmentRepository } from './repositories/radar-recruitment.repository.js';
-import { RadarApplicationsRepository } from './repositories/radar-applications.repository.js';
 
 @Module({
   imports: [
+    RadarConsentsModule,
+    JobOffersModule,
+    UsersModule,
+    ApplicationsModule,
     CvSourcesModule,
     PrismaModule,
     JwtAuthModule,
@@ -47,12 +56,13 @@ import { RadarApplicationsRepository } from './repositories/radar-applications.r
   providers: [
     RadarPublicationRepository,
     RadarRecruitmentRepository,
-    RadarApplicationsRepository,
+    RadarApplicationsService,
     RadarAccessRepository,
     RadarCvRepository,
     RadarReviewRepository,
     RadarIntegrationService,
     RadarRecruitmentService,
+    RadarRecruitmentSourcesService,
     RadarPublicationService,
     RadarPublicationMapper,
     RadarPublicationEvidenceService,

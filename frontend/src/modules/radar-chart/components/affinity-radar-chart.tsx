@@ -12,6 +12,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { cn } from "@/lib/utils";
+import { Switch } from "@/components/ui/switch";
 import type { AffinityRadarChartProps } from "../types/radar-profile-components.types";
 import { formatDecimal } from "../utils/format-decimal";
 import { AffinityRadarAxisTick } from "./affinity-radar-axis-tick";
@@ -24,11 +25,19 @@ const SERIES_LABEL = "Puntaje de afinidad del perfil";
 export function AffinityRadarChart({
   areas,
   previousScores,
+  comparisonEnabled = false,
+  onComparisonChange,
+  previousPublishedAt,
+  publishedAt,
   average,
   onAreaClick,
   className,
 }: AffinityRadarChartProps) {
   const titleId = useId();
+  const comparisonId = useId();
+  const comparisonDescriptionId = useId();
+  const showPrevious = comparisonEnabled && Boolean(previousScores);
+  const formatDate = (date: string) => new Date(date).toLocaleString("es-BO", { dateStyle: "medium", timeStyle: "short" });
   const [radius, setRadius] = useState('68%');
   const hasAreas = areas.length > 0;
 
@@ -54,6 +63,18 @@ export function AffinityRadarChart({
           </div>
         )}
       </div>
+
+      {hasAreas && previousScores && onComparisonChange ? (
+        <div className="mt-4 flex items-center justify-between gap-4 rounded-lg border border-border bg-surface-soft px-4 py-3">
+          <div>
+            <label htmlFor={comparisonId} className="cursor-pointer text-sm font-semibold text-ink">Comparar con la anterior</label>
+            <p id={comparisonDescriptionId} className="mt-1 text-xs text-text-secondary">
+              {previousPublishedAt ? `Superpone tu publicación del ${formatDate(previousPublishedAt)}` : "Superpone tu publicación anterior"}
+            </p>
+          </div>
+          <Switch id={comparisonId} aria-describedby={comparisonDescriptionId} checked={comparisonEnabled} onCheckedChange={onComparisonChange} className="data-checked:bg-accent" />
+        </div>
+      ) : null}
 
       {hasAreas ? (
         <>
@@ -83,7 +104,7 @@ export function AffinityRadarChart({
                   axisLine={false}
                   tick={{ fill: "var(--color-text-secondary)", fontSize: 10 }}
                 />
-                {previousScores ? <Radar name="Publicación anterior" dataKey="previousScore" stroke="#d97706" strokeDasharray="6 4" fill="#d97706" fillOpacity={0.08} isAnimationActive={false} /> : null}
+                {showPrevious ? <Radar name="Publicación anterior" dataKey="previousScore" stroke="#d97706" strokeWidth={2} strokeDasharray="6 4" fill="#d97706" fillOpacity={0.08} isAnimationActive={false} dot={{ r: 4, stroke: "#d97706", strokeWidth: 2, fill: "var(--color-surface)" }} /> : null}
                 <Radar
                   name={SERIES_LABEL}
                   dataKey="score"
@@ -105,13 +126,16 @@ export function AffinityRadarChart({
               </RadarChart>
             </ResponsiveContainer>
           </div>
-          <p className="flex items-center gap-2 text-xs text-text-secondary">
+          <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs text-text-secondary">
+          <p className="flex items-center gap-2">
             <span
               className="h-2.5 w-5 rounded-sm border border-accent bg-accent/15"
               aria-hidden="true"
             />
-            {SERIES_LABEL}
+            {showPrevious ? `Actual (línea continua): ${publishedAt ? formatDate(publishedAt) : "Sin fecha"}` : SERIES_LABEL}
           </p>
+          {showPrevious ? <p className="flex items-center gap-2"><span aria-hidden="true" className="w-5 border-t-2 border-dashed border-[#d97706]" />Anterior (línea discontinua): {previousPublishedAt ? formatDate(previousPublishedAt) : "Sin fecha"}</p> : null}
+          </div>
         </>
       ) : (
         <div className="mt-6 flex min-h-60 flex-1 flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-border-strong bg-surface-soft p-6 text-center">

@@ -88,26 +88,39 @@ function CompanyApplicantsView() {
 }
 
 export function MatchingView() {
-  const [section, setSection] = useState<"applications" | "radar">("applications");
+  const [section, setSection] = useState<"applications" | "radar">("radar");
   if (
     process.env.NODE_ENV === "development" &&
     process.env.NEXT_PUBLIC_ENABLE_MATCHING_DEMO === "true"
-  ) return <MatchingDemoView />;
+  )
+    return <MatchingDemoView />;
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-4">
-      <div className="flex flex-wrap gap-2" role="group" aria-label="Secciones de Matching">
+      <div
+        className="flex flex-wrap gap-2"
+        role="group"
+        aria-label="Secciones de Matching"
+      >
         <Button
           type="button"
           variant={section === "applications" ? "default" : "outline"}
           onClick={() => setSection("applications")}
-        >Postulaciones</Button>
+        >
+          Postulaciones
+        </Button>
         <Button
           type="button"
           variant={section === "radar" ? "default" : "outline"}
           onClick={() => setSection("radar")}
-        >Radar de afinidad</Button>
+        >
+          Radar de afinidad
+        </Button>
       </div>
-      {section === "applications" ? <CompanyApplicantsView /> : <RecruiterRadarView />}
+      {section === "applications" ? (
+        <CompanyApplicantsView />
+      ) : (
+        <RecruiterRadarView />
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { RecruiterApplicant } from "../types/radar-recruiter.types";
+import type { RecruiterApplicant } from "../types/recruiter-applicant.types";
 import { RecruiterCandidateList } from "./recruiter-candidate-list";
 
 const CARLOS: RecruiterApplicant = {
@@ -58,6 +58,13 @@ describe("RecruiterCandidateList", () => {
     expect(screen.getByText("Carlos Mendoza Ríos")).toBeInTheDocument();
     expect(screen.getByText("Senior Software Engineer")).toBeInTheDocument();
     expect(screen.getByText("82%")).toBeInTheDocument();
+    const progress = screen.getByRole("progressbar", {
+      name: `Compatibilidad de ${CARLOS.name}`,
+    });
+    expect(progress).toHaveAttribute("aria-valuenow", "82");
+    expect(
+      progress.querySelector('[data-slot="progress-indicator"]'),
+    ).toHaveStyle({ width: "82%" });
     expect(screen.getByText("React")).toBeInTheDocument();
     expect(screen.getByText("AWS")).toBeInTheDocument();
     expect(screen.queryByText("TypeScript")).not.toBeInTheDocument();

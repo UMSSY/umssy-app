@@ -1,10 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { apiClient } from "@/shared/services/api-client";
-import type {
-  AreaEvidence,
-  RecruiterApplicantsResponse,
-  RecruiterVacancy,
-} from "../types/radar-recruiter.types";
+import type { AreaEvidence } from "../types/area-evidence.types";
+import type { RecruiterApplicantsResponse } from "../types/recruiter-applicants-response.types";
+import type { RecruiterVacancy } from "../types/recruiter-vacancy.types";
 import { radarRecruiterApi } from "./radar-recruiter.service";
 
 const VACANCY: RecruiterVacancy = {
@@ -92,11 +90,9 @@ describe("radarRecruiterApi", () => {
   });
 
   it("registra la decisión del reclutador", async () => {
-    const patchSpy = vi
-      .spyOn(apiClient, "patch")
-      .mockResolvedValueOnce({
-        data: { data: { id: "app-1", state: "hired" } },
-      });
+    const patchSpy = vi.spyOn(apiClient, "patch").mockResolvedValueOnce({
+      data: { data: { id: "app-1", state: "hired" } },
+    });
 
     await expect(radarRecruiterApi.decide("app-1", "hired")).resolves.toEqual({
       id: "app-1",

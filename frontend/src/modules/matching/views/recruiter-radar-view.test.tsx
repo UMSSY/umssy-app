@@ -1,5 +1,11 @@
 import { notifyManager } from "@tanstack/react-query";
-import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import {
   afterAll,
   afterEach,
@@ -12,12 +18,10 @@ import {
 } from "vitest";
 import { renderWithQuery } from "@/shared/testing/render-with-query";
 import { radarRecruiterApi } from "@/modules/matching/services/radar-recruiter.service";
-import type {
-  AreaEvidence,
-  RecruiterApplicant,
-  RecruiterApplicantsResponse,
-  RecruiterVacancy,
-} from "@/modules/matching/types/radar-recruiter.types";
+import type { AreaEvidence } from "@/modules/matching/types/area-evidence.types";
+import type { RecruiterApplicant } from "@/modules/matching/types/recruiter-applicant.types";
+import type { RecruiterApplicantsResponse } from "@/modules/matching/types/recruiter-applicants-response.types";
+import type { RecruiterVacancy } from "@/modules/matching/types/recruiter-vacancy.types";
 import { RecruiterRadarView } from "./recruiter-radar-view";
 
 vi.mock("@/modules/matching/components/radar-chart", () => ({
@@ -216,12 +220,12 @@ describe("RecruiterRadarView (HU4)", () => {
     expect(
       screen.getByRole("option", { name: "Data Scientist Sr." }),
     ).toBeInTheDocument();
-    expect(
-      screen.getAllByText("Carlos Mendoza Ríos").length,
-    ).toBeGreaterThan(0);
-    expect(
-      screen.getAllByText("Lucía Flores Mamani").length,
-    ).toBeGreaterThan(0);
+    expect(screen.getAllByText("Carlos Mendoza Ríos").length).toBeGreaterThan(
+      0,
+    );
+    expect(screen.getAllByText("Lucía Flores Mamani").length).toBeGreaterThan(
+      0,
+    );
     expect(screen.getAllByText("82%").length).toBeGreaterThan(0);
     expect(screen.getByText("React")).toBeInTheDocument();
     expect(screen.getByTestId("matching-radar-chart")).toBeInTheDocument();
@@ -244,13 +248,31 @@ describe("RecruiterRadarView (HU4)", () => {
       expect(screen.getByText(/1 candidato/i)).toBeInTheDocument();
     });
 
-    expect(
-      screen.getAllByText("Lucía Flores Mamani").length,
-    ).toBeGreaterThan(0);
-    expect(
-      screen.queryByText("Carlos Mendoza Ríos"),
-    ).not.toBeInTheDocument();
+    expect(screen.getAllByText("Lucía Flores Mamani").length).toBeGreaterThan(
+      0,
+    );
+    expect(screen.queryByText("Carlos Mendoza Ríos")).not.toBeInTheDocument();
     expect(screen.getAllByText("65%").length).toBeGreaterThan(0);
+  });
+
+  it("mantiene el mismo porcentaje en la tarjeta y el panel al seleccionar otro candidato", async () => {
+    renderWithQuery(<RecruiterRadarView />);
+    await screen.findByText(/2 candidatos/i);
+    const card = screen.getByRole("button", {
+      name: /Lucía Flores Mamani.*65%/,
+    });
+    fireEvent.click(card);
+    expect(card).toHaveAttribute("aria-pressed", "true");
+    expect(
+      screen.getByRole("button", { name: /Carlos Mendoza Ríos.*82%/ }),
+    ).toHaveAttribute("aria-pressed", "false");
+    expect(within(card).getByText("65%")).toBeInTheDocument();
+    expect(screen.getAllByText("65%")).toHaveLength(2);
+    expect(
+      screen.getByRole("progressbar", {
+        name: "Compatibilidad de Lucía Flores Mamani",
+      }),
+    ).toHaveAttribute("aria-valuenow", "65");
   });
 
   it("muestra el estado vacío cuando la búsqueda no tiene coincidencias", async () => {
@@ -278,10 +300,9 @@ describe("RecruiterRadarView (HU4)", () => {
     renderWithQuery(<RecruiterRadarView />);
     await screen.findByText(/Compatibilidad vs\. Tech Lead/i);
 
-    fireEvent.change(
-      screen.getByRole("combobox", { name: "Vacante activa" }),
-      { target: { value: "vac-2" } },
-    );
+    fireEvent.change(screen.getByRole("combobox", { name: "Vacante activa" }), {
+      target: { value: "vac-2" },
+    });
 
     await waitFor(() => {
       expect(
@@ -367,9 +388,7 @@ describe("RecruiterRadarView (HU4)", () => {
     renderWithQuery(<RecruiterRadarView />);
 
     expect(
-      await screen.findByText(
-        "No se pudieron cargar las vacantes publicadas.",
-      ),
+      await screen.findByText("No se pudieron cargar las vacantes publicadas."),
     ).toBeInTheDocument();
 
     fireEvent.click(

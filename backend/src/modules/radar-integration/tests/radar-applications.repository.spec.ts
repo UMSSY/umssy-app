@@ -2,13 +2,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { RadarApplicationsRepository } from '../repositories/radar-applications.repository.js';
 
-const USER_ID = '11111111-1111-4111-8111-111111111111';
 const APPLICATION_ID = '22222222-2222-4222-8222-222222222222';
-const JOB_ID = '33333333-3333-4333-8333-333333333333';
 
 function setup() {
   const prisma = {
     $queryRaw: vi.fn().mockResolvedValue([]),
+    $executeRaw: vi.fn().mockResolvedValue(1),
   };
   const repository = new RadarApplicationsRepository(
     prisma as unknown as PrismaService,
@@ -33,18 +32,15 @@ describe('RadarApplicationsRepository', () => {
     expect(prisma.$queryRaw).toHaveBeenCalledTimes(2);
   });
 
-  it('consulta postulaciones propias, postulantes y actualizaciones', async () => {
+  it('reads and revokes consent without accessing application tables', async () => {
     const { prisma, repository } = setup();
-
-    await repository.myApplications(USER_ID);
-    await repository.updateConsents(USER_ID, APPLICATION_ID, true, false, true);
-    await repository.withdraw(USER_ID, APPLICATION_ID);
-    await repository.applicants(JOB_ID);
-    await repository.companyForEvidence(APPLICATION_ID);
-    await repository.companyForCv(APPLICATION_ID);
-    await repository.companyForDecision(APPLICATION_ID);
-    await repository.recordRecruiterDecision(APPLICATION_ID, 'Aceptada');
-
-    expect(prisma.$queryRaw).toHaveBeenCalledTimes(8);
+    await repository.findConsents([APPLICATION_ID]);
+    await repository.revokeConsents(APPLICATION_ID);
+    expect(prisma.$queryRaw).toHaveBeenCalledOnce();
+    expect(prisma.$executeRaw).toHaveBeenCalledOnce();
+    const [sql, ids] = prisma.$queryRaw.mock.calls[0];
+    expect(sql.join(' ')).toContain('radar_application_consents');
+    expect(sql.join(' ')).not.toContain('job_applications');
+    expect(ids).toEqual([APPLICATION_ID]);
   });
 });
