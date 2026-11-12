@@ -24,6 +24,7 @@ import { AppointmentsRepository } from '../repositories/appointments.repository.
 import type { CreateAppointmentDto } from '../requests/create-appointment.request.js';
 import type { AppointmentRecord } from '../types/appointment-record.types.js';
 import type { MyAppointmentResponse } from '../types/my-appointment-response.types.js';
+import type { MyAppointmentsPageResponse } from '../types/my-appointments-page-response.types.js';
 import type { MyAppointmentsQuery } from '../types/my-appointments-query.types.js';
 import { getBoliviaDayRange } from '../utils/bolivia-day.js';
 
@@ -149,14 +150,29 @@ export class AppointmentsService {
   async findMine(
     userId: string,
     query: MyAppointmentsQuery,
-  ): Promise<MyAppointmentResponse[]> {
+  ): Promise<MyAppointmentsPageResponse> {
     const now = new Date();
-    const appointments = await this.appointmentsRepository.findMine(
+    const total = await this.appointmentsRepository.countMine(
       userId,
       query.scope,
       now,
     );
-    return this.appointmentMapper.toResponseList(appointments, userId);
+    const lastPage = Math.max(1, Math.ceil(total / query.pageSize));
+    const page = Math.min(query.page, lastPage);
+    const appointments = await this.appointmentsRepository.findMine(
+      userId,
+      query.scope,
+      now,
+      page,
+      query.pageSize,
+    );
+
+    return {
+      items: this.appointmentMapper.toResponseList(appointments, userId),
+      total,
+      page,
+      pageSize: query.pageSize,
+    };
   }
 
   async findOne(userId: string, id: string): Promise<MyAppointmentResponse> {
