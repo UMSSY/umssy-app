@@ -41,21 +41,44 @@ export const CV_SECTION_HEADINGS: readonly CvSectionHeading[] = [
     ],
   },
   {
-    key: 'other',
+    key: 'presentation',
     headings: [
       'perfil',
       'perfil profesional',
+      'perfil personal',
+      'presentacion',
+      'presentacion profesional',
       'resumen',
       'resumen profesional',
       'sobre mi',
       'acerca de mi',
       'objetivo',
       'objetivo profesional',
+      'summary',
+      'professional summary',
+      'profile',
+      'about me',
+    ],
+  },
+  {
+    key: 'skills',
+    headings: [
       'habilidades',
       'habilidades tecnicas',
       'competencias',
+      'competencias tecnicas',
       'aptitudes',
       'conocimientos',
+      'conocimientos tecnicos',
+      'herramientas',
+      'tecnologias',
+      'skills',
+      'technical skills',
+    ],
+  },
+  {
+    key: 'other',
+    headings: [
       'idiomas',
       'certificaciones',
       'cursos',
@@ -68,7 +91,6 @@ export const CV_SECTION_HEADINGS: readonly CvSectionHeading[] = [
       'referencias',
       'referencias personales',
       'referencias laborales',
-      'skills',
       'languages',
     ],
   },
@@ -254,4 +276,9 @@ export const CV_FIELD_MAX_LENGTHS = {
   companyName: 100,
   position: 150,
   workExperienceDescription: 5000,
+  presentation: 2000,
 } as const;
+
+export const CV_LOCATION_PART_SEPARATOR_PATTERN = /[,;|()–—-]/;
+
+export const CV_SKILL_SOURCE_TYPE = 'cv';

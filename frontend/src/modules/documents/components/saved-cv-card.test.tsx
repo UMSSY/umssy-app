@@ -163,7 +163,7 @@ describe("SavedCvCard", () => {
   it("offers to autofill the profile from the current cv", async () => {
     const { onAutofill, user } = renderCard();
 
-    await user.click(screen.getByRole("button", { name: "Autocompletar perfil" }));
+    await user.click(screen.getByRole("button", { name: "Autollenar perfil" }));
 
     expect(onAutofill).toHaveBeenCalledTimes(1);
   });
@@ -171,12 +171,12 @@ describe("SavedCvCard", () => {
   it("hides the autofill action without a current cv", () => {
     renderCard({ cvs: [buildCv(2), buildCv(3)] });
 
-    expect(screen.queryByRole("button", { name: "Autocompletar perfil" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Autollenar perfil" })).not.toBeInTheDocument();
   });
 
   it("disables the autofill action while reading the cv", () => {
     renderCard({ isAutofilling: true });
 
-    expect(screen.getByRole("button", { name: "Autocompletar perfil" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Autollenar perfil" })).toBeDisabled();
   });
 });

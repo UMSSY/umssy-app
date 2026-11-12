@@ -11,8 +11,11 @@ export function toCvExtraction(response: CvExtractionResponse): CvExtraction {
       email: contact.email ?? null,
       phone: contact.phone ?? null,
       location: contact.location ?? null,
+      cityId: contact.cityId ?? null,
     },
+    presentation: { headline: null, aboutMe: response.presentation ?? null },
     educations: response.educations ?? [],
     workExperiences: response.workExperiences ?? [],
+    skills: response.skills ?? [],
   };
 }

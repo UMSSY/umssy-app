@@ -13,18 +13,42 @@ vi.mock("../services/documents.service", () => ({
 
 const EXTRACTION: CvExtraction = {
   cvId: "cv-1",
-  contact: { firstName: "Juan", lastName: "Pérez", email: "juan@mail.com", phone: null, location: null },
+  contact: { firstName: "Juan", lastName: "Pérez", email: "juan@mail.com", phone: null, location: null, cityId: null },
+  presentation: { headline: null, aboutMe: "Ingeniero de sistemas" },
   educations: [
+    { institution: "UMSS", degree: "Licenciatura", startDate: "2014-01-01", endDate: "2019-01-01", description: null },
+  ],
+  workExperiences: [
     {
-      institution: "UMSS",
-      degree: "Licenciatura",
-      startDate: "2014-01-01",
-      endDate: "2019-01-01",
-      description: null,
+      companyName: "Empresa SRL",
+      position: "Desarrollador",
+      startDate: "2021-03-01",
+      endDate: null,
+      isCurrent: true,
+      description: "APIs",
     },
   ],
-  workExperiences: [],
+  skills: [
+    { skillId: "skill-ts", name: "TypeScript" },
+    { skillId: "skill-sql", name: "SQL" },
+  ],
 };
+
+const FULL_SELECTION = {
+  contact: ["firstName", "lastName", "email"],
+  presentation: [0],
+  education: [0],
+  experience: [0],
+  skills: [0, 1],
+};
+
+async function renderExtracted(currentHeadline: string | null = "Desarrollador web") {
+  vi.mocked(documentsService.extractCvData).mockResolvedValue(EXTRACTION);
+  const rendered = renderHook(() => useCvExtraction({ currentHeadline }));
+  act(() => rendered.result.current.startExtraction("cv-1"));
+  await waitFor(() => expect(rendered.result.current.extraction).not.toBeNull());
+  return rendered;
+}
 
 describe("useCvExtraction", () => {
   afterEach(() => {
@@ -37,10 +61,10 @@ describe("useCvExtraction", () => {
 
     expect(result.current.isOpen).toBe(false);
     expect(result.current.extraction).toBeNull();
-    expect(result.current.buildDraft()).toBeNull();
+    expect(result.current.errorMessage).toBeNull();
   });
 
-  it("opens while the extraction is pending", async () => {
+  it("opens while the cv is being read", async () => {
     vi.mocked(documentsService.extractCvData).mockReturnValue(new Promise(() => undefined));
     const { result } = renderHook(() => useCvExtraction());
 
@@ -48,44 +72,58 @@ describe("useCvExtraction", () => {
 
     await waitFor(() => expect(result.current.isExtracting).toBe(true));
     expect(result.current.isOpen).toBe(true);
-  });
-
-  it("selects every detected value once the extraction arrives", async () => {
-    vi.mocked(documentsService.extractCvData).mockResolvedValue(EXTRACTION);
-    const { result } = renderHook(() => useCvExtraction());
-
-    act(() => result.current.startExtraction("cv-1"));
-
-    await waitFor(() => expect(result.current.extraction).toEqual(EXTRACTION));
     expect(documentsService.extractCvData).toHaveBeenCalledWith("cv-1");
-    expect(result.current.isExtracting).toBe(false);
-    expect(result.current.selection).toEqual({
-      contactFields: ["firstName", "lastName", "email"],
-      educations: [0],
-      workExperiences: [],
+  });
+
+  it("selects every detected item and keeps the current headline", async () => {
+    const { result } = await renderExtracted();
+
+    expect(result.current.available).toEqual(FULL_SELECTION);
+    expect(result.current.selection).toEqual(FULL_SELECTION);
+    expect(result.current.extraction?.presentation).toEqual({
+      headline: "Desarrollador web",
+      aboutMe: "Ingeniero de sistemas",
     });
   });
 
-  it("builds the draft from the values the user keeps", async () => {
-    vi.mocked(documentsService.extractCvData).mockResolvedValue(EXTRACTION);
-    const { result } = renderHook(() => useCvExtraction());
-    act(() => result.current.startExtraction("cv-1"));
-    await waitFor(() => expect(result.current.extraction).not.toBeNull());
+  it("leaves the headline empty when the profile has none", async () => {
+    const { result } = await renderExtracted("   ");
 
-    act(() => {
-      result.current.toggleContactField("email");
-      result.current.toggleEducation(0);
-    });
-
-    expect(result.current.buildDraft()).toEqual({
-      cvId: "cv-1",
-      contact: { firstName: "Juan", lastName: "Pérez" },
-      educations: [],
-      workExperiences: [],
-    });
+    expect(result.current.extraction?.presentation.headline).toBeNull();
   });
 
-  it("keeps the dialog open with the real error message when extraction fails", async () => {
+  it("toggles single items and whole sections", async () => {
+    const { result } = await renderExtracted();
+
+    act(() => result.current.toggleItem("contact", "email"));
+    act(() => result.current.toggleItem("skills", 0));
+    expect(result.current.selection.contact).toEqual(["firstName", "lastName"]);
+    expect(result.current.selection.skills).toEqual([1]);
+
+    act(() => result.current.toggleSection("contact"));
+    expect(result.current.selection.contact).toEqual(["firstName", "lastName", "email"]);
+
+    act(() => result.current.toggleSection("contact"));
+    expect(result.current.selection.contact).toEqual([]);
+    expect(result.current.available.contact).toEqual(["firstName", "lastName", "email"]);
+  });
+
+  it("keeps the corrections made by the user", async () => {
+    const { result } = await renderExtracted();
+
+    act(() => result.current.updateContact({ firstName: "Juana", cityId: "city-cbba" }));
+    act(() => result.current.updatePresentation({ headline: "Ingeniera" }));
+    act(() => result.current.updateEducation(0, { degree: "Ingeniería" }));
+    act(() => result.current.updateWorkExperience(0, { isCurrent: false, endDate: "2023-01-01" }));
+
+    expect(result.current.extraction?.contact).toMatchObject({ firstName: "Juana", cityId: "city-cbba" });
+    expect(result.current.extraction?.presentation.headline).toBe("Ingeniera");
+    expect(result.current.extraction?.educations[0].degree).toBe("Ingeniería");
+    expect(result.current.extraction?.workExperiences[0]).toMatchObject({ isCurrent: false, endDate: "2023-01-01" });
+    expect(result.current.available.contact).toEqual(["firstName", "lastName", "email"]);
+  });
+
+  it("exposes a spanish error when the extraction fails", async () => {
     vi.mocked(documentsService.extractCvData).mockRejectedValue({ response: { status: 500 } });
     const { result } = renderHook(() => useCvExtraction());
 
@@ -95,19 +133,15 @@ describe("useCvExtraction", () => {
       expect(result.current.errorMessage).toBe("No se pudieron leer los datos de tu CV. Intenta de nuevo."),
     );
     expect(result.current.isOpen).toBe(true);
-    expect(result.current.extraction).toBeNull();
   });
 
-  it("clears everything when closed", async () => {
-    vi.mocked(documentsService.extractCvData).mockResolvedValue(EXTRACTION);
-    const { result } = renderHook(() => useCvExtraction());
-    act(() => result.current.startExtraction("cv-1"));
-    await waitFor(() => expect(result.current.extraction).not.toBeNull());
+  it("closes and forgets the extraction", async () => {
+    const { result } = await renderExtracted();
 
     act(() => result.current.close());
 
-    expect(result.current.isOpen).toBe(false);
+    await waitFor(() => expect(result.current.isOpen).toBe(false));
     expect(result.current.extraction).toBeNull();
-    expect(result.current.selection).toEqual({ contactFields: [], educations: [], workExperiences: [] });
+    expect(result.current.selection.skills).toEqual([]);
   });
 });
