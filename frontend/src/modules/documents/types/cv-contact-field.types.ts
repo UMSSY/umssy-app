@@ -1,3 +1,3 @@
 import type { CvExtractedContact } from "./cv-extracted-contact.types";
 
-export type CvContactField = keyof CvExtractedContact;
+export type CvContactField = Exclude<keyof CvExtractedContact, "location">;

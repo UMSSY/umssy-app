@@ -14,50 +14,54 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  CV_CONTACT_FIELD_LABELS,
-  CV_CONTACT_FIELDS,
-  CV_EXTRACTION_TABS,
+  CV_EXTRACTION_SECTION_LABELS,
+  CV_EXTRACTION_SECTIONS,
+  CV_PRESENTATION_INDEX,
+  CV_REVIEW_TEXTS,
 } from "../constants/cv-extraction.constants";
 import type { CvExtractionDialogProps } from "../types/cv-extraction-dialog-props.types";
-import { formatCvPeriod } from "../utils/format-cv-period";
-import { hasCvText } from "../utils/has-cv-text";
-import { isCvEducationIncomplete } from "../utils/is-cv-education-incomplete";
-import { isCvWorkExperienceIncomplete } from "../utils/is-cv-work-experience-incomplete";
-import { CvExtractionOption } from "./cv-extraction-option";
+import { countCvSelection } from "../utils/count-cv-selection";
+import { isCvHeadlineMissing } from "../utils/is-cv-headline-missing";
+import { isCvSectionFullySelected } from "../utils/is-cv-section-fully-selected";
+import { CvContactReview } from "./cv-contact-review";
+import { CvEducationReview } from "./cv-education-review";
+import { CvPresentationReview } from "./cv-presentation-review";
+import { CvReviewSection } from "./cv-review-section";
+import { CvSkillsReview } from "./cv-skills-review";
+import { CvWorkExperienceReview } from "./cv-work-experience-review";
 
 export function CvExtractionDialog({
   isOpen,
   isExtracting,
   extraction,
+  available,
   selection,
   errorMessage = null,
-  onToggleContactField,
-  onToggleEducation,
-  onToggleWorkExperience,
+  onToggleItem,
+  onToggleSection,
+  onContactChange,
+  onPresentationChange,
+  onEducationChange,
+  onWorkExperienceChange,
   onApply,
   onClose,
 }: CvExtractionDialogProps) {
-  const contactFields = CV_CONTACT_FIELDS.filter((field) => hasCvText(extraction?.contact?.[field]));
-  const educations = extraction?.educations ?? [];
-  const workExperiences = extraction?.workExperiences ?? [];
-  const selectedCount =
-    selection.contactFields.length + selection.educations.length + selection.workExperiences.length;
+  const isHeadlineMissing = isCvHeadlineMissing(extraction, selection);
+  const canApply = !isExtracting && extraction !== null && countCvSelection(selection) > 0 && !isHeadlineMissing;
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => (open || isExtracting ? undefined : onClose())}>
-      <DialogContent className="max-w-2xl gap-0 rounded-lg border border-border bg-surface p-0 text-ink ring-0 sm:max-w-2xl">
+      <DialogContent className="max-w-3xl gap-0 rounded-lg border border-border bg-surface p-0 text-ink ring-0 sm:max-w-3xl">
         <DialogHeader className="gap-1.5 border-b border-border px-6 py-5 pr-14">
-          <DialogTitle className="font-tight text-xl font-bold text-ink">Datos encontrados en tu CV</DialogTitle>
-          <DialogDescription className="text-sm text-text-secondary">
-            Elige qué datos quieres usar. Se cargarán como borrador en tu perfil y podrás revisarlos antes de guardar.
-          </DialogDescription>
+          <DialogTitle className="font-tight text-xl font-bold text-ink">{CV_REVIEW_TEXTS.title}</DialogTitle>
+          <DialogDescription className="text-sm text-text-secondary">{CV_REVIEW_TEXTS.description}</DialogDescription>
         </DialogHeader>
-        <div className="max-h-[60vh] overflow-y-auto px-6 py-5">
+        <div className="max-h-[65vh] overflow-y-auto px-6 py-5">
           {isExtracting ? (
             <div aria-busy="true" className="flex flex-col gap-3">
               <p className="flex items-center gap-2 text-sm text-text-secondary">
                 <LoaderCircle aria-hidden="true" className="size-4 animate-spin" />
-                Leyendo los datos de tu CV...
+                {CV_REVIEW_TEXTS.loading}
               </p>
               <Skeleton className="h-12 w-full" />
               <Skeleton className="h-12 w-full" />
@@ -69,73 +73,65 @@ export function CvExtractionDialog({
             </Alert>
           ) : null}
           {!isExtracting && !errorMessage && extraction ? (
-            <Tabs defaultValue={CV_EXTRACTION_TABS.contact}>
-              <TabsList aria-label="Secciones del CV">
-                <TabsTrigger value={CV_EXTRACTION_TABS.contact}>{`Contacto (${contactFields.length})`}</TabsTrigger>
-                <TabsTrigger value={CV_EXTRACTION_TABS.education}>{`Educación (${educations.length})`}</TabsTrigger>
-                <TabsTrigger value={CV_EXTRACTION_TABS.experience}>
-                  {`Experiencia (${workExperiences.length})`}
-                </TabsTrigger>
+            <Tabs defaultValue={CV_EXTRACTION_SECTIONS[0]}>
+              <TabsList aria-label="Secciones del CV" className="h-auto flex-wrap">
+                {CV_EXTRACTION_SECTIONS.map((section) => (
+                  <TabsTrigger key={section} value={section}>
+                    {`${CV_EXTRACTION_SECTION_LABELS[section]} (${(available[section] ?? []).length})`}
+                  </TabsTrigger>
+                ))}
               </TabsList>
-              <TabsContent value={CV_EXTRACTION_TABS.contact} className="pt-4">
-                {contactFields.length === 0 ? (
-                  <p className="py-6 text-center text-sm text-text-secondary">No encontramos datos de contacto en tu CV.</p>
-                ) : (
-                  <ul aria-label="Datos de contacto" className="flex flex-col gap-2">
-                    {contactFields.map((field) => (
-                      <CvExtractionOption
-                        key={field}
-                        title={CV_CONTACT_FIELD_LABELS[field]}
-                        details={[(extraction.contact[field] ?? "").trim()]}
-                        isChecked={selection.contactFields.includes(field)}
-                        onToggle={() => onToggleContactField(field)}
+              {CV_EXTRACTION_SECTIONS.map((section) => (
+                <TabsContent key={section} value={section} className="pt-4">
+                  <CvReviewSection
+                    section={section}
+                    selectedCount={(selection[section] ?? []).length}
+                    availableCount={(available[section] ?? []).length}
+                    isFullySelected={isCvSectionFullySelected<string | number>(selection[section], available[section])}
+                    onToggleSection={() => onToggleSection(section)}
+                  >
+                    {section === "contact" ? (
+                      <CvContactReview
+                        contact={extraction.contact}
+                        fields={available.contact}
+                        selected={selection.contact}
+                        onToggle={(field) => onToggleItem("contact", field)}
+                        onChange={onContactChange}
                       />
-                    ))}
-                  </ul>
-                )}
-              </TabsContent>
-              <TabsContent value={CV_EXTRACTION_TABS.education} className="pt-4">
-                {educations.length === 0 ? (
-                  <p className="py-6 text-center text-sm text-text-secondary">No encontramos estudios en tu CV.</p>
-                ) : (
-                  <ul aria-label="Educación" className="flex flex-col gap-2">
-                    {educations.map((education, index) => (
-                      <CvExtractionOption
-                        key={`${education.institution ?? ""}-${education.degree ?? ""}-${index}`}
-                        title={(education.degree ?? "").trim() || "Título sin detectar"}
-                        details={[
-                          (education.institution ?? "").trim() || "Institución sin detectar",
-                          formatCvPeriod(education.startDate, education.endDate),
-                        ]}
-                        isChecked={selection.educations.includes(index)}
-                        isIncomplete={isCvEducationIncomplete(education)}
-                        onToggle={() => onToggleEducation(index)}
+                    ) : null}
+                    {section === "presentation" && selection.presentation.includes(CV_PRESENTATION_INDEX) ? (
+                      <CvPresentationReview
+                        presentation={extraction.presentation}
+                        isHeadlineMissing={isHeadlineMissing}
+                        onChange={onPresentationChange}
                       />
-                    ))}
-                  </ul>
-                )}
-              </TabsContent>
-              <TabsContent value={CV_EXTRACTION_TABS.experience} className="pt-4">
-                {workExperiences.length === 0 ? (
-                  <p className="py-6 text-center text-sm text-text-secondary">No encontramos experiencia laboral en tu CV.</p>
-                ) : (
-                  <ul aria-label="Experiencia laboral" className="flex flex-col gap-2">
-                    {workExperiences.map((experience, index) => (
-                      <CvExtractionOption
-                        key={`${experience.companyName ?? ""}-${experience.position ?? ""}-${index}`}
-                        title={(experience.position ?? "").trim() || "Cargo sin detectar"}
-                        details={[
-                          (experience.companyName ?? "").trim() || "Empresa sin detectar",
-                          formatCvPeriod(experience.startDate, experience.endDate, experience.isCurrent),
-                        ]}
-                        isChecked={selection.workExperiences.includes(index)}
-                        isIncomplete={isCvWorkExperienceIncomplete(experience)}
-                        onToggle={() => onToggleWorkExperience(index)}
+                    ) : null}
+                    {section === "education" ? (
+                      <CvEducationReview
+                        educations={extraction.educations}
+                        selected={selection.education}
+                        onToggle={(index) => onToggleItem("education", index)}
+                        onChange={onEducationChange}
                       />
-                    ))}
-                  </ul>
-                )}
-              </TabsContent>
+                    ) : null}
+                    {section === "experience" ? (
+                      <CvWorkExperienceReview
+                        workExperiences={extraction.workExperiences}
+                        selected={selection.experience}
+                        onToggle={(index) => onToggleItem("experience", index)}
+                        onChange={onWorkExperienceChange}
+                      />
+                    ) : null}
+                    {section === "skills" ? (
+                      <CvSkillsReview
+                        skills={extraction.skills}
+                        selected={selection.skills}
+                        onToggle={(index) => onToggleItem("skills", index)}
+                      />
+                    ) : null}
+                  </CvReviewSection>
+                </TabsContent>
+              ))}
             </Tabs>
           ) : null}
         </div>
@@ -147,15 +143,15 @@ export function CvExtractionDialog({
             disabled={isExtracting}
             onClick={onClose}
           >
-            Ahora no
+            {CV_REVIEW_TEXTS.cancel}
           </Button>
           <Button
             type="button"
             className="h-10 bg-primary px-4 text-sm text-primary-foreground hover:bg-brand-hover"
-            disabled={isExtracting || !extraction || selectedCount === 0}
+            disabled={!canApply}
             onClick={onApply}
           >
-            Usar datos seleccionados
+            {CV_REVIEW_TEXTS.apply}
           </Button>
         </DialogFooter>
       </DialogContent>

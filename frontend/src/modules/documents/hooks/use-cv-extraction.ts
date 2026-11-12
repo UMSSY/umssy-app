@@ -5,34 +5,48 @@ import { useMutation } from "@tanstack/react-query";
 import { CV_EMPTY_EXTRACTION_SELECTION } from "../constants/cv-extraction.constants";
 import { CV_ERROR_MESSAGES } from "../constants/cv-error-messages.constants";
 import { documentsService } from "../services/documents.service";
-import type { CvContactField } from "../types/cv-contact-field.types";
+import type { CvExtractedContact } from "../types/cv-extracted-contact.types";
+import type { CvExtractedEducation } from "../types/cv-extracted-education.types";
+import type { CvExtractedPresentation } from "../types/cv-extracted-presentation.types";
+import type { CvExtractedWorkExperience } from "../types/cv-extracted-work-experience.types";
 import type { CvExtraction } from "../types/cv-extraction.types";
+import type { CvExtractionSection } from "../types/cv-extraction-section.types";
 import type { CvExtractionSelection } from "../types/cv-extraction-selection.types";
-import type { CvProfileDraft } from "../types/cv-profile-draft.types";
-import { buildCvProfileDraft } from "../utils/build-cv-profile-draft";
+import type { UseCvExtractionOptions } from "../types/use-cv-extraction-options.types";
 import { buildDefaultCvSelection } from "../utils/build-default-cv-selection";
 import { getCvErrorMessage } from "../utils/get-cv-error-message";
-import { toggleListItem } from "../utils/toggle-list-item";
+import { toggleCvSection } from "../utils/toggle-cv-section";
+import { toggleCvSelectionItem } from "../utils/toggle-cv-selection-item";
+import { updateListItem } from "../utils/update-list-item";
 
-export function useCvExtraction() {
+export function useCvExtraction({ currentHeadline = null }: UseCvExtractionOptions = {}) {
   const [extraction, setExtraction] = useState<CvExtraction | null>(null);
+  const [available, setAvailable] = useState<CvExtractionSelection>(CV_EMPTY_EXTRACTION_SELECTION);
   const [selection, setSelection] = useState<CvExtractionSelection>(CV_EMPTY_EXTRACTION_SELECTION);
   const mutation = useMutation({
     mutationFn: (cvId: string) => documentsService.extractCvData(cvId),
     onSuccess: (result) => {
-      setExtraction(result);
-      setSelection(buildDefaultCvSelection(result));
+      const defaults = buildDefaultCvSelection(result);
+      const headline = (currentHeadline ?? "").trim();
+      setExtraction({ ...result, presentation: { ...result.presentation, headline: headline || null } });
+      setAvailable(defaults);
+      setSelection(defaults);
     },
   });
+
+  const updateExtraction = (update: (current: CvExtraction) => CvExtraction) =>
+    setExtraction((current) => (current ? update(current) : current));
 
   const close = () => {
     mutation.reset();
     setExtraction(null);
+    setAvailable(CV_EMPTY_EXTRACTION_SELECTION);
     setSelection(CV_EMPTY_EXTRACTION_SELECTION);
   };
 
   return {
     extraction,
+    available,
     selection,
     isExtracting: mutation.isPending,
     isOpen: mutation.isPending || mutation.isError || extraction !== null,
@@ -41,13 +55,21 @@ export function useCvExtraction() {
       close();
       mutation.mutate(cvId);
     },
-    toggleContactField: (field: CvContactField) =>
-      setSelection((current) => ({ ...current, contactFields: toggleListItem(current.contactFields, field) })),
-    toggleEducation: (index: number) =>
-      setSelection((current) => ({ ...current, educations: toggleListItem(current.educations, index) })),
-    toggleWorkExperience: (index: number) =>
-      setSelection((current) => ({ ...current, workExperiences: toggleListItem(current.workExperiences, index) })),
-    buildDraft: (): CvProfileDraft | null => (extraction ? buildCvProfileDraft(extraction, selection) : null),
+    toggleItem: <K extends CvExtractionSection>(section: K, item: CvExtractionSelection[K][number]) =>
+      setSelection((current) => toggleCvSelectionItem(current, section, item)),
+    toggleSection: (section: CvExtractionSection) =>
+      setSelection((current) => toggleCvSection(current, available, section)),
+    updateContact: (changes: Partial<CvExtractedContact>) =>
+      updateExtraction((current) => ({ ...current, contact: { ...current.contact, ...changes } })),
+    updatePresentation: (changes: Partial<CvExtractedPresentation>) =>
+      updateExtraction((current) => ({ ...current, presentation: { ...current.presentation, ...changes } })),
+    updateEducation: (index: number, changes: Partial<CvExtractedEducation>) =>
+      updateExtraction((current) => ({ ...current, educations: updateListItem(current.educations, index, changes) })),
+    updateWorkExperience: (index: number, changes: Partial<CvExtractedWorkExperience>) =>
+      updateExtraction((current) => ({
+        ...current,
+        workExperiences: updateListItem(current.workExperiences, index, changes),
+      })),
     close,
   };
 }

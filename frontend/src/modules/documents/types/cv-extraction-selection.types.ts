@@ -1,7 +1,9 @@
 import type { CvContactField } from "./cv-contact-field.types";
 
 export interface CvExtractionSelection {
-  contactFields: CvContactField[];
-  educations: number[];
-  workExperiences: number[];
+  contact: CvContactField[];
+  presentation: number[];
+  education: number[];
+  experience: number[];
+  skills: number[];
 }
