@@ -13,12 +13,13 @@ import { APPOINTMENT_DOCUMENT_METADATA_SELECT } from '../constants/appointment-d
 describe('AppointmentsRepository', () => {
   const findMany = vi.fn();
   const findUnique = vi.fn();
+  const updateMany = vi.fn();
   let repository: AppointmentsRepository;
 
   beforeEach(() => {
     vi.resetAllMocks();
     repository = new AppointmentsRepository({
-      appointment: { findMany, findUnique },
+      appointment: { findMany, findUnique, updateMany },
     } as unknown as PrismaService);
   });
 
@@ -110,5 +111,49 @@ describe('AppointmentsRepository', () => {
     findUnique.mockRejectedValue(failure);
 
     await expect(repository.findById(APPOINTMENT_ID)).rejects.toBe(failure);
+  });
+
+  it('assigns the meeting url only when the appointment has none and returns the stored one', async () => {
+    const meetingUrl = 'https://meet.jit.si/umssy-new';
+    updateMany.mockResolvedValue({ count: 1 });
+    findUnique.mockResolvedValue({ meetingUrl });
+
+    await expect(
+      repository.assignMeetingUrl(APPOINTMENT_ID, meetingUrl),
+    ).resolves.toBe(meetingUrl);
+    expect(updateMany).toHaveBeenCalledExactlyOnceWith({
+      where: { id: APPOINTMENT_ID, meetingUrl: null },
+      data: { meetingUrl },
+    });
+    expect(findUnique).toHaveBeenCalledExactlyOnceWith({
+      where: { id: APPOINTMENT_ID },
+      select: { meetingUrl: true },
+    });
+  });
+
+  it('keeps the meeting url that another request saved first', async () => {
+    updateMany.mockResolvedValue({ count: 0 });
+    findUnique.mockResolvedValue({
+      meetingUrl: 'https://meet.jit.si/umssy-first',
+    });
+
+    await expect(
+      repository.assignMeetingUrl(
+        APPOINTMENT_ID,
+        'https://meet.jit.si/umssy-late',
+      ),
+    ).resolves.toBe('https://meet.jit.si/umssy-first');
+  });
+
+  it('returns null when the appointment disappears while assigning the meeting url', async () => {
+    updateMany.mockResolvedValue({ count: 0 });
+    findUnique.mockResolvedValue(null);
+
+    await expect(
+      repository.assignMeetingUrl(
+        APPOINTMENT_ID,
+        'https://meet.jit.si/umssy-x',
+      ),
+    ).resolves.toBeNull();
   });
 });
