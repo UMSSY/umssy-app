@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import type { Prisma } from '../../../prisma/client.js';
-import { parsePortfolioProvider } from '../enums/portfolio-provider.enum.js';
+import { UnknownPortfolioProviderException } from '../exceptions/unknown-portfolio-provider.exception.js';
 import type { NormalizedPortfolioProject } from '../types/normalized-portfolio-project.type.js';
 import type { PortfolioProjectEntity } from '../types/portfolio-project-entity.type.js';
+import { parsePortfolioProvider } from '../utils/parse-portfolio-provider.util.js';
 
 const portfolioProjectSelect = {
   id: true,
@@ -52,7 +53,7 @@ export class PortfolioRepository {
           data: projects.map((project) => {
             const providerId = providerMap.get(project.provider);
             if (!providerId) {
-              throw new Error(`Unknown portfolio provider: ${project.provider}`);
+              throw new UnknownPortfolioProviderException(project.provider);
             }
             return {
               userId,
