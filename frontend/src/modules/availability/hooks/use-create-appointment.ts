@@ -7,7 +7,10 @@ import { APPOINTMENTS_QUERY_KEYS, appointmentsApi } from "@/modules/appointments
 import { isApiError } from "@/shared/services/api-client";
 import { getApiErrorDetail } from "@/shared/utils/api-error-detail";
 import { AVAILABILITY_QUERY_KEYS } from "../constants/availability-query-keys.constants";
-import { REQUEST_APPOINTMENT_TEXT } from "../constants/request-appointment.constants";
+import {
+  APPOINTMENT_REQUEST_ERROR_CODES,
+  REQUEST_APPOINTMENT_TEXT,
+} from "../constants/request-appointment.constants";
 import type { AvailabilityBlock } from "../types/availability-block.types";
 import type { CreateAppointmentVariables } from "../types/create-appointment-variables.types";
 import { formatAppointmentSchedule } from "../utils/appointment-request.utils";
@@ -15,7 +18,7 @@ import { useUploadAppointmentDocument } from "./use-upload-appointment-document"
 
 export function useCreateAppointment(
   onConflict: (block: AvailabilityBlock) => void,
-  onOverlap?: () => void,
+  onReservationRejected?: (message: string) => void,
 ) {
   const queryClient = useQueryClient();
   const isSendingRef = useRef(false);
@@ -35,8 +38,17 @@ export function useCreateAppointment(
     },
     onError: (error, { block }) => {
       if (isApiError(error) && error.response?.status === 409) {
-        if (getApiErrorDetail(error) === REQUEST_APPOINTMENT_TEXT.overlap) {
-          onOverlap?.();
+        const body: unknown = error.response.data;
+        const code = typeof body === "object" && body !== null && "code" in body ? body.code : undefined;
+        if (
+          code === APPOINTMENT_REQUEST_ERROR_CODES.overlap ||
+          code === APPOINTMENT_REQUEST_ERROR_CODES.dailyLimit
+        ) {
+          onReservationRejected?.(
+            code === APPOINTMENT_REQUEST_ERROR_CODES.overlap
+              ? REQUEST_APPOINTMENT_TEXT.overlap
+              : REQUEST_APPOINTMENT_TEXT.dailyLimit,
+          );
           return;
         }
         toast.error(getApiErrorDetail(error) ?? REQUEST_APPOINTMENT_TEXT.alreadyBooked);
