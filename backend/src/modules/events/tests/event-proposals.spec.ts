@@ -63,14 +63,16 @@ function setup() {
   };
 }
 describe('Workshop proposal validation and persistence', () => {
-  it.each(['Facultad', 'Facultad, Aula, Piso', ', Aula', 'Facultad, '])(
-    'rejects an invalid physical location: %s',
-    (location) => {
-      expect(
-        CreateProposalSchema.safeParse({ ...valid, location }).success,
-      ).toBe(false);
-    },
-  );
+  it.each([
+    'Facultad, Aula, Piso, Bloque, Campus',
+    'Facultad,, Aula',
+    ', Aula',
+    'Facultad, ',
+  ])('rejects an invalid physical location: %s', (location) => {
+    expect(CreateProposalSchema.safeParse({ ...valid, location }).success).toBe(
+      false,
+    );
+  });
   it.each([
     { title: '' },
     { title: 'a'.repeat(81) },
@@ -84,6 +86,40 @@ describe('Workshop proposal validation and persistence', () => {
     expect(
       CreateProposalSchema.safeParse({ ...valid, ...change }).success,
     ).toBe(false);
+  });
+  it.each(['', '   ', '... ---', 'a'.repeat(151)])(
+    'rejects invalid physical locations: %s',
+    (location) => {
+      expect(
+        CreateProposalSchema.safeParse({ ...valid, location }).success,
+      ).toBe(false);
+    },
+  );
+  it.each([
+    'Auditorio central',
+    'Edificio de Tecnología, piso 2, laboratorio 1',
+    'a'.repeat(150),
+  ])('accepts clear or boundary locations: %s', (location) => {
+    expect(CreateProposalSchema.safeParse({ ...valid, location }).success).toBe(
+      true,
+    );
+  });
+  it.each(['19', '61'])(
+    'rejects capacity outside the form range: %s',
+    (capacity) => {
+      expect(
+        CreateProposalSchema.safeParse({ ...valid, capacity }).success,
+      ).toBe(false);
+    },
+  );
+  it('keeps long virtual meeting URLs valid', () => {
+    expect(
+      CreateProposalSchema.safeParse({
+        ...valid,
+        modality: 'virtual',
+        location: 'https://example.org/' + 'a'.repeat(160),
+      }).success,
+    ).toBe(true);
   });
   it('atomically saves the authenticated author, image, voting status, threshold and deadline', async () => {
     const { service, tx } = setup();
@@ -143,7 +179,7 @@ describe('Workshop proposal validation and persistence', () => {
       errors: [
         {
           field: 'categoryId',
-          message: 'Selecciona una categoría disponible.',
+          message: 'Esta categoría ya no está disponible. Elige otra.',
         },
       ],
     });
@@ -169,5 +205,132 @@ describe('Workshop proposal validation and persistence', () => {
         }),
       }),
     );
+  });
+});
+
+describe('Basic proposal text validation', () => {
+  it.each(['   ', '12345', '!!!', '123 - !!!', 'aaaaaa', 'A a A a', 'ññññ'])(
+    'rejects non-text or repeated content: %s',
+    (text) => {
+      const result = CreateProposalSchema.safeParse({
+        ...valid,
+        title: text,
+        description: text,
+      });
+      expect(result.success).toBe(false);
+      if (!result.success)
+        expect(result.error.issues.map((issue) => issue.path[0])).toEqual(
+          expect.arrayContaining(['title', 'description']),
+        );
+    },
+  );
+  it.each([
+    'C++',
+    'C# y .NET',
+    'Diseño UX/UI',
+    'Python 3: introducción',
+    'Excel',
+    'Línea uno.\nLínea dos.',
+  ])('accepts technical names and punctuation: %s', (text) => {
+    expect(
+      CreateProposalSchema.safeParse({
+        ...valid,
+        title: text,
+        description: text,
+      }).success,
+    ).toBe(true);
+  });
+  it('trims outer spaces and preserves description line breaks', () => {
+    const result = CreateProposalSchema.parse({
+      ...valid,
+      title: '  Python  ',
+      description: '  Primera línea.\nSegunda línea.  ',
+    });
+    expect(result.title).toBe('Python');
+    expect(result.description).toBe('Primera línea.\nSegunda línea.');
+  });
+});
+
+describe('Location and meeting link structure', () => {
+  it.each([
+    ['presencial', ', Auditorio central'],
+    ['presencial', 'Edificio B,'],
+    ['presencial', 'Edificio B,, aula 2'],
+    ['presencial', 'Edificio B, , aula 2'],
+    ['presencial', 'Edificio B, !!!, aula 2'],
+    ['presencial', '12345'],
+    ['virtual', 'http://meet.example.org/room'],
+    ['virtual', 'meet.example.org/room'],
+    ['virtual', 'https:/meet.example.org/room'],
+    ['virtual', 'https:///meet.example.org/room'],
+    ['virtual', 'https://'],
+    ['virtual', 'https://meet.example.org/my room'],
+    ['virtual', 'https://user:password@meet.example.org/room'],
+    ['virtual', 'https://meet.example.org/' + 'a'.repeat(2000)],
+  ] as const)('rejects %s malformed input: %s', (modality, location) => {
+    expect(
+      CreateProposalSchema.safeParse({ ...valid, location, modality }).success,
+    ).toBe(false);
+  });
+});
+
+describe('Physical location segment limit', () => {
+  it.each([
+    ['Auditorio central', true],
+    ['Facultad de Tecnología, edificio B, piso 2, aula 204', true],
+    [
+      'Facultad de Tecnología, edificio B, piso 2, aula 204, puerta norte',
+      false,
+    ],
+  ] as const)('validates segment count: %s', (location, accepted) => {
+    expect(CreateProposalSchema.safeParse({ ...valid, location }).success).toBe(
+      accepted,
+    );
+  });
+});
+
+describe('Specific location feedback', () => {
+  it.each([
+    ['presencial', '', 'Escribe la ubicación del taller.'],
+    ['presencial', '123', 'Incluye el nombre del lugar.'],
+    ['presencial', ', Aula 1', 'Quita la coma del inicio o del final.'],
+    [
+      'presencial',
+      'Edificio A, , aula 1',
+      'Completa o elimina la parte vacía entre comas.',
+    ],
+    [
+      'presencial',
+      'Edificio A, !!!',
+      'Reemplaza los símbolos por un lugar o referencia.',
+    ],
+    ['presencial', 'A, B, C, D, E', 'Usa hasta 4 partes separadas por comas.'],
+    ['virtual', '', 'Pega el enlace de la reunión.'],
+    ['virtual', 'http://example.org', 'El enlace debe comenzar con https://.'],
+    [
+      'virtual',
+      'https://example.org/my room',
+      'Quita los espacios del enlace.',
+    ],
+    ['virtual', 'https://', 'Completa la dirección después de https://.'],
+    [
+      'virtual',
+      'https://user:pass@example.org',
+      'Usa un enlace sin usuario ni contraseña incluidos.',
+    ],
+    ['virtual', 'https://[invalid', 'Revisa la dirección del enlace.'],
+  ] as const)('explains %s input %s', (modality, location, message) => {
+    const result = CreateProposalSchema.safeParse({
+      ...valid,
+      modality,
+      location,
+    });
+    expect(result.success).toBe(false);
+    if (!result.success)
+      expect(
+        result.error.issues
+          .filter((issue) => issue.path[0] === 'location')
+          .map((issue) => issue.message),
+      ).toEqual([message]);
   });
 });

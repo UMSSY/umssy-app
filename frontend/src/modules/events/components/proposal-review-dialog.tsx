@@ -41,7 +41,7 @@ export function ProposalReviewDialog({ open, values, cover, tutor, category, pen
               </dl>
               <p className="text-xs text-text-secondary">Duración: {formatProposalDuration(values.startTime, values.endTime)}</p>
               <div className="space-y-2 border-t border-border pt-3"><h4 className="text-xs font-semibold text-ink">DESCRIPCIÓN</h4><p className="text-sm wrap-anywhere whitespace-pre-wrap text-text-secondary">{values.description}</p></div>
-              <p className="flex justify-between gap-2 text-sm text-ink"><span>Cupo máximo</span><strong>{values.capacity} participantes</strong></p>
+              <p className="flex justify-between gap-2 text-sm text-ink"><span>Cupo del taller</span><strong>{values.capacity} participantes</strong></p>
             </div>
           </article>
           <div className="flex gap-3 rounded-lg border border-availability-border bg-availability p-4">
@@ -53,8 +53,8 @@ export function ProposalReviewDialog({ open, values, cover, tutor, category, pen
           {unavailable && <p role="alert" className="text-sm text-danger">No se pudo verificar la sesión o los datos del formulario. Vuelve al formulario para revisarlos.</p>}
         </div>
         <div className="flex flex-wrap justify-end gap-3 border-t border-border pt-4">
-          <Button type="button" variant="outline" disabled={pending} onClick={onClose}>Cancelar/Modificar</Button>
-          <Button type="button" disabled={pending || unavailable} onClick={onConfirm}>{pending && <Loader2 className="animate-spin" aria-hidden="true" />}{pending ? 'Enviando…' : 'Confirmar y enviar'}</Button>
+          <Button type="button" variant="outline" disabled={pending} onClick={onClose}>Cancelar</Button>
+          <Button type="button" disabled={pending || unavailable} onClick={onConfirm}>{pending && <Loader2 className="animate-spin" aria-hidden="true" />}{pending ? 'Enviando…' : 'Confirmar'}</Button>
         </div>
       </DialogContent>
     </Dialog>

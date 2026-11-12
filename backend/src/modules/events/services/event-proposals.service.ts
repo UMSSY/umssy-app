@@ -77,7 +77,7 @@ export class EventProposalsService {
           throw new RequestValidationException([
             {
               field: 'categoryId',
-              message: 'Selecciona una categoría disponible.',
+              message: 'Esta categoría ya no está disponible. Elige otra.',
             },
           ]);
         const title = values.modality === 'virtual' ? 'Virtual' : 'Presencial';

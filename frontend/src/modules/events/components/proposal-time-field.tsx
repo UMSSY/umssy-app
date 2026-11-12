@@ -9,26 +9,30 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { formatProposalTime } from '../utils/proposal-format';
+import { formatProposalTime, normalizeProposalTime, proposalTimeSuggestions } from '../utils/proposal-format';
+import { isProposalTime } from '../utils/proposal-validation';
 import { ProposalField } from './proposal-field';
 
 const HOURS = Array.from({ length: 24 }, (_, index) => String(index).padStart(2, '0'));
 const MINUTES = Array.from({ length: 60 }, (_, index) => String(index).padStart(2, '0'));
 
-export function ProposalTimeField({ id, label, value, onChange, error, disabled }: ProposalTimeFieldProps) {
+export function ProposalTimeField({ id, label, value, onChange, error, disabled, startTime, endTime }: ProposalTimeFieldProps) {
   const [open, setOpen] = useState(false);
   const [hour, setHour] = useState('09');
   const [minute, setMinute] = useState('00');
   const [editing, setEditing] = useState(false);
   return (
-    <ProposalField id={id} label={label} error={error}>
+    <ProposalField id={id} label={label} error={editing ? undefined : error}>
       <div className="relative">
-        <Input id={id} value={editing ? value : value ? formatProposalTime(value) : ''} placeholder="hh:mm" inputMode="numeric" required disabled={disabled}
-          className="h-11 pr-12" onFocus={() => setEditing(true)} onBlur={() => setEditing(false)}
-          onChange={(event) => onChange(event.target.value)} aria-invalid={Boolean(error)} aria-describedby={`${id}-help${error ? ` ${id}-error` : ''}`} />
-        <Button type="button" variant="ghost" size="icon" className="absolute top-0 right-0 size-11" disabled={disabled}
+        <Input id={id} value={editing ? value : value ? formatProposalTime(value) : ''} placeholder="hh:mm" inputMode="text" autoComplete="off" list={`${id}-suggestions`} required disabled={disabled}
+          className="h-11 pr-12" onFocus={() => setEditing(true)} onBlur={(event) => { const normalized = normalizeProposalTime(event.target.value); if (normalized !== value) onChange(normalized); setEditing(false); }}
+          onChange={(event) => onChange(event.target.value)} aria-invalid={!editing && Boolean(error)} aria-describedby={!editing && error ? `${id}-error` : undefined} />
+        <datalist id={`${id}-suggestions`}>
+          {proposalTimeSuggestions(startTime, endTime).map(time => <option key={time} value={formatProposalTime(time)} />)}
+        </datalist>
+        <Button type="button" variant="ghost" size="icon"  className="absolute top-0 right-0 size-11 text-accent" disabled={disabled}
         aria-label={`Seleccionar ${label.toLowerCase()}`} aria-haspopup="dialog"
-        onClick={() => { const parts = (value || '09:00').split(':'); setHour(parts[0]); setMinute(parts[1]); setOpen(true); }}>
+        onClick={() => { const normalized = normalizeProposalTime(value); const parts = (isProposalTime(normalized) ? normalized : '09:00').split(':'); setHour(parts[0]); setMinute(parts[1]); setOpen(true); }}>
         <Clock aria-hidden="true" />
         </Button>
       </div>
