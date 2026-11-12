@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AppointmentStatusTitle } from '../../availability/enums/appointment-status-title.enum.js';
 import {
   DayBlockedException,
@@ -23,6 +23,7 @@ import {
   APPOINTMENT_ID,
   createAppointmentRecord,
   MENTOR_ID,
+  NOW,
   STUDENT_ID,
 } from './fixtures/appointment-record.fixture.js';
 
@@ -72,6 +73,8 @@ describe('AppointmentsService', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(NOW);
     availabilityService.findBlockWithAppointments.mockResolvedValue(block());
     mentorsService.findOne.mockResolvedValue({
       id: MENTOR_ID,
@@ -101,6 +104,10 @@ describe('AppointmentsService', () => {
       mentorsService as never,
       {} as never,
     );
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('crea la cita confirmada dentro del candado del día con los datos del bloque', async () => {

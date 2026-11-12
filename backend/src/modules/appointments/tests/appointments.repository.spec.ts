@@ -63,7 +63,7 @@ describe('AppointmentsRepository', () => {
     expect(count).toHaveBeenCalledExactlyOnceWith({
       where: {
         OR: [{ mentorId: MENTOR_ID }, { studentId: MENTOR_ID }],
-        status: { title: { in: ['CONFIRMED', 'CONFIRMADA'] } },
+        status: { title: { in: ['CONFIRMED', 'CONFIRMADA', 'COMPLETED', 'COMPLETADA'] } },
         endAt: { lte: NOW },
       },
     });
@@ -78,7 +78,7 @@ describe('AppointmentsRepository', () => {
     expect(findMany).toHaveBeenCalledExactlyOnceWith({
       where: {
         OR: [{ mentorId: MENTOR_ID }, { studentId: MENTOR_ID }],
-        status: { title: { in: ['CONFIRMED', 'CONFIRMADA'] } },
+        status: { title: { in: ['CONFIRMED', 'CONFIRMADA', 'COMPLETED', 'COMPLETADA'] } },
         endAt: { lte: NOW },
       },
       orderBy: [{ endAt: 'desc' }, { startAt: 'desc' }, { id: 'asc' }],

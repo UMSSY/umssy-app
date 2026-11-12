@@ -140,7 +140,11 @@ export class AppointmentsService {
           tx,
         );
 
-        return this.appointmentMapper.toResponse(appointment, user.id);
+        return this.appointmentMapper.toResponse(
+          appointment,
+          user.id,
+          new Date(),
+        );
       })
       .catch((error: unknown) => {
         if (error instanceof DayBlockedException) {
@@ -171,7 +175,7 @@ export class AppointmentsService {
     );
 
     return {
-      items: this.appointmentMapper.toResponseList(appointments, userId),
+      items: this.appointmentMapper.toResponseList(appointments, userId, now),
       total,
       page,
       pageSize: query.pageSize,
@@ -183,11 +187,13 @@ export class AppointmentsService {
     id: string,
   ): Promise<AppointmentDetailResponse> {
     const appointment = await this.findParticipatedAppointment(userId, id);
-    const meetingUrl = await this.resolveMeetingUrl(appointment);
+    const now = new Date();
+    const meetingUrl = await this.resolveMeetingUrl(appointment, now);
     return this.appointmentMapper.toDetailResponse(
       appointment,
       userId,
       meetingUrl,
+      now,
     );
   }
 
@@ -205,14 +211,9 @@ export class AppointmentsService {
 
   private async resolveMeetingUrl(
     appointment: AppointmentRecord,
+    now: Date,
   ): Promise<string | null> {
-    if (
-      !canShareMeetingUrl(
-        appointment.status.title,
-        appointment.endAt,
-        new Date(),
-      )
-    ) {
+    if (!canShareMeetingUrl(appointment.status.title, appointment.endAt, now)) {
       return null;
     }
     if (appointment.meetingUrl) {

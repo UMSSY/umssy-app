@@ -96,6 +96,7 @@ describe('AppointmentsService', () => {
       expect(mapper.toResponseList).toHaveBeenCalledExactlyOnceWith(
         records,
         MENTOR_ID,
+        NOW,
       );
     },
   );
@@ -106,9 +107,13 @@ describe('AppointmentsService', () => {
     mapper.toResponseList.mockReturnValue([]);
 
     await expect(
-      service.findMine(STUDENT_ID, { scope: 'upcoming', page: 1, pageSize: 10 }),
+      service.findMine(STUDENT_ID, {
+        scope: 'upcoming',
+        page: 1,
+        pageSize: 10,
+      }),
     ).resolves.toEqual({ items: [], total: 0, page: 1, pageSize: 10 });
-    expect(mapper.toResponseList).toHaveBeenCalledWith([], STUDENT_ID);
+    expect(mapper.toResponseList).toHaveBeenCalledWith([], STUDENT_ID, NOW);
   });
 
   it('keeps the first page when there are no appointments at all', async () => {
@@ -179,7 +184,11 @@ describe('AppointmentsService', () => {
     repository.findMine.mockRejectedValue(failure);
 
     await expect(
-      service.findMine(STUDENT_ID, { scope: 'upcoming', page: 1, pageSize: 10 }),
+      service.findMine(STUDENT_ID, {
+        scope: 'upcoming',
+        page: 1,
+        pageSize: 10,
+      }),
     ).rejects.toBe(failure);
     expect(mapper.toResponseList).not.toHaveBeenCalled();
   });
@@ -202,6 +211,7 @@ describe('AppointmentsService', () => {
         record,
         userId,
         MEETING_URL,
+        NOW,
       );
       expect(repository.assignMeetingUrl).not.toHaveBeenCalled();
     },
@@ -253,6 +263,7 @@ describe('AppointmentsService', () => {
       record,
       STUDENT_ID,
       MEETING_URL,
+      NOW,
     );
   });
 
@@ -289,6 +300,7 @@ describe('AppointmentsService', () => {
         record,
         MENTOR_ID,
         null,
+        NOW,
       );
       expect(repository.assignMeetingUrl).not.toHaveBeenCalled();
     },
