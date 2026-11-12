@@ -31,6 +31,7 @@ import { RolesGuard } from '../../../common/guards/roles.guard.js';
 import { RequestValidationPipe } from '../../../common/pipes/request-validation.pipe.js';
 import type { AuthenticatedUser } from '../../../common/types/authenticated-user.types.js';
 import {
+  APPOINTMENT_DETAIL_RESPONSE_SCHEMA,
   APPOINTMENT_MESSAGES,
   APPOINTMENT_RESPONSE_SCHEMA,
   CREATE_APPOINTMENT_DOCS,
@@ -123,6 +124,7 @@ export class AppointmentsController {
   @Get(':id')
   @ApiOperation({
     summary: FIND_APPOINTMENT_DOCS.summary,
+    description: FIND_APPOINTMENT_DOCS.description,
   })
   @ApiParam({
     name: 'id',
@@ -143,7 +145,7 @@ export class AppointmentsController {
         statusCode: { type: 'integer', example: 200 },
         ok: { type: 'boolean', example: true },
         detail: { type: 'string' },
-        data: APPOINTMENT_RESPONSE_SCHEMA,
+        data: APPOINTMENT_DETAIL_RESPONSE_SCHEMA,
       },
     },
   })
