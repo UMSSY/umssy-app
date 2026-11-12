@@ -114,7 +114,47 @@ describe('GET /api/mentors/me/profile-suggestions', () => {
       detail: 'OK',
       data: { pendingCount: 4 },
     });
-    expect(response.body.data.suggestions).toHaveLength(4);
+    expect(response.body.data).toEqual({
+      pendingCount: 4,
+      suggestions: [
+        {
+          code: 'MISSING_PROFILE_PHOTO',
+          field: 'photoUrl',
+          message: 'Agrega una fotografía a tu perfil.',
+          title: 'Agrega tu fotografía',
+          benefitDescription:
+            'Ayuda a los estudiantes a reconocerte y conocer tu perfil.',
+          editReference: { section: 'photoUrl', action: 'edit' },
+        },
+        {
+          code: 'MISSING_PROFESSIONAL_DESCRIPTION',
+          field: 'aboutMe',
+          message: 'Completa tu descripción profesional.',
+          title: 'Completa tu descripción profesional',
+          benefitDescription:
+            'Presenta tu trayectoria y lo que puedes aportar como mentor.',
+          editReference: { section: 'aboutMe', action: 'edit' },
+        },
+        {
+          code: 'MISSING_SPECIALTY',
+          field: 'mentorTechnicalAreas',
+          message: 'Agrega al menos un área técnica como especialidad.',
+          title: 'Completa tus áreas técnicas',
+          benefitDescription:
+            'Ayuda a los estudiantes a identificar tus especialidades.',
+          editReference: { section: 'mentorTechnicalAreas', action: 'edit' },
+        },
+        {
+          code: 'MISSING_WORK_EXPERIENCE',
+          field: 'workExperiences',
+          message: 'Registra tu experiencia laboral.',
+          title: 'Registra tu experiencia laboral',
+          benefitDescription:
+            'Muestra la experiencia práctica que puedes compartir en las mentorías.',
+          editReference: { section: 'workExperiences', action: 'edit' },
+        },
+      ],
+    });
     expect(Object.keys(response.body).sort()).toEqual([
       'data',
       'detail',
