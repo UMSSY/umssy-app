@@ -56,6 +56,8 @@ const STATUS_TITLES = [
   AppointmentStatusTitle.LEGACY_PENDING,
   AppointmentStatusTitle.CANCELLED,
   AppointmentStatusTitle.COMPLETED,
+  AppointmentStatusTitle.LEGACY_COMPLETED,
+  'CANCELADA',
   'RECHAZADA',
 ] as const;
 
