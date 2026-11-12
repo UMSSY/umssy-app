@@ -257,6 +257,8 @@ export function DocumentsCvView() {
         available={cvExtraction.available}
         selection={cvExtraction.selection}
         errorMessage={cvExtraction.errorMessage}
+        canRetry={cvExtraction.isRetryable}
+        onRetry={cvExtraction.retry}
         isApplying={cvApply.isApplying}
         applyReport={cvApply.report}
         onToggleItem={cvExtraction.toggleItem}
