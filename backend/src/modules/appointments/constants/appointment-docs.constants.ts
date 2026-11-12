@@ -61,7 +61,12 @@ export const APPOINTMENT_RESPONSE_SCHEMA = {
         role: { type: 'string' as const, enum: ['mentor', 'student'] },
       },
     },
-    status: { type: 'string' as const, example: 'CONFIRMED' },
+    status: {
+      type: 'string' as const,
+      example: 'CONFIRMED',
+      description:
+        'CONFIRMED hasta la hora de fin; COMPLETED desde la hora de fin (calculado, no se guarda); CANCELLED se conserva',
+    },
     message: {
       type: 'string' as const,
       nullable: true,
@@ -90,7 +95,7 @@ export const CREATE_APPOINTMENT_DOCS = {
 export const FIND_MY_APPOINTMENTS_DOCS = {
   summary: 'Consulta las citas propias próximas o pasadas',
   description:
-    'Incluye citas confirmadas y confirmaciones heredadas, normalizadas a CONFIRMED',
+    'Incluye citas confirmadas y confirmaciones heredadas, normalizadas a CONFIRMED; past incluye además las completadas. Una cita confirmada se devuelve COMPLETED desde su hora de fin',
   scopeDescription:
     'Por defecto upcoming; la clasificación utiliza la hora de fin de la cita',
   invalidQueryDescription: 'Los parámetros de consulta no son válidos',
