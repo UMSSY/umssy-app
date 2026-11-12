@@ -175,4 +175,45 @@ describe('AppointmentsRepository', () => {
       ),
     ).resolves.toBe(false);
   });
+
+  it('busca reservas propias confirmadas o completadas que empiezan dentro del día', async () => {
+    const tx = { appointment: { count: vi.fn().mockResolvedValue(1) } };
+    const repository = new AppointmentsRepository({} as never);
+    const day = {
+      start: new Date('2026-10-23T04:00:00.000Z'),
+      end: new Date('2026-10-24T04:00:00.000Z'),
+    };
+
+    await expect(
+      repository.hasReservationOnDay(DATA.studentId, day, tx as never),
+    ).resolves.toBe(true);
+
+    expect(tx.appointment.count).toHaveBeenCalledWith({
+      where: {
+        studentId: DATA.studentId,
+        startAt: { gte: day.start, lt: day.end },
+        status: {
+          title: {
+            in: [
+              AppointmentStatusTitle.CONFIRMED,
+              AppointmentStatusTitle.LEGACY_CONFIRMED,
+              AppointmentStatusTitle.COMPLETED,
+            ],
+          },
+        },
+      },
+    });
+  });
+
+  it('no encuentra reservas cuando el conteo del día es cero', async () => {
+    const prisma = { appointment: { count: vi.fn().mockResolvedValue(0) } };
+    const repository = new AppointmentsRepository(prisma as never);
+
+    await expect(
+      repository.hasReservationOnDay(DATA.studentId, {
+        start: new Date('2026-10-23T04:00:00.000Z'),
+        end: new Date('2026-10-24T04:00:00.000Z'),
+      }),
+    ).resolves.toBe(false);
+  });
 });

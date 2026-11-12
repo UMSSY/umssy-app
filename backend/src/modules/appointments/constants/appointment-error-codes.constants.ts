@@ -7,7 +7,9 @@ export const APPOINTMENT_ERROR_CODES = {
   appointmentOverlap: 'APPOINTMENT_OVERLAP',
   blockAlreadyBooked: 'BLOCK_ALREADY_BOOKED',
   blockInPast: 'BLOCK_IN_PAST',
+  dailyAppointmentLimit: 'DAILY_APPOINTMENT_LIMIT',
   invalidOrientationType: 'INVALID_ORIENTATION_TYPE',
   mentorUnavailable: 'MENTOR_UNAVAILABLE',
   ownBlock: 'OWN_BLOCK',
+  slotUnavailable: 'SLOT_UNAVAILABLE',
 } as const;

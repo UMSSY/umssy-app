@@ -77,7 +77,7 @@ export const APPOINTMENT_RESPONSE_SCHEMA = {
 export const CREATE_APPOINTMENT_DOCS = {
   summary: 'Solicita una cita en un horario libre y la devuelve confirmada',
   description:
-    'Valida el bloque, la disponibilidad del mentor y la fecha, y crea la cita con estado CONFIRMED (201, horarios en UTC)',
+    'Valida el bloque y la fecha, revisa al confirmar que el mentor siga disponible (403 si está en pausa) y crea la cita con estado CONFIRMED (201, horarios en UTC)',
   blockDescription:
     'Identificador (UUID) del bloque de disponibilidad a reservar',
   topicDescription:
@@ -85,8 +85,9 @@ export const CREATE_APPOINTMENT_DOCS = {
   messageDescription: `Mensaje obligatorio para el mentor (de 1 a 300 caracteres, sin contar espacios al inicio y al final)`,
   createdDescription: 'Cita creada con estado CONFIRMED',
   badRequestDescription: `El cuerpo no es válido: tema ausente o no ofrecido por el mentor, o mensaje vacío o mayor a 300 caracteres`,
-  notFoundDescription: 'El bloque de disponibilidad o el mentor no existen',
-  conflictDescription: 'El horario ya fue reservado o el día está bloqueado',
+  notFoundDescription: 'El mentor del bloque no existe',
+  conflictDescription:
+    'El horario ya fue reservado, ya no está disponible porque el bloque se eliminó o el día está bloqueado, se cruza con otra cita o quien reserva ya tiene una cita ese día (hora de Bolivia)',
 } as const;
 
 export const FIND_MY_APPOINTMENTS_DOCS = {
