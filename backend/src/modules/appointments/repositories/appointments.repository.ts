@@ -3,6 +3,7 @@ import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import type { TransactionClient } from '../../../common/types/transaction-client.types.js';
 import { AppointmentStatusTitle } from '../../availability/enums/appointment-status-title.enum.js';
 import { ACTIVE_APPOINTMENT_STATUS_TITLES } from '../constants/active-appointment-statuses.constants.js';
+import { UPCOMING_APPOINTMENT_STATUS_TITLES } from '../constants/upcoming-appointment-statuses.constants.js';
 import { PAST_APPOINTMENT_STATUS_TITLES } from '../constants/past-appointment-statuses.constants.js';
 import { APPOINTMENT_PARTICIPANT_LOCK_PREFIX } from '../constants/appointment-lock.constants.js';
 import { APPOINTMENT_SELECT } from '../constants/appointment-select.constants.js';
@@ -146,7 +147,7 @@ export class AppointmentsRepository {
         title: {
           in:
             scope === 'upcoming'
-              ? ACTIVE_APPOINTMENT_STATUS_TITLES
+              ? UPCOMING_APPOINTMENT_STATUS_TITLES
               : PAST_APPOINTMENT_STATUS_TITLES,
         },
       },
