@@ -157,7 +157,7 @@ export function WeekGrid({
                     );
                   })}
                   {draftsByDay[dayIndex].map((draft) => {
-                    const { topPx, heightPx } = getBlockVerticalPosition(draft.startAt, draft.endAt, startHour, endHour);
+                    const { topPx, heightPx } = getBlockVerticalPosition(draft.startAt, draft.endAt, startHour, endHour, hourHeightPx);
                     const draftRange = `${toBoliviaTime(draft.startAt).time} – ${toBoliviaTime(draft.endAt).time}`;
                     return (
                       <li
