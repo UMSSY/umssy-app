@@ -30,11 +30,11 @@ export function ReportActions({
       <DropdownMenu>
         <DropdownMenuTrigger
           render={
-            <Button type="button" variant="brand" disabled={!hasResults || isExporting} aria-busy={isExporting} />
+            <Button type="button" variant="brand" className="group" disabled={!hasResults || isExporting} aria-busy={isExporting} />
           }
         >
           {isExporting ? "Descargando..." : "Descargar"}
-          <ChevronDown className="size-4" aria-hidden="true" />
+          <ChevronDown className="size-4 transition-transform group-aria-expanded:rotate-180" aria-hidden="true" />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-72 rounded-md shadow-lg">
           <p className="px-2 py-1 text-xs font-medium text-muted-foreground">Alcance de la descarga</p>
