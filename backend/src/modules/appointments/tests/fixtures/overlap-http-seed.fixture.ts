@@ -12,6 +12,8 @@ import {
   FIXTURE_USERS,
 } from '../../../users/constants/seed-fixture-users.constants.js';
 import { ACTIVE_APPOINTMENT_STATUS_TITLES } from '../../constants/active-appointment-statuses.constants.js';
+import { DAILY_APPOINTMENT_LIMIT_STATUS_TITLES } from '../../constants/daily-appointment-limit-statuses.constants.js';
+import type { BoliviaDayRange } from '../../types/bolivia-day-range.types.js';
 import type { AppointmentRecord } from '../../types/appointment-record.types.js';
 import type { CreateAppointmentData } from '../../types/create-appointment-data.types.js';
 import type { CreateAppointmentHistoryData } from '../../types/create-appointment-history-data.types.js';
@@ -161,11 +163,7 @@ export class InMemoryOverlapSeed {
     return block;
   }
 
-  addBlock(
-    mentorId: string,
-    startAt: Date,
-    endAt: Date,
-  ): InMemoryBlock {
+  addBlock(mentorId: string, startAt: Date, endAt: Date): InMemoryBlock {
     const block: InMemoryBlock = {
       id: randomUUID(),
       mentorId,
@@ -239,17 +237,18 @@ export class InMemoryOverlapSeed {
         userIds: string[],
         transaction: TestTransaction,
       ): Promise<void> => this.lockParticipants(userIds, transaction),
-      hasOverlappingAppointment: (
-        userId: string,
-        startAt: Date,
-        endAt: Date,
-      ) => Promise.resolve(this.hasOverlapping(userId, startAt, endAt)),
+      hasOverlappingAppointment: (userId: string, startAt: Date, endAt: Date) =>
+        Promise.resolve(this.hasOverlapping(userId, startAt, endAt)),
+      hasReservationOnDay: (userId: string, day: BoliviaDayRange) =>
+        Promise.resolve(this.hasReservationOnDay(userId, day)),
     };
   }
 
   get availabilityRepository() {
     return {
-      findById: (blockId: string): Promise<AvailabilityBlockWithAppointments | null> => {
+      findById: (
+        blockId: string,
+      ): Promise<AvailabilityBlockWithAppointments | null> => {
         const block = this.blocks.find((item) => item.id === blockId);
         if (!block) {
           return Promise.resolve(null);
@@ -389,18 +388,25 @@ export class InMemoryOverlapSeed {
     );
   }
 
-  private hasOverlapping(
-    userId: string,
-    startAt: Date,
-    endAt: Date,
-  ): boolean {
+  private hasOverlapping(userId: string, startAt: Date, endAt: Date): boolean {
     return this.appointments.some(
       (appointment) =>
-        (appointment.mentorId === userId ||
-          appointment.studentId === userId) &&
+        (appointment.mentorId === userId || appointment.studentId === userId) &&
         appointment.startAt.getTime() < endAt.getTime() &&
         appointment.endAt.getTime() > startAt.getTime() &&
         ACTIVE_APPOINTMENT_STATUS_TITLES.includes(
+          appointment.status.title as AppointmentStatusTitle,
+        ),
+    );
+  }
+
+  private hasReservationOnDay(userId: string, day: BoliviaDayRange): boolean {
+    return this.appointments.some(
+      (appointment) =>
+        appointment.studentId === userId &&
+        appointment.startAt.getTime() >= day.start.getTime() &&
+        appointment.startAt.getTime() < day.end.getTime() &&
+        DAILY_APPOINTMENT_LIMIT_STATUS_TITLES.includes(
           appointment.status.title as AppointmentStatusTitle,
         ),
     );
