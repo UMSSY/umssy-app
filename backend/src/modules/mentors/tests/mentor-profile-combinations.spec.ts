@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { MentorsRepository } from '../repositories/mentors.repository.js';
 import { MentorProfileSuggestionsService } from '../services/mentor-profile-suggestions.service.js';
+import { MentorMapper } from '../mappers/mentor.mapper.js';
 import { buildMentorProfile } from './fixtures/mentor-profile.fixture.js';
 
 // Explicit expected code order is independent of the production detection functions.
@@ -43,7 +44,12 @@ describe('profile completeness combinations', () => {
           ? [{ code: 'MISSING_WORK_EXPERIENCE', field: 'workExperiences' }]
           : []),
       ];
-      const result = await service.findSuggestions(profile.id);
+      const response = new MentorMapper().toProfileSuggestionsResponse(
+        await service.findSuggestions(profile.id),
+      );
+      const result = response.suggestions;
+      expect(response.pendingCount).toBe(expected.length);
+      expect(response.pendingCount).toBe(result.length);
       expect(result.map(({ code, field }) => ({ code, field }))).toEqual(
         expected,
       );
