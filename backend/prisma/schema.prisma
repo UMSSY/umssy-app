@@ -456,22 +456,24 @@ model BlockedDate {
 }
 
 model Appointment {
-  id                String    @id @default(uuid()) @db.Uuid
-  blockId           String?   @map("block_id") @db.Uuid
-  mentorId          String    @map("mentor_id") @db.Uuid
-  studentId         String    @map("student_id") @db.Uuid
-  startAt           DateTime  @map("start_at") @db.Timestamptz(6)
-  endAt             DateTime  @map("end_at") @db.Timestamptz(6)
-  statusId          String    @map("status_id") @db.Uuid
-  orientationTypeId String?   @map("orientation_type_id") @db.Uuid
-  message           String?   @db.VarChar(300)
-  rejectionReason   String?   @map("rejection_reason") @db.VarChar(300)
-  meetingUrl        String?   @map("meeting_url") @db.VarChar(255)
-  cancelledById     String?   @map("cancelled_by_id") @db.Uuid
-  requestedAt       DateTime  @default(now()) @map("requested_at") @db.Timestamptz(6)
-  respondedAt       DateTime? @map("responded_at") @db.Timestamptz(6)
-  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt         DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  id                 String    @id @default(uuid()) @db.Uuid
+  blockId            String?   @map("block_id") @db.Uuid
+  mentorId           String    @map("mentor_id") @db.Uuid
+  studentId          String    @map("student_id") @db.Uuid
+  startAt            DateTime  @map("start_at") @db.Timestamptz(6)
+  endAt              DateTime  @map("end_at") @db.Timestamptz(6)
+  statusId           String    @map("status_id") @db.Uuid
+  orientationTypeId  String?   @map("orientation_type_id") @db.Uuid
+  message            String?   @db.VarChar(300)
+  rejectionReason    String?   @map("rejection_reason") @db.VarChar(300)
+  meetingUrl         String?   @map("meeting_url") @db.VarChar(255)
+  cancelledById      String?   @map("cancelled_by_id") @db.Uuid
+  cancellationReason String?   @map("cancellation_reason") @db.VarChar(300)
+  cancelledAt        DateTime? @map("cancelled_at") @db.Timestamptz(6)
+  requestedAt        DateTime  @default(now()) @map("requested_at") @db.Timestamptz(6)
+  respondedAt        DateTime? @map("responded_at") @db.Timestamptz(6)
+  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   block           AvailabilityBlock? @relation(fields: [blockId], references: [id], onDelete: SetNull)
   mentor          User               @relation("AppointmentMentor", fields: [mentorId], references: [id], onDelete: Restrict)
