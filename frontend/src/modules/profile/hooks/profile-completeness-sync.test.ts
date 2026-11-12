@@ -16,6 +16,8 @@ import { DETECTED_SKILLS_QUERY_KEY } from '@/modules/skills/constants/skills.con
 import { useSaveProfile } from './use-save-profile';
 import { useProfileCompleteness } from './use-profile-completeness';
 import { useInvalidateProfileCompleteness } from './use-invalidate-profile-completeness';
+import { createProfileCompleteness } from '../testing/profile-completeness.fixture';
+import type { ProfileCompletenessSectionId } from '../types/profile-completeness-section-id.types';
 
 const api = vi.hoisted(() => ({
   completeness: vi.fn(),
@@ -29,6 +31,8 @@ const api = vi.hoisted(() => ({
   deleteExperience: vi.fn(),
   createCertification: vi.fn(),
   updateCertification: vi.fn(),
+  createCertificationWithDocument: vi.fn(),
+  updateCertificationWithDocument: vi.fn(),
   deleteCertification: vi.fn(),
   saveSkills: vi.fn(),
   catalog: vi.fn(),
@@ -65,6 +69,8 @@ vi.mock('@/modules/certifications/services/certifications.service', () => ({
   certificationsService: {
     createCertification: api.createCertification,
     updateCertification: api.updateCertification,
+    createWithDocument: api.createCertificationWithDocument,
+    updateWithDocument: api.updateCertificationWithDocument,
     deleteCertification: api.deleteCertification,
   },
 }));
@@ -135,89 +141,148 @@ function useActions() {
   };
 }
 
-const cases: [
-  string,
-  (actions: ReturnType<typeof useActions>) => Promise<unknown>,
-  ReturnType<typeof vi.fn>,
-  number,
-][] = [
-  ['contact', (a) => a.profile.savePersonalInfo(contact), api.contact, 55],
-  [
-    'presentation',
-    (a) =>
+interface SyncCase {
+  name: string;
+  section: ProfileCompletenessSectionId;
+  operation: 'complete' | 'edit' | 'remove';
+  action: (actions: ReturnType<typeof useActions>) => Promise<unknown>;
+  request: ReturnType<typeof vi.fn>;
+}
+
+const document = new File(['certificate'], 'certificate.pdf', {
+  type: 'application/pdf',
+});
+const cases: SyncCase[] = [
+  {
+    name: 'contact',
+    section: 'contact',
+    operation: 'complete',
+    action: (a) => a.profile.savePersonalInfo(contact),
+    request: api.contact,
+  },
+  {
+    name: 'presentation',
+    section: 'presentation',
+    operation: 'complete',
+    action: (a) =>
       a.profile.savePresentation({
         headline: 'Developer',
         aboutMe: 'Web applications',
       }),
-    api.presentation,
-    50,
-  ],
-  [
-    'create education',
-    (a) => a.education.save(education),
-    api.createEducation,
-    55,
-  ],
-  [
-    'edit education',
-    (a) => a.education.save(education, education.id),
-    api.updateEducation,
-    35,
-  ],
-  [
-    'delete education',
-    (a) => a.deleteEducation.deleteEducation(education),
-    api.deleteEducation,
-    15,
-  ],
-  [
-    'create experience',
-    (a) => a.experience.save(experience),
-    api.createExperience,
-    55,
-  ],
-  [
-    'edit experience',
-    (a) => a.experience.save(experience, experience.id),
-    api.updateExperience,
-    35,
-  ],
-  [
-    'delete experience',
-    (a) => a.deleteExperience.deleteWorkExperience(experience),
-    api.deleteExperience,
-    15,
-  ],
-  [
-    'create certification',
-    (a) => a.createCertification.mutate(certification),
-    api.createCertification,
-    45,
-  ],
-  [
-    'edit certification',
-    (a) =>
+    request: api.presentation,
+  },
+  {
+    name: 'create education',
+    section: 'education',
+    operation: 'complete',
+    action: (a) => a.education.save(education),
+    request: api.createEducation,
+  },
+  {
+    name: 'edit education',
+    section: 'education',
+    operation: 'edit',
+    action: (a) => a.education.save(education, education.id),
+    request: api.updateEducation,
+  },
+  {
+    name: 'delete education',
+    section: 'education',
+    operation: 'remove',
+    action: (a) => a.deleteEducation.deleteEducation(education),
+    request: api.deleteEducation,
+  },
+  {
+    name: 'create experience',
+    section: 'work-experience',
+    operation: 'complete',
+    action: (a) => a.experience.save(experience),
+    request: api.createExperience,
+  },
+  {
+    name: 'edit experience',
+    section: 'work-experience',
+    operation: 'edit',
+    action: (a) => a.experience.save(experience, experience.id),
+    request: api.updateExperience,
+  },
+  {
+    name: 'delete experience',
+    section: 'work-experience',
+    operation: 'remove',
+    action: (a) => a.deleteExperience.deleteWorkExperience(experience),
+    request: api.deleteExperience,
+  },
+  {
+    name: 'create certification',
+    section: 'certifications',
+    operation: 'complete',
+    action: (a) => a.createCertification.mutate(certification),
+    request: api.createCertification,
+  },
+  {
+    name: 'edit certification',
+    section: 'certifications',
+    operation: 'edit',
+    action: (a) =>
       a.updateCertification.mutate({
         id: certification.id,
         data: certification,
       }),
-    api.updateCertification,
-    35,
-  ],
-  [
-    'delete certification',
-    (a) => a.deleteCertification.deleteCertification(certification),
-    api.deleteCertification,
-    25,
-  ],
-  ['add skill', (a) => a.skills.saveSkills([skill]), api.saveSkills, 50],
-  ['remove skill', (a) => a.skills.saveSkills([]), api.saveSkills, 20],
+    request: api.updateCertification,
+  },
+  {
+    name: 'create certification with document',
+    section: 'certifications',
+    operation: 'complete',
+    action: (a) =>
+      a.createCertification.mutate({ data: certification, document }),
+    request: api.createCertificationWithDocument,
+  },
+  {
+    name: 'edit certification with document',
+    section: 'certifications',
+    operation: 'edit',
+    action: (a) =>
+      a.updateCertification.mutate({
+        id: certification.id,
+        data: certification,
+        documentChange: { type: 'replace', file: document },
+      }),
+    request: api.updateCertificationWithDocument,
+  },
+  {
+    name: 'delete certification',
+    section: 'certifications',
+    operation: 'remove',
+    action: (a) => a.deleteCertification.deleteCertification(certification),
+    request: api.deleteCertification,
+  },
+  {
+    name: 'add skill',
+    section: 'skills',
+    operation: 'complete',
+    action: (a) => a.skills.saveSkills([skill]),
+    request: api.saveSkills,
+  },
+  {
+    name: 'remove skill',
+    section: 'skills',
+    operation: 'remove',
+    action: (a) => a.skills.saveSkills([]),
+    request: api.saveSkills,
+  },
 ];
+
+const initialCompleteness = createProfileCompleteness([
+  'contact',
+  'presentation',
+]);
 
 beforeEach(() => {
   for (const mock of Object.values(api))
     mock.mockResolvedValue({ id: 'saved' });
-  api.completeness.mockResolvedValue({ percentage: 35, sections: [] });
+  api.completeness.mockResolvedValue(initialCompleteness);
   api.catalog.mockResolvedValue([skill]);
   api.mySkills.mockResolvedValue([]);
   api.saveSkills.mockResolvedValue([skill]);
@@ -228,10 +293,11 @@ afterEach(() => {
   vi.resetAllMocks();
 });
 
-async function renderActions() {
+async function renderActions(initial = initialCompleteness) {
+  api.completeness.mockResolvedValue(initial);
   const hook = renderHookWithQuery(useActions);
   await waitFor(() => {
-    expect(hook.result.current.progress.completeness?.percentage).toBe(35);
+    expect(hook.result.current.progress.completeness).toEqual(initial);
     expect(hook.result.current.skills.isLoading).toBe(false);
   });
   return hook;
@@ -239,31 +305,39 @@ async function renderActions() {
 
 describe('profile completeness synchronization', () => {
   it.each(cases)(
-    'refreshes after successful %s without remounting',
-    async (_name, action, _request, percentage) => {
-      const { result } = await renderActions();
-      api.completeness.mockResolvedValue({ percentage, sections: [] });
+    'refreshes percentage and all section statuses after successful $name without remounting',
+    async ({ action, request, section, operation }) => {
+      const initial = createProfileCompleteness(
+        operation === 'complete' ? [] : [section],
+      );
+      const saved = createProfileCompleteness(
+        operation === 'remove' ? [] : [section],
+      );
+      const { result } = await renderActions(initial);
+      api.completeness.mockResolvedValue(saved);
       await act(async () => {
         await action(result.current);
       });
       await waitFor(() =>
-        expect(result.current.progress.completeness?.percentage).toBe(
-          percentage,
-        ),
+        expect(result.current.progress.completeness).toEqual(saved),
       );
+      expect(request).toHaveBeenCalledOnce();
       expect(api.completeness).toHaveBeenCalledTimes(2);
     },
   );
 
   it.each(cases)(
-    'does not refresh after failed %s',
-    async (_name, action, request) => {
-      const { result } = await renderActions();
+    'preserves percentage and all section statuses after failed $name',
+    async ({ action, request, section, operation }) => {
+      const initial = createProfileCompleteness(
+        operation === 'complete' ? [] : [section],
+      );
+      const { result } = await renderActions(initial);
       request.mockRejectedValue(new Error('Write failed'));
       await act(async () => {
         await action(result.current);
       });
-      expect(result.current.progress.completeness?.percentage).toBe(35);
+      expect(result.current.progress.completeness).toEqual(initial);
       expect(api.completeness).toHaveBeenCalledOnce();
     },
   );
@@ -296,14 +370,19 @@ describe('profile completeness synchronization', () => {
       refresh: useInvalidateProfileCompleteness(),
     }));
     const initialSignal = api.completeness.mock.calls[0][0] as AbortSignal;
-    api.completeness.mockResolvedValue({ percentage: 55, sections: [] });
+    const saved = createProfileCompleteness([
+      'contact',
+      'presentation',
+      'education',
+    ]);
+    api.completeness.mockResolvedValue(saved);
     await act(() => result.current.refresh());
     expect(initialSignal.aborted).toBe(true);
     await act(async () => {
-      resolveOld({ percentage: 0, sections: [] });
+      resolveOld(createProfileCompleteness());
     });
     await waitFor(() =>
-      expect(result.current.progress.completeness?.percentage).toBe(55),
+      expect(result.current.progress.completeness).toEqual(saved),
     );
   });
 
@@ -315,7 +394,12 @@ describe('profile completeness synchronization', () => {
     await waitFor(() =>
       expect(result.current.detected.summary?.status).toBe('pending'),
     );
-    api.completeness.mockResolvedValue({ percentage: 50, sections: [] });
+    const saved = createProfileCompleteness([
+      'contact',
+      'presentation',
+      'skills',
+    ]);
+    api.completeness.mockResolvedValue(saved);
     await act(async () => {
       client.setQueryData(DETECTED_SKILLS_QUERY_KEY, {
         status: 'ready',
@@ -323,7 +407,7 @@ describe('profile completeness synchronization', () => {
       });
     });
     await waitFor(() =>
-      expect(result.current.progress.completeness?.percentage).toBe(50),
+      expect(result.current.progress.completeness).toEqual(saved),
     );
   });
 });
