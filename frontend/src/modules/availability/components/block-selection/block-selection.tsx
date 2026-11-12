@@ -19,6 +19,7 @@ export function BlockSelection({
   weekRange,
   fetchFreeBlocks,
   stickyOffset,
+  density,
 }: BlockSelectionProps) {
   const {
     selectedBlock,
@@ -64,6 +65,7 @@ export function BlockSelection({
           selectedBlockId={selectedBlock?.id}
           onSelectBlock={handleSelectBlock}
           stickyOffset={stickyOffset}
+          density={density}
         />
         <BlockSelectionPanel
           selectedBlock={selectedBlock}

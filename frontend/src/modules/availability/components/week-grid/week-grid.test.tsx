@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, fireEvent, cleanup, within } from "@testing-library/react";
 import { WeekGrid } from "./week-grid";
-import { HOUR_HEIGHT_PX } from "../../constants/week-grid.constants";
+import { COMPACT_HOUR_HEIGHT_PX, HOUR_HEIGHT_PX } from "../../constants/week-grid.constants";
 import type { AvailabilityBlock } from "../../types/availability-block.types";
 import type { WeekRange } from "@/shared/types/week-range.types";
 
@@ -272,5 +272,36 @@ describe("WeekGrid", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Martes 6 de octubre, 18:00 a 19:00, libre" }));
     expect(onEditBlock).toHaveBeenCalledWith(blocks[0]);
+  });
+
+  it("en densidad compacta, reduce la altura de la grilla y de un bloque de 30 minutos", () => {
+    const shortBlock = makeBlock({
+      id: "5",
+      startAt: "2026-10-09T14:00:00.000Z",
+      endAt: "2026-10-09T14:30:00.000Z",
+      state: "free",
+    });
+    render(<WeekGrid blocks={[shortBlock]} weekRange={WEEK_RANGE} variant="owner" density="compact" />);
+
+    const item = screen.getByRole("button", { name: "libre, 10:00 a 10:30" }).closest("li");
+    expect(item).toHaveStyle({ height: `${COMPACT_HOUR_HEIGHT_PX / 2}px` });
+
+    const dayColumn = screen.getByRole("heading", { name: "LUN 5" }).nextElementSibling;
+    expect(dayColumn).toHaveStyle({ height: `${15 * COMPACT_HOUR_HEIGHT_PX}px` });
+  });
+
+  it("en densidad compacta, muestra solo la hora en el bloque, sin el estado", () => {
+    render(<WeekGrid blocks={blocks} weekRange={WEEK_RANGE} variant="owner" density="compact" />);
+
+    const button = screen.getByRole("button", { name: /^confirmada, 17:00/ });
+    expect(button).toHaveTextContent("17:00");
+    expect(button).not.toHaveTextContent("Cita");
+  });
+
+  it("en densidad normal (por defecto), muestra el estado y la hora en el bloque", () => {
+    render(<WeekGrid blocks={blocks} weekRange={WEEK_RANGE} variant="owner" />);
+
+    const button = screen.getByRole("button", { name: /^confirmada, 17:00/ });
+    expect(button).toHaveTextContent("Cita17:00");
   });
 });

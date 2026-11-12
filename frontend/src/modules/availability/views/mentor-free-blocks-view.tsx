@@ -12,7 +12,9 @@ import { BlockSelection } from "../components/block-selection/block-selection";
 import { MENTOR_FREE_BLOCKS_TEXT } from "../constants/mentor-free-blocks.constants";
 import { useElementHeight } from "../hooks/use-element-height";
 import { useMentorFreeBlocks } from "../hooks/use-mentor-free-blocks";
+import { useWeekGridDensity } from "../hooks/use-week-grid-density";
 import { availabilityApi } from "../services/availability.service";
+import { WeekGridDensityToggle } from "../components/week-grid/week-grid-density-toggle";
 import type { MentorFreeBlocksViewProps } from "../types/mentor-free-blocks-view-props.types";
 import { formatWeekLabel } from "../utils/format-week-label";
 
@@ -22,6 +24,7 @@ export function MentorFreeBlocksView({ mentorId }: MentorFreeBlocksViewProps) {
   const currentWeekStart = getWeekRange(new Date()).startAt;
   const { blocks, isLoading, error } = useMentorFreeBlocks(mentorId, weekRange);
   const { ref: weekNavRef, height: weekNavHeight } = useElementHeight<HTMLElement>();
+  const { density, setDensity } = useWeekGridDensity();
 
   const goToNextWeek = () => setWeekStart(addWeeks(weekStart, 1));
 
@@ -61,6 +64,7 @@ export function MentorFreeBlocksView({ mentorId }: MentorFreeBlocksViewProps) {
         >
           {MENTOR_FREE_BLOCKS_TEXT.today}
         </Button>
+        <WeekGridDensityToggle density={density} onDensityChange={setDensity} />
       </nav>
 
       {isLoading ? (
@@ -86,6 +90,7 @@ export function MentorFreeBlocksView({ mentorId }: MentorFreeBlocksViewProps) {
           weekRange={weekRange}
           fetchFreeBlocks={() => availabilityApi.getMentorFreeBlocks(mentorId, weekRange)}
           stickyOffset={weekNavHeight}
+          density={density}
         />
       )}
     </div>
