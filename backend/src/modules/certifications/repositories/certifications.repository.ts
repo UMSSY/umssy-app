@@ -21,6 +21,14 @@ const certificationSelect = {
 export class CertificationsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
+  async hasByUserId(userId: string): Promise<boolean> {
+    const record = await this.prisma.certification.findFirst({
+      where: { userId },
+      select: { id: true },
+    });
+    return record !== null;
+  }
+
   findPublicationEvidenceIds(userId: string, context: TransactionContext) {
     return context.client.certification.findMany({
       where: { userId, documentUrl: { not: null } },
