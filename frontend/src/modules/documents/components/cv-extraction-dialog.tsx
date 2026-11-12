@@ -1,7 +1,7 @@
 "use client";
 
 import { LoaderCircle } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -19,6 +19,7 @@ import {
   CV_PRESENTATION_INDEX,
   CV_REVIEW_TEXTS,
 } from "../constants/cv-extraction.constants";
+import { CV_APPLY_TEXTS } from "../constants/cv-apply.constants";
 import type { CvExtractionDialogProps } from "../types/cv-extraction-dialog-props.types";
 import { countCvSelection } from "../utils/count-cv-selection";
 import { isCvHeadlineMissing } from "../utils/is-cv-headline-missing";
@@ -37,6 +38,8 @@ export function CvExtractionDialog({
   available,
   selection,
   errorMessage = null,
+  isApplying = false,
+  applyReport = null,
   onToggleItem,
   onToggleSection,
   onContactChange,
@@ -47,10 +50,13 @@ export function CvExtractionDialog({
   onClose,
 }: CvExtractionDialogProps) {
   const isHeadlineMissing = isCvHeadlineMissing(extraction, selection);
-  const canApply = !isExtracting && extraction !== null && countCvSelection(selection) > 0 && !isHeadlineMissing;
+  const isBusy = isExtracting || isApplying;
+  const canApply = !isBusy && extraction !== null && countCvSelection(selection) > 0 && !isHeadlineMissing;
+  const failed = applyReport?.failed ?? [];
+  const applied = applyReport?.applied ?? [];
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => (open || isExtracting ? undefined : onClose())}>
+    <Dialog open={isOpen} onOpenChange={(open) => (open || isBusy ? undefined : onClose())}>
       <DialogContent className="max-w-3xl gap-0 rounded-lg border border-border bg-surface p-0 text-ink ring-0 sm:max-w-3xl">
         <DialogHeader className="gap-1.5 border-b border-border px-6 py-5 pr-14">
           <DialogTitle className="font-tight text-xl font-bold text-ink">{CV_REVIEW_TEXTS.title}</DialogTitle>
@@ -70,6 +76,16 @@ export function CvExtractionDialog({
           {!isExtracting && errorMessage ? (
             <Alert variant="destructive">
               <AlertDescription>{errorMessage}</AlertDescription>
+            </Alert>
+          ) : null}
+          {failed.length > 0 ? (
+            <Alert variant="destructive" className="mb-4">
+              <AlertTitle>{CV_APPLY_TEXTS.partialTitle}</AlertTitle>
+              <AlertDescription className="flex flex-col gap-1">
+                {applied.length > 0 ? <p>{`${CV_APPLY_TEXTS.appliedLabel} ${applied.join(", ")}.`}</p> : null}
+                <p>{`${CV_APPLY_TEXTS.failedLabel} ${failed.join(", ")}.`}</p>
+                <p>{CV_APPLY_TEXTS.retryHint}</p>
+              </AlertDescription>
             </Alert>
           ) : null}
           {!isExtracting && !errorMessage && extraction ? (
@@ -140,7 +156,7 @@ export function CvExtractionDialog({
             type="button"
             variant="outline"
             className="h-10 border-border-strong px-4 text-sm text-ink hover:bg-surface-soft"
-            disabled={isExtracting}
+            disabled={isBusy}
             onClick={onClose}
           >
             {CV_REVIEW_TEXTS.cancel}
@@ -151,7 +167,8 @@ export function CvExtractionDialog({
             disabled={!canApply}
             onClick={onApply}
           >
-            {CV_REVIEW_TEXTS.apply}
+            {isApplying ? <LoaderCircle aria-hidden="true" className="size-4 animate-spin" /> : null}
+            {isApplying ? CV_APPLY_TEXTS.applying : CV_REVIEW_TEXTS.apply}
           </Button>
         </DialogFooter>
       </DialogContent>
