@@ -26,6 +26,32 @@ export const APPOINTMENT_DOCUMENT_RESPONSE_SCHEMA = {
   },
 };
 
+export const APPOINTMENT_CANCELLATION_RESPONSE_SCHEMA = {
+  type: 'object' as const,
+  description: 'Solo en citas canceladas; null en las demás',
+  required: ['cancelledBy', 'cancelledByMe', 'reason', 'cancelledAt'],
+  properties: {
+    cancelledBy: {
+      type: 'string' as const,
+      enum: ['MENTOR', 'STUDENT'],
+      nullable: true,
+      description: 'null si no se registró quién canceló',
+    },
+    cancelledByMe: { type: 'boolean' as const },
+    reason: {
+      type: 'string' as const,
+      nullable: true,
+      maxLength: 300,
+      description: 'null si se canceló sin motivo',
+    },
+    cancelledAt: {
+      type: 'string' as const,
+      format: 'date-time',
+      nullable: true,
+    },
+  },
+};
+
 export const APPOINTMENT_RESPONSE_SCHEMA = {
   type: 'object' as const,
   required: [
@@ -39,6 +65,7 @@ export const APPOINTMENT_RESPONSE_SCHEMA = {
     'message',
     'requestedAt',
     'document',
+    'cancellation',
   ],
   properties: {
     id: { type: 'string' as const, format: 'uuid' },
@@ -76,6 +103,10 @@ export const APPOINTMENT_RESPONSE_SCHEMA = {
     },
     requestedAt: { type: 'string' as const, format: 'date-time' },
     document: { ...APPOINTMENT_DOCUMENT_RESPONSE_SCHEMA, nullable: true },
+    cancellation: {
+      ...APPOINTMENT_CANCELLATION_RESPONSE_SCHEMA,
+      nullable: true,
+    },
   },
 };
 
@@ -114,7 +145,7 @@ export const CREATE_APPOINTMENT_DOCS = {
 export const FIND_MY_APPOINTMENTS_DOCS = {
   summary: 'Consulta las citas propias próximas o pasadas',
   description:
-    'Incluye citas confirmadas y confirmaciones heredadas, normalizadas a CONFIRMED; past incluye además las completadas. Una cita confirmada se devuelve COMPLETED desde su hora de fin',
+    'Incluye citas confirmadas y canceladas, con sus títulos heredados normalizados; past incluye además las completadas. Una cita confirmada se devuelve COMPLETED desde su hora de fin y una cancelada trae quién canceló y el motivo',
   scopeDescription:
     'Por defecto upcoming; la clasificación utiliza la hora de fin de la cita',
   invalidQueryDescription: 'Los parámetros de consulta no son válidos',
@@ -127,7 +158,7 @@ export const FIND_MY_APPOINTMENTS_DOCS = {
 export const FIND_APPOINTMENT_DOCS = {
   summary: 'Consulta una cita únicamente si el usuario participa en ella',
   description:
-    'Incluye el enlace de la videollamada de una cita confirmada que no terminó; si aún no tiene enlace, se genera en esta consulta',
+    'Incluye el enlace de la videollamada de una cita confirmada que no terminó (si aún no tiene enlace, se genera en esta consulta) y, si la cita está cancelada, quién canceló y el motivo',
   idDescription: 'Identificador de la cita',
   invalidIdDescription: 'El identificador de la cita no es válido',
   notFoundDescription: 'La cita no existe',
