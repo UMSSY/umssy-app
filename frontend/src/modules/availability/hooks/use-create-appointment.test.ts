@@ -81,6 +81,25 @@ describe("useCreateAppointment", () => {
     expect(toast.error).toHaveBeenCalledWith("El mentor bloqueó ese día")
   })
 
+  it("con cruce usa el aviso del panel sin marcar el bloque ni mostrar datos privados", async () => {
+    const message = "Ya tienes una cita en ese horario. Elige otro horario."
+    vi.spyOn(appointmentsApi, "createAppointment").mockRejectedValue({
+      isAxiosError: true,
+      response: { status: 409, data: { detail: message, appointment: { name: "Privado", topic: "Privado" } } },
+    })
+    const onConflict = vi.fn()
+    const onOverlap = vi.fn()
+    const { result } = renderHook(() => useCreateAppointment(onConflict, onOverlap), createQueryWrapper())
+
+    const created = await act(async () => result.current.createAppointment(variables))
+
+    expect(created).toBe(false)
+    expect(onOverlap).toHaveBeenCalledOnce()
+    expect(onConflict).not.toHaveBeenCalled()
+    expect(toast.error).not.toHaveBeenCalled()
+    expect(toast.success).not.toHaveBeenCalled()
+  })
+
   it("con otros errores muestra el detail o un mensaje genérico sin marcar el bloque", async () => {
     vi.spyOn(appointmentsApi, "createAppointment")
       .mockRejectedValueOnce({ response: { data: { detail: "El tema de la sesión no es válido" } } })

@@ -250,6 +250,47 @@ describe("BlockSelection", () => {
     expect(screen.getByRole("button", { name: saturdayButton })).toBeEnabled()
   })
 
+  it("conserva tema y mensaje tras un cruce y reserva otro horario", async () => {
+    const user = userEvent.setup()
+    const createSpy = vi.spyOn(appointmentsApi, "createAppointment")
+      .mockRejectedValueOnce({
+        isAxiosError: true,
+        response: { status: 409, data: { detail: REQUEST_APPOINTMENT_TEXT.overlap } },
+      })
+      .mockResolvedValueOnce({ id: "a2" } as Appointment)
+    const uploadSpy = vi.spyOn(appointmentsApi, "uploadDocument")
+      .mockResolvedValue({ fileName: "Referencia.pdf", mimeType: "application/pdf", sizeBytes: 8, uploadedAt: "2026-10-06T22:00:00.000Z" } as AppointmentDocument)
+    const pdf = new File(["%PDF-1.4"], "Referencia.pdf", { type: "application/pdf" })
+    renderSelection(vi.fn().mockResolvedValue([tuesdayBlock, saturdayBlock]))
+
+    await selectTuesday(user)
+    await chooseTopic(user, "Revisión de CV")
+    await user.type(screen.getByLabelText(/Mensaje para el mentor/), "Revisar mi CV")
+    await user.upload(screen.getByLabelText(APPOINTMENT_DOCUMENT_TEXT.label), pdf)
+    await user.click(screen.getByRole("button", { name: REQUEST_APPOINTMENT_TEXT.submit }))
+
+    expect(await screen.findByText(REQUEST_APPOINTMENT_TEXT.overlap)).toBeInTheDocument()
+    expect(screen.getByLabelText(/Mensaje para el mentor/)).toHaveValue("Revisar mi CV")
+    expect(uploadSpy).not.toHaveBeenCalled()
+    expect(screen.getByText("Referencia.pdf")).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: tuesdayButton })).toBeInTheDocument()
+    await user.click(screen.getByRole("button", { name: saturdayButton }))
+    await screen.findByText("Sábado 10 de octubre de 2026")
+
+    expect(screen.queryByText(REQUEST_APPOINTMENT_TEXT.overlap)).not.toBeInTheDocument()
+    expect(screen.getByLabelText(/Tema de la sesión/)).toHaveTextContent("Revisión de CV")
+    expect(screen.getByLabelText(/Mensaje para el mentor/)).toHaveValue("Revisar mi CV")
+    await user.click(screen.getByRole("button", { name: REQUEST_APPOINTMENT_TEXT.submit }))
+    await waitFor(() => expect(createSpy).toHaveBeenLastCalledWith({
+      blockId: "2", orientationTypeId: "t1", message: "Revisar mi CV",
+    }))
+    await waitFor(() => expect(uploadSpy).toHaveBeenCalledWith("a2", pdf))
+    await screen.findByText(BLOCK_SELECTION_TEXT.empty)
+    await user.click(screen.getByRole("button", { name: tuesdayButton }))
+    await screen.findByText("Martes 6 de octubre de 2026")
+    expect(screen.getByLabelText(/Mensaje para el mentor/)).toHaveValue("")
+  })
+
   it("advierte al salir con datos sin enviar y permite quedarse o salir", async () => {
     const user = userEvent.setup()
     renderSelection(vi.fn().mockResolvedValue([tuesdayBlock]))
