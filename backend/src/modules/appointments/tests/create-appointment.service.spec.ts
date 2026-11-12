@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AppointmentStatusTitle } from '../../availability/enums/appointment-status-title.enum.js';
 import {
-  BlockNotFoundException,
   DayBlockedException,
   DayBusyException,
 } from '../../availability/exceptions/index.js';
@@ -13,6 +12,7 @@ import {
   InvalidOrientationTypeException,
   MentorUnavailableException,
   OwnBlockException,
+  SlotUnavailableException,
 } from '../exceptions/index.js';
 import { AppointmentDocumentMapper } from '../mappers/appointment-document.mapper.js';
 import { AppointmentMapper } from '../mappers/appointment.mapper.js';
@@ -173,7 +173,6 @@ describe('AppointmentsService', () => {
     await expect(service.create(user, payload)).rejects.toThrow(
       InvalidOrientationTypeException,
     );
-    expect(blockedDatesService.runOnUnblockedDay).not.toHaveBeenCalled();
     expect(appointmentsRepository.createAppointment).not.toHaveBeenCalled();
     expect(
       appointmentsRepository.createAppointmentHistory,
@@ -192,11 +191,11 @@ describe('AppointmentsService', () => {
     expect(result.status).toBe(AppointmentStatusTitle.CONFIRMED);
   });
 
-  it('responde 404 cuando el bloque no existe', async () => {
+  it('responde que el horario ya no está disponible cuando el bloque no existe', async () => {
     availabilityService.findBlockWithAppointments.mockResolvedValue(null);
 
     await expect(service.create(user, payload)).rejects.toThrow(
-      BlockNotFoundException,
+      SlotUnavailableException,
     );
     expect(mentorsService.findOne).not.toHaveBeenCalled();
     expect(blockedDatesService.runOnUnblockedDay).not.toHaveBeenCalled();
@@ -244,7 +243,7 @@ describe('AppointmentsService', () => {
     await expect(service.create(user, payload)).rejects.toThrow(
       MentorNotFoundException,
     );
-    expect(blockedDatesService.runOnUnblockedDay).not.toHaveBeenCalled();
+    expect(appointmentsRepository.createAppointment).not.toHaveBeenCalled();
   });
 
   it('responde 403 cuando el mentor está pausado', async () => {
@@ -256,17 +255,19 @@ describe('AppointmentsService', () => {
     await expect(service.create(user, payload)).rejects.toThrow(
       MentorUnavailableException,
     );
-    expect(blockedDatesService.runOnUnblockedDay).not.toHaveBeenCalled();
     expect(appointmentsRepository.createAppointment).not.toHaveBeenCalled();
+    expect(
+      appointmentsRepository.createAppointmentHistory,
+    ).not.toHaveBeenCalled();
   });
 
-  it('responde 409 cuando el día está bloqueado y no crea la cita', async () => {
+  it('responde que el horario ya no está disponible cuando el día está bloqueado', async () => {
     blockedDatesService.runOnUnblockedDay.mockRejectedValue(
       new DayBlockedException(),
     );
 
     await expect(service.create(user, payload)).rejects.toThrow(
-      DayBlockedException,
+      SlotUnavailableException,
     );
     expect(appointmentsRepository.createAppointment).not.toHaveBeenCalled();
   });
@@ -299,15 +300,104 @@ describe('AppointmentsService', () => {
     expect(appointmentsRepository.createAppointment).not.toHaveBeenCalled();
   });
 
-  it('responde 404 cuando el bloque desaparece dentro del candado', async () => {
+  it('responde que el horario ya no está disponible cuando el bloque desaparece dentro del candado', async () => {
     availabilityService.findBlockWithAppointments
       .mockResolvedValueOnce(block())
       .mockResolvedValueOnce(null);
 
     await expect(service.create(user, payload)).rejects.toThrow(
-      BlockNotFoundException,
+      SlotUnavailableException,
     );
+    expect(mentorsService.findOne).not.toHaveBeenCalled();
     expect(appointmentsRepository.createAppointment).not.toHaveBeenCalled();
+  });
+
+  it('consulta la disponibilidad del mentor dentro del candado, después de releer el bloque', async () => {
+    let insideTransaction = false;
+    blockedDatesService.runOnUnblockedDay.mockImplementation(
+      async (
+        _mentorId: string,
+        _startAt: Date,
+        work: (tx: unknown) => Promise<unknown>,
+      ) => {
+        insideTransaction = true;
+        try {
+          return await work(TX);
+        } finally {
+          insideTransaction = false;
+        }
+      },
+    );
+    mentorsService.findOne.mockImplementation(async () => {
+      expect(insideTransaction).toBe(true);
+      return {
+        id: MENTOR_ID,
+        isAvailable: true,
+        orientationTypes: [{ id: TOPIC_ID, name: 'Orientación profesional' }],
+      };
+    });
+
+    await service.create(user, payload);
+
+    expect(mentorsService.findOne).toHaveBeenCalledExactlyOnceWith(MENTOR_ID);
+    expect(
+      mentorsService.findOne.mock.invocationCallOrder[0],
+    ).toBeGreaterThan(
+      availabilityService.findBlockWithAppointments.mock.invocationCallOrder[1],
+    );
+  });
+
+  it('usa el estado del mentor al confirmar aunque estuviera disponible al abrir el formulario', async () => {
+    mentorsService.findOne.mockResolvedValueOnce({
+      id: MENTOR_ID,
+      isAvailable: false,
+      orientationTypes: [{ id: TOPIC_ID, name: 'Orientación profesional' }],
+    });
+
+    await expect(service.create(user, payload)).rejects.toMatchObject({
+      statusCode: 403,
+      message: 'El mentor no está disponible para recibir citas',
+    });
+    expect(appointmentsRepository.findStatusIdByTitle).not.toHaveBeenCalled();
+    expect(appointmentsRepository.createAppointment).not.toHaveBeenCalled();
+  });
+
+  it('no crea la cita cuando falla el servicio de mentores', async () => {
+    const failure = new Error('Database unavailable');
+    mentorsService.findOne.mockRejectedValue(failure);
+
+    await expect(service.create(user, payload)).rejects.toBe(failure);
+    expect(appointmentsRepository.createAppointment).not.toHaveBeenCalled();
+    expect(
+      appointmentsRepository.createAppointmentHistory,
+    ).not.toHaveBeenCalled();
+  });
+
+  it('permite reservar a un mentor en pausa con otro mentor disponible', async () => {
+    const pausedMentor = {
+      id: STUDENT_ID,
+      email: 'mentor.pausado@test.com',
+      roles: ['mentor'],
+    };
+
+    await expect(service.create(pausedMentor, payload)).resolves.toMatchObject({
+      id: APPOINTMENT_ID,
+    });
+    expect(mentorsService.findOne).toHaveBeenCalledExactlyOnceWith(MENTOR_ID);
+  });
+
+  it('propaga errores que no son de día bloqueado sin cambiarlos', async () => {
+    const failure = new Error('Transaction aborted');
+    blockedDatesService.runOnUnblockedDay.mockRejectedValue(failure);
+
+    await expect(service.create(user, payload)).rejects.toBe(failure);
+  });
+
+  it('usa el texto del HU para el horario que ya no está disponible', () => {
+    const error = new SlotUnavailableException();
+
+    expect(error.message).toBe('Este horario ya no está disponible');
+    expect(error.statusCode).toBe(409);
   });
 
   it('toma el candado de quien reserva y del mentor antes de releer el bloque', async () => {
