@@ -1,4 +1,3 @@
-import type { HeatmapCareerId } from "./heatmap-graduate-record.types";
 import type { HeatmapFilters, HeatmapSemesterRange } from "./heatmap-filters.types";
 import type { HeatmapCell, HeatmapColumn, HeatmapExtraColumnConfig, HeatmapExtraValue, HeatmapRow } from "./heatmap.types";
 import type { HeatmapCellFormat, HeatmapViewConfig } from "./heatmap-view-config.types";
@@ -36,7 +35,8 @@ export interface HeatmapQuickReadProps {
 export interface HeatmapToolbarProps {
   config: HeatmapViewConfig;
   filters: HeatmapFilters;
-  onCareerChange: (career?: HeatmapCareerId) => void;
+  careerOptions: { value: string; label: string }[];
+  onCareerChange: (careerId?: string) => void;
   onYearChange: (year?: string) => void;
   onMonthChange: (month?: string) => void;
   onOpenDateRange: () => void;

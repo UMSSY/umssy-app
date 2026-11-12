@@ -4,8 +4,9 @@ import { toast } from "sonner";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithQuery } from "@/shared/testing/render-with-query";
 import { downloadFile } from "@/shared/utils/download-file";
-import { HEATMAP_FILTER_TEXT } from "../constants/heatmap-filters.constants";
+import { HEATMAP_FILTER_TEXT, HEATMAP_LAST_YEAR } from "../constants/heatmap-filters.constants";
 import { HEATMAP_TEXT } from "../constants/heatmap-text.constants";
+import { surveysService } from "@/modules/surveys";
 import { heatmapsService } from "../services/heatmaps.service";
 import type { HeatmapData } from "../types/heatmap.types";
 import { HeatmapView } from "./heatmap-view";
@@ -47,6 +48,12 @@ async function renderView(type: Parameters<typeof HeatmapView>[0]["type"] = "ski
 describe("HeatmapView", () => {
   beforeEach(() => {
     vi.spyOn(heatmapsService, "getHeatmap").mockResolvedValue({ statusCode: 200, ok: true, detail: "ok", data: DATA });
+    vi.spyOn(surveysService, "listCareers").mockResolvedValue({
+      statusCode: 200,
+      ok: true,
+      detail: "ok",
+      data: [{ id: "career-systems", title: "Licenciatura en Ingeniería de Sistemas" }],
+    });
   });
 
   afterEach(() => {
@@ -81,11 +88,17 @@ describe("HeatmapView", () => {
     expect(screen.queryByRole("combobox", { name: "Carrera" })).not.toBeInTheDocument();
   });
 
-  it("muestra los filtros de carrera, gestión y meses en HU8", async () => {
+  it("muestra los filtros de carrera, gestión y meses en HU8 y filtra por la carrera de la BD", async () => {
+    const user = userEvent.setup();
+    const getHeatmap = vi.mocked(heatmapsService.getHeatmap);
     await renderView();
-    expect(screen.getByRole("combobox", { name: "Carrera" })).toBeInTheDocument();
     expect(screen.getByRole("combobox", { name: "Gestión" })).toBeInTheDocument();
     expect(screen.getByRole("combobox", { name: "Meses" })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("combobox", { name: "Carrera" }));
+    await user.click(await screen.findByRole("option", { name: "Licenciatura en Ingeniería de Sistemas" }));
+
+    await waitFor(() => expect(getHeatmap).toHaveBeenLastCalledWith("skills-by-experience", { careerId: "career-systems" }));
   });
 
   it("aplica el filtro por gestión académica y semestre, y marca el botón como activo", async () => {
@@ -102,9 +115,9 @@ describe("HeatmapView", () => {
     await user.click(within(dialog).getByRole("button", { name: HEATMAP_FILTER_TEXT.apply }));
 
     await waitFor(() =>
-      expect(getHeatmap).toHaveBeenLastCalledWith("skills-by-experience", { semesterRange: { startYear: 2023, startSemester: 2, endYear: 2026, endSemester: 2 }, year: undefined }),
+      expect(getHeatmap).toHaveBeenLastCalledWith("skills-by-experience", { semesterRange: { startYear: 2023, startSemester: 2, endYear: HEATMAP_LAST_YEAR, endSemester: 2 }, year: undefined }),
     );
-    expect(screen.getByRole("button", { name: `${HEATMAP_FILTER_TEXT.dateRangeButton}: 2023-2 a 2026-2` })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: `${HEATMAP_FILTER_TEXT.dateRangeButton}: 2023-2 a ${HEATMAP_LAST_YEAR}-2` })).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByText(HEATMAP_FILTER_TEXT.yearOverridden)).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: HEATMAP_FILTER_TEXT.clearDateRange }));

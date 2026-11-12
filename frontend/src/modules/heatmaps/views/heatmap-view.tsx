@@ -4,6 +4,7 @@ import { useState } from "react";
 import { RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { useCareers } from "@/modules/surveys";
 import { PageBreadcrumb, WorkspacePage } from "@/shared/components/layout";
 import { downloadFile } from "@/shared/utils/download-file";
 import { HeatmapBaseIndicator } from "../components/heatmap-base-indicator";
@@ -25,6 +26,8 @@ export function HeatmapView({ type }: HeatmapViewProps) {
   const config = HEATMAP_VIEW_CONFIGS[type];
   const { filters, setCareer, setYear, setMonth, setSemesterRange } = useHeatmapFilters();
   const { data, isLoading, hasError, refetch } = useHeatmap(type, filters);
+  const { careers } = useCareers();
+  const careerOptions = (careers ?? []).map((career) => ({ value: career.id, label: career.title }));
   const [isDateRangeOpen, setIsDateRangeOpen] = useState(false);
   const canExport = Boolean(data && data.baseCount > 0) && !isLoading;
 
@@ -58,6 +61,7 @@ export function HeatmapView({ type }: HeatmapViewProps) {
       <HeatmapToolbar
         config={config}
         filters={filters}
+        careerOptions={careerOptions}
         onCareerChange={setCareer}
         onYearChange={setYear}
         onMonthChange={setMonth}

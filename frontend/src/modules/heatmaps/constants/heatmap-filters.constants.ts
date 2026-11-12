@@ -3,7 +3,7 @@ import type { HeatmapSemester } from "../types/heatmap-filters.types";
 export const BOLIVIA_UTC_OFFSET = "-04:00";
 export const BOLIVIA_UTC_OFFSET_HOURS = -4;
 export const HEATMAP_FIRST_YEAR = 2022;
-export const HEATMAP_LAST_YEAR = 2026;
+export const HEATMAP_LAST_YEAR = Math.max(new Date().getFullYear(), HEATMAP_FIRST_YEAR);
 
 export const HEATMAP_YEAR_OPTIONS = Array.from({ length: HEATMAP_LAST_YEAR - HEATMAP_FIRST_YEAR + 1 }, (_, index) => {
   const year = String(HEATMAP_FIRST_YEAR + index);

@@ -3,17 +3,15 @@
 import { CalendarRange, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ReportFilterSelect } from "@/modules/reports";
-import { HEATMAP_CAREERS } from "../constants/heatmap-dimensions.constants";
 import { HEATMAP_FILTER_TEXT, HEATMAP_MONTH_OPTIONS, HEATMAP_YEAR_OPTIONS } from "../constants/heatmap-filters.constants";
 import type { HeatmapToolbarProps } from "../types/heatmap-component-props.types";
 import { formatSemesterRange } from "../utils/semester-range-to-timestamps";
 import { HeatmapExportMenu } from "./heatmap-export-menu";
 
-const CAREER_OPTIONS = HEATMAP_CAREERS.map((career) => ({ value: career.id, label: career.label }));
-
 export function HeatmapToolbar({
   config,
   filters,
+  careerOptions,
   onCareerChange,
   onYearChange,
   onMonthChange,
@@ -28,7 +26,7 @@ export function HeatmapToolbar({
     <div role="search" aria-label="Filtros del mapa de calor" className="flex flex-wrap items-start justify-between gap-4 rounded-lg border border-border bg-surface p-4">
       <div className="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start">
         {config.showCareerFilter && (
-          <ReportFilterSelect label={HEATMAP_FILTER_TEXT.careerLabel} allLabel={HEATMAP_FILTER_TEXT.allCareers} options={CAREER_OPTIONS} value={filters.career} onChange={onCareerChange} />
+          <ReportFilterSelect label={HEATMAP_FILTER_TEXT.careerLabel} allLabel={HEATMAP_FILTER_TEXT.allCareers} options={careerOptions} value={filters.careerId} onChange={onCareerChange} />
         )}
         <div className="flex w-full flex-col gap-1 sm:w-72">
           <ReportFilterSelect

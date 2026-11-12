@@ -1,5 +1,3 @@
-import type { HeatmapCareerId } from "./heatmap-graduate-record.types";
-
 export type HeatmapSemester = 1 | 2;
 
 export interface HeatmapSemesterRange {
@@ -15,7 +13,7 @@ export interface HeatmapDateRange {
 }
 
 export interface HeatmapFilters {
-  career?: HeatmapCareerId;
+  careerId?: string;
   year?: string;
   month?: string;
   semesterRange?: HeatmapSemesterRange;
