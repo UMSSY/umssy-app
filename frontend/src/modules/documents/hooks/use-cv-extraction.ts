@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { CV_EMPTY_EXTRACTION_SELECTION } from "../constants/cv-extraction.constants";
-import { CV_ERROR_MESSAGES } from "../constants/cv-error-messages.constants";
 import { documentsService } from "../services/documents.service";
 import type { CvApplyResult } from "../types/cv-apply-result.types";
 import type { CvExtractedContact } from "../types/cv-extracted-contact.types";
@@ -15,7 +14,7 @@ import type { CvExtractionSection } from "../types/cv-extraction-section.types";
 import type { CvExtractionSelection } from "../types/cv-extraction-selection.types";
 import type { UseCvExtractionOptions } from "../types/use-cv-extraction-options.types";
 import { buildDefaultCvSelection } from "../utils/build-default-cv-selection";
-import { getCvErrorMessage } from "../utils/get-cv-error-message";
+import { getCvExtractionError } from "../utils/get-cv-extraction-error";
 import { removeAppliedCvSelection } from "../utils/remove-applied-cv-selection";
 import { toggleCvSection } from "../utils/toggle-cv-section";
 import { toggleCvSelectionItem } from "../utils/toggle-cv-selection-item";
@@ -36,6 +35,8 @@ export function useCvExtraction({ currentHeadline = null }: UseCvExtractionOptio
     },
   });
 
+  const error = mutation.error ? getCvExtractionError(mutation.error) : null;
+
   const updateExtraction = (update: (current: CvExtraction) => CvExtraction) =>
     setExtraction((current) => (current ? update(current) : current));
 
@@ -52,10 +53,14 @@ export function useCvExtraction({ currentHeadline = null }: UseCvExtractionOptio
     selection,
     isExtracting: mutation.isPending,
     isOpen: mutation.isPending || mutation.isError || extraction !== null,
-    errorMessage: mutation.error ? getCvErrorMessage(mutation.error, CV_ERROR_MESSAGES.extract) : null,
+    errorMessage: error?.message ?? null,
+    isRetryable: error?.isRetryable ?? false,
     startExtraction: (cvId: string) => {
       close();
       mutation.mutate(cvId);
+    },
+    retry: () => {
+      if (mutation.variables && error?.isRetryable) mutation.mutate(mutation.variables);
     },
     toggleItem: <K extends CvExtractionSection>(section: K, item: CvExtractionSelection[K][number]) =>
       setSelection((current) => toggleCvSelectionItem(current, section, item)),

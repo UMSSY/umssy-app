@@ -80,3 +80,14 @@ export const CV_WORK_EXPERIENCE_CURRENT_LABEL = "Trabajo actualmente aquí";
 export const CV_CURRENT_PERIOD_LABEL = "Actualidad";
 
 export const CV_UNKNOWN_PERIOD_LABEL = "Sin fecha";
+
+export const CV_EXTRACTION_FALLBACK_TEXTS = {
+  errorTitle: "No pudimos autollenar tu perfil",
+  emptyTitle: "No detectamos datos en tu CV",
+  emptyMessage:
+    "Leímos tu CV, pero no encontramos contacto, presentación, estudios, experiencia ni habilidades que podamos reconocer. Puedes completar tu perfil a mano.",
+  retry: "Reintentar",
+  manualFill: "Llenar mi perfil a mano",
+} as const;
+
+export const CV_MANUAL_FILL_HREF = "/profile";
