@@ -5,6 +5,8 @@ import { AppointmentStatusTitle } from '../../availability/enums/appointment-sta
 import { ACTIVE_APPOINTMENT_STATUS_TITLES } from '../constants/active-appointment-statuses.constants.js';
 import { APPOINTMENT_PARTICIPANT_LOCK_PREFIX } from '../constants/appointment-lock.constants.js';
 import { APPOINTMENT_SELECT } from '../constants/appointment-select.constants.js';
+import { DAILY_APPOINTMENT_LIMIT_STATUS_TITLES } from '../constants/daily-appointment-limit-statuses.constants.js';
+import type { BoliviaDayRange } from '../types/bolivia-day-range.types.js';
 import type { AppointmentRecord } from '../types/appointment-record.types.js';
 import type { CreateAppointmentData } from '../types/create-appointment-data.types.js';
 import type { CreateAppointmentHistoryData } from '../types/create-appointment-history-data.types.js';
@@ -68,6 +70,22 @@ export class AppointmentsRepository {
     });
 
     return overlapping > 0;
+  }
+
+  async hasReservationOnDay(
+    userId: string,
+    day: BoliviaDayRange,
+    client: TransactionClient = this.prisma,
+  ): Promise<boolean> {
+    const reservations = await client.appointment.count({
+      where: {
+        studentId: userId,
+        startAt: { gte: day.start, lt: day.end },
+        status: { title: { in: DAILY_APPOINTMENT_LIMIT_STATUS_TITLES } },
+      },
+    });
+
+    return reservations > 0;
   }
 
   findMine(

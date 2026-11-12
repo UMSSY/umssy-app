@@ -85,7 +85,7 @@ export const CREATE_APPOINTMENT_DOCS = {
   badRequestDescription: `El cuerpo no es válido: tema ausente o no ofrecido por el mentor, o mensaje vacío o mayor a 300 caracteres`,
   notFoundDescription: 'El mentor del bloque no existe',
   conflictDescription:
-    'El horario ya fue reservado o ya no está disponible porque el bloque se eliminó o el día está bloqueado',
+    'El horario ya fue reservado, ya no está disponible porque el bloque se eliminó o el día está bloqueado, se cruza con otra cita o quien reserva ya tiene una cita ese día (hora de Bolivia)',
 } as const;
 
 export const FIND_MY_APPOINTMENTS_DOCS = {

@@ -11,6 +11,7 @@ import {
   AppointmentOverlapException,
   BlockAlreadyBookedException,
   BlockInPastException,
+  DailyAppointmentLimitException,
   InvalidOrientationTypeException,
   MentorUnavailableException,
   OwnBlockException,
@@ -24,6 +25,7 @@ import type { CreateAppointmentDto } from '../requests/create-appointment.reques
 import type { AppointmentRecord } from '../types/appointment-record.types.js';
 import type { MyAppointmentResponse } from '../types/my-appointment-response.types.js';
 import type { MyAppointmentsQuery } from '../types/my-appointments-query.types.js';
+import { getBoliviaDayRange } from '../utils/bolivia-day.js';
 
 @Injectable()
 export class AppointmentsService {
@@ -92,6 +94,17 @@ export class AppointmentsService {
 
         if (overlaps) {
           throw new AppointmentOverlapException();
+        }
+
+        const reservedThatDay =
+          await this.appointmentsRepository.hasReservationOnDay(
+            user.id,
+            getBoliviaDayRange(current.startAt),
+            tx,
+          );
+
+        if (reservedThatDay) {
+          throw new DailyAppointmentLimitException();
         }
 
         const statusId = await this.appointmentsRepository.findStatusIdByTitle(
