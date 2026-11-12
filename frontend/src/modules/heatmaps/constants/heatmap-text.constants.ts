@@ -1,7 +1,4 @@
 export const HEATMAP_TEXT = {
-  home: "Home",
-  administration: "Administración",
-  section: "Mapa de calor",
   rowHeader: "Habilidad técnica",
   base: (count: number, label: string) => `Base: ${count} ${label}`,
   quickReadTitle: "Lectura rápida",

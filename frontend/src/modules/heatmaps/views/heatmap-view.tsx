@@ -5,7 +5,7 @@ import { RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useCareers } from "@/modules/surveys";
-import { PageBreadcrumb, WorkspacePage } from "@/shared/components/layout";
+import { WorkspacePage } from "@/shared/components/layout";
 import { downloadFile } from "@/shared/utils/download-file";
 import { HeatmapBaseIndicator } from "../components/heatmap-base-indicator";
 import { HeatmapDateRangeDialog } from "../components/heatmap-date-range-dialog";
@@ -13,7 +13,6 @@ import { HeatmapLegend } from "../components/heatmap-legend";
 import { HeatmapMatrix } from "../components/heatmap-matrix";
 import { HeatmapQuickRead } from "../components/heatmap-quick-read";
 import { HeatmapToolbar } from "../components/heatmap-toolbar";
-import { HEATMAPS_BASE_PATH } from "../constants/heatmap-routes.constants";
 import { HEATMAP_TEXT } from "../constants/heatmap-text.constants";
 import { HEATMAP_VIEW_CONFIGS } from "../constants/heatmap-views.constants";
 import { useHeatmap } from "../hooks/use-heatmap";
@@ -49,15 +48,6 @@ export function HeatmapView({ type }: HeatmapViewProps) {
 
   return (
     <WorkspacePage title={config.title} description={config.subtitle}>
-      <PageBreadcrumb
-        items={[
-          { label: HEATMAP_TEXT.home, href: "/dashboard" },
-          { label: HEATMAP_TEXT.administration, href: "/backoffice" },
-          { label: HEATMAP_TEXT.section, href: HEATMAPS_BASE_PATH },
-          { label: config.navLabel },
-        ]}
-      />
-
       <HeatmapToolbar
         config={config}
         filters={filters}

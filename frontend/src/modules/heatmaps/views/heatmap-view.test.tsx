@@ -64,12 +64,9 @@ describe("HeatmapView", () => {
     vi.mocked(downloadFile).mockClear();
   });
 
-  it("muestra breadcrumb, base procesada, matriz, columnas extra, leyenda y lectura rápida", async () => {
+  it("muestra base procesada, matriz, columnas extra, leyenda y lectura rápida", async () => {
     await renderView();
 
-    const breadcrumb = screen.getByRole("navigation", { name: "Ruta de navegación" });
-    expect(within(breadcrumb).getByText("Mapa de calor")).toBeInTheDocument();
-    expect(within(breadcrumb).getByText("Habilidades vs. Experiencia")).toBeInTheDocument();
     expect(screen.getByRole("heading", { level: 1, name: "Habilidades vs. años de experiencia" })).toBeInTheDocument();
     expect(screen.getByText("Base: 192 titulados con experiencia laboral registrada")).toBeInTheDocument();
     expect(screen.getByText("69%")).toBeInTheDocument();
