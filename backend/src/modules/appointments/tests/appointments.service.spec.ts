@@ -71,6 +71,7 @@ describe('AppointmentsService', () => {
       expect(mapper.toResponseList).toHaveBeenCalledExactlyOnceWith(
         records,
         MENTOR_ID,
+        NOW,
       );
     },
   );
@@ -82,7 +83,7 @@ describe('AppointmentsService', () => {
     await expect(
       service.findMine(STUDENT_ID, { scope: 'upcoming' }),
     ).resolves.toEqual([]);
-    expect(mapper.toResponseList).toHaveBeenCalledWith([], STUDENT_ID);
+    expect(mapper.toResponseList).toHaveBeenCalledWith([], STUDENT_ID, NOW);
   });
 
   it('does not turn a failed database query into an empty list', async () => {
@@ -109,7 +110,11 @@ describe('AppointmentsService', () => {
       expect(repository.findById).toHaveBeenCalledExactlyOnceWith(
         APPOINTMENT_ID,
       );
-      expect(mapper.toResponse).toHaveBeenCalledExactlyOnceWith(record, userId);
+      expect(mapper.toResponse).toHaveBeenCalledExactlyOnceWith(
+        record,
+        userId,
+        NOW,
+      );
     },
   );
 
