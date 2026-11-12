@@ -75,6 +75,17 @@ describe("MentorFreeBlocksView", () => {
     expect(screen.getByRole("button", { name: "Ver semana siguiente" })).toBeInTheDocument();
   });
 
+  it("mantiene el panel montado cuando la actualización deja la semana sin horarios", () => {
+    mockedUseMentorFreeBlocks.mockReturnValue({ blocks: [freeBlock], isLoading: false, error: null });
+    const { rerender } = render(<MentorFreeBlocksView mentorId="m1" />);
+    const panel = screen.getByTestId("block-selection");
+    mockedUseMentorFreeBlocks.mockReturnValue({ blocks: [], isLoading: false, error: null });
+    rerender(<MentorFreeBlocksView mentorId="m1" />);
+    expect(screen.getByTestId("block-selection")).toBe(panel);
+    expect(panel).toHaveAttribute("data-blocks", "0");
+    expect(screen.getByText("Este mentor no tiene horarios libres esta semana.")).toBeInTheDocument();
+  });
+
   it("muestra el encabezado y la semana actual en hora de Bolivia", () => {
     vi.useFakeTimers({ toFake: ["Date"], now: new Date("2026-10-07T15:00:00.000Z") });
     mockedUseMentorFreeBlocks.mockReturnValue({ blocks: [freeBlock], isLoading: false, error: null });
