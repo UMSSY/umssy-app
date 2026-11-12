@@ -9,13 +9,51 @@ describe('My appointments request validation', () => {
   const queryPipe = new RequestValidationPipe(myAppointmentsQuerySchema);
   const idPipe = new RequestValidationPipe(appointmentIdSchema);
 
-  it('uses upcoming when the scope is omitted', () => {
-    expect(queryPipe.transform({})).toEqual({ scope: 'upcoming' });
+  it('uses upcoming and the first page of ten when nothing is sent', () => {
+    expect(queryPipe.transform({})).toEqual({
+      scope: 'upcoming',
+      page: 1,
+      pageSize: 10,
+    });
   });
 
   it.each(['upcoming', 'past'])('accepts scope=%s', (scope) => {
-    expect(queryPipe.transform({ scope })).toEqual({ scope });
+    expect(queryPipe.transform({ scope })).toEqual({
+      scope,
+      page: 1,
+      pageSize: 10,
+    });
   });
+
+  it('reads page and pageSize as numbers from the query string', () => {
+    expect(queryPipe.transform({ page: '3', pageSize: '25' })).toEqual({
+      scope: 'upcoming',
+      page: 3,
+      pageSize: 25,
+    });
+  });
+
+  it('accepts the maximum page size', () => {
+    expect(queryPipe.transform({ pageSize: '50' }).pageSize).toBe(50);
+  });
+
+  it.each(['0', '-1', '1.5', 'two', ''])(
+    'rejects the invalid page %j',
+    (page) => {
+      expect(() => queryPipe.transform({ page })).toThrow(
+        RequestValidationException,
+      );
+    },
+  );
+
+  it.each(['0', '-5', '51', '100', '10.5', 'ten', ''])(
+    'rejects the invalid page size %j',
+    (pageSize) => {
+      expect(() => queryPipe.transform({ pageSize })).toThrow(
+        RequestValidationException,
+      );
+    },
+  );
 
   it.each(['', 'future', 'UPCOMING', null, 1, ['upcoming', 'past']])(
     'rejects an invalid scope: %j',
@@ -26,7 +64,7 @@ describe('My appointments request validation', () => {
     },
   );
 
-  it.each(['userId', 'mentorId', 'studentId', 'limit'])(
+  it.each(['userId', 'mentorId', 'studentId', 'limit', 'offset'])(
     'rejects the unknown query key %s',
     (key) => {
       expect(() => queryPipe.transform({ [key]: 'other-user' })).toThrow(
