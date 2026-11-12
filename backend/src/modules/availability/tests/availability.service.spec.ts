@@ -47,7 +47,7 @@ describe('AvailabilityService', () => {
   const mentorId = 'ed9934b9-1a4e-4b8d-bbed-b8772154cba8';
   const payload = {
     startAt: new Date('2026-11-03T22:00:00.000Z'),
-    endAt: new Date('2026-11-04T00:00:00.000Z'),
+    endAt: new Date('2026-11-03T23:30:00.000Z'),
   } satisfies CreateBlockDto;
   const savedBlock = {
     id: 'a3f1c2d4-0000-4000-8000-000000000001',
@@ -358,8 +358,63 @@ describe('AvailabilityService', () => {
       for (const call of calls) {
         expect(call[0]).toBe(mentorId);
         expect(call[3]).toBe(TX);
-        expect(call[2].getTime() - call[1].getTime()).toBe(2 * 60 * 60_000);
+        expect(call[2].getTime() - call[1].getTime()).toBe(90 * 60_000);
       }
+    });
+
+    it('divide el rango en bloques de 1 h 30 dentro de la misma transacción', async () => {
+      const result = await service.create(mentorId, {
+        startAt: new Date('2026-11-03T14:00:00.000Z'),
+        endAt: new Date('2026-11-03T18:30:00.000Z'),
+      });
+
+      expect(result).toEqual({ created: 3, skipped: [] });
+      expect(blockedDatesService.assertDayNotBlocked).toHaveBeenCalledTimes(1);
+      expect(
+        availabilityRepository.create.mock.calls.map((call) => [
+          call[1].toISOString(),
+          call[2].toISOString(),
+          call[3],
+        ]),
+      ).toEqual([
+        ['2026-11-03T14:00:00.000Z', '2026-11-03T15:30:00.000Z', TX],
+        ['2026-11-03T15:30:00.000Z', '2026-11-03T17:00:00.000Z', TX],
+        ['2026-11-03T17:00:00.000Z', '2026-11-03T18:30:00.000Z', TX],
+      ]);
+    });
+
+    it('no crea ningún bloque del rango si uno se cruza con otro bloque', async () => {
+      availabilityRepository.create
+        .mockResolvedValueOnce(savedBlock)
+        .mockRejectedValueOnce({ code: '23P01' });
+
+      await expect(
+        service.create(mentorId, {
+          startAt: new Date('2026-11-03T14:00:00.000Z'),
+          endAt: new Date('2026-11-03T18:30:00.000Z'),
+        }),
+      ).rejects.toBeInstanceOf(BlockOverlapException);
+      expect(availabilityRepository.create).toHaveBeenCalledTimes(2);
+    });
+
+    it('repite cada semana todos los bloques del rango y los cuenta', async () => {
+      const result = await service.create(mentorId, {
+        startAt: new Date('2026-11-03T14:00:00.000Z'),
+        endAt: new Date('2026-11-03T17:00:00.000Z'),
+        repeatWeekly: true,
+        repeatUntil: '2026-11-10',
+      });
+
+      expect(result).toEqual({ created: 4, skipped: [] });
+      expect(blockedDatesService.assertDayNotBlocked).toHaveBeenCalledTimes(2);
+      const calls = availabilityRepository.create.mock.calls;
+      expect(calls.map((call) => call[1].toISOString())).toEqual([
+        '2026-11-03T14:00:00.000Z',
+        '2026-11-03T15:30:00.000Z',
+        '2026-11-10T14:00:00.000Z',
+        '2026-11-10T15:30:00.000Z',
+      ]);
+      expect(new Set(calls.map((call) => call[4].seriesId)).size).toBe(1);
     });
 
     it('omite conflictos sin interrumpir las siguientes semanas', async () => {
@@ -450,6 +505,7 @@ describe('AvailabilityService', () => {
         payload.startAt,
         payload.endAt,
         TX,
+        undefined,
       );
       expect(payload.startAt).toBeInstanceOf(Date);
     });

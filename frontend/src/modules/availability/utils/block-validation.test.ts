@@ -8,8 +8,12 @@ const FIXED_NOW = new Date("2026-10-01T12:00:00Z")
 const validate = (startAt: string, endAt: string) => validateBlock({ startAt, endAt }, FIXED_NOW)
 
 describe("validateBlock", () => {
-  it("acepta un bloque futuro válido (15:00 a 16:00 Bolivia)", () => {
-    expect(validate("2026-10-10T19:00:00Z", "2026-10-10T20:00:00Z")).toEqual({})
+  it("acepta un bloque futuro válido (15:00 a 16:30 Bolivia)", () => {
+    expect(validate("2026-10-10T19:00:00Z", "2026-10-10T20:30:00Z")).toEqual({})
+  })
+
+  it("rechaza un horario que no se divide en bloques de 1 h 30", () => {
+    expect(validate("2026-10-10T19:00:00Z", "2026-10-10T20:00:00Z")).toEqual({ endAt: MSG.invalidDuration })
   })
 
   it("acepta el borde 07:00 a 22:00 Bolivia", () => {
@@ -26,14 +30,14 @@ describe("validateBlock", () => {
   })
 
   it("rechaza horas fuera de intervalos de 30 minutos", () => {
-    expect(validate("2026-10-10T19:15:00Z", "2026-10-10T20:10:00Z")).toEqual({
+    expect(validate("2026-10-10T19:10:00Z", "2026-10-10T20:40:00Z")).toEqual({
       startAt: MSG.invalidStep,
       endAt: MSG.invalidStep,
     })
   })
 
   it("rechaza horas fuera del rango 07:00 a 22:00 Bolivia", () => {
-    expect(validate("2026-10-10T10:00:00Z", "2026-10-10T12:00:00Z")).toEqual({ startAt: MSG.outOfRange })
+    expect(validate("2026-10-10T10:00:00Z", "2026-10-10T11:30:00Z")).toEqual({ startAt: MSG.outOfRange })
     expect(validate("2026-10-11T01:00:00Z", "2026-10-11T02:30:00Z")).toEqual({ endAt: MSG.outOfRange })
   })
 
@@ -42,7 +46,7 @@ describe("validateBlock", () => {
   })
 
   it("rechaza un bloque que cruza la medianoche de Bolivia", () => {
-    expect(validate("2026-10-11T01:00:00Z", "2026-10-11T04:30:00Z")).toEqual({ endAt: MSG.differentDays })
+    expect(validate("2026-10-11T01:00:00Z", "2026-10-11T05:30:00Z")).toEqual({ endAt: MSG.differentDays })
   })
 
   it("usa la fecha actual por defecto", () => {
