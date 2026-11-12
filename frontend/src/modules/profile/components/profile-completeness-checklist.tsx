@@ -2,6 +2,11 @@
 
 import { Circle, CircleCheck } from 'lucide-react';
 import { useId } from 'react';
+import Link from 'next/link';
+import {
+  PROFILE_COMPLETENESS_HASH_PREFIX,
+  PROFILE_COMPLETENESS_ROUTES,
+} from '../constants/profile-completeness-navigation.constants';
 import {
   PROFILE_COMPLETENESS_MESSAGES,
   PROFILE_COMPLETENESS_SECTION_IDS,
@@ -48,12 +53,8 @@ export function ProfileCompletenessChecklist({
             if (!section) return null;
             const Icon = section.isCompleted ? CircleCheck : Circle;
 
-            return (
-              <li
-                key={id}
-                aria-label={`${PROFILE_COMPLETENESS_SECTION_LABELS[id]}: ${section.isCompleted ? PROFILE_COMPLETENESS_MESSAGES.completed : PROFILE_COMPLETENESS_MESSAGES.pending}`}
-                className="flex min-h-16 min-w-0 items-start gap-2 rounded-md border border-border bg-surface p-2"
-              >
+            const content = (
+              <>
                 <Icon
                   aria-hidden="true"
                   className={
@@ -72,6 +73,50 @@ export function ProfileCompletenessChecklist({
                       : PROFILE_COMPLETENESS_MESSAGES.pending}
                   </span>
                 </span>
+              </>
+            );
+
+            return (
+              <li
+                key={id}
+                aria-label={`${PROFILE_COMPLETENESS_SECTION_LABELS[id]}: ${section.isCompleted ? PROFILE_COMPLETENESS_MESSAGES.completed : PROFILE_COMPLETENESS_MESSAGES.pending}`}
+                className="min-w-0"
+              >
+                {section.isCompleted ? (
+                  <div className="flex h-full min-h-16 items-start gap-2 rounded-md border border-border bg-surface p-2">
+                    {content}
+                  </div>
+                ) : (
+                  <Link
+                    href={`${PROFILE_COMPLETENESS_ROUTES[id]}${PROFILE_COMPLETENESS_HASH_PREFIX}${id}`}
+                    scroll={false}
+                    onClick={(event) => {
+                      if (
+                        event.button !== 0 ||
+                        event.metaKey ||
+                        event.ctrlKey ||
+                        event.shiftKey ||
+                        event.altKey ||
+                        window.location.pathname !==
+                          PROFILE_COMPLETENESS_ROUTES[id]
+                      )
+                        return;
+
+                      // Next's same-page pushState does not emit hashchange.
+                      event.preventDefault();
+                      const hash = `${PROFILE_COMPLETENESS_HASH_PREFIX}${id}`;
+                      if (window.location.hash === hash) {
+                        window.dispatchEvent(new HashChangeEvent('hashchange'));
+                      } else {
+                        window.location.hash = hash;
+                      }
+                    }}
+                    aria-label={`Completar ${PROFILE_COMPLETENESS_SECTION_LABELS[id]}`}
+                    className="flex h-full min-h-16 items-start gap-2 rounded-md border border-border bg-surface p-2 hover:border-app-header hover:bg-interaction focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-app-header"
+                  >
+                    {content}
+                  </Link>
+                )}
               </li>
             );
           })}

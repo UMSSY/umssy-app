@@ -64,6 +64,37 @@ describe('ProfileCompletenessChecklist', () => {
     expect(panel.queryByRole('checkbox')).not.toBeInTheDocument();
   });
 
+  it('offers keyboard-accessible deep links for all pending sections', async () => {
+    const user = userEvent.setup();
+    const panel = renderChecklist(createProfileCompleteness([]).sections);
+    const links = panel.getAllByRole('link');
+    expect(links.map((link) => link.getAttribute('href'))).toEqual([
+      '/profile/settings#complete-contact',
+      '/profile/settings#complete-presentation',
+      '/profile#complete-education',
+      '/profile#complete-work-experience',
+      '/profile#complete-skills',
+      '/profile#complete-certifications',
+    ]);
+    for (const link of links) {
+      await user.tab();
+      expect(link).toHaveFocus();
+      expect(link).toHaveAccessibleName(/^Completar /);
+    }
+  });
+
+  it('only makes pending sections navigable', () => {
+    const panel = renderChecklist(sections);
+    expect(panel.getAllByRole('link')).toHaveLength(5);
+    expect(
+      within(
+        panel.getByRole('listitem', {
+          name: 'Datos de contacto: Completada',
+        }),
+      ).queryByRole('link'),
+    ).not.toBeInTheDocument();
+  });
+
   it.each([
     { name: 'undefined', data: undefined },
     { name: 'null', data: null },
