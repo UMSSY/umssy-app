@@ -169,14 +169,22 @@ describe("documentsService", () => {
 
   it("requests the extraction of a cv and fills the missing data", async () => {
     vi.mocked(apiClient.post).mockResolvedValue(
-      wrapResponse({ cvId: "cv-1", contact: { email: "ana@mail.com" }, educations: null }),
+      wrapResponse({
+        cvId: "cv-1",
+        contact: { email: "ana@mail.com", cityId: "city-lpz" },
+        presentation: "Desarrolladora web",
+        educations: null,
+        skills: [{ skillId: "skill-ts", name: "TypeScript" }],
+      }),
     );
 
     await expect(documentsService.extractCvData("cv-1")).resolves.toEqual({
       cvId: "cv-1",
-      contact: { firstName: null, lastName: null, email: "ana@mail.com", phone: null, location: null },
+      contact: { firstName: null, lastName: null, email: "ana@mail.com", phone: null, location: null, cityId: "city-lpz" },
+      presentation: { headline: null, aboutMe: "Desarrolladora web" },
       educations: [],
       workExperiences: [],
+      skills: [{ skillId: "skill-ts", name: "TypeScript" }],
     });
     expect(apiClient.post).toHaveBeenCalledWith("/profile/me/cvs/cv-1/extraction", {}, { headers: AUTH_HEADERS });
   });

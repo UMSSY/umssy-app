@@ -20,6 +20,8 @@ import { EducationsModule } from '../educations/educations.module.js';
 import { WorkExperienceModule } from '../work-experience/work-experience.module.js';
 import { SkillsModule } from '../skills/skills.module.js';
 import { CertificationSourcesModule } from '../certifications/certification-sources.module.js';
+import { NlpModule } from '../nlp/nlp.module.js';
+import { SkillAnalysisModule } from '../skills/skill-analysis.module.js';
 
 @Module({
   imports: [
@@ -32,6 +34,8 @@ import { CertificationSourcesModule } from '../certifications/certification-sour
     WorkExperienceModule,
     SkillsModule,
     CertificationSourcesModule,
+    NlpModule,
+    SkillAnalysisModule,
   ],
   controllers: [
     CvHistoryController,

@@ -2,8 +2,18 @@ import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import { cleanup, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { profileService } from "../services/profile.service";
+import { profileCompletenessService } from "../services/profile-completeness.service";
+import { createProfileCompleteness } from "../testing/profile-completeness.fixture";
 import type { ProfileResponse } from "../types/profile-response.types";
 import { ProfileOverviewView } from "./profile-overview-view";
+
+vi.mock("@/shared/contexts/auth-context", () => ({
+  useAuth: () => ({ currentUserId: "11111111-1111-4111-8111-111111111111", isLoading: false }),
+}));
+
+vi.mock("../services/profile-completeness.service", () => ({
+  profileCompletenessService: { getCompleteness: vi.fn() },
+}));
 
 vi.mock("../services/profile-photo.service", () => ({
   profilePhotoService: {
@@ -43,6 +53,7 @@ const COMPLETE_PROFILE: ProfileResponse = {
 describe("ProfileOverviewView", () => {
   beforeEach(() => {
     vi.mocked(profileService.getProfile).mockResolvedValue(COMPLETE_PROFILE);
+    vi.mocked(profileCompletenessService.getCompleteness).mockResolvedValue(createProfileCompleteness(["contact", "presentation"]));
   });
 
   afterEach(() => {
@@ -60,10 +71,33 @@ describe("ProfileOverviewView", () => {
 
   it("shows a loading message while the profile is requested", () => {
     vi.mocked(profileService.getProfile).mockReturnValue(new Promise(() => {}));
+    vi.mocked(profileCompletenessService.getCompleteness).mockReturnValue(new Promise(() => {}));
 
     render(<ProfileOverviewView />);
 
-    expect(screen.getByRole("status")).toHaveTextContent("Cargando tu perfil...");
+    expect(screen.getByText("Cargando tu perfil...")).toHaveAttribute("role", "status");
+    expect(screen.getByText("Cargando el progreso de tu perfil...")).toBeVisible();
+    expect(profileService.getProfile).toHaveBeenCalledOnce();
+    expect(profileCompletenessService.getCompleteness).toHaveBeenCalledOnce();
+  });
+
+  it("shows completeness without waiting for the profile request to finish", async () => {
+    vi.mocked(profileService.getProfile).mockReturnValue(new Promise(() => {}));
+    render(<ProfileOverviewView />);
+
+    expect(await screen.findByRole("progressbar", { name: "Completitud del perfil" })).toHaveAttribute("aria-valuenow", "35");
+    expect(screen.getByRole("region", { name: "Secciones del perfil" })).toBeVisible();
+    expect(screen.getByText("Cargando tu perfil...")).toBeVisible();
+    expect(screen.queryByText("Valeria Quispe")).not.toBeInTheDocument();
+  });
+
+  it("keeps profile data available while completeness is still loading", async () => {
+    vi.mocked(profileCompletenessService.getCompleteness).mockReturnValue(new Promise(() => {}));
+    render(<ProfileOverviewView />);
+
+    expect(await screen.findByText("Valeria Quispe")).toBeVisible();
+    expect(screen.getByText("Cargando el progreso de tu perfil...")).toBeVisible();
+    expect(screen.getByRole("link", { name: "Editar datos personales" })).toBeVisible();
   });
 
   it("invites the user to complete a new profile", async () => {
@@ -89,7 +123,8 @@ describe("ProfileOverviewView", () => {
     render(<ProfileOverviewView />);
 
     expect(await screen.findByText("Valeria Quispe")).toBeInTheDocument();
-    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(await screen.findByRole("progressbar", { name: "Completitud del perfil" })).toHaveAttribute("aria-valuenow", "35");
+    expect(screen.queryByText("Cargando tu perfil...")).not.toBeInTheDocument();
     expect(screen.getByText("VQ")).toBeInTheDocument();
     expect(screen.getByText("Desarrolladora web junior")).toBeInTheDocument();
     expect(screen.getByText("Cochabamba")).toBeInTheDocument();
@@ -149,6 +184,15 @@ describe("ProfileOverviewView", () => {
     vi.mocked(profileService.getProfile).mockResolvedValue({ ...COMPLETE_PROFILE, aboutMe: null });
     render(<ProfileOverviewView />);
     expect(await screen.findByRole("link", { name: "Completar perfil" })).toHaveAttribute("href", "/profile/settings#presentation");
+  });
+
+  it("keeps the profile and edit actions available when completeness fails", async () => {
+    vi.mocked(profileCompletenessService.getCompleteness).mockRejectedValue(new Error("Unavailable"));
+    render(<ProfileOverviewView />);
+    expect(await screen.findByText("No se pudo cargar el progreso de tu perfil. Intenta de nuevo.")).toBeInTheDocument();
+    expect(screen.getByText("Valeria Quispe")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Editar datos personales" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Editar presentación profesional" })).toBeInTheDocument();
   });
 
 });

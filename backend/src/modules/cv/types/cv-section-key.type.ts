@@ -1,1 +1,2 @@
-export type CvSectionKey = 'header' | 'education' | 'experience' | 'other';
+export type CvSectionKey =
+  'header' | 'presentation' | 'education' | 'experience' | 'skills' | 'other';
