@@ -13,7 +13,10 @@ import type { CreateAppointmentVariables } from "../types/create-appointment-var
 import { formatAppointmentSchedule } from "../utils/appointment-request.utils";
 import { useUploadAppointmentDocument } from "./use-upload-appointment-document";
 
-export function useCreateAppointment(onConflict: (block: AvailabilityBlock) => void) {
+export function useCreateAppointment(
+  onConflict: (block: AvailabilityBlock) => void,
+  onOverlap?: () => void,
+) {
   const queryClient = useQueryClient();
   const isSendingRef = useRef(false);
   const uploadDocument = useUploadAppointmentDocument();
@@ -32,6 +35,10 @@ export function useCreateAppointment(onConflict: (block: AvailabilityBlock) => v
     },
     onError: (error, { block }) => {
       if (isApiError(error) && error.response?.status === 409) {
+        if (getApiErrorDetail(error) === REQUEST_APPOINTMENT_TEXT.overlap) {
+          onOverlap?.();
+          return;
+        }
         toast.error(getApiErrorDetail(error) ?? REQUEST_APPOINTMENT_TEXT.alreadyBooked);
         onConflict(block);
         return;

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useLeaveGuard } from "@/modules/job-offers";
 import { useMentorProfile } from "@/modules/mentorship";
+import { REQUEST_APPOINTMENT_TEXT } from "../../constants/request-appointment.constants";
 import { useBlockSelection } from "../../hooks/use-block-selection";
 import { useCreateAppointment } from "../../hooks/use-create-appointment";
 import type { AppointmentRequestValues } from "../../types/appointment-request-values.types";
@@ -33,14 +34,17 @@ export function BlockSelection({
   const mentorProfile = useMentorProfile(mentorId);
   const [isFormDirty, setIsFormDirty] = useState(false);
   const [formVersion, setFormVersion] = useState(0);
-  const { createAppointment, isSubmitting } = useCreateAppointment((block) => {
-    markUnavailable(block);
-  });
+  const [overlapError, setOverlapError] = useState<string | null>(null);
+  const { createAppointment, isSubmitting } = useCreateAppointment(
+    markUnavailable,
+    () => setOverlapError(REQUEST_APPOINTMENT_TEXT.overlap),
+  );
   const leaveGuard = useLeaveGuard(isFormDirty);
 
   const selectableBlocks = blocks.filter((block) => !unavailableBlockIds.includes(block.id));
 
   const handleSelectBlock = (block: AvailabilityBlock) => {
+    setOverlapError(null);
     selectBlock(block);
   };
 
@@ -69,7 +73,7 @@ export function BlockSelection({
           selectedBlock={selectedBlock}
           unavailableBlock={unavailableBlock}
           isChecking={isChecking}
-          error={error}
+          error={overlapError ?? error}
         >
           <RequestAppointmentForm
             key={formVersion}

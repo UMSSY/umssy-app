@@ -11,6 +11,7 @@ export const REQUEST_APPOINTMENT_TEXT = {
   missingMessage: "Escribe un mensaje para el mentor",
   messageTooLong: `El mensaje no puede superar los ${APPOINTMENT_MESSAGE_MAX_LENGTH} caracteres`,
   confirmed: "Cita confirmada",
+  overlap: "Ya tienes una cita en ese horario. Elige otro horario.",
   alreadyBooked: "Este horario ya fue reservado",
   createError: "No se pudo solicitar la cita. Intenta de nuevo.",
 } as const;
