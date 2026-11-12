@@ -10,4 +10,5 @@ export interface BlockFormProps {
   onSubmit: (values: CreateAvailabilityBlockInput) => void;
   onCancel: () => void;
   onValuesChange?: () => void;
+  onDraftChange?: (draft: CreateAvailabilityBlockInput | null) => void;
 }
