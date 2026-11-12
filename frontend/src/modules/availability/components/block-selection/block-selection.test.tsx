@@ -250,12 +250,15 @@ describe("BlockSelection", () => {
     expect(screen.getByRole("button", { name: saturdayButton })).toBeEnabled()
   })
 
-  it("conserva tema y mensaje tras un cruce y reserva otro horario", async () => {
+  it.each([
+    ["APPOINTMENT_OVERLAP", REQUEST_APPOINTMENT_TEXT.overlap],
+    ["DAILY_APPOINTMENT_LIMIT", REQUEST_APPOINTMENT_TEXT.dailyLimit],
+  ])("conserva el formulario tras %s y reserva otro día", async (code, message) => {
     const user = userEvent.setup()
     const createSpy = vi.spyOn(appointmentsApi, "createAppointment")
       .mockRejectedValueOnce({
         isAxiosError: true,
-        response: { status: 409, data: { detail: REQUEST_APPOINTMENT_TEXT.overlap } },
+        response: { status: 409, data: { code, detail: "Texto del servidor modificado" } },
       })
       .mockResolvedValueOnce({ id: "a2" } as Appointment)
     const uploadSpy = vi.spyOn(appointmentsApi, "uploadDocument")
@@ -269,7 +272,7 @@ describe("BlockSelection", () => {
     await user.upload(screen.getByLabelText(APPOINTMENT_DOCUMENT_TEXT.label), pdf)
     await user.click(screen.getByRole("button", { name: REQUEST_APPOINTMENT_TEXT.submit }))
 
-    expect(await screen.findByText(REQUEST_APPOINTMENT_TEXT.overlap)).toBeInTheDocument()
+    expect(await screen.findByText(message)).toBeInTheDocument()
     expect(screen.getByLabelText(/Mensaje para el mentor/)).toHaveValue("Revisar mi CV")
     expect(uploadSpy).not.toHaveBeenCalled()
     expect(screen.getByText("Referencia.pdf")).toBeInTheDocument()
@@ -277,7 +280,7 @@ describe("BlockSelection", () => {
     await user.click(screen.getByRole("button", { name: saturdayButton }))
     await screen.findByText("Sábado 10 de octubre de 2026")
 
-    expect(screen.queryByText(REQUEST_APPOINTMENT_TEXT.overlap)).not.toBeInTheDocument()
+    expect(screen.queryByText(message)).not.toBeInTheDocument()
     expect(screen.getByLabelText(/Tema de la sesión/)).toHaveTextContent("Revisión de CV")
     expect(screen.getByLabelText(/Mensaje para el mentor/)).toHaveValue("Revisar mi CV")
     await user.click(screen.getByRole("button", { name: REQUEST_APPOINTMENT_TEXT.submit }))

@@ -81,11 +81,13 @@ describe("useCreateAppointment", () => {
     expect(toast.error).toHaveBeenCalledWith("El mentor bloqueó ese día")
   })
 
-  it("con cruce usa el aviso del panel sin marcar el bloque ni mostrar datos privados", async () => {
-    const message = "Ya tienes una cita en ese horario. Elige otro horario."
+  it.each([
+    ["APPOINTMENT_OVERLAP", "Ya tienes una cita en ese horario. Elige otro horario."],
+    ["DAILY_APPOINTMENT_LIMIT", "Ya tienes una cita reservada ese día. Elige otro día."],
+  ])("con %s muestra el aviso sin marcar el bloque ni revelar detalles", async (code, message) => {
     vi.spyOn(appointmentsApi, "createAppointment").mockRejectedValue({
       isAxiosError: true,
-      response: { status: 409, data: { detail: message, appointment: { name: "Privado", topic: "Privado" } } },
+      response: { status: 409, data: { code, detail: "Texto distinto con datos privados", appointment: { name: "Privado", topic: "Privado" } } },
     })
     const onConflict = vi.fn()
     const onOverlap = vi.fn()
@@ -94,10 +96,25 @@ describe("useCreateAppointment", () => {
     const created = await act(async () => result.current.createAppointment(variables))
 
     expect(created).toBe(false)
-    expect(onOverlap).toHaveBeenCalledOnce()
+    expect(onOverlap).toHaveBeenCalledExactlyOnceWith(message)
     expect(onConflict).not.toHaveBeenCalled()
     expect(toast.error).not.toHaveBeenCalled()
     expect(toast.success).not.toHaveBeenCalled()
+  })
+
+  it("no identifica un cruce solo por el texto del detail", async () => {
+    const detail = "Ya tienes una cita en ese horario. Elige otro horario."
+    vi.spyOn(appointmentsApi, "createAppointment").mockRejectedValue(conflictError(detail))
+    const onConflict = vi.fn()
+    const onReservationRejected = vi.fn()
+    const { result } = renderHook(
+      () => useCreateAppointment(onConflict, onReservationRejected), createQueryWrapper(),
+    )
+
+    await act(async () => result.current.createAppointment(variables))
+
+    expect(onReservationRejected).not.toHaveBeenCalled()
+    expect(onConflict).toHaveBeenCalledWith(block)
   })
 
   it("con otros errores muestra el detail o un mensaje genérico sin marcar el bloque", async () => {
