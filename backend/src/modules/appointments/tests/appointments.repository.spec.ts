@@ -14,12 +14,13 @@ describe('AppointmentsRepository', () => {
   const findMany = vi.fn();
   const findUnique = vi.fn();
   const updateMany = vi.fn();
+  const count = vi.fn();
   let repository: AppointmentsRepository;
 
   beforeEach(() => {
     vi.resetAllMocks();
     repository = new AppointmentsRepository({
-      appointment: { findMany, findUnique, updateMany },
+      appointment: { findMany, findUnique, updateMany, count },
     } as unknown as PrismaService);
   });
 
@@ -27,9 +28,9 @@ describe('AppointmentsRepository', () => {
     const records = [createAppointmentRecord()];
     findMany.mockResolvedValue(records);
 
-    await expect(repository.findMine(MENTOR_ID, 'upcoming', NOW)).resolves.toBe(
-      records,
-    );
+    await expect(
+      repository.findMine(MENTOR_ID, 'upcoming', NOW, 1, 10),
+    ).resolves.toBe(records);
     expect(findMany).toHaveBeenCalledExactlyOnceWith({
       where: {
         OR: [{ mentorId: MENTOR_ID }, { studentId: MENTOR_ID }],
@@ -37,16 +38,43 @@ describe('AppointmentsRepository', () => {
         endAt: { gt: NOW },
       },
       orderBy: [{ startAt: 'asc' }, { id: 'asc' }],
+      skip: 0,
+      take: 10,
       select: APPOINTMENT_SELECT,
+    });
+  });
+
+  it('asks the database for the requested page instead of slicing in memory', async () => {
+    findMany.mockResolvedValue([]);
+
+    await repository.findMine(MENTOR_ID, 'upcoming', NOW, 4, 10);
+
+    expect(findMany).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({ skip: 30, take: 10 }),
+    );
+  });
+
+  it('counts the same appointments the page query filters', async () => {
+    count.mockResolvedValue(48);
+
+    await expect(repository.countMine(MENTOR_ID, 'past', NOW)).resolves.toBe(
+      48,
+    );
+    expect(count).toHaveBeenCalledExactlyOnceWith({
+      where: {
+        OR: [{ mentorId: MENTOR_ID }, { studentId: MENTOR_ID }],
+        status: { title: { in: ['CONFIRMED', 'CONFIRMADA'] } },
+        endAt: { lte: NOW },
+      },
     });
   });
 
   it('includes the exact end boundary in past and orders by latest finish with stable tie breaks', async () => {
     findMany.mockResolvedValue([]);
 
-    await expect(repository.findMine(MENTOR_ID, 'past', NOW)).resolves.toEqual(
-      [],
-    );
+    await expect(
+      repository.findMine(MENTOR_ID, 'past', NOW, 1, 10),
+    ).resolves.toEqual([]);
     expect(findMany).toHaveBeenCalledExactlyOnceWith({
       where: {
         OR: [{ mentorId: MENTOR_ID }, { studentId: MENTOR_ID }],
@@ -54,6 +82,8 @@ describe('AppointmentsRepository', () => {
         endAt: { lte: NOW },
       },
       orderBy: [{ endAt: 'desc' }, { startAt: 'desc' }, { id: 'asc' }],
+      skip: 0,
+      take: 10,
       select: APPOINTMENT_SELECT,
     });
   });
@@ -100,7 +130,8 @@ describe('AppointmentsRepository', () => {
       const failure = new Error('Database unavailable');
       findMany.mockRejectedValue(failure);
 
-      await expect(repository.findMine(MENTOR_ID, scope, NOW)).rejects.toBe(
+      await expect(repository.findMine(MENTOR_ID, scope, NOW, 1, 10),
+      ).rejects.toBe(
         failure,
       );
     },

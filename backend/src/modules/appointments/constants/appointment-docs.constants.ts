@@ -1,6 +1,8 @@
 export const APPOINTMENT_MESSAGES = {
   invalidId: 'El id de la cita no es válido',
   invalidScope: 'El alcance debe ser upcoming o past',
+  invalidPage: 'La página debe ser un número entero mayor o igual a 1',
+  invalidPageSize: 'El tamaño de página debe ser un número entero entre 1 y 50',
   invalidBlockId: 'El bloque de disponibilidad no es válido',
   missingTopic: 'Selecciona el tema de la sesión',
   invalidTopic: 'El tema de la sesión no es válido',
@@ -111,8 +113,10 @@ export const FIND_MY_APPOINTMENTS_DOCS = {
   scopeDescription:
     'Por defecto upcoming; la clasificación utiliza la hora de fin de la cita',
   invalidQueryDescription: 'Los parámetros de consulta no son válidos',
+  pageDescription: 'Número de página, desde 1; por defecto 1',
+  pageSizeDescription: 'Citas por página, entre 1 y 50; por defecto 10',
   responseDescription:
-    'Citas propias con horarios UTC y nombre de la contraparte',
+    'Página de citas propias con horarios UTC, nombre de la contraparte y total',
 } as const;
 
 export const FIND_APPOINTMENT_DOCS = {

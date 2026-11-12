@@ -88,21 +88,31 @@ export class AppointmentsRepository {
     return reservations > 0;
   }
 
+  countMine(
+    userId: string,
+    scope: MyAppointmentsQuery['scope'],
+    now: Date,
+  ): Promise<number> {
+    return this.prisma.appointment.count({
+      where: this.myAppointmentsWhere(userId, scope, now),
+    });
+  }
+
   findMine(
     userId: string,
     scope: MyAppointmentsQuery['scope'],
     now: Date,
+    page: number,
+    pageSize: number,
   ): Promise<AppointmentRecord[]> {
     return this.prisma.appointment.findMany({
-      where: {
-        OR: [{ mentorId: userId }, { studentId: userId }],
-        endAt: scope === 'upcoming' ? { gt: now } : { lte: now },
-        status: { title: { in: ACTIVE_APPOINTMENT_STATUS_TITLES } },
-      },
+      where: this.myAppointmentsWhere(userId, scope, now),
       orderBy:
         scope === 'upcoming'
           ? [{ startAt: 'asc' }, { id: 'asc' }]
           : [{ endAt: 'desc' }, { startAt: 'desc' }, { id: 'asc' }],
+      skip: (page - 1) * pageSize,
+      take: pageSize,
       select: APPOINTMENT_SELECT,
     });
   }
@@ -121,6 +131,18 @@ export class AppointmentsRepository {
     });
 
     return appointment?.meetingUrl ?? null;
+  }
+
+  private myAppointmentsWhere(
+    userId: string,
+    scope: MyAppointmentsQuery['scope'],
+    now: Date,
+  ) {
+    return {
+      OR: [{ mentorId: userId }, { studentId: userId }],
+      endAt: scope === 'upcoming' ? { gt: now } : { lte: now },
+      status: { title: { in: ACTIVE_APPOINTMENT_STATUS_TITLES } },
+    };
   }
 
   findById(id: string): Promise<AppointmentRecord | null> {
