@@ -130,8 +130,11 @@ describe("useCvExtraction", () => {
     act(() => result.current.startExtraction("cv-1"));
 
     await waitFor(() =>
-      expect(result.current.errorMessage).toBe("No se pudieron leer los datos de tu CV. Intenta de nuevo."),
+      expect(result.current.errorMessage).toBe(
+        "El servidor no pudo leer tu CV en este momento. Intenta de nuevo en unos segundos.",
+      ),
     );
+    expect(result.current.isRetryable).toBe(true);
     expect(result.current.isOpen).toBe(true);
   });
 

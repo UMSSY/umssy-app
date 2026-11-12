@@ -419,7 +419,7 @@ it("offers to generate a cv from the profile data", async () => {
 
     const dialog = await screen.findByRole("dialog");
     expect(await within(dialog).findByRole("alert")).toHaveTextContent(
-      "No se pudieron leer los datos de tu CV. Intenta de nuevo.",
+      "El servidor no pudo leer tu CV en este momento. Intenta de nuevo en unos segundos.",
     );
     await user.click(within(dialog).getByRole("button", { name: "Cancelar" }));
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
