@@ -198,10 +198,11 @@ describe('GET /api/mentors/me/profile-suggestions', () => {
       const call = request(app.getHttpServer()).get(path);
       if (authorization) call.auth(authorization, { type: 'bearer' });
       const response = await call.expect(401);
-      expect(response.body).toMatchObject({
+      expect(response.body).toEqual({
         statusCode: 401,
         ok: false,
         code: 'UNAUTHENTICATED',
+        detail: 'Se requiere una sesión válida.',
         data: null,
       });
       expect(findUserById).not.toHaveBeenCalled();
@@ -221,7 +222,13 @@ describe('GET /api/mentors/me/profile-suggestions', () => {
       .get(path)
       .auth(token(), { type: 'bearer' })
       .expect(403);
-    expect(response.body.code).toBe('USER_INACTIVE');
+    expect(response.body).toEqual({
+      statusCode: 403,
+      ok: false,
+      code: 'USER_INACTIVE',
+      detail: 'La cuenta del usuario está inactiva.',
+      data: null,
+    });
     expect(findActiveMentorById).not.toHaveBeenCalled();
   });
 
@@ -419,23 +426,31 @@ describe('GET /api/mentors/me/profile-suggestions', () => {
     expect(findActiveMentorById).toHaveBeenCalledTimes(3);
   });
 
-  it('propagates repository failures through the shared filter without exposing their details', async () => {
-    findActiveMentorById.mockRejectedValueOnce(
-      new Error('private database details'),
-    );
-    const response = await request(app.getHttpServer())
-      .get(path)
-      .auth(token(), { type: 'bearer' })
-      .expect(500);
-    expect(response.body).toMatchObject({
-      statusCode: 500,
-      ok: false,
-      data: null,
-    });
-    expect(JSON.stringify(response.body)).not.toContain(
-      'private database details',
-    );
-  });
+  it.each(['profile', 'session'] as const)(
+    'propagates %s repository failures through the shared filter without exposing their details',
+    async (source) => {
+      const error = new Error('private database details');
+      if (source === 'profile')
+        findActiveMentorById.mockRejectedValueOnce(error);
+      else findUserById.mockRejectedValueOnce(error);
+      const response = await request(app.getHttpServer())
+        .get(path)
+        .auth(token(), { type: 'bearer' })
+        .expect(500);
+      expect(response.body).toEqual({
+        statusCode: 500,
+        ok: false,
+        code: 'INTERNAL_ERROR',
+        detail: 'Ocurrió un error interno al procesar la solicitud.',
+        data: null,
+      });
+      expect(JSON.stringify(response.body)).not.toContain(
+        'private database details',
+      );
+      if (source === 'session')
+        expect(findActiveMentorById).not.toHaveBeenCalled();
+    },
+  );
 
   it.each([
     { field: 'photoUrl', code: 'MISSING_PROFILE_PHOTO' },
