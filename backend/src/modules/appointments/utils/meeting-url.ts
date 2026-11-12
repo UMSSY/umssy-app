@@ -8,7 +8,6 @@ import { ACTIVE_APPOINTMENT_STATUS_TITLES } from '../constants/active-appointmen
 export const buildMeetingUrl = (): string =>
   `${MEETING_BASE_URL}/${MEETING_ROOM_PREFIX}${randomUUID()}`;
 
-// El enlace solo se comparte mientras la cita está confirmada y no ha terminado.
 export const canShareMeetingUrl = (
   statusTitle: string,
   endAt: Date,
