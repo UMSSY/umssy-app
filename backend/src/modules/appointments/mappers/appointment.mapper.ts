@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { AppointmentStatusTitle } from '../../availability/enums/appointment-status-title.enum.js';
 import { AppointmentDocumentMapper } from './appointment-document.mapper.js';
 import type { AppointmentRecord } from '../types/appointment-record.types.js';
 import type { MyAppointmentResponse } from '../types/my-appointment-response.types.js';
+import { resolveAppointmentStatus } from '../utils/appointment-status.js';
 
 @Injectable()
 export class AppointmentMapper {
@@ -11,6 +11,7 @@ export class AppointmentMapper {
   toResponse(
     appointment: AppointmentRecord,
     userId: string,
+    now: Date,
   ): MyAppointmentResponse {
     const counterpart =
       appointment.mentorId === userId
@@ -28,10 +29,11 @@ export class AppointmentMapper {
         fullName: `${counterpart.firstName} ${counterpart.lastName}`.trim(),
         role: appointment.mentorId === userId ? 'student' : 'mentor',
       },
-      status:
-        appointment.status.title === AppointmentStatusTitle.LEGACY_CONFIRMED
-          ? AppointmentStatusTitle.CONFIRMED
-          : appointment.status.title,
+      status: resolveAppointmentStatus(
+        appointment.status.title,
+        appointment.endAt,
+        now,
+      ),
       message: appointment.message,
       requestedAt: appointment.requestedAt.toISOString(),
       document: appointment.document
@@ -43,9 +45,10 @@ export class AppointmentMapper {
   toResponseList(
     appointments: AppointmentRecord[],
     userId: string,
+    now: Date,
   ): MyAppointmentResponse[] {
     return appointments.map((appointment) =>
-      this.toResponse(appointment, userId),
+      this.toResponse(appointment, userId, now),
     );
   }
 }
