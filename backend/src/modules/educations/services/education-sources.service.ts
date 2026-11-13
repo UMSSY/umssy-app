@@ -7,6 +7,10 @@ import type { EducationAnalysisSourceResponse } from '../responses/education-ana
 export class EducationSourcesService {
   constructor(private readonly repository: EducationsRepository) {}
 
+  hasByUserId(userId: string): Promise<boolean> {
+    return this.repository.hasByUserId(userId);
+  }
+
   findPublicationEvidenceIds(userId: string, context: TransactionContext) {
     return this.repository.findPublicationEvidenceIds(userId, context);
   }

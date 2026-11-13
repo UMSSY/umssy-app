@@ -71,6 +71,10 @@ import { RadarRecruitmentRepository } from './repositories/radar-recruitment.rep
     RadarReviewMapper,
     RadarPdfExtractionService,
   ],
-  exports: [RadarIntegrationService, RadarRecruitmentService],
+  exports: [
+    RadarIntegrationService,
+    RadarRecruitmentService,
+    RadarPdfExtractionService,
+  ],
 })
 export class RadarIntegrationModule {}

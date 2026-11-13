@@ -21,6 +21,14 @@ import type { EducationPeriodSnapshot } from '../types/education-period-snapshot
 export class EducationsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
+  async hasByUserId(userId: string): Promise<boolean> {
+    const record = await this.prisma.education.findFirst({
+      where: { userId },
+      select: { id: true },
+    });
+    return record !== null;
+  }
+
   findAnalysisSources(
     userId: string,
   ): Promise<EducationAnalysisSourceResponse[]> {
