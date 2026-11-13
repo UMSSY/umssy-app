@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLeaveGuard } from "@/modules/job-offers";
 import { useMentorProfile } from "@/modules/mentorship";
 import { useBlockSelection } from "../../hooks/use-block-selection";
@@ -20,6 +20,7 @@ export function BlockSelection({
   fetchFreeBlocks,
   stickyOffset,
   density,
+  onActivityChange,
 }: BlockSelectionProps) {
   const {
     selectedBlock,
@@ -41,6 +42,12 @@ export function BlockSelection({
     clearSelection,
   );
   const leaveGuard = useLeaveGuard(isFormDirty);
+  const hasSelectionOrDraft = selectedBlock !== null || isFormDirty;
+
+  useEffect(() => {
+    onActivityChange?.(hasSelectionOrDraft);
+    return () => onActivityChange?.(false);
+  }, [hasSelectionOrDraft, onActivityChange]);
 
   const selectableBlocks = blocks.filter((block) => !unavailableBlockIds.includes(block.id));
 
