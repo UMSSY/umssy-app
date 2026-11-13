@@ -1,6 +1,6 @@
 
 import { apiClient } from "@/shared/services/api-client";
-import { getAuthHeaders } from "@/modules/profile";
+import { getAuthHeaders } from "../utils/get-auth-headers";
 import type { ApiResponse } from "../types/api-response.types";
 import type { ProfileSkillsRadarResponse } from "../types/profile-skills-radar-response.types";
 
