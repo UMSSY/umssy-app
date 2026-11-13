@@ -14,6 +14,7 @@ export interface HeatmapDateRange {
 
 export interface HeatmapFilters {
   careerId?: string;
+  promotion?: string;
   year?: string;
   month?: string;
   semesterRange?: HeatmapSemesterRange;

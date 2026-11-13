@@ -8,6 +8,7 @@ export function toHeatmapQueryParams(filters: HeatmapFilters): Record<string, st
   const range = filters.semesterRange ? semesterRangeToTimestamps(filters.semesterRange) : undefined;
   const params: Record<string, string | undefined> = {
     careerId: filters.careerId,
+    promotion: filters.promotion,
     year: range ? undefined : filters.year,
     month: filters.month,
     startTimestamp: range?.startTimestamp,

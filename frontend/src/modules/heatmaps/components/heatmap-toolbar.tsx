@@ -3,7 +3,7 @@
 import { CalendarRange, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ReportFilterSelect } from "@/modules/reports";
-import { HEATMAP_FILTER_TEXT, HEATMAP_MONTH_OPTIONS, HEATMAP_YEAR_OPTIONS } from "../constants/heatmap-filters.constants";
+import { HEATMAP_FILTER_TEXT, HEATMAP_MONTH_OPTIONS, HEATMAP_PROMOTION_OPTIONS, HEATMAP_YEAR_OPTIONS } from "../constants/heatmap-filters.constants";
 import type { HeatmapToolbarProps } from "../types/heatmap-component-props.types";
 import { formatSemesterRange } from "../utils/semester-range-to-timestamps";
 import { HeatmapExportMenu } from "./heatmap-export-menu";
@@ -13,6 +13,7 @@ export function HeatmapToolbar({
   filters,
   careerOptions,
   onCareerChange,
+  onPromotionChange,
   onYearChange,
   onMonthChange,
   onOpenDateRange,
@@ -27,6 +28,9 @@ export function HeatmapToolbar({
       <div className="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start">
         {config.showCareerFilter && (
           <ReportFilterSelect label={HEATMAP_FILTER_TEXT.careerLabel} allLabel={HEATMAP_FILTER_TEXT.allCareers} options={careerOptions} value={filters.careerId} onChange={onCareerChange} />
+        )}
+        {config.showPromotionFilter && (
+          <ReportFilterSelect label={HEATMAP_FILTER_TEXT.promotionLabel} allLabel={HEATMAP_FILTER_TEXT.allPromotions} options={HEATMAP_PROMOTION_OPTIONS} value={filters.promotion} onChange={onPromotionChange} />
         )}
         <div className="flex w-full flex-col gap-1 sm:w-72">
           <ReportFilterSelect

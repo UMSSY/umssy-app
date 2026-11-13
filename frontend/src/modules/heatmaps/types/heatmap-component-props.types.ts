@@ -37,6 +37,7 @@ export interface HeatmapToolbarProps {
   filters: HeatmapFilters;
   careerOptions: { value: string; label: string }[];
   onCareerChange: (careerId?: string) => void;
+  onPromotionChange: (promotion?: string) => void;
   onYearChange: (year?: string) => void;
   onMonthChange: (month?: string) => void;
   onOpenDateRange: () => void;

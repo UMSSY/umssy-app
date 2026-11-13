@@ -32,9 +32,15 @@ export class HeatmapGraduatesRepository {
         },
         respondent: {
           isActive: true,
-          approvedAccessRequest: source.careerId
-            ? { is: { careerId: source.careerId } }
-            : { isNot: null },
+           approvedAccessRequest:
+             source.careerId || source.promotion
+               ? {
+                   is: {
+                     ...(source.careerId ? { careerId: source.careerId } : {}),
+                     ...(source.promotion ? { graduationYear: source.promotion } : {}),
+                   },
+                 }
+               : { isNot: null },
         },
       },
       select: {
@@ -55,7 +61,7 @@ export class HeatmapGraduatesRepository {
         },
         respondent: {
           select: {
-            approvedAccessRequest: { select: { careerId: true } },
+            approvedAccessRequest: { select: { careerId: true, graduationYear: true } },
             userSkills: {
               select: {
                 source: true,

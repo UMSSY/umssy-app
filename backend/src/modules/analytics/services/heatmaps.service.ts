@@ -51,11 +51,11 @@ export class HeatmapsService {
       const from = new Date(query.startTimestamp);
       const to = new Date(query.endTimestamp);
       if (from > to) throw new InvalidHeatmapRangeException();
-      return { careerId: query.careerId, from, to };
+      return { careerId: query.careerId, promotion: query.promotion, from, to };
     }
     if (query.year !== undefined) {
-      return { careerId: query.careerId, ...yearToRange(query.year) };
+      return { careerId: query.careerId, promotion: query.promotion, ...yearToRange(query.year) };
     }
-    return { careerId: query.careerId };
+    return { careerId: query.careerId, promotion: query.promotion };
   }
 }

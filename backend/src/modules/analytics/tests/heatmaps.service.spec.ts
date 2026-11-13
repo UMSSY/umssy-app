@@ -32,9 +32,29 @@ describe('HeatmapsService', () => {
     const { repository, service } = createService();
     const result = await service.getHeatmap('employability', {});
 
-    expect(repository.findEmploymentResponses).toHaveBeenCalledWith({ careerId: undefined });
+    expect(repository.findEmploymentResponses).toHaveBeenCalledWith({ careerId: undefined, promotion: undefined });
     expect(repository.findCareers).not.toHaveBeenCalled();
     expect(result.baseCount).toBe(2);
+  });
+
+  it('pasa la promoción al repository cuando se filtra por año de egreso', async () => {
+    const { repository, service } = createService();
+    await service.getHeatmap('employability', { careerId: 'career-systems', promotion: 2023 });
+
+    expect(repository.findEmploymentResponses).toHaveBeenCalledWith({
+      careerId: 'career-systems',
+      promotion: 2023,
+    });
+  });
+
+  it('pasa promoción undefined cuando no se filtra por promoción', async () => {
+    const { repository, service } = createService();
+    await service.getHeatmap('employability', { careerId: 'career-systems' });
+
+    expect(repository.findEmploymentResponses).toHaveBeenCalledWith({
+      careerId: 'career-systems',
+      promotion: undefined,
+    });
   });
 
   it('convierte la gestión a un rango anual en hora de Bolivia', async () => {

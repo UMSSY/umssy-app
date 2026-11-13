@@ -9,6 +9,7 @@ export function useHeatmapFilters() {
   return {
     filters,
     setCareer: (careerId?: string) => setFilters((current) => ({ ...current, careerId })),
+    setPromotion: (promotion?: string) => setFilters((current) => ({ ...current, promotion })),
     setYear: (year?: string) => setFilters((current) => ({ ...current, year })),
     setMonth: (month?: string) => setFilters((current) => ({ ...current, month })),
     setSemesterRange: (semesterRange?: HeatmapSemesterRange) => setFilters((current) => ({ ...current, semesterRange, year: semesterRange ? undefined : current.year })),

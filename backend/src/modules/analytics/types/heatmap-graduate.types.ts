@@ -37,7 +37,7 @@ export interface HeatmapGraduateRecord {
   submittedAt: Date;
   answers: { question: { statement: string }; option: { label: string } | null }[];
   respondent: {
-    approvedAccessRequest: { careerId: string } | null;
+    approvedAccessRequest: { careerId: string; graduationYear: number } | null;
     userSkills: { source: string; skill: { id: string; name: string } }[];
     workExperiences: WorkPeriod[];
   };
@@ -45,6 +45,7 @@ export interface HeatmapGraduateRecord {
 
 export interface HeatmapGraduateSource {
   careerId?: string;
+  promotion?: number;
   from?: Date;
   to?: Date;
 }

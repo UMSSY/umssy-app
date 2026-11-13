@@ -15,6 +15,12 @@ const timestampSchema = z.iso.datetime({
 export const heatmapQuerySchema = z
   .object({
     careerId: z.uuid({ message: 'La carrera no es válida' }).optional(),
+    promotion: z.coerce
+      .number()
+      .int({ message: 'La promoción debe ser un año entero' })
+      .min(2000, { message: 'La promoción no es válida' })
+      .max(2100, { message: 'La promoción no es válida' })
+      .optional(),
     year: z.coerce
       .number()
       .int({ message: 'La gestión debe ser un año entero' })

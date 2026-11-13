@@ -27,7 +27,7 @@ export function record(overrides: Partial<HeatmapGraduateRecord> = {}): HeatmapG
     submittedAt: new Date('2025-03-01T14:00:00.000Z'),
     answers: [],
     respondent: {
-      approvedAccessRequest: { careerId: 'career-systems' },
+      approvedAccessRequest: { careerId: 'career-systems', graduationYear: 2023 },
       userSkills: [],
       workExperiences: [],
     },

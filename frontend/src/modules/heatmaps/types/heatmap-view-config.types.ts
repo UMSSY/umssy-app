@@ -11,6 +11,7 @@ export interface HeatmapViewConfig {
   cellFormat: HeatmapCellFormat;
   cellUnit: string;
   showCareerFilter: boolean;
+  showPromotionFilter: boolean;
   showMonthFilter: boolean;
   emptyMessage: string;
 }

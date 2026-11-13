@@ -23,7 +23,7 @@ import { heatmapToCsv } from "../utils/heatmap-to-csv";
 
 export function HeatmapView({ type }: HeatmapViewProps) {
   const config = HEATMAP_VIEW_CONFIGS[type];
-  const { filters, setCareer, setYear, setMonth, setSemesterRange } = useHeatmapFilters();
+  const { filters, setCareer, setPromotion, setYear, setMonth, setSemesterRange } = useHeatmapFilters();
   const { data, isLoading, hasError, refetch } = useHeatmap(type, filters);
   const { careers } = useCareers();
   const careerOptions = (careers ?? []).map((career) => ({ value: career.id, label: career.title }));
@@ -53,6 +53,7 @@ export function HeatmapView({ type }: HeatmapViewProps) {
         filters={filters}
         careerOptions={careerOptions}
         onCareerChange={setCareer}
+        onPromotionChange={setPromotion}
         onYearChange={setYear}
         onMonthChange={setMonth}
         onOpenDateRange={() => setIsDateRangeOpen(true)}

@@ -10,6 +10,8 @@ export const HEATMAP_YEAR_OPTIONS = Array.from({ length: HEATMAP_LAST_YEAR - HEA
   return { value: year, label: year };
 });
 
+export const HEATMAP_PROMOTION_OPTIONS = HEATMAP_YEAR_OPTIONS;
+
 export const HEATMAP_MONTH_OPTIONS = [
   "Enero",
   "Febrero",
@@ -38,6 +40,8 @@ export const HEATMAP_SEMESTER_BOUNDS: Record<HeatmapSemester, { start: string; e
 export const HEATMAP_FILTER_TEXT = {
   careerLabel: "Carrera",
   allCareers: "Todas las carreras",
+  promotionLabel: "Promoción",
+  allPromotions: "Todas las promociones",
   yearLabel: "Gestión",
   allYears: "Todas",
   yearOverridden: "Definida por el filtro de fecha",
