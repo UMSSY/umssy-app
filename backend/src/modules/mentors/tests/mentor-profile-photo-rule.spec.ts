@@ -3,6 +3,14 @@ import { isProfilePhotoMissing } from '../utils/mentor-profile-completeness.js';
 import { buildMentorProfile } from './fixtures/mentor-profile.fixture.js';
 
 describe('isProfilePhotoMissing', () => {
+  it.each([
+    [null, true],
+    [0, true],
+    [3, false],
+  ] as const)(
+    'evaluates a projected byte length %s without loading the photo',
+    (length, missing) => expect(isProfilePhotoMissing(length)).toBe(missing),
+  );
   it('detects an absent photo', () => {
     expect(isProfilePhotoMissing(null)).toBe(true);
   });

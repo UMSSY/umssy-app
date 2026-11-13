@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Prisma } from '../../../prisma/client.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { MENTOR_ROLE_NAME } from '../constants/mentor.constants.js';
+import type { MentorProfileSnapshot } from '../types/mentor-profile-snapshot.types.js';
 import {} from '../exceptions/index.js';
 import {
   readMentorCapacity,
@@ -381,6 +382,24 @@ export class MentorsRepository extends MentorIntakeRepository {
         },
       },
     });
+  }
+
+  async findActiveMentorProfileSnapshot(
+    userId: string,
+    now: Date,
+  ): Promise<MentorProfileSnapshot | null> {
+    const rows = await this.prisma.$queryRaw<
+      MentorProfileSnapshot[]
+    >(Prisma.sql`
+      SELECT octet_length(u.photo_url) AS "photoByteLength",
+        u.about_me AS "aboutMe",
+        EXISTS (SELECT 1 FROM mentor_technical_areas a WHERE a.mentor_id = u.id) AS "hasTechnicalAreas",
+        EXISTS (SELECT 1 FROM work_experiences w WHERE w.user_id = u.id) AS "hasWorkExperience"
+      FROM users u
+      WHERE u.id = ${userId}::uuid
+        AND ${directoryPredicate({ search: '', available: false }, now)}
+    `);
+    return rows[0] ?? null;
   }
 
   findActiveMentorById(userId: string, now: Date) {

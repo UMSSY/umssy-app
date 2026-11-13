@@ -1,8 +1,21 @@
 import type { MentorsRepository } from '../../repositories/mentors.repository.js';
+import type { MentorProfileSnapshot } from '../../types/mentor-profile-snapshot.types.js';
 
 type MentorProfileRecord = NonNullable<
   Awaited<ReturnType<MentorsRepository['findActiveMentorById']>>
 >;
+
+export function toMentorProfileSnapshot(
+  profile: MentorProfileRecord | null,
+): MentorProfileSnapshot | null {
+  if (!profile) return null;
+  return {
+    photoByteLength: profile.photoUrl?.length ?? null,
+    aboutMe: profile.aboutMe,
+    hasTechnicalAreas: profile.mentorTechnicalAreas.length > 0,
+    hasWorkExperience: profile.workExperiences.length > 0,
+  };
+}
 
 export function buildMentorProfile(
   overrides: Partial<MentorProfileRecord> = {},

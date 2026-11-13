@@ -1,3 +1,8 @@
+import {
+  toMentorProfileSnapshot,
+  buildEmptyMentorProfile,
+  buildMentorProfile,
+} from './fixtures/mentor-profile.fixture.js';
 import 'reflect-metadata';
 import {
   afterAll,
@@ -24,18 +29,16 @@ import { MentorMapper } from '../mappers/mentor.mapper.js';
 import { MentorsRepository } from '../repositories/mentors.repository.js';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
 import type { UserSkillService } from '../../skills/services/user-skill.service.js';
-import {
-  buildEmptyMentorProfile,
-  buildMentorProfile,
-} from './fixtures/mentor-profile.fixture.js';
+
 import { createMentorProfileEditingFixture } from './fixtures/mentor-profile-editing.fixture.js';
 
 describe('GET /api/mentors/me/profile-suggestions', () => {
   const path = '/api/mentors/me/profile-suggestions';
   const jwt = new JwtService({ secret: 'hu13-http-test-secret' });
   const findUserById = vi.fn<SessionRepository['findUserById']>();
-  const findActiveMentorById =
-    vi.fn<MentorsRepository['findActiveMentorById']>();
+  const findActiveMentorProfileSnapshot =
+    vi.fn<MentorsRepository['findActiveMentorProfileSnapshot']>();
+  const findMyParticipation = vi.fn<MentorsRepository['findMyParticipation']>();
   let app: INestApplication;
   const originalMetadata = Reflect.getOwnMetadata(
     'design:paramtypes',
@@ -56,7 +59,10 @@ describe('GET /api/mentors/me/profile-suggestions', () => {
       [MentorsService],
       MentorsController,
     );
-    const repository = { findActiveMentorById } as unknown as MentorsRepository;
+    const repository = {
+      findActiveMentorProfileSnapshot,
+      findMyParticipation,
+    } as unknown as MentorsRepository;
     const service = new MentorsService(
       repository,
       new MentorMapper(),
@@ -105,8 +111,45 @@ describe('GET /api/mentors/me/profile-suggestions', () => {
       company: null,
       roles: [{ role: { name: 'mentor' } }],
     }));
-    findActiveMentorById.mockResolvedValue(buildEmptyMentorProfile());
+    findActiveMentorProfileSnapshot.mockResolvedValue(
+      toMentorProfileSnapshot(buildEmptyMentorProfile()),
+    );
   });
+
+  it.each(['ACTIVE', 'DEACTIVATED', 'NEVER'] as const)(
+    'distinguishes participation %s from an empty suggestion list using the existing endpoints',
+    async (status) => {
+      findMyParticipation.mockResolvedValueOnce({
+        status,
+        areas: [],
+        orientations: [],
+      });
+      findActiveMentorProfileSnapshot.mockResolvedValueOnce(
+        status === 'ACTIVE'
+          ? toMentorProfileSnapshot(buildMentorProfile())
+          : null,
+      );
+      const authorization = token();
+      const participation = await request(app.getHttpServer())
+        .get('/api/mentors/me/participation')
+        .auth(authorization, { type: 'bearer' })
+        .expect(200);
+      const suggestions = await request(app.getHttpServer())
+        .get(path)
+        .auth(authorization, { type: 'bearer' })
+        .expect(200);
+      expect(participation.body.data.status).toBe(status);
+      expect(suggestions.body.data).toEqual({
+        suggestions: [],
+        pendingCount: 0,
+      });
+      expect(findMyParticipation).toHaveBeenCalledExactlyOnceWith('mentor-a');
+      expect(findActiveMentorProfileSnapshot).toHaveBeenCalledExactlyOnceWith(
+        'mentor-a',
+        expect.any(Date),
+      );
+    },
+  );
 
   it('accepts a signed JWT and returns only the public suggestion contract', async () => {
     const response = await request(app.getHttpServer())
@@ -175,7 +218,7 @@ describe('GET /api/mentors/me/profile-suggestions', () => {
       'title',
     ]);
     expect(findUserById).toHaveBeenCalledExactlyOnceWith('mentor-a');
-    expect(findActiveMentorById).toHaveBeenCalledExactlyOnceWith(
+    expect(findActiveMentorProfileSnapshot).toHaveBeenCalledExactlyOnceWith(
       'mentor-a',
       expect.any(Date),
     );
@@ -206,7 +249,7 @@ describe('GET /api/mentors/me/profile-suggestions', () => {
         data: null,
       });
       expect(findUserById).not.toHaveBeenCalled();
-      expect(findActiveMentorById).not.toHaveBeenCalled();
+      expect(findActiveMentorProfileSnapshot).not.toHaveBeenCalled();
     },
   );
 
@@ -229,7 +272,7 @@ describe('GET /api/mentors/me/profile-suggestions', () => {
       detail: 'La cuenta del usuario está inactiva.',
       data: null,
     });
-    expect(findActiveMentorById).not.toHaveBeenCalled();
+    expect(findActiveMentorProfileSnapshot).not.toHaveBeenCalled();
   });
 
   it('returns no suggestions for an authenticated user without active mentor participation', async () => {
@@ -240,7 +283,9 @@ describe('GET /api/mentors/me/profile-suggestions', () => {
       company: null,
       roles: [{ role: { name: 'titulado' } }],
     });
-    findActiveMentorById.mockResolvedValueOnce(null);
+    findActiveMentorProfileSnapshot.mockResolvedValueOnce(
+      toMentorProfileSnapshot(null),
+    );
     const response = await request(app.getHttpServer())
       .get(path)
       .auth(token(), { type: 'bearer' })
@@ -273,31 +318,22 @@ describe('GET /api/mentors/me/profile-suggestions', () => {
         id: 'mentor-a',
         isAvailableForMentoring: false,
       };
-      const findFirst = vi.fn().mockImplementation(async ({ where }) => {
-        expect(where).toEqual({
-          id: 'mentor-a',
-          isActive: true,
-          roles: {
-            some: {
-              deletedAt: null,
-              startAt: { lte: expect.any(Date) },
-              role: { name: 'mentor' },
-            },
-          },
-        });
+      const queryRaw = vi.fn().mockImplementation(async (query) => {
+        expect(query.values).toEqual(['mentor-a', expect.any(Date), 'mentor']);
+        expect(query.sql).toContain('u.is_active = true');
+        expect(query.sql).toContain('ur.deleted_at IS NULL');
+        expect(query.sql).not.toContain('is_available_for_mentoring');
         return roles.some(
-          (role) =>
-            role.deletedAt === null &&
-            role.startAt <= where.roles.some.startAt.lte,
+          (role) => role.deletedAt === null && role.startAt <= query.values[1],
         )
-          ? profile
-          : null;
+          ? [toMentorProfileSnapshot(profile)]
+          : [];
       });
       const repository = new MentorsRepository({
-        user: { findFirst },
+        $queryRaw: queryRaw,
       } as unknown as PrismaService);
-      findActiveMentorById.mockImplementation((id, now) =>
-        repository.findActiveMentorById(id, now),
+      findActiveMentorProfileSnapshot.mockImplementation((id, now) =>
+        repository.findActiveMentorProfileSnapshot(id, now),
       );
       findUserById.mockResolvedValueOnce({
         id: 'mentor-a',
@@ -312,7 +348,7 @@ describe('GET /api/mentors/me/profile-suggestions', () => {
         .expect(200);
       expect(response.body.data.pendingCount).toBe(pendingCount);
       expect(response.body.data.suggestions).toHaveLength(pendingCount);
-      expect(findFirst).toHaveBeenCalledTimes(1);
+      expect(queryRaw).toHaveBeenCalledTimes(1);
       if (pendingCount === 0)
         expect(response.body.data).toEqual({
           suggestions: [],
@@ -330,24 +366,26 @@ describe('GET /api/mentors/me/profile-suggestions', () => {
     'keeps technical areas independent from orientations over HTTP (areas=$technicalAreas, orientations=$orientations)',
     async ({ technicalAreas, orientations }) => {
       const complete = buildMentorProfile();
-      findActiveMentorById.mockResolvedValueOnce(
-        buildMentorProfile({
-          id: 'mentor-a',
-          mentorTechnicalAreas: technicalAreas
-            ? complete.mentorTechnicalAreas
-            : [],
-          mentorOrientationTypes: orientations
-            ? [
-                {
-                  orientationType: {
-                    id: 'orientation-1',
-                    name: 'Orientación técnica',
-                    description: null,
+      findActiveMentorProfileSnapshot.mockResolvedValueOnce(
+        toMentorProfileSnapshot(
+          buildMentorProfile({
+            id: 'mentor-a',
+            mentorTechnicalAreas: technicalAreas
+              ? complete.mentorTechnicalAreas
+              : [],
+            mentorOrientationTypes: orientations
+              ? [
+                  {
+                    orientationType: {
+                      id: 'orientation-1',
+                      name: 'Orientación técnica',
+                      description: null,
+                    },
                   },
-                },
-              ]
-            : [],
-        }),
+                ]
+              : [],
+          }),
+        ),
       );
       const response = await request(app.getHttpServer())
         .get(path)
@@ -384,8 +422,8 @@ describe('GET /api/mentors/me/profile-suggestions', () => {
         }),
       ],
     ]);
-    findActiveMentorById.mockImplementation(async (id) =>
-      structuredClone(profiles.get(id) ?? null),
+    findActiveMentorProfileSnapshot.mockImplementation(async (id) =>
+      toMentorProfileSnapshot(profiles.get(id) ?? null),
     );
     const first = await request(app.getHttpServer())
       .get(`${path}?userId=mentor-b&mentorId=mentor-b`)
@@ -414,16 +452,14 @@ describe('GET /api/mentors/me/profile-suggestions', () => {
       ['mentor-b'],
       ['mentor-a'],
     ]);
-    expect(findActiveMentorById.mock.calls.map(([id]) => id)).toEqual([
-      'mentor-a',
-      'mentor-b',
-      'mentor-a',
-    ]);
+    expect(
+      findActiveMentorProfileSnapshot.mock.calls.map(([id]) => id),
+    ).toEqual(['mentor-a', 'mentor-b', 'mentor-a']);
     await request(app.getHttpServer())
       .get('/api/mentors/mentor-b/profile-suggestions')
       .auth(token(), { type: 'bearer' })
       .expect(404);
-    expect(findActiveMentorById).toHaveBeenCalledTimes(3);
+    expect(findActiveMentorProfileSnapshot).toHaveBeenCalledTimes(3);
   });
 
   it.each(['profile', 'session'] as const)(
@@ -431,7 +467,7 @@ describe('GET /api/mentors/me/profile-suggestions', () => {
     async (source) => {
       const error = new Error('private database details');
       if (source === 'profile')
-        findActiveMentorById.mockRejectedValueOnce(error);
+        findActiveMentorProfileSnapshot.mockRejectedValueOnce(error);
       else findUserById.mockRejectedValueOnce(error);
       const response = await request(app.getHttpServer())
         .get(path)
@@ -448,7 +484,7 @@ describe('GET /api/mentors/me/profile-suggestions', () => {
         'private database details',
       );
       if (source === 'session')
-        expect(findActiveMentorById).not.toHaveBeenCalled();
+        expect(findActiveMentorProfileSnapshot).not.toHaveBeenCalled();
     },
   );
 
@@ -461,7 +497,7 @@ describe('GET /api/mentors/me/profile-suggestions', () => {
     'refreshes only $code after saving $field through its existing service with the same JWT (simulated repositories)',
     async ({ field, code }) => {
       const editing = createMentorProfileEditingFixture('mentor-a');
-      findActiveMentorById.mockImplementation(editing.read);
+      findActiveMentorProfileSnapshot.mockImplementation(editing.read);
       const authorization = token();
       const before = await request(app.getHttpServer())
         .get(path)
@@ -493,10 +529,9 @@ describe('GET /api/mentors/me/profile-suggestions', () => {
         ),
       ).toBe(1);
       expect(findUserById.mock.calls).toEqual([['mentor-a'], ['mentor-a']]);
-      expect(findActiveMentorById.mock.calls.map(([id]) => id)).toEqual([
-        'mentor-a',
-        'mentor-a',
-      ]);
+      expect(
+        findActiveMentorProfileSnapshot.mock.calls.map(([id]) => id),
+      ).toEqual(['mentor-a', 'mentor-a']);
     },
   );
 
@@ -509,7 +544,7 @@ describe('GET /api/mentors/me/profile-suggestions', () => {
     'preserves suggestions after discarding a %s draft without saving (simulated repositories)',
     async (field) => {
       const editing = createMentorProfileEditingFixture('mentor-a');
-      findActiveMentorById.mockImplementation(editing.read);
+      findActiveMentorProfileSnapshot.mockImplementation(editing.read);
       const authorization = token();
       const before = await request(app.getHttpServer())
         .get(path)
@@ -537,10 +572,9 @@ describe('GET /api/mentors/me/profile-suggestions', () => {
       expect(editing.snapshot()).toEqual(storedBefore);
       for (const write of Object.values(editing.writes))
         expect(write).not.toHaveBeenCalled();
-      expect(findActiveMentorById.mock.calls.map(([id]) => id)).toEqual([
-        'mentor-a',
-        'mentor-a',
-      ]);
+      expect(
+        findActiveMentorProfileSnapshot.mock.calls.map(([id]) => id),
+      ).toEqual(['mentor-a', 'mentor-a']);
     },
   );
 });

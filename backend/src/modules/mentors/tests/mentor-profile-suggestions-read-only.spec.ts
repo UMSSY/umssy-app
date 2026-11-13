@@ -5,6 +5,7 @@ import { MentorProfileSuggestionsService } from '../services/mentor-profile-sugg
 import {
   buildEmptyMentorProfile,
   buildMentorProfile,
+  toMentorProfileSnapshot,
 } from './fixtures/mentor-profile.fixture.js';
 
 function freezeNested(value: unknown): void {
@@ -17,7 +18,7 @@ function freezeNested(value: unknown): void {
 
 describe('read-only suggestion evaluation', () => {
   it.each(['complete', 'partial', 'empty'] as const)(
-    'only calls the existing Prisma reader for a $state profile',
+    'only executes the minimal read for a $state profile',
     async (state) => {
       const profile =
         state === 'empty'
@@ -27,28 +28,18 @@ describe('read-only suggestion evaluation', () => {
             });
       const before = structuredClone(profile);
       freezeNested(profile);
-      const findFirst = vi.fn().mockResolvedValue(profile);
+      const queryRaw = vi
+        .fn()
+        .mockResolvedValue([toMentorProfileSnapshot(profile)]);
       const operations: string[] = [];
-      // Fail on any unexpected database operation, including writes, raw SQL or transactions.
-      const user = new Proxy(
-        { findFirst },
-        {
-          get(target, key) {
-            operations.push(`user.${String(key)}`);
-            if (key !== 'findFirst')
-              throw new Error(`Unexpected user operation: ${String(key)}`);
-            return target.findFirst;
-          },
-        },
-      );
       const prisma = new Proxy(
-        { user },
+        { $queryRaw: queryRaw },
         {
           get(target, key) {
             operations.push(String(key));
-            if (key !== 'user')
+            if (key !== '$queryRaw')
               throw new Error(`Unexpected Prisma operation: ${String(key)}`);
-            return target.user;
+            return target.$queryRaw;
           },
         },
       );
@@ -60,8 +51,8 @@ describe('read-only suggestion evaluation', () => {
       expect(result).toHaveLength(
         state === 'complete' ? 0 : state === 'partial' ? 1 : 4,
       );
-      expect(findFirst).toHaveBeenCalledTimes(1);
-      expect(operations).toEqual(['user', 'user.findFirst']);
+      expect(queryRaw).toHaveBeenCalledTimes(1);
+      expect(operations).toEqual(['$queryRaw']);
       expect(profile).toEqual(before);
     },
   );

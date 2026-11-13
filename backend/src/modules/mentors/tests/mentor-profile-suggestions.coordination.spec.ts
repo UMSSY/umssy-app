@@ -1,18 +1,23 @@
+import {
+  toMentorProfileSnapshot,
+  buildEmptyMentorProfile,
+  buildMentorProfile,
+} from './fixtures/mentor-profile.fixture.js';
 import { describe, expect, it, vi } from 'vitest';
 import { MentorsService } from '../services/mentors.service.js';
 import { MentorProfileSuggestionsService } from '../services/mentor-profile-suggestions.service.js';
 import { MentorMapper } from '../mappers/mentor.mapper.js';
 import type { MentorsRepository } from '../repositories/mentors.repository.js';
 import type { UserSkillService } from '../../skills/services/user-skill.service.js';
-import {
-  buildEmptyMentorProfile,
-  buildMentorProfile,
-} from './fixtures/mentor-profile.fixture.js';
 
 describe('MentorsService suggestion coordination', () => {
   function setup(profile: ReturnType<typeof buildMentorProfile> | null) {
-    const findActiveMentorById = vi.fn().mockResolvedValue(profile);
-    const repository = { findActiveMentorById } as unknown as MentorsRepository;
+    const findActiveMentorProfileSnapshot = vi
+      .fn()
+      .mockResolvedValue(toMentorProfileSnapshot(profile));
+    const repository = {
+      findActiveMentorProfileSnapshot,
+    } as unknown as MentorsRepository;
     const evaluator = new MentorProfileSuggestionsService(repository);
     const findSuggestions = vi.spyOn(evaluator, 'findSuggestions');
     const mapper = new MentorMapper();
@@ -23,12 +28,21 @@ describe('MentorsService suggestion coordination', () => {
       {} as UserSkillService,
       evaluator,
     );
-    return { service, findSuggestions, toResponse, findActiveMentorById };
+    return {
+      service,
+      findSuggestions,
+      toResponse,
+      findActiveMentorProfileSnapshot,
+    };
   }
 
   it('delegates detection to the existing evaluator and transformation to the mapper', async () => {
-    const { service, findSuggestions, toResponse, findActiveMentorById } =
-      setup(buildEmptyMentorProfile());
+    const {
+      service,
+      findSuggestions,
+      toResponse,
+      findActiveMentorProfileSnapshot,
+    } = setup(buildEmptyMentorProfile());
     const result = await service.findMyProfileSuggestions('session-user');
     expect(findSuggestions).toHaveBeenCalledExactlyOnceWith('session-user');
     expect(toResponse).toHaveBeenCalledExactlyOnceWith(
@@ -36,7 +50,7 @@ describe('MentorsService suggestion coordination', () => {
     );
     expect(result).toBe(toResponse.mock.results[0]?.value);
     expect(result.pendingCount).toBe(4);
-    expect(findActiveMentorById).toHaveBeenCalledExactlyOnceWith(
+    expect(findActiveMentorProfileSnapshot).toHaveBeenCalledExactlyOnceWith(
       'session-user',
       expect.any(Date),
     );
@@ -54,9 +68,10 @@ describe('MentorsService suggestion coordination', () => {
   );
 
   it('propagates read failures without mapping a successful empty response', async () => {
-    const { service, findActiveMentorById, toResponse } = setup(null);
+    const { service, findActiveMentorProfileSnapshot, toResponse } =
+      setup(null);
     const error = new Error('read failed');
-    findActiveMentorById.mockRejectedValueOnce(error);
+    findActiveMentorProfileSnapshot.mockRejectedValueOnce(error);
     await expect(service.findMyProfileSuggestions('user')).rejects.toBe(error);
     expect(toResponse).not.toHaveBeenCalled();
   });

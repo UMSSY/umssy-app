@@ -14,11 +14,12 @@ Prisma, migraciones, CI/CD, cupos, ofertas, solicitudes ni participación.
 `MentorsService.findMyProfileSuggestions(user.id)`, que coordina
 `MentorProfileSuggestionsService.findSuggestions` y
 `MentorMapper.toProfileSuggestionsResponse`. El evaluador reutiliza
-`MentorsRepository.findActiveMentorById`; solo el repositorio accede a Prisma.
+`MentorsRepository.findActiveMentorProfileSnapshot`; solo el repositorio accede a Prisma.
 El mapper añade metadatos y calcula el contador. El interceptor global
 `ResponseInterceptor` genera el envoltorio; `DomainExceptionFilter` maneja errores.
 
-No hay consultas nuevas, lógica de detección duplicada, caché ni persistencia
+La consulta específica obtiene longitud de fotografía, descripción y existencia
+de áreas y experiencias. No hay lógica de detección duplicada, caché ni persistencia
 de recomendaciones. Los imports y providers existentes de `MentorsModule`
 resuelven la nueva dependencia de `MentorsService`. El mapper solo utiliza el
 tipo del repositorio para los métodos preexistentes; no inyecta Prisma.
@@ -163,7 +164,7 @@ visuales ni reemplaza la aceptación del producto.
 | CA14     | Datos actualizados con el mismo JWT; persistencia real y refresco visual pendientes                                |
 | CA15     | Áreas vacías con orientaciones registradas producen `MISSING_SPECIALTY`; sin recomendación nueva por orientaciones |
 
-## Rendimiento: consulta compartida y alternativa
+## Rendimiento: consulta mínima de HU-13
 
 `findActiveMentorById` recupera identificación/nombres, titular, descripción,
 disponibilidad, fotografía binaria, ciudad, educación, experiencia completa,
@@ -171,21 +172,43 @@ certificaciones con `documentUrl` binario, áreas técnicas y orientaciones.
 HU-13 necesita solo presencia de fotografía no vacía, descripción y existencia
 de áreas técnicas y experiencias, además de los filtros actuales de identidad/rol.
 
-Una proyección específica podría usar longitud de bytes en PostgreSQL y existencia
-o conteo de relaciones para evitar transferir binarios y registros detallados.
-La mejora sería menor transferencia y materialización; no se midió latencia ni
-volumen, por lo que no se afirma una mejora cuantitativa. `PhotoFileRepository.exists`
-no es equivalente: acepta bytes de longitud cero. La consulta del directorio ya
-filtra fotos nulas/vacías sin leer bytes, pero no cubre todo el perfil requerido.
+`findActiveMentorProfileSnapshot` usa una consulta parametrizada y tipada con
+`Prisma.sql` y `$queryRaw<MentorProfileSnapshot[]>`. Solo selecciona longitud de
+fotografía, descripción y dos indicadores `EXISTS` de áreas y experiencia.
+No selecciona contenido binario, certificaciones ni relaciones detalladas.
+Reutiliza `directoryPredicate` con búsqueda vacía y disponibilidad sin filtro
+para mantener los filtros existentes de usuario activo y rol mentor vigente.
+No cambia ese predicado ni la consulta compartida `findActiveMentorById`.
 
-Una implementación futura afectaría `mentors.repository.ts`, el tipo de evaluación,
-el evaluador y sus pruebas/fixtures; podría exigir adaptar la entrada de la regla
-de foto sin duplicarla. Debe conservar los filtros de actividad y la semántica de
-bytes vacíos. No debe modificar la consulta compartida usada por el detalle y
-`MentorMapper.toProfileResponse`, ni introducir consultas de otros dominios.
-Si se usan varias lecturas, debe evaluarse su consistencia frente a escrituras
-concurrentes. Se documenta esta alternativa sin introducir consultas ni cambios
-arquitectónicos en #2130; el riesgo de lectura innecesaria permanece.
+Las funciones de detección aceptan también longitud/indicadores y mantienen sus
+entradas anteriores. La descripción conserva `trim()` en JavaScript. Fotografía
+nula o de cero bytes y apartados vacíos conservan su significado. Códigos, campos,
+mensajes, metadatos, orden, mapper y contrato HTTP permanecen iguales.
+Es una sola lectura coherente, sin ventanas entre consultas separadas.
+La mejora es menor transferencia y materialización; no se cuantifica latencia.
+
+## Composición de participación y sugerencias en frontend
+
+Consultar con el mismo usuario autenticado `GET /api/mentors/me/participation`
+y `GET /api/mentors/me/profile-suggestions` permite distinguir los casos sin
+ampliar el contrato:
+
+| `data.status` de participación | Pendientes                  | Interpretación                                           |
+| ------------------------------ | --------------------------- | -------------------------------------------------------- |
+| `ACTIVE`                       | Lista vacía y contador cero | Los cuatro apartados evaluados están completos           |
+| `ACTIVE`                       | Lista no vacía              | Mostrar recomendaciones opcionales                       |
+| `DEACTIVATED` o `NEVER`        | Lista vacía y contador cero | No hay participación activa; no concluir perfil completo |
+
+La ruta existente usa `DEACTIVATED` si hay registros del rol pero ninguno vigente,
+incluidos inicios futuros; `NEVER` si no encuentra registros de ese rol. La cuenta
+inactiva es rechazada por el guard. Disponibilidad desactivada no cambia un rol
+vigente y no equivale a participación pausada: CA12 sigue pendiente.
+
+Las respuestas son independientes, no una instantánea atómica. Frontend debe
+refrescar ambas tras guardar o cambiar participación, no interpretar errores
+como perfil completo y repetir ambas lecturas si cambia la participación entre
+solicitudes. Las pruebas HTTP cubren la composición para los tres estados.
+No se implementa navegación ni se añaden campos o códigos HTTP.
 
 ## Estándares verificados y limitaciones
 
@@ -202,7 +225,7 @@ Los hooks se exceptúan únicamente por comando al registrar commits para evitar
 respaldos de stash; sus analizadores y el validador de mensajes se ejecutan de forma
 directa. No se cambia configuración permanente ni se manipulan stashes.
 
-## Validación final y cobertura
+## Validación del cierre inicial y cobertura histórica
 
 Medición global con `vitest run --coverage` y la configuración original:
 **3.680 pruebas aprobadas en 385 archivos**. Todos los umbrales globales del 80%
@@ -240,7 +263,31 @@ Los reportes detallados se generan localmente en `backend/coverage/`
 y no se incluyen en commits.
 
 El backend de #2130 está listo para revisión técnica con estas limitaciones
-declaradas: CA12 sin definición, documentos oficiales no disponibles, pruebas
-de PostgreSQL y frontend pendientes, y lectura compartida de binarios sin
-optimizar. Esto no certifica aceptación completa de la historia ni autoriza
+declaradas en ese cierre: CA12 sin definición, documentos oficiales no disponibles,
+pruebas de PostgreSQL y frontend pendientes y lectura compartida sin optimizar.
+La revisión posterior de consultas y PostgreSQL se registra a continuación.
+Esto no certifica aceptación completa de la historia ni autoriza
 publicación, merge o creación de PR.
+
+## Validación de la optimización para PR #2075 y PR #2156
+
+- Suite HU-13: 126 pruebas aprobadas en 15 archivos, incluidas las 16 combinaciones.
+- Mentorías completa: 330 pruebas aprobadas en 33 archivos, incluidas regresiones
+  de directorio, detalle, participación y aislamiento entre usuarios.
+- Las pruebas del repositorio comprueban parámetros separados del texto SQL,
+  proyección de cuatro valores, ausencia de selección binaria/documentos,
+  falta de mentor y propagación de errores.
+- La validación HTTP real utilizó el módulo compilado con Prisma real contra
+  `app_db_hu13_check/public`, con `default_transaction_read_only=on`.
+  Para `seed.user13@umssy.test` devolvió 200, únicamente `MISSING_PROFILE_PHOTO`
+  y contador 1; la ruta de participación devolvió `ACTIVE` y sin token hubo 401.
+- Se inspeccionó la consulta realmente ejecutada: no recupera binarios ni
+  certificaciones. Las huellas de filas de las 85 tablas quedaron sin cambios.
+  No se consultó ni modificó `app_db` durante esta validación.
+- El JWT temporal de la validación se mantuvo solo en memoria; no se ejecutó
+  login con contraseña ni se publicaron credenciales.
+
+Los porcentajes globales anteriores corresponden al cierre inicial, no a una
+nueva medición de cobertura tras optimizar. La composición con participación
+resuelve la interpretación sin cambiar el contrato; frontend todavía debe usarla.
+CA12 conserva su definición pendiente. No se han publicado estos cambios.

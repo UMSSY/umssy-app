@@ -1,8 +1,11 @@
+import {
+  toMentorProfileSnapshot,
+  buildMentorProfile,
+} from './fixtures/mentor-profile.fixture.js';
 import { describe, expect, it, vi } from 'vitest';
 import type { MentorsRepository } from '../repositories/mentors.repository.js';
 import { MentorProfileSuggestionsService } from '../services/mentor-profile-suggestions.service.js';
 import { MentorMapper } from '../mappers/mentor.mapper.js';
-import { buildMentorProfile } from './fixtures/mentor-profile.fixture.js';
 
 // Explicit expected code order is independent of the production detection functions.
 const combinations = Array.from({ length: 16 }, (_, mask) => ({
@@ -24,11 +27,11 @@ describe('profile completeness combinations', () => {
         mentorTechnicalAreas: specialty ? complete.mentorTechnicalAreas : [],
         workExperiences: experience ? complete.workExperiences : [],
       });
-      const findActiveMentorById = vi
-        .fn<MentorsRepository['findActiveMentorById']>()
-        .mockResolvedValue(profile);
+      const findActiveMentorProfileSnapshot = vi
+        .fn<MentorsRepository['findActiveMentorProfileSnapshot']>()
+        .mockResolvedValue(toMentorProfileSnapshot(profile));
       const service = new MentorProfileSuggestionsService({
-        findActiveMentorById,
+        findActiveMentorProfileSnapshot,
       } as unknown as MentorsRepository);
       const expected = [
         ...(!photo

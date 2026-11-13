@@ -29,8 +29,11 @@ describe('compiled MentorsModule suggestions integration', () => {
       const prisma = { user: { findFirst: async ({ where, select }) => {
         reads.push(where.id);
         if (select.roles) return { id: where.id, email: 'mentor@test.com', isActive: true, company: null, roles: [{ role: { name: 'mentor' } }] };
-        return { photoUrl: null, aboutMe: null, mentorTechnicalAreas: [], workExperiences: [] };
-      } } };
+        throw new Error('Unexpected full profile read');
+      } }, $queryRaw: async (query) => {
+        reads.push(query.values[0]);
+        return [{ photoByteLength: null, aboutMe: null, hasTechnicalAreas: false, hasWorkExperience: false }];
+      } };
       const module = await Test.createTestingModule({ imports: [MentorsModule] })
         .overrideProvider(PrismaService).useValue(prisma).compile();
       const app = module.createNestApplication({ logger: false });

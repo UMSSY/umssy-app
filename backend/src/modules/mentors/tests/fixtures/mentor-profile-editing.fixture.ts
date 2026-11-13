@@ -1,3 +1,8 @@
+import {
+  toMentorProfileSnapshot,
+  buildEmptyMentorProfile,
+  buildMentorProfile,
+} from './mentor-profile.fixture.js';
 import { vi } from 'vitest';
 import { FileValidationService } from '../../../../common/services/file-validation.service.js';
 import { ProfileMapper } from '../../../profile/mappers/profile.mapper.js';
@@ -17,10 +22,6 @@ import { MentorMapper } from '../../mappers/mentor.mapper.js';
 import type { MentorsRepository } from '../../repositories/mentors.repository.js';
 import { MentorsService } from '../../services/mentors.service.js';
 import { MentorProfileSuggestionsService } from '../../services/mentor-profile-suggestions.service.js';
-import {
-  buildEmptyMentorProfile,
-  buildMentorProfile,
-} from './mentor-profile.fixture.js';
 
 export function createMentorProfileEditingFixture(userId: string) {
   const profile = { ...buildEmptyMentorProfile(), id: userId };
@@ -75,8 +76,8 @@ export function createMentorProfileEditingFixture(userId: string) {
       );
     });
   const repository = {
-    findActiveMentorById: vi.fn(async (id: string) =>
-      id === userId ? structuredClone(profile) : null,
+    findActiveMentorProfileSnapshot: vi.fn(async (id: string) =>
+      id === userId ? toMentorProfileSnapshot(profile) : null,
     ),
     findActiveMentorParticipation: vi.fn(async (id: string) =>
       id === userId ? { id } : null,
@@ -132,7 +133,8 @@ export function createMentorProfileEditingFixture(userId: string) {
   );
 
   return {
-    read: (id: string, now: Date) => repository.findActiveMentorById(id, now),
+    read: (id: string, now: Date) =>
+      repository.findActiveMentorProfileSnapshot(id, now),
     snapshot: () => structuredClone(profile),
     writes: {
       updatePresentation,
