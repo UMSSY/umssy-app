@@ -11,15 +11,17 @@ import { usePassesViewState } from "./use-passes-view-state";
 vi.mock("./use-my-passes", () => ({ useMyPasses: vi.fn() }));
 vi.mock("./use-online-status", () => ({ useOnlineStatus: vi.fn() }));
 
+type LiveState = ReturnType<typeof useMyPasses>;
+
 const retry = vi.fn();
-const live = { registrations: [], isLoading: false, error: null as string | null, retry };
+const live: LiveState = { registrations: [], isLoading: false, error: null, retry };
 const registration = { id: "reg-1", eventName: "React", date: "2026-11-20", startTime: "09:00", endTime: "12:00", location: "Aula 101", status: "Confirmada" };
 const saved = { ...registration, location: null, qrToken: "c".repeat(64) };
 const token = (sub: string) => `h.${btoa(JSON.stringify({ sub }))}.s`;
 
-function setup({ online = true, liveState = {} }: { online?: boolean; liveState?: Partial<typeof live> & { registrations?: typeof registration[] } } = {}) {
+function setup({ online = true, liveState = {} }: { online?: boolean; liveState?: Partial<LiveState> } = {}) {
   vi.mocked(useOnlineStatus).mockReturnValue(online);
-  vi.mocked(useMyPasses).mockReturnValue({ ...live, ...liveState } as ReturnType<typeof useMyPasses>);
+  vi.mocked(useMyPasses).mockReturnValue({ ...live, ...liveState });
   return renderHookWithQuery(() => usePassesViewState());
 }
 
