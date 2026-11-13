@@ -1,7 +1,5 @@
-import type {
-  RecruiterVacancyResponse,
-  ActiveVacancyResponse,
-} from '../types/vacancy-response.type.js';
+import type { RecruiterVacancyResponse } from '../types/recruiter-vacancy-response.type.js';
+import type { ActiveVacancyResponse } from '../types/active-vacancy-response.type.js';
 import { mapApplicationStatus } from './radar-applications.mapper.js';
 import type { RecruiterCandidateInput } from '../types/recruiter-candidate-input.type.js';
 import type { RecruiterAreaEvidenceInput } from '../types/recruiter-area-evidence-input.type.js';
