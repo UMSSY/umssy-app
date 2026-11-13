@@ -1,5 +1,5 @@
 import { cn } from "cn";
-import { HEATMAP_EMPTY_TONE, HEATMAP_TEXT, HEATMAP_TONE_SCALE } from "../constants/heatmap-text.constants";
+import { HEATMAP_TEXT, HEATMAP_TONE_SCALE } from "../constants/heatmap-text.constants";
 
 export function HeatmapLegend() {
   return (
@@ -13,9 +13,6 @@ export function HeatmapLegend() {
         ))}
       </ul>
       <span>{HEATMAP_TEXT.legendHigh}</span>
-      <span className={cn("ml-2 rounded px-2 py-1 font-medium", HEATMAP_EMPTY_TONE)}>
-        {HEATMAP_TEXT.emptyCell} {HEATMAP_TEXT.legendEmpty}
-      </span>
     </div>
   );
 }
