@@ -42,6 +42,7 @@ export const WORKSPACE_SECTIONS: readonly WorkspaceSectionProps[] = [
   {
     id: "heatmaps", label: "Mapas de calor", icon: LayoutGrid, patterns: [/^\/backoffice\/reports\/heatmaps(?:\/|$)/],
     items: [
+      { label: "Mapas de calor", href: "/backoffice/reports/heatmaps" },
       { label: "Habilidades por Carrera", href: "/backoffice/reports/heatmaps/skills-by-career" },
       { label: "Habilidades vs. Rango Salarial", href: "/backoffice/reports/heatmaps/skills-by-salary" },
       { label: "Empleabilidad y Habilidades", href: "/backoffice/reports/heatmaps/employability" },
