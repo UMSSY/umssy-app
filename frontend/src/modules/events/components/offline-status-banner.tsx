@@ -1,4 +1,4 @@
-import { CloudOff, RefreshCw } from "lucide-react";
+import { Info, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { OFFLINE_PASSES_TEXTS } from "../constants/offline-passes.constants";
 
@@ -10,16 +10,16 @@ export function OfflineStatusBanner({ isOnline, lastUpdated, isStale, onRetry }:
   return (
     <div
       role="status"
-      className="flex flex-col gap-3 rounded-lg border border-notice-border bg-notice px-4 py-3 text-sm text-notice-foreground sm:flex-row sm:items-center sm:justify-between"
+      className="flex flex-col gap-3 rounded-lg bg-interaction px-4 py-3 text-sm text-ink sm:flex-row sm:items-center sm:justify-between"
     >
-      <div className="flex min-w-0 items-start gap-3">
-        <CloudOff className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+      <div className="flex min-w-0 items-start gap-2.5">
+        <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
         <div className="min-w-0 space-y-1">
           <p>
-            <span className="font-semibold">{message}</span>
-            {lastUpdated ? <span> · {OFFLINE_PASSES_TEXTS.lastUpdated} {lastUpdated}</span> : null}
+            {message}
+            {lastUpdated ? <span className="text-text-secondary"> {OFFLINE_PASSES_TEXTS.lastUpdated} {lastUpdated}</span> : null}
           </p>
-          {isStale ? <p>{OFFLINE_PASSES_TEXTS.staleNotice}</p> : null}
+          {isStale ? <p className="text-text-secondary">{OFFLINE_PASSES_TEXTS.staleNotice}</p> : null}
         </div>
       </div>
       {isOnline && onRetry ? (

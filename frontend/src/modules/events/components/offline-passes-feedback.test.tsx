@@ -10,7 +10,7 @@ describe("OfflineStatusBanner", () => {
   it("tells the user they are viewing saved passes offline with the last update", () => {
     render(<OfflineStatusBanner isOnline={false} lastUpdated="13 nov 2026, 14:30" isStale={false} onRetry={vi.fn()} />);
     expect(screen.getByRole("status")).toHaveTextContent(
-      "Estás viendo tus pases guardados sin conexión · Última actualización: 13 nov 2026, 14:30",
+      "Sin conexión. Estás viendo tus pases guardados. Última actualización: 13 nov 2026, 14:30",
     );
     expect(screen.queryByText(/más de 24 horas/)).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Reintentar" })).not.toBeInTheDocument();

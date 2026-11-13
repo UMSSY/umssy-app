@@ -8,8 +8,8 @@ export const OFFLINE_PASSES_CLOCK_INTERVAL_MS = MINUTE_MS;
 export const OFFLINE_PASSES_LOCALE = "es-BO";
 
 export const OFFLINE_PASSES_TEXTS = {
-  offlineBanner: "Estás viendo tus pases guardados sin conexión",
-  failedRefreshBanner: "No se pudieron actualizar tus pases. Estás viendo la copia guardada",
+  offlineBanner: "Sin conexión. Estás viendo tus pases guardados.",
+  failedRefreshBanner: "No se pudieron actualizar tus pases. Estás viendo tus pases guardados.",
   lastUpdated: "Última actualización:",
   staleNotice: "La copia tiene más de 24 horas. Conéctate a Internet para actualizarla.",
   availableOffline: "Disponible sin conexión",

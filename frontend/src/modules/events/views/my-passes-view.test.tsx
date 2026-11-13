@@ -189,8 +189,8 @@ describe('Mis pases sin conexión', () => {
     await offlinePassesStore.save('user-a', [saved]);
     goOffline();
     render(<MyPassesView onOpenWorkshopChat={vi.fn()} />);
-    const banner = await screen.findByText('Estás viendo tus pases guardados sin conexión');
-    expect(banner.closest('p')).toHaveTextContent(/Estás viendo tus pases guardados sin conexión · Última actualización: .*2026/);
+    const banner = await screen.findByText(/Sin conexión\. Estás viendo tus pases guardados\./);
+    expect(banner.closest('p')).toHaveTextContent(/Sin conexión\. Estás viendo tus pases guardados\. Última actualización: .*2026/);
     const panel = await screen.findByRole('complementary', { name: 'Detalle de la inscripción' });
     expect(await within(panel).findByRole('img', { name: 'Código QR del pase' })).toBeInTheDocument();
     expect(screen.getByText('1 pase')).toBeInTheDocument();
