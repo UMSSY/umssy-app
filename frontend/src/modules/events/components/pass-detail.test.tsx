@@ -15,6 +15,12 @@ beforeEach(async () => {
 afterEach(() => { cleanup(); clearAccessToken(); });
 
 describe('Private pass detail', () => {
+  it('describes a real persistent QR without the illustrative Sprint 1 legend', async () => {
+    vi.mocked(registrationsService.getPass).mockResolvedValue({ ...pass, qrToken: 'a'.repeat(64) });
+    renderWithQuery(<PassDetail registration={pass} />);
+    await screen.findByRole('img', { name: 'Código QR del pase' });
+    expect(screen.queryByText(/ilustrativo/i)).not.toBeInTheDocument();
+  });
   it('shows an error and retries without rendering a fallback QR', async () => {
     vi.mocked(registrationsService.getPass).mockRejectedValueOnce(new Error('offline')).mockResolvedValueOnce({ ...pass, qrToken: 'a'.repeat(64) });
     renderWithQuery(<PassDetail registration={pass} />);
