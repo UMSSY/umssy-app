@@ -1,5 +1,3 @@
-
-
 import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { NotificationsRepository } from '../repositories/notifications.repository.js';
 import { PreferencesRepository } from '../repositories/preferences.repository.js';
@@ -35,7 +33,7 @@ export class NotificationsService {
     private readonly notificationGateway: NotificationGateway,
   ) {}
 
-  async notify<T>(request: NotifyRequest<T>): Promise<NotifyResult> {
+  async notify(request: NotifyRequest): Promise<NotifyResult> {
     const { recipientIds, actorId, type, payload, actionUrl, groupKey } = request;
 
     const finalRecipients = recipientIds.filter((id) => id !== actorId);

@@ -19,6 +19,14 @@ describe('NotificationsService', () => {
   let mockMailDispatcher: any;
   let mockGateway: any;
 
+  
+  const validPayload = { 
+    counterpartName: 'Test', 
+    date: '2023-01-01', 
+    time: '10:00', 
+    topic: 'Test Topic' 
+  };
+
   beforeAll(() => {
     Logger.overrideLogger(false);
   });
@@ -54,7 +62,7 @@ describe('NotificationsService', () => {
       recipientIds: ['user-1'],
       actorId: 'user-1', 
       type: NotificationType.APPOINTMENT_BOOKED,
-      payload: { counterpartName: 'Test', date: '2023-01-01', time: '10:00' },
+      payload: validPayload,
       actionUrl: '/test',
     });
 
@@ -70,7 +78,7 @@ describe('NotificationsService', () => {
       recipientIds: ['user-2'],
       actorId: 'user-1',
       type: NotificationType.APPOINTMENT_BOOKED,
-      payload: { counterpartName: 'Test', date: '2023-01-01', time: '10:00' },
+      payload: validPayload,
       actionUrl: '/test',
     });
 
@@ -85,14 +93,13 @@ describe('NotificationsService', () => {
       service.notify({
         recipientIds: ['user-2'],
         type: NotificationType.APPOINTMENT_BOOKED,
-        payload: {},
+        payload: validPayload, 
         actionUrl: '/test',
       })
     ).rejects.toThrow(NotFoundException);
   });
 
   it('debe respetar las preferencias y enrutar solo a los canales correctos (Fan-out)', async () => {
-   
     mockPreferencesRepo.findManyByUserIds.mockResolvedValue([
       { userId: 'user-2', pushEnabled: true, emailEnabled: false },
       { userId: 'user-3', pushEnabled: false, emailEnabled: true },
@@ -104,7 +111,7 @@ describe('NotificationsService', () => {
       recipientIds: ['user-2', 'user-3'],
       actorId: 'user-1',
       type: NotificationType.APPOINTMENT_BOOKED,
-      payload: { counterpartName: 'Test', date: '2023-01-01', time: '10:00' },
+      payload: validPayload, 
       actionUrl: '/test',
     });
 
@@ -129,7 +136,7 @@ describe('NotificationsService', () => {
       recipientIds: ['user-2'],
       actorId: 'user-1',
       type: NotificationType.APPOINTMENT_BOOKED,
-      payload: { counterpartName: 'Test', date: '2023-01-01', time: '10:00' },
+      payload: validPayload,
       actionUrl: '/test',
     });
 
