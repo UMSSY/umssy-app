@@ -13,6 +13,8 @@ export { SectionCard } from "./components/section-card";
 export type { Feedback } from "./types/feedback.types";
 export type { FeedbackType } from "./types/feedback-type.types";
 export { profileService } from "./services/profile.service";
+export { profilePhotoService } from "./services/profile-photo.service";
+export type { ProfileResponse } from "./types/profile-response.types";
 
 export { formatFileSize } from "./utils/format-file-size";
 export { getFieldErrorProps, getFieldErrorId } from "./utils/get-field-error-props";
