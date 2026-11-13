@@ -61,8 +61,19 @@ export const reportsService = {
     return data;
   },
 
-  exportRegisteredUsersCsv: ({ userType, period, search }: RegisteredUsersExportParams): Promise<ExportedFile> =>
-    downloadCsv("/reports/registered-users/export", { userType, period, search }, REGISTERED_USERS_CSV_FALLBACK_NAME),
+  exportRegisteredUsersCsv: ({ userType, period, search, page, limit, snapshotAt, format }: RegisteredUsersExportParams): Promise<ExportedFile> =>
+    downloadCsv(
+      "/reports/registered-users/export",
+      {
+        userType,
+        period,
+        search,
+        ...(format && { format }),
+        ...(page !== undefined && limit !== undefined && { page, limit }),
+        ...(snapshotAt && { snapshotAt }),
+      },
+      REGISTERED_USERS_CSV_FALLBACK_NAME,
+    ),
 
   getRejectedUsers: async (
     { page, limit, userType, period, search, snapshotAt }: RejectedUsersParams,
@@ -77,10 +88,17 @@ export const reportsService = {
     return data;
   },
 
-  exportRejectedUsersCsv: ({ userType, period, search }: RejectedUsersExportParams): Promise<ExportedFile> =>
+  exportRejectedUsersCsv: ({ userType, period, search, page, limit, snapshotAt, format }: RejectedUsersExportParams): Promise<ExportedFile> =>
     downloadCsv(
       "/reports/rejected-users/export",
-      { userType, period, search: search || undefined },
+      {
+        userType,
+        period,
+        search: search || undefined,
+        ...(format && { format }),
+        ...(page !== undefined && limit !== undefined && { page, limit }),
+        ...(snapshotAt && { snapshotAt }),
+      },
       REJECTED_USERS_CSV_FALLBACK_NAME,
     ),
 };

@@ -3,8 +3,10 @@ import { ReportUsersRepository } from '../repositories/report-users.repository.j
 import { CSV_BOM } from '../../../common/utils/csv.js';
 import {
   registeredUsersFiltersSchema,
+  registeredUsersExportQuerySchema,
   registeredUsersQuerySchema,
   rejectedUsersFiltersSchema,
+  rejectedUsersExportQuerySchema,
   rejectedUsersQuerySchema,
 } from '../requests/report-users.schema.js';
 import { ReportsService } from '../services/reports.service.js';
@@ -465,6 +467,33 @@ describe('ReportsService', () => {
         (await service.getRejectedUsers(rejectedQuery({ search: 'contacto@' })))
           .items,
       ).toHaveLength(1);
+    });
+  });
+
+  describe('paginación de exportaciones', () => {
+    it('exporta solo la página solicitada de usuarios registrados', async () => {
+      const { content } = await buildService().exportRegisteredUsersCsv(
+        registeredUsersExportQuerySchema.parse({ page: '2', limit: '1' }),
+      );
+
+      expect(content).toContain('Ana Pérez');
+      expect(content).not.toContain('Bruno Díaz');
+      expect(content).not.toContain('Carla Ríos');
+    });
+
+    it('exporta solo la página solicitada de usuarios rechazados', async () => {
+      const { content } = await buildService().exportRejectedUsersCsv(
+        rejectedUsersExportQuerySchema.parse({ page: '2', limit: '1' }),
+      );
+
+      expect(content).toContain('Elena Soto');
+      expect(content).not.toContain('Fabio León');
+    });
+
+    it('exige página y límite juntos y limita el tamaño de página', () => {
+      expect(() => registeredUsersExportQuerySchema.parse({ page: 2 })).toThrow();
+      expect(() => rejectedUsersExportQuerySchema.parse({ limit: 10 })).toThrow();
+      expect(() => registeredUsersExportQuerySchema.parse({ page: 1, limit: 11 })).toThrow();
     });
   });
 });

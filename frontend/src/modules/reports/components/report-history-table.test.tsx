@@ -49,10 +49,19 @@ describe("ReportHistoryTable", () => {
     expect(screen.getByRole("cell", { name: "-" })).toBeDefined();
   });
 
-  it("muestra las tres columnas definidas, en orden", () => {
+  it("muestra las cuatro columnas definidas, en orden", () => {
     render(<ReportHistoryTable reports={[]} isLoading={false} />);
 
     const headers = screen.getAllByRole("columnheader").map((header) => header.textContent);
-    expect(headers).toEqual(["Nombre del Archivo/Reporte", "Tipo de Reporte", "Fecha y Hora de Generación"]);
+    expect(headers).toEqual(["Nombre del Archivo/Reporte", "Tipo de Reporte", "Formato", "Fecha y Hora de Generación"]);
+  });
+
+  it("muestra el formato del archivo generado en cada entrada", () => {
+    const pdfReport = { ...buildReport("STUDENTS"), id: "pdf-report", fileName: "estudiantes.pdf" };
+    const csvReport = { ...buildReport("MENTORS"), id: "csv-report", fileName: "mentores.csv" };
+    render(<ReportHistoryTable reports={[pdfReport, csvReport]} isLoading={false} />);
+
+    expect(screen.getByText("PDF")).toBeInTheDocument();
+    expect(screen.getByText("CSV")).toBeInTheDocument();
   });
 });

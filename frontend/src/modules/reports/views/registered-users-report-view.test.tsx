@@ -90,7 +90,7 @@ describe("RegisteredUsersReportView", () => {
     render(<RegisteredUsersReportView />);
 
     expect(screen.getByRole("heading", { name: "Usuarios aceptados" })).toBeDefined();
-    expect(screen.getByRole("button", { name: "Exportar CSV" })).toBeDefined();
+    expect(screen.getByRole("button", { name: "Descargar" })).toBeDefined();
     expect(screen.getByRole("button", { name: "Gestión" })).toBeDefined();
     expect(screen.getByRole("button", { name: "actualizar" })).toBeDefined();
     expect(screen.getByText("Cargando usuarios...")).toBeDefined();
@@ -344,6 +344,14 @@ describe("RegisteredUsersReportView", () => {
     expect(screen.queryByText(/^Mostrando/)).toBeNull();
   });
 
+  it("deshabilita la descarga mientras se aplica una nueva búsqueda", async () => {
+    await renderLoadedView();
+
+    fireEvent.change(screen.getByPlaceholderText("Buscar por correo electrónico"), { target: { value: "ana" } });
+
+    expect(screen.getByRole("button", { name: "Descargar" })).toBeDisabled();
+  });
+
   it("muestra un mensaje de error si falla la carga", async () => {
     vi.spyOn(reportsService, "getRegisteredUsers").mockRejectedValueOnce(new Error("Network error"));
 
@@ -366,19 +374,46 @@ describe("RegisteredUsersReportView", () => {
     await selectUserType(user, "Empresa");
     await selectPeriod(user, "II-2025");
 
-    await user.click(screen.getByRole("button", { name: "Exportar CSV" }));
+    fireEvent.click(screen.getByRole("button", { name: "Descargar" }));
+    await user.click(screen.getByRole("menuitem", { name: /Exportar CSV/ }));
 
-    const exportingButton = screen.getByRole("button", { name: "Exportando..." }) as HTMLButtonElement;
+    const exportingButton = screen.getByRole("button", { name: "Descargando..." }) as HTMLButtonElement;
     expect(exportingButton.disabled).toBe(true);
-    expect(exportSpy).toHaveBeenCalledWith({ userType: "empresa", period: "II-2025", search: "" });
+    expect(exportSpy).toHaveBeenCalledWith({ userType: "empresa", period: "II-2025", search: "", format: "csv" });
 
     resolveExport({ file, fileName: "usuarios-registrados-2026-10-03.csv" });
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: "Exportar CSV" })).toBeDefined();
+      expect(screen.getByRole("button", { name: "Descargar" })).toBeDefined();
     });
     expect(downloadSpy).toHaveBeenCalledWith(file, "usuarios-registrados-2026-10-03.csv");
     expect(screen.queryByRole("alert")).toBeNull();
     expect(screen.getByText("La exportación de la tabla ha sido un éxito")).toBeDefined();
+  });
+
+  it("limita la exportación a la página actual y conserva la fecha de corte", async () => {
+    const user = userEvent.setup();
+    const exportSpy = vi.spyOn(reportsService, "exportRegisteredUsersCsv").mockResolvedValue({
+      file: new Blob(["Usuario"], { type: "text/csv" }),
+      fileName: "usuarios.csv",
+    });
+    vi.spyOn(downloadFileModule, "downloadFile").mockImplementation(() => undefined);
+    await renderLoadedView();
+
+    fireEvent.click(screen.getByRole("button", { name: "Página 2" }));
+    await waitFor(() => expect(screen.getByText("Mostrando 11-20 de 24 usuarios")).toBeDefined());
+
+    fireEvent.click(screen.getByRole("button", { name: "Descargar" }));
+    await user.click(screen.getByRole("menuitemradio", { name: "Solo la página actual" }));
+    fireEvent.click(screen.getByRole("button", { name: "Descargar" }));
+    await user.click(screen.getByRole("menuitem", { name: /Exportar CSV/ }));
+
+    await waitFor(() => {
+      expect(exportSpy).toHaveBeenCalledWith(expect.objectContaining({
+        page: 2,
+        limit: 10,
+        snapshotAt: expect.any(String),
+      }));
+    });
   });
 
   it("muestra el aviso de éxito solo cuando termina de guardarse el CSV", async () => {
@@ -399,17 +434,18 @@ describe("RegisteredUsersReportView", () => {
     });
     await renderLoadedView();
 
-    await user.click(screen.getByRole("button", { name: "Exportar CSV" }));
+    fireEvent.click(screen.getByRole("button", { name: "Descargar" }));
+    await user.click(screen.getByRole("menuitem", { name: /Exportar CSV/ }));
     await waitFor(() => expect(close).toHaveBeenCalledOnce());
     expect(screen.queryByText("La exportación de la tabla ha sido un éxito")).toBeNull();
-    expect(screen.getByRole("button", { name: "Exportando..." })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Descargando..." })).toBeDisabled();
     expect(picker).toHaveBeenCalledWith(expect.objectContaining({ suggestedName: "usuarios-registrados.csv" }));
 
     await act(async () => { finishSaving(); });
 
     const message = await screen.findByText("La exportación de la tabla ha sido un éxito");
     expect(message.parentElement).toHaveClass("bg-surface-soft");
-    expect(screen.getByRole("button", { name: "Exportar CSV" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Descargar" })).toBeEnabled();
   });
 
   it("muestra un mensaje si falla la exportación", async () => {
@@ -418,7 +454,8 @@ describe("RegisteredUsersReportView", () => {
     const toastErrorSpy = vi.spyOn(toast, "error");
     await renderLoadedView();
 
-    fireEvent.click(screen.getByRole("button", { name: "Exportar CSV" }));
+    fireEvent.click(screen.getByRole("button", { name: "Descargar" }));
+    fireEvent.click(screen.getByRole("menuitem", { name: /Exportar CSV/ }));
 
     await waitFor(() =>
       expect(toastErrorSpy).toHaveBeenCalledWith("No se pudo exportar el reporte. Inténtalo de nuevo.", expect.any(Object)),

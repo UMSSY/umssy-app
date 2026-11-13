@@ -15,6 +15,7 @@ function mockRegisteredUsers(state: { isSlow?: boolean; hasConnectionError?: boo
     users: [],
     totalItems: 0,
     totalPages: 1,
+    snapshotAt: undefined,
     isLoading: false,
     errorMessage: undefined,
     isSlow: false,

@@ -1,6 +1,7 @@
 import type { RoleTag } from "@/modules/auth";
 import type { DocumentType } from "@/modules/access-request";
 import type { AcademicPeriod } from "./registered-user.types";
+import type { ReportExportFormat } from "./report-export.types";
 
 export interface RejectedUser {
   id: string;
@@ -22,4 +23,5 @@ export interface RejectedUsersParams {
   snapshotAt?: string;
 }
 
-export type RejectedUsersExportParams = Pick<RejectedUsersParams, "userType" | "period" | "search">;
+export type RejectedUsersExportParams = Pick<RejectedUsersParams, "userType" | "period" | "search"> &
+  Partial<Pick<RejectedUsersParams, "page" | "limit" | "snapshotAt">> & { format?: ReportExportFormat };
