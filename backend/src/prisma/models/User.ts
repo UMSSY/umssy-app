@@ -341,6 +341,8 @@ export type UserWhereInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotListRelationFilter;
   radarAuditSubjects?: Prisma.RadarAuditEventListRelationFilter;
   radarAuditActors?: Prisma.RadarAuditEventListRelationFilter;
+  socialAccounts?: Prisma.UserSocialAccountListRelationFilter;
+  portfolioProjects?: Prisma.UserPortfolioProjectListRelationFilter;
 };
 
 export type UserOrderByWithRelationInput = {
@@ -410,6 +412,8 @@ export type UserOrderByWithRelationInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotOrderByRelationAggregateInput;
   radarAuditSubjects?: Prisma.RadarAuditEventOrderByRelationAggregateInput;
   radarAuditActors?: Prisma.RadarAuditEventOrderByRelationAggregateInput;
+  socialAccounts?: Prisma.UserSocialAccountOrderByRelationAggregateInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectOrderByRelationAggregateInput;
 };
 
 export type UserWhereUniqueInput = Prisma.AtLeast<
@@ -501,6 +505,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<
     radarSnapshots?: Prisma.RadarScoreSnapshotListRelationFilter;
     radarAuditSubjects?: Prisma.RadarAuditEventListRelationFilter;
     radarAuditActors?: Prisma.RadarAuditEventListRelationFilter;
+    socialAccounts?: Prisma.UserSocialAccountListRelationFilter;
+    portfolioProjects?: Prisma.UserPortfolioProjectListRelationFilter;
   },
   'id' | 'email'
 >;
@@ -620,6 +626,8 @@ export type UserCreateInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateInput = {
@@ -687,6 +695,8 @@ export type UserUncheckedCreateInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserUpdateInput = {
@@ -756,6 +766,8 @@ export type UserUpdateInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateInput = {
@@ -825,6 +837,8 @@ export type UserUncheckedUpdateInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserCreateManyInput = {
@@ -2420,6 +2434,58 @@ export type UserUpdateOneWithoutRadarAuditActorsNestedInput = {
   >;
 };
 
+export type UserCreateNestedOneWithoutSocialAccountsInput = {
+  create?: Prisma.XOR<
+    Prisma.UserCreateWithoutSocialAccountsInput,
+    Prisma.UserUncheckedCreateWithoutSocialAccountsInput
+  >;
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSocialAccountsInput;
+  connect?: Prisma.UserWhereUniqueInput;
+};
+
+export type UserUpdateOneRequiredWithoutSocialAccountsNestedInput = {
+  create?: Prisma.XOR<
+    Prisma.UserCreateWithoutSocialAccountsInput,
+    Prisma.UserUncheckedCreateWithoutSocialAccountsInput
+  >;
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSocialAccountsInput;
+  upsert?: Prisma.UserUpsertWithoutSocialAccountsInput;
+  connect?: Prisma.UserWhereUniqueInput;
+  update?: Prisma.XOR<
+    Prisma.XOR<
+      Prisma.UserUpdateToOneWithWhereWithoutSocialAccountsInput,
+      Prisma.UserUpdateWithoutSocialAccountsInput
+    >,
+    Prisma.UserUncheckedUpdateWithoutSocialAccountsInput
+  >;
+};
+
+export type UserCreateNestedOneWithoutPortfolioProjectsInput = {
+  create?: Prisma.XOR<
+    Prisma.UserCreateWithoutPortfolioProjectsInput,
+    Prisma.UserUncheckedCreateWithoutPortfolioProjectsInput
+  >;
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPortfolioProjectsInput;
+  connect?: Prisma.UserWhereUniqueInput;
+};
+
+export type UserUpdateOneRequiredWithoutPortfolioProjectsNestedInput = {
+  create?: Prisma.XOR<
+    Prisma.UserCreateWithoutPortfolioProjectsInput,
+    Prisma.UserUncheckedCreateWithoutPortfolioProjectsInput
+  >;
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPortfolioProjectsInput;
+  upsert?: Prisma.UserUpsertWithoutPortfolioProjectsInput;
+  connect?: Prisma.UserWhereUniqueInput;
+  update?: Prisma.XOR<
+    Prisma.XOR<
+      Prisma.UserUpdateToOneWithWhereWithoutPortfolioProjectsInput,
+      Prisma.UserUpdateWithoutPortfolioProjectsInput
+    >,
+    Prisma.UserUncheckedUpdateWithoutPortfolioProjectsInput
+  >;
+};
+
 export type UserCreateWithoutCityInput = {
   id?: string;
   firstName: string;
@@ -2484,6 +2550,8 @@ export type UserCreateWithoutCityInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutCityInput = {
@@ -2550,6 +2618,8 @@ export type UserUncheckedCreateWithoutCityInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutCityInput = {
@@ -2679,6 +2749,8 @@ export type UserCreateWithoutCompanyInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutCompanyInput = {
@@ -2745,6 +2817,8 @@ export type UserUncheckedCreateWithoutCompanyInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutCompanyInput = {
@@ -2852,6 +2926,8 @@ export type UserCreateWithoutRolesInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutRolesInput = {
@@ -2918,6 +2994,8 @@ export type UserUncheckedCreateWithoutRolesInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutRolesInput = {
@@ -3014,6 +3092,8 @@ export type UserUpdateWithoutRolesInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutRolesInput = {
@@ -3082,6 +3162,8 @@ export type UserUncheckedUpdateWithoutRolesInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserCreateWithoutEducationsInput = {
@@ -3148,6 +3230,8 @@ export type UserCreateWithoutEducationsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutEducationsInput = {
@@ -3214,6 +3298,8 @@ export type UserUncheckedCreateWithoutEducationsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutEducationsInput = {
@@ -3310,6 +3396,8 @@ export type UserUpdateWithoutEducationsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutEducationsInput = {
@@ -3378,6 +3466,8 @@ export type UserUncheckedUpdateWithoutEducationsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserCreateWithoutWorkExperiencesInput = {
@@ -3444,6 +3534,8 @@ export type UserCreateWithoutWorkExperiencesInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutWorkExperiencesInput = {
@@ -3510,6 +3602,8 @@ export type UserUncheckedCreateWithoutWorkExperiencesInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutWorkExperiencesInput = {
@@ -3606,6 +3700,8 @@ export type UserUpdateWithoutWorkExperiencesInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutWorkExperiencesInput = {
@@ -3674,6 +3770,8 @@ export type UserUncheckedUpdateWithoutWorkExperiencesInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserCreateWithoutUserSkillsInput = {
@@ -3740,6 +3838,8 @@ export type UserCreateWithoutUserSkillsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutUserSkillsInput = {
@@ -3806,6 +3906,8 @@ export type UserUncheckedCreateWithoutUserSkillsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutUserSkillsInput = {
@@ -3902,6 +4004,8 @@ export type UserUpdateWithoutUserSkillsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutUserSkillsInput = {
@@ -3970,6 +4074,8 @@ export type UserUncheckedUpdateWithoutUserSkillsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserCreateWithoutCertificationsInput = {
@@ -4036,6 +4142,8 @@ export type UserCreateWithoutCertificationsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutCertificationsInput = {
@@ -4102,6 +4210,8 @@ export type UserUncheckedCreateWithoutCertificationsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutCertificationsInput = {
@@ -4198,6 +4308,8 @@ export type UserUpdateWithoutCertificationsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutCertificationsInput = {
@@ -4266,6 +4378,8 @@ export type UserUncheckedUpdateWithoutCertificationsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserCreateWithoutCvFilesInput = {
@@ -4332,6 +4446,8 @@ export type UserCreateWithoutCvFilesInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutCvFilesInput = {
@@ -4398,6 +4514,8 @@ export type UserUncheckedCreateWithoutCvFilesInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutCvFilesInput = {
@@ -4494,6 +4612,8 @@ export type UserUpdateWithoutCvFilesInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutCvFilesInput = {
@@ -4562,6 +4682,8 @@ export type UserUncheckedUpdateWithoutCvFilesInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserCreateWithoutSkillProcessingStateInput = {
@@ -4628,6 +4750,8 @@ export type UserCreateWithoutSkillProcessingStateInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutSkillProcessingStateInput = {
@@ -4694,6 +4818,8 @@ export type UserUncheckedCreateWithoutSkillProcessingStateInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutSkillProcessingStateInput = {
@@ -4790,6 +4916,8 @@ export type UserUpdateWithoutSkillProcessingStateInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutSkillProcessingStateInput = {
@@ -4858,6 +4986,8 @@ export type UserUncheckedUpdateWithoutSkillProcessingStateInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserCreateWithoutMentorTechnicalAreasInput = {
@@ -4924,6 +5054,8 @@ export type UserCreateWithoutMentorTechnicalAreasInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutMentorTechnicalAreasInput = {
@@ -4990,6 +5122,8 @@ export type UserUncheckedCreateWithoutMentorTechnicalAreasInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutMentorTechnicalAreasInput = {
@@ -5086,6 +5220,8 @@ export type UserUpdateWithoutMentorTechnicalAreasInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutMentorTechnicalAreasInput = {
@@ -5154,6 +5290,8 @@ export type UserUncheckedUpdateWithoutMentorTechnicalAreasInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserCreateWithoutMentorOrientationTypesInput = {
@@ -5220,6 +5358,8 @@ export type UserCreateWithoutMentorOrientationTypesInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutMentorOrientationTypesInput = {
@@ -5286,6 +5426,8 @@ export type UserUncheckedCreateWithoutMentorOrientationTypesInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutMentorOrientationTypesInput = {
@@ -5382,6 +5524,8 @@ export type UserUpdateWithoutMentorOrientationTypesInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutMentorOrientationTypesInput = {
@@ -5450,6 +5594,8 @@ export type UserUncheckedUpdateWithoutMentorOrientationTypesInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserCreateWithoutAvailabilityBlocksInput = {
@@ -5516,6 +5662,8 @@ export type UserCreateWithoutAvailabilityBlocksInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutAvailabilityBlocksInput = {
@@ -5582,6 +5730,8 @@ export type UserUncheckedCreateWithoutAvailabilityBlocksInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutAvailabilityBlocksInput = {
@@ -5678,6 +5828,8 @@ export type UserUpdateWithoutAvailabilityBlocksInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutAvailabilityBlocksInput = {
@@ -5746,6 +5898,8 @@ export type UserUncheckedUpdateWithoutAvailabilityBlocksInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserCreateWithoutBlockedDatesInput = {
@@ -5812,6 +5966,8 @@ export type UserCreateWithoutBlockedDatesInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutBlockedDatesInput = {
@@ -5878,6 +6034,8 @@ export type UserUncheckedCreateWithoutBlockedDatesInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutBlockedDatesInput = {
@@ -5974,6 +6132,8 @@ export type UserUpdateWithoutBlockedDatesInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutBlockedDatesInput = {
@@ -6042,6 +6202,8 @@ export type UserUncheckedUpdateWithoutBlockedDatesInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserCreateWithoutMentorAppointmentsInput = {
@@ -6108,6 +6270,8 @@ export type UserCreateWithoutMentorAppointmentsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutMentorAppointmentsInput = {
@@ -6174,6 +6338,8 @@ export type UserUncheckedCreateWithoutMentorAppointmentsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutMentorAppointmentsInput = {
@@ -6248,6 +6414,8 @@ export type UserCreateWithoutStudentAppointmentsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutStudentAppointmentsInput = {
@@ -6314,6 +6482,8 @@ export type UserUncheckedCreateWithoutStudentAppointmentsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutStudentAppointmentsInput = {
@@ -6388,6 +6558,8 @@ export type UserCreateWithoutCancelledAppointmentsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutCancelledAppointmentsInput = {
@@ -6454,6 +6626,8 @@ export type UserUncheckedCreateWithoutCancelledAppointmentsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutCancelledAppointmentsInput = {
@@ -6550,6 +6724,8 @@ export type UserUpdateWithoutMentorAppointmentsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutMentorAppointmentsInput = {
@@ -6618,6 +6794,8 @@ export type UserUncheckedUpdateWithoutMentorAppointmentsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUpsertWithoutStudentAppointmentsInput = {
@@ -6706,6 +6884,8 @@ export type UserUpdateWithoutStudentAppointmentsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutStudentAppointmentsInput = {
@@ -6774,6 +6954,8 @@ export type UserUncheckedUpdateWithoutStudentAppointmentsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUpsertWithoutCancelledAppointmentsInput = {
@@ -6862,6 +7044,8 @@ export type UserUpdateWithoutCancelledAppointmentsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutCancelledAppointmentsInput = {
@@ -6930,6 +7114,8 @@ export type UserUncheckedUpdateWithoutCancelledAppointmentsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserCreateWithoutAppointmentChangesInput = {
@@ -6996,6 +7182,8 @@ export type UserCreateWithoutAppointmentChangesInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutAppointmentChangesInput = {
@@ -7062,6 +7250,8 @@ export type UserUncheckedCreateWithoutAppointmentChangesInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutAppointmentChangesInput = {
@@ -7158,6 +7348,8 @@ export type UserUpdateWithoutAppointmentChangesInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutAppointmentChangesInput = {
@@ -7226,6 +7418,8 @@ export type UserUncheckedUpdateWithoutAppointmentChangesInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserCreateWithoutCreatedEventsInput = {
@@ -7292,6 +7486,8 @@ export type UserCreateWithoutCreatedEventsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutCreatedEventsInput = {
@@ -7358,6 +7554,8 @@ export type UserUncheckedCreateWithoutCreatedEventsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutCreatedEventsInput = {
@@ -7432,6 +7630,8 @@ export type UserCreateWithoutModeratedEventsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutModeratedEventsInput = {
@@ -7498,6 +7698,8 @@ export type UserUncheckedCreateWithoutModeratedEventsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutModeratedEventsInput = {
@@ -7594,6 +7796,8 @@ export type UserUpdateWithoutCreatedEventsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutCreatedEventsInput = {
@@ -7662,6 +7866,8 @@ export type UserUncheckedUpdateWithoutCreatedEventsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUpsertWithoutModeratedEventsInput = {
@@ -7750,6 +7956,8 @@ export type UserUpdateWithoutModeratedEventsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutModeratedEventsInput = {
@@ -7818,6 +8026,8 @@ export type UserUncheckedUpdateWithoutModeratedEventsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserCreateWithoutEventRegistrationsInput = {
@@ -7884,6 +8094,8 @@ export type UserCreateWithoutEventRegistrationsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutEventRegistrationsInput = {
@@ -7950,6 +8162,8 @@ export type UserUncheckedCreateWithoutEventRegistrationsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutEventRegistrationsInput = {
@@ -8046,6 +8260,8 @@ export type UserUpdateWithoutEventRegistrationsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutEventRegistrationsInput = {
@@ -8114,6 +8330,8 @@ export type UserUncheckedUpdateWithoutEventRegistrationsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserCreateWithoutCheckedInAttendancesInput = {
@@ -8180,6 +8398,8 @@ export type UserCreateWithoutCheckedInAttendancesInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutCheckedInAttendancesInput = {
@@ -8246,6 +8466,8 @@ export type UserUncheckedCreateWithoutCheckedInAttendancesInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutCheckedInAttendancesInput = {
@@ -8342,6 +8564,8 @@ export type UserUpdateWithoutCheckedInAttendancesInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutCheckedInAttendancesInput = {
@@ -8410,6 +8634,8 @@ export type UserUncheckedUpdateWithoutCheckedInAttendancesInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserCreateWithoutExportHistoriesInput = {
@@ -8476,6 +8702,8 @@ export type UserCreateWithoutExportHistoriesInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutExportHistoriesInput = {
@@ -8542,6 +8770,8 @@ export type UserUncheckedCreateWithoutExportHistoriesInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutExportHistoriesInput = {
@@ -8638,6 +8868,8 @@ export type UserUpdateWithoutExportHistoriesInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutExportHistoriesInput = {
@@ -8706,6 +8938,8 @@ export type UserUncheckedUpdateWithoutExportHistoriesInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserCreateWithoutOpenedAccessRequestsInput = {
@@ -8772,6 +9006,8 @@ export type UserCreateWithoutOpenedAccessRequestsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutOpenedAccessRequestsInput = {
@@ -8838,6 +9074,8 @@ export type UserUncheckedCreateWithoutOpenedAccessRequestsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutOpenedAccessRequestsInput = {
@@ -8912,6 +9150,8 @@ export type UserCreateWithoutReviewedAccessRequestsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutReviewedAccessRequestsInput = {
@@ -8978,6 +9218,8 @@ export type UserUncheckedCreateWithoutReviewedAccessRequestsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutReviewedAccessRequestsInput = {
@@ -9052,6 +9294,8 @@ export type UserCreateWithoutApprovedAccessRequestInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutApprovedAccessRequestInput = {
@@ -9118,6 +9362,8 @@ export type UserUncheckedCreateWithoutApprovedAccessRequestInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutApprovedAccessRequestInput = {
@@ -9214,6 +9460,8 @@ export type UserUpdateWithoutOpenedAccessRequestsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutOpenedAccessRequestsInput = {
@@ -9282,6 +9530,8 @@ export type UserUncheckedUpdateWithoutOpenedAccessRequestsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUpsertWithoutReviewedAccessRequestsInput = {
@@ -9370,6 +9620,8 @@ export type UserUpdateWithoutReviewedAccessRequestsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutReviewedAccessRequestsInput = {
@@ -9438,6 +9690,8 @@ export type UserUncheckedUpdateWithoutReviewedAccessRequestsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUpsertWithoutApprovedAccessRequestInput = {
@@ -9526,6 +9780,8 @@ export type UserUpdateWithoutApprovedAccessRequestInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutApprovedAccessRequestInput = {
@@ -9594,6 +9850,8 @@ export type UserUncheckedUpdateWithoutApprovedAccessRequestInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserCreateWithoutMentorParticipationRequestsInput = {
@@ -9660,6 +9918,8 @@ export type UserCreateWithoutMentorParticipationRequestsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutMentorParticipationRequestsInput = {
@@ -9726,6 +9986,8 @@ export type UserUncheckedCreateWithoutMentorParticipationRequestsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutMentorParticipationRequestsInput = {
@@ -9822,6 +10084,8 @@ export type UserUpdateWithoutMentorParticipationRequestsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutMentorParticipationRequestsInput = {
@@ -9890,6 +10154,8 @@ export type UserUncheckedUpdateWithoutMentorParticipationRequestsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserCreateWithoutMentorSlotOffersInput = {
@@ -9956,6 +10222,8 @@ export type UserCreateWithoutMentorSlotOffersInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutMentorSlotOffersInput = {
@@ -10022,6 +10290,8 @@ export type UserUncheckedCreateWithoutMentorSlotOffersInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutMentorSlotOffersInput = {
@@ -10118,6 +10388,8 @@ export type UserUpdateWithoutMentorSlotOffersInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutMentorSlotOffersInput = {
@@ -10186,6 +10458,8 @@ export type UserUncheckedUpdateWithoutMentorSlotOffersInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserCreateWithoutConversationsAsUserAInput = {
@@ -10252,6 +10526,8 @@ export type UserCreateWithoutConversationsAsUserAInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutConversationsAsUserAInput = {
@@ -10318,6 +10594,8 @@ export type UserUncheckedCreateWithoutConversationsAsUserAInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutConversationsAsUserAInput = {
@@ -10392,6 +10670,8 @@ export type UserCreateWithoutConversationsAsUserBInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutConversationsAsUserBInput = {
@@ -10458,6 +10738,8 @@ export type UserUncheckedCreateWithoutConversationsAsUserBInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutConversationsAsUserBInput = {
@@ -10554,6 +10836,8 @@ export type UserUpdateWithoutConversationsAsUserAInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutConversationsAsUserAInput = {
@@ -10622,6 +10906,8 @@ export type UserUncheckedUpdateWithoutConversationsAsUserAInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUpsertWithoutConversationsAsUserBInput = {
@@ -10710,6 +10996,8 @@ export type UserUpdateWithoutConversationsAsUserBInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutConversationsAsUserBInput = {
@@ -10778,6 +11066,8 @@ export type UserUncheckedUpdateWithoutConversationsAsUserBInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserCreateWithoutChatParticipantsInput = {
@@ -10844,6 +11134,8 @@ export type UserCreateWithoutChatParticipantsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutChatParticipantsInput = {
@@ -10910,6 +11202,8 @@ export type UserUncheckedCreateWithoutChatParticipantsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutChatParticipantsInput = {
@@ -11006,6 +11300,8 @@ export type UserUpdateWithoutChatParticipantsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutChatParticipantsInput = {
@@ -11074,6 +11370,8 @@ export type UserUncheckedUpdateWithoutChatParticipantsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserCreateWithoutChatMessagesInput = {
@@ -11140,6 +11438,8 @@ export type UserCreateWithoutChatMessagesInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutChatMessagesInput = {
@@ -11206,6 +11506,8 @@ export type UserUncheckedCreateWithoutChatMessagesInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutChatMessagesInput = {
@@ -11302,6 +11604,8 @@ export type UserUpdateWithoutChatMessagesInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutChatMessagesInput = {
@@ -11370,6 +11674,8 @@ export type UserUncheckedUpdateWithoutChatMessagesInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserCreateWithoutChatBlocksMadeInput = {
@@ -11436,6 +11742,8 @@ export type UserCreateWithoutChatBlocksMadeInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutChatBlocksMadeInput = {
@@ -11502,6 +11810,8 @@ export type UserUncheckedCreateWithoutChatBlocksMadeInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutChatBlocksMadeInput = {
@@ -11576,6 +11886,8 @@ export type UserCreateWithoutChatBlocksReceivedInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutChatBlocksReceivedInput = {
@@ -11642,6 +11954,8 @@ export type UserUncheckedCreateWithoutChatBlocksReceivedInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutChatBlocksReceivedInput = {
@@ -11738,6 +12052,8 @@ export type UserUpdateWithoutChatBlocksMadeInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutChatBlocksMadeInput = {
@@ -11806,6 +12122,8 @@ export type UserUncheckedUpdateWithoutChatBlocksMadeInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUpsertWithoutChatBlocksReceivedInput = {
@@ -11894,6 +12212,8 @@ export type UserUpdateWithoutChatBlocksReceivedInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutChatBlocksReceivedInput = {
@@ -11962,6 +12282,8 @@ export type UserUncheckedUpdateWithoutChatBlocksReceivedInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserCreateWithoutSentRequestsInput = {
@@ -12028,6 +12350,8 @@ export type UserCreateWithoutSentRequestsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutSentRequestsInput = {
@@ -12094,6 +12418,8 @@ export type UserUncheckedCreateWithoutSentRequestsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutSentRequestsInput = {
@@ -12168,6 +12494,8 @@ export type UserCreateWithoutReceivedRequestsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutReceivedRequestsInput = {
@@ -12234,6 +12562,8 @@ export type UserUncheckedCreateWithoutReceivedRequestsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutReceivedRequestsInput = {
@@ -12330,6 +12660,8 @@ export type UserUpdateWithoutSentRequestsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutSentRequestsInput = {
@@ -12398,6 +12730,8 @@ export type UserUncheckedUpdateWithoutSentRequestsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUpsertWithoutReceivedRequestsInput = {
@@ -12486,6 +12820,8 @@ export type UserUpdateWithoutReceivedRequestsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutReceivedRequestsInput = {
@@ -12554,6 +12890,8 @@ export type UserUncheckedUpdateWithoutReceivedRequestsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserCreateWithoutPresenceInput = {
@@ -12620,6 +12958,8 @@ export type UserCreateWithoutPresenceInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutPresenceInput = {
@@ -12686,6 +13026,8 @@ export type UserUncheckedCreateWithoutPresenceInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutPresenceInput = {
@@ -12782,6 +13124,8 @@ export type UserUpdateWithoutPresenceInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutPresenceInput = {
@@ -12850,6 +13194,8 @@ export type UserUncheckedUpdateWithoutPresenceInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserCreateWithoutPasswordResetOtpsInput = {
@@ -12916,6 +13262,8 @@ export type UserCreateWithoutPasswordResetOtpsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutPasswordResetOtpsInput = {
@@ -12982,6 +13330,8 @@ export type UserUncheckedCreateWithoutPasswordResetOtpsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutPasswordResetOtpsInput = {
@@ -13078,6 +13428,8 @@ export type UserUpdateWithoutPasswordResetOtpsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutPasswordResetOtpsInput = {
@@ -13146,6 +13498,8 @@ export type UserUncheckedUpdateWithoutPasswordResetOtpsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserCreateWithoutMentorParticipationAttemptLimitInput = {
@@ -13212,6 +13566,8 @@ export type UserCreateWithoutMentorParticipationAttemptLimitInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutMentorParticipationAttemptLimitInput = {
@@ -13278,6 +13634,8 @@ export type UserUncheckedCreateWithoutMentorParticipationAttemptLimitInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutMentorParticipationAttemptLimitInput = {
@@ -13375,6 +13733,8 @@ export type UserUpdateWithoutMentorParticipationAttemptLimitInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutMentorParticipationAttemptLimitInput = {
@@ -13443,6 +13803,8 @@ export type UserUncheckedUpdateWithoutMentorParticipationAttemptLimitInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserCreateWithoutJobApplicationsInput = {
@@ -13509,6 +13871,8 @@ export type UserCreateWithoutJobApplicationsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutJobApplicationsInput = {
@@ -13575,6 +13939,8 @@ export type UserUncheckedCreateWithoutJobApplicationsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutJobApplicationsInput = {
@@ -13671,6 +14037,8 @@ export type UserUpdateWithoutJobApplicationsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutJobApplicationsInput = {
@@ -13739,6 +14107,8 @@ export type UserUncheckedUpdateWithoutJobApplicationsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserCreateWithoutCreatedSurveysInput = {
@@ -13805,6 +14175,8 @@ export type UserCreateWithoutCreatedSurveysInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutCreatedSurveysInput = {
@@ -13871,6 +14243,8 @@ export type UserUncheckedCreateWithoutCreatedSurveysInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutCreatedSurveysInput = {
@@ -13967,6 +14341,8 @@ export type UserUpdateWithoutCreatedSurveysInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutCreatedSurveysInput = {
@@ -14035,6 +14411,8 @@ export type UserUncheckedUpdateWithoutCreatedSurveysInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserCreateWithoutSurveyResponsesInput = {
@@ -14101,6 +14479,8 @@ export type UserCreateWithoutSurveyResponsesInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutSurveyResponsesInput = {
@@ -14167,6 +14547,8 @@ export type UserUncheckedCreateWithoutSurveyResponsesInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutSurveyResponsesInput = {
@@ -14263,6 +14645,8 @@ export type UserUpdateWithoutSurveyResponsesInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutSurveyResponsesInput = {
@@ -14331,6 +14715,8 @@ export type UserUncheckedUpdateWithoutSurveyResponsesInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserCreateWithoutAuditEventsInput = {
@@ -14397,6 +14783,8 @@ export type UserCreateWithoutAuditEventsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutAuditEventsInput = {
@@ -14463,6 +14851,8 @@ export type UserUncheckedCreateWithoutAuditEventsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutAuditEventsInput = {
@@ -14559,6 +14949,8 @@ export type UserUpdateWithoutAuditEventsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutAuditEventsInput = {
@@ -14627,6 +15019,8 @@ export type UserUncheckedUpdateWithoutAuditEventsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserCreateWithoutRevertedValidationsInput = {
@@ -14693,6 +15087,8 @@ export type UserCreateWithoutRevertedValidationsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutRevertedValidationsInput = {
@@ -14759,6 +15155,8 @@ export type UserUncheckedCreateWithoutRevertedValidationsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutRevertedValidationsInput = {
@@ -14855,6 +15253,8 @@ export type UserUpdateWithoutRevertedValidationsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutRevertedValidationsInput = {
@@ -14923,6 +15323,8 @@ export type UserUncheckedUpdateWithoutRevertedValidationsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserCreateWithoutMentorIntakeAttemptsInput = {
@@ -14989,6 +15391,8 @@ export type UserCreateWithoutMentorIntakeAttemptsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutMentorIntakeAttemptsInput = {
@@ -15055,6 +15459,8 @@ export type UserUncheckedCreateWithoutMentorIntakeAttemptsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutMentorIntakeAttemptsInput = {
@@ -15151,6 +15557,8 @@ export type UserUpdateWithoutMentorIntakeAttemptsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutMentorIntakeAttemptsInput = {
@@ -15219,6 +15627,8 @@ export type UserUncheckedUpdateWithoutMentorIntakeAttemptsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserCreateWithoutMentorParticipationSanctionsInput = {
@@ -15285,6 +15695,8 @@ export type UserCreateWithoutMentorParticipationSanctionsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutMentorParticipationSanctionsInput = {
@@ -15351,6 +15763,8 @@ export type UserUncheckedCreateWithoutMentorParticipationSanctionsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutMentorParticipationSanctionsInput = {
@@ -15447,6 +15861,8 @@ export type UserUpdateWithoutMentorParticipationSanctionsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutMentorParticipationSanctionsInput = {
@@ -15515,6 +15931,8 @@ export type UserUncheckedUpdateWithoutMentorParticipationSanctionsInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserCreateWithoutRadarCvOwnedInput = {
@@ -15581,6 +15999,8 @@ export type UserCreateWithoutRadarCvOwnedInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutRadarCvOwnedInput = {
@@ -15647,6 +16067,8 @@ export type UserUncheckedCreateWithoutRadarCvOwnedInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutRadarCvOwnedInput = {
@@ -15721,6 +16143,8 @@ export type UserCreateWithoutRadarCvReviewedInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutRadarCvReviewedInput = {
@@ -15787,6 +16211,8 @@ export type UserUncheckedCreateWithoutRadarCvReviewedInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutRadarCvReviewedInput = {
@@ -15883,6 +16309,8 @@ export type UserUpdateWithoutRadarCvOwnedInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutRadarCvOwnedInput = {
@@ -15951,6 +16379,8 @@ export type UserUncheckedUpdateWithoutRadarCvOwnedInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUpsertWithoutRadarCvReviewedInput = {
@@ -16039,6 +16469,8 @@ export type UserUpdateWithoutRadarCvReviewedInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutRadarCvReviewedInput = {
@@ -16107,6 +16539,8 @@ export type UserUncheckedUpdateWithoutRadarCvReviewedInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserCreateWithoutRadarSnapshotsInput = {
@@ -16173,6 +16607,8 @@ export type UserCreateWithoutRadarSnapshotsInput = {
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutRadarSnapshotsInput = {
@@ -16239,6 +16675,8 @@ export type UserUncheckedCreateWithoutRadarSnapshotsInput = {
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutRadarSnapshotsInput = {
@@ -16335,6 +16773,8 @@ export type UserUpdateWithoutRadarSnapshotsInput = {
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutRadarSnapshotsInput = {
@@ -16403,6 +16843,8 @@ export type UserUncheckedUpdateWithoutRadarSnapshotsInput = {
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserCreateWithoutRadarAuditSubjectsInput = {
@@ -16469,6 +16911,8 @@ export type UserCreateWithoutRadarAuditSubjectsInput = {
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput;
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutRadarAuditSubjectsInput = {
@@ -16535,6 +16979,8 @@ export type UserUncheckedCreateWithoutRadarAuditSubjectsInput = {
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput;
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutRadarAuditSubjectsInput = {
@@ -16609,6 +17055,8 @@ export type UserCreateWithoutRadarAuditActorsInput = {
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput;
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutRadarAuditActorsInput = {
@@ -16675,6 +17123,8 @@ export type UserUncheckedCreateWithoutRadarAuditActorsInput = {
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput;
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutRadarAuditActorsInput = {
@@ -16771,6 +17221,8 @@ export type UserUpdateWithoutRadarAuditSubjectsInput = {
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput;
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutRadarAuditSubjectsInput = {
@@ -16839,6 +17291,8 @@ export type UserUncheckedUpdateWithoutRadarAuditSubjectsInput = {
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput;
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUpsertWithoutRadarAuditActorsInput = {
@@ -16927,6 +17381,8 @@ export type UserUpdateWithoutRadarAuditActorsInput = {
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput;
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutRadarAuditActorsInput = {
@@ -16995,6 +17451,616 @@ export type UserUncheckedUpdateWithoutRadarAuditActorsInput = {
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput;
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
+};
+
+export type UserCreateWithoutSocialAccountsInput = {
+  id?: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  password?: string | null;
+  isActive?: boolean;
+  isAvailableForMentoring?: boolean;
+  photoUrl?: runtime.Bytes | null;
+  phone?: string | null;
+  personalEmail?: string | null;
+  headline?: string | null;
+  aboutMe?: string | null;
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput;
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput;
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput;
+  city?: Prisma.CityCreateNestedOneWithoutUsersInput;
+  roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput;
+  educations?: Prisma.EducationCreateNestedManyWithoutUserInput;
+  workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput;
+  userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput;
+  certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput;
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput;
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput;
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput;
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput;
+  availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput;
+  blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutMentorInput;
+  mentorAppointments?: Prisma.AppointmentCreateNestedManyWithoutMentorInput;
+  studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput;
+  cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput;
+  appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput;
+  createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput;
+  moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput;
+  eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput;
+  checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput;
+  exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput;
+  openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput;
+  reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput;
+  approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput;
+  mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput;
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput;
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput;
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput;
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput;
+  conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput;
+  conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput;
+  chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput;
+  chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput;
+  presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput;
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput;
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput;
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput;
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput;
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput;
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput;
+  revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput;
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput;
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput;
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput;
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput;
+};
+
+export type UserUncheckedCreateWithoutSocialAccountsInput = {
+  id?: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  password?: string | null;
+  isActive?: boolean;
+  isAvailableForMentoring?: boolean;
+  photoUrl?: runtime.Bytes | null;
+  cityId?: string | null;
+  companyId?: string | null;
+  phone?: string | null;
+  personalEmail?: string | null;
+  headline?: string | null;
+  aboutMe?: string | null;
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput;
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput;
+  roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput;
+  educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput;
+  workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput;
+  userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput;
+  certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput;
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput;
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput;
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput;
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput;
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput;
+  blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutMentorInput;
+  mentorAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutMentorInput;
+  studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput;
+  cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput;
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput;
+  createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput;
+  moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput;
+  eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput;
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput;
+  exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput;
+  openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput;
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput;
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput;
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput;
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput;
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput;
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput;
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput;
+  conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput;
+  conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput;
+  chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput;
+  chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput;
+  presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput;
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput;
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput;
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput;
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput;
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput;
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput;
+  revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput;
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput;
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput;
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput;
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput;
+};
+
+export type UserCreateOrConnectWithoutSocialAccountsInput = {
+  where: Prisma.UserWhereUniqueInput;
+  create: Prisma.XOR<
+    Prisma.UserCreateWithoutSocialAccountsInput,
+    Prisma.UserUncheckedCreateWithoutSocialAccountsInput
+  >;
+};
+
+export type UserUpsertWithoutSocialAccountsInput = {
+  update: Prisma.XOR<
+    Prisma.UserUpdateWithoutSocialAccountsInput,
+    Prisma.UserUncheckedUpdateWithoutSocialAccountsInput
+  >;
+  create: Prisma.XOR<
+    Prisma.UserCreateWithoutSocialAccountsInput,
+    Prisma.UserUncheckedCreateWithoutSocialAccountsInput
+  >;
+  where?: Prisma.UserWhereInput;
+};
+
+export type UserUpdateToOneWithWhereWithoutSocialAccountsInput = {
+  where?: Prisma.UserWhereInput;
+  data: Prisma.XOR<
+    Prisma.UserUpdateWithoutSocialAccountsInput,
+    Prisma.UserUncheckedUpdateWithoutSocialAccountsInput
+  >;
+};
+
+export type UserUpdateWithoutSocialAccountsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string;
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string;
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string;
+  email?: Prisma.StringFieldUpdateOperationsInput | string;
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+  photoUrl?:
+    Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null;
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  personalEmail?:
+    Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput;
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput;
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput;
+  city?: Prisma.CityUpdateOneWithoutUsersNestedInput;
+  roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput;
+  educations?: Prisma.EducationUpdateManyWithoutUserNestedInput;
+  workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput;
+  userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput;
+  certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput;
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput;
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput;
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput;
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput;
+  availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput;
+  blockedDates?: Prisma.BlockedDateUpdateManyWithoutMentorNestedInput;
+  mentorAppointments?: Prisma.AppointmentUpdateManyWithoutMentorNestedInput;
+  studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput;
+  cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput;
+  appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput;
+  createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput;
+  moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput;
+  eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput;
+  checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput;
+  exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput;
+  openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput;
+  reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput;
+  approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput;
+  mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput;
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput;
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput;
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput;
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput;
+  conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput;
+  conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput;
+  chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput;
+  chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput;
+  presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput;
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput;
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput;
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput;
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput;
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput;
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput;
+  revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput;
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput;
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput;
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput;
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
+};
+
+export type UserUncheckedUpdateWithoutSocialAccountsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string;
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string;
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string;
+  email?: Prisma.StringFieldUpdateOperationsInput | string;
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+  photoUrl?:
+    Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null;
+  cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  personalEmail?:
+    Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput;
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput;
+  roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput;
+  educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput;
+  workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput;
+  userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput;
+  certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput;
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput;
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput;
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput;
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput;
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput;
+  blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutMentorNestedInput;
+  mentorAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutMentorNestedInput;
+  studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput;
+  cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput;
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput;
+  createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput;
+  moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput;
+  eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput;
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput;
+  exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput;
+  openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput;
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput;
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput;
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput;
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput;
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput;
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput;
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput;
+  conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput;
+  conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput;
+  chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput;
+  chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput;
+  presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput;
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput;
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput;
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput;
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput;
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput;
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput;
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput;
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput;
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput;
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
+};
+
+export type UserCreateWithoutPortfolioProjectsInput = {
+  id?: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  password?: string | null;
+  isActive?: boolean;
+  isAvailableForMentoring?: boolean;
+  photoUrl?: runtime.Bytes | null;
+  phone?: string | null;
+  personalEmail?: string | null;
+  headline?: string | null;
+  aboutMe?: string | null;
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput;
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput;
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput;
+  city?: Prisma.CityCreateNestedOneWithoutUsersInput;
+  roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput;
+  educations?: Prisma.EducationCreateNestedManyWithoutUserInput;
+  workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput;
+  userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput;
+  certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput;
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput;
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput;
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput;
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput;
+  availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput;
+  blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutMentorInput;
+  mentorAppointments?: Prisma.AppointmentCreateNestedManyWithoutMentorInput;
+  studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput;
+  cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput;
+  appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput;
+  createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput;
+  moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput;
+  eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput;
+  checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput;
+  exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput;
+  openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput;
+  reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput;
+  approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput;
+  mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput;
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput;
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput;
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput;
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput;
+  conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput;
+  conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput;
+  chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput;
+  chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput;
+  presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput;
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput;
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput;
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput;
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput;
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput;
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput;
+  revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput;
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput;
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput;
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput;
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput;
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput;
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput;
+};
+
+export type UserUncheckedCreateWithoutPortfolioProjectsInput = {
+  id?: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  password?: string | null;
+  isActive?: boolean;
+  isAvailableForMentoring?: boolean;
+  photoUrl?: runtime.Bytes | null;
+  cityId?: string | null;
+  companyId?: string | null;
+  phone?: string | null;
+  personalEmail?: string | null;
+  headline?: string | null;
+  aboutMe?: string | null;
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput;
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput;
+  roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput;
+  educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput;
+  workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput;
+  userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput;
+  certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput;
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput;
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput;
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput;
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput;
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput;
+  blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutMentorInput;
+  mentorAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutMentorInput;
+  studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput;
+  cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput;
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput;
+  createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput;
+  moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput;
+  eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput;
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput;
+  exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput;
+  openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput;
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput;
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput;
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput;
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput;
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput;
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput;
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput;
+  conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput;
+  conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput;
+  chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput;
+  chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput;
+  presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput;
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput;
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput;
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput;
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput;
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput;
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput;
+  revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput;
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput;
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput;
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput;
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput;
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput;
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput;
+};
+
+export type UserCreateOrConnectWithoutPortfolioProjectsInput = {
+  where: Prisma.UserWhereUniqueInput;
+  create: Prisma.XOR<
+    Prisma.UserCreateWithoutPortfolioProjectsInput,
+    Prisma.UserUncheckedCreateWithoutPortfolioProjectsInput
+  >;
+};
+
+export type UserUpsertWithoutPortfolioProjectsInput = {
+  update: Prisma.XOR<
+    Prisma.UserUpdateWithoutPortfolioProjectsInput,
+    Prisma.UserUncheckedUpdateWithoutPortfolioProjectsInput
+  >;
+  create: Prisma.XOR<
+    Prisma.UserCreateWithoutPortfolioProjectsInput,
+    Prisma.UserUncheckedCreateWithoutPortfolioProjectsInput
+  >;
+  where?: Prisma.UserWhereInput;
+};
+
+export type UserUpdateToOneWithWhereWithoutPortfolioProjectsInput = {
+  where?: Prisma.UserWhereInput;
+  data: Prisma.XOR<
+    Prisma.UserUpdateWithoutPortfolioProjectsInput,
+    Prisma.UserUncheckedUpdateWithoutPortfolioProjectsInput
+  >;
+};
+
+export type UserUpdateWithoutPortfolioProjectsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string;
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string;
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string;
+  email?: Prisma.StringFieldUpdateOperationsInput | string;
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+  photoUrl?:
+    Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null;
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  personalEmail?:
+    Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput;
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput;
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput;
+  city?: Prisma.CityUpdateOneWithoutUsersNestedInput;
+  roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput;
+  educations?: Prisma.EducationUpdateManyWithoutUserNestedInput;
+  workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput;
+  userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput;
+  certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput;
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput;
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput;
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput;
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput;
+  availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput;
+  blockedDates?: Prisma.BlockedDateUpdateManyWithoutMentorNestedInput;
+  mentorAppointments?: Prisma.AppointmentUpdateManyWithoutMentorNestedInput;
+  studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput;
+  cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput;
+  appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput;
+  createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput;
+  moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput;
+  eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput;
+  checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput;
+  exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput;
+  openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput;
+  reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput;
+  approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput;
+  mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput;
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput;
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput;
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput;
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput;
+  conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput;
+  conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput;
+  chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput;
+  chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput;
+  presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput;
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput;
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput;
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput;
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput;
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput;
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput;
+  revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput;
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput;
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput;
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput;
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+};
+
+export type UserUncheckedUpdateWithoutPortfolioProjectsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string;
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string;
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string;
+  email?: Prisma.StringFieldUpdateOperationsInput | string;
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+  photoUrl?:
+    Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null;
+  cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  personalEmail?:
+    Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput;
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput;
+  roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput;
+  educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput;
+  workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput;
+  userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput;
+  certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput;
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput;
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput;
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput;
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput;
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput;
+  blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutMentorNestedInput;
+  mentorAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutMentorNestedInput;
+  studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput;
+  cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput;
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput;
+  createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput;
+  moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput;
+  eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput;
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput;
+  exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput;
+  openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput;
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput;
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput;
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput;
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput;
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput;
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput;
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput;
+  conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput;
+  conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput;
+  chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput;
+  chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput;
+  presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput;
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput;
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput;
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput;
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput;
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput;
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput;
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput;
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput;
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput;
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserCreateManyCityInput = {
@@ -17081,6 +18147,8 @@ export type UserUpdateWithoutCityInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutCityInput = {
@@ -17149,6 +18217,8 @@ export type UserUncheckedUpdateWithoutCityInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateManyWithoutCityInput = {
@@ -17255,6 +18325,8 @@ export type UserUpdateWithoutCompanyInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutCompanyInput = {
@@ -17323,6 +18395,8 @@ export type UserUncheckedUpdateWithoutCompanyInput = {
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput;
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput;
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput;
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput;
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateManyWithoutCompanyInput = {
@@ -17394,6 +18468,8 @@ export type UserCountOutputType = {
   radarSnapshots: number;
   radarAuditSubjects: number;
   radarAuditActors: number;
+  socialAccounts: number;
+  portfolioProjects: number;
 };
 
 export type UserCountOutputTypeSelect<
@@ -17457,6 +18533,8 @@ export type UserCountOutputTypeSelect<
   radarSnapshots?: boolean | UserCountOutputTypeCountRadarSnapshotsArgs;
   radarAuditSubjects?: boolean | UserCountOutputTypeCountRadarAuditSubjectsArgs;
   radarAuditActors?: boolean | UserCountOutputTypeCountRadarAuditActorsArgs;
+  socialAccounts?: boolean | UserCountOutputTypeCountSocialAccountsArgs;
+  portfolioProjects?: boolean | UserCountOutputTypeCountPortfolioProjectsArgs;
 };
 
 /**
@@ -17912,6 +18990,26 @@ export type UserCountOutputTypeCountRadarAuditActorsArgs<
   where?: Prisma.RadarAuditEventWhereInput;
 };
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountSocialAccountsArgs<
+  ExtArgs extends runtime.Types.Extensions.InternalArgs =
+    runtime.Types.Extensions.DefaultArgs,
+> = {
+  where?: Prisma.UserSocialAccountWhereInput;
+};
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountPortfolioProjectsArgs<
+  ExtArgs extends runtime.Types.Extensions.InternalArgs =
+    runtime.Types.Extensions.DefaultArgs,
+> = {
+  where?: Prisma.UserPortfolioProjectWhereInput;
+};
+
 export type UserSelect<
   ExtArgs extends runtime.Types.Extensions.InternalArgs =
     runtime.Types.Extensions.DefaultArgs,
@@ -17999,6 +19097,8 @@ export type UserSelect<
     radarSnapshots?: boolean | Prisma.User$radarSnapshotsArgs<ExtArgs>;
     radarAuditSubjects?: boolean | Prisma.User$radarAuditSubjectsArgs<ExtArgs>;
     radarAuditActors?: boolean | Prisma.User$radarAuditActorsArgs<ExtArgs>;
+    socialAccounts?: boolean | Prisma.User$socialAccountsArgs<ExtArgs>;
+    portfolioProjects?: boolean | Prisma.User$portfolioProjectsArgs<ExtArgs>;
     _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>;
   },
   ExtArgs['result']['user']
@@ -18167,6 +19267,8 @@ export type UserInclude<
   radarSnapshots?: boolean | Prisma.User$radarSnapshotsArgs<ExtArgs>;
   radarAuditSubjects?: boolean | Prisma.User$radarAuditSubjectsArgs<ExtArgs>;
   radarAuditActors?: boolean | Prisma.User$radarAuditActorsArgs<ExtArgs>;
+  socialAccounts?: boolean | Prisma.User$socialAccountsArgs<ExtArgs>;
+  portfolioProjects?: boolean | Prisma.User$portfolioProjectsArgs<ExtArgs>;
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>;
 };
 export type UserIncludeCreateManyAndReturn<
@@ -18240,6 +19342,8 @@ export type $UserPayload<
     radarSnapshots: Prisma.$RadarScoreSnapshotPayload<ExtArgs>[];
     radarAuditSubjects: Prisma.$RadarAuditEventPayload<ExtArgs>[];
     radarAuditActors: Prisma.$RadarAuditEventPayload<ExtArgs>[];
+    socialAccounts: Prisma.$UserSocialAccountPayload<ExtArgs>[];
+    portfolioProjects: Prisma.$UserPortfolioProjectPayload<ExtArgs>[];
   };
   scalars: runtime.Types.Extensions.GetPayloadResult<
     {
@@ -19418,6 +20522,28 @@ export interface Prisma__UserClient<
   ): Prisma.PrismaPromise<
     | runtime.Types.Result.GetResult<
         Prisma.$RadarAuditEventPayload<ExtArgs>,
+        T,
+        'findMany',
+        GlobalOmitOptions
+      >
+    | Null
+  >;
+  socialAccounts<T extends Prisma.User$socialAccountsArgs<ExtArgs> = {}>(
+    args?: Prisma.Subset<T, Prisma.User$socialAccountsArgs<ExtArgs>>,
+  ): Prisma.PrismaPromise<
+    | runtime.Types.Result.GetResult<
+        Prisma.$UserSocialAccountPayload<ExtArgs>,
+        T,
+        'findMany',
+        GlobalOmitOptions
+      >
+    | Null
+  >;
+  portfolioProjects<T extends Prisma.User$portfolioProjectsArgs<ExtArgs> = {}>(
+    args?: Prisma.Subset<T, Prisma.User$portfolioProjectsArgs<ExtArgs>>,
+  ): Prisma.PrismaPromise<
+    | runtime.Types.Result.GetResult<
+        Prisma.$UserPortfolioProjectPayload<ExtArgs>,
         T,
         'findMany',
         GlobalOmitOptions
@@ -21395,6 +22521,68 @@ export type User$radarAuditActorsArgs<
   distinct?:
     | Prisma.RadarAuditEventScalarFieldEnum
     | Prisma.RadarAuditEventScalarFieldEnum[];
+};
+
+/**
+ * User.socialAccounts
+ */
+export type User$socialAccountsArgs<
+  ExtArgs extends runtime.Types.Extensions.InternalArgs =
+    runtime.Types.Extensions.DefaultArgs,
+> = {
+  /**
+   * Select specific fields to fetch from the UserSocialAccount
+   */
+  select?: Prisma.UserSocialAccountSelect<ExtArgs> | null;
+  /**
+   * Omit specific fields from the UserSocialAccount
+   */
+  omit?: Prisma.UserSocialAccountOmit<ExtArgs> | null;
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserSocialAccountInclude<ExtArgs> | null;
+  where?: Prisma.UserSocialAccountWhereInput;
+  orderBy?:
+    | Prisma.UserSocialAccountOrderByWithRelationInput
+    | Prisma.UserSocialAccountOrderByWithRelationInput[];
+  cursor?: Prisma.UserSocialAccountWhereUniqueInput;
+  take?: number;
+  skip?: number;
+  distinct?:
+    | Prisma.UserSocialAccountScalarFieldEnum
+    | Prisma.UserSocialAccountScalarFieldEnum[];
+};
+
+/**
+ * User.portfolioProjects
+ */
+export type User$portfolioProjectsArgs<
+  ExtArgs extends runtime.Types.Extensions.InternalArgs =
+    runtime.Types.Extensions.DefaultArgs,
+> = {
+  /**
+   * Select specific fields to fetch from the UserPortfolioProject
+   */
+  select?: Prisma.UserPortfolioProjectSelect<ExtArgs> | null;
+  /**
+   * Omit specific fields from the UserPortfolioProject
+   */
+  omit?: Prisma.UserPortfolioProjectOmit<ExtArgs> | null;
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserPortfolioProjectInclude<ExtArgs> | null;
+  where?: Prisma.UserPortfolioProjectWhereInput;
+  orderBy?:
+    | Prisma.UserPortfolioProjectOrderByWithRelationInput
+    | Prisma.UserPortfolioProjectOrderByWithRelationInput[];
+  cursor?: Prisma.UserPortfolioProjectWhereUniqueInput;
+  take?: number;
+  skip?: number;
+  distinct?:
+    | Prisma.UserPortfolioProjectScalarFieldEnum
+    | Prisma.UserPortfolioProjectScalarFieldEnum[];
 };
 
 /**

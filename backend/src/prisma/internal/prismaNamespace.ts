@@ -488,6 +488,7 @@ export const ModelName = {
   MentorParticipationAttemptLimit: 'MentorParticipationAttemptLimit',
   JobApplicationStatus: 'JobApplicationStatus',
   JobApplication: 'JobApplication',
+  RadarApplicationConsent: 'RadarApplicationConsent',
   SurveyStatus: 'SurveyStatus',
   SurveyQuestionType: 'SurveyQuestionType',
   SurveyTargetAudience: 'SurveyTargetAudience',
@@ -509,6 +510,9 @@ export const ModelName = {
   RadarCvReviewStatus: 'RadarCvReviewStatus',
   MentorParticipationStatus: 'MentorParticipationStatus',
   MentorOfferStatus: 'MentorOfferStatus',
+  PortfolioProvider: 'PortfolioProvider',
+  UserSocialAccount: 'UserSocialAccount',
+  UserPortfolioProject: 'UserPortfolioProject',
 } as const;
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName];
@@ -592,6 +596,7 @@ export type TypeMap<
       | 'mentorParticipationAttemptLimit'
       | 'jobApplicationStatus'
       | 'jobApplication'
+      | 'radarApplicationConsent'
       | 'surveyStatus'
       | 'surveyQuestionType'
       | 'surveyTargetAudience'
@@ -612,7 +617,10 @@ export type TypeMap<
       | 'radarCvExtractionStatus'
       | 'radarCvReviewStatus'
       | 'mentorParticipationStatus'
-      | 'mentorOfferStatus';
+      | 'mentorOfferStatus'
+      | 'portfolioProvider'
+      | 'userSocialAccount'
+      | 'userPortfolioProject';
     txIsolationLevel: TransactionIsolationLevel;
   };
   model: {
@@ -5252,6 +5260,82 @@ export type TypeMap<
         };
       };
     };
+    RadarApplicationConsent: {
+      payload: Prisma.$RadarApplicationConsentPayload<ExtArgs>;
+      fields: Prisma.RadarApplicationConsentFieldRefs;
+      operations: {
+        findUnique: {
+          args: Prisma.RadarApplicationConsentFindUniqueArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarApplicationConsentPayload> | null;
+        };
+        findUniqueOrThrow: {
+          args: Prisma.RadarApplicationConsentFindUniqueOrThrowArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarApplicationConsentPayload>;
+        };
+        findFirst: {
+          args: Prisma.RadarApplicationConsentFindFirstArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarApplicationConsentPayload> | null;
+        };
+        findFirstOrThrow: {
+          args: Prisma.RadarApplicationConsentFindFirstOrThrowArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarApplicationConsentPayload>;
+        };
+        findMany: {
+          args: Prisma.RadarApplicationConsentFindManyArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarApplicationConsentPayload>[];
+        };
+        create: {
+          args: Prisma.RadarApplicationConsentCreateArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarApplicationConsentPayload>;
+        };
+        createMany: {
+          args: Prisma.RadarApplicationConsentCreateManyArgs<ExtArgs>;
+          result: BatchPayload;
+        };
+        createManyAndReturn: {
+          args: Prisma.RadarApplicationConsentCreateManyAndReturnArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarApplicationConsentPayload>[];
+        };
+        delete: {
+          args: Prisma.RadarApplicationConsentDeleteArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarApplicationConsentPayload>;
+        };
+        update: {
+          args: Prisma.RadarApplicationConsentUpdateArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarApplicationConsentPayload>;
+        };
+        deleteMany: {
+          args: Prisma.RadarApplicationConsentDeleteManyArgs<ExtArgs>;
+          result: BatchPayload;
+        };
+        updateMany: {
+          args: Prisma.RadarApplicationConsentUpdateManyArgs<ExtArgs>;
+          result: BatchPayload;
+        };
+        updateManyAndReturn: {
+          args: Prisma.RadarApplicationConsentUpdateManyAndReturnArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarApplicationConsentPayload>[];
+        };
+        upsert: {
+          args: Prisma.RadarApplicationConsentUpsertArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarApplicationConsentPayload>;
+        };
+        aggregate: {
+          args: Prisma.RadarApplicationConsentAggregateArgs<ExtArgs>;
+          result: runtime.Types.Utils.Optional<Prisma.AggregateRadarApplicationConsent>;
+        };
+        groupBy: {
+          args: Prisma.RadarApplicationConsentGroupByArgs<ExtArgs>;
+          result: runtime.Types.Utils.Optional<Prisma.RadarApplicationConsentGroupByOutputType>[];
+        };
+        count: {
+          args: Prisma.RadarApplicationConsentCountArgs<ExtArgs>;
+          result:
+            | runtime.Types.Utils.Optional<Prisma.RadarApplicationConsentCountAggregateOutputType>
+            | number;
+        };
+      };
+    };
     SurveyStatus: {
       payload: Prisma.$SurveyStatusPayload<ExtArgs>;
       fields: Prisma.SurveyStatusFieldRefs;
@@ -6848,6 +6932,234 @@ export type TypeMap<
         };
       };
     };
+    PortfolioProvider: {
+      payload: Prisma.$PortfolioProviderPayload<ExtArgs>;
+      fields: Prisma.PortfolioProviderFieldRefs;
+      operations: {
+        findUnique: {
+          args: Prisma.PortfolioProviderFindUniqueArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortfolioProviderPayload> | null;
+        };
+        findUniqueOrThrow: {
+          args: Prisma.PortfolioProviderFindUniqueOrThrowArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortfolioProviderPayload>;
+        };
+        findFirst: {
+          args: Prisma.PortfolioProviderFindFirstArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortfolioProviderPayload> | null;
+        };
+        findFirstOrThrow: {
+          args: Prisma.PortfolioProviderFindFirstOrThrowArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortfolioProviderPayload>;
+        };
+        findMany: {
+          args: Prisma.PortfolioProviderFindManyArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortfolioProviderPayload>[];
+        };
+        create: {
+          args: Prisma.PortfolioProviderCreateArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortfolioProviderPayload>;
+        };
+        createMany: {
+          args: Prisma.PortfolioProviderCreateManyArgs<ExtArgs>;
+          result: BatchPayload;
+        };
+        createManyAndReturn: {
+          args: Prisma.PortfolioProviderCreateManyAndReturnArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortfolioProviderPayload>[];
+        };
+        delete: {
+          args: Prisma.PortfolioProviderDeleteArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortfolioProviderPayload>;
+        };
+        update: {
+          args: Prisma.PortfolioProviderUpdateArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortfolioProviderPayload>;
+        };
+        deleteMany: {
+          args: Prisma.PortfolioProviderDeleteManyArgs<ExtArgs>;
+          result: BatchPayload;
+        };
+        updateMany: {
+          args: Prisma.PortfolioProviderUpdateManyArgs<ExtArgs>;
+          result: BatchPayload;
+        };
+        updateManyAndReturn: {
+          args: Prisma.PortfolioProviderUpdateManyAndReturnArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortfolioProviderPayload>[];
+        };
+        upsert: {
+          args: Prisma.PortfolioProviderUpsertArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortfolioProviderPayload>;
+        };
+        aggregate: {
+          args: Prisma.PortfolioProviderAggregateArgs<ExtArgs>;
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePortfolioProvider>;
+        };
+        groupBy: {
+          args: Prisma.PortfolioProviderGroupByArgs<ExtArgs>;
+          result: runtime.Types.Utils.Optional<Prisma.PortfolioProviderGroupByOutputType>[];
+        };
+        count: {
+          args: Prisma.PortfolioProviderCountArgs<ExtArgs>;
+          result:
+            | runtime.Types.Utils.Optional<Prisma.PortfolioProviderCountAggregateOutputType>
+            | number;
+        };
+      };
+    };
+    UserSocialAccount: {
+      payload: Prisma.$UserSocialAccountPayload<ExtArgs>;
+      fields: Prisma.UserSocialAccountFieldRefs;
+      operations: {
+        findUnique: {
+          args: Prisma.UserSocialAccountFindUniqueArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserSocialAccountPayload> | null;
+        };
+        findUniqueOrThrow: {
+          args: Prisma.UserSocialAccountFindUniqueOrThrowArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserSocialAccountPayload>;
+        };
+        findFirst: {
+          args: Prisma.UserSocialAccountFindFirstArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserSocialAccountPayload> | null;
+        };
+        findFirstOrThrow: {
+          args: Prisma.UserSocialAccountFindFirstOrThrowArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserSocialAccountPayload>;
+        };
+        findMany: {
+          args: Prisma.UserSocialAccountFindManyArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserSocialAccountPayload>[];
+        };
+        create: {
+          args: Prisma.UserSocialAccountCreateArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserSocialAccountPayload>;
+        };
+        createMany: {
+          args: Prisma.UserSocialAccountCreateManyArgs<ExtArgs>;
+          result: BatchPayload;
+        };
+        createManyAndReturn: {
+          args: Prisma.UserSocialAccountCreateManyAndReturnArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserSocialAccountPayload>[];
+        };
+        delete: {
+          args: Prisma.UserSocialAccountDeleteArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserSocialAccountPayload>;
+        };
+        update: {
+          args: Prisma.UserSocialAccountUpdateArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserSocialAccountPayload>;
+        };
+        deleteMany: {
+          args: Prisma.UserSocialAccountDeleteManyArgs<ExtArgs>;
+          result: BatchPayload;
+        };
+        updateMany: {
+          args: Prisma.UserSocialAccountUpdateManyArgs<ExtArgs>;
+          result: BatchPayload;
+        };
+        updateManyAndReturn: {
+          args: Prisma.UserSocialAccountUpdateManyAndReturnArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserSocialAccountPayload>[];
+        };
+        upsert: {
+          args: Prisma.UserSocialAccountUpsertArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserSocialAccountPayload>;
+        };
+        aggregate: {
+          args: Prisma.UserSocialAccountAggregateArgs<ExtArgs>;
+          result: runtime.Types.Utils.Optional<Prisma.AggregateUserSocialAccount>;
+        };
+        groupBy: {
+          args: Prisma.UserSocialAccountGroupByArgs<ExtArgs>;
+          result: runtime.Types.Utils.Optional<Prisma.UserSocialAccountGroupByOutputType>[];
+        };
+        count: {
+          args: Prisma.UserSocialAccountCountArgs<ExtArgs>;
+          result:
+            | runtime.Types.Utils.Optional<Prisma.UserSocialAccountCountAggregateOutputType>
+            | number;
+        };
+      };
+    };
+    UserPortfolioProject: {
+      payload: Prisma.$UserPortfolioProjectPayload<ExtArgs>;
+      fields: Prisma.UserPortfolioProjectFieldRefs;
+      operations: {
+        findUnique: {
+          args: Prisma.UserPortfolioProjectFindUniqueArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserPortfolioProjectPayload> | null;
+        };
+        findUniqueOrThrow: {
+          args: Prisma.UserPortfolioProjectFindUniqueOrThrowArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserPortfolioProjectPayload>;
+        };
+        findFirst: {
+          args: Prisma.UserPortfolioProjectFindFirstArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserPortfolioProjectPayload> | null;
+        };
+        findFirstOrThrow: {
+          args: Prisma.UserPortfolioProjectFindFirstOrThrowArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserPortfolioProjectPayload>;
+        };
+        findMany: {
+          args: Prisma.UserPortfolioProjectFindManyArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserPortfolioProjectPayload>[];
+        };
+        create: {
+          args: Prisma.UserPortfolioProjectCreateArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserPortfolioProjectPayload>;
+        };
+        createMany: {
+          args: Prisma.UserPortfolioProjectCreateManyArgs<ExtArgs>;
+          result: BatchPayload;
+        };
+        createManyAndReturn: {
+          args: Prisma.UserPortfolioProjectCreateManyAndReturnArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserPortfolioProjectPayload>[];
+        };
+        delete: {
+          args: Prisma.UserPortfolioProjectDeleteArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserPortfolioProjectPayload>;
+        };
+        update: {
+          args: Prisma.UserPortfolioProjectUpdateArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserPortfolioProjectPayload>;
+        };
+        deleteMany: {
+          args: Prisma.UserPortfolioProjectDeleteManyArgs<ExtArgs>;
+          result: BatchPayload;
+        };
+        updateMany: {
+          args: Prisma.UserPortfolioProjectUpdateManyArgs<ExtArgs>;
+          result: BatchPayload;
+        };
+        updateManyAndReturn: {
+          args: Prisma.UserPortfolioProjectUpdateManyAndReturnArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserPortfolioProjectPayload>[];
+        };
+        upsert: {
+          args: Prisma.UserPortfolioProjectUpsertArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserPortfolioProjectPayload>;
+        };
+        aggregate: {
+          args: Prisma.UserPortfolioProjectAggregateArgs<ExtArgs>;
+          result: runtime.Types.Utils.Optional<Prisma.AggregateUserPortfolioProject>;
+        };
+        groupBy: {
+          args: Prisma.UserPortfolioProjectGroupByArgs<ExtArgs>;
+          result: runtime.Types.Utils.Optional<Prisma.UserPortfolioProjectGroupByOutputType>[];
+        };
+        count: {
+          args: Prisma.UserPortfolioProjectCountArgs<ExtArgs>;
+          result:
+            | runtime.Types.Utils.Optional<Prisma.UserPortfolioProjectCountAggregateOutputType>
+            | number;
+        };
+      };
+    };
   };
 } & {
   other: {
@@ -7707,6 +8019,19 @@ export const JobApplicationScalarFieldEnum = {
 export type JobApplicationScalarFieldEnum =
   (typeof JobApplicationScalarFieldEnum)[keyof typeof JobApplicationScalarFieldEnum];
 
+export const RadarApplicationConsentScalarFieldEnum = {
+  id: 'id',
+  applicationId: 'applicationId',
+  consentToRecruiter: 'consentToRecruiter',
+  consentToCv: 'consentToCv',
+  consentToContact: 'consentToContact',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+} as const;
+
+export type RadarApplicationConsentScalarFieldEnum =
+  (typeof RadarApplicationConsentScalarFieldEnum)[keyof typeof RadarApplicationConsentScalarFieldEnum];
+
 export const SurveyStatusScalarFieldEnum = {
   id: 'id',
   title: 'title',
@@ -7989,6 +8314,50 @@ export const MentorOfferStatusScalarFieldEnum = {
 
 export type MentorOfferStatusScalarFieldEnum =
   (typeof MentorOfferStatusScalarFieldEnum)[keyof typeof MentorOfferStatusScalarFieldEnum];
+
+export const PortfolioProviderScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+} as const;
+
+export type PortfolioProviderScalarFieldEnum =
+  (typeof PortfolioProviderScalarFieldEnum)[keyof typeof PortfolioProviderScalarFieldEnum];
+
+export const UserSocialAccountScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  providerId: 'providerId',
+  externalId: 'externalId',
+  username: 'username',
+  profileUrl: 'profileUrl',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+} as const;
+
+export type UserSocialAccountScalarFieldEnum =
+  (typeof UserSocialAccountScalarFieldEnum)[keyof typeof UserSocialAccountScalarFieldEnum];
+
+export const UserPortfolioProjectScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  socialAccountId: 'socialAccountId',
+  providerId: 'providerId',
+  repoName: 'repoName',
+  repoUrl: 'repoUrl',
+  description: 'description',
+  language: 'language',
+  starsCount: 'starsCount',
+  isOwner: 'isOwner',
+  displayOrder: 'displayOrder',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+} as const;
+
+export type UserPortfolioProjectScalarFieldEnum =
+  (typeof UserPortfolioProjectScalarFieldEnum)[keyof typeof UserPortfolioProjectScalarFieldEnum];
 
 export const SortOrder = {
   asc: 'asc',
@@ -8377,6 +8746,7 @@ export type GlobalOmitConfig = {
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitOmit;
   jobApplicationStatus?: Prisma.JobApplicationStatusOmit;
   jobApplication?: Prisma.JobApplicationOmit;
+  radarApplicationConsent?: Prisma.RadarApplicationConsentOmit;
   surveyStatus?: Prisma.SurveyStatusOmit;
   surveyQuestionType?: Prisma.SurveyQuestionTypeOmit;
   surveyTargetAudience?: Prisma.SurveyTargetAudienceOmit;
@@ -8398,6 +8768,9 @@ export type GlobalOmitConfig = {
   radarCvReviewStatus?: Prisma.RadarCvReviewStatusOmit;
   mentorParticipationStatus?: Prisma.MentorParticipationStatusOmit;
   mentorOfferStatus?: Prisma.MentorOfferStatusOmit;
+  portfolioProvider?: Prisma.PortfolioProviderOmit;
+  userSocialAccount?: Prisma.UserSocialAccountOmit;
+  userPortfolioProject?: Prisma.UserPortfolioProjectOmit;
 };
 
 /* Types for Logging */

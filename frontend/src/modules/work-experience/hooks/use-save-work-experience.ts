@@ -3,7 +3,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { PROFILE_SKILLS_RADAR_QUERY_KEY } from "@/modules/profile";
-import { SKILLS_PROFILE_QUERY_KEY } from "@/modules/skills";
+import { useInvalidateProfileCompleteness } from "@/modules/profile";
+import { MY_SKILLS_QUERY_KEY } from "@/modules/skills";
 import type { Feedback } from "@/modules/profile";
 import { WORK_EXPERIENCE_FEEDBACK_MESSAGES } from "../config/work-experience-feedback.config";
 import { workExperienceService } from "../services/work-experience.service";
@@ -12,9 +13,11 @@ import type { WorkExperiencePayload } from "../types/work-experience-payload.typ
 
 export function useSaveWorkExperience(onSaved: () => void) {
   const queryClient = useQueryClient();
+  const invalidateCompleteness = useInvalidateProfileCompleteness();
 
   const mutation = useMutation({
     mutationFn: (request: () => Promise<WorkExperienceItem>) => request(),
+    onSuccess: invalidateCompleteness,
   });
 
   const [isSaving, setIsSaving] = useState(false);
@@ -23,7 +26,7 @@ export function useSaveWorkExperience(onSaved: () => void) {
   async function refreshSkills(): Promise<void> {
     await Promise.all([
       queryClient.invalidateQueries({
-        queryKey: SKILLS_PROFILE_QUERY_KEY,
+        queryKey: MY_SKILLS_QUERY_KEY,
       }),
       queryClient.invalidateQueries({
         queryKey: PROFILE_SKILLS_RADAR_QUERY_KEY,

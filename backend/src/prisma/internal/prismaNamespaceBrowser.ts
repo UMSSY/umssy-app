@@ -115,6 +115,7 @@ export const ModelName = {
   MentorParticipationAttemptLimit: 'MentorParticipationAttemptLimit',
   JobApplicationStatus: 'JobApplicationStatus',
   JobApplication: 'JobApplication',
+  RadarApplicationConsent: 'RadarApplicationConsent',
   SurveyStatus: 'SurveyStatus',
   SurveyQuestionType: 'SurveyQuestionType',
   SurveyTargetAudience: 'SurveyTargetAudience',
@@ -136,6 +137,9 @@ export const ModelName = {
   RadarCvReviewStatus: 'RadarCvReviewStatus',
   MentorParticipationStatus: 'MentorParticipationStatus',
   MentorOfferStatus: 'MentorOfferStatus',
+  PortfolioProvider: 'PortfolioProvider',
+  UserSocialAccount: 'UserSocialAccount',
+  UserPortfolioProject: 'UserPortfolioProject',
 } as const;
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName];
@@ -974,6 +978,19 @@ export const JobApplicationScalarFieldEnum = {
 export type JobApplicationScalarFieldEnum =
   (typeof JobApplicationScalarFieldEnum)[keyof typeof JobApplicationScalarFieldEnum];
 
+export const RadarApplicationConsentScalarFieldEnum = {
+  id: 'id',
+  applicationId: 'applicationId',
+  consentToRecruiter: 'consentToRecruiter',
+  consentToCv: 'consentToCv',
+  consentToContact: 'consentToContact',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+} as const;
+
+export type RadarApplicationConsentScalarFieldEnum =
+  (typeof RadarApplicationConsentScalarFieldEnum)[keyof typeof RadarApplicationConsentScalarFieldEnum];
+
 export const SurveyStatusScalarFieldEnum = {
   id: 'id',
   title: 'title',
@@ -1256,6 +1273,50 @@ export const MentorOfferStatusScalarFieldEnum = {
 
 export type MentorOfferStatusScalarFieldEnum =
   (typeof MentorOfferStatusScalarFieldEnum)[keyof typeof MentorOfferStatusScalarFieldEnum];
+
+export const PortfolioProviderScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+} as const;
+
+export type PortfolioProviderScalarFieldEnum =
+  (typeof PortfolioProviderScalarFieldEnum)[keyof typeof PortfolioProviderScalarFieldEnum];
+
+export const UserSocialAccountScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  providerId: 'providerId',
+  externalId: 'externalId',
+  username: 'username',
+  profileUrl: 'profileUrl',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+} as const;
+
+export type UserSocialAccountScalarFieldEnum =
+  (typeof UserSocialAccountScalarFieldEnum)[keyof typeof UserSocialAccountScalarFieldEnum];
+
+export const UserPortfolioProjectScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  socialAccountId: 'socialAccountId',
+  providerId: 'providerId',
+  repoName: 'repoName',
+  repoUrl: 'repoUrl',
+  description: 'description',
+  language: 'language',
+  starsCount: 'starsCount',
+  isOwner: 'isOwner',
+  displayOrder: 'displayOrder',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+} as const;
+
+export type UserPortfolioProjectScalarFieldEnum =
+  (typeof UserPortfolioProjectScalarFieldEnum)[keyof typeof UserPortfolioProjectScalarFieldEnum];
 
 export const SortOrder = {
   asc: 'asc',

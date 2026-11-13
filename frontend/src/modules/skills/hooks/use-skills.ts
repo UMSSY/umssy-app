@@ -3,13 +3,14 @@
 import { useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
+  MY_SKILLS_QUERY_KEY,
   PENDING_SKILL_ID_PREFIX,
   SKILLS_ERROR_MESSAGES,
-  SKILLS_PROFILE_QUERY_KEY,
   SKILLS_SUCCESS_MESSAGES,
 } from "../constants/skills.constants";
 import { skillsService } from "../services/skills.service";
 import type { Feedback } from "@/modules/profile";
+import { useInvalidateProfileCompleteness } from "@/modules/profile";
 import type { SkillItem } from "../types/skill-item.types";
 import type { SkillsProfileResponse } from "../types/skills-profile-response.types";
 import type { UseSkillsResult } from "../types/use-skills-result.types";
@@ -17,6 +18,7 @@ import { getSkillsErrorMessage } from "../utils/get-skills-error-message";
 
 export function useSkills(): UseSkillsResult {
   const queryClient = useQueryClient();
+  const invalidateCompleteness = useInvalidateProfileCompleteness();
   const savingRef = useRef(false);
   const customRequestsRef = useRef(new Map<string, Promise<SkillItem>>());
   function resolveSkill(skill: SkillItem): Promise<SkillItem> {
@@ -24,7 +26,7 @@ export function useSkills(): UseSkillsResult {
     const existing = customRequestsRef.current.get(skill.id);
     if (existing) return existing;
     const request = skillsService.createCustomSkill(skill.name).then((created) => {
-      queryClient.setQueryData<SkillsProfileResponse>(SKILLS_PROFILE_QUERY_KEY, (current) => current ? {
+      queryClient.setQueryData<SkillsProfileResponse>(MY_SKILLS_QUERY_KEY, (current) => current ? {
         ...current, catalog: [...current.catalog.filter((item) => item.id !== created.id), created],
       } : current);
       return created;
@@ -33,7 +35,7 @@ export function useSkills(): UseSkillsResult {
     return request;
   }
   const query = useQuery({
-    queryKey: SKILLS_PROFILE_QUERY_KEY,
+    queryKey: MY_SKILLS_QUERY_KEY,
     queryFn: async () => {
       const [catalog, selected] = await Promise.all([skillsService.getCatalog(), skillsService.getMySkills()]);
       return { catalog, selected };
@@ -50,7 +52,7 @@ export function useSkills(): UseSkillsResult {
     const resolvedSkills = await Promise.all(selection.map(resolveSkill));
     const skillIds = [...new Set(resolvedSkills.map(({ id }) => id))];
     return skillsService.saveMySkills(skillIds);
-  } });
+  }, onSuccess: invalidateCompleteness });
   const isSaving = mutation.isPending;
   async function reload(): Promise<void> {
     setSelectedSkills(null);
@@ -97,7 +99,7 @@ export function useSkills(): UseSkillsResult {
 
     try {
       const savedSkills = await mutation.mutateAsync(selection);
-      queryClient.setQueryData<SkillsProfileResponse>(SKILLS_PROFILE_QUERY_KEY, (current) => ({
+      queryClient.setQueryData<SkillsProfileResponse>(MY_SKILLS_QUERY_KEY, (current) => ({
         catalog: current?.catalog ?? catalogSkills, selected: savedSkills ?? [],
       }));
       setSelectedSkills(null);
