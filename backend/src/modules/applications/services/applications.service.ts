@@ -54,4 +54,16 @@ export class ApplicationsService {
     );
     if (!result.count) throw new ApplicationNotWithdrawableException();
   }
+  findRecruitmentApplicationsByUser(userId: string) {
+    return this.repository.findRecruitmentApplicationsByUser(userId);
+  }
+  findRecruitmentApplicants(jobId: string) {
+    return this.repository.findRecruitmentApplicants(jobId);
+  }
+  findRecruitmentApplication(id: string) {
+    return this.repository.findRecruitmentApplication(id);
+  }
+  recordRecruiterDecision(applicationId: string, target: string) {
+    return this.repository.recordRecruiterDecision(applicationId, target);
+  }
 }
