@@ -1,7 +1,5 @@
-import type {
-  ApplicationConsentsResponse,
-  ApplicationResponse,
-} from '../types/application-response.type.js';
+import type { ApplicationConsentsResponse } from '../types/application-consents-response.type.js';
+import type { ApplicationResponse } from '../types/application-response.type.js';
 import type { RecruitmentApplication } from '../../applications/types/recruitment-application.type.js';
 import type { RadarApplicationConsent } from '../types/radar-application-consent.type.js';
 import type { RadarApplicationState } from '../types/radar-application-state.type.js';

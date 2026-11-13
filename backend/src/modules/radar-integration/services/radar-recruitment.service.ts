@@ -1,11 +1,7 @@
-import type {
-  ApplicationConsentsResponse,
-  ApplicationResponse,
-} from '../types/application-response.type.js';
-import type {
-  ActiveVacancyResponse,
-  RecruiterVacancyResponse,
-} from '../types/vacancy-response.type.js';
+import type { ApplicationConsentsResponse } from '../types/application-consents-response.type.js';
+import type { ApplicationResponse } from '../types/application-response.type.js';
+import type { ActiveVacancyResponse } from '../types/active-vacancy-response.type.js';
+import type { RecruiterVacancyResponse } from '../types/recruiter-vacancy-response.type.js';
 import { JobApplicationConsentRequiredException } from '../../matching/exceptions/job-application-consent-required.exception.js';
 import {
   mapRecruiterCandidate,
