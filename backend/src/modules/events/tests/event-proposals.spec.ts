@@ -64,6 +64,23 @@ function setup() {
 }
 describe('Workshop proposal validation and persistence', () => {
   it.each([
+    ' https://example.org',
+    'https://example.org ',
+    'https://example.org/my room',
+    'https://example.org/' + 'a'.repeat(131),
+  ])(
+    'rejects invalid virtual links through the real request schema: %s',
+    (location) => {
+      expect(
+        CreateProposalSchema.safeParse({
+          ...valid,
+          modality: 'virtual',
+          location,
+        }).success,
+      ).toBe(false);
+    },
+  );
+  it.each([
     'Facultad, Aula, Piso, Bloque, Campus',
     'Facultad,, Aula',
     ', Aula',
@@ -112,14 +129,14 @@ describe('Workshop proposal validation and persistence', () => {
       ).toBe(false);
     },
   );
-  it('keeps long virtual meeting URLs valid', () => {
+  it('rejects virtual meeting URLs longer than 150 characters', () => {
     expect(
       CreateProposalSchema.safeParse({
         ...valid,
         modality: 'virtual',
         location: 'https://example.org/' + 'a'.repeat(160),
       }).success,
-    ).toBe(true);
+    ).toBe(false);
   });
   it('atomically saves the authenticated author, image, voting status, threshold and deadline', async () => {
     const { service, tx } = setup();

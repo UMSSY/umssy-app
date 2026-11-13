@@ -8,6 +8,12 @@ export function proposalLocationError(
       ? 'Pega el enlace de la reunión.'
       : 'Escribe la ubicación del taller.';
   if (modality === 'presencial') {
+    if (
+      /\b(?:[a-z][a-z\d+.-]*:\/\/|www\.)|\b[\p{L}\p{N}-]+(?:\.[\p{L}\p{N}-]+)*\.[a-z]{2,}(?:[/:?#]|\b)/iu.test(
+        location,
+      )
+    )
+      return 'Indica un lugar físico, sin enlaces.';
     if (location.length > 150) return 'Usa hasta 150 caracteres.';
     if (!/\p{L}/u.test(location)) return 'Incluye el nombre del lugar.';
     if (location.startsWith(',') || location.endsWith(','))
@@ -20,11 +26,10 @@ export function proposalLocationError(
     if (parts.length > 4) return 'Usa hasta 4 partes separadas por comas.';
   }
   if (modality === 'virtual') {
-    if (location.length > 2000)
-      return 'Usa un enlace de hasta 2000 caracteres.';
+    if (raw.length > 150) return 'Usa hasta 150 caracteres.';
+    if (/\s/u.test(raw)) return 'Quita los espacios del enlace.';
     if (!/^https:\/\//i.test(location))
       return 'El enlace debe comenzar con https://.';
-    if (/\s/u.test(location)) return 'Quita los espacios del enlace.';
     if (/\\/u.test(location))
       return 'Usa barras / en lugar de barras invertidas.';
     if (!/^https:\/\/[^/?#]+/i.test(location))

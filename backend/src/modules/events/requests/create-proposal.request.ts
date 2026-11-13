@@ -50,7 +50,7 @@ export const CreateProposalSchema = z
     modality: z.enum(['presencial', 'virtual'], {
       error: 'Selecciona Presencial o Virtual.',
     }),
-    location: z.string({ error: 'Completa la ubicación o el enlace.' }).trim(),
+    location: z.string({ error: 'Completa la ubicación o el enlace.' }),
   })
   .strict()
   .superRefine((value, context) => {

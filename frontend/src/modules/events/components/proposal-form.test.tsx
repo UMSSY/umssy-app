@@ -43,3 +43,14 @@ it('marks a field for validation when leaving it', () => {
   fireEvent.blur(screen.getByRole('textbox', { name: /Título del taller/ }));
   expect(state.touch).toHaveBeenCalledWith('title');
 });
+
+it('limits virtual links to 150 characters and shows their count', () => {
+  const original = { ...state.values };
+  state.values.modality = 'virtual';
+  state.values.location = 'https://example.org/a';
+  try {
+    render(<ProposalForm />);
+    expect(screen.getByRole('textbox', { name: /Enlace de la reunión/ })).toHaveAttribute('maxlength', '150');
+    expect(screen.getByText(`${state.values.location.length}/150`)).toBeInTheDocument();
+  } finally { Object.assign(state.values, original); }
+});
