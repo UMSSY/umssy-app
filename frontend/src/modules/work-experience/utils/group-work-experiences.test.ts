@@ -37,11 +37,12 @@ describe("groupWorkExperiences", () => {
     const source = [earlier, later];
 
     expect(groupWorkExperiences(source)).toEqual([
-  {
-    companyName: "UMSS",
-    positions: [later, earlier],
-  },
-]);
+      {
+        id: "company:umss",
+        companyName: "UMSS",
+        positions: [later, earlier],
+      },
+    ]);
 
     expect(source).toEqual([earlier, later]);
   });
@@ -61,6 +62,7 @@ describe("groupWorkExperiences", () => {
 
     expect(groupWorkExperiences([earlier, later])).toEqual([
       {
+        id: "company:umss",
         companyName: "UMSS",
         positions: [later, earlier],
       },
@@ -96,12 +98,14 @@ describe("groupWorkExperiences", () => {
     ]);
 
     expect(groups).toHaveLength(2);
+    expect(groups[0].id).toBe("company:umss");
     expect(groups[0].companyName).toBe("UMSS");
     expect(groups[0].positions.map((item) => item.id)).toEqual([
       "return",
       "first",
     ]);
     expect(groups[1].companyName).toBe("Empresa B");
+    expect(groups[1].id).toBe("company:empresa b");
   });
 
   it("keeps different companies independent", () => {
@@ -137,6 +141,35 @@ describe("groupWorkExperiences", () => {
       "",
     );
 
-    expect(groupWorkExperiences([first, second])).toHaveLength(2);
+    const groups = groupWorkExperiences([first, second]);
+
+    expect(groups).toHaveLength(2);
+    expect(groups[0].id).toBe("experience:first");
+    expect(groups[1].id).toBe("experience:second");
+  });
+
+  it("uses a stable group id for company names with different casing and spaces", () => {
+    const first = createExperience(
+      "first",
+      "2020-01-01",
+      "2021-01-01",
+      "UMSS",
+    );
+
+    const second = createExperience(
+      "second",
+      "2022-01-01",
+      null,
+      " umss ",
+    );
+
+    const groups = groupWorkExperiences([first, second]);
+
+    expect(groups).toHaveLength(1);
+    expect(groups[0].id).toBe("company:umss");
+    expect(groups[0].positions.map((item) => item.id)).toEqual([
+      "second",
+      "first",
+    ]);
   });
 });

@@ -1,30 +1,30 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { act, cleanup, renderHook } from '@testing-library/react';
-import type { PropsWithChildren } from 'react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { PROFILE_SKILLS_RADAR_QUERY_KEY } from '@/modules/profile';
-import { WORK_EXPERIENCE_FEEDBACK_MESSAGES } from '../config/work-experience-feedback.config';
-import { workExperienceService } from '../services/work-experience.service';
-import type { WorkExperienceItem } from '../types/work-experience-item.types';
-import { useDeleteWorkExperience } from './use-delete-work-experience';
 
-vi.mock('../services/work-experience.service', () => ({
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { act, cleanup, renderHook } from "@testing-library/react";
+import type { PropsWithChildren } from "react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { PROFILE_SKILLS_RADAR_QUERY_KEY } from "@/modules/profile";
+import { SKILLS_PROFILE_QUERY_KEY } from "@/modules/skills";
+import { WORK_EXPERIENCE_FEEDBACK_MESSAGES } from "../config/work-experience-feedback.config";
+import { workExperienceService } from "../services/work-experience.service";
+import type { WorkExperienceItem } from "../types/work-experience-item.types";
+import { useDeleteWorkExperience } from "./use-delete-work-experience";
+
+vi.mock("../services/work-experience.service", () => ({
   workExperienceService: {
     deleteWorkExperience: vi.fn(),
   },
 }));
 
 const EXPERIENCE: WorkExperienceItem = {
-  id: 'experience-1',
-  companyName: 'UMSS',
-  position: 'Desarrollador',
-  startDate: '2023-01',
-  endDate: '2024-01',
+  id: "experience-1",
+  companyName: "UMSS",
+  position: "Desarrollador",
+  startDate: "2023-01",
+  endDate: "2024-01",
   isCurrent: false,
-  description: 'Desarrollo de aplicaciones.',
+  description: "Desarrollo de aplicaciones.",
 };
-
-const SKILLS_PROFILE_QUERY_KEY = ['skills', 'profile'] as const;
 
 function createWrapper(queryClient: QueryClient) {
   return function Wrapper({ children }: PropsWithChildren) {
@@ -34,7 +34,7 @@ function createWrapper(queryClient: QueryClient) {
   };
 }
 
-describe('useDeleteWorkExperience', () => {
+describe("useDeleteWorkExperience", () => {
   let queryClient: QueryClient;
 
   beforeEach(() => {
@@ -60,9 +60,9 @@ describe('useDeleteWorkExperience', () => {
     vi.clearAllMocks();
   });
 
-  it('elimina la experiencia e invalida las consultas de habilidades', async () => {
+  it("elimina la experiencia e invalida las consultas de habilidades", async () => {
     const onDeleted = vi.fn();
-    const invalidateQueries = vi.spyOn(queryClient, 'invalidateQueries');
+    const invalidateQueries = vi.spyOn(queryClient, "invalidateQueries");
 
     const { result } = renderHook(() => useDeleteWorkExperience(onDeleted), {
       wrapper: createWrapper(queryClient),
@@ -85,7 +85,7 @@ describe('useDeleteWorkExperience', () => {
     });
 
     expect(result.current.feedback).toEqual({
-      type: 'success',
+      type: "success",
       message: WORK_EXPERIENCE_FEEDBACK_MESSAGES.deleteSuccess,
     });
 
@@ -93,12 +93,12 @@ describe('useDeleteWorkExperience', () => {
     expect(result.current.isDeleting).toBe(false);
   });
 
-  it('muestra un error y no invalida consultas si falla la eliminación', async () => {
+  it("muestra un error y no invalida consultas si falla la eliminación", async () => {
     const onDeleted = vi.fn();
-    const invalidateQueries = vi.spyOn(queryClient, 'invalidateQueries');
+    const invalidateQueries = vi.spyOn(queryClient, "invalidateQueries");
 
     vi.mocked(workExperienceService.deleteWorkExperience).mockRejectedValue(
-      new Error('Error al eliminar'),
+      new Error("Error al eliminar"),
     );
 
     const { result } = renderHook(() => useDeleteWorkExperience(onDeleted), {
@@ -117,7 +117,7 @@ describe('useDeleteWorkExperience', () => {
     expect(onDeleted).not.toHaveBeenCalled();
 
     expect(result.current.feedback).toEqual({
-      type: 'error',
+      type: "error",
       message: WORK_EXPERIENCE_FEEDBACK_MESSAGES.deleteError,
     });
 

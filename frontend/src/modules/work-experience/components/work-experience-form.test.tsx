@@ -1,4 +1,3 @@
-
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import { act, cleanup, fireEvent, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -9,7 +8,6 @@ import { WorkExperienceForm } from "./work-experience-form";
 
 vi.mock("@/modules/matching/services/skills-analysis.service", () => ({
   skillsAnalysisService: {
-    analyzeExperience: vi.fn(),
     previewExperience: vi.fn(),
   },
 }));

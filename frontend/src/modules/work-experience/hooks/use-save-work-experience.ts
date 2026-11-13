@@ -3,13 +3,12 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { PROFILE_SKILLS_RADAR_QUERY_KEY } from "@/modules/profile";
+import { SKILLS_PROFILE_QUERY_KEY } from "@/modules/skills";
 import type { Feedback } from "@/modules/profile";
 import { WORK_EXPERIENCE_FEEDBACK_MESSAGES } from "../config/work-experience-feedback.config";
 import { workExperienceService } from "../services/work-experience.service";
 import type { WorkExperienceItem } from "../types/work-experience-item.types";
 import type { WorkExperiencePayload } from "../types/work-experience-payload.types";
-
-const SKILLS_PROFILE_QUERY_KEY = ["skills", "profile"] as const;
 
 export function useSaveWorkExperience(onSaved: () => void) {
   const queryClient = useQueryClient();
@@ -21,14 +20,15 @@ export function useSaveWorkExperience(onSaved: () => void) {
   const [isSaving, setIsSaving] = useState(false);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
 
-  function refreshSkills(): void {
-    void queryClient.invalidateQueries({
-      queryKey: SKILLS_PROFILE_QUERY_KEY,
-    });
-
-    void queryClient.invalidateQueries({
-      queryKey: PROFILE_SKILLS_RADAR_QUERY_KEY,
-    });
+  async function refreshSkills(): Promise<void> {
+    await Promise.all([
+      queryClient.invalidateQueries({
+        queryKey: SKILLS_PROFILE_QUERY_KEY,
+      }),
+      queryClient.invalidateQueries({
+        queryKey: PROFILE_SKILLS_RADAR_QUERY_KEY,
+      }),
+    ]);
   }
 
   async function save(
@@ -57,7 +57,7 @@ export function useSaveWorkExperience(onSaved: () => void) {
       });
 
       onSaved();
-      refreshSkills();
+      await refreshSkills();
     } catch {
       setFeedback({
         type: "error",
@@ -70,7 +70,7 @@ export function useSaveWorkExperience(onSaved: () => void) {
     }
   }
 
-  function clearFeedback() {
+  function clearFeedback(): void {
     setFeedback(null);
   }
 
