@@ -1,8 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
-import { renderHook, act } from "@testing-library/react"
+import { renderHook, act, waitFor } from "@testing-library/react"
 import { toast } from "sonner"
 import { createQueryWrapper } from "@/shared/testing/create-query-wrapper"
 import { useCreateAppointment } from "./use-create-appointment"
+import { useMentorFreeBlocks } from "./use-mentor-free-blocks"
+import { availabilityApi } from "../services/availability.service"
 import type { AvailabilityBlock } from "../types/availability-block.types"
 import { appointmentsApi, type Appointment, type AppointmentDocument } from "@/modules/appointments"
 import { APPOINTMENT_DOCUMENT_TEXT } from "../constants/appointment-document.constants"
@@ -117,20 +119,83 @@ describe("useCreateAppointment", () => {
     expect(onConflict).toHaveBeenCalledWith(block)
   })
 
-  it("con otros errores muestra el detail o un mensaje genérico sin marcar el bloque", async () => {
-    vi.spyOn(appointmentsApi, "createAppointment")
-      .mockRejectedValueOnce({ response: { data: { detail: "El tema de la sesión no es válido" } } })
-      .mockRejectedValueOnce(new Error("Network error"))
+  it("con error de validación muestra el detalle sin quitar la selección", async () => {
+    vi.spyOn(appointmentsApi, "createAppointment").mockRejectedValue({
+      isAxiosError: true,
+      response: { status: 400, data: { detail: "El tema de la sesión no es válido" } },
+    })
     const onConflict = vi.fn()
-
     const { result } = renderHook(() => useCreateAppointment(onConflict), createQueryWrapper())
-
     await act(async () => result.current.createAppointment(variables))
-    await act(async () => result.current.createAppointment(variables))
-
-    expect(toast.error).toHaveBeenNthCalledWith(1, "El tema de la sesión no es válido")
-    expect(toast.error).toHaveBeenNthCalledWith(2, "No se pudo solicitar la cita. Intenta de nuevo.")
+    expect(toast.error).toHaveBeenCalledWith("El tema de la sesión no es válido")
     expect(onConflict).not.toHaveBeenCalled()
+    expect(result.current.canRetry).toBe(false)
+  })
+
+  it.each([
+    [403, "MENTOR_UNAVAILABLE", "El mentor no está disponible para recibir citas."],
+    [409, "SLOT_UNAVAILABLE", "Este horario ya no está disponible."],
+  ])("con %s %s actualiza solo los horarios del mentor", async (status, code, message) => {
+    vi.spyOn(appointmentsApi, "createAppointment").mockRejectedValue({
+      isAxiosError: true, response: { status, data: { code, detail: "Detalle variable" } },
+    })
+    const wrapper = createQueryWrapper()
+    const invalidate = vi.spyOn(wrapper.client, "invalidateQueries")
+    const onConflict = vi.fn()
+    const onUnavailable = vi.fn()
+    const { result } = renderHook(() => useCreateAppointment(onConflict, vi.fn(), onUnavailable), wrapper)
+
+    await act(async () => result.current.createAppointment(variables))
+
+    expect(result.current.availabilityError).toBe(message)
+    expect(result.current.canRetry).toBe(false)
+    expect(onUnavailable).toHaveBeenCalledOnce()
+    expect(onConflict).not.toHaveBeenCalled()
+    expect(invalidate).toHaveBeenCalledExactlyOnceWith({ queryKey: ["availability", "free-blocks", "m1"] })
+    expect(toast.error).not.toHaveBeenCalled()
+  })
+
+  it.each([
+    new Error("Network error"),
+    { isAxiosError: true, response: { status: 503, data: { detail: "Private service error" } } },
+  ])("un fallo del servicio permite reintentar sin quitar el bloque", async (error) => {
+    vi.spyOn(appointmentsApi, "createAppointment")
+      .mockRejectedValueOnce(error)
+      .mockResolvedValueOnce({ id: "a1" } as Appointment)
+    const onUnavailable = vi.fn()
+    const onConflict = vi.fn()
+    const { result } = renderHook(() => useCreateAppointment(onConflict, vi.fn(), onUnavailable), createQueryWrapper())
+
+    await act(async () => result.current.createAppointment(variables))
+    expect(result.current.canRetry).toBe(true)
+    expect(result.current.availabilityError).toBe("No se pudo verificar la disponibilidad del mentor. Intenta de nuevo.")
+    expect(onUnavailable).not.toHaveBeenCalled()
+    expect(onConflict).not.toHaveBeenCalled()
+    expect(toast.error).not.toHaveBeenCalled()
+
+    await act(async () => result.current.createAppointment(variables))
+    expect(result.current.availabilityError).toBeNull()
+    expect(result.current.canRetry).toBe(false)
+  })
+
+  it("el rechazo refresca la query activa y retira el horario eliminado sin recargar", async () => {
+    const weekRange = { startAt: "2026-10-12T04:00:00.000Z", endAt: "2026-10-19T03:59:59.999Z" }
+    const fetchSpy = vi.spyOn(availabilityApi, "getMentorFreeBlocks")
+      .mockResolvedValueOnce([block]).mockResolvedValue([])
+    vi.spyOn(appointmentsApi, "createAppointment").mockRejectedValue({
+      isAxiosError: true, response: { status: 409, data: { code: "SLOT_UNAVAILABLE" } },
+    })
+    const { result } = renderHook(() => ({
+      availability: useMentorFreeBlocks("m1", weekRange),
+      booking: useCreateAppointment(vi.fn(), vi.fn(), vi.fn()),
+    }), createQueryWrapper())
+    await waitFor(() => expect(result.current.availability.blocks).toEqual([block]))
+
+    await act(async () => result.current.booking.createAppointment(variables))
+
+    await waitFor(() => expect(result.current.availability.blocks).toEqual([]))
+    expect(fetchSpy).toHaveBeenCalledTimes(2)
+    expect(result.current.booking.availabilityError).toBe("Este horario ya no está disponible.")
   })
 
   it("varios clics durante el envío registran una sola cita", async () => {

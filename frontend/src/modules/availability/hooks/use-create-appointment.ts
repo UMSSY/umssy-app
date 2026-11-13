@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { APPOINTMENTS_QUERY_KEYS, appointmentsApi } from "@/modules/appointments";
@@ -19,10 +19,17 @@ import { useUploadAppointmentDocument } from "./use-upload-appointment-document"
 export function useCreateAppointment(
   onConflict: (block: AvailabilityBlock) => void,
   onReservationRejected?: (message: string) => void,
+  onUnavailable?: () => void,
 ) {
   const queryClient = useQueryClient();
   const isSendingRef = useRef(false);
   const uploadDocument = useUploadAppointmentDocument();
+  const [availabilityError, setAvailabilityError] = useState<string | null>(null);
+  const [canRetry, setCanRetry] = useState(false);
+  const resetAvailabilityError = () => {
+    setAvailabilityError(null);
+    setCanRetry(false);
+  };
 
   const mutation = useMutation({
     mutationFn: ({ block, values }: CreateAppointmentVariables) =>
@@ -31,15 +38,34 @@ export function useCreateAppointment(
         orientationTypeId: values.orientationTypeId,
         message: values.message.trim(),
       }),
+    onMutate: resetAvailabilityError,
     onSuccess: (_appointment, { block }) => {
       toast.success(REQUEST_APPOINTMENT_TEXT.confirmed, {
         description: formatAppointmentSchedule(block),
       });
     },
     onError: (error, { block }) => {
-      if (isApiError(error) && error.response?.status === 409) {
-        const body: unknown = error.response.data;
-        const code = typeof body === "object" && body !== null && "code" in body ? body.code : undefined;
+      const body: unknown = isApiError(error) ? error.response?.data : undefined;
+      const code = typeof body === "object" && body !== null && "code" in body ? body.code : undefined;
+      const status = isApiError(error) ? error.response?.status : undefined;
+      if (
+        (status === 403 && code === APPOINTMENT_REQUEST_ERROR_CODES.mentorUnavailable) ||
+        (status === 409 && code === APPOINTMENT_REQUEST_ERROR_CODES.slotUnavailable)
+      ) {
+        setAvailabilityError(
+          code === APPOINTMENT_REQUEST_ERROR_CODES.mentorUnavailable
+            ? REQUEST_APPOINTMENT_TEXT.mentorUnavailable
+            : REQUEST_APPOINTMENT_TEXT.slotUnavailable,
+        );
+        onUnavailable?.();
+        return;
+      }
+      if (status === undefined || status >= 500) {
+        setAvailabilityError(REQUEST_APPOINTMENT_TEXT.serviceError);
+        setCanRetry(true);
+        return;
+      }
+      if (status === 409) {
         if (
           code === APPOINTMENT_REQUEST_ERROR_CODES.overlap ||
           code === APPOINTMENT_REQUEST_ERROR_CODES.dailyLimit
@@ -57,10 +83,14 @@ export function useCreateAppointment(
       }
       toast.error(getApiErrorDetail(error) ?? REQUEST_APPOINTMENT_TEXT.createError);
     },
-    onSettled: () =>
+    onSettled: (_appointment, error, { block }) =>
       Promise.all([
-        queryClient.invalidateQueries({ queryKey: AVAILABILITY_QUERY_KEYS.all }),
-        queryClient.invalidateQueries({ queryKey: APPOINTMENTS_QUERY_KEYS.all }),
+        queryClient.invalidateQueries({
+          queryKey: error
+            ? AVAILABILITY_QUERY_KEYS.mentorFreeBlocks(block.mentorId)
+            : AVAILABILITY_QUERY_KEYS.all,
+        }),
+        ...(!error ? [queryClient.invalidateQueries({ queryKey: APPOINTMENTS_QUERY_KEYS.all })] : []),
       ]),
   });
 
@@ -83,5 +113,11 @@ export function useCreateAppointment(
     }
   };
 
-  return { createAppointment, isSubmitting: mutation.isPending || uploadDocument.isPending };
+  return {
+    createAppointment,
+    isSubmitting: mutation.isPending || uploadDocument.isPending,
+    availabilityError,
+    canRetry,
+    resetAvailabilityError,
+  };
 }

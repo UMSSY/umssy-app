@@ -21,6 +21,7 @@ export function RequestAppointmentForm({
   orientationTypes,
   isLoadingTopics,
   isSubmitting,
+  canRetry = false,
   onSubmit,
   onDirtyChange,
 }: RequestAppointmentFormProps) {
@@ -135,7 +136,7 @@ export function RequestAppointmentForm({
         className="w-full bg-primary text-primary-foreground hover:bg-brand-hover"
         disabled={isSubmitting || Boolean(errors.document)}
       >
-        {isSubmitting ? REQUEST_APPOINTMENT_TEXT.submitting : REQUEST_APPOINTMENT_TEXT.submit}
+        {isSubmitting ? REQUEST_APPOINTMENT_TEXT.submitting : canRetry ? REQUEST_APPOINTMENT_TEXT.retry : REQUEST_APPOINTMENT_TEXT.submit}
       </Button>
       <FieldDescription className="text-xs">
         {REQUEST_APPOINTMENT_TEXT.instantConfirmationNote}
