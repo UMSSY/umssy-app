@@ -8,19 +8,17 @@ afterEach(cleanup);
 
 describe("OfflineStatusBanner", () => {
   it("tells the user they are viewing saved passes offline with the last update", () => {
-    render(<OfflineStatusBanner isOnline={false} lastUpdated="13 nov 2026, 14:30" isStale={false} onRetry={vi.fn()} />);
+    render(<OfflineStatusBanner isOnline={false} lastUpdated="13 nov 2026, 14:30" onRetry={vi.fn()} />);
     expect(screen.getByText("Sin conexión. Estás viendo tus pases guardados.")).toBeInTheDocument();
     expect(screen.getByText("Última actualización: 13 nov 2026, 14:30").tagName).toBe("P");
-    expect(screen.queryByText(/más de 24 horas/)).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Reintentar" })).not.toBeInTheDocument();
   });
 
-  it("warns about stale copies and offers a retry when the online refresh failed", () => {
+  it("offers a retry when the online refresh failed", () => {
     const onRetry = vi.fn();
-    render(<OfflineStatusBanner isOnline lastUpdated={null} isStale onRetry={onRetry} />);
+    render(<OfflineStatusBanner isOnline lastUpdated={null} onRetry={onRetry} />);
     expect(screen.getByRole("status")).toHaveTextContent("No se pudieron actualizar tus pases");
     expect(screen.getByRole("status")).not.toHaveTextContent("Última actualización");
-    expect(screen.getByText(/más de 24 horas/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Reintentar" }));
     expect(onRetry).toHaveBeenCalledOnce();
   });

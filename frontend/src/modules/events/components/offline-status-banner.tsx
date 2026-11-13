@@ -4,7 +4,7 @@ import { OFFLINE_PASSES_TEXTS } from "../constants/offline-passes.constants";
 
 import type { OfflineStatusBannerProps } from "../types/offline-status-banner-props.types";
 
-export function OfflineStatusBanner({ isOnline, lastUpdated, isStale, onRetry }: OfflineStatusBannerProps) {
+export function OfflineStatusBanner({ isOnline, lastUpdated, onRetry }: OfflineStatusBannerProps) {
   const message = isOnline ? OFFLINE_PASSES_TEXTS.failedRefreshBanner : OFFLINE_PASSES_TEXTS.offlineBanner;
 
   return (
@@ -17,7 +17,6 @@ export function OfflineStatusBanner({ isOnline, lastUpdated, isStale, onRetry }:
         <div className="min-w-0 space-y-1">
           <p>{message}</p>
           {lastUpdated ? <p className="text-text-secondary">{OFFLINE_PASSES_TEXTS.lastUpdated} {lastUpdated}</p> : null}
-          {isStale ? <p className="text-text-secondary">{OFFLINE_PASSES_TEXTS.staleNotice}</p> : null}
         </div>
       </div>
       {isOnline && onRetry ? (

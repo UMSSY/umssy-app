@@ -19,7 +19,7 @@ import { MyPassesEmptyState } from "../components/my-passes-empty-state";
 import type { MyPassesViewProps } from "../types/my-passes-view-props.types";
 
 export function MyPassesView({ onOpenWorkshopChat }: MyPassesViewProps = {}) {
-  const { status, isOnline, passes: registrations, offlineQrTokens, lastUpdated, isStale, error, isConnectionError, retry } = usePassesViewState();
+  const { status, isOnline, passes: registrations, offlineQrTokens, lastUpdated, error, isConnectionError, retry } = usePassesViewState();
   const isLoading = status === "loading";
   const offlineReason = isOnline ? undefined : OFFLINE_PASSES_TEXTS.requiresConnection;
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -35,7 +35,7 @@ export function MyPassesView({ onOpenWorkshopChat }: MyPassesViewProps = {}) {
           ? <Button variant="outline" disabled title={offlineReason}><CalendarDays aria-hidden="true" />Explorar talleres</Button>
           : <Link href="/events" className={buttonVariants({ variant: "outline" })}><CalendarDays aria-hidden="true" />Explorar talleres</Link>}
       />
-      {status === "saved" ? <OfflineStatusBanner isOnline={isOnline} lastUpdated={lastUpdated} isStale={isStale} onRetry={retry} /> : null}
+      {status === "saved" ? <OfflineStatusBanner isOnline={isOnline} lastUpdated={lastUpdated} onRetry={retry} /> : null}
       {isLoading ? (
         <RequestFeedback message="Cargando tus inscripciones..." />
       ) : status === "no-offline-copy" || (status === "error" && error) ? (

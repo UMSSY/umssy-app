@@ -227,13 +227,12 @@ describe('Mis pases sin conexión', () => {
     expect(screen.getByRole('link', { name: 'Explorar talleres' })).toHaveAttribute('href', '/events');
   });
 
-  it('falls back to the saved copy as outdated when the online refresh fails', async () => {
+  it('falls back to the saved copy when the online refresh fails', async () => {
     await offlinePassesStore.save('user-a', [saved]);
     getMine.mockRejectedValueOnce(new Error('Sin servidor')).mockResolvedValueOnce([pass]);
     vi.mocked(registrationsService.getPass).mockRejectedValue(new Error('Sin servidor'));
     render(<MyPassesView />);
     expect(await screen.findByText(/No se pudieron actualizar tus pases/)).toBeInTheDocument();
-    expect(screen.getByText(/más de 24 horas/)).toBeInTheDocument();
     const panel = screen.getByRole('complementary', { name: 'Detalle de la inscripción' });
     expect(await within(panel).findByRole('img', { name: 'Código QR del pase' })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Reintentar' }));

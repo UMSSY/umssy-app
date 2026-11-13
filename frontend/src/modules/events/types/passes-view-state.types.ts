@@ -7,7 +7,6 @@ export interface PassesViewState {
   passes: Registration[];
   offlineQrTokens: Record<string, string>;
   lastUpdated: string | null;
-  isStale: boolean;
   error: string | null;
   isConnectionError: boolean;
   retry: () => void;
