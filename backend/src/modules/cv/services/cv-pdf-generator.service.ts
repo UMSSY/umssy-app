@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import { SimplePdfDocument } from "../../../common/utils/simple-pdf-document.js";
 import {
   CV_PDF_COLORS,
   CV_PDF_FONTS,
@@ -12,10 +13,7 @@ import type {
   CvWorkExperience,
 } from "../types/cv-document-data.type.js";
 import type { CvPdfRenderOptions } from "../types/cv-pdf-options.type.js";
-
-interface PdfPageStream {
-  operations: string[];
-}
+import type { PdfPageStream } from "../types/pdf-page-stream.type.js";
 
 @Injectable()
 export class CvPdfGeneratorService {
@@ -46,15 +44,11 @@ export class CvPdfGeneratorService {
       }
     };
 
-    // First page top accent bar
     this.drawTopAccentBar(currentPage);
-
-    // Draw header (Name, headline, contact info)
     currentY = this.drawMainHeader(currentPage, data.personalInfo, currentY);
 
     const sections = options?.sections;
 
-    // 1. Professional Summary
     if (sections?.includeSummary !== false && data.summary?.trim()) {
       ensureSpace(60);
       currentY = this.drawSectionHeader(currentPage, "PRESENTACIÓN PROFESIONAL", currentY);
@@ -62,7 +56,6 @@ export class CvPdfGeneratorService {
       currentY -= 10;
     }
 
-    // 2. Work Experience
     if (
       sections?.includeWorkExperience !== false &&
       data.workExperiences &&
@@ -76,7 +69,6 @@ export class CvPdfGeneratorService {
       currentY -= 6;
     }
 
-    // 3. Education
     if (
       sections?.includeEducation !== false &&
       data.educations &&
@@ -90,7 +82,6 @@ export class CvPdfGeneratorService {
       currentY -= 6;
     }
 
-    // 4. Skills
     if (
       sections?.includeSkills !== false &&
       data.skills &&
@@ -102,7 +93,6 @@ export class CvPdfGeneratorService {
       currentY -= 10;
     }
 
-    // 5. Certifications
     if (
       sections?.includeCertifications !== false &&
       data.certifications &&
@@ -116,7 +106,6 @@ export class CvPdfGeneratorService {
       currentY -= 6;
     }
 
-    // 6. Projects
     if (
       sections?.includeProjects !== false &&
       data.projects &&
@@ -129,13 +118,27 @@ export class CvPdfGeneratorService {
       }
     }
 
-    // Draw footers on all pages
     const totalPages = pages.length;
     for (let i = 0; i < totalPages; i++) {
       this.drawPageFooter(pages[i], i + 1, totalPages);
     }
 
     return this.compilePdfBuffer(pages);
+  }
+
+  private drawText(
+    page: PdfPageStream,
+    text: string,
+    font: string,
+    fontSize: number,
+    color: readonly [number, number, number],
+    x: number,
+    y: number,
+  ): void {
+    const [r, g, b] = color;
+    page.operations.push(
+      `BT ${font} ${fontSize} Tf ${r.toFixed(3)} ${g.toFixed(3)} ${b.toFixed(3)} rg 1 0 0 1 ${x.toFixed(2)} ${y.toFixed(2)} Tm (${this.escapePdfText(text)}) Tj ET`,
+    );
   }
 
   private drawTopAccentBar(page: PdfPageStream): void {
@@ -153,23 +156,30 @@ export class CvPdfGeneratorService {
   ): number {
     let y = startY;
 
-    // Candidate Name
-    const [pr, pg, pb] = CV_PDF_COLORS.PRIMARY;
-    page.operations.push(
-      `BT ${CV_PDF_FONTS.BOLD} 20 Tf ${pr.toFixed(3)} ${pg.toFixed(3)} ${pb.toFixed(3)} rg ${CV_PDF_PAGE.MARGIN_LEFT} ${y.toFixed(2)} Td (${this.escapePdfText(info.fullName)}) Tj ET`,
+    this.drawText(
+      page,
+      info.fullName,
+      CV_PDF_FONTS.BOLD,
+      20,
+      CV_PDF_COLORS.PRIMARY,
+      CV_PDF_PAGE.MARGIN_LEFT,
+      y,
     );
     y -= 18;
 
-    // Professional headline
     if (info.headline?.trim()) {
-      const [sr, sg, sb] = CV_PDF_COLORS.TEXT_MUTED;
-      page.operations.push(
-        `BT ${CV_PDF_FONTS.BOLD} 11 Tf ${sr.toFixed(3)} ${sg.toFixed(3)} ${sb.toFixed(3)} rg ${CV_PDF_PAGE.MARGIN_LEFT} ${y.toFixed(2)} Td (${this.escapePdfText(info.headline.trim())}) Tj ET`,
+      this.drawText(
+        page,
+        info.headline.trim(),
+        CV_PDF_FONTS.BOLD,
+        11,
+        CV_PDF_COLORS.TEXT_MUTED,
+        CV_PDF_PAGE.MARGIN_LEFT,
+        y,
       );
       y -= 16;
     }
 
-    // Contact info row
     const contactParts: string[] = [];
     if (info.email) contactParts.push(info.email);
     if (info.phone) contactParts.push(info.phone);
@@ -181,18 +191,22 @@ export class CvPdfGeneratorService {
 
     if (contactParts.length > 0) {
       const contactText = contactParts.join("  •  ");
-      const [tr, tg, tb] = CV_PDF_COLORS.TEXT_MUTED;
       const lines = this.wrapText(contactText, 85);
       for (const line of lines) {
-        page.operations.push(
-          `BT ${CV_PDF_FONTS.REGULAR} 8.5 Tf ${tr.toFixed(3)} ${tg.toFixed(3)} ${tb.toFixed(3)} rg ${CV_PDF_PAGE.MARGIN_LEFT} ${y.toFixed(2)} Td (${this.escapePdfText(line)}) Tj ET`,
+        this.drawText(
+          page,
+          line,
+          CV_PDF_FONTS.REGULAR,
+          8.5,
+          CV_PDF_COLORS.TEXT_MUTED,
+          CV_PDF_PAGE.MARGIN_LEFT,
+          y,
         );
         y -= 12;
       }
     }
 
     y -= 4;
-    // Header divider line
     const [lr, lg, lb] = CV_PDF_COLORS.LINE_MUTED;
     page.operations.push(
       `${lr.toFixed(3)} ${lg.toFixed(3)} ${lb.toFixed(3)} RG 0.75 w`,
@@ -209,10 +223,15 @@ export class CvPdfGeneratorService {
     startY: number,
   ): void {
     const y = startY - 5;
-    const [tr, tg, tb] = CV_PDF_COLORS.TEXT_MUTED;
     const continuationText = `${fullName}  •  Currículum Vitae`;
-    page.operations.push(
-      `BT ${CV_PDF_FONTS.REGULAR} 8.5 Tf ${tr.toFixed(3)} ${tg.toFixed(3)} ${tb.toFixed(3)} rg ${CV_PDF_PAGE.MARGIN_LEFT} ${y.toFixed(2)} Td (${this.escapePdfText(continuationText)}) Tj ET`,
+    this.drawText(
+      page,
+      continuationText,
+      CV_PDF_FONTS.REGULAR,
+      8.5,
+      CV_PDF_COLORS.TEXT_MUTED,
+      CV_PDF_PAGE.MARGIN_LEFT,
+      y,
     );
 
     const [lr, lg, lb] = CV_PDF_COLORS.LINE_MUTED;
@@ -230,19 +249,22 @@ export class CvPdfGeneratorService {
     let y = startY;
     const [pr, pg, pb] = CV_PDF_COLORS.PRIMARY;
 
-    // Small vertical marker
     page.operations.push(
       `${pr.toFixed(3)} ${pg.toFixed(3)} ${pb.toFixed(3)} rg`,
       `${CV_PDF_PAGE.MARGIN_LEFT} ${(y - 2).toFixed(2)} 3 11 re f`,
     );
 
-    // Section title
-    page.operations.push(
-      `BT ${CV_PDF_FONTS.BOLD} 10.5 Tf ${pr.toFixed(3)} ${pg.toFixed(3)} ${pb.toFixed(3)} rg ${(CV_PDF_PAGE.MARGIN_LEFT + 7).toFixed(2)} ${y.toFixed(2)} Td (${this.escapePdfText(title)}) Tj ET`,
+    this.drawText(
+      page,
+      title,
+      CV_PDF_FONTS.BOLD,
+      10.5,
+      CV_PDF_COLORS.PRIMARY,
+      CV_PDF_PAGE.MARGIN_LEFT + 7,
+      y,
     );
     y -= 6;
 
-    // Subtle horizontal rule
     const [lr, lg, lb] = CV_PDF_COLORS.LINE_MUTED;
     page.operations.push(
       `${lr.toFixed(3)} ${lg.toFixed(3)} ${lb.toFixed(3)} RG 0.5 w`,
@@ -260,13 +282,18 @@ export class CvPdfGeneratorService {
     ensureSpace: (needed: number) => void,
   ): number {
     let y = startY;
-    const [tr, tg, tb] = CV_PDF_COLORS.TEXT_MAIN;
     const lines = this.wrapText(text, 96);
 
     for (const line of lines) {
       ensureSpace(14);
-      page.operations.push(
-        `BT ${CV_PDF_FONTS.REGULAR} 9 Tf ${tr.toFixed(3)} ${tg.toFixed(3)} ${tb.toFixed(3)} rg ${CV_PDF_PAGE.MARGIN_LEFT} ${y.toFixed(2)} Td (${this.escapePdfText(line)}) Tj ET`,
+      this.drawText(
+        page,
+        line,
+        CV_PDF_FONTS.REGULAR,
+        9,
+        CV_PDF_COLORS.TEXT_MAIN,
+        CV_PDF_PAGE.MARGIN_LEFT,
+        y,
       );
       y -= 12.5;
     }
@@ -283,37 +310,55 @@ export class CvPdfGeneratorService {
     ensureSpace(35);
     let y = startY;
 
-    // Line 1: Job title (Bold) and Date range (Right/Italic)
-    const [pr, pg, pb] = CV_PDF_COLORS.TEXT_MAIN;
-    page.operations.push(
-      `BT ${CV_PDF_FONTS.BOLD} 9.5 Tf ${pr.toFixed(3)} ${pg.toFixed(3)} ${pb.toFixed(3)} rg ${CV_PDF_PAGE.MARGIN_LEFT} ${y.toFixed(2)} Td (${this.escapePdfText(exp.jobTitle)}) Tj ET`,
+    this.drawText(
+      page,
+      exp.jobTitle,
+      CV_PDF_FONTS.BOLD,
+      9.5,
+      CV_PDF_COLORS.TEXT_MAIN,
+      CV_PDF_PAGE.MARGIN_LEFT,
+      y,
     );
 
     const dateSpan = this.formatDateSpan(exp.startDate, exp.endDate, exp.isCurrent);
     if (dateSpan) {
-      const [dr, dg, db] = CV_PDF_COLORS.TEXT_MUTED;
       const xRight = CV_PDF_PAGE.WIDTH - CV_PDF_PAGE.MARGIN_RIGHT - dateSpan.length * 5.2;
-      page.operations.push(
-        `BT ${CV_PDF_FONTS.OBLIQUE} 8.5 Tf ${dr.toFixed(3)} ${dg.toFixed(3)} ${db.toFixed(3)} rg ${xRight.toFixed(2)} ${y.toFixed(2)} Td (${this.escapePdfText(dateSpan)}) Tj ET`,
+      this.drawText(
+        page,
+        dateSpan,
+        CV_PDF_FONTS.OBLIQUE,
+        8.5,
+        CV_PDF_COLORS.TEXT_MUTED,
+        xRight,
+        y,
       );
     }
     y -= 12;
 
-    // Line 2: Company and optional location
     const companyText = exp.location ? `${exp.company}  •  ${exp.location}` : exp.company;
-    const [cr, cg, cb] = CV_PDF_COLORS.TEXT_MUTED;
-    page.operations.push(
-      `BT ${CV_PDF_FONTS.REGULAR} 8.5 Tf ${cr.toFixed(3)} ${cg.toFixed(3)} ${cb.toFixed(3)} rg ${CV_PDF_PAGE.MARGIN_LEFT} ${y.toFixed(2)} Td (${this.escapePdfText(companyText)}) Tj ET`,
+    this.drawText(
+      page,
+      companyText,
+      CV_PDF_FONTS.REGULAR,
+      8.5,
+      CV_PDF_COLORS.TEXT_MUTED,
+      CV_PDF_PAGE.MARGIN_LEFT,
+      y,
     );
     y -= 12;
 
-    // Line 3+: Description
     if (exp.description?.trim()) {
       const descLines = this.wrapText(exp.description.trim(), 95);
       for (const line of descLines) {
         ensureSpace(14);
-        page.operations.push(
-          `BT ${CV_PDF_FONTS.REGULAR} 8.5 Tf ${pr.toFixed(3)} ${pg.toFixed(3)} ${pb.toFixed(3)} rg ${CV_PDF_PAGE.MARGIN_LEFT} ${y.toFixed(2)} Td (${this.escapePdfText(line)}) Tj ET`,
+        this.drawText(
+          page,
+          line,
+          CV_PDF_FONTS.REGULAR,
+          8.5,
+          CV_PDF_COLORS.TEXT_MAIN,
+          CV_PDF_PAGE.MARGIN_LEFT,
+          y,
         );
         y -= 11.5;
       }
@@ -332,25 +377,40 @@ export class CvPdfGeneratorService {
     ensureSpace(30);
     let y = startY;
 
-    const [pr, pg, pb] = CV_PDF_COLORS.TEXT_MAIN;
-    page.operations.push(
-      `BT ${CV_PDF_FONTS.BOLD} 9.5 Tf ${pr.toFixed(3)} ${pg.toFixed(3)} ${pb.toFixed(3)} rg ${CV_PDF_PAGE.MARGIN_LEFT} ${y.toFixed(2)} Td (${this.escapePdfText(edu.degree)}) Tj ET`,
+    this.drawText(
+      page,
+      edu.degree,
+      CV_PDF_FONTS.BOLD,
+      9.5,
+      CV_PDF_COLORS.TEXT_MAIN,
+      CV_PDF_PAGE.MARGIN_LEFT,
+      y,
     );
 
     const dateSpan = this.formatDateSpan(edu.startDate, edu.endDate, edu.isCurrent);
     if (dateSpan) {
-      const [dr, dg, db] = CV_PDF_COLORS.TEXT_MUTED;
       const xRight = CV_PDF_PAGE.WIDTH - CV_PDF_PAGE.MARGIN_RIGHT - dateSpan.length * 5.2;
-      page.operations.push(
-        `BT ${CV_PDF_FONTS.OBLIQUE} 8.5 Tf ${dr.toFixed(3)} ${dg.toFixed(3)} ${db.toFixed(3)} rg ${xRight.toFixed(2)} ${y.toFixed(2)} Td (${this.escapePdfText(dateSpan)}) Tj ET`,
+      this.drawText(
+        page,
+        dateSpan,
+        CV_PDF_FONTS.OBLIQUE,
+        8.5,
+        CV_PDF_COLORS.TEXT_MUTED,
+        xRight,
+        y,
       );
     }
     y -= 12;
 
     const instText = edu.location ? `${edu.institution}  •  ${edu.location}` : edu.institution;
-    const [cr, cg, cb] = CV_PDF_COLORS.TEXT_MUTED;
-    page.operations.push(
-      `BT ${CV_PDF_FONTS.REGULAR} 8.5 Tf ${cr.toFixed(3)} ${cg.toFixed(3)} ${cb.toFixed(3)} rg ${CV_PDF_PAGE.MARGIN_LEFT} ${y.toFixed(2)} Td (${this.escapePdfText(instText)}) Tj ET`,
+    this.drawText(
+      page,
+      instText,
+      CV_PDF_FONTS.REGULAR,
+      8.5,
+      CV_PDF_COLORS.TEXT_MUTED,
+      CV_PDF_PAGE.MARGIN_LEFT,
+      y,
     );
     y -= 12;
 
@@ -358,8 +418,14 @@ export class CvPdfGeneratorService {
       const lines = this.wrapText(edu.description.trim(), 95);
       for (const line of lines) {
         ensureSpace(14);
-        page.operations.push(
-          `BT ${CV_PDF_FONTS.REGULAR} 8.5 Tf ${pr.toFixed(3)} ${pg.toFixed(3)} ${pb.toFixed(3)} rg ${CV_PDF_PAGE.MARGIN_LEFT} ${y.toFixed(2)} Td (${this.escapePdfText(line)}) Tj ET`,
+        this.drawText(
+          page,
+          line,
+          CV_PDF_FONTS.REGULAR,
+          8.5,
+          CV_PDF_COLORS.TEXT_MAIN,
+          CV_PDF_PAGE.MARGIN_LEFT,
+          y,
         );
         y -= 11.5;
       }
@@ -376,14 +442,19 @@ export class CvPdfGeneratorService {
     ensureSpace: (needed: number) => void,
   ): number {
     let y = startY;
-    const [tr, tg, tb] = CV_PDF_COLORS.TEXT_MAIN;
     const joined = skills.join("   •   ");
     const lines = this.wrapText(joined, 90);
 
     for (const line of lines) {
       ensureSpace(14);
-      page.operations.push(
-        `BT ${CV_PDF_FONTS.REGULAR} 9 Tf ${tr.toFixed(3)} ${tg.toFixed(3)} ${tb.toFixed(3)} rg ${CV_PDF_PAGE.MARGIN_LEFT} ${y.toFixed(2)} Td (${this.escapePdfText(line)}) Tj ET`,
+      this.drawText(
+        page,
+        line,
+        CV_PDF_FONTS.REGULAR,
+        9,
+        CV_PDF_COLORS.TEXT_MAIN,
+        CV_PDF_PAGE.MARGIN_LEFT,
+        y,
       );
       y -= 13;
     }
@@ -400,17 +471,27 @@ export class CvPdfGeneratorService {
     ensureSpace(25);
     let y = startY;
 
-    const [pr, pg, pb] = CV_PDF_COLORS.TEXT_MAIN;
-    page.operations.push(
-      `BT ${CV_PDF_FONTS.BOLD} 9 Tf ${pr.toFixed(3)} ${pg.toFixed(3)} ${pb.toFixed(3)} rg ${CV_PDF_PAGE.MARGIN_LEFT} ${y.toFixed(2)} Td (${this.escapePdfText(cert.title)}) Tj ET`,
+    this.drawText(
+      page,
+      cert.title,
+      CV_PDF_FONTS.BOLD,
+      9,
+      CV_PDF_COLORS.TEXT_MAIN,
+      CV_PDF_PAGE.MARGIN_LEFT,
+      y,
     );
 
     if (cert.issueDate) {
-      const [dr, dg, db] = CV_PDF_COLORS.TEXT_MUTED;
       const dateText = this.formatSingleDate(cert.issueDate);
       const xRight = CV_PDF_PAGE.WIDTH - CV_PDF_PAGE.MARGIN_RIGHT - dateText.length * 5.2;
-      page.operations.push(
-        `BT ${CV_PDF_FONTS.OBLIQUE} 8 Tf ${dr.toFixed(3)} ${dg.toFixed(3)} ${db.toFixed(3)} rg ${xRight.toFixed(2)} ${y.toFixed(2)} Td (${this.escapePdfText(dateText)}) Tj ET`,
+      this.drawText(
+        page,
+        dateText,
+        CV_PDF_FONTS.OBLIQUE,
+        8,
+        CV_PDF_COLORS.TEXT_MUTED,
+        xRight,
+        y,
       );
     }
     y -= 11;
@@ -418,9 +499,14 @@ export class CvPdfGeneratorService {
     const meta = cert.credentialUrl
       ? `${cert.issuingOrganization}  •  ${cert.credentialUrl.replace(/^https?:\/\//, "")}`
       : cert.issuingOrganization;
-    const [mr, mg, mb] = CV_PDF_COLORS.TEXT_MUTED;
-    page.operations.push(
-      `BT ${CV_PDF_FONTS.REGULAR} 8 Tf ${mr.toFixed(3)} ${mg.toFixed(3)} ${mb.toFixed(3)} rg ${CV_PDF_PAGE.MARGIN_LEFT} ${y.toFixed(2)} Td (${this.escapePdfText(meta)}) Tj ET`,
+    this.drawText(
+      page,
+      meta,
+      CV_PDF_FONTS.REGULAR,
+      8,
+      CV_PDF_COLORS.TEXT_MUTED,
+      CV_PDF_PAGE.MARGIN_LEFT,
+      y,
     );
     y -= 11;
 
@@ -436,9 +522,14 @@ export class CvPdfGeneratorService {
     ensureSpace(30);
     let y = startY;
 
-    const [pr, pg, pb] = CV_PDF_COLORS.TEXT_MAIN;
-    page.operations.push(
-      `BT ${CV_PDF_FONTS.BOLD} 9 Tf ${pr.toFixed(3)} ${pg.toFixed(3)} ${pb.toFixed(3)} rg ${CV_PDF_PAGE.MARGIN_LEFT} ${y.toFixed(2)} Td (${this.escapePdfText(proj.title)}) Tj ET`,
+    this.drawText(
+      page,
+      proj.title,
+      CV_PDF_FONTS.BOLD,
+      9,
+      CV_PDF_COLORS.TEXT_MAIN,
+      CV_PDF_PAGE.MARGIN_LEFT,
+      y,
     );
 
     const tags: string[] = [];
@@ -449,11 +540,16 @@ export class CvPdfGeneratorService {
     }
 
     if (tags.length > 0) {
-      const [tr, tg, tb] = CV_PDF_COLORS.TEXT_MUTED;
       const tagText = tags.join("  •  ");
       const xRight = CV_PDF_PAGE.WIDTH - CV_PDF_PAGE.MARGIN_RIGHT - tagText.length * 4.9;
-      page.operations.push(
-        `BT ${CV_PDF_FONTS.REGULAR} 8 Tf ${tr.toFixed(3)} ${tg.toFixed(3)} ${tb.toFixed(3)} rg ${xRight.toFixed(2)} ${y.toFixed(2)} Td (${this.escapePdfText(tagText)}) Tj ET`,
+      this.drawText(
+        page,
+        tagText,
+        CV_PDF_FONTS.REGULAR,
+        8,
+        CV_PDF_COLORS.TEXT_MUTED,
+        xRight,
+        y,
       );
     }
     y -= 11;
@@ -462,17 +558,28 @@ export class CvPdfGeneratorService {
       const lines = this.wrapText(proj.description.trim(), 95);
       for (const line of lines) {
         ensureSpace(14);
-        page.operations.push(
-          `BT ${CV_PDF_FONTS.REGULAR} 8.5 Tf ${pr.toFixed(3)} ${pg.toFixed(3)} ${pb.toFixed(3)} rg ${CV_PDF_PAGE.MARGIN_LEFT} ${y.toFixed(2)} Td (${this.escapePdfText(line)}) Tj ET`,
+        this.drawText(
+          page,
+          line,
+          CV_PDF_FONTS.REGULAR,
+          8.5,
+          CV_PDF_COLORS.TEXT_MAIN,
+          CV_PDF_PAGE.MARGIN_LEFT,
+          y,
         );
         y -= 11;
       }
     }
 
     if (proj.url) {
-      const [ur, ug, ub] = CV_PDF_COLORS.PRIMARY;
-      page.operations.push(
-        `BT ${CV_PDF_FONTS.OBLIQUE} 8 Tf ${ur.toFixed(3)} ${ug.toFixed(3)} ${ub.toFixed(3)} rg ${CV_PDF_PAGE.MARGIN_LEFT} ${y.toFixed(2)} Td (${this.escapePdfText(proj.url)}) Tj ET`,
+      this.drawText(
+        page,
+        proj.url,
+        CV_PDF_FONTS.OBLIQUE,
+        8,
+        CV_PDF_COLORS.PRIMARY,
+        CV_PDF_PAGE.MARGIN_LEFT,
+        y,
       );
       y -= 11;
     }
@@ -493,17 +600,28 @@ export class CvPdfGeneratorService {
       `${CV_PDF_PAGE.MARGIN_LEFT} ${(y + 10).toFixed(2)} m ${(CV_PDF_PAGE.WIDTH - CV_PDF_PAGE.MARGIN_RIGHT).toFixed(2)} ${(y + 10).toFixed(2)} l S`,
     );
 
-    const [tr, tg, tb] = CV_PDF_COLORS.TEXT_MUTED;
     const footerLeft = "UMSSY - Plataforma de Titulados";
     const footerRight = `Página ${currentPageNumber} de ${totalCount}`;
 
-    page.operations.push(
-      `BT ${CV_PDF_FONTS.REGULAR} 8 Tf ${tr.toFixed(3)} ${tg.toFixed(3)} ${tb.toFixed(3)} rg ${CV_PDF_PAGE.MARGIN_LEFT} ${y.toFixed(2)} Td (${this.escapePdfText(footerLeft)}) Tj ET`,
+    this.drawText(
+      page,
+      footerLeft,
+      CV_PDF_FONTS.REGULAR,
+      8,
+      CV_PDF_COLORS.TEXT_MUTED,
+      CV_PDF_PAGE.MARGIN_LEFT,
+      y,
     );
 
     const xRight = CV_PDF_PAGE.WIDTH - CV_PDF_PAGE.MARGIN_RIGHT - footerRight.length * 4.8;
-    page.operations.push(
-      `BT ${CV_PDF_FONTS.REGULAR} 8 Tf ${tr.toFixed(3)} ${tg.toFixed(3)} ${tb.toFixed(3)} rg ${xRight.toFixed(2)} ${y.toFixed(2)} Td (${this.escapePdfText(footerRight)}) Tj ET`,
+    this.drawText(
+      page,
+      footerRight,
+      CV_PDF_FONTS.REGULAR,
+      8,
+      CV_PDF_COLORS.TEXT_MUTED,
+      xRight,
+      y,
     );
   }
 
@@ -565,7 +683,7 @@ export class CvPdfGeneratorService {
     return lines;
   }
 
-  public escapePdfText(text: string): string {
+  private escapePdfText(text: string): string {
     if (!text) return "";
     let result = "";
     for (let i = 0; i < text.length; i++) {
@@ -576,19 +694,14 @@ export class CvPdfGeneratorService {
       } else if (code < 128) {
         result += char;
       } else if (code <= 255) {
-        // Octal escape for 8-bit WinAnsi encoding
         result += "\\" + code.toString(8).padStart(3, "0");
       } else if (code === 8226) {
-        // bullet • (0x95 in WinAnsi, octal 225)
         result += "\\225";
       } else if (code === 8211 || code === 8212) {
-        // En-dash / Em-dash
         result += "-";
       } else if (code === 8216 || code === 8217) {
-        // Curly single quotes
         result += "'";
       } else if (code === 8220 || code === 8221) {
-        // Curly double quotes
         result += "\"";
       } else {
         result += "?";
@@ -598,69 +711,10 @@ export class CvPdfGeneratorService {
   }
 
   private compilePdfBuffer(pages: PdfPageStream[]): Buffer {
-    const objects: string[] = [];
-    const pageCount = pages.length;
-
-    // 1: Catalog
-    objects.push("<< /Type /Catalog /Pages 2 0 R >>");
-
-    // 2: Pages root
-    const pageKidsRefs: string[] = [];
-    const basePageObjIndex = 6; // Pages start at object 6
-    for (let i = 0; i < pageCount; i++) {
-      const pageObjNum = basePageObjIndex + i * 2;
-      pageKidsRefs.push(`${pageObjNum} 0 R`);
-    }
-    objects.push(
-      `<< /Type /Pages /Kids [${pageKidsRefs.join(" ")}] /Count ${pageCount} >>`,
+    return SimplePdfDocument.compileStreams(
+      pages,
+      CV_PDF_PAGE.WIDTH,
+      CV_PDF_PAGE.HEIGHT,
     );
-
-    // 3: Font Regular (Helvetica)
-    objects.push(
-      "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>",
-    );
-    // 4: Font Bold (Helvetica-Bold)
-    objects.push(
-      "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>",
-    );
-    // 5: Font Oblique (Helvetica-Oblique)
-    objects.push(
-      "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Oblique /Encoding /WinAnsiEncoding >>",
-    );
-
-    // For each page: create Page Object + Stream Object
-    for (let i = 0; i < pageCount; i++) {
-      const streamObjNum = basePageObjIndex + i * 2 + 1;
-      // Page Object
-      objects.push(
-        `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${CV_PDF_PAGE.WIDTH.toFixed(2)} ${CV_PDF_PAGE.HEIGHT.toFixed(2)}] /Contents ${streamObjNum} 0 R /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> >>`,
-      );
-
-      // Stream Object
-      const streamContent = pages[i].operations.join("\n");
-      const streamByteLength = Buffer.byteLength(streamContent, "latin1");
-      objects.push(
-        `<< /Length ${streamByteLength} >>\nstream\n${streamContent}\nendstream`,
-      );
-    }
-
-    // Assemble final PDF
-    let out = "%PDF-1.4\n";
-    const offsets: number[] = [0];
-
-    for (let i = 0; i < objects.length; i++) {
-      offsets.push(Buffer.byteLength(out, "latin1"));
-      out += `${i + 1} 0 obj\n${objects[i]}\nendobj\n`;
-    }
-
-    const xrefOffset = Buffer.byteLength(out, "latin1");
-    out += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
-    for (let i = 1; i <= objects.length; i++) {
-      out += `${String(offsets[i]).padStart(10, "0")} 00000 n \n`;
-    }
-
-    out += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF\n`;
-
-    return Buffer.from(out, "latin1");
   }
 }

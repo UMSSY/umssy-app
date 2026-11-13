@@ -130,9 +130,43 @@ describe("useCvExtraction", () => {
     act(() => result.current.startExtraction("cv-1"));
 
     await waitFor(() =>
-      expect(result.current.errorMessage).toBe("No se pudieron leer los datos de tu CV. Intenta de nuevo."),
+      expect(result.current.errorMessage).toBe(
+        "El servidor no pudo leer tu CV en este momento. Intenta de nuevo en unos segundos.",
+      ),
     );
+    expect(result.current.isRetryable).toBe(true);
     expect(result.current.isOpen).toBe(true);
+  });
+
+  it("does not offer a retry when the pdf has no text", async () => {
+    vi.mocked(documentsService.extractCvData).mockRejectedValue({
+      response: { status: 422, data: { code: "CV_UNREADABLE" } },
+    });
+    const { result } = renderHook(() => useCvExtraction());
+
+    act(() => result.current.startExtraction("cv-1"));
+    await waitFor(() => expect(result.current.errorMessage).toContain("no tiene texto seleccionable"));
+    expect(result.current.isRetryable).toBe(false);
+
+    act(() => result.current.retry());
+
+    expect(documentsService.extractCvData).toHaveBeenCalledTimes(1);
+  });
+
+  it("retries the same cv after a network error", async () => {
+    vi.mocked(documentsService.extractCvData).mockRejectedValueOnce(new Error("Network Error"));
+    vi.mocked(documentsService.extractCvData).mockResolvedValueOnce(EXTRACTION);
+    const { result } = renderHook(() => useCvExtraction());
+
+    act(() => result.current.startExtraction("cv-1"));
+    await waitFor(() => expect(result.current.isRetryable).toBe(true));
+
+    act(() => result.current.retry());
+
+    await waitFor(() => expect(result.current.extraction).not.toBeNull());
+    expect(documentsService.extractCvData).toHaveBeenNthCalledWith(2, "cv-1");
+    expect(result.current.errorMessage).toBeNull();
+    expect(result.current.isRetryable).toBe(false);
   });
 
   it("closes and forgets the extraction", async () => {

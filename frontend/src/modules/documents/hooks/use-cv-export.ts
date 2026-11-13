@@ -38,14 +38,14 @@ export function useCvExport() {
     setError(null);
 
     try {
-      const file = await mutation.mutateAsync();
+      const { file, fileName } = await mutation.mutateAsync();
 
       if (requestIdRef.current !== requestId) {
         return null;
       }
 
       const previewUrl = URL.createObjectURL(file);
-      const cv = { file, previewUrl };
+      const cv: GeneratedCv = { file, previewUrl, fileName };
       previewUrlRef.current = previewUrl;
       setGeneratedCv(cv);
       return cv;

@@ -44,7 +44,7 @@ export const documentsService = {
     return response.data;
   },
 
-  generateCv: async (): Promise<Blob> => {
+  generateCv: async (): Promise<{ file: Blob; fileName: string }> => {
     const response = await apiClient.post<Blob>(
       "/profile/cv/generate",
       {},
@@ -53,7 +53,10 @@ export const documentsService = {
         responseType: "blob",
       },
     );
-    return response.data;
+    const disposition = response.headers?.["content-disposition"] as string | undefined;
+    const match = disposition ? /filename="?([^";]+)"?/i.exec(disposition) : null;
+    const fileName = match ? match[1] : "CV.pdf";
+    return { file: response.data, fileName };
   },
 
   extractCvData: async (cvId: string): Promise<CvExtraction> => {

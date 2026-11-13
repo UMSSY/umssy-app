@@ -11,20 +11,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useProfile } from "@/modules/profile";
 import { downloadFile } from "@/shared/utils/download-file";
 import { CV_ERROR_MESSAGES } from "../constants/cv-error-messages.constants";
 import { useCvExport } from "../hooks/use-cv-export";
 import type { CvExportDialogProps } from "../types/cv-export-dialog-props.types";
 import type { CvExportStep } from "../types/cv-export-step.types";
-import { buildCvFileName } from "../utils/build-cv-file-name";
 
 function CvExportDialogBody({ onClose }: Pick<CvExportDialogProps, "onClose">) {
-  const { profile } = useProfile();
   const { generatedCv, isGenerating, error, generateCv } = useCvExport();
   const [step, setStep] = useState<CvExportStep>("sections");
   const [downloadError, setDownloadError] = useState<string | null>(null);
-  const fileName = buildCvFileName(profile?.firstName, profile?.lastName);
   const isPreviewing = step === "preview" && generatedCv !== null;
 
   const handlePreview = async () => {
@@ -45,7 +41,7 @@ function CvExportDialogBody({ onClose }: Pick<CvExportDialogProps, "onClose">) {
     }
 
     try {
-      downloadFile(cv.file, fileName);
+      downloadFile(cv.file, cv.fileName);
     } catch {
       setDownloadError(CV_ERROR_MESSAGES.download);
     }
@@ -93,7 +89,7 @@ function CvExportDialogBody({ onClose }: Pick<CvExportDialogProps, "onClose">) {
             </div>
             <iframe
               src={generatedCv.previewUrl}
-              title={`Vista previa de ${fileName}`}
+              title={`Vista previa de ${generatedCv.fileName}`}
               className="h-[50vh] w-full rounded-lg border border-border bg-surface"
             />
           </div>

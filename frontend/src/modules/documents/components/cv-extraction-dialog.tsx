@@ -14,6 +14,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
+  CV_EXTRACTION_FALLBACK_TEXTS,
   CV_EXTRACTION_SECTION_LABELS,
   CV_EXTRACTION_SECTIONS,
   CV_PRESENTATION_INDEX,
@@ -26,6 +27,7 @@ import { isCvHeadlineMissing } from "../utils/is-cv-headline-missing";
 import { isCvSectionFullySelected } from "../utils/is-cv-section-fully-selected";
 import { CvContactReview } from "./cv-contact-review";
 import { CvEducationReview } from "./cv-education-review";
+import { CvExtractionFallback } from "./cv-extraction-fallback";
 import { CvPresentationReview } from "./cv-presentation-review";
 import { CvReviewSection } from "./cv-review-section";
 import { CvSkillsReview } from "./cv-skills-review";
@@ -38,6 +40,7 @@ export function CvExtractionDialog({
   available,
   selection,
   errorMessage = null,
+  canRetry = false,
   isApplying = false,
   applyReport = null,
   onToggleItem,
@@ -46,12 +49,14 @@ export function CvExtractionDialog({
   onPresentationChange,
   onEducationChange,
   onWorkExperienceChange,
+  onRetry,
   onApply,
   onClose,
 }: CvExtractionDialogProps) {
   const isHeadlineMissing = isCvHeadlineMissing(extraction, selection);
   const isBusy = isExtracting || isApplying;
   const canApply = !isBusy && extraction !== null && countCvSelection(selection) > 0 && !isHeadlineMissing;
+  const isEmpty = extraction !== null && countCvSelection(available) === 0;
   const failed = applyReport?.failed ?? [];
   const applied = applyReport?.applied ?? [];
 
@@ -74,9 +79,20 @@ export function CvExtractionDialog({
             </div>
           ) : null}
           {!isExtracting && errorMessage ? (
-            <Alert variant="destructive">
-              <AlertDescription>{errorMessage}</AlertDescription>
-            </Alert>
+            <CvExtractionFallback
+              title={CV_EXTRACTION_FALLBACK_TEXTS.errorTitle}
+              message={errorMessage}
+              canRetry={canRetry}
+              onRetry={onRetry}
+              onManualFill={onClose}
+            />
+          ) : null}
+          {!isExtracting && !errorMessage && isEmpty ? (
+            <CvExtractionFallback
+              title={CV_EXTRACTION_FALLBACK_TEXTS.emptyTitle}
+              message={CV_EXTRACTION_FALLBACK_TEXTS.emptyMessage}
+              onManualFill={onClose}
+            />
           ) : null}
           {failed.length > 0 ? (
             <Alert variant="destructive" className="mb-4">
@@ -88,7 +104,7 @@ export function CvExtractionDialog({
               </AlertDescription>
             </Alert>
           ) : null}
-          {!isExtracting && !errorMessage && extraction ? (
+          {!isExtracting && !errorMessage && extraction && !isEmpty ? (
             <Tabs defaultValue={CV_EXTRACTION_SECTIONS[0]}>
               <TabsList aria-label="Secciones del CV" className="h-auto flex-wrap">
                 {CV_EXTRACTION_SECTIONS.map((section) => (

@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
+import { UnknownPortfolioProviderException } from '../exceptions/unknown-portfolio-provider.exception.js';
+import { UnsupportedPortfolioProviderException } from '../exceptions/unsupported-portfolio-provider.exception.js';
 import { PortfolioRepository } from '../repositories/portfolio.repository.js';
 import type { NormalizedPortfolioProject } from '../types/normalized-portfolio-project.type.js';
 import type { PortfolioProjectEntity } from '../types/portfolio-project-entity.type.js';
@@ -198,7 +200,7 @@ describe('PortfolioRepository', () => {
     expect(result).toEqual([]);
   });
 
-  it('throws an error when repository encounters an unsupported portfolio provider', async () => {
+  it('throws UnsupportedPortfolioProviderException when repository encounters an unsupported provider', async () => {
     userPortfolioProject.findMany.mockResolvedValue([
       {
         id: '22222222-2222-4222-8222-222222222220',
@@ -216,7 +218,15 @@ describe('PortfolioRepository', () => {
     ]);
 
     await expect(repository.findByUserId(userId)).rejects.toThrow(
-      'Unsupported portfolio provider: bitbucket',
+      UnsupportedPortfolioProviderException,
     );
+  });
+
+  it('throws UnknownPortfolioProviderException when provider is not in database catalog', async () => {
+    portfolioProvider.findMany.mockResolvedValue([]);
+
+    await expect(
+      repository.replaceForUser(userId, [buildNormalized(0)]),
+    ).rejects.toThrow(UnknownPortfolioProviderException);
   });
 });

@@ -14,6 +14,7 @@ export interface CvExtractionDialogProps {
   available: CvExtractionSelection;
   selection: CvExtractionSelection;
   errorMessage?: string | null;
+  canRetry?: boolean;
   isApplying?: boolean;
   applyReport?: CvApplyReport | null;
   onToggleItem: <K extends CvExtractionSection>(section: K, item: CvExtractionSelection[K][number]) => void;
@@ -22,6 +23,7 @@ export interface CvExtractionDialogProps {
   onPresentationChange: (changes: Partial<CvExtractedPresentation>) => void;
   onEducationChange: (index: number, changes: Partial<CvExtractedEducation>) => void;
   onWorkExperienceChange: (index: number, changes: Partial<CvExtractedWorkExperience>) => void;
+  onRetry?: () => void;
   onApply: () => void;
   onClose: () => void;
 }

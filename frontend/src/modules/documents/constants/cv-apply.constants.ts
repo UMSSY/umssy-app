@@ -1,5 +1,8 @@
 import type { PersonalInfoValues } from "@/modules/profile";
-import { PROFILE_SKILLS_RADAR_QUERY_KEY } from "@/modules/profile";
+import { PROFILE_ME_QUERY_KEY, PROFILE_SKILLS_RADAR_QUERY_KEY } from "@/modules/profile";
+import { EDUCATIONS_QUERY_KEY } from "@/modules/education";
+import { WORK_EXPERIENCES_QUERY_KEY } from "@/modules/work-experience";
+import { MY_SKILLS_QUERY_KEY } from "@/modules/skills";
 import type { CvContactField } from "../types/cv-contact-field.types";
 
 export const CV_PERSONAL_INFO_FIELDS: Readonly<Record<CvContactField, keyof PersonalInfoValues>> = {
@@ -11,10 +14,10 @@ export const CV_PERSONAL_INFO_FIELDS: Readonly<Record<CvContactField, keyof Pers
 };
 
 export const CV_APPLY_INVALIDATED_QUERY_KEYS: readonly (readonly unknown[])[] = [
-  ["profile", "me"],
-  ["education", "educations"],
-  ["work-experience", "experiences"],
-  ["skills", "profile"],
+  PROFILE_ME_QUERY_KEY,
+  EDUCATIONS_QUERY_KEY,
+  WORK_EXPERIENCES_QUERY_KEY,
+  MY_SKILLS_QUERY_KEY,
   PROFILE_SKILLS_RADAR_QUERY_KEY,
 ];
 
