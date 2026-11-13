@@ -9,13 +9,14 @@ import {
 import { profileCompletenessService } from '../services/profile-completeness.service';
 import { getProfileErrorMessage } from '../utils/get-profile-error-message';
 
-export function useProfileCompleteness() {
+export function useProfileCompleteness(refetchOnMount = true) {
   const { currentUserId, isLoading: isSessionLoading } = useAuth();
   const enabled = Boolean(currentUserId) && !isSessionLoading;
   const query = useQuery({
     queryKey: [...PROFILE_COMPLETENESS_QUERY_KEY, currentUserId],
     queryFn: ({ signal }) => profileCompletenessService.getCompleteness(signal),
     enabled,
+    refetchOnMount,
   });
 
   async function reload() {

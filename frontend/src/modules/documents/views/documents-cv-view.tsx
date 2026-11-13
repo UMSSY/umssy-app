@@ -3,7 +3,7 @@
 import { useRef, useState, type ChangeEvent } from "react";
 import { Input } from "@/components/ui/input";
 import { FeedbackMessage, useProfile } from "@/modules/profile";
-import { ProfilePageLayout } from "@/modules/profile";
+import { ProfilePageLayout, useProfileCompletionFocus } from "@/modules/profile";
 import { CvExtractionDialog } from "../components/cv-extraction-dialog";
 import { CvGenerateCard } from "../components/cv-generate-card";
 import { CvHistoryDialog } from "../components/cv-history-dialog";
@@ -53,6 +53,7 @@ export function DocumentsCvView() {
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
   const isBusy = isUploading || isDeleting;
+  useProfileCompletionFocus('cv', { 'cv-upload-select': '' }, !isLoading && !isBusy);
 
   const openFilePicker = () => {
     fileInputRef.current?.click();

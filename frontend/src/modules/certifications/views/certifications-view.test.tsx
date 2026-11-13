@@ -215,9 +215,7 @@ describe("CertificationsView", () => {
       issuingOrganization: "Cisco",
       issueDate: "2024-01-15",
     }, expect.any(File));
-    expect(await screen.findByRole("status")).toHaveTextContent(
-      CERTIFICATION_FEEDBACK_MESSAGES.createSuccess,
-    );
+    expect(await screen.findByText(CERTIFICATION_FEEDBACK_MESSAGES.createSuccess)).toBeVisible();
     expect(screen.queryByLabelText(/Nombre de la certificación/)).not.toBeInTheDocument();
     expect(getCertificationNames()).toEqual(["AWS Cloud Practitioner", "CCNA", "Scrum Master"]);
   });
@@ -257,9 +255,7 @@ describe("CertificationsView", () => {
       issuingOrganization: "Scrum Alliance",
       issueDate: "2022-05-10",
     });
-    expect(await screen.findByRole("status")).toHaveTextContent(
-      CERTIFICATION_FEEDBACK_MESSAGES.updateSuccess,
-    );
+    expect(await screen.findByText(CERTIFICATION_FEEDBACK_MESSAGES.updateSuccess)).toBeVisible();
     expect(screen.queryByRole("form", { name: "Agregar certificación" })).not.toBeInTheDocument();
   });
 
@@ -361,9 +357,7 @@ describe("CertificationsView", () => {
     });
 
     expect(certificationsService.deleteCertification).toHaveBeenCalledWith("scrum");
-    expect(await screen.findByRole("status")).toHaveTextContent(
-      CERTIFICATION_FEEDBACK_MESSAGES.deleteSuccess,
-    );
+    expect(await screen.findByText(CERTIFICATION_FEEDBACK_MESSAGES.deleteSuccess)).toBeVisible();
     await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
     expect(getCertificationNames()).toEqual(["AWS Cloud Practitioner"]);
   });

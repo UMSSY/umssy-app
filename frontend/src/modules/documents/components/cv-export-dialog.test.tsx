@@ -76,7 +76,7 @@ describe("CvExportDialog", () => {
 
     await user.click(screen.getByRole("button", { name: "Descargar CV en PDF" }));
 
-    expect(await screen.findByRole("status")).toHaveTextContent("Generando tu CV...");
+    expect(await screen.findByText("Generando tu CV...")).toBeVisible();
     expect(screen.getByRole("button", { name: "Descargar CV en PDF" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Previsualizar diseño del PDF" })).toBeDisabled();
   });

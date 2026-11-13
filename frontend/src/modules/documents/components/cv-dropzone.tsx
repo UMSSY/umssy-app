@@ -62,6 +62,7 @@ export function CvDropzone({
       {description ? <p className="text-sm text-text-secondary">{description}</p> : null}
       <p className="text-xs text-text-secondary">También puedes arrastrar el archivo y soltarlo aquí.</p>
       <Button
+        id="cv-upload-select"
         type="button"
         variant="outline"
         className="mt-3 h-10 border-border-strong px-4 text-sm text-ink hover:bg-surface-soft"

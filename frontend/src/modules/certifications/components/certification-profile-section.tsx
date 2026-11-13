@@ -7,7 +7,7 @@ import { CertificationDeleteDialog } from "./certification-delete-dialog";
 import { CertificationDocumentViewer } from "./certification-document-viewer";
 import { CertificationForm } from "./certification-form";
 import { DEFAULT_DOCUMENT_TITLE } from "../constants/certification-form.constants";
-import { FeedbackMessage, useProfileCompletionRequest } from "@/modules/profile";
+import { FeedbackMessage, ProfileCompletenessProgress, useProfileCompletionRequest } from "@/modules/profile";
 import { RecordEditorDialog } from "@/shared/components/layout/record-editor-dialog";
 import { Plus } from "lucide-react";
 import { SectionCard } from "@/modules/profile";
@@ -195,6 +195,7 @@ export function CertificationProfileSection() {
           onClose={closeForm}
         >
           {(requestClose) => <>
+            <ProfileCompletenessProgress showChecklist={false} />
             <FeedbackMessage feedback={visibleFeedback} />
             <CertificationForm
               initialData={editing ? toFormValues(editing) : undefined}
