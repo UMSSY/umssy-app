@@ -52,7 +52,7 @@ const weekRange = getWeekRange(tuesdayBlock.startAt)
 const tuesdayButton = "libre, 18:00 a 19:00"
 const saturdayButton = "libre, 10:00 a 11:00"
 
-const renderSelection = (fetchFreeBlocks: () => Promise<AvailabilityBlock[]>) =>
+const renderSelection = (fetchFreeBlocks: () => Promise<AvailabilityBlock[]>, onActivityChange?: (active: boolean) => void) =>
   renderWithQuery(
     <>
       <Link href="/mentors/m1">Volver al perfil</Link>
@@ -61,6 +61,7 @@ const renderSelection = (fetchFreeBlocks: () => Promise<AvailabilityBlock[]>) =>
         blocks={[tuesdayBlock, saturdayBlock]}
         weekRange={weekRange}
         fetchFreeBlocks={fetchFreeBlocks}
+        onActivityChange={onActivityChange}
       />
     </>
   )
@@ -88,6 +89,16 @@ describe("BlockSelection", () => {
 
   afterEach(() => {
     cleanup()
+  })
+
+  it("notifica si tiene selección y deja de retener el panel al desmontarse", async () => {
+    const onActivityChange = vi.fn()
+    const { unmount } = renderSelection(vi.fn().mockResolvedValue([tuesdayBlock]), onActivityChange)
+    expect(onActivityChange).toHaveBeenLastCalledWith(false)
+    await selectTuesday(userEvent.setup())
+    expect(onActivityChange).toHaveBeenLastCalledWith(true)
+    unmount()
+    expect(onActivityChange).toHaveBeenLastCalledWith(false)
   })
 
   it("resalta en Tu selección el bloque libre marcado y habilita Solicitar cita", async () => {
@@ -302,13 +313,15 @@ describe("BlockSelection", () => {
     vi.spyOn(appointmentsApi, "createAppointment").mockRejectedValue({
       isAxiosError: true, response: { status, data: { code } },
     })
-    renderSelection(vi.fn().mockResolvedValue([tuesdayBlock, saturdayBlock]))
+    const onActivityChange = vi.fn()
+    renderSelection(vi.fn().mockResolvedValue([tuesdayBlock, saturdayBlock]), onActivityChange)
     await selectTuesday(user)
     await chooseTopic(user, "Revisión de CV")
     await user.type(screen.getByLabelText(/Mensaje para el mentor/), "Mensaje conservado")
     await user.click(screen.getByRole("button", { name: REQUEST_APPOINTMENT_TEXT.submit }))
 
     expect(await screen.findByText(message)).toBeInTheDocument()
+    expect(onActivityChange).toHaveBeenLastCalledWith(true)
     expect(screen.getByRole("button", { name: REQUEST_APPOINTMENT_TEXT.submit })).toBeDisabled()
     expect(screen.getByRole("button", { name: tuesdayButton })).toBeInTheDocument()
     await user.click(screen.getByRole("button", { name: saturdayButton }))
