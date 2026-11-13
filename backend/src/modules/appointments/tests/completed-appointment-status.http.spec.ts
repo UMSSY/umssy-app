@@ -194,7 +194,7 @@ describe('Estado «Completada» de las citas (integración HTTP)', () => {
     }
   });
 
-  it('conserva CANCELLED en una cita cancelada cuya hora ya pasó (CA3)', async () => {
+  it('muestra en «Pasadas» como CANCELLED una cita cancelada cuya hora ya pasó (CA3)', async () => {
     const cancelled = addAppointment(
       -90,
       -60,
@@ -205,11 +205,12 @@ describe('Estado «Completada» de las citas (integración HTTP)', () => {
       await expect(detailStatus(token, cancelled.id)).resolves.toBe(
         'CANCELLED',
       );
-      const listed = [
-        ...(await listMine(token, 'upcoming')),
-        ...(await listMine(token, 'past')),
-      ].filter((row) => row.id === cancelled.id);
-      expect(listed.every((row) => row.status === 'CANCELLED')).toBe(true);
+      expect(findIn(await listMine(token, 'past'), cancelled.id)?.status).toBe(
+        'CANCELLED',
+      );
+      expect(
+        findIn(await listMine(token, 'upcoming'), cancelled.id),
+      ).toBeUndefined();
     }
   });
 
