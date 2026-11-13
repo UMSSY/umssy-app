@@ -20,3 +20,4 @@ export { useSurveyNotifications } from "./hooks/use-survey-notifications";
 export { SURVEY_NOTIFICATIONS_LABEL, SURVEY_NOTIFICATIONS_PATH } from "./constants/survey-notifications.constants";
 export type { SurveyNotification } from "./types/survey-notification.types";
 export type { SurveyNotificationStatus } from "./types/survey-notification-status.types";
+export { useCareers } from "./hooks/use-careers";
