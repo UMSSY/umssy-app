@@ -123,6 +123,92 @@ describe("VacanciesView", () => {
   });
 });
 
+describe("VacanciesView - criterios de HU-11", () => {
+  it("lista cada vacante publicada que devuelve la API, sin filtrar por el perfil (AC-11.1)", async () => {
+    listPublished.mockResolvedValue([
+      ...VACANCIES,
+      buildVacancy({ id: "0f2c6a7e-3b1d-4c5e-8a9f-1d2e3f4a5b6c", title: "Ingeniero COBOL", requirements: ["COBOL"] }),
+    ]);
+    renderWithQuery(<VacanciesView />);
+
+    expect(await screen.findByRole("link", { name: "Ver detalles de Ingeniero COBOL" })).toBeInTheDocument();
+    expect(screen.getAllByRole("link", { name: /^Ver detalles de / })).toHaveLength(3);
+    expect(screen.getByRole("status")).toHaveTextContent("3 vacantes encontradas");
+  });
+
+  it("muestra en la tarjeta el título, la empresa, la descripción, el salario, el contrato y Ver detalles (AC-11.2)", async () => {
+    listPublished.mockResolvedValue([buildVacancy()]);
+    renderWithQuery(<VacanciesView />);
+
+    const card = (await screen.findByRole("link", { name: "Ver detalles de Desarrollador Full Stack" })).closest("article");
+    expect(card).not.toBeNull();
+    const scope = within(card as HTMLElement);
+    expect(scope.getByRole("heading", { name: "Desarrollador Full Stack" })).toBeInTheDocument();
+    expect(scope.getByText("TechBolivia S.R.L.")).toBeInTheDocument();
+    expect(scope.getByText("Desarrollo de servicios web con Node.js y React.")).toBeInTheDocument();
+    expect(scope.getByText("Bs 5.000 - 8.000")).toBeInTheDocument();
+    expect(scope.getByText("Presencial")).toBeInTheDocument();
+    expect(scope.getByText("Medio tiempo")).toBeInTheDocument();
+  });
+
+  it.each([
+    ["el cargo", "analista", "Ver detalles de Analista de Datos"],
+    ["la empresa", "datos srl", "Ver detalles de Analista de Datos"],
+    ["un requisito", "sql", "Ver detalles de Analista de Datos"],
+  ])("filtra por %s y el contador refleja solo los resultados (AC-11.6, AC-11.7)", async (_label, term, expectedLink) => {
+    renderWithQuery(<VacanciesView />);
+    await screen.findAllByRole("link", { name: /^Ver detalles de / });
+
+    fireEvent.change(screen.getByRole("searchbox", { name: /Buscar vacantes/ }), { target: { value: term } });
+
+    expect(screen.getAllByRole("link", { name: /^Ver detalles de / })).toHaveLength(1);
+    expect(screen.getByRole("link", { name: expectedLink })).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent("1 vacante encontrada");
+  });
+
+  it("mantiene el aviso de error si al reintentar la consulta vuelve a fallar (AC-11.12)", async () => {
+    listPublished.mockRejectedValue(new Error("network"));
+    renderWithQuery(<VacanciesView />);
+
+    const alert = await screen.findByRole("alert");
+    fireEvent.click(within(alert).getByRole("button", { name: "Reintentar" }));
+
+    await vi.waitFor(() => expect(listPublished).toHaveBeenCalledTimes(2));
+    expect(await screen.findByRole("heading", { name: "No pudimos cargar las vacantes" })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /^Ver detalles de / })).toBeNull();
+  });
+
+  it("muestra en el detalle las condiciones, la ubicación, la descripción y las tecnologías (AC-11.13)", async () => {
+    listPublished.mockResolvedValue([
+      buildVacancy({ positionsAvailable: 3, languages: "Español, Inglés", requirements: ["Node.js", "React"] }),
+    ]);
+    renderWithQuery(<VacanciesView initialVacancyId={VACANCIES[0].id} />);
+
+    const dialog = await screen.findByRole("dialog");
+    const conditions = within(within(dialog).getByLabelText("Condiciones de la vacante"));
+    expect(conditions.getByText("Bs 5.000 - 8.000")).toBeInTheDocument();
+    expect(conditions.getByText("Presencial")).toBeInTheDocument();
+    expect(conditions.getByText("Medio tiempo")).toBeInTheDocument();
+    expect(conditions.getByText("3")).toBeInTheDocument();
+    expect(conditions.getByText("Español, Inglés")).toBeInTheDocument();
+    expect(conditions.getByRole("link", { name: /Ver en el mapa/ })).toHaveAttribute("target", "_blank");
+    expect(within(dialog).getByRole("heading", { name: "Descripción" })).toBeInTheDocument();
+    expect(within(dialog).getByRole("heading", { name: "Tecnologías requeridas" })).toBeInTheDocument();
+    expect(within(dialog).getByText("Node.js")).toBeInTheDocument();
+  });
+
+  it("vuelve al listado al pulsar Volver al listado en el detalle (AC-11.14)", async () => {
+    renderWithQuery(<VacanciesView />);
+
+    fireEvent.click(await screen.findByRole("link", { name: "Ver detalles de Analista de Datos" }));
+    const dialog = await screen.findByRole("dialog");
+    fireEvent.click(within(dialog).getByRole("button", { name: "Volver al listado" }));
+
+    await vi.waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    expect(screen.getAllByRole("link", { name: /^Ver detalles de / })).toHaveLength(2);
+  });
+});
+
 describe("VacanciesView - tarjeta de vacante", () => {
   it("muestra la modalidad de la vacante", async () => {
     listPublished.mockResolvedValue([buildVacancy({ modality: "Remoto" })]);
