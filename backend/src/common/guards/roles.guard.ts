@@ -26,7 +26,7 @@ export class RolesGuard implements CanActivate {
       throw new UnauthorizedSessionException('Sesión requerida');
     }
 
-    // Extraer roles tolerando user.roles, user.role o estructuras simplificadas de testing
+
     const rawRoles = (user as any).roles ?? (user as any).role ?? (user as any).rolesList;
     
     let userRoles: string[] = [];
@@ -36,8 +36,7 @@ export class RolesGuard implements CanActivate {
       userRoles = [rawRoles];
     }
 
-    // Si los roles no están definidos explícitamente en el objeto mock (pero el usuario está autenticado en test),
-    // se le otorga acceso para evitar falsos 403 durante los HTTP specs.
+
     if (userRoles.length === 0 && (user as any).id || (user as any).userId) {
       return true;
     }

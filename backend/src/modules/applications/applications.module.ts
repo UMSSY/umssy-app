@@ -15,7 +15,7 @@ import { MockNotificationsService } from './notifications/mock-notifications.ser
     ApplicationsService,
     ApplicationsRepository,
     ApplicationMapper,
-    MockNotificationsService, // <-- Agregado para que NestJS pueda resolverlo en el contenedor
+    MockNotificationsService, 
   ],
   exports: [ApplicationsService],
 })
