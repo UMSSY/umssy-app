@@ -17,4 +17,8 @@ export class CertificationSourcesService {
   findManyByUserId(userId: string) {
     return this.repository.findManyByUserId(userId);
   }
+
+  findRecruitmentEvidence(userId: string, ids: string[]) {
+    return this.repository.findRecruitmentEvidence(userId, ids);
+  }
 }
