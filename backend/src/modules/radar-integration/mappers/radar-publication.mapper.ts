@@ -73,6 +73,7 @@ export class RadarPublicationMapper {
             evidence: Object.fromEntries(AREA_IDS.map((id) => [id, []])),
             skills: [],
           }),
+      previous: prev ? { version: prev.version, updatedAt: prev.created_at, scores: prev.scores } : null,
       pending,
       hasPending: pending > 0,
       processingStatus: failed
