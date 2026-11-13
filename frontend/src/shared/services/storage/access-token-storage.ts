@@ -1,9 +1,7 @@
-import { ACCESS_TOKEN_STORAGE_KEY } from "@/shared/constants/auth.constants";
-import {
-  readIndexedDb,
-  writeIndexedDb,
-  removeIndexedDb,
-} from "./browser-indexed-db";
+import { ACCESS_TOKEN_STORAGE_KEY } from '@/shared/constants/auth.constants';
+import { OFFLINE_PASSES_STORAGE_KEY } from '@/shared/constants/offline-passes.constants';
+import { readAccessTokenSubject } from '@/shared/utils/read-access-token-subject';
+import { readIndexedDb, updateIndexedDbPair } from './browser-indexed-db';
 
 let token: string | null = null;
 let ready = false;
@@ -26,7 +24,7 @@ export function initializeAccessTokenStorage(): Promise<void> {
   loading = readIndexedDb<unknown>(ACCESS_TOKEN_STORAGE_KEY)
     .then((stored) => {
       if (revision === currentRevision)
-        token = typeof stored === "string" ? stored : null;
+        token = typeof stored === 'string' ? stored : null;
     })
     .catch(() => {
       if (revision === currentRevision) token = null;
@@ -42,8 +40,19 @@ export function initializeAccessTokenStorage(): Promise<void> {
 
 export async function saveAccessToken(value: string): Promise<boolean> {
   const writeRevision = ++revision;
+  const subject = readAccessTokenSubject(value);
   const operation = writes.then(() =>
-    writeIndexedDb(ACCESS_TOKEN_STORAGE_KEY, value),
+    updateIndexedDbPair(
+      ACCESS_TOKEN_STORAGE_KEY,
+      OFFLINE_PASSES_STORAGE_KEY,
+      (previous) => ({
+        primary: value,
+        secondary:
+          subject && readAccessTokenSubject(previous) === subject
+            ? undefined
+            : null,
+      }),
+    ),
   );
   writes = operation.catch(() => {});
   try {
@@ -60,7 +69,7 @@ export async function saveAccessToken(value: string): Promise<boolean> {
   token = value;
   ready = true;
   emit();
-  channel?.postMessage("changed");
+  channel?.postMessage('changed');
   return true;
 }
 
@@ -75,21 +84,25 @@ export function clearAccessToken(): boolean {
   loading = null;
   emit();
   const operation = writes.then(() =>
-    removeIndexedDb(ACCESS_TOKEN_STORAGE_KEY),
+    updateIndexedDbPair(
+      ACCESS_TOKEN_STORAGE_KEY,
+      OFFLINE_PASSES_STORAGE_KEY,
+      () => ({ primary: null, secondary: null }),
+    ),
   );
   writes = operation.catch(() => {});
-  void operation.then(() => channel?.postMessage("changed")).catch(() => {});
+  void operation.then(() => channel?.postMessage('changed')).catch(() => {});
   return true;
 }
 
 export function subscribeAccessToken(onChange: () => void): () => void {
   listeners.add(onChange);
   if (
-    typeof window !== "undefined" &&
-    typeof BroadcastChannel !== "undefined" &&
+    typeof window !== 'undefined' &&
+    typeof BroadcastChannel !== 'undefined' &&
     !channel
   ) {
-    channel = new BroadcastChannel("umssy-session");
+    channel = new BroadcastChannel('umssy-session');
     channel.onmessage = () => {
       revision++;
       token = null;
