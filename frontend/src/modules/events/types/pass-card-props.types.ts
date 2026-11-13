@@ -9,4 +9,6 @@ export interface PassCardProps {
   isSelected?: boolean;
   onClick?: () => void;
   onOpenChat?: (registrationId: string) => void;
+  chatDisabledReason?: string;
+  isAvailableOffline?: boolean;
 }

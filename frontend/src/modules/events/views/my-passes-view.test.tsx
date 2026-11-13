@@ -3,7 +3,9 @@ import { saveAccessToken, clearAccessToken } from '@/shared/services/storage/acc
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import { act, cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { onlineManager } from '@tanstack/react-query';
 import { registrationsService } from '../services/registrations.service';
+import { offlinePassesStore } from '../utils/offline-passes-store';
 import { MyPassesView } from './my-passes-view';
 
 vi.mock('../services/registrations.service', () => ({ registrationsService: { getMine: vi.fn(), getPass: vi.fn() } }));
@@ -165,3 +167,74 @@ describe("Mis pases", () => {
     expect(await screen.findByRole('img', { name: 'Código QR del pase' })).toBeInTheDocument();
   });
 });
+
+describe('Mis pases sin conexión', () => {
+  const userToken = `h.${btoa(JSON.stringify({ sub: 'user-a' }))}.s`;
+  const saved = { ...pass, qrToken: 'c'.repeat(64) };
+  const goOffline = () => {
+    vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
+    onlineManager.setOnline(false);
+  };
+
+  beforeEach(async () => {
+    await saveAccessToken(userToken);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    onlineManager.setOnline(true);
+  });
+
+  it('shows the saved passes and QR offline with the last update and blocked actions', async () => {
+    await offlinePassesStore.save('user-a', [saved]);
+    goOffline();
+    render(<MyPassesView onOpenWorkshopChat={vi.fn()} />);
+    const banner = await screen.findByText('Estás viendo tus pases guardados sin conexión');
+    expect(banner.closest('p')).toHaveTextContent(/Estás viendo tus pases guardados sin conexión · Última actualización: .*2026/);
+    const panel = await screen.findByRole('complementary', { name: 'Detalle de la inscripción' });
+    expect(await within(panel).findByRole('img', { name: 'Código QR del pase' })).toBeInTheDocument();
+    expect(screen.getByText('1 pase')).toBeInTheDocument();
+    const chat = screen.getByRole('button', { name: 'Abrir chat del taller' });
+    expect(chat).toBeDisabled();
+    expect(chat).toHaveAttribute('title', 'Requiere conexión a Internet');
+    const explore = screen.getByRole('button', { name: 'Explorar talleres' });
+    expect(explore).toBeDisabled();
+    expect(explore).toHaveAttribute('title', 'Requiere conexión a Internet');
+    expect(screen.queryByRole('link', { name: 'Explorar talleres' })).not.toBeInTheDocument();
+    expect(getMine).not.toHaveBeenCalled();
+  });
+
+  it('explains there is no saved copy instead of showing the empty registrations state', async () => {
+    goOffline();
+    render(<MyPassesView />);
+    expect(await screen.findByRole('heading', { name: 'No hay pases guardados en este dispositivo.' })).toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Aún no tienes inscripciones.' })).not.toBeInTheDocument();
+    expect(screen.queryByText('ID Inscripción')).not.toBeInTheDocument();
+  });
+
+  it('marks only the passes saved on this device while online', async () => {
+    await offlinePassesStore.save('user-a', [saved]);
+    getMine.mockResolvedValue([pass, { ...pass, id: 'reg-2', eventName: 'Prisma' }]);
+    render(<MyPassesView />);
+    expect(await screen.findByText('Disponible sin conexión')).toBeInTheDocument();
+    expect(within(screen.getByRole('button', { name: /React/ })).getByText('Disponible sin conexión')).toBeInTheDocument();
+    expect(within(screen.getByRole('button', { name: /Prisma/ })).queryByText('Disponible sin conexión')).not.toBeInTheDocument();
+    expect(screen.queryByText(/pases guardados sin conexión/)).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Explorar talleres' })).toHaveAttribute('href', '/events');
+  });
+
+  it('falls back to the saved copy as outdated when the online refresh fails', async () => {
+    await offlinePassesStore.save('user-a', [saved]);
+    getMine.mockRejectedValueOnce(new Error('Sin servidor')).mockResolvedValueOnce([pass]);
+    vi.mocked(registrationsService.getPass).mockRejectedValue(new Error('Sin servidor'));
+    render(<MyPassesView />);
+    expect(await screen.findByText(/No se pudieron actualizar tus pases/)).toBeInTheDocument();
+    expect(screen.getByText(/más de 24 horas/)).toBeInTheDocument();
+    const panel = screen.getByRole('complementary', { name: 'Detalle de la inscripción' });
+    expect(await within(panel).findByRole('img', { name: 'Código QR del pase' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Reintentar' }));
+    await waitFor(() => expect(screen.queryByText(/No se pudieron actualizar tus pases/)).not.toBeInTheDocument());
+    expect(getMine).toHaveBeenCalledTimes(2);
+  });
+});
+
