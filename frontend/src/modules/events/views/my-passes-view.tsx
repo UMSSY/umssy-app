@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { DEFAULT_REGISTRATION_ERROR_MESSAGE } from "@/modules/registrations";
 import Link from "next/link";
 import { CalendarDays } from "lucide-react";
 import { PageHeading } from "@/shared/components/layout/page-heading";
@@ -37,12 +38,10 @@ export function MyPassesView({ onOpenWorkshopChat }: MyPassesViewProps = {}) {
       {status === "saved" ? <OfflineStatusBanner isOnline={isOnline} lastUpdated={lastUpdated} isStale={isStale} onRetry={retry} /> : null}
       {isLoading ? (
         <RequestFeedback message="Cargando tus inscripciones..." />
-      ) : status === "no-offline-copy" ? (
-        <NoOfflineCopyState />
-      ) : status === "error" && error ? (
+      ) : status === "no-offline-copy" || (status === "error" && error) ? (
         <div className="space-y-6">
-          {isConnectionError ? <NoOfflineCopyState /> : null}
-          <RequestFeedback message={error} isError onRetry={retry} />
+          {status === "no-offline-copy" || isConnectionError ? <NoOfflineCopyState /> : null}
+          <RequestFeedback message={error ?? DEFAULT_REGISTRATION_ERROR_MESSAGE} isError onRetry={retry} />
         </div>
       ) : !registrations.length ? (
         <MyPassesEmptyState />

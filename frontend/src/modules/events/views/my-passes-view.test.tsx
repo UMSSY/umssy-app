@@ -207,7 +207,11 @@ describe('Mis pases sin conexión', () => {
   it('explains there is no saved copy instead of showing the empty registrations state', async () => {
     goOffline();
     render(<MyPassesView />);
-    expect(await screen.findByRole('heading', { name: 'No hay pases guardados en este dispositivo.' })).toBeInTheDocument();
+    const noCopy = await screen.findByRole('heading', { name: 'No hay pases guardados en este dispositivo.' });
+    const alert = screen.getByRole('alert');
+    expect(alert).toHaveTextContent('No pudimos completar la operación. Inténtalo más tarde.');
+    expect(within(alert).getByRole('button', { name: 'Reintentar' })).toBeInTheDocument();
+    expect(noCopy.compareDocumentPosition(alert) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(screen.queryByRole('region', { name: 'Aún no tienes inscripciones.' })).not.toBeInTheDocument();
     expect(screen.queryByText('ID Inscripción')).not.toBeInTheDocument();
   });
