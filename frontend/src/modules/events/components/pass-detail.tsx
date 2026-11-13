@@ -87,10 +87,6 @@ export function PassDetail({ registration }: PassDetailProps) {
               <PassQr token={pass.data.qrToken} />
             )}
           </div>
-
-          <p className="px-2 text-center text-xs text-surface/80 italic">
-            El QR de esta vista es ilustrativo; aún no está habilitado para validar asistencia.
-          </p>
         </div>
 
         <div className="mt-2 flex flex-wrap items-start justify-between gap-4 border-t border-surface/10 pt-5">

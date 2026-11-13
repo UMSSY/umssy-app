@@ -31,3 +31,13 @@ describe('Proposal cover preview', () => {
     expect(onChange).toHaveBeenCalledWith(null);
   });
 });
+
+it.each(['input', 'drop'])('rejects a cover larger than 5 MB via %s before creating its preview', async method => {
+  const onChange = vi.fn();
+  const oversized = new File([new Uint8Array(5 * 1024 * 1024 + 1)], 'too-large.png', { type: 'image/png' });
+  const { container } = render(<ProposalCoverField value={null} onChange={onChange} onBusyChange={vi.fn()} />);
+  if (method === 'input') fireEvent.change(container.querySelector('input[type=file]')!, { target: { files: [oversized] } });
+  else fireEvent.drop(container.querySelector('[class*="@container"]')!, { dataTransfer: { files: [oversized] } });
+  expect(await screen.findByRole('alert')).toHaveTextContent('5 MB');
+  expect(onChange).not.toHaveBeenCalled();
+});
