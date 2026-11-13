@@ -41,3 +41,14 @@ export { profileSkillsRadarService } from "./services/profile-skills-radar.servi
 export { useInvalidateProfileCompleteness } from "./hooks/use-invalidate-profile-completeness";
 export { useProfileCompletionRequest } from "./hooks/use-profile-completion-request";
 export { useProfileCompletionFocus } from "./hooks/use-profile-completion-focus";
+
+export { ProfileGuideMascot } from "./components/profile-guide-mascot";
+export { ProfileGuideWelcomeHero } from "./components/profile-guide-welcome-hero";
+export { ProfileGuideCelebration } from "./components/profile-guide-celebration";
+export { ProfileGuideBubble } from "./components/profile-guide-bubble";
+export { ProfileGuideReveal } from "./components/profile-guide-reveal";
+export { ProfileGuidePop } from "./components/profile-guide-pop";
+export { usePrefersReducedMotion } from "./hooks/use-prefers-reduced-motion";
+export { useCountUp } from "./hooks/use-count-up";
+export type { ProfileGuidePose } from "./types/profile-guide-pose.types";
+export type { ProfileGuideStepDirection } from "./types/profile-guide-step-direction.types";
