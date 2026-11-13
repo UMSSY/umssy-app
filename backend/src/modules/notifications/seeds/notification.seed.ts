@@ -44,9 +44,6 @@ export async function seedNotifications(prisma: PrismaClient) {
     ],
     skipDuplicates: true,
   });
-
-  // Suscripción Push Falsa (Para probar que el PushDispatcher no falle)
-  // Estos datos son ficticios, no enviarán un push real, pero sirven para probar el flujo.
   await prisma.pushSubscription.upsert({
     where: { endpoint: 'https://fcm.googleapis.com/fcm/send/mock-endpoint-123' },
     update: {},
