@@ -20,8 +20,9 @@ import type { ProfileCompletenessProgressProps } from '../types/profile-complete
 
 export function ProfileCompletenessProgress({
   showChecklist = true,
+  refetchOnMount = showChecklist,
 }: ProfileCompletenessProgressProps) {
-  const { completeness, isLoading, error, reload } = useProfileCompleteness(showChecklist);
+  const { completeness, isLoading, error, reload } = useProfileCompleteness(refetchOnMount);
   const isComplete =
     completeness?.percentage === PROFILE_COMPLETENESS_LIMITS.max;
   const { isOpen, panelId, containerRef, triggerRef, toggle } =
