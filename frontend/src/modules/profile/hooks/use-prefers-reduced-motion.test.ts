@@ -1,4 +1,6 @@
 import { act, cleanup, renderHook } from '@testing-library/react';
+import { createElement } from 'react';
+import { renderToString } from 'react-dom/server';
 import { afterEach, describe, expect, it } from 'vitest';
 import {
   removeMatchMedia,
@@ -42,5 +44,14 @@ describe('usePrefersReducedMotion', () => {
 
     unmount();
     expect(media.listeners.size).toBe(0);
+  });
+
+  it('returns false while rendering on the server', () => {
+    stubReducedMotion(true);
+    function Probe() {
+      return createElement('span', null, String(usePrefersReducedMotion()));
+    }
+
+    expect(renderToString(createElement(Probe))).toContain('false');
   });
 });
