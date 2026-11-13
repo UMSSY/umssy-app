@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "./select"
 
-function renderSelect(props: { open?: boolean; size?: "sm" | "default" } = {}) {
+function renderSelect(props: { open?: boolean; size?: "sm" | "default"; variant?: "default" | "subtle" } = {}) {
   return render(
     <Select open={props.open}>
       <SelectTrigger aria-label="Ciudad" size={props.size}>
@@ -21,9 +21,9 @@ function renderSelect(props: { open?: boolean; size?: "sm" | "default" } = {}) {
       <SelectContent>
         <SelectGroup>
           <SelectLabel>Departamentos</SelectLabel>
-          <SelectItem value="cb">Cochabamba</SelectItem>
+          <SelectItem value="cb" variant={props.variant}>Cochabamba</SelectItem>
           <SelectSeparator />
-          <SelectItem value="lp">La Paz</SelectItem>
+          <SelectItem value="lp" variant={props.variant}>La Paz</SelectItem>
         </SelectGroup>
       </SelectContent>
     </Select>
@@ -75,4 +75,29 @@ describe("Select", () => {
     expect(option).toHaveClass("focus:bg-interaction", "focus:text-ink")
     expect(option.className).not.toContain("text-accent-foreground")
   })
+  it.each(["default", "subtle"] as const)(
+    "mantiene el contraste al resaltar por teclado una opción %s",
+    async (variant) => {
+      const user = userEvent.setup()
+      renderSelect({ variant })
+      await user.click(screen.getByRole("combobox", { name: "Ciudad" }))
+      await user.keyboard("{End}")
+      const option = screen.getByRole("option", { name: "La Paz" })
+
+      expect(option).toHaveAttribute("data-highlighted")
+      expect(option).toHaveClass("focus:text-ink")
+      expect(option.className).not.toContain("text-accent-foreground")
+      if (variant === "default") {
+        expect(option).toHaveClass("focus:bg-interaction", "not-data-[variant=destructive]:focus:**:text-ink")
+      } else {
+        expect(option).toHaveClass("data-highlighted:bg-surface-soft", "data-highlighted:text-ink")
+      }
+
+      await user.keyboard("{Enter}")
+      expect(screen.getByRole("combobox", { name: "Ciudad" })).toHaveTextContent("lp")
+      expect(option).toHaveAttribute("aria-selected", "true")
+      expect(option).toHaveClass("focus:text-ink")
+    },
+  )
+
 })
