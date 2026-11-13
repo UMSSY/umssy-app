@@ -75,3 +75,18 @@ it('opens at the nearest allowed month instead of the upper boundary', async () 
   expect(await screen.findByRole('combobox', { name: 'Mes' })).toHaveValue('10');
   expect(screen.getByRole('combobox', { name: 'Año' })).toHaveValue('2026');
 });
+
+it('keeps the Spanish calendar in weekday order and selects a complete date', async () => {
+  const onValueChange = vi.fn();
+  const { rerender } = render(<DateField aria-label="Fecha" value="" min="2026-11-15" max="2027-05-15" initialMonth="2026-11-15" onValueChange={onValueChange} />);
+  fireEvent.click(screen.getByRole('button', { name: 'Elegir fecha en el calendario' }));
+  const dialog = await screen.findByRole('dialog', { name: 'Seleccionar fecha' });
+  expect(within(dialog).getByRole('combobox', { name: 'Mes' })).toHaveValue('10');
+  expect(Array.from(dialog.querySelectorAll('thead th')).map(cell => cell.textContent)).toEqual(['lu', 'ma', 'mi', 'ju', 'vi', 'sá', 'do']);
+  const day = dialog.querySelector('button[data-day="15/11/2026"]');
+  expect(day).not.toBeNull();
+  fireEvent.click(day!);
+  expect(onValueChange).toHaveBeenCalledWith('2026-11-15');
+  rerender(<DateField aria-label="Fecha" value="2026-11-15" onValueChange={onValueChange} />);
+  expect(screen.getByRole('textbox', { name: 'Fecha' })).toHaveValue('15/11/2026');
+});
