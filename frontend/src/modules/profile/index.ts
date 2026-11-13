@@ -52,3 +52,4 @@ export { usePrefersReducedMotion } from "./hooks/use-prefers-reduced-motion";
 export { useCountUp } from "./hooks/use-count-up";
 export type { ProfileGuidePose } from "./types/profile-guide-pose.types";
 export type { ProfileGuideStepDirection } from "./types/profile-guide-step-direction.types";
+export { ProfileGuidePreviewView } from "./views/profile-guide-preview-view";
