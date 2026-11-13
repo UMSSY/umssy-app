@@ -20,6 +20,7 @@ import { formatWeekLabel } from "../utils/format-week-label";
 
 export function MentorFreeBlocksView({ mentorId }: MentorFreeBlocksViewProps) {
   const [weekStart, setWeekStart] = useState(() => getWeekRange(new Date()).startAt);
+  const [hasSelectionOrDraft, setHasSelectionOrDraft] = useState(false);
   const weekRange = getWeekRange(weekStart);
   const currentWeekStart = getWeekRange(new Date()).startAt;
   const { blocks, isLoading, error } = useMentorFreeBlocks(mentorId, weekRange);
@@ -71,27 +72,33 @@ export function MentorFreeBlocksView({ mentorId }: MentorFreeBlocksViewProps) {
         <AvailabilityLoading />
       ) : error ? (
         <p className="text-center text-destructive">{error}</p>
-      ) : blocks.length === 0 ? (
-        <section
-          className={cn(
-            "flex flex-col items-center gap-3 rounded-lg",
-            "border border-dashed border-border p-8 text-center",
-          )}
-        >
-          <p className="text-muted-foreground">{MENTOR_FREE_BLOCKS_TEXT.empty}</p>
-          <Button type="button" variant="outline" onClick={goToNextWeek}>
-            {MENTOR_FREE_BLOCKS_TEXT.nextWeekFromEmpty}
-          </Button>
-        </section>
       ) : (
-        <BlockSelection
-          mentorId={mentorId}
-          blocks={blocks}
-          weekRange={weekRange}
-          fetchFreeBlocks={() => availabilityApi.getMentorFreeBlocks(mentorId, weekRange)}
-          stickyOffset={weekNavHeight}
-          density={density}
-        />
+        <>
+          {blocks.length === 0 && !hasSelectionOrDraft && (
+            <section
+              className={cn(
+                "flex flex-col items-center gap-3 rounded-lg",
+                "border border-dashed border-border p-8 text-center",
+              )}
+            >
+              <p className="text-muted-foreground">{MENTOR_FREE_BLOCKS_TEXT.empty}</p>
+              <Button type="button" variant="outline" onClick={goToNextWeek}>
+                {MENTOR_FREE_BLOCKS_TEXT.nextWeekFromEmpty}
+              </Button>
+            </section>
+          )}
+          {(blocks.length > 0 || hasSelectionOrDraft) && (
+            <BlockSelection
+              mentorId={mentorId}
+              blocks={blocks}
+              weekRange={weekRange}
+              fetchFreeBlocks={() => availabilityApi.getMentorFreeBlocks(mentorId, weekRange)}
+              stickyOffset={weekNavHeight}
+              density={density}
+              onActivityChange={setHasSelectionOrDraft}
+            />
+          )}
+        </>
       )}
     </div>
   );

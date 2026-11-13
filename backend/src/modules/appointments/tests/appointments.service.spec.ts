@@ -85,6 +85,7 @@ describe('AppointmentsService', () => {
         MENTOR_ID,
         scope,
         NOW,
+        undefined,
       );
       expect(repository.findMine).toHaveBeenCalledExactlyOnceWith(
         MENTOR_ID,
@@ -92,6 +93,7 @@ describe('AppointmentsService', () => {
         NOW,
         1,
         10,
+        undefined,
       );
       expect(mapper.toResponseList).toHaveBeenCalledExactlyOnceWith(
         records,
@@ -133,6 +135,7 @@ describe('AppointmentsService', () => {
       NOW,
       1,
       10,
+      undefined,
     );
   });
 
@@ -154,6 +157,7 @@ describe('AppointmentsService', () => {
       NOW,
       5,
       10,
+      undefined,
     );
   });
 
@@ -175,6 +179,7 @@ describe('AppointmentsService', () => {
       NOW,
       2,
       10,
+      undefined,
     );
   });
 

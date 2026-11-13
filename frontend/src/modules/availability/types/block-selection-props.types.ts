@@ -9,4 +9,5 @@ export interface BlockSelectionProps {
   fetchFreeBlocks: () => Promise<AvailabilityBlock[]>;
   stickyOffset?: number;
   density?: WeekGridDensity;
+  onActivityChange?: (hasSelectionOrDraft: boolean) => void;
 }

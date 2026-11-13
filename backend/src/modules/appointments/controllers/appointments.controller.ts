@@ -44,6 +44,7 @@ import {
   DEFAULT_MY_APPOINTMENTS_PAGE_SIZE,
   MAX_MY_APPOINTMENTS_PAGE_SIZE,
 } from '../constants/my-appointments-pagination.constants.js';
+import { MAX_MY_APPOINTMENTS_SEARCH_LENGTH } from '../constants/my-appointments-search.constants.js';
 import { CreateAppointmentDto } from '../requests/create-appointment.request.js';
 import { appointmentIdSchema } from '../requests/appointment-id.request.js';
 import { myAppointmentsQuerySchema } from '../requests/my-appointments-query.request.js';
@@ -124,6 +125,12 @@ export class AppointmentsController {
       maximum: MAX_MY_APPOINTMENTS_PAGE_SIZE,
       default: DEFAULT_MY_APPOINTMENTS_PAGE_SIZE,
     },
+  })
+  @ApiQuery({
+    name: 'q',
+    required: false,
+    description: FIND_MY_APPOINTMENTS_DOCS.searchDescription,
+    schema: { type: 'string', maxLength: MAX_MY_APPOINTMENTS_SEARCH_LENGTH },
   })
   @ApiBadRequestResponse({
     description: FIND_MY_APPOINTMENTS_DOCS.invalidQueryDescription,
