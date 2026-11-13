@@ -185,6 +185,14 @@ describe('completed profile checklist', () => {
 });
 
 describe('progress content and request states', () => {
+  it('can refresh a standalone bar without enabling checklist navigation', () => {
+    render(<ProfileCompletenessProgress showChecklist={false} refetchOnMount />);
+    expect(useProfileCompleteness).toHaveBeenCalledWith(true);
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '30');
+    expect(screen.queryByRole('region', checklistName)).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', triggerName)).not.toBeInTheDocument();
+  });
+
   it.each([{ ids: [] }, { ids: PROFILE_COMPLETENESS_SECTION_IDS }])(
     'shows the editor percentage without checklist navigation: %j',
     ({ ids }) => {
