@@ -24,7 +24,7 @@ describe('AppointmentsRepository', () => {
     } as unknown as PrismaService);
   });
 
-  it('filters upcoming confirmed appointments by either participant and the strict end boundary', async () => {
+  it('filters upcoming confirmed and cancelled appointments by either participant and the strict end boundary', async () => {
     const records = [createAppointmentRecord()];
     findMany.mockResolvedValue(records);
 
@@ -34,7 +34,9 @@ describe('AppointmentsRepository', () => {
     expect(findMany).toHaveBeenCalledExactlyOnceWith({
       where: {
         OR: [{ mentorId: MENTOR_ID }, { studentId: MENTOR_ID }],
-        status: { title: { in: ['CONFIRMED', 'CONFIRMADA'] } },
+        status: {
+          title: { in: ['CONFIRMED', 'CONFIRMADA', 'CANCELLED', 'CANCELADA'] },
+        },
         endAt: { gt: NOW },
       },
       orderBy: [{ startAt: 'asc' }, { id: 'asc' }],
@@ -63,7 +65,18 @@ describe('AppointmentsRepository', () => {
     expect(count).toHaveBeenCalledExactlyOnceWith({
       where: {
         OR: [{ mentorId: MENTOR_ID }, { studentId: MENTOR_ID }],
-        status: { title: { in: ['CONFIRMED', 'CONFIRMADA', 'COMPLETED', 'COMPLETADA'] } },
+        status: {
+          title: {
+            in: [
+              'CONFIRMED',
+              'CONFIRMADA',
+              'COMPLETED',
+              'COMPLETADA',
+              'CANCELLED',
+              'CANCELADA',
+            ],
+          },
+        },
         endAt: { lte: NOW },
       },
     });
@@ -78,7 +91,18 @@ describe('AppointmentsRepository', () => {
     expect(findMany).toHaveBeenCalledExactlyOnceWith({
       where: {
         OR: [{ mentorId: MENTOR_ID }, { studentId: MENTOR_ID }],
-        status: { title: { in: ['CONFIRMED', 'CONFIRMADA', 'COMPLETED', 'COMPLETADA'] } },
+        status: {
+          title: {
+            in: [
+              'CONFIRMED',
+              'CONFIRMADA',
+              'COMPLETED',
+              'COMPLETADA',
+              'CANCELLED',
+              'CANCELADA',
+            ],
+          },
+        },
         endAt: { lte: NOW },
       },
       orderBy: [{ endAt: 'desc' }, { startAt: 'desc' }, { id: 'asc' }],
@@ -99,6 +123,9 @@ describe('AppointmentsRepository', () => {
       message: true,
       requestedAt: true,
       meetingUrl: true,
+      cancelledById: true,
+      cancellationReason: true,
+      cancelledAt: true,
       mentor: { select: { id: true, firstName: true, lastName: true } },
       student: { select: { id: true, firstName: true, lastName: true } },
       orientationType: { select: { id: true, name: true } },
@@ -130,10 +157,9 @@ describe('AppointmentsRepository', () => {
       const failure = new Error('Database unavailable');
       findMany.mockRejectedValue(failure);
 
-      await expect(repository.findMine(MENTOR_ID, scope, NOW, 1, 10),
-      ).rejects.toBe(
-        failure,
-      );
+      await expect(
+        repository.findMine(MENTOR_ID, scope, NOW, 1, 10),
+      ).rejects.toBe(failure);
     },
   );
 

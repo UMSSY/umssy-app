@@ -14,6 +14,7 @@ import {
 import { ACTIVE_APPOINTMENT_STATUS_TITLES } from '../../constants/active-appointment-statuses.constants.js';
 import { DAILY_APPOINTMENT_LIMIT_STATUS_TITLES } from '../../constants/daily-appointment-limit-statuses.constants.js';
 import { PAST_APPOINTMENT_STATUS_TITLES } from '../../constants/past-appointment-statuses.constants.js';
+import { UPCOMING_APPOINTMENT_STATUS_TITLES } from '../../constants/upcoming-appointment-statuses.constants.js';
 import type { BoliviaDayRange } from '../../types/bolivia-day-range.types.js';
 import type { AppointmentRecord } from '../../types/appointment-record.types.js';
 import type { CreateAppointmentData } from '../../types/create-appointment-data.types.js';
@@ -39,6 +40,15 @@ export interface InMemoryBlock {
   updatedAt: Date;
 }
 
+export interface InMemoryBlockedDate {
+  id: string;
+  mentorId: string;
+  blockedOn: Date;
+  reason: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface AddAppointmentInput {
   mentorId: string;
   studentId: string;
@@ -59,14 +69,14 @@ const STATUS_TITLES = [
   AppointmentStatusTitle.CANCELLED,
   AppointmentStatusTitle.COMPLETED,
   AppointmentStatusTitle.LEGACY_COMPLETED,
-  'CANCELADA',
+  AppointmentStatusTitle.LEGACY_CANCELLED,
   'RECHAZADA',
 ] as const;
 
 const ADMIN_ID = '00000000-0000-4000-8000-000000000000';
 
 /**
- * Seed en memoria para las pruebas HTTP de cruces de horario.
+ * Seed en memoria para las pruebas HTTP de citas.
  * Reutiliza los usuarios, catálogos y bloques del seed de desarrollo.
  */
 export class InMemoryOverlapSeed {
@@ -81,16 +91,21 @@ export class InMemoryOverlapSeed {
   private readonly statusTitleById = new Map<string, string>();
   private readonly orientationNameById = new Map<string, string>();
   private readonly locks = new Map<string, Promise<void>>();
+  private readonly dayLocks = new Map<string, Promise<void>>();
+  private readonly availabilityByMentor = new Map<string, boolean>();
+  private readonly blockedDates: InMemoryBlockedDate[] = [];
   private readonly context: FixtureContext;
 
   constructor() {
     this.context = new FixtureContext(OVERLAP_HTTP_ANCHOR, ADMIN_ID);
 
     for (const user of FIXTURE_USERS) {
-      this.users.set(this.context.getId(user.key), {
+      const id = this.context.getId(user.key);
+      this.users.set(id, {
         ...user,
-        id: this.context.getId(user.key),
+        id,
       });
+      this.availabilityByMentor.set(id, true);
     }
 
     for (const status of STATUS_TITLES) {
@@ -153,6 +168,29 @@ export class InMemoryOverlapSeed {
 
   mentorIdAt(mentorIndex: number): string {
     return this.context.getId(FIXTURE_MENTORS[mentorIndex].key);
+  }
+
+  userIdAt(userIndex: number): string {
+    const user = FIXTURE_USERS[userIndex];
+    if (!user) {
+      throw new Error(`No existe el usuario ${userIndex}`);
+    }
+    return this.context.getId(user.key);
+  }
+
+  seededAppointmentFor(mentorIndex: number): AppointmentRecord {
+    const mentorId = this.mentorIdAt(mentorIndex);
+    const appointment = this.appointments.find(
+      (item) =>
+        item.mentorId === mentorId &&
+        item.status.title === AppointmentStatusTitle.LEGACY_CONFIRMED,
+    );
+    if (!appointment) {
+      throw new Error(
+        `No existe una cita confirmada del mentor ${mentorIndex}`,
+      );
+    }
+    return appointment;
   }
 
   blockFor(mentorIndex: number, slotIndex: number): InMemoryBlock {
@@ -234,6 +272,14 @@ export class InMemoryOverlapSeed {
       },
       createAppointment: (data: CreateAppointmentData) =>
         Promise.resolve(this.createAppointment(data)),
+      assignMeetingUrl: (id: string, meetingUrl: string) => {
+        const appointment = this.appointments.find((item) => item.id === id);
+        if (!appointment) {
+          return Promise.resolve(null);
+        }
+        appointment.meetingUrl ??= meetingUrl;
+        return Promise.resolve(appointment.meetingUrl);
+      },
       createAppointmentHistory: (data: CreateAppointmentHistoryData) => {
         this.histories.push(data);
         return Promise.resolve();
@@ -250,7 +296,7 @@ export class InMemoryOverlapSeed {
         userId: string,
         scope: MyAppointmentsQuery['scope'],
         now: Date,
-      ) => Promise.resolve(this.mine(userId, scope, now).length),
+      ) => Promise.resolve(this.mineAppointments(userId, scope, now).length),
       findMine: (
         userId: string,
         scope: MyAppointmentsQuery['scope'],
@@ -259,7 +305,7 @@ export class InMemoryOverlapSeed {
         pageSize: number,
       ) =>
         Promise.resolve(
-          this.mine(userId, scope, now).slice(
+          this.mineAppointments(userId, scope, now).slice(
             (page - 1) * pageSize,
             page * pageSize,
           ),
@@ -269,14 +315,6 @@ export class InMemoryOverlapSeed {
           this.appointments.find((appointment) => appointment.id === id) ??
             null,
         ),
-      assignMeetingUrl: (id: string, meetingUrl: string) => {
-        const appointment = this.appointments.find((item) => item.id === id);
-        if (!appointment) {
-          return Promise.resolve(null);
-        }
-        appointment.meetingUrl ??= meetingUrl;
-        return Promise.resolve(appointment.meetingUrl);
-      },
     };
   }
 
@@ -296,6 +334,21 @@ export class InMemoryOverlapSeed {
           ),
         } as AvailabilityBlockWithAppointments);
       },
+      delete: (blockId: string): Promise<InMemoryBlock> => {
+        const index = this.blocks.findIndex((item) => item.id === blockId);
+        const block = this.blocks[index];
+        if (!block) {
+          return Promise.reject(new Error(`No existe el bloque ${blockId}`));
+        }
+        this.blocks.splice(index, 1);
+        return Promise.resolve(block);
+      },
+      findMentorFreeBlocksInRange: (
+        mentorId: string,
+        from: Date,
+        to: Date,
+      ): Promise<AvailabilityBlockWithAppointments[]> =>
+        Promise.resolve(this.freeBlocksInRange(mentorId, from, to)),
     };
   }
 
@@ -322,9 +375,101 @@ export class InMemoryOverlapSeed {
       findOne: (id: string) =>
         Promise.resolve({
           id,
-          isAvailable: true,
+          isAvailable: this.availabilityByMentor.get(id) ?? true,
           orientationTypes: [OVERLAP_TOPIC],
         }),
+      updateAvailability: (id: string, isAvailable: boolean) => {
+        this.availabilityByMentor.set(id, isAvailable);
+        return Promise.resolve({ id, isAvailableForMentoring: isAvailable });
+      },
+    };
+  }
+
+  get blockedDatesRepository() {
+    return {
+      withDayLock: <T>(
+        mentorId: string,
+        day: string,
+        work: (transaction: TestTransaction) => Promise<T>,
+      ): Promise<T> => this.withDayLock(mentorId, day, work),
+      findByDay: (
+        mentorId: string,
+        blockedOn: Date,
+      ): Promise<InMemoryBlockedDate | null> =>
+        Promise.resolve(
+          this.blockedDates.find(
+            (item) =>
+              item.mentorId === mentorId &&
+              item.blockedOn.getTime() === blockedOn.getTime(),
+          ) ?? null,
+        ),
+      findById: (id: string): Promise<InMemoryBlockedDate | null> =>
+        Promise.resolve(
+          this.blockedDates.find((item) => item.id === id) ?? null,
+        ),
+      findInRange: (
+        mentorId: string,
+        fromDay: Date,
+        toDay?: Date,
+      ): Promise<InMemoryBlockedDate[]> =>
+        Promise.resolve(
+          this.blockedDates
+            .filter(
+              (item) =>
+                item.mentorId === mentorId &&
+                item.blockedOn.getTime() >= fromDay.getTime() &&
+                (!toDay || item.blockedOn.getTime() <= toDay.getTime()),
+            )
+            .sort(
+              (left, right) =>
+                left.blockedOn.getTime() - right.blockedOn.getTime(),
+            ),
+        ),
+      hasActiveAppointmentBetween: (
+        mentorId: string,
+        from: Date,
+        to: Date,
+      ): Promise<boolean> =>
+        Promise.resolve(
+          this.blocks.some(
+            (block) =>
+              block.mentorId === mentorId &&
+              block.startAt.getTime() >= from.getTime() &&
+              block.startAt.getTime() < to.getTime() &&
+              this.activeAppointmentsOf(block.id).length > 0,
+          ),
+        ),
+      create: (
+        mentorId: string,
+        blockedOn: Date,
+        reason: string | null,
+      ): Promise<InMemoryBlockedDate> =>
+        Promise.resolve(this.createBlockedDate(mentorId, blockedOn, reason)),
+      updateReason: (
+        id: string,
+        reason: string,
+      ): Promise<InMemoryBlockedDate> => {
+        const blockedDate = this.blockedDates.find((item) => item.id === id);
+        if (!blockedDate) {
+          return Promise.reject(
+            new Error(`No existe la fecha bloqueada ${id}`),
+          );
+        }
+        blockedDate.reason = reason;
+        blockedDate.updatedAt = new Date();
+        return Promise.resolve(blockedDate);
+      },
+      delete: (id: string): Promise<InMemoryBlockedDate> => {
+        const index = this.blockedDates.findIndex((item) => item.id === id);
+        const blockedDate = this.blockedDates[index];
+        if (!blockedDate) {
+          return Promise.reject(
+            new Error(`No existe la fecha bloqueada ${id}`),
+          );
+        }
+        this.blockedDates.splice(index, 1);
+        return Promise.resolve(blockedDate);
+      },
     };
   }
 
@@ -388,6 +533,9 @@ export class InMemoryOverlapSeed {
       message: input.message,
       requestedAt: input.requestedAt,
       meetingUrl: input.meetingUrl ?? null,
+      cancelledById: null,
+      cancellationReason: null,
+      cancelledAt: null,
       mentor: this.userBrief(input.mentorId),
       student: this.userBrief(input.studentId),
       orientationType: {
@@ -427,14 +575,14 @@ export class InMemoryOverlapSeed {
     );
   }
 
-  private mine(
+  private mineAppointments(
     userId: string,
     scope: MyAppointmentsQuery['scope'],
     now: Date,
   ): AppointmentRecord[] {
     const titles: readonly string[] =
       scope === 'upcoming'
-        ? ACTIVE_APPOINTMENT_STATUS_TITLES
+        ? UPCOMING_APPOINTMENT_STATUS_TITLES
         : PAST_APPOINTMENT_STATUS_TITLES;
     const byTime = (appointment: AppointmentRecord) =>
       scope === 'upcoming'
@@ -481,6 +629,76 @@ export class InMemoryOverlapSeed {
           appointment.status.title as AppointmentStatusTitle,
         ),
     );
+  }
+
+  private freeBlocksInRange(
+    mentorId: string,
+    from: Date,
+    to: Date,
+  ): AvailabilityBlockWithAppointments[] {
+    return this.blocks
+      .filter(
+        (block) =>
+          block.mentorId === mentorId &&
+          block.startAt.getTime() >= from.getTime() &&
+          block.startAt.getTime() < to.getTime() &&
+          this.activeAppointmentsOf(block.id).length === 0,
+      )
+      .sort((left, right) => left.startAt.getTime() - right.startAt.getTime())
+      .map(
+        (block) =>
+          ({
+            ...block,
+            appointments: [],
+          }) as AvailabilityBlockWithAppointments,
+      );
+  }
+
+  private createBlockedDate(
+    mentorId: string,
+    blockedOn: Date,
+    reason: string | null,
+  ): InMemoryBlockedDate {
+    const blockedDate: InMemoryBlockedDate = {
+      id: randomUUID(),
+      mentorId,
+      blockedOn,
+      reason,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.blockedDates.push(blockedDate);
+    return blockedDate;
+  }
+
+  private async withDayLock<T>(
+    mentorId: string,
+    day: string,
+    work: (transaction: TestTransaction) => Promise<T>,
+  ): Promise<T> {
+    const key = `${mentorId}:${day}`;
+    const previous = this.dayLocks.get(key) ?? Promise.resolve();
+    let release: () => void = () => undefined;
+    const held = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const tail = previous.then(() => held);
+    this.dayLocks.set(key, tail);
+    await previous;
+    const transaction: TestTransaction = { releases: [] };
+    transaction.releases.push(() => {
+      release();
+      if (this.dayLocks.get(key) === tail) {
+        this.dayLocks.delete(key);
+      }
+    });
+    try {
+      return await work(transaction);
+    } finally {
+      for (const releaseLock of transaction.releases) {
+        releaseLock();
+      }
+    }
   }
 
   private async lockParticipants(
