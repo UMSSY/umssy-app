@@ -443,7 +443,22 @@ export type UserSocialAccount = Prisma.UserSocialAccountModel
  */
 export type UserPortfolioProject = Prisma.UserPortfolioProjectModel
 /**
+ * Model NotificationType
+ * 
+ */
+export type NotificationType = Prisma.NotificationTypeModel
+/**
+ * Model Notification
+ * 
+ */
+export type Notification = Prisma.NotificationModel
+/**
  * Model PushSubscription
  * 
  */
 export type PushSubscription = Prisma.PushSubscriptionModel
+/**
+ * Model NotificationPreference
+ * 
+ */
+export type NotificationPreference = Prisma.NotificationPreferenceModel

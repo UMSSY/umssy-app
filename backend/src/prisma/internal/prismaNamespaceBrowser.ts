@@ -136,7 +136,10 @@ export const ModelName = {
   PortfolioProvider: 'PortfolioProvider',
   UserSocialAccount: 'UserSocialAccount',
   UserPortfolioProject: 'UserPortfolioProject',
-  PushSubscription: 'PushSubscription'
+  NotificationType: 'NotificationType',
+  Notification: 'Notification',
+  PushSubscription: 'PushSubscription',
+  NotificationPreference: 'NotificationPreference'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1302,6 +1305,36 @@ export const UserPortfolioProjectScalarFieldEnum = {
 export type UserPortfolioProjectScalarFieldEnum = (typeof UserPortfolioProjectScalarFieldEnum)[keyof typeof UserPortfolioProjectScalarFieldEnum]
 
 
+export const NotificationTypeScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  name: 'name',
+  sendsPush: 'sendsPush',
+  sendsEmail: 'sendsEmail',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type NotificationTypeScalarFieldEnum = (typeof NotificationTypeScalarFieldEnum)[keyof typeof NotificationTypeScalarFieldEnum]
+
+
+export const NotificationScalarFieldEnum = {
+  id: 'id',
+  recipientId: 'recipientId',
+  actorId: 'actorId',
+  typeId: 'typeId',
+  title: 'title',
+  body: 'body',
+  link: 'link',
+  groupKey: 'groupKey',
+  readAt: 'readAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
+
+
 export const PushSubscriptionScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -1315,6 +1348,18 @@ export const PushSubscriptionScalarFieldEnum = {
 } as const
 
 export type PushSubscriptionScalarFieldEnum = (typeof PushSubscriptionScalarFieldEnum)[keyof typeof PushSubscriptionScalarFieldEnum]
+
+
+export const NotificationPreferenceScalarFieldEnum = {
+  userId: 'userId',
+  pushEnabled: 'pushEnabled',
+  emailEnabled: 'emailEnabled',
+  inAppEnabled: 'inAppEnabled',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type NotificationPreferenceScalarFieldEnum = (typeof NotificationPreferenceScalarFieldEnum)[keyof typeof NotificationPreferenceScalarFieldEnum]
 
 
 export const SortOrder = {
