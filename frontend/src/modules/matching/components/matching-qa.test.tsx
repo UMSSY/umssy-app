@@ -84,7 +84,7 @@ function Panel({ candidate = lucia }: { candidate?: typeof lucia }) {
 }
 
 describe("QA HU3 y conexión HU4", () => {
-  it("representa brechas positivas en verde y negativas en naranja con escala proporcional", () => {
+  it("representa brechas con tokens institucionales, signos y escala proporcional", () => {
     const gaps = { ...lucia.gaps, desarrollo: 2, qa: -4 };
     const { container } = render(
       <GapBreakdownList axes={AFFINITY_AXES} gaps={gaps} />,
@@ -95,11 +95,11 @@ describe("QA HU3 y conexión HU4", () => {
     )!;
     const negative = rows.find((row) => row.textContent?.includes("QA"))!;
     expect(positive).toHaveTextContent("+2.0");
-    expect(positive.querySelector(".bg-green-600")).toHaveStyle({
+    expect(positive.querySelector(".bg-accent")).toHaveStyle({
       width: "20%",
     });
     expect(negative).toHaveTextContent("-4.0");
-    expect(negative.querySelector(".bg-orange-500")).toHaveStyle({
+    expect(negative.querySelector(".bg-ink")).toHaveStyle({
       width: "40%",
     });
   });
