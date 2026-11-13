@@ -14,11 +14,11 @@ import { RadarCompanyNotLinkedException } from '../exceptions/radar-company-not-
 import { RadarCvNotSharedException } from '../exceptions/radar-cv-not-shared.exception.js';
 import { RadarRecruiterDecisionInvalidException } from '../exceptions/radar-recruiter-decision-invalid.exception.js';
 import { RadarVacancyUnavailableException } from '../exceptions/radar-vacancy-unavailable.exception.js';
-import { RadarRecruitmentService } from '../radar-recruitment.service.js';
+import { RadarRecruitmentService } from '../services/radar-recruitment.service.js';
 import type { RadarAccessRepository } from '../repositories/radar-access.repository.js';
 import type { RadarApplicationsService } from '../services/radar-applications.service.js';
 import type { RadarRecruitmentRepository } from '../repositories/radar-recruitment.repository.js';
-import { emptyScores } from '../radar-scoring.js';
+import { emptyScores } from '../utils/radar-scoring.js';
 
 function makeAccess() {
   return {

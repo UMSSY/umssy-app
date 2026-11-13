@@ -10,6 +10,10 @@ import { planSkillReconciliation } from '../utils/plan-skill-reconciliation.js';
 export class SkillAnalysisService {
   constructor(private readonly repository: SkillAnalysisRepository) {}
 
+  hasProfileSkills(userId: string): Promise<boolean> {
+    return this.repository.hasProfileSkills(userId);
+  }
+
   listReviewQueue() {
     return this.repository.listReviewQueue();
   }

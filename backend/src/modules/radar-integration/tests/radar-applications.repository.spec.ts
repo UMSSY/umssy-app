@@ -6,6 +6,7 @@ const APPLICATION_ID = '22222222-2222-4222-8222-222222222222';
 
 function setup() {
   const prisma = {
+    radarApplicationConsent: { findMany: vi.fn().mockResolvedValue([]) },
     $queryRaw: vi.fn().mockResolvedValue([]),
     $executeRaw: vi.fn().mockResolvedValue(1),
   };
@@ -34,13 +35,33 @@ describe('RadarApplicationsRepository', () => {
 
   it('reads and revokes consent without accessing application tables', async () => {
     const { prisma, repository } = setup();
-    await repository.findConsents([APPLICATION_ID]);
+    prisma.radarApplicationConsent.findMany.mockResolvedValueOnce([
+      {
+        applicationId: APPLICATION_ID,
+        consentToRecruiter: true,
+        consentToCv: false,
+        consentToContact: true,
+      },
+    ]);
+    await expect(repository.findConsents([APPLICATION_ID])).resolves.toEqual([
+      {
+        application_id: APPLICATION_ID,
+        consent_to_recruiter: true,
+        consent_to_cv: false,
+        consent_to_contact: true,
+      },
+    ]);
     await repository.revokeConsents(APPLICATION_ID);
-    expect(prisma.$queryRaw).toHaveBeenCalledOnce();
+    expect(prisma.radarApplicationConsent.findMany).toHaveBeenCalledWith({
+      where: { applicationId: { in: [APPLICATION_ID] } },
+      select: {
+        applicationId: true,
+        consentToRecruiter: true,
+        consentToCv: true,
+        consentToContact: true,
+      },
+    });
+    expect(prisma.$queryRaw).not.toHaveBeenCalled();
     expect(prisma.$executeRaw).toHaveBeenCalledOnce();
-    const [sql, ids] = prisma.$queryRaw.mock.calls[0];
-    expect(sql.join(' ')).toContain('radar_application_consents');
-    expect(sql.join(' ')).not.toContain('job_applications');
-    expect(ids).toEqual([APPLICATION_ID]);
   });
 });

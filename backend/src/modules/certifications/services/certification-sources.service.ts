@@ -6,6 +6,10 @@ import { CertificationRecordsService } from './certification-records.service.js'
 export class CertificationSourcesService {
   constructor(private readonly repository: CertificationRecordsService) {}
 
+  hasByUserId(userId: string): Promise<boolean> {
+    return this.repository.hasByUserId(userId);
+  }
+
   findPublicationEvidenceIds(userId: string, context: TransactionContext) {
     return this.repository.findPublicationEvidenceIds(userId, context);
   }

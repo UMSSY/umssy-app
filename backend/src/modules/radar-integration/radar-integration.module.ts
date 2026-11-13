@@ -31,7 +31,7 @@ import { RadarIntegrationService } from './services/radar-integration.service.js
 
 import { MatchingModule } from '../matching/matching.module.js';
 import { RadarRecruitmentController } from './controllers/radar-recruitment.controller.js';
-import { RadarRecruitmentService } from './radar-recruitment.service.js';
+import { RadarRecruitmentService } from './services/radar-recruitment.service.js';
 import { RadarRecruitmentRepository } from './repositories/radar-recruitment.repository.js';
 
 @Module({
@@ -71,6 +71,10 @@ import { RadarRecruitmentRepository } from './repositories/radar-recruitment.rep
     RadarReviewMapper,
     RadarPdfExtractionService,
   ],
-  exports: [RadarIntegrationService, RadarRecruitmentService],
+  exports: [
+    RadarIntegrationService,
+    RadarRecruitmentService,
+    RadarPdfExtractionService,
+  ],
 })
 export class RadarIntegrationModule {}

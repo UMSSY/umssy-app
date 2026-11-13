@@ -27,6 +27,14 @@ const toJson = (refs: readonly SkillEvidenceRefPayload[]) =>
 export class SkillAnalysisRepository {
   constructor(private readonly prisma: PrismaService) {}
 
+  async hasProfileSkills(userId: string): Promise<boolean> {
+    const record = await this.prisma.userSkill.findFirst({
+      where: { userId },
+      select: { id: true },
+    });
+    return record !== null;
+  }
+
   listReviewQueue() {
     return this.prisma.userSkill.findMany({
       where: {

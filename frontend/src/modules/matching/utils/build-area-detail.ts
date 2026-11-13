@@ -3,23 +3,21 @@ import {
   getAreaLevel,
   type AreaDetail,
   type AreaId,
-} from "@/modules/radar-chart";
-import { RADAR_AXES } from "../constants/radar-axes.constants";
-import type { BuildAreaDetailInput } from "../types/build-area-detail-input.types";
+} from '@/modules/radar-chart';
+import { RADAR_AXES } from '../constants/radar-axes.constants';
+import type { BuildAreaDetailInput } from '../types/build-area-detail-input.types';
 
-/** Convierte la duración textual del backend a años para el timeline de HU3. */
 export function parseDurationYears(duration: string): number {
   const match = duration.match(/([\d.,]+)\s*(año|mes)/i);
   if (!match) return 0;
 
-  const amount = Number(match[1].replace(",", "."));
+  const amount = Number(match[1].replace(',', '.'));
   if (!Number.isFinite(amount)) return 0;
 
   const years = /año/i.test(match[2]) ? amount : amount / 12;
   return Math.round(years * 10) / 10;
 }
 
-/** Mapea evidencias autorizadas a la vista de detalle reutilizada de HU3/HU4. */
 export function buildAreaDetail({
   areaId,
   score,

@@ -1,3 +1,4 @@
+import { mapApplicationConsent } from '../mappers/radar-applications.mapper.js';
 import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
 import type { RadarApplicationConsent } from '../types/radar-application-consent.type.js';
 import { Injectable } from '@nestjs/common';
@@ -38,9 +39,16 @@ export class RadarApplicationsRepository {
       WHERE application_id=${applicationId}::uuid`;
   }
 
-  findConsents(ids: string[]) {
-    return this.prisma.$queryRaw<RadarApplicationConsent[]>`
-      SELECT application_id,consent_to_recruiter,consent_to_cv,consent_to_contact
-      FROM radar_application_consents WHERE application_id=ANY(${ids}::uuid[])`;
+  async findConsents(ids: string[]): Promise<RadarApplicationConsent[]> {
+    const rows = await this.prisma.radarApplicationConsent.findMany({
+      where: { applicationId: { in: ids } },
+      select: {
+        applicationId: true,
+        consentToRecruiter: true,
+        consentToCv: true,
+        consentToContact: true,
+      },
+    });
+    return rows.map(mapApplicationConsent);
   }
 }

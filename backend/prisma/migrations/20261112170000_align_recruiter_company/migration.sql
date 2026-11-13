@@ -1,6 +1,3 @@
--- Preserve existing administrative grants while adopting the company attached
--- to the account as the single source of ownership. Ambiguous grants require
--- explicit administrative assignment and never expand access automatically.
 UPDATE users AS u
 SET company_id = grants.company_id
 FROM (

@@ -1,3 +1,7 @@
+import type {
+  ApplicationConsentsResponse,
+  ApplicationResponse,
+} from '../types/application-response.type.js';
 import type { RecruitmentApplication } from '../../applications/types/recruitment-application.type.js';
 import type { RadarApplicationConsent } from '../types/radar-application-consent.type.js';
 import type { RadarApplicationState } from '../types/radar-application-state.type.js';
@@ -43,5 +47,53 @@ export function mapConsentedApplication(
     consent_to_recruiter: consent?.consent_to_recruiter ?? false,
     consent_to_cv: consent?.consent_to_cv ?? false,
     consent_to_contact: consent?.consent_to_contact ?? false,
+  };
+}
+
+export function mapApplicationConsent(row: {
+  applicationId: string;
+  consentToRecruiter: boolean;
+  consentToCv: boolean;
+  consentToContact: boolean;
+}): RadarApplicationConsent {
+  return {
+    application_id: row.applicationId,
+    consent_to_recruiter: row.consentToRecruiter,
+    consent_to_cv: row.consentToCv,
+    consent_to_contact: row.consentToContact,
+  };
+}
+export function mapApplicationConsentsResponse(
+  id: string,
+  status: string,
+  consent: boolean,
+  consentCv: boolean,
+  consentContact: boolean,
+): ApplicationConsentsResponse {
+  return {
+    id,
+    state: mapApplicationStatus(status),
+    consent,
+    consentCv: consent && consentCv,
+    consentContact: consent && consentContact,
+  };
+}
+export function mapApplicationResponse(
+  id: string,
+  jobOfferId: string,
+  status: string,
+  consent: boolean,
+  consentCv: boolean,
+  consentContact: boolean,
+): ApplicationResponse {
+  return {
+    ...mapApplicationConsentsResponse(
+      id,
+      status,
+      consent,
+      consentCv,
+      consentContact,
+    ),
+    jobOfferId,
   };
 }

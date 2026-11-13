@@ -1,7 +1,7 @@
 import { StreamableFile } from '@nestjs/common';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { RadarRecruitmentController } from '../controllers/radar-recruitment.controller.js';
-import type { RadarRecruitmentService } from '../radar-recruitment.service.js';
+import type { RadarRecruitmentService } from '../services/radar-recruitment.service.js';
 
 function setup() {
   const recruitment = {

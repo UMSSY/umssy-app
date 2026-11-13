@@ -1,3 +1,7 @@
+import type {
+  RecruiterVacancyResponse,
+  ActiveVacancyResponse,
+} from '../types/vacancy-response.type.js';
 import { mapApplicationStatus } from './radar-applications.mapper.js';
 import type { RecruiterCandidateInput } from '../types/recruiter-candidate-input.type.js';
 import type { RecruiterAreaEvidenceInput } from '../types/recruiter-area-evidence-input.type.js';
@@ -73,4 +77,15 @@ export function mapRecruiterAreaEvidence({
     })),
     tags: [...new Set(publishedSkills.map((item) => item.name))],
   };
+}
+
+export function mapRecruiterVacancy(
+  offer: RecruiterVacancyResponse,
+): RecruiterVacancyResponse {
+  return { id: offer.id, title: offer.title, companyId: offer.companyId };
+}
+export function mapActiveVacancy(
+  job: ActiveVacancyResponse,
+): ActiveVacancyResponse {
+  return { ...mapRecruiterVacancy(job), description: job.description };
 }
