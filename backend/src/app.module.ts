@@ -20,6 +20,7 @@ import { EducationsModule } from './modules/educations/educations.module.js';
 import { MentorsModule } from './modules/mentors/mentors.module.js';
 import { OrientationTypesModule } from './modules/orientation-types/orientation-types.module.js';
 import { ProfileModule } from './modules/profile/profile.module.js';
+import { PortfolioModule } from './modules/portfolio/portfolio.module.js';
 import { SkillsModule } from './modules/skills/skills.module.js';
 import { TechnicalAreasModule } from './modules/technical-areas/technical-areas.module.js';
 import { WorkExperienceModule } from './modules/work-experience/work-experience.module.js';
@@ -48,6 +49,7 @@ import { AppointmentsModule } from './modules/appointments/appointments.module.j
     EventCategoriesModule,
     EventRegistrationsModule,
     ProfileModule,
+    PortfolioModule,
     CvModule,
     SkillsModule,
     EducationsModule,

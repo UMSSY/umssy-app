@@ -15,6 +15,8 @@ import { ProfileRepository } from '../repositories/profile.repository.js';
 import { ProfilePhotoService } from '../services/profile-photo.service.js';
 import { ProfileService } from '../services/profile.service.js';
 import { CityCatalogService } from '../services/city-catalog.service.js';
+import { ProfileCompletenessController } from '../controllers/profile-completeness.controller.js';
+import { ProfileCompletenessService } from '../services/profile-completeness.service.js';
 
 describe('ProfileModule', () => {
   let moduleRef: TestingModule;
@@ -29,6 +31,8 @@ describe('ProfileModule', () => {
   });
 
   it.each([
+    ProfileCompletenessController,
+    ProfileCompletenessService,
     ProfileController,
     ProfilePhotoController,
     ProfileService,

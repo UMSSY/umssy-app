@@ -1,4 +1,4 @@
-import { SESSION_DRAFT_STORAGE_PREFIX } from "@/modules/auth";
+import { SESSION_DRAFT_STORAGE_PREFIX } from "@/modules/auth/constants/session.constants";
 import type { BreadcrumbEntry } from "@/shared/types/breadcrumb-entry.types";
 import type { QuestionType } from "../types/question-type.types";
 import { SURVEY_NOTIFICATIONS_LABEL, SURVEY_NOTIFICATIONS_PATH } from "./survey-notifications.constants";

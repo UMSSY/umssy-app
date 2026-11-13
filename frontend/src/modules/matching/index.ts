@@ -1,4 +1,31 @@
 export { MatchingView } from "./views/matching-view";
+export { useMatching } from "./hooks/use-matching";
+export { RecruiterRadarView } from "./views/recruiter-radar-view";
+export { RecruiterCandidateList } from "./components/recruiter-candidate-list";
+export { RecruiterCandidatePanel } from "./components/recruiter-candidate-panel";
+export {
+  useRecruiterApplicants,
+  useRecruiterAreaEvidence,
+  useRecruiterDecision,
+  useRecruiterVacancies,
+  radarRecruiterQueryKeys,
+} from "./hooks/use-radar-recruiter";
+export { radarRecruiterApi } from "./services/radar-recruiter.service";
+export { buildAreaDetail, parseDurationYears } from "./utils/build-area-detail";
+export { RADAR_AXES } from "./constants/radar-axes.constants";
+export type { AreaEvidence } from "./types/area-evidence.types";
+export type { AreaEvidenceCertification } from "./types/area-evidence-certification.types";
+export type { AreaEvidenceEducation } from "./types/area-evidence-education.types";
+export type { AreaEvidenceExperience } from "./types/area-evidence-experience.types";
+export type { PublishedEvidence } from "./types/published-evidence.types";
+export type { RadarAxis } from "./types/radar-axis.types";
+export type { RadarAxisId } from "./types/radar-axis-id.types";
+export type { RecruiterApplicant } from "./types/recruiter-applicant.types";
+export type { RecruiterApplicantsResponse } from "./types/recruiter-applicants-response.types";
+export type { RecruiterApplicationState } from "./types/recruiter-application-state.types";
+export type { RecruiterComparison } from "./types/recruiter-comparison.types";
+export type { RecruiterTarget } from "./types/recruiter-target.types";
+export type { RecruiterVacancy } from "./types/recruiter-vacancy.types";
 export type { AffinityAxis } from "./types/affinity-axis.types";
 export type { AffinityAxisId } from "./types/affinity-axis-id.types";
 export type { AxisScores } from "./types/axis-scores.types";
