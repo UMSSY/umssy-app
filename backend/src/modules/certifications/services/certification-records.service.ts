@@ -93,4 +93,8 @@ export class CertificationRecordsService {
   delete(id: string): Promise<void> {
     return this.repository.delete(id);
   }
+
+  findRecruitmentEvidence(userId: string, ids: string[]) {
+    return this.repository.findRecruitmentEvidence(userId, ids);
+  }
 }
