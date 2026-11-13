@@ -17,7 +17,7 @@ export function ProfileGuideSparkles({ className }: ProfileGuideSparklesProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const sparkles = [...(containerRef.current?.children ?? [])];
+    const sparkles = Array.from(containerRef.current!.children);
     const animations = sparkles.map((sparkle, index) =>
       animate(sparkle, PROFILE_GUIDE_SPARKLE_KEYFRAMES, {
         duration: PROFILE_GUIDE_DURATIONS_MS.sparkle,

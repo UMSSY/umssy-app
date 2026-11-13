@@ -17,7 +17,7 @@ export function ProfileGuideRings({ className }: ProfileGuideRingsProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const rings = [...(containerRef.current?.children ?? [])];
+    const rings = Array.from(containerRef.current!.children);
     const animations = rings.flatMap((ring, index) => [
       animate(ring, PROFILE_GUIDE_RING_ENTRANCE_KEYFRAMES, {
         duration: PROFILE_GUIDE_DURATIONS_MS.ringEntrance,
