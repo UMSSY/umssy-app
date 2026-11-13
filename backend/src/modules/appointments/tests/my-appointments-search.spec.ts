@@ -74,6 +74,26 @@ describe('My appointments search by counterpart name', () => {
       );
     });
 
+    it('removes the accent of a capital letter that lower() leaves untouched in the C locale', () => {
+      // Reproduce translate(lower(nombre)) de PostgreSQL con la configuración
+      // regional C, donde lower() solo convierte las letras ASCII.
+      const lowerInCLocale = (text: string) =>
+        text.replace(/[A-Z]/g, (letter) => letter.toLowerCase());
+      const translate = (text: string) =>
+        [...text]
+          .map((character) => {
+            const index = [...ACCENTED_SEARCH_CHARACTERS].indexOf(character);
+            return index === -1
+              ? character
+              : [...UNACCENTED_SEARCH_CHARACTERS][index];
+          })
+          .join('');
+
+      expect(translate(lowerInCLocale('Álvaro Ñúñez Óbrien'))).toBe(
+        'alvaro nunez obrien',
+      );
+    });
+
     it('pairs the session user with the matching counterparts in both roles', async () => {
       count.mockResolvedValue(2);
 
