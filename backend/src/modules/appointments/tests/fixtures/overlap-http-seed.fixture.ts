@@ -64,6 +64,8 @@ const STATUS_TITLES = [
   AppointmentStatusTitle.CONFIRMED,
   AppointmentStatusTitle.LEGACY_CONFIRMED,
   AppointmentStatusTitle.LEGACY_PENDING,
+  AppointmentStatusTitle.LEGACY_CANCELLED,
+  AppointmentStatusTitle.LEGACY_COMPLETED,
   AppointmentStatusTitle.CANCELLED,
   AppointmentStatusTitle.COMPLETED,
   'RECHAZADA',
@@ -174,16 +176,17 @@ export class InMemoryOverlapSeed {
     return this.context.getId(user.key);
   }
 
-  seededAppointmentFor(mentorIndex: number): AppointmentRecord {
+  seededAppointmentFor(
+    mentorIndex: number,
+    status: AppointmentStatusTitle = AppointmentStatusTitle.LEGACY_CONFIRMED,
+  ): AppointmentRecord {
     const mentorId = this.mentorIdAt(mentorIndex);
     const appointment = this.appointments.find(
-      (item) =>
-        item.mentorId === mentorId &&
-        item.status.title === AppointmentStatusTitle.LEGACY_CONFIRMED,
+      (item) => item.mentorId === mentorId && item.status.title === status,
     );
     if (!appointment) {
       throw new Error(
-        `No existe una cita confirmada del mentor ${mentorIndex}`,
+        `No existe una cita ${status} del mentor ${mentorIndex}`,
       );
     }
     return appointment;
