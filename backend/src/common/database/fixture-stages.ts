@@ -33,6 +33,7 @@ import { seedSurveyQuestionsFixtures } from '../../modules/surveys/seeds/survey-
 import { seedSurveyQuestionOptionsFixtures } from '../../modules/surveys/seeds/survey-question-options-fixtures.seed.js';
 import { seedSurveyResponsesFixtures } from '../../modules/surveys/seeds/survey-responses-fixtures.seed.js';
 import { seedSurveyAnswersFixtures } from '../../modules/surveys/seeds/survey-answers-fixtures.seed.js';
+import { seedHeatmapGraduatesFixtures } from '../../modules/analytics/seeds/heatmap-graduates-fixtures.seed.js';
 import type { Prisma } from '../../prisma/client.js';
 import type { FixtureContext } from './fixture-context.js';
 
@@ -98,5 +99,6 @@ export async function seedFixtureStages(
   );
   counts['survey_responses'] = await seedSurveyResponsesFixtures(tx, context);
   counts['survey_answers'] = await seedSurveyAnswersFixtures(tx, context);
+  counts['heatmap_graduates'] = await seedHeatmapGraduatesFixtures(tx, context);
   return counts;
 }
