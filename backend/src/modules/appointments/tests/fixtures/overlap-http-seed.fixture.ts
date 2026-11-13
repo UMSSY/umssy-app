@@ -268,6 +268,14 @@ export class InMemoryOverlapSeed {
       },
       createAppointment: (data: CreateAppointmentData) =>
         Promise.resolve(this.createAppointment(data)),
+      assignMeetingUrl: (id: string, meetingUrl: string) => {
+        const appointment = this.appointments.find((item) => item.id === id);
+        if (!appointment) {
+          return Promise.resolve(null);
+        }
+        appointment.meetingUrl ??= meetingUrl;
+        return Promise.resolve(appointment.meetingUrl);
+      },
       createAppointmentHistory: (data: CreateAppointmentHistoryData) => {
         this.histories.push(data);
         return Promise.resolve();
