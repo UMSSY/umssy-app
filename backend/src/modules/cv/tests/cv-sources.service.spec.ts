@@ -24,6 +24,23 @@ it('returns the stored CV or null through the owning repository', async () => {
 });
 
 describe('CV source projections', () => {
+  it.each([null, { id: 'saved-cv' }])('checks for a saved CV without loading its PDF: %j', async (record) => {
+    const findFirst = vi.fn().mockResolvedValue(record);
+    const repository = new CvFileRepository({
+      userCvFile: { findFirst },
+    } as unknown as PrismaService);
+    const service = new CvSourcesService(repository);
+    expect(await service.hasByUserId('owner')).toBe(record !== null);
+    expect(findFirst).toHaveBeenCalledExactlyOnceWith({
+      where: {
+        userId: 'owner',
+        cvPdfData: { not: null },
+        cvUploadedAt: { not: null },
+      },
+      select: { id: true },
+    });
+  });
+
   it('scopes the current CV by owner and selects the newest upload', async () => {
     const findFirst = vi.fn().mockResolvedValue(null);
     const repository = new CvFileRepository({

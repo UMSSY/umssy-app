@@ -8,6 +8,7 @@ export { DetectedSkillsChips } from "./components/detected-skills-chips";
 export { FeedbackMessage } from "./components/feedback-message";
 export { FormField } from "./components/form-field";
 export { ProfilePageLayout } from "./components/profile-page-layout";
+export { ProfileCompletenessProgress } from "./components/profile-completeness-progress";
 export { SectionCard } from "./components/section-card";
 
 export type { Feedback } from "./types/feedback.types";

@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { ProfileCompletenessProgress } from "@/modules/profile";
 import { downloadFile } from "@/shared/utils/download-file";
 import { CV_ERROR_MESSAGES } from "../constants/cv-error-messages.constants";
 import { useCvExport } from "../hooks/use-cv-export";
@@ -61,6 +62,7 @@ function CvExportDialogBody({ onClose }: Pick<CvExportDialogProps, "onClose">) {
             Personaliza las secciones y descarga tu currículum en formato PDF.
           </DialogDescription>
         </DialogHeader>
+        <div className="px-6 pt-5"><ProfileCompletenessProgress showChecklist={false} /></div>
         <Button
           type="button"
           variant="ghost"

@@ -9,10 +9,19 @@ import {
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { renderWithQuery as render } from '@/shared/testing/render-with-query';
-import { EducationProfileSection } from '@/modules/education';
-import { WorkExperienceProfileSection } from '@/modules/work-experience';
-import { CertificationProfileSection } from '@/modules/certifications';
-import { SkillsProfileSection } from '@/modules/skills';
+import { EducationProfileSection, EducationView } from '@/modules/education';
+import {
+  WorkExperienceProfileSection,
+  WorkExperienceView,
+} from '@/modules/work-experience';
+import {
+  CertificationProfileSection,
+  CertificationsView,
+} from '@/modules/certifications';
+import { SkillsProfileSection, SkillsView } from '@/modules/skills';
+import { PersonalInfoView } from '../views/personal-info-view';
+import { PresentationView } from '../views/presentation-view';
+import { ProfileSettingsView } from '../views/profile-settings-view';
 import { DEGREE_CATALOG_FIXTURE } from '@/modules/education/testing/degree-catalog.fixture';
 import { PersonalInfoSettings } from '../components/personal-info-settings';
 import { PresentationSettings } from '../components/presentation-settings';
@@ -271,10 +280,9 @@ function expectProgress(
   completed: boolean,
   percentage: number,
 ) {
-  expect(screen.getByRole('progressbar', { hidden: true })).toHaveAttribute(
-    'aria-valuenow',
-    String(percentage),
-  );
+  expect(
+    screen.getAllByRole('progressbar', { hidden: true })[0],
+  ).toHaveAttribute('aria-valuenow', String(percentage));
   expect(
     screen.getByRole('listitem', {
       name: `${PROFILE_COMPLETENESS_SECTION_LABELS[section]}: ${completed ? 'Completada' : 'Pendiente'}`,
@@ -284,6 +292,27 @@ function expectProgress(
 }
 
 describe('Profile completeness after saving from the interface', () => {
+  it.each([
+    { title: 'contact', View: PersonalInfoView },
+    { title: 'presentation', View: PresentationView },
+    { title: 'education', View: EducationView },
+    { title: 'experience', View: WorkExperienceView },
+    { title: 'skills', View: SkillsView },
+    { title: 'certifications', View: CertificationsView },
+    { title: 'settings', View: ProfileSettingsView },
+  ])('shows one progress indicator on the $title page', async ({ View }) => {
+    render(<View />);
+    const bar = await screen.findByRole('progressbar', {
+      name: 'Completitud del perfil',
+    });
+    expect(bar).toBeVisible();
+    expect(bar).toHaveAttribute('aria-valuenow', '0');
+    expect(
+      screen.getAllByRole('progressbar', { name: 'Completitud del perfil' }),
+    ).toHaveLength(1);
+    expect(screen.getByText('0 de 7 secciones completadas')).toBeVisible();
+  });
+
   it.each(cases)(
     'updates the bar and checklist after saving $section without remounting',
     async ({ section, Editor, fill, request, submit }) => {
@@ -296,6 +325,19 @@ describe('Profile completeness after saving from the interface', () => {
       );
       const bar = await screen.findByRole('progressbar');
       await fill(user);
+      const dialog = screen.queryByRole('dialog');
+      if (dialog) {
+        expect(
+          within(dialog).getByRole('progressbar', {
+            name: 'Completitud del perfil',
+          }),
+        ).toHaveAttribute('aria-valuenow', '0');
+        expect(
+          within(dialog).queryByRole('region', {
+            name: 'Secciones del perfil',
+          }),
+        ).not.toBeInTheDocument();
+      }
       expectProgress(section, false, 0);
       expect(api.completeness).toHaveBeenCalledOnce();
       const saved = createProfileCompleteness([section]);
@@ -310,9 +352,9 @@ describe('Profile completeness after saving from the interface', () => {
       });
       await user.click(screen.getByRole('button', { name: submit }));
       await waitFor(() => expectProgress(section, true, saved.percentage));
-      expect(screen.getByRole('progressbar', { hidden: true })).toBe(bar);
+      expect(screen.getAllByRole('progressbar', { hidden: true })[0]).toBe(bar);
       expect(
-        screen.getByText('1 de 6 secciones completadas'),
+        screen.getByText('1 de 7 secciones completadas'),
       ).toBeInTheDocument();
       expect(api.completeness).toHaveBeenCalledTimes(2);
       expect(request).toHaveBeenCalledOnce();
@@ -418,7 +460,7 @@ describe('Profile completeness after saving from the interface', () => {
       within(
         screen.getByRole('region', { name: 'Secciones del perfil' }),
       ).getAllByText('Completada'),
-    ).toHaveLength(6);
+    ).toHaveLength(7);
     api.skills.mockImplementationOnce(async () => {
       api.completeness.mockResolvedValue(
         createProfileCompleteness(withoutSkills),
