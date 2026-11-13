@@ -135,7 +135,8 @@ export const ModelName = {
   MentorOfferStatus: 'MentorOfferStatus',
   PortfolioProvider: 'PortfolioProvider',
   UserSocialAccount: 'UserSocialAccount',
-  UserPortfolioProject: 'UserPortfolioProject'
+  UserPortfolioProject: 'UserPortfolioProject',
+  PushSubscription: 'PushSubscription'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1299,6 +1300,21 @@ export const UserPortfolioProjectScalarFieldEnum = {
 } as const
 
 export type UserPortfolioProjectScalarFieldEnum = (typeof UserPortfolioProjectScalarFieldEnum)[keyof typeof UserPortfolioProjectScalarFieldEnum]
+
+
+export const PushSubscriptionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  endpoint: 'endpoint',
+  p256dh: 'p256dh',
+  auth: 'auth',
+  userAgent: 'userAgent',
+  lastUsedAt: 'lastUsedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PushSubscriptionScalarFieldEnum = (typeof PushSubscriptionScalarFieldEnum)[keyof typeof PushSubscriptionScalarFieldEnum]
 
 
 export const SortOrder = {

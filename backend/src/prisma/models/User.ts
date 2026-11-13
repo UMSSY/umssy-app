@@ -322,6 +322,7 @@ export type UserWhereInput = {
   radarAuditActors?: Prisma.RadarAuditEventListRelationFilter
   socialAccounts?: Prisma.UserSocialAccountListRelationFilter
   portfolioProjects?: Prisma.UserPortfolioProjectListRelationFilter
+  pushSubscriptions?: Prisma.PushSubscriptionListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -393,6 +394,7 @@ export type UserOrderByWithRelationInput = {
   radarAuditActors?: Prisma.RadarAuditEventOrderByRelationAggregateInput
   socialAccounts?: Prisma.UserSocialAccountOrderByRelationAggregateInput
   portfolioProjects?: Prisma.UserPortfolioProjectOrderByRelationAggregateInput
+  pushSubscriptions?: Prisma.PushSubscriptionOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -467,6 +469,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   radarAuditActors?: Prisma.RadarAuditEventListRelationFilter
   socialAccounts?: Prisma.UserSocialAccountListRelationFilter
   portfolioProjects?: Prisma.UserPortfolioProjectListRelationFilter
+  pushSubscriptions?: Prisma.PushSubscriptionListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -580,6 +583,7 @@ export type UserCreateInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -649,6 +653,7 @@ export type UserUncheckedCreateInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -718,6 +723,7 @@ export type UserUpdateInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -787,6 +793,7 @@ export type UserUncheckedUpdateInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -1739,6 +1746,20 @@ export type UserUpdateOneRequiredWithoutPortfolioProjectsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPortfolioProjectsInput, Prisma.UserUpdateWithoutPortfolioProjectsInput>, Prisma.UserUncheckedUpdateWithoutPortfolioProjectsInput>
 }
 
+export type UserCreateNestedOneWithoutPushSubscriptionsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPushSubscriptionsInput, Prisma.UserUncheckedCreateWithoutPushSubscriptionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPushSubscriptionsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutPushSubscriptionsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPushSubscriptionsInput, Prisma.UserUncheckedCreateWithoutPushSubscriptionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPushSubscriptionsInput
+  upsert?: Prisma.UserUpsertWithoutPushSubscriptionsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPushSubscriptionsInput, Prisma.UserUpdateWithoutPushSubscriptionsInput>, Prisma.UserUncheckedUpdateWithoutPushSubscriptionsInput>
+}
+
 export type UserCreateWithoutCityInput = {
   id?: string
   firstName: string
@@ -1805,6 +1826,7 @@ export type UserCreateWithoutCityInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCityInput = {
@@ -1873,6 +1895,7 @@ export type UserUncheckedCreateWithoutCityInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCityInput = {
@@ -1989,6 +2012,7 @@ export type UserCreateWithoutCompanyInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCompanyInput = {
@@ -2057,6 +2081,7 @@ export type UserUncheckedCreateWithoutCompanyInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCompanyInput = {
@@ -2151,6 +2176,7 @@ export type UserCreateWithoutRolesInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutRolesInput = {
@@ -2219,6 +2245,7 @@ export type UserUncheckedCreateWithoutRolesInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutRolesInput = {
@@ -2303,6 +2330,7 @@ export type UserUpdateWithoutRolesInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRolesInput = {
@@ -2371,6 +2399,7 @@ export type UserUncheckedUpdateWithoutRolesInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutEducationsInput = {
@@ -2439,6 +2468,7 @@ export type UserCreateWithoutEducationsInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutEducationsInput = {
@@ -2507,6 +2537,7 @@ export type UserUncheckedCreateWithoutEducationsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutEducationsInput = {
@@ -2591,6 +2622,7 @@ export type UserUpdateWithoutEducationsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEducationsInput = {
@@ -2659,6 +2691,7 @@ export type UserUncheckedUpdateWithoutEducationsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutWorkExperiencesInput = {
@@ -2727,6 +2760,7 @@ export type UserCreateWithoutWorkExperiencesInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutWorkExperiencesInput = {
@@ -2795,6 +2829,7 @@ export type UserUncheckedCreateWithoutWorkExperiencesInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutWorkExperiencesInput = {
@@ -2879,6 +2914,7 @@ export type UserUpdateWithoutWorkExperiencesInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutWorkExperiencesInput = {
@@ -2947,6 +2983,7 @@ export type UserUncheckedUpdateWithoutWorkExperiencesInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutUserSkillsInput = {
@@ -3015,6 +3052,7 @@ export type UserCreateWithoutUserSkillsInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutUserSkillsInput = {
@@ -3083,6 +3121,7 @@ export type UserUncheckedCreateWithoutUserSkillsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutUserSkillsInput = {
@@ -3167,6 +3206,7 @@ export type UserUpdateWithoutUserSkillsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutUserSkillsInput = {
@@ -3235,6 +3275,7 @@ export type UserUncheckedUpdateWithoutUserSkillsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCertificationsInput = {
@@ -3303,6 +3344,7 @@ export type UserCreateWithoutCertificationsInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCertificationsInput = {
@@ -3371,6 +3413,7 @@ export type UserUncheckedCreateWithoutCertificationsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCertificationsInput = {
@@ -3455,6 +3498,7 @@ export type UserUpdateWithoutCertificationsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCertificationsInput = {
@@ -3523,6 +3567,7 @@ export type UserUncheckedUpdateWithoutCertificationsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCvFilesInput = {
@@ -3591,6 +3636,7 @@ export type UserCreateWithoutCvFilesInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCvFilesInput = {
@@ -3659,6 +3705,7 @@ export type UserUncheckedCreateWithoutCvFilesInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCvFilesInput = {
@@ -3743,6 +3790,7 @@ export type UserUpdateWithoutCvFilesInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCvFilesInput = {
@@ -3811,6 +3859,7 @@ export type UserUncheckedUpdateWithoutCvFilesInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSkillProcessingStateInput = {
@@ -3879,6 +3928,7 @@ export type UserCreateWithoutSkillProcessingStateInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSkillProcessingStateInput = {
@@ -3947,6 +3997,7 @@ export type UserUncheckedCreateWithoutSkillProcessingStateInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSkillProcessingStateInput = {
@@ -4031,6 +4082,7 @@ export type UserUpdateWithoutSkillProcessingStateInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSkillProcessingStateInput = {
@@ -4099,6 +4151,7 @@ export type UserUncheckedUpdateWithoutSkillProcessingStateInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutMentorTechnicalAreasInput = {
@@ -4167,6 +4220,7 @@ export type UserCreateWithoutMentorTechnicalAreasInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutMentorTechnicalAreasInput = {
@@ -4235,6 +4289,7 @@ export type UserUncheckedCreateWithoutMentorTechnicalAreasInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutMentorTechnicalAreasInput = {
@@ -4319,6 +4374,7 @@ export type UserUpdateWithoutMentorTechnicalAreasInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMentorTechnicalAreasInput = {
@@ -4387,6 +4443,7 @@ export type UserUncheckedUpdateWithoutMentorTechnicalAreasInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutMentorOrientationTypesInput = {
@@ -4455,6 +4512,7 @@ export type UserCreateWithoutMentorOrientationTypesInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutMentorOrientationTypesInput = {
@@ -4523,6 +4581,7 @@ export type UserUncheckedCreateWithoutMentorOrientationTypesInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutMentorOrientationTypesInput = {
@@ -4607,6 +4666,7 @@ export type UserUpdateWithoutMentorOrientationTypesInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMentorOrientationTypesInput = {
@@ -4675,6 +4735,7 @@ export type UserUncheckedUpdateWithoutMentorOrientationTypesInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAvailabilityBlocksInput = {
@@ -4743,6 +4804,7 @@ export type UserCreateWithoutAvailabilityBlocksInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAvailabilityBlocksInput = {
@@ -4811,6 +4873,7 @@ export type UserUncheckedCreateWithoutAvailabilityBlocksInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAvailabilityBlocksInput = {
@@ -4895,6 +4958,7 @@ export type UserUpdateWithoutAvailabilityBlocksInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAvailabilityBlocksInput = {
@@ -4963,6 +5027,7 @@ export type UserUncheckedUpdateWithoutAvailabilityBlocksInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutBlockedDatesInput = {
@@ -5031,6 +5096,7 @@ export type UserCreateWithoutBlockedDatesInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutBlockedDatesInput = {
@@ -5099,6 +5165,7 @@ export type UserUncheckedCreateWithoutBlockedDatesInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutBlockedDatesInput = {
@@ -5183,6 +5250,7 @@ export type UserUpdateWithoutBlockedDatesInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutBlockedDatesInput = {
@@ -5251,6 +5319,7 @@ export type UserUncheckedUpdateWithoutBlockedDatesInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutMentorAppointmentsInput = {
@@ -5319,6 +5388,7 @@ export type UserCreateWithoutMentorAppointmentsInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutMentorAppointmentsInput = {
@@ -5387,6 +5457,7 @@ export type UserUncheckedCreateWithoutMentorAppointmentsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutMentorAppointmentsInput = {
@@ -5460,6 +5531,7 @@ export type UserCreateWithoutStudentAppointmentsInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutStudentAppointmentsInput = {
@@ -5528,6 +5600,7 @@ export type UserUncheckedCreateWithoutStudentAppointmentsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutStudentAppointmentsInput = {
@@ -5601,6 +5674,7 @@ export type UserCreateWithoutCancelledAppointmentsInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCancelledAppointmentsInput = {
@@ -5669,6 +5743,7 @@ export type UserUncheckedCreateWithoutCancelledAppointmentsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCancelledAppointmentsInput = {
@@ -5753,6 +5828,7 @@ export type UserUpdateWithoutMentorAppointmentsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMentorAppointmentsInput = {
@@ -5821,6 +5897,7 @@ export type UserUncheckedUpdateWithoutMentorAppointmentsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutStudentAppointmentsInput = {
@@ -5900,6 +5977,7 @@ export type UserUpdateWithoutStudentAppointmentsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutStudentAppointmentsInput = {
@@ -5968,6 +6046,7 @@ export type UserUncheckedUpdateWithoutStudentAppointmentsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutCancelledAppointmentsInput = {
@@ -6047,6 +6126,7 @@ export type UserUpdateWithoutCancelledAppointmentsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCancelledAppointmentsInput = {
@@ -6115,6 +6195,7 @@ export type UserUncheckedUpdateWithoutCancelledAppointmentsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAppointmentChangesInput = {
@@ -6183,6 +6264,7 @@ export type UserCreateWithoutAppointmentChangesInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAppointmentChangesInput = {
@@ -6251,6 +6333,7 @@ export type UserUncheckedCreateWithoutAppointmentChangesInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAppointmentChangesInput = {
@@ -6335,6 +6418,7 @@ export type UserUpdateWithoutAppointmentChangesInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAppointmentChangesInput = {
@@ -6403,6 +6487,7 @@ export type UserUncheckedUpdateWithoutAppointmentChangesInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCreatedEventsInput = {
@@ -6471,6 +6556,7 @@ export type UserCreateWithoutCreatedEventsInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCreatedEventsInput = {
@@ -6539,6 +6625,7 @@ export type UserUncheckedCreateWithoutCreatedEventsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCreatedEventsInput = {
@@ -6612,6 +6699,7 @@ export type UserCreateWithoutModeratedEventsInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutModeratedEventsInput = {
@@ -6680,6 +6768,7 @@ export type UserUncheckedCreateWithoutModeratedEventsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutModeratedEventsInput = {
@@ -6764,6 +6853,7 @@ export type UserUpdateWithoutCreatedEventsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCreatedEventsInput = {
@@ -6832,6 +6922,7 @@ export type UserUncheckedUpdateWithoutCreatedEventsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutModeratedEventsInput = {
@@ -6911,6 +7002,7 @@ export type UserUpdateWithoutModeratedEventsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutModeratedEventsInput = {
@@ -6979,6 +7071,7 @@ export type UserUncheckedUpdateWithoutModeratedEventsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutEventRegistrationsInput = {
@@ -7047,6 +7140,7 @@ export type UserCreateWithoutEventRegistrationsInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutEventRegistrationsInput = {
@@ -7115,6 +7209,7 @@ export type UserUncheckedCreateWithoutEventRegistrationsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutEventRegistrationsInput = {
@@ -7199,6 +7294,7 @@ export type UserUpdateWithoutEventRegistrationsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEventRegistrationsInput = {
@@ -7267,6 +7363,7 @@ export type UserUncheckedUpdateWithoutEventRegistrationsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCheckedInAttendancesInput = {
@@ -7335,6 +7432,7 @@ export type UserCreateWithoutCheckedInAttendancesInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCheckedInAttendancesInput = {
@@ -7403,6 +7501,7 @@ export type UserUncheckedCreateWithoutCheckedInAttendancesInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCheckedInAttendancesInput = {
@@ -7487,6 +7586,7 @@ export type UserUpdateWithoutCheckedInAttendancesInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCheckedInAttendancesInput = {
@@ -7555,6 +7655,7 @@ export type UserUncheckedUpdateWithoutCheckedInAttendancesInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutExportHistoriesInput = {
@@ -7623,6 +7724,7 @@ export type UserCreateWithoutExportHistoriesInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutExportHistoriesInput = {
@@ -7691,6 +7793,7 @@ export type UserUncheckedCreateWithoutExportHistoriesInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutExportHistoriesInput = {
@@ -7775,6 +7878,7 @@ export type UserUpdateWithoutExportHistoriesInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutExportHistoriesInput = {
@@ -7843,6 +7947,7 @@ export type UserUncheckedUpdateWithoutExportHistoriesInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutOpenedAccessRequestsInput = {
@@ -7911,6 +8016,7 @@ export type UserCreateWithoutOpenedAccessRequestsInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutOpenedAccessRequestsInput = {
@@ -7979,6 +8085,7 @@ export type UserUncheckedCreateWithoutOpenedAccessRequestsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutOpenedAccessRequestsInput = {
@@ -8052,6 +8159,7 @@ export type UserCreateWithoutReviewedAccessRequestsInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutReviewedAccessRequestsInput = {
@@ -8120,6 +8228,7 @@ export type UserUncheckedCreateWithoutReviewedAccessRequestsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutReviewedAccessRequestsInput = {
@@ -8193,6 +8302,7 @@ export type UserCreateWithoutApprovedAccessRequestInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutApprovedAccessRequestInput = {
@@ -8261,6 +8371,7 @@ export type UserUncheckedCreateWithoutApprovedAccessRequestInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutApprovedAccessRequestInput = {
@@ -8345,6 +8456,7 @@ export type UserUpdateWithoutOpenedAccessRequestsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOpenedAccessRequestsInput = {
@@ -8413,6 +8525,7 @@ export type UserUncheckedUpdateWithoutOpenedAccessRequestsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutReviewedAccessRequestsInput = {
@@ -8492,6 +8605,7 @@ export type UserUpdateWithoutReviewedAccessRequestsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReviewedAccessRequestsInput = {
@@ -8560,6 +8674,7 @@ export type UserUncheckedUpdateWithoutReviewedAccessRequestsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutApprovedAccessRequestInput = {
@@ -8639,6 +8754,7 @@ export type UserUpdateWithoutApprovedAccessRequestInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutApprovedAccessRequestInput = {
@@ -8707,6 +8823,7 @@ export type UserUncheckedUpdateWithoutApprovedAccessRequestInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutMentorParticipationRequestsInput = {
@@ -8775,6 +8892,7 @@ export type UserCreateWithoutMentorParticipationRequestsInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutMentorParticipationRequestsInput = {
@@ -8843,6 +8961,7 @@ export type UserUncheckedCreateWithoutMentorParticipationRequestsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutMentorParticipationRequestsInput = {
@@ -8927,6 +9046,7 @@ export type UserUpdateWithoutMentorParticipationRequestsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMentorParticipationRequestsInput = {
@@ -8995,6 +9115,7 @@ export type UserUncheckedUpdateWithoutMentorParticipationRequestsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutMentorSlotOffersInput = {
@@ -9063,6 +9184,7 @@ export type UserCreateWithoutMentorSlotOffersInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutMentorSlotOffersInput = {
@@ -9131,6 +9253,7 @@ export type UserUncheckedCreateWithoutMentorSlotOffersInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutMentorSlotOffersInput = {
@@ -9215,6 +9338,7 @@ export type UserUpdateWithoutMentorSlotOffersInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMentorSlotOffersInput = {
@@ -9283,6 +9407,7 @@ export type UserUncheckedUpdateWithoutMentorSlotOffersInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutConversationsAsUserAInput = {
@@ -9351,6 +9476,7 @@ export type UserCreateWithoutConversationsAsUserAInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutConversationsAsUserAInput = {
@@ -9419,6 +9545,7 @@ export type UserUncheckedCreateWithoutConversationsAsUserAInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutConversationsAsUserAInput = {
@@ -9492,6 +9619,7 @@ export type UserCreateWithoutConversationsAsUserBInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutConversationsAsUserBInput = {
@@ -9560,6 +9688,7 @@ export type UserUncheckedCreateWithoutConversationsAsUserBInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutConversationsAsUserBInput = {
@@ -9644,6 +9773,7 @@ export type UserUpdateWithoutConversationsAsUserAInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutConversationsAsUserAInput = {
@@ -9712,6 +9842,7 @@ export type UserUncheckedUpdateWithoutConversationsAsUserAInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutConversationsAsUserBInput = {
@@ -9791,6 +9922,7 @@ export type UserUpdateWithoutConversationsAsUserBInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutConversationsAsUserBInput = {
@@ -9859,6 +9991,7 @@ export type UserUncheckedUpdateWithoutConversationsAsUserBInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutChatParticipantsInput = {
@@ -9927,6 +10060,7 @@ export type UserCreateWithoutChatParticipantsInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutChatParticipantsInput = {
@@ -9995,6 +10129,7 @@ export type UserUncheckedCreateWithoutChatParticipantsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutChatParticipantsInput = {
@@ -10079,6 +10214,7 @@ export type UserUpdateWithoutChatParticipantsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutChatParticipantsInput = {
@@ -10147,6 +10283,7 @@ export type UserUncheckedUpdateWithoutChatParticipantsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutChatMessagesInput = {
@@ -10215,6 +10352,7 @@ export type UserCreateWithoutChatMessagesInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutChatMessagesInput = {
@@ -10283,6 +10421,7 @@ export type UserUncheckedCreateWithoutChatMessagesInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutChatMessagesInput = {
@@ -10367,6 +10506,7 @@ export type UserUpdateWithoutChatMessagesInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutChatMessagesInput = {
@@ -10435,6 +10575,7 @@ export type UserUncheckedUpdateWithoutChatMessagesInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutChatBlocksMadeInput = {
@@ -10503,6 +10644,7 @@ export type UserCreateWithoutChatBlocksMadeInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutChatBlocksMadeInput = {
@@ -10571,6 +10713,7 @@ export type UserUncheckedCreateWithoutChatBlocksMadeInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutChatBlocksMadeInput = {
@@ -10644,6 +10787,7 @@ export type UserCreateWithoutChatBlocksReceivedInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutChatBlocksReceivedInput = {
@@ -10712,6 +10856,7 @@ export type UserUncheckedCreateWithoutChatBlocksReceivedInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutChatBlocksReceivedInput = {
@@ -10796,6 +10941,7 @@ export type UserUpdateWithoutChatBlocksMadeInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutChatBlocksMadeInput = {
@@ -10864,6 +11010,7 @@ export type UserUncheckedUpdateWithoutChatBlocksMadeInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutChatBlocksReceivedInput = {
@@ -10943,6 +11090,7 @@ export type UserUpdateWithoutChatBlocksReceivedInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutChatBlocksReceivedInput = {
@@ -11011,6 +11159,7 @@ export type UserUncheckedUpdateWithoutChatBlocksReceivedInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSentRequestsInput = {
@@ -11079,6 +11228,7 @@ export type UserCreateWithoutSentRequestsInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSentRequestsInput = {
@@ -11147,6 +11297,7 @@ export type UserUncheckedCreateWithoutSentRequestsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSentRequestsInput = {
@@ -11220,6 +11371,7 @@ export type UserCreateWithoutReceivedRequestsInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutReceivedRequestsInput = {
@@ -11288,6 +11440,7 @@ export type UserUncheckedCreateWithoutReceivedRequestsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutReceivedRequestsInput = {
@@ -11372,6 +11525,7 @@ export type UserUpdateWithoutSentRequestsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSentRequestsInput = {
@@ -11440,6 +11594,7 @@ export type UserUncheckedUpdateWithoutSentRequestsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutReceivedRequestsInput = {
@@ -11519,6 +11674,7 @@ export type UserUpdateWithoutReceivedRequestsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReceivedRequestsInput = {
@@ -11587,6 +11743,7 @@ export type UserUncheckedUpdateWithoutReceivedRequestsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPresenceInput = {
@@ -11655,6 +11812,7 @@ export type UserCreateWithoutPresenceInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPresenceInput = {
@@ -11723,6 +11881,7 @@ export type UserUncheckedCreateWithoutPresenceInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPresenceInput = {
@@ -11807,6 +11966,7 @@ export type UserUpdateWithoutPresenceInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPresenceInput = {
@@ -11875,6 +12035,7 @@ export type UserUncheckedUpdateWithoutPresenceInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPasswordResetOtpsInput = {
@@ -11943,6 +12104,7 @@ export type UserCreateWithoutPasswordResetOtpsInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPasswordResetOtpsInput = {
@@ -12011,6 +12173,7 @@ export type UserUncheckedCreateWithoutPasswordResetOtpsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPasswordResetOtpsInput = {
@@ -12095,6 +12258,7 @@ export type UserUpdateWithoutPasswordResetOtpsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPasswordResetOtpsInput = {
@@ -12163,6 +12327,7 @@ export type UserUncheckedUpdateWithoutPasswordResetOtpsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutMentorParticipationAttemptLimitInput = {
@@ -12231,6 +12396,7 @@ export type UserCreateWithoutMentorParticipationAttemptLimitInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutMentorParticipationAttemptLimitInput = {
@@ -12299,6 +12465,7 @@ export type UserUncheckedCreateWithoutMentorParticipationAttemptLimitInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutMentorParticipationAttemptLimitInput = {
@@ -12383,6 +12550,7 @@ export type UserUpdateWithoutMentorParticipationAttemptLimitInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMentorParticipationAttemptLimitInput = {
@@ -12451,6 +12619,7 @@ export type UserUncheckedUpdateWithoutMentorParticipationAttemptLimitInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutJobApplicationsInput = {
@@ -12519,6 +12688,7 @@ export type UserCreateWithoutJobApplicationsInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutJobApplicationsInput = {
@@ -12587,6 +12757,7 @@ export type UserUncheckedCreateWithoutJobApplicationsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutJobApplicationsInput = {
@@ -12671,6 +12842,7 @@ export type UserUpdateWithoutJobApplicationsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutJobApplicationsInput = {
@@ -12739,6 +12911,7 @@ export type UserUncheckedUpdateWithoutJobApplicationsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCreatedSurveysInput = {
@@ -12807,6 +12980,7 @@ export type UserCreateWithoutCreatedSurveysInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCreatedSurveysInput = {
@@ -12875,6 +13049,7 @@ export type UserUncheckedCreateWithoutCreatedSurveysInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCreatedSurveysInput = {
@@ -12959,6 +13134,7 @@ export type UserUpdateWithoutCreatedSurveysInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCreatedSurveysInput = {
@@ -13027,6 +13203,7 @@ export type UserUncheckedUpdateWithoutCreatedSurveysInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSurveyResponsesInput = {
@@ -13095,6 +13272,7 @@ export type UserCreateWithoutSurveyResponsesInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSurveyResponsesInput = {
@@ -13163,6 +13341,7 @@ export type UserUncheckedCreateWithoutSurveyResponsesInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSurveyResponsesInput = {
@@ -13247,6 +13426,7 @@ export type UserUpdateWithoutSurveyResponsesInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSurveyResponsesInput = {
@@ -13315,6 +13495,7 @@ export type UserUncheckedUpdateWithoutSurveyResponsesInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAuditEventsInput = {
@@ -13383,6 +13564,7 @@ export type UserCreateWithoutAuditEventsInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAuditEventsInput = {
@@ -13451,6 +13633,7 @@ export type UserUncheckedCreateWithoutAuditEventsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAuditEventsInput = {
@@ -13535,6 +13718,7 @@ export type UserUpdateWithoutAuditEventsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAuditEventsInput = {
@@ -13603,6 +13787,7 @@ export type UserUncheckedUpdateWithoutAuditEventsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutRevertedValidationsInput = {
@@ -13671,6 +13856,7 @@ export type UserCreateWithoutRevertedValidationsInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutRevertedValidationsInput = {
@@ -13739,6 +13925,7 @@ export type UserUncheckedCreateWithoutRevertedValidationsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutRevertedValidationsInput = {
@@ -13823,6 +14010,7 @@ export type UserUpdateWithoutRevertedValidationsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRevertedValidationsInput = {
@@ -13891,6 +14079,7 @@ export type UserUncheckedUpdateWithoutRevertedValidationsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutMentorIntakeAttemptsInput = {
@@ -13959,6 +14148,7 @@ export type UserCreateWithoutMentorIntakeAttemptsInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutMentorIntakeAttemptsInput = {
@@ -14027,6 +14217,7 @@ export type UserUncheckedCreateWithoutMentorIntakeAttemptsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutMentorIntakeAttemptsInput = {
@@ -14111,6 +14302,7 @@ export type UserUpdateWithoutMentorIntakeAttemptsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMentorIntakeAttemptsInput = {
@@ -14179,6 +14371,7 @@ export type UserUncheckedUpdateWithoutMentorIntakeAttemptsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutMentorParticipationSanctionsInput = {
@@ -14247,6 +14440,7 @@ export type UserCreateWithoutMentorParticipationSanctionsInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutMentorParticipationSanctionsInput = {
@@ -14315,6 +14509,7 @@ export type UserUncheckedCreateWithoutMentorParticipationSanctionsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutMentorParticipationSanctionsInput = {
@@ -14399,6 +14594,7 @@ export type UserUpdateWithoutMentorParticipationSanctionsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMentorParticipationSanctionsInput = {
@@ -14467,6 +14663,7 @@ export type UserUncheckedUpdateWithoutMentorParticipationSanctionsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutRadarCvOwnedInput = {
@@ -14535,6 +14732,7 @@ export type UserCreateWithoutRadarCvOwnedInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutRadarCvOwnedInput = {
@@ -14603,6 +14801,7 @@ export type UserUncheckedCreateWithoutRadarCvOwnedInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutRadarCvOwnedInput = {
@@ -14676,6 +14875,7 @@ export type UserCreateWithoutRadarCvReviewedInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutRadarCvReviewedInput = {
@@ -14744,6 +14944,7 @@ export type UserUncheckedCreateWithoutRadarCvReviewedInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutRadarCvReviewedInput = {
@@ -14828,6 +15029,7 @@ export type UserUpdateWithoutRadarCvOwnedInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRadarCvOwnedInput = {
@@ -14896,6 +15098,7 @@ export type UserUncheckedUpdateWithoutRadarCvOwnedInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutRadarCvReviewedInput = {
@@ -14975,6 +15178,7 @@ export type UserUpdateWithoutRadarCvReviewedInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRadarCvReviewedInput = {
@@ -15043,6 +15247,7 @@ export type UserUncheckedUpdateWithoutRadarCvReviewedInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutRadarSnapshotsInput = {
@@ -15111,6 +15316,7 @@ export type UserCreateWithoutRadarSnapshotsInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutRadarSnapshotsInput = {
@@ -15179,6 +15385,7 @@ export type UserUncheckedCreateWithoutRadarSnapshotsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutRadarSnapshotsInput = {
@@ -15263,6 +15470,7 @@ export type UserUpdateWithoutRadarSnapshotsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRadarSnapshotsInput = {
@@ -15331,6 +15539,7 @@ export type UserUncheckedUpdateWithoutRadarSnapshotsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutRadarAuditSubjectsInput = {
@@ -15399,6 +15608,7 @@ export type UserCreateWithoutRadarAuditSubjectsInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutRadarAuditSubjectsInput = {
@@ -15467,6 +15677,7 @@ export type UserUncheckedCreateWithoutRadarAuditSubjectsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutRadarAuditSubjectsInput = {
@@ -15540,6 +15751,7 @@ export type UserCreateWithoutRadarAuditActorsInput = {
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutRadarAuditActorsInput = {
@@ -15608,6 +15820,7 @@ export type UserUncheckedCreateWithoutRadarAuditActorsInput = {
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutRadarAuditActorsInput = {
@@ -15692,6 +15905,7 @@ export type UserUpdateWithoutRadarAuditSubjectsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRadarAuditSubjectsInput = {
@@ -15760,6 +15974,7 @@ export type UserUncheckedUpdateWithoutRadarAuditSubjectsInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutRadarAuditActorsInput = {
@@ -15839,6 +16054,7 @@ export type UserUpdateWithoutRadarAuditActorsInput = {
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRadarAuditActorsInput = {
@@ -15907,6 +16123,7 @@ export type UserUncheckedUpdateWithoutRadarAuditActorsInput = {
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSocialAccountsInput = {
@@ -15975,6 +16192,7 @@ export type UserCreateWithoutSocialAccountsInput = {
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSocialAccountsInput = {
@@ -16043,6 +16261,7 @@ export type UserUncheckedCreateWithoutSocialAccountsInput = {
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSocialAccountsInput = {
@@ -16127,6 +16346,7 @@ export type UserUpdateWithoutSocialAccountsInput = {
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSocialAccountsInput = {
@@ -16195,6 +16415,7 @@ export type UserUncheckedUpdateWithoutSocialAccountsInput = {
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPortfolioProjectsInput = {
@@ -16263,6 +16484,7 @@ export type UserCreateWithoutPortfolioProjectsInput = {
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPortfolioProjectsInput = {
@@ -16331,6 +16553,7 @@ export type UserUncheckedCreateWithoutPortfolioProjectsInput = {
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPortfolioProjectsInput = {
@@ -16415,6 +16638,7 @@ export type UserUpdateWithoutPortfolioProjectsInput = {
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPortfolioProjectsInput = {
@@ -16483,6 +16707,299 @@ export type UserUncheckedUpdateWithoutPortfolioProjectsInput = {
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutPushSubscriptionsInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
+  city?: Prisma.CityCreateNestedOneWithoutUsersInput
+  roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutPushSubscriptionsInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  cityId?: string | null
+  companyId?: string | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutPushSubscriptionsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutPushSubscriptionsInput, Prisma.UserUncheckedCreateWithoutPushSubscriptionsInput>
+}
+
+export type UserUpsertWithoutPushSubscriptionsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutPushSubscriptionsInput, Prisma.UserUncheckedUpdateWithoutPushSubscriptionsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutPushSubscriptionsInput, Prisma.UserUncheckedCreateWithoutPushSubscriptionsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutPushSubscriptionsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutPushSubscriptionsInput, Prisma.UserUncheckedUpdateWithoutPushSubscriptionsInput>
+}
+
+export type UserUpdateWithoutPushSubscriptionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
+  city?: Prisma.CityUpdateOneWithoutUsersNestedInput
+  roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutPushSubscriptionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyCityInput = {
@@ -16569,6 +17086,7 @@ export type UserUpdateWithoutCityInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCityInput = {
@@ -16637,6 +17155,7 @@ export type UserUncheckedUpdateWithoutCityInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateManyWithoutCityInput = {
@@ -16741,6 +17260,7 @@ export type UserUpdateWithoutCompanyInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCompanyInput = {
@@ -16809,6 +17329,7 @@ export type UserUncheckedUpdateWithoutCompanyInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateManyWithoutCompanyInput = {
@@ -16881,6 +17402,7 @@ export type UserCountOutputType = {
   radarAuditActors: number
   socialAccounts: number
   portfolioProjects: number
+  pushSubscriptions: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -16930,6 +17452,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   radarAuditActors?: boolean | UserCountOutputTypeCountRadarAuditActorsArgs
   socialAccounts?: boolean | UserCountOutputTypeCountSocialAccountsArgs
   portfolioProjects?: boolean | UserCountOutputTypeCountPortfolioProjectsArgs
+  pushSubscriptions?: boolean | UserCountOutputTypeCountPushSubscriptionsArgs
 }
 
 /**
@@ -17264,6 +17787,13 @@ export type UserCountOutputTypeCountPortfolioProjectsArgs<ExtArgs extends runtim
   where?: Prisma.UserPortfolioProjectWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountPushSubscriptionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PushSubscriptionWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -17334,6 +17864,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   radarAuditActors?: boolean | Prisma.User$radarAuditActorsArgs<ExtArgs>
   socialAccounts?: boolean | Prisma.User$socialAccountsArgs<ExtArgs>
   portfolioProjects?: boolean | Prisma.User$portfolioProjectsArgs<ExtArgs>
+  pushSubscriptions?: boolean | Prisma.User$pushSubscriptionsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -17452,6 +17983,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   radarAuditActors?: boolean | Prisma.User$radarAuditActorsArgs<ExtArgs>
   socialAccounts?: boolean | Prisma.User$socialAccountsArgs<ExtArgs>
   portfolioProjects?: boolean | Prisma.User$portfolioProjectsArgs<ExtArgs>
+  pushSubscriptions?: boolean | Prisma.User$pushSubscriptionsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -17518,6 +18050,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     radarAuditActors: Prisma.$RadarAuditEventPayload<ExtArgs>[]
     socialAccounts: Prisma.$UserSocialAccountPayload<ExtArgs>[]
     portfolioProjects: Prisma.$UserPortfolioProjectPayload<ExtArgs>[]
+    pushSubscriptions: Prisma.$PushSubscriptionPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -17982,6 +18515,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   radarAuditActors<T extends Prisma.User$radarAuditActorsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$radarAuditActorsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RadarAuditEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   socialAccounts<T extends Prisma.User$socialAccountsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$socialAccountsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserSocialAccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   portfolioProjects<T extends Prisma.User$portfolioProjectsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$portfolioProjectsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserPortfolioProjectPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  pushSubscriptions<T extends Prisma.User$pushSubscriptionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$pushSubscriptionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PushSubscriptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -19643,6 +20177,30 @@ export type User$portfolioProjectsArgs<ExtArgs extends runtime.Types.Extensions.
   take?: number
   skip?: number
   distinct?: Prisma.UserPortfolioProjectScalarFieldEnum | Prisma.UserPortfolioProjectScalarFieldEnum[]
+}
+
+/**
+ * User.pushSubscriptions
+ */
+export type User$pushSubscriptionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PushSubscription
+   */
+  select?: Prisma.PushSubscriptionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PushSubscription
+   */
+  omit?: Prisma.PushSubscriptionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PushSubscriptionInclude<ExtArgs> | null
+  where?: Prisma.PushSubscriptionWhereInput
+  orderBy?: Prisma.PushSubscriptionOrderByWithRelationInput | Prisma.PushSubscriptionOrderByWithRelationInput[]
+  cursor?: Prisma.PushSubscriptionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PushSubscriptionScalarFieldEnum | Prisma.PushSubscriptionScalarFieldEnum[]
 }
 
 /**

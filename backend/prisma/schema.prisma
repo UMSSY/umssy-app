@@ -188,7 +188,8 @@ model User {
   radarDecisions       RadarJobApplication[]     @relation("RadarDecision") @ignore
   socialAccounts       UserSocialAccount[]
   portfolioProjects    UserPortfolioProject[]
-
+  pushSubscriptions    PushSubscription[]
+  
   @@index([cityId])
   @@index([companyId])
   @@map("users")
@@ -1573,4 +1574,21 @@ model UserPortfolioProject {
   @@index([socialAccountId])
   @@index([providerId])
   @@map("user_portfolio_projects")
+}
+
+model PushSubscription {
+  id         String    @id @default(uuid()) @db.Uuid
+  userId     String    @map("user_id") @db.Uuid
+  endpoint   String    @unique @db.VarChar(500)
+  p256dh     String    @db.VarChar(255)
+  auth       String    @db.VarChar(255)
+  userAgent  String?   @map("user_agent") @db.VarChar(255)
+  lastUsedAt DateTime? @map("last_used_at") @db.Timestamptz(6)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("push_subscriptions")
 }

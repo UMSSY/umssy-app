@@ -442,3 +442,8 @@ export type UserSocialAccount = Prisma.UserSocialAccountModel
  * 
  */
 export type UserPortfolioProject = Prisma.UserPortfolioProjectModel
+/**
+ * Model PushSubscription
+ * 
+ */
+export type PushSubscription = Prisma.PushSubscriptionModel
