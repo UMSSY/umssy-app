@@ -46,13 +46,56 @@ function setRadar(override: Partial<ReturnType<typeof useLiveRadar>> = {}) {
       rubricVersion:'servidor-v1',scores:{desarrollo:0,'cloud-devops':0,'data-ai':0,qa:0,ciberseguridad:0,'gobernanza-ti':0},
       average:0,variation:null,pending:0,hasPending:false,evidence:{},sourceRevision:1,inputRevision:1,
       processingStatus:'ready',skills:[]}), loading: false, error: null, variation: null,
-    refresh: vi.fn().mockResolvedValue(undefined), retry: vi.fn().mockResolvedValue(undefined), retrying: false, ...override,
+    refresh: vi.fn().mockResolvedValue(undefined), retry: vi.fn().mockResolvedValue(undefined), retrying: false, previous: null, ...override,
   });
 }
 
 describe("Radar personal integrado con Épica 2", () => {
   beforeEach(() => { stubMatchMedia(); setRadar(); });
   afterEach(() => { cleanup(); vi.clearAllMocks(); sessionStorage.clear(); });
+
+  it.each([[0, 0, 'Sin cambio'], [2, 0, 'Bajó 2 puntos'], [0, 2, 'Subió 2 puntos']])('compara el eje con diferencia %s', (previousScore, currentScore, label) => {
+    const data = mockHook().data!;
+    setRadar({ data: { ...data, version: 2, processingStatus: "pending", areas: data.areas.map(area => ({ ...area, score: area.id === "qa" ? currentScore : area.score })) }, previous: { version: 1, updatedAt: '2026-10-20T08:00:00Z', scores: { desarrollo: 0, 'cloud-devops': 0, 'data-ai': 0, qa: previousScore, ciberseguridad: 0, 'gobernanza-ti': 0 } } });
+    renderWithQuery(<RadarProfileView />);
+    const toggle = screen.getByRole('switch', { name: 'Comparar con la anterior' });
+    expect(toggle).not.toBeChecked();
+    expect(screen.queryByRole('table', { name: 'Cambios por eje' })).not.toBeInTheDocument();
+    expect(document.querySelectorAll('.recharts-radar')).toHaveLength(1);
+    fireEvent.click(toggle);
+    expect(toggle).toBeChecked();
+    expect(document.querySelectorAll('.recharts-radar')).toHaveLength(2);
+    expect(screen.getByRole('heading', { name: 'Detalle de los cambios' })).toBeInTheDocument();
+    expect(screen.queryByRole('table', { name: 'Cambios por eje' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'QA' }));
+    expect(screen.getByText(label)).toBeInTheDocument();
+    expect(screen.getByText(`Puntaje anterior: ${previousScore} / 10`)).toBeInTheDocument();
+    expect(screen.getByText(`Puntaje actual: ${currentScore} / 10`)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Ver detalle de QA' }));
+    expect(screen.getByRole('button', { name: 'QA' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByText(/Anterior \(línea discontinua\)/)).toBeInTheDocument();
+    expect(screen.getByText(/Hay un recálculo pendiente/)).toBeInTheDocument();
+    fireEvent.click(toggle);
+    expect(toggle).not.toBeChecked();
+    expect(document.querySelectorAll('.recharts-radar')).toHaveLength(1);
+    expect(screen.queryByText(label)).not.toBeInTheDocument();
+    expect(screen.queryByRole('table', { name: 'Cambios por eje' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Comparación de publicaciones' })).not.toBeInTheDocument();
+  });
+
+  it('avisa que la comparación estará disponible tras la próxima publicación', () => {
+    renderWithQuery(<RadarProfileView />);
+    expect(screen.getByText(/Tienes una publicación/)).toBeInTheDocument();
+    expect(screen.queryByRole('switch', { name: 'Comparar con la anterior' })).not.toBeInTheDocument();
+  });
+
+  it('muestra el estado sin publicaciones', () => {
+    const data = mockHook().data!;
+    setRadar({ data: { ...data, version: 0 } });
+    renderWithQuery(<RadarProfileView />);
+    expect(screen.getByText(/Tu radar está sin datos/)).toBeInTheDocument();
+    expect(screen.queryByTestId('radar-dot-qa')).not.toBeInTheDocument();
+  });
 
   it("muestra seis ejes en cero sin inventar datos ni mezclar perfiles", () => {
     renderWithQuery(<RadarProfileView />);

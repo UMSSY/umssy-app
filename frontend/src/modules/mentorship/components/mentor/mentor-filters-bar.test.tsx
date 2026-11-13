@@ -36,7 +36,7 @@ describe("MentorFiltersBar", () => {
     await user.click(
       screen.getByRole("combobox", { name: "Área técnica" }),
     );
-    await user.click(screen.getByRole("option", { name: "Backend" }));
+    await user.click(await screen.findByRole("option", { name: "Backend" }));
 
     expect(onAreaChange).toHaveBeenCalledWith("Backend");
   });
