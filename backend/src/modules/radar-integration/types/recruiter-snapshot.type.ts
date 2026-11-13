@@ -1,4 +1,4 @@
-import type { Scores } from '../radar-scoring.js';
+import type { Scores } from '../utils/radar-scoring.js';
 
 export interface RecruiterSnapshot {
   user_id: string;

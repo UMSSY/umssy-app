@@ -8,7 +8,7 @@ import {
   RUBRIC_VERSION,
   scoreVerifiedSkills,
   type EvidenceSkill,
-} from '../radar-scoring.js';
+} from '../utils/radar-scoring.js';
 
 const TECH_BOLIVIA = SEED_JOB_OFFER_COMPANIES[0].title;
 const NOVA_SOFT = SEED_JOB_OFFER_COMPANIES[1].title;

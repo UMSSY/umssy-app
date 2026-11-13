@@ -1,36 +1,47 @@
-import { JobApplicationConsentRequiredException } from '../matching/exceptions/job-application-consent-required.exception.js';
+import type {
+  ApplicationConsentsResponse,
+  ApplicationResponse,
+} from '../types/application-response.type.js';
+import type {
+  ActiveVacancyResponse,
+  RecruiterVacancyResponse,
+} from '../types/vacancy-response.type.js';
+import { JobApplicationConsentRequiredException } from '../../matching/exceptions/job-application-consent-required.exception.js';
 import {
   mapRecruiterCandidate,
+  mapRecruiterVacancy,
+  mapActiveVacancy,
   mapRecruiterAreaEvidence,
-} from './mappers/radar-recruitment.mapper.js';
-import { ApplicationsService } from '../applications/services/applications.service.js';
-import { RadarRecruitmentSourcesService } from './services/radar-recruitment-sources.service.js';
+} from '../mappers/radar-recruitment.mapper.js';
+import { ApplicationsService } from '../../applications/services/applications.service.js';
+import { RadarRecruitmentSourcesService } from './radar-recruitment-sources.service.js';
 import { Injectable } from '@nestjs/common';
-import { ForbiddenRoleException } from '../../common/exceptions/forbidden-role.exception.js';
-import { DuplicateJobApplicationException } from '../matching/exceptions/duplicate-job-application.exception.js';
-import { JobApplicationsService } from '../matching/services/job-applications.service.js';
-import { RadarApplicationConflictException } from './exceptions/radar-application-conflict.exception.js';
-import { RadarApplicationNotFoundException } from './exceptions/radar-application-not-found.exception.js';
-import { RadarAreaUnknownException } from './exceptions/radar-area-unknown.exception.js';
-import { RadarCompanyNotFoundException } from './exceptions/radar-company-not-found.exception.js';
-import { RadarCompanyNotLinkedException } from './exceptions/radar-company-not-linked.exception.js';
-import { RadarCvNotSharedException } from './exceptions/radar-cv-not-shared.exception.js';
-import { RadarRecruiterDecisionInvalidException } from './exceptions/radar-recruiter-decision-invalid.exception.js';
-import { RadarVacancyUnavailableException } from './exceptions/radar-vacancy-unavailable.exception.js';
-import { RadarAccessRepository } from './repositories/radar-access.repository.js';
-import { RadarApplicationsService } from './services/radar-applications.service.js';
-import { RadarRecruitmentRepository } from './repositories/radar-recruitment.repository.js';
+import { ForbiddenRoleException } from '../../../common/exceptions/forbidden-role.exception.js';
+import { DuplicateJobApplicationException } from '../../matching/exceptions/duplicate-job-application.exception.js';
+import { JobApplicationsService } from '../../matching/services/job-applications.service.js';
+import { RadarApplicationConflictException } from '../exceptions/radar-application-conflict.exception.js';
+import { RadarApplicationNotFoundException } from '../exceptions/radar-application-not-found.exception.js';
+import { RadarAreaUnknownException } from '../exceptions/radar-area-unknown.exception.js';
+import { RadarCompanyNotFoundException } from '../exceptions/radar-company-not-found.exception.js';
+import { RadarCompanyNotLinkedException } from '../exceptions/radar-company-not-linked.exception.js';
+import { RadarCvNotSharedException } from '../exceptions/radar-cv-not-shared.exception.js';
+import { RadarRecruiterDecisionInvalidException } from '../exceptions/radar-recruiter-decision-invalid.exception.js';
+import { RadarVacancyUnavailableException } from '../exceptions/radar-vacancy-unavailable.exception.js';
+import { RadarAccessRepository } from '../repositories/radar-access.repository.js';
+import { RadarApplicationsService } from './radar-applications.service.js';
+import { RadarRecruitmentRepository } from '../repositories/radar-recruitment.repository.js';
 import {
-  mapApplicationStatus,
+  mapApplicationConsentsResponse,
+  mapApplicationResponse,
   mapApplicationSummary,
-} from './mappers/radar-applications.mapper.js';
-import { recruiterContactProjection } from './recruiter-consent.js';
+} from '../mappers/radar-applications.mapper.js';
+import { recruiterContactProjection } from '../recruiter-consent.js';
 import {
   AREA_IDS,
   emptyScores,
   matchRadar,
   type Scores,
-} from './radar-scoring.js';
+} from '../utils/radar-scoring.js';
 
 @Injectable()
 export class RadarRecruitmentService {
@@ -87,31 +98,22 @@ export class RadarRecruitmentService {
     }
   }
 
-  async activeVacancies() {
+  async activeVacancies(): Promise<ActiveVacancyResponse[]> {
     const jobs = await this.sources.activeVacancies();
-    return jobs.map((job) => ({
-      id: job.id,
-      companyId: job.companyId,
-      title: job.title,
-      description: job.description,
-    }));
+    return jobs.map(mapActiveVacancy);
   }
 
-  // HU4: el Radar, el CV y el contacto requieren consentimientos independientes.
-  // Postularse no obliga a compartir información privada.
   async apply(
     userId: string,
     jobId: string,
     consent: boolean,
     consentCv: boolean,
     consentContact = false,
-  ) {
+  ): Promise<ApplicationResponse> {
     await this.requireApplicantRole(userId);
     if (!consent || !consentCv || !consentContact)
       throw new JobApplicationConsentRequiredException();
 
-    // Reutiliza las reglas de postulación del Epic (vacante abierta, estado
-    // inicial, duplicados). Si ya existe, sólo se actualizan consentimientos.
     let application = (await this.jobApplications.findMine(userId, jobId))
       .application;
     if (!application) {
@@ -157,14 +159,14 @@ export class RadarRecruitmentService {
       },
     );
 
-    return {
-      id: rows[0].id,
-      jobOfferId: jobId,
-      state: mapApplicationStatus(application.status),
+    return mapApplicationResponse(
+      rows[0].id,
+      jobId,
+      application.status,
       consent,
-      consentCv: consent && consentCv,
-      consentContact: consent && consentContact,
-    };
+      consentCv,
+      consentContact,
+    );
   }
 
   async myApplications(userId: string) {
@@ -179,7 +181,7 @@ export class RadarRecruitmentService {
     consent: boolean,
     consentCv: boolean,
     consentContact: boolean,
-  ) {
+  ): Promise<ApplicationConsentsResponse> {
     await this.requireApplicantRole(userId);
     const rows = await this.applications.updateConsents(
       userId,
@@ -204,13 +206,13 @@ export class RadarRecruitmentService {
         consentContact: consent && consentContact,
       },
     );
-    return {
-      id: applicationId,
-      state: mapApplicationStatus(rows[0].status_title),
+    return mapApplicationConsentsResponse(
+      applicationId,
+      rows[0].status_title,
       consent,
-      consentCv: consent && consentCv,
-      consentContact: consent && consentContact,
-    };
+      consentCv,
+      consentContact,
+    );
   }
 
   async withdrawMyApplication(userId: string, applicationId: string) {
@@ -221,17 +223,15 @@ export class RadarRecruitmentService {
     return { id: applicationId, state: 'withdrawn' as const };
   }
 
-  async recruiterVacancies(userId: string) {
+  async recruiterVacancies(
+    userId: string,
+  ): Promise<RecruiterVacancyResponse[]> {
     await this.requireRole(userId, 'empresa');
     const companyId = await this.sources.recruiterCompanyId(userId);
     if (!companyId) return [];
     const companyIds = [companyId];
     const offers = await this.sources.recruiterVacancies(companyIds);
-    return offers.map((offer) => ({
-      id: offer.id,
-      title: offer.title,
-      companyId: offer.companyId,
-    }));
+    return offers.map(mapRecruiterVacancy);
   }
 
   private async targetFromSkills(

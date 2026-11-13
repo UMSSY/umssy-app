@@ -1,10 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import {
-  applicationConsentsSchema,
-  applicationRequestSchema,
-  companyAccessSchema,
-  recruiterDecisionSchema,
-} from '../requests/radar-integration.requests.js';
+import { companyAccessSchema } from '../requests/company-access.request.js';
+import { applicationRequestSchema } from '../requests/application.request.js';
+import { applicationConsentsSchema } from '../requests/application-consents.request.js';
+import { recruiterDecisionSchema } from '../requests/recruiter-decision.request.js';
 
 const UUID = '11111111-1111-4111-8111-111111111111';
 

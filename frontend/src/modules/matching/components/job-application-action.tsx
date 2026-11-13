@@ -1,10 +1,12 @@
-"use client";
+'use client';
 
-import { CircleCheck } from "lucide-react";
-import { useState } from "react";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Label } from '@/components/ui/label';
+
+import { CircleCheck } from 'lucide-react';
+import { useState } from 'react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -12,11 +14,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { JOB_APPLICATION_MESSAGES } from "../constants/job-application.constants";
-import { useJobApplication } from "../hooks/use-job-application";
-import type { JobApplicationActionProps } from "../types/job-application-action-props.types";
-import { formatApplicationDate } from "../utils/format-application-date";
+} from '@/components/ui/dialog';
+import { JOB_APPLICATION_MESSAGES } from '../constants/job-application.constants';
+import { useJobApplication } from '../hooks/use-job-application';
+import type { JobApplicationActionProps } from '../types/job-application-action-props.types';
+import { formatApplicationDate } from '../utils/format-application-date';
 
 export function JobApplicationAction({
   jobOfferId,
@@ -46,7 +48,7 @@ export function JobApplicationAction({
             {JOB_APPLICATION_MESSAGES.alreadyApplied}
           </Button>
           <p className="flex items-center gap-2 text-xs text-text-secondary">
-            {JOB_APPLICATION_MESSAGES.appliedOn}{" "}
+            {JOB_APPLICATION_MESSAGES.appliedOn}{' '}
             {formatApplicationDate(application.appliedAt)} ·
             <Badge variant="outline">{application.status}</Badge>
           </p>
@@ -89,15 +91,15 @@ export function JobApplicationAction({
               Marca las tres casillas para enviar la postulación.
             </DialogDescription>
           </DialogHeader>
-          <label className="flex items-start gap-3 text-sm">
+          <Label className="flex items-start gap-3 text-sm">
             <Checkbox
               checked={consentCv}
               disabled={isApplying}
               onCheckedChange={(checked) => setConsentCv(checked === true)}
             />
             Permito que los reclutadores de esta empresa revisen mi CV actual.
-          </label>
-          <label className="flex items-start gap-3 text-sm">
+          </Label>
+          <Label className="flex items-start gap-3 text-sm">
             <Checkbox
               checked={consentRadar}
               disabled={isApplying}
@@ -105,8 +107,8 @@ export function JobApplicationAction({
             />
             Permito que los reclutadores de esta empresa revisen mi radar de
             afinidad publicado.
-          </label>
-          <label className="flex items-start gap-3 text-sm">
+          </Label>
+          <Label className="flex items-start gap-3 text-sm">
             <Checkbox
               checked={consentContact}
               disabled={isApplying}
@@ -114,7 +116,7 @@ export function JobApplicationAction({
             />
             Permito que los reclutadores de esta empresa vean mi información de
             contacto (correo electrónico y teléfono).
-          </label>
+          </Label>
           {applyError && (
             <p role="alert" className="text-sm text-destructive">
               {JOB_APPLICATION_MESSAGES.applyError}
@@ -138,7 +140,7 @@ export function JobApplicationAction({
             >
               {isApplying
                 ? JOB_APPLICATION_MESSAGES.applying
-                : "Confirmar postulación"}
+                : 'Confirmar postulación'}
             </Button>
           </DialogFooter>
         </DialogContent>
