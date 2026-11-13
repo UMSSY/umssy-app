@@ -2,10 +2,18 @@ import { act, cleanup, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { SaveFileHandle } from "@/shared/types/save-file.types";
 import * as downloadFileModule from "@/shared/utils/download-file";
+import * as reportAuthorModule from "../utils/report-author.util";
+import * as reportPdfModule from "../utils/report-pdf.util";
 
 import { useExportReportCsv } from "./use-export-report-csv";
 
 const EXPORTED_FILE = { file: new Blob(["Usuario"], { type: "text/csv" }), fileName: "usuarios.csv" };
+const PDF_OPTIONS = {
+  title: "Reporte de usuarios aceptados",
+  subtitle: "Personas con acceso aprobado a la plataforma",
+  dateColumnLabel: "Fecha de aprobación",
+  filters: [{ label: "Tipo de usuario", value: "Todos" }],
+};
 
 function deferred<T>() {
   let resolve!: (value: T) => void;
@@ -152,6 +160,26 @@ describe("useExportReportCsv", () => {
     expect(result.current.errorMessage).toBeUndefined();
     await act(async () => { await vi.advanceTimersByTimeAsync(4000); });
     expect(result.current.successMessage).toBeUndefined();
+  });
+
+  it("convierte el CSV de la página elegida en PDF sin abrir el selector CSV", async () => {
+    const pdfFile = new Blob(["PDF"], { type: "application/pdf" });
+    const pdfSpy = vi.spyOn(reportPdfModule, "createReportPdf").mockResolvedValue({ file: pdfFile, fileName: "usuarios.pdf" });
+    vi.spyOn(reportAuthorModule, "resolveReportAuthor").mockResolvedValue("Ana Pérez (Administrativo)");
+    const exportReport = vi.fn().mockResolvedValue(EXPORTED_FILE);
+    const { result } = renderHook(() => useExportReportCsv(exportReport, "usuarios.csv", PDF_OPTIONS));
+
+    await act(async () => { await result.current.exportCsv("pdf", "page"); });
+
+    expect(picker).not.toHaveBeenCalled();
+    expect(exportReport).toHaveBeenCalledWith("page", "pdf");
+    expect(pdfSpy).toHaveBeenCalledWith(EXPORTED_FILE.file, EXPORTED_FILE.fileName, {
+      ...PDF_OPTIONS,
+      generatedBy: "Ana Pérez (Administrativo)",
+      generatedAt: expect.any(Date),
+    });
+    expect(downloadFileModule.downloadFile).toHaveBeenCalledWith(pdfFile, "usuarios.pdf");
+    expect(result.current.successMessage).toBe("La exportación de la tabla ha sido un éxito");
   });
 
   it("no muestra éxito si falla la generación del CSV", async () => {

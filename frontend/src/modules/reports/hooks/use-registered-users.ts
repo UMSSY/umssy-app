@@ -26,7 +26,7 @@ export function useRegisteredUsers(page: number, userType?: RoleTag, period?: Ac
     reportsService
       .getRegisteredUsers({ page, limit: REGISTERED_USERS_PAGE_SIZE, userType, period, search, ...(snapshotAt && { snapshotAt }) })
       .then((response) => {
-        if (!isCancelled) setState({ requestKey, result: response.data });
+        if (!isCancelled) setState({ requestKey, result: response.data, snapshotAt });
       })
       .catch((error: unknown) => {
         if (isCancelled) return;
@@ -35,6 +35,7 @@ export function useRegisteredUsers(page: number, userType?: RoleTag, period?: Ac
         setState((previous) => ({
           requestKey,
           result: hasConnectionError ? previous?.result : undefined,
+          snapshotAt,
           errorMessage: "No se pudo cargar el reporte de usuarios registrados.",
           hasConnectionError,
         }));
@@ -60,6 +61,7 @@ export function useRegisteredUsers(page: number, userType?: RoleTag, period?: Ac
     users,
     totalItems,
     totalPages: Math.max(1, Math.ceil(totalItems / REGISTERED_USERS_PAGE_SIZE)),
+    snapshotAt: isCurrentRequest ? state.snapshotAt : undefined,
     isLoading: !isCurrentRequest,
     errorMessage: isCurrentRequest && users.length === 0 ? state.errorMessage : undefined,
     isSlow: !isCurrentRequest && slowRequestKey === requestKey,

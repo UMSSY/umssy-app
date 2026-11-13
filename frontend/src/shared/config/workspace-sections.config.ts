@@ -45,6 +45,10 @@ export const WORKSPACE_SECTIONS: readonly WorkspaceSectionProps[] = [
       { label: "Usuarios aceptados", href: "/backoffice/reports/registered-users" },
       { label: "Usuarios rechazados", href: "/backoffice/reports/rejected-users" },
       { label: "Historial de reportes", href: "/backoffice/reports/history" },
+      { label: "Habilidades por Carrera", href: "/backoffice/reports/heatmaps/skills-by-career", group: "Mapa de calor" },
+      { label: "Habilidades vs. Rango Salarial", href: "/backoffice/reports/heatmaps/skills-by-salary", group: "Mapa de calor" },
+      { label: "Empleabilidad y Habilidades", href: "/backoffice/reports/heatmaps/employability", group: "Mapa de calor" },
+      { label: "Habilidades vs. Experiencia", href: "/backoffice/reports/heatmaps/skills-by-experience", group: "Mapa de calor" },
     ],
   },
   // Va antes de "requests", que abarca todo /backoffice.

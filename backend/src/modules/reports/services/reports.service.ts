@@ -18,8 +18,10 @@ import {
 import { ReportUsersRepository } from '../repositories/report-users.repository.js';
 import type {
   RegisteredUsersFilters,
+  RegisteredUsersExportQuery,
   RegisteredUsersQuery,
   RejectedUsersFilters,
+  RejectedUsersExportQuery,
   RejectedUsersQuery,
 } from '../requests/report-users.schema.js';
 import type {
@@ -65,6 +67,13 @@ function sortByNewest(users: ReportUser[]): ReportUser[] {
   );
 }
 
+function paginateExport<T>(items: T[], page?: number, limit?: number): T[] {
+  if (page === undefined || limit === undefined) return items;
+
+  const start = (page - 1) * limit;
+  return items.slice(start, start + limit);
+}
+
 @Injectable()
 export class ReportsService {
   constructor(private readonly reportUsersRepository: ReportUsersRepository) {}
@@ -77,9 +86,9 @@ export class ReportsService {
   }
 
   async exportRegisteredUsersCsv(
-    filters: RegisteredUsersFilters,
+    filters: RegisteredUsersExportQuery,
   ): Promise<ReportCsvFile> {
-    const users = await this.findRegisteredUsers(filters);
+    const users = paginateExport(await this.findRegisteredUsers(filters), filters.page, filters.limit);
     const rows = users.map(toRegisteredUserCsvRow);
 
     const fileNameFilters = [
@@ -106,9 +115,9 @@ export class ReportsService {
   }
 
   async exportRejectedUsersCsv(
-    filters: RejectedUsersFilters,
+    filters: RejectedUsersExportQuery,
   ): Promise<ReportCsvFile> {
-    const users = await this.findRejectedUsers(filters);
+    const users = paginateExport(await this.findRejectedUsers(filters), filters.page, filters.limit);
     const rows = users.map(toRejectedUserCsvRow);
 
     return {
