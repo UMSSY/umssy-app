@@ -18,7 +18,7 @@ import { MyPassesEmptyState } from "../components/my-passes-empty-state";
 import type { MyPassesViewProps } from "../types/my-passes-view-props.types";
 
 export function MyPassesView({ onOpenWorkshopChat }: MyPassesViewProps = {}) {
-  const { status, isOnline, passes: registrations, offlineQrTokens, lastUpdated, isStale, error, retry } = usePassesViewState();
+  const { status, isOnline, passes: registrations, offlineQrTokens, lastUpdated, isStale, error, isConnectionError, retry } = usePassesViewState();
   const isLoading = status === "loading";
   const offlineReason = isOnline ? undefined : OFFLINE_PASSES_TEXTS.requiresConnection;
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -40,7 +40,10 @@ export function MyPassesView({ onOpenWorkshopChat }: MyPassesViewProps = {}) {
       ) : status === "no-offline-copy" ? (
         <NoOfflineCopyState />
       ) : status === "error" && error ? (
-        <RequestFeedback message={error} isError onRetry={retry} />
+        <div className="space-y-6">
+          {isConnectionError ? <NoOfflineCopyState /> : null}
+          <RequestFeedback message={error} isError onRetry={retry} />
+        </div>
       ) : !registrations.length ? (
         <MyPassesEmptyState />
       ) : (

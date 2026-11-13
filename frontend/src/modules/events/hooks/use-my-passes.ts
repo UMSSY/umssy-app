@@ -24,6 +24,7 @@ export function useMyPasses() {
         ? cause.message
         : getRegistrationErrorMessage(cause)
       : null,
+    isConnectionError: query.isError && !query.isFetching && isApiError(cause) && !cause.response,
     retry: () => { void query.refetch(); },
   };
 }

@@ -9,5 +9,6 @@ export interface PassesViewState {
   lastUpdated: string | null;
   isStale: boolean;
   error: string | null;
+  isConnectionError: boolean;
   retry: () => void;
 }

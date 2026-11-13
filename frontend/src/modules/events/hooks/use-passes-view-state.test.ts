@@ -14,7 +14,7 @@ vi.mock("./use-online-status", () => ({ useOnlineStatus: vi.fn() }));
 type LiveState = ReturnType<typeof useMyPasses>;
 
 const retry = vi.fn();
-const live: LiveState = { registrations: [], isLoading: false, error: null, retry };
+const live: LiveState = { registrations: [], isLoading: false, error: null, isConnectionError: false, retry };
 const registration = { id: "reg-1", eventName: "React", date: "2026-11-20", startTime: "09:00", endTime: "12:00", location: "Aula 101", status: "Confirmada" };
 const saved = { ...registration, location: null, qrToken: "c".repeat(64) };
 const token = (sub: string) => `h.${btoa(JSON.stringify({ sub }))}.s`;
@@ -105,5 +105,18 @@ describe("usePassesViewState", () => {
     const { result } = setup({ liveState: { error: "Sin servidor" } });
     await waitFor(() => expect(result.current.status).toBe("error"));
     expect(result.current.error).toBe("Sin servidor");
+  });
+
+  it("flags connection errors without a saved copy", async () => {
+    const { result } = setup({ liveState: { error: "No pudimos completar la operación", isConnectionError: true } });
+    await waitFor(() => expect(result.current.status).toBe("error"));
+    expect(result.current.isConnectionError).toBe(true);
+  });
+
+  it("does not flag connection errors when a saved copy is shown", async () => {
+    await offlinePassesStore.save("user-a", [saved]);
+    const { result } = setup({ liveState: { error: "Sin servidor", isConnectionError: true } });
+    await waitFor(() => expect(result.current.status).toBe("saved"));
+    expect(result.current.isConnectionError).toBe(false);
   });
 });

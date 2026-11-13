@@ -29,6 +29,7 @@ export function usePassesViewState(): PassesViewState {
     isOnline,
     offlineQrTokens: Object.fromEntries(saved.map(({ id, qrToken }) => [id, qrToken])),
     lastUpdated: snapshot ? formatLastUpdated(snapshot.savedAt) : null,
+    isConnectionError: false,
     retry: live.retry,
   };
   const savedView = (isStale: boolean, error: string | null): PassesViewState => ({
@@ -54,6 +55,10 @@ export function usePassesViewState(): PassesViewState {
     return savedView(isSnapshotStale(snapshot.savedAt, now), null);
   }
   if (live.isLoading) return emptyView("loading");
-  if (live.error) return saved.length ? savedView(true, live.error) : emptyView("error", live.error);
+  if (live.error) {
+    return saved.length
+      ? savedView(true, live.error)
+      : { ...emptyView("error", live.error), isConnectionError: live.isConnectionError };
+  }
   return { ...base, status: "live", passes: live.registrations, isStale: false, error: null };
 }

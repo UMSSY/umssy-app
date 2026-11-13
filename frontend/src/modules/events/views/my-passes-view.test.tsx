@@ -236,5 +236,25 @@ describe('Mis pases sin conexión', () => {
     await waitFor(() => expect(screen.queryByText(/No se pudieron actualizar tus pases/)).not.toBeInTheDocument());
     expect(getMine).toHaveBeenCalledTimes(2);
   });
+
+  it('shows the no-copy message above the error when the server cannot be reached', async () => {
+    getMine.mockRejectedValueOnce({ isAxiosError: true }).mockResolvedValueOnce([pass]);
+    render(<MyPassesView />);
+    const noCopy = await screen.findByRole('heading', { name: 'No hay pases guardados en este dispositivo.' });
+    const alert = screen.getByRole('alert');
+    expect(alert).toHaveTextContent('No pudimos completar la operación');
+    expect(noCopy.compareDocumentPosition(alert) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.queryByRole('region', { name: 'Aún no tienes inscripciones.' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Reintentar' }));
+    await within(await screen.findByRole('complementary', { name: 'Detalle de la inscripción' })).findByText('reg-1');
+    expect(screen.queryByRole('heading', { name: 'No hay pases guardados en este dispositivo.' })).not.toBeInTheDocument();
+  });
+
+  it('shows only the server error when the server answered', async () => {
+    getMine.mockRejectedValue({ isAxiosError: true, response: { status: 500 } });
+    render(<MyPassesView />);
+    expect(await screen.findByRole('alert')).toHaveTextContent('No pudimos completar la operación');
+    expect(screen.queryByRole('heading', { name: 'No hay pases guardados en este dispositivo.' })).not.toBeInTheDocument();
+  });
 });
 
