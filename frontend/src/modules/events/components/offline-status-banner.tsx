@@ -15,10 +15,8 @@ export function OfflineStatusBanner({ isOnline, lastUpdated, isStale, onRetry }:
       <div className="flex min-w-0 items-start gap-2.5">
         <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
         <div className="min-w-0 space-y-1">
-          <p>
-            {message}
-            {lastUpdated ? <span className="text-text-secondary"> {OFFLINE_PASSES_TEXTS.lastUpdated} {lastUpdated}</span> : null}
-          </p>
+          <p>{message}</p>
+          {lastUpdated ? <p className="text-text-secondary">{OFFLINE_PASSES_TEXTS.lastUpdated} {lastUpdated}</p> : null}
           {isStale ? <p className="text-text-secondary">{OFFLINE_PASSES_TEXTS.staleNotice}</p> : null}
         </div>
       </div>
