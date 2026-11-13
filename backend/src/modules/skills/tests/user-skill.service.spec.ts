@@ -24,6 +24,7 @@ describe('UserSkillService', () => {
     findAllByUserId: ReturnType<typeof vi.fn>;
     findByUserId: ReturnType<typeof vi.fn>;
     replaceForUser: ReturnType<typeof vi.fn>;
+    addSkillsForUser: ReturnType<typeof vi.fn>;
   };
   let profileService: { ensureProfileExists: ReturnType<typeof vi.fn> };
   let skillsAnalysis: { refreshAfterChange: ReturnType<typeof vi.fn> };
@@ -34,6 +35,7 @@ describe('UserSkillService', () => {
       findAllByUserId: vi.fn(),
       findByUserId: vi.fn(),
       replaceForUser: vi.fn(),
+      addSkillsForUser: vi.fn(),
     };
     profileService = {
       ensureProfileExists: vi.fn().mockResolvedValue({ id: userId }),
@@ -182,6 +184,41 @@ describe('UserSkillService', () => {
       ).rejects.toBeInstanceOf(ProfileNotFoundException);
       expect(skillRepository.findByIds).not.toHaveBeenCalled();
       expect(skillsAnalysis.refreshAfterChange).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('addSkills', () => {
+    it('appends skills without modifying existing sources and triggers analysis', async () => {
+      skillRepository.findByIds.mockResolvedValue([sql]);
+      userSkillRepository.addSkillsForUser.mockResolvedValue([
+        { skill: python, source: 'nlp' },
+        { skill: sql, source: 'manual' },
+      ]);
+
+      const result = await service.addSkills(userId, { skillIds: [sqlId] });
+
+      expect(result).toEqual([python, sql]);
+      expect(userSkillRepository.addSkillsForUser).toHaveBeenCalledWith(
+        userId,
+        [sqlId],
+      );
+      expect(skillsAnalysis.refreshAfterChange).toHaveBeenCalledWith(userId);
+    });
+
+    it('rejects duplicate skill ids in request', async () => {
+      await expect(
+        service.addSkills(userId, { skillIds: [sqlId, sqlId] }),
+      ).rejects.toBeInstanceOf(DuplicateSkillException);
+      expect(userSkillRepository.addSkillsForUser).not.toHaveBeenCalled();
+    });
+
+    it('rejects skill ids not in catalog', async () => {
+      skillRepository.findByIds.mockResolvedValue([]);
+
+      await expect(
+        service.addSkills(userId, { skillIds: [sqlId] }),
+      ).rejects.toBeInstanceOf(SkillNotFoundException);
+      expect(userSkillRepository.addSkillsForUser).not.toHaveBeenCalled();
     });
   });
 });
