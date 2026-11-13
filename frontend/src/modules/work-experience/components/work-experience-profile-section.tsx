@@ -5,6 +5,7 @@ import {
   ConfirmDeleteDialog,
   FeedbackMessage,
   useProfileSkillsRadar,
+  useProfileCompletionRequest,
 } from "@/modules/profile";
 import type { DetectedSkill } from "@/modules/matching";
 import { RecordEditorDialog } from "@/shared/components/layout/record-editor-dialog";
@@ -123,6 +124,8 @@ export function WorkExperienceProfileSection() {
     setHasChanges(false);
     setIsFormOpen(true);
   };
+
+  useProfileCompletionRequest('work-experience', !isLoading && !error && !isBusy, handleCreate);
 
   const handleDelete = (experience: WorkExperienceItem) => {
     if (isBusy) {

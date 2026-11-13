@@ -7,9 +7,11 @@ import { EDUCATION_FEEDBACK_MESSAGES } from "../constants/education-feedback.con
 import { educationsService } from "../services/educations.service";
 import type { EducationItem } from "../types/education-item.types";
 import type { Feedback } from "@/modules/profile";
+import { useInvalidateProfileCompleteness } from "@/modules/profile";
 
 export function useDeleteEducation(onDeleted: () => void | Promise<void>) {
-  const mutation = useMutation({ mutationFn: (request: () => Promise<void>) => request() });
+  const invalidateCompleteness = useInvalidateProfileCompleteness();
+  const mutation = useMutation({ mutationFn: (request: () => Promise<void>) => request(), onSuccess: invalidateCompleteness });
   const [isDeleting, setIsDeleting] = useState(false);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const isDeletingRef = useRef(false);
