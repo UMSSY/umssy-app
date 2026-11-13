@@ -60,6 +60,16 @@ describe('resolveAppointmentStatus', () => {
     ).toBe(AppointmentStatusTitle.COMPLETED);
   });
 
+  it('normaliza la cancelada heredada a CANCELLED aunque ya haya pasado', () => {
+    expect(
+      resolveAppointmentStatus(
+        AppointmentStatusTitle.LEGACY_CANCELLED,
+        END_AT,
+        millisecondsFromEnd(60_000),
+      ),
+    ).toBe(AppointmentStatusTitle.CANCELLED);
+  });
+
   it.each([
     AppointmentStatusTitle.CANCELLED,
     AppointmentStatusTitle.COMPLETED,

@@ -529,6 +529,9 @@ export class InMemoryOverlapSeed {
       message: input.message,
       requestedAt: input.requestedAt,
       meetingUrl: input.meetingUrl ?? null,
+      cancelledById: null,
+      cancellationReason: null,
+      cancelledAt: null,
       mentor: this.userBrief(input.mentorId),
       student: this.userBrief(input.studentId),
       orientationType: {
