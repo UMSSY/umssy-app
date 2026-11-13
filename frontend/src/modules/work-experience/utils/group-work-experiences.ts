@@ -10,20 +10,22 @@ export function groupWorkExperiences(
   for (const experience of sortWorkExperiences(experiences)) {
     const normalizedCompanyName = experience.companyName
       .trim()
+      .replace(/\s+/g, " ")
       .toLowerCase();
 
-    const groupKey = normalizedCompanyName
-      ? normalizedCompanyName
-      : `__experience__:${experience.id}`;
+    const groupId = normalizedCompanyName
+      ? `company:${normalizedCompanyName}`
+      : `experience:${experience.id}`;
 
-    const existingGroup = groups.get(groupKey);
+    const existingGroup = groups.get(groupId);
 
     if (existingGroup) {
       existingGroup.positions.push(experience);
       continue;
     }
 
-    groups.set(groupKey, {
+    groups.set(groupId, {
+      id: groupId,
       companyName: experience.companyName.trim(),
       positions: [experience],
     });

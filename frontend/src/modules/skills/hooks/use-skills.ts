@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   PENDING_SKILL_ID_PREFIX,
   SKILLS_ERROR_MESSAGES,
+  SKILLS_PROFILE_QUERY_KEY,
   SKILLS_SUCCESS_MESSAGES,
 } from "../constants/skills.constants";
 import { skillsService } from "../services/skills.service";
@@ -23,7 +24,7 @@ export function useSkills(): UseSkillsResult {
     const existing = customRequestsRef.current.get(skill.id);
     if (existing) return existing;
     const request = skillsService.createCustomSkill(skill.name).then((created) => {
-      queryClient.setQueryData<SkillsProfileResponse>(["skills", "profile"], (current) => current ? {
+      queryClient.setQueryData<SkillsProfileResponse>(SKILLS_PROFILE_QUERY_KEY, (current) => current ? {
         ...current, catalog: [...current.catalog.filter((item) => item.id !== created.id), created],
       } : current);
       return created;
@@ -32,7 +33,7 @@ export function useSkills(): UseSkillsResult {
     return request;
   }
   const query = useQuery({
-    queryKey: ["skills", "profile"],
+    queryKey: SKILLS_PROFILE_QUERY_KEY,
     queryFn: async () => {
       const [catalog, selected] = await Promise.all([skillsService.getCatalog(), skillsService.getMySkills()]);
       return { catalog, selected };
@@ -96,7 +97,7 @@ export function useSkills(): UseSkillsResult {
 
     try {
       const savedSkills = await mutation.mutateAsync(selection);
-      queryClient.setQueryData<SkillsProfileResponse>(["skills", "profile"], (current) => ({
+      queryClient.setQueryData<SkillsProfileResponse>(SKILLS_PROFILE_QUERY_KEY, (current) => ({
         catalog: current?.catalog ?? catalogSkills, selected: savedSkills ?? [],
       }));
       setSelectedSkills(null);

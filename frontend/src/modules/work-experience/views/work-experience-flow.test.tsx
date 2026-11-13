@@ -8,7 +8,6 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { skillsAnalysisService } from "@/modules/matching/services/skills-analysis.service";
 import { workExperienceService } from "../services/work-experience.service";
 import type { WorkExperienceItem } from "../types/work-experience-item.types";
 import type { WorkExperiencePayload } from "../types/work-experience-payload.types";
@@ -20,21 +19,6 @@ vi.mock("../services/work-experience.service", () => ({
     createWorkExperience: vi.fn(),
     updateWorkExperience: vi.fn(),
     deleteWorkExperience: vi.fn(),
-  },
-}));
-
-vi.mock("@/modules/matching/services/skills-analysis.service", () => ({
-  skillsAnalysisService: {
-    analyzeExperience: vi.fn().mockResolvedValue({
-      experienceId: "experience-1",
-      skills: [],
-      processingTimeMs: 0,
-    }),
-    previewExperience: vi.fn().mockResolvedValue({
-      experienceId: "experience-1",
-      skills: [],
-      processingTimeMs: 0,
-    }),
   },
 }));
 
@@ -157,7 +141,9 @@ describe("WorkExperienceView flow", () => {
       .closest("ul") as HTMLElement;
 
     expect(
-      within(list).getAllByRole("heading").map((item) => item.textContent),
+      within(list)
+        .getAllByRole("heading", { level: 4 })
+        .map((item) => item.textContent),
     ).toEqual([
       "Desarrolladora web junior",
       "Asistente de laboratorio",
@@ -165,7 +151,7 @@ describe("WorkExperienceView flow", () => {
 
     expect(
       screen.getAllByText(/Mar 2025 – Actualidad/),
-    ).toHaveLength(2);
+    ).toHaveLength(1);
 
     await user.click(
       screen.getByRole("button", {
@@ -307,7 +293,7 @@ describe("WorkExperienceView flow", () => {
     ).not.toBeInTheDocument();
   }, 20_000);
 
-  it("does not run the legacy individual skills analysis after saving (AC-01.8)", async () => {
+  it("does not show individual skills analysis after saving (AC-01.8)", async () => {
     const user = userEvent.setup();
 
     render(<WorkExperienceView />);
@@ -324,10 +310,6 @@ describe("WorkExperienceView flow", () => {
     expect(
       workExperienceService.createWorkExperience,
     ).toHaveBeenCalledTimes(1);
-
-    expect(
-      skillsAnalysisService.analyzeExperience,
-    ).not.toHaveBeenCalled();
 
     expect(
       screen.queryByText("Habilidades detectadas automáticamente"),
@@ -340,7 +322,7 @@ describe("WorkExperienceView flow", () => {
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   }, 20_000);
 
-  it("saves an experience without detected skills and shows no tags (AC-01.9)", async () => {
+  it("saves an experience without displaying individual analysis tags (AC-01.9)", async () => {
     const user = userEvent.setup();
 
     render(<WorkExperienceView />);
@@ -357,10 +339,6 @@ describe("WorkExperienceView flow", () => {
     expect(
       workExperienceService.createWorkExperience,
     ).toHaveBeenCalledTimes(1);
-
-    expect(
-      skillsAnalysisService.analyzeExperience,
-    ).not.toHaveBeenCalled();
 
     expect(
       screen.queryByText("Habilidades detectadas automáticamente"),

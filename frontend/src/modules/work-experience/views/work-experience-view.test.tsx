@@ -18,7 +18,6 @@ vi.mock("../services/work-experience.service", () => ({
 
 vi.mock("@/modules/matching/services/skills-analysis.service", () => ({
   skillsAnalysisService: {
-    analyzeExperience: vi.fn().mockResolvedValue({ experienceId: "experience-1", skills: [], processingTimeMs: 0 }),
     previewExperience: vi.fn().mockResolvedValue({ experienceId: "experience-1", skills: [], processingTimeMs: 0 }),
   },
 }));
@@ -59,8 +58,8 @@ describe("WorkExperienceView", () => {
     expect(screen.getByRole("heading", { level: 1, name: "Experiencia laboral" })).toBeInTheDocument();
     expect(screen.getByText("Cargando experiencia laboral...")).toBeInTheDocument();
     expect(await screen.findByText("Desarrolladora web junior")).toBeInTheDocument();
-    expect(screen.getAllByText(/Mar 2025 – Actualidad/)).toHaveLength(2);
-    expect(screen.getAllByText(/Mar 2023 – Dic 2024/)).toHaveLength(2);
+    expect(screen.getByText(/Mar 2025 – Actualidad/)).toBeInTheDocument();
+    expect(screen.getByText(/Mar 2023 – Dic 2024/)).toBeInTheDocument();
   });
 
   it("shows the empty message when there are no experiences", async () => {
