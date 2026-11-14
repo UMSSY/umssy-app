@@ -1,3 +1,7 @@
+import { TransactionService } from '../../../common/prisma/transaction.service.js';
+import { RadarApplicationConsentsService } from '../../radar-integration/services/radar-application-consents.service.js';
+import type { JobApplicationConsentsRequest } from '../requests/job-application-consents.request.js';
+import { JobApplicationConsentRequiredException } from '../exceptions/job-application-consent-required.exception.js';
 import { UNIQUE_CONSTRAINT_VIOLATION_CODE } from '../../../common/constants/prisma-errors.constants.js';
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '../../../prisma/client.js';
@@ -24,12 +28,21 @@ export class JobApplicationsService {
   constructor(
     private readonly repository: JobApplicationsRepository,
     private readonly mapper: JobApplicationMapper,
+    private readonly transactions: TransactionService,
+    private readonly consents: RadarApplicationConsentsService,
   ) {}
 
   async apply(
     userId: string,
     jobOfferId: string,
+    consents?: JobApplicationConsentsRequest,
   ): Promise<JobApplicationResponse> {
+    if (
+      consents?.consent !== true ||
+      consents?.consentCv !== true ||
+      consents?.consentContact !== true
+    )
+      throw new JobApplicationConsentRequiredException();
     if (!(await this.repository.isOfferOpen(jobOfferId, new Date()))) {
       throw new JobOfferUnavailableException();
     }
@@ -53,18 +66,24 @@ export class JobApplicationsService {
     }
 
     try {
-      if (existing) {
-        const reactivated = await this.repository.reactivate(
-          userId,
-          jobOfferId,
-          status.id,
-        );
-        if (!reactivated) throw new DuplicateJobApplicationException();
-        return this.mapper.toResponse(reactivated);
-      }
-      return this.mapper.toResponse(
-        await this.repository.create(userId, jobOfferId, status.id),
-      );
+      return await this.transactions.run(async (context) => {
+        const application = existing
+          ? await this.repository.reactivate(
+              userId,
+              jobOfferId,
+              status.id,
+              context,
+            )
+          : await this.repository.create(
+              userId,
+              jobOfferId,
+              status.id,
+              context,
+            );
+        if (!application) throw new DuplicateJobApplicationException();
+        await this.consents.recordRequired(application.id, context);
+        return this.mapper.toResponse(application);
+      });
     } catch (error) {
       if (isUniqueViolation(error)) {
         throw new DuplicateJobApplicationException();

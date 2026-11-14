@@ -3,9 +3,9 @@
 import { useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  MY_SKILLS_QUERY_KEY,
   PENDING_SKILL_ID_PREFIX,
   SKILLS_ERROR_MESSAGES,
-  MY_SKILLS_QUERY_KEY,
   SKILLS_SUCCESS_MESSAGES,
 } from "../constants/skills.constants";
 import { skillsService } from "../services/skills.service";
@@ -211,6 +211,7 @@ export function useSkills(): UseSkillsResult {
       savingRef.current = false;
     }
   }
+
 
   return {
     catalogSkills,
