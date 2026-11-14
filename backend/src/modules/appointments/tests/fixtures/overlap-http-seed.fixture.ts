@@ -56,6 +56,13 @@ export interface AddAppointmentInput {
   endAt: Date;
   status: AppointmentStatusTitle;
   blockId?: string;
+  cancellation?: InMemoryCancellation;
+}
+
+export interface InMemoryCancellation {
+  cancelledById: string | null;
+  cancellationReason: string | null;
+  cancelledAt: Date | null;
 }
 
 export interface TestTransaction {
@@ -155,6 +162,11 @@ export class InMemoryOverlapSeed {
           statusId: appointment.statusId,
           orientationTypeId: appointment.orientationTypeId,
           meetingUrl: appointment.meetingUrl,
+          cancellation: {
+            cancelledById: appointment.cancelledById,
+            cancellationReason: appointment.cancellationReason,
+            cancelledAt: appointment.cancelledAt,
+          },
         }),
       );
     }
@@ -238,6 +250,7 @@ export class InMemoryOverlapSeed {
         this.statusIdByTitle.get(input.status) ??
         this.context.getId(`appointment-status:${input.status}`),
       orientationTypeId: OVERLAP_TOPIC.id,
+      cancellation: input.cancellation,
     });
     this.appointments.push(record);
     return record;
@@ -525,6 +538,7 @@ export class InMemoryOverlapSeed {
     statusId: string;
     orientationTypeId: string;
     meetingUrl?: string | null;
+    cancellation?: InMemoryCancellation;
   }): AppointmentRecord {
     return {
       id: input.id,
@@ -536,9 +550,9 @@ export class InMemoryOverlapSeed {
       message: input.message,
       requestedAt: input.requestedAt,
       meetingUrl: input.meetingUrl ?? null,
-      cancelledById: null,
-      cancellationReason: null,
-      cancelledAt: null,
+      cancelledById: input.cancellation?.cancelledById ?? null,
+      cancellationReason: input.cancellation?.cancellationReason ?? null,
+      cancelledAt: input.cancellation?.cancelledAt ?? null,
       mentor: this.userBrief(input.mentorId),
       student: this.userBrief(input.studentId),
       orientationType: {
