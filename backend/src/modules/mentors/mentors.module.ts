@@ -6,6 +6,7 @@ import { MentorPhotoService } from './services/mentor-photo.service.js';
 import { AuthModule } from '../auth/auth.module.js';
 import { MentorsController } from './controllers/mentors.controller.js';
 import { MentorsService } from './services/mentors.service.js';
+import { MentorProfileSuggestionsService } from './services/mentor-profile-suggestions.service.js';
 import { MentorsRepository } from './repositories/mentors.repository.js';
 import { MentorMapper } from './mappers/mentor.mapper.js';
 import { MentorAffinityService } from './services/mentor-affinity.service.js';
@@ -31,6 +32,7 @@ import { MentorParticipationRepository } from './repositories/mentor-participati
   ],
   providers: [
     MentorsService,
+    MentorProfileSuggestionsService,
     MentorsRepository,
     MentorMapper,
     MentorPhotoService,
@@ -43,6 +45,6 @@ import { MentorParticipationRepository } from './repositories/mentor-participati
     MentorParticipationService,
     MentorParticipationRepository,
   ],
-  exports: [MentorsService],
+  exports: [MentorsService, MentorProfileSuggestionsService],
 })
 export class MentorsModule {}
