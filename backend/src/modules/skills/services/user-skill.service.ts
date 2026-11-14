@@ -73,6 +73,34 @@ export class UserSkillService {
     );
   }
 
+  async addSkills(
+    userId: string,
+    request: UpdateUserSkillsRequest,
+  ): Promise<SkillResponse[]> {
+    await this.ensureProfileExists(userId);
+
+    const { skillIds } = request;
+
+    if (new Set(skillIds).size !== skillIds.length) {
+      throw new DuplicateSkillException();
+    }
+
+    const skills = await this.skillRepository.findByIds(skillIds);
+
+    if (skills.length !== skillIds.length) {
+      throw new SkillNotFoundException();
+    }
+
+    const records = await this.userSkillRepository.addSkillsForUser(
+      userId,
+      skillIds,
+    );
+    await this.skillsAnalysis.refreshAfterChange(userId);
+    return records.map((record) =>
+      this.skillMapper.toUserSkillResponse(record),
+    );
+  }
+
   private async ensureProfileExists(userId: string): Promise<void> {
     await this.profileService.ensureProfileExists(userId);
   }
