@@ -7,21 +7,10 @@ import { saveFile, selectCsvDestination } from "@/shared/utils/save-file";
 import { REPORT_ALERT_DURATION_MS } from "../constants/reports.constants";
 import type { ExportedFile } from "../types/registered-user.types";
 import type { ReportExportFormat, ReportExportScope } from "../types/report-export.types";
-import type { ReportPdfOptions } from "../types/report-pdf.types";
-import { resolveReportAuthor } from "../utils/report-author.util";
-import { createReportPdf } from "../utils/report-pdf.util";
-
-const DEFAULT_PDF_OPTIONS: ReportPdfOptions = {
-  title: "Reporte de usuarios",
-  subtitle: "Personas registradas en la plataforma",
-  dateColumnLabel: "Fecha de registro",
-  filters: [],
-};
 
 export function useExportReportCsv(
   exportReport: (scope: ReportExportScope, format: ReportExportFormat) => Promise<ExportedFile>,
   suggestedFileName: string,
-  pdfOptions: ReportPdfOptions = DEFAULT_PDF_OPTIONS,
 ) {
   const exportInProgress = useRef(false);
   const [isExporting, setIsExporting] = useState(false);
@@ -58,14 +47,7 @@ export function useExportReportCsv(
         }
       }
 
-      const exportedFile = await exportReport(scope, format);
-      const { file, fileName } = format === "pdf"
-        ? await createReportPdf(exportedFile.file, exportedFile.fileName, {
-          ...pdfOptions,
-          generatedBy: await resolveReportAuthor(),
-          generatedAt: new Date(),
-        })
-        : exportedFile;
+      const { file, fileName } = await exportReport(scope, format);
       if (fileHandle) {
         await saveFile(file, fileHandle);
       } else {
@@ -83,7 +65,7 @@ export function useExportReportCsv(
       exportInProgress.current = false;
       setIsExporting(false);
     }
-  }, [exportReport, pdfOptions, suggestedFileName]);
+  }, [exportReport, suggestedFileName]);
 
   return { exportCsv, isExporting, errorMessage, successMessage };
 }

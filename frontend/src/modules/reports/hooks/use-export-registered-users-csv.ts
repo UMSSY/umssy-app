@@ -1,12 +1,11 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 import { REGISTERED_USERS_CSV_FALLBACK_NAME, REGISTERED_USERS_PAGE_SIZE } from "../constants/reports.constants";
 import { reportsService } from "../services/reports.service";
 import type { AcademicPeriod } from "../types/registered-user.types";
 import type { ReportExportFormat, ReportExportScope } from "../types/report-export.types";
 import type { RoleTag } from "@/modules/auth";
-import { buildReportPdfFilters } from "../utils/report-pdf-filters.util";
 import { useExportReportCsv } from "./use-export-report-csv";
 
 export function useExportRegisteredUsersCsv(
@@ -28,12 +27,5 @@ export function useExportRegisteredUsersCsv(
     [userType, period, search, page, limit, snapshotAt],
   );
 
-  const pdfOptions = useMemo(() => ({
-    title: "Reporte de usuarios aceptados",
-    subtitle: "Personas con acceso aprobado a la plataforma",
-    dateColumnLabel: "Fecha de aprobación",
-    filters: buildReportPdfFilters("Aprobados desde", userType, period, search),
-  }), [userType, period, search]);
-
-  return useExportReportCsv(exportReport, REGISTERED_USERS_CSV_FALLBACK_NAME, pdfOptions);
+  return useExportReportCsv(exportReport, REGISTERED_USERS_CSV_FALLBACK_NAME);
 }
