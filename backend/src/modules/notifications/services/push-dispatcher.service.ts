@@ -1,19 +1,30 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import * as webpush from 'web-push';
 import { PushSubscriptionsRepository } from '../repositories/push-subscriptions.repository.js';
 
 @Injectable()
-export class PushDispatcherService {
+export class PushDispatcherService implements OnModuleInit {
   private readonly logger = new Logger(PushDispatcherService.name);
 
   constructor(
     private readonly pushSubscriptionsRepository: PushSubscriptionsRepository,
-  ) {
-    webpush.setVapidDetails(
-      process.env.VAPID_SUBJECT || 'mailto:soporte@umssy.com',
-      process.env.VAPID_PUBLIC_KEY || '',
-      process.env.VAPID_PRIVATE_KEY || '',
-    );
+    private readonly configService: ConfigService,
+  ) {}
+
+  onModuleInit(): void {
+    const subject = this.configService.get<string>('VAPID_SUBJECT');
+    const publicKey = this.configService.get<string>('VAPID_PUBLIC_KEY');
+    const privateKey = this.configService.get<string>('VAPID_PRIVATE_KEY');
+
+    if (!subject || !publicKey || !privateKey) {
+      throw new Error(
+        'VAPID_SUBJECT, VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY must be configured',
+      );
+    }
+
+    webpush.setVapidDetails(subject, publicKey, privateKey);
+    this.logger.log('VAPID details configured');
   }
 
   async dispatchToUsers(
@@ -25,7 +36,8 @@ export class PushDispatcherService {
   ): Promise<'sent' | 'partial' | 'failed' | 'skipped'> {
     if (userIds.length === 0) return 'skipped';
 
-    const subscriptions = await this.pushSubscriptionsRepository.findManyByUserIds(userIds);
+    const subscriptions =
+      await this.pushSubscriptionsRepository.findManyByUserIds(userIds);
     if (subscriptions.length === 0) return 'skipped';
 
     let successCount = 0;
@@ -43,20 +55,28 @@ export class PushDispatcherService {
         continue;
       }
 
-      const pushSubscription = {
-        endpoint: sub.endpoint,
-        keys: { p256dh: sub.p256dh, auth: sub.auth },
-      };
-
       try {
-        await webpush.sendNotification(pushSubscription, payload);
+        await webpush.sendNotification(
+          {
+            endpoint: sub.endpoint,
+            keys: { p256dh: sub.p256dh, auth: sub.auth },
+          },
+          payload,
+        );
         successCount++;
-      } catch (error: any) {
+      } catch (error: unknown) {
         failedCount++;
-        if (error.statusCode === 404 || error.statusCode === 410) {
-          await this.pushSubscriptionsRepository.deleteByEndpointAndUserId(sub.endpoint, sub.userId);
+        const statusCode = this.getStatusCode(error);
+        if (statusCode === 404 || statusCode === 410) {
+          await this.pushSubscriptionsRepository.deleteByEndpointAndUserId(
+            sub.endpoint,
+            sub.userId,
+          );
         } else {
-          this.logger.error(`Error enviando push a ${sub.endpoint}`, error);
+          this.logger.error(
+            `Error sending push to ${sub.endpoint}`,
+            error instanceof Error ? error.stack : String(error),
+          );
         }
       }
     }
@@ -67,10 +87,23 @@ export class PushDispatcherService {
     return 'skipped';
   }
 
+  private getStatusCode(error: unknown): number | undefined {
+    if (
+      typeof error === 'object' &&
+      error !== null &&
+      'statusCode' in error &&
+      typeof (error as { statusCode: unknown }).statusCode === 'number'
+    ) {
+      return (error as { statusCode: number }).statusCode;
+    }
+    return undefined;
+  }
+
   private isDesktopUserAgent(userAgent: string | null): boolean {
     if (!userAgent) return false;
     const ua = userAgent.toLowerCase();
-    const isMobile = ua.includes('android') || ua.includes('iphone') || ua.includes('ipad');
+    const isMobile =
+      ua.includes('android') || ua.includes('iphone') || ua.includes('ipad');
     return !isMobile;
   }
 }

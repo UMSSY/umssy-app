@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { ConfigService } from '@nestjs/config';
 import { PushDispatcherService } from '../services/push-dispatcher.service.js';
 import { PushSubscriptionsRepository } from '../repositories/push-subscriptions.repository.js';
 import * as webpush from 'web-push';
@@ -7,6 +8,7 @@ const webpushMock = vi.hoisted(() => ({
   setVapidDetails: vi.fn(),
   sendNotification: vi.fn(),
 }));
+
 vi.mock('web-push', () => webpushMock);
 
 describe('PushDispatcherService', () => {
@@ -15,6 +17,9 @@ describe('PushDispatcherService', () => {
     findManyByUserIds: ReturnType<typeof vi.fn>;
     deleteByEndpointAndUserId: ReturnType<typeof vi.fn>;
   };
+  let mockConfigService: {
+    get: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(async () => {
     mockPushRepo = {
@@ -22,57 +27,95 @@ describe('PushDispatcherService', () => {
       deleteByEndpointAndUserId: vi.fn(),
     };
 
+    mockConfigService = {
+      get: vi.fn((key: string) => {
+        if (key === 'VAPID_SUBJECT') return 'mailto:test@umssy.com';
+        if (key === 'VAPID_PUBLIC_KEY') return 'pub';
+        if (key === 'VAPID_PRIVATE_KEY') return 'priv';
+        return undefined;
+      }),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         PushDispatcherService,
         { provide: PushSubscriptionsRepository, useValue: mockPushRepo },
+        { provide: ConfigService, useValue: mockConfigService },
       ],
     }).compile();
 
     service = module.get<PushDispatcherService>(PushDispatcherService);
   });
 
-  it('debe retornar skipped si no hay suscripciones', async () => {
-    mockPushRepo.findManyByUserIds.mockResolvedValue([]);
-    const result = await service.dispatchToUsers(['user-1'], 'Title', 'Body', '/url');
-    expect(result).toBe('skipped');
+  afterEach(() => {
+    vi.clearAllMocks();
   });
 
-  it('debe ignorar (skipped) los userAgents de escritorio', async () => {
-    mockPushRepo.findManyByUserIds.mockResolvedValue([
-      {
-        endpoint: 'https://fcm...',
-        p256dh: 'x',
-        auth: 'y',
-        userId: 'user-1',
-        userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-      },
-    ]);
+  describe('onModuleInit', () => {
+    it('throws if VAPID keys are missing', () => {
+      mockConfigService.get.mockReturnValue(undefined);
+      
+      expect(() => service.onModuleInit()).toThrow(
+        'VAPID_SUBJECT, VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY must be configured',
+      );
+    });
 
-    const result = await service.dispatchToUsers(['user-1'], 'Title', 'Body', '/url');
-
-    expect(webpush.sendNotification).not.toHaveBeenCalled();
-    expect(result).toBe('skipped');
+    it('configures web-push when keys are present', () => {
+      service.onModuleInit();
+      
+      expect(webpush.setVapidDetails).toHaveBeenCalledWith(
+        'mailto:test@umssy.com',
+        'pub',
+        'priv',
+      );
+    });
   });
 
-  it('debe eliminar la suscripción si el push service responde 410 (Gone)', async () => {
-    mockPushRepo.findManyByUserIds.mockResolvedValue([
-      {
-        endpoint: 'https://fcm...',
-        p256dh: 'x',
-        auth: 'y',
-        userId: 'user-1',
-        userAgent: 'Android',
-      },
-    ]);
+  describe('dispatchToUsers', () => {
+    it('debe retornar skipped si no hay suscripciones', async () => {
+      mockPushRepo.findManyByUserIds.mockResolvedValue([]);
+      
+      const result = await service.dispatchToUsers(['user-1'], 'Title', 'Body', '/url');
+      
+      expect(result).toBe('skipped');
+    });
 
-    const error: Error & { statusCode?: number } = new Error('Gone');
-    error.statusCode = 410;
-    (webpush.sendNotification as ReturnType<typeof vi.fn>).mockRejectedValueOnce(error);
+    it('debe ignorar (skipped) los userAgents de escritorio', async () => {
+      mockPushRepo.findManyByUserIds.mockResolvedValue([
+        {
+          endpoint: 'https://fcm...',
+          p256dh: 'x',
+          auth: 'y',
+          userId: 'user-1',
+          userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+        },
+      ]);
 
-    const result = await service.dispatchToUsers(['user-1'], 'Title', 'Body', '/url');
+      const result = await service.dispatchToUsers(['user-1'], 'Title', 'Body', '/url');
 
-    expect(mockPushRepo.deleteByEndpointAndUserId).toHaveBeenCalledWith('https://fcm...', 'user-1');
-    expect(result).toBe('failed');
+      expect(webpush.sendNotification).not.toHaveBeenCalled();
+      expect(result).toBe('skipped');
+    });
+
+    it('debe eliminar la suscripción si el push service responde 410 (Gone)', async () => {
+      mockPushRepo.findManyByUserIds.mockResolvedValue([
+        {
+          endpoint: 'https://fcm...',
+          p256dh: 'x',
+          auth: 'y',
+          userId: 'user-1',
+          userAgent: 'Android',
+        },
+      ]);
+
+      const error: Error & { statusCode?: number } = new Error('Gone');
+      error.statusCode = 410;
+      (webpush.sendNotification as ReturnType<typeof vi.fn>).mockRejectedValueOnce(error);
+
+      const result = await service.dispatchToUsers(['user-1'], 'Title', 'Body', '/url');
+
+      expect(mockPushRepo.deleteByEndpointAndUserId).toHaveBeenCalledWith('https://fcm...', 'user-1');
+      expect(result).toBe('failed');
+    });
   });
 });
