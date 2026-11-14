@@ -49,6 +49,42 @@ describe("registrations service", () => {
     });
   });
 
+  it("parses the active-pass contract with UTC timestamps and registration history fields", async () => {
+    const activePass = {
+      id: "registration-1",
+      eventId: "event-1",
+      eventName: "Taller nocturno",
+      date: "2026-10-20T00:00:00.000Z",
+      startTime: "1970-01-01T22:00:00.000Z",
+      endTime: "1970-01-01T23:59:00.000Z",
+      location: "Aula 101",
+      status: "Confirmada",
+      registeredAt: "2026-10-18T10:00:00.000Z",
+      cancelledAt: null,
+    };
+    const get = vi.spyOn(apiClient, "get").mockResolvedValue({
+      data: {
+        statusCode: 200,
+        ok: true,
+        detail: "Operación exitosa",
+        data: [activePass],
+      },
+    });
+    const signal = new AbortController().signal;
+
+    await expect(
+      registrationsService.getMine(signal, "captured-token"),
+    ).resolves.toEqual([activePass]);
+    expect(get).toHaveBeenCalledExactlyOnceWith(
+      "/event-registrations/me",
+      expect.objectContaining({
+        headers: { Authorization: expect.any(String) },
+        signal,
+        timeout: 10000,
+      }),
+    );
+  });
+
   it("returns null only for a typed 404 REGISTRATION_NOT_FOUND", async () => {
     vi.spyOn(apiClient, "get").mockRejectedValue(error("REGISTRATION_NOT_FOUND"));
     await expect(registrationsService.getOwn("event-1")).resolves.toBeNull();
