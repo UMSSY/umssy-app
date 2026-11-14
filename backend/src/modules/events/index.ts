@@ -11,3 +11,4 @@ export {
 export { EventNotFoundException } from './exceptions/event-not-found.exception.js';
 
 export type { RegistrationScheduleEvent } from './types/registration-schedule-event.types.js';
+export type { FinishedEventThreshold } from './types/finished-event-threshold.types.js';

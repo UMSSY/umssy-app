@@ -69,7 +69,7 @@ export class EventRegistrationsService {
       }
       if (event.status.title !== PUBLISHED_STATUS_TITLE)
         throw new EventNotOpenException();
-      assertRegistrationOpen(event);
+      assertRegistrationOpen(event, this.eventsService.isFinished(event));
       const registeredEventIds = await this.repository.findConfirmedEventIds(
         tx,
         userId,
@@ -122,7 +122,7 @@ export class EventRegistrationsService {
         registration.eventId,
         tx,
       );
-      assertRegistrationOpen(event);
+      assertRegistrationOpen(event, this.eventsService.isFinished(event));
       return mapRegistration(
         await this.repository.cancel(tx, registrationId, new Date()),
       );
