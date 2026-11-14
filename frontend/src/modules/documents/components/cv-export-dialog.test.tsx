@@ -23,6 +23,7 @@ vi.mock("@/modules/profile", async (importOriginal) => {
 vi.mock("../services/documents.service", () => ({
   documentsService: {
     generateCv: vi.fn(),
+    uploadCv: vi.fn(),
     getPortfolioProjectCount: vi.fn(),
   },
 }));
@@ -57,6 +58,7 @@ describe("CvExportDialog", () => {
     vi.spyOn(URL, "createObjectURL").mockReturnValue(FILE_URL);
     vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => undefined);
     vi.mocked(documentsService.generateCv).mockResolvedValue({ file: PDF, fileName: FILE_NAME });
+    vi.mocked(documentsService.uploadCv).mockResolvedValue(null);
     vi.mocked(documentsService.getPortfolioProjectCount).mockResolvedValue(6);
     useProfileCompletenessMock.mockReturnValue({
       completeness: null,
@@ -229,12 +231,17 @@ describe("CvExportDialog", () => {
   });
 
   it("generates the cv and downloads it named after the user", async () => {
-    const { user } = await renderDialog();
+    const { user, onClose } = await renderDialog();
 
     await user.click(screen.getByRole("button", { name: "Descargar CV en PDF" }));
 
     await waitFor(() => expect(downloadFileMock).toHaveBeenCalledWith(PDF, FILE_NAME));
     expect(documentsService.generateCv).toHaveBeenCalledTimes(1);
+    expect(documentsService.uploadCv).toHaveBeenCalledTimes(1);
+    const [uploadedFile] = vi.mocked(documentsService.uploadCv).mock.calls[0];
+    expect(uploadedFile).toBeInstanceOf(File);
+    expect(uploadedFile.name).toBe(FILE_NAME);
+    expect(onClose).toHaveBeenCalled();
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, ArrowLeft, Download, Eye, Info, LoaderCircle, X } from "lucide-react";
 import {
   AlertDialog,
@@ -21,8 +22,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ProfileCompletenessProgress, useProfileCompleteness } from "@/modules/profile";
+import {
+  ProfileCompletenessProgress,
+  useInvalidateProfileCompleteness,
+  useProfileCompleteness,
+} from "@/modules/profile";
 import { downloadFile } from "@/shared/utils/download-file";
+import { CV_QUERY_KEY } from "../constants/cv-api.constants";
 import { CV_ERROR_MESSAGES } from "../constants/cv-error-messages.constants";
 import {
   CV_EXPORT_DEFAULT_SECTIONS,
@@ -31,6 +37,7 @@ import {
 } from "../constants/cv-export.constants";
 import { useCvExport } from "../hooks/use-cv-export";
 import { useCvPortfolioCount } from "../hooks/use-cv-portfolio-count";
+import { documentsService } from "../services/documents.service";
 import type { CvExportDialogProps } from "../types/cv-export-dialog-props.types";
 import type { CvExportSectionKey } from "../types/cv-export-section-key.types";
 import type { CvExportSections as CvExportSectionsState } from "../types/cv-export-sections.types";
@@ -38,12 +45,15 @@ import type { CvExportStep } from "../types/cv-export-step.types";
 import { CvExportSections } from "./cv-export-sections";
 
 function CvExportDialogBody({ onClose }: Pick<CvExportDialogProps, "onClose">) {
+  const queryClient = useQueryClient();
+  const invalidateCompleteness = useInvalidateProfileCompleteness();
   const { generatedCv, isGenerating, error, generateCv, discardCv } = useCvExport();
   const { completeness } = useProfileCompleteness(false);
   const repositoryCount = useCvPortfolioCount();
   const [sections, setSections] = useState<CvExportSectionsState>(CV_EXPORT_DEFAULT_SECTIONS);
   const [step, setStep] = useState<CvExportStep>("sections");
   const [downloadError, setDownloadError] = useState<string | null>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
   const [hasConfirmedLowCompleteness, setHasConfirmedLowCompleteness] = useState(false);
   const [showIncompleteWarningDialog, setShowIncompleteWarningDialog] = useState(false);
 
@@ -51,6 +61,7 @@ function CvExportDialogBody({ onClose }: Pick<CvExportDialogProps, "onClose">) {
   const isLowCompleteness =
     typeof percentage === "number" && percentage < CV_EXPORT_LOW_COMPLETENESS_THRESHOLD;
   const isPreviewing = step === "preview" && generatedCv !== null;
+  const isBusy = isGenerating || isDownloading;
 
   const handleToggleSection = (key: CvExportSectionKey) => {
     setSections((current) => ({ ...current, [key]: !current[key] }));
@@ -68,17 +79,32 @@ function CvExportDialogBody({ onClose }: Pick<CvExportDialogProps, "onClose">) {
   };
 
   const executeDownload = async () => {
-    setDownloadError(null);
-    const cv = generatedCv ?? (await generateCv(sections));
-
-    if (!cv) {
+    if (isDownloading) {
       return;
     }
 
+    setDownloadError(null);
+    setIsDownloading(true);
+
     try {
+      const cv = generatedCv ?? (await generateCv(sections));
+
+      if (!cv) {
+        return;
+      }
+
       downloadFile(cv.file, cv.fileName);
+      const generatedFile = new File([cv.file], cv.fileName, { type: "application/pdf" });
+      await documentsService.uploadCv(generatedFile);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: CV_QUERY_KEY }),
+        invalidateCompleteness(),
+      ]);
+      onClose();
     } catch {
       setDownloadError(CV_ERROR_MESSAGES.download);
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -172,7 +198,7 @@ function CvExportDialogBody({ onClose }: Pick<CvExportDialogProps, "onClose">) {
               <CvExportSections
                 sections={sections}
                 repositoryCount={repositoryCount}
-                isDisabled={isGenerating}
+                isDisabled={isBusy}
                 onToggle={handleToggleSection}
               />
               <div className="flex items-start gap-3 rounded-lg border border-border bg-surface-soft px-4 py-3">
@@ -187,7 +213,7 @@ function CvExportDialogBody({ onClose }: Pick<CvExportDialogProps, "onClose">) {
                   type="button"
                   variant="ghost"
                   className="h-8 px-2 text-sm font-semibold text-ink"
-                  disabled={isGenerating}
+                  disabled={isBusy}
                   onClick={() => void handlePreview()}
                 >
                   <Eye aria-hidden="true" className="size-4" />
@@ -197,13 +223,13 @@ function CvExportDialogBody({ onClose }: Pick<CvExportDialogProps, "onClose">) {
               </div>
             </div>
           )}
-          {isGenerating ? (
+          {isBusy ? (
             <p role="status" className="flex items-center gap-2 px-6 pb-4 text-sm text-text-secondary">
               <LoaderCircle aria-hidden="true" className="size-4 animate-spin" />
               Generando tu CV...
             </p>
           ) : null}
-          {!isGenerating && (error ?? downloadError) ? (
+          {!isBusy && (error ?? downloadError) ? (
             <p role="alert" className="px-6 pb-4 text-sm text-danger">
               {error ?? downloadError}
             </p>
@@ -213,6 +239,7 @@ function CvExportDialogBody({ onClose }: Pick<CvExportDialogProps, "onClose">) {
               type="button"
               variant="outline"
               className="h-11 border-border-strong px-5 text-sm text-ink hover:bg-surface-soft"
+              disabled={isDownloading}
               onClick={onClose}
             >
               Cancelar
@@ -220,7 +247,7 @@ function CvExportDialogBody({ onClose }: Pick<CvExportDialogProps, "onClose">) {
             <Button
               type="button"
               className="h-11 bg-primary px-5 text-sm font-semibold text-primary-foreground hover:bg-brand-hover"
-              disabled={isGenerating}
+              disabled={isBusy}
               onClick={() => void handleDownload()}
             >
               <Download aria-hidden="true" className="size-4" />
