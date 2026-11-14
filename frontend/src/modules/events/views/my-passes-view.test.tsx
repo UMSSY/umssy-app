@@ -118,13 +118,13 @@ describe("Mis pases", () => {
     expect(screen.getByRole('button', { name: /Prisma/ })).toHaveAttribute('aria-pressed', 'false');
   });
 
-  it('shows the QA location and 24-hour time consistently in passes', async () => {
+  it('shows the QA location and 12-hour time with AM/PM consistently in passes', async () => {
     getMine.mockResolvedValue([{ ...pass, location: 'Laboratorio 1, Facultad de Ciencias y Tecnología, UMSS' }]);
     render(<MyPassesView />);
     await within(await screen.findByRole('complementary', { name: 'Detalle de la inscripción' })).findByText('reg-1');
     expect(screen.getAllByText('Laboratorio 1, Facultad de Ciencias y Tecnología')).toHaveLength(2);
     expect(screen.queryByText(/, UMSS$/)).not.toBeInTheDocument();
-    expect(screen.getAllByText(/09:00 - 12:00 hrs/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/09:00 AM - 12:00 PM/).length).toBeGreaterThan(0);
   });
 
   it('muestra carga, datos reales y cambia el detalle al seleccionar otra inscripción', async () => {
@@ -136,7 +136,7 @@ describe("Mis pases", () => {
     expect(screen.getAllByText('Aula 101')).toHaveLength(2);
     expect(screen.getByRole('button', { name: /React/ })).toHaveAttribute('aria-pressed', 'true');
     expect(screen.getByText('2 pases')).toBeInTheDocument();
-    expect(screen.getAllByText(/09:00 - 12:00/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/09:00 AM - 12:00 PM/).length).toBeGreaterThan(0);
     fireEvent.click(screen.getByRole('button', { name: /Prisma/ }));
     expect(within(screen.getByRole('complementary', { name: 'Detalle de la inscripción' })).getByText('reg-2')).toBeInTheDocument();
     expect(screen.getAllByText('Lab 2')).toHaveLength(2);

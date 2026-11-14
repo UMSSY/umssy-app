@@ -2,8 +2,11 @@
 
 import { useEventScheduleStatus } from '../hooks/use-event-finished';
 import { formatEventLocation } from '../utils/format-event-location';
-import { formatRegistrationDate, getEffectiveRegistrationStatus } from '../utils/registration-format';
-import { formatTimeRange } from '../utils/event-card';
+import {
+  formatRegistrationDate,
+  formatRegistrationTimeRangeAmPm,
+  getEffectiveRegistrationStatus,
+} from '../utils/registration-format';
 import { cn } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -36,7 +39,10 @@ export function PassCard({
     eventStatus.isFinished,
     eventStatus.isInProgress,
   );
-  const timeRange = (startTime || endTime) ? formatTimeRange(startTime ?? '', endTime ?? '') : null;
+  const timeRange =
+    startTime || endTime
+      ? formatRegistrationTimeRangeAmPm(startTime ?? '', endTime ?? '')
+      : null;
 
   return (
     <Card className="relative gap-0 border-0 bg-transparent p-0 shadow-none">

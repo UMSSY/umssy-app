@@ -3,6 +3,8 @@ import { describe, expect, it } from 'vitest';
 import {
   formatRegistrationDate,
   formatRegistrationTime,
+  formatRegistrationTimeAmPm,
+  formatRegistrationTimeRangeAmPm,
 } from '../utils/registration-format';
 
 describe('formato de datos del pase', () => {
@@ -18,6 +20,28 @@ describe('formato de datos del pase', () => {
       expect(formatRegistrationTime(time)).toBe('Horario no disponible');
     },
   );
+  it.each([
+    ['00:00', '12:00 AM'],
+    ['09:05', '09:05 AM'],
+    ['12:00', '12:00 PM'],
+    ['15:30', '03:30 PM'],
+    ['23:59', '11:59 PM'],
+  ])('formatea %s con indicador AM/PM', (time, expected) => {
+    expect(formatRegistrationTimeAmPm(time)).toBe(expected);
+  });
+  it('formatea el rango horario del pase con indicadores AM/PM', () => {
+    expect(
+      formatRegistrationTimeRangeAmPm(
+        '1970-01-01T09:00:00.000Z',
+        '1970-01-01T12:00:00.000Z',
+      ),
+    ).toBe('09:00 AM - 12:00 PM');
+  });
+  it('informa si el rango horario del pase no está disponible', () => {
+    expect(formatRegistrationTimeRangeAmPm('invalid', '12:00')).toBe(
+      'Horario no disponible',
+    );
+  });
   it.each([undefined, null, '', 'invalid'])(
     'no rompe el pase con fecha ausente o inválida: %s',
     (date) => {

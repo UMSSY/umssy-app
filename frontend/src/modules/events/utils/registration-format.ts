@@ -32,6 +32,32 @@ export function formatRegistrationTime(time: string | null | undefined) {
   }).format(value);
 }
 
+export function formatRegistrationTimeAmPm(time: string | null | undefined) {
+  const formattedTime = formatRegistrationTime(time);
+  if (formattedTime === 'Horario no disponible') return formattedTime;
+
+  const [hours, minutes] = formattedTime.split(':').map(Number);
+  const period = hours! < 12 ? 'AM' : 'PM';
+  return `${String(hours! % 12 || 12).padStart(2, '0')}:${String(minutes).padStart(2, '0')} ${period}`;
+}
+
+export function formatRegistrationTimeRangeAmPm(
+  startTime: string,
+  endTime: string,
+) {
+  const start = formatRegistrationTimeAmPm(startTime);
+  const end = formatRegistrationTimeAmPm(endTime);
+
+  if (
+    start === 'Horario no disponible' ||
+    end === 'Horario no disponible'
+  ) {
+    return 'Horario no disponible';
+  }
+
+  return `${start} - ${end}`;
+}
+
 export function getEffectiveRegistrationStatus(
   status: string,
   isPast: boolean,
