@@ -20,7 +20,7 @@ export function useReactivateApplication() {
 
   return {
     reactivate: mutation.mutate,
-    reactivateAsync: mutation.mutateAsync,
+    resetReactivation: mutation.reset,
     reactivatingId: mutation.isPending ? (mutation.variables ?? null) : null,
     hasReactivateError: mutation.isError,
   };

@@ -11,12 +11,14 @@ describe('ApplicationsController', () => {
   let controller: ApplicationsController;
   let serviceMock: {
     findMyApplications: ReturnType<typeof vi.fn>;
+    getApplicationContact: ReturnType<typeof vi.fn>;
     withdrawApplication: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(async () => {
     serviceMock = {
       findMyApplications: vi.fn(),
+      getApplicationContact: vi.fn(),
       withdrawApplication: vi.fn(),
     };
 
@@ -52,6 +54,28 @@ describe('ApplicationsController', () => {
         sortOrder: 'desc',
       });
       expect(result).toEqual([]);
+    });
+  });
+
+  describe('getApplicationContact', () => {
+    it('debe pedir al servicio el contexto de contacto de la postulacion del usuario', async () => {
+      const contact = {
+        applicationId: 'app-1',
+        jobOfferId: 'offer-1',
+        vacancyTitle: 'Dev',
+        companyId: 'company-1',
+        companyName: 'Empresa A',
+        recruiters: [{ id: 'recruiter-1', fullName: 'Ana Rojas' }],
+      };
+      serviceMock.getApplicationContact.mockResolvedValue(contact);
+
+      const result = await controller.getApplicationContact('app-1', 'user-1');
+
+      expect(serviceMock.getApplicationContact).toHaveBeenCalledWith(
+        'app-1',
+        'user-1',
+      );
+      expect(result).toBe(contact);
     });
   });
 

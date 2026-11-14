@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface ReactivateApplicationButtonProps {
   applicationId: string;
@@ -19,7 +20,7 @@ export function ReactivateApplicationButton({
     <Button
       type="button"
       size="sm"
-      className={`bg-green-600 text-white hover:bg-green-700 ${className ?? ""}`}
+      className={cn("bg-success text-surface hover:brightness-90", className)}
       disabled={isReactivating}
       onClick={() => onReactivate(applicationId)}
     >

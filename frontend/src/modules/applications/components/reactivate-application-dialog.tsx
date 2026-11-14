@@ -60,7 +60,7 @@ export function ReactivateApplicationDialog({
           </AlertDialogCancel>
           <Button
             type="button"
-            className="bg-green-600 text-white hover:bg-green-700"
+            className="bg-success text-surface hover:brightness-90"
             disabled={isPending || application === null}
             onClick={onConfirm}
           >

@@ -8,8 +8,16 @@ import {
 import { ApplicationNotFoundException } from '../exceptions/application-not-found.exception.js';
 import { ApplicationForbiddenException } from '../exceptions/application-forbidden.exception.js';
 import { ApplicationNotWithdrawableException } from '../exceptions/application-not-withdrawable.exception.js';
+import { ApplicationContactRestrictedException } from '../exceptions/application-contact-restricted.exception.js';
+import type { ApplicationContactResponse } from '../types/application-contact.types.js';
 import { ApplicationMapper } from '../mappers/application.mapper.js';
 import { JobRecommendationsService } from '../../matching/services/job-recommendations.service.js';
+
+const CONTACTABLE_STATUSES: readonly string[] = [
+  ApplicationStatus.IN_REVIEW,
+  ApplicationStatus.INTERVIEW,
+  ApplicationStatus.ACCEPTED,
+];
 
 @Injectable()
 export class ApplicationsService {
@@ -113,6 +121,18 @@ export class ApplicationsService {
         'La postulación no puede reactivarse en su estado actual o la vacante ya no está disponible.',
       );
     }
+  }
+
+  async getApplicationContact(
+    id: string,
+    userId: string,
+  ): Promise<ApplicationContactResponse> {
+    const application = await this.repository.findContactContext(id);
+    if (!application || application.userId !== userId)
+      throw new ApplicationNotFoundException();
+    if (!CONTACTABLE_STATUSES.includes(application.status.title))
+      throw new ApplicationContactRestrictedException();
+    return this.mapper.toContactResponse(application);
   }
 
   async withdrawApplication(id: string, userId: string): Promise<void> {
