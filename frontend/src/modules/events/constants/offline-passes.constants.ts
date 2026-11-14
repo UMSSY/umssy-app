@@ -10,7 +10,7 @@ export const OFFLINE_PASSES_TEXTS = {
   lastUpdated: 'Última actualización:',
   availableOffline: 'Disponible sin conexión',
   noCopyTitle: 'No hay pases guardados en este dispositivo.',
-  noCopyDescription: 'Conéctate a Internet para cargarlos.',
+  noCopyDescription: 'Conéctate a Internet y abre un pase confirmado para guardarlo en este dispositivo.',
   requiresConnection: 'Requiere conexión a Internet',
   retry: 'Reintentar',
 } as const;
