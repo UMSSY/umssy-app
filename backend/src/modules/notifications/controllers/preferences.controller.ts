@@ -3,7 +3,7 @@ import { SubscriptionsService } from '../services/subscriptions.service.js';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { CurrentUserId } from '../../../common/decorators/current-user-id.decorator.js';
 import { UpdatePreferencesSchema } from '../requests/preferences.schema.js';
-import type { NotificationPreferenceResponse } from '../types/notification.types.js';
+import type { NotificationPreferenceResponse } from '../types/notification-preference-response.type.js';
 
 @Controller('notifications/preferences')
 @UseGuards(JwtAuthGuard)
