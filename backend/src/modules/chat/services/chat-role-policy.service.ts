@@ -18,8 +18,8 @@ export class ChatRolePolicyService {
     userId: string,
     contactId: string,
     context?: {
-      contextType?: string;
-      contextId?: string;
+      contextType?: string | null;
+      contextId?: string | null;
     },
   ): Promise<void> {
     const ids = [userId.trim().toLowerCase(), contactId.trim().toLowerCase()];

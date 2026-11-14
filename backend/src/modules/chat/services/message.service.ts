@@ -72,8 +72,8 @@ export class MessageService {
         params.senderId,
         otherParticipantId,
         {
-          contextType: conversation.contextType,
-          contextId: conversation.contextId,
+          contextType: conversation.contextType ?? undefined,
+          contextId: conversation.contextId ?? undefined,
         },
       );
     }

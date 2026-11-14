@@ -110,8 +110,8 @@ export class AttachmentService {
         userId,
         otherParticipantId,
         {
-          contextType: conversation.contextType,
-          contextId: conversation.contextId,
+          contextType: conversation.contextType ?? undefined,
+          contextId: conversation.contextId ?? undefined,
         },
       );
     }
