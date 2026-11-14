@@ -9,6 +9,7 @@ import { ReportsController } from '../controllers/reports.controller.js';
 import { GeneratedReportsRepository } from '../repositories/generated-reports.repository.js';
 import { ReportUsersRepository } from '../repositories/report-users.repository.js';
 import { ReportHistoryService } from '../services/report-history.service.js';
+import { ReportPdfService } from '../services/report-pdf.service.js';
 import { ReportsService } from '../services/reports.service.js';
 
 describe('ReportsController', () => {
@@ -21,6 +22,7 @@ describe('ReportsController', () => {
       controllers: [ReportsController],
       providers: [
         ReportsService,
+        ReportPdfService,
         ReportUsersRepository,
         ReportHistoryService,
         GeneratedReportsRepository,
@@ -118,17 +120,24 @@ describe('ReportsController', () => {
     },
   );
 
-  it('registra como PDF la exportación de usuarios registrados', async () => {
-    vi.spyOn(service, 'exportRegisteredUsersCsv').mockResolvedValue({
-      fileName: 'usuarios-registrados-todos.csv',
-      content: 'Usuario\r\n',
+  it('genera el PDF de usuarios registrados en el servidor y lo registra en el historial', async () => {
+    const pdfSpy = vi.spyOn(service, 'exportRegisteredUsersPdf').mockResolvedValue({
+      fileName: 'usuarios-registrados-todos.pdf',
+      content: Buffer.from('%PDF-1.4'),
     });
+    const csvSpy = vi.spyOn(service, 'exportRegisteredUsersCsv');
     const historySpy = vi
       .spyOn(historyService, 'registerGeneratedReport')
       .mockResolvedValue({ id: 'r', fileName: 'f', reportType: 'REGISTERED_USERS', generatedAt: '' });
 
-    await controller.exportRegisteredUsersCsv({ format: 'pdf' }, 'admin-1');
+    const file = await controller.exportRegisteredUsersCsv({ format: 'pdf' }, 'admin-1');
 
+    expect(pdfSpy).toHaveBeenCalledWith({ format: 'pdf' }, 'admin-1');
+    expect(csvSpy).not.toHaveBeenCalled();
+    expect(file.getHeaders()).toMatchObject({
+      type: 'application/pdf',
+      disposition: 'attachment; filename="usuarios-registrados-todos.pdf"',
+    });
     expect(historySpy).toHaveBeenCalledWith('admin-1', {
       fileName: 'usuarios-registrados-todos.pdf',
       reportType: 'REGISTERED_USERS',
@@ -157,17 +166,18 @@ describe('ReportsController', () => {
     });
   });
 
-  it('registra como PDF la exportación de usuarios rechazados', async () => {
-    vi.spyOn(service, 'exportRejectedUsersCsv').mockResolvedValue({
-      fileName: 'usuarios-rechazados-2026-10-08.csv',
-      content: 'Usuario\r\n',
+  it('genera el PDF de usuarios rechazados en el servidor y lo registra en el historial', async () => {
+    vi.spyOn(service, 'exportRejectedUsersPdf').mockResolvedValue({
+      fileName: 'usuarios-rechazados-2026-10-08.pdf',
+      content: Buffer.from('%PDF-1.4'),
     });
     const historySpy = vi
       .spyOn(historyService, 'registerGeneratedReport')
       .mockResolvedValue({ id: 'r', fileName: 'f', reportType: 'REJECTED_USERS', generatedAt: '' });
 
-    await controller.exportRejectedUsersCsv({ format: 'pdf' }, 'admin-1');
+    const file = await controller.exportRejectedUsersCsv({ format: 'pdf' }, 'admin-1');
 
+    expect(file.getHeaders().type).toBe('application/pdf');
     expect(historySpy).toHaveBeenCalledWith('admin-1', {
       fileName: 'usuarios-rechazados-2026-10-08.pdf',
       reportType: 'REJECTED_USERS',

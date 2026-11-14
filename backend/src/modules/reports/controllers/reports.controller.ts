@@ -31,11 +31,19 @@ import {
 
 import { ReportHistoryService } from '../services/report-history.service.js';
 import { ReportsService } from '../services/reports.service.js';
+import type { ReportPdfFile } from '../types/report-pdf.types.js';
 import type { ReportCsvFile } from '../types/report-user.types.js';
 
 function toCsvFile({ fileName, content }: ReportCsvFile): StreamableFile {
   return new StreamableFile(Buffer.from(content, 'utf-8'), {
     type: 'text/csv; charset=utf-8',
+    disposition: `attachment; filename="${fileName}"`,
+  });
+}
+
+function toPdfFile({ fileName, content }: ReportPdfFile): StreamableFile {
+  return new StreamableFile(content, {
+    type: 'application/pdf',
     disposition: `attachment; filename="${fileName}"`,
   });
 }
@@ -60,17 +68,20 @@ export class ReportsController {
   }
 
   @Get('registered-users/export')
-  @ApiProduces('text/csv')
+  @ApiProduces('text/csv', 'application/pdf')
   async exportRegisteredUsersCsv(
     @Query(new ZodValidationPipe(registeredUsersExportQuerySchema))
     filters: RegisteredUsersExportQuery,
     @CurrentUserId() userId: string,
   ): Promise<StreamableFile> {
+    const reportType = toRegisteredUsersReportType(filters.userType);
+    if (filters.format === 'pdf') {
+      const file = await this.reportsService.exportRegisteredUsersPdf(filters, userId);
+      await this.reportHistoryService.registerGeneratedReport(userId, { fileName: file.fileName, reportType });
+      return toPdfFile(file);
+    }
     const file = await this.reportsService.exportRegisteredUsersCsv(filters);
-    await this.reportHistoryService.registerGeneratedReport(userId, {
-      fileName: filters.format === 'pdf' ? file.fileName.replace(/\.csv$/i, '.pdf') : file.fileName,
-      reportType: toRegisteredUsersReportType(filters.userType),
-    });
+    await this.reportHistoryService.registerGeneratedReport(userId, { fileName: file.fileName, reportType });
     return toCsvFile(file);
   }
 
@@ -84,17 +95,20 @@ export class ReportsController {
   }
 
   @Get('rejected-users/export')
-  @ApiProduces('text/csv')
+  @ApiProduces('text/csv', 'application/pdf')
   async exportRejectedUsersCsv(
     @Query(new ZodValidationPipe(rejectedUsersExportQuerySchema))
     filters: RejectedUsersExportQuery,
     @CurrentUserId() userId: string,
   ): Promise<StreamableFile> {
+    const reportType = 'REJECTED_USERS';
+    if (filters.format === 'pdf') {
+      const file = await this.reportsService.exportRejectedUsersPdf(filters, userId);
+      await this.reportHistoryService.registerGeneratedReport(userId, { fileName: file.fileName, reportType });
+      return toPdfFile(file);
+    }
     const file = await this.reportsService.exportRejectedUsersCsv(filters);
-    await this.reportHistoryService.registerGeneratedReport(userId, {
-      fileName: filters.format === 'pdf' ? file.fileName.replace(/\.csv$/i, '.pdf') : file.fileName,
-      reportType: 'REJECTED_USERS',
-    });
+    await this.reportHistoryService.registerGeneratedReport(userId, { fileName: file.fileName, reportType });
     return toCsvFile(file);
   }
 
