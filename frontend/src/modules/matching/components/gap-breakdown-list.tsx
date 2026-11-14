@@ -1,10 +1,10 @@
-import type { GapBreakdownListProps } from "../types/gap-breakdown-list-props.types";
-import { cn } from "@/lib/utils";
+import type { GapBreakdownListProps } from '../types/gap-breakdown-list-props.types';
+import { cn } from '@/lib/utils';
 
-import { AXIS_MAX_SCORE } from "../data/matching.data";
+import { AXIS_MAX_SCORE } from '../data/matching.data';
 
 function formatDelta(value: number) {
-  const sign = value > 0 ? "+" : "";
+  const sign = value > 0 ? '+' : '';
   return `${sign}${value.toFixed(1)}`;
 }
 
@@ -31,21 +31,19 @@ export function GapBreakdownList({ axes, gaps }: GapBreakdownListProps) {
                 <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
                   <div
                     className={cn(
-                      "h-full rounded-full",
-                      isGap
-                        ? "bg-ink-soft/50"
-                        : "border border-notice-border bg-gold",
+                      'h-full rounded-full',
+                      isGap ? 'bg-ink' : 'bg-accent',
                     )}
                     style={{
-                      width: `${Math.min(100, (Math.abs(delta) / AXIS_MAX_SCORE) * 100 * 2.5)}%`,
+                      width: `${Math.min(100, (Math.abs(delta) / AXIS_MAX_SCORE) * 100)}%`,
                     }}
                   />
                 </div>
               </div>
               <span
                 className={cn(
-                  "text-right font-medium tabular-nums",
-                  isGap ? "text-ink-soft" : "font-semibold text-ink",
+                  'text-right font-medium tabular-nums',
+                  isGap ? 'text-ink' : 'text-accent',
                 )}
               >
                 {formatDelta(delta)}
