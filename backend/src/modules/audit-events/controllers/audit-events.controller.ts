@@ -14,6 +14,7 @@ import { RequestValidationException } from '../../../common/exceptions/request-v
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../../../common/guards/roles.guard.js';
 import { ZodValidationPipe } from '../../../common/pipes/zod-validation.pipe.js';
+import { AuditEventTimelineService } from '../services/audit-event-timeline.service.js';
 
 import {
   auditEventsFiltersSchema,
@@ -47,6 +48,7 @@ export class AuditEventsController {
   constructor(
     private readonly auditEventsService: AuditEventsService,
     private readonly auditEventsExportService: AuditEventsExportService,
+    private readonly auditEventTimelineService: AuditEventTimelineService,
   ) {}
 
   @Get()
@@ -79,6 +81,11 @@ export class AuditEventsController {
   @Get(':id')
   getDetail(@Param('id', uuidPipe) id: string) {
     return this.auditEventsService.getDetail(id);
+  }
+
+  @Get(':id/timeline')
+  getTimeline(@Param('id', uuidPipe) id: string) {
+    return this.auditEventTimelineService.listForEvent(id);
   }
 
   @Get(':id/document')

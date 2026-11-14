@@ -1,3 +1,5 @@
+import { AuditEventNotFoundException } from '../exceptions/index.js';
+import type { AuditEventTimelineResponse } from '../types/audit-event-timeline-response.types.js';
 import { Injectable } from '@nestjs/common';
 import { AuditEventsRepository } from '../repositories/audit-events.repository.js';
 import type { AuditActionName } from '../types/audit-action.enum.js';
@@ -21,4 +23,17 @@ export class AuditEventTimelineService {
       detail: row.detail,
     }));
   }
+
+  async listForEvent(eventId: string): Promise<AuditEventTimelineResponse> {
+    const event = await this.auditEventsRepository.findTimelineOwner(eventId);
+    if (!event) {
+      throw new AuditEventNotFoundException();
+    }
+    return {
+      requestCode: event.requestCode,
+      focusedEventId: event.id,
+      items: await this.listForRequest(event.accessRequestId),
+    };
+  }
+
 }

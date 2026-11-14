@@ -113,4 +113,11 @@ export class AuditEventsRepository {
       select: AUDIT_TIMELINE_SELECT,
     });
   }
+
+   findTimelineOwner(id: string) {
+    return this.prisma.auditEvent.findUnique({
+      where: { id },
+      select: { id: true, accessRequestId: true, requestCode: true },
+    });
+  }
 }
