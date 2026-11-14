@@ -18,7 +18,7 @@ export class ApplicationMapper {
       companyName: record.jobOffer.company.title,
       affinityPercentage,
       status: record.status.title,
-      appliedDate: record.appliedAt.toISOString(),
+      appliedDate: new Date(record.appliedAt).toISOString(),
     };
   }
 
