@@ -56,7 +56,7 @@ describe('UserSkillRepository', () => {
     expect(transaction).not.toHaveBeenCalled();
   });
 
-  it('lists manual and detected skills of the user ordered by name', async () => {
+  it('loads only manually selected skills into the editable list', async () => {
     const records = [
       { skill: { id: skillId, name: 'Python', isCustom: false } },
       { skill: { id: detectedSkillId, name: 'HTML5', isCustom: false } },
@@ -66,7 +66,7 @@ describe('UserSkillRepository', () => {
     await expect(repository.findByUserId(userId)).resolves.toBe(records);
 
     expect(userSkill.findMany).toHaveBeenCalledWith({
-      where: { userId },
+      where: { userId, source: 'manual' },
       orderBy: { skill: { name: 'asc' } },
       select,
     });

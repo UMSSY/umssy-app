@@ -30,10 +30,10 @@ export class CertificationsRepository {
   }
 
   findPublicationEvidenceIds(userId: string, context: TransactionContext) {
-    return context.client.certification.findMany({
-      where: { userId, documentUrl: { not: null } },
-      select: { id: true },
-    });
+    return context.client.$queryRaw<{id:string}[]>`
+      SELECT c.id FROM certifications c WHERE c.user_id=${userId}::uuid
+      AND NOT EXISTS (SELECT 1 FROM radar_document_verifications d WHERE d.source_type='certification' AND d.source_id=c.id
+        AND d.active AND d.status NOT IN ('legacy','approved','manual_approved'))`;
   }
 
   findManyByUserId(userId: string) {

@@ -319,7 +319,7 @@ describe('Published radar processing states', () => {
         ]);
       const result = await service.myRadar(userId);
       expect(result.processingStatus).toBe(status);
-      expect(result.pending).toBe(4);
+      expect(result.pending).toBe(3);
       expect(result.hasPending).toBe(true);
     },
   );
