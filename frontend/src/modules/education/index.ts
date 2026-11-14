@@ -1,6 +1,7 @@
 export { EducationView } from "./views/education-view";
 
 export { EducationProfileSection } from "./components/education-profile-section";
+export { EducationGuideStep } from "./components/education-guide-step";
 export { useEducations } from "./hooks/use-educations";
 export { EducationInstitutionCombobox } from "./components/education-institution-combobox";
 export { EducationDegreeCombobox } from "./components/education-degree-combobox";

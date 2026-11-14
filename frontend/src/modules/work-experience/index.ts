@@ -3,6 +3,7 @@ export { WorkExperienceView } from "./views/work-experience-view";
 export { CURRENT_JOB_LABEL, WORK_EXPERIENCES_QUERY_KEY } from "./constants/work-experience.constants";
 
 export { WorkExperienceProfileSection } from "./components/work-experience-profile-section";
+export { WorkExperienceGuideStep } from "./components/work-experience-guide-step";
 export { useWorkExperiences } from "./hooks/use-work-experiences";
 export {
   WORK_EXPERIENCE_COMPANY_NAME_MAX_LENGTH,
