@@ -34,6 +34,14 @@ export const APPOINTMENT_STATUS_CLASSES: Record<AppointmentStatus, string> = {
   COMPLETED: "text-text-secondary",
 };
 
+export const APPOINTMENT_CANCELLATION_TEXT = {
+  byMe: "Cancelada por ti",
+  byMentor: "Cancelada por el mentor",
+  byStudent: "Cancelada por el titulado",
+  fallback: "Cancelada",
+  rebook: "Reservar otro horario",
+} as const;
+
 export const APPOINTMENT_DETAIL_TEXT = {
   fallbackTitle: "Detalle de la cita",
   titlePrefix: "Cita con",
@@ -43,6 +51,7 @@ export const APPOINTMENT_DETAIL_TEXT = {
   scheduleLabel: "Horario",
   topicLabel: "Tema",
   requestedAtLabel: "Reservada el",
+  cancellationReasonTitle: "Motivo de la cancelación",
   messageTitle: "Mensaje del titulado",
   noMessage: "Sin mensaje",
   documentTitle: "Documento compartido",
