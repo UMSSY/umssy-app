@@ -1,5 +1,5 @@
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
-import { cleanup, fireEvent, screen } from "@testing-library/react";
+import { cleanup, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { CvUploadCard } from "./cv-upload-card";
@@ -12,10 +12,9 @@ function renderCard(
   selectedFile: File | null = null,
   isUploading = false,
   isBusy = false,
-  { hasSavedCv = false, isLoading = false, uploadProgress = 0 } = {},
+  { hasSavedCv = false, isLoading = false } = {},
 ) {
   const onSelectFile = vi.fn();
-  const onFileDropped = vi.fn();
   const onConfirmUpload = vi.fn();
   render(
     <CvUploadCard
@@ -24,13 +23,11 @@ function renderCard(
       isLoading={isLoading}
       isUploading={isUploading}
       isBusy={isBusy}
-      uploadProgress={uploadProgress}
       onSelectFile={onSelectFile}
-      onFileDropped={onFileDropped}
       onConfirmUpload={onConfirmUpload}
     />,
   );
-  return { onSelectFile, onFileDropped, onConfirmUpload, user: userEvent.setup() };
+  return { onSelectFile, onConfirmUpload, user: userEvent.setup() };
 }
 
 describe("CvUploadCard", () => {
@@ -121,30 +118,5 @@ describe("CvUploadCard", () => {
 
     expect(uploadingButton).toBeDisabled();
     expect(uploadingButton.querySelector("svg.lucide-loader-circle")).toBeInTheDocument();
-  });
-
-  it("passes a dropped pdf to onFileDropped", () => {
-    const { onFileDropped } = renderCard();
-    const file = createPdf();
-
-    fireEvent.drop(screen.getByText("Selecciona tu CV en formato PDF"), { dataTransfer: { files: [file] } });
-
-    expect(onFileDropped).toHaveBeenCalledWith(file);
-  });
-
-  it("accepts a dropped pdf as a new version when a cv already exists", () => {
-    const { onFileDropped } = renderCard(null, false, false, { hasSavedCv: true });
-    const file = createPdf();
-
-    fireEvent.drop(screen.getByText("Ya tienes un CV vigente"), { dataTransfer: { files: [file] } });
-
-    expect(onFileDropped).toHaveBeenCalledWith(file);
-  });
-
-  it("shows the upload progress while uploading", () => {
-    renderCard(createPdf(), true, true, { uploadProgress: 60 });
-
-    expect(screen.getByText("Subiendo... 60%")).toBeInTheDocument();
-    expect(screen.getByRole("progressbar", { name: "Progreso de la subida" })).toBeInTheDocument();
   });
 });

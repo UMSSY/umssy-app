@@ -106,54 +106,12 @@ describe("useCvDocument", () => {
     vi.mocked(documentsService.getCvs).mockResolvedValue(buildPage([CURRENT_CV]));
 
     await act(async () => {
-      await expect(result.current.uploadCv(file)).resolves.toEqual(CURRENT_CV);
+      await result.current.uploadCv(file);
     });
 
-    expect(documentsService.uploadCv).toHaveBeenCalledWith(file, expect.any(Function));
+    expect(documentsService.uploadCv).toHaveBeenCalledWith(file);
     await waitFor(() => expect(result.current.currentCv).toEqual(CURRENT_CV));
     await waitFor(() => expect(result.current.isUploading).toBe(false));
-  });
-
-  it("exposes the upload progress and resets it when the upload finishes", async () => {
-    let finishUpload: (cv: SavedCv) => void = () => undefined;
-    vi.mocked(documentsService.uploadCv).mockImplementation((_file, onProgress) => {
-      onProgress?.(40);
-      return new Promise((resolve) => {
-        finishUpload = resolve;
-      });
-    });
-    const { result } = renderHook(() => useCvDocument());
-    await waitFor(() => expect(result.current.isLoading).toBe(false));
-    expect(result.current.uploadProgress).toBe(0);
-
-    let upload: Promise<SavedCv | null> = Promise.resolve(null);
-    act(() => {
-      upload = result.current.uploadCv(new File(["%PDF"], "CV.pdf", { type: "application/pdf" }));
-    });
-
-    await waitFor(() => expect(result.current.uploadProgress).toBe(40));
-    await act(async () => {
-      finishUpload(CURRENT_CV);
-      await upload;
-    });
-    await waitFor(() => expect(result.current.uploadProgress).toBe(0));
-  });
-
-  it("resets the upload progress when the upload fails", async () => {
-    vi.mocked(documentsService.uploadCv).mockImplementation((_file, onProgress) => {
-      onProgress?.(70);
-      return Promise.reject({ response: { status: 500 } });
-    });
-    const { result } = renderHook(() => useCvDocument());
-    await waitFor(() => expect(result.current.isLoading).toBe(false));
-
-    await act(async () => {
-      await expect(
-        result.current.uploadCv(new File(["%PDF"], "CV.pdf", { type: "application/pdf" })),
-      ).rejects.toEqual({ response: { status: 500 } });
-    });
-
-    await waitFor(() => expect(result.current.uploadProgress).toBe(0));
   });
 
   it("clears a previous load error after a successful upload", async () => {
@@ -246,7 +204,7 @@ describe("useCvDocument", () => {
     const { result } = renderHook(() => useCvDocument());
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    let upload: Promise<SavedCv | null> = Promise.resolve(null);
+    let upload: Promise<void> = Promise.resolve();
     act(() => {
       upload = result.current.uploadCv(new File(["%PDF"], "CV.pdf", { type: "application/pdf" }));
     });

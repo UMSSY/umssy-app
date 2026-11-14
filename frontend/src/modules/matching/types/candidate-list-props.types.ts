@@ -1,10 +1,9 @@
-import type { CandidateListEntry } from "./candidate-list-entry.types";
+import type { CandidateWithMatch } from "./candidate-with-match.types";
 
 export interface CandidateListProps {
-  emptyMessage?: string;
   query: string;
   onQueryChange: (query: string) => void;
-  candidates: CandidateListEntry[];
+  candidates: CandidateWithMatch[];
   selectedCandidateId: string | null;
   onSelectCandidate: (id: string) => void;
 }

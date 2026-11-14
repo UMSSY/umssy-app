@@ -8,10 +8,8 @@ export interface SavedCvCardProps {
   isReloading?: boolean;
   isBusy?: boolean;
   openingCvId?: string | null;
-  isAutofilling?: boolean;
   onView: (cv: SavedCv) => void;
   onDelete: (cv: SavedCv) => void;
   onOpenHistory: () => void;
   onRetry: () => void;
-  onAutofill: () => void;
 }

@@ -18,7 +18,7 @@ import { EDUCATION_DEGREE_TEXTS } from "../constants/education-degree-ui.constan
 import { getEducationDegrees, resolveEducationDegree } from "../utils/resolve-education-degree";
 import type { EducationFormProps } from "../types/education-form-props.types";
 import type { EducationFormValues } from "../types/education-form-values.types";
-import { getFieldErrorProps, useProfileCompletionFocus } from "@/modules/profile";
+import { getFieldErrorProps } from "@/modules/profile";
 import { validateEducationForm } from "../utils/validate-education-form";
 import { FeedbackMessage } from "@/modules/profile";
 import { FormField } from "@/modules/profile";
@@ -46,12 +46,6 @@ export function EducationForm({
     initialValues ?? EMPTY_EDUCATION_FORM_VALUES,
   );
   const title = initialValues ? EDUCATION_UI_TEXTS.editTitle : EDUCATION_UI_TEXTS.createTitle;
-  useProfileCompletionFocus('education', {
-    'education-institution': values.institution,
-    'education-degree': values.degree,
-    'education-startDate': values.startDate,
-    ...(!allowMissingEndDate ? { 'education-endDate': values.endDate } : {}),
-  }, !isPending && !catalogUnavailable);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const selectedInstitution = resolveEducationInstitution(values.institution, institutions);
   const degrees = getEducationDegrees(selectedInstitution ?? "", catalog);

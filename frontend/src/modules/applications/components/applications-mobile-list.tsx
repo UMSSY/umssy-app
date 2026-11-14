@@ -21,9 +21,7 @@ export function ApplicationsMobileList({
           className="flex flex-col gap-2 rounded-lg border border-border bg-surface p-4 transition-colors focus-within:border-availability-border hover:border-availability-border hover:bg-availability/30"
         >
           <p className="font-semibold text-ink">{application.vacancyTitle}</p>
-          <p className="text-sm text-text-secondary">
-            {application.companyName}
-          </p>
+          <p className="text-sm text-text-secondary">{application.companyName}</p>
           <div className="flex flex-wrap items-center gap-2 text-sm text-text-secondary">
             <span>
               {APPLICATION_MESSAGES.affinity}: {application.affinityPercentage}%

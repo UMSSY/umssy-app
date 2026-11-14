@@ -8,7 +8,6 @@ import { isApiError } from "@/shared/services/api-client";
 import { JOB_APPLICATION_QUERY_KEYS } from "../constants/job-application.constants";
 import { jobApplicationService } from "../services/job-application.service";
 import type { MyJobApplication } from "../types/my-job-application.types";
-import type { JobApplicationConsents } from "../types/job-application-consents.types";
 
 export function useJobApplication(jobOfferId: string) {
   const queryClient = useQueryClient();
@@ -22,13 +21,9 @@ export function useJobApplication(jobOfferId: string) {
   });
 
   const mutation = useMutation({
-    mutationFn: (consents: JobApplicationConsents) =>
-      jobApplicationService.apply(jobOfferId, consents),
+    mutationFn: () => jobApplicationService.apply(jobOfferId),
     onSuccess: (application) => {
-      queryClient.setQueryData<MyJobApplication>(queryKey, {
-        hasApplied: true,
-        application,
-      });
+      queryClient.setQueryData<MyJobApplication>(queryKey, { hasApplied: true, application });
     },
     onError: (error) => {
       if (isApiError(error) && error.response?.status === CONFLICT_STATUS) {
@@ -40,18 +35,10 @@ export function useJobApplication(jobOfferId: string) {
     },
   });
 
-  const apply = (consents: JobApplicationConsents) => {
-    if (!consents.consent || !consents.consentCv || !consents.consentContact)
-      return;
-    if (
-      submissionPending.current ||
-      query.isPending ||
-      mutation.isPending ||
-      query.data?.hasApplied
-    )
-      return;
+  const apply = () => {
+    if (submissionPending.current || query.isPending || mutation.isPending || query.data?.hasApplied) return;
     submissionPending.current = true;
-    mutation.mutate(consents);
+    mutation.mutate();
   };
 
   return {
@@ -59,12 +46,7 @@ export function useJobApplication(jobOfferId: string) {
     isLoading: query.isPending,
     apply,
     isApplying: mutation.isPending,
-    applyError:
-      mutation.isError &&
-      !(
-        isApiError(mutation.error) &&
-        mutation.error.response?.status === CONFLICT_STATUS
-      ),
+    applyError: mutation.isError && !(isApiError(mutation.error) && mutation.error.response?.status === CONFLICT_STATUS),
     submittedApplication: mutation.data ?? null,
     resetSubmission: mutation.reset,
   };

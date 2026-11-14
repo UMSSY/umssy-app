@@ -1,4 +1,4 @@
-import { SESSION_DRAFT_STORAGE_PREFIX } from "@/modules/auth/constants/session.constants";
+import { SESSION_DRAFT_STORAGE_PREFIX } from "@/modules/auth";
 import { CircleDot, SquareCheck, SquareChevronDown } from "lucide-react";
 import type { QuestionTypeOption } from "../types/question-type-option.types";
 import type { QuestionType } from "../types/question-type.types";

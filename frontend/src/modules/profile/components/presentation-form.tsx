@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, type ChangeEvent, type FormEvent } from "react";
-import { useProfileCompletionFocus } from "../hooks/use-profile-completion-focus";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -26,10 +25,6 @@ export function PresentationForm({
   const [values, setValues] = useState<PresentationValues>(initialValues);
   const [localErrors, setErrors] = useState<PresentationErrors>({});
   const errors = { ...localErrors, ...serverErrors };
-  useProfileCompletionFocus('presentation', {
-    headline: values.headline,
-    aboutMe: values.aboutMe,
-  }, !isSaving);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const field = event.target.name as keyof PresentationValues;

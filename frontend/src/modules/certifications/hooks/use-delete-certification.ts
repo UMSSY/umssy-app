@@ -6,11 +6,9 @@ import { CERTIFICATION_FEEDBACK_MESSAGES } from "../config/certification-feedbac
 import { certificationsService } from "../services/certifications.service";
 import type { Certification } from "../types/certification.types";
 import type { Feedback } from "@/modules/profile";
-import { useInvalidateProfileCompleteness } from "@/modules/profile";
 
 export function useDeleteCertification(onSuccess?: (certification: Certification) => void) {
-  const invalidateCompleteness = useInvalidateProfileCompleteness();
-  const mutation = useMutation({ mutationFn: (id: string) => certificationsService.deleteCertification(id), onSuccess: invalidateCompleteness });
+  const mutation = useMutation({ mutationFn: (id: string) => certificationsService.deleteCertification(id) });
   const [isDeleting, setIsDeleting] = useState(false);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
 

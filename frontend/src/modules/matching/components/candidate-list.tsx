@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { CandidateListItem } from "./candidate-list-item";
 
 export function CandidateList({
-  emptyMessage,
   query,
   onQueryChange,
   candidates,
@@ -24,13 +23,13 @@ export function CandidateList({
       />
 
       <p className="text-xs text-muted-foreground">
-        {candidates.length} candidato{candidates.length === 1 ? "" : "s"} ·
-        ordenados por compatibilidad
+        {candidates.length} candidato{candidates.length === 1 ? "" : "s"} · ordenados por
+        compatibilidad
       </p>
 
       {candidates.length === 0 ? (
         <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-          {emptyMessage ?? `No se encontraron candidatos para "${query}".`}
+          No se encontraron candidatos para &quot;{query}&quot;.
         </div>
       ) : (
         <div className="flex flex-1 flex-col gap-2 overflow-y-auto pr-1">

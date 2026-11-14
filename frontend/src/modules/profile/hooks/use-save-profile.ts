@@ -11,11 +11,9 @@ import type { ProfileResponse } from "../types/profile-response.types";
 import type { ProfileFieldErrors } from "../types/profile-field-errors.types";
 import { getProfileErrorMessage } from "../utils/get-profile-error-message";
 import { getProfileFieldErrors } from "../utils/get-profile-field-errors";
-import { useInvalidateProfileCompleteness } from "./use-invalidate-profile-completeness";
 
 export function useSaveProfile(onSaved: (profile: ProfileResponse) => void) {
-  const invalidateCompleteness = useInvalidateProfileCompleteness();
-  const mutation = useMutation({ mutationFn: (request: () => Promise<ProfileResponse>) => request(), onSuccess: invalidateCompleteness });
+  const mutation = useMutation({ mutationFn: (request: () => Promise<ProfileResponse>) => request() });
   const [isSaving, setIsSaving] = useState(false);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [fieldErrors, setFieldErrors] = useState<ProfileFieldErrors>({});
