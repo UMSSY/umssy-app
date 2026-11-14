@@ -100,8 +100,12 @@ describe('WorkExperienceListCard', () => {
 
   it('expands and collapses a company group and updates aria-expanded', async () => {
     const user = userEvent.setup();
+    const experiences = [
+      createExperience('senior', 'Desarrollador Senior', '2024-01-01', null, true),
+      createExperience('junior', 'Desarrollador Junior', '2020-01-01', '2022-12-31', false),
+    ];
 
-    render(<WorkExperienceListCard experiences={[EXPERIENCE]} />);
+    render(<WorkExperienceListCard experiences={experiences} />);
 
     const companyButton = screen.getByRole('button', {
       name: /Banco/,
@@ -109,22 +113,36 @@ describe('WorkExperienceListCard', () => {
 
     expect(companyButton).toHaveAttribute('aria-expanded', 'true');
     expect(
-      screen.getByRole('heading', { level: 4, name: LONG_POSITION }),
+      screen.getByRole('heading', { level: 4, name: 'Desarrollador Junior' }),
     ).toBeInTheDocument();
 
     await user.click(companyButton);
 
     expect(companyButton).toHaveAttribute('aria-expanded', 'false');
     expect(
-      screen.queryByRole('heading', { level: 4, name: LONG_POSITION }),
+      screen.queryByRole('heading', { level: 4, name: 'Desarrollador Junior' }),
     ).not.toBeInTheDocument();
 
     await user.click(companyButton);
 
     expect(companyButton).toHaveAttribute('aria-expanded', 'true');
     expect(
-      screen.getByRole('heading', { level: 4, name: LONG_POSITION }),
+      screen.getByRole('heading', { level: 4, name: 'Desarrollador Junior' }),
     ).toBeInTheDocument();
+  });
+
+  it('does not offer to collapse a company with a single position and always shows it', () => {
+    render(<WorkExperienceListCard experiences={[EXPERIENCE]} />);
+
+    expect(
+      screen.getByRole('heading', { level: 3, name: /Banco/ }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /Banco/ }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { level: 4, name: LONG_POSITION }),
+    ).toBeVisible();
   });
 
   it('identifies the first recorded position and current status for multiple positions', () => {
@@ -211,12 +229,14 @@ describe('WorkExperienceListCard', () => {
   it('does not repeat the company period when there is only one position', () => {
     render(<WorkExperienceListCard experiences={[EXPERIENCE]} />);
 
-    const companyButton = screen.getByRole('button', {
+    const companyHeading = screen.getByRole('heading', {
+      level: 3,
       name: /Banco/,
     });
 
-    expect(companyButton).toHaveTextContent('1 cargo');
-    expect(companyButton).not.toHaveTextContent('Tiene un cargo actual');
+    expect(companyHeading).toHaveTextContent('1 cargo');
+    expect(companyHeading).not.toHaveTextContent('Primer cargo');
+    expect(companyHeading).not.toHaveTextContent('Tiene un cargo actual');
 
     expect(
       screen.getByText(/Feb.*2020.*Jul.*2023/),
