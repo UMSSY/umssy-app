@@ -1,3 +1,4 @@
+import { ConflictException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { describe, beforeEach, it, expect, vi } from 'vitest';
 import { ConfigService } from '@nestjs/config';
@@ -11,13 +12,16 @@ import { ApplicationStatus } from '../types/applications.types.js';
 import { ApplicationNotFoundException } from '../exceptions/application-not-found.exception.js';
 import { ApplicationForbiddenException } from '../exceptions/application-forbidden.exception.js';
 import { ApplicationNotWithdrawableException } from '../exceptions/application-not-withdrawable.exception.js';
+import { ApplicationContactRestrictedException } from '../exceptions/application-contact-restricted.exception.js';
 
 describe('ApplicationsService (T5.1 & T5.2 & HU-15)', () => {
   let service: ApplicationsService;
   let repositoryMock: {
     findByUserId: ReturnType<typeof vi.fn>;
     findById: ReturnType<typeof vi.fn>;
+    findContactContext: ReturnType<typeof vi.fn>;
     withdraw: ReturnType<typeof vi.fn>;
+    reactivateApplication: ReturnType<typeof vi.fn>;
   };
   let notificationsMock: { notify: ReturnType<typeof vi.fn> };
   let configMock: { getOrThrow: ReturnType<typeof vi.fn> };
@@ -28,7 +32,9 @@ describe('ApplicationsService (T5.1 & T5.2 & HU-15)', () => {
     repositoryMock = {
       findByUserId: vi.fn(),
       findById: vi.fn(),
+      findContactContext: vi.fn(),
       withdraw: vi.fn().mockResolvedValue({ count: 1 }),
+      reactivateApplication: vi.fn().mockResolvedValue({ count: 1 }),
     };
 
     notificationsMock = {
@@ -133,6 +139,125 @@ describe('ApplicationsService (T5.1 & T5.2 & HU-15)', () => {
     });
   });
 
+  describe('ordenamiento por estado (AC-13.5 y AC-13.6)', () => {
+    it('respeta la prioridad de estados y su sentido inverso', async () => {
+      const statuses = [
+        ApplicationStatus.REJECTED,
+        ApplicationStatus.ACCEPTED,
+        ApplicationStatus.IN_REVIEW,
+        ApplicationStatus.INTERVIEW,
+      ];
+
+      repositoryMock.findByUserId.mockResolvedValue(
+        statuses.map((status, index) => ({
+          id: `app-${index}`,
+          jobOfferId: `offer-${index}`,
+          status: { title: status },
+          appliedAt: new Date('2026-11-10T12:00:00.000Z'),
+          jobOffer: {
+            title: `Vacante ${index}`,
+            company: { title: 'Empresa' },
+          },
+        })),
+      );
+
+      const ascending = await service.findMyApplications('user-1', {
+        sortBy: 'status',
+        sortOrder: 'asc',
+      });
+
+      expect(ascending.map((item) => item.status)).toEqual([
+        ApplicationStatus.IN_REVIEW,
+        ApplicationStatus.INTERVIEW,
+        ApplicationStatus.ACCEPTED,
+        ApplicationStatus.REJECTED,
+      ]);
+
+      const descending = await service.findMyApplications('user-1', {
+        sortBy: 'status',
+        sortOrder: 'desc',
+      });
+
+      expect(descending.map((item) => item.status)).toEqual([
+        ApplicationStatus.REJECTED,
+        ApplicationStatus.ACCEPTED,
+        ApplicationStatus.INTERVIEW,
+        ApplicationStatus.IN_REVIEW,
+      ]);
+    });
+  });
+
+  describe('desempates de HU-13', () => {
+    const applications = [
+      {
+        id: 'app-3',
+        jobOfferId: 'offer-3',
+        status: { title: ApplicationStatus.IN_REVIEW },
+        appliedAt: new Date('2026-11-10T10:00:00.000Z'),
+        jobOffer: {
+          title: 'Python Developer',
+          company: { title: 'Empresa C' },
+        },
+      },
+      {
+        id: 'app-2',
+        jobOfferId: 'offer-2',
+        status: { title: ApplicationStatus.IN_REVIEW },
+        appliedAt: new Date('2026-11-12T10:00:00.000Z'),
+        jobOffer: {
+          title: 'Zoología',
+          company: { title: 'Empresa B' },
+        },
+      },
+      {
+        id: 'app-1',
+        jobOfferId: 'offer-1',
+        status: { title: ApplicationStatus.IN_REVIEW },
+        appliedAt: new Date('2026-11-12T10:00:00.000Z'),
+        jobOffer: {
+          title: 'Analista',
+          company: { title: 'Empresa A' },
+        },
+      },
+    ];
+
+    it('muestra fechas recientes primero y desempata por título', async () => {
+      repositoryMock.findByUserId.mockResolvedValue(applications);
+
+      const result = await service.findMyApplications('user-1', {
+        sortOrder: 'desc',
+      });
+
+      expect(result.map((item) => item.id)).toEqual([
+        'app-1',
+        'app-2',
+        'app-3',
+      ]);
+    });
+
+    it('desempata afinidades iguales por fecha y título', async () => {
+      repositoryMock.findByUserId.mockResolvedValue(applications);
+      matching.scoresForOffers.mockResolvedValue(
+        new Map([
+          ['offer-1', 50],
+          ['offer-2', 50],
+          ['offer-3', 50],
+        ]),
+      );
+
+      const result = await service.findMyApplications('user-1', {
+        sortBy: 'affinity',
+        sortOrder: 'desc',
+      });
+
+      expect(result.map((item) => item.id)).toEqual([
+        'app-1',
+        'app-2',
+        'app-3',
+      ]);
+    });
+  });
+
   describe('withdrawApplication (AC-05.4)', () => {
     it('debe cambiar estado a Retirada', async () => {
       repositoryMock.findById.mockResolvedValue({
@@ -161,94 +286,4 @@ describe('ApplicationsService (T5.1 & T5.2 & HU-15)', () => {
       expect(repositoryMock.withdraw).not.toHaveBeenCalled();
     });
 
-    it('lanza ApplicationForbiddenException si es de otro usuario', async () => {
-      repositoryMock.findById.mockResolvedValue({
-        id: 'app-1',
-        userId: 'user-2',
-        status: { title: ApplicationStatus.IN_REVIEW },
-      });
-
-      await expect(
-        service.withdrawApplication('app-1', 'user-1'),
-      ).rejects.toThrow(ApplicationForbiddenException);
-      expect(repositoryMock.withdraw).not.toHaveBeenCalled();
-    });
-
-    it('lanza ApplicationNotWithdrawableException si esta Aceptada', async () => {
-      repositoryMock.withdraw.mockResolvedValue({ count: 0 });
-      repositoryMock.findById.mockResolvedValue({
-        id: 'app-1',
-        userId: 'user-1',
-        status: { title: ApplicationStatus.ACCEPTED },
-      });
-
-      await expect(
-        service.withdrawApplication('app-1', 'user-1'),
-      ).rejects.toThrow(ApplicationNotWithdrawableException);
-    });
-
-    it('rechaza el retiro si el estado cambió después de consultar la postulación', async () => {
-      repositoryMock.findById.mockResolvedValue({
-        id: 'app-1',
-        userId: 'user-1',
-        status: { title: ApplicationStatus.IN_REVIEW },
-      });
-      repositoryMock.withdraw.mockResolvedValue({ count: 0 });
-      await expect(
-        service.withdrawApplication('app-1', 'user-1'),
-      ).rejects.toThrow(ApplicationNotWithdrawableException);
-    });
-  });
-
-  describe('notifyStateChanged (HU-15)', () => {
-    it('AC-15.1: debe enviar la notificación APPLICATION_STATUS_CHANGED cuando el reclutador cambia el estado', async () => {
-      await service.notifyStateChanged({
-        recipientId: 'user-1',
-        applicationId: 'app-1',
-        previousStatus: 'IN_REVIEW' as any,
-        newStatus: 'INTERVIEW' as any,
-        jobTitle: 'Dev',
-        companyName: 'Empresa A',
-      });
-
-      expect(notificationsMock.notify).toHaveBeenCalledTimes(1);
-      expect(notificationsMock.notify).toHaveBeenCalledWith({
-        recipientIds: ['user-1'],
-        type: NotificationType.APPLICATION_STATUS_CHANGED,
-        payload: {
-          vacancyTitle: 'Dev',
-          companyName: 'Empresa A',
-          newStatus: 'INTERVIEW',
-        },
-        actionUrl: 'https://umssy.edu.bo/postulaciones/app-1',
-      });
-    });
-
-    it('AC-15.4: withdrawApplication NO genera ninguna notificación de cambio de estado', async () => {
-      repositoryMock.findById.mockResolvedValue({
-        id: 'app-1',
-        userId: 'user-1',
-        status: { title: ApplicationStatus.IN_REVIEW },
-      });
-
-      await service.withdrawApplication('app-1', 'user-1');
-
-      expect(repositoryMock.withdraw).toHaveBeenCalled();
-      expect(notificationsMock.notify).not.toHaveBeenCalled();
-    });
-
-    it('D-14: no notifica si el estado nuevo es idéntico al anterior', async () => {
-      await service.notifyStateChanged({
-        recipientId: 'user-1',
-        applicationId: 'app-1',
-        previousStatus: ApplicationStatus.IN_REVIEW,
-        newStatus: ApplicationStatus.IN_REVIEW,
-        jobTitle: 'Dev',
-        companyName: 'Empresa A',
-      });
-
-      expect(notificationsMock.notify).not.toHaveBeenCalled();
-    
-    });
-  });
-});
+    it('lanza ApplicationForbidden
