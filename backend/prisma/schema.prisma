@@ -683,6 +683,7 @@ model JobOffer {
   @@index([modalityId])
   @@index([contractTypeId])
   @@index([statusId])
+  @@index([statusId, expiresAt])
   @@map("job_offers")
 }
 

@@ -1,0 +1,1 @@
+CREATE INDEX "job_offers_status_id_expires_at_idx" ON "job_offers"("status_id", "expires_at");

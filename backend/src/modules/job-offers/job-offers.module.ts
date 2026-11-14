@@ -8,6 +8,8 @@ import { JobOfferMapper } from './mappers/job-offer.mapper.js';
 import { JobOffersRepository } from './repositories/job-offers.repository.js';
 import { JobOfferSkillsService } from './services/job-offer-skills.service.js';
 import { JobOffersService } from './services/job-offers.service.js';
+import { JobOfferExpirationScheduler } from './schedulers/job-offer-expiration.scheduler.js';
+
 
 @Module({
   imports: [JwtAuthModule, PrismaModule, SkillsModule],
@@ -18,6 +20,7 @@ import { JobOffersService } from './services/job-offers.service.js';
     JobOfferSkillsService,
     JobOffersRepository,
     JobOfferMapper,
+    JobOfferExpirationScheduler,
   ],
   exports: [JobOffersService],
 })

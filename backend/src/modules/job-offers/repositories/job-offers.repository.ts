@@ -167,12 +167,29 @@ export class JobOffersRepository {
     });
   }
 
-  reopen(
+    reopen(
     jobOfferId: string,
     statusId: string,
     publishedAt: Date,
+    clearExpiresAt = false,
   ): Promise<JobOfferRecord> {
-    return this.updateExisting(jobOfferId, { statusId, publishedAt });
+    return this.updateExisting(jobOfferId, {
+      statusId,
+      publishedAt,
+      ...(clearExpiresAt && { expiresAt: null }),
+    });
+  }
+
+  async closeExpired(
+    publishedStatusId: string,
+    closedStatusId: string,
+    now: Date,
+  ): Promise<number> {
+    const { count } = await this.prisma.jobOffer.updateMany({
+      where: { statusId: publishedStatusId, expiresAt: { lte: now } },
+      data: { statusId: closedStatusId },
+    });
+    return count;
   }
 
   updateStatus(jobOfferId: string, statusId: string): Promise<JobOfferRecord> {
