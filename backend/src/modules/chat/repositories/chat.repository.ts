@@ -61,4 +61,15 @@ export class ChatRepository {
       },
     });
   }
+  findBlockBetween(userAId: string, userBId: string) {
+  return this.prisma.chatUserBlock.findFirst({
+    where: {
+      OR: [
+        { blockerId: userAId, blockedId: userBId },
+        { blockerId: userBId, blockedId: userAId },
+      ],
+    },
+    select: { id: true },
+  });
+}
 }
