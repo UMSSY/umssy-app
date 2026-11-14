@@ -17,7 +17,7 @@ import {
   PushSubscriptionSchema,
   DeletePushSubscriptionSchema,
 } from '../requests/push-subscription.schema.js';
-import type { PushSubscriptionPayload } from '../types/notification.types.js';
+import type { PushSubscriptionPayload } from '../types/push-subscription-payload.type.js';
 
 @Controller('push')
 @UseGuards(JwtAuthGuard)
