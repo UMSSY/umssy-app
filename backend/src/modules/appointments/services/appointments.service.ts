@@ -8,6 +8,9 @@ import { BlockedDatesService } from '../../availability/services/blocked-dates.s
 import { MentorsService } from '../../mentors/services/mentors.service.js';
 import { ProfilePhotoService } from '../../profile/services/profile-photo.service.js';
 import type { PhotoFileDownload } from '../../profile/types/photo-file-download.type.js';
+import { ACTIVE_APPOINTMENT_STATUS_TITLES } from '../constants/active-appointment-statuses.constants.js';
+import { CANCELLATION_REASON_WINDOW_MS } from '../constants/cancellation.constants.js';
+import { CANCELLED_APPOINTMENT_STATUS_TITLES } from '../constants/cancelled-appointment-statuses.constants.js';
 import {
   AppointmentNotCancellableException,
   AppointmentOverlapException,
@@ -26,12 +29,13 @@ import { AppointmentMapper } from '../mappers/appointment.mapper.js';
 import { AppointmentsRepository } from '../repositories/appointments.repository.js';
 import type { CancelAppointmentDto } from '../requests/cancel-appointment.request.js';
 import type { CreateAppointmentDto } from '../requests/create-appointment.request.js';
-import { CANCELLATION_REASON_WINDOW_MS } from '../constants/cancellation.constants.js';
+import type { AppointmentDetailResponse } from '../types/appointment-detail-response.types.js';
 import type { AppointmentRecord } from '../types/appointment-record.types.js';
 import type { MyAppointmentResponse } from '../types/my-appointment-response.types.js';
 import type { MyAppointmentsPageResponse } from '../types/my-appointments-page-response.types.js';
 import type { MyAppointmentsQuery } from '../types/my-appointments-query.types.js';
 import { getBoliviaDayRange } from '../utils/bolivia-day.js';
+import { buildMeetingUrl, canShareMeetingUrl } from '../utils/meeting-url.js';
 
 @Injectable()
 export class AppointmentsService {
@@ -129,6 +133,7 @@ export class AppointmentsService {
             statusId,
             orientationTypeId: payload.orientationTypeId,
             message: payload.message,
+            meetingUrl: buildMeetingUrl(),
           },
           tx,
         );
@@ -143,7 +148,11 @@ export class AppointmentsService {
           tx,
         );
 
-        return this.appointmentMapper.toResponse(appointment, user.id);
+        return this.appointmentMapper.toResponse(
+          appointment,
+          user.id,
+          new Date(),
+        );
       })
       .catch((error: unknown) => {
         if (error instanceof DayBlockedException) {
@@ -158,10 +167,17 @@ export class AppointmentsService {
     query: MyAppointmentsQuery,
   ): Promise<MyAppointmentsPageResponse> {
     const now = new Date();
+    const counterpartIds = query.q
+      ? await this.appointmentsRepository.findCounterpartIdsByName(
+          userId,
+          this.normalizeSearchText(query.q),
+        )
+      : undefined;
     const total = await this.appointmentsRepository.countMine(
       userId,
       query.scope,
       now,
+      counterpartIds,
     );
     const lastPage = Math.max(1, Math.ceil(total / query.pageSize));
     const page = Math.min(query.page, lastPage);
@@ -171,19 +187,30 @@ export class AppointmentsService {
       now,
       page,
       query.pageSize,
+      counterpartIds,
     );
 
     return {
-      items: this.appointmentMapper.toResponseList(appointments, userId),
+      items: this.appointmentMapper.toResponseList(appointments, userId, now),
       total,
       page,
       pageSize: query.pageSize,
     };
   }
 
-  async findOne(userId: string, id: string): Promise<MyAppointmentResponse> {
+  async findOne(
+    userId: string,
+    id: string,
+  ): Promise<AppointmentDetailResponse> {
     const appointment = await this.findParticipatedAppointment(userId, id);
-    return this.appointmentMapper.toResponse(appointment, userId);
+    const now = new Date();
+    const meetingUrl = await this.resolveMeetingUrl(appointment, now);
+    return this.appointmentMapper.toDetailResponse(
+      appointment,
+      userId,
+      meetingUrl,
+      now,
+    );
   }
 
   async cancel(
@@ -192,15 +219,13 @@ export class AppointmentsService {
     payload: CancelAppointmentDto,
   ): Promise<MyAppointmentResponse> {
     const appointment = await this.findParticipatedAppointment(user.id, id);
+    const statusTitle = appointment.status.title as AppointmentStatusTitle;
 
-    if (appointment.status.title === AppointmentStatusTitle.CANCELLED) {
+    if (CANCELLED_APPOINTMENT_STATUS_TITLES.includes(statusTitle)) {
       return this.appointmentMapper.toResponse(appointment, user.id);
     }
 
-    if (
-      appointment.status.title !== AppointmentStatusTitle.CONFIRMED &&
-      appointment.status.title !== AppointmentStatusTitle.LEGACY_CONFIRMED
-    ) {
+    if (!ACTIVE_APPOINTMENT_STATUS_TITLES.includes(statusTitle)) {
       throw new AppointmentNotCancellableException();
     }
 
@@ -233,7 +258,11 @@ export class AppointmentsService {
       if (!current) {
         throw new AppointmentNotFoundException();
       }
-      if (current.status.title === AppointmentStatusTitle.CANCELLED) {
+      if (
+        CANCELLED_APPOINTMENT_STATUS_TITLES.includes(
+          current.status.title as AppointmentStatusTitle,
+        )
+      ) {
         return this.appointmentMapper.toResponse(current, user.id);
       }
 
@@ -284,6 +313,22 @@ export class AppointmentsService {
     return this.profilePhotoService.getPhoto(counterpartId);
   }
 
+  private async resolveMeetingUrl(
+    appointment: AppointmentRecord,
+    now: Date,
+  ): Promise<string | null> {
+    if (!canShareMeetingUrl(appointment.status.title, appointment.endAt, now)) {
+      return null;
+    }
+    if (appointment.meetingUrl) {
+      return appointment.meetingUrl;
+    }
+    return this.appointmentsRepository.assignMeetingUrl(
+      appointment.id,
+      buildMeetingUrl(),
+    );
+  }
+
   private async assertMentorAcceptsTopic(
     mentorId: string,
     orientationTypeId: string,
@@ -301,6 +346,14 @@ export class AppointmentsService {
     if (!offersTopic) {
       throw new InvalidOrientationTypeException();
     }
+  }
+
+  private normalizeSearchText(text: string): string {
+    return text
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/\s+/g, ' ');
   }
 
   private async findParticipatedAppointment(

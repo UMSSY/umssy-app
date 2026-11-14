@@ -31,7 +31,7 @@ export const APPOINTMENT_STATUS_LABELS: Record<AppointmentStatus, string> = {
 export const APPOINTMENT_STATUS_CLASSES: Record<AppointmentStatus, string> = {
   CONFIRMED: "text-success",
   CANCELLED: "text-text-secondary",
-  COMPLETED: "text-text-secondary",
+  COMPLETED: "border-transparent bg-muted text-text-secondary",
 };
 
 export const APPOINTMENT_DETAIL_TEXT = {
@@ -52,6 +52,11 @@ export const APPOINTMENT_DETAIL_TEXT = {
   close: "Cerrar",
   mentorProfile: "Ver perfil del mentor",
   photoAlt: "Foto de perfil de",
+} as const;
+
+export const JOIN_MEETING_TEXT = {
+  join: "Unirse a la reunión",
+  unavailable: "No se pudo abrir la reunión. Intenta nuevamente.",
 } as const;
 
 export const APPOINTMENT_WEEKDAY_LABELS = [

@@ -5,6 +5,7 @@ import {
   DEFAULT_MY_APPOINTMENTS_PAGE_SIZE,
   MAX_MY_APPOINTMENTS_PAGE_SIZE,
 } from '../constants/my-appointments-pagination.constants.js';
+import { MAX_MY_APPOINTMENTS_SEARCH_LENGTH } from '../constants/my-appointments-search.constants.js';
 
 export const myAppointmentsQuerySchema = z.strictObject({
   scope: z
@@ -25,4 +26,12 @@ export const myAppointmentsQuerySchema = z.strictObject({
       error: APPOINTMENT_MESSAGES.invalidPageSize,
     })
     .default(DEFAULT_MY_APPOINTMENTS_PAGE_SIZE),
+  q: z
+    .string({ error: APPOINTMENT_MESSAGES.invalidSearch })
+    .trim()
+    .max(MAX_MY_APPOINTMENTS_SEARCH_LENGTH, {
+      error: APPOINTMENT_MESSAGES.invalidSearch,
+    })
+    .optional()
+    .transform((value) => value || undefined),
 });

@@ -145,10 +145,11 @@ model User {
   availabilityBlocks     AvailabilityBlock[]
   blockedDates           BlockedDate[]
 
-  mentorAppointments    Appointment[]        @relation("AppointmentMentor")
-  studentAppointments   Appointment[]        @relation("AppointmentStudent")
-  cancelledAppointments Appointment[]        @relation("AppointmentCancelledBy")
-  appointmentChanges    AppointmentHistory[]
+  mentorAppointments       Appointment[]             @relation("AppointmentMentor")
+  studentAppointments      Appointment[]             @relation("AppointmentStudent")
+  cancelledAppointments    Appointment[]             @relation("AppointmentCancelledBy")
+  appointmentChanges       AppointmentHistory[]
+  appointmentNotifications AppointmentNotification[]
 
   createdEvents        Event[]             @relation("EventCreatedBy")
   moderatedEvents      Event[]             @relation("EventModeratedBy")
@@ -186,7 +187,13 @@ model User {
   radarCompanyAccess   RadarCompanyAccess[]      @ignore
   radarApplications    RadarJobApplication[]     @relation("RadarApplicant") @ignore
   radarDecisions       RadarJobApplication[]     @relation("RadarDecision") @ignore
+  socialAccounts       UserSocialAccount[]
+  portfolioProjects    UserPortfolioProject[]
 
+  notificationPreferences NotificationPreference?
+  receivedNotifications   Notification[]           @relation("ReceivedNotifications")
+  triggeredNotifications  Notification[]           @relation("TriggeredNotifications")
+  pushSubscriptions       PushSubscription[]
   @@index([cityId])
   @@index([companyId])
   @@map("users")
@@ -482,9 +489,10 @@ model Appointment {
   orientationType OrientationType?   @relation(fields: [orientationTypeId], references: [id], onDelete: SetNull)
   cancelledBy     User?              @relation("AppointmentCancelledBy", fields: [cancelledById], references: [id], onDelete: SetNull)
 
-  proposals TimeProposal[]
-  history   AppointmentHistory[]
-  document  AppointmentDocument?
+  proposals     TimeProposal[]
+  history       AppointmentHistory[]
+  document      AppointmentDocument?
+  notifications AppointmentNotification[]
 
   @@index([mentorId, startAt])
   @@index([studentId, startAt])
@@ -551,6 +559,69 @@ model AppointmentHistory {
   @@index([newStatusId])
   @@index([changedById])
   @@map("appointment_histories")
+}
+
+model AppointmentNotificationEvent {
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String   @unique @db.VarChar(100)
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  notifications AppointmentNotification[]
+
+  @@map("appointment_notification_events")
+}
+
+model AppointmentNotificationChannel {
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String   @unique @db.VarChar(100)
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  notifications AppointmentNotification[]
+
+  @@map("appointment_notification_channels")
+}
+
+model AppointmentNotificationStatus {
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String   @unique @db.VarChar(100)
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  notifications AppointmentNotification[]
+
+  @@map("appointment_notification_statuses")
+}
+
+model AppointmentNotification {
+  id            String    @id @default(uuid()) @db.Uuid
+  appointmentId String    @map("appointment_id") @db.Uuid
+  recipientId   String    @map("recipient_id") @db.Uuid
+  eventId       String    @map("event_id") @db.Uuid
+  channelId     String    @map("channel_id") @db.Uuid
+  statusId      String    @map("status_id") @db.Uuid
+  attempts      Int       @default(0)
+  lastError     String?   @map("last_error")
+  sentAt        DateTime? @map("sent_at") @db.Timestamptz(6)
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  appointment Appointment                    @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  recipient   User                           @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+  event       AppointmentNotificationEvent   @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  channel     AppointmentNotificationChannel @relation(fields: [channelId], references: [id], onDelete: Restrict)
+  status      AppointmentNotificationStatus  @relation(fields: [statusId], references: [id], onDelete: Restrict)
+
+  @@unique([appointmentId, recipientId, eventId, channelId])
+  @@index([recipientId])
+  @@index([eventId])
+  @@index([channelId])
+  @@index([statusId])
+  @@map("appointment_notifications")
 }
 
 model EventCategory {
@@ -1112,14 +1183,29 @@ model JobApplication {
   createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  jobOffer JobOffer             @relation(fields: [jobOfferId], references: [id], onDelete: Cascade)
-  user     User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
-  status   JobApplicationStatus @relation(fields: [statusId], references: [id], onDelete: Restrict)
+  jobOffer     JobOffer               @relation(fields: [jobOfferId], references: [id], onDelete: Cascade)
+  user         User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status       JobApplicationStatus   @relation(fields: [statusId], references: [id], onDelete: Restrict)
+  radarConsent RadarApplicationConsent?
 
   @@unique([jobOfferId, userId])
   @@index([userId])
   @@index([statusId])
   @@map("job_applications")
+}
+
+model RadarApplicationConsent {
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  applicationId      String   @unique @map("application_id") @db.Uuid
+  consentToRecruiter Boolean  @default(false) @map("consent_to_recruiter")
+  consentToCv        Boolean  @default(false) @map("consent_to_cv")
+  consentToContact   Boolean  @default(false) @map("consent_to_contact")
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  application JobApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@map("radar_application_consents")
 }
 
 model SurveyStatus {
@@ -1516,4 +1602,129 @@ model MentorOfferStatus {
   records     MentorSlotOffer[]
 
   @@map("mentor_offer_statuses")
+}
+
+model PortfolioProvider {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @unique @db.VarChar(50)
+  description String?  @db.VarChar(150)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  socialAccounts    UserSocialAccount[]
+  portfolioProjects UserPortfolioProject[]
+
+  @@map("portfolio_providers")
+}
+
+model UserSocialAccount {
+  id                String                 @id @default(uuid()) @db.Uuid
+  userId            String                 @map("user_id") @db.Uuid
+  providerId        String                 @map("provider_id") @db.Uuid
+  externalId        String                 @map("external_id") @db.VarChar(100)
+  username          String                 @db.VarChar(100)
+  profileUrl        String?                @map("profile_url") @db.VarChar(500)
+  createdAt         DateTime               @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime               @updatedAt @map("updated_at") @db.Timestamptz(6)
+  user              User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider          PortfolioProvider      @relation(fields: [providerId], references: [id], onDelete: Restrict)
+  portfolioProjects UserPortfolioProject[]
+
+  @@unique([userId, providerId])
+  @@unique([providerId, externalId])
+  @@index([providerId])
+  @@map("user_social_accounts")
+}
+
+model UserPortfolioProject {
+  id              String             @id @default(uuid()) @db.Uuid
+  userId          String             @map("user_id") @db.Uuid
+  socialAccountId String?            @map("social_account_id") @db.Uuid
+  providerId      String             @map("provider_id") @db.Uuid
+  repoName        String             @map("repo_name") @db.VarChar(150)
+  repoUrl         String             @map("repo_url") @db.VarChar(500)
+  description     String?            @db.Text
+  language        String?            @db.VarChar(60)
+  starsCount      Int                @default(0) @map("stars_count")
+  isOwner         Boolean            @default(true) @map("is_owner")
+  displayOrder    Int                @default(0) @map("display_order") @db.SmallInt
+  createdAt       DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime           @updatedAt @map("updated_at") @db.Timestamptz(6)
+  user            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  socialAccount   UserSocialAccount? @relation(fields: [socialAccountId], references: [id], onDelete: SetNull)
+  provider        PortfolioProvider  @relation(fields: [providerId], references: [id], onDelete: Restrict)
+
+  @@unique([userId, providerId, repoName])
+  @@index([userId, displayOrder])
+  @@index([socialAccountId])
+  @@index([providerId])
+  @@map("user_portfolio_projects")
+}
+
+model NotificationType {
+  id          String   @id @default(uuid()) @db.Uuid
+  code        String   @unique @db.VarChar(50)
+  name        String   @db.VarChar(100)
+  sendsPush   Boolean  @default(false) @map("sends_push")
+  sendsEmail  Boolean  @default(false) @map("sends_email")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  notifications Notification[]
+
+  @@map("notification_types")
+}
+
+model Notification {
+  id          String   @id @default(uuid()) @db.Uuid
+  recipientId String   @map("recipient_id") @db.Uuid
+  actorId     String?  @map("actor_id") @db.Uuid
+  typeId      String   @map("type_id") @db.Uuid
+  title       String   @db.VarChar(120)
+  body        String   @db.VarChar(255)
+  link        String   @db.VarChar(500)
+  groupKey    String?  @map("group_key") @db.VarChar(100)
+  readAt      DateTime? @map("read_at") @db.Timestamptz(6)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  recipient User             @relation("ReceivedNotifications", fields: [recipientId], references: [id], onDelete: Cascade)
+  actor     User?            @relation("TriggeredNotifications", fields: [actorId], references: [id], onDelete: SetNull)
+  type      NotificationType @relation(fields: [typeId], references: [id], onDelete: Restrict)
+
+  @@index([recipientId, readAt])
+  @@index([recipientId, createdAt(sort: Desc)])
+  @@index([actorId])
+  @@index([typeId])
+  @@map("notifications")
+}
+
+model PushSubscription {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  endpoint   String   @unique @db.VarChar(500)
+  p256dh     String   @db.VarChar(255)
+  auth       String   @db.VarChar(255)
+  userAgent  String?  @map("user_agent") @db.VarChar(255)
+  lastUsedAt DateTime? @map("last_used_at") @db.Timestamptz(6)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("push_subscriptions")
+}
+
+model NotificationPreference {
+  userId       String   @id @map("user_id") @db.Uuid
+  pushEnabled  Boolean  @default(false) @map("push_enabled")
+  emailEnabled Boolean  @default(true) @map("email_enabled")
+  inAppEnabled Boolean  @default(true) @map("in_app_enabled")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notification_preferences")
 }

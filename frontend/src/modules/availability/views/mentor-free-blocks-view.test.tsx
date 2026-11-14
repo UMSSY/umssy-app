@@ -15,11 +15,15 @@ import {
 import { MentorFreeBlocksView } from "./mentor-free-blocks-view";
 import { useMentorFreeBlocks } from "../hooks/use-mentor-free-blocks";
 import type { AvailabilityBlock } from "../types/availability-block.types";
+import type { WeekGridDensity } from "../types/week-grid-density.types";
 
 vi.mock("../hooks/use-mentor-free-blocks");
 vi.mock("../components/block-selection/block-selection", () => ({
-  BlockSelection: (props: { blocks: AvailabilityBlock[] }) => (
-    <div data-testid="block-selection" data-blocks={props.blocks.length} />
+  BlockSelection: (props: { blocks: AvailabilityBlock[]; density?: WeekGridDensity; onActivityChange?: (active: boolean) => void }) => (
+    <div data-testid="block-selection" data-blocks={props.blocks.length} data-density={props.density}>
+      <button onClick={() => props.onActivityChange?.(true)}>Seleccionar horario</button>
+      <button onClick={() => props.onActivityChange?.(false)}>Descartar borrador</button>
+    </div>
   ),
 }));
 vi.mock("../components/availability-loading", () => ({
@@ -46,6 +50,7 @@ describe("MentorFreeBlocksView", () => {
   afterEach(() => {
     cleanup();
     vi.clearAllMocks();
+    window.localStorage.clear();
   });
 
   it("muestra el loading mientras carga", () => {
@@ -71,6 +76,32 @@ describe("MentorFreeBlocksView", () => {
       screen.getByText("Este mentor no tiene horarios libres esta semana.")
     ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Ver semana siguiente" })).toBeInTheDocument();
+    expect(screen.queryByTestId("block-selection")).not.toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "Disponibilidad semanal" })).not.toBeInTheDocument();
+  });
+
+  it("mantiene el panel montado cuando la actualización deja la semana sin horarios", () => {
+    mockedUseMentorFreeBlocks.mockReturnValue({ blocks: [freeBlock], isLoading: false, error: null });
+    const { rerender } = render(<MentorFreeBlocksView mentorId="m1" />);
+    const panel = screen.getByTestId("block-selection");
+    fireEvent.click(screen.getByRole("button", { name: "Seleccionar horario" }));
+    mockedUseMentorFreeBlocks.mockReturnValue({ blocks: [], isLoading: false, error: null });
+    rerender(<MentorFreeBlocksView mentorId="m1" />);
+    expect(screen.getByTestId("block-selection")).toBe(panel);
+    expect(panel).toHaveAttribute("data-blocks", "0");
+    expect(screen.queryByText("Este mentor no tiene horarios libres esta semana.")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Descartar borrador" }));
+    expect(screen.queryByTestId("block-selection")).not.toBeInTheDocument();
+    expect(screen.getByText("Este mentor no tiene horarios libres esta semana.")).toBeInTheDocument();
+  });
+
+  it("retira la grilla al vaciarse la semana si no hay selección ni borrador", () => {
+    mockedUseMentorFreeBlocks.mockReturnValue({ blocks: [freeBlock], isLoading: false, error: null });
+    const { rerender } = render(<MentorFreeBlocksView mentorId="m1" />);
+    mockedUseMentorFreeBlocks.mockReturnValue({ blocks: [], isLoading: false, error: null });
+    rerender(<MentorFreeBlocksView mentorId="m1" />);
+    expect(screen.queryByTestId("block-selection")).not.toBeInTheDocument();
+    expect(screen.getByText("Este mentor no tiene horarios libres esta semana.")).toBeInTheDocument();
   });
 
   it("muestra el encabezado y la semana actual en hora de Bolivia", () => {
@@ -90,6 +121,17 @@ describe("MentorFreeBlocksView", () => {
     mockedUseMentorFreeBlocks.mockReturnValue({ blocks: [freeBlock], isLoading: false, error: null });
     render(<MentorFreeBlocksView mentorId="m1" />);
     expect(screen.getByTestId("block-selection")).toHaveAttribute("data-blocks", "1");
+  });
+
+  it("muestra el selector de densidad y lo propaga a BlockSelection", () => {
+    mockedUseMentorFreeBlocks.mockReturnValue({ blocks: [freeBlock], isLoading: false, error: null });
+    render(<MentorFreeBlocksView mentorId="m1" />);
+
+    expect(screen.getByTestId("block-selection")).toHaveAttribute("data-density", "normal");
+
+    fireEvent.click(screen.getByRole("button", { name: "Compacta" }));
+
+    expect(screen.getByTestId("block-selection")).toHaveAttribute("data-density", "compact");
   });
 
   it("al presionar 'Semana siguiente', vuelve a pedir una semana más adelante", () => {
@@ -133,5 +175,21 @@ describe("MentorFreeBlocksView", () => {
     expect(new Date(nextWeekRange!.startAt).getTime()).toBeGreaterThan(
       new Date(firstWeekRange!.startAt).getTime()
     );
+  });
+
+  it("conserva la densidad compacta al cambiar de semana", () => {
+    mockedUseMentorFreeBlocks.mockReturnValue({ blocks: [freeBlock], isLoading: false, error: null });
+    render(<MentorFreeBlocksView mentorId="m1" />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Compacta" }));
+    fireEvent.click(screen.getByRole("button", { name: "Semana siguiente" }));
+
+    expect(screen.getByTestId("block-selection")).toHaveAttribute("data-density", "compact");
+    expect(screen.getByRole("button", { name: "Compacta" })).toHaveAttribute("aria-pressed", "true");
+
+    fireEvent.click(screen.getByRole("button", { name: "Semana anterior" }));
+
+    expect(screen.getByTestId("block-selection")).toHaveAttribute("data-density", "compact");
+    expect(screen.getByRole("button", { name: "Compacta" })).toHaveAttribute("aria-pressed", "true");
   });
 });

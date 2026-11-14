@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AppointmentStatusTitle } from '../../availability/enums/appointment-status-title.enum.js';
 import {
   DayBlockedException,
@@ -23,6 +23,7 @@ import {
   APPOINTMENT_ID,
   createAppointmentRecord,
   MENTOR_ID,
+  NOW,
   STUDENT_ID,
 } from './fixtures/appointment-record.fixture.js';
 
@@ -76,6 +77,8 @@ describe('AppointmentsService', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(NOW);
     availabilityService.findBlockWithAppointments.mockResolvedValue(block());
     mentorsService.findOne.mockResolvedValue({
       id: MENTOR_ID,
@@ -108,6 +111,10 @@ describe('AppointmentsService', () => {
     );
   });
 
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it('crea la cita confirmada dentro del candado del día con los datos del bloque', async () => {
     const createdBlock = block();
     availabilityService.findBlockWithAppointments
@@ -138,6 +145,9 @@ describe('AppointmentsService', () => {
         statusId: STATUS_ID,
         orientationTypeId: TOPIC_ID,
         message: payload.message,
+        meetingUrl: expect.stringMatching(
+          /^https:\/\/meet\.jit\.si\/umssy-[0-9a-f-]{36}$/,
+        ),
       },
       TX,
     );
@@ -524,5 +534,22 @@ describe('AppointmentsService', () => {
     expect(new BlockAlreadyBookedException().message).toBe(
       'Este horario ya fue reservado',
     );
+  });
+
+  it('guarda una sala distinta de videollamada en cada cita confirmada', async () => {
+    await service.create(user, payload);
+    await service.create(user, payload);
+
+    const [first, second] =
+      appointmentsRepository.createAppointment.mock.calls.map(
+        ([data]) => (data as { meetingUrl: string }).meetingUrl,
+      );
+    expect(first).not.toBe(second);
+  });
+
+  it('no devuelve el enlace en la respuesta de la reserva', async () => {
+    const result = await service.create(user, payload);
+
+    expect(result).not.toHaveProperty('meetingUrl');
   });
 });

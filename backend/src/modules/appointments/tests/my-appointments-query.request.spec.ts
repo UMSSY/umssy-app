@@ -64,6 +64,30 @@ describe('My appointments request validation', () => {
     },
   );
 
+  it('trims the search text', () => {
+    expect(queryPipe.transform({ q: '  María López  ' }).q).toBe(
+      'María López',
+    );
+  });
+
+  it('ignores a search made only of spaces', () => {
+    expect(queryPipe.transform({ q: '   ' }).q).toBeUndefined();
+  });
+
+  it('accepts a search of exactly 100 characters after trimming', () => {
+    const q = 'a'.repeat(100);
+    expect(queryPipe.transform({ q: `  ${q}  ` }).q).toBe(q);
+  });
+
+  it.each(['a'.repeat(101), ['ana', 'luis'], 5])(
+    'rejects the invalid search %j',
+    (q) => {
+      expect(() => queryPipe.transform({ q })).toThrow(
+        RequestValidationException,
+      );
+    },
+  );
+
   it.each(['userId', 'mentorId', 'studentId', 'limit', 'offset'])(
     'rejects the unknown query key %s',
     (key) => {

@@ -3,6 +3,7 @@ export const APPOINTMENT_MESSAGES = {
   invalidScope: 'El alcance debe ser upcoming o past',
   invalidPage: 'La página debe ser un número entero mayor o igual a 1',
   invalidPageSize: 'El tamaño de página debe ser un número entero entre 1 y 50',
+  invalidSearch: 'La búsqueda no puede superar los 100 caracteres',
   invalidBlockId: 'El bloque de disponibilidad no es válido',
   missingTopic: 'Selecciona el tema de la sesión',
   invalidTopic: 'El tema de la sesión no es válido',
@@ -28,6 +29,32 @@ export const APPOINTMENT_DOCUMENT_RESPONSE_SCHEMA = {
   },
 };
 
+export const APPOINTMENT_CANCELLATION_RESPONSE_SCHEMA = {
+  type: 'object' as const,
+  description: 'Solo en citas canceladas; null en las demás',
+  required: ['cancelledBy', 'cancelledByMe', 'reason', 'cancelledAt'],
+  properties: {
+    cancelledBy: {
+      type: 'string' as const,
+      enum: ['MENTOR', 'STUDENT'],
+      nullable: true,
+      description: 'null si no se registró quién canceló',
+    },
+    cancelledByMe: { type: 'boolean' as const },
+    reason: {
+      type: 'string' as const,
+      nullable: true,
+      maxLength: 300,
+      description: 'null si se canceló sin motivo',
+    },
+    cancelledAt: {
+      type: 'string' as const,
+      format: 'date-time',
+      nullable: true,
+    },
+  },
+};
+
 export const APPOINTMENT_RESPONSE_SCHEMA = {
   type: 'object' as const,
   required: [
@@ -41,6 +68,7 @@ export const APPOINTMENT_RESPONSE_SCHEMA = {
     'message',
     'requestedAt',
     'document',
+    'cancellation',
   ],
   properties: {
     id: { type: 'string' as const, format: 'uuid' },
@@ -65,7 +93,12 @@ export const APPOINTMENT_RESPONSE_SCHEMA = {
         role: { type: 'string' as const, enum: ['mentor', 'student'] },
       },
     },
-    status: { type: 'string' as const, example: 'CONFIRMED' },
+    status: {
+      type: 'string' as const,
+      example: 'CONFIRMED',
+      description:
+        'CONFIRMED hasta la hora de fin; COMPLETED desde la hora de fin (calculado, no se guarda); CANCELLED se conserva',
+    },
     message: {
       type: 'string' as const,
       nullable: true,
@@ -73,6 +106,26 @@ export const APPOINTMENT_RESPONSE_SCHEMA = {
     },
     requestedAt: { type: 'string' as const, format: 'date-time' },
     document: { ...APPOINTMENT_DOCUMENT_RESPONSE_SCHEMA, nullable: true },
+    cancellation: {
+      ...APPOINTMENT_CANCELLATION_RESPONSE_SCHEMA,
+      nullable: true,
+    },
+  },
+};
+
+export const APPOINTMENT_DETAIL_RESPONSE_SCHEMA = {
+  ...APPOINTMENT_RESPONSE_SCHEMA,
+  required: [...APPOINTMENT_RESPONSE_SCHEMA.required, 'meetingUrl'],
+  properties: {
+    ...APPOINTMENT_RESPONSE_SCHEMA.properties,
+    meetingUrl: {
+      type: 'string' as const,
+      format: 'uri',
+      nullable: true,
+      example: 'https://meet.jit.si/umssy-3f9c1a2e-5b7d-4c1e-9a2b-1c2d3e4f5a6b',
+      description:
+        'Enlace de la videollamada; solo para los participantes y mientras la cita está confirmada y no terminó',
+    },
   },
 };
 
@@ -112,18 +165,22 @@ export const CANCEL_APPOINTMENT_DOCS = {
 export const FIND_MY_APPOINTMENTS_DOCS = {
   summary: 'Consulta las citas propias próximas o pasadas',
   description:
-    'Incluye citas confirmadas y confirmaciones heredadas, normalizadas a CONFIRMED',
+    'Incluye citas confirmadas y canceladas, con sus títulos heredados normalizados; past incluye además las completadas. Una cita confirmada se devuelve COMPLETED desde su hora de fin y una cancelada trae quién canceló y el motivo',
   scopeDescription:
     'Por defecto upcoming; la clasificación utiliza la hora de fin de la cita',
   invalidQueryDescription: 'Los parámetros de consulta no son válidos',
   pageDescription: 'Número de página, desde 1; por defecto 1',
   pageSizeDescription: 'Citas por página, entre 1 y 50; por defecto 10',
+  searchDescription:
+    'Nombre o parte del nombre de la otra persona, sin distinguir mayúsculas ni tildes; máximo 100 caracteres',
   responseDescription:
     'Página de citas propias con horarios UTC, nombre de la contraparte y total',
 } as const;
 
 export const FIND_APPOINTMENT_DOCS = {
   summary: 'Consulta una cita únicamente si el usuario participa en ella',
+  description:
+    'Incluye el enlace de la videollamada de una cita confirmada que no terminó (si aún no tiene enlace, se genera en esta consulta) y, si la cita está cancelada, quién canceló y el motivo',
   idDescription: 'Identificador de la cita',
   invalidIdDescription: 'El identificador de la cita no es válido',
   notFoundDescription: 'La cita no existe',

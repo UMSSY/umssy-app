@@ -4,6 +4,9 @@ import { seedMentorParticipationStatusesCatalog } from '../../modules/mentors/se
 import { seedMentorOfferStatusesCatalog } from '../../modules/mentors/seeds/mentor-offer-statuses-catalog.seed.js';
 import { seedAppointmentStatusesCatalog } from '../../modules/availability/seeds/appointment-statuses-catalog.seed.js';
 import { seedProposalStatusesCatalog } from '../../modules/availability/seeds/proposal-statuses-catalog.seed.js';
+import { seedAppointmentNotificationEventsCatalog } from '../../modules/appointments/seeds/appointment-notification-events-catalog.seed.js';
+import { seedAppointmentNotificationChannelsCatalog } from '../../modules/appointments/seeds/appointment-notification-channels-catalog.seed.js';
+import { seedAppointmentNotificationStatusesCatalog } from '../../modules/appointments/seeds/appointment-notification-statuses-catalog.seed.js';
 import { seedEventCategoriesCatalog } from '../../modules/event-categories/seeds/event-categories-catalog.seed.js';
 import { seedEventModalitiesCatalog } from '../../modules/events/seeds/event-modalities-catalog.seed.js';
 import { seedEventOriginsCatalog } from '../../modules/events/seeds/event-origins-catalog.seed.js';
@@ -18,6 +21,7 @@ import { seedCareersCatalog } from '../../modules/access-requests/seeds/careers-
 import { seedMessageStatusesCatalog } from '../../modules/chat/seeds/message-statuses-catalog.seed.js';
 import { seedConnectionRequestStatusesCatalog } from '../../modules/chat/seeds/connection-request-statuses-catalog.seed.js';
 import { seedAttachmentTypesCatalog } from '../../modules/chat/seeds/attachment-types-catalog.seed.js';
+import { seedPortfolioProvidersCatalog } from '../../modules/portfolio/seeds/portfolio-providers-catalog.seed.js';
 import { seedSurveyStatusesCatalog } from '../../modules/surveys/seeds/survey-statuses-catalog.seed.js';
 import { seedSurveyQuestionTypesCatalog } from '../../modules/surveys/seeds/survey-question-types-catalog.seed.js';
 import { seedSurveyTargetAudiencesCatalog } from '../../modules/surveys/seeds/survey-target-audiences-catalog.seed.js';
@@ -32,6 +36,9 @@ export async function seedCatalogStages(
   await seedMentorOfferStatusesCatalog(tx);
   await seedAppointmentStatusesCatalog(tx);
   await seedProposalStatusesCatalog(tx);
+  await seedAppointmentNotificationEventsCatalog(tx);
+  await seedAppointmentNotificationChannelsCatalog(tx);
+  await seedAppointmentNotificationStatusesCatalog(tx);
   await seedEventCategoriesCatalog(tx);
   await seedEventModalitiesCatalog(tx);
   await seedEventOriginsCatalog(tx);
@@ -49,4 +56,5 @@ export async function seedCatalogStages(
   await seedSurveyTargetAudiencesCatalog(tx);
   await seedConnectionRequestStatusesCatalog(tx);
   await seedAttachmentTypesCatalog(tx);
+  await seedPortfolioProvidersCatalog(tx);
 }

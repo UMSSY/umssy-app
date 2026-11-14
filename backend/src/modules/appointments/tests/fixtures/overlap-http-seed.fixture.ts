@@ -13,10 +13,13 @@ import {
 } from '../../../users/constants/seed-fixture-users.constants.js';
 import { ACTIVE_APPOINTMENT_STATUS_TITLES } from '../../constants/active-appointment-statuses.constants.js';
 import { DAILY_APPOINTMENT_LIMIT_STATUS_TITLES } from '../../constants/daily-appointment-limit-statuses.constants.js';
+import { PAST_APPOINTMENT_STATUS_TITLES } from '../../constants/past-appointment-statuses.constants.js';
+import { UPCOMING_APPOINTMENT_STATUS_TITLES } from '../../constants/upcoming-appointment-statuses.constants.js';
 import type { BoliviaDayRange } from '../../types/bolivia-day-range.types.js';
 import type { AppointmentRecord } from '../../types/appointment-record.types.js';
 import type { CreateAppointmentData } from '../../types/create-appointment-data.types.js';
 import type { CreateAppointmentHistoryData } from '../../types/create-appointment-history-data.types.js';
+import type { MyAppointmentsQuery } from '../../types/my-appointments-query.types.js';
 
 export const OVERLAP_HTTP_ANCHOR = new Date('2026-11-16T15:00:00.000Z');
 
@@ -37,6 +40,15 @@ export interface InMemoryBlock {
   updatedAt: Date;
 }
 
+export interface InMemoryBlockedDate {
+  id: string;
+  mentorId: string;
+  blockedOn: Date;
+  reason: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface AddAppointmentInput {
   mentorId: string;
   studentId: string;
@@ -44,6 +56,13 @@ export interface AddAppointmentInput {
   endAt: Date;
   status: AppointmentStatusTitle;
   blockId?: string;
+  cancellation?: InMemoryCancellation;
+}
+
+export interface InMemoryCancellation {
+  cancelledById: string | null;
+  cancellationReason: string | null;
+  cancelledAt: Date | null;
 }
 
 export interface TestTransaction {
@@ -54,15 +73,19 @@ const STATUS_TITLES = [
   AppointmentStatusTitle.CONFIRMED,
   AppointmentStatusTitle.LEGACY_CONFIRMED,
   AppointmentStatusTitle.LEGACY_PENDING,
+  AppointmentStatusTitle.LEGACY_CANCELLED,
+  AppointmentStatusTitle.LEGACY_COMPLETED,
   AppointmentStatusTitle.CANCELLED,
   AppointmentStatusTitle.COMPLETED,
+  AppointmentStatusTitle.LEGACY_COMPLETED,
+  AppointmentStatusTitle.LEGACY_CANCELLED,
   'RECHAZADA',
 ] as const;
 
 const ADMIN_ID = '00000000-0000-4000-8000-000000000000';
 
 /**
- * Seed en memoria para las pruebas HTTP de cruces de horario.
+ * Seed en memoria para las pruebas HTTP de citas.
  * Reutiliza los usuarios, catálogos y bloques del seed de desarrollo.
  */
 export class InMemoryOverlapSeed {
@@ -77,16 +100,21 @@ export class InMemoryOverlapSeed {
   private readonly statusTitleById = new Map<string, string>();
   private readonly orientationNameById = new Map<string, string>();
   private readonly locks = new Map<string, Promise<void>>();
+  private readonly dayLocks = new Map<string, Promise<void>>();
+  private readonly availabilityByMentor = new Map<string, boolean>();
+  private readonly blockedDates: InMemoryBlockedDate[] = [];
   private readonly context: FixtureContext;
 
   constructor() {
     this.context = new FixtureContext(OVERLAP_HTTP_ANCHOR, ADMIN_ID);
 
     for (const user of FIXTURE_USERS) {
-      this.users.set(this.context.getId(user.key), {
+      const id = this.context.getId(user.key);
+      this.users.set(id, {
         ...user,
-        id: this.context.getId(user.key),
+        id,
       });
+      this.availabilityByMentor.set(id, true);
     }
 
     for (const status of STATUS_TITLES) {
@@ -133,6 +161,12 @@ export class InMemoryOverlapSeed {
           requestedAt: appointment.requestedAt,
           statusId: appointment.statusId,
           orientationTypeId: appointment.orientationTypeId,
+          meetingUrl: appointment.meetingUrl,
+          cancellation: {
+            cancelledById: appointment.cancelledById,
+            cancellationReason: appointment.cancellationReason,
+            cancelledAt: appointment.cancelledAt,
+          },
         }),
       );
     }
@@ -148,6 +182,30 @@ export class InMemoryOverlapSeed {
 
   mentorIdAt(mentorIndex: number): string {
     return this.context.getId(FIXTURE_MENTORS[mentorIndex].key);
+  }
+
+  userIdAt(userIndex: number): string {
+    const user = FIXTURE_USERS[userIndex];
+    if (!user) {
+      throw new Error(`No existe el usuario ${userIndex}`);
+    }
+    return this.context.getId(user.key);
+  }
+
+  seededAppointmentFor(
+    mentorIndex: number,
+    status: AppointmentStatusTitle = AppointmentStatusTitle.LEGACY_CONFIRMED,
+  ): AppointmentRecord {
+    const mentorId = this.mentorIdAt(mentorIndex);
+    const appointment = this.appointments.find(
+      (item) => item.mentorId === mentorId && item.status.title === status,
+    );
+    if (!appointment) {
+      throw new Error(
+        `No existe una cita ${status} del mentor ${mentorIndex}`,
+      );
+    }
+    return appointment;
   }
 
   blockFor(mentorIndex: number, slotIndex: number): InMemoryBlock {
@@ -192,6 +250,7 @@ export class InMemoryOverlapSeed {
         this.statusIdByTitle.get(input.status) ??
         this.context.getId(`appointment-status:${input.status}`),
       orientationTypeId: OVERLAP_TOPIC.id,
+      cancellation: input.cancellation,
     });
     this.appointments.push(record);
     return record;
@@ -229,6 +288,14 @@ export class InMemoryOverlapSeed {
       },
       createAppointment: (data: CreateAppointmentData) =>
         Promise.resolve(this.createAppointment(data)),
+      assignMeetingUrl: (id: string, meetingUrl: string) => {
+        const appointment = this.appointments.find((item) => item.id === id);
+        if (!appointment) {
+          return Promise.resolve(null);
+        }
+        appointment.meetingUrl ??= meetingUrl;
+        return Promise.resolve(appointment.meetingUrl);
+      },
       createAppointmentHistory: (data: CreateAppointmentHistoryData) => {
         this.histories.push(data);
         return Promise.resolve();
@@ -241,6 +308,29 @@ export class InMemoryOverlapSeed {
         Promise.resolve(this.hasOverlapping(userId, startAt, endAt)),
       hasReservationOnDay: (userId: string, day: BoliviaDayRange) =>
         Promise.resolve(this.hasReservationOnDay(userId, day)),
+      countMine: (
+        userId: string,
+        scope: MyAppointmentsQuery['scope'],
+        now: Date,
+      ) => Promise.resolve(this.mineAppointments(userId, scope, now).length),
+      findMine: (
+        userId: string,
+        scope: MyAppointmentsQuery['scope'],
+        now: Date,
+        page: number,
+        pageSize: number,
+      ) =>
+        Promise.resolve(
+          this.mineAppointments(userId, scope, now).slice(
+            (page - 1) * pageSize,
+            page * pageSize,
+          ),
+        ),
+      findById: (id: string) =>
+        Promise.resolve(
+          this.appointments.find((appointment) => appointment.id === id) ??
+            null,
+        ),
     };
   }
 
@@ -260,6 +350,21 @@ export class InMemoryOverlapSeed {
           ),
         } as AvailabilityBlockWithAppointments);
       },
+      delete: (blockId: string): Promise<InMemoryBlock> => {
+        const index = this.blocks.findIndex((item) => item.id === blockId);
+        const block = this.blocks[index];
+        if (!block) {
+          return Promise.reject(new Error(`No existe el bloque ${blockId}`));
+        }
+        this.blocks.splice(index, 1);
+        return Promise.resolve(block);
+      },
+      findMentorFreeBlocksInRange: (
+        mentorId: string,
+        from: Date,
+        to: Date,
+      ): Promise<AvailabilityBlockWithAppointments[]> =>
+        Promise.resolve(this.freeBlocksInRange(mentorId, from, to)),
     };
   }
 
@@ -286,9 +391,101 @@ export class InMemoryOverlapSeed {
       findOne: (id: string) =>
         Promise.resolve({
           id,
-          isAvailable: true,
+          isAvailable: this.availabilityByMentor.get(id) ?? true,
           orientationTypes: [OVERLAP_TOPIC],
         }),
+      updateAvailability: (id: string, isAvailable: boolean) => {
+        this.availabilityByMentor.set(id, isAvailable);
+        return Promise.resolve({ id, isAvailableForMentoring: isAvailable });
+      },
+    };
+  }
+
+  get blockedDatesRepository() {
+    return {
+      withDayLock: <T>(
+        mentorId: string,
+        day: string,
+        work: (transaction: TestTransaction) => Promise<T>,
+      ): Promise<T> => this.withDayLock(mentorId, day, work),
+      findByDay: (
+        mentorId: string,
+        blockedOn: Date,
+      ): Promise<InMemoryBlockedDate | null> =>
+        Promise.resolve(
+          this.blockedDates.find(
+            (item) =>
+              item.mentorId === mentorId &&
+              item.blockedOn.getTime() === blockedOn.getTime(),
+          ) ?? null,
+        ),
+      findById: (id: string): Promise<InMemoryBlockedDate | null> =>
+        Promise.resolve(
+          this.blockedDates.find((item) => item.id === id) ?? null,
+        ),
+      findInRange: (
+        mentorId: string,
+        fromDay: Date,
+        toDay?: Date,
+      ): Promise<InMemoryBlockedDate[]> =>
+        Promise.resolve(
+          this.blockedDates
+            .filter(
+              (item) =>
+                item.mentorId === mentorId &&
+                item.blockedOn.getTime() >= fromDay.getTime() &&
+                (!toDay || item.blockedOn.getTime() <= toDay.getTime()),
+            )
+            .sort(
+              (left, right) =>
+                left.blockedOn.getTime() - right.blockedOn.getTime(),
+            ),
+        ),
+      hasActiveAppointmentBetween: (
+        mentorId: string,
+        from: Date,
+        to: Date,
+      ): Promise<boolean> =>
+        Promise.resolve(
+          this.blocks.some(
+            (block) =>
+              block.mentorId === mentorId &&
+              block.startAt.getTime() >= from.getTime() &&
+              block.startAt.getTime() < to.getTime() &&
+              this.activeAppointmentsOf(block.id).length > 0,
+          ),
+        ),
+      create: (
+        mentorId: string,
+        blockedOn: Date,
+        reason: string | null,
+      ): Promise<InMemoryBlockedDate> =>
+        Promise.resolve(this.createBlockedDate(mentorId, blockedOn, reason)),
+      updateReason: (
+        id: string,
+        reason: string,
+      ): Promise<InMemoryBlockedDate> => {
+        const blockedDate = this.blockedDates.find((item) => item.id === id);
+        if (!blockedDate) {
+          return Promise.reject(
+            new Error(`No existe la fecha bloqueada ${id}`),
+          );
+        }
+        blockedDate.reason = reason;
+        blockedDate.updatedAt = new Date();
+        return Promise.resolve(blockedDate);
+      },
+      delete: (id: string): Promise<InMemoryBlockedDate> => {
+        const index = this.blockedDates.findIndex((item) => item.id === id);
+        const blockedDate = this.blockedDates[index];
+        if (!blockedDate) {
+          return Promise.reject(
+            new Error(`No existe la fecha bloqueada ${id}`),
+          );
+        }
+        this.blockedDates.splice(index, 1);
+        return Promise.resolve(blockedDate);
+      },
     };
   }
 
@@ -323,6 +520,7 @@ export class InMemoryOverlapSeed {
       requestedAt: new Date(),
       statusId: data.statusId,
       orientationTypeId: data.orientationTypeId,
+      meetingUrl: data.meetingUrl,
     });
     this.appointments.push(record);
     return record;
@@ -339,6 +537,8 @@ export class InMemoryOverlapSeed {
     requestedAt: Date;
     statusId: string;
     orientationTypeId: string;
+    meetingUrl?: string | null;
+    cancellation?: InMemoryCancellation;
   }): AppointmentRecord {
     return {
       id: input.id,
@@ -349,6 +549,10 @@ export class InMemoryOverlapSeed {
       endAt: input.endAt,
       message: input.message,
       requestedAt: input.requestedAt,
+      meetingUrl: input.meetingUrl ?? null,
+      cancelledById: input.cancellation?.cancelledById ?? null,
+      cancellationReason: input.cancellation?.cancellationReason ?? null,
+      cancelledAt: input.cancellation?.cancelledAt ?? null,
       mentor: this.userBrief(input.mentorId),
       student: this.userBrief(input.studentId),
       orientationType: {
@@ -388,6 +592,38 @@ export class InMemoryOverlapSeed {
     );
   }
 
+  private mineAppointments(
+    userId: string,
+    scope: MyAppointmentsQuery['scope'],
+    now: Date,
+  ): AppointmentRecord[] {
+    const titles: readonly string[] =
+      scope === 'upcoming'
+        ? UPCOMING_APPOINTMENT_STATUS_TITLES
+        : PAST_APPOINTMENT_STATUS_TITLES;
+    const byTime = (appointment: AppointmentRecord) =>
+      scope === 'upcoming'
+        ? appointment.endAt.getTime() > now.getTime()
+        : appointment.endAt.getTime() <= now.getTime();
+
+    return this.appointments
+      .filter(
+        (appointment) =>
+          (appointment.mentorId === userId ||
+            appointment.studentId === userId) &&
+          titles.includes(appointment.status.title) &&
+          byTime(appointment),
+      )
+      .sort((a, b) =>
+        scope === 'upcoming'
+          ? a.startAt.getTime() - b.startAt.getTime() ||
+            a.id.localeCompare(b.id)
+          : b.endAt.getTime() - a.endAt.getTime() ||
+            b.startAt.getTime() - a.startAt.getTime() ||
+            a.id.localeCompare(b.id),
+      );
+  }
+
   private hasOverlapping(userId: string, startAt: Date, endAt: Date): boolean {
     return this.appointments.some(
       (appointment) =>
@@ -410,6 +646,76 @@ export class InMemoryOverlapSeed {
           appointment.status.title as AppointmentStatusTitle,
         ),
     );
+  }
+
+  private freeBlocksInRange(
+    mentorId: string,
+    from: Date,
+    to: Date,
+  ): AvailabilityBlockWithAppointments[] {
+    return this.blocks
+      .filter(
+        (block) =>
+          block.mentorId === mentorId &&
+          block.startAt.getTime() >= from.getTime() &&
+          block.startAt.getTime() < to.getTime() &&
+          this.activeAppointmentsOf(block.id).length === 0,
+      )
+      .sort((left, right) => left.startAt.getTime() - right.startAt.getTime())
+      .map(
+        (block) =>
+          ({
+            ...block,
+            appointments: [],
+          }) as AvailabilityBlockWithAppointments,
+      );
+  }
+
+  private createBlockedDate(
+    mentorId: string,
+    blockedOn: Date,
+    reason: string | null,
+  ): InMemoryBlockedDate {
+    const blockedDate: InMemoryBlockedDate = {
+      id: randomUUID(),
+      mentorId,
+      blockedOn,
+      reason,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.blockedDates.push(blockedDate);
+    return blockedDate;
+  }
+
+  private async withDayLock<T>(
+    mentorId: string,
+    day: string,
+    work: (transaction: TestTransaction) => Promise<T>,
+  ): Promise<T> {
+    const key = `${mentorId}:${day}`;
+    const previous = this.dayLocks.get(key) ?? Promise.resolve();
+    let release: () => void = () => undefined;
+    const held = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const tail = previous.then(() => held);
+    this.dayLocks.set(key, tail);
+    await previous;
+    const transaction: TestTransaction = { releases: [] };
+    transaction.releases.push(() => {
+      release();
+      if (this.dayLocks.get(key) === tail) {
+        this.dayLocks.delete(key);
+      }
+    });
+    try {
+      return await work(transaction);
+    } finally {
+      for (const releaseLock of transaction.releases) {
+        releaseLock();
+      }
+    }
   }
 
   private async lockParticipants(

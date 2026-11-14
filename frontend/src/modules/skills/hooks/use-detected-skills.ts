@@ -6,17 +6,23 @@ import { DETECTED_SKILLS_QUERY_KEY, SKILLS_ANALYSIS_MUTATION_KEY } from "../cons
 import { skillsService } from "../services/skills.service";
 import type { DetectedSkillsSummary } from "../types/detected-skills-summary.types";
 import type { UseDetectedSkillsResult } from "../types/use-detected-skills-result.types";
+import { useInvalidateProfileCompleteness } from "@/modules/profile";
 
 const ANALYSIS_KEY = JSON.stringify(SKILLS_ANALYSIS_MUTATION_KEY);
 
 export function useDetectedSkills(): UseDetectedSkillsResult {
   const queryClient = useQueryClient();
+  const invalidateCompleteness = useInvalidateProfileCompleteness();
   const query = useQuery({ queryKey: DETECTED_SKILLS_QUERY_KEY, queryFn: skillsService.getDetectedSkills, refetchInterval: state => state.state.data?.status === 'pending' ? 1500 : false });
   const analysis = useMutation({
     mutationKey: SKILLS_ANALYSIS_MUTATION_KEY,
     mutationFn: skillsService.analyzeSkills,
     onSuccess: (summary) => queryClient.setQueryData<DetectedSkillsSummary>(DETECTED_SKILLS_QUERY_KEY, summary),
   });
+
+  useEffect(() => {
+    if (query.data?.status === "ready") void invalidateCompleteness();
+  }, [query.data, invalidateCompleteness]);
 
   useEffect(
     () =>

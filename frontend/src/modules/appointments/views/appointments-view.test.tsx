@@ -131,6 +131,41 @@ describe("AppointmentsView", () => {
     },
   );
 
+  it.each(["mentor", "titulado"] as const)(
+    "muestra las completadas en Pasadas y el mismo estado en el detalle para %s",
+    async (role) => {
+      vi.mocked(useAuth).mockReturnValue({
+        currentUserId: "user-a", roles: [role], isLoading: false,
+        refreshRoles: vi.fn().mockResolvedValue(undefined),
+      });
+      const completed = makeAppointment({
+        status: "COMPLETED",
+        counterpart: { id: "other-1", fullName: "Persona de la cita", role: role === "mentor" ? "student" : "mentor" },
+      });
+      vi.mocked(appointmentsApi.getMyAppointments).mockImplementation(async (scope) =>
+        scope === "past" ? [completed, makeAppointment({ id: "cancelled-1", status: "CANCELLED" })] : [],
+      );
+      vi.spyOn(appointmentsApi, "getById").mockResolvedValue({ ...completed, meetingUrl: null });
+      vi.spyOn(appointmentsApi, "getCounterpartPhoto").mockResolvedValue(null);
+      const user = userEvent.setup();
+      renderWithQuery(<AppointmentsView />);
+      await screen.findByText("No tienes citas próximas");
+      expect(screen.queryByText("Completada")).not.toBeInTheDocument();
+
+      await user.click(screen.getByRole("tab", { name: "Pasadas" }));
+      const cardBadge = await screen.findByText("Completada");
+      expect(screen.getByText("Cancelada")).toBeInTheDocument();
+      expect(appointmentsApi.getMyAppointments).toHaveBeenCalledWith("past");
+      await user.click(screen.getByRole("button", { name: /Persona de la cita/ }));
+      const dialog = await screen.findByRole("dialog");
+      const detailBadge = await within(dialog).findByText("Completada");
+      for (const badge of [cardBadge, detailBadge]) {
+        expect(badge).toHaveClass("h-6", "px-2.5", "text-sm", "bg-muted", "text-text-secondary", "border-transparent");
+      }
+      expect(within(dialog).queryByText("Confirmada")).not.toBeInTheDocument();
+    },
+  );
+
   it("muestra el vacío de pasadas sin ofrecer buscar mentores", async () => {
     const user = userEvent.setup();
     renderWithQuery(<AppointmentsView />);
@@ -298,7 +333,7 @@ describe("AppointmentsView", () => {
   it("abre el detalle al tocar una cita y lo cierra", async () => {
     const user = userEvent.setup();
     vi.mocked(appointmentsApi.getMyAppointments).mockResolvedValue([makeAppointment()]);
-    const getById = vi.spyOn(appointmentsApi, "getById").mockResolvedValue(makeAppointment());
+    const getById = vi.spyOn(appointmentsApi, "getById").mockResolvedValue({ ...makeAppointment(), meetingUrl: null });
     vi.spyOn(appointmentsApi, "getCounterpartPhoto").mockResolvedValue(null);
 
     renderWithQuery(<AppointmentsView />);
@@ -319,7 +354,7 @@ describe("AppointmentsView", () => {
   it("abre el detalle con el teclado", async () => {
     const user = userEvent.setup();
     vi.mocked(appointmentsApi.getMyAppointments).mockResolvedValue([makeAppointment()]);
-    vi.spyOn(appointmentsApi, "getById").mockResolvedValue(makeAppointment());
+    vi.spyOn(appointmentsApi, "getById").mockResolvedValue({ ...makeAppointment(), meetingUrl: null });
     vi.spyOn(appointmentsApi, "getCounterpartPhoto").mockResolvedValue(null);
 
     renderWithQuery(<AppointmentsView />);
