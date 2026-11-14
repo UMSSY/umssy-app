@@ -47,6 +47,15 @@ interface DirectoryFilters {
 
 type MentorDirectorySort = 'default' | 'name_asc' | 'name_desc';
 
+const similaritySelect = {
+  id: true,
+  mentorTechnicalAreas: { select: { technicalAreaId: true } },
+  mentorOrientationTypes: {
+    where: { orientationType: { isActive: true } },
+    select: { orientationTypeId: true },
+  },
+} satisfies Prisma.UserSelect;
+
 @Injectable()
 export class MentorsRepository extends MentorIntakeRepository {
   constructor(prisma: PrismaService) {
@@ -247,6 +256,43 @@ export class MentorsRepository extends MentorIntakeRepository {
         },
       },
     };
+  }
+
+  findSimilaritySource(userId: string, now: Date) {
+    return this.prisma.user.findFirst({
+      where: { ...this.activeMentorWhere(now), id: userId },
+      select: similaritySelect,
+    });
+  }
+
+  findSimilarCandidates(
+    userId: string,
+    technicalAreaIds: string[],
+    orientationTypeIds: string[],
+    now: Date,
+  ) {
+    return this.prisma.user.findMany({
+      where: {
+        ...this.activeMentorWhere(now),
+        id: { not: userId },
+        OR: [
+          {
+            mentorTechnicalAreas: {
+              some: { technicalAreaId: { in: technicalAreaIds } },
+            },
+          },
+          {
+            mentorOrientationTypes: {
+              some: {
+                orientationTypeId: { in: orientationTypeIds },
+                orientationType: { isActive: true },
+              },
+            },
+          },
+        ],
+      },
+      select: similaritySelect,
+    });
   }
 
   private directoryWhere(

@@ -18,6 +18,10 @@ import { mentorParticipationService } from "../services/mentor-participation.ser
 import { type MyMentorParticipation } from "../types/my-mentor-participation.types";
 import { ParticipationView } from "./participation-view";
 import { writeIndexedDb } from "@/shared/services/storage/browser-indexed-db";
+import { availabilityApi } from "@/modules/availability";
+import { educationsService } from "@/modules/education";
+import { profilePhotoService, profileService } from "@/modules/profile";
+import { workExperienceService } from "@/modules/work-experience";
 
 vi.mock("@/modules/mentorship/hooks/use-mentorship-catalogs", () => ({
   useMentorshipCatalogs: () => ({ technicalAreas: [], orientationTypes: [], isTechnicalAreasLoading: false, isOrientationTypesLoading: false }),
@@ -56,6 +60,16 @@ const deactivated: MyMentorParticipation = { ...active, status: "DEACTIVATED" };
 
 describe("ParticipationView HU-MEN-06", () => {
   beforeEach(async () => {
+    vi.spyOn(profileService, "getProfile").mockResolvedValue({
+      id: "mentor-1", firstName: "Ana", lastName: "Pérez",
+      institutionalEmail: "ana@umss.edu", personalEmail: null,
+      phone: null, city: null, headline: "Ingeniera", aboutMe: "Mentora",
+      updatedAt: "2026-11-01T00:00:00.000Z",
+    });
+    vi.spyOn(profilePhotoService, "getPhoto").mockResolvedValue(new Blob(["foto"]));
+    vi.spyOn(workExperienceService, "getWorkExperiences").mockResolvedValue([]);
+    vi.spyOn(educationsService, "getEducations").mockResolvedValue([]);
+    vi.spyOn(availabilityApi, "getAvailabilityBlocks").mockResolvedValue([]);
     vi.mocked(toast.success).mockClear();
     window.history.replaceState(null, "", "/mentors/participation");
     vi.spyOn(mentorParticipationService, "capacity").mockResolvedValue({ available: 1, capacity: 1, occupied: 0 });

@@ -27,6 +27,14 @@ const toJson = (refs: readonly SkillEvidenceRefPayload[]) =>
 export class SkillAnalysisRepository {
   constructor(private readonly prisma: PrismaService) {}
 
+  async hasProfileSkills(userId: string): Promise<boolean> {
+    const record = await this.prisma.userSkill.findFirst({
+      where: { userId },
+      select: { id: true },
+    });
+    return record !== null;
+  }
+
   listReviewQueue() {
     return this.prisma.userSkill.findMany({
       where: {
@@ -132,5 +140,12 @@ export class SkillAnalysisRepository {
         skipDuplicates: true,
       });
     }
+  }
+
+  findApprovedRecruitmentReferences(userId: string, ids: string[]) {
+    return this.prisma.userSkill.findMany({
+      where: { userId, verificationStatus: 'approved', skillId: { in: ids } },
+      select: { skillId: true, evidenceRefs: true },
+    });
   }
 }

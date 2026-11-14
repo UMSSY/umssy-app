@@ -161,6 +161,61 @@ export class MentorsService {
     };
   }
 
+  async findSimilar(userId: string) {
+    const now = new Date();
+    const source = await this.mentorsRepository.findSimilaritySource(
+      userId,
+      now,
+    );
+    if (!source) throw new MentorNotFoundException();
+
+    const areaIds = new Set(
+      source.mentorTechnicalAreas.map(({ technicalAreaId }) => technicalAreaId),
+    );
+    const orientationIds = new Set(
+      source.mentorOrientationTypes.map(
+        ({ orientationTypeId }) => orientationTypeId,
+      ),
+    );
+    if (!areaIds.size && !orientationIds.size) return [];
+
+    const candidates = await this.mentorsRepository.findSimilarCandidates(
+      userId,
+      [...areaIds],
+      [...orientationIds],
+      now,
+    );
+    const ranked = candidates.map((mentor) => ({
+      id: mentor.id,
+      areas: mentor.mentorTechnicalAreas.filter(({ technicalAreaId }) =>
+        areaIds.has(technicalAreaId),
+      ).length,
+      orientations: mentor.mentorOrientationTypes.filter(
+        ({ orientationTypeId }) => orientationIds.has(orientationTypeId),
+      ).length,
+    }));
+    // El ID ascendente estabiliza empates sin depender del orden de Prisma.
+    ranked.sort(
+      (a, b) =>
+        b.areas - a.areas ||
+        b.orientations - a.orientations ||
+        a.id.localeCompare(b.id),
+    );
+    const ids = ranked.slice(0, 3).map(({ id }) => id);
+    if (!ids.length) return [];
+
+    const mentors = await this.mentorsRepository.findDirectoryByIds(
+      ids,
+      { search: '', available: false },
+      now,
+    );
+    const byId = new Map(mentors.map((mentor) => [mentor.id, mentor]));
+    return ids.flatMap((id) => {
+      const mentor = byId.get(id);
+      return mentor ? [this.mentorMapper.toDirectoryResponse(mentor)] : [];
+    });
+  }
+
   async findOne(userId: string) {
     const now = new Date();
     const mentor = await this.mentorsRepository.findActiveMentorById(
