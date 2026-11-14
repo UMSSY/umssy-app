@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import type { AuthenticatedUser } from '../../../common/types/authenticated-user.types.js';
+import { TransactionService } from '../../../common/prisma/transaction.service.js';
 import { AppointmentStatusTitle } from '../../availability/enums/appointment-status-title.enum.js';
 import { DayBlockedException } from '../../availability/exceptions/index.js';
 import { AvailabilityService } from '../../availability/services/availability.service.js';
@@ -8,9 +9,11 @@ import { MentorsService } from '../../mentors/services/mentors.service.js';
 import { ProfilePhotoService } from '../../profile/services/profile-photo.service.js';
 import type { PhotoFileDownload } from '../../profile/types/photo-file-download.type.js';
 import {
+  AppointmentNotCancellableException,
   AppointmentOverlapException,
   BlockAlreadyBookedException,
   BlockInPastException,
+  CancelReasonRequiredException,
   DailyAppointmentLimitException,
   InvalidOrientationTypeException,
   MentorUnavailableException,
@@ -21,7 +24,9 @@ import { AppointmentNotFoundException } from '../exceptions/appointment-not-foun
 import { AppointmentNotOwnedException } from '../exceptions/appointment-not-owned.exception.js';
 import { AppointmentMapper } from '../mappers/appointment.mapper.js';
 import { AppointmentsRepository } from '../repositories/appointments.repository.js';
+import type { CancelAppointmentDto } from '../requests/cancel-appointment.request.js';
 import type { CreateAppointmentDto } from '../requests/create-appointment.request.js';
+import { CANCELLATION_REASON_WINDOW_MS } from '../constants/cancellation.constants.js';
 import type { AppointmentRecord } from '../types/appointment-record.types.js';
 import type { MyAppointmentResponse } from '../types/my-appointment-response.types.js';
 import type { MyAppointmentsPageResponse } from '../types/my-appointments-page-response.types.js';
@@ -37,6 +42,7 @@ export class AppointmentsService {
     private readonly blockedDatesService: BlockedDatesService,
     private readonly mentorsService: MentorsService,
     private readonly profilePhotoService: ProfilePhotoService,
+    private readonly transactions: TransactionService,
   ) {}
 
   async create(
@@ -178,6 +184,92 @@ export class AppointmentsService {
   async findOne(userId: string, id: string): Promise<MyAppointmentResponse> {
     const appointment = await this.findParticipatedAppointment(userId, id);
     return this.appointmentMapper.toResponse(appointment, userId);
+  }
+
+  async cancel(
+    user: AuthenticatedUser,
+    id: string,
+    payload: CancelAppointmentDto,
+  ): Promise<MyAppointmentResponse> {
+    const appointment = await this.findParticipatedAppointment(user.id, id);
+
+    if (appointment.status.title === AppointmentStatusTitle.CANCELLED) {
+      return this.appointmentMapper.toResponse(appointment, user.id);
+    }
+
+    if (
+      appointment.status.title !== AppointmentStatusTitle.CONFIRMED &&
+      appointment.status.title !== AppointmentStatusTitle.LEGACY_CONFIRMED
+    ) {
+      throw new AppointmentNotCancellableException();
+    }
+
+    const now = new Date();
+    if (appointment.startAt.getTime() <= now.getTime()) {
+      throw new AppointmentNotCancellableException();
+    }
+
+    const reason = payload.reason?.trim() || null;
+    const timeLeft = appointment.startAt.getTime() - now.getTime();
+    if (!reason && timeLeft < CANCELLATION_REASON_WINDOW_MS) {
+      throw new CancelReasonRequiredException();
+    }
+
+    const counterpartId =
+      appointment.mentorId === user.id
+        ? appointment.studentId
+        : appointment.mentorId;
+
+    return this.transactions.run(async ({ client }) => {
+      await this.appointmentsRepository.lockParticipants(
+        [user.id, counterpartId],
+        client,
+      );
+
+      const current = await this.appointmentsRepository.findById(
+        appointment.id,
+        client,
+      );
+      if (!current) {
+        throw new AppointmentNotFoundException();
+      }
+      if (current.status.title === AppointmentStatusTitle.CANCELLED) {
+        return this.appointmentMapper.toResponse(current, user.id);
+      }
+
+      const previousStatusId =
+        await this.appointmentsRepository.findStatusIdByTitle(
+          current.status.title as AppointmentStatusTitle,
+          client,
+        );
+      const newStatusId = await this.appointmentsRepository.findStatusIdByTitle(
+        AppointmentStatusTitle.CANCELLED,
+        client,
+      );
+
+      const cancelled = await this.appointmentsRepository.cancelAppointment(
+        appointment.id,
+        {
+          statusId: newStatusId,
+          cancelledById: user.id,
+          cancelledAt: now,
+          cancellationReason: reason,
+        },
+        client,
+      );
+
+      await this.appointmentsRepository.createAppointmentHistory(
+        {
+          appointmentId: appointment.id,
+          previousStatusId,
+          newStatusId,
+          changedById: user.id,
+        },
+        client,
+      );
+
+      return this.appointmentMapper.toResponse(cancelled, user.id);
+    });
   }
 
   async getCounterpartPhoto(
