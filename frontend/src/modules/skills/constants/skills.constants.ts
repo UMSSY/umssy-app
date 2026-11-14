@@ -4,6 +4,8 @@ export const CUSTOM_SKILL_ENDPOINT = "/skills/custom";
 
 export const MY_SKILLS_ENDPOINT = "/profile/me/skills";
 
+export const MY_SKILLS_QUERY_KEY = ["skills", "profile"] as const;
+
 export const DETECTED_SKILLS_QUERY_KEY = ["skills", "detected"] as const;
 
 export const SKILLS_ANALYSIS_MUTATION_KEY = ["skills", "analysis"] as const;

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button-variants";
 import { cn } from "@/lib/utils";
 import { PageHeading } from "@/shared/components/layout";
+import { ParticipationRecommendations } from "./participation-recommendations";
 
 function ParticipationPreferences({
   title,
@@ -88,6 +89,9 @@ export function ParticipationOverview({ isActive, areas, orientations, onAction,
           <ParticipationPreferences title="Áreas técnicas" editHref="/mentors/participation/technical-areas" editLabel="Editar áreas técnicas" items={areas} isEditable={isActive} />
           <ParticipationPreferences title="Tipos de orientación" editHref="/mentorship/orientation" editLabel="Editar tipos de orientación" items={orientations} isEditable={isActive} showIcon />
         </div>
+        {isActive && (
+          <ParticipationRecommendations areas={areas} orientations={orientations} />
+        )}
       </div>
     </section>
   );

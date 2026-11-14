@@ -192,4 +192,38 @@ export class JobOffersRepository {
       () => new JobOfferNotFoundException(),
     );
   }
+
+  activeRecruitmentVacancies() {
+    return this.prisma.jobOffer.findMany({
+      where: {
+        status: { title: 'Publicada' },
+        OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+      },
+      include: { skills: { include: { skill: true } } },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  recruiterVacancies(companyIds: string[]) {
+    return this.prisma.jobOffer.findMany({
+      where: {
+        companyId: { in: companyIds },
+        status: { title: 'Publicada' },
+        OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+      },
+      include: { skills: { include: { skill: true } } },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  publishedRecruitmentJob(jobId: string) {
+    return this.prisma.jobOffer.findFirst({
+      where: {
+        id: jobId,
+        status: { title: 'Publicada' },
+        OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+      },
+      include: { skills: { include: { skill: true } } },
+    });
+  }
 }
