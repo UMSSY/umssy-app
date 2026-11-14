@@ -3,6 +3,7 @@ CREATE TABLE "refresh_tokens" (
     "id" UUID NOT NULL,
     "user_id" UUID NOT NULL,
     "family_id" UUID NOT NULL,
+    "role_tag" VARCHAR(30) NOT NULL,
     "token_hash" VARCHAR(64) NOT NULL,
     "expires_at" TIMESTAMPTZ(6) NOT NULL,
     "absolute_expires_at" TIMESTAMPTZ(6) NOT NULL,
