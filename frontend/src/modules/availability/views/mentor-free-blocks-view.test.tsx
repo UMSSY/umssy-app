@@ -176,4 +176,20 @@ describe("MentorFreeBlocksView", () => {
       new Date(firstWeekRange!.startAt).getTime()
     );
   });
+
+  it("conserva la densidad compacta al cambiar de semana", () => {
+    mockedUseMentorFreeBlocks.mockReturnValue({ blocks: [freeBlock], isLoading: false, error: null });
+    render(<MentorFreeBlocksView mentorId="m1" />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Compacta" }));
+    fireEvent.click(screen.getByRole("button", { name: "Semana siguiente" }));
+
+    expect(screen.getByTestId("block-selection")).toHaveAttribute("data-density", "compact");
+    expect(screen.getByRole("button", { name: "Compacta" })).toHaveAttribute("aria-pressed", "true");
+
+    fireEvent.click(screen.getByRole("button", { name: "Semana anterior" }));
+
+    expect(screen.getByTestId("block-selection")).toHaveAttribute("data-density", "compact");
+    expect(screen.getByRole("button", { name: "Compacta" })).toHaveAttribute("aria-pressed", "true");
+  });
 });

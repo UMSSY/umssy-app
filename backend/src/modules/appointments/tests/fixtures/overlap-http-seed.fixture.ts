@@ -13,6 +13,8 @@ import {
 } from '../../../users/constants/seed-fixture-users.constants.js';
 import { ACTIVE_APPOINTMENT_STATUS_TITLES } from '../../constants/active-appointment-statuses.constants.js';
 import { DAILY_APPOINTMENT_LIMIT_STATUS_TITLES } from '../../constants/daily-appointment-limit-statuses.constants.js';
+import { PAST_APPOINTMENT_STATUS_TITLES } from '../../constants/past-appointment-statuses.constants.js';
+import { UPCOMING_APPOINTMENT_STATUS_TITLES } from '../../constants/upcoming-appointment-statuses.constants.js';
 import type { BoliviaDayRange } from '../../types/bolivia-day-range.types.js';
 import type { AppointmentRecord } from '../../types/appointment-record.types.js';
 import type { CreateAppointmentData } from '../../types/create-appointment-data.types.js';
@@ -54,6 +56,13 @@ export interface AddAppointmentInput {
   endAt: Date;
   status: AppointmentStatusTitle;
   blockId?: string;
+  cancellation?: InMemoryCancellation;
+}
+
+export interface InMemoryCancellation {
+  cancelledById: string | null;
+  cancellationReason: string | null;
+  cancelledAt: Date | null;
 }
 
 export interface TestTransaction {
@@ -64,8 +73,12 @@ const STATUS_TITLES = [
   AppointmentStatusTitle.CONFIRMED,
   AppointmentStatusTitle.LEGACY_CONFIRMED,
   AppointmentStatusTitle.LEGACY_PENDING,
+  AppointmentStatusTitle.LEGACY_CANCELLED,
+  AppointmentStatusTitle.LEGACY_COMPLETED,
   AppointmentStatusTitle.CANCELLED,
   AppointmentStatusTitle.COMPLETED,
+  AppointmentStatusTitle.LEGACY_COMPLETED,
+  AppointmentStatusTitle.LEGACY_CANCELLED,
   'RECHAZADA',
 ] as const;
 
@@ -149,6 +162,11 @@ export class InMemoryOverlapSeed {
           statusId: appointment.statusId,
           orientationTypeId: appointment.orientationTypeId,
           meetingUrl: appointment.meetingUrl,
+          cancellation: {
+            cancelledById: appointment.cancelledById,
+            cancellationReason: appointment.cancellationReason,
+            cancelledAt: appointment.cancelledAt,
+          },
         }),
       );
     }
@@ -174,16 +192,17 @@ export class InMemoryOverlapSeed {
     return this.context.getId(user.key);
   }
 
-  seededAppointmentFor(mentorIndex: number): AppointmentRecord {
+  seededAppointmentFor(
+    mentorIndex: number,
+    status: AppointmentStatusTitle = AppointmentStatusTitle.LEGACY_CONFIRMED,
+  ): AppointmentRecord {
     const mentorId = this.mentorIdAt(mentorIndex);
     const appointment = this.appointments.find(
-      (item) =>
-        item.mentorId === mentorId &&
-        item.status.title === AppointmentStatusTitle.LEGACY_CONFIRMED,
+      (item) => item.mentorId === mentorId && item.status.title === status,
     );
     if (!appointment) {
       throw new Error(
-        `No existe una cita confirmada del mentor ${mentorIndex}`,
+        `No existe una cita ${status} del mentor ${mentorIndex}`,
       );
     }
     return appointment;
@@ -231,6 +250,7 @@ export class InMemoryOverlapSeed {
         this.statusIdByTitle.get(input.status) ??
         this.context.getId(`appointment-status:${input.status}`),
       orientationTypeId: OVERLAP_TOPIC.id,
+      cancellation: input.cancellation,
     });
     this.appointments.push(record);
     return record;
@@ -518,6 +538,7 @@ export class InMemoryOverlapSeed {
     statusId: string;
     orientationTypeId: string;
     meetingUrl?: string | null;
+    cancellation?: InMemoryCancellation;
   }): AppointmentRecord {
     return {
       id: input.id,
@@ -529,9 +550,9 @@ export class InMemoryOverlapSeed {
       message: input.message,
       requestedAt: input.requestedAt,
       meetingUrl: input.meetingUrl ?? null,
-      cancelledById: null,
-      cancellationReason: null,
-      cancelledAt: null,
+      cancelledById: input.cancellation?.cancelledById ?? null,
+      cancellationReason: input.cancellation?.cancellationReason ?? null,
+      cancelledAt: input.cancellation?.cancelledAt ?? null,
       mentor: this.userBrief(input.mentorId),
       student: this.userBrief(input.studentId),
       orientationType: {
@@ -571,6 +592,38 @@ export class InMemoryOverlapSeed {
     );
   }
 
+  private mineAppointments(
+    userId: string,
+    scope: MyAppointmentsQuery['scope'],
+    now: Date,
+  ): AppointmentRecord[] {
+    const titles: readonly string[] =
+      scope === 'upcoming'
+        ? UPCOMING_APPOINTMENT_STATUS_TITLES
+        : PAST_APPOINTMENT_STATUS_TITLES;
+    const byTime = (appointment: AppointmentRecord) =>
+      scope === 'upcoming'
+        ? appointment.endAt.getTime() > now.getTime()
+        : appointment.endAt.getTime() <= now.getTime();
+
+    return this.appointments
+      .filter(
+        (appointment) =>
+          (appointment.mentorId === userId ||
+            appointment.studentId === userId) &&
+          titles.includes(appointment.status.title) &&
+          byTime(appointment),
+      )
+      .sort((a, b) =>
+        scope === 'upcoming'
+          ? a.startAt.getTime() - b.startAt.getTime() ||
+            a.id.localeCompare(b.id)
+          : b.endAt.getTime() - a.endAt.getTime() ||
+            b.startAt.getTime() - a.startAt.getTime() ||
+            a.id.localeCompare(b.id),
+      );
+  }
+
   private hasOverlapping(userId: string, startAt: Date, endAt: Date): boolean {
     return this.appointments.some(
       (appointment) =>
@@ -593,38 +646,6 @@ export class InMemoryOverlapSeed {
           appointment.status.title as AppointmentStatusTitle,
         ),
     );
-  }
-
-  private mineAppointments(
-    userId: string,
-    scope: MyAppointmentsQuery['scope'],
-    now: Date,
-  ): AppointmentRecord[] {
-    return this.appointments
-      .filter(
-        (appointment) =>
-          (appointment.mentorId === userId ||
-            appointment.studentId === userId) &&
-          ACTIVE_APPOINTMENT_STATUS_TITLES.includes(
-            appointment.status.title as AppointmentStatusTitle,
-          ) &&
-          (scope === 'upcoming'
-            ? appointment.endAt.getTime() > now.getTime()
-            : appointment.endAt.getTime() <= now.getTime()),
-      )
-      .sort((left, right) => {
-        if (scope === 'upcoming') {
-          return (
-            left.startAt.getTime() - right.startAt.getTime() ||
-            left.id.localeCompare(right.id)
-          );
-        }
-        return (
-          right.endAt.getTime() - left.endAt.getTime() ||
-          right.startAt.getTime() - left.startAt.getTime() ||
-          left.id.localeCompare(right.id)
-        );
-      });
   }
 
   private freeBlocksInRange(

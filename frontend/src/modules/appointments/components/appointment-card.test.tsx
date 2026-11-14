@@ -88,6 +88,22 @@ describe("AppointmentCard", () => {
     expect(screen.getByText("Cancelada")).not.toHaveClass("text-success");
   });
 
+  it.each(["mentor", "student"] as const)(
+    "muestra Completada con estilo neutro para una cita con %s",
+    (role) => {
+      render(<AppointmentCard appointment={makeAppointment({
+        status: "COMPLETED",
+        counterpart: { id: "other-1", fullName: "Otra persona", role },
+      })} />);
+
+      expect(screen.getByText("Completada")).toHaveClass(
+        "h-6", "px-2.5", "text-sm", "bg-muted", "text-text-secondary", "border-transparent",
+      );
+      expect(screen.getByText("Completada")).not.toHaveClass("text-success");
+      expect(screen.queryByText("Confirmada")).not.toBeInTheDocument();
+    },
+  );
+
   it("notifica la selección al hacer clic en la tarjeta", async () => {
     const user = userEvent.setup();
     const onSelect = vi.fn();
