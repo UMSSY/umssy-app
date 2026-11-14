@@ -19,8 +19,10 @@ import { CertificationSourcesModule } from '../certifications/certification-sour
 import { ProfileCompletenessController } from './controllers/profile-completeness.controller.js';
 import { ProfileCompletenessService } from './services/profile-completeness.service.js';
 
+import { ProfileSkillsEventsModule } from '../../common/profile-skills/profile-skills-events.module.js';
 @Module({
   imports: [
+    ProfileSkillsEventsModule,
     PrismaModule,
     JwtAuthModule,
     EducationSourcesModule,

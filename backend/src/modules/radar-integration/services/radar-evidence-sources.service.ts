@@ -10,6 +10,10 @@ export class RadarEvidenceSourcesService {
     return this.repository.findPublicationCvStates(userId, context);
   }
 
+  findCertificateSkills(userId: string) {
+    return this.repository.findCertificateSkills(userId);
+  }
+
   findCurrentCvText(userId: string) {
     return this.repository.findCurrentCvText(userId);
   }

@@ -1,60 +1,61 @@
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { radarIntegrationApi } from '../services/radar-integration.service';
-import type { IntegrationRadar, ReviewRow } from '../types/radar-integration.types';
-import { ReviewQueueView } from "./review-queue-view";
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-function renderQueue() {
-  const client=new QueryClient({defaultOptions:{queries:{retry:false}}});
-  return render(<QueryClientProvider client={client}><ReviewQueueView/></QueryClientProvider>);
-}
+import { cleanup, screen, waitFor } from '@testing-library/react';
+import { renderWithQuery as render } from '@/shared/testing/render-with-query';
+import userEvent from '@testing-library/user-event';
+import { afterEach, expect, it, vi } from 'vitest';
+import { verificationApi } from '@/modules/documents/services/document-verification.service';
+import type { DocumentVerification } from '@/modules/documents/types/document-verification.types';
+import { ReviewQueueView } from './review-queue-view';
 
-vi.mock("../services/radar-integration.service", () => ({ radarIntegrationApi: { reviews: vi.fn(), decision: vi.fn(), adminReprocessCv: vi.fn() } }));
-const row: ReviewRow = { id: "skill:skill-1", userId: "owner", userName: "Persona QA", type: "skill", title: "Python", status: "pending", date: "2026-10-26T12:00:00Z", areaId: "data-ai", evidenceRefs: [] };
-beforeEach(() => {
-  vi.mocked(radarIntegrationApi.reviews).mockResolvedValue([row]);
-  vi.mocked(radarIntegrationApi.decision).mockResolvedValue({} as IntegrationRadar);
+const row: DocumentVerification = {
+  id: 'v1',
+  sourceId: 'cv',
+  sourceType: 'cv',
+  filename: 'Curso.pdf',
+  ownerName: 'Ana',
+  mime: 'application/pdf',
+  sizeBytes: 123,
+  status: 'review',
+  reason: 'Nombre distinto',
+  confidence: 0.92,
+  skills: [],
+  createdAt: '2026-11-01',
+  decidedAt: '2026-11-01',
+  available: true,
+  active: true,
+  synced: true,
+  noticeRead: false,
+  publishedIds: [],
+  radarVersion: null,
+};
+afterEach(() => {
+  cleanup();
+  vi.restoreAllMocks();
 });
-afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.resetAllMocks(); });
-
-describe("ReviewQueueView with the persistent API", () => {
-  it("reviews a real queued skill and reloads the saved decision", async () => {
-    const user = userEvent.setup();
-    renderQueue();
-    await screen.findByRole("heading", { name: row.userName });
-    vi.mocked(radarIntegrationApi.reviews).mockResolvedValue([{ ...row, status: "approved" }]);
-    await user.click(screen.getByRole("button", { name: "Aprobar" }));
-    await user.click(screen.getByRole("button", { name: "Confirmar" }));
-    await waitFor(() => expect(radarIntegrationApi.decision).toHaveBeenCalledWith("skill", "skill-1", "approved"));
-    await user.click(screen.getByRole("button", { name: "Aprobados" }));
-    expect(await screen.findByRole("heading", { name: row.userName })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Revocar" })).toBeEnabled();
-    expect(screen.getByRole("button", { name: "Aprobar" })).toBeDisabled();
-  });
-
-  it("does not save a cancelled administrative decision", async () => {
-    const user = userEvent.setup();
-    renderQueue();
-    await screen.findByRole("heading", { name: row.userName });
-    await user.click(screen.getByRole("button", { name: "Rechazar" }));
-    await user.click(screen.getByRole("button", { name: "Cancelar" }));
-    expect(radarIntegrationApi.decision).not.toHaveBeenCalled();
-  });
-
-  it("shows an empty queue without demonstration profiles", async () => {
-    vi.mocked(radarIntegrationApi.reviews).mockResolvedValue([]);
-    renderQueue();
-    expect(await screen.findByText("No hay elementos en esta categoría.")).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /Carlos|María|Ana/ })).not.toBeInTheDocument();
-  });
-
-  it("allows retry after the API rejects the queue request", async () => {
-    vi.mocked(radarIntegrationApi.reviews).mockRejectedValueOnce(new Error("unavailable")).mockResolvedValue([row]);
-    const user = userEvent.setup();
-    renderQueue();
-    await screen.findByRole("alert");
-    await user.click(screen.getByRole("button", { name: "Reintentar" }));
-    expect(await screen.findByRole("heading", { name: row.userName })).toBeInTheDocument();
-  });
+it('permite revisar un único documento con su motivo y confirmar la decisión', async () => {
+  vi.spyOn(verificationApi, 'list').mockResolvedValue([row]);
+  const decide = vi.spyOn(verificationApi, 'decide').mockResolvedValue();
+  const user = userEvent.setup();
+  render(<ReviewQueueView />);
+  await screen.findByText(/Nombre distinto/);
+  await user.click(screen.getByRole('button', { name: 'Aprobar documento' }));
+  await user.click(screen.getByRole('button', { name: 'Cancelar' }));
+  expect(decide).not.toHaveBeenCalled();
+  await user.click(screen.getByRole('button', { name: 'Aprobar documento' }));
+  await user.click(screen.getByRole('button', { name: 'Confirmar' }));
+  await waitFor(() => expect(decide).toHaveBeenCalledWith('v1', 'approved'));
+});
+it('permite consultar aprobados y revocar desde el mismo panel', async () => {
+  const list = vi
+    .spyOn(verificationApi, 'list')
+    .mockImplementation(async (_, filter) =>
+      filter === 'approved' ? [{ ...row, status: 'approved' }] : [],
+    );
+  const user = userEvent.setup();
+  render(<ReviewQueueView />);
+  await screen.findByText('No hay documentos pendientes.');
+  await user.click(screen.getByRole('button', { name: 'Aprobados' }));
+  expect(
+    await screen.findByRole('button', { name: 'Revocar aprobación' }),
+  ).toBeEnabled();
+  expect(list).toHaveBeenCalledWith(true, 'approved');
 });

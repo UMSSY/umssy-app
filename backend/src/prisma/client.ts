@@ -465,6 +465,11 @@ export type MentorParticipationStatus = Prisma.MentorParticipationStatusModel;
  */
 export type MentorOfferStatus = Prisma.MentorOfferStatusModel;
 /**
+ * Model RadarDocumentVerification
+ *
+ */
+export type RadarDocumentVerification = Prisma.RadarDocumentVerificationModel;
+/**
  * Model PortfolioProvider
  *
  */

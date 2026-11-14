@@ -196,7 +196,7 @@ export function CertificationProfileSection() {
         >
           {(requestClose) => <>
             <FeedbackMessage feedback={visibleFeedback} />
-            <CertificationForm
+            <CertificationForm requireDocument={false}
               initialData={editing ? toFormValues(editing) : undefined}
               currentDocumentName={getCurrentDocumentName(editing)}
               onValuesChange={() => setHasChanges(true)}

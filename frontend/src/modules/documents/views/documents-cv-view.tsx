@@ -25,7 +25,49 @@ import { getCvErrorMessage } from "../utils/get-cv-error-message";
 import { isCvFileRejection } from "../utils/is-cv-file-rejection";
 import { validateCvFile } from "../utils/validate-cv-file";
 
+import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/shared/contexts/auth-context";
+import { Button } from "@/components/ui/button";
+import { verificationApi } from "../services/document-verification.service";
+import { VerificationDashboard } from "../components/verification-dashboard";
+
 export function DocumentsCvView() {
+  const { currentUserId } = useAuth();
+  const history = useQuery({
+    queryKey: ["documents", "verifications", currentUserId],
+    enabled: Boolean(currentUserId),
+    queryFn: () => verificationApi.list(),
+    refetchInterval: (q) =>
+      q.state.data?.some((d) => d.active && !d.synced) ? 1500 : 15000,
+    refetchOnReconnect: 'always',
+  });
+  if (history.isError && !history.data)
+    return (
+      <>
+        <p role="alert">
+          El historial de verificaciones no está disponible.{' '}
+          <Button variant="ghost" onClick={() => void history.refetch()}>
+            Reintentar
+          </Button>
+        </p>
+        <LegacyDocumentsCvView />
+      </>
+    );
+  return (
+    <ProfilePageLayout
+      title="Documentos y CV"
+      description="Tus documentos pueden actualizar automáticamente tu radar de afinidad."
+    >
+      {history.data ? (
+        <VerificationDashboard rows={history.data} refresh={history.refetch} />
+      ) : (
+        <p aria-busy="true">Cargando documentos…</p>
+      )}
+    </ProfilePageLayout>
+  );
+}
+
+export function LegacyDocumentsCvView() {
   const {
     recentCvs,
     currentCv,

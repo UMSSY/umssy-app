@@ -15,6 +15,19 @@ export class ProfileSkillsEvents {
   private readonly listeners = new Set<PublicationListener>();
   private readonly logger = new Logger(ProfileSkillsEvents.name);
 
+  private readonly sourceListeners = new Set<
+    (userId: string) => Promise<void>
+  >();
+  onSourceChange(listener: (userId: string) => Promise<void>) {
+    this.sourceListeners.add(listener);
+    return () => this.sourceListeners.delete(listener);
+  }
+  async sourceChanged(userId: string) {
+    await Promise.all(
+      [...this.sourceListeners].map((listener) => listener(userId)),
+    );
+  }
+
   subscribe(listener: PublicationListener): () => void {
     this.listeners.add(listener);
     return () => this.listeners.delete(listener);

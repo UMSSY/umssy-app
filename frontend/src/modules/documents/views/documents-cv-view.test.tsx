@@ -14,7 +14,7 @@ import { documentsService } from "../services/documents.service";
 import type { CvPage } from "../types/cv-page.types";
 import type { CvExtraction } from "../types/cv-extraction.types";
 import type { SavedCv } from "../types/saved-cv.types";
-import { DocumentsCvView } from "./documents-cv-view";
+import { LegacyDocumentsCvView as DocumentsCvView } from "./documents-cv-view";
 
 vi.mock("../services/documents.service", () => ({
   documentsService: {

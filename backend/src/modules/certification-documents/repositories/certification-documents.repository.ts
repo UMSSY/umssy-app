@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { mapRecordNotFound } from '../../../common/utils/map-record-not-found.js';
 import { CertificationNotFoundException } from '../../certifications/exceptions/certification-not-found.exception.js';
@@ -11,6 +11,16 @@ const idSelect = { id: true } as const;
 @Injectable()
 export class CertificationDocumentsRepository {
   constructor(private readonly prisma: PrismaService) {}
+
+  async requireCurrentVersion(id: string, userId: string, version: string, context: TransactionContext) {
+    // Both upload paths lock the certification before writing its metadata.
+    await context.client.$queryRaw`SELECT id FROM certifications WHERE id=${id}::uuid AND user_id=${userId}::uuid FOR UPDATE`;
+    const current = await context.client.radarDocumentVerification.findFirst({
+      where: {sourceType:'certification',sourceId:id,userId,active:true},
+      select: {id:true},
+    });
+    if (current?.id !== version) throw new ConflictException('La versión cambió. Actualiza la lista antes de continuar.');
+  }
 
   async save(
     id: string,

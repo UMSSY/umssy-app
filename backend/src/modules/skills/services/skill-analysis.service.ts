@@ -55,9 +55,14 @@ export class SkillAnalysisService {
 
     const plan = planSkillReconciliation(rows, detected);
 
-    await this.repository.applyReconciliation(userId, plan, context);
+    const decisions = await this.repository.applyReconciliation(
+      userId,
+      plan,
+      context,
+    );
 
     return (
+      decisions > 0 ||
       plan.creates.length + plan.updates.length + plan.deleteIds.length > 0
     );
   }
