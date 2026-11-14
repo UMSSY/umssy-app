@@ -39,7 +39,7 @@ function vacancyColumn() {
   return screen
     .getAllByRole("row")
     .slice(1)
-    .map((row) => within(row).getAllByRole("cell")[0].textContent);
+    .map((row) => within(row).getAllByRole("cell")[0].querySelector("p")?.textContent);
 }
 
 beforeEach(() => {
@@ -117,21 +117,39 @@ describe("ApplicationsView", () => {
     expect(screen.getByRole("button", { name: "Retirar" })).toBeEnabled();
   });
 
-  it("sorts by a column and toggles the direction on a second click", async () => {
+  it("sorts affinity from lowest to highest using the dropdown", async () => {
     getMine.mockResolvedValue(APPLICATIONS);
 
     renderWithQuery(<ApplicationsView />);
     await screen.findByText("Backend Java");
 
-    fireEvent.click(screen.getByRole("button", { name: "Afinidad" }));
+    await userEvent.click(screen.getByRole("combobox", { name: "Ordenar postulaciones" }));
+    await userEvent.click(screen.getByRole("option", { name: "Afinidad (menor a mayor)" }));
+
     expect(vacancyColumn()).toEqual(["Backend Java", "Analista de datos"]);
-    expect(screen.getByRole("columnheader", { name: "Afinidad" })).toHaveAttribute("aria-sort", "ascending");
+  });
 
-    fireEvent.click(screen.getByRole("button", { name: "Afinidad" }));
+  it("sorts affinity from highest to lowest using the dropdown", async () => {
+    getMine.mockResolvedValue(APPLICATIONS);
+
+    renderWithQuery(<ApplicationsView />);
+    await screen.findByText("Backend Java");
+
+    await userEvent.click(screen.getByRole("combobox", { name: "Ordenar postulaciones" }));
+    await userEvent.click(screen.getByRole("option", { name: "Afinidad (mayor a menor)" }));
+
     expect(vacancyColumn()).toEqual(["Analista de datos", "Backend Java"]);
-    expect(screen.getByRole("columnheader", { name: "Afinidad" })).toHaveAttribute("aria-sort", "descending");
+  });
 
-    fireEvent.click(screen.getByRole("button", { name: "Empresa" }));
+  it("sorts companies alphabetically using the dropdown", async () => {
+    getMine.mockResolvedValue(APPLICATIONS);
+
+    renderWithQuery(<ApplicationsView />);
+    await screen.findByText("Backend Java");
+
+    await userEvent.click(screen.getByRole("combobox", { name: "Ordenar postulaciones" }));
+    await userEvent.click(screen.getByRole("option", { name: "Empresa (A-Z)" }));
+
     expect(vacancyColumn()).toEqual(["Analista de datos", "Backend Java"]);
   });
 
@@ -169,12 +187,12 @@ describe("ApplicationsView", () => {
     renderWithQuery(<ApplicationsView />);
     await screen.findByText("Backend Java");
 
-    expect(vacancyColumn()).toEqual(["Backend Java", "Analista de datos"]);
+    expect(vacancyColumn()).toEqual(["Analista de datos", "Backend Java"]);
     expect(screen.queryByRole("tab", { name: "Retirada" })).not.toBeInTheDocument();
 
     await userEvent.click(screen.getByRole("switch", { name: "Mostrar postulaciones retiradas (1)" }));
 
-    await waitFor(() => expect(vacancyColumn()).toEqual(["Backend Java", "Analista de datos", "Frontend React"]));
+    await waitFor(() => expect(vacancyColumn()).toEqual(["Analista de datos", "Backend Java", "Frontend React"]));
     fireEvent.click(await screen.findByRole("tab", { name: "Retirada" }));
     expect(vacancyColumn()).toEqual(["Frontend React"]);
   });
@@ -190,7 +208,7 @@ describe("ApplicationsView", () => {
     await userEvent.click(screen.getByRole("switch", { name: "Mostrar postulaciones retiradas (1)" }));
 
     await waitFor(() => expect(screen.queryByRole("tab", { name: "Retirada" })).not.toBeInTheDocument());
-    expect(vacancyColumn()).toEqual(["Backend Java", "Analista de datos"]);
+    expect(vacancyColumn()).toEqual(["Analista de datos", "Backend Java"]);
   });
 
   it("does not offer the switch when there are no withdrawn applications", async () => {

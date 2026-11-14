@@ -42,4 +42,28 @@ describe("ApplicationsMobileList", () => {
     expect(screen.getByRole("button", { name: "Retirar" })).toBeDisabled();
     expect(screen.queryByText("No disponible")).not.toBeInTheDocument();
   });
+
+  it("shows the reactivation button only for withdrawn applications", () => {
+    const onReactivate = vi.fn();
+
+    render(
+      <ApplicationsMobileList
+        applications={[
+          buildApplication({ id: "application-1", status: "Retirada" }),
+          buildApplication({ id: "application-2", status: "En revisión" }),
+        ]}
+        withdrawingId={null}
+        onWithdraw={vi.fn()}
+        onReactivate={onReactivate}
+      />,
+    );
+
+    const button = screen.getByRole("button", { name: "Volver a postular" });
+    expect(button).toBeEnabled();
+    expect(screen.getAllByRole("button", { name: "Retirar" })).toHaveLength(1);
+
+    fireEvent.click(button);
+    expect(onReactivate).toHaveBeenCalledWith("application-1");
+  });
+
 });
