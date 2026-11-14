@@ -8,6 +8,7 @@ import { PageHeading } from "@/shared/components/layout/page-heading";
 import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button-variants";
 import { OFFLINE_PASSES_TEXTS } from "../constants/offline-passes.constants";
+import { useEventFinished } from "../hooks/use-event-finished";
 import { usePassesViewState } from "../hooks/use-passes-view-state";
 import { OfflineStatusBanner } from "../components/offline-status-banner";
 import { NoOfflineCopyState } from "../components/no-offline-copy-state";
@@ -20,17 +21,28 @@ import type { MyPassesViewProps } from "../types/my-passes-view-props.types";
 
 export function MyPassesView({ onOpenWorkshopChat }: MyPassesViewProps = {}) {
   const { status, isOnline, passes: registrations, offlineQrTokens, lastUpdated, error, isConnectionError, retry } = usePassesViewState();
+  const finishedRegistrations = useEventFinished(
+    registrations.map(({ date, endTime }) => ({
+      eventDate: date,
+      endTime,
+    })),
+  );
+  const activeRegistrations = registrations.filter(
+    (_, index) => !finishedRegistrations[index],
+  );
   const isLoading = status === "loading";
   const offlineReason = isOnline ? undefined : OFFLINE_PASSES_TEXTS.requiresConnection;
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const selected = registrations.find((item) => item.id === selectedId) ?? registrations[0];
+  const selected =
+    activeRegistrations.find((item) => item.id === selectedId) ??
+    activeRegistrations[0];
 
   return (
     <main className="mx-auto w-full max-w-7xl space-y-6">
       <PageHeading
         title="Mis inscripciones"
-        description={isLoading ? "Cargando tus inscripciones…" : `${registrations.length} ${registrations.length === 1 ? "pase" : "pases"}`}
+        description={isLoading ? "Cargando tus inscripciones…" : `${activeRegistrations.length} ${activeRegistrations.length === 1 ? "pase" : "pases"}`}
         actions={offlineReason
           ? <Button variant="outline" disabled title={offlineReason}><CalendarDays aria-hidden="true" />Explorar talleres</Button>
           : <Link href="/events" className={buttonVariants({ variant: "outline" })}><CalendarDays aria-hidden="true" />Explorar talleres</Link>}
@@ -43,13 +55,13 @@ export function MyPassesView({ onOpenWorkshopChat }: MyPassesViewProps = {}) {
           {status === "no-offline-copy" || isConnectionError ? <NoOfflineCopyState /> : null}
           <RequestFeedback message={error ?? DEFAULT_REGISTRATION_ERROR_MESSAGE} isError onRetry={retry} />
         </div>
-      ) : !registrations.length ? (
+      ) : !activeRegistrations.length ? (
         <MyPassesEmptyState />
       ) : (
         <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
           <section aria-label="Tus inscripciones">
             <ul className="space-y-3">
-              {registrations.map((item) => (
+              {activeRegistrations.map((item) => (
                 <li key={item.id}>
                   <PassCard
                     title={item.eventName}

@@ -32,23 +32,42 @@ describe("Mis pases", () => {
     expect(screen.getAllByRole('button', { name: /React/ })).toHaveLength(2);
   });
 
-  it.each([
-    ['2026-10-20T04:00:00Z', 'Confirmada', true],
-    ['2026-10-20T15:59:59Z', 'Confirmada', true],
-    ['2026-10-20T16:00:00Z', 'Finalizado', false],
-    ['2026-10-21T00:00:00Z', 'Finalizado', false],
-  ])('keeps card and ticket consistent at %s', async (now, status, hasQr) => {
-    vi.setSystemTime(new Date(now));
+  it('keeps the card and ticket active before the event closes', async () => {
+    vi.setSystemTime(new Date('2026-10-20T15:59:59Z'));
     getMine.mockResolvedValue([pass]);
     render(<MyPassesView />);
     const panel = await screen.findByRole('complementary');
-    await within(panel).findByText(status);
-    expect(within(screen.getByRole('button', { name: /React/ })).getByText(status)).toBeInTheDocument();
-    if (hasQr) expect(await within(panel).findByRole('img', { name: 'Código QR del pase' })).toBeInTheDocument();
-    else {
-      expect(await within(panel).findByText(/Pase finalizado/)).toBeInTheDocument();
-      expect(within(panel).queryByRole('img', { name: 'Código QR del pase' })).not.toBeInTheDocument();
-    }
+    await within(panel).findByText('Confirmada');
+    expect(within(screen.getByRole('button', { name: /React/ })).getByText('Confirmada')).toBeInTheDocument();
+    expect(await within(panel).findByRole('img', { name: 'Código QR del pase' })).toBeInTheDocument();
+  });
+
+  it('retira automáticamente los pases al llegar su hora de cierre sin volver a consultar', async () => {
+    vi.useFakeTimers({
+      now: new Date('2026-10-20T15:59:59.000Z'),
+      toFake: ['Date', 'setInterval', 'clearInterval'],
+    });
+    getMine.mockResolvedValue([
+      pass,
+      { ...pass, id: 'reg-2', eventName: 'Prisma', date: '2026-10-21T00:00:00Z' },
+    ]);
+
+    render(<MyPassesView />);
+
+    expect(await screen.findByText('2 pases')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /React/ })).toBeInTheDocument();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1000);
+    });
+
+    expect(await screen.findByText('1 pase')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /React/ })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Prisma/ })).toBeInTheDocument();
+    const panel = screen.getByRole('complementary', { name: 'Detalle de la inscripción' });
+    expect(await within(panel).findByText('reg-2')).toBeInTheDocument();
+    expect(within(panel).queryByText('reg-1')).not.toBeInTheDocument();
+    expect(getMine).toHaveBeenCalledTimes(1);
   });
 
   it('keeps chat unavailable until the chat module is connected', async () => {
@@ -260,4 +279,3 @@ describe('Mis pases sin conexión', () => {
     expect(screen.queryByRole('heading', { name: 'No hay pases guardados en este dispositivo.' })).not.toBeInTheDocument();
   });
 });
-
