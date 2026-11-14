@@ -71,4 +71,33 @@ export class UserSkillRepository {
 
     return this.findByUserId(userId);
   }
+
+  async addSkillsForUser(
+    userId: string,
+    skillIds: string[],
+  ): Promise<UserSkillRecord[]> {
+    if (skillIds.length === 0) {
+      return this.findByUserId(userId);
+    }
+
+    const existingRows = await this.prisma.userSkill.findMany({
+      where: { userId },
+      select: { skillId: true },
+    });
+    const existingSkillIds = new Set(existingRows.map((row) => row.skillId));
+    const newSkillIds = skillIds.filter((id) => !existingSkillIds.has(id));
+
+    if (newSkillIds.length > 0) {
+      await this.prisma.userSkill.createMany({
+        data: newSkillIds.map((skillId) => ({
+          userId,
+          skillId,
+          source: USER_SKILL_SOURCES.manual,
+        })),
+        skipDuplicates: true,
+      });
+    }
+
+    return this.findByUserId(userId);
+  }
 }

@@ -186,6 +186,8 @@ model User {
   radarCompanyAccess   RadarCompanyAccess[]      @ignore
   radarApplications    RadarJobApplication[]     @relation("RadarApplicant") @ignore
   radarDecisions       RadarJobApplication[]     @relation("RadarDecision") @ignore
+  socialAccounts       UserSocialAccount[]
+  portfolioProjects    UserPortfolioProject[]
 
   @@index([cityId])
   @@index([companyId])
@@ -1110,14 +1112,29 @@ model JobApplication {
   createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  jobOffer JobOffer             @relation(fields: [jobOfferId], references: [id], onDelete: Cascade)
-  user     User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
-  status   JobApplicationStatus @relation(fields: [statusId], references: [id], onDelete: Restrict)
+  jobOffer     JobOffer               @relation(fields: [jobOfferId], references: [id], onDelete: Cascade)
+  user         User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status       JobApplicationStatus   @relation(fields: [statusId], references: [id], onDelete: Restrict)
+  radarConsent RadarApplicationConsent?
 
   @@unique([jobOfferId, userId])
   @@index([userId])
   @@index([statusId])
   @@map("job_applications")
+}
+
+model RadarApplicationConsent {
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  applicationId      String   @unique @map("application_id") @db.Uuid
+  consentToRecruiter Boolean  @default(false) @map("consent_to_recruiter")
+  consentToCv        Boolean  @default(false) @map("consent_to_cv")
+  consentToContact   Boolean  @default(false) @map("consent_to_contact")
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  application JobApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@map("radar_application_consents")
 }
 
 model SurveyStatus {
@@ -1514,4 +1531,61 @@ model MentorOfferStatus {
   records     MentorSlotOffer[]
 
   @@map("mentor_offer_statuses")
+}
+
+model PortfolioProvider {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @unique @db.VarChar(50)
+  description String?  @db.VarChar(150)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  socialAccounts    UserSocialAccount[]
+  portfolioProjects UserPortfolioProject[]
+
+  @@map("portfolio_providers")
+}
+
+model UserSocialAccount {
+  id                String                 @id @default(uuid()) @db.Uuid
+  userId            String                 @map("user_id") @db.Uuid
+  providerId        String                 @map("provider_id") @db.Uuid
+  externalId        String                 @map("external_id") @db.VarChar(100)
+  username          String                 @db.VarChar(100)
+  profileUrl        String?                @map("profile_url") @db.VarChar(500)
+  createdAt         DateTime               @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime               @updatedAt @map("updated_at") @db.Timestamptz(6)
+  user              User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider          PortfolioProvider      @relation(fields: [providerId], references: [id], onDelete: Restrict)
+  portfolioProjects UserPortfolioProject[]
+
+  @@unique([userId, providerId])
+  @@unique([providerId, externalId])
+  @@index([providerId])
+  @@map("user_social_accounts")
+}
+
+model UserPortfolioProject {
+  id              String             @id @default(uuid()) @db.Uuid
+  userId          String             @map("user_id") @db.Uuid
+  socialAccountId String?            @map("social_account_id") @db.Uuid
+  providerId      String             @map("provider_id") @db.Uuid
+  repoName        String             @map("repo_name") @db.VarChar(150)
+  repoUrl         String             @map("repo_url") @db.VarChar(500)
+  description     String?            @db.Text
+  language        String?            @db.VarChar(60)
+  starsCount      Int                @default(0) @map("stars_count")
+  isOwner         Boolean            @default(true) @map("is_owner")
+  displayOrder    Int                @default(0) @map("display_order") @db.SmallInt
+  createdAt       DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime           @updatedAt @map("updated_at") @db.Timestamptz(6)
+  user            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  socialAccount   UserSocialAccount? @relation(fields: [socialAccountId], references: [id], onDelete: SetNull)
+  provider        PortfolioProvider  @relation(fields: [providerId], references: [id], onDelete: Restrict)
+
+  @@unique([userId, providerId, repoName])
+  @@index([userId, displayOrder])
+  @@index([socialAccountId])
+  @@index([providerId])
+  @@map("user_portfolio_projects")
 }

@@ -354,6 +354,11 @@ export type JobApplicationStatus = Prisma.JobApplicationStatusModel;
  */
 export type JobApplication = Prisma.JobApplicationModel;
 /**
+ * Model RadarApplicationConsent
+ *
+ */
+export type RadarApplicationConsent = Prisma.RadarApplicationConsentModel;
+/**
  * Model SurveyStatus
  *
  */
@@ -459,3 +464,18 @@ export type MentorParticipationStatus = Prisma.MentorParticipationStatusModel;
  *
  */
 export type MentorOfferStatus = Prisma.MentorOfferStatusModel;
+/**
+ * Model PortfolioProvider
+ *
+ */
+export type PortfolioProvider = Prisma.PortfolioProviderModel;
+/**
+ * Model UserSocialAccount
+ *
+ */
+export type UserSocialAccount = Prisma.UserSocialAccountModel;
+/**
+ * Model UserPortfolioProject
+ *
+ */
+export type UserPortfolioProject = Prisma.UserPortfolioProjectModel;
