@@ -3,6 +3,7 @@ import { seedEventRegistrationsFixtures } from '../../event-registrations/seeds/
 import { seedEventsFixtures } from '../seeds/events-fixtures.seed.js';
 import { describe, expect, it, vi } from 'vitest';
 import type { Prisma } from '../../../prisma/client.js';
+import { toBoliviaTime } from '../../../common/utils/date-time.js';
 import { seedEvents } from '../seeds/events.seed.js';
 import {
   SEED_CATEGORY_NAMES,
@@ -76,13 +77,14 @@ describe('Development event fixtures', () => {
     );
     const createMany = vi.fn().mockResolvedValue({ count: 20 });
     const updateMany = vi.fn().mockResolvedValue({ count: 1 });
-    const tx = { event: { createMany, updateMany } };
+    const eventUpsert = vi.fn().mockResolvedValue({});
+    const tx = { event: { createMany, updateMany, upsert: eventUpsert } };
     const count = await seedEventsFixtures(
       tx as unknown as Prisma.TransactionClient,
       context,
     );
     const data = createMany.mock.calls[0][0].data;
-    expect(count).toBe(data.length);
+    expect(count).toBe(data.length + 2);
     expect(new Set(data.map((event: { id: string }) => event.id)).size).toBe(
       data.length,
     );
@@ -98,6 +100,32 @@ describe('Development event fixtures', () => {
         ),
       ).toBe(true);
     }
+    const lifecycleUpserts = eventUpsert.mock.calls.map(([input]) => input);
+    expect(lifecycleUpserts).toHaveLength(2);
+    expect(lifecycleUpserts.map(({ create }) => create.title)).toEqual([
+      '[QA 08.5] Pase vigente',
+      '[QA 08.5] Pase finalizado por horario',
+    ]);
+    expect(
+      lifecycleUpserts.every(
+        ({ create, update }) =>
+          create.statusId === 'event_statuses:Publicado' &&
+          update.statusId === 'event_statuses:Publicado',
+      ),
+    ).toBe(true);
+    const [year, month, day] = toBoliviaTime(new Date()).date
+      .split('-')
+      .map(Number);
+    expect(lifecycleUpserts.map(({ create }) => create.eventDate)).toEqual([
+      new Date(Date.UTC(year!, month! - 1, day! + 1)),
+      new Date(Date.UTC(year!, month! - 1, day! - 1)),
+    ]);
+    expect(
+      lifecycleUpserts.map(({ create }) => create.endTime),
+    ).toEqual([
+      new Date('1970-01-01T10:00:00Z'),
+      new Date('1970-01-01T10:00:00Z'),
+    ]);
     expect(createMany).toHaveBeenCalledWith({ data, skipDuplicates: true });
   });
 
@@ -112,11 +140,18 @@ describe('Development event fixtures', () => {
     const eventCreateMany = vi.fn().mockResolvedValue({ count: 0 });
     const registrationCreateMany = vi.fn().mockResolvedValue({ count: 0 });
     const updateMany = vi.fn().mockResolvedValue({ count: 1 });
+    const eventUpsert = vi.fn().mockResolvedValue({});
+    const registrationUpsert = vi.fn().mockResolvedValue({});
     const tx = {
-      event: { createMany: eventCreateMany, updateMany },
+      event: { createMany: eventCreateMany, updateMany, upsert: eventUpsert },
       eventRegistration: {
         createMany: registrationCreateMany,
         findMany: vi.fn().mockResolvedValue([]),
+        upsert: registrationUpsert,
+      },
+      user: { findUniqueOrThrow: vi.fn().mockResolvedValue({ id: 'qa-user' }) },
+      registrationStatus: {
+        findUniqueOrThrow: vi.fn().mockResolvedValue({ id: 'confirmed' }),
       },
     };
 
@@ -133,6 +168,11 @@ describe('Development event fixtures', () => {
       .data as Prisma.EventCreateManyInput[];
     const registrations = registrationCreateMany.mock.calls[0][0]
       .data as Prisma.EventRegistrationCreateManyInput[];
+    expect(eventUpsert).toHaveBeenCalledTimes(2);
+    expect(registrationUpsert).toHaveBeenCalledTimes(2);
+    expect(registrationUpsert.mock.calls.map(([input]) => input.update)).toEqual(
+      Array(2).fill({ statusId: 'confirmed', cancelledAt: null }),
+    );
     const scenarios = [
       { key: 'record-01700', capacity: 13, availableSpots: 0 },
       { key: 'record-00376', capacity: 14, availableSpots: 1 },

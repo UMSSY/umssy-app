@@ -2,6 +2,7 @@ import { repairSeededQrTokens } from './repair-seeded-qr-tokens.js';
 import { randomBytes } from 'node:crypto';
 import type { Prisma } from '../../../prisma/client.js';
 import type { FixtureContext } from '../../../common/database/fixture-context.js';
+import { REGISTRATION_STATUS_TITLES } from '../../../common/constants/registration-status.constants.js';
 
 const REGISTRATION_PLANS = [
   {
@@ -1350,5 +1351,27 @@ export async function seedEventRegistrationsFixtures(
       }),
     );
   await tx.eventRegistration.createMany({ data, skipDuplicates: true });
-  return data.length;
+  const qaUser = await tx.user.findUniqueOrThrow({
+    where: { email: 'prueba@umss.edu.bo' },
+    select: { id: true },
+  });
+  const confirmedStatus = await tx.registrationStatus.findUniqueOrThrow({
+    where: { title: REGISTRATION_STATUS_TITLES.confirmed },
+    select: { id: true },
+  });
+  for (const eventKey of ['qa-event-pass-active', 'qa-event-pass-finished']) {
+    const eventId = context.getId(eventKey);
+    await tx.eventRegistration.upsert({
+      where: { eventId_userId: { eventId, userId: qaUser.id } },
+      update: { statusId: confirmedStatus.id, cancelledAt: null },
+      create: {
+        id: context.getId(`qa-registration-${eventKey}`),
+        eventId,
+        userId: qaUser.id,
+        statusId: confirmedStatus.id,
+        qrToken: randomBytes(32).toString('hex'),
+      },
+    });
+  }
+  return data.length + 2;
 }

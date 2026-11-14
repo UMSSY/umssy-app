@@ -1,10 +1,29 @@
 import type { Prisma } from '../../../prisma/client.js';
 import type { FixtureContext } from '../../../common/database/fixture-context.js';
+import { toBoliviaTime } from '../../../common/utils/date-time.js';
 
 const WORKSHOP_CAPACITY_SCENARIOS = {
   full: { key: 'record-01700', capacity: 13 },
   oneSpotLeft: { key: 'record-00376', capacity: 14 },
 } as const;
+
+const PASS_LIFECYCLE_SCENARIOS = [
+  {
+    key: 'qa-event-pass-active',
+    title: '[QA 08.5] Pase vigente',
+    dayOffset: 1,
+  },
+  {
+    key: 'qa-event-pass-finished',
+    title: '[QA 08.5] Pase finalizado por horario',
+    dayOffset: -1,
+  },
+] as const;
+
+const getBoliviaDate = (dayOffset: number, now: Date): Date => {
+  const [year, month, day] = toBoliviaTime(now).date.split('-').map(Number);
+  return new Date(Date.UTC(year!, month! - 1, day! + dayOffset));
+};
 
 export async function seedEventsFixtures(
   tx: Prisma.TransactionClient,
@@ -479,5 +498,37 @@ export async function seedEventsFixtures(
       data: { capacity: scenario.capacity },
     });
   }
-  return data.length;
+  const now = new Date();
+  for (const scenario of PASS_LIFECYCLE_SCENARIOS) {
+    const event = {
+      title: scenario.title,
+      description:
+        'Fixture de QA para verificar la vigencia del pase según la fecha y hora de cierre en Bolivia.',
+      categoryId: context.getReference('event_categories', 'Tecnología'),
+      instructorName: 'Facilitador QA',
+      eventDate: getBoliviaDate(scenario.dayOffset, now),
+      startTime: new Date('1970-01-01T09:00:00Z'),
+      endTime: new Date('1970-01-01T10:00:00Z'),
+      modalityId: context.getReference('event_modalities', 'Virtual'),
+      location: 'https://events.example.invalid/qa/pass-lifecycle',
+      capacity: 30,
+      originId: context.getReference('event_origins', 'Comunidad'),
+      statusId: context.getReference('event_statuses', 'Publicado'),
+      supportThreshold: null,
+      votingDeadline: null,
+      moderatedById: null,
+      moderationReason: null,
+      createdById: context.adminId,
+    };
+    await tx.event.upsert({
+      where: { id: context.getId(scenario.key) },
+      update: event,
+      create: {
+        id: context.getId(scenario.key),
+        ...event,
+        createdAt: now,
+      },
+    });
+  }
+  return data.length + PASS_LIFECYCLE_SCENARIOS.length;
 }
