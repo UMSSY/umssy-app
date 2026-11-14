@@ -7,26 +7,33 @@ self.addEventListener('activate', (event) => {
 });
 
 (function webPushHandlers() {
-  self.addEventListener('push', (event) => {
-    if (!event.data) return;
+  const PUSH_TEXT_MAX_LENGTH = 100;
+  const PUSH_DEFAULT_TITLE = 'UMSSY';
+  const PUSH_DEFAULT_BODY = 'Tienes una nueva notificación';
+  const PUSH_DEFAULT_ICON = '/icons/icon-192x192.png';
 
-    let payload;
+  function readPushPayload(event) {
+    if (!event.data) return {};
     try {
-      payload = event.data.json();
+      return event.data.json() || {};
     } catch (error) {
       console.error('Push event payload is not valid JSON', error);
-      return;
+      return {};
     }
+  }
 
-    const title = payload.title || 'UMSSY';
+  self.addEventListener('push', (event) => {
+    const payload = readPushPayload(event);
+
+    const title = String(payload.title || PUSH_DEFAULT_TITLE).slice(0, PUSH_TEXT_MAX_LENGTH);
     const options = {
-      body: payload.body || 'Tienes una nueva notificación',
-      icon: '/icons/icon-192x192.png',
-      badge: '/icons/icon-192x192.png',
+      body: String(payload.body || PUSH_DEFAULT_BODY).slice(0, PUSH_TEXT_MAX_LENGTH),
+      icon: payload.icon || PUSH_DEFAULT_ICON,
+      badge: PUSH_DEFAULT_ICON,
       data: {
-        actionUrl: payload.url || '/',
+        actionUrl: payload.actionUrl || payload.url || '/',
       },
-      tag: payload.tag || undefined,
+      tag: payload.groupKey || payload.tag || undefined,
     };
 
     event.waitUntil(self.registration.showNotification(title, options));
