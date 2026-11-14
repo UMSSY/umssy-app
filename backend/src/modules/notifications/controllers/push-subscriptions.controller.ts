@@ -1,34 +1,58 @@
-import { Controller, Get, Post, Delete, Body, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Body,
+  UseGuards,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { SubscriptionsService } from '../services/subscriptions.service.js';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { CurrentUserId } from '../../../common/decorators/current-user-id.decorator.js';
-import { PushSubscriptionSchema, DeletePushSubscriptionSchema } from '../requests/push-subscription.schema.js';
+import { RequestValidationPipe } from '../../../common/pipes/request-validation.pipe.js';
+import {
+  PushSubscriptionSchema,
+  DeletePushSubscriptionSchema,
+} from '../requests/push-subscription.schema.js';
+import type { PushSubscriptionPayload } from '../types/notification.types.js';
 
 @Controller('push')
 @UseGuards(JwtAuthGuard)
 export class PushSubscriptionsController {
-  constructor(private readonly subscriptionsService: SubscriptionsService) {}
+  constructor(
+    private readonly subscriptionsService: SubscriptionsService,
+    private readonly configService: ConfigService,
+  ) {}
 
   @Get('public-key')
-  getPublicKey() {
-    return { publicKey: process.env.VAPID_PUBLIC_KEY };
+  getPublicKey(): { publicKey: string } {
+    const publicKey = this.configService.get<string>('VAPID_PUBLIC_KEY');
+    if (!publicKey) {
+      throw new Error('VAPID_PUBLIC_KEY is not configured');
+    }
+    return { publicKey };
   }
 
   @Post('subscriptions')
+  @HttpCode(HttpStatus.OK)
   async subscribe(
     @CurrentUserId() userId: string,
-    @Body() payload: unknown, 
+    @Body(new RequestValidationPipe(PushSubscriptionSchema))
+    payload: PushSubscriptionPayload,
   ) {
-    const validatedPayload = PushSubscriptionSchema.parse(payload);
-    return this.subscriptionsService.subscribe(userId, validatedPayload);
+    return this.subscriptionsService.subscribe(userId, payload);
   }
 
   @Delete('subscriptions')
+  @HttpCode(HttpStatus.NO_CONTENT)
   async unsubscribe(
     @CurrentUserId() userId: string,
-    @Body() payload: unknown, 
-  ) {
-    const { endpoint } = DeletePushSubscriptionSchema.parse(payload);
-    return this.subscriptionsService.unsubscribe(userId, endpoint);
+    @Body(new RequestValidationPipe(DeletePushSubscriptionSchema))
+    payload: { endpoint: string },
+  ): Promise<void> {
+    await this.subscriptionsService.unsubscribe(userId, payload.endpoint);
   }
 }

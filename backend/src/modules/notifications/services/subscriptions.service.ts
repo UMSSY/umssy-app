@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { PushSubscriptionsRepository } from '../repositories/push-subscriptions.repository.js';
 import { PreferencesRepository } from '../repositories/preferences.repository.js';
-import type { NotificationPreferenceResponse } from '../types/notification.types.js';
+import type {
+  NotificationPreferenceResponse,
+  NotificationPreferencePayload,
+  PushSubscriptionPayload,
+} from '../types/notification.types.js';
 
 @Injectable()
 export class SubscriptionsService {
@@ -10,14 +14,16 @@ export class SubscriptionsService {
     private readonly preferencesRepo: PreferencesRepository,
   ) {}
 
-  async subscribe(userId: string, payload: any) {
+  async subscribe(
+    userId: string,
+    payload: PushSubscriptionPayload,
+  ): Promise<{ ok: true }> {
     await this.pushRepo.upsert(userId, payload);
     return { ok: true };
   }
 
-  async unsubscribe(userId: string, endpoint: string) {
+  async unsubscribe(userId: string, endpoint: string): Promise<void> {
     await this.pushRepo.deleteByEndpointAndUserId(endpoint, userId);
-    return { ok: true };
   }
 
   async getPreferences(userId: string): Promise<NotificationPreferenceResponse> {
@@ -31,7 +37,10 @@ export class SubscriptionsService {
     };
   }
 
-  async updatePreferences(userId: string, payload: any) {
+  async updatePreferences(
+    userId: string,
+    payload: NotificationPreferencePayload,
+  ): Promise<{ ok: true }> {
     await this.preferencesRepo.upsert(userId, {
       pushEnabled: payload.pushEnabled,
       emailEnabled: payload.emailEnabled,

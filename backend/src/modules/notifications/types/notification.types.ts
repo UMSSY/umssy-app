@@ -57,3 +57,9 @@ export type PushSubscriptionPayload = {
   };
   userAgent?: string;
 };
+
+export type NotificationPreferencePayload = {
+  pushEnabled: boolean;
+  emailEnabled: boolean;
+  inAppEnabled: boolean;
+};
