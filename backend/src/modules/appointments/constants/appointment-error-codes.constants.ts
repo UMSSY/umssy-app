@@ -1,5 +1,7 @@
 export const APPOINTMENT_ERROR_CODES = {
   appointmentClosed: 'APPOINTMENT_CLOSED',
+  appointmentNotCancellable: 'APPOINTMENT_NOT_CANCELLABLE',
+  cancelReasonRequired: 'CANCEL_REASON_REQUIRED',
   appointmentDocumentNotFound: 'APPOINTMENT_DOCUMENT_NOT_FOUND',
   appointmentDocumentUploadForbidden: 'APPOINTMENT_DOCUMENT_UPLOAD_FORBIDDEN',
   appointmentNotFound: 'APPOINTMENT_NOT_FOUND',
