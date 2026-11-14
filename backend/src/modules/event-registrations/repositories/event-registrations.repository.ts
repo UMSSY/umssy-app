@@ -2,7 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import type { Prisma } from '../../../prisma/client.js';
 import { REGISTRATION_STATUS_TITLES } from '../../../common/constants/registration-status.constants.js';
-import { PUBLISHED_STATUS_TITLE } from '../../events/index.js';
+import {
+  FINISHED_STATUS_TITLE,
+  PUBLISHED_STATUS_TITLE,
+} from '../../events/index.js';
+import type { FinishedEventThreshold } from '../../events/index.js';
 import { REGISTRATION_SELECT } from '../constants/registrations.constants.js';
 import type { CreateEventRegistrationPayload } from '../types/event-registrations.types.js';
 
@@ -202,5 +206,60 @@ export class EventRegistrationsRepository {
       },
       orderBy: { event: { eventDate: 'asc' } },
     });
+  }
+
+  async findFinishedByUserId(
+    userId: string,
+    threshold: FinishedEventThreshold,
+    skip: number,
+    take: number,
+  ) {
+    const where: Prisma.EventRegistrationWhereInput = {
+      userId,
+      cancelledAt: null,
+      status: { title: REGISTRATION_STATUS_TITLES.confirmed },
+      event: {
+        status: {
+          title: { in: [PUBLISHED_STATUS_TITLE, FINISHED_STATUS_TITLE] },
+        },
+        OR: [
+          { eventDate: { lt: threshold.eventDate } },
+          {
+            eventDate: threshold.eventDate,
+            endTime: { lte: threshold.endTime },
+          },
+        ],
+      },
+    };
+    const [items, total] = await this.prisma.$transaction([
+      this.prisma.eventRegistration.findMany({
+        where,
+        select: {
+          id: true,
+          eventId: true,
+          registeredAt: true,
+          cancelledAt: true,
+          status: { select: { title: true } },
+          event: {
+            select: {
+              title: true,
+              eventDate: true,
+              startTime: true,
+              endTime: true,
+              location: true,
+            },
+          },
+        },
+        orderBy: [
+          { event: { eventDate: 'desc' } },
+          { event: { endTime: 'desc' } },
+          { id: 'desc' },
+        ],
+        skip,
+        take,
+      }),
+      this.prisma.eventRegistration.count({ where }),
+    ]);
+    return { items, total };
   }
 }

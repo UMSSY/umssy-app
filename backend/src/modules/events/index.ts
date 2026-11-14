@@ -1,6 +1,9 @@
 export { EventsModule } from './events.module.js';
 export { EventsService } from './services/events.service.js';
-export { PUBLISHED_STATUS_TITLE } from './constants/events.constants.js';
+export {
+  PUBLISHED_STATUS_TITLE,
+  FINISHED_STATUS_TITLE,
+} from './constants/events.constants.js';
 export type { EventSupportContext } from './types/event-support-context.types.js';
 export type { SupportEventRecord } from './types/support-event-record.types.js';
 export {
@@ -11,3 +14,4 @@ export {
 export { EventNotFoundException } from './exceptions/event-not-found.exception.js';
 
 export type { RegistrationScheduleEvent } from './types/registration-schedule-event.types.js';
+export type { FinishedEventThreshold } from './types/finished-event-threshold.types.js';

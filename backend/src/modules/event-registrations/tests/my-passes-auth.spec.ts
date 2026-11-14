@@ -40,7 +40,9 @@ describe('identidad en Mis pases', () => {
           switchToHttp: () => ({ getRequest: () => request }),
         } as unknown as ExecutionContext;
         await guard.canActivate(context);
-        await expect(controller.findMine(request.user!)).resolves.toEqual([]);
+        await expect(
+          controller.findMine(request.user!, { page: 1, limit: 10 }),
+        ).resolves.toEqual([]);
         expect(findMany).toHaveBeenLastCalledWith(
           expect.objectContaining({
             where: {
