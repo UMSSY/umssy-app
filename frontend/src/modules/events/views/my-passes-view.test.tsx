@@ -43,10 +43,7 @@ describe("Mis pases", () => {
   });
 
   it('retira automáticamente los pases al llegar su hora de cierre sin volver a consultar', async () => {
-    vi.useFakeTimers({
-      now: new Date('2026-10-20T15:59:59.000Z'),
-      toFake: ['Date', 'setInterval', 'clearInterval'],
-    });
+    vi.setSystemTime(new Date('2026-10-20T15:59:59.000Z'));
     getMine.mockResolvedValue([
       pass,
       { ...pass, id: 'reg-2', eventName: 'Prisma', date: '2026-10-21T00:00:00Z' },
@@ -58,7 +55,9 @@ describe("Mis pases", () => {
     expect(screen.getByRole('button', { name: /React/ })).toBeInTheDocument();
 
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(1000);
+      await new Promise((resolve) => window.setTimeout(resolve, 900));
+      vi.setSystemTime(new Date('2026-10-20T16:00:00.000Z'));
+      await new Promise((resolve) => window.setTimeout(resolve, 200));
     });
 
     expect(await screen.findByText('1 pase')).toBeInTheDocument();

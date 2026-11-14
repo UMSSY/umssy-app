@@ -26,12 +26,22 @@ export function useEventFinished(
   const hasUnfinishedEvent = endTimes.some(
     (endsAt) => Number.isFinite(endsAt) && now < endsAt,
   );
+  const nextEndAt = endTimes
+    .filter((endsAt) => Number.isFinite(endsAt) && now < endsAt)
+    .reduce<number | null>(
+      (earliest, endsAt) =>
+        earliest === null ? endsAt : Math.min(earliest, endsAt),
+      null,
+    );
 
   useEffect(() => {
-    if (!hasUnfinishedEvent) return;
-    const timer = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => window.clearInterval(timer);
-  }, [hasUnfinishedEvent, schedulesKey]);
+    if (!hasUnfinishedEvent || nextEndAt === null) return;
+    const timer = window.setTimeout(
+      () => setNow(Date.now()),
+      Math.min(nextEndAt - Date.now(), 2_147_483_647),
+    );
+    return () => window.clearTimeout(timer);
+  }, [hasUnfinishedEvent, nextEndAt, schedulesKey]);
 
   return Array.isArray(eventOrEvents) ? finished : (finished[0] ?? false);
 }
