@@ -1627,6 +1627,8 @@ model Notification {
 
   @@index([recipientId, readAt])
   @@index([recipientId, createdAt(sort: Desc)])
+  @@index([actorId])
+  @@index([typeId])
   @@map("notifications")
 }
 
