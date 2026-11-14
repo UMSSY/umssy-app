@@ -18,4 +18,7 @@ export class UsersService {
   assignCompany(userId: string, companyId: string) {
     return this.usersRepository.assignCompany(userId, companyId);
   }
+  findEmailById(userId: string): Promise<string | null> {
+    return this.usersRepository.findEmailById(userId);
+  }
 }
