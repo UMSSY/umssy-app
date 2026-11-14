@@ -6,8 +6,12 @@ import { downloadFile } from "@/shared/utils/download-file";
 import { saveFile, selectCsvDestination } from "@/shared/utils/save-file";
 import { REPORT_ALERT_DURATION_MS } from "../constants/reports.constants";
 import type { ExportedFile } from "../types/registered-user.types";
+import type { ReportExportFormat, ReportExportScope } from "../types/report-export.types";
 
-export function useExportReportCsv(exportReport: () => Promise<ExportedFile>, suggestedFileName: string) {
+export function useExportReportCsv(
+  exportReport: (scope: ReportExportScope, format: ReportExportFormat) => Promise<ExportedFile>,
+  suggestedFileName: string,
+) {
   const exportInProgress = useRef(false);
   const [isExporting, setIsExporting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
@@ -23,7 +27,7 @@ export function useExportReportCsv(exportReport: () => Promise<ExportedFile>, su
     return () => clearTimeout(timeoutId);
   }, [successMessage]);
 
-  const exportCsv = useCallback(async () => {
+  const exportCsv = useCallback(async (format: ReportExportFormat = "csv", scope: ReportExportScope = "filtered") => {
     if (exportInProgress.current) return;
     exportInProgress.current = true;
     setIsExporting(true);
@@ -31,7 +35,7 @@ export function useExportReportCsv(exportReport: () => Promise<ExportedFile>, su
     setSuccessMessage(undefined);
 
     try {
-      const destination = selectCsvDestination(suggestedFileName);
+      const destination = format === "csv" ? selectCsvDestination(suggestedFileName) : undefined;
       let fileHandle;
 
       if (destination) {
@@ -43,7 +47,7 @@ export function useExportReportCsv(exportReport: () => Promise<ExportedFile>, su
         }
       }
 
-      const { file, fileName } = await exportReport();
+      const { file, fileName } = await exportReport(scope, format);
       if (fileHandle) {
         await saveFile(file, fileHandle);
       } else {

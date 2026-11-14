@@ -10,4 +10,5 @@ export interface ReportFilterSelectProps<TValue extends string> {
   options: ReportFilterOption<TValue>[];
   value?: TValue;
   onChange: (value?: TValue) => void;
+  disabled?: boolean;
 }

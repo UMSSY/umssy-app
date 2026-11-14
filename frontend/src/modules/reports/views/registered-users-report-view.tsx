@@ -23,13 +23,13 @@ export function RegisteredUsersReportView() {
   const [period, setPeriod] = useState<AcademicPeriod | undefined>(undefined);
   const [searchInput, setSearchInput] = useState("");
   const search = useDebouncedValue(searchInput.trim(), SEARCH_DEBOUNCE_MS);
-  const { users, totalItems, totalPages, isLoading, errorMessage, isSlow, hasConnectionError, refresh } =
+  const { users, totalItems, totalPages, isLoading, errorMessage, isSlow, hasConnectionError, refresh, snapshotAt } =
     useRegisteredUsers(currentPage, userType, period, search);
   const {
     exportCsv,
     isExporting,
     successMessage: exportSuccessMessage,
-  } = useExportRegisteredUsersCsv(userType, period, search);
+  } = useExportRegisteredUsersCsv(userType, period, search, currentPage, REGISTERED_USERS_PAGE_SIZE, snapshotAt);
 
   useEffect(() => {
     if (isSlow) {
@@ -85,7 +85,13 @@ export function RegisteredUsersReportView() {
           <ReportSearchInput value={searchInput} onChange={handleSearchChange} label={EMAIL_SEARCH_LABEL} />
         </div>
         {userType || period || searchInput ? <Button variant="brand" onClick={() => { setUserType(undefined); setPeriod(undefined); setSearchInput(""); setCurrentPage(1); }}>Limpiar filtros</Button> : null}
-        <ReportActions onExport={exportCsv} isExporting={isExporting} period={period} onPeriodChange={handlePeriodChange} />
+        <ReportActions
+          onExport={exportCsv}
+          isExporting={isExporting}
+          hasResults={users.length > 0 && !isLoading && !errorMessage && !hasConnectionError && searchInput.trim() === search}
+          period={period}
+          onPeriodChange={handlePeriodChange}
+        />
       </div>
 
       <RegisteredUsersTable users={users} isLoading={isLoading} errorMessage={errorMessage} searchTerm={search} />
