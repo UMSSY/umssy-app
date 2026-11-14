@@ -16,9 +16,13 @@ import {
 import { useProfileCompleteness } from '../hooks/use-profile-completeness';
 import { useProfileCompletenessDisclosure } from '../hooks/use-profile-completeness-disclosure';
 import { ProfileCompletenessChecklist } from './profile-completeness-checklist';
+import type { ProfileCompletenessProgressProps } from '../types/profile-completeness-progress-props.types';
 
-export function ProfileCompletenessProgress() {
-  const { completeness, isLoading, error, reload } = useProfileCompleteness();
+export function ProfileCompletenessProgress({
+  showChecklist = true,
+  refetchOnMount = showChecklist,
+}: ProfileCompletenessProgressProps) {
+  const { completeness, isLoading, error, reload } = useProfileCompleteness(refetchOnMount);
   const isComplete =
     completeness?.percentage === PROFILE_COMPLETENESS_LIMITS.max;
   const { isOpen, panelId, containerRef, triggerRef, toggle } =
@@ -95,7 +99,7 @@ export function ProfileCompletenessProgress() {
             </ProgressValue>
           </div>
         </Progress>
-        {isComplete ? (
+        {showChecklist && isComplete ? (
           <Button
             ref={triggerRef}
             type="button"
@@ -108,11 +112,13 @@ export function ProfileCompletenessProgress() {
           />
         ) : null}
       </div>
-      <div id={panelId} hidden={!isOpen}>
-        {isOpen ? (
-          <ProfileCompletenessChecklist sections={completeness.sections} />
-        ) : null}
-      </div>
+      {showChecklist ? (
+        <div id={panelId} hidden={!isOpen}>
+          {isOpen ? (
+            <ProfileCompletenessChecklist sections={completeness.sections} />
+          ) : null}
+        </div>
+      ) : null}
     </Card>
   );
 }

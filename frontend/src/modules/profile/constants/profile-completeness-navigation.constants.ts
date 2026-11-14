@@ -7,6 +7,7 @@ export const PROFILE_COMPLETENESS_ROUTES = {
   'work-experience': '/profile',
   skills: '/profile',
   certifications: '/profile',
+  cv: '/profile/documents',
 } as const satisfies Record<ProfileCompletenessSectionId, string>;
 
 export const PROFILE_COMPLETENESS_HASH_PREFIX = '#complete-';

@@ -85,7 +85,7 @@ describe("ProfileOverviewView", () => {
     vi.mocked(profileService.getProfile).mockReturnValue(new Promise(() => {}));
     render(<ProfileOverviewView />);
 
-    expect(await screen.findByRole("progressbar", { name: "Completitud del perfil" })).toHaveAttribute("aria-valuenow", "35");
+    expect(await screen.findByRole("progressbar", { name: "Completitud del perfil" })).toHaveAttribute("aria-valuenow", "30");
     expect(screen.getByRole("region", { name: "Secciones del perfil" })).toBeVisible();
     expect(screen.getByText("Cargando tu perfil...")).toBeVisible();
     expect(screen.queryByText("Valeria Quispe")).not.toBeInTheDocument();
@@ -123,7 +123,7 @@ describe("ProfileOverviewView", () => {
     render(<ProfileOverviewView />);
 
     expect(await screen.findByText("Valeria Quispe")).toBeInTheDocument();
-    expect(await screen.findByRole("progressbar", { name: "Completitud del perfil" })).toHaveAttribute("aria-valuenow", "35");
+    expect(await screen.findByRole("progressbar", { name: "Completitud del perfil" })).toHaveAttribute("aria-valuenow", "30");
     expect(screen.queryByText("Cargando tu perfil...")).not.toBeInTheDocument();
     expect(screen.getByText("VQ")).toBeInTheDocument();
     expect(screen.getByText("Desarrolladora web junior")).toBeInTheDocument();

@@ -31,7 +31,7 @@ describe("SkillsView", () => {
   it("shows a loading message and then the saved skills", async () => {
     render(<SkillsView />);
 
-    expect(screen.getByRole("status")).toHaveTextContent("Cargando habilidades...");
+    expect(screen.getByText("Cargando habilidades...")).toBeVisible();
     expect(await screen.findByRole("button", { name: "Quitar Python" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { level: 1, name: "Habilidades" })).toBeInTheDocument();
     expect(screen.getByText("Buscar en el catálogo")).toBeInTheDocument();

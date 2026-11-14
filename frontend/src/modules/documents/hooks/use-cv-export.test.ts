@@ -1,6 +1,7 @@
 import { renderHookWithQuery as renderHook } from "@/shared/testing/render-hook-with-query";
 import { act, cleanup, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { CV_EXPORT_DEFAULT_SECTIONS } from "../constants/cv-export.constants";
 import { documentsService } from "../services/documents.service";
 import { useCvExport } from "./use-cv-export";
 
@@ -13,6 +14,7 @@ vi.mock("../services/documents.service", () => ({
 const PDF = new Blob(["%PDF"], { type: "application/pdf" });
 const FILE_NAME = "CV_Test.pdf";
 const FILE_URL = "blob:generated-cv";
+const SECTIONS = { ...CV_EXPORT_DEFAULT_SECTIONS, includeCertifications: false };
 
 describe("useCvExport", () => {
   beforeEach(() => {
@@ -40,11 +42,12 @@ describe("useCvExport", () => {
 
     let returnedCv: unknown = "not called";
     await act(async () => {
-      returnedCv = await result.current.generateCv();
+      returnedCv = await result.current.generateCv(SECTIONS);
     });
 
     expect(returnedCv).toEqual({ file: PDF, previewUrl: FILE_URL, fileName: FILE_NAME });
     expect(documentsService.generateCv).toHaveBeenCalledTimes(1);
+    expect(documentsService.generateCv).toHaveBeenCalledWith(SECTIONS);
     expect(URL.createObjectURL).toHaveBeenCalledWith(PDF);
     expect(result.current.generatedCv).toEqual({ file: PDF, previewUrl: FILE_URL, fileName: FILE_NAME });
     expect(result.current.error).toBeNull();
@@ -60,7 +63,7 @@ describe("useCvExport", () => {
 
     let generation: Promise<unknown> = Promise.resolve();
     act(() => {
-      generation = result.current.generateCv();
+      generation = result.current.generateCv(SECTIONS);
     });
 
     await waitFor(() => expect(result.current.isGenerating).toBe(true));
@@ -77,7 +80,7 @@ describe("useCvExport", () => {
     const { result } = renderHook(() => useCvExport());
 
     await act(async () => {
-      await result.current.generateCv();
+      await result.current.generateCv(SECTIONS);
     });
 
     expect(result.current.error).toBe(
@@ -92,7 +95,7 @@ describe("useCvExport", () => {
 
     let returnedCv: unknown = "not called";
     await act(async () => {
-      returnedCv = await result.current.generateCv();
+      returnedCv = await result.current.generateCv(SECTIONS);
     });
 
     expect(returnedCv).toBeNull();
@@ -104,10 +107,10 @@ describe("useCvExport", () => {
     const { result } = renderHook(() => useCvExport());
 
     await act(async () => {
-      await result.current.generateCv();
+      await result.current.generateCv(SECTIONS);
     });
     await act(async () => {
-      await result.current.generateCv();
+      await result.current.generateCv(SECTIONS);
     });
 
     expect(result.current.error).toBeNull();
@@ -119,14 +122,38 @@ describe("useCvExport", () => {
     const { result } = renderHook(() => useCvExport());
 
     await act(async () => {
-      await result.current.generateCv();
+      await result.current.generateCv(SECTIONS);
     });
     await act(async () => {
-      await result.current.generateCv();
+      await result.current.generateCv(SECTIONS);
     });
 
     expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:first");
     expect(result.current.generatedCv?.previewUrl).toBe("blob:second");
+  });
+
+  it("discards the generated cv and releases its url", async () => {
+    const { result } = renderHook(() => useCvExport());
+    await act(async () => {
+      await result.current.generateCv(SECTIONS);
+    });
+
+    act(() => result.current.discardCv());
+
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith(FILE_URL);
+    expect(result.current.generatedCv).toBeNull();
+  });
+
+  it("clears the error when the cv is discarded", async () => {
+    vi.mocked(documentsService.generateCv).mockRejectedValueOnce(new Error("Network Error"));
+    const { result } = renderHook(() => useCvExport());
+    await act(async () => {
+      await result.current.generateCv(SECTIONS);
+    });
+
+    act(() => result.current.discardCv());
+
+    expect(result.current.error).toBeNull();
   });
 
   it("ignores a cv that arrives after unmounting", async () => {
@@ -138,7 +165,7 @@ describe("useCvExport", () => {
 
     let generation: Promise<unknown> = Promise.resolve();
     act(() => {
-      generation = result.current.generateCv();
+      generation = result.current.generateCv(SECTIONS);
     });
     unmount();
     resolveFile({ file: PDF, fileName: FILE_NAME });
@@ -156,7 +183,7 @@ describe("useCvExport", () => {
 
     let generation: Promise<unknown> = Promise.resolve();
     act(() => {
-      generation = result.current.generateCv();
+      generation = result.current.generateCv(SECTIONS);
     });
     unmount();
     rejectFile({ response: { status: 500 } });
@@ -168,7 +195,7 @@ describe("useCvExport", () => {
   it("releases the temporary url when unmounting", async () => {
     const { result, unmount } = renderHook(() => useCvExport());
     await act(async () => {
-      await result.current.generateCv();
+      await result.current.generateCv(SECTIONS);
     });
 
     unmount();
