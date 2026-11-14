@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PushSubscriptionsRepository } from '../repositories/push-subscriptions.repository.js';
 import { PreferencesRepository } from '../repositories/preferences.repository.js';
-import type { NotificationPreferenceResponse } from '../types/notification.types.js';
+import type { NotificationPreferenceResponse } from '../types/notification-preference-response.type.js';
 
 @Injectable()
 export class SubscriptionsService {
