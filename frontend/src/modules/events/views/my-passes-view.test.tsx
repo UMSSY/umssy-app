@@ -63,9 +63,34 @@ describe("Mis pases", () => {
     expect(await screen.findByText('1 pase')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /React/ })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Prisma/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Prisma/ })).toHaveAttribute('aria-pressed', 'true');
     const panel = screen.getByRole('complementary', { name: 'Detalle de la inscripción' });
     expect(await within(panel).findByText('reg-2')).toBeInTheDocument();
     expect(within(panel).queryByText('reg-1')).not.toBeInTheDocument();
+    expect(getMine).toHaveBeenCalledTimes(1);
+  });
+
+  it('actualiza el contador y muestra el estado vacío cuando vence el último pase', async () => {
+    vi.setSystemTime(new Date('2026-10-20T15:59:59.000Z'));
+    getMine.mockResolvedValue([pass]);
+    render(<MyPassesView />);
+
+    expect(await screen.findByText('1 pase')).toBeInTheDocument();
+
+    await act(async () => {
+      await new Promise((resolve) => window.setTimeout(resolve, 900));
+      vi.setSystemTime(new Date('2026-10-20T16:00:00.000Z'));
+      await new Promise((resolve) => window.setTimeout(resolve, 200));
+    });
+
+    expect(await screen.findByText('0 pases')).toBeInTheDocument();
+    expect(
+      screen.getByRole('region', { name: 'Aún no tienes inscripciones.' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('complementary', { name: 'Detalle de la inscripción' }),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /React/ })).not.toBeInTheDocument();
     expect(getMine).toHaveBeenCalledTimes(1);
   });
 
