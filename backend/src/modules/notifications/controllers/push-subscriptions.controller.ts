@@ -1,13 +1,13 @@
 import { Controller, Get, Post, Delete, Body, UseGuards } from '@nestjs/common';
-import { PushSubscriptionsRepository } from '../repositories/push-subscriptions.repository.js';
+import { SubscriptionsService } from '../services/subscriptions.service.js';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { CurrentUserId } from '../../../common/decorators/current-user-id.decorator.js';
-import type { PushSubscriptionPayload } from '../types/push-subscription-payload.type.js';
+import { PushSubscriptionSchema, DeletePushSubscriptionSchema } from '../requests/push-subscription.schema.js';
 
 @Controller('push')
 @UseGuards(JwtAuthGuard)
 export class PushSubscriptionsController {
-  constructor(private readonly pushRepo: PushSubscriptionsRepository) {}
+  constructor(private readonly subscriptionsService: SubscriptionsService) {}
 
   @Get('public-key')
   getPublicKey() {
@@ -17,15 +17,18 @@ export class PushSubscriptionsController {
   @Post('subscriptions')
   async subscribe(
     @CurrentUserId() userId: string,
-    @Body() payload: PushSubscriptionPayload,
+    @Body() payload: unknown, 
   ) {
-    await this.pushRepo.upsert(userId, payload);
-    return { ok: true };
+    const validatedPayload = PushSubscriptionSchema.parse(payload);
+    return this.subscriptionsService.subscribe(userId, validatedPayload);
   }
 
   @Delete('subscriptions')
-  async unsubscribe(@Body('endpoint') endpoint: string) {
-    await this.pushRepo.deleteByEndpoint(endpoint);
-    return { ok: true };
+  async unsubscribe(
+    @CurrentUserId() userId: string,
+    @Body() payload: unknown, 
+  ) {
+    const { endpoint } = DeletePushSubscriptionSchema.parse(payload);
+    return this.subscriptionsService.unsubscribe(userId, endpoint);
   }
 }

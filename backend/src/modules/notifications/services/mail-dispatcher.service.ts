@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { MailService } from '../../mail/services/mail.service.js';
 import { NotificationUserLookupRepository } from '../repositories/notification-user-lookup.repository.js';
+import { readFile } from 'node:fs/promises';
 
 @Injectable()
 export class MailDispatcherService {
@@ -22,18 +23,8 @@ export class MailDispatcherService {
     let successCount = 0;
     let failedCount = 0;
 
-    // Layout base institucional UMSSY (ADR-002)
-    const mjmlContent = `
-      <mj-section background-color="#ffffff" padding="20px">
-        <mj-column>
-          <mj-text font-size="20px" font-weight="bold" color="#0B1F2E">${title}</mj-text>
-          <mj-text font-size="16px" color="#33465A" padding-top="10px">${body}</mj-text>
-          <mj-button background-color="#C9A227" color="#ffffff" href="${actionUrl}" padding-top="20px">
-            Ver en UMSSY
-          </mj-button>
-        </mj-column>
-      </mj-section>
-    `;
+    const templatePath = new URL('../../mail/mjml/notification.mjml', import.meta.url);
+const mjmlContent = await readFile(templatePath, 'utf8');
 
     for (const userId of userIds) {
       try {
@@ -45,7 +36,11 @@ export class MailDispatcherService {
           subject: title,
           text: body,
           mjml: mjmlContent,
-          values: {},
+          values: {
+            title: title,
+            body: body,
+            actionUrl: actionUrl,
+          },
         });
         successCount++;
       } catch (error) {

@@ -1,38 +1,26 @@
-import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { NotificationsRepository } from '../repositories/notifications.repository.js';
 import { PreferencesRepository } from '../repositories/preferences.repository.js';
 import { NotificationUserLookupRepository } from '../repositories/notification-user-lookup.repository.js';
 import { PushDispatcherService } from './push-dispatcher.service.js';
 import { MailDispatcherService } from './mail-dispatcher.service.js';
-import { NOTIFICATION_CATALOG } from '../constants/notification-catalog.constants.js';
+import { NotificationGateway } from '../gateways/notification.gateway.js';
 import { NOTIFICATION_TEMPLATES } from '../constants/notification-templates.constants.js';
 import type { NotifyRequest } from '../types/notify-request.type.js';
 import type { NotifyResult } from '../types/notify-result.type.js';
 import { NotificationType } from '../types/notification-type.enum.js';
 import type { NotificationTemplateDefinition } from '../types/notification-template-definition.type.js';
-import { NotificationGateway } from '../gateways/notification.gateway.js'; 
 
 @Injectable()
 export class NotificationsService {
   private readonly logger = new Logger(NotificationsService.name);
 
   constructor(
-    @Inject(NotificationsRepository)
     private readonly notificationsRepository: NotificationsRepository,
-    
-    @Inject(PreferencesRepository)
     private readonly preferencesRepository: PreferencesRepository,
-    
-    @Inject(NotificationUserLookupRepository)
     private readonly userLookupRepository: NotificationUserLookupRepository,
-    
-    @Inject(PushDispatcherService)
     private readonly pushDispatcher: PushDispatcherService,
-    
-    @Inject(MailDispatcherService)
     private readonly mailDispatcher: MailDispatcherService,
-    
-    @Inject(NotificationGateway)
     private readonly notificationGateway: NotificationGateway,
   ) {}
 
@@ -56,11 +44,19 @@ export class NotificationsService {
       return { inAppCount: 0, pushStatus: 'skipped', emailStatus: 'skipped' };
     }
 
+    const typeRecord = await this.notificationsRepository.findTypeByCode(type);
+    if (!typeRecord) {
+      throw new NotFoundException(`NotificationType ${type} no encontrado en el catálogo`);
+    }
+
     const template = NOTIFICATION_TEMPLATES[type] as NotificationTemplateDefinition<NotificationType>;
+    if (!template) {
+      throw new NotFoundException(`Plantilla no encontrada para el tipo ${type}`);
+    }
+    
     const title = template.renderTitle(payload);
     const body = template.renderBody(payload);
 
-    const catalog = NOTIFICATION_CATALOG[type];
     const preferences = await this.preferencesRepository.findManyByUserIds(validRecipients);
     
     const pushTargets: string[] = [];
@@ -71,18 +67,15 @@ export class NotificationsService {
       const pushEnabled = userPref ? userPref.pushEnabled : false;
       const emailEnabled = userPref ? userPref.emailEnabled : true;
 
-      if (catalog.sendsPush && pushEnabled) pushTargets.push(recipientId);
-      if (catalog.sendsEmail && emailEnabled) emailTargets.push(recipientId);
+      if (typeRecord.sendsPush && pushEnabled) pushTargets.push(recipientId);
+      if (typeRecord.sendsEmail && emailEnabled) emailTargets.push(recipientId);
     }
-
-    const typeRecord = await this.notificationsRepository.findTypeByCode(type);
-    if (!typeRecord) throw new NotFoundException(`NotificationType ${type} no encontrado`);
 
     const inAppCount = await this.notificationsRepository.createMany(
       validRecipients.map((id) => ({
         recipientId: id,
         actorId: actorId,
-        typeId: typeRecord.id,
+        typeId: typeRecord.id, 
         title,
         body,
         link: actionUrl,

@@ -1,36 +1,26 @@
 import { Controller, Get, Put, Body, UseGuards } from '@nestjs/common';
-import { PreferencesRepository } from '../repositories/preferences.repository.js';
+import { SubscriptionsService } from '../services/subscriptions.service.js';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { CurrentUserId } from '../../../common/decorators/current-user-id.decorator.js';
+import { UpdatePreferencesSchema } from '../requests/preferences.schema.js';
 import type { NotificationPreferenceResponse } from '../types/notification-preference-response.type.js';
 
 @Controller('notifications/preferences')
 @UseGuards(JwtAuthGuard)
 export class PreferencesController {
-  constructor(private readonly preferencesRepo: PreferencesRepository) {}
+  constructor(private readonly subscriptionsService: SubscriptionsService) {}
 
   @Get()
   async getPreferences(@CurrentUserId() userId: string): Promise<NotificationPreferenceResponse> {
-    const prefs = await this.preferencesRepo.findManyByUserIds([userId]);
-    const userPref = prefs.find((p) => p.userId === userId);
-
-    return {
-      pushEnabled: userPref ? userPref.pushEnabled : false,
-      emailEnabled: userPref ? userPref.emailEnabled : true,
-      inAppEnabled: userPref ? userPref.inAppEnabled : true,
-    };
+    return this.subscriptionsService.getPreferences(userId);
   }
 
   @Put()
   async updatePreferences(
     @CurrentUserId() userId: string,
-    @Body() body: NotificationPreferenceResponse,
+    @Body() body: unknown,
   ): Promise<{ ok: boolean }> {
-    await this.preferencesRepo.upsert(userId, {
-      pushEnabled: body.pushEnabled,
-      emailEnabled: body.emailEnabled,
-      inAppEnabled: body.inAppEnabled,
-    });
-    return { ok: true };
+    const validatedData = UpdatePreferencesSchema.parse(body);
+    return this.subscriptionsService.updatePreferences(userId, validatedData);
   }
 }

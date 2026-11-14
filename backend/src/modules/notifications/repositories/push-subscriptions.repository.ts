@@ -29,11 +29,19 @@ export class PushSubscriptionsRepository {
     });
   }
 
-  async deleteByEndpoint(endpoint: string): Promise<void> {
-    await this.prisma.pushSubscription.deleteMany({
-      where: { endpoint },
+  async deleteByEndpointAndUserId(endpoint: string, userId: string): Promise<void> {
+  await this.prisma.pushSubscription.deleteMany({
+    where: { 
+      endpoint,
+      userId,
+    },
     });
   }
+  async deleteByEndpoint(endpoint: string): Promise<void> {
+  await this.prisma.pushSubscription.deleteMany({
+    where: { endpoint },
+  });
+}
 
   async findManyByUserIds(userIds: string[]): Promise<{
     id: string;
