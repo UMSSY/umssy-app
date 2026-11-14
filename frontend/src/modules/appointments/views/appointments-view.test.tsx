@@ -30,6 +30,7 @@ function makeAppointment(
     message: "Quiero revisar mi CV",
     requestedAt: "2026-10-20T22:42:00.000Z",
     document: null,
+    cancellation: null,
     ...overrides,
   };
 }
