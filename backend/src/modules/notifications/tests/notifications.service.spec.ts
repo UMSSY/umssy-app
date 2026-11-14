@@ -8,6 +8,7 @@ import { NotificationUserLookupRepository } from '../repositories/notification-u
 import { PushDispatcherService } from '../services/push-dispatcher.service.js';
 import { MailDispatcherService } from '../services/mail-dispatcher.service.js';
 import { NotificationGateway } from '../gateways/notification.gateway.js';
+import { AppVisibilityService } from '../services/app-visibility.service.js';
 import { NotificationType } from '../types/notification-type.enum.js';
 
 interface MockNotificationsRepo {
@@ -35,6 +36,10 @@ interface MockGateway {
   emitToUser: ReturnType<typeof vi.fn>;
 }
 
+interface MockAppVisibilityService {
+  isVisible: ReturnType<typeof vi.fn>;
+}
+
 describe('NotificationsService', () => {
   let service: NotificationsService;
 
@@ -44,6 +49,7 @@ describe('NotificationsService', () => {
   let mockPushDispatcher: MockPushDispatcher;
   let mockMailDispatcher: MockMailDispatcher;
   let mockGateway: MockGateway;
+  let mockAppVisibilityService: MockAppVisibilityService;
 
   const validPayload = {
     counterpartName: 'Test',
@@ -71,6 +77,7 @@ describe('NotificationsService', () => {
     mockPushDispatcher = { dispatchToUsers: vi.fn().mockResolvedValue('sent') };
     mockMailDispatcher = { dispatchToUsers: vi.fn().mockResolvedValue('sent') };
     mockGateway = { emitToUser: vi.fn() };
+    mockAppVisibilityService = { isVisible: vi.fn().mockReturnValue(false) };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -81,6 +88,7 @@ describe('NotificationsService', () => {
         { provide: PushDispatcherService, useValue: mockPushDispatcher },
         { provide: MailDispatcherService, useValue: mockMailDispatcher },
         { provide: NotificationGateway, useValue: mockGateway },
+        { provide: AppVisibilityService, useValue: mockAppVisibilityService },
       ],
     }).compile();
 
@@ -182,5 +190,32 @@ describe('NotificationsService', () => {
     expect(result.inAppCount).toBe(1);
     expect(result.pushStatus).toBe('failed');
     expect(result.emailStatus).toBe('sent');
+  });
+
+  it('no debe enviar push a un destinatario con la app visible', async () => {
+    mockPreferencesRepo.findManyByUserIds.mockResolvedValue([
+      { userId: 'user-2', pushEnabled: true, emailEnabled: false },
+      { userId: 'user-3', pushEnabled: true, emailEnabled: false },
+    ]);
+    mockAppVisibilityService.isVisible.mockImplementation(
+      (userId: string) => userId === 'user-2',
+    );
+
+    await service.notify({
+      recipientIds: ['user-2', 'user-3'],
+      actorId: 'user-1',
+      type: NotificationType.APPOINTMENT_BOOKED,
+      payload: validPayload,
+      actionUrl: '/test',
+    });
+
+    expect(mockPushDispatcher.dispatchToUsers).toHaveBeenCalledWith(
+      ['user-3'],
+      expect.any(String),
+      expect.any(String),
+      expect.any(String),
+      undefined,
+    );
+    expect(mockGateway.emitToUser).toHaveBeenCalledTimes(2);
   });
 });
