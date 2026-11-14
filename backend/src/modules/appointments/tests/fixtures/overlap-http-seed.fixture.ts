@@ -13,6 +13,8 @@ import {
 } from '../../../users/constants/seed-fixture-users.constants.js';
 import { ACTIVE_APPOINTMENT_STATUS_TITLES } from '../../constants/active-appointment-statuses.constants.js';
 import { DAILY_APPOINTMENT_LIMIT_STATUS_TITLES } from '../../constants/daily-appointment-limit-statuses.constants.js';
+import { PAST_APPOINTMENT_STATUS_TITLES } from '../../constants/past-appointment-statuses.constants.js';
+import { UPCOMING_APPOINTMENT_STATUS_TITLES } from '../../constants/upcoming-appointment-statuses.constants.js';
 import type { BoliviaDayRange } from '../../types/bolivia-day-range.types.js';
 import type { AppointmentRecord } from '../../types/appointment-record.types.js';
 import type { CreateAppointmentData } from '../../types/create-appointment-data.types.js';
@@ -66,6 +68,8 @@ const STATUS_TITLES = [
   AppointmentStatusTitle.LEGACY_PENDING,
   AppointmentStatusTitle.CANCELLED,
   AppointmentStatusTitle.COMPLETED,
+  AppointmentStatusTitle.LEGACY_COMPLETED,
+  AppointmentStatusTitle.LEGACY_CANCELLED,
   'RECHAZADA',
 ] as const;
 
@@ -571,6 +575,38 @@ export class InMemoryOverlapSeed {
     );
   }
 
+  private mineAppointments(
+    userId: string,
+    scope: MyAppointmentsQuery['scope'],
+    now: Date,
+  ): AppointmentRecord[] {
+    const titles: readonly string[] =
+      scope === 'upcoming'
+        ? UPCOMING_APPOINTMENT_STATUS_TITLES
+        : PAST_APPOINTMENT_STATUS_TITLES;
+    const byTime = (appointment: AppointmentRecord) =>
+      scope === 'upcoming'
+        ? appointment.endAt.getTime() > now.getTime()
+        : appointment.endAt.getTime() <= now.getTime();
+
+    return this.appointments
+      .filter(
+        (appointment) =>
+          (appointment.mentorId === userId ||
+            appointment.studentId === userId) &&
+          titles.includes(appointment.status.title) &&
+          byTime(appointment),
+      )
+      .sort((a, b) =>
+        scope === 'upcoming'
+          ? a.startAt.getTime() - b.startAt.getTime() ||
+            a.id.localeCompare(b.id)
+          : b.endAt.getTime() - a.endAt.getTime() ||
+            b.startAt.getTime() - a.startAt.getTime() ||
+            a.id.localeCompare(b.id),
+      );
+  }
+
   private hasOverlapping(userId: string, startAt: Date, endAt: Date): boolean {
     return this.appointments.some(
       (appointment) =>
@@ -593,38 +629,6 @@ export class InMemoryOverlapSeed {
           appointment.status.title as AppointmentStatusTitle,
         ),
     );
-  }
-
-  private mineAppointments(
-    userId: string,
-    scope: MyAppointmentsQuery['scope'],
-    now: Date,
-  ): AppointmentRecord[] {
-    return this.appointments
-      .filter(
-        (appointment) =>
-          (appointment.mentorId === userId ||
-            appointment.studentId === userId) &&
-          ACTIVE_APPOINTMENT_STATUS_TITLES.includes(
-            appointment.status.title as AppointmentStatusTitle,
-          ) &&
-          (scope === 'upcoming'
-            ? appointment.endAt.getTime() > now.getTime()
-            : appointment.endAt.getTime() <= now.getTime()),
-      )
-      .sort((left, right) => {
-        if (scope === 'upcoming') {
-          return (
-            left.startAt.getTime() - right.startAt.getTime() ||
-            left.id.localeCompare(right.id)
-          );
-        }
-        return (
-          right.endAt.getTime() - left.endAt.getTime() ||
-          right.startAt.getTime() - left.startAt.getTime() ||
-          left.id.localeCompare(right.id)
-        );
-      });
   }
 
   private freeBlocksInRange(
