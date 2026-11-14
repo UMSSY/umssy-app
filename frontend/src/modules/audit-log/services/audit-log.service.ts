@@ -66,7 +66,7 @@ async function getEventDetail(eventId: string): Promise<AuditApiResult<AuditEven
 
     const body: unknown = response.data;
     const payload = isRecord(body) && isRecord(body.data) ? body.data : null;
-    if (!payload || typeof payload.id !== "string") {
+    if (!payload || typeof payload.id !== "string" || !isRecord(payload.request) || !isRecord(payload.applicant)) {
       return { ok: false, status: 0, message: GENERIC_ERROR_MESSAGE };
     }
     return { ok: true, data: payload as unknown as AuditEventDetail };
