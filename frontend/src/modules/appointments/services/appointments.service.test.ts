@@ -11,16 +11,14 @@ describe("getMyAppointments", () => {
     vi.restoreAllMocks()
   })
 
-  it("pide las citas del usuario con el alcance elegido y devuelve las de la página", async () => {
-    const appointments = [{ id: "a1" }]
-    const get = vi
-      .spyOn(apiClient, "get")
-      .mockResolvedValue(envelope({ items: appointments, total: 1, page: 1, pageSize: 10 }))
+  it("pide las citas del usuario con el alcance y la página elegidos y devuelve la página completa", async () => {
+    const page = { items: [{ id: "a1" }], total: 1, page: 2, pageSize: 10 }
+    const get = vi.spyOn(apiClient, "get").mockResolvedValue(envelope(page))
 
-    const result = await appointmentsApi.getMyAppointments("past")
+    const result = await appointmentsApi.getMyAppointments({ scope: "past", page: 2 })
 
-    expect(get).toHaveBeenCalledWith("/appointments/me", { params: { scope: "past" } })
-    expect(result).toEqual(appointments)
+    expect(get).toHaveBeenCalledWith("/appointments/me", { params: { scope: "past", page: 2 } })
+    expect(result).toEqual(page)
   })
 })
 
