@@ -4,12 +4,14 @@ import { SwaggerModule } from '@nestjs/swagger';
 import { cleanupOpenApiDoc } from 'nestjs-zod';
 import { AppModule } from './app.module.js';
 import { validateEnv } from './common/utils/validate-env.js';
+import { securityHeaders } from './config/security-headers.config.js';
 import { buildSwaggerConfig } from './config/swagger.config.js';
 
 async function bootstrap(): Promise<void> {
   validateEnv();
 
   const app = await NestFactory.create(AppModule);
+  app.use(securityHeaders);
 
   const corsOrigins = (process.env.CORS_ORIGIN ?? '')
     .split(',')
