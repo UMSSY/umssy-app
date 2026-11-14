@@ -3,6 +3,12 @@ import { isWorkExperienceMissing } from '../utils/mentor-profile-completeness.js
 import { buildMentorProfile } from './fixtures/mentor-profile.fixture.js';
 
 describe('isWorkExperienceMissing', () => {
+  it.each([true, false])(
+    'accepts the projected existence flag %s',
+    (present) => {
+      expect(isWorkExperienceMissing(present)).toBe(!present);
+    },
+  );
   it('detects absent experience records', () => {
     expect(isWorkExperienceMissing([])).toBe(true);
   });

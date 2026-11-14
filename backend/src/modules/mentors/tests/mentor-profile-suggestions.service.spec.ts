@@ -1,22 +1,25 @@
+import {
+  toMentorProfileSnapshot,
+  buildEmptyMentorProfile,
+  buildMentorProfile,
+} from './fixtures/mentor-profile.fixture.js';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { MentorsRepository } from '../repositories/mentors.repository.js';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { MentorProfileSuggestionsService } from '../services/mentor-profile-suggestions.service.js';
-import {
-  buildEmptyMentorProfile,
-  buildMentorProfile,
-} from './fixtures/mentor-profile.fixture.js';
 
 type Profile = ReturnType<typeof buildMentorProfile>;
 
 function setup(profile: Profile | null) {
-  const findActiveMentorById = vi
-    .fn<MentorsRepository['findActiveMentorById']>()
-    .mockResolvedValue(profile);
-  const repository = { findActiveMentorById } as unknown as MentorsRepository;
+  const findActiveMentorProfileSnapshot = vi
+    .fn<MentorsRepository['findActiveMentorProfileSnapshot']>()
+    .mockResolvedValue(toMentorProfileSnapshot(profile));
+  const repository = {
+    findActiveMentorProfileSnapshot,
+  } as unknown as MentorsRepository;
   return {
     service: new MentorProfileSuggestionsService(repository),
-    findActiveMentorById,
+    findActiveMentorProfileSnapshot,
   };
 }
 
@@ -27,9 +30,10 @@ describe('MentorProfileSuggestionsService', () => {
     vi.useFakeTimers();
     const now = new Date('2026-11-11T16:00:00.000Z');
     vi.setSystemTime(now);
-    const { service, findActiveMentorById } = setup(buildMentorProfile());
+    const { service, findActiveMentorProfileSnapshot } =
+      setup(buildMentorProfile());
     expect(await service.findSuggestions('mentor-1')).toEqual([]);
-    expect(findActiveMentorById).toHaveBeenCalledExactlyOnceWith(
+    expect(findActiveMentorProfileSnapshot).toHaveBeenCalledExactlyOnceWith(
       'mentor-1',
       now,
     );
@@ -109,16 +113,16 @@ describe('MentorProfileSuggestionsService', () => {
     Object.freeze(profile.workExperiences);
     Object.freeze(profile);
     // This repository intentionally exposes only the read method; any write fails.
-    const { service, findActiveMentorById } = setup(profile);
+    const { service, findActiveMentorProfileSnapshot } = setup(profile);
     await service.findSuggestions('mentor-1');
     expect(profile).toEqual(before);
-    expect(findActiveMentorById).toHaveBeenCalledTimes(1);
+    expect(findActiveMentorProfileSnapshot).toHaveBeenCalledTimes(1);
   });
 
   it('propagates read failures instead of reporting a complete profile', async () => {
-    const { service, findActiveMentorById } = setup(null);
+    const { service, findActiveMentorProfileSnapshot } = setup(null);
     const error = new Error('database unavailable');
-    findActiveMentorById.mockRejectedValueOnce(error);
+    findActiveMentorProfileSnapshot.mockRejectedValueOnce(error);
     await expect(service.findSuggestions('mentor-1')).rejects.toBe(error);
   });
 
@@ -138,28 +142,27 @@ describe('MentorProfileSuggestionsService', () => {
     async (user) => {
       vi.useFakeTimers();
       vi.setSystemTime(new Date('2026-11-11T16:00:00.000Z'));
-      const findFirst = vi.fn().mockImplementation(({ where }) => {
-        expect(where.isActive).toBe(true);
-        expect(where.roles.some.deletedAt).toBeNull();
-        expect(where.roles.some.role.name).toBe('mentor');
+      const queryRaw = vi.fn().mockImplementation((query) => {
+        expect(query.sql).toContain('u.is_active = true');
+        expect(query.sql).toContain('ur.deleted_at IS NULL');
+        expect(query.values).toEqual(['user-1', expect.any(Date), 'mentor']);
         return user.isActive &&
           user.roles.some(
             (role) =>
-              role.deletedAt === null &&
-              role.startAt <= where.roles.some.startAt.lte,
+              role.deletedAt === null && role.startAt <= query.values[1],
           )
-          ? buildMentorProfile()
-          : null;
+          ? [toMentorProfileSnapshot(buildMentorProfile())]
+          : [];
       });
       const repository = new MentorsRepository({
-        user: { findFirst },
+        $queryRaw: queryRaw,
       } as unknown as PrismaService);
       expect(
         await new MentorProfileSuggestionsService(repository).findSuggestions(
           'user-1',
         ),
       ).toEqual([]);
-      expect(findFirst).toHaveBeenCalledTimes(1);
+      expect(queryRaw).toHaveBeenCalledTimes(1);
     },
   );
 });

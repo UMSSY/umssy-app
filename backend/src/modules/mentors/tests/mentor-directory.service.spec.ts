@@ -1,3 +1,4 @@
+import type { MentorProfileSuggestionsService } from '../services/mentor-profile-suggestions.service.js';
 import { describe, expect, it, vi } from 'vitest';
 import type { MentorsRepository } from '../repositories/mentors.repository.js';
 import { MentorMapper } from '../mappers/mentor.mapper.js';
@@ -67,6 +68,7 @@ describe('MentorsService directory pagination', () => {
         repository,
         new MentorMapper(),
         userSkillService,
+        {} as MentorProfileSuggestionsService,
       ),
       countDirectoryMentors,
       findDirectoryPage,
@@ -304,6 +306,7 @@ describe('MentorsService directory pagination', () => {
       repository,
       new MentorMapper(),
       userSkillService,
+      {} as MentorProfileSuggestionsService,
     );
     const received: Array<{ id: string; fullName: string }> = [];
     const totalPages = Math.ceil(totalItems / 6);
@@ -383,6 +386,7 @@ describe('MentorsService directory pagination', () => {
       repository,
       new MentorMapper(),
       userSkillService,
+      {} as MentorProfileSuggestionsService,
     );
     const received: Array<{ id: string; fullName: string }> = [];
     const totalPages = Math.ceil(allMentors.length / 6);
@@ -446,6 +450,7 @@ describe('MentorsService directory pagination', () => {
         repository,
         new MentorMapper(),
         userSkillService,
+        {} as MentorProfileSuggestionsService,
         affinity,
       );
       const result = await service.findDirectory(

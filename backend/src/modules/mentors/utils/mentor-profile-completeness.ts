@@ -6,9 +6,12 @@ export function normalizeProfileText(value: string | null): string {
 }
 
 export function isProfilePhotoMissing(
-  photoUrl: MentorProfileEvaluation['photoUrl'],
+  photoUrl: MentorProfileEvaluation['photoUrl'] | number,
 ): boolean {
-  return photoUrl === null || photoUrl.length === 0;
+  return (
+    photoUrl === null ||
+    (typeof photoUrl === 'number' ? photoUrl : photoUrl.length) === 0
+  );
 }
 
 export function isProfessionalDescriptionMissing(
@@ -18,13 +21,17 @@ export function isProfessionalDescriptionMissing(
 }
 
 export function isMentorSpecialtyMissing(
-  technicalAreas: MentorProfileEvaluation['mentorTechnicalAreas'],
+  technicalAreas: MentorProfileEvaluation['mentorTechnicalAreas'] | boolean,
 ): boolean {
-  return technicalAreas.length === 0;
+  return typeof technicalAreas === 'boolean'
+    ? !technicalAreas
+    : technicalAreas.length === 0;
 }
 
 export function isWorkExperienceMissing(
-  workExperiences: MentorProfileEvaluation['workExperiences'],
+  workExperiences: MentorProfileEvaluation['workExperiences'] | boolean,
 ): boolean {
-  return workExperiences.length === 0;
+  return typeof workExperiences === 'boolean'
+    ? !workExperiences
+    : workExperiences.length === 0;
 }

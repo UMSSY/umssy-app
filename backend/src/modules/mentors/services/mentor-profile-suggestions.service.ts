@@ -13,14 +13,14 @@ export class MentorProfileSuggestionsService {
   constructor(private readonly mentorsRepository: MentorsRepository) {}
 
   async findSuggestions(userId: string): Promise<MentorProfileSuggestion[]> {
-    const mentor = await this.mentorsRepository.findActiveMentorById(
+    const mentor = await this.mentorsRepository.findActiveMentorProfileSnapshot(
       userId,
       new Date(),
     );
     if (!mentor) return [];
 
     const suggestions: MentorProfileSuggestion[] = [];
-    if (isProfilePhotoMissing(mentor.photoUrl)) {
+    if (isProfilePhotoMissing(mentor.photoByteLength)) {
       suggestions.push({
         code: 'MISSING_PROFILE_PHOTO',
         field: 'photoUrl',
@@ -34,14 +34,14 @@ export class MentorProfileSuggestionsService {
         message: 'Completa tu descripción profesional.',
       });
     }
-    if (isMentorSpecialtyMissing(mentor.mentorTechnicalAreas)) {
+    if (isMentorSpecialtyMissing(mentor.hasTechnicalAreas)) {
       suggestions.push({
         code: 'MISSING_SPECIALTY',
         field: 'mentorTechnicalAreas',
         message: 'Agrega al menos un área técnica como especialidad.',
       });
     }
-    if (isWorkExperienceMissing(mentor.workExperiences)) {
+    if (isWorkExperienceMissing(mentor.hasWorkExperience)) {
       suggestions.push({
         code: 'MISSING_WORK_EXPERIENCE',
         field: 'workExperiences',

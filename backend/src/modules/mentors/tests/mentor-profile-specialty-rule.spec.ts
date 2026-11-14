@@ -3,6 +3,12 @@ import { isMentorSpecialtyMissing } from '../utils/mentor-profile-completeness.j
 import { buildMentorProfile } from './fixtures/mentor-profile.fixture.js';
 
 describe('isMentorSpecialtyMissing', () => {
+  it.each([true, false])(
+    'accepts the projected existence flag %s',
+    (present) => {
+      expect(isMentorSpecialtyMissing(present)).toBe(!present);
+    },
+  );
   it('detects an empty collection', () => {
     expect(isMentorSpecialtyMissing([])).toBe(true);
   });

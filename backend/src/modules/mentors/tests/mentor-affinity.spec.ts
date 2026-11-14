@@ -1,3 +1,4 @@
+import type { MentorProfileSuggestionsService } from '../services/mentor-profile-suggestions.service.js';
 import { describe, expect, it, vi } from 'vitest';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { SEED_SKILLS_CATALOG } from '../../skills/seeds/skills-catalog.seed.js';
@@ -95,6 +96,7 @@ function makeContext(
     repository,
     new MentorMapper(),
     userSkillService,
+    {} as MentorProfileSuggestionsService,
     affinityService,
   );
   return {

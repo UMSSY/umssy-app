@@ -41,7 +41,7 @@ describe('MentorsModule profile suggestions configuration', () => {
     );
   });
 
-  it('preserves the existing controllers without exposing suggestions over HTTP', () => {
+  it('preserves the existing controller registrations', () => {
     expect(
       Reflect.getMetadata(MODULE_METADATA.CONTROLLERS, MentorsModule),
     ).toEqual([
