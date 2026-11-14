@@ -1,6 +1,13 @@
 import {
-  Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post,
-  StreamableFile, UseGuards,
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  Post,
+  StreamableFile,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import { CurrentUserId } from '../../../common/decorators/current-user-id.decorator.js';
@@ -9,12 +16,15 @@ import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../../../common/guards/roles.guard.js';
 import { RequestValidationPipe } from '../../../common/pipes/request-validation.pipe.js';
 import { toApiBody } from '../../../common/utils/to-api-body.js';
-import { RadarRecruitmentService } from '../radar-recruitment.service.js';
-import {
-  applicationConsentsSchema, applicationRequestSchema, companyAccessSchema,
-  recruiterDecisionSchema, type ApplicationConsentsRequest,
-  type ApplicationRequest, type CompanyAccessRequest, type RecruiterDecisionRequest,
-} from '../requests/radar-integration.requests.js';
+import { RadarRecruitmentService } from '../services/radar-recruitment.service.js';
+import { companyAccessSchema } from '../requests/company-access.request.js';
+import type { CompanyAccessRequest } from '../types/company-access-request.type.js';
+import { applicationRequestSchema } from '../requests/application.request.js';
+import type { ApplicationRequest } from '../types/application-request.type.js';
+import { applicationConsentsSchema } from '../requests/application-consents.request.js';
+import type { ApplicationConsentsRequest } from '../types/application-consents-request.type.js';
+import { recruiterDecisionSchema } from '../requests/recruiter-decision.request.js';
+import type { RecruiterDecisionRequest } from '../types/recruiter-decision-request.type.js';
 
 @ApiTags('radar-integration')
 @ApiBearerAuth()
@@ -29,7 +39,8 @@ export class RadarRecruitmentController {
   @ApiBody(toApiBody(companyAccessSchema))
   grantCompany(
     @CurrentUserId() adminId: string,
-    @Body(new RequestValidationPipe(companyAccessSchema)) body: CompanyAccessRequest,
+    @Body(new RequestValidationPipe(companyAccessSchema))
+    body: CompanyAccessRequest,
   ) {
     return this.recruitment.grantCompany(adminId, body.userId, body.companyId);
   }
@@ -45,7 +56,8 @@ export class RadarRecruitmentController {
   @ApiBody(toApiBody(applicationRequestSchema))
   apply(
     @CurrentUserId() userId: string,
-    @Body(new RequestValidationPipe(applicationRequestSchema)) body: ApplicationRequest,
+    @Body(new RequestValidationPipe(applicationRequestSchema))
+    body: ApplicationRequest,
   ) {
     return this.recruitment.apply(
       userId,

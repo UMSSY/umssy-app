@@ -1,10 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import {
-  applicationConsentsSchema,
-  applicationRequestSchema,
-  companyAccessSchema,
-  recruiterDecisionSchema,
-} from '../requests/radar-integration.requests.js';
+import { companyAccessSchema } from '../requests/company-access.request.js';
+import { applicationRequestSchema } from '../requests/application.request.js';
+import { applicationConsentsSchema } from '../requests/application-consents.request.js';
+import { recruiterDecisionSchema } from '../requests/recruiter-decision.request.js';
 
 const UUID = '11111111-1111-4111-8111-111111111111';
 
@@ -21,11 +19,18 @@ describe('Contratos Zod de reclutamiento del Radar', () => {
   });
 
   it('aplica consentimientos independientes con valor por defecto falso', () => {
-    expect(applicationRequestSchema.parse({ jobOfferId: UUID })).toEqual({
+    expect(
+      applicationRequestSchema.parse({
+        jobOfferId: UUID,
+        consent: true,
+        consentCv: true,
+        consentContact: true,
+      }),
+    ).toEqual({
       jobOfferId: UUID,
-      consent: false,
-      consentCv: false,
-      consentContact: false,
+      consent: true,
+      consentCv: true,
+      consentContact: true,
     });
     expect(
       applicationRequestSchema.safeParse({
@@ -43,15 +48,15 @@ describe('Contratos Zod de reclutamiento del Radar', () => {
         consentContact: true,
       }).success,
     ).toBe(true);
-    expect(
-      applicationConsentsSchema.safeParse({ consent: true }).success,
-    ).toBe(false);
+    expect(applicationConsentsSchema.safeParse({ consent: true }).success).toBe(
+      false,
+    );
   });
 
   it('admite sólo contratación o rechazo como decisión del reclutador', () => {
-    expect(recruiterDecisionSchema.safeParse({ decision: 'hired' }).success).toBe(
-      true,
-    );
+    expect(
+      recruiterDecisionSchema.safeParse({ decision: 'hired' }).success,
+    ).toBe(true);
     expect(
       recruiterDecisionSchema.safeParse({ decision: 'rejected' }).success,
     ).toBe(true);

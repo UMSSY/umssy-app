@@ -1,5 +1,6 @@
 "use client";
 
+import { useProfileCompletionFocus } from "@/modules/profile";
 import { useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -61,6 +62,11 @@ export function CertificationForm({
   const isEditing = Boolean(initialData);
   const isBusy = isSubmitting;
   const title = isEditing ? "Editar certificación" : "Agregar certificación";
+  useProfileCompletionFocus('certifications', {
+    'certification-name': values.name,
+    'certification-issuingOrganization': values.issuingOrganization,
+    'certification-issueDate': values.issueDate,
+  }, !isBusy);
 
   const handleValueChange = (field: keyof CreateCertificationDto, value: string) => {
     onValuesChange?.();

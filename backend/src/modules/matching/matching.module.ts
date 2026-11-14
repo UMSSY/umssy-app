@@ -1,3 +1,4 @@
+import { RadarConsentsModule } from '../radar-integration/radar-consents.module.js';
 import { CompanyJobApplicantsController } from './controllers/company-job-applicants.controller.js';
 import { JobApplicationsController } from './controllers/job-applications.controller.js';
 import { CompanyJobApplicantsService } from './services/company-job-applicants.service.js';
@@ -30,6 +31,7 @@ import { JobRecommendationsService } from './services/job-recommendations.servic
 
 @Module({
   imports: [
+    RadarConsentsModule,
     PrismaModule,
     JwtAuthModule,
     SkillsModule,

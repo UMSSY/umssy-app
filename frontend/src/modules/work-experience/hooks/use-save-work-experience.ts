@@ -8,6 +8,7 @@ import {
 } from "@/modules/matching";
 import { profileSkillsRadarService } from "@/modules/profile";
 import { PROFILE_SKILLS_RADAR_QUERY_KEY } from "@/modules/profile";
+import { useInvalidateProfileCompleteness } from "@/modules/profile";
 import { WORK_EXPERIENCE_FEEDBACK_MESSAGES } from "../config/work-experience-feedback.config";
 import { workExperienceService } from "../services/work-experience.service";
 import type { Feedback } from "@/modules/profile";
@@ -18,9 +19,11 @@ const SKILLS_PROFILE_QUERY_KEY = ["skills", "profile"] as const;
 
 export function useSaveWorkExperience(onSaved: () => void) {
   const queryClient = useQueryClient();
+  const invalidateCompleteness = useInvalidateProfileCompleteness();
 
   const mutation = useMutation({
     mutationFn: (request: () => Promise<WorkExperienceItem>) => request(),
+    onSuccess: invalidateCompleteness,
   });
 
   const [isSaving, setIsSaving] = useState(false);

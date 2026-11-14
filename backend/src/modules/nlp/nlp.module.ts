@@ -37,6 +37,10 @@ import { SkillValidationService } from './services/skill-validation.service.js';
     ProfileSkillResultsRepository,
     ProfileSkillsRadarMapper,
   ],
-  exports: [ProfileSkillsAnalysisService, SkillDetectionService, SkillValidationService],
+  exports: [
+    ProfileSkillsAnalysisService,
+    SkillDetectionService,
+    SkillValidationService,
+  ],
 })
 export class NlpModule {}

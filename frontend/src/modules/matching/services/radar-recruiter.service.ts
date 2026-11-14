@@ -1,11 +1,9 @@
 import { apiClient } from "@/shared/services/api-client";
 import type { ApiResponse } from "@/shared/types/api-response.types";
-import type {
-  AreaEvidence,
-  RadarAxisId,
-  RecruiterApplicantsResponse,
-  RecruiterVacancy,
-} from "../types/radar-recruiter.types";
+import type { AreaEvidence } from "../types/area-evidence.types";
+import type { RadarAxisId } from "../types/radar-axis-id.types";
+import type { RecruiterApplicantsResponse } from "../types/recruiter-applicants-response.types";
+import type { RecruiterVacancy } from "../types/recruiter-vacancy.types";
 
 const RADAR_ROOT = "/radar-integration";
 
@@ -20,7 +18,9 @@ export const radarRecruiterApi = {
         `${RADAR_ROOT}/recruiter/vacancies`,
       ),
     ),
-  applicants: async (jobOfferId: string): Promise<RecruiterApplicantsResponse> =>
+  applicants: async (
+    jobOfferId: string,
+  ): Promise<RecruiterApplicantsResponse> =>
     extract(
       await apiClient.get<ApiResponse<RecruiterApplicantsResponse>>(
         `${RADAR_ROOT}/recruiter/vacancies/${jobOfferId}/applicants`,

@@ -1,3 +1,9 @@
+import { RadarConsentsModule } from './radar-consents.module.js';
+import { RadarApplicationsService } from './services/radar-applications.service.js';
+import { JobOffersModule } from '../job-offers/job-offers.module.js';
+import { UsersModule } from '../users/users.module.js';
+import { ApplicationsModule } from '../applications/applications.module.js';
+import { RadarRecruitmentSourcesService } from './services/radar-recruitment-sources.service.js';
 import { CvSourcesModule } from '../cv/cv-sources.module.js';
 import { Module } from '@nestjs/common';
 import { PrismaModule } from '../../common/prisma/prisma.module.js';
@@ -25,9 +31,8 @@ import { RadarIntegrationService } from './services/radar-integration.service.js
 
 import { MatchingModule } from '../matching/matching.module.js';
 import { RadarRecruitmentController } from './controllers/radar-recruitment.controller.js';
-import { RadarRecruitmentService } from './radar-recruitment.service.js';
+import { RadarRecruitmentService } from './services/radar-recruitment.service.js';
 import { RadarRecruitmentRepository } from './repositories/radar-recruitment.repository.js';
-import { RadarApplicationsRepository } from './repositories/radar-applications.repository.js';
 
 import { DocumentOcrModule } from '../access-requests/document-ocr.module.js';
 import { DocumentVerificationRepository } from './repositories/document-verification.repository.js';
@@ -36,6 +41,10 @@ import { DocumentVerificationController } from './controllers/document-verificat
 @Module({
   imports: [
     DocumentOcrModule,
+    RadarConsentsModule,
+    JobOffersModule,
+    UsersModule,
+    ApplicationsModule,
     CvSourcesModule,
     PrismaModule,
     JwtAuthModule,
@@ -53,12 +62,13 @@ import { DocumentVerificationController } from './controllers/document-verificat
     DocumentVerificationRepository, DocumentVerificationService,
     RadarPublicationRepository,
     RadarRecruitmentRepository,
-    RadarApplicationsRepository,
+    RadarApplicationsService,
     RadarAccessRepository,
     RadarCvRepository,
     RadarReviewRepository,
     RadarIntegrationService,
     RadarRecruitmentService,
+    RadarRecruitmentSourcesService,
     RadarPublicationService,
     RadarPublicationMapper,
     RadarPublicationEvidenceService,
@@ -67,6 +77,10 @@ import { DocumentVerificationController } from './controllers/document-verificat
     RadarReviewMapper,
     RadarPdfExtractionService,
   ],
-  exports: [RadarIntegrationService, RadarRecruitmentService],
+  exports: [
+    RadarIntegrationService,
+    RadarRecruitmentService,
+    RadarPdfExtractionService,
+  ],
 })
 export class RadarIntegrationModule {}

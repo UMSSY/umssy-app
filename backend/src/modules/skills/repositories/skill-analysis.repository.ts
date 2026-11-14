@@ -28,6 +28,14 @@ const toJson = (refs: readonly SkillEvidenceRefPayload[]) =>
 export class SkillAnalysisRepository {
   constructor(private readonly prisma: PrismaService) {}
 
+  async hasProfileSkills(userId: string): Promise<boolean> {
+    const record = await this.prisma.userSkill.findFirst({
+      where: { userId },
+      select: { id: true },
+    });
+    return record !== null;
+  }
+
   listReviewQueue() {
     return this.prisma.userSkill.findMany({
       where: {
@@ -166,5 +174,12 @@ export class SkillAnalysisRepository {
       )
       UPDATE user_skills s SET verification_status=CASE WHEN c.eligible THEN 'approved' ELSE 'pending' END,
         radar_auto_verified=c.eligible,updated_at=clock_timestamp() FROM changes c WHERE c.id=s.id`;
+  }
+
+  findApprovedRecruitmentReferences(userId: string, ids: string[]) {
+    return this.prisma.userSkill.findMany({
+      where: { userId, verificationStatus: 'approved', skillId: { in: ids } },
+      select: { skillId: true, evidenceRefs: true },
+    });
   }
 }
