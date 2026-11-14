@@ -6,6 +6,8 @@ export interface ApplicationsTableProps {
   applications: readonly Application[];
   withdrawingId: string | null;
   onWithdraw: (applicationId: string) => void;
+  onReactivate?: (applicationId: string) => void;
+  reactivatingId?: string | null;
   sort?: ApplicationSort | null;
   onSortChange?: (key: ApplicationSortKey) => void;
 }

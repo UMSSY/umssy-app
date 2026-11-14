@@ -60,6 +60,30 @@ describe('ApplicationsRepository', () => {
       });
     });
 
+    it('ordena por fecha ascendente y descendente', async () => {
+      await repository.findByUserId('user-1', {
+        sortBy: 'date',
+        sortOrder: 'asc',
+      });
+      await repository.findByUserId('user-1', {
+        sortBy: 'date',
+        sortOrder: 'desc',
+      });
+
+      expect(prismaMock.jobApplication.findMany).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          orderBy: [{ appliedAt: 'asc' }, { id: 'asc' }],
+        }),
+      );
+      expect(prismaMock.jobApplication.findMany).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          orderBy: [{ appliedAt: 'desc' }, { id: 'desc' }],
+        }),
+      );
+    });
+
     it('debe aplicar filtros por status y sort por vacancy', async () => {
       prismaMock.jobApplication.findMany.mockResolvedValue([]);
 
@@ -169,4 +193,55 @@ describe('ApplicationsRepository', () => {
       expect(result).toEqual({ count: 1 });
     });
   });
+
+  describe('reactivateApplication', () => {
+    it('actualiza el mismo registro y la fecha si está retirada y la vacante está disponible', async () => {
+      const now = new Date('2026-11-14T12:00:00.000Z');
+
+      transaction.jobApplicationStatus.findUniqueOrThrow.mockResolvedValue({
+        id: 'review-status-id',
+      });
+
+      const result = await repository.reactivateApplication(
+        'app-1',
+        'user-1',
+        now,
+      );
+
+      expect(prismaMock.$transaction).toHaveBeenCalledOnce();
+      expect(transaction.jobApplicationStatus.findUniqueOrThrow).toHaveBeenCalledWith({
+        where: { title: ApplicationStatus.IN_REVIEW },
+        select: { id: true },
+      });
+      expect(transaction.jobApplication.updateMany).toHaveBeenCalledWith({
+        where: {
+          id: 'app-1',
+          userId: 'user-1',
+          status: { title: ApplicationStatus.WITHDRAWN },
+          jobOffer: {
+            status: { title: expect.any(String) },
+            OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
+          },
+        },
+        data: {
+          statusId: 'review-status-id',
+          appliedAt: now,
+        },
+      });
+      expect(result).toEqual({ count: 1 });
+    });
+
+    it('devuelve count cero si ninguna postulación cumple las condiciones', async () => {
+      transaction.jobApplication.updateMany.mockResolvedValue({ count: 0 });
+
+      const result = await repository.reactivateApplication(
+        'app-1',
+        'user-1',
+        new Date('2026-11-14T12:00:00.000Z'),
+      );
+
+      expect(result).toEqual({ count: 0 });
+    });
+  });
+
 });

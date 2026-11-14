@@ -43,6 +43,21 @@ export class ApplicationsController {
     return this.applicationsService.findMyApplications(userId, query);
   }
 
+  @Patch(':id/reactivate')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  reactivateApplication(
+    @Param(
+      'id',
+      new ParseUUIDPipe({
+        exceptionFactory: () => new ApplicationNotFoundException(),
+      }),
+    )
+    id: string,
+    @CurrentUserId() userId: string,
+  ) {
+    return this.applicationsService.reactivateApplication(id, userId);
+  }
+
   @Patch(':id/withdraw')
   @HttpCode(HttpStatus.NO_CONTENT)
   withdrawApplication(

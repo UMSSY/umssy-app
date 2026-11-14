@@ -2,8 +2,9 @@ import { Badge } from "@/components/ui/badge";
 import { APPLICATION_MESSAGES } from "../constants/application.constants";
 import type { ApplicationsMobileListProps } from "../types/applications-mobile-list-props.types";
 import { WithdrawApplicationButton } from "./withdraw-application-button";
+import { ReactivateApplicationButton } from "./reactivate-application-button";
 
-export function ApplicationsMobileList({ applications, withdrawingId, onWithdraw }: ApplicationsMobileListProps) {
+export function ApplicationsMobileList({ applications, withdrawingId, onWithdraw, onReactivate, reactivatingId }: ApplicationsMobileListProps) {
   return (
     <ul className="flex flex-col gap-3">
       {applications.map((application) => (
@@ -16,12 +17,21 @@ export function ApplicationsMobileList({ applications, withdrawingId, onWithdraw
             </span>
             <Badge variant="outline">{application.status}</Badge>
           </div>
-          <WithdrawApplicationButton
-            application={application}
-            withdrawingId={withdrawingId}
-            onWithdraw={onWithdraw}
-            className="self-start"
-          />
+          {application.status === "Retirada" && onReactivate ? (
+            <ReactivateApplicationButton
+              applicationId={application.id}
+              reactivatingId={reactivatingId}
+              onReactivate={onReactivate}
+              className="self-start"
+            />
+          ) : (
+            <WithdrawApplicationButton
+              application={application}
+              withdrawingId={withdrawingId}
+              onWithdraw={onWithdraw}
+              className="self-start"
+            />
+          )}
         </li>
       ))}
     </ul>
