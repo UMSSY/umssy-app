@@ -1,8 +1,8 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+import { formatBoliviaDate } from "@/shared/utils/date-time";
 import { APPLICATION_MESSAGES } from "../constants/application.constants";
 import type { ApplicationsTableProps } from "../types/applications-table-props.types";
-import { formatApplicationDate } from "../utils/format-application-date";
 import { ApplicationActions } from "./application-actions";
 import { ApplicationStatusBadge } from "./application-status-badge";
 
@@ -42,7 +42,7 @@ export function ApplicationsTable({
               {application.affinityPercentage}%
             </TableCell>
             <TableCell className={cn(CARD_CELL_CLASS, "text-center text-text-secondary")}>
-              {formatApplicationDate(application.appliedDate)}
+              {formatBoliviaDate(application.appliedDate)}
             </TableCell>
             <TableCell className={cn(CARD_CELL_CLASS, "text-center")}>
               <ApplicationStatusBadge status={application.status} />
