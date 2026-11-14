@@ -53,3 +53,5 @@ export { useCountUp } from "./hooks/use-count-up";
 export type { ProfileGuidePose } from "./types/profile-guide-pose.types";
 export type { ProfileGuideStepDirection } from "./types/profile-guide-step-direction.types";
 export { ProfileGuidePreviewView } from "./views/profile-guide-preview-view";
+export { ProfileGuideProvider } from "./components/profile-guide-provider";
+export { useProfileGuide } from "./contexts/profile-guide-context";

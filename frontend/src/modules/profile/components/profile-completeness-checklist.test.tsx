@@ -1,6 +1,7 @@
 import { cleanup, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { ProfileGuideContext } from '../contexts/profile-guide-context';
 import { PROFILE_COMPLETENESS_SECTION_IDS } from '../constants/profile-completeness.constants';
 import { createProfileCompleteness } from '../testing/profile-completeness.fixture';
 import type { ProfileCompletenessSection } from '../types/profile-completeness-section.types';
@@ -16,6 +17,19 @@ function renderChecklist(data?: readonly ProfileCompletenessSection[] | null) {
 }
 
 describe('ProfileCompletenessChecklist', () => {
+  it('opens a pending section in the guide without changing the current route', async () => {
+    const start = vi.fn();
+    const before = window.location.href;
+    render(
+      <ProfileGuideContext.Provider value={{ isEnabled: true, isComplete: false, start }}>
+        <ProfileCompletenessChecklist sections={sections} />
+      </ProfileGuideContext.Provider>,
+    );
+    await userEvent.setup().click(screen.getByRole('link', { name: 'Completar Formación académica' }));
+    expect(start).toHaveBeenCalledExactlyOnceWith('education');
+    expect(window.location.href).toBe(before);
+  });
+
   it('renders all seven sections in a stable order with their saved status', () => {
     const panel = renderChecklist([...sections].reverse());
     expect(

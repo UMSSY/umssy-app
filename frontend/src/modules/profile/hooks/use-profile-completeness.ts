@@ -1,6 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
+import { useCallback } from 'react';
 import { useAuth } from '@/shared/contexts/auth-context';
 import {
   PROFILE_COMPLETENESS_MESSAGES,
@@ -19,9 +20,10 @@ export function useProfileCompleteness(refetchOnMount = true) {
     refetchOnMount,
   });
 
-  async function reload() {
-    if (enabled) await query.refetch();
-  }
+  const refetch = query.refetch;
+  const reload = useCallback(async () => {
+    if (enabled) await refetch();
+  }, [enabled, refetch]);
 
   return {
     completeness: enabled && !query.isError ? (query.data ?? null) : null,

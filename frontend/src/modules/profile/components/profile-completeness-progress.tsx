@@ -14,6 +14,7 @@ import {
   PROFILE_COMPLETENESS_MESSAGES,
 } from '../constants/profile-completeness.constants';
 import { useProfileCompleteness } from '../hooks/use-profile-completeness';
+import { useProfileGuide } from '../contexts/profile-guide-context';
 import { useProfileCompletenessDisclosure } from '../hooks/use-profile-completeness-disclosure';
 import { ProfileCompletenessChecklist } from './profile-completeness-checklist';
 import type { ProfileCompletenessProgressProps } from '../types/profile-completeness-progress-props.types';
@@ -21,7 +22,9 @@ import type { ProfileCompletenessProgressProps } from '../types/profile-complete
 export function ProfileCompletenessProgress({
   showChecklist = true,
   refetchOnMount = showChecklist,
+  hideWhenComplete = false,
 }: ProfileCompletenessProgressProps) {
+  const guide = useProfileGuide();
   const { completeness, isLoading, error, reload } = useProfileCompleteness(refetchOnMount);
   const isComplete =
     completeness?.percentage === PROFILE_COMPLETENESS_LIMITS.max;
@@ -60,7 +63,8 @@ export function ProfileCompletenessProgress({
     );
   }
 
-  if (!completeness) return null;
+  if (!completeness || (hideWhenComplete && guide?.isEnabled && isComplete))
+    return null;
   const { percentage } = completeness;
   const title = isComplete
     ? PROFILE_COMPLETENESS_MESSAGES.completedTitle
@@ -112,6 +116,13 @@ export function ProfileCompletenessProgress({
           />
         ) : null}
       </div>
+      {showChecklist && guide?.isEnabled && !isComplete ? (
+        <div className="px-4 pb-4 sm:px-5">
+          <Button data-profile-guide-trigger onClick={() => guide.start()}>
+            Continuar mi perfil
+          </Button>
+        </div>
+      ) : null}
       {showChecklist ? (
         <div id={panelId} hidden={!isOpen}>
           {isOpen ? (
