@@ -33,3 +33,17 @@ export const CV_EXPORT_DEFAULT_SECTIONS: CvExportSections = {
 export const CV_EXPORT_REPOSITORIES_SECTION_KEY: CvExportSectionKey = "includeProjects";
 
 export const CV_EXPORT_PORTFOLIO_COUNT_QUERY_KEY = ["documents", "cv-export", "portfolio-count"] as const;
+
+export const CV_EXPORT_LOW_COMPLETENESS_THRESHOLD = 50;
+
+export const CV_EXPORT_INCOMPLETE_PROFILE_MESSAGES = {
+  bannerTitle: (percentage: number) => `Perfil con nivel de completitud bajo (${percentage}%)`,
+  bannerDescription:
+    "Te sugerimos registrar más información en tu perfil para que tu currículum destaque ante reclutadores.",
+  dialogTitle: "Perfil con información incompleta",
+  dialogDescription: (percentage: number) =>
+    `Tu perfil cuenta actualmente con menos del 50% de la información registrada (${percentage}%). Te sugerimos completar más datos para obtener un currículum más competitivo, pero puedes continuar con la descarga si lo prefieres.`,
+  continueAnyway: "Continuar de todos modos",
+  completeProfile: "Completar mi perfil",
+} as const;
+

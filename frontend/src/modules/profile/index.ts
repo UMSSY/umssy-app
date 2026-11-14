@@ -41,3 +41,5 @@ export { profileSkillsRadarService } from "./services/profile-skills-radar.servi
 export { useInvalidateProfileCompleteness } from "./hooks/use-invalidate-profile-completeness";
 export { useProfileCompletionRequest } from "./hooks/use-profile-completion-request";
 export { useProfileCompletionFocus } from "./hooks/use-profile-completion-focus";
+export { useProfileCompleteness } from "./hooks/use-profile-completeness";
+

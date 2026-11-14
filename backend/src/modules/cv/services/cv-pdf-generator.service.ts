@@ -44,10 +44,12 @@ export class CvPdfGeneratorService {
       }
     };
 
-    this.drawTopAccentBar(currentPage);
-    currentY = this.drawMainHeader(currentPage, data.personalInfo, currentY);
-
     const sections = options?.sections;
+    const includeContactInfo = sections?.includeContactInfo !== false;
+
+    this.drawTopAccentBar(currentPage);
+    currentY = this.drawMainHeader(currentPage, data.personalInfo, currentY, includeContactInfo);
+
 
     if (sections?.includeSummary !== false && data.summary?.trim()) {
       ensureSpace(60);
@@ -153,6 +155,7 @@ export class CvPdfGeneratorService {
     page: PdfPageStream,
     info: CvDocumentData["personalInfo"],
     startY: number,
+    includeContactInfo = true,
   ): number {
     let y = startY;
 
@@ -181,13 +184,15 @@ export class CvPdfGeneratorService {
     }
 
     const contactParts: string[] = [];
-    if (info.email) contactParts.push(info.email);
-    if (info.phone) contactParts.push(info.phone);
-    if (info.location) contactParts.push(info.location);
-    if (info.linkedinUrl) contactParts.push(info.linkedinUrl.replace(/^https?:\/\//, ""));
-    if (info.githubUrl) contactParts.push(info.githubUrl.replace(/^https?:\/\//, ""));
-    if (info.gitlabUrl) contactParts.push(info.gitlabUrl.replace(/^https?:\/\//, ""));
-    if (info.portfolioUrl) contactParts.push(info.portfolioUrl.replace(/^https?:\/\//, ""));
+    if (includeContactInfo) {
+      if (info.email) contactParts.push(info.email);
+      if (info.phone) contactParts.push(info.phone);
+      if (info.location) contactParts.push(info.location);
+      if (info.linkedinUrl) contactParts.push(info.linkedinUrl.replace(/^https?:\/\//, ""));
+      if (info.githubUrl) contactParts.push(info.githubUrl.replace(/^https?:\/\//, ""));
+      if (info.gitlabUrl) contactParts.push(info.gitlabUrl.replace(/^https?:\/\//, ""));
+      if (info.portfolioUrl) contactParts.push(info.portfolioUrl.replace(/^https?:\/\//, ""));
+    }
 
     if (contactParts.length > 0) {
       const contactText = contactParts.join("  •  ");
