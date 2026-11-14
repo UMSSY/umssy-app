@@ -486,6 +486,7 @@ export const ModelName = {
   NotificationType: 'NotificationType',
   Notification: 'Notification',
   PushSubscription: 'PushSubscription',
+  RefreshToken: 'RefreshToken',
   NotificationPreference: 'NotificationPreference'
 } as const
 
@@ -502,7 +503,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "appointmentStatus" | "proposalStatus" | "eventModality" | "eventOrigin" | "eventStatus" | "registrationStatus" | "city" | "company" | "user" | "role" | "userRole" | "education" | "workExperience" | "radarArea" | "skill" | "jobOfferSkill" | "userSkill" | "certification" | "userCvFile" | "profileSkillProcessingState" | "technicalArea" | "orientationType" | "mentorTechnicalArea" | "mentorOrientationType" | "availabilityBlock" | "blockedDate" | "appointment" | "appointmentDocument" | "timeProposal" | "appointmentHistory" | "eventCategory" | "event" | "eventRegistration" | "eventAttendance" | "jobOffer" | "jobOfferModality" | "jobOfferContractType" | "jobOfferStatus" | "adminExportHistory" | "accessRequestStatus" | "accessRequestDocumentType" | "file" | "career" | "accessRequest" | "mentorParticipationRequest" | "mentorSlotOffer" | "activationOtp" | "messageStatus" | "connectionRequestStatus" | "attachmentType" | "conversation" | "conversationParticipant" | "message" | "messageAttachment" | "chatUserBlock" | "connectionRequest" | "userPresence" | "passwordResetOtp" | "mentorParticipationAttemptLimit" | "jobApplicationStatus" | "jobApplication" | "radarApplicationConsent" | "surveyStatus" | "surveyQuestionType" | "surveyTargetAudience" | "survey" | "surveyQuestion" | "surveyQuestionOption" | "surveyResponse" | "surveyAnswer" | "auditAction" | "auditEvent" | "documentValidation" | "mentorIntakeAttempt" | "mentorParticipationSanction" | "mentorIntakeOperation" | "radarCvEvidence" | "radarScoreSnapshot" | "radarAuditEvent" | "radarCvExtractionStatus" | "radarCvReviewStatus" | "mentorParticipationStatus" | "mentorOfferStatus" | "portfolioProvider" | "userSocialAccount" | "userPortfolioProject" | "notificationType" | "notification" | "pushSubscription" | "notificationPreference"
+    modelProps: "appointmentStatus" | "proposalStatus" | "eventModality" | "eventOrigin" | "eventStatus" | "registrationStatus" | "city" | "company" | "user" | "role" | "userRole" | "education" | "workExperience" | "radarArea" | "skill" | "jobOfferSkill" | "userSkill" | "certification" | "userCvFile" | "profileSkillProcessingState" | "technicalArea" | "orientationType" | "mentorTechnicalArea" | "mentorOrientationType" | "availabilityBlock" | "blockedDate" | "appointment" | "appointmentDocument" | "timeProposal" | "appointmentHistory" | "eventCategory" | "event" | "eventRegistration" | "eventAttendance" | "jobOffer" | "jobOfferModality" | "jobOfferContractType" | "jobOfferStatus" | "adminExportHistory" | "accessRequestStatus" | "accessRequestDocumentType" | "file" | "career" | "accessRequest" | "mentorParticipationRequest" | "mentorSlotOffer" | "activationOtp" | "messageStatus" | "connectionRequestStatus" | "attachmentType" | "conversation" | "conversationParticipant" | "message" | "messageAttachment" | "chatUserBlock" | "connectionRequest" | "userPresence" | "passwordResetOtp" | "mentorParticipationAttemptLimit" | "jobApplicationStatus" | "jobApplication" | "radarApplicationConsent" | "surveyStatus" | "surveyQuestionType" | "surveyTargetAudience" | "survey" | "surveyQuestion" | "surveyQuestionOption" | "surveyResponse" | "surveyAnswer" | "auditAction" | "auditEvent" | "documentValidation" | "mentorIntakeAttempt" | "mentorParticipationSanction" | "mentorIntakeOperation" | "radarCvEvidence" | "radarScoreSnapshot" | "radarAuditEvent" | "radarCvExtractionStatus" | "radarCvReviewStatus" | "mentorParticipationStatus" | "mentorOfferStatus" | "portfolioProvider" | "userSocialAccount" | "userPortfolioProject" | "notificationType" | "notification" | "pushSubscription" | "refreshToken" | "notificationPreference"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -7092,6 +7093,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    RefreshToken: {
+      payload: Prisma.$RefreshTokenPayload<ExtArgs>
+      fields: Prisma.RefreshTokenFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.RefreshTokenFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RefreshTokenPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.RefreshTokenFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RefreshTokenPayload>
+        }
+        findFirst: {
+          args: Prisma.RefreshTokenFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RefreshTokenPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.RefreshTokenFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RefreshTokenPayload>
+        }
+        findMany: {
+          args: Prisma.RefreshTokenFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RefreshTokenPayload>[]
+        }
+        create: {
+          args: Prisma.RefreshTokenCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RefreshTokenPayload>
+        }
+        createMany: {
+          args: Prisma.RefreshTokenCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.RefreshTokenCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RefreshTokenPayload>[]
+        }
+        delete: {
+          args: Prisma.RefreshTokenDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RefreshTokenPayload>
+        }
+        update: {
+          args: Prisma.RefreshTokenUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RefreshTokenPayload>
+        }
+        deleteMany: {
+          args: Prisma.RefreshTokenDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.RefreshTokenUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.RefreshTokenUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RefreshTokenPayload>[]
+        }
+        upsert: {
+          args: Prisma.RefreshTokenUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RefreshTokenPayload>
+        }
+        aggregate: {
+          args: Prisma.RefreshTokenAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateRefreshToken>
+        }
+        groupBy: {
+          args: Prisma.RefreshTokenGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RefreshTokenGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.RefreshTokenCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RefreshTokenCountAggregateOutputType> | number
+        }
+      }
+    }
     NotificationPreference: {
       payload: Prisma.$NotificationPreferencePayload<ExtArgs>
       fields: Prisma.NotificationPreferenceFieldRefs
@@ -8410,6 +8485,24 @@ export const PushSubscriptionScalarFieldEnum = {
 export type PushSubscriptionScalarFieldEnum = (typeof PushSubscriptionScalarFieldEnum)[keyof typeof PushSubscriptionScalarFieldEnum]
 
 
+export const RefreshTokenScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  familyId: 'familyId',
+  roleTag: 'roleTag',
+  tokenHash: 'tokenHash',
+  expiresAt: 'expiresAt',
+  absoluteExpiresAt: 'absoluteExpiresAt',
+  usedAt: 'usedAt',
+  revokedAt: 'revokedAt',
+  revokedReason: 'revokedReason',
+  userAgent: 'userAgent',
+  createdAt: 'createdAt'
+} as const
+
+export type RefreshTokenScalarFieldEnum = (typeof RefreshTokenScalarFieldEnum)[keyof typeof RefreshTokenScalarFieldEnum]
+
+
 export const NotificationPreferenceScalarFieldEnum = {
   userId: 'userId',
   pushEnabled: 'pushEnabled',
@@ -8820,6 +8913,7 @@ export type GlobalOmitConfig = {
   notificationType?: Prisma.NotificationTypeOmit
   notification?: Prisma.NotificationOmit
   pushSubscription?: Prisma.PushSubscriptionOmit
+  refreshToken?: Prisma.RefreshTokenOmit
   notificationPreference?: Prisma.NotificationPreferenceOmit
 }
 
