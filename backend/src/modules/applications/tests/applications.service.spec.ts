@@ -248,6 +248,7 @@ describe('ApplicationsService (T5.1 & T5.2 & HU-15)', () => {
       });
 
       expect(notificationsMock.notify).not.toHaveBeenCalled();
+    
     });
   });
 });

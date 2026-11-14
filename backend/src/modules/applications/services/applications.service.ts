@@ -11,7 +11,6 @@ import { ApplicationNotWithdrawableException } from '../exceptions/application-n
 import { ApplicationMapper } from '../mappers/application.mapper.js';
 import { JobRecommendationsService } from '../../matching/services/job-recommendations.service.js';
 import { StateChangedDto } from '../notifications/state-changed.dto.js';
-import { STATE_CHANGED_TEMPLATE } from '../notifications/state-changed.templates.js';
 import { NotificationsService } from '../../notifications/services/notifications.service.js';
 import { ConfigService } from '@nestjs/config';
 import { NotificationType } from '../../notifications/types/notification-type.enum.js';
