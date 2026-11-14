@@ -202,4 +202,11 @@ export class RefreshTokenService {
     const value: RefreshRevocationReason = REFRESH_REVOCATION_REASONS[reason];
     return this.refreshTokens.revokeFamily(familyId, value);
   }
+
+  revokeAllForUser(userId: string) {
+    return this.refreshTokens.revokeAllForUser(
+      userId,
+      REFRESH_REVOCATION_REASONS.passwordChanged,
+    );
+  }
 }

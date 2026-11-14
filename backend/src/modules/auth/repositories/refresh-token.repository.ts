@@ -24,8 +24,7 @@ export class RefreshTokenRepository {
     return this.prisma.refreshToken.findUnique({ where: { tokenHash } });
   }
 
-  // Marks the current token as used and stores the next one atomically.
-  // Returns false when someone else already used or revoked the token.
+  
   rotate(currentId: string, next: NewRefreshToken): Promise<boolean> {
     return this.prisma.$transaction(async (tx) => {
       const consumed = await tx.refreshToken.updateMany({
@@ -41,6 +40,12 @@ export class RefreshTokenRepository {
   revokeFamily(familyId: string, reason: RefreshRevocationReason) {
     return this.prisma.refreshToken.updateMany({
       where: { familyId, revokedAt: null },
+      data: { revokedAt: new Date(), revokedReason: reason },
+    });
+  }
+    revokeAllForUser(userId: string, reason: RefreshRevocationReason) {
+    return this.prisma.refreshToken.updateMany({
+      where: { userId, revokedAt: null },
       data: { revokedAt: new Date(), revokedReason: reason },
     });
   }
