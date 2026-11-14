@@ -66,6 +66,7 @@ export function registrationFixture() {
   const eventService = new EventsService(new EventsRepository(prisma as never));
   const events = {
     findForRegistration: vi.fn().mockResolvedValue(event),
+    findFinishedEventIds: vi.fn().mockResolvedValue([]),
     lockEventRow: eventService.lockEventRow.bind(eventService),
     hasScheduleConflict: eventService.hasScheduleConflict.bind(eventService),
   };

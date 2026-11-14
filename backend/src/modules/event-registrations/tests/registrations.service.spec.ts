@@ -302,3 +302,42 @@ describe('registration cancellation', () => {
     expect(tx.eventRegistration.update).not.toHaveBeenCalled();
   });
 });
+
+describe('finished registration persistence', () => {
+  it('keeps the registration and QR retrievable after omitting a finished event from the list', async () => {
+    const { service, tx, events } = registrationFixture();
+    const record = registrationRecord();
+    tx.eventRegistration.findMany.mockResolvedValue([
+      {
+        ...record,
+        status: { title: 'Confirmada' },
+        event: {
+          title: 'Taller finalizado',
+          eventDate: new Date('2026-10-20T00:00:00.000Z'),
+          startTime: new Date('1970-01-01T10:00:00.000Z'),
+          endTime: new Date('1970-01-01T12:00:00.000Z'),
+          location: 'Aula 101',
+        },
+      },
+    ]);
+    events.findFinishedEventIds.mockResolvedValue([EVENT_ID]);
+
+    await expect(service.findMine(USER_ID)).resolves.toEqual([]);
+
+    const qrToken = record.qrToken;
+    tx.eventRegistration.findFirst.mockResolvedValue({
+      id: record.id,
+      qrToken,
+      createdAt: record.registeredAt,
+      status: { title: 'Confirmada' },
+      event: { id: EVENT_ID, title: 'Taller finalizado' },
+      user: { id: USER_ID },
+    });
+
+    await expect(service.getPassById(REGISTRATION_ID, USER_ID)).resolves.toMatchObject({
+      id: REGISTRATION_ID,
+      qrToken,
+    });
+    expect(tx.eventRegistration.update).not.toHaveBeenCalled();
+  });
+});

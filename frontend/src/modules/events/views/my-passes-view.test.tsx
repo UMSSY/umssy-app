@@ -247,6 +247,40 @@ describe('Mis pases sin conexión', () => {
     expect(getMine).not.toHaveBeenCalled();
   });
 
+  it('restores saved passes and QR after reloading with a renewed session for the same user', async () => {
+    await offlinePassesStore.save('user-a', [saved]);
+    goOffline();
+    const { unmount } = render(<MyPassesView />);
+    const firstPanel = await screen.findByRole('complementary', {
+      name: 'Detalle de la inscripción',
+    });
+    expect(
+      await within(firstPanel).findByRole('img', {
+        name: 'Código QR del pase',
+      }),
+    ).toBeInTheDocument();
+
+    unmount();
+    await saveAccessToken(
+      `h.${btoa(JSON.stringify({ sub: 'user-a', session: 'renewed' }))}.s`,
+    );
+    render(<MyPassesView />);
+
+    expect(
+      await screen.findByText('Sin conexión. Estás viendo tus pases guardados.'),
+    ).toBeInTheDocument();
+    const restoredPanel = await screen.findByRole('complementary', {
+      name: 'Detalle de la inscripción',
+    });
+    expect(
+      await within(restoredPanel).findByRole('img', {
+        name: 'Código QR del pase',
+      }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('1 pase')).toBeInTheDocument();
+    expect(getMine).not.toHaveBeenCalled();
+  });
+
   it('explains there is no saved copy instead of showing the empty registrations state', async () => {
     goOffline();
     render(<MyPassesView />);
