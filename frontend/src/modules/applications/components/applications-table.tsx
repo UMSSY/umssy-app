@@ -16,13 +16,22 @@ import {
 import type { ApplicationSort } from "../types/application-sort.types";
 import type { ApplicationSortKey } from "../types/application-sort-key.types";
 import type { ApplicationsTableProps } from "../types/applications-table-props.types";
+import { ReactivateApplicationButton } from "./reactivate-application-button";
 import { WithdrawApplicationButton } from "./withdraw-application-button";
+
+const dateFormatter = new Intl.DateTimeFormat("es-BO", {
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+  timeZone: "America/La_Paz",
+});
 
 function ariaSortFor(
   sort: ApplicationSort | null | undefined,
   key: ApplicationSortKey,
 ) {
   if (sort?.key !== key) return "none" as const;
+
   return sort.direction === "asc"
     ? ("ascending" as const)
     : ("descending" as const);
@@ -35,8 +44,10 @@ function SortIcon({
   sort: ApplicationSort | null | undefined;
   columnKey: ApplicationSortKey;
 }) {
-  if (sort?.key !== columnKey)
+  if (sort?.key !== columnKey) {
     return <ArrowUpDown className="size-3.5" aria-hidden="true" />;
+  }
+
   return sort.direction === "asc" ? (
     <ArrowUp className="size-3.5" aria-hidden="true" />
   ) : (
@@ -48,6 +59,8 @@ export function ApplicationsTable({
   applications,
   withdrawingId,
   onWithdraw,
+  onReactivate,
+  reactivatingId,
   sort,
   onSortChange,
 }: ApplicationsTableProps) {
@@ -82,27 +95,44 @@ export function ApplicationsTable({
             <TableHead>{APPLICATION_MESSAGES.actions}</TableHead>
           </TableRow>
         </TableHeader>
+
         <TableBody>
           {applications.map((application) => (
             <TableRow key={application.id}>
               <TableCell className="font-semibold text-ink">
                 {application.vacancyTitle}
               </TableCell>
+
               <TableCell className="text-text-secondary">
                 {application.companyName}
               </TableCell>
+
               <TableCell className="text-text-secondary">
                 {application.affinityPercentage}%
               </TableCell>
+
               <TableCell>
                 <Badge variant="outline">{application.status}</Badge>
               </TableCell>
+
+              <TableCell className="text-text-secondary">
+                {dateFormatter.format(new Date(application.appliedDate))}
+              </TableCell>
+
               <TableCell>
-                <WithdrawApplicationButton
-                  application={application}
-                  withdrawingId={withdrawingId}
-                  onWithdraw={onWithdraw}
-                />
+                {application.status === "Retirada" && onReactivate ? (
+                  <ReactivateApplicationButton
+                    applicationId={application.id}
+                    reactivatingId={reactivatingId}
+                    onReactivate={onReactivate}
+                  />
+                ) : (
+                  <WithdrawApplicationButton
+                    application={application}
+                    withdrawingId={withdrawingId}
+                    onWithdraw={onWithdraw}
+                  />
+                )}
               </TableCell>
             </TableRow>
           ))}

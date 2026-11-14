@@ -5,29 +5,34 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button-variants";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ApplicationsMobileList } from "../components/applications-mobile-list";
 import { ApplicationsStatusTabs } from "../components/applications-status-tabs";
 import { ApplicationsTable } from "../components/applications-table";
 import { ShowWithdrawnSwitch } from "../components/show-withdrawn-switch";
 import { WithdrawApplicationDialog } from "../components/withdraw-application-dialog";
-import { APPLICATION_MESSAGES, WITHDRAWN_STATUS } from "../constants/application.constants";
+import { ReactivateApplicationDialog } from "../components/reactivate-application-dialog";
+import { APPLICATION_MESSAGES, APPLICATION_SORT_OPTIONS, WITHDRAWN_STATUS } from "../constants/application.constants";
 import { useMyApplications } from "../hooks/use-my-applications";
 import { useWithdrawApplication } from "../hooks/use-withdraw-application";
+import { useReactivateApplication } from "../hooks/use-reactivate-application";
 import type { Application } from "../types/application.types";
 import type { ApplicationSort } from "../types/application-sort.types";
 import type { ApplicationStatusFilter } from "../types/application-status-filter.types";
 import { excludeWithdrawnApplications } from "../utils/exclude-withdrawn-applications";
 import { filterApplicationsByStatus } from "../utils/filter-applications-by-status";
-import { nextApplicationSort, sortApplications } from "../utils/sort-applications";
+import { sortApplications } from "../utils/sort-applications";
 
 export function ApplicationsView() {
   const { data, isPending, isError, refetch } = useMyApplications();
   const { withdraw, withdrawingId, hasWithdrawError } = useWithdrawApplication();
+  const { reactivateAsync, reactivatingId, hasReactivateError } = useReactivateApplication();
   const isMobile = useIsMobile();
   const [statusFilter, setStatusFilter] = useState<ApplicationStatusFilter>("all");
   const [sort, setSort] = useState<ApplicationSort | null>(null);
   const [pendingWithdrawal, setPendingWithdrawal] = useState<Application | null>(null);
+  const [pendingReactivation, setPendingReactivation] = useState<Application | null>(null);
   const [showWithdrawn, setShowWithdrawn] = useState(false);
 
   const withdrawnCount = useMemo(
@@ -47,6 +52,10 @@ export function ApplicationsView() {
 
   const requestWithdraw = (applicationId: string) => {
     setPendingWithdrawal(data?.find((application) => application.id === applicationId) ?? null);
+  };
+
+  const requestReactivate = (applicationId: string) => {
+    setPendingReactivation(data?.find((application) => application.id === applicationId) ?? null);
   };
 
   return (
@@ -95,6 +104,27 @@ export function ApplicationsView() {
                 count={withdrawnCount}
               />
             )}
+            <div className="ml-auto flex items-center gap-2">
+              <span className="text-sm text-text-secondary">Ordenar:</span>
+              <Select
+                value={sort ? `${sort.key}:${sort.direction}` : "date:desc"}
+                onValueChange={(value) => {
+                  const option = APPLICATION_SORT_OPTIONS.find((item) => item.value === value);
+                  if (option) setSort({ key: option.key, direction: option.direction });
+                }}
+              >
+                <SelectTrigger aria-label="Ordenar postulaciones" className="w-[210px] max-w-full bg-surface">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {APPLICATION_SORT_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {visibleApplications.length === 0 && (
@@ -111,19 +141,34 @@ export function ApplicationsView() {
                 applications={visibleApplications}
                 withdrawingId={withdrawingId}
                 onWithdraw={requestWithdraw}
+                onReactivate={requestReactivate}
+                reactivatingId={reactivatingId}
               />
             ) : (
               <ApplicationsTable
                 applications={visibleApplications}
                 withdrawingId={withdrawingId}
                 onWithdraw={requestWithdraw}
-                sort={sort}
-                onSortChange={(key) => setSort((current) => nextApplicationSort(current, key))}
+                onReactivate={requestReactivate}
+                reactivatingId={reactivatingId}
               />
             ))}
         </>
       )}
 
+      <ReactivateApplicationDialog
+        application={pendingReactivation}
+        isPending={reactivatingId !== null}
+        hasError={hasReactivateError}
+        onCancel={() => setPendingReactivation(null)}
+        onConfirm={() => {
+          if (!pendingReactivation || reactivatingId !== null) return;
+          void reactivateAsync(pendingReactivation.id)
+            .then(() => setPendingReactivation(null))
+            .catch(() => {
+            });
+        }}
+      />
       <WithdrawApplicationDialog
         application={pendingWithdrawal}
         onCancel={() => setPendingWithdrawal(null)}

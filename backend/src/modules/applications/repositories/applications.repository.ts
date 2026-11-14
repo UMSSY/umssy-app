@@ -1,5 +1,6 @@
 import { RECRUITMENT_APPLICATION_SELECT } from '../constants/recruitment-application-select.constants.js';
 import { Injectable } from '@nestjs/common';
+import { JobOfferStatus } from '../../job-offers/types/job-offer.enum.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import type { Prisma } from '../../../prisma/client.js';
 import type { FindApplicationsQueryDto } from '../requests/find-applications.request.js';
@@ -41,6 +42,28 @@ export class ApplicationsRepository {
     return this.prisma.jobApplication.findUnique({
       where: { id },
       select: { id: true, userId: true, status: { select: { title: true } } },
+    });
+  }
+
+  reactivateApplication(id: string, userId: string, now: Date) {
+    return this.prisma.$transaction(async (tx) => {
+      const status = await tx.jobApplicationStatus.findUniqueOrThrow({
+        where: { title: 'En revisión' },
+        select: { id: true },
+      });
+
+      return tx.jobApplication.updateMany({
+        where: {
+          id,
+          userId,
+          status: { title: 'Retirada' },
+          jobOffer: {
+            status: { title: JobOfferStatus.PUBLISHED },
+            OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
+          },
+        },
+        data: { statusId: status.id, appliedAt: now },
+      });
     });
   }
 
