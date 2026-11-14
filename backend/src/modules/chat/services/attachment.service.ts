@@ -109,6 +109,10 @@ export class AttachmentService {
       await this.chatRolePolicyService.assertCanCommunicate(
         userId,
         otherParticipantId,
+        {
+          contextType: conversation.contextType,
+          contextId: conversation.contextId,
+        },
       );
     }
 
