@@ -5,8 +5,11 @@ import { NotificationUserLookupRepository } from '../repositories/notification-u
 import { PushDispatcherService } from './push-dispatcher.service.js';
 import { MailDispatcherService } from './mail-dispatcher.service.js';
 import { NotificationGateway } from '../gateways/notification.gateway.js';
-import { NOTIFICATION_TEMPLATES } from '../constants/notification-templates.constants.js'; 
-import type { NotifyRequest, NotifyResult } from '../types/notification.types.js';
+import { NOTIFICATION_TEMPLATES } from '../constants/notification-templates.constants.js';
+import type { NotifyRequest } from '../types/notify-request.type.js';
+import type { NotifyResult } from '../types/notify-result.type.js';
+import { NotificationType } from '../types/notification-type.enum.js';
+import type { NotificationTemplateDefinition } from '../types/notification-template-definition.type.js';
 
 @Injectable()
 export class NotificationsService {
@@ -46,10 +49,11 @@ export class NotificationsService {
       throw new NotFoundException(`NotificationType ${type} no encontrado en el catálogo`);
     }
 
-    const template = NOTIFICATION_TEMPLATES[type];
+    const template = NOTIFICATION_TEMPLATES[type] as NotificationTemplateDefinition<NotificationType>;
     if (!template) {
       throw new NotFoundException(`Plantilla no encontrada para el tipo ${type}`);
     }
+    
     const title = template.renderTitle(payload);
     const body = template.renderBody(payload);
 

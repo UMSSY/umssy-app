@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
-import type { NotificationResponse } from '../types/notification.types.js';
+import type { NotificationResponse } from '../types/notification-response.type.js';
 
 @Injectable()
 export class NotificationsRepository {
