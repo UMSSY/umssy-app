@@ -71,4 +71,27 @@ describe('Épica 3 · rúbrica determinista provisional', () => {
     expect(matchRadar(a, b).gaps.qa).toBe(-10);
     expect(matchRadar(a, b).match).toBeGreaterThanOrEqual(0);
   });
+
+  it('mantiene porcentajes entre cero y cien y brechas por cada uno de los seis ejes', () => {
+    for (const candidateValue of [0, 1.5, 5, 10]) {
+      for (const targetValue of [0, 2.5, 5, 10]) {
+        const candidate = emptyScores();
+        const target = emptyScores();
+        for (const id of AREA_IDS) {
+          candidate[id] = candidateValue;
+          target[id] = targetValue;
+        }
+        const comparison = matchRadar(candidate, target);
+        expect(comparison.match).toBeGreaterThanOrEqual(0);
+        expect(comparison.match).toBeLessThanOrEqual(100);
+        for (const id of AREA_IDS) {
+          expect(comparison.gaps[id]).toBe(candidateValue - targetValue);
+        }
+      }
+    }
+    const maximum = emptyScores();
+    for (const id of AREA_IDS) maximum[id] = 10;
+    expect(matchRadar(emptyScores(), maximum).match).toBe(0);
+    expect(matchRadar(maximum, maximum).match).toBe(100);
+  });
 });
