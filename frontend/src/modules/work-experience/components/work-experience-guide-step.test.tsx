@@ -11,6 +11,7 @@ import { renderWithQuery as render } from '@/shared/testing/render-with-query';
 import { workExperienceService } from '../services/work-experience.service';
 import type { WorkExperienceItem } from '../types/work-experience-item.types';
 import { WorkExperienceGuideStep } from './work-experience-guide-step';
+import { skillsAnalysisService } from '@/modules/matching/services/skills-analysis.service';
 
 vi.mock('../services/work-experience.service', () => ({
   workExperienceService: {
@@ -61,6 +62,46 @@ describe('WorkExperienceGuideStep', () => {
   afterEach(() => {
     cleanup();
     vi.clearAllMocks();
+  });
+
+  it('lets the guide continue after a saved write while NLP analysis is still pending', async () => {
+    let finishAnalysis!: (result: {
+      experienceId: string;
+      skills: [];
+      processingTimeMs: number;
+    }) => void;
+    vi.mocked(skillsAnalysisService.analyzeExperience).mockReturnValueOnce(
+      new Promise((resolve) => {
+        finishAnalysis = resolve;
+      }),
+    );
+    vi.mocked(workExperienceService.updateWorkExperience).mockResolvedValueOnce(
+      EXPERIENCE,
+    );
+    const { user, onSaved, onBusyChange } = setupStep();
+    await screen.findByRole('form', { name: 'Agregar experiencia' });
+    await user.click(screen.getByRole('button', { name: 'Cancelar' }));
+    await user.click(
+      screen.getByRole('button', { name: 'Editar Desarrollador' }),
+    );
+    await user.click(screen.getByRole('button', { name: 'Guardar cambios' }));
+    await waitFor(() => expect(onSaved).toHaveBeenCalledOnce());
+    expect(
+      await screen.findByText(
+        /Analizando las habilidades de tu experiencia en segundo plano/,
+      ),
+    ).toBeInTheDocument();
+    await waitFor(() => expect(onBusyChange).toHaveBeenLastCalledWith(false));
+    expect(
+      screen.getByRole('button', { name: 'Añadir experiencia' }),
+    ).toBeEnabled();
+    await act(async () => {
+      finishAnalysis({
+        experienceId: EXPERIENCE.id,
+        skills: [],
+        processingTimeMs: 100,
+      });
+    });
   });
 
   it('saves an existing job inline before notifying the guide and keeps adding records available', async () => {

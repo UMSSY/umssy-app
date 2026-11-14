@@ -12,7 +12,7 @@ export function SkillsGuideStep({
   onDirtyChange,
   onBusyChange,
 }: ProfileGuideStepProps) {
-  const skills = useSkills();
+  const skills = useSkills({ forGuide: true });
   const [hasCustomDraft, setHasCustomDraft] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [draftError, setDraftError] = useState<string | null>(null);
@@ -62,7 +62,7 @@ export function SkillsGuideStep({
       {draftError ? (
         <FeedbackMessage feedback={{ type: 'error', message: draftError }} />
       ) : null}
-      <DetectedSkillsPanel onBusyChange={setIsAnalyzing} />
+      <DetectedSkillsPanel forGuide onBusyChange={setIsAnalyzing} />
     </section>
   );
 }

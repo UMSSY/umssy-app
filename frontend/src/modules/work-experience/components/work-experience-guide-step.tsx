@@ -19,7 +19,9 @@ export function WorkExperienceGuideStep({
   onDirtyChange,
   onBusyChange,
 }: ProfileGuideStepProps) {
-  const { experiences, isLoading, error, reload } = useWorkExperiences();
+  const { experiences, isLoading, error, reload } = useWorkExperiences({
+    forGuide: true,
+  });
   const [editingExperience, setEditingExperience] =
     useState<WorkExperienceItem | null>(null);
   const [pendingDelete, setPendingDelete] = useState<WorkExperienceItem | null>(
@@ -38,20 +40,20 @@ export function WorkExperienceGuideStep({
     onDirtyChange(false);
   }
 
-  const saveMutation = useSaveWorkExperience(() => {
-    resetForm();
-    onSaved();
-    void reload();
-  });
+  const saveMutation = useSaveWorkExperience(
+    () => {
+      resetForm();
+      onSaved();
+      void reload();
+    },
+    { forGuide: true },
+  );
   const deleteMutation = useDeleteWorkExperience(() => {
     if (editingExperience?.id === pendingDelete?.id) resetForm();
     setPendingDelete(null);
     void reload();
   });
-  const isBusy =
-    saveMutation.isSaving ||
-    saveMutation.isAnalyzing ||
-    deleteMutation.isDeleting;
+  const isBusy = saveMutation.isSaving || deleteMutation.isDeleting;
 
   useEffect(() => {
     onBusyChange(isBusy);
@@ -94,6 +96,12 @@ export function WorkExperienceGuideStep({
 
   return (
     <section className="space-y-5" aria-label="Experiencia laboral en la guía">
+      {saveMutation.isAnalyzing ? (
+        <p role="status" className="text-sm text-text-secondary">
+          Analizando las habilidades de tu experiencia en segundo plano. Puedes
+          continuar con tu perfil.
+        </p>
+      ) : null}
       <FeedbackMessage
         feedback={
           deleteMutation.feedback ??

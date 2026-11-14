@@ -22,7 +22,9 @@ export function CertificationGuideStep({
   onDirtyChange,
   onBusyChange,
 }: ProfileGuideStepProps) {
-  const { certifications, isLoading, error, reload } = useCertifications();
+  const { certifications, isLoading, error, reload } = useCertifications({
+    forGuide: true,
+  });
   const [editor, setEditor] = useState<Certification | null | undefined>();
   const [pendingDelete, setPendingDelete] = useState<Certification | null>(
     null,

@@ -20,7 +20,9 @@ export function EducationGuideStep({
   onDirtyChange,
   onBusyChange,
 }: ProfileGuideStepProps) {
-  const { educations, isLoading, error, reload } = useEducations();
+  const { educations, isLoading, error, reload } = useEducations({
+    forGuide: true,
+  });
   const [editingEducation, setEditingEducation] =
     useState<EducationItem | null>(null);
   const [pendingDelete, setPendingDelete] = useState<EducationItem | null>(
