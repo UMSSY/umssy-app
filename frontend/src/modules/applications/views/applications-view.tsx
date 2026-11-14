@@ -8,12 +8,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ApplicationsMobileList } from "../components/applications-mobile-list";
-import { ApplicationsStatusTabs } from "../components/applications-status-tabs";
+import { ApplicationsStatusSelect } from "../components/applications-status-select";
 import { ApplicationsTable } from "../components/applications-table";
-import { ShowWithdrawnSwitch } from "../components/show-withdrawn-switch";
+import { ShowWithdrawnToggle } from "../components/show-withdrawn-toggle";
 import { WithdrawApplicationDialog } from "../components/withdraw-application-dialog";
 import { ReactivateApplicationDialog } from "../components/reactivate-application-dialog";
 import { APPLICATION_MESSAGES, APPLICATION_SORT_OPTIONS, WITHDRAWN_STATUS } from "../constants/application.constants";
+import { useContactApplication } from "../hooks/use-contact-application";
 import { useMyApplications } from "../hooks/use-my-applications";
 import { useWithdrawApplication } from "../hooks/use-withdraw-application";
 import { useReactivateApplication } from "../hooks/use-reactivate-application";
@@ -26,8 +27,9 @@ import { sortApplications } from "../utils/sort-applications";
 
 export function ApplicationsView() {
   const { data, isPending, isError, refetch } = useMyApplications();
-  const { withdraw, withdrawingId, hasWithdrawError } = useWithdrawApplication();
-  const { reactivateAsync, reactivatingId, hasReactivateError } = useReactivateApplication();
+  const { withdraw, retryWithdraw, withdrawingId, hasWithdrawError } = useWithdrawApplication();
+  const { reactivate, resetReactivation, reactivatingId, hasReactivateError } = useReactivateApplication();
+  const { contact, contactingId } = useContactApplication();
   const isMobile = useIsMobile();
   const [statusFilter, setStatusFilter] = useState<ApplicationStatusFilter>("all");
   const [sort, setSort] = useState<ApplicationSort | null>(null);
@@ -45,9 +47,9 @@ export function ApplicationsView() {
     return sortApplications(filterApplicationsByStatus(listed, statusFilter), sort);
   }, [data, showWithdrawn, statusFilter, sort]);
 
-  const handleShowWithdrawnChange = (checked: boolean) => {
-    setShowWithdrawn(checked);
-    if (!checked && statusFilter === WITHDRAWN_STATUS) setStatusFilter("all");
+  const handleShowWithdrawnChange = (pressed: boolean) => {
+    setShowWithdrawn(pressed);
+    if (!pressed && statusFilter === WITHDRAWN_STATUS) setStatusFilter("all");
   };
 
   const requestWithdraw = (applicationId: string) => {
@@ -55,7 +57,13 @@ export function ApplicationsView() {
   };
 
   const requestReactivate = (applicationId: string) => {
+    resetReactivation();
     setPendingReactivation(data?.find((application) => application.id === applicationId) ?? null);
+  };
+
+  const cancelReactivation = () => {
+    resetReactivation();
+    setPendingReactivation(null);
   };
 
   return (
@@ -79,9 +87,12 @@ export function ApplicationsView() {
       )}
 
       {hasWithdrawError && (
-        <p role="alert" className="text-sm text-destructive">
-          {APPLICATION_MESSAGES.withdrawError}
-        </p>
+        <div role="alert" className="flex flex-wrap items-center gap-3 text-sm text-destructive">
+          <p>{APPLICATION_MESSAGES.withdrawError}</p>
+          <Button variant="outline" size="sm" onClick={retryWithdraw}>
+            {APPLICATION_MESSAGES.retry}
+          </Button>
+        </div>
       )}
 
       {data && data.length === 0 && (
@@ -96,17 +107,20 @@ export function ApplicationsView() {
       {data && data.length > 0 && (
         <>
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <ApplicationsStatusTabs value={statusFilter} onValueChange={setStatusFilter} showWithdrawn={showWithdrawn} />
-            {withdrawnCount > 0 && (
-              <ShowWithdrawnSwitch
-                checked={showWithdrawn}
-                onCheckedChange={handleShowWithdrawnChange}
-                count={withdrawnCount}
+            <div className="flex flex-wrap items-center gap-3">
+              <ApplicationsStatusSelect
+                value={statusFilter}
+                onValueChange={setStatusFilter}
+                showWithdrawn={showWithdrawn}
               />
-            )}
+              {withdrawnCount > 0 && (
+                <ShowWithdrawnToggle pressed={showWithdrawn} onPressedChange={handleShowWithdrawnChange} />
+              )}
+            </div>
             <div className="ml-auto flex items-center gap-2">
               <span className="text-sm text-text-secondary">Ordenar:</span>
               <Select
+                items={APPLICATION_SORT_OPTIONS}
                 value={sort ? `${sort.key}:${sort.direction}` : "date:desc"}
                 onValueChange={(value) => {
                   const option = APPLICATION_SORT_OPTIONS.find((item) => item.value === value);
@@ -141,6 +155,8 @@ export function ApplicationsView() {
                 applications={visibleApplications}
                 withdrawingId={withdrawingId}
                 onWithdraw={requestWithdraw}
+                contactingId={contactingId}
+                onContact={contact}
                 onReactivate={requestReactivate}
                 reactivatingId={reactivatingId}
               />
@@ -149,6 +165,8 @@ export function ApplicationsView() {
                 applications={visibleApplications}
                 withdrawingId={withdrawingId}
                 onWithdraw={requestWithdraw}
+                contactingId={contactingId}
+                onContact={contact}
                 onReactivate={requestReactivate}
                 reactivatingId={reactivatingId}
               />
@@ -160,13 +178,10 @@ export function ApplicationsView() {
         application={pendingReactivation}
         isPending={reactivatingId !== null}
         hasError={hasReactivateError}
-        onCancel={() => setPendingReactivation(null)}
+        onCancel={cancelReactivation}
         onConfirm={() => {
           if (!pendingReactivation || reactivatingId !== null) return;
-          void reactivateAsync(pendingReactivation.id)
-            .then(() => setPendingReactivation(null))
-            .catch(() => {
-            });
+          reactivate(pendingReactivation.id, { onSuccess: () => setPendingReactivation(null) });
         }}
       />
       <WithdrawApplicationDialog

@@ -1,8 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { JobOfferStatus } from '../../job-offers/types/job-offer.enum.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
+import type { RoleName } from '../../../common/enums/roles.enum.js';
 import type { Prisma } from '../../../prisma/client.js';
 import type { FindApplicationsQueryDto } from '../requests/find-applications.request.js';
+
+const RECRUITER_ROLE: RoleName = 'empresa';
 
 @Injectable()
 export class ApplicationsRepository {
@@ -63,6 +66,47 @@ export class ApplicationsRepository {
         },
         data: { statusId: status.id, appliedAt: now },
       });
+    });
+  }
+
+  findContactContext(id: string) {
+    return this.prisma.jobApplication.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        userId: true,
+        jobOfferId: true,
+        status: { select: { title: true } },
+        jobOffer: {
+          select: {
+            title: true,
+            company: {
+              select: {
+                id: true,
+                title: true,
+                recruiters: {
+                  where: {
+                    isActive: true,
+                    roles: {
+                      some: {
+                        deletedAt: null,
+                        startAt: { lte: new Date() },
+                        role: { name: RECRUITER_ROLE },
+                      },
+                    },
+                  },
+                  select: { id: true, firstName: true, lastName: true },
+                  orderBy: [
+                    { firstName: 'asc' },
+                    { lastName: 'asc' },
+                    { id: 'asc' },
+                  ],
+                },
+              },
+            },
+          },
+        },
+      },
     });
   }
 
