@@ -137,13 +137,14 @@ describe('session cookie over HTTP', () => {
   it('refresh rotates both cookies using only the refresh cookie', async () => {
     const response = await request(app.getHttpServer())
       .post('/api/auth/refresh')
+      .set('User-Agent', 'test-agent')
       .set('Cookie', 'umssy_refresh=refresh-1');
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual({ roleTag: 'titulado', roles: ['titulado'] });
     expect(refreshTokens.rotate).toHaveBeenCalledWith(
       'refresh-1',
-      expect.anything(),
+      'test-agent',
     );
     const cookies = (response.headers['set-cookie'] as unknown as string[]) ?? [];
     expect(cookies.some((item) => item.startsWith(`umssy_access=${token}`))).toBe(
