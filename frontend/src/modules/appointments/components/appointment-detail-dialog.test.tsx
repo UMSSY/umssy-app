@@ -87,6 +87,21 @@ describe("AppointmentDetailDialog", () => {
     expect(screen.getByText("8 de octubre de 2026, 18:42")).toBeInTheDocument()
   })
 
+  it.each(["mentor", "student"] as const)("muestra Completada con el estilo de la tarjeta para %s", async (role) => {
+    vi.mocked(appointmentsApi.getById).mockResolvedValue(makeAppointment({
+      status: "COMPLETED",
+      counterpart: { id: "other-1", fullName: "Otra persona", role },
+    }))
+    renderDialog()
+
+    expect(await screen.findByText("Completada")).toHaveClass(
+      "h-6", "px-2.5", "text-sm", "bg-muted", "text-text-secondary", "border-transparent",
+    )
+    expect(screen.queryByText("Confirmada")).not.toBeInTheDocument()
+    expect(screen.getByText("09:00 - 10:00 · Hora de Bolivia (GMT-4)")).toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: JOIN_MEETING_TEXT.join })).not.toBeInTheDocument()
+  })
+
   it("muestra las iniciales cuando la otra persona no tiene foto", async () => {
     renderDialog()
 
