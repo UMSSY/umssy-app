@@ -5,6 +5,7 @@ import { act, cleanup, fireEvent, screen, waitFor, within } from "@testing-libra
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { onlineManager } from '@tanstack/react-query';
 import { registrationsService } from '../services/registrations.service';
+import { saveOfflinePass } from '../services/offline-passes.service';
 import { offlinePassesStore } from '../utils/offline-passes-store';
 import { MyPassesView } from './my-passes-view';
 
@@ -200,18 +201,48 @@ describe('Mis pases sin conexión', () => {
     const explore = screen.getByRole('button', { name: 'Explorar talleres' });
     expect(explore).toBeDisabled();
     expect(explore).toHaveAttribute('title', 'Requiere conexión a Internet');
+    expect(screen.getByText('El chat y el catálogo de talleres requieren conexión a Internet.')).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Explorar talleres' })).not.toBeInTheDocument();
     expect(getMine).not.toHaveBeenCalled();
+  });
+
+  it('shows the same saved QR on reopening offline and removes it after reconnecting', async () => {
+    getMine.mockResolvedValueOnce([pass]).mockResolvedValue([]);
+    const getPass = vi.mocked(registrationsService.getPass);
+    getPass.mockImplementationOnce(async (_id, signal, accessToken) => {
+      if (!accessToken) throw new Error('Missing session');
+      await saveOfflinePass(saved, accessToken, signal);
+      return saved;
+    });
+    const onlineView = render(<MyPassesView />);
+    const onlineQr = await screen.findByRole('img', { name: 'Código QR del pase' });
+    const qrMarkup = onlineQr.outerHTML;
+    expect(await screen.findByText('Disponible sin conexión')).toBeInTheDocument();
+    onlineView.unmount();
+
+    goOffline();
+    render(<MyPassesView />);
+    const restoredQr = await screen.findByRole('img', { name: 'Código QR del pase' });
+    expect(restoredQr.outerHTML).toBe(qrMarkup);
+    expect(getMine).toHaveBeenCalledTimes(1);
+    expect(getPass).toHaveBeenCalledTimes(1);
+
+    act(() => {
+      vi.restoreAllMocks();
+      window.dispatchEvent(new Event('online'));
+      onlineManager.setOnline(true);
+    });
+    expect(await screen.findByText(/Se retiraron los pases/)).toBeInTheDocument();
+    expect(screen.queryByRole('img', { name: 'Código QR del pase' })).not.toBeInTheDocument();
+    expect((await offlinePassesStore.load('user-a'))?.passes).toEqual([]);
   });
 
   it('explains there is no saved copy instead of showing the empty registrations state', async () => {
     goOffline();
     render(<MyPassesView />);
-    const noCopy = await screen.findByRole('heading', { name: 'No hay pases guardados en este dispositivo.' });
-    const alert = screen.getByRole('alert');
-    expect(alert).toHaveTextContent('No pudimos completar la operación. Inténtalo más tarde.');
-    expect(within(alert).getByRole('button', { name: 'Reintentar' })).toBeInTheDocument();
-    expect(noCopy.compareDocumentPosition(alert) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    await screen.findByRole('heading', { name: 'No hay pases guardados en este dispositivo.' });
+    expect(screen.getByText(/abre un pase confirmado para guardarlo/)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Reintentar' })).not.toBeInTheDocument();
     expect(screen.queryByRole('region', { name: 'Aún no tienes inscripciones.' })).not.toBeInTheDocument();
     expect(screen.queryByText('ID Inscripción')).not.toBeInTheDocument();
   });

@@ -12,6 +12,7 @@ import {
 } from '@/shared/services/storage/browser-indexed-db';
 import { loadSessionOfflinePasses } from '../utils/offline-passes-store';
 import { registrationsService } from './registrations.service';
+import { reconcileOfflinePasses } from './offline-passes.service';
 
 const accountA = `header.${btoa(JSON.stringify({ sub: 'titulado-a' }))}.test`;
 const accountB = `header.${btoa(JSON.stringify({ sub: 'titulado-b' }))}.test`;
@@ -127,5 +128,25 @@ describe('HU-08-14 offline pass copies', () => {
     vi.mocked(readIndexedDbPair).mockResolvedValueOnce([accountB, cache]);
     await expect(loadSessionOfflinePasses(accountA)).resolves.toBeNull();
     get.mockRestore();
+  });
+
+  it('removes missing passes after a successful refresh and updates the remaining workshop details', async () => {
+    await saveAccessToken(accountA);
+    vi.spyOn(apiClient, 'get')
+      .mockResolvedValueOnce(response)
+      .mockResolvedValueOnce({ data: { data: { ...pass, id: 'keep-me' } } });
+    await registrationsService.getPass(pass.id);
+    const remaining = await registrationsService.getPass('keep-me');
+    const signal = new AbortController().signal;
+    await expect(
+      reconcileOfflinePasses(
+        [{ ...remaining, location: 'Virtual' }],
+        accountA,
+        signal,
+      ),
+    ).resolves.toBe(true);
+    expect((await loadSessionOfflinePasses(accountA))?.passes).toEqual([
+      { ...remaining, location: 'Virtual' },
+    ]);
   });
 });
