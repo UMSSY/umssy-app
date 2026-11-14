@@ -200,7 +200,7 @@ export function WorkExperienceListCard({
                             {skillsList.map((skill) => (
                               <span
                                 key={skill.toLowerCase()}
-                                className="inline-flex items-center rounded-full border border-border bg-interaction px-2.5 py-0.5 text-xs font-medium text-ink"
+                                className="inline-flex items-center rounded-full border border-transparent bg-availability px-2.5 py-0.5 text-xs font-medium text-availability-foreground"
                               >
                                 {skill}
                               </span>
