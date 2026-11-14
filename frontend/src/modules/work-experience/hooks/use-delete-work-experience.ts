@@ -2,9 +2,12 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { PROFILE_SKILLS_RADAR_QUERY_KEY } from "@/modules/profile";
-import { SKILLS_PROFILE_QUERY_KEY } from "@/modules/skills";
-import type { Feedback } from "@/modules/profile";
+import {
+  PROFILE_SKILLS_RADAR_QUERY_KEY,
+  useInvalidateProfileCompleteness,
+  type Feedback,
+} from "@/modules/profile";
+import { MY_SKILLS_QUERY_KEY } from "@/modules/skills";
 import { WORK_EXPERIENCE_FEEDBACK_MESSAGES } from "../config/work-experience-feedback.config";
 import { workExperienceService } from "../services/work-experience.service";
 import type { WorkExperienceItem } from "../types/work-experience-item.types";
@@ -13,10 +16,12 @@ export function useDeleteWorkExperience(
   onDeleted: (experience: WorkExperienceItem) => void,
 ) {
   const queryClient = useQueryClient();
+  const invalidateCompleteness = useInvalidateProfileCompleteness();
 
   const mutation = useMutation({
     mutationFn: (experience: WorkExperienceItem) =>
       workExperienceService.deleteWorkExperience(experience.id),
+    onSuccess: invalidateCompleteness,
   });
 
   const [isDeleting, setIsDeleting] = useState(false);
@@ -33,7 +38,7 @@ export function useDeleteWorkExperience(
 
       await Promise.all([
         queryClient.invalidateQueries({
-          queryKey: SKILLS_PROFILE_QUERY_KEY,
+          queryKey: MY_SKILLS_QUERY_KEY,
         }),
         queryClient.invalidateQueries({
           queryKey: PROFILE_SKILLS_RADAR_QUERY_KEY,

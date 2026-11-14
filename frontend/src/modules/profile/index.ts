@@ -31,3 +31,4 @@ export type { HttpError } from "./types/http-error.types";
 
 export { useProfileSkillsRadar, PROFILE_SKILLS_RADAR_QUERY_KEY } from "./hooks/use-profile-skills-radar";
 export { profileSkillsRadarService } from "./services/profile-skills-radar.service";
+export { useInvalidateProfileCompleteness } from "./hooks/use-invalidate-profile-completeness";
