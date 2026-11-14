@@ -11,6 +11,7 @@ import {
   TooManyAttemptsException,
 } from '../exceptions/index.js';
 import { LOGIN_ROLE_PRIORITY } from '../constants/login-role-priority.constants.js';
+import { SESSION_MAX_MS } from '../constants/session.constants.js';
 import { MailService } from '../../mail/services/mail.service.js';
 import { loadMailTemplate } from '../../mail/helpers/load-mail-template.js';
 import type { SessionResponse } from '../types/session-response.types.js';
@@ -37,6 +38,14 @@ export class AuthService {
 
   existsByEmail(email: string) {
     return this.authRepository.existsByEmail(email);
+  }
+
+  getAccessTokenMaxAgeMs(accessToken: string): number {
+    const payload = this.jwtService.decode<{ exp?: unknown } | null>(
+      accessToken,
+    );
+    if (typeof payload?.exp !== 'number') return SESSION_MAX_MS;
+    return Math.max(payload.exp * 1000 - Date.now(), 0);
   }
 
   getSession(user: AuthenticatedUser): SessionResponse {

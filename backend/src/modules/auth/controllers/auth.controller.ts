@@ -1,9 +1,24 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import type { Response } from 'express';
 import { AuthService } from '../services/auth.service.js';
+import { ACCESS_TOKEN_COOKIE } from '../../../common/constants/auth.constants.js';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator.js';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import type { AuthenticatedUser } from '../../../common/types/authenticated-user.types.js';
+import {
+  buildAccessTokenCookieOptions,
+  buildClearAccessTokenCookieOptions,
+} from '../../../common/utils/access-token-cookie.js';
 import { LoginDto } from '../requests/login.schema.js';
 import { RequestPasswordResetDto } from '../requests/request-password-reset.schema.js';
 import { VerifyPasswordResetDto } from '../requests/verify-password-reset.schema.js';
@@ -21,8 +36,28 @@ export class AuthController {
   }
 
   @Post('login')
-  login(@Body() body: LoginDto) {
-    return this.authService.login(body);
+  async login(
+    @Body() body: LoginDto,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const result = await this.authService.login(body);
+    response.cookie(
+      ACCESS_TOKEN_COOKIE,
+      result.accessToken,
+      buildAccessTokenCookieOptions(
+        this.authService.getAccessTokenMaxAgeMs(result.accessToken),
+      ),
+    );
+    return result;
+  }
+
+  @Post('logout')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  logout(@Res({ passthrough: true }) response: Response): void {
+    response.clearCookie(
+      ACCESS_TOKEN_COOKIE,
+      buildClearAccessTokenCookieOptions(),
+    );
   }
 
   @Post('forgot-password/request')
