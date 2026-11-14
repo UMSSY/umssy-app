@@ -15,7 +15,6 @@ export const WEB_PUSH_CLIENT = 'WEB_PUSH_CLIENT';
 
 async function loadDefaultWebPush(): Promise<WebPushClient | null> {
   try {
-    // @ts-expect-error web-push is loaded dynamically when installed
     const mod = (await import('web-push')) as { default?: WebPushClient } & WebPushClient;
     return mod.default ?? mod;
   } catch {
