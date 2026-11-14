@@ -17,6 +17,7 @@ import { trimFormValues } from "../utils/trim-form-values";
 import { validatePersonalInfo } from "../utils/validate-personal-info";
 import { FormField } from "./form-field";
 import { ProfilePhotoField } from "./profile-photo-field";
+import { SocialAccountConnectButtons } from "./social-account-connect-buttons";
 import { FormSection } from "@/shared/components/layout/form-section";
 
 function sanitizeFieldValue(field: keyof PersonalInfoValues, value: string): string {
@@ -182,6 +183,7 @@ export function PersonalInfoForm({
               {...getFieldErrorProps("personalEmail", errors.personalEmail)}
             />
           </FormField>
+          <SocialAccountConnectButtons />
           </div>
         </FormSection>
         <div className="-mx-6 flex flex-wrap items-center justify-between gap-4 rounded-b-lg border-t border-border bg-surface px-6 py-5 lg:-mx-8 lg:px-8">
