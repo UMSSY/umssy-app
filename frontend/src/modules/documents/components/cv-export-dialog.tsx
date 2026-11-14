@@ -1,7 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowLeft, Download, Eye, Info, LoaderCircle, X } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Download, Eye, Info, LoaderCircle, X } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,10 +21,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ProfileCompletenessProgress } from "@/modules/profile";
+import { ProfileCompletenessProgress, useProfileCompleteness } from "@/modules/profile";
 import { downloadFile } from "@/shared/utils/download-file";
 import { CV_ERROR_MESSAGES } from "../constants/cv-error-messages.constants";
-import { CV_EXPORT_DEFAULT_SECTIONS } from "../constants/cv-export.constants";
+import {
+  CV_EXPORT_DEFAULT_SECTIONS,
+  CV_EXPORT_INCOMPLETE_PROFILE_MESSAGES,
+  CV_EXPORT_LOW_COMPLETENESS_THRESHOLD,
+} from "../constants/cv-export.constants";
 import { useCvExport } from "../hooks/use-cv-export";
 import { useCvPortfolioCount } from "../hooks/use-cv-portfolio-count";
 import type { CvExportDialogProps } from "../types/cv-export-dialog-props.types";
@@ -25,10 +39,17 @@ import { CvExportSections } from "./cv-export-sections";
 
 function CvExportDialogBody({ onClose }: Pick<CvExportDialogProps, "onClose">) {
   const { generatedCv, isGenerating, error, generateCv, discardCv } = useCvExport();
+  const { completeness } = useProfileCompleteness(false);
   const repositoryCount = useCvPortfolioCount();
   const [sections, setSections] = useState<CvExportSectionsState>(CV_EXPORT_DEFAULT_SECTIONS);
   const [step, setStep] = useState<CvExportStep>("sections");
   const [downloadError, setDownloadError] = useState<string | null>(null);
+  const [hasConfirmedLowCompleteness, setHasConfirmedLowCompleteness] = useState(false);
+  const [showIncompleteWarningDialog, setShowIncompleteWarningDialog] = useState(false);
+
+  const percentage = completeness?.percentage;
+  const isLowCompleteness =
+    typeof percentage === "number" && percentage < CV_EXPORT_LOW_COMPLETENESS_THRESHOLD;
   const isPreviewing = step === "preview" && generatedCv !== null;
 
   const handleToggleSection = (key: CvExportSectionKey) => {
@@ -46,7 +67,7 @@ function CvExportDialogBody({ onClose }: Pick<CvExportDialogProps, "onClose">) {
     }
   };
 
-  const handleDownload = async () => {
+  const executeDownload = async () => {
     setDownloadError(null);
     const cv = generatedCv ?? (await generateCv(sections));
 
@@ -61,115 +82,186 @@ function CvExportDialogBody({ onClose }: Pick<CvExportDialogProps, "onClose">) {
     }
   };
 
+  const handleDownload = async () => {
+    if (isLowCompleteness && !hasConfirmedLowCompleteness) {
+      setShowIncompleteWarningDialog(true);
+      return;
+    }
+
+    await executeDownload();
+  };
+
+  const handleConfirmDownload = async () => {
+    setHasConfirmedLowCompleteness(true);
+    setShowIncompleteWarningDialog(false);
+    await executeDownload();
+  };
+
+  const handleCompleteProfile = () => {
+    setShowIncompleteWarningDialog(false);
+    onClose();
+  };
+
+
   return (
-    <Dialog open onOpenChange={(isOpen) => (isOpen ? undefined : onClose())}>
-      <DialogContent
-        showCloseButton={false}
-        className="max-w-xl gap-0 rounded-lg border border-border bg-surface p-0 text-ink ring-0 sm:max-w-xl"
-      >
-        <DialogHeader className="gap-1.5 border-b border-border px-6 py-5 pr-14">
-          <DialogTitle className="font-tight text-xl font-bold text-ink">
-            Generar CV profesional
-          </DialogTitle>
-          <DialogDescription className="text-sm text-text-secondary">
-            Personaliza las secciones y descarga tu currículum en formato PDF.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="px-6 pt-5"><ProfileCompletenessProgress showChecklist={false} /></div>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-sm"
-          aria-label="Cerrar"
-          className="absolute top-4 right-4 text-text-secondary"
-          onClick={onClose}
+    <>
+      <Dialog open onOpenChange={(isOpen) => (isOpen ? undefined : onClose())}>
+        <DialogContent
+          showCloseButton={false}
+          className="max-w-xl gap-0 rounded-lg border border-border bg-surface p-0 text-ink ring-0 sm:max-w-xl"
         >
-          <X aria-hidden="true" className="size-4" />
-        </Button>
-        {isPreviewing ? (
-          <div className="flex flex-col gap-3 bg-surface-soft px-6 py-5">
-            <div className="flex items-center justify-between gap-4">
-              <p className="text-sm font-semibold text-ink-soft">
-                Vista previa de maquetación institucional (A4)
-              </p>
-              <Button
-                type="button"
-                variant="ghost"
-                className="h-8 px-2 text-sm font-semibold text-ink"
-                onClick={() => setStep("sections")}
-              >
-                <ArrowLeft aria-hidden="true" className="size-4" />
-                Volver a secciones
-              </Button>
-            </div>
-            <iframe
-              src={generatedCv.previewUrl}
-              title={`Vista previa de ${generatedCv.fileName}`}
-              className="h-[50vh] w-full rounded-lg border border-border bg-surface"
-            />
-          </div>
-        ) : (
-          <div className="flex max-h-[60vh] flex-col gap-4 overflow-y-auto px-6 py-5">
-            <CvExportSections
-              sections={sections}
-              repositoryCount={repositoryCount}
-              isDisabled={isGenerating}
-              onToggle={handleToggleSection}
-            />
-            <div className="flex items-start gap-3 rounded-lg border border-border bg-surface-soft px-4 py-3">
-              <Info aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-ink-soft" />
-              <p className="text-sm leading-relaxed text-text-secondary">
-                El documento se maquetará en plantilla institucional optimizada de 1 a 2 páginas para
-                postulaciones laborales.
-              </p>
-            </div>
-            <div className="flex items-center justify-between gap-4">
-              <Button
-                type="button"
-                variant="ghost"
-                className="h-8 px-2 text-sm font-semibold text-ink"
-                disabled={isGenerating}
-                onClick={() => void handlePreview()}
-              >
-                <Eye aria-hidden="true" className="size-4" />
-                Previsualizar diseño del PDF
-              </Button>
-              <p className="text-xs text-text-secondary">Formato A4 · Estándar ATS</p>
-            </div>
-          </div>
-        )}
-        {isGenerating ? (
-          <p role="status" className="flex items-center gap-2 px-6 pb-4 text-sm text-text-secondary">
-            <LoaderCircle aria-hidden="true" className="size-4 animate-spin" />
-            Generando tu CV...
-          </p>
-        ) : null}
-        {!isGenerating && (error ?? downloadError) ? (
-          <p role="alert" className="px-6 pb-4 text-sm text-danger">
-            {error ?? downloadError}
-          </p>
-        ) : null}
-        <DialogFooter className="mx-0 mb-0 flex-row justify-end gap-3 rounded-b-lg border-t border-border bg-transparent px-6 py-4">
+          <DialogHeader className="gap-1.5 border-b border-border px-6 py-5 pr-14">
+            <DialogTitle className="font-tight text-xl font-bold text-ink">
+              Generar CV profesional
+            </DialogTitle>
+            <DialogDescription className="text-sm text-text-secondary">
+              Personaliza las secciones y descarga tu currículum en formato PDF.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="px-6 pt-5"><ProfileCompletenessProgress showChecklist={false} /></div>
           <Button
             type="button"
-            variant="outline"
-            className="h-11 border-border-strong px-5 text-sm text-ink hover:bg-surface-soft"
+            variant="ghost"
+            size="icon-sm"
+            aria-label="Cerrar"
+            className="absolute top-4 right-4 text-text-secondary"
             onClick={onClose}
           >
-            Cancelar
+            <X aria-hidden="true" className="size-4" />
           </Button>
-          <Button
-            type="button"
-            className="h-11 bg-primary px-5 text-sm font-semibold text-primary-foreground hover:bg-brand-hover"
-            disabled={isGenerating}
-            onClick={() => void handleDownload()}
-          >
-            <Download aria-hidden="true" className="size-4" />
-            Descargar CV en PDF
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          {isPreviewing ? (
+            <div className="flex flex-col gap-3 bg-surface-soft px-6 py-5">
+              <div className="flex items-center justify-between gap-4">
+                <p className="text-sm font-semibold text-ink-soft">
+                  Vista previa de maquetación institucional (A4)
+                </p>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="h-8 px-2 text-sm font-semibold text-ink"
+                  onClick={() => setStep("sections")}
+                >
+                  <ArrowLeft aria-hidden="true" className="size-4" />
+                  Volver a secciones
+                </Button>
+              </div>
+              <iframe
+                src={generatedCv.previewUrl}
+                title={`Vista previa de ${generatedCv.fileName}`}
+                className="h-[50vh] w-full rounded-lg border border-border bg-surface"
+              />
+            </div>
+          ) : (
+            <div className="flex max-h-[60vh] flex-col gap-4 overflow-y-auto px-6 py-5">
+              {isLowCompleteness ? (
+                <div
+                  role="status"
+                  className="flex items-start gap-3 rounded-lg border border-notice-border bg-notice px-4 py-3 text-notice-foreground"
+                >
+                  <AlertTriangle aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-notice-foreground" />
+                  <div className="flex flex-col gap-0.5 text-sm">
+                    <p className="font-semibold text-notice-foreground">
+                      {CV_EXPORT_INCOMPLETE_PROFILE_MESSAGES.bannerTitle(percentage)}
+                    </p>
+                    <p className="leading-relaxed text-notice-foreground/90">
+                      {CV_EXPORT_INCOMPLETE_PROFILE_MESSAGES.bannerDescription}
+                    </p>
+                  </div>
+                </div>
+              ) : null}
+              <CvExportSections
+                sections={sections}
+                repositoryCount={repositoryCount}
+                isDisabled={isGenerating}
+                onToggle={handleToggleSection}
+              />
+              <div className="flex items-start gap-3 rounded-lg border border-border bg-surface-soft px-4 py-3">
+                <Info aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-ink-soft" />
+                <p className="text-sm leading-relaxed text-text-secondary">
+                  El documento se maquetará en plantilla institucional optimizada de 1 a 2 páginas para
+                  postulaciones laborales.
+                </p>
+              </div>
+              <div className="flex items-center justify-between gap-4">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="h-8 px-2 text-sm font-semibold text-ink"
+                  disabled={isGenerating}
+                  onClick={() => void handlePreview()}
+                >
+                  <Eye aria-hidden="true" className="size-4" />
+                  Previsualizar diseño del PDF
+                </Button>
+                <p className="text-xs text-text-secondary">Formato A4 · Estándar ATS</p>
+              </div>
+            </div>
+          )}
+          {isGenerating ? (
+            <p role="status" className="flex items-center gap-2 px-6 pb-4 text-sm text-text-secondary">
+              <LoaderCircle aria-hidden="true" className="size-4 animate-spin" />
+              Generando tu CV...
+            </p>
+          ) : null}
+          {!isGenerating && (error ?? downloadError) ? (
+            <p role="alert" className="px-6 pb-4 text-sm text-danger">
+              {error ?? downloadError}
+            </p>
+          ) : null}
+          <DialogFooter className="mx-0 mb-0 flex-row justify-end gap-3 rounded-b-lg border-t border-border bg-transparent px-6 py-4">
+            <Button
+              type="button"
+              variant="outline"
+              className="h-11 border-border-strong px-5 text-sm text-ink hover:bg-surface-soft"
+              onClick={onClose}
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              className="h-11 bg-primary px-5 text-sm font-semibold text-primary-foreground hover:bg-brand-hover"
+              disabled={isGenerating}
+              onClick={() => void handleDownload()}
+            >
+              <Download aria-hidden="true" className="size-4" />
+              Descargar CV en PDF
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={showIncompleteWarningDialog} onOpenChange={setShowIncompleteWarningDialog}>
+        <AlertDialogContent className="max-w-md gap-0 rounded-lg border border-border bg-surface p-6 text-ink shadow-sm ring-0 data-[size=default]:max-w-md data-[size=default]:sm:max-w-md">
+          <AlertDialogHeader className="place-items-start text-left">
+            <div className="mb-2 flex size-10 items-center justify-center rounded-full bg-notice text-notice-foreground">
+              <AlertTriangle aria-hidden="true" className="size-5 text-notice-foreground" />
+            </div>
+            <AlertDialogTitle className="font-tight text-xl font-bold text-ink">
+              {CV_EXPORT_INCOMPLETE_PROFILE_MESSAGES.dialogTitle}
+            </AlertDialogTitle>
+            <AlertDialogDescription className="mt-2 text-sm text-text-secondary">
+              {CV_EXPORT_INCOMPLETE_PROFILE_MESSAGES.dialogDescription(percentage ?? 0)}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mx-0 mt-6 mb-0 flex-row justify-end gap-3 border-t-0 bg-transparent p-0">
+            <AlertDialogCancel
+              type="button"
+              className="h-10 border-border-strong px-4 text-sm text-ink hover:bg-surface-soft"
+              onClick={handleCompleteProfile}
+            >
+              {CV_EXPORT_INCOMPLETE_PROFILE_MESSAGES.completeProfile}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              type="button"
+              className="h-10 bg-primary px-4 text-sm font-semibold text-primary-foreground hover:bg-brand-hover"
+              onClick={() => void handleConfirmDownload()}
+            >
+              {CV_EXPORT_INCOMPLETE_PROFILE_MESSAGES.continueAnyway}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
 
