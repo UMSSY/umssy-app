@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { RefreshCw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,8 +16,9 @@ function getStatusMessage(summary: DetectedSkillsSummary | null, hasLoadError: b
   return summary.skills.length ? null : DETECTED_SKILLS_TEXTS.empty;
 }
 
-export function DetectedSkillsPanel() {
+export function DetectedSkillsPanel({ onBusyChange }: { onBusyChange?: (busy: boolean) => void } = {}) {
   const detected = useDetectedSkills();
+  useEffect(() => { onBusyChange?.(detected.isAnalyzing); }, [detected.isAnalyzing, onBusyChange]);
   const message = getStatusMessage(detected.summary, detected.hasLoadError, detected.isLoading);
 
   return (

@@ -44,6 +44,10 @@ export function useSkills(): UseSkillsResult {
   const [draftSkills, setSelectedSkills] = useState<SkillItem[] | null>(null);
   const selectedSkills = draftSkills ?? query.data?.selected ?? [];
   const catalogSkills = query.data?.catalog ?? [];
+  const savedIds = new Set(query.data?.selected.map((skill) => skill.id) ?? []);
+  const hasUnsavedChanges = draftSkills !== null && (
+    draftSkills.length !== savedIds.size || draftSkills.some((skill) => !savedIds.has(skill.id))
+  );
   const isLoading = query.isFetching;
   const hasLoadError = query.isError;
   const [localFeedback, setFeedback] = useState<Feedback | null>(null);
@@ -121,6 +125,7 @@ export function useSkills(): UseSkillsResult {
     selectedSkills,
     isLoading,
     isSaving,
+    hasUnsavedChanges,
     hasLoadError,
     feedback,
     addSkill,
