@@ -4,7 +4,7 @@ import { act, cleanup, renderHook } from "@testing-library/react";
 import type { PropsWithChildren } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { PROFILE_SKILLS_RADAR_QUERY_KEY } from "@/modules/profile";
-import { SKILLS_PROFILE_QUERY_KEY } from "@/modules/skills";
+import { MY_SKILLS_QUERY_KEY } from "@/modules/skills";
 import { WORK_EXPERIENCE_FEEDBACK_MESSAGES } from "../config/work-experience-feedback.config";
 import { workExperienceService } from "../services/work-experience.service";
 import type { WorkExperienceItem } from "../types/work-experience-item.types";
@@ -81,7 +81,7 @@ describe("useDeleteWorkExperience", () => {
     });
 
     expect(invalidateQueries).toHaveBeenCalledWith({
-      queryKey: SKILLS_PROFILE_QUERY_KEY,
+      queryKey: MY_SKILLS_QUERY_KEY,
     });
 
     expect(result.current.feedback).toEqual({

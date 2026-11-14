@@ -11,13 +11,15 @@ import type { CertificationMutationMessages } from "../types/certification-mutat
 import type { CertificationMutationOptions } from "../types/certification-mutation-options.types";
 import type { Feedback } from "@/modules/profile";
 import type { CertificationDocumentChange } from '../types/certification-document-change.types';
+import { useInvalidateProfileCompleteness } from "@/modules/profile";
 
 function useCertificationMutation<TVariables>(
   mutationFn: (variables: TVariables) => Promise<Certification>,
   messages: CertificationMutationMessages,
   options: CertificationMutationOptions,
 ) {
-  const mutation = useMutation({ mutationFn: (variables: TVariables) => mutationFn(variables) });
+  const invalidateCompleteness = useInvalidateProfileCompleteness();
+  const mutation = useMutation({ mutationFn: (variables: TVariables) => mutationFn(variables), onSuccess: invalidateCompleteness });
   const [isPending, setIsPending] = useState(false);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const lastError = useRef<unknown>(null);

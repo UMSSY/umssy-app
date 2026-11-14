@@ -18,6 +18,7 @@ import { seedCareersCatalog } from '../../modules/access-requests/seeds/careers-
 import { seedMessageStatusesCatalog } from '../../modules/chat/seeds/message-statuses-catalog.seed.js';
 import { seedConnectionRequestStatusesCatalog } from '../../modules/chat/seeds/connection-request-statuses-catalog.seed.js';
 import { seedAttachmentTypesCatalog } from '../../modules/chat/seeds/attachment-types-catalog.seed.js';
+import { seedPortfolioProvidersCatalog } from '../../modules/portfolio/seeds/portfolio-providers-catalog.seed.js';
 import { seedSurveyStatusesCatalog } from '../../modules/surveys/seeds/survey-statuses-catalog.seed.js';
 import { seedSurveyQuestionTypesCatalog } from '../../modules/surveys/seeds/survey-question-types-catalog.seed.js';
 import { seedSurveyTargetAudiencesCatalog } from '../../modules/surveys/seeds/survey-target-audiences-catalog.seed.js';
@@ -49,4 +50,5 @@ export async function seedCatalogStages(
   await seedSurveyTargetAudiencesCatalog(tx);
   await seedConnectionRequestStatusesCatalog(tx);
   await seedAttachmentTypesCatalog(tx);
+  await seedPortfolioProvidersCatalog(tx);
 }

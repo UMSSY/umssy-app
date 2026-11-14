@@ -1,0 +1,7 @@
+<mj-section padding="8px 24px">
+  <mj-column>
+    <mj-text mj-class="heading">{{ title }}</mj-text>
+    <mj-text>{{ body }}</mj-text>
+    <mj-button href="{{ actionUrl }}">Ver en UMSSY</mj-button>
+  </mj-column>
+</mj-section>
