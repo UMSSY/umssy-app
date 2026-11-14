@@ -1,6 +1,6 @@
 import '@/shared/testing/indexed-db.mock';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { OFFLINE_PASSES_STORAGE_KEY } from '@/shared/constants/offline-passes.constants';
+import { offlinePassesKey } from '@/shared/constants/offline-passes.constants';
 import { apiClient } from '@/shared/services/api-client';
 import {
   clearAccessToken,
@@ -10,7 +10,7 @@ import {
   readIndexedDb,
   readIndexedDbPair,
 } from '@/shared/services/storage/browser-indexed-db';
-import { listOfflinePasses } from './offline-passes.service';
+import { loadSessionOfflinePasses } from '../utils/offline-passes-store';
 import { registrationsService } from './registrations.service';
 
 const accountA = `header.${btoa(JSON.stringify({ sub: 'titulado-a' }))}.test`;
@@ -51,10 +51,12 @@ describe('HU-08-14 offline pass copies', () => {
     vi.resetModules();
     const { initializeAccessTokenStorage } =
       await import('@/shared/services/storage/access-token-storage');
-    const { listOfflinePasses: listAfterRestart } =
-      await import('./offline-passes.service');
+    const { loadSessionOfflinePasses: readAfterRestart } =
+      await import('../utils/offline-passes-store');
     await initializeAccessTokenStorage();
-    await expect(listAfterRestart()).resolves.toEqual([
+    const restored = await readAfterRestart(accountA);
+    expect(restored?.savedAt).toEqual(expect.any(String));
+    expect(restored?.passes).toEqual([
       {
         id: pass.id,
         qrToken: pass.qrToken,
@@ -64,7 +66,6 @@ describe('HU-08-14 offline pass copies', () => {
         startTime: pass.event.startTime,
         endTime: pass.event.endTime,
         location: pass.event.location,
-        savedAt: expect.any(String),
       },
     ]);
   });
@@ -75,7 +76,7 @@ describe('HU-08-14 offline pass copies', () => {
       data: { data: { ...pass, status: { title: 'Cancelada' } } },
     });
     await expect(registrationsService.getPass(pass.id)).rejects.toThrow();
-    await expect(listOfflinePasses()).resolves.toEqual([]);
+    await expect(loadSessionOfflinePasses(accountA)).resolves.toBeNull();
     get.mockRestore();
   });
 
@@ -83,7 +84,7 @@ describe('HU-08-14 offline pass copies', () => {
     await saveAccessToken(accountA);
     const get = vi.spyOn(apiClient, 'get').mockResolvedValueOnce(response);
     await registrationsService.getPass(pass.id);
-    await expect(listOfflinePasses()).resolves.toHaveLength(1);
+    expect((await loadSessionOfflinePasses(accountA))?.passes).toHaveLength(1);
 
     let finishRequest!: (value: typeof response) => void;
     get.mockReturnValueOnce(
@@ -96,9 +97,11 @@ describe('HU-08-14 offline pass copies', () => {
     finishRequest(response);
     await pending;
 
-    await expect(listOfflinePasses()).resolves.toEqual([]);
-    await expect(listOfflinePasses(accountA)).resolves.toEqual([]);
-    await expect(readIndexedDb(OFFLINE_PASSES_STORAGE_KEY)).resolves.toBeNull();
+    await expect(loadSessionOfflinePasses(accountA)).resolves.toBeNull();
+    await expect(loadSessionOfflinePasses(accountB)).resolves.toBeNull();
+    await expect(
+      readIndexedDb(offlinePassesKey('titulado-a')),
+    ).resolves.toBeNull();
     get.mockRestore();
   });
 
@@ -106,13 +109,13 @@ describe('HU-08-14 offline pass copies', () => {
     await saveAccessToken(accountA);
     const get = vi.spyOn(apiClient, 'get').mockResolvedValue(response);
     await registrationsService.getPass(pass.id);
-    const pendingRead = listOfflinePasses();
+    const pendingRead = loadSessionOfflinePasses(accountA);
     clearAccessToken();
-    await expect(pendingRead).resolves.toEqual([]);
+    await expect(pendingRead).resolves.toBeNull();
     await vi.waitFor(async () =>
-      expect(await readIndexedDb(OFFLINE_PASSES_STORAGE_KEY)).toBeNull(),
+      expect(await readIndexedDb(offlinePassesKey('titulado-a'))).toBeNull(),
     );
-    await expect(listOfflinePasses()).resolves.toEqual([]);
+    await expect(loadSessionOfflinePasses(accountA)).resolves.toBeNull();
     get.mockRestore();
   });
 
@@ -120,9 +123,9 @@ describe('HU-08-14 offline pass copies', () => {
     await saveAccessToken(accountA);
     const get = vi.spyOn(apiClient, 'get').mockResolvedValue(response);
     await registrationsService.getPass(pass.id);
-    const cache = await readIndexedDb(OFFLINE_PASSES_STORAGE_KEY);
+    const cache = await readIndexedDb(offlinePassesKey('titulado-a'));
     vi.mocked(readIndexedDbPair).mockResolvedValueOnce([accountB, cache]);
-    await expect(listOfflinePasses()).resolves.toEqual([]);
+    await expect(loadSessionOfflinePasses(accountA)).resolves.toBeNull();
     get.mockRestore();
   });
 });

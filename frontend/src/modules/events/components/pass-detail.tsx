@@ -3,7 +3,7 @@
 import { cn } from '@/lib/utils';
 
 import { useEventFinished } from '../hooks/use-event-finished';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRegistrationSession } from '@/modules/registrations';
 import { Button } from '@/components/ui/button';
 import { PassQr } from './pass-qr';
@@ -14,12 +14,20 @@ import { Calendar, MapPin, Check, Clock, Loader2 } from 'lucide-react';
 import { formatRegistrationDate, getEffectiveRegistrationStatus } from '../utils/registration-format';
 import { registrationsService } from '../services/registrations.service';
 import type { PassDetailProps } from '../types/pass-detail-props.types';
+import { OFFLINE_PASSES_SNAPSHOT_QUERY_KEY } from '../constants/offline-passes.constants';
 
 export function PassDetail({ registration, offlineQrToken }: PassDetailProps) {
   const accessToken = useRegistrationSession();
+  const queryClient = useQueryClient();
   const pass = useQuery({
     queryKey: ['private-event-pass', accessToken, registration.id],
-    queryFn: ({ signal }) => registrationsService.getPass(registration.id, signal, accessToken),
+    queryFn: async ({ signal }) => {
+      const data = await registrationsService.getPass(registration.id, signal, accessToken);
+      if (!signal.aborted) {
+        void queryClient.invalidateQueries({ queryKey: [OFFLINE_PASSES_SNAPSHOT_QUERY_KEY, accessToken] });
+      }
+      return data;
+    },
     enabled: Boolean(accessToken),
     retry: false,
   });

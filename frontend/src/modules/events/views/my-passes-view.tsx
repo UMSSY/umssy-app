@@ -19,7 +19,7 @@ import { MyPassesEmptyState } from "../components/my-passes-empty-state";
 import type { MyPassesViewProps } from "../types/my-passes-view-props.types";
 
 export function MyPassesView({ onOpenWorkshopChat }: MyPassesViewProps = {}) {
-  const { status, isOnline, passes: registrations, offlineQrTokens, lastUpdated, error, isConnectionError, retry } = usePassesViewState();
+  const { status, isOnline, passes: registrations, offlineQrTokens, lastUpdated, error, isConnectionError, removedSavedPasses, retry } = usePassesViewState();
   const isLoading = status === "loading";
   const offlineReason = isOnline ? undefined : OFFLINE_PASSES_TEXTS.requiresConnection;
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -36,6 +36,10 @@ export function MyPassesView({ onOpenWorkshopChat }: MyPassesViewProps = {}) {
           : <Link href="/events" className={buttonVariants({ variant: "outline" })}><CalendarDays aria-hidden="true" />Explorar talleres</Link>}
       />
       {status === "saved" ? <OfflineStatusBanner isOnline={isOnline} lastUpdated={lastUpdated} onRetry={retry} /> : null}
+      {status === "live" && removedSavedPasses ? (
+        <RequestFeedback message="Actualizamos tus pases guardados. Se retiraron los pases que ya no están disponibles." />
+      ) : null}
+      {!isOnline ? <RequestFeedback message="El chat y el catálogo de talleres requieren conexión a Internet." /> : null}
       {isLoading ? (
         <RequestFeedback message="Cargando tus inscripciones..." />
       ) : status === "no-offline-copy" || (status === "error" && error) ? (

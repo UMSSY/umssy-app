@@ -2,7 +2,6 @@
 
 import { useRegistrationSession } from "@/modules/registrations";
 import { formatLastUpdated } from "../utils/format-last-updated";
-import { getTokenUserId } from "../utils/get-token-user-id";
 import { useMyPasses } from "./use-my-passes";
 import { useOfflinePassesSnapshot } from "./use-offline-passes-snapshot";
 import { useOnlineStatus } from "./use-online-status";
@@ -10,10 +9,10 @@ import { useOnlineStatus } from "./use-online-status";
 import type { PassesViewState } from "../types/passes-view-state.types";
 
 export function usePassesViewState(): PassesViewState {
-  const userId = getTokenUserId(useRegistrationSession());
+  const accessToken = useRegistrationSession();
   const isOnline = useOnlineStatus();
   const live = useMyPasses();
-  const { snapshot, isLoading: isSnapshotLoading } = useOfflinePassesSnapshot(userId, isOnline);
+  const { snapshot, isLoading: isSnapshotLoading } = useOfflinePassesSnapshot(accessToken, isOnline);
 
   const saved = snapshot?.passes ?? [];
   const base = {
@@ -21,6 +20,7 @@ export function usePassesViewState(): PassesViewState {
     offlineQrTokens: Object.fromEntries(saved.map(({ id, qrToken }) => [id, qrToken])),
     lastUpdated: snapshot ? formatLastUpdated(snapshot.savedAt) : null,
     isConnectionError: false,
+    removedSavedPasses: live.removedSavedPasses,
     retry: live.retry,
   };
   const savedView = (error: string | null): PassesViewState => ({

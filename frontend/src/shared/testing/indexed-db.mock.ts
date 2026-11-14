@@ -18,7 +18,7 @@ vi.mock('@/shared/services/storage/browser-indexed-db', () => ({
   updateIndexedDbPair: vi.fn(
     async (
       primary: string,
-      secondary: string,
+      secondary: string | ((primary: unknown) => string),
       update: (
         primary: unknown,
         secondary: unknown,
@@ -27,10 +27,13 @@ vi.mock('@/shared/services/storage/browser-indexed-db', () => ({
         secondary?: unknown;
       },
     ) => {
-      const next = update(values.get(primary), values.get(secondary));
+      const previous = values.get(primary);
+      const secondaryKey =
+        typeof secondary === 'string' ? secondary : secondary(previous);
+      const next = update(previous, values.get(secondaryKey));
       for (const [key, value] of [
         [primary, next.primary],
-        [secondary, next.secondary],
+        [secondaryKey, next.secondary],
       ] as const) {
         if (value === null) values.delete(key);
         else if (value !== undefined) values.set(key, structuredClone(value));

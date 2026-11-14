@@ -1,7 +1,10 @@
 import { ACCESS_TOKEN_STORAGE_KEY } from '@/shared/constants/auth.constants';
-import { OFFLINE_PASSES_STORAGE_KEY } from '@/shared/constants/offline-passes.constants';
+import {
+  OFFLINE_PASSES_STORAGE_KEY,
+  offlinePassesKey,
+} from '@/shared/constants/offline-passes.constants';
 import { readAccessTokenSubject } from '@/shared/utils/read-access-token-subject';
-import { readIndexedDb, updateIndexedDbPair } from './browser-indexed-db';
+import { readIndexedDb, removeIndexedDb, updateIndexedDbPair } from './browser-indexed-db';
 
 let token: string | null = null;
 let ready = false;
@@ -12,6 +15,10 @@ const listeners = new Set<() => void>();
 let channel: BroadcastChannel | null = null;
 const emit = () => {
   for (const listener of listeners) listener();
+};
+const previousPassesKey = (previous: unknown) => {
+  const owner = readAccessTokenSubject(previous);
+  return owner ? offlinePassesKey(owner) : OFFLINE_PASSES_STORAGE_KEY;
 };
 
 export function isAccessTokenReady(): boolean {
@@ -41,10 +48,10 @@ export function initializeAccessTokenStorage(): Promise<void> {
 export async function saveAccessToken(value: string): Promise<boolean> {
   const writeRevision = ++revision;
   const subject = readAccessTokenSubject(value);
-  const operation = writes.then(() =>
-    updateIndexedDbPair(
+  const operation = writes.then(async () => {
+    await updateIndexedDbPair(
       ACCESS_TOKEN_STORAGE_KEY,
-      OFFLINE_PASSES_STORAGE_KEY,
+      previousPassesKey,
       (previous) => ({
         primary: value,
         secondary:
@@ -52,8 +59,9 @@ export async function saveAccessToken(value: string): Promise<boolean> {
             ? undefined
             : null,
       }),
-    ),
-  );
+    );
+    await removeIndexedDb(OFFLINE_PASSES_STORAGE_KEY).catch(() => {});
+  });
   writes = operation.catch(() => {});
   try {
     await operation;
@@ -83,13 +91,13 @@ export function clearAccessToken(): boolean {
   ready = true;
   loading = null;
   emit();
-  const operation = writes.then(() =>
-    updateIndexedDbPair(
-      ACCESS_TOKEN_STORAGE_KEY,
-      OFFLINE_PASSES_STORAGE_KEY,
-      () => ({ primary: null, secondary: null }),
-    ),
-  );
+  const operation = writes.then(async () => {
+    await updateIndexedDbPair(ACCESS_TOKEN_STORAGE_KEY, previousPassesKey, () => ({
+      primary: null,
+      secondary: null,
+    }));
+    await removeIndexedDb(OFFLINE_PASSES_STORAGE_KEY).catch(() => {});
+  });
   writes = operation.catch(() => {});
   void operation.then(() => channel?.postMessage('changed')).catch(() => {});
   return true;

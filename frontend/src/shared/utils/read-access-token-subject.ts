@@ -12,7 +12,7 @@ export function readAccessTokenSubject(token: unknown): string | null {
       claims !== null &&
       'sub' in claims &&
       typeof claims.sub === 'string' &&
-      claims.sub.length > 0
+      claims.sub.trim().length > 0
     ) {
       return claims.sub;
     }

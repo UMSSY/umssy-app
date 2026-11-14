@@ -40,7 +40,7 @@ export function createIndexedDbStorage({
     },
     updatePair(
       primaryKey: string,
-      secondaryKey: string,
+      secondary: string | ((primary: unknown) => string),
       update: (
         primary: unknown,
         secondary: unknown,
@@ -52,11 +52,13 @@ export function createIndexedDbStorage({
       return withDatabase(async (database) => {
         const transaction = database.transaction(storeName, 'readwrite');
         try {
-          const [primary, secondary] = await Promise.all([
-            transaction.store.get(primaryKey),
-            transaction.store.get(secondaryKey),
-          ]);
-          const next = update(primary, secondary);
+          const primary = await transaction.store.get(primaryKey);
+          const secondaryKey =
+            typeof secondary === 'string' ? secondary : secondary(primary);
+          const next = update(
+            primary,
+            await transaction.store.get(secondaryKey),
+          );
           for (const [key, value] of [
             [primaryKey, next.primary],
             [secondaryKey, next.secondary],

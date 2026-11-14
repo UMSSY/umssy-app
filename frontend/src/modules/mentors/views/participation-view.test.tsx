@@ -46,10 +46,12 @@ vi.mock("@/shared/services/storage/browser-indexed-db", () => ({
     drafts.delete(key);
   }),
   updateIndexedDbPair: vi.fn(async (primary, secondary, update) => {
-    const next = update(drafts.get(primary), drafts.get(secondary));
+    const previous = drafts.get(primary);
+    const key = typeof secondary === 'string' ? secondary : secondary(previous);
+    const next = update(previous, drafts.get(key));
     if (next.primary === null) drafts.delete(primary);
     else if (next.primary !== undefined) drafts.set(primary, next.primary);
-    if (next.secondary === null) drafts.delete(secondary);
+    if (next.secondary === null) drafts.delete(key);
   }),
 }));
 
