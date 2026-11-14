@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { SwaggerModule } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
 import { cleanupOpenApiDoc } from 'nestjs-zod';
@@ -12,7 +13,8 @@ import { buildSwaggerConfig } from './config/swagger.config.js';
 async function bootstrap(): Promise<void> {
   validateEnv();
 
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  app.set('trust proxy', 1);
   app.use(securityHeaders);
   app.use(cookieParser());
 
