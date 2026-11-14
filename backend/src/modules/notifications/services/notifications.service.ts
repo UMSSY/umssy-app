@@ -6,7 +6,8 @@ import { PushDispatcherService } from './push-dispatcher.service.js';
 import { MailDispatcherService } from './mail-dispatcher.service.js';
 import { NOTIFICATION_CATALOG } from '../constants/notification-catalog.constants.js';
 import { NOTIFICATION_TEMPLATES } from '../constants/notification-templates.constants.js';
-import type { NotifyRequest, NotifyResult } from '../types/notification.types.js';
+import type { NotifyRequest } from '../types/notify-request.type.js';
+import type { NotifyResult } from '../types/notify-result.type.js';
 import { NotificationGateway } from '../gateways/notification.gateway.js'; 
 
 @Injectable()

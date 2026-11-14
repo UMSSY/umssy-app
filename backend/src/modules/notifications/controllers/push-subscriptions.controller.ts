@@ -2,7 +2,7 @@ import { Controller, Get, Post, Delete, Body, UseGuards } from '@nestjs/common';
 import { PushSubscriptionsRepository } from '../repositories/push-subscriptions.repository.js';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { CurrentUserId } from '../../../common/decorators/current-user-id.decorator.js';
-import type { PushSubscriptionPayload } from '../types/notification.types.js';
+import type { PushSubscriptionPayload } from '../types/push-subscription-payload.type.js';
 
 @Controller('push')
 @UseGuards(JwtAuthGuard)
