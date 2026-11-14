@@ -7,6 +7,7 @@ import { SectionCard } from "@/modules/profile";
 import { CvDropzone } from "./cv-dropzone";
 
 export function CvUploadCard({
+  selectId,
   selectedFile,
   hasSavedCv,
   isLoading = false,
@@ -32,6 +33,7 @@ export function CvUploadCard({
     return (
       <SectionCard title="Subir currículum">
         <CvDropzone
+          selectId={selectId}
           title="Ya tienes un CV vigente"
           description="Sube una nueva versión en PDF. Tu CV actual pasará al historial."
           selectLabel={isUploading ? "Cargando..." : "Subir nueva versión"}
@@ -50,6 +52,7 @@ export function CvUploadCard({
   return (
     <SectionCard title="Subir currículum">
       <CvDropzone
+        selectId={selectId}
         title="Selecciona tu CV en formato PDF"
         selectLabel="Seleccionar PDF"
         isDisabled={isBusy}

@@ -74,4 +74,18 @@ describe("useApplyCvExtraction", () => {
     act(() => result.current.reset());
     expect(result.current.report).toBeNull();
   });
+
+  it("keeps applied data successful when a post-save refresh rejects", async () => {
+    vi.mocked(profileService.updatePresentation).mockResolvedValue(PROFILE);
+    const { result, client } = renderHook(() => useApplyCvExtraction());
+    vi.spyOn(client, "invalidateQueries").mockRejectedValue(new Error("Refresh unavailable"));
+
+    await act(async () => {
+      await expect(result.current.apply(EXTRACTION, SELECTION, null)).resolves.toEqual([
+        expect.objectContaining({ isApplied: true }),
+      ]);
+    });
+
+    expect(result.current.report).toEqual({ applied: ["Presentación"], failed: [] });
+  });
 });
