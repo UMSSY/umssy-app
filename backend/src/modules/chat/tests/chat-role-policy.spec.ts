@@ -28,6 +28,7 @@ function setup(rolesA: string[], rolesB: string[]) {
     {
       id: USER_B,
       isActive: true,
+      companyId: 'company-uuid-1',
       roles: rolesB.map((name) => ({ role: { name } })),
     },
   ];
@@ -36,10 +37,21 @@ function setup(rolesA: string[], rolesB: string[]) {
     findManyWithActiveRoles: vi.fn().mockResolvedValue(users),
   };
 
+  const applicationsService = {
+    validateApplicationForChat: vi.fn().mockResolvedValue({
+      isValid: true,
+      vacancyTitle: 'Desarrollador Fullstack',
+      companyName: 'Tech Corp',
+    }),
+  };
+
   const policy = new ChatRolePolicyService(
     usersService as unknown as ConstructorParameters<
       typeof ChatRolePolicyService
     >[0],
+    applicationsService as unknown as ConstructorParameters<
+      typeof ChatRolePolicyService
+    >[1],
   );
 
   const conversation = {
@@ -180,6 +192,7 @@ function setup(rolesA: string[], rolesB: string[]) {
   return {
     users,
     usersService,
+    applicationsService,
     policy,
     conversation,
     conversations,
@@ -361,5 +374,60 @@ describe('HU8 tarea 3: roles permitidos', () => {
     expect(context.messages.create).not.toHaveBeenCalled();
     expect(to).not.toHaveBeenCalled();
     expect(emit).not.toHaveBeenCalled();
+  });
+
+  it('permite comunicacion entre estudiante y empresa cuando existe postulacion activa valida', async () => {
+    const context = setup(['estudiante'], ['empresa']);
+
+    await expect(
+      context.policy.assertCanCommunicate(USER_A, USER_B, {
+        contextType: 'POSTULACION',
+        contextId: 'postulacion-uuid-1',
+      }),
+    ).resolves.toBeUndefined();
+
+    expect(
+      context.applicationsService.validateApplicationForChat,
+    ).toHaveBeenCalledWith('postulacion-uuid-1', USER_A, 'company-uuid-1');
+  });
+
+  it('permite comunicacion entre empresa y titulado cuando existe postulacion activa valida', async () => {
+    const context = setup(['empresa'], ['titulado']);
+    context.users[0].companyId = 'company-uuid-1';
+
+    await expect(
+      context.policy.assertCanCommunicate(USER_A, USER_B, {
+        contextType: 'POSTULACION',
+        contextId: 'postulacion-uuid-2',
+      }),
+    ).resolves.toBeUndefined();
+
+    expect(
+      context.applicationsService.validateApplicationForChat,
+    ).toHaveBeenCalledWith('postulacion-uuid-2', USER_B, 'company-uuid-1');
+  });
+
+  it('rechaza comunicacion entre estudiante y empresa cuando la postulacion no es valida o inactiva', async () => {
+    const context = setup(['estudiante'], ['empresa']);
+    context.applicationsService.validateApplicationForChat.mockResolvedValueOnce({
+      isValid: false,
+      vacancyTitle: null,
+      companyName: null,
+    });
+
+    await expect(
+      context.policy.assertCanCommunicate(USER_A, USER_B, {
+        contextType: 'POSTULACION',
+        contextId: 'postulacion-inactiva',
+      }),
+    ).rejects.toBeInstanceOf(ChatRoleNotAllowedException);
+  });
+
+  it('rechaza comunicacion entre estudiante y empresa cuando no se provee contexto', async () => {
+    const context = setup(['estudiante'], ['empresa']);
+
+    await expect(
+      context.policy.assertCanCommunicate(USER_A, USER_B),
+    ).rejects.toBeInstanceOf(ChatRoleNotAllowedException);
   });
 });

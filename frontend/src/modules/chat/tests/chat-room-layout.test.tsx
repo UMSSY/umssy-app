@@ -267,5 +267,50 @@ describe('ChatRoom Layout y Componentes Responsivos (HU-03 Tarea 3)', () => {
     fireEvent.click(sendButton);
     expect(onSend).not.toHaveBeenCalled();
   });
+
+  it('debe mostrar la insignia y el banner de postulacion cuando contextType es POSTULACION', () => {
+    const postulationConversation: Conversation = {
+      ...mockConversation,
+      contextType: 'POSTULACION',
+      contextId: 'app-uuid-1234',
+    };
+
+    render(
+      <ChatRoom
+        conversation={postulationConversation}
+        messages={[]}
+        currentUserId="current-user"
+        onBack={vi.fn()}
+        onSendMessage={vi.fn()}
+      />
+    );
+
+    expect(screen.getByTestId('chat-room-postulation-badge')).toBeInTheDocument();
+    expect(screen.getByTestId('chat-room-postulation-badge')).toHaveTextContent('Postulación');
+    expect(screen.getByTestId('chat-room-postulation-banner')).toBeInTheDocument();
+    expect(
+      screen.getByText('Conversación vinculada a una postulación laboral')
+    ).toBeInTheDocument();
+
+    const viewButton = screen.getByTestId('chat-room-view-postulation-button');
+    expect(viewButton).toBeInTheDocument();
+    expect(viewButton).toHaveAttribute('href', '/vacancies/my-applications');
+  });
+
+  it('no debe mostrar la insignia ni el banner cuando contextType no es POSTULACION', () => {
+    render(
+      <ChatRoom
+        conversation={mockConversation}
+        messages={[]}
+        currentUserId="current-user"
+        onBack={vi.fn()}
+        onSendMessage={vi.fn()}
+      />
+    );
+
+    expect(screen.queryByTestId('chat-room-postulation-badge')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('chat-room-postulation-banner')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('chat-room-view-postulation-button')).not.toBeInTheDocument();
+  });
 });
 

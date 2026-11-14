@@ -31,8 +31,23 @@ export class ConversationRepository {
   }
 
   async findByOrderedPair(userAId: string, userBId: string) {
-    return this.prisma.conversation.findUnique({
-      where: { userAId_userBId: { userAId, userBId } },
+    return this.prisma.conversation.findFirst({
+      where: { userAId, userBId, contextId: null },
+      include: {
+        userA: CONTACT_USER_SELECT,
+        userB: CONTACT_USER_SELECT,
+        messages: {
+          orderBy: { sentAt: 'desc' },
+          take: 1,
+          include: { status: { select: { title: true } } },
+        },
+      },
+    });
+  }
+
+  async findByContextId(contextId: string) {
+    return this.prisma.conversation.findFirst({
+      where: { contextId },
       include: {
         userA: CONTACT_USER_SELECT,
         userB: CONTACT_USER_SELECT,
@@ -49,11 +64,17 @@ export class ConversationRepository {
     userAId: string,
     userBId: string,
     lastReadAt: Date,
+    context?: {
+      contextType?: string | null;
+      contextId?: string | null;
+    },
   ) {
     return this.prisma.conversation.create({
       data: {
         userAId,
         userBId,
+        contextType: context?.contextType ?? null,
+        contextId: context?.contextId ?? null,
         participants: {
           createMany: {
             data: [

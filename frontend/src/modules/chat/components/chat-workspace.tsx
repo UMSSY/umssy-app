@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
@@ -135,9 +135,47 @@ export function ChatWorkspace({
     clearSelectedConversation,
     findExistingConversationByContact,
     startConversationWithContact,
+    openContextualConversation,
     updateConversationLastMessage,
     setConversationBlocked,
   } = useConversations();
+
+  const handledQueryParamRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const searchParams = new URLSearchParams(window.location.search);
+    const contactIdParam = searchParams.get("contactId");
+    const contextTypeParam = searchParams.get("contextType");
+    const contextIdParam = searchParams.get("contextId");
+
+    if (!contactIdParam || !contextTypeParam || !contextIdParam) {
+      return;
+    }
+
+    const queryKey = `${contactIdParam}-${contextTypeParam}-${contextIdParam}`;
+    if (handledQueryParamRef.current === queryKey) {
+      return;
+    }
+
+    handledQueryParamRef.current = queryKey;
+
+    const initContextualChat = async () => {
+      try {
+        await openContextualConversation(contactIdParam, {
+          contextType: contextTypeParam,
+          contextId: contextIdParam,
+        });
+      } catch {
+        setContactSelectionError("No se pudo iniciar la conversación de la postulación.");
+      }
+    };
+
+    void initContextualChat();
+  }, [openContextualConversation]);
 
   const {
     data: messages = [],

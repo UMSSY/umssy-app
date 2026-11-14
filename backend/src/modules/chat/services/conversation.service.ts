@@ -42,10 +42,15 @@ export class ConversationService {
   async getOrCreate(
     currentUserId: string,
     contactId: string,
+    context?: {
+      contextType?: string;
+      contextId?: string;
+    },
   ): Promise<ConversationResponse> {
     const { conversation } = await this.getOrCreateWithStatus(
       currentUserId,
       contactId,
+      context,
     );
 
     return conversation;
@@ -54,6 +59,10 @@ export class ConversationService {
   async getOrCreateWithStatus(
     currentUserId: string,
     contactId: string,
+    context?: {
+      contextType?: string;
+      contextId?: string;
+    },
   ): Promise<{
     conversation: ConversationResponse;
     isCreated: boolean;
@@ -97,12 +106,12 @@ export class ConversationService {
     await this.chatRolePolicyService.assertCanCommunicate(
       normalizedCurrentUserId,
       normalizedContactId,
+      context,
     );
 
-    const existing = await this.conversationRepository.findByOrderedPair(
-      userAId,
-      userBId,
-    );
+    const existing = context?.contextId
+      ? await this.conversationRepository.findByContextId(context.contextId)
+      : await this.conversationRepository.findByOrderedPair(userAId, userBId);
 
     if (existing) {
       const conversation = await this.toResponse(
@@ -117,16 +126,21 @@ export class ConversationService {
       };
     }
 
-    const acceptedRequest =
-      await this.connectionRequestRepository.findAcceptedRequest(
-        userAId,
-        userBId,
-      );
+    const isPostulationContext =
+      context?.contextType === 'POSTULACION' && Boolean(context?.contextId);
 
-    if (!acceptedRequest) {
-      throw new ForbiddenException(
-        'Debes tener una solicitud de conexión aceptada para iniciar una conversación.',
-      );
+    if (!isPostulationContext) {
+      const acceptedRequest =
+        await this.connectionRequestRepository.findAcceptedRequest(
+          userAId,
+          userBId,
+        );
+
+      if (!acceptedRequest) {
+        throw new ForbiddenException(
+          'Debes tener una solicitud de conexión aceptada para iniciar una conversación.',
+        );
+      }
     }
 
     try {
@@ -134,6 +148,7 @@ export class ConversationService {
         userAId,
         userBId,
         new Date(),
+        context,
       );
 
       const conversation = await this.toResponse(
@@ -157,8 +172,12 @@ export class ConversationService {
         err?.message?.includes(UNIQUE_CONSTRAINT_VIOLATION_CODE) ||
         err?.message?.includes('Unique constraint')
       ) {
-        const concurrentExisting =
-          await this.conversationRepository.findByOrderedPair(userAId, userBId);
+        const concurrentExisting = context?.contextId
+          ? await this.conversationRepository.findByContextId(context.contextId)
+          : await this.conversationRepository.findByOrderedPair(
+              userAId,
+              userBId,
+            );
 
         if (concurrentExisting) {
           const conversation = await this.toResponse(
