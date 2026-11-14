@@ -12,6 +12,7 @@ import type { ProposalSupportResponse } from '../types/proposal-support-response
 
 export const registrationsService = {
   getMine: registrationApi.getMine,
+  getFinished: registrationApi.getFinished,
 
   async supportProposal(
     eventId: string,

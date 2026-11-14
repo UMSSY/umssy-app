@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   formatRegistrationDate,
   formatRegistrationTime,
+  getFinishedRegistrationPresentation,
 } from '../utils/registration-format';
 
 describe('formato de datos del pase', () => {
@@ -28,5 +29,9 @@ describe('formato de datos del pase', () => {
     expect(formatRegistrationDate('2026-10-20T00:00:00Z')).toContain(
       '20 de octubre de 2026',
     );
+  });
+  it('presents finished history without changing registration status', () => {
+    expect(getFinishedRegistrationPresentation()).toEqual({ label: 'Finalizado', code: 'FINALIZED' });
+    expect(formatRegistrationDate('2026-09-20')).toContain('20 de septiembre de 2026');
   });
 });
