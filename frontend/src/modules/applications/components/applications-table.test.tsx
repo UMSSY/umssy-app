@@ -12,10 +12,12 @@ describe("ApplicationsTable", () => {
         applications={[buildApplication()]}
         withdrawingId={null}
         onWithdraw={vi.fn()}
+        contactingId={null}
+        onContact={vi.fn()}
       />,
     );
 
-    expect(screen.getByRole("columnheader", { name: "Vacante" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "Vacante y empresa" })).toBeInTheDocument();
     expect(screen.getByText("Desarrollador Backend Python / FastAPI")).toBeInTheDocument();
     expect(screen.getByText("TechBolivia S.R.L.")).toBeInTheDocument();
     expect(screen.getByText("92%")).toBeInTheDocument();
@@ -29,12 +31,62 @@ describe("ApplicationsTable", () => {
         applications={[buildApplication({ id: "application-7" })]}
         withdrawingId={null}
         onWithdraw={onWithdraw}
+        contactingId={null}
+        onContact={vi.fn()}
       />,
     );
 
     fireEvent.click(screen.getByRole("button", { name: "Retirar" }));
 
     expect(onWithdraw).toHaveBeenCalledWith("application-7");
+  });
+
+  it("shows the date on which the person applied", () => {
+    render(
+      <ApplicationsTable
+        applications={[buildApplication({ appliedDate: "2026-11-10T12:00:00.000Z" })]}
+        withdrawingId={null}
+        onWithdraw={vi.fn()}
+        contactingId={null}
+        onContact={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole("columnheader", { name: "Fecha" })).toBeInTheDocument();
+    expect(screen.getByText("10/11/2026")).toBeInTheDocument();
+  });
+
+  it("lets the person contact the recruiter of an application", () => {
+    const onContact = vi.fn();
+    const application = buildApplication({ id: "application-7" });
+    render(
+      <ApplicationsTable
+        applications={[application]}
+        withdrawingId={null}
+        onWithdraw={vi.fn()}
+        contactingId={null}
+        onContact={onContact}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Contactar" }));
+
+    expect(onContact).toHaveBeenCalledWith(application);
+  });
+
+  it("disables only the contact button of the application that is being opened in the chat", () => {
+    render(
+      <ApplicationsTable
+        applications={[buildApplication({ id: "application-7" })]}
+        withdrawingId={null}
+        onWithdraw={vi.fn()}
+        contactingId="application-7"
+        onContact={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "Abriendo chat…" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Retirar" })).toBeEnabled();
   });
 
   it("disables the withdraw button of an application that already has a decision", () => {
@@ -46,6 +98,8 @@ describe("ApplicationsTable", () => {
         ]}
         withdrawingId={null}
         onWithdraw={vi.fn()}
+        contactingId={null}
+        onContact={vi.fn()}
       />,
     );
 
@@ -62,9 +116,37 @@ describe("ApplicationsTable", () => {
         applications={[buildApplication({ id: "application-7" })]}
         withdrawingId="application-7"
         onWithdraw={vi.fn()}
+        contactingId={null}
+        onContact={vi.fn()}
       />,
     );
 
     expect(screen.getByRole("button", { name: "Retirando…" })).toBeDisabled();
   });
+
+  it("shows the reactivation button only for withdrawn applications", () => {
+    const onReactivate = vi.fn();
+
+    render(
+      <ApplicationsTable
+        applications={[
+          buildApplication({ id: "application-1", status: "Retirada" }),
+          buildApplication({ id: "application-2", status: "En revisión" }),
+        ]}
+        withdrawingId={null}
+        onWithdraw={vi.fn()}
+        contactingId={null}
+        onContact={vi.fn()}
+        onReactivate={onReactivate}
+      />,
+    );
+
+    const button = screen.getByRole("button", { name: "Volver a postular" });
+    expect(button).toBeEnabled();
+    expect(screen.getAllByRole("button", { name: "Retirar" })).toHaveLength(1);
+
+    fireEvent.click(button);
+    expect(onReactivate).toHaveBeenCalledWith("application-1");
+  });
+
 });

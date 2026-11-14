@@ -1,7 +1,7 @@
 import type { ApplicationStatusFilter } from "./application-status-filter.types";
 
-export interface ApplicationsStatusTabsProps {
+export interface ApplicationsStatusSelectProps {
   value: ApplicationStatusFilter;
   onValueChange: (value: ApplicationStatusFilter) => void;
-  showWithdrawn?: boolean;
+  showWithdrawn: boolean;
 }
