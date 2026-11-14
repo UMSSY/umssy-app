@@ -11,7 +11,11 @@ const userId = '11111111-1111-4111-8111-111111111111';
 describe('SkillAnalysisRepository', () => {
   const prisma = {
     skill: { findMany: vi.fn() },
-    userSkill: { findMany: vi.fn() },
+    userSkill: {
+      findMany: vi.fn(),
+      deleteMany: vi.fn(),
+      update: vi.fn(),
+    },
   };
   const client = {
     userSkill: {
@@ -97,4 +101,79 @@ describe('SkillAnalysisRepository', () => {
     expect(client.userSkill.update).not.toHaveBeenCalled();
     expect(client.userSkill.createMany).not.toHaveBeenCalled();
   });
+
+  it('deletes nlp skills when their only evidence was from the deleted cv', async () => {
+    prisma.userSkill.findMany.mockResolvedValue([
+      {
+        id: 'nlp-skill',
+        source: 'nlp',
+        evidenceRefs: [{ type: 'cv', id: 'cv-1' }],
+      },
+    ]);
+    await repository.removeCvEvidence(userId, 'cv-1');
+    expect(prisma.userSkill.deleteMany).toHaveBeenCalledWith({
+      where: { userId, id: { in: ['nlp-skill'] } },
+    });
+    expect(prisma.userSkill.update).not.toHaveBeenCalled();
+  });
+
+  it('updates evidenceRefs and retains relevance when skill has remaining evidence', async () => {
+    prisma.userSkill.findMany.mockResolvedValue([
+      {
+        id: 'nlp-multi',
+        source: 'nlp',
+        evidenceRefs: [
+          { type: 'cv', id: 'cv-1' },
+          { type: 'education', id: 'edu-1' },
+        ],
+      },
+    ]);
+    await repository.removeCvEvidence(userId, 'cv-1');
+    expect(prisma.userSkill.deleteMany).not.toHaveBeenCalled();
+    expect(prisma.userSkill.update).toHaveBeenCalledWith({
+      where: { id: 'nlp-multi' },
+      data: {
+        evidenceRefs: [{ type: 'education', id: 'edu-1' }],
+        isHighRelevance: true,
+      },
+    });
+  });
+
+  it('retains manual skill when cv evidence is removed', async () => {
+    prisma.userSkill.findMany.mockResolvedValue([
+      {
+        id: 'manual-skill',
+        source: 'manual',
+        evidenceRefs: [{ type: 'cv', id: 'cv-1' }],
+      },
+    ]);
+    await repository.removeCvEvidence(userId, 'cv-1');
+    expect(prisma.userSkill.deleteMany).not.toHaveBeenCalled();
+    expect(prisma.userSkill.update).toHaveBeenCalledWith({
+      where: { id: 'manual-skill' },
+      data: {
+        evidenceRefs: [],
+        isHighRelevance: false,
+      },
+    });
+  });
+
+  it('leaves untouched skills that do not match the deleted cv', async () => {
+    prisma.userSkill.findMany.mockResolvedValue([
+      {
+        id: 'other-skill',
+        source: 'nlp',
+        evidenceRefs: [{ type: 'cv', id: 'cv-other' }],
+      },
+      {
+        id: 'no-refs',
+        source: 'manual',
+        evidenceRefs: null,
+      },
+    ]);
+    await repository.removeCvEvidence(userId, 'cv-1');
+    expect(prisma.userSkill.deleteMany).not.toHaveBeenCalled();
+    expect(prisma.userSkill.update).not.toHaveBeenCalled();
+  });
 });
+

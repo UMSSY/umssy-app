@@ -65,4 +65,13 @@ export class SkillAnalysisService {
   findApprovedRecruitmentReferences(userId: string, ids: string[]) {
     return this.repository.findApprovedRecruitmentReferences(userId, ids);
   }
+
+  removeCvEvidence(
+    userId: string,
+    cvId: string,
+    context?: TransactionContext,
+  ): Promise<void> {
+    return this.repository.removeCvEvidence(userId, cvId, context);
+  }
 }
+

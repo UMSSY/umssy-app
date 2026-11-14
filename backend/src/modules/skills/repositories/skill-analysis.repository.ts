@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
+import type { Prisma } from '../../../prisma/client.js';
 import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
 import {
   USER_SKILL_SOURCES,
@@ -9,6 +10,7 @@ import type { ProfileSkillRowResponse } from '../responses/profile-skill-row.res
 import type { SkillAnalysisCatalogResponse } from '../responses/skill-analysis-catalog.response.js';
 import type { SkillEvidenceRefPayload } from '../types/skill-evidence-ref-payload.type.js';
 import type { SkillReconciliationPayload } from '../types/skill-reconciliation-payload.type.js';
+import { isRefForCv } from '../utils/is-ref-for-cv.js';
 
 export const profileSkillRowSelect = {
   id: true,
@@ -148,4 +150,51 @@ export class SkillAnalysisRepository {
       select: { skillId: true, evidenceRefs: true },
     });
   }
+
+  async removeCvEvidence(
+    userId: string,
+    cvId: string,
+    context?: TransactionContext,
+  ): Promise<void> {
+    const client = context?.client ?? this.prisma;
+    const rows = await client.userSkill.findMany({
+      where: { userId },
+      select: {
+        id: true,
+        source: true,
+        evidenceRefs: true,
+      },
+    });
+
+    const deleteIds: string[] = [];
+
+    for (const row of rows) {
+      if (!Array.isArray(row.evidenceRefs)) continue;
+      const hadCvRef = row.evidenceRefs.some((ref) => isRefForCv(ref, cvId));
+      if (!hadCvRef) continue;
+
+      const remainingRefs = row.evidenceRefs.filter(
+        (ref) => !isRefForCv(ref, cvId),
+      );
+
+      if (remainingRefs.length === 0 && row.source === USER_SKILL_SOURCES.nlp) {
+        deleteIds.push(row.id);
+      } else {
+        await client.userSkill.update({
+          where: { id: row.id },
+          data: {
+            evidenceRefs: remainingRefs as Prisma.InputJsonValue,
+            isHighRelevance: remainingRefs.length > 0,
+          },
+        });
+      }
+    }
+
+    if (deleteIds.length > 0) {
+      await client.userSkill.deleteMany({
+        where: { userId, id: { in: deleteIds } },
+      });
+    }
+  }
 }
+

@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { documentsService } from "../services/documents.service";
 import type { CvPage } from "../types/cv-page.types";
 import type { SavedCv } from "../types/saved-cv.types";
+import { PROFILE_SKILLS_RADAR_QUERY_KEY } from "@/modules/profile";
 import { useCvDocument } from "./use-cv-document";
 
 vi.mock("../services/documents.service", () => ({
@@ -190,7 +191,8 @@ describe("useCvDocument", () => {
   it("deletes the chosen cv by id and reloads the list", async () => {
     vi.mocked(documentsService.getCvs).mockResolvedValue(buildPage([CURRENT_CV, OLDER_CV]));
     vi.mocked(documentsService.deleteCv).mockResolvedValue(undefined);
-    const { result } = renderHook(() => useCvDocument());
+    const { result, client } = renderHook(() => useCvDocument());
+    const invalidateSpy = vi.spyOn(client, "invalidateQueries");
     await waitFor(() => expect(result.current.recentCvs).toHaveLength(2));
     vi.mocked(documentsService.getCvs).mockResolvedValue(
       buildPage([{ ...OLDER_CV, isCurrent: true }]),
@@ -201,6 +203,10 @@ describe("useCvDocument", () => {
     });
 
     expect(documentsService.deleteCv).toHaveBeenCalledWith("cv-2");
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ["skills"] });
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: PROFILE_SKILLS_RADAR_QUERY_KEY,
+    });
     await waitFor(() =>
       expect(result.current.currentCv).toMatchObject({ id: "cv-1", isCurrent: true }),
     );

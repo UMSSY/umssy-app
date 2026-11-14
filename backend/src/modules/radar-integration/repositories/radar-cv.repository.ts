@@ -30,4 +30,12 @@ export class RadarCvRepository {
       SELECT review.title AS review_status FROM saved
       JOIN radar_cv_review_statuses review ON review.id=saved.review_status_id`;
   }
+
+  deleteEvidence(userId: string, cvId: string) {
+    return this.prisma.radarCvEvidence.deleteMany({
+      where: { userId, cvId },
+    });
+  }
 }
+
+

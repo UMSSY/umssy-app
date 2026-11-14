@@ -7,6 +7,7 @@ import { RadarAccessRepository } from '../repositories/radar-access.repository.j
 import { ProfileSkillsAnalysisService } from '../../nlp/services/profile-skills-analysis.service.js';
 import { RadarPublicationService } from './radar-publication.service.js';
 import { RadarPdfExtractionService } from './radar-pdf-extraction.service.js';
+import { SkillAnalysisService } from '../../skills/services/skill-analysis.service.js';
 
 @Injectable()
 export class RadarCvService {
@@ -17,6 +18,7 @@ export class RadarCvService {
     private readonly publication: RadarPublicationService,
     private readonly extractor: RadarPdfExtractionService,
     private readonly cvs: CvSourcesService,
+    private readonly skills: SkillAnalysisService,
   ) {}
   private async audit(
     userId: string,
@@ -86,8 +88,11 @@ export class RadarCvService {
     return result;
   }
   async cvRemoved(userId: string, cvId: string) {
+    await this.repository.deleteEvidence(userId, cvId);
+    await this.skills.removeCvEvidence(userId, cvId);
     await this.audit(userId, userId, 'cv.removed', cvId);
     await this.nlp.refreshAfterChange(userId);
     await this.publication.recalculate(userId, userId);
   }
 }
+

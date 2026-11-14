@@ -23,6 +23,7 @@ function setupCv() {
   const cvs = { currentCv: vi.fn(), cvById: vi.fn() };
   const repository = {
     upsertEvidence: vi.fn().mockResolvedValue([{ review_status: 'approved' }]),
+    deleteEvidence: vi.fn().mockResolvedValue({ count: 1 }),
   };
   const access = {
     hasRole: vi.fn().mockResolvedValue(true),
@@ -39,6 +40,9 @@ function setupCv() {
       extractionStatus: 'ready',
     }),
   };
+  const skills = {
+    removeCvEvidence: vi.fn().mockResolvedValue(undefined),
+  };
   const service = new RadarCvService(
     repository as unknown as RadarCvRepository,
     access as unknown as RadarAccessRepository,
@@ -46,8 +50,9 @@ function setupCv() {
     publication as unknown as RadarPublicationService,
     extractor as unknown as RadarPdfExtractionService,
     cvs as unknown as CvSourcesService,
+    skills as unknown as SkillAnalysisService,
   );
-  return { cvs, repository, access, nlp, publication, extractor, service };
+  return { cvs, repository, access, nlp, publication, extractor, skills, service };
 }
 
 function setupReview() {
@@ -170,6 +175,23 @@ describe('Separación de CV y revisión', () => {
     ).rejects.toThrow('El CV no pertenece al titular');
     expect(access.recordAudit).not.toHaveBeenCalled();
   });
+
+  it('cleans up radar evidence, removes detected cv skills and triggers nlp/publication recalculation when a cv is removed', async () => {
+    const { service, repository, access, nlp, publication, skills } = setupCv();
+    await service.cvRemoved(owner, cvId);
+    expect(repository.deleteEvidence).toHaveBeenCalledWith(owner, cvId);
+    expect(skills.removeCvEvidence).toHaveBeenCalledWith(owner, cvId);
+    expect(access.recordAudit).toHaveBeenCalledWith(
+      owner,
+      owner,
+      'cv.removed',
+      cvId,
+      {},
+    );
+    expect(nlp.refreshAfterChange).toHaveBeenCalledWith(owner);
+    expect(publication.recalculate).toHaveBeenCalledWith(owner, owner);
+  });
+
   it('protege el reprocesamiento y la descarga administrativa con roles', () => {
     expect(
       Reflect.getMetadata(

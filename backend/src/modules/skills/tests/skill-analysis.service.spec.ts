@@ -112,4 +112,15 @@ describe('SkillAnalysisService', () => {
       service.reconcileDetected(userId, [], context),
     ).rejects.toThrow('write failed');
   });
+
+  it('delegates removeCvEvidence to the repository', async () => {
+    repository.removeCvEvidence = vi.fn().mockResolvedValue(undefined);
+    await service.removeCvEvidence(userId, 'cv-1', context);
+    expect(repository.removeCvEvidence).toHaveBeenCalledWith(
+      userId,
+      'cv-1',
+      context,
+    );
+  });
 });
+
