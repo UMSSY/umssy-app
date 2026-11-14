@@ -1,22 +1,23 @@
-import { createRequire } from 'node:module';
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, Optional } from '@nestjs/common';
 import { PushSubscriptionsRepository } from '../repositories/push-subscriptions.repository.js';
 
-interface WebPushSubscription {
+export interface WebPushSubscription {
   endpoint: string;
   keys: { p256dh: string; auth: string };
 }
 
-interface WebPushClient {
+export interface WebPushClient {
   setVapidDetails(subject: string, publicKey: string, privateKey: string): void;
   sendNotification(subscription: WebPushSubscription, payload: string): Promise<unknown>;
 }
 
-const require = createRequire(import.meta.url);
+export const WEB_PUSH_CLIENT = 'WEB_PUSH_CLIENT';
 
-function loadWebPush(): WebPushClient | null {
+async function loadDefaultWebPush(): Promise<WebPushClient | null> {
   try {
-    return require('web-push') as WebPushClient;
+    // @ts-expect-error web-push is loaded dynamically when installed
+    const mod = (await import('web-push')) as { default?: WebPushClient } & WebPushClient;
+    return mod.default ?? mod;
   } catch {
     return null;
   }
@@ -25,19 +26,29 @@ function loadWebPush(): WebPushClient | null {
 @Injectable()
 export class PushDispatcherService {
   private readonly logger = new Logger(PushDispatcherService.name);
-  private readonly webpush: WebPushClient | null;
+  private vapidConfigured = false;
 
   constructor(
     private readonly pushSubscriptionsRepository: PushSubscriptionsRepository,
-  ) {
-    this.webpush = loadWebPush();
-    if (this.webpush) {
-      this.webpush.setVapidDetails(
+    @Optional()
+    @Inject(WEB_PUSH_CLIENT)
+    private readonly injectedClient?: WebPushClient,
+  ) {}
+
+  private async getClient(): Promise<WebPushClient | null> {
+    const client = this.injectedClient ?? (await loadDefaultWebPush());
+    if (!client) return null;
+
+    if (!this.vapidConfigured) {
+      client.setVapidDetails(
         process.env.VAPID_SUBJECT || 'mailto:soporte@umssy.com',
         process.env.VAPID_PUBLIC_KEY || '',
         process.env.VAPID_PRIVATE_KEY || '',
       );
+      this.vapidConfigured = true;
     }
+
+    return client;
   }
 
   async dispatchToUsers(
@@ -47,7 +58,10 @@ export class PushDispatcherService {
     actionUrl: string,
     groupKey?: string,
   ): Promise<'sent' | 'partial' | 'failed' | 'skipped'> {
-    if (!this.webpush || userIds.length === 0) return 'skipped';
+    if (userIds.length === 0) return 'skipped';
+
+    const webpush = await this.getClient();
+    if (!webpush) return 'skipped';
 
     const subscriptions = await this.pushSubscriptionsRepository.findManyByUserIds(userIds);
     if (subscriptions.length === 0) return 'skipped';
@@ -73,7 +87,7 @@ export class PushDispatcherService {
       };
 
       try {
-        await this.webpush.sendNotification(pushSubscription, payload);
+        await webpush.sendNotification(pushSubscription, payload);
         successCount++;
       } catch (error: unknown) {
         failedCount++;
