@@ -1,4 +1,5 @@
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import {
@@ -68,14 +69,16 @@ export function ApplicationsTable({
               aria-sort={onSortChange ? ariaSortFor(sort, column.key) : undefined}
             >
               {onSortChange ? (
-                <button
+                <Button
                   type="button"
-                  className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-text-secondary hover:text-ink"
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 gap-1 px-2 text-xs font-semibold tracking-wide text-text-secondary uppercase hover:text-ink"
                   onClick={() => onSortChange(column.key)}
                 >
                   {column.label}
                   <SortIcon sort={sort} columnKey={column.key} />
-                </button>
+                </Button>
               ) : (
                 column.label
               )}
