@@ -31,6 +31,7 @@ function makeAppointment(overrides: Partial<AppointmentDetail> = {}): Appointmen
       uploadedAt: "2026-10-08T22:43:00.000Z",
     },
     meetingUrl: MEETING_URL,
+    cancellation: null,
     ...overrides,
   }
 }
@@ -165,6 +166,129 @@ describe("AppointmentDetailDialog", () => {
     await user.click(screen.getByRole("button", { name: APPOINTMENT_DETAIL_TEXT.close }))
 
     expect(onClose).toHaveBeenCalledOnce()
+  })
+})
+
+describe("AppointmentDetailDialog: cita cancelada", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks()
+    vi.spyOn(appointmentsApi, "getCounterpartPhoto").mockResolvedValue(null)
+  })
+
+  afterEach(() => {
+    cleanup()
+  })
+
+  it("muestra «Cancelada por ti» cuando el usuario canceló", async () => {
+    vi.spyOn(appointmentsApi, "getById").mockResolvedValue(
+      makeAppointment({
+        status: "CANCELLED",
+        meetingUrl: null,
+        cancellation: { cancelledBy: "MENTOR", cancelledByMe: true, reason: null, cancelledAt: "2026-10-10T00:00:00.000Z" },
+      }),
+    )
+
+    renderDialog()
+
+    expect(await screen.findByText("Cancelada por ti")).toBeInTheDocument()
+  })
+
+  it("muestra el motivo de la cancelación cuando existe", async () => {
+    vi.spyOn(appointmentsApi, "getById").mockResolvedValue(
+      makeAppointment({
+        status: "CANCELLED",
+        meetingUrl: null,
+        cancellation: {
+          cancelledBy: "STUDENT",
+          cancelledByMe: false,
+          reason: "Tuve un imprevisto de salud",
+          cancelledAt: "2026-10-10T00:00:00.000Z",
+        },
+      }),
+    )
+
+    renderDialog()
+
+    expect(await screen.findByText(APPOINTMENT_DETAIL_TEXT.cancellationReasonTitle)).toBeInTheDocument()
+    expect(screen.getByText("Tuve un imprevisto de salud")).toBeInTheDocument()
+  })
+
+  it("no muestra la sección de motivo si no hay razón registrada", async () => {
+    vi.spyOn(appointmentsApi, "getById").mockResolvedValue(
+      makeAppointment({
+        status: "CANCELLED",
+        meetingUrl: null,
+        cancellation: { cancelledBy: "STUDENT", cancelledByMe: false, reason: null, cancelledAt: "2026-10-10T00:00:00.000Z" },
+      }),
+    )
+
+    renderDialog()
+
+    await screen.findByRole("heading", { name: "Cita con Ana Rojas" })
+    expect(screen.queryByText(APPOINTMENT_DETAIL_TEXT.cancellationReasonTitle)).not.toBeInTheDocument()
+  })
+
+  it("no muestra «Cancelar cita» ni «Unirse a la reunión»", async () => {
+    vi.spyOn(appointmentsApi, "getById").mockResolvedValue(
+      makeAppointment({
+        status: "CANCELLED",
+        meetingUrl: null,
+        cancellation: { cancelledBy: "MENTOR", cancelledByMe: false, reason: null, cancelledAt: "2026-10-10T00:00:00.000Z" },
+      }),
+    )
+
+    renderDialog()
+
+    await screen.findByRole("heading", { name: "Cita con Ana Rojas" })
+    expect(screen.queryByText(JOIN_MEETING_TEXT.join)).not.toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: /cancelar cita/i })).not.toBeInTheDocument()
+  })
+
+  it("el titulado ve «Reservar otro horario» cuando el mentor canceló, y abre la agenda de ese mentor", async () => {
+    vi.spyOn(appointmentsApi, "getById").mockResolvedValue(
+      makeAppointment({
+        status: "CANCELLED",
+        meetingUrl: null,
+        cancellation: { cancelledBy: "MENTOR", cancelledByMe: false, reason: null, cancelledAt: "2026-10-10T00:00:00.000Z" },
+      }),
+    )
+
+    renderDialog()
+
+    const rebook = await screen.findByRole("link", { name: "Reservar otro horario" })
+    expect(rebook).toHaveAttribute("href", "/mentors/mentor-1")
+    expect(screen.queryByRole("link", { name: APPOINTMENT_DETAIL_TEXT.mentorProfile })).not.toBeInTheDocument()
+  })
+
+  it("el mentor que canceló no ve «Reservar otro horario»", async () => {
+    vi.spyOn(appointmentsApi, "getById").mockResolvedValue(
+      makeAppointment({
+        status: "CANCELLED",
+        meetingUrl: null,
+        counterpart: { id: "student-1", fullName: "Luis Flores", role: "student" },
+        cancellation: { cancelledBy: "MENTOR", cancelledByMe: true, reason: null, cancelledAt: "2026-10-10T00:00:00.000Z" },
+      }),
+    )
+
+    renderDialog()
+
+    await screen.findByRole("heading", { name: "Cita con Luis Flores" })
+    expect(screen.queryByRole("link", { name: "Reservar otro horario" })).not.toBeInTheDocument()
+  })
+
+  it("no muestra «Reservar otro horario» cuando canceló el titulado", async () => {
+    vi.spyOn(appointmentsApi, "getById").mockResolvedValue(
+      makeAppointment({
+        status: "CANCELLED",
+        meetingUrl: null,
+        cancellation: { cancelledBy: "STUDENT", cancelledByMe: false, reason: null, cancelledAt: "2026-10-10T00:00:00.000Z" },
+      }),
+    )
+
+    renderDialog()
+
+    expect(await screen.findByRole("link", { name: APPOINTMENT_DETAIL_TEXT.mentorProfile })).toBeInTheDocument()
+    expect(screen.queryByRole("link", { name: "Reservar otro horario" })).not.toBeInTheDocument()
   })
 })
 
