@@ -4,6 +4,7 @@ import { formatDateTime } from "@/shared/utils/date.utils";
 import { REPORT_TYPE_LABELS } from "../constants/generated-report.constants";
 import { TABLE_CELL_CLASSES as CELL_CLASSES, TABLE_CONTAINER_CLASSES as CONTAINER_CLASSES } from "../constants/report-table.constants";
 import type { ReportHistoryTableProps } from "../types/report-history-table-props.types";
+import { getReportFormatLabel } from "../utils/report-format.util";
 import { TableMessageRow, TableNoResultsRow, TableSkeletonRows } from "./table-state-rows";
 
 function renderDateTime(isoDate: string) {
@@ -34,19 +35,19 @@ export function ReportHistoryTable({
 
   const renderBody = () => {
     if (isLoading) {
-      return <TableSkeletonRows columnCount={3} />;
+      return <TableSkeletonRows columnCount={4} />;
     }
 
     if (errorMessage) {
-      return <TableMessageRow columnCount={3} message={errorMessage} />;
+      return <TableMessageRow columnCount={4} message={errorMessage} />;
     }
 
     if (reports.length === 0 && searchTerm) {
-      return <TableNoResultsRow columnCount={3} message={"No se encontraron reportes que coincidan con la búsqueda"} />;
+      return <TableNoResultsRow columnCount={4} message={"No se encontraron reportes que coincidan con la búsqueda"} />;
     }
 
     if (reports.length === 0) {
-      return <TableMessageRow columnCount={3} message={emptyMessage} />;
+      return <TableMessageRow columnCount={4} message={emptyMessage} />;
     }
 
     return reports.map((report) => (
@@ -58,6 +59,7 @@ export function ReportHistoryTable({
           </span>
         </TableCell>
         <TableCell className={`${cellClasses} md:whitespace-nowrap`}>{REPORT_TYPE_LABELS[report.reportType]}</TableCell>
+        <TableCell className={`${cellClasses} md:whitespace-nowrap`}>{getReportFormatLabel(report.fileName)}</TableCell>
         <TableCell className={cellClasses}>{renderDateTime(report.generatedAt)}</TableCell>
       </TableRow>
     ));
@@ -74,6 +76,7 @@ export function ReportHistoryTable({
               Reporte
             </TableHead>
             <TableHead scope="col" className={headClasses}>Tipo de Reporte</TableHead>
+            <TableHead scope="col" className={headClasses}>Formato</TableHead>
             <TableHead scope="col" className={headClasses}>Fecha y Hora de Generación</TableHead>
           </TableRow>
         </TableHeader>

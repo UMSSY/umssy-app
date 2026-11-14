@@ -10,7 +10,17 @@ import { paginate } from '../../../common/utils/pagination.js';
 import {
   toRegisteredUserCsvRow,
   toRejectedUserCsvRow,
+  toReportUserPdfRow,
 } from '../mappers/report-user-csv.mapper.js';
+import {
+  PDF_EXTENSION,
+  REGISTERED_USERS_PDF,
+  REJECTED_USERS_PDF,
+  REPORT_PDF_TEXT,
+} from '../constants/report-pdf.constants.js';
+import { ReportAuthorNotFoundException } from '../exceptions/report-author-not-found.exception.js';
+import { buildReportPdfFilters } from '../utils/report-pdf-filters.util.js';
+import { ReportPdfService } from './report-pdf.service.js';
 import {
   toRegisteredUserResponse,
   toRejectedUserResponse,
@@ -18,8 +28,10 @@ import {
 import { ReportUsersRepository } from '../repositories/report-users.repository.js';
 import type {
   RegisteredUsersFilters,
+  RegisteredUsersExportQuery,
   RegisteredUsersQuery,
   RejectedUsersFilters,
+  RejectedUsersExportQuery,
   RejectedUsersQuery,
 } from '../requests/report-users.schema.js';
 import type {
@@ -28,6 +40,10 @@ import type {
   ReportCsvFile,
   ReportUser,
 } from '../types/report-user.types.js';
+import type {
+  ReportPdfDefinition,
+  ReportPdfFile,
+} from '../types/report-pdf.types.js';
 import { getAcademicPeriod } from '../utils/academic-period.js';
 
 const REGISTERED_USERS_CSV_PREFIX = 'usuarios-registrados';
@@ -65,9 +81,19 @@ function sortByNewest(users: ReportUser[]): ReportUser[] {
   );
 }
 
+function paginateExport<T>(items: T[], page?: number, limit?: number): T[] {
+  if (page === undefined || limit === undefined) return items;
+
+  const start = (page - 1) * limit;
+  return items.slice(start, start + limit);
+}
+
 @Injectable()
 export class ReportsService {
-  constructor(private readonly reportUsersRepository: ReportUsersRepository) {}
+  constructor(
+    private readonly reportUsersRepository: ReportUsersRepository,
+    private readonly reportPdfService: ReportPdfService,
+  ) {}
 
   async getRegisteredUsers(
     query: RegisteredUsersQuery,
@@ -77,24 +103,23 @@ export class ReportsService {
   }
 
   async exportRegisteredUsersCsv(
-    filters: RegisteredUsersFilters,
+    filters: RegisteredUsersExportQuery,
   ): Promise<ReportCsvFile> {
-    const users = await this.findRegisteredUsers(filters);
-    const rows = users.map(toRegisteredUserCsvRow);
-
-    const fileNameFilters = [
-      filters.userType && USER_TYPE_LABELS[filters.userType],
-      filters.search,
-    ];
-
+    const users = paginateExport(await this.findRegisteredUsers(filters), filters.page, filters.limit);
     return {
-      fileName: buildExportFileName(
-        REGISTERED_USERS_CSV_PREFIX,
-        fileNameFilters,
-        filters.period ?? ALL_PERIODS_FILE_NAME_SUFFIX,
-        CSV_EXTENSION,
-      ),
-      content: buildCsv(REPORT_USER_CSV_HEADERS, rows),
+      fileName: this.registeredFileName(filters, CSV_EXTENSION),
+      content: buildCsv(REPORT_USER_CSV_HEADERS, users.map(toRegisteredUserCsvRow)),
+    };
+  }
+
+  async exportRegisteredUsersPdf(
+    filters: RegisteredUsersExportQuery,
+    authorId: string,
+  ): Promise<ReportPdfFile> {
+    const users = paginateExport(await this.findRegisteredUsers(filters), filters.page, filters.limit);
+    return {
+      fileName: this.registeredFileName(filters, PDF_EXTENSION),
+      content: await this.renderPdf(REGISTERED_USERS_PDF, filters, users, authorId),
     };
   }
 
@@ -106,23 +131,64 @@ export class ReportsService {
   }
 
   async exportRejectedUsersCsv(
-    filters: RejectedUsersFilters,
+    filters: RejectedUsersExportQuery,
   ): Promise<ReportCsvFile> {
-    const users = await this.findRejectedUsers(filters);
-    const rows = users.map(toRejectedUserCsvRow);
-
+    const users = paginateExport(await this.findRejectedUsers(filters), filters.page, filters.limit);
     return {
-      fileName: buildExportFileName(
-        REJECTED_USERS_CSV_PREFIX,
-        [
-          filters.userType && USER_TYPE_LABELS[filters.userType],
-          filters.search,
-        ],
-        filters.period ?? todayIsoDate(),
-        CSV_EXTENSION,
-      ),
-      content: buildCsv(REPORT_USER_CSV_HEADERS, rows),
+      fileName: this.rejectedFileName(filters, CSV_EXTENSION),
+      content: buildCsv(REPORT_USER_CSV_HEADERS, users.map(toRejectedUserCsvRow)),
     };
+  }
+
+  async exportRejectedUsersPdf(
+    filters: RejectedUsersExportQuery,
+    authorId: string,
+  ): Promise<ReportPdfFile> {
+    const users = paginateExport(await this.findRejectedUsers(filters), filters.page, filters.limit);
+    return {
+      fileName: this.rejectedFileName(filters, PDF_EXTENSION),
+      content: await this.renderPdf(REJECTED_USERS_PDF, filters, users, authorId),
+    };
+  }
+
+  private registeredFileName(filters: RegisteredUsersExportQuery, extension: string): string {
+    return buildExportFileName(
+      REGISTERED_USERS_CSV_PREFIX,
+      [filters.userType && USER_TYPE_LABELS[filters.userType], filters.search],
+      filters.period ?? ALL_PERIODS_FILE_NAME_SUFFIX,
+      extension,
+    );
+  }
+
+  private rejectedFileName(filters: RejectedUsersExportQuery, extension: string): string {
+    return buildExportFileName(
+      REJECTED_USERS_CSV_PREFIX,
+      [filters.userType && USER_TYPE_LABELS[filters.userType], filters.search],
+      filters.period ?? todayIsoDate(),
+      extension,
+    );
+  }
+
+  private async renderPdf(
+    definition: ReportPdfDefinition,
+    filters: RegisteredUsersExportQuery | RejectedUsersExportQuery,
+    users: (RegisteredUserResponse | RejectedUserResponse)[],
+    authorId: string,
+  ): Promise<Buffer> {
+    const author = await this.reportUsersRepository.findAuthor(authorId);
+    const fullName = [author?.firstName, author?.lastName]
+      .map((name) => (name ?? '').trim())
+      .filter(Boolean)
+      .join(' ');
+    if (!fullName) throw new ReportAuthorNotFoundException();
+
+    return this.reportPdfService.render({
+      ...definition,
+      generatedBy: REPORT_PDF_TEXT.author(fullName, USER_TYPE_LABELS.administrativo),
+      generatedAt: new Date(),
+      filters: buildReportPdfFilters(definition.dateFilterLabel, filters),
+      rows: users.map(toReportUserPdfRow),
+    });
   }
 
   private async findRegisteredUsers(

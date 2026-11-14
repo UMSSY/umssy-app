@@ -32,12 +32,13 @@ export function useRejectedUsers(page: number, userType?: RoleTag, period?: Acad
   const { resolveSnapshotAt, renewSnapshot } = useReportSnapshot();
   const query = useQuery({
     queryKey: REPORTS_QUERY_KEYS.rejectedUsers(page, userType, period, search),
-    queryFn: ({ signal }) => {
+    queryFn: async ({ signal }) => {
       const snapshotAt = resolveSnapshotAt(page);
-      return reportsService.getRejectedUsers(
+      const response = await reportsService.getRejectedUsers(
         { page, limit: REJECTED_USERS_PAGE_SIZE, userType, period, search, ...(snapshotAt && { snapshotAt }) },
         signal,
       );
+      return { response, snapshotAt };
     },
     placeholderData: keepPreviousData,
   });
@@ -52,13 +53,14 @@ export function useRejectedUsers(page: number, userType?: RoleTag, period?: Acad
     void refetch();
   }, [refetch, renewSnapshot]);
 
-  const result = query.isError ? undefined : query.data?.data;
+  const result = query.isError ? undefined : query.data?.response.data;
   const totalItems = result?.totalItems ?? 0;
 
   return {
     users: result?.items ?? [],
     totalItems,
     totalPages: Math.max(1, Math.ceil(totalItems / REJECTED_USERS_PAGE_SIZE)),
+    snapshotAt: query.isError ? undefined : query.data?.snapshotAt,
     isLoading: query.isFetching,
     errorMessage: query.isError && !query.isFetching ? "No se pudo cargar el reporte de usuarios rechazados." : undefined,
     refresh,

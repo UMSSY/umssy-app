@@ -59,6 +59,31 @@ export const rejectedUsersFiltersSchema = z.object({
   snapshotAt: snapshotAtSchema,
 });
 
+const exportPaginationSchema = z.object({
+  page: z.coerce.number().int().min(1).optional(),
+  limit: z.coerce.number().int().min(1).max(DEFAULT_PAGE_SIZE).optional(),
+});
+// Define si la exportación se entrega como CSV o como PDF institucional generado en el servidor.
+const exportFormatSchema = z.enum(['csv', 'pdf']).optional();
+
+function hasCompleteExportPagination(query: { page?: number; limit?: number }): boolean {
+  return (query.page === undefined) === (query.limit === undefined);
+}
+
+export const registeredUsersExportQuerySchema = registeredUsersFiltersSchema
+  .extend({ ...exportPaginationSchema.shape, format: exportFormatSchema })
+  .refine(hasCompleteExportPagination, {
+    message: 'La página y el límite deben enviarse juntos',
+    path: ['limit'],
+  });
+
+export const rejectedUsersExportQuerySchema = rejectedUsersFiltersSchema
+  .extend({ ...exportPaginationSchema.shape, format: exportFormatSchema })
+  .refine(hasCompleteExportPagination, {
+    message: 'La página y el límite deben enviarse juntos',
+    path: ['limit'],
+  });
+
 export const rejectedUsersQuerySchema = paginationSchema.extend(
   rejectedUsersFiltersSchema.shape,
 );
@@ -69,3 +94,5 @@ export type RegisteredUsersFilters = z.infer<
 export type RegisteredUsersQuery = z.infer<typeof registeredUsersQuerySchema>;
 export type RejectedUsersFilters = z.infer<typeof rejectedUsersFiltersSchema>;
 export type RejectedUsersQuery = z.infer<typeof rejectedUsersQuerySchema>;
+export type RegisteredUsersExportQuery = z.infer<typeof registeredUsersExportQuerySchema>;
+export type RejectedUsersExportQuery = z.infer<typeof rejectedUsersExportQuerySchema>;
