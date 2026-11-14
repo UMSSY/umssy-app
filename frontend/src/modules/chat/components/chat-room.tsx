@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useAuth } from "@/shared/contexts/auth-context";
 import type { Conversation, Message } from "../types/conversation.types";
 import type { MessageAttachment } from "../types/attachment.types";
 import { MessageInputBar } from "./message-input-bar";
@@ -124,6 +125,11 @@ function ChatRoomContent({
   onUnblockUser,
   connectionStatus = "connected",
 }: ChatRoomProps) {
+  const { roles } = useAuth();
+  const isCompany = roles.includes("empresa");
+  const postulationHref = isCompany
+    ? "/recruiters"
+    : "/vacancies/my-applications";
   const eventConversation = conversation.eventId ? conversation : null;
   const isEventConversation = Boolean(eventConversation);
   const conversationName = eventConversation
@@ -535,7 +541,7 @@ function ChatRoomContent({
         >
           <span className="font-semibold">Conversación vinculada a una postulación laboral</span>
           <Link
-            href="/vacancies/my-applications"
+            href={postulationHref}
             data-testid="chat-room-view-postulation-button"
             className="inline-flex items-center gap-1 rounded bg-white px-2.5 py-1 text-xs font-semibold text-blue-700 shadow-xs hover:bg-blue-100/50"
           >

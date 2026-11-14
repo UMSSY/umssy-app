@@ -5,7 +5,19 @@ import { ChatRoom } from '../components/chat-room';
 import { MessageInputBar } from '../components/message-input-bar';
 import { Conversation, Message } from '../types/conversation.types';
 
+const mockAuthState = vi.hoisted(() => ({
+  roles: [] as string[],
+  currentUserId: 'current-user',
+  isLoading: false,
+  refreshRoles: vi.fn(),
+}));
+
+vi.mock("@/shared/contexts/auth-context", () => ({
+  useAuth: () => mockAuthState,
+}));
+
 afterEach(() => {
+  mockAuthState.roles = [];
   cleanup();
   vi.clearAllMocks();
 });
@@ -295,6 +307,29 @@ describe('ChatRoom Layout y Componentes Responsivos (HU-03 Tarea 3)', () => {
     const viewButton = screen.getByTestId('chat-room-view-postulation-button');
     expect(viewButton).toBeInTheDocument();
     expect(viewButton).toHaveAttribute('href', '/vacancies/my-applications');
+  });
+
+  it('debe dirigir el enlace de ver postulacion a /recruiters cuando el usuario tiene rol empresa', () => {
+    mockAuthState.roles = ['empresa'];
+    const postulationConversation: Conversation = {
+      ...mockConversation,
+      contextType: 'POSTULACION',
+      contextId: 'app-uuid-1234',
+    };
+
+    render(
+      <ChatRoom
+        conversation={postulationConversation}
+        messages={[]}
+        currentUserId="current-user"
+        onBack={vi.fn()}
+        onSendMessage={vi.fn()}
+      />
+    );
+
+    const viewButton = screen.getByTestId('chat-room-view-postulation-button');
+    expect(viewButton).toBeInTheDocument();
+    expect(viewButton).toHaveAttribute('href', '/recruiters');
   });
 
   it('no debe mostrar la insignia ni el banner cuando contextType no es POSTULACION', () => {
