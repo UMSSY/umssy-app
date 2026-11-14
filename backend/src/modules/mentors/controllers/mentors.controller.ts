@@ -107,6 +107,13 @@ export class MentorsController {
     return this.mentorsService.findOne(userId);
   }
 
+  @Get(':userId/similar')
+  findSimilar(
+    @Param('userId', new ParseUUIDPipe({ version: '4' })) userId: string,
+  ) {
+    return this.mentorsService.findSimilar(userId);
+  }
+
   @Post('activate')
   @UseGuards(JwtAuthGuard)
   activate(
