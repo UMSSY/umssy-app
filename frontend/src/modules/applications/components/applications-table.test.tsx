@@ -1,3 +1,4 @@
+
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { buildApplication } from "../testing/application-fixtures";
@@ -15,8 +16,15 @@ describe("ApplicationsTable", () => {
       />,
     );
 
-    expect(screen.getByRole("columnheader", { name: "Vacante y empresa" })).toBeInTheDocument();
-    expect(screen.getByText("Desarrollador Backend Python / FastAPI")).toBeInTheDocument();
+    expect(
+      screen.getByRole("columnheader", { name: "Vacante" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("columnheader", { name: "Empresa" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Desarrollador Backend Python / FastAPI"),
+    ).toBeInTheDocument();
     expect(screen.getByText("TechBolivia S.R.L.")).toBeInTheDocument();
     expect(screen.getByText("92%")).toBeInTheDocument();
     expect(screen.getByText("En revisión")).toBeInTheDocument();
@@ -24,6 +32,7 @@ describe("ApplicationsTable", () => {
 
   it("lets the person withdraw an application that is still open", () => {
     const onWithdraw = vi.fn();
+
     render(
       <ApplicationsTable
         applications={[buildApplication({ id: "application-7" })]}
@@ -42,7 +51,10 @@ describe("ApplicationsTable", () => {
       <ApplicationsTable
         applications={[
           buildApplication({ id: "application-1", status: "Aceptada" }),
-          buildApplication({ id: "application-2", status: "No seleccionado" }),
+          buildApplication({
+            id: "application-2",
+            status: "No seleccionado",
+          }),
         ]}
         withdrawingId={null}
         onWithdraw={vi.fn()}
@@ -65,7 +77,9 @@ describe("ApplicationsTable", () => {
       />,
     );
 
-    expect(screen.getByRole("button", { name: "Retirando…" })).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: "Retirando…" }),
+    ).toBeDisabled();
   });
 
   it("shows the reactivation button only for withdrawn applications", () => {
@@ -83,12 +97,17 @@ describe("ApplicationsTable", () => {
       />,
     );
 
-    const button = screen.getByRole("button", { name: "Volver a postular" });
+    const button = screen.getByRole("button", {
+      name: "Volver a postular",
+    });
+
     expect(button).toBeEnabled();
-    expect(screen.getAllByRole("button", { name: "Retirar" })).toHaveLength(1);
+    expect(
+      screen.getAllByRole("button", { name: "Retirar" }),
+    ).toHaveLength(1);
 
     fireEvent.click(button);
+
     expect(onReactivate).toHaveBeenCalledWith("application-1");
   });
-
 });
