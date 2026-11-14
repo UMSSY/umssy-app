@@ -1,8 +1,11 @@
+import { Logger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { PushDispatcherService } from '../services/push-dispatcher.service.js';
 import { PushSubscriptionsRepository } from '../repositories/push-subscriptions.repository.js';
 import * as webpush from 'web-push';
+import { PUSH_NOTIFICATION_ICON } from '../constants/push-notification.constants.js';
+import type { PushNotificationPayload } from '../types/push-notification-payload.type.js';
 
 const webpushMock = vi.hoisted(() => ({
   setVapidDetails: vi.fn(),
@@ -10,6 +13,34 @@ const webpushMock = vi.hoisted(() => ({
 }));
 
 vi.mock('web-push', () => webpushMock);
+
+const androidSubscription = {
+  endpoint: 'https://fcm.googleapis.com/fcm/send/android',
+  p256dh: 'x',
+  auth: 'y',
+  userId: 'user-1',
+  userAgent: 'Android',
+};
+
+const iphoneSubscription = {
+  endpoint: 'https://web.push.apple.com/iphone',
+  p256dh: 'x',
+  auth: 'y',
+  userId: 'user-1',
+  userAgent: 'iPhone',
+};
+
+const desktopSubscription = {
+  endpoint: 'https://fcm.googleapis.com/fcm/send/desktop',
+  p256dh: 'x',
+  auth: 'y',
+  userId: 'user-1',
+  userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+};
+
+function createPushError(message: string, statusCode: number): Error & { statusCode: number } {
+  return Object.assign(new Error(message), { statusCode });
+}
 
 describe('PushDispatcherService', () => {
   let service: PushDispatcherService;
@@ -116,6 +147,99 @@ describe('PushDispatcherService', () => {
 
       expect(mockPushRepo.deleteByEndpointAndUserId).toHaveBeenCalledWith('https://fcm...', 'user-1');
       expect(result).toBe('failed');
+    });
+
+    it('debe enviar el payload con title, body, icon, actionUrl y groupKey', async () => {
+      mockPushRepo.findManyByUserIds.mockResolvedValue([androidSubscription]);
+
+      const result = await service.dispatchToUsers(
+        ['user-1'],
+        'Title',
+        'Body',
+        '/appointments',
+        'group-1',
+      );
+
+      const [, rawPayload] = webpushMock.sendNotification.mock.calls[0] as [unknown, string];
+      const payload = JSON.parse(rawPayload) as PushNotificationPayload;
+      expect(payload).toEqual({
+        title: 'Title',
+        body: 'Body',
+        icon: PUSH_NOTIFICATION_ICON,
+        actionUrl: '/appointments',
+        groupKey: 'group-1',
+      });
+      expect(result).toBe('sent');
+    });
+
+    it('debe limitar title y body a 100 caracteres', async () => {
+      mockPushRepo.findManyByUserIds.mockResolvedValue([androidSubscription]);
+
+      await service.dispatchToUsers(['user-1'], 'T'.repeat(150), 'B'.repeat(150), '/chat');
+
+      const [, rawPayload] = webpushMock.sendNotification.mock.calls[0] as [unknown, string];
+      const payload = JSON.parse(rawPayload) as PushNotificationPayload;
+      expect(payload.title).toHaveLength(100);
+      expect(payload.body).toHaveLength(100);
+    });
+
+    it('debe enviar un push por cada dispositivo móvil del usuario', async () => {
+      mockPushRepo.findManyByUserIds.mockResolvedValue([androidSubscription, iphoneSubscription]);
+
+      const result = await service.dispatchToUsers(['user-1'], 'Title', 'Body', '/url');
+
+      expect(webpushMock.sendNotification).toHaveBeenCalledTimes(2);
+      expect(result).toBe('sent');
+    });
+
+    it('debe enviar solo a los móviles cuando también hay un escritorio', async () => {
+      mockPushRepo.findManyByUserIds.mockResolvedValue([androidSubscription, desktopSubscription]);
+
+      const result = await service.dispatchToUsers(['user-1'], 'Title', 'Body', '/url');
+
+      expect(webpushMock.sendNotification).toHaveBeenCalledTimes(1);
+      expect(result).toBe('sent');
+    });
+
+    it('debe eliminar la suscripción si el push service responde 404', async () => {
+      mockPushRepo.findManyByUserIds.mockResolvedValue([androidSubscription]);
+      webpushMock.sendNotification.mockRejectedValueOnce(createPushError('Not Found', 404));
+
+      const result = await service.dispatchToUsers(['user-1'], 'Title', 'Body', '/url');
+
+      expect(mockPushRepo.deleteByEndpointAndUserId).toHaveBeenCalledWith(
+        androidSubscription.endpoint,
+        'user-1',
+      );
+      expect(result).toBe('failed');
+    });
+
+    it('registra la purga cuando el push service responde 410', async () => {
+      const warnSpy = vi.spyOn(Logger.prototype, 'warn').mockImplementation(() => undefined);
+      mockPushRepo.findManyByUserIds.mockResolvedValue([androidSubscription]);
+      webpushMock.sendNotification.mockRejectedValueOnce(createPushError('Gone', 410));
+
+      await service.dispatchToUsers(['user-1'], 'Title', 'Body', '/url');
+
+      expect(warnSpy).toHaveBeenCalledWith(
+        '[PushAudit] userId=user-1 endpointHost=fcm.googleapis.com statusCode=410 subscriptionRemoved=true',
+      );
+    });
+
+    it('ante otro error no elimina la suscripción, lo registra y continúa con las demás', async () => {
+      const errorSpy = vi.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
+      mockPushRepo.findManyByUserIds.mockResolvedValue([androidSubscription, iphoneSubscription]);
+      webpushMock.sendNotification.mockRejectedValueOnce(createPushError('Server error', 500));
+
+      const result = await service.dispatchToUsers(['user-1'], 'Title', 'Body', '/url');
+
+      expect(mockPushRepo.deleteByEndpointAndUserId).not.toHaveBeenCalled();
+      expect(webpushMock.sendNotification).toHaveBeenCalledTimes(2);
+      expect(errorSpy).toHaveBeenCalledWith(
+        '[PushAudit] userId=user-1 endpointHost=fcm.googleapis.com statusCode=500 subscriptionRemoved=false',
+        expect.any(String),
+      );
+      expect(result).toBe('partial');
     });
   });
 });
