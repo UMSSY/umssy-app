@@ -12,8 +12,9 @@ import { ApplicationMapper } from '../mappers/application.mapper.js';
 import { JobRecommendationsService } from '../../matching/services/job-recommendations.service.js';
 import { StateChangedDto } from '../notifications/state-changed.dto.js';
 import { STATE_CHANGED_TEMPLATE } from '../notifications/state-changed.templates.js';
-import { MockNotificationsService as NotificationsService } from '../notifications/mock-notifications.service.js';
+import { NotificationsService } from '../../notifications/services/notifications.service.js';
 import { ConfigService } from '@nestjs/config';
+import { NotificationType } from '../../notifications/types/notification-type.enum.js';
 
 @Injectable()
 export class ApplicationsService {
@@ -75,7 +76,6 @@ export class ApplicationsService {
       ApplicationStatus.WITHDRAWN,
     );
     if (!result.count) throw new ApplicationNotWithdrawableException();
-
   }
 
   public async notifyStateChanged(p: {
@@ -99,11 +99,16 @@ export class ApplicationsService {
 
       await this.withTimeout(
         this.notifications.notify({
-          recipientId: p.recipientId,
-          type: STATE_CHANGED_TEMPLATE.type,
-          context,
+          recipientIds: [p.recipientId],
+          type: NotificationType.APPLICATION_STATUS_CHANGED,
+          payload: {
+            vacancyTitle: context.jobTitle,
+            companyName: context.companyName,
+            newStatus: context.newStatus,
+          },
+          actionUrl: context.actionUrl,
         }),
-        5000, 
+        5000,
       );
     } catch (error) {
       console.error('--- ERROR DETALLADO EN NOTIFY STATE CHANGED ---', error);
@@ -127,5 +132,21 @@ export class ApplicationsService {
       timer = setTimeout(() => reject(new Error(`notify() timeout (${ms}ms)`)), ms);
     });
     return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+  }
+
+  findRecruitmentApplicationsByUser(userId: string) {
+    return this.repository.findRecruitmentApplicationsByUser(userId);
+  }
+
+  findRecruitmentApplicants(jobId: string) {
+    return this.repository.findRecruitmentApplicants(jobId);
+  }
+
+  findRecruitmentApplication(id: string) {
+    return this.repository.findRecruitmentApplication(id);
+  }
+
+  recordRecruiterDecision(applicationId: string, target: string) {
+    return this.repository.recordRecruiterDecision(applicationId, target);
   }
 }

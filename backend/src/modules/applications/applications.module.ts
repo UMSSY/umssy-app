@@ -6,16 +6,15 @@ import { ApplicationsController } from './controllers/applications.controller.js
 import { ApplicationsService } from './services/applications.service.js';
 import { ApplicationsRepository } from './repositories/applications.repository.js';
 import { PrismaModule } from '../../common/prisma/prisma.module.js';
-import { MockNotificationsService } from './notifications/mock-notifications.service.js';
+import { NotificationsModule } from '../notifications/notifications.module.js';
 
 @Module({
-  imports: [PrismaModule, MatchingModule, JwtAuthModule],
+  imports: [PrismaModule, MatchingModule, JwtAuthModule, NotificationsModule],
   controllers: [ApplicationsController],
   providers: [
     ApplicationsService,
     ApplicationsRepository,
     ApplicationMapper,
-    MockNotificationsService, 
   ],
   exports: [ApplicationsService],
 })

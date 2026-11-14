@@ -5,7 +5,8 @@ import { ApplicationMapper } from '../mappers/application.mapper.js';
 import { JobRecommendationsService } from '../../matching/services/job-recommendations.service.js';
 import { ApplicationsService } from '../services/applications.service.js';
 import { ApplicationsRepository } from '../repositories/applications.repository.js';
-import { MockNotificationsService } from '../notifications/mock-notifications.service.js';
+import { NotificationsService } from '../../notifications/services/notifications.service.js';
+import { NotificationType } from '../../notifications/types/notification-type.enum.js';
 import { ApplicationStatus } from '../types/applications.types.js';
 import { ApplicationNotFoundException } from '../exceptions/application-not-found.exception.js';
 import { ApplicationForbiddenException } from '../exceptions/application-forbidden.exception.js';
@@ -31,7 +32,11 @@ describe('ApplicationsService (T5.1 & T5.2 & HU-15)', () => {
     };
 
     notificationsMock = {
-      notify: vi.fn().mockResolvedValue({ success: true }),
+      notify: vi.fn().mockResolvedValue({
+        inAppCount: 1,
+        pushStatus: 'skipped',
+        emailStatus: 'sent',
+      }),
     };
 
     configMock = {
@@ -44,7 +49,7 @@ describe('ApplicationsService (T5.1 & T5.2 & HU-15)', () => {
         ApplicationMapper,
         { provide: JobRecommendationsService, useValue: matching },
         { provide: ApplicationsRepository, useValue: repositoryMock },
-        { provide: MockNotificationsService, useValue: notificationsMock },
+        { provide: NotificationsService, useValue: notificationsMock },
         { provide: ConfigService, useValue: configMock },
       ],
     }).compile();
@@ -200,23 +205,22 @@ describe('ApplicationsService (T5.1 & T5.2 & HU-15)', () => {
       await service.notifyStateChanged({
         recipientId: 'user-1',
         applicationId: 'app-1',
-        previousStatus: 'IN_REVIEW' as any, 
-        newStatus: 'INTERVIEW' as any,     
+        previousStatus: 'IN_REVIEW' as any,
+        newStatus: 'INTERVIEW' as any,
         jobTitle: 'Dev',
         companyName: 'Empresa A',
       });
 
       expect(notificationsMock.notify).toHaveBeenCalledTimes(1);
       expect(notificationsMock.notify).toHaveBeenCalledWith({
-        recipientId: 'user-1',
-        type: 'APPLICATION_STATUS_CHANGED',
-        context: {
-          jobTitle: 'Dev',
+        recipientIds: ['user-1'],
+        type: NotificationType.APPLICATION_STATUS_CHANGED,
+        payload: {
+          vacancyTitle: 'Dev',
           companyName: 'Empresa A',
-          previousStatus: 'IN_REVIEW',
           newStatus: 'INTERVIEW',
-          actionUrl: 'https://umssy.edu.bo/postulaciones/app-1',
         },
+        actionUrl: 'https://umssy.edu.bo/postulaciones/app-1',
       });
     });
 
