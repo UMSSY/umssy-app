@@ -9,12 +9,14 @@ import { readAccessTokenSubject } from '@/shared/utils/read-access-token-subject
 import type { OfflinePass } from '../types/offline-pass.types';
 import type { PassData } from '../types/pass-data.types';
 
+type SavedOfflinePass = OfflinePass & { savedAt: string };
+
 interface OfflinePassCache {
   ownerId: string;
-  passes: OfflinePass[];
+  passes: SavedOfflinePass[];
 }
 
-function readAccountCache(value: unknown, ownerId: string): OfflinePass[] {
+function readAccountCache(value: unknown, ownerId: string): SavedOfflinePass[] {
   const cache = value as Partial<OfflinePassCache> | null | undefined;
   return cache?.ownerId === ownerId && Array.isArray(cache.passes)
     ? cache.passes
@@ -29,7 +31,7 @@ export async function saveOfflinePass(
   const ownerId = readAccessTokenSubject(accessToken);
   if (!ownerId || pass.status !== 'Confirmada' || signal?.aborted) return;
 
-  const savedPass: OfflinePass = {
+  const savedPass: SavedOfflinePass = {
     id: pass.id,
     qrToken: pass.qrToken,
     eventName: pass.eventName,
@@ -62,7 +64,7 @@ export async function saveOfflinePass(
 
 export async function listOfflinePasses(
   accessToken = getAccessToken(),
-): Promise<OfflinePass[]> {
+): Promise<SavedOfflinePass[]> {
   const ownerId = readAccessTokenSubject(accessToken);
   if (!accessToken || !ownerId || getAccessToken() !== accessToken) return [];
 

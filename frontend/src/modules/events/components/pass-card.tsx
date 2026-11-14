@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar, Clock, Check, MessageCircle } from 'lucide-react';
+import { OfflineAvailableBadge } from './offline-available-badge';
 
 import type { PassCardProps } from '../types/pass-card-props.types';
 
@@ -22,6 +23,8 @@ export function PassCard({
   isSelected,
   onClick,
   onOpenChat,
+  chatDisabledReason,
+  isAvailableOffline,
 }: PassCardProps) {
   const effectiveStatus = getEffectiveRegistrationStatus(status, useEventFinished({ eventDate: date, endTime: endTime ?? '' }));
   const timeRange = (startTime || endTime) ? formatTimeRange(startTime ?? '', endTime ?? '') : null;
@@ -50,6 +53,7 @@ export function PassCard({
         >
           <Check className="size-3" /> {effectiveStatus.label}
         </div>
+        {isAvailableOffline ? <OfflineAvailableBadge /> : null}
 
         <div className="min-w-0">
           <h3
@@ -90,8 +94,8 @@ export function PassCard({
         type="button"
         className="absolute right-5 bottom-5"
         aria-label="Abrir chat del taller"
-        title={onOpenChat ? 'Abrir chat del taller' : 'Chat del taller próximamente'}
-        disabled={!onOpenChat}
+        title={chatDisabledReason ?? (onOpenChat ? 'Abrir chat del taller' : 'Chat del taller próximamente')}
+        disabled={!onOpenChat || Boolean(chatDisabledReason)}
         onClick={() => onOpenChat?.(registrationId)}
       >
         <MessageCircle className="size-5" aria-hidden="true" />

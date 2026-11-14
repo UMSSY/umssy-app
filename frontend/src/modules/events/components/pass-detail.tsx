@@ -15,7 +15,7 @@ import { formatRegistrationDate, getEffectiveRegistrationStatus } from '../utils
 import { registrationsService } from '../services/registrations.service';
 import type { PassDetailProps } from '../types/pass-detail-props.types';
 
-export function PassDetail({ registration }: PassDetailProps) {
+export function PassDetail({ registration, offlineQrToken }: PassDetailProps) {
   const accessToken = useRegistrationSession();
   const pass = useQuery({
     queryKey: ['private-event-pass', accessToken, registration.id],
@@ -24,6 +24,7 @@ export function PassDetail({ registration }: PassDetailProps) {
     retry: false,
   });
   const detail = pass.data ?? registration;
+  const savedQrToken = pass.data ? undefined : offlineQrToken;
 
   const effectiveStatus = getEffectiveRegistrationStatus(detail.status, useEventFinished({ eventDate: detail.date, endTime: detail.endTime }));
 
@@ -71,20 +72,20 @@ export function PassDetail({ registration }: PassDetailProps) {
           <div className="flex min-h-[220px] items-center justify-center rounded-xl bg-surface p-6 shadow-inner">
             {!accessToken ? (
               <p role="alert">Inicia sesión para consultar el pase.</p>
-            ) : pass.isPending ? (
+            ) : pass.isPending && !savedQrToken ? (
               <div className="flex flex-col items-center gap-2 text-ink/70">
                 <Loader2 className="size-8 animate-spin" />
                 <span className="text-xs">Generando pase...</span>
               </div>
             ) : effectiveStatus.isPast ? (
               <p className="text-center text-ink">Pase finalizado. Este taller ya concluyó.</p>
-            ) : pass.isError ? (
+            ) : pass.isError && !savedQrToken ? (
               <div role="alert" className="space-y-3 text-center text-ink">
                 <p>No se pudo cargar el pase. Inténtalo nuevamente.</p>
                 <Button variant="outline" onClick={() => { void pass.refetch(); }}>Reintentar</Button>
               </div>
             ) : (
-              <PassQr token={pass.data.qrToken} />
+              <PassQr token={pass.data?.qrToken ?? savedQrToken ?? ''} />
             )}
           </div>
         </div>

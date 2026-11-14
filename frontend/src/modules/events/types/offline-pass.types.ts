@@ -1,5 +1,10 @@
-import type { PassData } from './pass-data.types';
-
-export interface OfflinePass extends PassData {
-  savedAt: string;
+export interface OfflinePass {
+  id: string;
+  eventName: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  location: string | null;
+  status: string;
+  qrToken: string;
 }
