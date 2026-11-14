@@ -200,13 +200,13 @@ describe('ApplicationsService (T5.1 & T5.2 & HU-15)', () => {
     });
   });
 
-  describe('notifyStateChanged (HU-15)', () => {
+     describe('notifyStateChanged (HU-15)', () => {
     it('AC-15.1: debe enviar la notificación APPLICATION_STATUS_CHANGED cuando el reclutador cambia el estado', async () => {
       await service.notifyStateChanged({
         recipientId: 'user-1',
         applicationId: 'app-1',
-        previousStatus: 'IN_REVIEW' as any,
-        newStatus: 'INTERVIEW' as any,
+        previousStatus: 'IN_REVIEW' as unknown as ApplicationStatus,
+        newStatus: 'INTERVIEW' as unknown as ApplicationStatus,
         jobTitle: 'Dev',
         companyName: 'Empresa A',
       });
@@ -220,7 +220,8 @@ describe('ApplicationsService (T5.1 & T5.2 & HU-15)', () => {
           companyName: 'Empresa A',
           newStatus: 'INTERVIEW',
         },
-        actionUrl: 'https://umssy.edu.bo/postulaciones/app-1',
+                actionUrl: 'https://umssy.edu.bo/postulaciones/app-1',
+
       });
     });
 
@@ -241,14 +242,13 @@ describe('ApplicationsService (T5.1 & T5.2 & HU-15)', () => {
       await service.notifyStateChanged({
         recipientId: 'user-1',
         applicationId: 'app-1',
-        previousStatus: ApplicationStatus.IN_REVIEW,
-        newStatus: ApplicationStatus.IN_REVIEW,
+        previousStatus: 'IN_REVIEW' as unknown as ApplicationStatus,
+        newStatus: 'IN_REVIEW' as unknown as ApplicationStatus,
         jobTitle: 'Dev',
         companyName: 'Empresa A',
       });
 
       expect(notificationsMock.notify).not.toHaveBeenCalled();
-    
     });
   });
 });
