@@ -370,3 +370,28 @@ describe('Published radar processing states', () => {
     expect(result.skills).toEqual([]);
   });
 });
+
+
+describe('published radar comparison', () => {
+  it('returns the two published snapshots while a newer revision is pending', () => {
+    const current = snapshot();
+    const previous = { ...snapshot(), version: 3, created_at: new Date('2026-10-20T12:00:00Z'), scores: { ...emptyScores(), qa: 3 } };
+    const result = new RadarPublicationMapper().myRadar(userId, {
+      snapshots: [current, previous], pendingDocs: [], pendingSkills: 0,
+      attempts: [], state: { status: 'pending', inputRevision: 3, processedRevision: 2, dictionaryVersion: '1' },
+    });
+    expect(result.version).toBe(4);
+    expect(result.scores.qa).toBe(1.5);
+    expect(result.previous).toEqual({ version: 3, updatedAt: previous.created_at, scores: previous.scores });
+    expect(result.processingStatus).toBe('pending');
+  });
+
+  it('does not invent a previous publication', () => {
+    const mapper = new RadarPublicationMapper();
+    const state = { pendingDocs: [], pendingSkills: 0, attempts: [], state: null };
+    expect(mapper.myRadar(userId, { ...state, snapshots: [snapshot()] }).previous).toBeNull();
+    const empty = mapper.myRadar(userId, { ...state, snapshots: [] });
+    expect(empty.previous).toBeNull();
+    expect(empty.version).toBe(0);
+  });
+});

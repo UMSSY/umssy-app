@@ -1,3 +1,9 @@
+import { RadarConsentsModule } from './radar-consents.module.js';
+import { RadarApplicationsService } from './services/radar-applications.service.js';
+import { JobOffersModule } from '../job-offers/job-offers.module.js';
+import { UsersModule } from '../users/users.module.js';
+import { ApplicationsModule } from '../applications/applications.module.js';
+import { RadarRecruitmentSourcesService } from './services/radar-recruitment-sources.service.js';
 import { CvSourcesModule } from '../cv/cv-sources.module.js';
 import { Module } from '@nestjs/common';
 import { PrismaModule } from '../../common/prisma/prisma.module.js';
@@ -23,8 +29,17 @@ import { RadarPublicationRepository } from './repositories/radar-publication.rep
 import { RadarIntegrationController } from './controllers/radar-integration.controller.js';
 import { RadarIntegrationService } from './services/radar-integration.service.js';
 
+import { MatchingModule } from '../matching/matching.module.js';
+import { RadarRecruitmentController } from './controllers/radar-recruitment.controller.js';
+import { RadarRecruitmentService } from './services/radar-recruitment.service.js';
+import { RadarRecruitmentRepository } from './repositories/radar-recruitment.repository.js';
+
 @Module({
   imports: [
+    RadarConsentsModule,
+    JobOffersModule,
+    UsersModule,
+    ApplicationsModule,
     CvSourcesModule,
     PrismaModule,
     JwtAuthModule,
@@ -35,14 +50,19 @@ import { RadarIntegrationService } from './services/radar-integration.service.js
     EducationSourcesModule,
     CertificationSourcesModule,
     RadarEvidenceSourcesModule,
+    MatchingModule,
   ],
-  controllers: [RadarIntegrationController],
+  controllers: [RadarIntegrationController, RadarRecruitmentController],
   providers: [
     RadarPublicationRepository,
+    RadarRecruitmentRepository,
+    RadarApplicationsService,
     RadarAccessRepository,
     RadarCvRepository,
     RadarReviewRepository,
     RadarIntegrationService,
+    RadarRecruitmentService,
+    RadarRecruitmentSourcesService,
     RadarPublicationService,
     RadarPublicationMapper,
     RadarPublicationEvidenceService,
@@ -51,6 +71,10 @@ import { RadarIntegrationService } from './services/radar-integration.service.js
     RadarReviewMapper,
     RadarPdfExtractionService,
   ],
-  exports: [RadarIntegrationService],
+  exports: [
+    RadarIntegrationService,
+    RadarRecruitmentService,
+    RadarPdfExtractionService,
+  ],
 })
 export class RadarIntegrationModule {}
