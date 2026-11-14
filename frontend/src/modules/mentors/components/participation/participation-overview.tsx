@@ -90,7 +90,7 @@ export function ParticipationOverview({ isActive, areas, orientations, onAction,
           <ParticipationPreferences title="Tipos de orientación" editHref="/mentorship/orientation" editLabel="Editar tipos de orientación" items={orientations} isEditable={isActive} showIcon />
         </div>
         {isActive && (
-          <ParticipationRecommendations areas={areas} orientations={orientations} />
+          <ParticipationRecommendations orientations={orientations} />
         )}
       </div>
     </section>
