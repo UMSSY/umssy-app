@@ -9,6 +9,42 @@ import { MentorsController } from '../controllers/mentors.controller.js';
 import type { MentorsService } from '../services/mentors.service.js';
 
 describe('MentorsController', () => {
+  it('protects profile suggestions with JWT and delegates only the current user id', async () => {
+    const response = { suggestions: [], pendingCount: 0 };
+    const findMyProfileSuggestions = vi.fn().mockResolvedValue(response);
+    const controller = new MentorsController({
+      findMyProfileSuggestions,
+    } as unknown as MentorsService);
+    const handler = Object.getOwnPropertyDescriptor(
+      MentorsController.prototype,
+      'findMyProfileSuggestions',
+    )?.value;
+    expect(Reflect.getMetadata(GUARDS_METADATA, handler)).toEqual([
+      JwtAuthGuard,
+    ]);
+    const user = {
+      id: 'session-user',
+      email: 'mentor@test.com',
+      roles: ['mentor'],
+    };
+    expect(await controller.findMyProfileSuggestions(user)).toBe(response);
+    expect(findMyProfileSuggestions).toHaveBeenCalledExactlyOnceWith(user.id);
+  });
+
+  it('propagates suggestion errors to the shared HTTP handling', async () => {
+    const error = new Error('read failed');
+    const controller = new MentorsController({
+      findMyProfileSuggestions: vi.fn().mockRejectedValue(error),
+    } as unknown as MentorsService);
+    await expect(
+      controller.findMyProfileSuggestions({
+        id: 'user',
+        email: 'mentor@test.com',
+        roles: ['mentor'],
+      }),
+    ).rejects.toBe(error);
+  });
+
   it('consulta los cupos con JWT sin modificar información', async () => {
     const capacity = vi
       .fn()

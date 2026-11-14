@@ -62,6 +62,12 @@ export class MentorsController {
     return this.mentorsService.findMyTechnicalAreas(user.id);
   }
 
+  @Get('me/profile-suggestions')
+  @UseGuards(JwtAuthGuard)
+  findMyProfileSuggestions(@CurrentUser() user: AuthenticatedUser) {
+    return this.mentorsService.findMyProfileSuggestions(user.id);
+  }
+
   @Get('me/participation')
   @UseGuards(JwtAuthGuard)
   findMyParticipation(@CurrentUser() user: AuthenticatedUser) {
