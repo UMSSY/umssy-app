@@ -20,6 +20,19 @@ const toTimestamp = (value: DateInput): number => {
 const toBoliviaShifted = (value: DateInput): Date =>
   new Date(toTimestamp(value) + BOLIVIA_OFFSET_MS);
 
+export const getBoliviaDateTimeAsUtc = (date: Date, time: Date): Date =>
+  new Date(
+    Date.UTC(
+      date.getUTCFullYear(),
+      date.getUTCMonth(),
+      date.getUTCDate(),
+      time.getUTCHours(),
+      time.getUTCMinutes(),
+      time.getUTCSeconds(),
+      time.getUTCMilliseconds(),
+    ) - BOLIVIA_OFFSET_MS,
+  );
+
 export const toBoliviaTime = (value: DateInput): BoliviaDateTime => {
   const shifted = toBoliviaShifted(value);
   const year = shifted.getUTCFullYear();

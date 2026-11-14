@@ -6,6 +6,7 @@ import { EventsRepository } from '../repositories/events.repository.js';
 import { mapEventsToListResponse } from '../mappers/events.mapper.js';
 import { mapEventDetailToResponse } from '../mappers/event-detail.mapper.js';
 import type { GetEventsPayload } from '../types/get-events-payload.types.js';
+import { isEventFinished } from '../utils/is-event-finished.js';
 import type {
   EventDetailResponse,
   EventsListResponse,
@@ -78,6 +79,21 @@ export class EventsService {
     if (!event) throw new EventNotFoundException(id);
     return event;
   }
+
+  async findFinishedEventIds(
+    eventIds: string[],
+    now: Date,
+  ): Promise<string[]> {
+    if (eventIds.length === 0) return [];
+
+    const schedules = await this.repository.findEventSchedulesByIds(eventIds);
+    return schedules
+      .filter(({ eventDate, endTime }) =>
+        isEventFinished(eventDate, endTime, now),
+      )
+      .map(({ id }) => id);
+  }
+
   lockEventRow(tx: Prisma.TransactionClient, eventId: string): Promise<void> {
     return this.repository.lockEventRow(tx, eventId);
   }

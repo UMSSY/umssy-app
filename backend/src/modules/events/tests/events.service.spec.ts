@@ -31,11 +31,20 @@ describe('EventsService', () => {
   let repositoryMock: {
     findAndCount: ReturnType<typeof vi.fn>;
     findById: ReturnType<typeof vi.fn>;
+    findEventSchedulesByIds: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
-    repositoryMock = { findAndCount: vi.fn(), findById: vi.fn() };
-    service = new EventsService(new EventsRepository({} as never));
+    repositoryMock = {
+      findAndCount: vi.fn(),
+      findById: vi.fn(),
+      findEventSchedulesByIds: vi.fn(),
+    };
+    const repository = new EventsRepository({} as never);
+    vi.spyOn(repository, 'findEventSchedulesByIds').mockImplementation(
+      repositoryMock.findEventSchedulesByIds,
+    );
+    service = new EventsService(repository);
     vi.spyOn(service, 'findAndCount').mockImplementation(
       repositoryMock.findAndCount,
     );
@@ -157,5 +166,38 @@ describe('EventsService', () => {
     expect(repositoryMock.findAndCount).toHaveBeenCalledWith(
       expect.objectContaining({ userId: 'user-1' }),
     );
+  });
+
+  it('finds events closed at their Bolivia end time', async () => {
+    repositoryMock.findEventSchedulesByIds.mockResolvedValue([
+      {
+        id: 'finished-event',
+        eventDate: new Date('2026-10-20T00:00:00.000Z'),
+        endTime: new Date('1970-01-01T12:00:00.000Z'),
+      },
+      {
+        id: 'upcoming-event',
+        eventDate: new Date('2026-10-20T00:00:00.000Z'),
+        endTime: new Date('1970-01-01T12:01:00.000Z'),
+      },
+    ]);
+
+    await expect(
+      service.findFinishedEventIds(
+        ['finished-event', 'upcoming-event'],
+        new Date('2026-10-20T16:00:00.000Z'),
+      ),
+    ).resolves.toEqual(['finished-event']);
+    expect(repositoryMock.findEventSchedulesByIds).toHaveBeenCalledWith([
+      'finished-event',
+      'upcoming-event',
+    ]);
+  });
+
+  it('skips the schedule query when there are no event ids', async () => {
+    await expect(service.findFinishedEventIds([], new Date())).resolves.toEqual(
+      [],
+    );
+    expect(repositoryMock.findEventSchedulesByIds).not.toHaveBeenCalled();
   });
 });

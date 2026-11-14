@@ -161,8 +161,18 @@ export class EventRegistrationsService {
   }
 
   async findMine(userId: string): Promise<MyRegistrationResponse[]> {
+    const registrations = await this.findByUserId(userId);
+    if (registrations.length === 0) return [];
+
+    const finishedEventIds = new Set(
+      await this.eventsService.findFinishedEventIds(
+        [...new Set(registrations.map(({ eventId }) => eventId))],
+        new Date(),
+      ),
+    );
+
     return EventRegistrationsMapper.toMyRegistrationList(
-      await this.findByUserId(userId),
+      registrations.filter(({ eventId }) => !finishedEventIds.has(eventId)),
     );
   }
 

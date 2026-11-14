@@ -187,6 +187,14 @@ export class EventsRepository {
     });
     return event;
   }
+
+  findEventSchedulesByIds(eventIds: string[]) {
+    return this.prisma.event.findMany({
+      where: { id: { in: eventIds } },
+      select: { id: true, eventDate: true, endTime: true },
+    });
+  }
+
   async lockEventRow(
     tx: Prisma.TransactionClient,
     eventId: string,

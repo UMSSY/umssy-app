@@ -3,6 +3,20 @@ import { describe, expect, it, vi } from 'vitest';
 import { EventsService } from '../services/events.service.js';
 
 describe('event registration lookup', () => {
+  it('loads event schedules in a batch', async () => {
+    const findMany = vi.fn().mockResolvedValue([]);
+    const repository = new EventsRepository({
+      event: { findMany },
+    } as never);
+
+    await repository.findEventSchedulesByIds(['event-1', 'event-2']);
+
+    expect(findMany).toHaveBeenCalledWith({
+      where: { id: { in: ['event-1', 'event-2'] } },
+      select: { id: true, eventDate: true, endTime: true },
+    });
+  });
+
   it('uses the caller transaction and only selects event data', async () => {
     const prisma = { event: { findUnique: vi.fn() } };
     const event = { id: 'event' };
