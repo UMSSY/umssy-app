@@ -150,8 +150,8 @@ export class RadarRecruitmentService {
       application.id,
       {
         consent,
-        consentCv: consent && consentCv,
-        consentContact: consent && consentContact,
+        consentCv,
+        consentContact,
       },
     );
 
@@ -198,8 +198,8 @@ export class RadarRecruitmentService {
       applicationId,
       {
         consent,
-        consentCv: consent && consentCv,
-        consentContact: consent && consentContact,
+        consentCv,
+        consentContact,
       },
     );
     return mapApplicationConsentsResponse(

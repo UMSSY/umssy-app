@@ -21,7 +21,7 @@ describe('RadarApplicationsRepository', () => {
     vi.clearAllMocks();
   });
 
-  it('persiste consentimientos independientes y deriva CV/contacto del radar', async () => {
+  it('persiste cada consentimiento sin derivarlo del radar', async () => {
     const { prisma, repository } = setup();
     prisma.$queryRaw.mockResolvedValueOnce([{ id: APPLICATION_ID }]);
 
@@ -31,6 +31,7 @@ describe('RadarApplicationsRepository', () => {
     await repository.setConsents(APPLICATION_ID, false, true, true);
 
     expect(prisma.$queryRaw).toHaveBeenCalledTimes(2);
+    expect(prisma.$queryRaw.mock.calls[1].slice(1)).toEqual([APPLICATION_ID, false, true, true]);
   });
 
   it('reads and revokes consent without accessing application tables', async () => {

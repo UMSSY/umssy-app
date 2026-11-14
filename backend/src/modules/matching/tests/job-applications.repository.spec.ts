@@ -122,6 +122,10 @@ describe('HU-02B T2.8 - JobApplicationsRepository', () => {
 
     expect(prisma.jobApplication.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
+        select: expect.objectContaining({
+          radarConsent: { select: { consentToContact: true } },
+          user: { select: expect.objectContaining({ phone: true, email: true }) },
+        }),
         where: {
           jobOfferId: 'offer-1',
           status: { title: { not: 'Retirada' } },

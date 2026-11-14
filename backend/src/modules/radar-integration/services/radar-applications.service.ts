@@ -70,18 +70,23 @@ export class RadarApplicationsService {
       await this.applications.findRecruitmentApplication(applicationId);
     if (!application || application.status.title === 'Retirada') return [];
     const consent = (await this.consents.findConsents([applicationId]))[0];
-    if (!consent?.consent_to_recruiter) return [];
+    if (!consent) return [];
     return [
       {
         user_id: application.userId,
         company_id: application.jobOffer.companyId,
-        consent_to_cv: consent.consent_to_cv,
+        consent_to_cv: consent?.consent_to_cv ?? false,
       },
     ];
   }
 
-  companyForEvidence(applicationId: string) {
-    return this.companyForCv(applicationId);
+  async companyForEvidence(applicationId: string) {
+    const application =
+      await this.applications.findRecruitmentApplication(applicationId);
+    if (!application || application.status.title === 'Retirada') return [];
+    const consent = (await this.consents.findConsents([applicationId]))[0];
+    if (!consent?.consent_to_recruiter) return [];
+    return [{ user_id: application.userId, company_id: application.jobOffer.companyId }];
   }
 
   async companyForDecision(applicationId: string) {

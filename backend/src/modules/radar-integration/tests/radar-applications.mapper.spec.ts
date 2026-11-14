@@ -2,9 +2,15 @@ import { describe, expect, it } from 'vitest';
 import {
   mapApplicationStatus,
   mapApplicationSummary,
+  mapApplicationConsentsResponse,
 } from '../mappers/radar-applications.mapper.js';
 
 describe('radar-applications mapper', () => {
+  it('revocar radar conserva los otros permisos explícitos en la respuesta', () => {
+    expect(mapApplicationConsentsResponse('app', 'En revisión', false, true, true)).toMatchObject({
+      consent: false, consentCv: true, consentContact: true,
+    });
+  });
   it('traduce los estados de postulación del Epic a estados del radar', () => {
     expect(mapApplicationStatus('En revisión')).toBe('applied');
     expect(mapApplicationStatus('Entrevista')).toBe('interview');

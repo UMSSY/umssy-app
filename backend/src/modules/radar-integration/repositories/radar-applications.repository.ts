@@ -25,7 +25,7 @@ export class RadarApplicationsRepository {
     const client = context?.client ?? this.prisma;
     return client.$queryRaw<{ id: string }[]>`
       INSERT INTO radar_application_consents(application_id,consent_to_recruiter,consent_to_cv,consent_to_contact)
-      VALUES (${applicationId}::uuid,${consent},${consent && cv},${consent && contact})
+      VALUES (${applicationId}::uuid,${consent},${cv},${contact})
       ON CONFLICT(application_id) DO UPDATE SET
         consent_to_recruiter=EXCLUDED.consent_to_recruiter,consent_to_cv=EXCLUDED.consent_to_cv,
         consent_to_contact=EXCLUDED.consent_to_contact,updated_at=now()

@@ -71,9 +71,11 @@ function CompanyApplicantsView() {
                     <CardContent className="space-y-2 py-4">
                       <h2 className="font-semibold">{applicant.fullName}</h2>
                       <p>{applicant.headline}</p>
-                      <p className="text-sm text-text-secondary">
-                        {applicant.email}
-                      </p>
+                      {applicant.email && <p className="text-sm text-text-secondary">{applicant.email}</p>}
+                      {applicant.phone && <p className="text-sm text-text-secondary">{applicant.phone}</p>}
+                      {!applicant.email && !applicant.phone && (
+                        <p className="text-sm text-text-secondary">Contacto no autorizado.</p>
+                      )}
                       <p className="text-sm">{applicant.status}</p>
                     </CardContent>
                   </Card>

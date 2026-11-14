@@ -8,6 +8,18 @@ afterEach(() => {
 });
 
 describe("applicationService", () => {
+  it("lee los permisos vigentes y no inventa permisos de una postulación ausente", async () => {
+    const current = { id: "application-1", consent: false, consentCv: true, consentContact: false };
+    vi.spyOn(apiClient, "get").mockResolvedValue({ data: { data: [current] } });
+    await expect(applicationService.getConsents(current.id)).resolves.toEqual(current);
+    await expect(applicationService.getConsents("another")).rejects.toThrow("Postulación no disponible");
+  });
+  it("envía los tres valores explícitos sin convertir falsos en autorizaciones", async () => {
+    const current = { id: "application-1", consent: false, consentCv: true, consentContact: false };
+    const request = vi.spyOn(apiClient, "patch").mockResolvedValue({ data: { data: current } });
+    await expect(applicationService.updateConsents(current)).resolves.toEqual(current);
+    expect(request).toHaveBeenCalledWith("/radar-integration/me/applications/application-1/consents", { consent: false, consentCv: true, consentContact: false });
+  });
   it("lists the applications of the authenticated person through the shared client", async () => {
     const applications = [buildApplication()];
     const request = vi.spyOn(apiClient, "get").mockResolvedValue({

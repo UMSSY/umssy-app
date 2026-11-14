@@ -72,8 +72,8 @@ export function mapApplicationConsentsResponse(
     id,
     state: mapApplicationStatus(status),
     consent,
-    consentCv: consent && consentCv,
-    consentContact: consent && consentContact,
+    consentCv,
+    consentContact,
   };
 }
 export function mapApplicationResponse(

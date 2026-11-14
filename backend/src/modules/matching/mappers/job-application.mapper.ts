@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { recruiterContactProjection } from '../../radar-integration/recruiter-consent.js';
 import { JOB_APPLICATION_STATUS } from '../constants/job-application.constants.js';
 import type {
   CompanyJobApplicantsResponse,
@@ -45,7 +46,12 @@ export class JobApplicationMapper {
       id: record.id,
       userId: record.user.id,
       fullName: `${record.user.firstName} ${record.user.lastName}`.trim(),
-      email: record.user.email,
+      ...recruiterContactProjection(
+        record.status.title !== JOB_APPLICATION_STATUS.WITHDRAWN &&
+          record.radarConsent?.consentToContact === true,
+        record.user.email,
+        record.user.phone ?? null,
+      ),
       headline: record.user.headline,
       appliedAt: record.appliedAt.toISOString(),
       status: record.status.title,

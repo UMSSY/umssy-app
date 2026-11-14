@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { APPLICATION_MESSAGES } from "../constants/application.constants";
 import type { ApplicationsMobileListProps } from "../types/applications-mobile-list-props.types";
 import { WithdrawApplicationButton } from "./withdraw-application-button";
+import { ApplicationConsentsDialog } from "./application-consents-dialog";
 
 export function ApplicationsMobileList({
   applications,
@@ -25,6 +26,7 @@ export function ApplicationsMobileList({
             </span>
             <Badge variant="outline">{application.status}</Badge>
           </div>
+          <ApplicationConsentsDialog application={application} />
           <WithdrawApplicationButton
             application={application}
             withdrawingId={withdrawingId}

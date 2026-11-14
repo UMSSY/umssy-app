@@ -45,7 +45,7 @@ describe('RadarApplicationsService', () => {
     await expect(service.companyForEvidence('app')).resolves.toEqual([]);
   });
 
-  it('requires current radar consent and a non-withdrawn application for evidence and CV', async () => {
+  it('requires current independent consent and a non-withdrawn application', async () => {
     const { service, applications, consents } = setup();
     consents.findConsents.mockResolvedValue([
       {
@@ -63,6 +63,16 @@ describe('RadarApplicationsService', () => {
     });
     await expect(service.companyForCv('app')).resolves.toEqual([]);
     await expect(service.companyForEvidence('app')).resolves.toEqual([]);
+  });
+
+  it('revocar radar bloquea evidencias sin revocar el CV autorizado', async () => {
+    const { service, consents } = setup();
+    consents.findConsents.mockResolvedValue([{ application_id: 'app', consent_to_recruiter: false, consent_to_cv: true }]);
+    await expect(service.companyForEvidence('app')).resolves.toEqual([]);
+    await expect(service.companyForCv('app')).resolves.toEqual([{ user_id: 'owner', company_id: 'company', consent_to_cv: true }]);
+    consents.findConsents.mockResolvedValue([{ application_id: 'app', consent_to_recruiter: true, consent_to_cv: false }]);
+    await expect(service.companyForCv('app')).resolves.toEqual([{ user_id: 'owner', company_id: 'company', consent_to_cv: false }]);
+    await expect(service.companyForEvidence('app')).resolves.toEqual([{ user_id: 'owner', company_id: 'company' }]);
   });
 
   it('only lets the owner update consent on an active application', async () => {

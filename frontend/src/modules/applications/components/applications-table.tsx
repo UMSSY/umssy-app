@@ -17,6 +17,7 @@ import type { ApplicationSort } from "../types/application-sort.types";
 import type { ApplicationSortKey } from "../types/application-sort-key.types";
 import type { ApplicationsTableProps } from "../types/applications-table-props.types";
 import { WithdrawApplicationButton } from "./withdraw-application-button";
+import { ApplicationConsentsDialog } from "./application-consents-dialog";
 
 function ariaSortFor(
   sort: ApplicationSort | null | undefined,
@@ -98,6 +99,7 @@ export function ApplicationsTable({
                 <Badge variant="outline">{application.status}</Badge>
               </TableCell>
               <TableCell>
+                <ApplicationConsentsDialog application={application} />
                 <WithdrawApplicationButton
                   application={application}
                   withdrawingId={withdrawingId}

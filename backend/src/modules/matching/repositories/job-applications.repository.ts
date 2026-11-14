@@ -26,12 +26,14 @@ const JOB_APPLICANT_SELECT = {
   id: true,
   appliedAt: true,
   status: { select: { title: true } },
+  radarConsent: { select: { consentToContact: true } },
   user: {
     select: {
       id: true,
       firstName: true,
       lastName: true,
       email: true,
+      phone: true,
       headline: true,
     },
   },
