@@ -8,6 +8,7 @@ import {
   Controller,
   Delete,
   Get,
+  Header,
   HttpCode,
   Param,
   Post,
@@ -111,6 +112,7 @@ export class EventRegistrationsController {
     return this.registrationsService.cancel(params.id, userId);
   }
   @Get('event-registrations/me')
+  @Header('Cache-Control', 'private, no-store')
   @ApiOperation({ summary: 'Consultar los pases activos del usuario' })
   @ApiQuery({
     name: 'scope',
