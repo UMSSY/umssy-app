@@ -7,18 +7,58 @@ describe('AuthController', () => {
       login: vi
         .fn()
         .mockResolvedValue({ accessToken: 'token', roleTag: 'titulado' }),
+      getAccessTokenMaxAgeMs: vi.fn().mockReturnValue(1000),
     };
     const controller = new AuthController(authService as any);
+    const response = { cookie: vi.fn() };
 
     const body = {
       email: 'prueba@umss.edu.bo',
       password: 'Prueba123',
       roleTag: 'titulado' as const,
     };
-    const result = await controller.login(body);
+    const result = await controller.login(body, response as any);
 
     expect(authService.login).toHaveBeenCalledWith(body);
     expect(result).toEqual({ accessToken: 'token', roleTag: 'titulado' });
+  });
+
+  it('sets the access token as an HttpOnly cookie on login', async () => {
+    const authService = {
+      login: vi.fn().mockResolvedValue({ accessToken: 'token' }),
+      getAccessTokenMaxAgeMs: vi.fn().mockReturnValue(60_000),
+    };
+    const controller = new AuthController(authService as any);
+    const response = { cookie: vi.fn() };
+
+    await controller.login({} as any, response as any);
+
+    expect(authService.getAccessTokenMaxAgeMs).toHaveBeenCalledWith('token');
+    expect(response.cookie).toHaveBeenCalledWith(
+      'umssy_access',
+      'token',
+      expect.objectContaining({
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 60_000,
+      }),
+    );
+  });
+
+  it('clears the access token cookie on logout', () => {
+    const controller = new AuthController({} as any);
+    const response = { clearCookie: vi.fn() };
+
+    controller.logout(response as any);
+
+    expect(response.clearCookie).toHaveBeenCalledWith(
+      'umssy_access',
+      expect.objectContaining({ httpOnly: true, path: '/' }),
+    );
+    expect(response.clearCookie.mock.calls[0]?.[1]).not.toHaveProperty(
+      'maxAge',
+    );
   });
 
   it('delegates session readback with the identity verified by the guard', () => {

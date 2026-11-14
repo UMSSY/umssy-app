@@ -2,11 +2,13 @@ import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { SessionService } from '../services/session.service.js';
 import { ROLE_NAMES } from '../enums/roles.enum.js';
-import { BEARER_PREFIX } from '../constants/auth.constants.js';
+import { SAFE_HTTP_METHODS } from '../constants/auth.constants.js';
 import { MissingUserException } from '../exceptions/missing-user.exception.js';
 import { UnauthorizedSessionException } from '../exceptions/unauthorized-session.exception.js';
 import type { AuthenticatedRequest } from '../types/authenticated-request.types.js';
 import type { LoginJwtPayload } from '../types/login-jwt-payload.types.js';
+import { parseCorsOrigins } from '../utils/cors-origins.js';
+import { extractAccessToken } from '../utils/extract-access-token.js';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
@@ -17,23 +19,24 @@ export class JwtAuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
-    const authorization = request.headers?.authorization;
+    const extracted = extractAccessToken(request);
 
-    if (
-      typeof authorization !== 'string' ||
-      !authorization.startsWith(BEARER_PREFIX)
-    ) {
+    if (!extracted) {
       throw new MissingUserException();
     }
 
-    const token = authorization.slice(BEARER_PREFIX.length).trim();
-    if (!token) {
-      throw new MissingUserException();
+    if (
+      extracted.source === 'cookie' &&
+      !this.isTrustedCookieRequest(request)
+    ) {
+      throw new UnauthorizedSessionException();
     }
 
     let payload: LoginJwtPayload;
     try {
-      payload = await this.jwtService.verifyAsync<LoginJwtPayload>(token);
+      payload = await this.jwtService.verifyAsync<LoginJwtPayload>(
+        extracted.token,
+      );
     } catch {
       throw new UnauthorizedSessionException();
     }
@@ -57,5 +60,14 @@ export class JwtAuthGuard implements CanActivate {
     request.user = await this.sessionService.getAuthenticatedUser(payload.sub);
 
     return true;
+  }
+
+  private isTrustedCookieRequest(request: AuthenticatedRequest): boolean {
+    const method = request.method?.toUpperCase() ?? 'GET';
+    if (SAFE_HTTP_METHODS.some((safeMethod) => safeMethod === method)) {
+      return true;
+    }
+    const origin = request.headers?.origin;
+    return typeof origin === 'string' && parseCorsOrigins().includes(origin);
   }
 }
