@@ -23,6 +23,10 @@ import {
   type FindApplicationsQueryDto,
 } from '../requests/find-applications.request.js';
 
+const applicationIdPipe = new ParseUUIDPipe({
+  exceptionFactory: () => new ApplicationNotFoundException(),
+});
+
 @Controller('applications')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('titulado', 'estudiante')
@@ -43,16 +47,27 @@ export class ApplicationsController {
     return this.applicationsService.findMyApplications(userId, query);
   }
 
+  @Patch(':id/reactivate')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  reactivateApplication(
+    @Param('id', applicationIdPipe) id: string,
+    @CurrentUserId() userId: string,
+  ) {
+    return this.applicationsService.reactivateApplication(id, userId);
+  }
+
+  @Get(':id/contact')
+  getApplicationContact(
+    @Param('id', applicationIdPipe) id: string,
+    @CurrentUserId() userId: string,
+  ) {
+    return this.applicationsService.getApplicationContact(id, userId);
+  }
+
   @Patch(':id/withdraw')
   @HttpCode(HttpStatus.NO_CONTENT)
   withdrawApplication(
-    @Param(
-      'id',
-      new ParseUUIDPipe({
-        exceptionFactory: () => new ApplicationNotFoundException(),
-      }),
-    )
-    id: string,
+    @Param('id', applicationIdPipe) id: string,
     @CurrentUserId() userId: string,
   ) {
     return this.applicationsService.withdrawApplication(id, userId);
