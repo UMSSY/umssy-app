@@ -13,15 +13,9 @@ import { subscribeToPush } from '../utils/subscribe-to-push';
 
 function detectEnvironment(): PushEnvironment {
   if (typeof window === 'undefined') return 'unsupported';
-  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-    return 'unsupported';
-  }
 
   const ua = navigator.userAgent;
   const isIOS = /iPad|iPhone|iPod/.test(ua);
-  const isDesktop = !/Android|iPhone|iPad|iPod/i.test(ua);
-
-  if (isDesktop) return 'desktop';
 
   if (isIOS) {
     const match = ua.match(/OS (\d+)_(\d+)/);
@@ -36,13 +30,18 @@ function detectEnvironment(): PushEnvironment {
     const isStandalone =
       window.matchMedia('(display-mode: standalone)').matches ||
       nav.standalone === true;
-    
+
     if (!isStandalone) {
       return 'ios-not-installed';
     }
   }
 
-  return 'supported';
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+    return 'unsupported';
+  }
+
+  const isDesktop = !/Android|iPhone|iPad|iPod/i.test(ua);
+  return isDesktop ? 'desktop' : 'supported';
 }
 
 const getServerSnapshotEnv = () => 'unsupported' as PushEnvironment;
@@ -50,9 +49,9 @@ const getClientSnapshotEnv = () => detectEnvironment();
 const subscribeEnv = () => () => {};
 
 const getServerSnapshotPerm = () => 'default' as PushPermissionState;
-const getClientSnapshotPerm = () => 
-  (typeof window !== 'undefined' && 'Notification' in window 
-    ? Notification.permission 
+const getClientSnapshotPerm = () =>
+  (typeof window !== 'undefined' && 'Notification' in window
+    ? Notification.permission
     : 'default') as PushPermissionState;
 const subscribePerm = () => () => {};
 
@@ -67,7 +66,7 @@ export function usePushNotifications(): UsePushNotificationsResult {
     if (environment !== 'supported') return;
 
     let isMounted = true;
-    
+
     navigator.serviceWorker.ready
       .then((registration) => registration.pushManager.getSubscription())
       .then((sub) => {
