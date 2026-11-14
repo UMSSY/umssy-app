@@ -32,13 +32,13 @@ describe("Mis pases", () => {
     expect(screen.getAllByRole('button', { name: /React/ })).toHaveLength(2);
   });
 
-  it('keeps the card and ticket active before the event closes', async () => {
+  it('labels the workshop in progress after its Bolivia start time while keeping its pass active', async () => {
     vi.setSystemTime(new Date('2026-10-20T15:59:59Z'));
     getMine.mockResolvedValue([pass]);
     render(<MyPassesView />);
     const panel = await screen.findByRole('complementary');
-    await within(panel).findByText('Confirmada');
-    expect(within(screen.getByRole('button', { name: /React/ })).getByText('Confirmada')).toBeInTheDocument();
+    await within(panel).findByText('En curso');
+    expect(within(screen.getByRole('button', { name: /React/ })).getByText('En curso')).toBeInTheDocument();
     expect(await within(panel).findByRole('img', { name: 'Código QR del pase' })).toBeInTheDocument();
   });
 

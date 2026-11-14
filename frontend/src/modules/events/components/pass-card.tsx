@@ -1,6 +1,6 @@
 'use client';
 
-import { useEventFinished } from '../hooks/use-event-finished';
+import { useEventScheduleStatus } from '../hooks/use-event-finished';
 import { formatEventLocation } from '../utils/format-event-location';
 import { formatRegistrationDate, getEffectiveRegistrationStatus } from '../utils/registration-format';
 import { formatTimeRange } from '../utils/event-card';
@@ -26,7 +26,16 @@ export function PassCard({
   chatDisabledReason,
   isAvailableOffline,
 }: PassCardProps) {
-  const effectiveStatus = getEffectiveRegistrationStatus(status, useEventFinished({ eventDate: date, endTime: endTime ?? '' }));
+  const eventStatus = useEventScheduleStatus({
+    eventDate: date,
+    startTime,
+    endTime: endTime ?? '',
+  });
+  const effectiveStatus = getEffectiveRegistrationStatus(
+    status,
+    eventStatus.isFinished,
+    eventStatus.isInProgress,
+  );
   const timeRange = (startTime || endTime) ? formatTimeRange(startTime ?? '', endTime ?? '') : null;
 
   return (

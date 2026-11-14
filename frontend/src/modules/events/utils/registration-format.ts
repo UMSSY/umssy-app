@@ -32,9 +32,16 @@ export function formatRegistrationTime(time: string | null | undefined) {
   }).format(value);
 }
 
-export function getEffectiveRegistrationStatus(status: string, isPast: boolean) {
+export function getEffectiveRegistrationStatus(
+  status: string,
+  isPast: boolean,
+  isInProgress = false,
+) {
   if (isPast && (status === "CONFIRMED" || status === "APPROVED" || status === "Confirmada")) {
     return { label: "Finalizado", isPast: true, code: "FINALIZED" };
+  }
+  if (isInProgress && (status === "CONFIRMED" || status === "APPROVED" || status === "Confirmada")) {
+    return { label: "En curso", isPast: false, code: "IN_PROGRESS" };
   }
 
   const statusLabels: Record<string, string> = {

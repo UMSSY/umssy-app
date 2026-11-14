@@ -2,7 +2,7 @@
 
 import { cn } from '@/lib/utils';
 
-import { useEventFinished } from '../hooks/use-event-finished';
+import { useEventScheduleStatus } from '../hooks/use-event-finished';
 import { useQuery } from '@tanstack/react-query';
 import { useRegistrationSession } from '@/modules/registrations';
 import { Button } from '@/components/ui/button';
@@ -26,7 +26,16 @@ export function PassDetail({ registration, offlineQrToken }: PassDetailProps) {
   const detail = pass.data ?? registration;
   const savedQrToken = pass.data ? undefined : offlineQrToken;
 
-  const effectiveStatus = getEffectiveRegistrationStatus(detail.status, useEventFinished({ eventDate: detail.date, endTime: detail.endTime }));
+  const eventStatus = useEventScheduleStatus({
+    eventDate: detail.date,
+    startTime: detail.startTime,
+    endTime: detail.endTime,
+  });
+  const effectiveStatus = getEffectiveRegistrationStatus(
+    detail.status,
+    eventStatus.isFinished,
+    eventStatus.isInProgress,
+  );
 
   return (
     <div className="flex w-full min-w-0 flex-col gap-5">
