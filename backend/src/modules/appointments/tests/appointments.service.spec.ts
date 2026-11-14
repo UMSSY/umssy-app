@@ -1,5 +1,6 @@
 import { Test, type TestingModule } from '@nestjs/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { TransactionService } from '../../../common/prisma/transaction.service.js';
 import { AvailabilityService } from '../../availability/services/availability.service.js';
 import { BlockedDatesService } from '../../availability/services/blocked-dates.service.js';
 import { MentorsService } from '../../mentors/services/mentors.service.js';
@@ -51,6 +52,7 @@ describe('AppointmentsService', () => {
         { provide: BlockedDatesService, useValue: {} },
         { provide: MentorsService, useValue: {} },
         { provide: ProfilePhotoService, useValue: profilePhotoService },
+        { provide: TransactionService, useValue: { run: vi.fn() } },
       ],
     }).compile();
     service = moduleRef.get(AppointmentsService);

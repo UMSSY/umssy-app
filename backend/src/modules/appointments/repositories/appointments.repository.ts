@@ -14,6 +14,7 @@ import {
 import { DAILY_APPOINTMENT_LIMIT_STATUS_TITLES } from '../constants/daily-appointment-limit-statuses.constants.js';
 import type { BoliviaDayRange } from '../types/bolivia-day-range.types.js';
 import type { AppointmentRecord } from '../types/appointment-record.types.js';
+import type { CancelAppointmentData } from '../types/cancel-appointment-data.types.js';
 import type { CreateAppointmentData } from '../types/create-appointment-data.types.js';
 import type { CreateAppointmentHistoryData } from '../types/create-appointment-history-data.types.js';
 import type { MyAppointmentsQuery } from '../types/my-appointments-query.types.js';
@@ -46,6 +47,18 @@ export class AppointmentsRepository {
     client: TransactionClient = this.prisma,
   ): Promise<void> {
     await client.appointmentHistory.create({ data });
+  }
+
+  cancelAppointment(
+    id: string,
+    data: CancelAppointmentData,
+    client: TransactionClient = this.prisma,
+  ): Promise<AppointmentRecord> {
+    return client.appointment.update({
+      where: { id },
+      data,
+      select: APPOINTMENT_SELECT,
+    });
   }
 
   async lockParticipants(
@@ -189,8 +202,11 @@ export class AppointmentsRepository {
     };
   }
 
-  findById(id: string): Promise<AppointmentRecord | null> {
-    return this.prisma.appointment.findUnique({
+  findById(
+    id: string,
+    client: TransactionClient = this.prisma,
+  ): Promise<AppointmentRecord | null> {
+    return client.appointment.findUnique({
       where: { id },
       select: APPOINTMENT_SELECT,
     });

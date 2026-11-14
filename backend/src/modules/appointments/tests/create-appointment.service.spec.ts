@@ -59,6 +59,10 @@ describe('AppointmentsService', () => {
   const availabilityService = { findBlockWithAppointments: vi.fn() };
   const blockedDatesService = { runOnUnblockedDay: vi.fn() };
   const mentorsService = { findOne: vi.fn() };
+  const transactions = {
+    run: <T>(operation: (context: { client: unknown }) => Promise<T>) =>
+      operation({ client: TX }),
+  };
   const user = {
     id: STUDENT_ID,
     email: 'student@test.com',
@@ -103,6 +107,7 @@ describe('AppointmentsService', () => {
       blockedDatesService as never,
       mentorsService as never,
       {} as never,
+      transactions as never,
     );
   });
 

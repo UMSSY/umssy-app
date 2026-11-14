@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  Patch,
   Post,
   Query,
   StreamableFile,
@@ -34,6 +35,7 @@ import {
   APPOINTMENT_DETAIL_RESPONSE_SCHEMA,
   APPOINTMENT_MESSAGES,
   APPOINTMENT_RESPONSE_SCHEMA,
+  CANCEL_APPOINTMENT_DOCS,
   CREATE_APPOINTMENT_DOCS,
   FIND_APPOINTMENT_DOCS,
   FIND_COUNTERPART_PHOTO_DOCS,
@@ -45,6 +47,7 @@ import {
   MAX_MY_APPOINTMENTS_PAGE_SIZE,
 } from '../constants/my-appointments-pagination.constants.js';
 import { MAX_MY_APPOINTMENTS_SEARCH_LENGTH } from '../constants/my-appointments-search.constants.js';
+import { CancelAppointmentDto } from '../requests/cancel-appointment.request.js';
 import { CreateAppointmentDto } from '../requests/create-appointment.request.js';
 import { appointmentIdSchema } from '../requests/appointment-id.request.js';
 import { myAppointmentsQuerySchema } from '../requests/my-appointments-query.request.js';
@@ -91,6 +94,49 @@ export class AppointmentsController {
     @Body() body: CreateAppointmentDto,
   ): Promise<MyAppointmentResponse> {
     return this.appointmentsService.create(user, body);
+  }
+
+  @Patch(':id/cancel')
+  @Roles('mentor', 'titulado', 'estudiante')
+  @ApiOperation({
+    summary: CANCEL_APPOINTMENT_DOCS.summary,
+    description: CANCEL_APPOINTMENT_DOCS.description,
+  })
+  @ApiParam({
+    name: 'id',
+    format: 'uuid',
+    description: CANCEL_APPOINTMENT_DOCS.idDescription,
+  })
+  @ApiOkResponse({
+    description: CANCEL_APPOINTMENT_DOCS.okDescription,
+    schema: {
+      type: 'object',
+      properties: {
+        statusCode: { type: 'integer', example: 200 },
+        ok: { type: 'boolean', example: true },
+        detail: { type: 'string' },
+        data: APPOINTMENT_RESPONSE_SCHEMA,
+      },
+    },
+  })
+  @ApiBadRequestResponse({
+    description: CANCEL_APPOINTMENT_DOCS.badRequestDescription,
+  })
+  @ApiForbiddenResponse({
+    description: CANCEL_APPOINTMENT_DOCS.forbiddenDescription,
+  })
+  @ApiNotFoundResponse({
+    description: CANCEL_APPOINTMENT_DOCS.notFoundDescription,
+  })
+  @ApiConflictResponse({
+    description: CANCEL_APPOINTMENT_DOCS.conflictDescription,
+  })
+  cancel(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id', new RequestValidationPipe(appointmentIdSchema)) id: string,
+    @Body() body: CancelAppointmentDto,
+  ): Promise<MyAppointmentResponse> {
+    return this.appointmentsService.cancel(user, id, body);
   }
 
   @Get('me')
