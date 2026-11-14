@@ -3,7 +3,6 @@
 import { useEffect, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { EDUCATION_FEEDBACK_MESSAGES } from "../constants/education-feedback.constants";
-import { EDUCATIONS_QUERY_KEY } from "../constants/education-query-keys.constants";
 import { educationsService } from "../services/educations.service";
 
 export function useEducations() {
@@ -13,7 +12,7 @@ export function useEducations() {
     mountedRef.current = true;
     return () => { mountedRef.current = false; };
   }, []);
-  const queryKey = EDUCATIONS_QUERY_KEY;
+  const queryKey = ["education", "educations"];
   const query = useQuery({
     queryKey,
     queryFn: async ({ signal }) => {

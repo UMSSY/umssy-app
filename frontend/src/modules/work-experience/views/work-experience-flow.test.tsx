@@ -1,9 +1,13 @@
-
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
-import { cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { skillsAnalysisService } from "@/modules/matching/services/skills-analysis.service";
 import { workExperienceService } from "../services/work-experience.service";
 import type { WorkExperienceItem } from "../types/work-experience-item.types";
 import type { WorkExperiencePayload } from "../types/work-experience-payload.types";
@@ -18,27 +22,12 @@ vi.mock("../services/work-experience.service", () => ({
   },
 }));
 
-vi.mock("@/modules/matching/services/skills-analysis.service", () => ({
-  skillsAnalysisService: {
-    analyzeExperience: vi.fn().mockResolvedValue({
-      experienceId: "experience-1",
-      skills: [],
-      processingTimeMs: 0,
-    }),
-    previewExperience: vi.fn().mockResolvedValue({
-      experienceId: "experience-1",
-      skills: [],
-      processingTimeMs: 0,
-    }),
-  },
-}));
-
 function useInMemoryService() {
   let records: WorkExperienceItem[] = [];
   let sequence = 0;
 
-  vi.mocked(workExperienceService.getWorkExperiences).mockImplementation(() =>
-    Promise.resolve([...records]),
+  vi.mocked(workExperienceService.getWorkExperiences).mockImplementation(
+    () => Promise.resolve([...records]),
   );
 
   vi.mocked(workExperienceService.createWorkExperience).mockImplementation(
@@ -53,7 +42,9 @@ function useInMemoryService() {
   vi.mocked(workExperienceService.updateWorkExperience).mockImplementation(
     (id: string, payload: WorkExperiencePayload) => {
       const updated = { id, ...payload };
-      records = records.map((record) => (record.id === id ? updated : record));
+      records = records.map((record) =>
+        record.id === id ? updated : record,
+      );
       return Promise.resolve(updated);
     },
   );
@@ -76,7 +67,10 @@ async function addExperience(
     description: string;
   },
 ) {
-  await user.click(screen.getByRole("button", { name: "Añadir experiencia" }));
+  await user.click(
+    screen.getByRole("button", { name: "Añadir experiencia" }),
+  );
+
   await user.type(screen.getByLabelText(/Empresa/), values.companyName);
   await user.type(screen.getByLabelText(/Cargo/), values.position);
 
@@ -95,13 +89,16 @@ async function addExperience(
       }),
     );
   }
+
   await user.type(
     screen.getByLabelText(/Descripción de funciones/),
     values.description,
   );
+
   await user.click(
     screen.getByRole("button", { name: "Guardar experiencia" }),
   );
+
   await screen.findByText(values.position);
 }
 
@@ -144,15 +141,17 @@ describe("WorkExperienceView flow", () => {
       .closest("ul") as HTMLElement;
 
     expect(
-      within(list).getAllByRole("heading").map((item) => item.textContent),
+      within(list)
+        .getAllByRole("heading", { level: 4 })
+        .map((item) => item.textContent),
     ).toEqual([
       "Desarrolladora web junior",
       "Asistente de laboratorio",
     ]);
 
     expect(
-      screen.getByText(/Mar 2025 – Actualidad/),
-    ).toBeInTheDocument();
+      screen.getAllByText(/Mar 2025 – Actualidad/),
+    ).toHaveLength(1);
 
     await user.click(
       screen.getByRole("button", {
@@ -227,7 +226,9 @@ describe("WorkExperienceView flow", () => {
       screen.getByText("Técnico de laboratorio"),
     ).toBeInTheDocument();
 
-    expect(workExperienceService.deleteWorkExperience).toHaveBeenCalledTimes(1);
+    expect(
+      workExperienceService.deleteWorkExperience,
+    ).toHaveBeenCalledTimes(1);
 
     expect(workExperienceService.deleteWorkExperience).toHaveBeenCalledWith(
       "experience-2",
@@ -255,6 +256,7 @@ describe("WorkExperienceView flow", () => {
 
     await user.type(screen.getByLabelText(/Empresa/), "UMSS");
     await user.type(screen.getByLabelText(/Cargo/), "Practicante");
+
     fireEvent.change(screen.getByLabelText(/Desde/), {
       target: { value: "2024-07-01" },
     });
@@ -291,16 +293,7 @@ describe("WorkExperienceView flow", () => {
     ).not.toBeInTheDocument();
   }, 20_000);
 
-  it("runs the skills analysis silently after saving (AC-01.8)", async () => {
-    vi.mocked(skillsAnalysisService.analyzeExperience).mockResolvedValueOnce({
-      experienceId: "experience-1",
-      skills: [
-        { id: "skill-1", name: "Python" },
-        { id: "skill-2", name: "Scrum" },
-      ],
-      processingTimeMs: 420,
-    });
-
+  it("does not show individual skills analysis after saving (AC-01.8)", async () => {
     const user = userEvent.setup();
 
     render(<WorkExperienceView />);
@@ -314,14 +307,9 @@ describe("WorkExperienceView flow", () => {
       description: "Desarrollo con Python y Scrum",
     });
 
-    await waitFor(() => {
-      expect(
-        skillsAnalysisService.analyzeExperience,
-      ).toHaveBeenCalledWith(
-        "experience-1",
-        "Desarrollo con Python y Scrum",
-      );
-    });
+    expect(
+      workExperienceService.createWorkExperience,
+    ).toHaveBeenCalledTimes(1);
 
     expect(
       screen.queryByText("Habilidades detectadas automáticamente"),
@@ -334,7 +322,7 @@ describe("WorkExperienceView flow", () => {
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   }, 20_000);
 
-  it("saves an experience without detected skills and shows no tags (AC-01.9)", async () => {
+  it("saves an experience without displaying individual analysis tags (AC-01.9)", async () => {
     const user = userEvent.setup();
 
     render(<WorkExperienceView />);
@@ -348,11 +336,9 @@ describe("WorkExperienceView flow", () => {
       description: "Desarrollo con Python y Scrum",
     });
 
-    await waitFor(() =>
-      expect(
-        skillsAnalysisService.analyzeExperience,
-      ).toHaveBeenCalledTimes(1),
-    );
+    expect(
+      workExperienceService.createWorkExperience,
+    ).toHaveBeenCalledTimes(1);
 
     expect(
       screen.queryByText("Habilidades detectadas automáticamente"),

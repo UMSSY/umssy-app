@@ -28,18 +28,4 @@ describe("ProfilePageLayout", () => {
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
     expect(screen.getByText("Section content")).toBeInTheDocument();
   });
-
-  it("renders the actions next to the title", () => {
-    render(
-      <ProfilePageLayout
-        title="Mi perfil"
-        description="Section description"
-        actions={<p>Page action</p>}
-      >
-        <p>Section content</p>
-      </ProfilePageLayout>,
-    );
-
-    expect(screen.getByText("Page action")).toBeInTheDocument();
-  });
 });

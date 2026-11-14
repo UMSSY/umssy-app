@@ -6,23 +6,14 @@ import {
 } from "../constants/job-application.constants";
 import type { JobApplication } from "../types/job-application.types";
 import type { MyJobApplication } from "../types/my-job-application.types";
-import type { JobApplicationConsents } from "../types/job-application-consents.types";
 
 export const jobApplicationService = {
-  apply: async (
-    jobOfferId: string,
-    consents: JobApplicationConsents,
-  ): Promise<JobApplication> => {
-    const response = await apiClient.post<ApiResponse<JobApplication>>(
-      getJobApplicationsEndpoint(jobOfferId),
-      consents,
-    );
+  apply: async (jobOfferId: string): Promise<JobApplication> => {
+    const response = await apiClient.post<ApiResponse<JobApplication>>(getJobApplicationsEndpoint(jobOfferId));
     return response.data.data;
   },
   getMine: async (jobOfferId: string): Promise<MyJobApplication> => {
-    const response = await apiClient.get<ApiResponse<MyJobApplication>>(
-      getMyJobApplicationEndpoint(jobOfferId),
-    );
+    const response = await apiClient.get<ApiResponse<MyJobApplication>>(getMyJobApplicationEndpoint(jobOfferId));
     return response.data.data;
   },
 };

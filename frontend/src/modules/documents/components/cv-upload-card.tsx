@@ -4,7 +4,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { CvUploadCardProps } from "../types/cv-upload-card-props.types";
 import { formatFileSize } from "@/modules/profile";
 import { SectionCard } from "@/modules/profile";
-import { CvDropzone } from "./cv-dropzone";
 
 export function CvUploadCard({
   selectedFile,
@@ -12,9 +11,7 @@ export function CvUploadCard({
   isLoading = false,
   isUploading,
   isBusy,
-  uploadProgress,
   onSelectFile,
-  onFileDropped,
   onConfirmUpload,
 }: CvUploadCardProps) {
   if (isLoading) {
@@ -31,39 +28,46 @@ export function CvUploadCard({
   if (hasSavedCv) {
     return (
       <SectionCard title="Subir currículum">
-        <CvDropzone
-          title="Ya tienes un CV vigente"
-          description="Sube una nueva versión en PDF. Tu CV actual pasará al historial."
-          selectLabel={isUploading ? "Cargando..." : "Subir nueva versión"}
-          icon={<CircleCheck aria-hidden="true" className="size-6 text-ink-soft" />}
-          isDisabled={isBusy}
-          isUploading={isUploading}
-          isSelectPending={isUploading}
-          progress={uploadProgress}
-          onSelectFile={onSelectFile}
-          onFileDropped={onFileDropped}
-        />
+        <div className="flex flex-col items-center gap-2 rounded-lg bg-surface-soft px-6 py-12 text-center">
+          <CircleCheck aria-hidden="true" className="size-6 text-ink-soft" />
+          <p className="text-base font-semibold text-ink">Ya tienes un CV vigente</p>
+          <p className="text-sm text-text-secondary">
+            Sube una nueva versión en PDF. Tu CV actual pasará al historial.
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            className="mt-3 h-10 border-border-strong px-4 text-sm text-ink hover:bg-surface-soft"
+            disabled={isBusy}
+            onClick={onSelectFile}
+          >
+            {isUploading ? <LoaderCircle aria-hidden="true" className="animate-spin" /> : null}
+            {isUploading ? "Cargando..." : "Subir nueva versión"}
+          </Button>
+        </div>
       </SectionCard>
     );
   }
 
   return (
     <SectionCard title="Subir currículum">
-      <CvDropzone
-        title="Selecciona tu CV en formato PDF"
-        selectLabel="Seleccionar PDF"
-        isDisabled={isBusy}
-        isUploading={isUploading}
-        progress={uploadProgress}
-        onSelectFile={onSelectFile}
-        onFileDropped={onFileDropped}
-      >
+      <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-border-strong bg-interaction/40 px-6 py-12 text-center">
+        <p className="text-base font-semibold text-ink">Selecciona tu CV en formato PDF</p>
+        <Button
+          type="button"
+          variant="outline"
+          className="mt-3 h-10 border-border-strong px-4 text-sm text-ink hover:bg-surface-soft"
+          disabled={isBusy}
+          onClick={onSelectFile}
+        >
+          Seleccionar PDF
+        </Button>
         {selectedFile ? (
           <p className="mt-2 text-sm break-all text-text-secondary">
             {selectedFile.name} · {formatFileSize(selectedFile.size)}
           </p>
         ) : null}
-      </CvDropzone>
+      </div>
       <div className="mt-6 flex justify-end">
         <Button
           type="button"

@@ -1,17 +1,13 @@
 "use client";
 
-import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CV_FILE_QUERY_KEY, CV_QUERY_KEY, CV_RECENT_LIMIT } from "../constants/cv-api.constants";
 import { CV_ERROR_MESSAGES } from "../constants/cv-error-messages.constants";
-import { CV_UPLOAD_PROGRESS } from "../constants/cv-upload.constants";
 import { documentsService } from "../services/documents.service";
-import type { SavedCv } from "../types/saved-cv.types";
 import { getCvErrorMessage } from "../utils/get-cv-error-message";
 
 export function useCvDocument() {
   const queryClient = useQueryClient();
-  const [uploadProgress, setUploadProgress] = useState<number>(CV_UPLOAD_PROGRESS.min);
   const query = useQuery({
     queryKey: [...CV_QUERY_KEY, "recent"],
     queryFn: ({ signal }) => {
@@ -22,13 +18,9 @@ export function useCvDocument() {
   const cancelLoads = () => queryClient.cancelQueries({ queryKey: CV_QUERY_KEY });
   const reloadCvs = () => queryClient.invalidateQueries({ queryKey: CV_QUERY_KEY });
   const uploadMutation = useMutation({
-    mutationFn: (file: File) => documentsService.uploadCv(file, setUploadProgress),
-    onMutate: () => {
-      setUploadProgress(CV_UPLOAD_PROGRESS.min);
-      return cancelLoads();
-    },
+    mutationFn: (file: File) => documentsService.uploadCv(file),
+    onMutate: cancelLoads,
     onSuccess: reloadCvs,
-    onSettled: () => setUploadProgress(CV_UPLOAD_PROGRESS.min),
   });
   const deleteMutation = useMutation({
     mutationFn: (cvId: string) => documentsService.deleteCv(cvId),
@@ -47,13 +39,14 @@ export function useCvDocument() {
     isLoading: query.isPending,
     isReloading: query.isFetching,
     isUploading: uploadMutation.isPending,
-    uploadProgress,
     isDeleting: deleteMutation.isPending,
     loadError: query.error ? getCvErrorMessage(query.error, CV_ERROR_MESSAGES.load) : null,
     reloadCvs: async (): Promise<void> => {
       await query.refetch();
     },
-    uploadCv: (file: File): Promise<SavedCv | null> => uploadMutation.mutateAsync(file),
+    uploadCv: async (file: File): Promise<void> => {
+      await uploadMutation.mutateAsync(file);
+    },
     deleteCv: async (cvId: string): Promise<void> => {
       await deleteMutation.mutateAsync(cvId);
     },

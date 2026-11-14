@@ -12,11 +12,9 @@ import type { SaveEducationArguments } from "../types/save-education-arguments.t
 import type { Feedback } from "@/modules/profile";
 import { getHttpStatus } from "@/modules/profile";
 import { getEducationSaveError } from "../utils/get-education-save-error";
-import { useInvalidateProfileCompleteness } from "@/modules/profile";
 
 export function useSaveEducation(onSaved: () => void | Promise<void>) {
-  const invalidateCompleteness = useInvalidateProfileCompleteness();
-  const mutation = useMutation({ mutationFn: (request: () => Promise<unknown>) => request(), onSuccess: invalidateCompleteness });
+  const mutation = useMutation({ mutationFn: (request: () => Promise<unknown>) => request() });
   const [isSaving, setIsSaving] = useState(false);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const isSavingRef = useRef(false);

@@ -98,7 +98,6 @@ export function useLiveRadar() {
     loading: Boolean(session) && query.isPending,
     error,
     variation: query.data?.variation ?? null,
-    previous: query.data?.previous ?? null,
     refresh,
     retry,
     retrying: recalculate.isPending,

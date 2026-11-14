@@ -1,19 +1,54 @@
-import { Injectable, Logger } from '@nestjs/common';
-import * as webpush from 'web-push';
+import { Inject, Injectable, Logger, Optional } from '@nestjs/common';
 import { PushSubscriptionsRepository } from '../repositories/push-subscriptions.repository.js';
+
+export interface WebPushSubscription {
+  endpoint: string;
+  keys: { p256dh: string; auth: string };
+}
+
+export interface WebPushClient {
+  setVapidDetails(subject: string, publicKey: string, privateKey: string): void;
+  sendNotification(subscription: WebPushSubscription, payload: string): Promise<unknown>;
+}
+
+export const WEB_PUSH_CLIENT = 'WEB_PUSH_CLIENT';
+
+async function loadDefaultWebPush(): Promise<WebPushClient | null> {
+  try {
+    // @ts-expect-error web-push is loaded dynamically when installed
+    const mod = (await import('web-push')) as { default?: WebPushClient } & WebPushClient;
+    return mod.default ?? mod;
+  } catch {
+    return null;
+  }
+}
 
 @Injectable()
 export class PushDispatcherService {
   private readonly logger = new Logger(PushDispatcherService.name);
+  private vapidConfigured = false;
 
   constructor(
     private readonly pushSubscriptionsRepository: PushSubscriptionsRepository,
-  ) {
-    webpush.setVapidDetails(
-      process.env.VAPID_SUBJECT || 'mailto:soporte@umssy.com',
-      process.env.VAPID_PUBLIC_KEY || '',
-      process.env.VAPID_PRIVATE_KEY || '',
-    );
+    @Optional()
+    @Inject(WEB_PUSH_CLIENT)
+    private readonly injectedClient?: WebPushClient,
+  ) {}
+
+  private async getClient(): Promise<WebPushClient | null> {
+    const client = this.injectedClient ?? (await loadDefaultWebPush());
+    if (!client) return null;
+
+    if (!this.vapidConfigured) {
+      client.setVapidDetails(
+        process.env.VAPID_SUBJECT || 'mailto:soporte@umssy.com',
+        process.env.VAPID_PUBLIC_KEY || '',
+        process.env.VAPID_PRIVATE_KEY || '',
+      );
+      this.vapidConfigured = true;
+    }
+
+    return client;
   }
 
   async dispatchToUsers(
@@ -24,6 +59,9 @@ export class PushDispatcherService {
     groupKey?: string,
   ): Promise<'sent' | 'partial' | 'failed' | 'skipped'> {
     if (userIds.length === 0) return 'skipped';
+
+    const webpush = await this.getClient();
+    if (!webpush) return 'skipped';
 
     const subscriptions = await this.pushSubscriptionsRepository.findManyByUserIds(userIds);
     if (subscriptions.length === 0) return 'skipped';
@@ -43,7 +81,7 @@ export class PushDispatcherService {
         continue;
       }
 
-      const pushSubscription = {
+      const pushSubscription: WebPushSubscription = {
         endpoint: sub.endpoint,
         keys: { p256dh: sub.p256dh, auth: sub.auth },
       };
@@ -51,9 +89,14 @@ export class PushDispatcherService {
       try {
         await webpush.sendNotification(pushSubscription, payload);
         successCount++;
-      } catch (error: any) {
+      } catch (error: unknown) {
         failedCount++;
-        if (error.statusCode === 404 || error.statusCode === 410) {
+        const statusCode =
+          typeof error === 'object' && error !== null && 'statusCode' in error
+            ? (error as { statusCode?: number }).statusCode
+            : undefined;
+
+        if (statusCode === 404 || statusCode === 410) {
           await this.pushSubscriptionsRepository.deleteByEndpointAndUserId(sub.endpoint, sub.userId);
         } else {
           this.logger.error(`Error enviando push a ${sub.endpoint}`, error);

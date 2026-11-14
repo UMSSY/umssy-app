@@ -51,15 +51,6 @@ export const skillsService = {
     );
     return (response.data.data ?? []).map(toSkillItem);
   },
-
-  addSkills: async (skillIds: string[]): Promise<SkillItem[]> => {
-    const response = await apiClient.post<ApiResponse<SkillResponse[]>>(
-      MY_SKILLS_ENDPOINT,
-      { skillIds },
-      { headers: getAuthHeaders() },
-    );
-    return (response.data.data ?? []).map(toSkillItem);
-  },
   getDetectedSkills: async (): Promise<DetectedSkillsSummary> => {
     return toDetectedSkillsSummary(await profileSkillsRadarService.getSkills());
   },

@@ -1,21 +1,26 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { describe, beforeEach, it, expect, vi } from 'vitest';
+import { ConfigService } from '@nestjs/config';
 import { ApplicationMapper } from '../mappers/application.mapper.js';
 import { JobRecommendationsService } from '../../matching/services/job-recommendations.service.js';
 import { ApplicationsService } from '../services/applications.service.js';
 import { ApplicationsRepository } from '../repositories/applications.repository.js';
+import { NotificationsService } from '../../notifications/services/notifications.service.js';
+import { NotificationType } from '../../notifications/types/notification-type.enum.js';
 import { ApplicationStatus } from '../types/applications.types.js';
 import { ApplicationNotFoundException } from '../exceptions/application-not-found.exception.js';
 import { ApplicationForbiddenException } from '../exceptions/application-forbidden.exception.js';
 import { ApplicationNotWithdrawableException } from '../exceptions/application-not-withdrawable.exception.js';
 
-describe('ApplicationsService (T5.1 & T5.2)', () => {
+describe('ApplicationsService (T5.1 & T5.2 & HU-15)', () => {
   let service: ApplicationsService;
   let repositoryMock: {
     findByUserId: ReturnType<typeof vi.fn>;
     findById: ReturnType<typeof vi.fn>;
     withdraw: ReturnType<typeof vi.fn>;
   };
+  let notificationsMock: { notify: ReturnType<typeof vi.fn> };
+  let configMock: { getOrThrow: ReturnType<typeof vi.fn> };
   const matching = { scoresForOffers: vi.fn() };
 
   beforeEach(async () => {
@@ -26,15 +31,26 @@ describe('ApplicationsService (T5.1 & T5.2)', () => {
       withdraw: vi.fn().mockResolvedValue({ count: 1 }),
     };
 
+    notificationsMock = {
+      notify: vi.fn().mockResolvedValue({
+        inAppCount: 1,
+        pushStatus: 'skipped',
+        emailStatus: 'sent',
+      }),
+    };
+
+    configMock = {
+      getOrThrow: vi.fn().mockReturnValue('https://umssy.edu.bo'),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ApplicationsService,
         ApplicationMapper,
         { provide: JobRecommendationsService, useValue: matching },
-        {
-          provide: ApplicationsRepository,
-          useValue: repositoryMock,
-        },
+        { provide: ApplicationsRepository, useValue: repositoryMock },
+        { provide: NotificationsService, useValue: notificationsMock },
+        { provide: ConfigService, useValue: configMock },
       ],
     }).compile();
 
@@ -87,6 +103,7 @@ describe('ApplicationsService (T5.1 & T5.2)', () => {
         'offer-1',
         'offer-2',
       ]);
+
       expect(result).toEqual([
         {
           id: 'app-1',
@@ -107,6 +124,7 @@ describe('ApplicationsService (T5.1 & T5.2)', () => {
           appliedDate: '2026-10-29T12:00:00.000Z',
         },
       ]);
+
       const sorted = await service.findMyApplications('user-1', {
         sortBy: 'affinity',
         sortOrder: 'asc',
@@ -168,6 +186,7 @@ describe('ApplicationsService (T5.1 & T5.2)', () => {
         service.withdrawApplication('app-1', 'user-1'),
       ).rejects.toThrow(ApplicationNotWithdrawableException);
     });
+
     it('rechaza el retiro si el estado cambió después de consultar la postulación', async () => {
       repositoryMock.findById.mockResolvedValue({
         id: 'app-1',
@@ -178,6 +197,58 @@ describe('ApplicationsService (T5.1 & T5.2)', () => {
       await expect(
         service.withdrawApplication('app-1', 'user-1'),
       ).rejects.toThrow(ApplicationNotWithdrawableException);
+    });
+  });
+
+     describe('notifyStateChanged (HU-15)', () => {
+    it('AC-15.1: debe enviar la notificación APPLICATION_STATUS_CHANGED cuando el reclutador cambia el estado', async () => {
+      await service.notifyStateChanged({
+        recipientId: 'user-1',
+        applicationId: 'app-1',
+        previousStatus: 'IN_REVIEW' as unknown as ApplicationStatus,
+        newStatus: 'INTERVIEW' as unknown as ApplicationStatus,
+        jobTitle: 'Dev',
+        companyName: 'Empresa A',
+      });
+
+      expect(notificationsMock.notify).toHaveBeenCalledTimes(1);
+      expect(notificationsMock.notify).toHaveBeenCalledWith({
+        recipientIds: ['user-1'],
+        type: NotificationType.APPLICATION_STATUS_CHANGED,
+        payload: {
+          vacancyTitle: 'Dev',
+          companyName: 'Empresa A',
+          newStatus: 'INTERVIEW',
+        },
+                actionUrl: 'https://umssy.edu.bo/postulaciones/app-1',
+
+      });
+    });
+
+    it('AC-15.4: withdrawApplication NO genera ninguna notificación de cambio de estado', async () => {
+      repositoryMock.findById.mockResolvedValue({
+        id: 'app-1',
+        userId: 'user-1',
+        status: { title: ApplicationStatus.IN_REVIEW },
+      });
+
+      await service.withdrawApplication('app-1', 'user-1');
+
+      expect(repositoryMock.withdraw).toHaveBeenCalled();
+      expect(notificationsMock.notify).not.toHaveBeenCalled();
+    });
+
+    it('D-14: no notifica si el estado nuevo es idéntico al anterior', async () => {
+      await service.notifyStateChanged({
+        recipientId: 'user-1',
+        applicationId: 'app-1',
+        previousStatus: 'IN_REVIEW' as unknown as ApplicationStatus,
+        newStatus: 'IN_REVIEW' as unknown as ApplicationStatus,
+        jobTitle: 'Dev',
+        companyName: 'Empresa A',
+      });
+
+      expect(notificationsMock.notify).not.toHaveBeenCalled();
     });
   });
 });

@@ -9,16 +9,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Progress } from "@/components/ui/progress";
 import { formatFileSize } from "@/modules/profile";
-import { CV_UPLOAD_PROGRESS } from "../constants/cv-upload.constants";
 import type { ReplaceCvDialogProps } from "../types/replace-cv-dialog-props.types";
 
 export function ReplaceCvDialog({
   file,
   currentFileName,
   isReplacing = false,
-  uploadProgress = CV_UPLOAD_PROGRESS.min,
   errorMessage = null,
   onConfirm,
   onCancel,
@@ -43,12 +40,6 @@ export function ReplaceCvDialog({
             <FileText aria-hidden="true" className="size-5 shrink-0 text-ink-soft" />
             {file.name} · {formatFileSize(file.size)}
           </p>
-        ) : null}
-        {isReplacing ? (
-          <div aria-live="polite" className="mt-4 flex flex-col gap-2">
-            <Progress value={uploadProgress} aria-label="Progreso de la subida" />
-            <p className="text-xs text-text-secondary">{`Subiendo... ${uploadProgress}%`}</p>
-          </div>
         ) : null}
         {errorMessage ? (
           <p role="alert" className="mt-4 flex items-center gap-2 text-sm text-danger">

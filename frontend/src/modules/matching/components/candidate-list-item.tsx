@@ -1,55 +1,44 @@
 "use client";
 import type { CandidateListItemProps } from "../types/candidate-list-item-props.types";
 
-import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { getInitials } from "@/shared/utils/get-initials";
 
-export function CandidateListItem({
-  candidate,
-  selected,
-  onSelect,
-}: CandidateListItemProps) {
+export function CandidateListItem({ candidate, selected, onSelect }: CandidateListItemProps) {
   const isDiscarded = candidate.status === "discarded";
 
   return (
-    <Button
-      variant="ghost"
+    <Button variant="ghost"
       type="button"
       onClick={() => onSelect(candidate.id)}
       aria-pressed={selected}
       className={cn(
         "h-auto w-full items-stretch rounded-lg border p-3 text-left whitespace-normal transition-colors",
-        selected
-          ? "border-primary bg-muted"
-          : "border-border bg-background hover:bg-muted/60",
-        isDiscarded && "opacity-60",
+        selected ? "border-primary bg-muted" : "border-border bg-background hover:bg-muted/60",
+        isDiscarded && "opacity-60"
       )}
     >
-      <div className="flex w-full min-w-0 items-start gap-3">
+      <div className="flex items-start gap-3">
         <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold text-muted-foreground">
           {getInitials(candidate.name)}
         </span>
 
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-2">
-            <p className="truncate text-sm font-medium text-foreground">
-              {candidate.name}
-            </p>
+            <p className="truncate text-sm font-medium text-foreground">{candidate.name}</p>
             <span className="shrink-0 text-sm font-semibold text-foreground">
               {candidate.matchPercent}%
             </span>
           </div>
-          <p className="truncate text-xs text-muted-foreground">
-            {candidate.role}
-          </p>
+          <p className="truncate text-xs text-muted-foreground">{candidate.role}</p>
 
-          <Progress
-            value={candidate.matchPercent}
-            aria-label={`Compatibilidad de ${candidate.name}`}
-            className="mt-1.5 w-full [&_[data-slot=progress-track]]:h-1.5"
-          />
+          <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-muted">
+            <div
+              className="h-full rounded-full border border-notice-border bg-gold transition-[width] duration-300 ease-out"
+              style={{ width: `${candidate.matchPercent}%` }}
+            />
+          </div>
 
           <div className="mt-2 flex flex-wrap gap-1">
             {candidate.technologies.map((tech) => (

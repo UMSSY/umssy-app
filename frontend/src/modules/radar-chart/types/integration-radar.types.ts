@@ -1,7 +1,6 @@
 import type { Scores } from "./radar-scores.types";
 
 export interface IntegrationRadar {
-  previous?: { version: number; updatedAt: string; scores: Scores } | null;
   dictionaryVersion?: string | null;
   userId: string;
   status: string;
