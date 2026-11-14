@@ -8,6 +8,8 @@ export const APPOINTMENT_MESSAGES = {
   invalidTopic: 'El tema de la sesión no es válido',
   missingMessage: 'Escribe un mensaje para el mentor',
   messageTooLong: `El mensaje no puede superar los 300 caracteres`,
+  reasonTooLong: `El motivo no puede superar los 300 caracteres`,
+  invalidReason: `El motivo de la cancelación no es válido`,
   unauthorizedSession: 'La sesión es requerida o no es válida',
   forbiddenAccess: 'El usuario no tiene acceso a las citas solicitadas',
 } as const;
@@ -88,6 +90,23 @@ export const CREATE_APPOINTMENT_DOCS = {
   notFoundDescription: 'El mentor del bloque no existe',
   conflictDescription:
     'El horario ya fue reservado, ya no está disponible porque el bloque se eliminó o el día está bloqueado, se cruza con otra cita o quien reserva ya tiene una cita ese día (hora de Bolivia)',
+} as const;
+
+export const CANCEL_APPOINTMENT_DOCS = {
+  summary: 'Cancela una cita confirmada en la que participas',
+  description:
+    'Pasa la cita a CANCELLED con quién canceló, la fecha y el motivo dentro de una transacción; con menos de 24 horas el motivo es obligatorio y una cita ya cancelada no se vuelve a cancelar',
+  idDescription: 'Identificador de la cita',
+  invalidIdDescription: 'El identificador de la cita no es válido',
+  reasonDescription:
+    'Motivo de la cancelación, opcional salvo cuando faltan menos de 24 horas (máximo 300 caracteres)',
+  okDescription: 'Cita cancelada',
+  badRequestDescription:
+    'El motivo supera los 300 caracteres o falta cuando es obligatorio',
+  forbiddenDescription: 'El usuario no participa en la cita',
+  notFoundDescription: 'La cita no existe',
+  conflictDescription:
+    'La cita ya empezó o ya no está confirmada',
 } as const;
 
 export const FIND_MY_APPOINTMENTS_DOCS = {
