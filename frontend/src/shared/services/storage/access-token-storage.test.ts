@@ -10,26 +10,28 @@ import {
   subscribeAccessToken,
 } from "./access-token-storage";
 
-describe("access token IndexedDB storage", () => {
+describe("access token memory storage (no IndexedDB persistence)", () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
-  it("persists the token without copying it into browser web storage", async () => {
+  it("keeps token in memory without persisting it into IndexedDB, localStorage or sessionStorage", async () => {
     expect(await saveAccessToken("token-value")).toBe(true);
     expect(getAccessToken()).toBe("token-value");
-    expect(await readIndexedDb(ACCESS_TOKEN_STORAGE_KEY)).toBe("token-value");
+    expect(await readIndexedDb(ACCESS_TOKEN_STORAGE_KEY)).toBeNull();
     expect(Object.values(sessionStorage)).not.toContain("token-value");
     expect(Object.values(localStorage)).not.toContain("token-value");
   });
 
-  it("hydrates the token before consumers read the session", async () => {
-    await writeIndexedDb(ACCESS_TOKEN_STORAGE_KEY, "persisted");
+  it("removes any legacy token from IndexedDB during initialization", async () => {
+    await writeIndexedDb(ACCESS_TOKEN_STORAGE_KEY, "legacy-token");
     vi.resetModules();
     const storage = await import("./access-token-storage");
     expect(storage.isAccessTokenReady()).toBe(false);
     await storage.initializeAccessTokenStorage();
-    expect(storage.getAccessToken()).toBe("persisted");
+    expect(storage.isAccessTokenReady()).toBe(true);
+    expect(await readIndexedDb(ACCESS_TOKEN_STORAGE_KEY)).toBeNull();
+    expect(storage.getAccessToken()).toBeNull();
     storage.clearAccessToken();
   });
 
@@ -38,16 +40,8 @@ describe("access token IndexedDB storage", () => {
     clearAccessToken();
     expect(getAccessToken()).toBeNull();
     await saveAccessToken("replacement");
-    expect(await readIndexedDb(ACCESS_TOKEN_STORAGE_KEY)).toBe("replacement");
-  });
-
-  it("does not publish a login if durable persistence fails", async () => {
-    clearAccessToken();
-    vi.mocked(writeIndexedDb).mockRejectedValueOnce(
-      new Error("storage blocked"),
-    );
-    expect(await saveAccessToken("token-value")).toBe(false);
-    expect(getAccessToken()).toBeNull();
+    expect(await readIndexedDb(ACCESS_TOKEN_STORAGE_KEY)).toBeNull();
+    expect(getAccessToken()).toBe("replacement");
   });
 
   it("notifies subscribers after login and logout", async () => {

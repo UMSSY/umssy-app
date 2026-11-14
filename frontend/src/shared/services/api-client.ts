@@ -9,6 +9,7 @@ import {
 
 export const apiClient = axios.create({
   baseURL: ENV_CONFIG.apiUrl,
+  withCredentials: true,
 });
 
 apiClient.interceptors.request.use(async (config) => {
