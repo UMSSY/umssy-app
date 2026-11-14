@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const CACHE_PREFIX = 'umssy-';
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${CACHE_VERSION}`;
 const ASSETS_CACHE = `${CACHE_PREFIX}assets-${CACHE_VERSION}`;
@@ -17,8 +17,9 @@ const STATIC_ASSETS = [
   '/icons/umss-institutional-seal.svg',
 ];
 const NEXT_STATIC_PREFIX = '/_next/static/';
-const NEXT_STATIC_PATTERN = /\/_next\/static\/[^"'\s)<>\\]+/g;
+const NEXT_STATIC_PATTERN = /\/_next\/static\/[^"'\s<>\\]+/g;
 const CACHE_URLS_MESSAGE = 'CACHE_URLS';
+const assetFetches = new Map();
 
 const sameOriginUrl = (value) => {
   try {
@@ -59,37 +60,46 @@ const putIfCacheable = async (cacheName, key, response) => {
   return true;
 };
 
-const fetchAndCache = async (cacheName, url) => {
-  const cache = await caches.open(cacheName);
-  if (await cache.match(url)) return;
-  const response = await fetch(new Request(url, { cache: 'reload', credentials: 'same-origin' }));
-  await putIfCacheable(cacheName, url, response);
+const fetchAndCache = (cacheName, value) => {
+  const url = sameOriginUrl(value);
+  if (!url) return;
+  const key = url.href;
+  if (assetFetches.has(key)) return assetFetches.get(key);
+  const pending = (async () => {
+    const cache = await caches.open(cacheName);
+    if (await cache.match(key)) return;
+    const response = await fetch(new Request(key, { cache: 'reload', credentials: 'omit' }));
+    await putIfCacheable(cacheName, key, response);
+  })().finally(() => assetFetches.delete(key));
+  assetFetches.set(key, pending);
+  return pending;
 };
 
 const extractNextStaticUrls = (html) =>
   [...new Set(html.match(NEXT_STATIC_PATTERN) || [])];
 
 const precacheRoute = async (route) => {
-  const response = await fetch(new Request(route, { cache: 'reload', credentials: 'same-origin' }));
-  if (!isCacheable(response)) return [];
+  const key = shellKey(route);
+  const response = await fetch(new Request(key, { cache: 'reload', credentials: 'omit' }));
+  return cacheShell(key, response);
+};
+
+const cacheShell = async (key, response) => {
+  if (!isCacheable(response) || !response.headers.get('Content-Type')?.startsWith('text/html')) return;
   const html = await response.clone().text();
-  await putIfCacheable(SHELL_CACHE, shellKey(route), response);
-  return extractNextStaticUrls(html);
+  await Promise.allSettled(extractNextStaticUrls(html).map((url) => fetchAndCache(ASSETS_CACHE, url)));
+  await putIfCacheable(SHELL_CACHE, key, response);
 };
 
 const precache = async () => {
-  const offline = await fetch(new Request(OFFLINE_URL, { cache: 'reload' }));
+  const offline = await fetch(new Request(new URL(OFFLINE_URL, self.location.origin), { cache: 'reload' }));
   if (!(await putIfCacheable(SHELL_CACHE, OFFLINE_URL, offline))) {
     throw new Error('offline fallback could not be cached');
   }
-  const [, routes] = await Promise.all([
+  await Promise.all([
     Promise.allSettled(STATIC_ASSETS.map((url) => fetchAndCache(SHELL_CACHE, url))),
     Promise.allSettled(SHELL_ROUTES.map(precacheRoute)),
   ]);
-  const assetUrls = new Set(
-    routes.flatMap((result) => (result.status === 'fulfilled' ? result.value : [])),
-  );
-  await Promise.allSettled([...assetUrls].map((url) => fetchAndCache(ASSETS_CACHE, url)));
 };
 
 const withTimeout = (promise, ms) =>
@@ -116,7 +126,10 @@ const handleNavigation = async (event) => {
   if (key) {
     event.waitUntil(
       network
-        .then((response) => putIfCacheable(SHELL_CACHE, key, response.clone()))
+        .then((response) => {
+          if (!isCacheable(response)) return;
+          return precacheRoute(key);
+        })
         .catch(() => undefined),
     );
   }
@@ -200,5 +213,12 @@ self.addEventListener('message', (event) => {
     .map((value) => (typeof value === 'string' ? sameOriginUrl(value) : null))
     .filter((url) => url && isNextStatic(url.pathname) && !url.searchParams.has('_rsc'))
     .map((url) => url.href);
-  event.waitUntil(Promise.allSettled(urls.map((url) => fetchAndCache(ASSETS_CACHE, url))));
+  event.waitUntil(Promise.allSettled([
+    ...urls.map((url) => fetchAndCache(ASSETS_CACHE, url)),
+    // Recover routes missed during installation, even after client-side navigation.
+    ...SHELL_ROUTES.map(async (route) => {
+      const key = shellKey(route);
+      if (!(await caches.match(key, { cacheName: SHELL_CACHE }))) await precacheRoute(key);
+    }),
+  ]));
 });

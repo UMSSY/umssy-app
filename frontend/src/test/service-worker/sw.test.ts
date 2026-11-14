@@ -9,8 +9,8 @@ type Listener = (event: Record<string, unknown>) => void;
 type Route = () => Response;
 
 const ORIGIN = "https://umssy.test";
-const SHELL = "umssy-shell-v1";
-const ASSETS = "umssy-assets-v1";
+const SHELL = "umssy-shell-v2";
+const ASSETS = "umssy-assets-v2";
 const source = readFileSync(path.resolve(import.meta.dirname, "../../../public/sw.js"), "utf8");
 
 const keyOf = (input: RequestLike) =>
@@ -201,6 +201,7 @@ describe("service worker navigations", () => {
   it("caches allowed static routes and never other navigations", async () => {
     const worker = loadWorker({
       "/events/my-passes/": html("passes shell"),
+      "/events/my-passes": html("passes shell"),
       "/chat": html("chat"),
       "/dashboard": html("private dashboard", "private, no-cache, no-store, max-age=0, must-revalidate"),
     });
@@ -238,7 +239,7 @@ describe("service worker navigations", () => {
     await shell.put("/dashboard", html("cached dashboard")());
 
     const pending = worker.navigate("/dashboard");
-    await vi.advanceTimersByTimeAsync(10000);
+    await vi.advanceTimersByTimeAsync(20000);
     const result = await pending;
     expect(await result.response!.text()).toBe("cached dashboard");
     expect(await (await shell.match("/dashboard"))!.text()).toBe("fresh dashboard");
@@ -296,6 +297,26 @@ describe("service worker lifecycle", () => {
     const worker = loadWorker({ "/offline.html": () => new Response("x", { status: 500 }) });
     const result = await worker.install();
     await expect(result.waits[0]).rejects.toThrow("offline fallback could not be cached");
+  });
+
+  it("recovers a missing passes route on a later online visit and caches Next route-group chunks", async () => {
+    const chunk = "/_next/static/chunks/app/(app)/events/my-passes/page-2257.js";
+    const routes: Record<string, Route> = { "/offline.html": html("offline") };
+    const worker = loadWorker(routes);
+    await worker.install();
+    expect(await (await worker.navigate("/events/my-passes")).response!.text()).toBe("offline");
+
+    routes["/events/my-passes"] = html(`<script src="${chunk}"></script>`);
+    routes[chunk] = asset("passes chunk");
+    await worker.message({ type: "CACHE_URLS", urls: [] });
+    expect(worker.caches.cachedUrls(ASSETS)).toContain(chunk);
+    expect(worker.fetch.mock.calls.some(([request]) =>
+      keyOf(request).endsWith("/events/my-passes") &&
+      request instanceof Request && request.credentials === "omit",
+    )).toBe(true);
+
+    delete routes["/events/my-passes"];
+    expect(await (await worker.navigate("/events/my-passes")).response!.text()).toContain(chunk);
   });
 
   it("deletes caches from other versions and claims clients", async () => {
