@@ -31,7 +31,7 @@ export const APPOINTMENT_STATUS_LABELS: Record<AppointmentStatus, string> = {
 export const APPOINTMENT_STATUS_CLASSES: Record<AppointmentStatus, string> = {
   CONFIRMED: "text-success",
   CANCELLED: "text-text-secondary",
-  COMPLETED: "text-text-secondary",
+  COMPLETED: "border-transparent bg-muted text-text-secondary",
 };
 
 export const APPOINTMENT_DETAIL_TEXT = {

@@ -1,6 +1,4 @@
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { cn } from "cn";
 import { BOLIVIA_TIME_LABEL } from "@/shared/constants/date-time.constants";
 import {
   formatBlockRange,
@@ -11,9 +9,8 @@ import {
 import {
   APPOINTMENTS_TEXT,
   APPOINTMENT_ROLE_LABELS,
-  APPOINTMENT_STATUS_CLASSES,
-  APPOINTMENT_STATUS_LABELS,
 } from "../constants/appointments.constants";
+import { AppointmentStatusBadge } from "./appointment-status-badge";
 import type { AppointmentCardProps } from "../types/appointment-card-props.types";
 
 export function AppointmentCard({ appointment, onSelect }: AppointmentCardProps) {
@@ -44,15 +41,10 @@ export function AppointmentCard({ appointment, onSelect }: AppointmentCardProps)
           {appointment.counterpart.fullName}
         </span>
 
-        <Badge
-          variant="outline"
-          className={cn(
-            "col-start-1 row-start-2 h-6 w-fit justify-self-start px-2.5 text-sm sm:col-start-2 sm:row-span-3 sm:row-start-1 sm:justify-self-end",
-            APPOINTMENT_STATUS_CLASSES[appointment.status],
-          )}
-        >
-          {APPOINTMENT_STATUS_LABELS[appointment.status]}
-        </Badge>
+        <AppointmentStatusBadge
+          status={appointment.status}
+          className="col-start-1 row-start-2 w-fit justify-self-start sm:col-start-2 sm:row-span-3 sm:row-start-1 sm:justify-self-end"
+        />
 
         <span className="col-start-1 row-start-3 text-sm wrap-anywhere text-text-secondary sm:row-start-2">
           {APPOINTMENT_ROLE_LABELS[appointment.counterpart.role]}
