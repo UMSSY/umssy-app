@@ -1,8 +1,18 @@
 import { describe, expect, it, vi } from 'vitest';
 import { EventRegistrationsController } from '../controllers/event-registrations.controller.js';
 import type { EventRegistrationsService } from '../services/event-registrations.service.js';
+import { HEADERS_METADATA } from '@nestjs/common/constants.js';
 
 describe('EventRegistrationsController', () => {
+  it('marks my registrations as private and non-cacheable', () => {
+    expect(
+      Reflect.getMetadata(
+        HEADERS_METADATA,
+        EventRegistrationsController.prototype.findMine,
+      ),
+    ).toContainEqual({ name: 'Cache-Control', value: 'private, no-store' });
+  });
+
   it('delega en el service con el userId recibido', async () => {
     const expected = [{ id: 'reg-1' }];
     const findMine = vi.fn().mockResolvedValue(expected);
@@ -10,13 +20,17 @@ describe('EventRegistrationsController', () => {
       findMine,
     } as unknown as EventRegistrationsService);
 
-    const result = await controller.findMine({
-      id: 'user-1',
-      email: 'user@test.com',
-      roles: ['titulado'],
-    });
+    const query = { scope: 'finished' as const, page: 2, limit: 2 };
+    const result = await controller.findMine(
+      {
+        id: 'user-1',
+        email: 'user@test.com',
+        roles: ['titulado'],
+      },
+      query,
+    );
 
-    expect(findMine).toHaveBeenCalledWith('user-1');
+    expect(findMine).toHaveBeenCalledWith('user-1', query);
     expect(result).toBe(expected);
   });
 
