@@ -8,6 +8,8 @@ import { NOTIFICATION_CATALOG } from '../constants/notification-catalog.constant
 import { NOTIFICATION_TEMPLATES } from '../constants/notification-templates.constants.js';
 import type { NotifyRequest } from '../types/notify-request.type.js';
 import type { NotifyResult } from '../types/notify-result.type.js';
+import { NotificationType } from '../types/notification-type.enum.js';
+import type { NotificationTemplateDefinition } from '../types/notification-template-definition.type.js';
 import { NotificationGateway } from '../gateways/notification.gateway.js'; 
 
 @Injectable()
@@ -54,7 +56,7 @@ export class NotificationsService {
       return { inAppCount: 0, pushStatus: 'skipped', emailStatus: 'skipped' };
     }
 
-    const template = NOTIFICATION_TEMPLATES[type];
+    const template = NOTIFICATION_TEMPLATES[type] as NotificationTemplateDefinition<NotificationType>;
     const title = template.renderTitle(payload);
     const body = template.renderBody(payload);
 

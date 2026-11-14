@@ -1,9 +1,5 @@
 import { NotificationType } from '../types/notification-type.enum.js';
-
-export type NotificationCatalogDefinition = {
-  sendsPush: boolean;
-  sendsEmail: boolean;
-};
+import type { NotificationCatalogDefinition } from '../types/notification-catalog-definition.type.js';
 
 export const NOTIFICATION_CATALOG: Record<NotificationType, NotificationCatalogDefinition> = {
   [NotificationType.CHAT_MESSAGE]: { sendsPush: true, sendsEmail: false },

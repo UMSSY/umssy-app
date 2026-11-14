@@ -1,14 +1,11 @@
 import { NotificationType } from '../types/notification-type.enum.js';
 
-type TemplateDefinition = {
-  renderTitle: (payload: any) => string;
-  renderBody: (payload: any) => string;
-};
+import type { NotificationTemplateMap } from '../types/notification-template-map.type.js';
 
 const truncate = (text: string, max: number = 100) => 
   text.length > max ? `${text.substring(0, max - 3)}...` : text;
 
-export const NOTIFICATION_TEMPLATES: Record<NotificationType, TemplateDefinition> = {
+export const NOTIFICATION_TEMPLATES: NotificationTemplateMap = {
   [NotificationType.CHAT_MESSAGE]: {
     renderTitle: (p) => `Mensaje nuevo de: ${p.senderName}`,
     renderBody: (p) => truncate(`${p.previewText} (${p.messageCount} mensajes)`),
