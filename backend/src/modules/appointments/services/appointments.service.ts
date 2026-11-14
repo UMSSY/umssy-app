@@ -218,18 +218,18 @@ export class AppointmentsService {
     id: string,
     payload: CancelAppointmentDto,
   ): Promise<MyAppointmentResponse> {
+    const now = new Date();
     const appointment = await this.findParticipatedAppointment(user.id, id);
     const statusTitle = appointment.status.title as AppointmentStatusTitle;
 
     if (CANCELLED_APPOINTMENT_STATUS_TITLES.includes(statusTitle)) {
-      return this.appointmentMapper.toResponse(appointment, user.id);
+      return this.appointmentMapper.toResponse(appointment, user.id, now);
     }
 
     if (!ACTIVE_APPOINTMENT_STATUS_TITLES.includes(statusTitle)) {
       throw new AppointmentNotCancellableException();
     }
 
-    const now = new Date();
     if (appointment.startAt.getTime() <= now.getTime()) {
       throw new AppointmentNotCancellableException();
     }
@@ -263,7 +263,7 @@ export class AppointmentsService {
           current.status.title as AppointmentStatusTitle,
         )
       ) {
-        return this.appointmentMapper.toResponse(current, user.id);
+        return this.appointmentMapper.toResponse(current, user.id, now);
       }
 
       const previousStatusId =
@@ -297,7 +297,7 @@ export class AppointmentsService {
         client,
       );
 
-      return this.appointmentMapper.toResponse(cancelled, user.id);
+      return this.appointmentMapper.toResponse(cancelled, user.id, now);
     });
   }
 
