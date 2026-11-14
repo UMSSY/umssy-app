@@ -5,6 +5,7 @@ import { RadarEvidenceSourcesRepository } from '../repositories/radar-evidence-s
 function build(current: unknown) {
   const findFirst = vi.fn().mockResolvedValue(current);
   const repository = new RadarEvidenceSourcesRepository({
+    $queryRaw: vi.fn().mockResolvedValue([]),
     radarCvEvidence: { findFirst },
   } as unknown as PrismaService);
   return { repository, findFirst };

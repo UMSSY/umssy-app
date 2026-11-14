@@ -133,7 +133,8 @@ export const ModelName = {
   RadarCvExtractionStatus: 'RadarCvExtractionStatus',
   RadarCvReviewStatus: 'RadarCvReviewStatus',
   MentorParticipationStatus: 'MentorParticipationStatus',
-  MentorOfferStatus: 'MentorOfferStatus'
+  MentorOfferStatus: 'MentorOfferStatus',
+  RadarDocumentVerification: 'RadarDocumentVerification'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -351,6 +352,7 @@ export type JobOfferSkillScalarFieldEnum = (typeof JobOfferSkillScalarFieldEnum)
 
 
 export const UserSkillScalarFieldEnum = {
+  radarAutoVerified: 'radarAutoVerified',
   id: 'id',
   userId: 'userId',
   skillId: 'skillId',
@@ -1266,6 +1268,35 @@ export const MentorOfferStatusScalarFieldEnum = {
 } as const
 
 export type MentorOfferStatusScalarFieldEnum = (typeof MentorOfferStatusScalarFieldEnum)[keyof typeof MentorOfferStatusScalarFieldEnum]
+
+
+export const RadarDocumentVerificationScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  sourceType: 'sourceType',
+  sourceId: 'sourceId',
+  filename: 'filename',
+  mime: 'mime',
+  content: 'content',
+  sizeBytes: 'sizeBytes',
+  active: 'active',
+  digest: 'digest',
+  status: 'status',
+  confidence: 'confidence',
+  reason: 'reason',
+  skills: 'skills',
+  createdAt: 'createdAt',
+  decidedAt: 'decidedAt',
+  reviewerId: 'reviewerId',
+  noticeRead: 'noticeRead',
+  publishedIds: 'publishedIds',
+  radarVersion: 'radarVersion',
+  synced: 'synced',
+  lease: 'lease',
+  retryAt: 'retryAt'
+} as const
+
+export type RadarDocumentVerificationScalarFieldEnum = (typeof RadarDocumentVerificationScalarFieldEnum)[keyof typeof RadarDocumentVerificationScalarFieldEnum]
 
 
 export const SortOrder = {

@@ -18,12 +18,16 @@ export class UserSkillRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   findAllByUserId(userId: string): Promise<UserSkillRecord[]> {
-    return this.findByUserId(userId);
+    return this.listSkills(userId);
   }
 
   findByUserId(userId: string): Promise<UserSkillRecord[]> {
+    return this.listSkills(userId, USER_SKILL_SOURCES.manual);
+  }
+
+  private listSkills(userId: string, source?: string): Promise<UserSkillRecord[]> {
     return this.prisma.userSkill.findMany({
-      where: { userId },
+      where: { userId, ...(source && {source}) },
       orderBy: { skill: { name: 'asc' } },
       select: userSkillSelect,
     });

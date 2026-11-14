@@ -479,7 +479,8 @@ export const ModelName = {
   RadarCvExtractionStatus: 'RadarCvExtractionStatus',
   RadarCvReviewStatus: 'RadarCvReviewStatus',
   MentorParticipationStatus: 'MentorParticipationStatus',
-  MentorOfferStatus: 'MentorOfferStatus'
+  MentorOfferStatus: 'MentorOfferStatus',
+  RadarDocumentVerification: 'RadarDocumentVerification'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -495,7 +496,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "appointmentStatus" | "proposalStatus" | "eventModality" | "eventOrigin" | "eventStatus" | "registrationStatus" | "city" | "company" | "user" | "role" | "userRole" | "education" | "workExperience" | "radarArea" | "skill" | "jobOfferSkill" | "userSkill" | "certification" | "userCvFile" | "profileSkillProcessingState" | "technicalArea" | "orientationType" | "mentorTechnicalArea" | "mentorOrientationType" | "availabilityBlock" | "blockedDate" | "appointment" | "appointmentDocument" | "timeProposal" | "appointmentHistory" | "eventCategory" | "event" | "eventRegistration" | "eventAttendance" | "jobOffer" | "jobOfferModality" | "jobOfferContractType" | "jobOfferStatus" | "adminExportHistory" | "accessRequestStatus" | "accessRequestDocumentType" | "file" | "career" | "accessRequest" | "mentorParticipationRequest" | "mentorSlotOffer" | "activationOtp" | "messageStatus" | "connectionRequestStatus" | "attachmentType" | "conversation" | "conversationParticipant" | "message" | "messageAttachment" | "chatUserBlock" | "connectionRequest" | "userPresence" | "passwordResetOtp" | "mentorParticipationAttemptLimit" | "jobApplicationStatus" | "jobApplication" | "radarApplicationConsent" | "surveyStatus" | "surveyQuestionType" | "surveyTargetAudience" | "survey" | "surveyQuestion" | "surveyQuestionOption" | "surveyResponse" | "surveyAnswer" | "auditAction" | "auditEvent" | "documentValidation" | "mentorIntakeAttempt" | "mentorParticipationSanction" | "mentorIntakeOperation" | "radarCvEvidence" | "radarScoreSnapshot" | "radarAuditEvent" | "radarCvExtractionStatus" | "radarCvReviewStatus" | "mentorParticipationStatus" | "mentorOfferStatus"
+    modelProps: "appointmentStatus" | "proposalStatus" | "eventModality" | "eventOrigin" | "eventStatus" | "registrationStatus" | "city" | "company" | "user" | "role" | "userRole" | "education" | "workExperience" | "radarArea" | "skill" | "jobOfferSkill" | "userSkill" | "certification" | "userCvFile" | "profileSkillProcessingState" | "technicalArea" | "orientationType" | "mentorTechnicalArea" | "mentorOrientationType" | "availabilityBlock" | "blockedDate" | "appointment" | "appointmentDocument" | "timeProposal" | "appointmentHistory" | "eventCategory" | "event" | "eventRegistration" | "eventAttendance" | "jobOffer" | "jobOfferModality" | "jobOfferContractType" | "jobOfferStatus" | "adminExportHistory" | "accessRequestStatus" | "accessRequestDocumentType" | "file" | "career" | "accessRequest" | "mentorParticipationRequest" | "mentorSlotOffer" | "activationOtp" | "messageStatus" | "connectionRequestStatus" | "attachmentType" | "conversation" | "conversationParticipant" | "message" | "messageAttachment" | "chatUserBlock" | "connectionRequest" | "userPresence" | "passwordResetOtp" | "mentorParticipationAttemptLimit" | "jobApplicationStatus" | "jobApplication" | "radarApplicationConsent" | "surveyStatus" | "surveyQuestionType" | "surveyTargetAudience" | "survey" | "surveyQuestion" | "surveyQuestionOption" | "surveyResponse" | "surveyAnswer" | "auditAction" | "auditEvent" | "documentValidation" | "mentorIntakeAttempt" | "mentorParticipationSanction" | "mentorIntakeOperation" | "radarCvEvidence" | "radarScoreSnapshot" | "radarAuditEvent" | "radarCvExtractionStatus" | "radarCvReviewStatus" | "mentorParticipationStatus" | "mentorOfferStatus" | "radarDocumentVerification"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -6641,6 +6642,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    RadarDocumentVerification: {
+      payload: Prisma.$RadarDocumentVerificationPayload<ExtArgs>
+      fields: Prisma.RadarDocumentVerificationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.RadarDocumentVerificationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarDocumentVerificationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.RadarDocumentVerificationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarDocumentVerificationPayload>
+        }
+        findFirst: {
+          args: Prisma.RadarDocumentVerificationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarDocumentVerificationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.RadarDocumentVerificationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarDocumentVerificationPayload>
+        }
+        findMany: {
+          args: Prisma.RadarDocumentVerificationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarDocumentVerificationPayload>[]
+        }
+        create: {
+          args: Prisma.RadarDocumentVerificationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarDocumentVerificationPayload>
+        }
+        createMany: {
+          args: Prisma.RadarDocumentVerificationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.RadarDocumentVerificationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarDocumentVerificationPayload>[]
+        }
+        delete: {
+          args: Prisma.RadarDocumentVerificationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarDocumentVerificationPayload>
+        }
+        update: {
+          args: Prisma.RadarDocumentVerificationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarDocumentVerificationPayload>
+        }
+        deleteMany: {
+          args: Prisma.RadarDocumentVerificationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.RadarDocumentVerificationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.RadarDocumentVerificationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarDocumentVerificationPayload>[]
+        }
+        upsert: {
+          args: Prisma.RadarDocumentVerificationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarDocumentVerificationPayload>
+        }
+        aggregate: {
+          args: Prisma.RadarDocumentVerificationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateRadarDocumentVerification>
+        }
+        groupBy: {
+          args: Prisma.RadarDocumentVerificationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RadarDocumentVerificationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.RadarDocumentVerificationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RadarDocumentVerificationCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -6879,6 +6954,7 @@ export type JobOfferSkillScalarFieldEnum = (typeof JobOfferSkillScalarFieldEnum)
 
 
 export const UserSkillScalarFieldEnum = {
+  radarAutoVerified: 'radarAutoVerified',
   id: 'id',
   userId: 'userId',
   skillId: 'skillId',
@@ -7796,6 +7872,35 @@ export const MentorOfferStatusScalarFieldEnum = {
 export type MentorOfferStatusScalarFieldEnum = (typeof MentorOfferStatusScalarFieldEnum)[keyof typeof MentorOfferStatusScalarFieldEnum]
 
 
+export const RadarDocumentVerificationScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  sourceType: 'sourceType',
+  sourceId: 'sourceId',
+  filename: 'filename',
+  mime: 'mime',
+  content: 'content',
+  sizeBytes: 'sizeBytes',
+  active: 'active',
+  digest: 'digest',
+  status: 'status',
+  confidence: 'confidence',
+  reason: 'reason',
+  skills: 'skills',
+  createdAt: 'createdAt',
+  decidedAt: 'decidedAt',
+  reviewerId: 'reviewerId',
+  noticeRead: 'noticeRead',
+  publishedIds: 'publishedIds',
+  radarVersion: 'radarVersion',
+  synced: 'synced',
+  lease: 'lease',
+  retryAt: 'retryAt'
+} as const
+
+export type RadarDocumentVerificationScalarFieldEnum = (typeof RadarDocumentVerificationScalarFieldEnum)[keyof typeof RadarDocumentVerificationScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -8188,6 +8293,7 @@ export type GlobalOmitConfig = {
   radarCvReviewStatus?: Prisma.RadarCvReviewStatusOmit
   mentorParticipationStatus?: Prisma.MentorParticipationStatusOmit
   mentorOfferStatus?: Prisma.MentorOfferStatusOmit
+  radarDocumentVerification?: Prisma.RadarDocumentVerificationOmit
 }
 
 /* Types for Logging */

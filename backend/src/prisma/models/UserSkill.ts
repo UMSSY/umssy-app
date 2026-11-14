@@ -25,6 +25,7 @@ export type AggregateUserSkill = {
 }
 
 export type UserSkillMinAggregateOutputType = {
+  radarAutoVerified: boolean | null
   id: string | null
   userId: string | null
   skillId: string | null
@@ -36,6 +37,7 @@ export type UserSkillMinAggregateOutputType = {
 }
 
 export type UserSkillMaxAggregateOutputType = {
+  radarAutoVerified: boolean | null
   id: string | null
   userId: string | null
   skillId: string | null
@@ -47,6 +49,7 @@ export type UserSkillMaxAggregateOutputType = {
 }
 
 export type UserSkillCountAggregateOutputType = {
+  radarAutoVerified: number
   id: number
   userId: number
   skillId: number
@@ -61,6 +64,7 @@ export type UserSkillCountAggregateOutputType = {
 
 
 export type UserSkillMinAggregateInputType = {
+  radarAutoVerified?: true
   id?: true
   userId?: true
   skillId?: true
@@ -72,6 +76,7 @@ export type UserSkillMinAggregateInputType = {
 }
 
 export type UserSkillMaxAggregateInputType = {
+  radarAutoVerified?: true
   id?: true
   userId?: true
   skillId?: true
@@ -83,6 +88,7 @@ export type UserSkillMaxAggregateInputType = {
 }
 
 export type UserSkillCountAggregateInputType = {
+  radarAutoVerified?: true
   id?: true
   userId?: true
   skillId?: true
@@ -168,6 +174,7 @@ export type UserSkillGroupByArgs<ExtArgs extends runtime.Types.Extensions.Intern
 }
 
 export type UserSkillGroupByOutputType = {
+  radarAutoVerified: boolean
   id: string
   userId: string
   skillId: string
@@ -201,6 +208,7 @@ export type UserSkillWhereInput = {
   AND?: Prisma.UserSkillWhereInput | Prisma.UserSkillWhereInput[]
   OR?: Prisma.UserSkillWhereInput[]
   NOT?: Prisma.UserSkillWhereInput | Prisma.UserSkillWhereInput[]
+  radarAutoVerified?: Prisma.BoolFilter<"UserSkill"> | boolean
   id?: Prisma.UuidFilter<"UserSkill"> | string
   userId?: Prisma.UuidFilter<"UserSkill"> | string
   skillId?: Prisma.UuidFilter<"UserSkill"> | string
@@ -215,6 +223,7 @@ export type UserSkillWhereInput = {
 }
 
 export type UserSkillOrderByWithRelationInput = {
+  radarAutoVerified?: Prisma.SortOrder
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   skillId?: Prisma.SortOrder
@@ -234,6 +243,7 @@ export type UserSkillWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.UserSkillWhereInput | Prisma.UserSkillWhereInput[]
   OR?: Prisma.UserSkillWhereInput[]
   NOT?: Prisma.UserSkillWhereInput | Prisma.UserSkillWhereInput[]
+  radarAutoVerified?: Prisma.BoolFilter<"UserSkill"> | boolean
   userId?: Prisma.UuidFilter<"UserSkill"> | string
   skillId?: Prisma.UuidFilter<"UserSkill"> | string
   source?: Prisma.StringFilter<"UserSkill"> | string
@@ -247,6 +257,7 @@ export type UserSkillWhereUniqueInput = Prisma.AtLeast<{
 }, "id" | "userId_skillId">
 
 export type UserSkillOrderByWithAggregationInput = {
+  radarAutoVerified?: Prisma.SortOrder
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   skillId?: Prisma.SortOrder
@@ -265,6 +276,7 @@ export type UserSkillScalarWhereWithAggregatesInput = {
   AND?: Prisma.UserSkillScalarWhereWithAggregatesInput | Prisma.UserSkillScalarWhereWithAggregatesInput[]
   OR?: Prisma.UserSkillScalarWhereWithAggregatesInput[]
   NOT?: Prisma.UserSkillScalarWhereWithAggregatesInput | Prisma.UserSkillScalarWhereWithAggregatesInput[]
+  radarAutoVerified?: Prisma.BoolWithAggregatesFilter<"UserSkill"> | boolean
   id?: Prisma.UuidWithAggregatesFilter<"UserSkill"> | string
   userId?: Prisma.UuidWithAggregatesFilter<"UserSkill"> | string
   skillId?: Prisma.UuidWithAggregatesFilter<"UserSkill"> | string
@@ -277,6 +289,7 @@ export type UserSkillScalarWhereWithAggregatesInput = {
 }
 
 export type UserSkillCreateInput = {
+  radarAutoVerified?: boolean
   id?: string
   source?: string
   verificationStatus?: string
@@ -289,6 +302,7 @@ export type UserSkillCreateInput = {
 }
 
 export type UserSkillUncheckedCreateInput = {
+  radarAutoVerified?: boolean
   id?: string
   userId: string
   skillId: string
@@ -301,6 +315,7 @@ export type UserSkillUncheckedCreateInput = {
 }
 
 export type UserSkillUpdateInput = {
+  radarAutoVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   id?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.StringFieldUpdateOperationsInput | string
   verificationStatus?: Prisma.StringFieldUpdateOperationsInput | string
@@ -313,6 +328,7 @@ export type UserSkillUpdateInput = {
 }
 
 export type UserSkillUncheckedUpdateInput = {
+  radarAutoVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   skillId?: Prisma.StringFieldUpdateOperationsInput | string
@@ -325,6 +341,7 @@ export type UserSkillUncheckedUpdateInput = {
 }
 
 export type UserSkillCreateManyInput = {
+  radarAutoVerified?: boolean
   id?: string
   userId: string
   skillId: string
@@ -337,6 +354,7 @@ export type UserSkillCreateManyInput = {
 }
 
 export type UserSkillUpdateManyMutationInput = {
+  radarAutoVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   id?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.StringFieldUpdateOperationsInput | string
   verificationStatus?: Prisma.StringFieldUpdateOperationsInput | string
@@ -347,6 +365,7 @@ export type UserSkillUpdateManyMutationInput = {
 }
 
 export type UserSkillUncheckedUpdateManyInput = {
+  radarAutoVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   skillId?: Prisma.StringFieldUpdateOperationsInput | string
@@ -374,6 +393,7 @@ export type UserSkillUserIdSkillIdCompoundUniqueInput = {
 }
 
 export type UserSkillCountOrderByAggregateInput = {
+  radarAutoVerified?: Prisma.SortOrder
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   skillId?: Prisma.SortOrder
@@ -386,6 +406,7 @@ export type UserSkillCountOrderByAggregateInput = {
 }
 
 export type UserSkillMaxOrderByAggregateInput = {
+  radarAutoVerified?: Prisma.SortOrder
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   skillId?: Prisma.SortOrder
@@ -397,6 +418,7 @@ export type UserSkillMaxOrderByAggregateInput = {
 }
 
 export type UserSkillMinOrderByAggregateInput = {
+  radarAutoVerified?: Prisma.SortOrder
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   skillId?: Prisma.SortOrder
@@ -492,6 +514,7 @@ export type UserSkillUncheckedUpdateManyWithoutSkillNestedInput = {
 }
 
 export type UserSkillCreateWithoutUserInput = {
+  radarAutoVerified?: boolean
   id?: string
   source?: string
   verificationStatus?: string
@@ -503,6 +526,7 @@ export type UserSkillCreateWithoutUserInput = {
 }
 
 export type UserSkillUncheckedCreateWithoutUserInput = {
+  radarAutoVerified?: boolean
   id?: string
   skillId: string
   source?: string
@@ -543,6 +567,7 @@ export type UserSkillScalarWhereInput = {
   AND?: Prisma.UserSkillScalarWhereInput | Prisma.UserSkillScalarWhereInput[]
   OR?: Prisma.UserSkillScalarWhereInput[]
   NOT?: Prisma.UserSkillScalarWhereInput | Prisma.UserSkillScalarWhereInput[]
+  radarAutoVerified?: Prisma.BoolFilter<"UserSkill"> | boolean
   id?: Prisma.UuidFilter<"UserSkill"> | string
   userId?: Prisma.UuidFilter<"UserSkill"> | string
   skillId?: Prisma.UuidFilter<"UserSkill"> | string
@@ -555,6 +580,7 @@ export type UserSkillScalarWhereInput = {
 }
 
 export type UserSkillCreateWithoutSkillInput = {
+  radarAutoVerified?: boolean
   id?: string
   source?: string
   verificationStatus?: string
@@ -566,6 +592,7 @@ export type UserSkillCreateWithoutSkillInput = {
 }
 
 export type UserSkillUncheckedCreateWithoutSkillInput = {
+  radarAutoVerified?: boolean
   id?: string
   userId: string
   source?: string
@@ -603,6 +630,7 @@ export type UserSkillUpdateManyWithWhereWithoutSkillInput = {
 }
 
 export type UserSkillCreateManyUserInput = {
+  radarAutoVerified?: boolean
   id?: string
   skillId: string
   source?: string
@@ -614,6 +642,7 @@ export type UserSkillCreateManyUserInput = {
 }
 
 export type UserSkillUpdateWithoutUserInput = {
+  radarAutoVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   id?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.StringFieldUpdateOperationsInput | string
   verificationStatus?: Prisma.StringFieldUpdateOperationsInput | string
@@ -625,6 +654,7 @@ export type UserSkillUpdateWithoutUserInput = {
 }
 
 export type UserSkillUncheckedUpdateWithoutUserInput = {
+  radarAutoVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   id?: Prisma.StringFieldUpdateOperationsInput | string
   skillId?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.StringFieldUpdateOperationsInput | string
@@ -636,6 +666,7 @@ export type UserSkillUncheckedUpdateWithoutUserInput = {
 }
 
 export type UserSkillUncheckedUpdateManyWithoutUserInput = {
+  radarAutoVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   id?: Prisma.StringFieldUpdateOperationsInput | string
   skillId?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.StringFieldUpdateOperationsInput | string
@@ -647,6 +678,7 @@ export type UserSkillUncheckedUpdateManyWithoutUserInput = {
 }
 
 export type UserSkillCreateManySkillInput = {
+  radarAutoVerified?: boolean
   id?: string
   userId: string
   source?: string
@@ -658,6 +690,7 @@ export type UserSkillCreateManySkillInput = {
 }
 
 export type UserSkillUpdateWithoutSkillInput = {
+  radarAutoVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   id?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.StringFieldUpdateOperationsInput | string
   verificationStatus?: Prisma.StringFieldUpdateOperationsInput | string
@@ -669,6 +702,7 @@ export type UserSkillUpdateWithoutSkillInput = {
 }
 
 export type UserSkillUncheckedUpdateWithoutSkillInput = {
+  radarAutoVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.StringFieldUpdateOperationsInput | string
@@ -680,6 +714,7 @@ export type UserSkillUncheckedUpdateWithoutSkillInput = {
 }
 
 export type UserSkillUncheckedUpdateManyWithoutSkillInput = {
+  radarAutoVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.StringFieldUpdateOperationsInput | string
@@ -693,6 +728,7 @@ export type UserSkillUncheckedUpdateManyWithoutSkillInput = {
 
 
 export type UserSkillSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  radarAutoVerified?: boolean
   id?: boolean
   userId?: boolean
   skillId?: boolean
@@ -707,6 +743,7 @@ export type UserSkillSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
 }, ExtArgs["result"]["userSkill"]>
 
 export type UserSkillSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  radarAutoVerified?: boolean
   id?: boolean
   userId?: boolean
   skillId?: boolean
@@ -721,6 +758,7 @@ export type UserSkillSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
 }, ExtArgs["result"]["userSkill"]>
 
 export type UserSkillSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  radarAutoVerified?: boolean
   id?: boolean
   userId?: boolean
   skillId?: boolean
@@ -735,6 +773,7 @@ export type UserSkillSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
 }, ExtArgs["result"]["userSkill"]>
 
 export type UserSkillSelectScalar = {
+  radarAutoVerified?: boolean
   id?: boolean
   userId?: boolean
   skillId?: boolean
@@ -746,7 +785,7 @@ export type UserSkillSelectScalar = {
   updatedAt?: boolean
 }
 
-export type UserSkillOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "skillId" | "source" | "verificationStatus" | "isHighRelevance" | "evidenceRefs" | "createdAt" | "updatedAt", ExtArgs["result"]["userSkill"]>
+export type UserSkillOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"radarAutoVerified" | "id" | "userId" | "skillId" | "source" | "verificationStatus" | "isHighRelevance" | "evidenceRefs" | "createdAt" | "updatedAt", ExtArgs["result"]["userSkill"]>
 export type UserSkillInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   skill?: boolean | Prisma.SkillDefaultArgs<ExtArgs>
@@ -767,6 +806,7 @@ export type $UserSkillPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     skill: Prisma.$SkillPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
+    radarAutoVerified: boolean
     id: string
     userId: string
     skillId: string
@@ -859,8 +899,8 @@ export interface UserSkillDelegate<ExtArgs extends runtime.Types.Extensions.Inte
    * // Get first 10 UserSkills
    * const userSkills = await prisma.userSkill.findMany({ take: 10 })
    *
-   * // Only select the `id`
-   * const userSkillWithIdOnly = await prisma.userSkill.findMany({ select: { id: true } })
+   * // Only select the `radarAutoVerified`
+   * const userSkillWithRadarAutoVerifiedOnly = await prisma.userSkill.findMany({ select: { radarAutoVerified: true } })
    *
    */
   findMany<T extends UserSkillFindManyArgs>(args?: Prisma.SelectSubset<T, UserSkillFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserSkillPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
@@ -904,9 +944,9 @@ export interface UserSkillDelegate<ExtArgs extends runtime.Types.Extensions.Inte
    *   ]
    * })
    *
-   * // Create many UserSkills and only return the `id`
-   * const userSkillWithIdOnly = await prisma.userSkill.createManyAndReturn({
-   *   select: { id: true },
+   * // Create many UserSkills and only return the `radarAutoVerified`
+   * const userSkillWithRadarAutoVerifiedOnly = await prisma.userSkill.createManyAndReturn({
+   *   select: { radarAutoVerified: true },
    *   data: [
    *     // ... provide data here
    *   ]
@@ -995,9 +1035,9 @@ export interface UserSkillDelegate<ExtArgs extends runtime.Types.Extensions.Inte
    *   ]
    * })
    *
-   * // Update zero or more UserSkills and only return the `id`
-   * const userSkillWithIdOnly = await prisma.userSkill.updateManyAndReturn({
-   *   select: { id: true },
+   * // Update zero or more UserSkills and only return the `radarAutoVerified`
+   * const userSkillWithRadarAutoVerifiedOnly = await prisma.userSkill.updateManyAndReturn({
+   *   select: { radarAutoVerified: true },
    *   where: {
    *     // ... provide filter here
    *   },
@@ -1201,6 +1241,7 @@ export interface Prisma__UserSkillClient<T, Null = never, ExtArgs extends runtim
  * Fields of the UserSkill model
  */
 export interface UserSkillFieldRefs {
+  readonly radarAutoVerified: Prisma.FieldRef<"UserSkill", 'Boolean'>
   readonly id: Prisma.FieldRef<"UserSkill", 'String'>
   readonly userId: Prisma.FieldRef<"UserSkill", 'String'>
   readonly skillId: Prisma.FieldRef<"UserSkill", 'String'>

@@ -29,8 +29,13 @@ import { RadarRecruitmentService } from './radar-recruitment.service.js';
 import { RadarRecruitmentRepository } from './repositories/radar-recruitment.repository.js';
 import { RadarApplicationsRepository } from './repositories/radar-applications.repository.js';
 
+import { DocumentOcrModule } from '../access-requests/document-ocr.module.js';
+import { DocumentVerificationRepository } from './repositories/document-verification.repository.js';
+import { DocumentVerificationService } from './services/document-verification.service.js';
+import { DocumentVerificationController } from './controllers/document-verification.controller.js';
 @Module({
   imports: [
+    DocumentOcrModule,
     CvSourcesModule,
     PrismaModule,
     JwtAuthModule,
@@ -43,8 +48,9 @@ import { RadarApplicationsRepository } from './repositories/radar-applications.r
     RadarEvidenceSourcesModule,
     MatchingModule,
   ],
-  controllers: [RadarIntegrationController, RadarRecruitmentController],
+  controllers: [DocumentVerificationController, RadarIntegrationController, RadarRecruitmentController],
   providers: [
+    DocumentVerificationRepository, DocumentVerificationService,
     RadarPublicationRepository,
     RadarRecruitmentRepository,
     RadarApplicationsRepository,

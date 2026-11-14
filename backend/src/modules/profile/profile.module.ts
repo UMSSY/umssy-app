@@ -13,8 +13,9 @@ import { ProfilePhotoService } from './services/profile-photo.service.js';
 import { ProfileService } from './services/profile.service.js';
 import { CityCatalogService } from './services/city-catalog.service.js';
 
+import { ProfileSkillsEventsModule } from '../../common/profile-skills/profile-skills-events.module.js';
 @Module({
-  imports: [PrismaModule, JwtAuthModule],
+  imports: [ProfileSkillsEventsModule, PrismaModule, JwtAuthModule],
   controllers: [ProfileController, ProfilePhotoController],
   providers: [
     ProfileService,

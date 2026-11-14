@@ -181,6 +181,8 @@ model User {
   radarCvOwned         RadarCvEvidence[]         @relation("RadarCvOwner")
   radarCvReviewed      RadarCvEvidence[]         @relation("RadarCvReviewer")
   radarSnapshots       RadarScoreSnapshot[]
+  documentVerifications RadarDocumentVerification[] @relation("VerifiedDocumentOwner")
+  reviewedDocuments RadarDocumentVerification[] @relation("VerifiedDocumentReviewer")
   radarAuditSubjects   RadarAuditEvent[]         @relation("RadarAuditSubject")
   radarAuditActors     RadarAuditEvent[]         @relation("RadarAuditActor")
   radarCompanyAccess   RadarCompanyAccess[]      @ignore
@@ -302,6 +304,7 @@ model JobOfferSkill {
 }
 
 model UserSkill {
+  radarAutoVerified Boolean @default(false) @map("radar_auto_verified")
   id                 String   @id @default(uuid()) @db.Uuid
   userId             String   @map("user_id") @db.Uuid
   skillId            String   @map("skill_id") @db.Uuid
@@ -1529,4 +1532,34 @@ model MentorOfferStatus {
   records     MentorSlotOffer[]
 
   @@map("mentor_offer_statuses")
+}
+
+model RadarDocumentVerification {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId String @map("user_id") @db.Uuid
+  sourceType String @map("source_type")
+  sourceId String @map("source_id") @db.Uuid
+  filename String
+  mime String
+  content Bytes?
+  sizeBytes Int @map("size_bytes")
+  active Boolean @default(true)
+  digest String
+  status String @default("queued")
+  confidence Float?
+  reason String @default("")
+  skills Json @default("[]")
+  createdAt DateTime @default(dbgenerated("clock_timestamp()")) @map("created_at") @db.Timestamptz(6)
+  decidedAt DateTime? @map("decided_at") @db.Timestamptz(6)
+  reviewerId String? @map("reviewer_id") @db.Uuid
+  noticeRead Boolean @default(false) @map("notice_read")
+  publishedIds Json @default("[]") @map("published_ids")
+  radarVersion Int? @map("radar_version")
+  synced Boolean @default(false)
+  lease String? @db.Uuid
+  retryAt DateTime @default(now()) @map("retry_at") @db.Timestamptz(6)
+  owner User @relation("VerifiedDocumentOwner", fields:[userId],references:[id],onDelete:Cascade,onUpdate:NoAction)
+  reviewer User? @relation("VerifiedDocumentReviewer",fields:[reviewerId],references:[id],onDelete:SetNull,onUpdate:NoAction)
+  @@index([userId,createdAt(sort:Desc)],map:"radar_doc_owner_date")
+  @@map("radar_document_verifications")
 }
