@@ -1,5 +1,6 @@
 export { DEFAULT_NOTIFICATION_CATALOG_DEFINITION, NOTIFICATION_CATALOG } from "./constants/notification-catalog.constants";
 export { NOTIFICATION_INBOX_FILTER_LABELS, NOTIFICATION_INBOX_FILTERS } from "./constants/notification-inbox-filters.constants";
+export { AppVisibilityReporter } from "./components/app-visibility-reporter";
 export { getNotificationCatalogDefinition } from "./utils/get-notification-catalog-definition";
 export { getNotificationCategory } from "./utils/get-notification-category";
 export { getNotificationIcon } from "./utils/get-notification-icon";

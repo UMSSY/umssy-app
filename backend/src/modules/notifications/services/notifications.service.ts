@@ -4,6 +4,7 @@ import { PreferencesRepository } from '../repositories/preferences.repository.js
 import { NotificationUserLookupRepository } from '../repositories/notification-user-lookup.repository.js';
 import { PushDispatcherService } from './push-dispatcher.service.js';
 import { MailDispatcherService } from './mail-dispatcher.service.js';
+import { AppVisibilityService } from './app-visibility.service.js';
 import { NotificationGateway } from '../gateways/notification.gateway.js';
 import { NOTIFICATION_TEMPLATES } from '../constants/notification-templates.constants.js';
 import type { NotifyRequest } from '../types/notify-request.type.js';
@@ -22,6 +23,7 @@ export class NotificationsService {
     private readonly pushDispatcher: PushDispatcherService,
     private readonly mailDispatcher: MailDispatcherService,
     private readonly notificationGateway: NotificationGateway,
+    private readonly appVisibilityService: AppVisibilityService,
   ) {}
 
   async notify(request: NotifyRequest): Promise<NotifyResult> {
@@ -67,7 +69,8 @@ export class NotificationsService {
       const pushEnabled = userPref ? userPref.pushEnabled : false;
       const emailEnabled = userPref ? userPref.emailEnabled : true;
 
-      if (typeRecord.sendsPush && pushEnabled) pushTargets.push(recipientId);
+      const appVisible = this.appVisibilityService.isVisible(recipientId);
+      if (typeRecord.sendsPush && pushEnabled && !appVisible) pushTargets.push(recipientId);
       if (typeRecord.sendsEmail && emailEnabled) emailTargets.push(recipientId);
     }
 

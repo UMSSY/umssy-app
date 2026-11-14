@@ -2,6 +2,11 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as webpush from 'web-push';
 import { PushSubscriptionsRepository } from '../repositories/push-subscriptions.repository.js';
+import {
+  PUSH_NOTIFICATION_ICON,
+  PUSH_TEXT_MAX_LENGTH,
+} from '../constants/push-notification.constants.js';
+import type { PushNotificationPayload } from '../types/push-notification-payload.type.js';
 
 @Injectable()
 export class PushDispatcherService implements OnModuleInit {
@@ -43,12 +48,14 @@ export class PushDispatcherService implements OnModuleInit {
     let successCount = 0;
     let failedCount = 0;
 
-    const payload = JSON.stringify({
-      title: title.substring(0, 100),
-      body: body.substring(0, 100),
-      url: actionUrl,
-      tag: groupKey,
-    });
+    const pushPayload: PushNotificationPayload = {
+      title: title.substring(0, PUSH_TEXT_MAX_LENGTH),
+      body: body.substring(0, PUSH_TEXT_MAX_LENGTH),
+      icon: PUSH_NOTIFICATION_ICON,
+      actionUrl,
+      groupKey,
+    };
+    const payload = JSON.stringify(pushPayload);
 
     for (const sub of subscriptions) {
       if (this.isDesktopUserAgent(sub.userAgent)) {
@@ -67,17 +74,20 @@ export class PushDispatcherService implements OnModuleInit {
       } catch (error: unknown) {
         failedCount++;
         const statusCode = this.getStatusCode(error);
-        if (statusCode === 404 || statusCode === 410) {
+        const subscriptionRemoved = statusCode === 404 || statusCode === 410;
+        if (subscriptionRemoved) {
           await this.pushSubscriptionsRepository.deleteByEndpointAndUserId(
             sub.endpoint,
             sub.userId,
           );
-        } else {
-          this.logger.error(
-            `Error sending push to ${sub.endpoint}`,
-            error instanceof Error ? error.stack : String(error),
-          );
         }
+        this.logDeliveryFailure(
+          sub.userId,
+          sub.endpoint,
+          statusCode,
+          subscriptionRemoved,
+          error,
+        );
       }
     }
 
@@ -85,6 +95,33 @@ export class PushDispatcherService implements OnModuleInit {
     if (successCount > 0 && failedCount > 0) return 'partial';
     if (successCount === 0 && failedCount > 0) return 'failed';
     return 'skipped';
+  }
+
+  private logDeliveryFailure(
+    userId: string,
+    endpoint: string,
+    statusCode: number | undefined,
+    subscriptionRemoved: boolean,
+    error: unknown,
+  ): void {
+    const entry = `[PushAudit] userId=${userId} endpointHost=${this.getEndpointHost(endpoint)} statusCode=${statusCode ?? 'unknown'} subscriptionRemoved=${subscriptionRemoved}`;
+    if (subscriptionRemoved) {
+      this.logger.warn(entry);
+      return;
+    }
+    this.logger.error(
+      entry,
+      error instanceof Error ? error.stack : String(error),
+    );
+  }
+
+  // El endpoint completo identifica al dispositivo; en el log solo va el dominio.
+  private getEndpointHost(endpoint: string): string {
+    try {
+      return new URL(endpoint).host;
+    } catch {
+      return 'invalid-endpoint';
+    }
   }
 
   private getStatusCode(error: unknown): number | undefined {
