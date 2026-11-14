@@ -16,6 +16,7 @@ function makeAppointment(overrides: Partial<Appointment> = {}): Appointment {
     message: "Quiero revisar mi CV",
     requestedAt: "2026-10-20T22:42:00.000Z",
     document: null,
+    cancellation: null,
     ...overrides,
   };
 }
@@ -86,6 +87,63 @@ describe("AppointmentCard", () => {
     );
 
     expect(screen.getByText("Cancelada")).not.toHaveClass("text-success");
+  });
+
+  it("muestra «Cancelada por ti» cuando el usuario canceló la cita", () => {
+    render(
+      <AppointmentCard
+        appointment={makeAppointment({
+          status: "CANCELLED",
+          cancellation: { cancelledBy: "MENTOR", cancelledByMe: true, reason: null, cancelledAt: "2026-10-25T00:00:00.000Z" },
+        })}
+      />,
+    );
+
+    expect(screen.getByText("Cancelada por ti")).toBeInTheDocument();
+  });
+
+  it("muestra «Cancelada por el mentor» cuando canceló la otra persona", () => {
+    render(
+      <AppointmentCard
+        appointment={makeAppointment({
+          status: "CANCELLED",
+          cancellation: { cancelledBy: "MENTOR", cancelledByMe: false, reason: null, cancelledAt: "2026-10-25T00:00:00.000Z" },
+        })}
+      />,
+    );
+
+    expect(screen.getByText("Cancelada por el mentor")).toBeInTheDocument();
+  });
+
+  it("muestra el motivo de la cancelación cuando existe", () => {
+    render(
+      <AppointmentCard
+        appointment={makeAppointment({
+          status: "CANCELLED",
+          cancellation: {
+            cancelledBy: "STUDENT",
+            cancelledByMe: false,
+            reason: "Me surgió un imprevisto",
+            cancelledAt: "2026-10-25T00:00:00.000Z",
+          },
+        })}
+      />,
+    );
+
+    expect(screen.getByText("Me surgió un imprevisto")).toBeInTheDocument();
+  });
+
+  it("no muestra motivo en una cita cancelada sin razón registrada", () => {
+    render(
+      <AppointmentCard
+        appointment={makeAppointment({
+          status: "CANCELLED",
+          cancellation: { cancelledBy: "STUDENT", cancelledByMe: false, reason: null, cancelledAt: "2026-10-25T00:00:00.000Z" },
+        })}
+      />,
+    );
+
+    expect(screen.getByText("Cancelada por el titulado")).toBeInTheDocument();
   });
 
   it("notifica la selección al hacer clic en la tarjeta", async () => {
