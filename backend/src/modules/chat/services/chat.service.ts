@@ -82,4 +82,8 @@ export class ChatService {
       hasMore,
     };
   }
+  async hasBlockBetween(userAId: string, userBId: string): Promise<boolean> {
+  const block = await this.chatRepository.findBlockBetween(userAId, userBId);
+  return block !== null;
+}
 }
