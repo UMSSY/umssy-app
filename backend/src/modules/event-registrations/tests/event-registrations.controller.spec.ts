@@ -10,13 +10,17 @@ describe('EventRegistrationsController', () => {
       findMine,
     } as unknown as EventRegistrationsService);
 
-    const result = await controller.findMine({
-      id: 'user-1',
-      email: 'user@test.com',
-      roles: ['titulado'],
-    });
+    const query = { scope: 'finished' as const, page: 2, limit: 2 };
+    const result = await controller.findMine(
+      {
+        id: 'user-1',
+        email: 'user@test.com',
+        roles: ['titulado'],
+      },
+      query,
+    );
 
-    expect(findMine).toHaveBeenCalledWith('user-1');
+    expect(findMine).toHaveBeenCalledWith('user-1', query);
     expect(result).toBe(expected);
   });
 
