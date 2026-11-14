@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PrismaModule } from '../../common/prisma/prisma.module.js';
 import { JwtAuthModule } from '../../common/guards/jwt-auth.module.js';
@@ -9,6 +9,7 @@ import { NotificationsService } from './services/notifications.service.js';
 import { PushDispatcherService } from './services/push-dispatcher.service.js';
 import { MailDispatcherService } from './services/mail-dispatcher.service.js';
 import { NotificationGateway } from './gateways/notification.gateway.js';
+import { SubscriptionsService } from './services/subscriptions.service.js';
 
 import { NotificationsRepository } from './repositories/notifications.repository.js';
 import { PushSubscriptionsRepository } from './repositories/push-subscriptions.repository.js';
@@ -18,6 +19,9 @@ import { NotificationUserLookupRepository } from './repositories/notification-us
 import { NotificationsController } from './controllers/notifications.controller.js';
 import { PushSubscriptionsController } from './controllers/push-subscriptions.controller.js';
 import { PreferencesController } from './controllers/preferences.controller.js';
+import { NotificationsInboxService } from './services/notifications-inbox.service.js';
+import { UsersModule } from '../users/users.module.js'; 
+import { ChatModule } from '../chat/chat.module.js'; 
 
 @Module({
   imports: [
@@ -26,6 +30,8 @@ import { PreferencesController } from './controllers/preferences.controller.js';
     AuthModule, 
     JwtModule.register({}), 
     MailModule,
+    UsersModule,
+    forwardRef(() => ChatModule),
   ],
   controllers: [
     NotificationsController,
@@ -41,7 +47,9 @@ import { PreferencesController } from './controllers/preferences.controller.js';
     PushSubscriptionsRepository,
     PreferencesRepository,
     NotificationUserLookupRepository,
+    SubscriptionsService,
+    NotificationsInboxService,
   ],
-  exports: [NotificationsService],
+  exports: [NotificationsService, SubscriptionsService],
 })
 export class NotificationsModule {}

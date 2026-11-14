@@ -54,7 +54,7 @@ export class PushDispatcherService {
       } catch (error: any) {
         failedCount++;
         if (error.statusCode === 404 || error.statusCode === 410) {
-          await this.pushSubscriptionsRepository.deleteByEndpoint(sub.endpoint);
+          await this.pushSubscriptionsRepository.deleteByEndpointAndUserId(sub.endpoint, sub.userId);
         } else {
           this.logger.error(`Error enviando push a ${sub.endpoint}`, error);
         }

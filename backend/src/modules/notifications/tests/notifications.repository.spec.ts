@@ -1,10 +1,23 @@
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotificationsRepository } from '../repositories/notifications.repository.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 
+interface MockPrisma {
+  notification: {
+    createMany: ReturnType<typeof vi.fn>;
+    findMany: ReturnType<typeof vi.fn>;
+    count: ReturnType<typeof vi.fn>;
+    updateMany: ReturnType<typeof vi.fn>;
+  };
+  notificationType: {
+    findUnique: ReturnType<typeof vi.fn>;
+  };
+}
+
 describe('NotificationsRepository', () => {
   let repository: NotificationsRepository;
-  let mockPrisma: any;
+  let mockPrisma: MockPrisma;
 
   beforeEach(async () => {
     mockPrisma = {
@@ -31,7 +44,7 @@ describe('NotificationsRepository', () => {
 
   it('debe crear múltiples notificaciones en lote', async () => {
     mockPrisma.notification.createMany.mockResolvedValue({ count: 2 });
-    
+
     const result = await repository.createMany([
       { recipientId: '1', typeId: 't1', title: 'T', body: 'B', link: '/' },
       { recipientId: '2', typeId: 't1', title: 'T', body: 'B', link: '/' },
