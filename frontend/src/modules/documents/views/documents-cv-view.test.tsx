@@ -16,6 +16,10 @@ import type { CvExtraction } from "../types/cv-extraction.types";
 import type { SavedCv } from "../types/saved-cv.types";
 import { DocumentsCvView } from "./documents-cv-view";
 
+vi.mock("@/shared/utils/download-file", () => ({
+  downloadFile: vi.fn(),
+}));
+
 vi.mock("../services/documents.service", () => ({
   documentsService: {
     getCvs: vi.fn(),
@@ -23,6 +27,8 @@ vi.mock("../services/documents.service", () => ({
     uploadCv: vi.fn(),
     deleteCv: vi.fn(),
     extractCvData: vi.fn(),
+    generateCv: vi.fn(),
+    getPortfolioProjectCount: vi.fn(),
   },
 }));
 
@@ -174,6 +180,11 @@ describe("DocumentsCvView", () => {
     );
     vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:cv");
     vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => undefined);
+    vi.mocked(documentsService.generateCv).mockResolvedValue({
+      file: new Blob(["%PDF"], { type: PDF_TYPE }),
+      fileName: "CV_Valeria_Quispe.pdf",
+    });
+    vi.mocked(documentsService.getPortfolioProjectCount).mockResolvedValue(0);
     vi.mocked(documentsService.deleteCv).mockImplementation((cvId: string) => {
       serverCvs = serverCvs.filter((cv) => cv.id !== cvId);
       if (serverCvs.length > 0) {
@@ -189,13 +200,57 @@ describe("DocumentsCvView", () => {
     vi.clearAllMocks();
   });
 
-it("offers to generate a cv from the profile data", async () => {
+  it("offers to generate a cv from the profile data", async () => {
     render(<DocumentsCvView />);
 
     expect(
       await screen.findByRole("region", { name: "Generar CV con los datos del perfil" }),
     ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Generar CV" })).toBeInTheDocument();
+  });
+
+  it("generates a cv and displays its card as current cv in saved cvs", async () => {
+    const user = userEvent.setup();
+    await renderView();
+
+    await user.click(screen.getByRole("button", { name: "Generar CV" }));
+
+    expect(await screen.findByRole("dialog", { name: "Generar CV profesional" })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Descargar CV en PDF" }));
+
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog", { name: "Generar CV profesional" })).not.toBeInTheDocument();
+    });
+
+    const [currentItem] = getRecentItems();
+    expect(within(currentItem).getByText("CV_Valeria_Quispe.pdf")).toBeInTheDocument();
+    expect(within(currentItem).getByText("Vigente")).toBeInTheDocument();
+    expect(within(currentItem).getByRole("button", { name: "Ver CV_Valeria_Quispe.pdf" })).toBeInTheDocument();
+  });
+
+  it("allows consulting the generated cv in the document viewer", async () => {
+    const user = userEvent.setup();
+    await renderView();
+
+    await user.click(screen.getByRole("button", { name: "Generar CV" }));
+    await user.click(await screen.findByRole("button", { name: "Descargar CV en PDF" }));
+
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog", { name: "Generar CV profesional" })).not.toBeInTheDocument();
+    });
+
+    const [currentItem] = getRecentItems();
+    await user.click(within(currentItem).getByRole("button", { name: "Ver CV_Valeria_Quispe.pdf" }));
+
+    expect(await screen.findByRole("dialog", { name: "Vista previa del CV" })).toBeInTheDocument();
+    expect(screen.getByTitle("Vista previa de CV_Valeria_Quispe.pdf")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Cerrar" }));
+
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog", { name: "Vista previa del CV" })).not.toBeInTheDocument();
+    });
   });
 
   it("renders the cv title once in the main heading", async () => {
