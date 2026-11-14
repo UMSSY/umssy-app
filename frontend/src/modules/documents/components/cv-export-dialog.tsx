@@ -14,19 +14,32 @@ import {
 import { ProfileCompletenessProgress } from "@/modules/profile";
 import { downloadFile } from "@/shared/utils/download-file";
 import { CV_ERROR_MESSAGES } from "../constants/cv-error-messages.constants";
+import { CV_EXPORT_DEFAULT_SECTIONS } from "../constants/cv-export.constants";
 import { useCvExport } from "../hooks/use-cv-export";
+import { useCvPortfolioCount } from "../hooks/use-cv-portfolio-count";
 import type { CvExportDialogProps } from "../types/cv-export-dialog-props.types";
+import type { CvExportSectionKey } from "../types/cv-export-section-key.types";
+import type { CvExportSections as CvExportSectionsState } from "../types/cv-export-sections.types";
 import type { CvExportStep } from "../types/cv-export-step.types";
+import { CvExportSections } from "./cv-export-sections";
 
 function CvExportDialogBody({ onClose }: Pick<CvExportDialogProps, "onClose">) {
-  const { generatedCv, isGenerating, error, generateCv } = useCvExport();
+  const { generatedCv, isGenerating, error, generateCv, discardCv } = useCvExport();
+  const repositoryCount = useCvPortfolioCount();
+  const [sections, setSections] = useState<CvExportSectionsState>(CV_EXPORT_DEFAULT_SECTIONS);
   const [step, setStep] = useState<CvExportStep>("sections");
   const [downloadError, setDownloadError] = useState<string | null>(null);
   const isPreviewing = step === "preview" && generatedCv !== null;
 
+  const handleToggleSection = (key: CvExportSectionKey) => {
+    setSections((current) => ({ ...current, [key]: !current[key] }));
+    setDownloadError(null);
+    discardCv();
+  };
+
   const handlePreview = async () => {
     setDownloadError(null);
-    const cv = generatedCv ?? (await generateCv());
+    const cv = generatedCv ?? (await generateCv(sections));
 
     if (cv) {
       setStep("preview");
@@ -35,7 +48,7 @@ function CvExportDialogBody({ onClose }: Pick<CvExportDialogProps, "onClose">) {
 
   const handleDownload = async () => {
     setDownloadError(null);
-    const cv = generatedCv ?? (await generateCv());
+    const cv = generatedCv ?? (await generateCv(sections));
 
     if (!cv) {
       return;
@@ -96,7 +109,13 @@ function CvExportDialogBody({ onClose }: Pick<CvExportDialogProps, "onClose">) {
             />
           </div>
         ) : (
-          <div className="flex flex-col gap-4 px-6 py-5">
+          <div className="flex max-h-[60vh] flex-col gap-4 overflow-y-auto px-6 py-5">
+            <CvExportSections
+              sections={sections}
+              repositoryCount={repositoryCount}
+              isDisabled={isGenerating}
+              onToggle={handleToggleSection}
+            />
             <div className="flex items-start gap-3 rounded-lg border border-border bg-surface-soft px-4 py-3">
               <Info aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-ink-soft" />
               <p className="text-sm leading-relaxed text-text-secondary">

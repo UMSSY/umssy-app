@@ -1,6 +1,7 @@
 import { apiClient } from "@/shared/services/api-client";
 
 import type { ApiResponse } from "@/modules/profile";
+import type { CvExportSections } from "../types/cv-export-sections.types";
 import type { CvExtraction } from "../types/cv-extraction.types";
 import type { CvExtractionResponse } from "../types/cv-extraction-response.types";
 import type { CvPage } from "../types/cv-page.types";
@@ -44,10 +45,10 @@ export const documentsService = {
     return response.data;
   },
 
-  generateCv: async (): Promise<{ file: Blob; fileName: string }> => {
+  generateCv: async (sections: CvExportSections): Promise<{ file: Blob; fileName: string }> => {
     const response = await apiClient.post<Blob>(
       "/profile/cv/generate",
-      {},
+      { sections },
       {
         headers: getAuthHeaders(),
         responseType: "blob",
@@ -57,6 +58,13 @@ export const documentsService = {
     const match = disposition ? /filename="?([^";]+)"?/i.exec(disposition) : null;
     const fileName = match ? match[1] : "CV.pdf";
     return { file: response.data, fileName };
+  },
+
+  getPortfolioProjectCount: async (): Promise<number> => {
+    const response = await apiClient.get<ApiResponse<unknown[] | null>>("/profile/portfolio/projects", {
+      headers: getAuthHeaders(),
+    });
+    return response.data.data?.length ?? 0;
   },
 
   extractCvData: async (cvId: string): Promise<CvExtraction> => {

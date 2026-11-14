@@ -22,4 +22,30 @@ export class UsersRepository {
       },
     });
   }
+
+  findRecruitmentProfile(userId: string) {
+    return this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        firstName: true,
+        lastName: true,
+        headline: true,
+        email: true,
+        phone: true,
+      },
+    });
+  }
+  findCompany(userId: string) {
+    return this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { companyId: true },
+    });
+  }
+  assignCompany(userId: string, companyId: string) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { companyId },
+      select: { id: true },
+    });
+  }
 }

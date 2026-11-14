@@ -13,6 +13,7 @@ vi.mock("@/modules/profile/services/profile.service", () => ({
 vi.mock("../services/documents.service", () => ({
   documentsService: {
     generateCv: vi.fn(),
+    getPortfolioProjectCount: vi.fn().mockResolvedValue(0),
   },
 }));
 

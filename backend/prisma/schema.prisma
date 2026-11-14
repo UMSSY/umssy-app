@@ -1112,14 +1112,29 @@ model JobApplication {
   createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  jobOffer JobOffer             @relation(fields: [jobOfferId], references: [id], onDelete: Cascade)
-  user     User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
-  status   JobApplicationStatus @relation(fields: [statusId], references: [id], onDelete: Restrict)
+  jobOffer     JobOffer               @relation(fields: [jobOfferId], references: [id], onDelete: Cascade)
+  user         User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status       JobApplicationStatus   @relation(fields: [statusId], references: [id], onDelete: Restrict)
+  radarConsent RadarApplicationConsent?
 
   @@unique([jobOfferId, userId])
   @@index([userId])
   @@index([statusId])
   @@map("job_applications")
+}
+
+model RadarApplicationConsent {
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  applicationId      String   @unique @map("application_id") @db.Uuid
+  consentToRecruiter Boolean  @default(false) @map("consent_to_recruiter")
+  consentToCv        Boolean  @default(false) @map("consent_to_cv")
+  consentToContact   Boolean  @default(false) @map("consent_to_contact")
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  application JobApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@map("radar_application_consents")
 }
 
 model SurveyStatus {

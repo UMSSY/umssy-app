@@ -1,7 +1,7 @@
-import type { CandidateWithMatch } from "./candidate-with-match.types";
+import type { CandidateListEntry } from "./candidate-list-entry.types";
 
 export interface CandidateListItemProps {
-  candidate: CandidateWithMatch;
+  candidate: CandidateListEntry;
   selected: boolean;
   onSelect: (id: string) => void;
 }

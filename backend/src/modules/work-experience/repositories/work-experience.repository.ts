@@ -129,4 +129,18 @@ export class WorkExperienceRepository {
       },
     };
   }
+
+  findRecruitmentEvidence(userId: string, ids: string[]) {
+    return this.prisma.workExperience.findMany({
+      where: { userId, id: { in: ids } },
+      select: {
+        id: true,
+        position: true,
+        startDate: true,
+        endDate: true,
+        description: true,
+        company: { select: { title: true } },
+      },
+    });
+  }
 }

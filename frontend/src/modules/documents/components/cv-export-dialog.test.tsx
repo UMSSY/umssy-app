@@ -14,12 +14,21 @@ vi.mock("@/shared/utils/download-file", () => ({
 vi.mock("../services/documents.service", () => ({
   documentsService: {
     generateCv: vi.fn(),
+    getPortfolioProjectCount: vi.fn(),
   },
 }));
 
 const PDF = new Blob(["%PDF"], { type: "application/pdf" });
 const FILE_URL = "blob:generated-cv";
 const FILE_NAME = "CV_Valeria_Quispe.pdf";
+const ALL_SECTIONS = {
+  includeContactInfo: true,
+  includeSummary: true,
+  includeWorkExperience: true,
+  includeEducation: true,
+  includeCertifications: true,
+  includeProjects: true,
+};
 
 async function renderDialog(isOpen = true) {
   const onClose = vi.fn();
@@ -38,6 +47,7 @@ describe("CvExportDialog", () => {
     vi.spyOn(URL, "createObjectURL").mockReturnValue(FILE_URL);
     vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => undefined);
     vi.mocked(documentsService.generateCv).mockResolvedValue({ file: PDF, fileName: FILE_NAME });
+    vi.mocked(documentsService.getPortfolioProjectCount).mockResolvedValue(6);
   });
 
   afterEach(() => {
@@ -68,6 +78,126 @@ describe("CvExportDialog", () => {
     expect(screen.getByRole("button", { name: "Cancelar" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Descargar CV en PDF" })).toBeInTheDocument();
     expect(documentsService.generateCv).not.toHaveBeenCalled();
+  });
+
+  it("lists every optional section checked by default as in the mockup", async () => {
+    await renderDialog();
+
+    expect(screen.getByText("Selecciona las secciones a incluir en el documento:")).toBeInTheDocument();
+    expect(screen.getByText("6 de 6 activas")).toBeInTheDocument();
+    for (const name of [
+      "Datos personales y de contacto",
+      "Presentación profesional",
+      "Experiencia laboral",
+      "Formación académica",
+      "Certificaciones",
+      "Proyectos de código y portafolio (GitHub / GitLab)",
+    ]) {
+      expect(screen.getByRole("checkbox", { name })).toBeChecked();
+    }
+    expect(await screen.findByText("6 repositorios")).toBeInTheDocument();
+  });
+
+  it("sends every section enabled when nothing is unchecked", async () => {
+    const { user } = await renderDialog();
+
+    await user.click(screen.getByRole("button", { name: "Descargar CV en PDF" }));
+
+    await waitFor(() => expect(documentsService.generateCv).toHaveBeenCalledWith(ALL_SECTIONS));
+  });
+
+  it("sends the unchecked sections as excluded in the generation request", async () => {
+    const { user } = await renderDialog();
+
+    await user.click(screen.getByRole("checkbox", { name: "Certificaciones" }));
+    await user.click(screen.getByRole("checkbox", { name: "Experiencia laboral" }));
+
+    expect(screen.getByText("4 de 6 activas")).toBeInTheDocument();
+    expect(screen.getByRole("checkbox", { name: "Certificaciones" })).not.toBeChecked();
+
+    await user.click(screen.getByRole("button", { name: "Descargar CV en PDF" }));
+
+    await waitFor(() =>
+      expect(documentsService.generateCv).toHaveBeenCalledWith({
+        ...ALL_SECTIONS,
+        includeCertifications: false,
+        includeWorkExperience: false,
+      }),
+    );
+  });
+
+  it("includes a section again when it is checked back", async () => {
+    const { user } = await renderDialog();
+
+    await user.click(screen.getByRole("checkbox", { name: "Formación académica" }));
+    await user.click(screen.getByRole("checkbox", { name: "Formación académica" }));
+    await user.click(screen.getByRole("button", { name: "Previsualizar diseño del PDF" }));
+
+    await screen.findByTitle(`Vista previa de ${FILE_NAME}`);
+    expect(documentsService.generateCv).toHaveBeenCalledWith(ALL_SECTIONS);
+  });
+
+  it("generates the cv again when the sections change after a preview", async () => {
+    const { user } = await renderDialog();
+    await user.click(screen.getByRole("button", { name: "Previsualizar diseño del PDF" }));
+    await screen.findByTitle(`Vista previa de ${FILE_NAME}`);
+    await user.click(screen.getByRole("button", { name: "Volver a secciones" }));
+
+    await user.click(screen.getByRole("checkbox", { name: "Presentación profesional" }));
+    await user.click(screen.getByRole("button", { name: "Descargar CV en PDF" }));
+
+    await waitFor(() => expect(documentsService.generateCv).toHaveBeenCalledTimes(2));
+    expect(documentsService.generateCv).toHaveBeenLastCalledWith({ ...ALL_SECTIONS, includeSummary: false });
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith(FILE_URL);
+  });
+
+  it("keeps the sections chosen when coming back from the preview", async () => {
+    const { user } = await renderDialog();
+    await user.click(screen.getByRole("checkbox", { name: "Certificaciones" }));
+    await user.click(screen.getByRole("button", { name: "Previsualizar diseño del PDF" }));
+    await screen.findByTitle(`Vista previa de ${FILE_NAME}`);
+
+    expect(screen.queryByRole("checkbox", { name: "Certificaciones" })).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Volver a secciones" }));
+
+    expect(screen.getByRole("checkbox", { name: "Certificaciones" })).not.toBeChecked();
+    expect(screen.getByText("5 de 6 activas")).toBeInTheDocument();
+  });
+
+  it("blocks the sections while the cv is generated", async () => {
+    vi.mocked(documentsService.generateCv).mockReturnValue(new Promise(() => {}));
+    const { user } = await renderDialog();
+
+    await user.click(screen.getByRole("button", { name: "Descargar CV en PDF" }));
+
+    await screen.findByText("Generando tu CV...");
+    expect(screen.getByRole("checkbox", { name: "Certificaciones" })).toHaveAttribute("aria-disabled", "true");
+  });
+
+  it("clears a previous error when a section changes", async () => {
+    vi.mocked(documentsService.generateCv).mockRejectedValueOnce({ response: { status: 500 } });
+    const { user } = await renderDialog();
+    await user.click(screen.getByRole("button", { name: "Descargar CV en PDF" }));
+    await screen.findByRole("alert");
+
+    await user.click(screen.getByRole("checkbox", { name: "Certificaciones" }));
+
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
+  it("hides the repositories badge when the user has no portfolio projects", async () => {
+    vi.mocked(documentsService.getPortfolioProjectCount).mockResolvedValue(0);
+    await renderDialog();
+
+    expect(screen.queryByText(/repositorio/)).not.toBeInTheDocument();
+  });
+
+  it("hides the repositories badge when the portfolio cannot be loaded", async () => {
+    vi.mocked(documentsService.getPortfolioProjectCount).mockRejectedValue(new Error("Network Error"));
+    await renderDialog();
+
+    expect(screen.queryByText(/repositorio/)).not.toBeInTheDocument();
   });
 
   it("shows a progress indicator while the cv is generated", async () => {

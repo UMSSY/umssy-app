@@ -1,20 +1,42 @@
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { APPLICATION_MESSAGES, APPLICATION_SORT_COLUMNS } from "../constants/application.constants";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  APPLICATION_MESSAGES,
+  APPLICATION_SORT_COLUMNS,
+} from "../constants/application.constants";
 import type { ApplicationSort } from "../types/application-sort.types";
 import type { ApplicationSortKey } from "../types/application-sort-key.types";
 import type { ApplicationsTableProps } from "../types/applications-table-props.types";
 import { WithdrawApplicationButton } from "./withdraw-application-button";
 
-function ariaSortFor(sort: ApplicationSort | null | undefined, key: ApplicationSortKey) {
+function ariaSortFor(
+  sort: ApplicationSort | null | undefined,
+  key: ApplicationSortKey,
+) {
   if (sort?.key !== key) return "none" as const;
-  return sort.direction === "asc" ? ("ascending" as const) : ("descending" as const);
+  return sort.direction === "asc"
+    ? ("ascending" as const)
+    : ("descending" as const);
 }
 
-function SortIcon({ sort, columnKey }: { sort: ApplicationSort | null | undefined; columnKey: ApplicationSortKey }) {
-  if (sort?.key !== columnKey) return <ArrowUpDown className="size-3.5" aria-hidden="true" />;
+function SortIcon({
+  sort,
+  columnKey,
+}: {
+  sort: ApplicationSort | null | undefined;
+  columnKey: ApplicationSortKey;
+}) {
+  if (sort?.key !== columnKey)
+    return <ArrowUpDown className="size-3.5" aria-hidden="true" />;
   return sort.direction === "asc" ? (
     <ArrowUp className="size-3.5" aria-hidden="true" />
   ) : (
@@ -22,14 +44,25 @@ function SortIcon({ sort, columnKey }: { sort: ApplicationSort | null | undefine
   );
 }
 
-export function ApplicationsTable({ applications, withdrawingId, onWithdraw, sort, onSortChange }: ApplicationsTableProps) {
+export function ApplicationsTable({
+  applications,
+  withdrawingId,
+  onWithdraw,
+  sort,
+  onSortChange,
+}: ApplicationsTableProps) {
   return (
     <div className="rounded-lg border border-border bg-surface">
       <Table>
         <TableHeader>
           <TableRow>
             {APPLICATION_SORT_COLUMNS.map((column) => (
-              <TableHead key={column.key} aria-sort={onSortChange ? ariaSortFor(sort, column.key) : undefined}>
+              <TableHead
+                key={column.key}
+                aria-sort={
+                  onSortChange ? ariaSortFor(sort, column.key) : undefined
+                }
+              >
                 {onSortChange ? (
                   <Button
                     type="button"
@@ -52,9 +85,15 @@ export function ApplicationsTable({ applications, withdrawingId, onWithdraw, sor
         <TableBody>
           {applications.map((application) => (
             <TableRow key={application.id}>
-              <TableCell className="font-semibold text-ink">{application.vacancyTitle}</TableCell>
-              <TableCell className="text-text-secondary">{application.companyName}</TableCell>
-              <TableCell className="text-text-secondary">{application.affinityPercentage}%</TableCell>
+              <TableCell className="font-semibold text-ink">
+                {application.vacancyTitle}
+              </TableCell>
+              <TableCell className="text-text-secondary">
+                {application.companyName}
+              </TableCell>
+              <TableCell className="text-text-secondary">
+                {application.affinityPercentage}%
+              </TableCell>
               <TableCell>
                 <Badge variant="outline">{application.status}</Badge>
               </TableCell>
