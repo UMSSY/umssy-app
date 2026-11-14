@@ -1,39 +1,39 @@
 import { Controller, Get, Patch, Param, Query, UseGuards } from '@nestjs/common';
-import { NotificationsRepository } from '../repositories/notifications.repository.js';
+import { NotificationsInboxService } from '../services/notifications-inbox.service.js';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { CurrentUserId } from '../../../common/decorators/current-user-id.decorator.js';
+import { GetNotificationsQuerySchema, NotificationIdParamSchema } from '../requests/notifications-query.schema.js';
 
 @Controller('notifications')
 @UseGuards(JwtAuthGuard)
 export class NotificationsController {
-  constructor(private readonly notificationsRepository: NotificationsRepository) {}
+  constructor(private readonly inboxService: NotificationsInboxService) {}
 
   @Get()
   async getNotifications(
     @CurrentUserId() userId: string,
-    @Query('page') page: string = '1',
-    @Query('limit') limit: string = '10',
+    @Query() query: unknown,
   ) {
-    const skip = (Number(page) - 1) * Number(limit);
-    const data = await this.notificationsRepository.findManyByUser(userId, skip, Number(limit));
-    return { data, page: Number(page), limit: Number(limit) };
+    const { page, limit } = GetNotificationsQuerySchema.parse(query);
+    return this.inboxService.getNotifications(userId, page, limit);
   }
 
   @Get('unread-count')
   async getUnreadCount(@CurrentUserId() userId: string) {
-    const count = await this.notificationsRepository.countUnread(userId);
-    return { count };
+    return this.inboxService.getUnreadCount(userId);
   }
 
   @Patch(':id/read')
-  async markAsRead(@CurrentUserId() userId: string, @Param('id') id: string) {
-    await this.notificationsRepository.markAsRead(id, userId);
-    return { ok: true };
+  async markAsRead(
+    @CurrentUserId() userId: string, 
+    @Param() params: unknown
+  ) {
+    const { id } = NotificationIdParamSchema.parse(params);
+    return this.inboxService.markAsRead(userId, id);
   }
 
   @Patch('read-all')
   async markAllAsRead(@CurrentUserId() userId: string) {
-    await this.notificationsRepository.markAllAsRead(userId);
-    return { ok: true };
+    return this.inboxService.markAllAsRead(userId);
   }
 }

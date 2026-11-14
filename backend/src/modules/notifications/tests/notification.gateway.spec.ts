@@ -1,13 +1,28 @@
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotificationGateway } from '../gateways/notification.gateway.js';
 import { JwtService } from '@nestjs/jwt';
+import { NotificationGateway } from '../gateways/notification.gateway.js';
 import { SessionService } from '../../../common/services/session.service.js';
+
+interface MockServer {
+  use: ReturnType<typeof vi.fn>;
+  to: ReturnType<typeof vi.fn>;
+  emit: ReturnType<typeof vi.fn>;
+}
+
+interface MockJwtService {
+  verifyAsync: ReturnType<typeof vi.fn>;
+}
+
+interface MockSessionService {
+  getAuthenticatedUser: ReturnType<typeof vi.fn>;
+}
 
 describe('NotificationGateway', () => {
   let gateway: NotificationGateway;
-  let mockServer: any;
-  let mockJwtService: any;
-  let mockSessionService: any;
+  let mockServer: MockServer;
+  let mockJwtService: MockJwtService;
+  let mockSessionService: MockSessionService;
 
   beforeEach(async () => {
     mockServer = {
@@ -28,7 +43,7 @@ describe('NotificationGateway', () => {
     }).compile();
 
     gateway = module.get<NotificationGateway>(NotificationGateway);
-    gateway.server = mockServer;
+    gateway.server = mockServer as unknown as NotificationGateway['server'];
   });
 
   it('debe emitir el evento a la sala privada del usuario', () => {
@@ -39,7 +54,7 @@ describe('NotificationGateway', () => {
   });
 
   it('debe configurar el middleware de autenticación en afterInit', () => {
-    gateway.afterInit(mockServer);
+    gateway.afterInit(mockServer as unknown as NotificationGateway['server']);
     expect(mockServer.use).toHaveBeenCalledTimes(1);
   });
 });
