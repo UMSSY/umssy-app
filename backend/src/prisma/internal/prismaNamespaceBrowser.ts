@@ -140,6 +140,7 @@ export const ModelName = {
   NotificationType: 'NotificationType',
   Notification: 'Notification',
   PushSubscription: 'PushSubscription',
+  RefreshToken: 'RefreshToken',
   NotificationPreference: 'NotificationPreference'
 } as const
 
@@ -1362,6 +1363,24 @@ export const PushSubscriptionScalarFieldEnum = {
 } as const
 
 export type PushSubscriptionScalarFieldEnum = (typeof PushSubscriptionScalarFieldEnum)[keyof typeof PushSubscriptionScalarFieldEnum]
+
+
+export const RefreshTokenScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  familyId: 'familyId',
+  roleTag: 'roleTag',
+  tokenHash: 'tokenHash',
+  expiresAt: 'expiresAt',
+  absoluteExpiresAt: 'absoluteExpiresAt',
+  usedAt: 'usedAt',
+  revokedAt: 'revokedAt',
+  revokedReason: 'revokedReason',
+  userAgent: 'userAgent',
+  createdAt: 'createdAt'
+} as const
+
+export type RefreshTokenScalarFieldEnum = (typeof RefreshTokenScalarFieldEnum)[keyof typeof RefreshTokenScalarFieldEnum]
 
 
 export const NotificationPreferenceScalarFieldEnum = {

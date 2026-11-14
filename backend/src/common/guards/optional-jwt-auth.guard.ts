@@ -1,6 +1,6 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
-import { BEARER_PREFIX } from '../constants/auth.constants.js';
 import type { AuthenticatedRequest } from '../types/authenticated-request.types.js';
+import { extractAccessToken } from '../utils/extract-access-token.js';
 import { JwtAuthGuard } from './jwt-auth.guard.js';
 
 @Injectable()
@@ -9,12 +9,8 @@ export class OptionalJwtAuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
-    const authorization = request.headers?.authorization;
 
-    if (
-      typeof authorization !== 'string' ||
-      !authorization.startsWith(BEARER_PREFIX)
-    ) {
+    if (!extractAccessToken(request)) {
       return true;
     }
 

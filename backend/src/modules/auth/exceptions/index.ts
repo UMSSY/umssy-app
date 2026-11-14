@@ -4,3 +4,7 @@ export * from './invalid-reset-code.exception.js';
 export * from './expired-reset-code.exception.js';
 export * from './too-many-attempts.exception.js';
 export * from './reset-code-cooldown.exception.js';
+export * from './session-expired.exception.js';
+export * from './session-revoked.exception.js';
+export * from './refresh-invalid.exception.js';
+export * from './password-changed.exception.js';
