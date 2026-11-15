@@ -36,13 +36,7 @@ export class PushDispatcherService {
     actionUrl: string,
     groupKey?: string,
   ): Promise<'sent' | 'partial' | 'failed' | 'skipped'> {
-    if (
-      !process.env.VAPID_PUBLIC_KEY ||
-      !process.env.VAPID_PRIVATE_KEY ||
-      userIds.length === 0
-    ) {
-      return 'skipped';
-    }
+    if (userIds.length === 0) return 'skipped';
 
     const subscriptions = await this.pushSubscriptionsRepository.findManyByUserIds(userIds);
     if (subscriptions.length === 0) return 'skipped';
