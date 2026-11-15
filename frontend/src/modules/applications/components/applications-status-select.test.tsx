@@ -27,7 +27,9 @@ describe("ApplicationsStatusSelect", () => {
 
     await userEvent.click(screen.getByRole("combobox", { name: "Mostrar:" }));
 
-    expect(await screen.findByRole("option", { name: "Retirada" })).toBeInTheDocument();
+    expect(await screen.findAllByRole("option")).toHaveLength(2);
+    expect(screen.getByRole("option", { name: "Retirada" })).toBeInTheDocument();
+    expect(screen.queryByRole("option", { name: "En revisión" })).not.toBeInTheDocument();
   });
 
   it("reports the status the person picks", async () => {

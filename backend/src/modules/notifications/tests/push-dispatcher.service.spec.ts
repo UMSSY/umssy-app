@@ -1,19 +1,17 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { PushDispatcherService } from '../services/push-dispatcher.service.js';
+import { describe, beforeEach, it, expect, vi } from 'vitest';
+import { PushDispatcherService, WEB_PUSH_CLIENT } from '../services/push-dispatcher.service.js';
 import { PushSubscriptionsRepository } from '../repositories/push-subscriptions.repository.js';
-import * as webpush from 'web-push';
-
-const webpushMock = vi.hoisted(() => ({
-  setVapidDetails: vi.fn(),
-  sendNotification: vi.fn(),
-}));
-vi.mock('web-push', () => webpushMock);
 
 describe('PushDispatcherService', () => {
   let service: PushDispatcherService;
   let mockPushRepo: {
     findManyByUserIds: ReturnType<typeof vi.fn>;
     deleteByEndpointAndUserId: ReturnType<typeof vi.fn>;
+  };
+  let webpushMock: {
+    setVapidDetails: ReturnType<typeof vi.fn>;
+    sendNotification: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(async () => {
@@ -22,10 +20,16 @@ describe('PushDispatcherService', () => {
       deleteByEndpointAndUserId: vi.fn(),
     };
 
+    webpushMock = {
+      setVapidDetails: vi.fn(),
+      sendNotification: vi.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         PushDispatcherService,
         { provide: PushSubscriptionsRepository, useValue: mockPushRepo },
+        { provide: WEB_PUSH_CLIENT, useValue: webpushMock },
       ],
     }).compile();
 
@@ -51,7 +55,7 @@ describe('PushDispatcherService', () => {
 
     const result = await service.dispatchToUsers(['user-1'], 'Title', 'Body', '/url');
 
-    expect(webpush.sendNotification).not.toHaveBeenCalled();
+    expect(webpushMock.sendNotification).not.toHaveBeenCalled();
     expect(result).toBe('skipped');
   });
 
@@ -68,7 +72,7 @@ describe('PushDispatcherService', () => {
 
     const error: Error & { statusCode?: number } = new Error('Gone');
     error.statusCode = 410;
-    (webpush.sendNotification as ReturnType<typeof vi.fn>).mockRejectedValueOnce(error);
+    webpushMock.sendNotification.mockRejectedValueOnce(error);
 
     const result = await service.dispatchToUsers(['user-1'], 'Title', 'Body', '/url');
 

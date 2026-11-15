@@ -15,6 +15,7 @@ import type { SkillItem } from "../types/skill-item.types";
 import type { SkillsProfileResponse } from "../types/skills-profile-response.types";
 import type { UseSkillsResult } from "../types/use-skills-result.types";
 import { getSkillsErrorMessage } from "../utils/get-skills-error-message";
+import { isManualSkill } from "../utils/is-manual-skill";
 
 export function useSkills(): UseSkillsResult {
   const queryClient = useQueryClient();
@@ -101,7 +102,7 @@ export function useSkills(): UseSkillsResult {
       );
 
       const skillIds = [
-        ...new Set(resolvedSkills.map(({ id }) => id)),
+        ...new Set(resolvedSkills.filter(isManualSkill).map(({ id }) => id)),
       ];
 
       return skillsService.saveMySkills(skillIds);
