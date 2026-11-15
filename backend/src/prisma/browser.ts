@@ -467,3 +467,23 @@ export type PushSubscription = Prisma.PushSubscriptionModel
  * 
  */
 export type NotificationPreference = Prisma.NotificationPreferenceModel
+/**
+ * Model CompanyProfile
+ * 
+ */
+export type CompanyProfile = Prisma.CompanyProfileModel
+/**
+ * Model CompanyLogo
+ * 
+ */
+export type CompanyLogo = Prisma.CompanyLogoModel
+/**
+ * Model CompanyAccessRequest
+ * 
+ */
+export type CompanyAccessRequest = Prisma.CompanyAccessRequestModel
+/**
+ * Model CompanyActivationOtp
+ * 
+ */
+export type CompanyActivationOtp = Prisma.CompanyActivationOtpModel

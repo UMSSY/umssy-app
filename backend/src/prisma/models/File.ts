@@ -242,6 +242,8 @@ export type FileWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"File"> | Date | string
   accessRequest?: Prisma.XOR<Prisma.AccessRequestNullableScalarRelationFilter, Prisma.AccessRequestWhereInput> | null
   auditEvents?: Prisma.AuditEventListRelationFilter
+  companyRequestDocument?: Prisma.XOR<Prisma.CompanyAccessRequestNullableScalarRelationFilter, Prisma.CompanyAccessRequestWhereInput> | null
+  companyRequestLogo?: Prisma.XOR<Prisma.CompanyAccessRequestNullableScalarRelationFilter, Prisma.CompanyAccessRequestWhereInput> | null
 }
 
 export type FileOrderByWithRelationInput = {
@@ -255,6 +257,8 @@ export type FileOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   accessRequest?: Prisma.AccessRequestOrderByWithRelationInput
   auditEvents?: Prisma.AuditEventOrderByRelationAggregateInput
+  companyRequestDocument?: Prisma.CompanyAccessRequestOrderByWithRelationInput
+  companyRequestLogo?: Prisma.CompanyAccessRequestOrderByWithRelationInput
 }
 
 export type FileWhereUniqueInput = Prisma.AtLeast<{
@@ -271,6 +275,8 @@ export type FileWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"File"> | Date | string
   accessRequest?: Prisma.XOR<Prisma.AccessRequestNullableScalarRelationFilter, Prisma.AccessRequestWhereInput> | null
   auditEvents?: Prisma.AuditEventListRelationFilter
+  companyRequestDocument?: Prisma.XOR<Prisma.CompanyAccessRequestNullableScalarRelationFilter, Prisma.CompanyAccessRequestWhereInput> | null
+  companyRequestLogo?: Prisma.XOR<Prisma.CompanyAccessRequestNullableScalarRelationFilter, Prisma.CompanyAccessRequestWhereInput> | null
 }, "id">
 
 export type FileOrderByWithAggregationInput = {
@@ -314,6 +320,8 @@ export type FileCreateInput = {
   updatedAt?: Date | string
   accessRequest?: Prisma.AccessRequestCreateNestedOneWithoutDocumentFileInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutEvidenceFileInput
+  companyRequestDocument?: Prisma.CompanyAccessRequestCreateNestedOneWithoutDocumentFileInput
+  companyRequestLogo?: Prisma.CompanyAccessRequestCreateNestedOneWithoutLogoFileInput
 }
 
 export type FileUncheckedCreateInput = {
@@ -327,6 +335,8 @@ export type FileUncheckedCreateInput = {
   updatedAt?: Date | string
   accessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutDocumentFileInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutEvidenceFileInput
+  companyRequestDocument?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutDocumentFileInput
+  companyRequestLogo?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutLogoFileInput
 }
 
 export type FileUpdateInput = {
@@ -340,6 +350,8 @@ export type FileUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accessRequest?: Prisma.AccessRequestUpdateOneWithoutDocumentFileNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutEvidenceFileNestedInput
+  companyRequestDocument?: Prisma.CompanyAccessRequestUpdateOneWithoutDocumentFileNestedInput
+  companyRequestLogo?: Prisma.CompanyAccessRequestUpdateOneWithoutLogoFileNestedInput
 }
 
 export type FileUncheckedUpdateInput = {
@@ -353,6 +365,8 @@ export type FileUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutDocumentFileNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutEvidenceFileNestedInput
+  companyRequestDocument?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutDocumentFileNestedInput
+  companyRequestLogo?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutLogoFileNestedInput
 }
 
 export type FileCreateManyInput = {
@@ -466,6 +480,38 @@ export type FileUpdateOneWithoutAuditEventsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.FileUpdateToOneWithWhereWithoutAuditEventsInput, Prisma.FileUpdateWithoutAuditEventsInput>, Prisma.FileUncheckedUpdateWithoutAuditEventsInput>
 }
 
+export type FileCreateNestedOneWithoutCompanyRequestDocumentInput = {
+  create?: Prisma.XOR<Prisma.FileCreateWithoutCompanyRequestDocumentInput, Prisma.FileUncheckedCreateWithoutCompanyRequestDocumentInput>
+  connectOrCreate?: Prisma.FileCreateOrConnectWithoutCompanyRequestDocumentInput
+  connect?: Prisma.FileWhereUniqueInput
+}
+
+export type FileCreateNestedOneWithoutCompanyRequestLogoInput = {
+  create?: Prisma.XOR<Prisma.FileCreateWithoutCompanyRequestLogoInput, Prisma.FileUncheckedCreateWithoutCompanyRequestLogoInput>
+  connectOrCreate?: Prisma.FileCreateOrConnectWithoutCompanyRequestLogoInput
+  connect?: Prisma.FileWhereUniqueInput
+}
+
+export type FileUpdateOneWithoutCompanyRequestDocumentNestedInput = {
+  create?: Prisma.XOR<Prisma.FileCreateWithoutCompanyRequestDocumentInput, Prisma.FileUncheckedCreateWithoutCompanyRequestDocumentInput>
+  connectOrCreate?: Prisma.FileCreateOrConnectWithoutCompanyRequestDocumentInput
+  upsert?: Prisma.FileUpsertWithoutCompanyRequestDocumentInput
+  disconnect?: Prisma.FileWhereInput | boolean
+  delete?: Prisma.FileWhereInput | boolean
+  connect?: Prisma.FileWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.FileUpdateToOneWithWhereWithoutCompanyRequestDocumentInput, Prisma.FileUpdateWithoutCompanyRequestDocumentInput>, Prisma.FileUncheckedUpdateWithoutCompanyRequestDocumentInput>
+}
+
+export type FileUpdateOneWithoutCompanyRequestLogoNestedInput = {
+  create?: Prisma.XOR<Prisma.FileCreateWithoutCompanyRequestLogoInput, Prisma.FileUncheckedCreateWithoutCompanyRequestLogoInput>
+  connectOrCreate?: Prisma.FileCreateOrConnectWithoutCompanyRequestLogoInput
+  upsert?: Prisma.FileUpsertWithoutCompanyRequestLogoInput
+  disconnect?: Prisma.FileWhereInput | boolean
+  delete?: Prisma.FileWhereInput | boolean
+  connect?: Prisma.FileWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.FileUpdateToOneWithWhereWithoutCompanyRequestLogoInput, Prisma.FileUpdateWithoutCompanyRequestLogoInput>, Prisma.FileUncheckedUpdateWithoutCompanyRequestLogoInput>
+}
+
 export type FileCreateWithoutAccessRequestInput = {
   id?: string
   name: string
@@ -476,6 +522,8 @@ export type FileCreateWithoutAccessRequestInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutEvidenceFileInput
+  companyRequestDocument?: Prisma.CompanyAccessRequestCreateNestedOneWithoutDocumentFileInput
+  companyRequestLogo?: Prisma.CompanyAccessRequestCreateNestedOneWithoutLogoFileInput
 }
 
 export type FileUncheckedCreateWithoutAccessRequestInput = {
@@ -488,6 +536,8 @@ export type FileUncheckedCreateWithoutAccessRequestInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutEvidenceFileInput
+  companyRequestDocument?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutDocumentFileInput
+  companyRequestLogo?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutLogoFileInput
 }
 
 export type FileCreateOrConnectWithoutAccessRequestInput = {
@@ -516,6 +566,8 @@ export type FileUpdateWithoutAccessRequestInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   auditEvents?: Prisma.AuditEventUpdateManyWithoutEvidenceFileNestedInput
+  companyRequestDocument?: Prisma.CompanyAccessRequestUpdateOneWithoutDocumentFileNestedInput
+  companyRequestLogo?: Prisma.CompanyAccessRequestUpdateOneWithoutLogoFileNestedInput
 }
 
 export type FileUncheckedUpdateWithoutAccessRequestInput = {
@@ -528,6 +580,8 @@ export type FileUncheckedUpdateWithoutAccessRequestInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutEvidenceFileNestedInput
+  companyRequestDocument?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutDocumentFileNestedInput
+  companyRequestLogo?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutLogoFileNestedInput
 }
 
 export type FileCreateWithoutAuditEventsInput = {
@@ -540,6 +594,8 @@ export type FileCreateWithoutAuditEventsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   accessRequest?: Prisma.AccessRequestCreateNestedOneWithoutDocumentFileInput
+  companyRequestDocument?: Prisma.CompanyAccessRequestCreateNestedOneWithoutDocumentFileInput
+  companyRequestLogo?: Prisma.CompanyAccessRequestCreateNestedOneWithoutLogoFileInput
 }
 
 export type FileUncheckedCreateWithoutAuditEventsInput = {
@@ -552,6 +608,8 @@ export type FileUncheckedCreateWithoutAuditEventsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   accessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutDocumentFileInput
+  companyRequestDocument?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutDocumentFileInput
+  companyRequestLogo?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutLogoFileInput
 }
 
 export type FileCreateOrConnectWithoutAuditEventsInput = {
@@ -580,6 +638,8 @@ export type FileUpdateWithoutAuditEventsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accessRequest?: Prisma.AccessRequestUpdateOneWithoutDocumentFileNestedInput
+  companyRequestDocument?: Prisma.CompanyAccessRequestUpdateOneWithoutDocumentFileNestedInput
+  companyRequestLogo?: Prisma.CompanyAccessRequestUpdateOneWithoutLogoFileNestedInput
 }
 
 export type FileUncheckedUpdateWithoutAuditEventsInput = {
@@ -592,6 +652,152 @@ export type FileUncheckedUpdateWithoutAuditEventsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutDocumentFileNestedInput
+  companyRequestDocument?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutDocumentFileNestedInput
+  companyRequestLogo?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutLogoFileNestedInput
+}
+
+export type FileCreateWithoutCompanyRequestDocumentInput = {
+  id?: string
+  name: string
+  extension: string
+  mimeType: string
+  size: number
+  content: runtime.Bytes
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  accessRequest?: Prisma.AccessRequestCreateNestedOneWithoutDocumentFileInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutEvidenceFileInput
+  companyRequestLogo?: Prisma.CompanyAccessRequestCreateNestedOneWithoutLogoFileInput
+}
+
+export type FileUncheckedCreateWithoutCompanyRequestDocumentInput = {
+  id?: string
+  name: string
+  extension: string
+  mimeType: string
+  size: number
+  content: runtime.Bytes
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  accessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutDocumentFileInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutEvidenceFileInput
+  companyRequestLogo?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutLogoFileInput
+}
+
+export type FileCreateOrConnectWithoutCompanyRequestDocumentInput = {
+  where: Prisma.FileWhereUniqueInput
+  create: Prisma.XOR<Prisma.FileCreateWithoutCompanyRequestDocumentInput, Prisma.FileUncheckedCreateWithoutCompanyRequestDocumentInput>
+}
+
+export type FileCreateWithoutCompanyRequestLogoInput = {
+  id?: string
+  name: string
+  extension: string
+  mimeType: string
+  size: number
+  content: runtime.Bytes
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  accessRequest?: Prisma.AccessRequestCreateNestedOneWithoutDocumentFileInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutEvidenceFileInput
+  companyRequestDocument?: Prisma.CompanyAccessRequestCreateNestedOneWithoutDocumentFileInput
+}
+
+export type FileUncheckedCreateWithoutCompanyRequestLogoInput = {
+  id?: string
+  name: string
+  extension: string
+  mimeType: string
+  size: number
+  content: runtime.Bytes
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  accessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutDocumentFileInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutEvidenceFileInput
+  companyRequestDocument?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutDocumentFileInput
+}
+
+export type FileCreateOrConnectWithoutCompanyRequestLogoInput = {
+  where: Prisma.FileWhereUniqueInput
+  create: Prisma.XOR<Prisma.FileCreateWithoutCompanyRequestLogoInput, Prisma.FileUncheckedCreateWithoutCompanyRequestLogoInput>
+}
+
+export type FileUpsertWithoutCompanyRequestDocumentInput = {
+  update: Prisma.XOR<Prisma.FileUpdateWithoutCompanyRequestDocumentInput, Prisma.FileUncheckedUpdateWithoutCompanyRequestDocumentInput>
+  create: Prisma.XOR<Prisma.FileCreateWithoutCompanyRequestDocumentInput, Prisma.FileUncheckedCreateWithoutCompanyRequestDocumentInput>
+  where?: Prisma.FileWhereInput
+}
+
+export type FileUpdateToOneWithWhereWithoutCompanyRequestDocumentInput = {
+  where?: Prisma.FileWhereInput
+  data: Prisma.XOR<Prisma.FileUpdateWithoutCompanyRequestDocumentInput, Prisma.FileUncheckedUpdateWithoutCompanyRequestDocumentInput>
+}
+
+export type FileUpdateWithoutCompanyRequestDocumentInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  extension?: Prisma.StringFieldUpdateOperationsInput | string
+  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  size?: Prisma.IntFieldUpdateOperationsInput | number
+  content?: Prisma.BytesFieldUpdateOperationsInput | runtime.Bytes
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  accessRequest?: Prisma.AccessRequestUpdateOneWithoutDocumentFileNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutEvidenceFileNestedInput
+  companyRequestLogo?: Prisma.CompanyAccessRequestUpdateOneWithoutLogoFileNestedInput
+}
+
+export type FileUncheckedUpdateWithoutCompanyRequestDocumentInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  extension?: Prisma.StringFieldUpdateOperationsInput | string
+  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  size?: Prisma.IntFieldUpdateOperationsInput | number
+  content?: Prisma.BytesFieldUpdateOperationsInput | runtime.Bytes
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  accessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutDocumentFileNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutEvidenceFileNestedInput
+  companyRequestLogo?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutLogoFileNestedInput
+}
+
+export type FileUpsertWithoutCompanyRequestLogoInput = {
+  update: Prisma.XOR<Prisma.FileUpdateWithoutCompanyRequestLogoInput, Prisma.FileUncheckedUpdateWithoutCompanyRequestLogoInput>
+  create: Prisma.XOR<Prisma.FileCreateWithoutCompanyRequestLogoInput, Prisma.FileUncheckedCreateWithoutCompanyRequestLogoInput>
+  where?: Prisma.FileWhereInput
+}
+
+export type FileUpdateToOneWithWhereWithoutCompanyRequestLogoInput = {
+  where?: Prisma.FileWhereInput
+  data: Prisma.XOR<Prisma.FileUpdateWithoutCompanyRequestLogoInput, Prisma.FileUncheckedUpdateWithoutCompanyRequestLogoInput>
+}
+
+export type FileUpdateWithoutCompanyRequestLogoInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  extension?: Prisma.StringFieldUpdateOperationsInput | string
+  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  size?: Prisma.IntFieldUpdateOperationsInput | number
+  content?: Prisma.BytesFieldUpdateOperationsInput | runtime.Bytes
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  accessRequest?: Prisma.AccessRequestUpdateOneWithoutDocumentFileNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutEvidenceFileNestedInput
+  companyRequestDocument?: Prisma.CompanyAccessRequestUpdateOneWithoutDocumentFileNestedInput
+}
+
+export type FileUncheckedUpdateWithoutCompanyRequestLogoInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  extension?: Prisma.StringFieldUpdateOperationsInput | string
+  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  size?: Prisma.IntFieldUpdateOperationsInput | number
+  content?: Prisma.BytesFieldUpdateOperationsInput | runtime.Bytes
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  accessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutDocumentFileNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutEvidenceFileNestedInput
+  companyRequestDocument?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutDocumentFileNestedInput
 }
 
 
@@ -636,6 +842,8 @@ export type FileSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   updatedAt?: boolean
   accessRequest?: boolean | Prisma.File$accessRequestArgs<ExtArgs>
   auditEvents?: boolean | Prisma.File$auditEventsArgs<ExtArgs>
+  companyRequestDocument?: boolean | Prisma.File$companyRequestDocumentArgs<ExtArgs>
+  companyRequestLogo?: boolean | Prisma.File$companyRequestLogoArgs<ExtArgs>
   _count?: boolean | Prisma.FileCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["file"]>
 
@@ -676,6 +884,8 @@ export type FileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = run
 export type FileInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   accessRequest?: boolean | Prisma.File$accessRequestArgs<ExtArgs>
   auditEvents?: boolean | Prisma.File$auditEventsArgs<ExtArgs>
+  companyRequestDocument?: boolean | Prisma.File$companyRequestDocumentArgs<ExtArgs>
+  companyRequestLogo?: boolean | Prisma.File$companyRequestLogoArgs<ExtArgs>
   _count?: boolean | Prisma.FileCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type FileIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -686,6 +896,8 @@ export type $FilePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   objects: {
     accessRequest: Prisma.$AccessRequestPayload<ExtArgs> | null
     auditEvents: Prisma.$AuditEventPayload<ExtArgs>[]
+    companyRequestDocument: Prisma.$CompanyAccessRequestPayload<ExtArgs> | null
+    companyRequestLogo: Prisma.$CompanyAccessRequestPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1092,6 +1304,8 @@ export interface Prisma__FileClient<T, Null = never, ExtArgs extends runtime.Typ
   readonly [Symbol.toStringTag]: "PrismaPromise"
   accessRequest<T extends Prisma.File$accessRequestArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.File$accessRequestArgs<ExtArgs>>): Prisma.Prisma__AccessRequestClient<runtime.Types.Result.GetResult<Prisma.$AccessRequestPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   auditEvents<T extends Prisma.File$auditEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.File$auditEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuditEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  companyRequestDocument<T extends Prisma.File$companyRequestDocumentArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.File$companyRequestDocumentArgs<ExtArgs>>): Prisma.Prisma__CompanyAccessRequestClient<runtime.Types.Result.GetResult<Prisma.$CompanyAccessRequestPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  companyRequestLogo<T extends Prisma.File$companyRequestLogoArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.File$companyRequestLogoArgs<ExtArgs>>): Prisma.Prisma__CompanyAccessRequestClient<runtime.Types.Result.GetResult<Prisma.$CompanyAccessRequestPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1562,6 +1776,44 @@ export type File$auditEventsArgs<ExtArgs extends runtime.Types.Extensions.Intern
   take?: number
   skip?: number
   distinct?: Prisma.AuditEventScalarFieldEnum | Prisma.AuditEventScalarFieldEnum[]
+}
+
+/**
+ * File.companyRequestDocument
+ */
+export type File$companyRequestDocumentArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CompanyAccessRequest
+   */
+  select?: Prisma.CompanyAccessRequestSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CompanyAccessRequest
+   */
+  omit?: Prisma.CompanyAccessRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompanyAccessRequestInclude<ExtArgs> | null
+  where?: Prisma.CompanyAccessRequestWhereInput
+}
+
+/**
+ * File.companyRequestLogo
+ */
+export type File$companyRequestLogoArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CompanyAccessRequest
+   */
+  select?: Prisma.CompanyAccessRequestSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CompanyAccessRequest
+   */
+  omit?: Prisma.CompanyAccessRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompanyAccessRequestInclude<ExtArgs> | null
+  where?: Prisma.CompanyAccessRequestWhereInput
 }
 
 /**
