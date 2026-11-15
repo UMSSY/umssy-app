@@ -24,6 +24,7 @@ import { BlockedDatesService } from '../../availability/services/blocked-dates.s
 import { MentorsService } from '../../mentors/services/mentors.service.js';
 import { AppointmentsModule } from '../appointments.module.js';
 import { APPOINTMENT_ERROR_CODES } from '../constants/appointment-error-codes.constants.js';
+import { AppointmentNotificationsService } from '../notifications/appointment-notifications.service.js';
 import { AppointmentsRepository } from '../repositories/appointments.repository.js';
 import type { AppointmentRecord } from '../types/appointment-record.types.js';
 import type { MyAppointmentResponse } from '../types/my-appointment-response.types.js';
@@ -81,6 +82,8 @@ describe('Cita cancelada en «Mis citas» (integración HTTP)', () => {
       .useValue(seed.blockedDatesService)
       .overrideProvider(MentorsService)
       .useValue(seed.mentorsService)
+      .overrideProvider(AppointmentNotificationsService)
+      .useValue({ notifyBooked: vi.fn(), notifyCancelled: vi.fn() })
       .overrideProvider(PrismaService)
       .useValue({})
       .compile();

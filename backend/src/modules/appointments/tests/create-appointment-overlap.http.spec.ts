@@ -24,6 +24,7 @@ import { BlockedDatesService } from '../../availability/services/blocked-dates.s
 import { MentorsService } from '../../mentors/services/mentors.service.js';
 import { AppointmentsModule } from '../appointments.module.js';
 import { APPOINTMENT_ERROR_CODES } from '../constants/appointment-error-codes.constants.js';
+import { AppointmentNotificationsService } from '../notifications/appointment-notifications.service.js';
 import { AppointmentsRepository } from '../repositories/appointments.repository.js';
 import { getBoliviaDayRange } from '../utils/bolivia-day.js';
 import {
@@ -87,6 +88,8 @@ describe('POST /appointments (integración HTTP de cruces)', () => {
       .useValue(seed.blockedDatesService)
       .overrideProvider(MentorsService)
       .useValue(seed.mentorsService)
+      .overrideProvider(AppointmentNotificationsService)
+      .useValue({ notifyBooked: vi.fn(), notifyCancelled: vi.fn() })
       .overrideProvider(PrismaService)
       .useValue({})
       .compile();
