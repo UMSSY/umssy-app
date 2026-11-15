@@ -8,6 +8,7 @@ import { EventsController } from './controllers/events.controller.js';
 import { EventProposalsRepository } from './repositories/event-proposals.repository.js';
 import { EventsRepository } from './repositories/events.repository.js';
 import { EventsService } from './services/events.service.js';
+import { EventsCronService } from './services/events-cron.service.js';
 
 @Module({
   imports: [JwtAuthModule],
@@ -17,6 +18,7 @@ import { EventsService } from './services/events.service.js';
     EventsRepository,
     EventsService,
     EventProposalsService,
+    EventsCronService,
     RolesGuard,
     FileValidationService,
   ],
