@@ -1,5 +1,6 @@
-"use client";
+'use client';
 
+import { getAccessToken } from "@/shared/services/storage/access-token-storage";
 import { useEffect, useMemo, useRef } from "react";
 import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import { isApiError } from "@/shared/services/api-client";
@@ -7,37 +8,64 @@ import {
   getRegistrationErrorMessage,
   REGISTRATION_QUERY_KEYS,
   useRegistrationSession,
-} from "@/modules/registrations";
-import { registrationsService } from "../services/registrations.service";
+} from '@/modules/registrations';
+import { registrationsService } from '../services/registrations.service';
+import { reconcileOfflinePasses } from '../services/offline-passes.service';
+import { OFFLINE_PASSES_SNAPSHOT_QUERY_KEY } from '../constants/offline-passes.constants';
+import { useOnlineStatus } from './use-online-status';
 
 export function useMyPasses(isActive = true) {
   const accessToken = useRegistrationSession();
   const queryClient = useQueryClient();
-  const wasActive = useRef(isActive);
+  const isOnline = useOnlineStatus();
   const query = useQuery({
     queryKey: [...REGISTRATION_QUERY_KEYS.passes, accessToken],
-    queryFn: ({ signal }) => registrationsService.getMine(signal, accessToken),
+    enabled: Boolean(accessToken) && isOnline && isActive,
+    refetchOnReconnect: 'always',
+    queryFn: async ({ signal }) => {
+      const registrations = await registrationsService.getMine(
+        signal,
+        accessToken,
+      );
+      const removedSavedPasses = accessToken
+        ? await reconcileOfflinePasses(
+            registrations,
+            accessToken,
+            signal,
+          ).catch(() => false)
+        : false;
+      if (accessToken && getAccessToken() === accessToken && !signal.aborted) {
+        void queryClient.invalidateQueries({
+          queryKey: [OFFLINE_PASSES_SNAPSHOT_QUERY_KEY, accessToken],
+        });
+      }
+      return { registrations, removedSavedPasses };
+    },
   });
   const cause = query.error;
-  const refetch = query.refetch;
   useEffect(() => {
-    if (!isActive) {
+    if (!isActive || !isOnline) {
       void queryClient.cancelQueries({ queryKey: [...REGISTRATION_QUERY_KEYS.passes, accessToken], exact: true });
-    } else if (!wasActive.current) {
-      void refetch();
     }
-    wasActive.current = isActive;
-  }, [isActive, accessToken, queryClient, refetch]);
+  }, [isActive, isOnline, accessToken, queryClient]);
   return {
-    registrations: query.data ?? [],
+    registrations: query.data?.registrations ?? [],
+    removedSavedPasses: query.data?.removedSavedPasses ?? false,
     isLoading: query.isFetching,
-    error: query.isError && !query.isFetching
-      ? cause instanceof Error && !isApiError(cause)
-        ? cause.message
-        : getRegistrationErrorMessage(cause)
-      : null,
-    isConnectionError: query.isError && !query.isFetching && isApiError(cause) && !cause.response,
-    retry: () => { void query.refetch(); },
+    error:
+      query.isError && !query.isFetching
+        ? cause instanceof Error && !isApiError(cause)
+          ? cause.message
+          : getRegistrationErrorMessage(cause)
+        : null,
+    isConnectionError:
+      query.isError &&
+      !query.isFetching &&
+      isApiError(cause) &&
+      !cause.response,
+    retry: () => {
+      if (isOnline && isActive && accessToken) void query.refetch();
+    },
   };
 }
 
@@ -77,6 +105,6 @@ export function useMyPassesHistory(isEnabled: boolean) {
     isLoading: isEnabled && query.isFetching && !query.isFetchingNextPage,
     isLoadingMore: query.isFetchingNextPage,
     loadMore: () => { if (query.hasNextPage && !query.isFetching) void query.fetchNextPage(); },
-    retry: () => { void query.refetch(); },
+    retry: () => { if (isEnabled && accessToken) void query.refetch(); },
   };
 }

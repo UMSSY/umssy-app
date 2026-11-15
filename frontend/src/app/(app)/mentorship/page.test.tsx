@@ -1,4 +1,5 @@
 import { act, cleanup, screen } from "@testing-library/react";
+import "@/shared/testing/indexed-db.mock";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithQuery } from "@/shared/testing/render-with-query";
 import { mentorParticipationService } from "@/modules/mentors/services/mentor-participation.service";
@@ -10,12 +11,6 @@ import MentorshipPage from "./page";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn() }),
-}));
-
-vi.mock("@/shared/services/storage/browser-indexed-db", () => ({
-  readIndexedDb: vi.fn(async () => null),
-  writeIndexedDb: vi.fn(async () => {}),
-  removeIndexedDb: vi.fn(async () => {}),
 }));
 
 vi.mock("@/modules/mentorship/services/technical-area.service", () => ({

@@ -1,7 +1,6 @@
-"use client";
+'use client';
 
 import { useState } from "react";
-import { DEFAULT_REGISTRATION_ERROR_MESSAGE } from "@/modules/registrations";
 import Link from "next/link";
 import { CalendarDays } from "lucide-react";
 import { PageHeading } from "@/shared/components/layout/page-heading";
@@ -20,11 +19,11 @@ import { FinishedRegistrationCard } from "../components/finished-registration-ca
 import { useMyPassesHistory } from "../hooks/use-my-passes";
 import { getHistoryErrorMessage } from "../utils/get-history-error-message";
 
-import type { MyPassesViewProps } from "../types/my-passes-view-props.types";
+import type { MyPassesViewProps } from '../types/my-passes-view-props.types';
 
 export function MyPassesView({ onOpenWorkshopChat }: MyPassesViewProps = {}) {
   const [activeTab, setActiveTab] = useState("current");
-  const { status, isOnline, passes: registrations, offlineQrTokens, lastUpdated, error, isConnectionError, retry } = usePassesViewState(activeTab === "current");
+  const { status, isOnline, passes: registrations, offlineQrTokens, lastUpdated, error, isConnectionError, removedSavedPasses, retry } = usePassesViewState(activeTab === "current");
   const isLoading = status === "loading";
   const offlineReason = isOnline ? undefined : OFFLINE_PASSES_TEXTS.requiresConnection;
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -34,16 +33,15 @@ export function MyPassesView({ onOpenWorkshopChat }: MyPassesViewProps = {}) {
   const showCount = activeTab === "history" ? !history.isLoading && !history.error && !historyUnavailable : !isLoading && status !== "error" && status !== "no-offline-copy";
   const description = showCount ? `${visibleCount} ${visibleCount === 1 ? "pase" : "pases"}` : activeTab === "history" && (history.error || historyUnavailable) ? "" : "Cargando tus inscripciones…";
 
-  const selected = registrations.find((item) => item.id === selectedId) ?? registrations[0];
+  const selected =
+    registrations.find((item) => item.id === selectedId) ?? registrations[0];
 
   return (
     <main className="mx-auto w-full max-w-7xl space-y-6">
       <div aria-live="polite"><PageHeading
         title="Mis inscripciones"
         description={description}
-        actions={offlineReason
-          ? <Button variant="outline" disabled title={offlineReason}><CalendarDays aria-hidden="true" />Explorar talleres</Button>
-          : <Link href="/events" className={buttonVariants({ variant: "outline" })}><CalendarDays aria-hidden="true" />Explorar talleres</Link>}
+        actions={<Link href="/events" className={buttonVariants({ variant: "outline" })}><CalendarDays aria-hidden="true" />Explorar talleres</Link>}
       /></div>
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList aria-label="Secciones de mis inscripciones">
@@ -52,12 +50,16 @@ export function MyPassesView({ onOpenWorkshopChat }: MyPassesViewProps = {}) {
         </TabsList>
         <TabsContent value="current" className="pt-6">
       {status === "saved" ? <OfflineStatusBanner isOnline={isOnline} lastUpdated={lastUpdated} onRetry={retry} /> : null}
+      {status === "live" && removedSavedPasses ? <RequestFeedback message="Actualizamos tus pases guardados. Se retiraron los pases que ya no están disponibles." /> : null}
+      {!isOnline ? <RequestFeedback message="El chat requiere conexión a Internet." /> : null}
       {isLoading ? (
         <RequestFeedback message="Cargando tus inscripciones..." />
-      ) : status === "no-offline-copy" || (status === "error" && error) ? (
+      ) : status === 'no-offline-copy' ? (
+        <NoOfflineCopyState />
+      ) : status === 'error' && error ? (
         <div className="space-y-6">
-          {status === "no-offline-copy" || isConnectionError ? <NoOfflineCopyState /> : null}
-          <RequestFeedback message={error ?? DEFAULT_REGISTRATION_ERROR_MESSAGE} isError onRetry={retry} />
+          {isConnectionError ? <NoOfflineCopyState /> : null}
+          <RequestFeedback message={error} isError onRetry={retry} />
         </div>
       ) : !registrations.length ? (
         <MyPassesEmptyState />
@@ -77,7 +79,9 @@ export function MyPassesView({ onOpenWorkshopChat }: MyPassesViewProps = {}) {
                     registrationId={item.id}
                     onOpenChat={onOpenWorkshopChat}
                     chatDisabledReason={offlineReason}
-                    isAvailableOffline={status === "live" && item.id in offlineQrTokens}
+                    isAvailableOffline={
+                      status === 'live' && item.id in offlineQrTokens
+                    }
                     isSelected={selected?.id === item.id}
                     onClick={() => setSelectedId(item.id)}
                   />
@@ -86,8 +90,16 @@ export function MyPassesView({ onOpenWorkshopChat }: MyPassesViewProps = {}) {
             </ul>
           </section>
           {selected ? (
-            <aside aria-label="Detalle de la inscripción" className="sticky top-24 min-w-0">
-              <PassDetail registration={selected} offlineQrToken={status === "saved" ? offlineQrTokens[selected.id] : undefined} />
+            <aside
+              aria-label="Detalle de la inscripción"
+              className="sticky top-24 min-w-0"
+            >
+              <PassDetail
+                registration={selected}
+                offlineQrToken={
+                  status === 'saved' ? offlineQrTokens[selected.id] : undefined
+                }
+              />
             </aside>
           ) : null}
         </div>
@@ -95,7 +107,7 @@ export function MyPassesView({ onOpenWorkshopChat }: MyPassesViewProps = {}) {
         </TabsContent>
         <TabsContent value="history" className="pt-6">
           {historyUnavailable ? (
-            <RequestFeedback message="El historial requiere conexión a Internet." isError onRetry={history.retry} />
+            <RequestFeedback message="El historial requiere conexión a Internet." />
           ) : history.isLoading ? (
             <RequestFeedback message="Cargando tu historial..." />
           ) : history.error ? (

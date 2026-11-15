@@ -8,6 +8,7 @@ import { REQUEST_TIMEOUT_MS } from '../constants/events.constants';
 import { apiClient } from '@/shared/services/api-client';
 import { parseProposalSupportResponse } from '../utils/proposal-support-response';
 import type { ProposalSupportResponse } from '../types/proposal-support-response.types';
+import { saveOfflinePass } from './offline-passes.service';
 import type { FinishedHistoryPage } from '../types/finished-history-page.types';
 import { toFinishedRegistrationItem } from '../utils/to-finished-registration-item';
 
@@ -38,7 +39,7 @@ export const registrationsService = {
     return parseProposalSupportResponse(response.data, eventId);
   },
 
-  async getPass(registrationId: string, signal?: AbortSignal, accessToken = getAccessToken()): Promise<PassData> {
+  async getPass(registrationId: string, signal?: AbortSignal, accessToken = getAccessToken(), saveCopy = true): Promise<PassData> {
     const token = accessToken;
     if (!token)
       throw new Error('Debes iniciar sesión para consultar el pase.');
@@ -63,7 +64,7 @@ export const registrationsService = {
     if (id !== registrationId || !/^[a-f0-9]{64}$/i.test(qrToken) || status !== 'Confirmada') {
       throw new Error('El pase no contiene una inscripción confirmada con un token QR válido.');
     }
-    return {
+    const pass = {
       id,
       qrToken,
       eventName: readString(event.title),
@@ -73,5 +74,8 @@ export const registrationsService = {
       location: readNullableString(event.location),
       status,
     };
+    // A blocked browser store should not prevent showing a valid online pass.
+    if (saveCopy) await saveOfflinePass(pass, token, signal).catch(() => {});
+    return pass;
   },
 };
