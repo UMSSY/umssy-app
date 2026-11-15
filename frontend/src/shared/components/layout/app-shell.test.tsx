@@ -7,6 +7,14 @@ vi.mock("next/navigation", () => ({
   usePathname: () => "/home",
 }));
 
+vi.mock("@/modules/notifications/hooks/use-notifications-realtime-sync", () => ({
+  useNotificationsRealtimeSync: vi.fn(),
+}));
+
+vi.mock("@/modules/notifications/hooks/use-notification-unread-count", () => ({
+  useNotificationUnreadCount: () => ({ unreadCount: 0, isLoading: false }),
+}));
+
 describe("AppShell", () => {
   beforeEach(() => {
     stubMatchMedia();

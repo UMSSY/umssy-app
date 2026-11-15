@@ -18,24 +18,53 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { usePushNotifications } from '@/shared/hooks/use-push-notifications';
+import { useNotificationPreferences } from '../hooks/use-notification-preferences';
+import type { NotificationChannel } from '../types/notification-preference.types';
 
 export function NotificationPreferencesSection() {
   const {
     environment,
     permission,
     isSubscribed,
-    isLoading,
+    isLoading: isPushLoading,
     activate,
     deactivate,
   } = usePushNotifications();
 
+  const {
+    preferences,
+    isLoading: isPrefsLoading,
+    updatePreferences,
+    isUpdating,
+  } = useNotificationPreferences();
+
   const [showPermissionDialog, setShowPermissionDialog] = useState(false);
-  const [selectedChannel, setSelectedChannel] = useState('push');
+
+  const selectedChannel: NotificationChannel = preferences
+    ? preferences.pushEnabled
+      ? 'push'
+      : preferences.emailEnabled
+        ? 'email'
+        : 'in-app'
+    : 'in-app';
+
+  const handleChannelChange = async (channel: NotificationChannel) => {
+    try {
+      await updatePreferences({
+        pushEnabled: channel === 'push',
+        emailEnabled: channel === 'email',
+        inAppEnabled: channel === 'in-app',
+      });
+      toast.success('Preferencia guardada');
+    } catch {
+      toast.error('Error al guardar la preferencia');
+    }
+  };
 
   const handlePushToggle = async (checked: boolean) => {
     if (checked) {
       if (permission === 'denied') {
-        toast.error('Las notificaciones están bloqueadas. Habilítalas en la configuración de tu navegador.', {
+        toast.error('Las notificaciones están bloqueadas. Habilítalas en tu navegador.', {
           id: 'push-denied',
         });
         return;
@@ -43,7 +72,12 @@ export function NotificationPreferencesSection() {
       setShowPermissionDialog(true);
     } else {
       await deactivate();
-      toast.success('Notificaciones push desactivadas en este dispositivo.');
+      await updatePreferences({
+        pushEnabled: false,
+        emailEnabled: preferences?.emailEnabled ?? true,
+        inAppEnabled: preferences?.inAppEnabled ?? false,
+      });
+      toast.success('Notificaciones push desactivadas');
     }
   };
 
@@ -52,6 +86,11 @@ export function NotificationPreferencesSection() {
     const result = await activate();
     
     if (result.ok) {
+      await updatePreferences({
+        pushEnabled: true,
+        emailEnabled: false,
+        inAppEnabled: false,
+      });
       toast.success('¡Notificaciones activadas!', { id: 'push-success' });
     } else {
       if (result.reason === 'permission-denied') {
@@ -63,6 +102,7 @@ export function NotificationPreferencesSection() {
   };
 
   const isPushDisabled = environment !== 'supported';
+  const isBusy = isPrefsLoading || isUpdating || isPushLoading;
 
   return (
     <Card>
@@ -76,7 +116,12 @@ export function NotificationPreferencesSection() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <RadioGroup value={selectedChannel} onValueChange={setSelectedChannel} className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <RadioGroup 
+          value={selectedChannel} 
+          onValueChange={(v) => handleChannelChange(v as NotificationChannel)} 
+          className="grid grid-cols-1 gap-4 md:grid-cols-3"
+          disabled={isBusy}
+        >
           <div className="relative">
             <RadioGroupItem value="push" id="channel-push" className="peer sr-only" />
             <Label
@@ -102,7 +147,7 @@ export function NotificationPreferencesSection() {
                 <Switch
                   checked={isSubscribed}
                   onCheckedChange={handlePushToggle}
-                  disabled={isLoading}
+                  disabled={isBusy}
                   aria-label="Activar notificaciones push"
                 />
               </div>

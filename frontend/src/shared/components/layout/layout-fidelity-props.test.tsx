@@ -8,6 +8,14 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 
 vi.mock("next/navigation", () => ({ usePathname: () => "/backoffice/solicitudes" }));
 
+vi.mock("@/modules/notifications/hooks/use-notifications-realtime-sync", () => ({
+  useNotificationsRealtimeSync: vi.fn(),
+}));
+
+vi.mock("@/modules/notifications/hooks/use-notification-unread-count", () => ({
+  useNotificationUnreadCount: () => ({ unreadCount: 0, isLoading: false }),
+}));
+
 const ITEMS = [{ label: "Solicitudes", icon: Inbox, href: "/backoffice/solicitudes" }];
 
 describe("props opcionales del layout compartido", () => {
