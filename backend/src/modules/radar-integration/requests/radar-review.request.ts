@@ -6,7 +6,19 @@ export type ReviewKind = z.infer<typeof reviewKindSchema>;
 
 export const reviewDecisionSchema = z
   .object({
+    operationId: z.string().uuid(),
     decision: z.enum(['approved', 'rejected', 'revoked']),
   })
   .strict();
+
 export type ReviewDecisionRequest = z.infer<typeof reviewDecisionSchema>;
+export const documentReviewDecisionSchema = z
+  .object({
+    operationId: z.string().uuid(),
+    decision: z.enum(['approved', 'rejected']),
+  })
+  .strict();
+
+export type DocumentReviewDecisionRequest = z.infer<
+  typeof documentReviewDecisionSchema
+>;

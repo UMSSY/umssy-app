@@ -2,6 +2,7 @@ import type { Scores } from '../utils/radar-scoring.js';
 import type { PublishedSkill } from './published-skill.type.js';
 
 export type SnapshotRow = {
+  id: string;
   user_id: string;
   version: number;
   rubric_version: string;

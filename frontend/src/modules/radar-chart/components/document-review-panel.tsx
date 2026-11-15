@@ -1,6 +1,14 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { isApiError } from '@/shared/services/api-client';
+import { useRadarReviewOperationRecovery } from '../hooks/use-radar-integration-queries';
+import { radarIntegrationApi } from '../services/radar-integration.service';
+import {
+  clearRadarReviewOperationId,
+  getRadarReviewOperationId,
+} from '../services/radar-review-idempotency';
+import type { RadarReviewOperationResult } from '../services/radar-integration.service';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { verificationApi } from '@/modules/documents/services/document-verification.service';
@@ -11,6 +19,7 @@ import {
 import { ConfirmActionDialog } from '@/shared/components/confirm-action-dialog';
 
 export function DocumentReviewPanel() {
+  useRadarReviewOperationRecovery();
   const [filter, setFilter] = useState('pending');
   const labels = {
     approved: 'Aprobar documento',
@@ -41,16 +50,70 @@ export function DocumentReviewPanel() {
     [preview],
   );
   const mutation = useMutation({
-    mutationFn: ({ id, decision }: { id: string; decision: Decision }) =>
-      verificationApi.decide(id, decision),
+    mutationFn: async ({
+      id,
+      decision,
+    }: {
+      id: string;
+      decision: Decision;
+    }) => {
+      if (decision !== 'approved' && decision !== 'rejected') {
+        return verificationApi.decide(id, decision);
+      }
+
+      const operationId = await getRadarReviewOperationId(
+        'cv',
+        id,
+        decision,
+      );
+
+      let result: RadarReviewOperationResult;
+
+      try {
+        result = await radarIntegrationApi.operationStatus(operationId);
+      } catch (error: unknown) {
+        if (!isApiError(error) || error.response?.status !== 404) {
+          throw error;
+        }
+
+        result = await radarIntegrationApi.decision(
+          'cv',
+          id,
+          operationId,
+          decision,
+        );
+      }
+
+      if (
+        result.operationId !== operationId ||
+        result.status !== 'completed' ||
+        result.kind !== 'cv' ||
+        result.targetId !== id ||
+        result.decision !== decision
+      ) {
+        throw new Error(
+          'El resultado recuperado no coincide con la decision solicitada.',
+        );
+      }
+
+      await clearRadarReviewOperationId(
+        'cv',
+        id,
+        decision,
+        operationId,
+      );
+
+      return result;
+    },
     onSuccess: () => {
       setConfirmation(null);
       setError('');
     },
-    onError: () =>
+    onError: () => {
       setError(
-        'No se pudo confirmar la decisión. Comprueba el estado actualizado.',
-      ),
+        'No se pudo confirmar la decision. Puedes reintentar; se conservara el identificador de la operacion.',
+      );
+    },
     onSettled: () => queue.refetch(),
   });
   const rows = queue.data ?? [];
@@ -151,7 +214,6 @@ export function DocumentReviewPanel() {
           </div>
         </div>
       )}
-      {error && <p role="alert">{error}</p>}
       <ConfirmActionDialog
         open={!!confirmation}
         title="Confirmar decisión"
@@ -161,6 +223,7 @@ export function DocumentReviewPanel() {
             : ''
         }
         busy={mutation.isPending}
+          error={error}
         onOpenChange={(v) => {
           if (!v) setConfirmation(null);
         }}

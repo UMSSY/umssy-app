@@ -9,6 +9,7 @@ import type { RadarPublicationEvidenceService } from '../services/radar-publicat
 import { RadarPublicationRepository } from '../repositories/radar-publication.repository.js';
 import type { RadarCvService } from '../services/radar-cv.service.js';
 import type { RadarReviewService } from '../services/radar-review.service.js';
+import type { RadarNotificationsService } from '../services/radar-notifications.service.js';
 import { emptyScores, scoreVerifiedSkills } from '../utils/radar-scoring.js';
 
 const userId = '11111111-1111-4111-8111-111111111111';
@@ -25,6 +26,7 @@ const skill = (
   skill: { name: id, areaId },
 });
 const snapshot = (revision: number | null = 2) => ({
+  id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
   user_id: userId,
   version: 4,
   source_revision: revision,
@@ -104,7 +106,13 @@ function setup() {
       if (sql.includes('FROM radar_score_snapshots')) return rows;
       if (sql.includes('INSERT INTO radar_score_snapshots')) {
         insertions.push(values);
-        return [snapshot()];
+        return [
+          {
+
+            ...snapshot(),
+            id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+          },
+        ];
       }
       if (sql.includes('FROM radar_audit_events')) return [];
       throw new Error('Unexpected database operation');
@@ -146,6 +154,7 @@ function setup() {
     publication,
     {} as RadarCvService,
     {} as RadarReviewService,
+    {} as RadarNotificationsService,
   );
   return { service, db, state, rows, insertions, nlp, events };
 }
@@ -157,6 +166,23 @@ describe('Radar publication consistency', () => {
     expect(nlp.readLockedRevision).toHaveBeenCalledWith(userId, { client: db });
     expect(db.$queryRaw.mock.invocationCallOrder[0]).toBeLessThan(
       nlp.readLockedRevision.mock.invocationCallOrder[0],
+    );
+  });
+
+    it('creates a notification for a newly published snapshot', async () => {
+    const { service, db } = setup();
+
+    await service.recalculate(userId, null);
+
+    const notificationCalls = db.$executeRaw.mock.calls.filter(
+      ([strings]) =>
+        strings.join('').includes('INSERT INTO radar_notifications'),
+    );
+
+    expect(notificationCalls).toHaveLength(1);
+    expect(notificationCalls[0][1]).toBe(userId);
+    expect(notificationCalls[0][2]).toBe(
+      'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
     );
   });
 
@@ -246,6 +272,12 @@ describe('Radar publication consistency', () => {
     expect(result?.version).toBe(4);
     expect(result?.sourceRevision).toBe(2);
     expect(insertions).toEqual([]);
+    const notificationCalls = db.$executeRaw.mock.calls.filter(
+      ([strings]) =>
+        strings.join('').includes('INSERT INTO radar_notifications'),
+    );
+
+    expect(notificationCalls).toHaveLength(0);
   });
 
   it('refuses to score a pending NLP revision and persists a recoverable failure', async () => {
@@ -257,7 +289,28 @@ describe('Radar publication consistency', () => {
     );
     expect(rows).toEqual(previous);
     expect(insertions).toEqual([]);
+    const notificationCalls = db.$executeRaw.mock.calls.filter(
+      ([strings]) =>
+        strings.join('').includes('INSERT INTO radar_notifications'),
+    );
+
+    expect(notificationCalls).toHaveLength(0);
     expect(db.$executeRaw).toHaveBeenCalled();
+  });
+
+    it('does not create a notification when NLP analysis has failed', async () => {
+    const { service, state, db } = setup();
+
+    state.status = 'error';
+
+    await expect(service.recalculate(userId, null)).rejects.toThrow();
+
+    const notificationCalls = db.$executeRaw.mock.calls.filter(
+      ([strings]) =>
+        strings.join('').includes('INSERT INTO radar_notifications'),
+    );
+
+    expect(notificationCalls).toHaveLength(0);
   });
 
   it('does not hide the original publication failure if saving its error state also fails', async () => {

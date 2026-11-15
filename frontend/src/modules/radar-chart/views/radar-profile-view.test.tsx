@@ -24,6 +24,18 @@ vi.mock("@/modules/auth", async (importOriginal) => {
   return { ...actual, SessionUserCard: () => null };
 });
 vi.mock("../hooks/use-live-radar", () => ({ useLiveRadar: vi.fn() }));
+const {
+  useRadarNotificationsMock,
+  useRadarNotificationMutationsMock,
+} = vi.hoisted(() => ({
+  useRadarNotificationsMock: vi.fn(),
+  useRadarNotificationMutationsMock: vi.fn(),
+}));
+
+vi.mock("../hooks/use-radar-integration-queries", () => ({
+  useRadarNotifications: useRadarNotificationsMock,
+  useRadarNotificationMutations: useRadarNotificationMutationsMock,
+}));
 vi.mock("recharts", async (importOriginal) => {
   const actual = await importOriginal<typeof import("recharts")>();
   return {
@@ -51,7 +63,24 @@ function setRadar(override: Partial<ReturnType<typeof useLiveRadar>> = {}) {
 }
 
 describe("Radar personal integrado con Épica 2", () => {
-  beforeEach(() => { stubMatchMedia(); setRadar(); });
+  beforeEach(() => {
+    stubMatchMedia();
+    setRadar();
+
+    useRadarNotificationsMock.mockReturnValue({
+      data: [],
+      isLoading: false,
+      isError: false,
+    });
+
+    useRadarNotificationMutationsMock.mockReturnValue({
+      openNotification: {
+        mutateAsync: vi.fn(),
+        isPending: false,
+        isError: false,
+      },
+    });
+  });
   afterEach(() => { cleanup(); vi.clearAllMocks(); sessionStorage.clear(); });
 
   it.each([[0, 0, 'Sin cambio'], [2, 0, 'Bajó 2 puntos'], [0, 2, 'Subió 2 puntos']])('compara el eje con diferencia %s', (previousScore, currentScore, label) => {
@@ -129,5 +158,127 @@ describe("Radar personal integrado con Épica 2", () => {
     );
     renderWithQuery(<AppLayout><RadarProfileView /></AppLayout>);
     expect(screen.getAllByRole("navigation", { name: "Menú principal" })).toHaveLength(1);
+  });
+
+  it("muestra las notificaciones de nuevas publicaciones del radar", () => {
+    useRadarNotificationsMock.mockReturnValue({
+      data: [
+        {
+          id: "notification-1",
+          message: "Tu radar se ha actualizado",
+          version: 2,
+          createdAt: "2026-11-14T18:00:00Z",
+          readAt: null,
+        },
+      ],
+      isLoading: false,
+      isError: false,
+    });
+
+    renderWithQuery(<RadarProfileView />);
+
+    expect(
+      screen.getByRole("region", { name: "Notificaciones del radar" }),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByText("Tu radar se ha actualizado"),
+    ).toBeInTheDocument();
+
+    expect(screen.getByText(/Versión\s*2/)).toBeInTheDocument();
+    expect(screen.getByText("Sin leer")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Abrir radar" }),
+    ).toBeInTheDocument();
+  });
+
+  it("abre el radar al seleccionar una notificación", async () => {
+    const openNotification = vi.fn().mockResolvedValue({
+      compare: true,
+      radar: {
+        userId: "person-1",
+        status: "published",
+        version: 2,
+        rubricVersion: "servidor-v1",
+        updatedAt: "2026-11-14T18:00:00Z",
+        scores: {
+          desarrollo: 0,
+          "cloud-devops": 0,
+          "data-ai": 0,
+          qa: 7,
+          ciberseguridad: 0,
+          "gobernanza-ti": 0,
+        },
+        average: 7,
+        variation: 7,
+        pending: 0,
+        hasPending: false,
+        evidence: {},
+        sourceRevision: 2,
+        inputRevision: 2,
+        processingStatus: "ready" as const,
+        dictionaryVersion: null,
+        previous: {
+          version: 1,
+          updatedAt: "2026-10-25T08:00:00Z",
+          scores: {
+            desarrollo: 0,
+            "cloud-devops": 0,
+            "data-ai": 0,
+            qa: 0,
+            ciberseguridad: 0,
+            "gobernanza-ti": 0,
+          },
+        },
+        skills: [],
+      },
+      notification: {
+        id: "notification-1",
+        version: 2,
+        readAt: "2026-11-14T18:00:00Z",
+      },
+
+    });
+
+    useRadarNotificationsMock.mockReturnValue({
+      data: [
+        {
+          id: "notification-1",
+          message: "Tu radar se ha actualizado",
+          version: 2,
+          createdAt: "2026-11-14T18:00:00Z",
+          readAt: null,
+        },
+      ],
+      isLoading: false,
+      isError: false,
+    });
+
+    useRadarNotificationMutationsMock.mockReturnValue({
+      openNotification: {
+        mutateAsync: openNotification,
+        isPending: false,
+        isError: false,
+      },
+    });
+
+    renderWithQuery(<RadarProfileView />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Abrir radar" }));
+
+    expect(openNotification).toHaveBeenCalledWith("notification-1");
+    expect(
+      await screen.findByText("Consultando la versión histórica 2"),
+    ).toBeInTheDocument();
+
+    expect(screen.getByText("7 / 10")).toBeInTheDocument();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Volver al radar actual" }),
+    );
+
+    expect(
+      screen.queryByText("Consultando la versión histórica 2"),
+    ).not.toBeInTheDocument();
   });
 });

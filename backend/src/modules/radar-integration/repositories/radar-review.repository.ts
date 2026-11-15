@@ -4,6 +4,17 @@ import { PrismaService } from '../../../common/prisma/prisma.service.js';
 
 import type { CvReview } from '../types/cv-review.type.js';
 
+type ReviewOperationRecord = {
+  id: string;
+  admin_id: string;
+  kind: string;
+  target_id: string;
+  decision: string;
+  payload_hash: string;
+  response_data: unknown;
+  created_at: Date;
+};
+
 @Injectable()
 export class RadarReviewRepository {
   constructor(private readonly prisma: PrismaService) {}
@@ -20,6 +31,70 @@ export class RadarReviewRepository {
         JOIN user_cv_file c ON c.id=e.cv_id
         WHERE NOT EXISTS (SELECT 1 FROM radar_document_verifications d WHERE d.source_type='cv' AND d.source_id=e.cv_id AND d.status<>'legacy')
         ORDER BY e.submitted_at DESC LIMIT 300`;
+  }
+
+  claimReviewOperation(
+    operationId: string,
+    adminId: string,
+    kind: string,
+    targetId: string,
+    decision: string,
+    payloadHash: string,
+    context: TransactionContext,
+  ) {
+    return context.client.$executeRaw`
+      INSERT INTO radar_review_operations (
+        id,
+        admin_id,
+        kind,
+        target_id,
+        decision,
+        payload_hash,
+        response_data
+      )
+      VALUES (
+        ${operationId}::uuid,
+        ${adminId}::uuid,
+        ${kind},
+        ${targetId}::uuid,
+        ${decision},
+        ${payloadHash},
+        '{}'::jsonb
+      )
+      ON CONFLICT (id) DO NOTHING
+    `;
+  }
+
+  findReviewOperation(
+    operationId: string,
+    context: TransactionContext,
+  ) {
+    return context.client.$queryRaw<ReviewOperationRecord[]>`
+      SELECT
+        id,
+        admin_id,
+        kind,
+        target_id,
+        decision,
+        payload_hash,
+        response_data,
+        created_at
+      FROM radar_review_operations
+      WHERE id = ${operationId}::uuid
+      LIMIT 1
+    `;
+  }
+
+  saveReviewOperationResult(
+    operationId: string,
+    responseData: object,
+    context: TransactionContext,
+  ) {
+    return context.client.$executeRaw`
+      UPDATE radar_review_operations
+      SET response_data = ${JSON.stringify(responseData)}::jsonb
+      WHERE id = ${operationId}::uuid
+    `;
   }
 
   changeCvDecision(

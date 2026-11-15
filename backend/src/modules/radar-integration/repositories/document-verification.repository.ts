@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { Prisma } from '../../../prisma/client.js';
+import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
 import type {
   VerificationJob,
   VerificationResult,
@@ -87,11 +88,14 @@ export class DocumentVerificationRepository {
       return count;
     });
   }
-  decide(admin: string, id: string, approve: boolean) {
-    return this.db
-      .$executeRaw`UPDATE radar_document_verifications SET reviewer_id=${admin}::uuid,
-      status=${approve ? 'manual_approved' : 'manual_rejected'},reason=${approve ? 'Aprobación administrativa.' : 'Rechazo administrativo.'},
+  decide(admin: string, id: string, approve: boolean, context: TransactionContext) {
+    return context.client.$queryRaw<{ userId: string }[]>`
+      UPDATE radar_document_verifications SET reviewer_id=${admin}::uuid,
+      status=${approve ? 'manual_approved' : 'manual_rejected'},
+      reason=${approve ? 'Aprobación administrativa.' : 'Rechazo administrativo.'},
       synced=false,notice_read=false,lease=NULL,retry_at=now(),decided_at=clock_timestamp()
-      WHERE id=${id}::uuid AND active AND status IN ('review','low_confidence')`;
+      WHERE id=${id}::uuid AND active AND status IN ('review','low_confidence')
+      RETURNING user_id AS "userId"
+    `;
   }
 }

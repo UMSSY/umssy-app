@@ -17,11 +17,16 @@ import { Roles } from '../../../common/decorators/roles.decorator.js';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../../../common/guards/roles.guard.js';
 import { DocumentVerificationRepository } from '../repositories/document-verification.repository.js';
+import { DocumentReviewDecisionService } from '../services/document-review-decision.service.js';
+import { documentReviewDecisionSchema } from '../requests/radar-review.request.js';
 
 @Controller()
 @UseGuards(JwtAuthGuard)
 export class DocumentVerificationController {
-  constructor(private readonly store: DocumentVerificationRepository) {}
+  constructor(
+    private readonly store: DocumentVerificationRepository,
+    private readonly decisionService: DocumentReviewDecisionService,
+  ) {}
   @Get('profile/me/document-verifications')
   history(@CurrentUserId() owner: string) {
     return this.store.history(owner);
@@ -63,20 +68,30 @@ export class DocumentVerificationController {
   async decide(
     @CurrentUserId() admin: string,
     @Param('id', ParseUUIDPipe) id: string,
-    @Body('decision') decision: unknown,
+    @Body() body: unknown,
   ) {
+    const payload =
+      typeof body === 'object' && body !== null
+        ? (body as Record<string, unknown>)
+        : {};
+    const decision = payload.decision;
+
     if (decision === 'reprocess' || decision === 'revoke') {
       if (!(await this.store.revise(admin, id, decision)))
-        throw new ConflictException('Esta versión ya cambió.');
+        throw new ConflictException('Esta version ya cambio.');
       return { id };
     }
-    if (decision !== 'approved' && decision !== 'rejected')
-      throw new BadRequestException('Decisión inválida');
-    if (!(await this.store.decide(admin, id, decision === 'approved')))
-      throw new ConflictException(
-        'La versión ya tiene una decisión o fue reemplazada.',
-      );
-    return { id };
+
+    const parsed = documentReviewDecisionSchema.safeParse(body);
+    if (!parsed.success)
+      throw new BadRequestException('Decision u operationId invalido.');
+
+    return this.decisionService.decide(
+      admin,
+      id,
+      parsed.data.operationId,
+      parsed.data.decision,
+    );
   }
   private async file(id: string, owner?: string) {
     const [row] = await this.store.file(id, owner);

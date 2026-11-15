@@ -17,6 +17,7 @@ export function ConfirmActionDialog({
   title,
   description,
   busy = false,
+  error,
   onConfirm,
   onOpenChange,
 }: ConfirmActionDialogProps) {
@@ -27,9 +28,10 @@ export function ConfirmActionDialog({
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
+        {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
         <AlertDialogFooter>
           <AlertDialogCancel disabled={busy}>Cancelar</AlertDialogCancel>
-          <AlertDialogAction disabled={busy} onClick={onConfirm}>
+          <AlertDialogAction disabled={busy} onClick={(event) => { event.preventDefault(); onConfirm(); }}>
             Confirmar
           </AlertDialogAction>
         </AlertDialogFooter>

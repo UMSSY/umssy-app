@@ -37,7 +37,12 @@ import { RadarRecruitmentRepository } from './repositories/radar-recruitment.rep
 import { DocumentOcrModule } from '../access-requests/document-ocr.module.js';
 import { DocumentVerificationRepository } from './repositories/document-verification.repository.js';
 import { DocumentVerificationService } from './services/document-verification.service.js';
+import { DocumentReviewDecisionService } from './services/document-review-decision.service.js';
 import { DocumentVerificationController } from './controllers/document-verification.controller.js';
+
+import { RadarNotificationsRepository } from './repositories/radar-notifications.repository.js';
+import { RadarNotificationsService } from './services/radar-notifications.service.js';
+
 @Module({
   imports: [
     DocumentOcrModule,
@@ -60,11 +65,14 @@ import { DocumentVerificationController } from './controllers/document-verificat
   controllers: [DocumentVerificationController, RadarIntegrationController, RadarRecruitmentController],
   providers: [
     DocumentVerificationRepository, DocumentVerificationService,
+    DocumentReviewDecisionService,
     RadarPublicationRepository,
     RadarRecruitmentRepository,
     RadarApplicationsService,
     RadarAccessRepository,
     RadarCvRepository,
+    RadarNotificationsRepository,
+    RadarNotificationsService,
     RadarReviewRepository,
     RadarIntegrationService,
     RadarRecruitmentService,

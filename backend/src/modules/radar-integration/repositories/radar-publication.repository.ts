@@ -61,6 +61,16 @@ export class RadarPublicationTransaction {
       VALUES (${userId}::uuid,${actorId}::uuid,'radar.published',
         ${JSON.stringify({ version, rubric: RUBRIC_VERSION, sourceRevision: revision, skills })}::jsonb,clock_timestamp())`;
   }
+
+  async createNotification(
+    userId: string,
+    snapshotId: string,
+  ): Promise<void> {
+    await this.tx.$executeRaw`
+      INSERT INTO radar_notifications (user_id, snapshot_id)
+      VALUES (${userId}::uuid, ${snapshotId}::uuid)
+      ON CONFLICT (snapshot_id) DO NOTHING`;
+  }
 }
 
 function querySnapshots(

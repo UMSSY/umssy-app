@@ -33,6 +33,17 @@ export class RadarIntegrationController {
   @Get('profile/me/radar') me(@CurrentUserId() user: string) {
     return this.svc.myRadar(user);
   }
+  @Get('profile/me/radar/notifications')
+  notifications(@CurrentUserId() user: string) {
+    return this.svc.notificationsList(user);
+  }
+  @Post('profile/me/radar/notifications/:id/open')
+  openNotification(
+    @CurrentUserId() user: string,
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ) {
+    return this.svc.openNotification(user, id);
+  }
   @Post('profile/me/radar/cv-rescans') rescan(@CurrentUserId() user: string) {
     return this.svc.rescanCurrentCv(user);
   }
@@ -49,6 +60,15 @@ export class RadarIntegrationController {
   }
   @UseGuards(RolesGuard)
   @Roles('administrativo')
+  @Get('radar-reviews/operations/:operationId')
+  operationStatus(
+    @CurrentUserId() admin: string,
+    @Param('operationId', new ParseUUIDPipe()) operationId: string,
+  ) {
+    return this.svc.operationStatus(admin, operationId);
+  }
+  @UseGuards(RolesGuard)
+  @Roles('administrativo')
   @ApiBody(toApiBody(reviewDecisionSchema))
   @Patch('radar-reviews/:kind/:id')
   decision(
@@ -59,8 +79,15 @@ export class RadarIntegrationController {
     @Body(new RequestValidationPipe(reviewDecisionSchema))
     body: ReviewDecisionRequest,
   ) {
-    return this.svc.decision(admin, kind, id, body.decision);
+    return this.svc.decision(
+      admin,
+      kind,
+      id,
+      body.decision,
+      body.operationId,
+    );
   }
+
   @UseGuards(RolesGuard)
   @Roles('administrativo')
   @Post('radar-reviews/cvs/:id/reprocessings')
