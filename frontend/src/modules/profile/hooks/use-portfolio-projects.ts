@@ -1,12 +1,17 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { PORTFOLIO_PROJECTS_QUERY_KEY } from "../constants/portfolio-projects.constants";
+import {
+  PORTFOLIO_PROJECTS_QUERY_KEY,
+  PORTFOLIO_REPOSITORIES_QUERY_KEY,
+} from "../constants/portfolio-projects.constants";
 import { portfolioProjectsService } from "../services/portfolio-projects.service";
 import type {
+  ExternalRepositoryItem,
   PortfolioProjectItem,
   UpdatePortfolioProjectsPayload,
 } from "../types/portfolio-project.types";
+import type { PortfolioProviderName } from "../types/portfolio-account.types";
 
 export function usePortfolioProjects() {
   const query = useQuery<PortfolioProjectItem[]>({
@@ -33,5 +38,27 @@ export function useUpdatePortfolioProjects() {
       await queryClient.invalidateQueries({ queryKey: PORTFOLIO_PROJECTS_QUERY_KEY });
     },
   });
+}
+
+export function usePortfolioRepositories(
+  enabled = true,
+  provider?: PortfolioProviderName,
+) {
+  const query = useQuery<ExternalRepositoryItem[]>({
+    queryKey: provider
+      ? [...PORTFOLIO_REPOSITORIES_QUERY_KEY, provider]
+      : PORTFOLIO_REPOSITORIES_QUERY_KEY,
+    queryFn: () => portfolioProjectsService.getAvailableRepositories(provider),
+    enabled,
+    retry: false,
+  });
+
+  return {
+    repositories: query.data ?? [],
+    isLoading: query.isPending,
+    isError: query.isError,
+    error: query.error,
+    refetch: query.refetch,
+  };
 }
 

@@ -13,12 +13,16 @@ vi.mock("../services/portfolio-projects.service", () => ({
   portfolioProjectsService: {
     getPortfolioProjects: vi.fn(),
     updatePortfolioProjects: vi.fn(),
+    getAvailableRepositories: vi.fn(),
   },
 }));
 
 describe("PortfolioProfileSection", () => {
   beforeEach(() => {
     vi.mocked(portfolioProjectsService.getPortfolioProjects).mockResolvedValue([]);
+    vi.mocked(
+      portfolioProjectsService.getAvailableRepositories,
+    ).mockResolvedValue([]);
   });
 
   afterEach(() => {
@@ -120,5 +124,24 @@ describe("PortfolioProfileSection", () => {
     expect(cards).toHaveLength(6);
     expect(screen.queryByText("project-7")).not.toBeInTheDocument();
     expect(screen.queryByText("project-8")).not.toBeInTheDocument();
+  });
+
+  it("opens the selection modal when clicking add project button", async () => {
+    vi.mocked(
+      portfolioProjectsService.getAvailableRepositories,
+    ).mockResolvedValue([]);
+
+    render(<PortfolioProfileSection />);
+
+    const addButton = await screen.findByRole("button", {
+      name: /Añadir proyecto/i,
+    });
+    fireEvent.click(addButton);
+
+    expect(
+      await screen.findByRole("heading", {
+        name: /Seleccionar proyectos de portafolio/i,
+      }),
+    ).toBeInTheDocument();
   });
 });
