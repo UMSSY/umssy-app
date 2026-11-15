@@ -10,6 +10,13 @@ vi.mock("next/navigation", () => ({
   usePathname: () => "/backoffice/solicitudes",
   useRouter: () => ({ replace: vi.fn() }),
 }));
+vi.mock("@/modules/notifications/hooks/use-notifications-realtime-sync", () => ({
+  useNotificationsRealtimeSync: vi.fn(),
+}));
+
+vi.mock("@/modules/notifications/hooks/use-notification-unread-count", () => ({
+  useNotificationUnreadCount: () => ({ unreadCount: 0, isLoading: false }),
+}));
 
 vi.mock("@/modules/request-review/hooks/use-backoffice-session", () => ({
   useBackofficeSession: () => ({ state: "allowed", logout: vi.fn() }),
