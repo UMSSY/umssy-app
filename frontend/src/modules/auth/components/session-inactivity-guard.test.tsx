@@ -106,7 +106,9 @@ describe("SessionInactivityGuard", () => {
 
     expect(mockEndSession).toHaveBeenCalledTimes(1);
     expect(mockLogout).toHaveBeenCalledTimes(1);
-    expect(mockReplace).toHaveBeenCalledWith("/login");
+    expect(mockReplace).toHaveBeenCalledWith(
+      expect.stringContaining("reason=SESSION_EXPIRED"),
+    );
   });
 
   it("closes session and redirects with reason=SESSION_EXPIRED on timeout", () => {

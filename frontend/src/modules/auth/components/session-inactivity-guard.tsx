@@ -24,6 +24,11 @@ export function SessionInactivityGuard() {
     void authService.logout();
     if (typeof window !== "undefined") {
       const currentPath = `${window.location.pathname}${window.location.search}`;
+      try {
+        sessionStorage.setItem("umssy_post_login_redirect", currentPath);
+      } catch {
+        // ignore storage error
+      }
       const loginUrl = buildLoginUrl(currentPath);
       const separator = loginUrl.includes("?") ? "&" : "?";
       router.replace(`${loginUrl}${separator}reason=SESSION_EXPIRED`);
@@ -35,7 +40,19 @@ export function SessionInactivityGuard() {
   const handleCloseSession = () => {
     endSession();
     void authService.logout();
-    router.replace("/login");
+    if (typeof window !== "undefined") {
+      const currentPath = `${window.location.pathname}${window.location.search}`;
+      try {
+        sessionStorage.setItem("umssy_post_login_redirect", currentPath);
+      } catch {
+        // ignore storage error
+      }
+      const loginUrl = buildLoginUrl(currentPath);
+      const separator = loginUrl.includes("?") ? "&" : "?";
+      router.replace(`${loginUrl}${separator}reason=SESSION_EXPIRED`);
+    } else {
+      router.replace("/login?reason=SESSION_EXPIRED");
+    }
   };
 
   const { isWarningOpen, secondsLeft, isRefreshing, stayConnected } =
