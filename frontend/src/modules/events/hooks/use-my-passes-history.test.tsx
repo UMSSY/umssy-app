@@ -49,4 +49,24 @@ describe("useMyPassesHistory", () => {
     resolveSecond({ items: [{ id: "new", title: "New workshop", date: "2026-09-10", startTime: "09:00", endTime: "12:00", location: null }], total: 1, totalPages: 1, limit: 10 });
     await waitFor(() => expect(result.current.registrations[0]?.id).toBe("new"));
   });
+  it("ignores a stale response after switching tabs quickly", async () => {
+    await saveAccessToken("signed-token");
+    let resolveOld!: (value: Awaited<ReturnType<typeof registrationsService.getFinished>>) => void;
+    const getFinished = vi.spyOn(registrationsService, "getFinished")
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveOld = resolve; }))
+      .mockResolvedValueOnce({ items: [{ id: "new", title: "New", date: "2026-09-10", startTime: "09:00", endTime: "12:00", location: null }], total: 1, totalPages: 1, limit: 10 });
+    const { result, rerender } = renderHookWithQuery(
+      ({ enabled }: { enabled: boolean }) => useMyPassesHistory(enabled),
+      { initialProps: { enabled: true } },
+    );
+
+    await waitFor(() => expect(getFinished).toHaveBeenCalledTimes(1));
+    const oldSignal = getFinished.mock.calls[0][2];
+    rerender({ enabled: false });
+    await waitFor(() => expect(oldSignal?.aborted).toBe(true));
+    rerender({ enabled: true });
+    await waitFor(() => expect(result.current.registrations[0]?.id).toBe("new"));
+    resolveOld({ items: [{ id: "old", title: "Old", date: "2026-08-10", startTime: "09:00", endTime: "12:00", location: null }], total: 1, totalPages: 1, limit: 10 });
+    await waitFor(() => expect(result.current.registrations[0]?.id).toBe("new"));
+  });
 });

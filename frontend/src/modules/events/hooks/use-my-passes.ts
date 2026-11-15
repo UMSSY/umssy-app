@@ -44,11 +44,17 @@ export function useMyPasses(isActive = true) {
 export function useMyPassesHistory(isEnabled: boolean) {
   const accessToken = useRegistrationSession();
   const queryClient = useQueryClient();
+  const requestVersion = useRef(0);
   const queryKey = useMemo(() => ["events", "finished-registrations", accessToken], [accessToken]);
   const query = useInfiniteQuery({
     queryKey,
     initialPageParam: 1,
-    queryFn: ({ pageParam, signal }) => registrationsService.getFinished(pageParam, 10, signal, accessToken),
+    queryFn: async ({ pageParam, signal }) => {
+      const version = requestVersion.current;
+      const page = await registrationsService.getFinished(pageParam, 10, signal, accessToken);
+      if (version !== requestVersion.current) throw new DOMException("Request cancelled", "AbortError");
+      return page;
+    },
     getNextPageParam: (lastPage, pages) => pages.length < lastPage.totalPages ? pages.length + 1 : undefined,
     enabled: isEnabled && Boolean(accessToken),
     staleTime: Infinity,
@@ -57,6 +63,7 @@ export function useMyPassesHistory(isEnabled: boolean) {
 
   useEffect(() => {
     if (!isEnabled) {
+      requestVersion.current += 1;
       void queryClient.cancelQueries({ queryKey, exact: true });
       queryClient.removeQueries({ queryKey, exact: true });
     }
