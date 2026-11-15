@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, RefreshCw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -9,7 +9,10 @@ import {
   MAX_PORTFOLIO_PROJECTS,
   PORTFOLIO_PROJECTS_MESSAGES,
 } from "../constants/portfolio-projects.constants";
-import { usePortfolioProjects } from "../hooks/use-portfolio-projects";
+import {
+  usePortfolioProjects,
+  useSyncPortfolioProjects,
+} from "../hooks/use-portfolio-projects";
 import type { PortfolioProfileSectionProps } from "../types/portfolio-project.types";
 import { PortfolioProjectCard } from "./portfolio-project-card";
 import { PortfolioSelectionDialog } from "./portfolio-selection-dialog";
@@ -20,7 +23,9 @@ export function PortfolioProfileSection({
   onAddProjectClick,
 }: PortfolioProfileSectionProps) {
   const [isSelectionDialogOpen, setIsSelectionDialogOpen] = useState(false);
+  const [syncErrorMessage, setSyncErrorMessage] = useState<string | null>(null);
   const { projects = [], isLoading, isError, refetch } = usePortfolioProjects();
+  const syncProjectsMutation = useSyncPortfolioProjects();
 
   const sortedProjects = [...projects]
     .sort((first, second) => first.displayOrder - second.displayOrder)
@@ -31,6 +36,15 @@ export function PortfolioProfileSection({
   const handleAddClick = () => {
     setIsSelectionDialogOpen(true);
     onAddProjectClick?.();
+  };
+
+  const handleSync = () => {
+    setSyncErrorMessage(null);
+    syncProjectsMutation.mutate(undefined, {
+      onError: () => {
+        setSyncErrorMessage(PORTFOLIO_PROJECTS_MESSAGES.syncError);
+      },
+    });
   };
 
   const renderContent = () => {
@@ -88,17 +102,58 @@ export function PortfolioProfileSection({
         }
         description={PORTFOLIO_PROJECTS_MESSAGES.description}
         action={
-          <Button
-            type="button"
-            variant="outline"
-            className="h-8 gap-2 px-3 text-sm"
-            onClick={handleAddClick}
-          >
-            <Plus className="size-4" aria-hidden="true" />
-            <span>{PORTFOLIO_PROJECTS_MESSAGES.addProject}</span>
-          </Button>
+          <div className="flex items-center gap-2">
+            {displayCount > 0 ? (
+              <Button
+                type="button"
+                variant="outline"
+                className="h-8 gap-2 px-3 text-sm"
+                disabled={syncProjectsMutation.isPending}
+                onClick={handleSync}
+              >
+                <RefreshCw
+                  className={cn(
+                    "size-4",
+                    syncProjectsMutation.isPending && "animate-spin",
+                  )}
+                  aria-hidden="true"
+                />
+                <span>
+                  {syncProjectsMutation.isPending
+                    ? PORTFOLIO_PROJECTS_MESSAGES.syncing
+                    : PORTFOLIO_PROJECTS_MESSAGES.syncButton}
+                </span>
+              </Button>
+            ) : null}
+            <Button
+              type="button"
+              variant="outline"
+              className="h-8 gap-2 px-3 text-sm"
+              onClick={handleAddClick}
+            >
+              <Plus className="size-4" aria-hidden="true" />
+              <span>{PORTFOLIO_PROJECTS_MESSAGES.addProject}</span>
+            </Button>
+          </div>
         }
       >
+        {syncErrorMessage ? (
+          <div
+            role="alert"
+            className="mb-4 flex items-center justify-between rounded-md border border-critical-action/30 bg-critical-action/10 p-3 text-sm text-critical-action"
+          >
+            <span>{syncErrorMessage}</span>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-6 px-2 text-xs hover:bg-critical-action/20"
+              onClick={() => setSyncErrorMessage(null)}
+            >
+              Descartar
+            </Button>
+          </div>
+        ) : null}
         {renderContent()}
       </SectionCard>
       <PortfolioSelectionDialog

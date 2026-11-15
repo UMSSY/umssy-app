@@ -1,5 +1,5 @@
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
-import { cleanup, fireEvent, screen } from "@testing-library/react";
+import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   MAX_PORTFOLIO_PROJECTS,
@@ -14,6 +14,7 @@ vi.mock("../services/portfolio-projects.service", () => ({
     getPortfolioProjects: vi.fn(),
     updatePortfolioProjects: vi.fn(),
     getAvailableRepositories: vi.fn(),
+    syncPortfolioProjects: vi.fn(),
   },
 }));
 
@@ -143,5 +144,65 @@ describe("PortfolioProfileSection", () => {
         name: /Seleccionar proyectos de portafolio/i,
       }),
     ).toBeInTheDocument();
+  });
+
+  it("does not render synchronize button when projects list is empty", async () => {
+    vi.mocked(portfolioProjectsService.getPortfolioProjects).mockResolvedValue([]);
+
+    render(<PortfolioProfileSection />);
+
+    await screen.findByText(PORTFOLIO_PROJECTS_MESSAGES.empty);
+
+    expect(
+      screen.queryByRole("button", { name: "Sincronizar" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("renders synchronize button when projects are present and calls sync service", async () => {
+    const projects: PortfolioProjectItem[] = [
+      createProject("1", 0, "project-sync-test"),
+    ];
+    vi.mocked(portfolioProjectsService.getPortfolioProjects).mockResolvedValue(projects);
+    vi.mocked(portfolioProjectsService.syncPortfolioProjects).mockResolvedValue(projects);
+
+    render(<PortfolioProfileSection />);
+
+    const syncButton = await screen.findByRole("button", { name: "Sincronizar" });
+    expect(syncButton).toBeInTheDocument();
+
+    fireEvent.click(syncButton);
+
+    await waitFor(() => {
+      expect(portfolioProjectsService.syncPortfolioProjects).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it("displays error banner on sync failure without hiding or discarding existing cards", async () => {
+    const projects: PortfolioProjectItem[] = [
+      createProject("1", 0, "project-persistent-card"),
+    ];
+    vi.mocked(portfolioProjectsService.getPortfolioProjects).mockResolvedValue(projects);
+    vi.mocked(portfolioProjectsService.syncPortfolioProjects).mockRejectedValueOnce(
+      new Error("Sync network error"),
+    );
+
+    render(<PortfolioProfileSection />);
+
+    const syncButton = await screen.findByRole("button", { name: "Sincronizar" });
+    fireEvent.click(syncButton);
+
+    expect(
+      await screen.findByText(PORTFOLIO_PROJECTS_MESSAGES.syncError),
+    ).toBeInTheDocument();
+
+    expect(screen.getByText("project-persistent-card")).toBeInTheDocument();
+
+    const discardButton = screen.getByRole("button", { name: "Descartar" });
+    fireEvent.click(discardButton);
+
+    expect(
+      screen.queryByText(PORTFOLIO_PROJECTS_MESSAGES.syncError),
+    ).not.toBeInTheDocument();
+    expect(screen.getByText("project-persistent-card")).toBeInTheDocument();
   });
 });

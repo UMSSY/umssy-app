@@ -18,6 +18,7 @@ import type { SessionService } from '../../../common/services/session.service.js
 import { PortfolioController } from '../controllers/portfolio.controller.js';
 import { DuplicatePortfolioProjectException } from '../exceptions/duplicate-portfolio-project.exception.js';
 import { MaxPortfolioProjectsExceededException } from '../exceptions/max-portfolio-projects-exceeded.exception.js';
+import { SocialAccountNotFoundException } from '../exceptions/social-account-not-found.exception.js';
 import type { ExternalRepositoryResponse } from '../responses/external-repository.response.js';
 import type { OAuthUrlResponse } from '../responses/oauth-url.response.js';
 import type { PortfolioProjectResponse } from '../responses/portfolio-project.response.js';
@@ -93,6 +94,8 @@ describe('PortfolioController', () => {
     updateProjects: vi.fn(),
     getAccounts: vi.fn(),
     getRepositories: vi.fn(),
+    disconnectSocialAccount: vi.fn(),
+    syncProjects: vi.fn(),
   };
 
   const socialOAuthService = {
@@ -374,6 +377,97 @@ describe('PortfolioController', () => {
     });
   });
 
+  describe('DELETE /api/profile/portfolio/accounts/:provider', () => {
+    it('returns 401 Unauthorized without bearer token', async () => {
+      await request(app.getHttpServer())
+        .delete('/api/profile/portfolio/accounts/github')
+        .expect(401);
+    });
+
+    it('returns 400 Bad Request when provider parameter is invalid', async () => {
+      const response = await request(app.getHttpServer())
+        .delete('/api/profile/portfolio/accounts/bitbucket')
+        .auth(token, { type: 'bearer' })
+        .expect(400);
+
+      expect(response.body).toMatchObject({
+        statusCode: 400,
+        ok: false,
+        code: 'VALIDATION_ERROR',
+      });
+    });
+
+    it('returns 404 when service throws SocialAccountNotFoundException', async () => {
+      service.disconnectSocialAccount.mockRejectedValue(
+        new SocialAccountNotFoundException(),
+      );
+
+      const response = await request(app.getHttpServer())
+        .delete('/api/profile/portfolio/accounts/github')
+        .auth(token, { type: 'bearer' })
+        .expect(404);
+
+      expect(response.body).toEqual({
+        statusCode: 404,
+        ok: false,
+        code: 'SOCIAL_ACCOUNT_NOT_FOUND',
+        detail: 'La cuenta social no se encuentra vinculada',
+        data: null,
+      });
+    });
+
+    it('disconnects social account successfully and returns status', async () => {
+      service.disconnectSocialAccount.mockResolvedValue({
+        provider: 'github',
+        connected: false,
+      });
+
+      const response = await request(app.getHttpServer())
+        .delete('/api/profile/portfolio/accounts/github')
+        .auth(token, { type: 'bearer' })
+        .expect(200);
+
+      expect(service.disconnectSocialAccount).toHaveBeenCalledWith(
+        userId,
+        'github',
+      );
+      expect(response.body).toEqual({
+        statusCode: 200,
+        ok: true,
+        data: {
+          provider: 'github',
+          connected: false,
+        },
+        detail: 'OK',
+      });
+    });
+  });
+
+  describe('POST /api/profile/portfolio/projects/sync', () => {
+    it('returns 401 Unauthorized without bearer token', async () => {
+      await request(app.getHttpServer())
+        .post('/api/profile/portfolio/projects/sync')
+        .expect(401);
+    });
+
+    it('synchronizes portfolio projects and returns updated list', async () => {
+      service.syncProjects.mockResolvedValue([sampleDto]);
+
+      const response = await request(app.getHttpServer())
+        .post('/api/profile/portfolio/projects/sync')
+        .auth(token, { type: 'bearer' })
+        .expect(200);
+
+      expect(service.syncProjects).toHaveBeenCalledWith(userId);
+      expect(response.body).toEqual({
+        statusCode: 200,
+        ok: true,
+        data: [sampleDto],
+        detail: 'OK',
+      });
+    });
+  });
+
   it('documents GET, PUT, and POST endpoints in Swagger with bearer auth', () => {
     const document = SwaggerModule.createDocument(
       app,
@@ -385,8 +479,18 @@ describe('PortfolioController', () => {
     expect(projectsPath?.get?.responses).toHaveProperty('200');
     expect(projectsPath?.put?.responses).toHaveProperty('400');
 
+    const syncPath = document.paths['/api/profile/portfolio/projects/sync'];
+    expect(syncPath?.post?.security).toContainEqual({ bearer: [] });
+    expect(syncPath?.post?.responses).toHaveProperty('200');
+
     const accountsPath = document.paths['/api/profile/portfolio/accounts'];
     expect(accountsPath?.get?.security).toContainEqual({ bearer: [] });
+
+    const disconnectPath =
+      document.paths['/api/profile/portfolio/accounts/{provider}'];
+    expect(disconnectPath?.delete?.security).toContainEqual({ bearer: [] });
+    expect(disconnectPath?.delete?.responses).toHaveProperty('200');
+    expect(disconnectPath?.delete?.responses).toHaveProperty('404');
 
     const oauthUrlPath =
       document.paths['/api/profile/portfolio/oauth/{provider}/url'];

@@ -1,6 +1,7 @@
 import { apiClient } from "@/shared/services/api-client";
 import type { ApiResponse } from "../types/api-response.types";
 import type {
+  PortfolioAccountDisconnectResponse,
   PortfolioAccountStatusResponse,
   PortfolioConnectedAccountResponse,
   PortfolioOAuthCallbackPayload,
@@ -39,6 +40,16 @@ export const portfolioAccountsService = {
     const response = await apiClient.post<ApiResponse<PortfolioConnectedAccountResponse>>(
       `/profile/portfolio/oauth/${provider}/callback`,
       payload,
+      { headers: getAuthHeaders() },
+    );
+    return response.data.data;
+  },
+
+  disconnectSocialAccount: async (
+    provider: PortfolioProviderName,
+  ): Promise<PortfolioAccountDisconnectResponse> => {
+    const response = await apiClient.delete<ApiResponse<PortfolioAccountDisconnectResponse>>(
+      `/profile/portfolio/accounts/${provider}`,
       { headers: getAuthHeaders() },
     );
     return response.data.data;

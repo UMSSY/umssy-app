@@ -40,5 +40,14 @@ export const portfolioProjectsService = {
     );
     return response.data.data ?? [];
   },
+
+  syncPortfolioProjects: async (): Promise<PortfolioProjectItem[]> => {
+    const response = await apiClient.post<ApiResponse<PortfolioProjectItem[]>>(
+      "/profile/portfolio/projects/sync",
+      {},
+      { headers: getAuthHeaders() },
+    );
+    return response.data.data ?? [];
+  },
 };
 

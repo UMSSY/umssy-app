@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -18,6 +19,7 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiConflictResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiParam,
@@ -108,6 +110,20 @@ export class PortfolioController {
     return this.portfolioService.updateProjects(userId, request.projects);
   }
 
+  @Post('projects/sync')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Synchronize portfolio projects with remote provider repositories',
+  })
+  @ApiOkResponse({
+    description: 'Updated list of synchronized portfolio projects',
+  })
+  syncProjects(
+    @CurrentUserId() userId: string,
+  ): Promise<PortfolioProjectResponse[]> {
+    return this.portfolioService.syncProjects(userId);
+  }
+
   @Get('accounts')
   @ApiOperation({
     summary: 'Get connected social accounts status (GitHub and GitLab)',
@@ -119,6 +135,26 @@ export class PortfolioController {
     @CurrentUserId() userId: string,
   ): Promise<SocialAccountStatusResponse[]> {
     return this.portfolioService.getAccounts(userId);
+  }
+
+  @Delete('accounts/:provider')
+  @ApiOperation({
+    summary:
+      'Disconnect a social account and remove its associated portfolio projects',
+  })
+  @ApiParam({ name: 'provider', enum: PORTFOLIO_PROVIDERS })
+  @ApiOkResponse({
+    description: 'Social account disconnected successfully',
+  })
+  @ApiNotFoundResponse({
+    description: 'Social account is not connected',
+  })
+  disconnectAccount(
+    @CurrentUserId() userId: string,
+    @Param('provider', { schema: portfolioProviderParamSchema })
+    provider: PortfolioProvider,
+  ): Promise<{ provider: PortfolioProvider; connected: false }> {
+    return this.portfolioService.disconnectSocialAccount(userId, provider);
   }
 
   @Get('oauth/:provider/url')

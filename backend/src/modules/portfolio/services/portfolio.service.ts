@@ -13,6 +13,7 @@ import type { ExternalRepositoryResponse } from '../responses/external-repositor
 import type { PortfolioProjectResponse } from '../responses/portfolio-project.response.js';
 import type { SocialAccountStatusResponse } from '../responses/social-account-status.response.js';
 import type { NormalizedPortfolioProject } from '../types/normalized-portfolio-project.type.js';
+import type { PortfolioProvider } from '../types/portfolio-provider.type.js';
 import { ProviderRepositoriesService } from './provider-repositories.service.js';
 
 @Injectable()
@@ -59,6 +60,89 @@ export class PortfolioService {
         profileUrl: account ? account.profileUrl : null,
       };
     });
+  }
+
+  async disconnectSocialAccount(
+    userId: string,
+    provider: PortfolioProvider,
+  ): Promise<{ provider: PortfolioProvider; connected: false }> {
+    await this.socialAccountRepository.disconnect(userId, provider);
+    return {
+      provider,
+      connected: false,
+    };
+  }
+
+  async syncProjects(userId: string): Promise<PortfolioProjectResponse[]> {
+    const savedProjects = await this.portfolioRepository.findByUserId(userId);
+    if (savedProjects.length === 0) {
+      return [];
+    }
+
+    const accounts = await this.socialAccountRepository.findByUserId(userId);
+    const providersNeeded = new Set(savedProjects.map((p) => p.provider));
+
+    const remoteReposByProvider = new Map<
+      PortfolioProvider,
+      Map<string, ExternalRepositoryResponse>
+    >();
+
+    for (const account of accounts) {
+      if (!providersNeeded.has(account.provider)) {
+        continue;
+      }
+
+      let repos: ExternalRepositoryResponse[] = [];
+      if (account.provider === PortfolioProviderEnum.GITHUB) {
+        repos = await this.providerRepositoriesService.fetchGitHubRepositories(
+          account.username,
+        );
+      } else if (account.provider === PortfolioProviderEnum.GITLAB) {
+        repos = await this.providerRepositoriesService.fetchGitLabRepositories(
+          account.externalId,
+          account.username,
+        );
+      }
+
+      const repoMap = new Map<string, ExternalRepositoryResponse>();
+      for (const repo of repos) {
+        repoMap.set((repo.repoName ?? '').trim().toLowerCase(), repo);
+      }
+      remoteReposByProvider.set(account.provider, repoMap);
+    }
+
+    const updatedProjects: NormalizedPortfolioProject[] = [];
+
+    for (const saved of savedProjects) {
+      const providerRepos = remoteReposByProvider.get(saved.provider);
+      if (!providerRepos) {
+        continue;
+      }
+
+      const normalizedName = (saved.repoName ?? '').trim().toLowerCase();
+      const matched = providerRepos.get(normalizedName);
+      if (!matched) {
+        continue;
+      }
+
+      updatedProjects.push({
+        provider: saved.provider,
+        repoName: (matched.repoName ?? '').trim(),
+        repoUrl: (matched.repoUrl ?? '').trim(),
+        description: this.normalizeOptionalText(matched.description),
+        language: this.normalizeOptionalText(matched.language),
+        starsCount: matched.starsCount,
+        isOwner: matched.isOwner,
+        displayOrder: updatedProjects.length,
+      });
+    }
+
+    const persisted = await this.portfolioRepository.replaceForUser(
+      userId,
+      updatedProjects,
+    );
+
+    return this.portfolioProjectMapper.toResponseList(persisted);
   }
 
   async getRepositories(

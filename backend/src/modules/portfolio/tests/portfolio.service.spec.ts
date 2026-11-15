@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DuplicatePortfolioProjectException } from '../exceptions/duplicate-portfolio-project.exception.js';
+import { ExternalProviderUnavailableException } from '../exceptions/external-provider-unavailable.exception.js';
 import { MaxPortfolioProjectsExceededException } from '../exceptions/max-portfolio-projects-exceeded.exception.js';
 import { PortfolioProjectMapper } from '../mappers/portfolio-project.mapper.js';
 import type { PortfolioRepository } from '../repositories/portfolio.repository.js';
@@ -38,6 +39,7 @@ describe('PortfolioService', () => {
   let socialAccountRepository: {
     findByUserId: ReturnType<typeof vi.fn>;
     upsertAccount: ReturnType<typeof vi.fn>;
+    disconnect: ReturnType<typeof vi.fn>;
   };
   let providerRepositoriesService: {
     fetchGitHubRepositories: ReturnType<typeof vi.fn>;
@@ -52,6 +54,7 @@ describe('PortfolioService', () => {
     socialAccountRepository = {
       findByUserId: vi.fn(),
       upsertAccount: vi.fn(),
+      disconnect: vi.fn(),
     };
     providerRepositoriesService = {
       fetchGitHubRepositories: vi.fn(),
@@ -415,6 +418,254 @@ describe('PortfolioService', () => {
       const result = await service.getRepositories(userId);
       expect(result).toHaveLength(1);
       expect(result[0]?.repoName).toBe('my-repo');
+    });
+  });
+
+  describe('disconnectSocialAccount', () => {
+    it('calls socialAccountRepository.disconnect and returns disconnected status', async () => {
+      socialAccountRepository.disconnect.mockResolvedValue(undefined);
+
+      const result = await service.disconnectSocialAccount(userId, 'github');
+
+      expect(socialAccountRepository.disconnect).toHaveBeenCalledWith(
+        userId,
+        'github',
+      );
+      expect(result).toEqual({
+        provider: 'github',
+        connected: false,
+      });
+    });
+  });
+
+  describe('syncProjects', () => {
+    it('returns empty array when user has no saved projects', async () => {
+      repository.findByUserId.mockResolvedValue([]);
+
+      const result = await service.syncProjects(userId);
+
+      expect(result).toEqual([]);
+      expect(socialAccountRepository.findByUserId).not.toHaveBeenCalled();
+      expect(repository.replaceForUser).not.toHaveBeenCalled();
+    });
+
+    it('synchronizes projects by updating metadata and dropping removed repositories', async () => {
+      const savedProjects: PortfolioProjectEntity[] = [
+        {
+          id: 'proj-1',
+          userId,
+          provider: 'github',
+          repoName: 'umssy/umssy-app',
+          repoUrl: 'https://github.com/umssy/umssy-app',
+          description: 'Old description',
+          language: 'JavaScript',
+          starsCount: 5,
+          isOwner: true,
+          displayOrder: 0,
+        },
+        {
+          id: 'proj-2',
+          userId,
+          provider: 'github',
+          repoName: 'umssy/deleted-repo',
+          repoUrl: 'https://github.com/umssy/deleted-repo',
+          description: null,
+          language: null,
+          starsCount: 0,
+          isOwner: true,
+          displayOrder: 1,
+        },
+        {
+          id: 'proj-3',
+          userId,
+          provider: 'gitlab',
+          repoName: 'gitlab-repo',
+          repoUrl: 'https://gitlab.com/gluser/gitlab-repo',
+          description: null,
+          language: 'Python',
+          starsCount: 2,
+          isOwner: false,
+          displayOrder: 2,
+        },
+      ];
+      repository.findByUserId.mockResolvedValue(savedProjects);
+
+      const accounts: SocialAccountEntity[] = [
+        {
+          id: 'acc-gh',
+          userId,
+          provider: 'github',
+          externalId: 'gh-123',
+          username: 'octocat',
+          profileUrl: null,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          id: 'acc-gl',
+          userId,
+          provider: 'gitlab',
+          externalId: 'gl-456',
+          username: 'gluser',
+          profileUrl: null,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ];
+      socialAccountRepository.findByUserId.mockResolvedValue(accounts);
+
+      const remoteGithubRepos: ExternalRepositoryResponse[] = [
+        {
+          provider: 'github',
+          repoName: 'umssy/umssy-app',
+          repoUrl: 'https://github.com/umssy/umssy-app',
+          description: 'New updated description',
+          language: 'TypeScript',
+          starsCount: 30,
+          isOwner: true,
+          updatedAt: '2026-11-15T10:00:00.000Z',
+        },
+      ];
+      providerRepositoriesService.fetchGitHubRepositories.mockResolvedValue(
+        remoteGithubRepos,
+      );
+
+      const remoteGitlabRepos: ExternalRepositoryResponse[] = [
+        {
+          provider: 'gitlab',
+          repoName: 'gitlab-repo',
+          repoUrl: 'https://gitlab.com/gluser/gitlab-repo',
+          description: 'Updated gitlab project',
+          language: 'Python',
+          starsCount: 10,
+          isOwner: false,
+          updatedAt: '2026-11-15T12:00:00.000Z',
+        },
+      ];
+      providerRepositoriesService.fetchGitLabRepositories.mockResolvedValue(
+        remoteGitlabRepos,
+      );
+
+      const persistedEntities: PortfolioProjectEntity[] = [
+        {
+          id: 'proj-1-updated',
+          userId,
+          provider: 'github',
+          repoName: 'umssy/umssy-app',
+          repoUrl: 'https://github.com/umssy/umssy-app',
+          description: 'New updated description',
+          language: 'TypeScript',
+          starsCount: 30,
+          isOwner: true,
+          displayOrder: 0,
+        },
+        {
+          id: 'proj-3-updated',
+          userId,
+          provider: 'gitlab',
+          repoName: 'gitlab-repo',
+          repoUrl: 'https://gitlab.com/gluser/gitlab-repo',
+          description: 'Updated gitlab project',
+          language: 'Python',
+          starsCount: 10,
+          isOwner: false,
+          displayOrder: 1,
+        },
+      ];
+      repository.replaceForUser.mockResolvedValue(persistedEntities);
+
+      const result = await service.syncProjects(userId);
+
+      expect(repository.replaceForUser).toHaveBeenCalledWith(userId, [
+        {
+          provider: 'github',
+          repoName: 'umssy/umssy-app',
+          repoUrl: 'https://github.com/umssy/umssy-app',
+          description: 'New updated description',
+          language: 'TypeScript',
+          starsCount: 30,
+          isOwner: true,
+          displayOrder: 0,
+        },
+        {
+          provider: 'gitlab',
+          repoName: 'gitlab-repo',
+          repoUrl: 'https://gitlab.com/gluser/gitlab-repo',
+          description: 'Updated gitlab project',
+          language: 'Python',
+          starsCount: 10,
+          isOwner: false,
+          displayOrder: 1,
+        },
+      ]);
+
+      expect(result).toEqual([
+        {
+          id: 'proj-1-updated',
+          provider: 'github',
+          repoName: 'umssy/umssy-app',
+          repoUrl: 'https://github.com/umssy/umssy-app',
+          description: 'New updated description',
+          language: 'TypeScript',
+          starsCount: 30,
+          isOwner: true,
+          displayOrder: 0,
+        },
+        {
+          id: 'proj-3-updated',
+          provider: 'gitlab',
+          repoName: 'gitlab-repo',
+          repoUrl: 'https://gitlab.com/gluser/gitlab-repo',
+          description: 'Updated gitlab project',
+          language: 'Python',
+          starsCount: 10,
+          isOwner: false,
+          displayOrder: 1,
+        },
+      ]);
+    });
+
+    it('propagates ExternalProviderUnavailableException without persisting changes when provider fails', async () => {
+      const savedProjects: PortfolioProjectEntity[] = [
+        {
+          id: 'proj-1',
+          userId,
+          provider: 'github',
+          repoName: 'umssy/umssy-app',
+          repoUrl: 'https://github.com/umssy/umssy-app',
+          description: 'Desc',
+          language: 'TypeScript',
+          starsCount: 10,
+          isOwner: true,
+          displayOrder: 0,
+        },
+      ];
+      repository.findByUserId.mockResolvedValue(savedProjects);
+
+      socialAccountRepository.findByUserId.mockResolvedValue([
+        {
+          id: 'acc-gh',
+          userId,
+          provider: 'github',
+          externalId: 'gh-123',
+          username: 'octocat',
+          profileUrl: null,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ]);
+
+      providerRepositoriesService.fetchGitHubRepositories.mockRejectedValue(
+        new ExternalProviderUnavailableException(
+          'El servicio de GitHub no está disponible temporalmente',
+        ),
+      );
+
+      await expect(service.syncProjects(userId)).rejects.toThrow(
+        ExternalProviderUnavailableException,
+      );
+
+      expect(repository.replaceForUser).not.toHaveBeenCalled();
     });
   });
 });

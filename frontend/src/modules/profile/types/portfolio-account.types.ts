@@ -23,6 +23,11 @@ export interface PortfolioConnectedAccountResponse {
   connected: boolean;
 }
 
+export interface PortfolioAccountDisconnectResponse {
+  provider: PortfolioProviderName;
+  connected: false;
+}
+
 export interface SocialAccountConnectButtonsProps {
   className?: string;
 }

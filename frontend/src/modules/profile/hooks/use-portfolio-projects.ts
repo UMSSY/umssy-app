@@ -62,3 +62,18 @@ export function usePortfolioRepositories(
   };
 }
 
+export function useSyncPortfolioProjects() {
+  const queryClient = useQueryClient();
+
+  return useMutation<PortfolioProjectItem[], Error, void>({
+    mutationFn: () => portfolioProjectsService.syncPortfolioProjects(),
+    onSuccess: async (syncedProjects) => {
+      queryClient.setQueryData(PORTFOLIO_PROJECTS_QUERY_KEY, syncedProjects);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: PORTFOLIO_PROJECTS_QUERY_KEY }),
+        queryClient.invalidateQueries({ queryKey: PORTFOLIO_REPOSITORIES_QUERY_KEY }),
+      ]);
+    },
+  });
+}
+

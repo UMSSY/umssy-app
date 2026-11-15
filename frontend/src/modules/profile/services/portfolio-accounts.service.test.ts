@@ -120,5 +120,26 @@ describe("portfolioAccountsService", () => {
       expect(result).toEqual(mockResponse);
     });
   });
+
+  describe("disconnectSocialAccount", () => {
+    it("sends delete request to disconnect social account", async () => {
+      const mockResponse = {
+        provider: "github" as const,
+        connected: false as const,
+      };
+
+      vi.spyOn(apiClient, "delete").mockResolvedValueOnce({
+        data: { statusCode: 200, data: mockResponse, ok: true, detail: "ok" },
+      });
+
+      const result = await portfolioAccountsService.disconnectSocialAccount("github");
+
+      expect(apiClient.delete).toHaveBeenCalledWith(
+        "/profile/portfolio/accounts/github",
+        { headers: { Authorization: "Bearer mock-token" } },
+      );
+      expect(result).toEqual(mockResponse);
+    });
+  });
 });
 

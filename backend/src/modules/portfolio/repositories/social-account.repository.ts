@@ -2,7 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import type { Prisma } from '../../../prisma/client.js';
 import { SocialAccountAlreadyLinkedException } from '../exceptions/social-account-already-linked.exception.js';
+import { SocialAccountNotFoundException } from '../exceptions/social-account-not-found.exception.js';
 import { UnknownPortfolioProviderException } from '../exceptions/unknown-portfolio-provider.exception.js';
+import type { PortfolioProvider } from '../types/portfolio-provider.type.js';
 import type { SocialAccountEntity } from '../types/social-account-entity.type.js';
 import type { UpsertSocialAccountInput } from '../types/upsert-social-account.type.js';
 import { parsePortfolioProvider } from '../utils/parse-portfolio-provider.util.js';
@@ -94,6 +96,65 @@ export class SocialAccountRepository {
     });
 
     return this.toEntity(row);
+  }
+
+  async disconnect(
+    userId: string,
+    provider: PortfolioProvider,
+  ): Promise<void> {
+    const providerRecord = await this.prisma.portfolioProvider.findUnique({
+      where: { name: provider },
+      select: { id: true },
+    });
+
+    if (!providerRecord) {
+      throw new UnknownPortfolioProviderException(provider);
+    }
+
+    const existing = await this.prisma.userSocialAccount.findUnique({
+      where: {
+        userId_providerId: {
+          userId,
+          providerId: providerRecord.id,
+        },
+      },
+      select: { id: true },
+    });
+
+    if (!existing) {
+      throw new SocialAccountNotFoundException();
+    }
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.userPortfolioProject.deleteMany({
+        where: {
+          userId,
+          providerId: providerRecord.id,
+        },
+      });
+
+      await tx.userSocialAccount.delete({
+        where: {
+          userId_providerId: {
+            userId,
+            providerId: providerRecord.id,
+          },
+        },
+      });
+
+      const remaining = await tx.userPortfolioProject.findMany({
+        where: { userId },
+        orderBy: { displayOrder: 'asc' },
+        select: { id: true },
+      });
+
+      for (let index = 0; index < remaining.length; index++) {
+        await tx.userPortfolioProject.update({
+          where: { id: remaining[index].id },
+          data: { displayOrder: index },
+        });
+      }
+    });
   }
 
   private toEntity(row: SocialAccountRecord): SocialAccountEntity {
