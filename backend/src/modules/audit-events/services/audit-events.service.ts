@@ -6,6 +6,7 @@ import {
   AuditEvidenceNotFoundException,
   AuditEvidenceUnavailableException,
 } from '../exceptions/index.js';
+import { toAuditEventDetail } from '../mappers/audit-event-detail.mapper.js';
 import {
   toAuditEventListItem,
   toAuditResponsibleOptions,
@@ -39,6 +40,14 @@ export class AuditEventsService {
     return toAuditResponsibleOptions(
       await this.auditEventsRepository.findResponsibles(),
     );
+  }
+
+  async getDetail(id: string) {
+    const event = await this.auditEventsRepository.findDetailById(id);
+    if (!event) {
+      throw new AuditEventNotFoundException();
+    }
+    return toAuditEventDetail(event);
   }
 
   // La evidencia sale de la referencia guardada en el evento, nunca del documento actual de la solicitud

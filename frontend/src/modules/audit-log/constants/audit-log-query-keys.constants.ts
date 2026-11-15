@@ -6,4 +6,5 @@ export const AUDIT_LOG_QUERY_KEYS = {
   all: ROOT,
   list: (filters: AuditLogFilters, page: number, limit: number) => [...ROOT, "list", filters, page, limit] as const,
   responsibles: [...ROOT, "responsibles"] as const,
+  detail: (eventId: string) => [...ROOT, "detail", eventId] as const,
 };

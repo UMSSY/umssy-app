@@ -76,6 +76,11 @@ export class AuditEventsController {
     });
   }
 
+  @Get(':id')
+  getDetail(@Param('id', uuidPipe) id: string) {
+    return this.auditEventsService.getDetail(id);
+  }
+
   @Get(':id/document')
   async getDocument(
     @Param('id', uuidPipe) id: string,

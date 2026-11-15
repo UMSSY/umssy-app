@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import type { Prisma } from '../../../prisma/client.js';
 import {
+  AUDIT_EVENT_DETAIL_SELECT,
   AUDIT_EVENT_LIST_SELECT,
   AUDIT_EVENT_ORDER,
   AUDIT_TIMELINE_ORDER,
@@ -89,6 +90,13 @@ export class AuditEventsRepository {
       }),
     ]);
     return { people, hasSystemEvents: systemEvent !== null };
+  }
+
+  findDetailById(id: string) {
+    return this.prisma.auditEvent.findUnique({
+      where: { id },
+      select: AUDIT_EVENT_DETAIL_SELECT,
+    });
   }
 
   findEvidenceReference(id: string) {
