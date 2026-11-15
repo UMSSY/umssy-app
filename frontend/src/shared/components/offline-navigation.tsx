@@ -1,7 +1,10 @@
 'use client';
 
 import { useEffect } from 'react';
-import { toast } from 'sonner';
+import {
+  BEFORE_OFFLINE_NAVIGATION,
+  openOfflineRoute,
+} from '@/shared/services/offline-navigation';
 import { useOnlineStatus } from '@/modules/events/hooks/use-online-status';
 
 export function OfflineNavigation() {
@@ -10,6 +13,7 @@ export function OfflineNavigation() {
     const navigate = (event: MouseEvent) => {
       if (
         navigator.onLine ||
+        event.defaultPrevented ||
         event.button !== 0 ||
         event.ctrlKey ||
         event.metaKey ||
@@ -32,13 +36,11 @@ export function OfflineNavigation() {
         return;
       event.preventDefault();
       event.stopPropagation();
-      void (async () => {
-        const cached =
-          typeof caches !== 'undefined' &&
-          (await caches.match(url.origin + url.pathname));
-        if (cached) location.assign(url.href);
-        else toast.info('Conéctate para abrir esta sección.');
-      })().catch(() => toast.info('Conéctate para abrir esta sección.'));
+      const permission = new CustomEvent(BEFORE_OFFLINE_NAVIGATION, {
+        cancelable: true,
+        detail: url.pathname + url.search + url.hash,
+      });
+      if (window.dispatchEvent(permission)) void openOfflineRoute(url.href);
     };
     document.addEventListener('click', navigate, true);
     return () => document.removeEventListener('click', navigate, true);
