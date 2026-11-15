@@ -1,13 +1,99 @@
 import { cleanup, render, screen, within } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import userEvent from '@testing-library/user-event';
+import { useState } from 'react';
+import { act } from '@testing-library/react';
+import type { SimilarMentorsSectionProps } from '../../types/similar-mentor.types';
 import { SIMILAR_MENTORS_FIXTURE } from '../../testing/similar-mentors.fixture';
 import { SimilarMentorsSection } from './similar-mentors-section';
 
 afterEach(cleanup);
 
 describe('SimilarMentorsSection', () => {
+  it.each([false, true])(
+    'recupera error, carga y resultado vacío=%s',
+    async (empty) => {
+      const user = userEvent.setup();
+      const retry = vi.fn();
+      let complete = () => {};
+      function ControlledSection() {
+        const [state, setState] = useState<SimilarMentorsSectionProps>({
+          status: 'error',
+          onRetry: () => {
+            retry();
+            setState({ status: 'loading' });
+          },
+        });
+        complete = () =>
+          setState({
+            status: 'success',
+            mentors: empty ? [] : SIMILAR_MENTORS_FIXTURE,
+          });
+        return <SimilarMentorsSection {...state} />;
+      }
+      render(<ControlledSection />);
+      const section = screen.getByRole('region', {
+        name: 'También podría interesarte',
+      });
+      expect(within(section).getByRole('alert')).toHaveTextContent(
+        'No pudimos cargar los mentores similares',
+      );
+      expect(
+        within(section).queryByRole('heading', { level: 3 }),
+      ).not.toBeInTheDocument();
+      await user.click(
+        within(section).getByRole('button', { name: 'Reintentar' }),
+      );
+      expect(retry).toHaveBeenCalledTimes(1);
+      expect(section).toHaveAttribute('aria-busy', 'true');
+      expect(within(section).getByRole('heading', { level: 2 })).toBeVisible();
+      expect(within(section).getByRole('status')).toHaveTextContent(
+        'Cargando mentores similares...',
+      );
+      expect(section.querySelectorAll('[data-slot="skeleton"]')).toHaveLength(
+        3,
+      );
+      expect(within(section).queryByRole('alert')).not.toBeInTheDocument();
+      expect(
+        within(section).queryByRole('heading', { level: 3 }),
+      ).not.toBeInTheDocument();
+      expect(
+        within(section).queryByText('No hay mentores similares disponibles'),
+      ).not.toBeInTheDocument();
+      act(() => complete());
+      expect(section).toHaveAttribute('aria-busy', 'false');
+      expect(within(section).queryByRole('alert')).not.toBeInTheDocument();
+      expect(
+        within(section).queryByText('Cargando mentores similares...'),
+      ).not.toBeInTheDocument();
+      expect(
+        within(section).queryByRole('button', { name: 'Reintentar' }),
+      ).not.toBeInTheDocument();
+      expect(
+        within(section).queryAllByRole('heading', { level: 3 }),
+      ).toHaveLength(empty ? 0 : 3);
+      if (empty)
+        expect(within(section).getByRole('status')).toHaveTextContent(
+          /^No hay mentores similares disponibles$/,
+        );
+    },
+  );
+
+  it('representa el estado vacío explícito', () => {
+    render(<SimilarMentorsSection status="empty" />);
+    expect(screen.getByRole('status')).toHaveTextContent(
+      /^No hay mentores similares disponibles$/,
+    );
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+  });
+
   it('muestra tres mentores con todo el contenido y ambos estados de disponibilidad', () => {
-    render(<SimilarMentorsSection />);
+    render(
+      <SimilarMentorsSection
+        status="success"
+        mentors={SIMILAR_MENTORS_FIXTURE}
+      />,
+    );
     const section = screen.getByRole('region', {
       name: 'También podría interesarte',
     });
@@ -56,7 +142,12 @@ describe('SimilarMentorsSection', () => {
       fullName: 'Mentor adicional',
     });
     try {
-      render(<SimilarMentorsSection />);
+      render(
+        <SimilarMentorsSection
+          status="success"
+          mentors={SIMILAR_MENTORS_FIXTURE}
+        />,
+      );
       expect(screen.getAllByRole('heading', { level: 3 })).toHaveLength(3);
       expect(screen.queryByText('Mentor adicional')).not.toBeInTheDocument();
     } finally {
@@ -65,7 +156,12 @@ describe('SimilarMentorsSection', () => {
   });
 
   it('define una columna en móvil y tres cuando el contenedor tiene espacio', () => {
-    render(<SimilarMentorsSection />);
+    render(
+      <SimilarMentorsSection
+        status="success"
+        mentors={SIMILAR_MENTORS_FIXTURE}
+      />,
+    );
     const section = screen.getByRole('region');
     expect(section).toHaveClass('@container', 'min-w-0', 'w-full');
     expect(section.lastElementChild).toHaveClass(

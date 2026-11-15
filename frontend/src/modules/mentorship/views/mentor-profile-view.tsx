@@ -12,6 +12,7 @@ import { MentorQuerySkeleton } from '../components/mentor/mentor-query-skeleton'
 import { MentorProfileNavigation } from '../components/mentor/mentor-profile-navigation';
 import { useCurrentUserId } from '../hooks/use-current-user-id';
 import { SimilarMentorsSection } from '../components/mentor/similar-mentors-section';
+import { SIMILAR_MENTORS_FIXTURE } from '../testing/similar-mentors.fixture';
 
 export function MentorProfileView({
   mentorId,
@@ -139,7 +140,10 @@ export function MentorProfileView({
             <MentorTechnicalAreas areas={mentor.technicalAreas} />
           </div>
         </div>
-        <SimilarMentorsSection />
+        <SimilarMentorsSection
+          status="success"
+          mentors={SIMILAR_MENTORS_FIXTURE}
+        />
       </div>
     </main>
   );
