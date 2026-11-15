@@ -5,7 +5,7 @@ import { ProfileCompletenessProgress } from "./profile-completeness-progress";
 export function ProfilePageLayout({ title, description, actions, children }: ProfilePageLayoutProps) {
   return (
     <WorkspacePage title={title} description={description} actions={actions} className="max-w-profile space-y-8">
-      <ProfileCompletenessProgress />
+      <ProfileCompletenessProgress hideWhenComplete />
       {children}
     </WorkspacePage>
   );

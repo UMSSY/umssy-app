@@ -15,6 +15,7 @@ import type { CvPage } from "../types/cv-page.types";
 import type { CvExtraction } from "../types/cv-extraction.types";
 import type { SavedCv } from "../types/saved-cv.types";
 import { DocumentsCvView } from "./documents-cv-view";
+import { DocumentsCvGuideStep } from "../components/documents-cv-guide-step";
 
 vi.mock("@/shared/utils/download-file", () => ({
   downloadFile: vi.fn(),
@@ -1045,5 +1046,102 @@ describe("DocumentsCvView", () => {
       "No encontramos tu CV. Recarga la página.",
     );
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("embeds the guide without a page or dialog and advances only after uploading", async () => {
+    const user = userEvent.setup();
+    const pendingUpload = createDeferred<SavedCv>();
+    const onSaved = vi.fn();
+    const onDirtyChange = vi.fn();
+    const onBusyChange = vi.fn();
+    const file = createFile("CV_Guia.pdf");
+    const savedCv = buildCv(file.name, file.size);
+    vi.mocked(documentsService.uploadCv).mockReturnValueOnce(pendingUpload.promise);
+    render(<DocumentsCvGuideStep onSaved={onSaved} onDirtyChange={onDirtyChange} onBusyChange={onBusyChange} />);
+
+    await screen.findByRole("button", { name: "Seleccionar PDF" });
+    expect(screen.queryByRole("heading", { level: 1 })).not.toBeInTheDocument();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(onDirtyChange).toHaveBeenLastCalledWith(false);
+
+    await user.upload(getFileInput(), file);
+    expect(onDirtyChange).toHaveBeenLastCalledWith(true);
+    expect(onSaved).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("button", { name: "Confirmar carga" }));
+    await waitFor(() => expect(onBusyChange).toHaveBeenLastCalledWith(true));
+    expect(onSaved).not.toHaveBeenCalled();
+
+    await act(async () => {
+      storeCv(savedCv);
+      pendingUpload.resolve(savedCv);
+    });
+
+    await waitFor(() => expect(onSaved).toHaveBeenCalledTimes(1));
+    expect(onDirtyChange).toHaveBeenLastCalledWith(false);
+    expect(onBusyChange).toHaveBeenLastCalledWith(false);
+    expect(documentsService.uploadCv).toHaveBeenCalledWith(file, expect.any(Function));
+  });
+
+  it("keeps the guide dirty and does not advance after an upload error", async () => {
+    const user = userEvent.setup();
+    const onSaved = vi.fn();
+    const onDirtyChange = vi.fn();
+    const onBusyChange = vi.fn();
+    vi.mocked(documentsService.uploadCv).mockRejectedValueOnce({ response: { status: 500 } });
+    render(<DocumentsCvGuideStep onSaved={onSaved} onDirtyChange={onDirtyChange} onBusyChange={onBusyChange} />);
+    await screen.findByRole("button", { name: "Seleccionar PDF" });
+
+    await chooseAndConfirm(user, createFile("CV_Guia.pdf"));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("No se pudo subir tu CV. Intenta de nuevo.");
+    expect(onSaved).not.toHaveBeenCalled();
+    expect(onDirtyChange).toHaveBeenLastCalledWith(true);
+    expect(onBusyChange).toHaveBeenLastCalledWith(false);
+    expect(screen.getByRole("button", { name: "Confirmar carga" })).toBeEnabled();
+  });
+
+  it("does not mark an empty upload response as a saved guide step", async () => {
+    const user = userEvent.setup();
+    const onSaved = vi.fn();
+    const onDirtyChange = vi.fn();
+    vi.mocked(documentsService.uploadCv).mockResolvedValueOnce(null);
+    render(<DocumentsCvGuideStep onSaved={onSaved} onDirtyChange={onDirtyChange} onBusyChange={vi.fn()} />);
+    await screen.findByRole("button", { name: "Seleccionar PDF" });
+
+    await chooseAndConfirm(user, createFile("CV_Guia.pdf"));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("No se pudo subir tu CV.");
+    expect(onSaved).not.toHaveBeenCalled();
+    expect(onDirtyChange).toHaveBeenLastCalledWith(true);
+  });
+
+  it.each([false, true])("keeps upload selectors unique when the normal page and guide coexist (saved CV: %s)", async (hasSavedCv) => {
+    const user = userEvent.setup();
+    if (hasSavedCv) seedCvs("CV_2026.pdf");
+    const { container } = render(
+      <>
+        <section aria-label="Documentos habituales"><DocumentsCvView /></section>
+        <section aria-label="Documentos en la guía"><DocumentsCvGuideStep onSaved={vi.fn()} onDirtyChange={vi.fn()} onBusyChange={vi.fn()} /></section>
+      </>,
+    );
+    const normal = within(screen.getByRole("region", { name: "Documentos habituales" }));
+    const guide = within(screen.getByRole("region", { name: "Documentos en la guía" }));
+    const selectLabel = hasSavedCv ? "Subir nueva versión" : "Seleccionar PDF";
+    const normalButton = await normal.findByRole("button", { name: selectLabel });
+    const guideButton = await guide.findByRole("button", { name: selectLabel });
+
+    expect(normalButton).toHaveAttribute("id", "cv-upload-select");
+    expect(guideButton).toHaveAttribute("id", "profile-guide-cv-upload-select");
+    const ids = [...container.querySelectorAll("[id]")].map((element) => element.id);
+    expect(new Set(ids).size).toBe(ids.length);
+
+    const normalPicker = vi.spyOn(normal.getByLabelText("Archivo PDF del CV"), "click");
+    const guidePicker = vi.spyOn(guide.getByLabelText("Archivo PDF del CV"), "click");
+    await user.click(guideButton);
+    expect(guidePicker).toHaveBeenCalledTimes(1);
+    expect(normalPicker).not.toHaveBeenCalled();
+    await user.click(normalButton);
+    expect(normalPicker).toHaveBeenCalledTimes(1);
+    expect(guidePicker).toHaveBeenCalledTimes(1);
   });
 });

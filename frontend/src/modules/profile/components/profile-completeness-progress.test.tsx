@@ -6,6 +6,7 @@ import { useProfileCompleteness } from '../hooks/use-profile-completeness';
 import { createProfileCompleteness } from '../testing/profile-completeness.fixture';
 import type { ProfileCompletenessSectionId } from '../types/profile-completeness-section-id.types';
 import { ProfileCompletenessProgress } from './profile-completeness-progress';
+import { ProfileGuideContext } from '../contexts/profile-guide-context';
 
 vi.mock('../hooks/use-profile-completeness', () => ({
   useProfileCompleteness: vi.fn(),
@@ -34,6 +35,28 @@ afterEach(() => {
 });
 
 describe('incomplete profile checklist', () => {
+  it('resumes the shared guide from the progress card', async () => {
+    const start = vi.fn();
+    render(
+      <ProfileGuideContext.Provider value={{ isEnabled: true, isComplete: false, start }}>
+        <ProfileCompletenessProgress />
+      </ProfileGuideContext.Provider>,
+    );
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Continuar mi perfil' }));
+    expect(start).toHaveBeenCalledExactlyOnceWith();
+  });
+
+  it('removes the completed dashboard bar when the guide is available', () => {
+    setCompletedSections(PROFILE_COMPLETENESS_SECTION_IDS);
+    render(
+      <ProfileGuideContext.Provider value={{ isEnabled: true, isComplete: true, start: vi.fn() }}>
+        <ProfileCompletenessProgress hideWhenComplete />
+      </ProfileGuideContext.Provider>,
+    );
+    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Continuar mi perfil' })).not.toBeInTheDocument();
+  });
+
   it.each([
     { percentage: 0, completed: [] },
     { percentage: 30, completed: ['contact', 'presentation'] },

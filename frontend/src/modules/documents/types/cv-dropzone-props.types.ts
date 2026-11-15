@@ -4,6 +4,7 @@ export interface CvDropzoneProps {
   title: string;
   description?: string;
   selectLabel: string;
+  selectId?: string;
   icon?: ReactNode;
   isDisabled?: boolean;
   isUploading?: boolean;

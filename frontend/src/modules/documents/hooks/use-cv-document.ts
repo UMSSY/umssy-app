@@ -23,7 +23,9 @@ export function useCvDocument() {
   });
   const cancelLoads = () => queryClient.cancelQueries({ queryKey: CV_QUERY_KEY });
   const reloadCvs = () => queryClient.invalidateQueries({ queryKey: CV_QUERY_KEY });
-  const refreshAfterSave = () => Promise.all([reloadCvs(), invalidateCompleteness()]);
+  const refreshAfterSave = async () => {
+    await Promise.allSettled([reloadCvs(), invalidateCompleteness()]);
+  };
   const uploadMutation = useMutation({
     mutationFn: (file: File) => documentsService.uploadCv(file, setUploadProgress),
     onMutate: () => {
