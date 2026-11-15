@@ -29,8 +29,16 @@ export function getNotificationActionLabel(
 
 const getServerToken = () => null;
 
+function useOptionalRouter(): ReturnType<typeof useRouter> | null {
+  try {
+    return useRouter();
+  } catch {
+    return null;
+  }
+}
+
 export function useNotificationToasts(): void {
-  const router = useRouter();
+  const router = useOptionalRouter();
   const token = useSyncExternalStore(
     subscribeAccessToken,
     getAccessToken,
@@ -63,7 +71,11 @@ export function useNotificationToasts(): void {
               label: actionLabel,
               onClick: () => {
                 if (data.actionUrl) {
-                  router.push(data.actionUrl);
+                  if (router) {
+                    router.push(data.actionUrl);
+                  } else if (typeof window !== 'undefined') {
+                    window.location.assign(data.actionUrl);
+                  }
                 }
               },
             }

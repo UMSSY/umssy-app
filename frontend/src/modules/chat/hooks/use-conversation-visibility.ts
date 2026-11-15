@@ -7,7 +7,12 @@ export function useConversationVisibility(conversationId: string | null) {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    const socket = getChatSocket();
+    let socket;
+    try {
+      socket = getChatSocket();
+    } catch {
+      return;
+    }
 
     const notifyVisibility = () => {
       const isFocused =
@@ -49,10 +54,14 @@ export function useConversationVisibility(conversationId: string | null) {
       window.removeEventListener('blur', handleBlur);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
 
-      socket.emit('visibility:changed', {
-        conversationId: null,
-        isFocused: false,
-      });
+      try {
+        socket.emit('visibility:changed', {
+          conversationId: null,
+          isFocused: false,
+        });
+      } catch {
+        // Socket may not be available or connected
+      }
     };
   }, [conversationId]);
 }
