@@ -4,7 +4,6 @@ import { UnknownPortfolioProviderException } from '../exceptions/unknown-portfol
 import { UnsupportedPortfolioProviderException } from '../exceptions/unsupported-portfolio-provider.exception.js';
 import { PortfolioRepository } from '../repositories/portfolio.repository.js';
 import type { NormalizedPortfolioProject } from '../types/normalized-portfolio-project.type.js';
-import type { PortfolioProjectEntity } from '../types/portfolio-project-entity.type.js';
 
 const userId = '11111111-1111-4111-8111-111111111111';
 

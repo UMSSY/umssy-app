@@ -6,17 +6,28 @@ import { documentsService } from "../services/documents.service";
 import { CvExportDialog } from "./cv-export-dialog";
 
 const downloadFileMock = vi.hoisted(() => vi.fn());
+const useProfileCompletenessMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@/shared/utils/download-file", () => ({
   downloadFile: downloadFileMock,
 }));
 
+vi.mock("@/modules/profile", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/modules/profile")>();
+  return {
+    ...actual,
+    useProfileCompleteness: useProfileCompletenessMock,
+  };
+});
+
 vi.mock("../services/documents.service", () => ({
   documentsService: {
     generateCv: vi.fn(),
+    uploadCv: vi.fn(),
     getPortfolioProjectCount: vi.fn(),
   },
 }));
+
 
 const PDF = new Blob(["%PDF"], { type: "application/pdf" });
 const FILE_URL = "blob:generated-cv";
@@ -47,8 +58,16 @@ describe("CvExportDialog", () => {
     vi.spyOn(URL, "createObjectURL").mockReturnValue(FILE_URL);
     vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => undefined);
     vi.mocked(documentsService.generateCv).mockResolvedValue({ file: PDF, fileName: FILE_NAME });
+    vi.mocked(documentsService.uploadCv).mockResolvedValue(null);
     vi.mocked(documentsService.getPortfolioProjectCount).mockResolvedValue(6);
+    useProfileCompletenessMock.mockReturnValue({
+      completeness: null,
+      isLoading: false,
+      error: null,
+      reload: vi.fn(),
+    });
   });
+
 
   afterEach(() => {
     cleanup();
@@ -212,12 +231,17 @@ describe("CvExportDialog", () => {
   });
 
   it("generates the cv and downloads it named after the user", async () => {
-    const { user } = await renderDialog();
+    const { user, onClose } = await renderDialog();
 
     await user.click(screen.getByRole("button", { name: "Descargar CV en PDF" }));
 
     await waitFor(() => expect(downloadFileMock).toHaveBeenCalledWith(PDF, FILE_NAME));
     expect(documentsService.generateCv).toHaveBeenCalledTimes(1);
+    expect(documentsService.uploadCv).toHaveBeenCalledTimes(1);
+    const [uploadedFile] = vi.mocked(documentsService.uploadCv).mock.calls[0];
+    expect(uploadedFile).toBeInstanceOf(File);
+    expect(uploadedFile.name).toBe(FILE_NAME);
+    expect(onClose).toHaveBeenCalled();
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
@@ -327,4 +351,127 @@ describe("CvExportDialog", () => {
 
     expect(onClose).toHaveBeenCalled();
   });
+
+  it("renders a cordial warning banner when profile completeness is below 50%", async () => {
+    useProfileCompletenessMock.mockReturnValue({
+      completeness: { percentage: 35, sections: [] },
+      isLoading: false,
+      error: null,
+      reload: vi.fn(),
+    });
+
+    await renderDialog();
+
+    expect(screen.getByText("Perfil con nivel de completitud bajo (35%)")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Te sugerimos registrar más información en tu perfil para que tu currículum destaque ante reclutadores.",
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("does not render the low completeness banner when completeness is 50% or higher", async () => {
+    useProfileCompletenessMock.mockReturnValue({
+      completeness: { percentage: 50, sections: [] },
+      isLoading: false,
+      error: null,
+      reload: vi.fn(),
+    });
+
+    await renderDialog();
+
+    expect(screen.queryByText(/Perfil con nivel de completitud bajo/)).not.toBeInTheDocument();
+  });
+
+  it("prompts the user with a confirmation alert dialog on download when completeness is below 50%", async () => {
+    useProfileCompletenessMock.mockReturnValue({
+      completeness: { percentage: 30, sections: [] },
+      isLoading: false,
+      error: null,
+      reload: vi.fn(),
+    });
+    const { user } = await renderDialog();
+
+    await user.click(screen.getByRole("button", { name: "Descargar CV en PDF" }));
+
+    expect(screen.getByRole("alertdialog")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Perfil con información incompleta" })).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Tu perfil cuenta actualmente con menos del 50% de la información registrada (30%). Te sugerimos completar más datos para obtener un currículum más competitivo, pero puedes continuar con la descarga si lo prefieres.",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Continuar de todos modos" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Completar mi perfil" })).toBeInTheDocument();
+    expect(documentsService.generateCv).not.toHaveBeenCalled();
+  });
+
+  it("proceeds with CV generation and download when clicking Continuar de todos modos", async () => {
+    useProfileCompletenessMock.mockReturnValue({
+      completeness: { percentage: 30, sections: [] },
+      isLoading: false,
+      error: null,
+      reload: vi.fn(),
+    });
+    const { user } = await renderDialog();
+
+    await user.click(screen.getByRole("button", { name: "Descargar CV en PDF" }));
+    await user.click(screen.getByRole("button", { name: "Continuar de todos modos" }));
+
+    await waitFor(() => expect(documentsService.generateCv).toHaveBeenCalledWith(ALL_SECTIONS));
+    await waitFor(() => expect(downloadFileMock).toHaveBeenCalledWith(PDF, FILE_NAME));
+    expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+  });
+
+  it("does not prompt again on subsequent downloads once confirmed in the same session", async () => {
+    useProfileCompletenessMock.mockReturnValue({
+      completeness: { percentage: 30, sections: [] },
+      isLoading: false,
+      error: null,
+      reload: vi.fn(),
+    });
+    const { user } = await renderDialog();
+
+    await user.click(screen.getByRole("button", { name: "Descargar CV en PDF" }));
+    await user.click(screen.getByRole("button", { name: "Continuar de todos modos" }));
+    await waitFor(() => expect(documentsService.generateCv).toHaveBeenCalledTimes(1));
+
+    await user.click(screen.getByRole("button", { name: "Descargar CV en PDF" }));
+
+    expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+    expect(documentsService.generateCv).toHaveBeenCalledTimes(1);
+  });
+
+  it("closes the dialog when clicking Completar mi perfil in the warning dialog", async () => {
+    useProfileCompletenessMock.mockReturnValue({
+      completeness: { percentage: 30, sections: [] },
+      isLoading: false,
+      error: null,
+      reload: vi.fn(),
+    });
+    const { user, onClose } = await renderDialog();
+
+    await user.click(screen.getByRole("button", { name: "Descargar CV en PDF" }));
+    await user.click(screen.getByRole("button", { name: "Completar mi perfil" }));
+
+    expect(onClose).toHaveBeenCalled();
+    expect(documentsService.generateCv).not.toHaveBeenCalled();
+  });
+
+  it("downloads directly without alert dialog when completeness is 50% or higher", async () => {
+    useProfileCompletenessMock.mockReturnValue({
+      completeness: { percentage: 75, sections: [] },
+      isLoading: false,
+      error: null,
+      reload: vi.fn(),
+    });
+    const { user } = await renderDialog();
+
+    await user.click(screen.getByRole("button", { name: "Descargar CV en PDF" }));
+
+    expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+    await waitFor(() => expect(documentsService.generateCv).toHaveBeenCalledWith(ALL_SECTIONS));
+    await waitFor(() => expect(downloadFileMock).toHaveBeenCalledWith(PDF, FILE_NAME));
+  });
 });
+

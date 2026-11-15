@@ -10,6 +10,7 @@ export { FormField } from './components/form-field';
 export { ProfilePageLayout } from './components/profile-page-layout';
 export { ProfileCompletenessProgress } from './components/profile-completeness-progress';
 export { SectionCard } from './components/section-card';
+export { SocialAccountConnectButtons } from './components/social-account-connect-buttons';
 
 export type { Feedback } from './types/feedback.types';
 export type { PersonalInfoValues } from './types/personal-info-values.types';
@@ -65,3 +66,24 @@ export { ProfileGuidePreviewView } from './views/profile-guide-preview-view';
 export { ProfileGuideProvider } from './components/profile-guide-provider';
 export { ProfileGuideDashboardCard } from './components/profile-guide-dashboard-card';
 export { useProfileGuide } from './contexts/profile-guide-context';
+export { useProfileCompleteness } from './hooks/use-profile-completeness';
+export {
+  usePortfolioAccounts,
+  useStartPortfolioOAuth,
+  useCompletePortfolioOAuth,
+} from './hooks/use-portfolio-accounts';
+export { portfolioAccountsService } from './services/portfolio-accounts.service';
+export {
+  PORTFOLIO_ACCOUNTS_QUERY_KEY,
+  PORTFOLIO_PROVIDERS,
+  PORTFOLIO_PROVIDER_LABELS,
+  PORTFOLIO_ACCOUNT_MESSAGES,
+} from './constants/portfolio-accounts.constants';
+export type {
+  PortfolioAccountStatusResponse,
+  PortfolioConnectedAccountResponse,
+  PortfolioOAuthCallbackPayload,
+  PortfolioOAuthUrlResponse,
+  PortfolioProviderName,
+  SocialAccountConnectButtonsProps,
+} from './types/portfolio-account.types';

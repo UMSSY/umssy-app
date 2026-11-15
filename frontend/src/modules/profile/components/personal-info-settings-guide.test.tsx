@@ -2,11 +2,11 @@ import {
   act,
   cleanup,
   fireEvent,
-  render,
   screen,
   waitFor,
   within,
 } from '@testing-library/react';
+import { renderWithQuery as render } from '@/shared/testing/render-with-query';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PersonalInfoValues } from '../types/personal-info-values.types';
@@ -18,6 +18,12 @@ const mocks = vi.hoisted(() => ({
   setProfile: vi.fn(),
   uploadPhoto: vi.fn(),
   isSavingContact: false,
+}));
+
+vi.mock('../services/portfolio-accounts.service', () => ({
+  portfolioAccountsService: {
+    getSocialAccounts: vi.fn().mockResolvedValue([]),
+  },
 }));
 
 vi.mock('../hooks/use-profile', () => ({
