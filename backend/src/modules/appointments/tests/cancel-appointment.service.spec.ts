@@ -283,4 +283,38 @@ describe('AppointmentsService.cancel', () => {
       TX,
     );
   });
+
+  it('responde 409 cuando dentro de la transacción la cita dejó de estar confirmada', async () => {
+    appointmentsRepository.findById
+      .mockResolvedValueOnce(createAppointmentRecord())
+      .mockResolvedValueOnce(
+        createAppointmentRecord({
+          status: { title: AppointmentStatusTitle.COMPLETED },
+        }),
+      );
+
+    await expect(
+      service.cancel(student, APPOINTMENT_ID, { reason: 'Imprevisto' }),
+    ).rejects.toThrow(AppointmentNotCancellableException);
+    expect(appointmentsRepository.lockParticipants).toHaveBeenCalled();
+    expect(appointmentsRepository.cancelAppointment).not.toHaveBeenCalled();
+    expect(
+      appointmentsRepository.createAppointmentHistory,
+    ).not.toHaveBeenCalled();
+  });
+
+  it('responde 409 cuando dentro de la transacción la cita ya empezó', async () => {
+    appointmentsRepository.findById
+      .mockResolvedValueOnce(createAppointmentRecord())
+      .mockResolvedValueOnce(createAppointmentRecord({ startAt: NOW }));
+
+    await expect(
+      service.cancel(student, APPOINTMENT_ID, { reason: 'Imprevisto' }),
+    ).rejects.toThrow(AppointmentNotCancellableException);
+    expect(appointmentsRepository.lockParticipants).toHaveBeenCalled();
+    expect(appointmentsRepository.cancelAppointment).not.toHaveBeenCalled();
+    expect(
+      appointmentsRepository.createAppointmentHistory,
+    ).not.toHaveBeenCalled();
+  });
 });
