@@ -84,6 +84,8 @@
   --grid-template-columns-login: 3fr 2fr;
   --color-danger: #B4050F;
   --color-success: #0E8345;
+  --color-success-soft: #E7F3EC;
+  --color-success-soft-foreground: #0A6234;
   --color-interaction: #EEF3F8;
   --color-gold: #C9A227;
   --color-surface: #FFFFFF;

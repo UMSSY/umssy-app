@@ -243,4 +243,20 @@ export class JobOffersService {
     const exists = await this.jobOffersRepository.companyExists(companyId);
     if (!exists) throw new CompanyNotFoundException();
   }
+
+  activeRecruitmentVacancies() {
+    return this.jobOffersRepository.activeRecruitmentVacancies();
+  }
+
+  recruiterVacancies(companyIds: string[]) {
+    return this.jobOffersRepository.recruiterVacancies(companyIds);
+  }
+
+  publishedRecruitmentJob(jobId: string) {
+    return this.jobOffersRepository.publishedRecruitmentJob(jobId);
+  }
+
+  companyExists(companyId: string) {
+    return this.jobOffersRepository.companyExists(companyId);
+  }
 }

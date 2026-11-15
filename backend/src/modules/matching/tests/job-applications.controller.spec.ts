@@ -33,10 +33,18 @@ describe('HU-02B T2.8 - JobApplicationsController', () => {
       service as unknown as JobApplicationsService,
     );
 
-    await expect(controller.apply(OFFER_ID, USER_ID)).resolves.toEqual(
-      response,
-    );
-    expect(service.apply).toHaveBeenCalledWith(USER_ID, OFFER_ID);
+    await expect(
+      controller.apply(OFFER_ID, USER_ID, {
+        consent: true,
+        consentCv: true,
+        consentContact: true,
+      }),
+    ).resolves.toEqual(response);
+    expect(service.apply).toHaveBeenCalledWith(USER_ID, OFFER_ID, {
+      consent: true,
+      consentCv: true,
+      consentContact: true,
+    });
   });
 
   it('consulta la postulación propia de la vacante', async () => {

@@ -1,3 +1,4 @@
+import { RadarConsentsModule } from '../radar-integration/radar-consents.module.js';
 import { CompanyJobApplicantsController } from './controllers/company-job-applicants.controller.js';
 import { JobApplicationsController } from './controllers/job-applications.controller.js';
 import { CompanyJobApplicantsService } from './services/company-job-applicants.service.js';
@@ -27,9 +28,11 @@ import { CandidateProfileService } from './services/candidate-profile.service.js
 import { JobApplicationMapper } from './mappers/job-application.mapper.js';
 import { JobRecommendationsController } from './controllers/job-recommendations.controller.js';
 import { JobRecommendationsService } from './services/job-recommendations.service.js';
+import { RequirementsController } from './controllers/requirements.controller.js'; 
 
 @Module({
   imports: [
+    RadarConsentsModule,
     PrismaModule,
     JwtAuthModule,
     SkillsModule,
@@ -43,6 +46,7 @@ import { JobRecommendationsService } from './services/job-recommendations.servic
     JobApplicationsController,
     JobRecommendationsController,
     CompanyJobApplicantsController,
+    RequirementsController,
   ],
   providers: [
     JobApplicationsService,
@@ -64,6 +68,7 @@ import { JobRecommendationsService } from './services/job-recommendations.servic
     JobRecommendationsService,
   ],
   exports: [
+    JobApplicationsService,
     JobRecommendationsService,
     MatchingService,
     ActiveJobOffersService,
