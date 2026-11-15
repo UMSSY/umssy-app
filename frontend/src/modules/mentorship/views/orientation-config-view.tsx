@@ -29,10 +29,15 @@ import {
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useOrientationConfig } from "../hooks/use-orientation-config";
+import { useMentorProfileDraft } from "../hooks/use-mentor-profile-draft";
 
 export function OrientationConfigView() {
   const { orientationTypes, savedIds, isLoading, isSaving, hasLoadError, isMentorActive, retry, save } = useOrientationConfig();
-  const [draftIds, setSelectedIds] = useState<string[] | null>(null);
+  const {
+    orientationTypeIds: draftIds,
+    setOrientationTypeIds: setSelectedIds,
+    clearOrientationTypeIds,
+  } = useMentorProfileDraft();
   const selectedIds = draftIds ?? savedIds;
   const [isDiscardDialogOpen, setIsDiscardDialogOpen] = useState(false);
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
@@ -58,6 +63,7 @@ export function OrientationConfigView() {
     const idsToSave = [...selectedIds];
     try {
       await save(idsToSave);
+      clearOrientationTypeIds();
       setErrorMessage(null);
       toast.success("Tipos de orientación actualizados correctamente");
     } catch {
@@ -313,6 +319,7 @@ export function OrientationConfigView() {
               nativeButton={false}
               type="button"
               render={<Link href="/mentors/participation" />}
+              onClick={clearOrientationTypeIds}
               disabled={isSaving}
               className="h-10 bg-critical-action px-6 text-sm font-semibold text-critical-action-foreground hover:bg-brand-hover"
             >
