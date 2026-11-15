@@ -827,8 +827,13 @@ describe('ProfileGuideProvider', () => {
       }),
     ).toBeVisible();
     expect(
-      within(list).getByRole('button', { name: 'Presentación · Pendiente' }),
+      within(list).getByRole('button', { name: 'Presentación · En proceso' }),
     ).toHaveAttribute('aria-current', 'step');
+    expect(
+      within(list).getByRole('button', {
+        name: 'Formación académica · Pendiente',
+      }),
+    ).not.toHaveAttribute('aria-current');
     await user.click(hide);
 
     expect(

@@ -13,6 +13,7 @@ import {
   ArrowLeft,
   ArrowRight,
   Check,
+  CircleDashed,
   ListChecks,
   Minus,
   X,
@@ -614,6 +615,7 @@ function ProfileGuideSessionProvider({
                             const completed = completeness?.sections.find(
                               (section) => section.id === id,
                             )?.isCompleted;
+                            const inProgress = !completed && id === step;
                             return (
                               <Button
                                 key={id}
@@ -625,11 +627,20 @@ function ProfileGuideSessionProvider({
                               >
                                 {completed ? (
                                   <Check aria-hidden="true" />
+                                ) : inProgress ? (
+                                  <CircleDashed
+                                    aria-hidden="true"
+                                    className="text-app-header"
+                                  />
                                 ) : (
                                   <ArrowRight aria-hidden="true" />
                                 )}
                                 {PROFILE_COMPLETENESS_SECTION_LABELS[id]} ·{' '}
-                                {completed ? 'Completada' : 'Pendiente'}
+                                {completed
+                                  ? 'Completada'
+                                  : inProgress
+                                    ? 'En proceso'
+                                    : 'Pendiente'}
                               </Button>
                             );
                           })}
