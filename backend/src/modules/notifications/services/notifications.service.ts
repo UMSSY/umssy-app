@@ -26,34 +26,36 @@ export class NotificationsService {
     private readonly notificationGateway: NotificationGateway,
     private readonly appVisibilityService: AppVisibilityService,
   ) {}
- private normalizePayload(payload: any): any {
-    if (!payload || typeof payload !== 'object') return payload;
 
-    const normalized = { ...payload };
+  private isIsoDateString(value: string): boolean {
+  return /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$/.test(value);
+}
+  private normalizePayload(payload: any): any {
+  if (!payload || typeof payload !== 'object') return payload;
 
-    if (normalized.date) {
-      try {
-        normalized.date = formatBoliviaDate(normalized.date);
-      } catch (e) {
-      }
-    }
+  const normalized = { ...payload };
 
-    if (normalized.time) {
-      try {
-        normalized.time = formatBoliviaTime(normalized.time);
-      } catch (e) {
-      }
-    }
-
-    if (normalized.expiresAt) {
-      try {
-        normalized.expiresAt = `${formatBoliviaDate(normalized.expiresAt)} a las ${formatBoliviaTime(normalized.expiresAt)}`;
-      } catch (e) {
-      }
-    }
-
-    return normalized;
+  if (normalized.date && typeof normalized.date === 'string' && this.isIsoDateString(normalized.date)) {
+    try {
+      normalized.date = formatBoliviaDate(normalized.date);
+    } catch (e) {}
   }
+
+  if (normalized.time && typeof normalized.time === 'string' && this.isIsoDateString(normalized.time)) {
+    try {
+      normalized.time = formatBoliviaTime(normalized.time);
+    } catch (e) {}
+  }
+
+  if (normalized.expiresAt && typeof normalized.expiresAt === 'string' && this.isIsoDateString(normalized.expiresAt)) {
+    try {
+      normalized.expiresAt = `${formatBoliviaDate(normalized.expiresAt)} a las ${formatBoliviaTime(normalized.expiresAt)}`;
+    } catch (e) {}
+  }
+
+  return normalized;
+}
+
   async notify(request: NotifyRequest): Promise<NotifyResult> {
     const { recipientIds, actorId, type, payload, actionUrl, groupKey } = request;
 
@@ -83,9 +85,10 @@ export class NotificationsService {
     if (!template) {
       throw new NotFoundException(`Plantilla no encontrada para el tipo ${type}`);
     }
-    
-    const title = template.renderTitle(payload);
-    const body = template.renderBody(payload);
+
+    const normalizedPayload = this.normalizePayload(payload);
+    const title = template.renderTitle(normalizedPayload);
+    const body = template.renderBody(normalizedPayload);
 
     const preferences = await this.preferencesRepository.findManyByUserIds(validRecipients);
     
