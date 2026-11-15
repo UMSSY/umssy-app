@@ -9,6 +9,7 @@ import { EventRegistrationsModule } from '../event-registrations/event-registrat
 import { EducationsModule } from '../educations/educations.module.js';
 import { SkillsModule } from '../skills/skills.module.js';
 import { UsersModule } from '../users/users.module.js';
+import { ApplicationsModule } from '../applications/applications.module.js';
 
 import { ChatRolePolicyService } from './services/chat-role-policy.service.js';
 
@@ -58,6 +59,7 @@ import { ChatGateway } from './gateways/chat.gateway.js';
     EducationsModule,
     SkillsModule,
     UsersModule,
+    ApplicationsModule,
   ],
   controllers: [
     UserSearchController,

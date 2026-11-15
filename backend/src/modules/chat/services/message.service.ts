@@ -71,6 +71,10 @@ export class MessageService {
       await this.chatRolePolicyService.assertCanCommunicate(
         params.senderId,
         otherParticipantId,
+        {
+          contextType: conversation.contextType ?? undefined,
+          contextId: conversation.contextId ?? undefined,
+        },
       );
     }
 
