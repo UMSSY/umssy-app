@@ -8,6 +8,12 @@ export default defineConfig({
     globals: true,
     root: './',
     include: ['**/*.spec.ts'],
+    env: {
+      VAPID_SUBJECT: 'mailto:soporte@umssy.com',
+      VAPID_PUBLIC_KEY:
+        'BEZ8wdcbxKrsApxDH7oAlMFpNsjQMzQw0zcg059G6t5rSMUL7_wAVwAcatr8UHKYaTZHJOXTHHp7KvIAdkWOi_c',
+      VAPID_PRIVATE_KEY: 'fuc5SV1vkbN7h3idj8Nsg8W6uqf7zDYhOyZ8GbXz3Zk',
+    },
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],
