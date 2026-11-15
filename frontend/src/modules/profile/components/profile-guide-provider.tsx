@@ -39,6 +39,10 @@ import {
   PROFILE_COMPLETENESS_SECTION_IDS,
   PROFILE_COMPLETENESS_SECTION_LABELS,
 } from '../constants/profile-completeness.constants';
+import {
+  PROFILE_GUIDE_ASSISTANT_MESSAGES,
+  PROFILE_GUIDE_SECTION_TIPS,
+} from '../constants/profile-guide-tips.constants';
 import { ProfileGuideContext } from '../contexts/profile-guide-context';
 import { useProfile } from '../hooks/use-profile';
 import { useProfileCompleteness } from '../hooks/use-profile-completeness';
@@ -538,6 +542,17 @@ function ProfileGuideSessionProvider({
                         isTraveling && 'invisible',
                       )}
                     >
+                      <div className="space-y-1">
+                        <p className="text-sm font-semibold text-app-header">
+                          {PROFILE_GUIDE_ASSISTANT_MESSAGES.title}
+                        </p>
+                        <p className="text-xs font-semibold text-text-secondary">
+                          {PROFILE_GUIDE_ASSISTANT_MESSAGES.subtitle}
+                        </p>
+                      </div>
+                      <p className="text-sm text-text-secondary">
+                        {PROFILE_GUIDE_SECTION_TIPS[step]}
+                      </p>
                       <p
                         role="status"
                         aria-live="polite"
@@ -556,6 +571,16 @@ function ProfileGuideSessionProvider({
                                 : sectionComplete
                                   ? 'Esta sección ya está completa. Puedes revisarla o continuar.'
                                   : 'Completemos esta sección juntos. Tú decides cuándo continuar.'}
+                      </p>
+                      <p className="text-xs text-text-secondary">
+                        {PROFILE_GUIDE_ASSISTANT_MESSAGES.nextStep}:{' '}
+                        <span className="font-semibold text-ink">
+                          {index < PROFILE_COMPLETENESS_SECTION_IDS.length - 1
+                            ? PROFILE_COMPLETENESS_SECTION_LABELS[
+                                PROFILE_COMPLETENESS_SECTION_IDS[index + 1]
+                              ]
+                            : PROFILE_GUIDE_ASSISTANT_MESSAGES.lastStep}
+                        </span>
                       </p>
                       <Button
                         variant="outline"

@@ -770,6 +770,12 @@ describe('ProfileGuideProvider', () => {
     const assistant = screen.getByRole('complementary', {
       name: 'Ayuda de la guía',
     });
+    expect(assistant).toHaveTextContent('Asistente UMSSY');
+    expect(assistant).toHaveTextContent('Guía de perfil');
+    expect(assistant).toHaveTextContent(
+      'Resume en pocas líneas quién eres y qué te distingue como profesional.',
+    );
+    expect(assistant).toHaveTextContent('Siguiente paso: Formación académica');
     const show = within(assistant).getByRole('button', {
       name: 'Ver pendientes',
     });
@@ -803,6 +809,27 @@ describe('ProfileGuideProvider', () => {
     expect(
       within(assistant).getByRole('button', { name: 'Ver pendientes' }),
     ).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('announces the pending review as the next step on the last section', async () => {
+    const user = userEvent.setup();
+    state.sessions.set('user-a', session({ dismissed: true, lastStep: 'cv' }));
+    render(page());
+    await waitFor(() =>
+      expect(
+        screen.getByRole('button', { name: 'Continuar guía de prueba' }),
+      ).toBeEnabled(),
+    );
+    await user.click(
+      screen.getByRole('button', { name: 'Continuar guía de prueba' }),
+    );
+
+    expect(
+      await screen.findByRole('dialog', { name: 'Documentos y CV' }),
+    ).toBeVisible();
+    expect(
+      screen.getByRole('complementary', { name: 'Ayuda de la guía' }),
+    ).toHaveTextContent('Siguiente paso: Revisar pendientes');
   });
 
   it('uses the dirty-change confirmation before jumping through the robot checklist', async () => {
