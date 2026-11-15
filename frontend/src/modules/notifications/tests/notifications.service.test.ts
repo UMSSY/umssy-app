@@ -87,6 +87,14 @@ describe("notifications.service", () => {
     expect(apiClient.patch).toHaveBeenCalledWith("/notifications/notif-42/read");
   });
 
+  it("codifica el id al marcar una notificación como leída", async () => {
+    vi.mocked(apiClient.patch).mockResolvedValue(createAxiosResponse(undefined));
+
+    await markNotificationAsRead("id/raro");
+
+    expect(apiClient.patch).toHaveBeenCalledWith("/notifications/id%2Fraro/read");
+  });
+
   it("marca todas las notificaciones como leídas", async () => {
     vi.mocked(apiClient.patch).mockResolvedValue(createAxiosResponse(undefined));
 
