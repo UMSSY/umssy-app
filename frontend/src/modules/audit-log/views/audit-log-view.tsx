@@ -16,12 +16,18 @@ import { useAuditFilters } from "../hooks/use-audit-filters";
 import { useAuditResponsibles } from "../hooks/use-audit-responsibles";
 import { useEvidenceViewer } from "../hooks/use-evidence-viewer";
 
+import { useState } from "react";
+import { AuditEventDetailPanel } from "../components/detail/audit-event-detail-panel";
+import { AuditEventTimeline } from "../components/detail/audit-event-timeline";
+import type { AuditEvent } from "../types/audit-event.types";
+
 export function AuditLogView() {
   const auditFilters = useAuditFilters();
   const responsibles = useAuditResponsibles();
   const list = useAuditEvents(auditFilters.filters);
   const evidence = useEvidenceViewer();
   const csv = useAuditCsvExport();
+  const [selectedEvent, setSelectedEvent] = useState<AuditEvent | null>(null);
 
   const isEmpty = !list.isLoading && !list.error && list.items.length === 0;
   const listProps = {
@@ -29,6 +35,7 @@ export function AuditLogView() {
     isLoading: list.isLoading,
     loadingEvidenceId: evidence.loadingId,
     onOpenEvidence: evidence.open,
+    onSelectEvent: setSelectedEvent,
   };
 
   return (
@@ -97,7 +104,10 @@ export function AuditLogView() {
           </>
         )}
       </div>
-
+      <AuditEventDetailPanel event={selectedEvent} onClose={() => setSelectedEvent(null)}>
+        {selectedEvent ? <AuditEventTimeline eventId={selectedEvent.id} /> : null}
+      </AuditEventDetailPanel>
+ 
       <EvidenceViewerDialog event={evidence.opened?.event ?? null} url={evidence.opened?.url ?? null} finalFocus={evidence.triggerRef} onClose={evidence.close} />
     </WorkspacePage>
   );

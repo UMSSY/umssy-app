@@ -7,6 +7,7 @@ import type { AuditEventListProps } from "../../types/audit-event-list-props.typ
 import { EvidenceButton } from "../evidence/evidence-button";
 import { AuditActionBadge } from "./audit-action-badge";
 import { AuditEventDate } from "./audit-event-date";
+import { Button } from "@/components/ui/button";
 
 const SKELETON_CARDS = 3;
 
@@ -15,6 +16,7 @@ export function AuditEventCards({
   isLoading = false,
   loadingEvidenceId,
   onOpenEvidence,
+  onSelectEvent,
 }: AuditEventListProps) {
   if (isLoading) {
     return (
@@ -36,9 +38,15 @@ export function AuditEventCards({
           className="flex min-w-0 flex-col gap-2 rounded-lg border border-border bg-surface px-4 py-3.5"
         >
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <span className="font-bold text-ink">
+            <Button
+              type="button"
+              variant="link"
+              onClick={() => onSelectEvent(event)}
+              className="h-auto px-0 text-base font-bold text-ink"
+            >
               {event.request.code || EMPTY_VALUE}
-            </span>
+              <span className="sr-only"> · ver detalle del evento</span>
+            </Button>
             <AuditEventDate occurredAt={event.occurredAt} inline />
           </div>
           <div>
