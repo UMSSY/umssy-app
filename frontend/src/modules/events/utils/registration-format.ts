@@ -51,3 +51,7 @@ export function getEffectiveRegistrationStatus(status: string, isPast: boolean) 
     code: status,
   };
 }
+
+export function getFinishedRegistrationPresentation() {
+  return { label: "Finalizado", code: "FINALIZED" };
+}
