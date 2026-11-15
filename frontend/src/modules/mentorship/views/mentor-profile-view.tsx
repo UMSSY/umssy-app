@@ -12,7 +12,8 @@ import { MentorQuerySkeleton } from '../components/mentor/mentor-query-skeleton'
 import { MentorProfileNavigation } from '../components/mentor/mentor-profile-navigation';
 import { useCurrentUserId } from '../hooks/use-current-user-id';
 import { SimilarMentorsSection } from '../components/mentor/similar-mentors-section';
-import { SIMILAR_MENTORS_FIXTURE } from '../testing/similar-mentors.fixture';
+import { useSimilarMentors } from '../hooks/use-similar-mentors';
+import type { SimilarMentorsSectionProps } from '../types/similar-mentor.types';
 
 export function MentorProfileView({
   mentorId,
@@ -27,6 +28,11 @@ export function MentorProfileView({
     isFetching,
     refetch,
   } = useMentorProfile(mentorId);
+
+  const similar = useSimilarMentors(
+    mentorId,
+    !isError && Boolean(mentor?.fullName?.trim()),
+  );
 
   if (isPending || (isError && isFetching)) {
     return (
@@ -77,6 +83,17 @@ export function MentorProfileView({
   const professionalInterests = mentor.skills.filter((skill) =>
     skill.name?.trim(),
   );
+  const similarProps: SimilarMentorsSectionProps =
+    similar.isPending || (similar.isError && similar.isFetching)
+      ? { status: 'loading' }
+      : similar.isError
+        ? {
+            status: 'error',
+            onRetry: () => {
+              void similar.refetch();
+            },
+          }
+        : { status: 'success', mentors: similar.data };
 
   return (
     <main className="bg-background">
@@ -140,10 +157,7 @@ export function MentorProfileView({
             <MentorTechnicalAreas areas={mentor.technicalAreas} />
           </div>
         </div>
-        <SimilarMentorsSection
-          status="success"
-          mentors={SIMILAR_MENTORS_FIXTURE}
-        />
+        <SimilarMentorsSection {...similarProps} returnTo={returnTo} />
       </div>
     </main>
   );
