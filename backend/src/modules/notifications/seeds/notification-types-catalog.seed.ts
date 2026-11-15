@@ -15,6 +15,7 @@ export async function seedNotificationTypes(
     { code: 'APPOINTMENT_CANCELLED', name: 'Cita cancelada', sendsPush: true, sendsEmail: true },
     { code: 'APPOINTMENT_BOOKED', name: 'Cita confirmada', sendsPush: true, sendsEmail: true },
     { code: 'SURVEY_PUBLISHED', name: 'Encuesta publicada', sendsPush: true, sendsEmail: true },
+    { code: 'SURVEY_REMINDER', name: 'Recordatorio de encuesta pendiente', sendsPush: true, sendsEmail: false },
     { code: 'APPLICATION_STATUS_CHANGED', name: 'Cambio de estado de una postulación', sendsPush: true, sendsEmail: false },
     { code: 'NEW_JOB_APPLICANT', name: 'Nuevo postulante en una vacante', sendsPush: true, sendsEmail: true },
     { code: 'EVENT_STARTING_SOON', name: 'Evento por comenzar', sendsPush: true, sendsEmail: false },

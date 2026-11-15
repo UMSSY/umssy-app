@@ -46,6 +46,10 @@ export const NOTIFICATION_TEMPLATES: NotificationTemplateMap = {
     renderTitle: () => 'Nueva encuesta publicada',
     renderBody: (p) => truncate(`La encuesta "${p.surveyTitle}" está disponible.`),
   },
+  [NotificationType.SURVEY_REMINDER]: {
+    renderTitle: () => 'Recordatorio de encuesta',
+    renderBody: (p) => truncate(`Aún no respondiste la encuesta "${p.surveyTitle}".`),
+  },
 
   [NotificationType.APPLICATION_STATUS_CHANGED]: {
     renderTitle: () => 'Actualización de postulación',
