@@ -26,6 +26,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     queryKey: ["auth-session", accessToken],
     queryFn: () => authService.getSession(accessToken),
     enabled: Boolean(accessToken),
+    networkMode: "offlineFirst",
     retry: false,
     staleTime: 0,
     refetchOnWindowFocus: true,

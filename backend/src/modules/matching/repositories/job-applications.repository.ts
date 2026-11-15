@@ -1,3 +1,4 @@
+import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { JobOfferStatus } from '../../job-offers/types/job-offer.enum.js';
@@ -62,8 +63,10 @@ export class JobApplicationsRepository {
   findByUserAndOffer(
     userId: string,
     jobOfferId: string,
+    context?: TransactionContext,
   ): Promise<JobApplicationRecord | null> {
-    return this.prisma.jobApplication.findUnique({
+    const client = context?.client ?? this.prisma;
+    return client.jobApplication.findUnique({
       where: { jobOfferId_userId: { jobOfferId, userId } },
       select: JOB_APPLICATION_SELECT,
     });
@@ -73,8 +76,10 @@ export class JobApplicationsRepository {
     userId: string,
     jobOfferId: string,
     statusId: string,
+    context?: TransactionContext,
   ): Promise<JobApplicationRecord> {
-    return this.prisma.jobApplication.create({
+    const client = context?.client ?? this.prisma;
+    return client.jobApplication.create({
       data: { userId, jobOfferId, statusId },
       select: JOB_APPLICATION_SELECT,
     });
@@ -84,8 +89,10 @@ export class JobApplicationsRepository {
     userId: string,
     jobOfferId: string,
     statusId: string,
+    context?: TransactionContext,
   ): Promise<JobApplicationRecord | null> {
-    const result = await this.prisma.jobApplication.updateMany({
+    const client = context?.client ?? this.prisma;
+    const result = await client.jobApplication.updateMany({
       where: {
         userId,
         jobOfferId,
@@ -94,7 +101,7 @@ export class JobApplicationsRepository {
       data: { statusId, appliedAt: new Date() },
     });
     if (result.count !== 1) return null;
-    return this.findByUserAndOffer(userId, jobOfferId);
+    return this.findByUserAndOffer(userId, jobOfferId, context);
   }
 
   findApplicantsByOffer(jobOfferId: string): Promise<JobApplicantRecord[]> {

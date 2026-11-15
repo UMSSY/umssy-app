@@ -9,6 +9,7 @@ import { seedEvents } from '../../modules/events/seeds/events.seed.js';
 import { seedEventRegistrations } from '../../modules/event-registrations/seeds/event-registrations.seed.js';
 import { seedAvailability } from '../../modules/availability/seeds/availability.seed.js';
 import { seedAccessRequests } from '../../modules/access-requests/seeds/access-requests.seed.js';
+import { seedRadar } from '../../modules/radar-integration/seeds/radar.seed.js';
 import { seedTechnicalAreas } from '../../modules/technical-areas/seeds/technical-areas.seed.js';
 import { seedOrientationTypes } from '../../modules/orientation-types/seeds/orientation-types.seed.js';
 
@@ -49,6 +50,9 @@ vi.mock('../../modules/chat/seeds/chat.seed.js', () => ({
     conversations: 5,
     messages: 11,
   }),
+}));
+vi.mock('../../modules/radar-integration/seeds/radar.seed.js', () => ({
+  seedRadar: vi.fn(),
 }));
 
 const users = {
@@ -146,11 +150,12 @@ describe('combined events and availability seed', () => {
       expect.any(Date),
     );
     expect(seedAccessRequests).toHaveBeenCalledWith(tx);
+    expect(seedRadar).toHaveBeenCalledWith(tx, users);
     expect(client.$transaction).toHaveBeenCalledWith(expect.any(Function), {
       maxWait: 5000,
       timeout: 120000,
     });
-    expect(client.$transaction).toHaveBeenCalledTimes(9);
+    expect(client.$transaction).toHaveBeenCalledTimes(10);
     expect(client.$disconnect).not.toHaveBeenCalled();
   });
 

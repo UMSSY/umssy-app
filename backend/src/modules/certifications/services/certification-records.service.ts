@@ -29,6 +29,10 @@ export class CertificationRecordsService {
     private readonly transactions: TransactionService,
   ) {}
 
+  hasByUserId(userId: string): Promise<boolean> {
+    return this.repository.hasByUserId(userId);
+  }
+
   findPublicationEvidenceIds(userId: string, context: TransactionContext) {
     return this.repository.findPublicationEvidenceIds(userId, context);
   }
@@ -88,5 +92,9 @@ export class CertificationRecordsService {
 
   delete(id: string): Promise<void> {
     return this.repository.delete(id);
+  }
+
+  findRecruitmentEvidence(userId: string, ids: string[]) {
+    return this.repository.findRecruitmentEvidence(userId, ids);
   }
 }

@@ -4,6 +4,25 @@ import { EducationsRepository } from '../repositories/educations.repository.js';
 import { EducationSourcesService } from '../services/education-sources.service.js';
 
 describe('EducationSourcesService', () => {
+  it.each([null, { id: 'education-1' }])(
+    'checks record presence without loading education content: %j',
+    async (record) => {
+      const findFirst = vi.fn().mockResolvedValue(record);
+      const repository = new EducationsRepository({
+        education: { findFirst },
+      } as unknown as PrismaService);
+      const service = new EducationSourcesService(repository);
+
+      await expect(service.hasByUserId('owner-1')).resolves.toBe(
+        record !== null,
+      );
+      expect(findFirst).toHaveBeenCalledExactlyOnceWith({
+        where: { userId: 'owner-1' },
+        select: { id: true },
+      });
+    },
+  );
+
   it('reads only the analysis fields of the requested owner', async () => {
     const userId = '11111111-1111-4111-8111-111111111111';
     const records = [

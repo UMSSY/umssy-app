@@ -24,6 +24,14 @@ const workExperienceSelect = {
 export class WorkExperienceRepository {
   constructor(private readonly prisma: PrismaService) {}
 
+  async hasByUserId(userId: string): Promise<boolean> {
+    const record = await this.prisma.workExperience.findFirst({
+      where: { userId },
+      select: { id: true },
+    });
+    return record !== null;
+  }
+
   findAnalysisSources(
     userId: string,
   ): Promise<WorkExperienceAnalysisSourceResponse[]> {
@@ -120,5 +128,19 @@ export class WorkExperienceRepository {
         create: { title: companyName },
       },
     };
+  }
+
+  findRecruitmentEvidence(userId: string, ids: string[]) {
+    return this.prisma.workExperience.findMany({
+      where: { userId, id: { in: ids } },
+      select: {
+        id: true,
+        position: true,
+        startDate: true,
+        endDate: true,
+        description: true,
+        company: { select: { title: true } },
+      },
+    });
   }
 }
