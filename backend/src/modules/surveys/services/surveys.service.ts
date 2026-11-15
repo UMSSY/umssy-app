@@ -35,6 +35,7 @@ import {
   isSurveyForGraduate,
 } from '../utils/is-survey-for-graduate.js';
 import { getScheduleError } from '../utils/survey-schedule.js';
+import type { SurveyAlertConfigDto } from '../requests/survey-alert-config.schema.js';
 
 import { ReportHistoryService } from '../../reports/services/report-history.service.js';
 import { SurveyPdfService } from './survey-pdf.service.js';
@@ -251,6 +252,102 @@ export class SurveysService {
 
     await this.surveysRepository.submitResponse(id, userId, request.answers);
     return { success: true, message: 'Respuestas guardadas con éxito' };
+  }
+
+  async getAlertConfig(surveyId: string): Promise<{
+    enabled: boolean;
+    threshold: number;
+    questionIds: string[] | null;
+  }> {
+    const config = await this.surveysRepository.findAlertConfig(surveyId);
+    if (!config) {
+      return {
+        enabled: true,
+        threshold: 10,
+        questionIds: null,
+      };
+    }
+    return {
+      enabled: config.isEnabled,
+      threshold: config.threshold,
+      questionIds: (config.questionIds as string[] | null) ?? null,
+    };
+  }
+
+  async saveAlertConfig(
+    surveyId: string,
+    dto: SurveyAlertConfigDto,
+  ): Promise<{
+    saved: boolean;
+    enabled: boolean;
+    threshold: number;
+    questionIds: string[] | null;
+  }> {
+    const survey = await this.surveysRepository.findStatus(surveyId);
+    if (!survey) throw new SurveyNotFoundException();
+
+    const isEnabled = dto.enabled ?? dto.isEnabled ?? true;
+    const config = await this.surveysRepository.upsertAlertConfig(surveyId, {
+      isEnabled,
+      threshold: dto.threshold,
+      questionIds: dto.questionIds ?? null,
+    });
+    return {
+      saved: true,
+      enabled: config.isEnabled,
+      threshold: config.threshold,
+      questionIds: (config.questionIds as string[] | null) ?? null,
+    };
+  }
+
+  async getAudience(surveyId: string): Promise<{
+    surveyId: string;
+    totalAudience: number;
+    audienceLabel: string;
+    lastReminderAt: string | null;
+  }> {
+    const survey = await this.surveysRepository.findForAudience(surveyId);
+    if (!survey) throw new SurveyNotFoundException();
+
+    const totalAudience = await this.surveysRepository.countAudience({
+      careerId: survey.career?.id,
+    });
+    const careerLabel = survey.career?.title ?? 'Todas las carreras';
+    const periodLabel = survey.academicPeriod ?? 'General';
+    const audienceLabel = `${careerLabel} · ${periodLabel}`;
+
+    return {
+      surveyId,
+      totalAudience:
+        totalAudience > 0
+          ? totalAudience
+          : Math.max(1, survey._count.responses),
+      audienceLabel,
+      lastReminderAt: survey.lastReminderSentAt?.toISOString() ?? null,
+    };
+  }
+
+  async sendReminder(
+    surveyId: string,
+    pendingResponses: number,
+  ): Promise<{
+    sent: boolean;
+    pendingResponses: number;
+    message: string;
+    sentAt: string;
+  }> {
+    const survey = await this.surveysRepository.findStatus(surveyId);
+    if (!survey) throw new SurveyNotFoundException();
+
+    const now = new Date();
+    await this.surveysRepository.updateLastReminderSent(surveyId, now);
+
+    return {
+      sent: true,
+      pendingResponses,
+      message: `Recordatorio enviado a ${pendingResponses} titulados pendientes.`,
+      sentAt: now.toISOString(),
+    };
   }
 
   private async ensureSurveyIsValid(

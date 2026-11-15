@@ -9,11 +9,24 @@ export class PushDispatcherService {
   constructor(
     private readonly pushSubscriptionsRepository: PushSubscriptionsRepository,
   ) {
-    webpush.setVapidDetails(
-      process.env.VAPID_SUBJECT || 'mailto:soporte@umssy.com',
-      process.env.VAPID_PUBLIC_KEY || '',
-      process.env.VAPID_PRIVATE_KEY || '',
-    );
+    if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
+      try {
+        webpush.setVapidDetails(
+          process.env.VAPID_SUBJECT || 'mailto:soporte@umssy.com',
+          process.env.VAPID_PUBLIC_KEY,
+          process.env.VAPID_PRIVATE_KEY,
+        );
+      } catch (error) {
+        this.logger.warn(
+          'No se pudieron configurar los detalles de VAPID',
+          error instanceof Error ? error.message : String(error),
+        );
+      }
+    } else {
+      this.logger.warn(
+        'Claves VAPID no configuradas; notificaciones push desactivadas.',
+      );
+    }
   }
 
   async dispatchToUsers(
@@ -23,7 +36,13 @@ export class PushDispatcherService {
     actionUrl: string,
     groupKey?: string,
   ): Promise<'sent' | 'partial' | 'failed' | 'skipped'> {
-    if (userIds.length === 0) return 'skipped';
+    if (
+      !process.env.VAPID_PUBLIC_KEY ||
+      !process.env.VAPID_PRIVATE_KEY ||
+      userIds.length === 0
+    ) {
+      return 'skipped';
+    }
 
     const subscriptions = await this.pushSubscriptionsRepository.findManyByUserIds(userIds);
     if (subscriptions.length === 0) return 'skipped';

@@ -7,6 +7,7 @@ import {
   Param,
   Patch,
   Post,
+  Put,
   Query,
   StreamableFile,
   UseGuards,
@@ -40,6 +41,10 @@ import {
   submitSurveyResponseSchema,
   type SubmitSurveyResponseRequest,
 } from '../requests/submit-survey-response.schema.js';
+import {
+  surveyAlertConfigSchema,
+  type SurveyAlertConfigDto,
+} from '../requests/survey-alert-config.schema.js';
 import { surveyIdSchema } from '../requests/survey-id.schema.js';
 import {
   surveyStatisticsQuerySchema,
@@ -186,5 +191,53 @@ export class SurveysController {
       type: 'application/pdf',
       disposition: `attachment; filename="${fileName}"`,
     });
+  }
+
+  @Get(':id/alert-config')
+  @ApiOperation({
+    summary: 'Obtiene la configuración de alertas de variación de la encuesta',
+  })
+  @ApiOkResponse({ description: 'Configuración de alertas' })
+  getAlertConfig(
+    @Param('id', new ZodValidationPipe(surveyIdSchema)) id: string,
+  ) {
+    return this.surveysService.getAlertConfig(id);
+  }
+
+  @Put(':id/alert-config')
+  @ApiOperation({
+    summary: 'Guarda la configuración de alertas de variación de la encuesta',
+  })
+  @ApiBody(toApiBody(surveyAlertConfigSchema))
+  @ApiOkResponse({ description: 'Configuración guardada' })
+  saveAlertConfig(
+    @Param('id', new ZodValidationPipe(surveyIdSchema)) id: string,
+    @Body(new ZodValidationPipe(surveyAlertConfigSchema))
+    request: SurveyAlertConfigDto,
+  ) {
+    return this.surveysService.saveAlertConfig(id, request);
+  }
+
+  @Get(':id/audience')
+  @ApiOperation({
+    summary: 'Obtiene datos de audiencia y tasa de respuesta de la encuesta',
+  })
+  @ApiOkResponse({ description: 'Datos de audiencia' })
+  getAudience(
+    @Param('id', new ZodValidationPipe(surveyIdSchema)) id: string,
+  ) {
+    return this.surveysService.getAudience(id);
+  }
+
+  @Post(':id/reminders')
+  @ApiOperation({
+    summary: 'Envía un recordatorio a los usuarios pendientes de responder',
+  })
+  @ApiOkResponse({ description: 'Recordatorio enviado' })
+  sendReminder(
+    @Param('id', new ZodValidationPipe(surveyIdSchema)) id: string,
+    @Body() body: { pendingResponses?: number },
+  ) {
+    return this.surveysService.sendReminder(id, body?.pendingResponses ?? 0);
   }
 }

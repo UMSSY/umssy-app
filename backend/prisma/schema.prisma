@@ -1188,9 +1188,12 @@ model Survey {
   opensAt           DateTime? @map("opens_at") @db.Timestamptz(6)
   closesAt          DateTime? @map("closes_at") @db.Timestamptz(6)
   statusId          String    @map("status_id") @db.Uuid
-  createdById       String    @map("created_by_id") @db.Uuid
-  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt         DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  createdById           String    @map("created_by_id") @db.Uuid
+  closingSoonNotifiedAt DateTime? @map("closing_soon_notified_at") @db.Timestamptz(6)
+  closedNotifiedAt      DateTime? @map("closed_notified_at") @db.Timestamptz(6)
+  lastReminderSentAt    DateTime? @map("last_reminder_sent_at") @db.Timestamptz(6)
+  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   career         Career?               @relation(fields: [careerId], references: [id], onDelete: Restrict)
   status         SurveyStatus          @relation(fields: [statusId], references: [id], onDelete: Restrict)
@@ -1198,12 +1201,27 @@ model Survey {
   createdBy      User                  @relation("SurveyCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
   questions      SurveyQuestion[]
   responses      SurveyResponse[]
+  alertConfig    SurveyAlertConfig?
 
   @@index([careerId, academicPeriod])
   @@index([createdById])
   @@index([statusId])
   @@index([targetAudienceId])
   @@map("surveys")
+}
+
+model SurveyAlertConfig {
+  id          String   @id @default(uuid()) @db.Uuid
+  surveyId    String   @unique @map("survey_id") @db.Uuid
+  isEnabled   Boolean  @default(true) @map("is_enabled")
+  threshold   Int      @default(10)
+  questionIds Json?    @map("question_ids")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  survey Survey @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+
+  @@map("survey_alert_configs")
 }
 
 model SurveyQuestion {
