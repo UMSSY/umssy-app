@@ -84,9 +84,10 @@ it('waits for preparation before offering the native install prompt', () => {
   rerender(tree());
   fireEvent.click(screen.getByRole('button', { name: 'Reintentar' }));
   expect(state.query.refetch).toHaveBeenCalledOnce();
-  expect(
-    screen.queryByRole('button', { name: 'Instalar app' }),
-  ).not.toBeInTheDocument();
+  expect(screen.getByRole('status')).toHaveTextContent(
+    'Datos sin conexión pendientes.',
+  );
+  expect(screen.getByRole('button', { name: 'Instalar app' })).toBeVisible();
 
   state.query = { ...state.query, isError: false };
   rerender(tree());
@@ -96,6 +97,42 @@ it('waits for preparation before offering the native install prompt', () => {
   expect(prompt).not.toHaveBeenCalled();
   fireEvent.click(screen.getByRole('button', { name: 'Instalar app' }));
   expect(prompt).toHaveBeenCalledOnce();
+});
+
+it('allows installation after a download error without claiming offline readiness', () => {
+  state.query = {
+    ...state.query,
+    isFetching: false,
+    isPending: false,
+    isError: true,
+  };
+  render(tree());
+  const prompt = vi.fn().mockResolvedValue(undefined);
+  act(() =>
+    window.dispatchEvent(
+      Object.assign(new Event('beforeinstallprompt', { cancelable: true }), {
+        prompt,
+      }),
+    ),
+  );
+  fireEvent.click(screen.getByRole('button', { name: 'Instalar app' }));
+  expect(prompt).toHaveBeenCalledOnce();
+  expect(screen.getByRole('status')).toHaveTextContent(
+    'Datos sin conexión pendientes.',
+  );
+  expect(screen.getByRole('button', { name: 'Reintentar' })).toBeVisible();
+});
+
+it('shows manual installation instructions when downloading fails without a native prompt', () => {
+  state.query = {
+    ...state.query,
+    isFetching: false,
+    isPending: false,
+    isError: true,
+  };
+  render(tree());
+  expect(screen.getByText(/añadir a pantalla de inicio/i)).toBeVisible();
+  expect(screen.getByRole('button', { name: 'Reintentar' })).toBeVisible();
 });
 
 it('shows manual installation instructions only after preparation', () => {

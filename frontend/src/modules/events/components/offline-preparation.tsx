@@ -48,7 +48,7 @@ export function OfflinePreparation() {
         {preparing
           ? 'Guardando tus pases…'
           : failed
-            ? 'No pudimos preparar tus pases.'
+            ? 'Datos sin conexión pendientes.'
             : 'Pases listos sin conexión.'}
       </p>
       {failed ? (
@@ -60,7 +60,7 @@ export function OfflinePreparation() {
           Reintentar
         </Button>
       ) : null}
-      {!preparing && !failed && !installed ? (
+      {!preparing && !installed ? (
         install ? (
           <Button size="sm" onClick={install}>
             Instalar app

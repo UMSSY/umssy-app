@@ -9,8 +9,8 @@ Usar los ID como evidencia. Evitar incluir códigos QR, tokens o credenciales.
 | Caso | Pasos | Resultado esperado |
 | --- | --- | --- |
 | Pase consultado en línea | Entrar como A, abrir el detalle del pase confirmado con internet y comprobar que aparece el QR. Cerrar la PWA, activar modo avión y volver a abrir «Mis inscripciones». | El mismo pase puede leerse desde la copia local, con fecha de última actualización. La lectura local no necesita hacer una solicitud al backend. |
-| Sin precarga | Entrar como B y abrir «Mis inscripciones» sin consultar el detalle de un pase. Cerrar, activar modo avión y reabrir la PWA. | La cuenta B no tiene copias locales. La vista indica que se debe abrir un pase confirmado con internet. |
-| Cambio de cuenta | Precargar el pase de A. En el mismo navegador, cerrar sesión, entrar como B y repetir la prueba sin conexión. Luego volver a entrar como A sin abrir todavía el detalle de su pase. | B no ve el pase de A. Al volver a A, la copia anterior ya no existe y se debe abrir el pase con internet para guardarlo de nuevo. |
+| Sin precarga | En una cuenta sin copia previa, bloquear la consulta de inscripciones antes de entrar para que falle la preparación automática. Activar modo avión y abrir «Mis inscripciones». | La vista informa que no hay pases guardados. La cuenta puede reintentar la descarga cuando recupere conexión. |
+| Cambio de cuenta | Precargar el pase de A. Cerrar sesión, entrar como B, esperar su preparación y repetir la prueba sin conexión. Volver a A y esperar su nueva preparación. | Cada cuenta ve únicamente sus propios pases. La nueva descarga de A no depende de abrir manualmente cada pase. |
 | Respuesta tardía | Con una prueba automatizada, retrasar la respuesta del detalle de A hasta después de iniciar sesión como B. | La respuesta atrasada no vuelve a guardar el pase de A y B sigue sin copias. |
 | Pase retirado al reconectar | Precargar el pase de A, dejar ese dispositivo sin red y cancelar la inscripción de prueba desde otra sesión con conexión antes del inicio. Volver a conectar el primer dispositivo y después desconectarlo de nuevo. | La vista avisa que retiró los pases que ya no están disponibles. El QR retirado tampoco aparece en la siguiente consulta sin red. |
 | Fallo temporal al reconectar | Precargar el pase, desconectar el dispositivo y volver a conectar manteniendo la API inaccesible. | La vista conserva la copia y su última actualización hasta poder confirmar el estado con el servidor. |
@@ -33,6 +33,15 @@ inscripciones». Pulsa «Instalar app» si Chrome ofrece la instalación. Cierra
 la PWA, activa modo avión y ábrela desde el ícono. Entra a «Mis inscripciones»
 y verifica el QR de un taller vigente. Usa también una cuenta sin pases para
 comprobar que una lista vacía confirmada completa la preparación.
+
+Para probar una descarga incompleta, bloquear una consulta del catálogo
+manteniendo conexión con el frontend. Debe aparecer «Datos sin conexión
+pendientes», junto con «Reintentar» y «Instalar app» cuando Chrome permita
+instalar. Si no ofrece el diálogo, debe mostrarse la instrucción del menú.
+Instalar en este estado conserva el aviso de datos pendientes hasta una
+preparación exitosa. Una preparación detenida termina como error tras un
+máximo de 60 segundos. Restaurar la API y pulsar «Reintentar», o reconectar,
+debe permitir completar la descarga.
 
 ## Navegación y datos ampliados
 
