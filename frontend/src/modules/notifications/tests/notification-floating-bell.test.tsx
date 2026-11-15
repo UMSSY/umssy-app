@@ -1,10 +1,26 @@
-import { render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { AnchorHTMLAttributes, ReactNode } from "react";
+import { cleanup, render, screen } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NotificationFloatingBell } from "../components/notification-floating-bell";
 import {
   useNotificationsRealtimeSync,
   useUnreadNotificationsCount,
 } from "../hooks/use-notifications";
+
+vi.mock("next/link", () => ({
+  default: ({
+    children,
+    href,
+    ...props
+  }: AnchorHTMLAttributes<HTMLAnchorElement> & {
+    href: string;
+    children: ReactNode;
+  }) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
+}));
 
 vi.mock("../hooks/use-notifications", () => ({
   useNotificationsRealtimeSync: vi.fn(),
@@ -14,6 +30,10 @@ vi.mock("../hooks/use-notifications", () => ({
 describe("NotificationFloatingBell", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    cleanup();
   });
 
   it("oculta el badge cuando no hay notificaciones sin leer", () => {
