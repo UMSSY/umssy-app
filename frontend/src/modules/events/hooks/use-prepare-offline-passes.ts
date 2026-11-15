@@ -28,13 +28,14 @@ export function usePrepareOfflinePasses(allowed: boolean) {
       if (!token) throw new Error('Inicia sesión para guardar tus pases.');
       await Promise.all([
         prepareOfflineShell(signal),
-        prepareOfflinePasses(token, signal),
+        prepareOfflinePasses(token, signal).finally(() => {
+          void queryClient.invalidateQueries({
+            queryKey: [OFFLINE_PASSES_SNAPSHOT_QUERY_KEY, token],
+          });
+        }),
         prepareOfflineEvents(token, signal),
-        authService.getSession(token),
+        authService.getSession(token, signal, true),
       ]);
-      void queryClient.invalidateQueries({
-        queryKey: [OFFLINE_PASSES_SNAPSHOT_QUERY_KEY, token],
-      });
       return true;
     },
   });

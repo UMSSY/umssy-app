@@ -1,10 +1,11 @@
-const CACHE_VERSION = 'v4';
+const CACHE_VERSION = 'v5';
 const CACHE_PREFIX = 'umssy-';
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${CACHE_VERSION}`;
 const ASSETS_CACHE = `${CACHE_PREFIX}assets-${CACHE_VERSION}`;
 const OFFLINE_URL = '/offline.html';
 const NAVIGATION_TIMEOUT_MS = 4000;
 const SHELL_ROUTES = ['/', '/events/my-passes', '/dashboard'];
+const REQUIRED_ROUTES = [...SHELL_ROUTES, '/login', '/events'];
 const ADDITIONAL_ROUTES = [
   "/affinity-radar/review-queue",
   "/appointments",
@@ -148,7 +149,10 @@ const precache = async () => {
   }
   await Promise.all([
     Promise.allSettled(STATIC_ASSETS.map((url) => fetchAndCache(SHELL_CACHE, url))),
-    Promise.allSettled([...SHELL_ROUTES, ...ADDITIONAL_ROUTES].map(precacheRoute)),
+    Promise.all(REQUIRED_ROUTES.map(precacheRoute)).then((routes) => {
+      if (!routes.every(Boolean)) throw new Error('required offline routes could not be cached');
+    }),
+    Promise.allSettled(ADDITIONAL_ROUTES.filter((route) => !REQUIRED_ROUTES.includes(route)).map(precacheRoute)),
   ]);
 };
 
@@ -231,8 +235,7 @@ const selectStrategy = (request) => {
 };
 
 self.addEventListener('install', (event) => {
-  self.skipWaiting();
-  event.waitUntil(precache());
+  event.waitUntil(precache().then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', (event) => {
@@ -259,7 +262,7 @@ self.addEventListener('fetch', (event) => {
 self.addEventListener('message', (event) => {
   const data = event.data;
   if (data?.type === 'PREPARE_OFFLINE_PASSES' && event.ports?.[0]) {
-    event.waitUntil(Promise.all(SHELL_ROUTES.map(precacheRoute)).then(
+    event.waitUntil(Promise.all(REQUIRED_ROUTES.map(precacheRoute)).then(
       (routes) => event.ports[0].postMessage(routes.every(Boolean)),
       () => event.ports[0].postMessage(false),
     ));

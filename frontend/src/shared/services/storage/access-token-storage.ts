@@ -85,6 +85,10 @@ export function getAccessToken(): string | null {
   return token;
 }
 
+export async function waitForAccessTokenWrites(): Promise<void> {
+  await writes;
+}
+
 export function clearAccessToken(): boolean {
   revision++;
   token = null;

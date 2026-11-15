@@ -11,10 +11,14 @@ import { withOfflineSessionCopy } from '@/shared/services/storage/offline-sessio
 import { REQUEST_TIMEOUT_MS } from '@/shared/constants/http.constants';
 
 export const eventCategoriesService = {
-  async getAll(): Promise<EventCategoryItem[]> {
+  async getAll(
+    signal?: AbortSignal,
+    token = getAccessToken(),
+    requireStorage = false,
+  ): Promise<EventCategoryItem[]> {
     return withOfflineSessionCopy(
       'event-categories',
-      getAccessToken(),
+      token,
       async () => {
         if (!apiClient.defaults.baseURL) {
           throw new Error('La URL del backend no está configurada.');
@@ -25,6 +29,8 @@ export const eventCategoriesService = {
         }>('/event-categories', {
           params: { page: 1, limit: 50 },
           timeout: REQUEST_TIMEOUT_MS,
+          signal,
+          headers: { Authorization: token ? `Bearer ${token}` : '' },
         });
 
         return readArray(readRecord(readRecord(response.data).data).items).map(
@@ -37,6 +43,7 @@ export const eventCategoriesService = {
           },
         );
       },
+      { signal, requireStorage },
     );
   },
 };

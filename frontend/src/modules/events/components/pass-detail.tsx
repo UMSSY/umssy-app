@@ -11,30 +11,44 @@ import { formatTimeRange } from '../utils/event-card';
 import { formatEventLocation } from '../utils/format-event-location';
 import { Card } from '@/components/ui/card';
 import { Calendar, MapPin, Check, Clock, Loader2 } from 'lucide-react';
-import { formatRegistrationDate, getEffectiveRegistrationStatus } from '../utils/registration-format';
+import {
+  formatRegistrationDate,
+  getEffectiveRegistrationStatus,
+} from '../utils/registration-format';
 import { registrationsService } from '../services/registrations.service';
 import type { PassDetailProps } from '../types/pass-detail-props.types';
 import { OFFLINE_PASSES_SNAPSHOT_QUERY_KEY } from '../constants/offline-passes.constants';
+import { useOnlineStatus } from '../hooks/use-online-status';
 
 export function PassDetail({ registration, offlineQrToken }: PassDetailProps) {
   const accessToken = useRegistrationSession();
   const queryClient = useQueryClient();
+  const isOnline = useOnlineStatus();
   const pass = useQuery({
     queryKey: ['private-event-pass', accessToken, registration.id],
     queryFn: async ({ signal }) => {
-      const data = await registrationsService.getPass(registration.id, signal, accessToken);
+      const data = await registrationsService.getPass(
+        registration.id,
+        signal,
+        accessToken,
+      );
       if (!signal.aborted) {
-        void queryClient.invalidateQueries({ queryKey: [OFFLINE_PASSES_SNAPSHOT_QUERY_KEY, accessToken] });
+        void queryClient.invalidateQueries({
+          queryKey: [OFFLINE_PASSES_SNAPSHOT_QUERY_KEY, accessToken],
+        });
       }
       return data;
     },
-    enabled: Boolean(accessToken),
+    enabled: Boolean(accessToken) && isOnline,
     retry: false,
   });
   const detail = pass.data ?? registration;
   const savedQrToken = pass.data ? undefined : offlineQrToken;
 
-  const effectiveStatus = getEffectiveRegistrationStatus(detail.status, useEventFinished({ eventDate: detail.date, endTime: detail.endTime }));
+  const effectiveStatus = getEffectiveRegistrationStatus(
+    detail.status,
+    useEventFinished({ eventDate: detail.date, endTime: detail.endTime }),
+  );
 
   return (
     <div className="flex w-full min-w-0 flex-col gap-5">
@@ -86,11 +100,20 @@ export function PassDetail({ registration, offlineQrToken }: PassDetailProps) {
                 <span className="text-xs">Generando pase...</span>
               </div>
             ) : effectiveStatus.isPast ? (
-              <p className="text-center text-ink">Pase finalizado. Este taller ya concluyó.</p>
+              <p className="text-center text-ink">
+                Pase finalizado. Este taller ya concluyó.
+              </p>
             ) : pass.isError && !savedQrToken ? (
               <div role="alert" className="space-y-3 text-center text-ink">
                 <p>No se pudo cargar el pase. Inténtalo nuevamente.</p>
-                <Button variant="outline" onClick={() => { void pass.refetch(); }}>Reintentar</Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    void pass.refetch();
+                  }}
+                >
+                  Reintentar
+                </Button>
               </div>
             ) : (
               <PassQr token={pass.data?.qrToken ?? savedQrToken ?? ''} />
@@ -111,10 +134,17 @@ export function PassDetail({ registration, offlineQrToken }: PassDetailProps) {
             <span className="text-[10px] tracking-widest text-surface/80 uppercase">
               ESTADO
             </span>
-            <span className={cn('flex items-center justify-end gap-1 text-sm font-bold',
-              effectiveStatus.isPast ? 'text-surface/80' : 'text-gold'
-            )}>
-              {effectiveStatus.isPast ? <Clock className="size-4" /> : <Check className="size-4" />}
+            <span
+              className={cn(
+                'flex items-center justify-end gap-1 text-sm font-bold',
+                effectiveStatus.isPast ? 'text-surface/80' : 'text-gold',
+              )}
+            >
+              {effectiveStatus.isPast ? (
+                <Clock className="size-4" />
+              ) : (
+                <Check className="size-4" />
+              )}
               {effectiveStatus.label}
             </span>
           </div>

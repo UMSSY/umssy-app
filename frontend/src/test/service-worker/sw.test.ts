@@ -9,8 +9,8 @@ type Listener = (event: Record<string, unknown>) => void;
 type Route = () => Response;
 
 const ORIGIN = "https://umssy.test";
-const SHELL = "umssy-shell-v4";
-const ASSETS = "umssy-assets-v4";
+const SHELL = "umssy-shell-v5";
+const ASSETS = "umssy-assets-v5";
 const source = readFileSync(path.resolve(import.meta.dirname, "../../../public/sw.js"), "utf8");
 
 const keyOf = (input: RequestLike) =>
@@ -271,7 +271,9 @@ describe("service worker lifecycle", () => {
       "/": html(shellHtml),
       "/events/my-passes": html(shellHtml),
       "/dashboard": html(shellHtml),
-      "/events": html("dynamic", "private, no-cache, no-store, max-age=0, must-revalidate"),
+      "/events": html(shellHtml),
+      "/login": html(shellHtml),
+      "/mentor/availability": html("dynamic", "private, no-cache, no-store, max-age=0, must-revalidate"),
       "/manifest.json": asset("{}"),
       "/_next/static/css/app.css": asset("css"),
       "/_next/static/chunks/main.js": asset("main"),
@@ -284,7 +286,7 @@ describe("service worker lifecycle", () => {
     expect(worker.caches.cachedUrls(SHELL)).toEqual(
       expect.arrayContaining(["/offline.html", "/manifest.json", "/", "/events/my-passes", "/dashboard"]),
     );
-    expect(worker.caches.cachedUrls(SHELL)).not.toContain("/events");
+    expect(worker.caches.cachedUrls(SHELL)).not.toContain("/mentor/availability");
     expect(worker.caches.cachedUrls(ASSETS).sort()).toEqual([
       "/_next/static/chunks/main.js",
       "/_next/static/chunks/page.js",
@@ -301,9 +303,14 @@ describe("service worker lifecycle", () => {
 
   it("recovers a missing passes route on a later online visit and caches Next route-group chunks", async () => {
     const chunk = "/_next/static/chunks/app/(app)/events/my-passes/page-2257.js";
-    const routes: Record<string, Route> = { "/offline.html": html("offline") };
+    const routes: Record<string, Route> = {
+      "/offline.html": html("offline"), "/": html("home"), "/dashboard": html("dashboard"),
+      "/login": html("login"), "/events": html("events"), "/events/my-passes": html("passes"),
+    };
     const worker = loadWorker(routes);
     await worker.install();
+    (await worker.caches.open(SHELL)).entries.delete(keyOf("/events/my-passes"));
+    delete routes["/events/my-passes"];
     expect(await (await worker.navigate("/events/my-passes")).response!.text()).toBe("offline");
 
     routes["/events/my-passes"] = html(`<script src="${chunk}"></script>`);
@@ -327,6 +334,13 @@ describe("service worker lifecycle", () => {
     await worker.activate();
     expect(await worker.caches.keys()).toEqual([SHELL, ASSETS, "third-party"]);
     expect(worker.self.clients.claim).toHaveBeenCalled();
+  });
+
+  it("keeps an incomplete update from taking over the existing worker", async () => {
+    const worker = loadWorker({ "/offline.html": html("offline") });
+    const result = await worker.install();
+    await expect(result.waits[0]).rejects.toThrow();
+    expect(worker.self.skipWaiting).not.toHaveBeenCalled();
   });
 
   it("caches only same-origin Next assets sent by the page", async () => {
@@ -355,6 +369,8 @@ describe("service worker lifecycle", () => {
 
   it.each([true, false])("reports whether the required routes and chunks are ready (%s)", async (ready) => {
     const worker = loadWorker({
+      "/login": html(shellHtml),
+      "/events": html(shellHtml),
       "/": html(shellHtml),
       "/dashboard": html(shellHtml),
       "/events/my-passes": html(shellHtml),

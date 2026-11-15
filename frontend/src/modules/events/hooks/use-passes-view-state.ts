@@ -40,7 +40,7 @@ export function usePassesViewState(): PassesViewState {
 
   if (!isOnline) {
     if (isSnapshotLoading) return emptyView("loading");
-    if (!snapshot || !saved.length) return emptyView("no-offline-copy");
+    if (!snapshot) return emptyView("no-offline-copy");
     return savedView(null);
   }
   if (live.isLoading) return emptyView("loading");

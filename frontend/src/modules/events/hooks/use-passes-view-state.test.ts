@@ -63,10 +63,10 @@ describe("usePassesViewState", () => {
     expect(result.current.passes).toEqual([]);
   });
 
-  it("treats an empty saved copy as no copy offline", async () => {
+  it("keeps a successfully saved empty list available offline", async () => {
     await offlinePassesStore.save("user-a", []);
     const { result } = setup({ online: false });
-    await waitFor(() => expect(result.current.status).toBe("no-offline-copy"));
+    await waitFor(() => expect(result.current.status).toBe("saved"));
   });
 
   it("falls back to the saved copy when the online query fails", async () => {

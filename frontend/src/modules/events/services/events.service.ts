@@ -19,27 +19,36 @@ export const eventsService = {
     id: string,
     signal?: AbortSignal,
     accessToken: string | null = getAccessToken(),
+    requireStorage = false,
   ): Promise<EventDetail> {
-    return withOfflineSessionCopy('event:' + id, accessToken, async () => {
-      if (!apiClient.defaults.baseURL)
-        throw new Error('La URL del backend no está configurada.');
-      const response = await apiClient.get<{ data: EventDetail }>(
-        `/events/${encodeURIComponent(id)}`,
-        {
-          headers: {
-            Authorization: accessToken ? `${BEARER_PREFIX}${accessToken}` : '',
+    return withOfflineSessionCopy(
+      'event:' + id,
+      accessToken,
+      async () => {
+        if (!apiClient.defaults.baseURL)
+          throw new Error('La URL del backend no está configurada.');
+        const response = await apiClient.get<{ data: EventDetail }>(
+          `/events/${encodeURIComponent(id)}`,
+          {
+            headers: {
+              Authorization: accessToken
+                ? `${BEARER_PREFIX}${accessToken}`
+                : '',
+            },
+            signal,
+            timeout: REQUEST_TIMEOUT_MS,
           },
-          signal,
-          timeout: REQUEST_TIMEOUT_MS,
-        },
-      );
-      return parseEventDetail(readRecord(response.data).data);
-    });
+        );
+        return parseEventDetail(readRecord(response.data).data);
+      },
+      { signal, requireStorage },
+    );
   },
   async getEvents(
     params: GetEventsParams,
     signal?: AbortSignal,
     accessToken: string | null = getAccessToken(),
+    requireStorage = false,
   ): Promise<EventsListResponse> {
     const copyKey = JSON.stringify([
       params.page,
@@ -77,6 +86,7 @@ export const eventsService = {
           offset: readCount(body.offset),
         };
       },
+      { signal, requireStorage },
     );
   },
 };

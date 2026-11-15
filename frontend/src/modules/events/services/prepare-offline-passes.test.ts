@@ -61,6 +61,31 @@ describe('preparing passes from the authenticated shell', () => {
     await expect(prepareOfflinePasses(token, signal)).rejects.toThrow(
       'Sin conexión',
     );
-    await expect(loadSessionOfflinePasses(token)).resolves.toEqual(previous);
+    expect((await loadSessionOfflinePasses(token))?.passes).toEqual(
+      previous?.passes,
+    );
+  });
+
+  it('removes revoked passes even if downloading another QR fails', async () => {
+    vi.mocked(registrationsService.getMine).mockResolvedValue([
+      registration,
+      { ...registration, id: 'reg-2' },
+    ]);
+    vi.mocked(registrationsService.getPass).mockImplementation(async (id) => ({
+      ...detail,
+      id,
+    }));
+    const { signal } = new AbortController();
+    await prepareOfflinePasses(token, signal);
+    vi.mocked(registrationsService.getMine).mockResolvedValue([registration]);
+    vi.mocked(registrationsService.getPass).mockRejectedValue(
+      new Error('Network failed'),
+    );
+    await expect(prepareOfflinePasses(token, signal)).rejects.toThrow(
+      'Network failed',
+    );
+    expect(
+      (await loadSessionOfflinePasses(token))?.passes.map((pass) => pass.id),
+    ).toEqual(['reg-1']);
   });
 });
