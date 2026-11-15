@@ -7,25 +7,10 @@ import {
   getAccessToken,
   subscribeAccessToken,
 } from '@/shared/services/storage/access-token-storage';
+import { NOTIFICATION_NEW_EVENT } from '../constants/notification-socket-events.constants';
 import { getNotificationsSocket } from '../services/notifications-socket';
-
-export interface NotificationNewSocketPayload {
-  title: string;
-  body: string;
-  actionUrl?: string;
-}
-
-export function getNotificationActionLabel(
-  title: string,
-  actionUrl?: string,
-): string {
-  if (!actionUrl) return 'Ver';
-  const lowerTitle = title.toLowerCase();
-  if (lowerTitle.includes('mensaje')) return 'Ver mensaje';
-  if (lowerTitle.includes('aceptada')) return 'Ir a la sala de chat';
-  if (lowerTitle.includes('solicitud')) return 'Ver Solicitud';
-  return 'Ver';
-}
+import type { NotificationNewSocketPayload } from '../types/notification-new-socket-payload.types';
+import { getNotificationActionLabel } from '../utils/get-notification-action-label';
 
 const getServerToken = () => null;
 
@@ -58,10 +43,7 @@ export function useNotificationToasts(): void {
     const handleNewNotification = (data: NotificationNewSocketPayload) => {
       if (!data || typeof data.title !== 'string') return;
 
-      const actionLabel = getNotificationActionLabel(
-        data.title,
-        data.actionUrl,
-      );
+      const actionLabel = getNotificationActionLabel(data.typeCode ?? '');
 
       toast(data.title, {
         description: data.body,
@@ -83,10 +65,10 @@ export function useNotificationToasts(): void {
       });
     };
 
-    socket.on('notification:new', handleNewNotification);
+    socket.on(NOTIFICATION_NEW_EVENT, handleNewNotification);
 
     return () => {
-      socket.off('notification:new', handleNewNotification);
+      socket.off(NOTIFICATION_NEW_EVENT, handleNewNotification);
     };
   }, [token, router]);
 }

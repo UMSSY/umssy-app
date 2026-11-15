@@ -33,7 +33,7 @@ export async function getUnreadCount(): Promise<UnreadCountResponse> {
 }
 
 export async function markNotificationAsRead(notificationId: string): Promise<void> {
-  await apiClient.patch(`/notifications/${notificationId}/read`);
+    await apiClient.patch(`/notifications/${encodeURIComponent(notificationId)}/read`);
 }
 
 export async function markAllNotificationsAsRead(
