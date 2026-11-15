@@ -53,3 +53,5 @@ export type { NotificationType } from "./types/notification-type.types";
 export type { PushSubscriptionPayload } from "./types/push-subscription-payload.types";
 export type { UnreadCountResponse } from "./types/unread-count-response.types";
 export { NotificationFloatingBell } from "./components/notification-floating-bell";
+export { useNotificationPreferences } from "./hooks/use-notification-preferences";
+export type { NotificationChannel } from "./types/notification-channel.types";
