@@ -1,3 +1,5 @@
+import { DAY_MS } from '../../../common/constants/date-time.constants.js';
+
 export const HEATMAP_TYPES = [
   'skills-by-career',
   'skills-by-salary',
@@ -5,16 +7,8 @@ export const HEATMAP_TYPES = [
   'skills-by-experience',
 ] as const;
 
-export const BOLIVIA_UTC_OFFSET = '-04:00';
-export const BOLIVIA_UTC_OFFSET_MS = -4 * 3_600_000;
-export const MS_PER_YEAR = 365.25 * 24 * 3_600_000;
+export const AVERAGE_YEAR_MS = 365.25 * DAY_MS;
 export const MAX_HEATMAP_SKILL_ROWS = 10;
-export const NLP_SKILL_SOURCE = 'nlp';
-
-// Las analíticas leen las respuestas de cualquier encuesta que use estos enunciados.
-export const EMPLOYMENT_STATUS_QUESTION =
-  '¿Cuál es tu situación laboral actual respecto a tu carrera?';
-export const MONTHLY_SALARY_QUESTION = '¿Cuál es tu rango salarial mensual?';
 
 export const EMPLOYMENT_STATUSES = [
   { id: 'employed-in-field', label: 'Empleado en su área', retains: true },

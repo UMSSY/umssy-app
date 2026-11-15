@@ -5,13 +5,11 @@ import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../../../common/guards/roles.guard.js';
 import { ResponseInterceptor } from '../../../common/interceptors/index.js';
 import { ZodValidationPipe } from '../../../common/pipes/zod-validation.pipe.js';
-import {
-  heatmapParamsSchema,
-  heatmapQuerySchema,
-  type HeatmapParams,
-  type HeatmapQuery,
-} from '../requests/heatmap-request.schema.js';
+import { heatmapParamsSchema } from '../requests/heatmap-params.schema.js';
+import { heatmapQuerySchema } from '../requests/heatmap-query.schema.js';
 import { HeatmapsService } from '../services/heatmaps.service.js';
+import type { HeatmapParams } from '../types/heatmap-params.types.js';
+import type { HeatmapQuery } from '../types/heatmap-query.types.js';
 
 @ApiTags('Analíticas')
 @Controller('analytics/heatmap')

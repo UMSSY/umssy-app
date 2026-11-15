@@ -1,5 +1,5 @@
-import { MS_PER_YEAR } from '../constants/heatmap.constants.js';
-import type { WorkPeriod } from '../types/heatmap-graduate.types.js';
+import { AVERAGE_YEAR_MS } from '../constants/heatmap.constants.js';
+import type { WorkPeriod } from '../types/work-period.types.js';
 
 // Une periodos superpuestos para no contar dos veces el mismo tiempo trabajado.
 export function computeExperienceYears(
@@ -26,7 +26,7 @@ export function computeExperienceYears(
     }
   }
   total += current.end - current.start;
-  return Math.round((total / MS_PER_YEAR) * 10) / 10;
+  return Math.round((total / AVERAGE_YEAR_MS) * 10) / 10;
 }
 
 export function getExperienceLevelIndex(years: number): number {

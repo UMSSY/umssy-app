@@ -1,11 +1,4 @@
 import { z } from 'zod';
-import { HEATMAP_TYPES } from '../constants/heatmap.constants.js';
-
-export const heatmapParamsSchema = z.object({
-  type: z.enum(HEATMAP_TYPES, {
-    message: 'El tipo de mapa de calor no es válido',
-  }),
-});
 
 const timestampSchema = z.iso.datetime({
   offset: true,
@@ -39,6 +32,3 @@ export const heatmapQuerySchema = z
       path: ['endTimestamp'],
     },
   );
-
-export type HeatmapParams = z.infer<typeof heatmapParamsSchema>;
-export type HeatmapQuery = z.infer<typeof heatmapQuerySchema>;

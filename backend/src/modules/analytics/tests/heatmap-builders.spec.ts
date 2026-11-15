@@ -1,5 +1,5 @@
 import { HEATMAP_EXTRA_COLUMNS } from '../constants/heatmap.constants.js';
-import type { HeatmapResponse } from '../types/heatmap.types.js';
+import type { HeatmapResponse } from '../types/heatmap-response.types.js';
 import { buildCareerHeatmap } from '../utils/build-career-heatmap.util.js';
 import { buildEmployabilityHeatmap } from '../utils/build-employability-heatmap.util.js';
 import { buildExperienceHeatmap } from '../utils/build-experience-heatmap.util.js';

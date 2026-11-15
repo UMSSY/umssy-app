@@ -1,33 +1,36 @@
 import { Injectable } from '@nestjs/common';
+import { CareersService } from '../../surveys/services/careers.service.js';
 import { InvalidHeatmapRangeException } from '../exceptions/invalid-heatmap-range.exception.js';
-import { toHeatmapGraduates } from '../mappers/heatmap-graduate.mapper.js';
-import { HeatmapGraduatesRepository } from '../repositories/heatmap-graduates.repository.js';
-import type { HeatmapQuery } from '../requests/heatmap-request.schema.js';
-import type { HeatmapGraduateSource } from '../types/heatmap-graduate.types.js';
-import type { HeatmapResponse, HeatmapType } from '../types/heatmap.types.js';
+import type { HeatmapGraduateFilter } from '../types/heatmap-graduate-filter.types.js';
+import type { HeatmapQuery } from '../types/heatmap-query.types.js';
+import type { HeatmapResponse } from '../types/heatmap-response.types.js';
+import type { HeatmapType } from '../types/heatmap-type.types.js';
 import { buildCareerHeatmap } from '../utils/build-career-heatmap.util.js';
 import { buildEmployabilityHeatmap } from '../utils/build-employability-heatmap.util.js';
 import { buildExperienceHeatmap } from '../utils/build-experience-heatmap.util.js';
 import { buildSalaryHeatmap } from '../utils/build-salary-heatmap.util.js';
 import { boliviaMonth, yearToRange } from '../utils/heatmap-dates.util.js';
+import { HeatmapGraduatesService } from './heatmap-graduates.service.js';
 
 @Injectable()
 export class HeatmapsService {
-  constructor(private readonly repository: HeatmapGraduatesRepository) {}
+  constructor(
+    private readonly heatmapGraduates: HeatmapGraduatesService,
+    private readonly careers: CareersService,
+  ) {}
 
   async getHeatmap(
     type: HeatmapType,
     query: HeatmapQuery,
     now: Date = new Date(),
   ): Promise<HeatmapResponse> {
-    const source = this.toSource(query);
-    const [records, careers] = await Promise.all([
-      this.repository.findEmploymentResponses(source),
+    const [graduates, careers] = await Promise.all([
+      this.heatmapGraduates.findGraduates(this.toGraduateFilter(query), now),
       type === 'skills-by-career'
-        ? this.repository.findCareers()
+        ? this.careers.listCareers('desc')
         : Promise.resolve([]),
     ]);
-    const graduates = toHeatmapGraduates(records, now).filter(
+    const graduatesInMonth = graduates.filter(
       (graduate) =>
         query.month === undefined ||
         boliviaMonth(graduate.answeredAt) === query.month,
@@ -35,27 +38,33 @@ export class HeatmapsService {
 
     switch (type) {
       case 'skills-by-career':
-        return buildCareerHeatmap(graduates, careers);
+        return buildCareerHeatmap(graduatesInMonth, careers);
       case 'skills-by-salary':
-        return buildSalaryHeatmap(graduates);
+        return buildSalaryHeatmap(graduatesInMonth);
       case 'employability':
-        return buildEmployabilityHeatmap(graduates);
+        return buildEmployabilityHeatmap(graduatesInMonth);
       case 'skills-by-experience':
-        return buildExperienceHeatmap(graduates);
+        return buildExperienceHeatmap(graduatesInMonth);
     }
   }
 
-  // El rango de semestres tiene prioridad sobre la gestión para evitar filtros contradictorios.
-  private toSource(query: HeatmapQuery): HeatmapGraduateSource {
+  private toGraduateFilter(query: HeatmapQuery): HeatmapGraduateFilter {
     if (query.startTimestamp && query.endTimestamp) {
-      const from = new Date(query.startTimestamp);
-      const to = new Date(query.endTimestamp);
-      if (from > to) throw new InvalidHeatmapRangeException();
-      return { careerId: query.careerId, from, to };
+      return { careerId: query.careerId, ...this.toSemesterRange(query.startTimestamp, query.endTimestamp) };
     }
     if (query.year !== undefined) {
       return { careerId: query.careerId, ...yearToRange(query.year) };
     }
     return { careerId: query.careerId };
+  }
+
+  private toSemesterRange(
+    startTimestamp: string,
+    endTimestamp: string,
+  ): { from: Date; to: Date } {
+    const from = new Date(startTimestamp);
+    const to = new Date(endTimestamp);
+    if (from > to) throw new InvalidHeatmapRangeException();
+    return { from, to };
   }
 }

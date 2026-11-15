@@ -5,6 +5,8 @@ import type { ProfileSkillRowResponse } from '../responses/profile-skill-row.res
 import type { SkillAnalysisCatalogResponse } from '../responses/skill-analysis-catalog.response.js';
 import type { DetectedSkillPayload } from '../types/detected-skill-payload.type.js';
 import { planSkillReconciliation } from '../utils/plan-skill-reconciliation.js';
+import { toUserSkillSummary } from '../mappers/user-skill-summary.mapper.js';
+import type { UserSkillSummaryResponse } from '../responses/user-skill-summary.response.js';
 
 @Injectable()
 export class SkillAnalysisService {
@@ -60,6 +62,14 @@ export class SkillAnalysisService {
     return (
       plan.creates.length + plan.updates.length + plan.deleteIds.length > 0
     );
+  }
+
+  async findSkillSummariesByUserIds(
+    userIds: string[],
+  ): Promise<UserSkillSummaryResponse[]> {
+    if (userIds.length === 0) return [];
+    const records = await this.repository.findSkillSummariesByUserIds(userIds);
+    return records.map(toUserSkillSummary);
   }
 
   findApprovedRecruitmentReferences(userId: string, ids: string[]) {
