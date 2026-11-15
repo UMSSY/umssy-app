@@ -107,6 +107,18 @@ export class AppointmentsRepository {
     return reservations > 0;
   }
 
+  async hasMentorCancellation(
+    blockId: string,
+    mentorId: string,
+    client: TransactionClient = this.prisma,
+  ): Promise<boolean> {
+    const cancellations = await client.appointment.count({
+      where: { blockId, cancelledById: mentorId },
+    });
+
+    return cancellations > 0;
+  }
+
   async findCounterpartIdsByName(
     userId: string,
     normalizedName: string,
