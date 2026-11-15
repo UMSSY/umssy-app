@@ -4,36 +4,26 @@ import dynamic from 'next/dynamic';
 import type { ProfileGuideStepContentProps } from '../types/profile-guide-step-content-props.types';
 import { PersonalInfoSettings } from './personal-info-settings';
 import { PresentationSettings } from './presentation-settings';
+import { loadProfileGuideStep } from '../utils/profile-guide-step-loaders';
 
 const loading = () => <p role="status">Cargando formulario...</p>;
-const EducationGuideStep = dynamic(
-  () =>
-    import('@/modules/education').then((module) => module.EducationGuideStep),
-  { loading },
-);
+const EducationGuideStep = dynamic(() => loadProfileGuideStep('education'), {
+  loading,
+});
 const WorkExperienceGuideStep = dynamic(
-  () =>
-    import('@/modules/work-experience').then(
-      (module) => module.WorkExperienceGuideStep,
-    ),
+  () => loadProfileGuideStep('work-experience'),
   { loading },
 );
-const SkillsGuideStep = dynamic(
-  () => import('@/modules/skills').then((module) => module.SkillsGuideStep),
-  { loading },
-);
+const SkillsGuideStep = dynamic(() => loadProfileGuideStep('skills'), {
+  loading,
+});
 const CertificationGuideStep = dynamic(
-  () =>
-    import('@/modules/certifications').then(
-      (module) => module.CertificationGuideStep,
-    ),
+  () => loadProfileGuideStep('certifications'),
   { loading },
 );
-const DocumentsCvGuideStep = dynamic(
-  () =>
-    import('@/modules/documents').then((module) => module.DocumentsCvGuideStep),
-  { loading },
-);
+const DocumentsCvGuideStep = dynamic(() => loadProfileGuideStep('cv'), {
+  loading,
+});
 
 export function ProfileGuideStepContent({
   step,
