@@ -128,7 +128,7 @@ describe('PushDispatcherService', () => {
       expect(result).toBe('skipped');
     });
 
-    it('debe eliminar la suscripción si el push service responde 410 (Gone)', async () => {
+    it('debe eliminar la suscripciÃ³n si el push service responde 410 (Gone)', async () => {
       mockPushRepo.findManyByUserIds.mockResolvedValue([
         {
           endpoint: 'https://fcm...',
@@ -183,7 +183,7 @@ describe('PushDispatcherService', () => {
       expect(payload.body).toHaveLength(100);
     });
 
-    it('debe enviar un push por cada dispositivo móvil del usuario', async () => {
+    it('debe enviar un push por cada dispositivo mÃ³vil del usuario', async () => {
       mockPushRepo.findManyByUserIds.mockResolvedValue([androidSubscription, iphoneSubscription]);
 
       const result = await service.dispatchToUsers(['user-1'], 'Title', 'Body', '/url');
@@ -192,7 +192,7 @@ describe('PushDispatcherService', () => {
       expect(result).toBe('sent');
     });
 
-    it('debe enviar solo a los móviles cuando también hay un escritorio', async () => {
+    it('debe enviar solo a los mÃ³viles cuando tambiÃ©n hay un escritorio', async () => {
       mockPushRepo.findManyByUserIds.mockResolvedValue([androidSubscription, desktopSubscription]);
 
       const result = await service.dispatchToUsers(['user-1'], 'Title', 'Body', '/url');
@@ -201,7 +201,7 @@ describe('PushDispatcherService', () => {
       expect(result).toBe('sent');
     });
 
-    it('debe eliminar la suscripción si el push service responde 404', async () => {
+    it('debe eliminar la suscripciÃ³n si el push service responde 404', async () => {
       mockPushRepo.findManyByUserIds.mockResolvedValue([androidSubscription]);
       webpushMock.sendNotification.mockRejectedValueOnce(createPushError('Not Found', 404));
 
@@ -226,7 +226,7 @@ describe('PushDispatcherService', () => {
       );
     });
 
-    it('ante otro error no elimina la suscripción, lo registra y continúa con las demás', async () => {
+    it('ante otro error no elimina la suscripciÃ³n, lo registra y continÃºa con las demÃ¡s', async () => {
       const errorSpy = vi.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
       mockPushRepo.findManyByUserIds.mockResolvedValue([androidSubscription, iphoneSubscription]);
       webpushMock.sendNotification.mockRejectedValueOnce(createPushError('Server error', 500));
@@ -240,6 +240,30 @@ describe('PushDispatcherService', () => {
         expect.any(String),
       );
       expect(result).toBe('partial');
+    });
+
+    it('debe incluir en cada push el id del aviso de su destinatario', async () => {
+      mockPushRepo.findManyByUserIds.mockResolvedValue([
+        androidSubscription,
+        { ...iphoneSubscription, userId: 'user-2' },
+      ]);
+
+      await service.dispatchToUsers(
+        ['user-1', 'user-2'],
+        'Title',
+        'Body',
+        '/appointments',
+        undefined,
+        new Map([
+          ['user-1', 'notification-1'],
+          ['user-2', 'notification-2'],
+        ]),
+      );
+
+      const notificationIds = webpushMock.sendNotification.mock.calls.map(
+        ([, rawPayload]) => (JSON.parse(rawPayload as string) as PushNotificationPayload).notificationId,
+      );
+      expect(notificationIds).toEqual(['notification-1', 'notification-2']);
     });
   });
 });

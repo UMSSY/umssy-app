@@ -70,7 +70,7 @@ describe('NotificationsService', () => {
         sendsPush: true,
         sendsEmail: true,
       }),
-      createMany: vi.fn().mockResolvedValue(1),
+      createMany: vi.fn().mockResolvedValue([{ id: 'notification-1', recipientId: 'user-2' }]),
     };
     mockPreferencesRepo = { findManyByUserIds: vi.fn().mockResolvedValue([]) };
     mockUserLookupRepo = { hasBlockBetween: vi.fn().mockResolvedValue(false) };
@@ -95,7 +95,7 @@ describe('NotificationsService', () => {
     service = module.get<NotificationsService>(NotificationsService);
   });
 
-  it('debe omitir la notificación si el actor es el mismo destinatario (Anti-Autor)', async () => {
+  it('debe omitir la notificaciÃ³n si el actor es el mismo destinatario (Anti-Autor)', async () => {
     const result = await service.notify({
       recipientIds: ['user-1'],
       actorId: 'user-1',
@@ -109,7 +109,7 @@ describe('NotificationsService', () => {
     expect(mockPushDispatcher.dispatchToUsers).not.toHaveBeenCalled();
   });
 
-  it('debe omitir la notificación si hay un bloqueo entre los usuarios', async () => {
+  it('debe omitir la notificaciÃ³n si hay un bloqueo entre los usuarios', async () => {
     mockUserLookupRepo.hasBlockBetween.mockResolvedValue(true);
 
     const result = await service.notify({
@@ -124,7 +124,7 @@ describe('NotificationsService', () => {
     expect(mockNotificationsRepo.createMany).not.toHaveBeenCalled();
   });
 
-  it('debe lanzar NotFoundException si el tipo no está en la BD', async () => {
+  it('debe lanzar NotFoundException si el tipo no estÃ¡ en la BD', async () => {
     mockNotificationsRepo.findTypeByCode.mockResolvedValue(null);
 
     await expect(
@@ -143,8 +143,11 @@ describe('NotificationsService', () => {
       { userId: 'user-3', pushEnabled: false, emailEnabled: true },
     ]);
 
-    mockNotificationsRepo.createMany.mockImplementation((data: unknown[]) =>
-      Promise.resolve(data.length),
+    mockNotificationsRepo.createMany.mockImplementation(
+      (data: { recipientId: string }[]) =>
+        Promise.resolve(
+          data.map((item) => ({ id: `notification-${item.recipientId}`, recipientId: item.recipientId })),
+        ),
     );
 
     const result = await service.notify({
@@ -163,6 +166,7 @@ describe('NotificationsService', () => {
       expect.any(String),
       expect.any(String),
       undefined,
+      expect.any(Map),
     );
 
     expect(mockMailDispatcher.dispatchToUsers).toHaveBeenCalledWith(
@@ -173,7 +177,7 @@ describe('NotificationsService', () => {
     );
   });
 
-  it('debe aislar fallos de canal (si push falla, el resto continúa)', async () => {
+  it('debe aislar fallos de canal (si push falla, el resto continÃºa)', async () => {
     mockPreferencesRepo.findManyByUserIds.mockResolvedValue([
       { userId: 'user-2', pushEnabled: true, emailEnabled: true },
     ]);
@@ -215,7 +219,28 @@ describe('NotificationsService', () => {
       expect.any(String),
       expect.any(String),
       undefined,
+      expect.any(Map),
     );
     expect(mockGateway.emitToUser).toHaveBeenCalledTimes(2);
+  });
+
+  it('debe pasar al push el id del aviso creado para cada destinatario', async () => {
+    mockPreferencesRepo.findManyByUserIds.mockResolvedValue([
+      { userId: 'user-2', pushEnabled: true, emailEnabled: false },
+    ]);
+    mockNotificationsRepo.createMany.mockResolvedValue([
+      { id: 'notification-9', recipientId: 'user-2' },
+    ]);
+
+    await service.notify({
+      recipientIds: ['user-2'],
+      actorId: 'user-1',
+      type: NotificationType.APPOINTMENT_BOOKED,
+      payload: validPayload,
+      actionUrl: '/appointments',
+    });
+
+    const notificationIds = mockPushDispatcher.dispatchToUsers.mock.calls[0][5] as Map<string, string>;
+    expect(notificationIds.get('user-2')).toBe('notification-9');
   });
 });

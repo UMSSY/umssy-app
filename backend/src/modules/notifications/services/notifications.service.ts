@@ -48,7 +48,7 @@ export class NotificationsService {
 
     const typeRecord = await this.notificationsRepository.findTypeByCode(type);
     if (!typeRecord) {
-      throw new NotFoundException(`NotificationType ${type} no encontrado en el catálogo`);
+      throw new NotFoundException(`NotificationType ${type} no encontrado en el catÃ¡logo`);
     }
 
     const template = NOTIFICATION_TEMPLATES[type] as NotificationTemplateDefinition<NotificationType>;
@@ -74,7 +74,7 @@ export class NotificationsService {
       if (typeRecord.sendsEmail && emailEnabled) emailTargets.push(recipientId);
     }
 
-    const inAppCount = await this.notificationsRepository.createMany(
+    const createdNotifications = await this.notificationsRepository.createMany(
       validRecipients.map((id) => ({
         recipientId: id,
         actorId: actorId,
@@ -84,6 +84,10 @@ export class NotificationsService {
         link: actionUrl,
         groupKey,
       })),
+    );
+    const inAppCount = createdNotifications.length;
+    const notificationIdsByRecipient = new Map(
+      createdNotifications.map((notification) => [notification.recipientId, notification.id]),
     );
 
     for (const recipientId of validRecipients) {
@@ -95,9 +99,16 @@ export class NotificationsService {
 
     if (pushTargets.length > 0) {
       try {
-        pushStatus = await this.pushDispatcher.dispatchToUsers(pushTargets, title, body, actionUrl, groupKey);
+        pushStatus = await this.pushDispatcher.dispatchToUsers(
+          pushTargets,
+          title,
+          body,
+          actionUrl,
+          groupKey,
+          notificationIdsByRecipient,
+        );
       } catch (e) {
-        this.logger.error('Fallo crítico en PushDispatcher', e);
+        this.logger.error('Fallo crÃ­tico en PushDispatcher', e);
         pushStatus = 'failed';
       }
     }
@@ -106,7 +117,7 @@ export class NotificationsService {
       try {
         emailStatus = await this.mailDispatcher.dispatchToUsers(emailTargets, title, body, actionUrl);
       } catch (e) {
-        this.logger.error('Fallo crítico en MailDispatcher', e);
+        this.logger.error('Fallo crÃ­tico en MailDispatcher', e);
         emailStatus = 'failed';
       }
     }
