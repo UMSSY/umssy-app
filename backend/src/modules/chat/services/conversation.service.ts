@@ -110,7 +110,7 @@ export class ConversationService {
     );
 
     const existing = context?.contextId
-      ? await this.conversationRepository.findByContextId(context.contextId)
+      ? await this.conversationRepository.findByContextId(context.contextId, userAId, userBId)
       : await this.conversationRepository.findByOrderedPair(userAId, userBId);
 
     if (existing) {
@@ -173,7 +173,7 @@ export class ConversationService {
         err?.message?.includes('Unique constraint')
       ) {
         const concurrentExisting = context?.contextId
-          ? await this.conversationRepository.findByContextId(context.contextId)
+          ? await this.conversationRepository.findByContextId(context.contextId, userAId, userBId)
           : await this.conversationRepository.findByOrderedPair(
               userAId,
               userBId,
