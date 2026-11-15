@@ -18,6 +18,7 @@ export interface KpiCardsProps {
 }
 
 export interface AffinityRadarChartProps {
+  projectedScores?: Partial<Record<AreaId, number>>;
   previousScores?: Partial<Record<AreaId, number>>;
   comparisonEnabled?: boolean;
   onComparisonChange?: (enabled: boolean) => void;
@@ -47,6 +48,9 @@ export interface AffinityRadarDotProps {
 }
 
 export interface AreaBreakdownPanelProps {
+  compact?: boolean;
+  selectedArea?: AreaId | null;
+  onAreaClick?: (areaId: AreaId) => void;
   areas: RadarAreaScore[];
   average: number;
   className?: string;

@@ -1,4 +1,6 @@
 "use client";
+import Link from "next/link";
+import { RADAR_AXIS_NAMES } from "@/modules/radar-chart/constants/radar-axis-names.constants";
 import type { MentorDirectoryViewProps } from "../types/mentor-directory-view-props.types";
 
 import { useEffect, useMemo } from "react";
@@ -37,6 +39,7 @@ export function MentorDirectoryView({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const queryString = searchParams.toString();
+  const fromRadar = searchParams.get("from") === "radar";
 
   const {
     page,
@@ -62,7 +65,7 @@ export function MentorDirectoryView({
     search,
     area,
     orientation,
-    available: isAvailableOnly,
+    available: fromRadar || isAvailableOnly,
     sort: sortBy,
   });
 
@@ -161,6 +164,11 @@ export function MentorDirectoryView({
   return (
     <main className="min-h-full bg-background">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+        {fromRadar ? <><Link href="/profile/radar" className="underline">Volver al radar</Link>
+          <nav aria-label="Áreas del radar" className="flex flex-wrap gap-2">
+            <Button variant={!area ? "default" : "outline"} aria-pressed={!area} onClick={() => navigateWithUpdates({ area: "" })}>Todos</Button>
+            {RADAR_AXIS_NAMES.map(item => <Button key={item.id} variant={area === item.name ? "default" : "outline"} aria-pressed={area === item.name} onClick={() => navigateWithUpdates({ area: item.name })}>{item.name}</Button>)}
+          </nav></> : null}
         <header>
           <PageHeading
             title="Encuentra un mentor"
@@ -185,7 +193,7 @@ export function MentorDirectoryView({
           <MentorFiltersBar
             area={area}
             orientation={orientation}
-            technicalAreas={technicalAreas.map((item) => item.name)}
+            technicalAreas={fromRadar ? RADAR_AXIS_NAMES.map(item => item.name) : technicalAreas.map((item) => item.name)}
             orientationTypes={orientationTypes.map((item) => item.name)}
             onAreaChange={(value) =>
               navigateWithUpdates({ area: value })
@@ -199,7 +207,8 @@ export function MentorDirectoryView({
             className={cn("flex items-center gap-2", isAvailableOnly && "text-primary")}
           >
             <Checkbox
-              checked={isAvailableOnly}
+              disabled={fromRadar}
+              checked={fromRadar || isAvailableOnly}
               onCheckedChange={(checked) =>
                 navigateWithUpdates({
                   available: checked === true,
