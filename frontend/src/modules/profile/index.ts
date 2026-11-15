@@ -13,6 +13,7 @@ export { SectionCard } from "./components/section-card";
 export { SocialAccountConnectButtons } from "./components/social-account-connect-buttons";
 export { PortfolioProjectCard } from "./components/portfolio-project-card";
 export { PortfolioProfileSection } from "./components/portfolio-profile-section";
+export { PortfolioSelectionDialog } from "./components/portfolio-selection-dialog";
 
 export type { Feedback } from './types/feedback.types';
 export type { PersonalInfoValues } from './types/personal-info-values.types';
@@ -91,12 +92,15 @@ export type {
 } from "./types/portfolio-account.types";
 export {
   usePortfolioProjects,
+  usePortfolioRepositories,
   useUpdatePortfolioProjects,
 } from "./hooks/use-portfolio-projects";
 export { portfolioProjectsService } from "./services/portfolio-projects.service";
 export {
   PORTFOLIO_PROJECTS_QUERY_KEY,
+  PORTFOLIO_REPOSITORIES_QUERY_KEY,
   PORTFOLIO_PROJECTS_MESSAGES,
+  PORTFOLIO_SELECTION_MESSAGES,
   MAX_PORTFOLIO_PROJECTS,
 } from "./constants/portfolio-projects.constants";
 export type {
@@ -105,5 +109,8 @@ export type {
   UpdatePortfolioProjectsPayload,
   PortfolioProjectCardProps,
   PortfolioProfileSectionProps,
+  ExternalRepositoryItem,
+  PortfolioProviderFilter,
+  PortfolioSelectionDialogProps,
 } from "./types/portfolio-project.types";
 

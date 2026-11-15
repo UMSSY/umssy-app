@@ -2,6 +2,7 @@ import { apiClient } from "@/shared/services/api-client";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { portfolioProjectsService } from "./portfolio-projects.service";
 import type {
+  ExternalRepositoryItem,
   PortfolioProjectItem,
   UpdatePortfolioProjectsPayload,
 } from "../types/portfolio-project.types";
@@ -98,6 +99,55 @@ describe("portfolioProjectsService", () => {
         },
       );
       expect(result).toEqual(updatedProjects);
+    });
+  });
+
+  describe("getAvailableRepositories", () => {
+    it("fetches available repositories with auth headers and optional provider", async () => {
+      const mockRepos: ExternalRepositoryItem[] = [
+        {
+          provider: "github",
+          repoName: "umssy-frontend",
+          repoUrl: "https://github.com/UMSSY/umssy-frontend",
+          description: "Frontend repo",
+          language: "TypeScript",
+          starsCount: 12,
+          isOwner: true,
+        },
+      ];
+
+      vi.spyOn(apiClient, "get").mockResolvedValueOnce({
+        data: { statusCode: 200, data: mockRepos, ok: true, detail: "ok" },
+      });
+
+      const result =
+        await portfolioProjectsService.getAvailableRepositories("github");
+
+      expect(apiClient.get).toHaveBeenCalledWith(
+        "/profile/portfolio/repositories",
+        {
+          headers: { Authorization: "Bearer mock-token" },
+          params: { provider: "github" },
+        },
+      );
+      expect(result).toEqual(mockRepos);
+    });
+
+    it("fetches all repositories when provider is undefined and handles nullish response", async () => {
+      vi.spyOn(apiClient, "get").mockResolvedValueOnce({
+        data: { statusCode: 200, data: null, ok: true, detail: "ok" },
+      });
+
+      const result = await portfolioProjectsService.getAvailableRepositories();
+
+      expect(apiClient.get).toHaveBeenCalledWith(
+        "/profile/portfolio/repositories",
+        {
+          headers: { Authorization: "Bearer mock-token" },
+          params: undefined,
+        },
+      );
+      expect(result).toEqual([]);
     });
   });
 });

@@ -37,3 +37,22 @@ export interface PortfolioProfileSectionProps {
   onAddProjectClick?: () => void;
 }
 
+export interface ExternalRepositoryItem {
+  provider: PortfolioProviderName;
+  repoName: string;
+  repoUrl: string;
+  description: string | null;
+  language: string | null;
+  starsCount: number;
+  isOwner: boolean;
+  updatedAt?: string;
+}
+
+export type PortfolioProviderFilter = "all" | PortfolioProviderName;
+
+export interface PortfolioSelectionDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  currentProjects?: PortfolioProjectItem[];
+}
+
