@@ -1,20 +1,21 @@
-"use client";
-import type { MentorProfileViewProps } from "../types/mentor-profile-view-props.types";
+'use client';
+import type { MentorProfileViewProps } from '../types/mentor-profile-view-props.types';
 
-import { MentorProfileHeader } from "../components/mentor/mentor-profile-header";
-import { MentorAbout } from "../components/mentor/mentor-about";
-import { MentorCareer } from "../components/mentor/mentor-career";
-import { MentorGuidanceTypes } from "../components/mentor/mentor-guidance-types";
-import { MentorTechnicalAreas } from "../components/mentor/mentor-technical-areas";
-import { useMentorProfile } from "../hooks/use-mentor-profile";
-import { MentorQueryFeedback } from "../components/mentor/mentor-query-feedback";
-import { MentorQuerySkeleton } from "../components/mentor/mentor-query-skeleton";
-import { MentorProfileNavigation } from "../components/mentor/mentor-profile-navigation";
-import { useCurrentUserId } from "../hooks/use-current-user-id";
+import { MentorProfileHeader } from '../components/mentor/mentor-profile-header';
+import { MentorAbout } from '../components/mentor/mentor-about';
+import { MentorCareer } from '../components/mentor/mentor-career';
+import { MentorGuidanceTypes } from '../components/mentor/mentor-guidance-types';
+import { MentorTechnicalAreas } from '../components/mentor/mentor-technical-areas';
+import { useMentorProfile } from '../hooks/use-mentor-profile';
+import { MentorQueryFeedback } from '../components/mentor/mentor-query-feedback';
+import { MentorQuerySkeleton } from '../components/mentor/mentor-query-skeleton';
+import { MentorProfileNavigation } from '../components/mentor/mentor-profile-navigation';
+import { useCurrentUserId } from '../hooks/use-current-user-id';
+import { SimilarMentorsSection } from '../components/mentor/similar-mentors-section';
 
 export function MentorProfileView({
   mentorId,
-  returnTo = "/mentorship/mentors",
+  returnTo = '/mentorship/mentors',
 }: MentorProfileViewProps) {
   const { currentUserId, canVerifyIdentity } = useCurrentUserId();
 
@@ -72,7 +73,9 @@ export function MentorProfileView({
       </main>
     );
   }
-  const professionalInterests = mentor.skills.filter((skill) => skill.name?.trim());
+  const professionalInterests = mentor.skills.filter((skill) =>
+    skill.name?.trim(),
+  );
 
   return (
     <main className="bg-background">
@@ -136,6 +139,7 @@ export function MentorProfileView({
             <MentorTechnicalAreas areas={mentor.technicalAreas} />
           </div>
         </div>
+        <SimilarMentorsSection />
       </div>
     </main>
   );
