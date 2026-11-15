@@ -1,5 +1,5 @@
 import { HEATMAP_EMPTY_TONE, HEATMAP_TONE_SCALE } from "../constants/heatmap-text.constants";
-import type { HeatmapCell } from "../types/heatmap.types";
+import type { HeatmapCell } from "../types/heatmap-cell.types";
 
 export function getHeatmapTone(cell?: HeatmapCell): string {
   if (!cell || cell.isEmpty || cell.percentage === undefined) return HEATMAP_EMPTY_TONE;

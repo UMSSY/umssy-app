@@ -1,4 +1,4 @@
-import type { HeatmapType } from "../types/heatmap.types";
+import type { HeatmapType } from "../types/heatmap-type.types";
 import type { HeatmapViewConfig } from "../types/heatmap-view-config.types";
 import {
   EMPLOYABILITY_HEATMAP_PATH,

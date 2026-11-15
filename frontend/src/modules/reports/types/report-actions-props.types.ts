@@ -1,5 +1,6 @@
-import type { AcademicPeriod } from "./registered-user.types";
-import type { ReportExportFormat, ReportExportScope } from "./report-export.types";
+import type { AcademicPeriod } from "./academic-period.types";
+import type { ReportExportFormat } from "./report-export-format.types";
+import type { ReportExportScope } from "./report-export-scope.types";
 
 export interface ReportActionsProps {
   onExport?: (format: ReportExportFormat, scope: ReportExportScope) => void;

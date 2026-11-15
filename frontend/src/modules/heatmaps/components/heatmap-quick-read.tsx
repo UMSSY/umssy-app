@@ -1,6 +1,6 @@
 import { Lightbulb } from "lucide-react";
 import { HEATMAP_TEXT } from "../constants/heatmap-text.constants";
-import type { HeatmapQuickReadProps } from "../types/heatmap-component-props.types";
+import type { HeatmapQuickReadProps } from "../types/heatmap-quick-read-props.types";
 
 export function HeatmapQuickRead({ summary }: HeatmapQuickReadProps) {
   return (

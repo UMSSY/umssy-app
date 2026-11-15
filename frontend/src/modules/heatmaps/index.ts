@@ -9,4 +9,5 @@ export {
   SKILLS_BY_SALARY_HEATMAP_PATH,
 } from "./constants/heatmap-routes.constants";
 export { heatmapsService } from "./services/heatmaps.service";
-export type { HeatmapData, HeatmapType } from "./types/heatmap.types";
+export type { HeatmapData } from "./types/heatmap-data.types";
+export type { HeatmapType } from "./types/heatmap-type.types";

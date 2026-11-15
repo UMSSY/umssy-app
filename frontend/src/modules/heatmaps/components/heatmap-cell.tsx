@@ -1,7 +1,7 @@
 import { cn } from "cn";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { HEATMAP_TEXT } from "../constants/heatmap-text.constants";
-import type { HeatmapCellProps } from "../types/heatmap-component-props.types";
+import type { HeatmapCellProps } from "../types/heatmap-cell-props.types";
 import { getHeatmapTone } from "../utils/get-heatmap-tone";
 
 export function HeatmapCell({ cell, column, skillName, cellFormat, cellUnit }: HeatmapCellProps) {

@@ -1,4 +1,4 @@
-import type { HeatmapSemester } from "../types/heatmap-filters.types";
+import type { HeatmapSemester } from "../types/heatmap-semester.types";
 
 export const BOLIVIA_UTC_OFFSET = "-04:00";
 export const BOLIVIA_UTC_OFFSET_HOURS = -4;

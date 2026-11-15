@@ -1,6 +1,5 @@
-import type { HeatmapType } from "./heatmap.types";
-
-export type HeatmapCellFormat = "count-first" | "percentage-first";
+import type { HeatmapCellFormat } from "./heatmap-cell-format.types";
+import type { HeatmapType } from "./heatmap-type.types";
 
 export interface HeatmapViewConfig {
   type: HeatmapType;

@@ -1,7 +1,8 @@
 import { apiClient } from "@/shared/services/api-client";
 import type { ApiResponse } from "@/shared/types/api-response.types";
 import type { HeatmapFilters } from "../types/heatmap-filters.types";
-import type { HeatmapData, HeatmapType } from "../types/heatmap.types";
+import type { HeatmapData } from "../types/heatmap-data.types";
+import type { HeatmapType } from "../types/heatmap-type.types";
 import { semesterRangeToTimestamps } from "../utils/semester-range-to-timestamps";
 
 export function toHeatmapQueryParams(filters: HeatmapFilters): Record<string, string> {

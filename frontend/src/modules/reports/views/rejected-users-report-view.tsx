@@ -17,7 +17,7 @@ import { TablePagination } from "../components/table-pagination";
 import { UserTypeFilter } from "../components/user-type-filter";
 import { useExportRejectedUsersCsv } from "../hooks/use-export-rejected-users-csv";
 import { useRejectedUsers } from "../hooks/use-rejected-users";
-import type { AcademicPeriod } from "../types/registered-user.types";
+import type { AcademicPeriod } from "../types/academic-period.types";
 import type { RoleTag } from "@/modules/auth";
 
 export function RejectedUsersReportView() {

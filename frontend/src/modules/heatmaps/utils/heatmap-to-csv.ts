@@ -1,5 +1,5 @@
 import { HEATMAP_TEXT } from "../constants/heatmap-text.constants";
-import type { HeatmapData } from "../types/heatmap.types";
+import type { HeatmapData } from "../types/heatmap-data.types";
 
 function escapeCsv(value: string | number): string {
   const text = String(value ?? "");

@@ -4,7 +4,7 @@ import { CalendarRange, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ReportFilterSelect } from "@/modules/reports";
 import { HEATMAP_FILTER_TEXT, HEATMAP_MONTH_OPTIONS, HEATMAP_YEAR_OPTIONS } from "../constants/heatmap-filters.constants";
-import type { HeatmapToolbarProps } from "../types/heatmap-component-props.types";
+import type { HeatmapToolbarProps } from "../types/heatmap-toolbar-props.types";
 import { formatSemesterRange } from "../utils/semester-range-to-timestamps";
 import { HeatmapExportMenu } from "./heatmap-export-menu";
 

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import type { HeatmapFilters, HeatmapSemesterRange } from "../types/heatmap-filters.types";
+import type { HeatmapFilters } from "../types/heatmap-filters.types";
+import type { HeatmapSemesterRange } from "../types/heatmap-semester-range.types";
 
 export function useHeatmapFilters() {
   const [filters, setFilters] = useState<HeatmapFilters>({});

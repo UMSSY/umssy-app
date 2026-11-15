@@ -3,7 +3,7 @@
 import { CalendarRange } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { HEATMAP_FILTER_TEXT } from "../constants/heatmap-filters.constants";
-import type { HeatmapDateRangeDialogProps } from "../types/heatmap-component-props.types";
+import type { HeatmapDateRangeDialogProps } from "../types/heatmap-date-range-dialog-props.types";
 import { HeatmapDateRangeForm } from "./heatmap-date-range-form";
 
 export function HeatmapDateRangeDialog({ open, onOpenChange, value, onApply }: HeatmapDateRangeDialogProps) {

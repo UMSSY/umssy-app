@@ -1,6 +1,6 @@
 import { Users } from "lucide-react";
 import { HEATMAP_TEXT } from "../constants/heatmap-text.constants";
-import type { HeatmapBaseIndicatorProps } from "../types/heatmap-component-props.types";
+import type { HeatmapBaseIndicatorProps } from "../types/heatmap-base-indicator-props.types";
 
 export function HeatmapBaseIndicator({ baseCount, baseLabel }: HeatmapBaseIndicatorProps) {
   return (

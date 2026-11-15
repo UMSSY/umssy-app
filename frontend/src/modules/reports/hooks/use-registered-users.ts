@@ -5,7 +5,8 @@ import { isConnectionError } from "@/shared/utils/is-connection-error";
 import { REGISTERED_USERS_PAGE_SIZE, SLOW_REQUEST_THRESHOLD_MS } from "../constants/reports.constants";
 import { reportsService } from "../services/reports.service";
 import { useReportSnapshot } from "./use-report-snapshot";
-import type { AcademicPeriod, RegisteredUsersState } from "../types/registered-user.types";
+import type { AcademicPeriod } from "../types/academic-period.types";
+import type { RegisteredUsersState } from "../types/registered-users-state.types";
 import type { RoleTag } from "@/modules/auth";
 
 export function useRegisteredUsers(page: number, userType?: RoleTag, period?: AcademicPeriod, search = "") {
