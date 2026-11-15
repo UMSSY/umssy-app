@@ -18,7 +18,7 @@ import { getNotificationCategory } from "../utils/get-notification-category";
 import { groupNotificationsByDate } from "../utils/group-notifications-by-date";
 import { resolveNotificationLink } from "../utils/resolve-notification-link";
 import { NotificationItem } from "../components/notification-item";
-import { NotificationFloatingBell } from "../components/notification-floating-bell";
+import { NotificationBell } from "../components/notification-bell";
 
 const PAGE_SIZE = 8;
 
@@ -283,7 +283,7 @@ export function NotificationsView() {
         </footer>
       ) : null}
 
-      <NotificationFloatingBell />
+      <NotificationBell variant="floating" /> 
     </section>
   );
 }
