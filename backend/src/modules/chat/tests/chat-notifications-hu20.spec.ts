@@ -21,6 +21,7 @@ describe('HU-20: Chat & Connection Notifications', () => {
   let mockUserLookupRepo: any;
   let mockConnectionRequestRepo: any;
   let mockChatGateway: any;
+  let mockEventsService: any;
 
   beforeEach(() => {
     visibilityService = new ChatVisibilityService();
@@ -46,12 +47,14 @@ describe('HU-20: Chat & Connection Notifications', () => {
       findParticipantsByConversationId: vi
         .fn()
         .mockResolvedValue([{ userId: 'user-a' }, { userId: 'user-b' }]),
-      findWithEventById: vi.fn().mockResolvedValue({
-        id: 'conv-group-1',
-        eventId: 'event-1',
-        event: { title: 'Taller de Empleabilidad' },
-      }),
       findByOrderedPair: vi.fn().mockResolvedValue({ id: 'conv-direct-1' }),
+    };
+
+    mockEventsService = {
+      findById: vi.fn().mockResolvedValue({
+        id: 'event-1',
+        title: 'Taller de Empleabilidad',
+      }),
     };
 
     mockParticipantRepo = {
@@ -80,13 +83,11 @@ describe('HU-20: Chat & Connection Notifications', () => {
     };
 
     mockNotificationsService = {
-      notify: vi
-        .fn()
-        .mockResolvedValue({
-          inAppCount: 1,
-          pushStatus: 'delivered',
-          emailStatus: 'skipped',
-        }),
+      notify: vi.fn().mockResolvedValue({
+        inAppCount: 1,
+        pushStatus: 'delivered',
+        emailStatus: 'skipped',
+      }),
     };
 
     mockUserLookupRepo = {
@@ -114,13 +115,11 @@ describe('HU-20: Chat & Connection Notifications', () => {
       findPendingRequest: vi.fn().mockResolvedValue(null),
       findAcceptedRequest: vi.fn().mockResolvedValue(null),
       findStatusByTitle: vi.fn().mockResolvedValue({ id: 'status-pending' }),
-      create: vi
-        .fn()
-        .mockResolvedValue({
-          id: 'req-1',
-          senderId: 'user-a',
-          receiverId: 'user-b',
-        }),
+      create: vi.fn().mockResolvedValue({
+        id: 'req-1',
+        senderId: 'user-a',
+        receiverId: 'user-b',
+      }),
       findById: vi.fn().mockResolvedValue({
         id: 'req-1',
         senderId: 'user-a',
@@ -146,6 +145,7 @@ describe('HU-20: Chat & Connection Notifications', () => {
       mockNotificationsService,
       visibilityService,
       mockUserLookupRepo,
+      mockEventsService,
     );
 
     connectionRequestService = new ConnectionRequestService(
@@ -160,7 +160,6 @@ describe('HU-20: Chat & Connection Notifications', () => {
 
   describe('Criterio 1: Mensaje de chat privado con receptor desconectado/en otra pantalla', () => {
     it('debe disparar notificación CHAT_MESSAGE con nombre del remitente y actionUrl de conversación', async () => {
-      // user-b NO tiene la conversación abierta
       await messageService.send({
         conversationId: 'conv-1',
         senderId: 'user-a',
@@ -177,7 +176,6 @@ describe('HU-20: Chat & Connection Notifications', () => {
       expect(call.actionUrl).toBe('/chat?conversationId=conv-1');
       expect(call.groupKey).toBe('conv-1');
 
-      // Validar renderizado de template de QA
       const template = NOTIFICATION_TEMPLATES[NotificationType.CHAT_MESSAGE];
       expect(template.renderTitle(call.payload)).toBe(
         'Mensaje nuevo de: Usuario De Prueba',
@@ -187,7 +185,6 @@ describe('HU-20: Chat & Connection Notifications', () => {
 
   describe('Criterio 4: Supresión cuando el receptor tiene el chat abierto', () => {
     it('NO debe llamar a notify() si el receptor tiene la conversación activa y enfocada', async () => {
-      // Registrar que user-b tiene conv-1 abierta y enfocada
       visibilityService.setConversationVisibility(
         'user-b',
         'socket-b1',
@@ -252,13 +249,13 @@ describe('HU-20: Chat & Connection Notifications', () => {
         content: 'Nos vemos en el taller',
       });
 
+      expect(mockEventsService.findById).toHaveBeenCalledWith('event-1');
       expect(mockNotificationsService.notify).toHaveBeenCalledTimes(1);
       const call = mockNotificationsService.notify.mock.calls[0][0];
       expect(call.type).toBe(NotificationType.CHAT_GROUP_MESSAGE);
       expect(call.payload.groupName).toBe('Taller de Empleabilidad');
       expect(call.payload.senderName).toBe('Usuario De Prueba');
 
-      // Validar renderizado de template de QA
       const template =
         NOTIFICATION_TEMPLATES[NotificationType.CHAT_GROUP_MESSAGE];
       expect(template.renderTitle(call.payload)).toBe(
