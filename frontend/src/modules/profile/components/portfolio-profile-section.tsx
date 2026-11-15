@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,12 +12,14 @@ import {
 import { usePortfolioProjects } from "../hooks/use-portfolio-projects";
 import type { PortfolioProfileSectionProps } from "../types/portfolio-project.types";
 import { PortfolioProjectCard } from "./portfolio-project-card";
+import { PortfolioSelectionDialog } from "./portfolio-selection-dialog";
 import { SectionCard } from "./section-card";
 
 export function PortfolioProfileSection({
   className,
   onAddProjectClick,
 }: PortfolioProfileSectionProps) {
+  const [isSelectionDialogOpen, setIsSelectionDialogOpen] = useState(false);
   const { projects = [], isLoading, isError, refetch } = usePortfolioProjects();
 
   const sortedProjects = [...projects]
@@ -24,6 +27,11 @@ export function PortfolioProfileSection({
     .slice(0, MAX_PORTFOLIO_PROJECTS);
 
   const displayCount = Math.min(projects.length, MAX_PORTFOLIO_PROJECTS);
+
+  const handleAddClick = () => {
+    setIsSelectionDialogOpen(true);
+    onAddProjectClick?.();
+  };
 
   const renderContent = () => {
     if (isLoading) {
@@ -84,7 +92,7 @@ export function PortfolioProfileSection({
             type="button"
             variant="outline"
             className="h-8 gap-2 px-3 text-sm"
-            onClick={onAddProjectClick}
+            onClick={handleAddClick}
           >
             <Plus className="size-4" aria-hidden="true" />
             <span>{PORTFOLIO_PROJECTS_MESSAGES.addProject}</span>
@@ -93,6 +101,11 @@ export function PortfolioProfileSection({
       >
         {renderContent()}
       </SectionCard>
+      <PortfolioSelectionDialog
+        open={isSelectionDialogOpen}
+        onOpenChange={setIsSelectionDialogOpen}
+        currentProjects={sortedProjects}
+      />
     </section>
   );
 }

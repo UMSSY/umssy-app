@@ -4,11 +4,13 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { PORTFOLIO_PROJECTS_QUERY_KEY } from "../constants/portfolio-projects.constants";
 import { portfolioProjectsService } from "../services/portfolio-projects.service";
 import type {
+  ExternalRepositoryItem,
   PortfolioProjectItem,
   UpdatePortfolioProjectsPayload,
 } from "../types/portfolio-project.types";
 import {
   usePortfolioProjects,
+  usePortfolioRepositories,
   useUpdatePortfolioProjects,
 } from "./use-portfolio-projects";
 
@@ -16,6 +18,7 @@ vi.mock("../services/portfolio-projects.service", () => ({
   portfolioProjectsService: {
     getPortfolioProjects: vi.fn(),
     updatePortfolioProjects: vi.fn(),
+    getAvailableRepositories: vi.fn(),
   },
 }));
 
@@ -105,6 +108,56 @@ describe("use-portfolio-projects hooks", () => {
       expect(invalidateSpy).toHaveBeenCalledWith({
         queryKey: PORTFOLIO_PROJECTS_QUERY_KEY,
       });
+    });
+  });
+
+  describe("usePortfolioRepositories", () => {
+    it("fetches available repositories when enabled", async () => {
+      const mockRepos: ExternalRepositoryItem[] = [
+        {
+          provider: "github",
+          repoName: "test-repo",
+          repoUrl: "https://github.com/user/test-repo",
+          description: "Test description",
+          language: "TypeScript",
+          starsCount: 42,
+          isOwner: true,
+        },
+      ];
+      vi.mocked(
+        portfolioProjectsService.getAvailableRepositories,
+      ).mockResolvedValueOnce(mockRepos);
+
+      const { result } = renderHook(() => usePortfolioRepositories(true));
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      expect(result.current.repositories).toEqual(mockRepos);
+      expect(result.current.isError).toBe(false);
+      expect(
+        portfolioProjectsService.getAvailableRepositories,
+      ).toHaveBeenCalledWith(undefined);
+    });
+
+    it("does not fetch repositories when enabled is false", () => {
+      renderHook(() => usePortfolioRepositories(false));
+
+      expect(
+        portfolioProjectsService.getAvailableRepositories,
+      ).not.toHaveBeenCalled();
+    });
+
+    it("handles error state when repository fetch fails", async () => {
+      vi.mocked(
+        portfolioProjectsService.getAvailableRepositories,
+      ).mockRejectedValueOnce(new Error("Fetch failed"));
+
+      const { result } = renderHook(() => usePortfolioRepositories(true));
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      expect(result.current.repositories).toEqual([]);
+      expect(result.current.isError).toBe(true);
     });
   });
 });

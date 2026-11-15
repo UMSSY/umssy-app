@@ -1,9 +1,11 @@
 import { apiClient } from "@/shared/services/api-client";
 import type { ApiResponse } from "../types/api-response.types";
 import type {
+  ExternalRepositoryItem,
   PortfolioProjectItem,
   UpdatePortfolioProjectsPayload,
 } from "../types/portfolio-project.types";
+import type { PortfolioProviderName } from "../types/portfolio-account.types";
 import { getAuthHeaders } from "../utils/get-auth-headers";
 
 export const portfolioProjectsService = {
@@ -22,6 +24,19 @@ export const portfolioProjectsService = {
       "/profile/portfolio/projects",
       payload,
       { headers: getAuthHeaders() },
+    );
+    return response.data.data ?? [];
+  },
+
+  getAvailableRepositories: async (
+    provider?: PortfolioProviderName,
+  ): Promise<ExternalRepositoryItem[]> => {
+    const response = await apiClient.get<ApiResponse<ExternalRepositoryItem[]>>(
+      "/profile/portfolio/repositories",
+      {
+        headers: getAuthHeaders(),
+        params: provider ? { provider } : undefined,
+      },
     );
     return response.data.data ?? [];
   },
