@@ -11,6 +11,7 @@ import type { NotifyRequest } from '../types/notify-request.type.js';
 import type { NotifyResult } from '../types/notify-result.type.js';
 import { NotificationType } from '../types/notification-type.enum.js';
 import type { NotificationTemplateDefinition } from '../types/notification-template-definition.type.js';
+import { formatBoliviaDate, formatBoliviaTime } from '../../../common/utils/date-time.js';
 
 @Injectable()
 export class NotificationsService {
@@ -25,7 +26,34 @@ export class NotificationsService {
     private readonly notificationGateway: NotificationGateway,
     private readonly appVisibilityService: AppVisibilityService,
   ) {}
+ private normalizePayload(payload: any): any {
+    if (!payload || typeof payload !== 'object') return payload;
 
+    const normalized = { ...payload };
+
+    if (normalized.date) {
+      try {
+        normalized.date = formatBoliviaDate(normalized.date);
+      } catch (e) {
+      }
+    }
+
+    if (normalized.time) {
+      try {
+        normalized.time = formatBoliviaTime(normalized.time);
+      } catch (e) {
+      }
+    }
+
+    if (normalized.expiresAt) {
+      try {
+        normalized.expiresAt = `${formatBoliviaDate(normalized.expiresAt)} a las ${formatBoliviaTime(normalized.expiresAt)}`;
+      } catch (e) {
+      }
+    }
+
+    return normalized;
+  }
   async notify(request: NotifyRequest): Promise<NotifyResult> {
     const { recipientIds, actorId, type, payload, actionUrl, groupKey } = request;
 
