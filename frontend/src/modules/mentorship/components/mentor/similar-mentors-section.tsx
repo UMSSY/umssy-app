@@ -1,6 +1,8 @@
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import Link from 'next/link';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button-variants';
+import { getSafeReturnTo } from '../../utils/get-safe-mentor-return-to';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { getInitials } from '@/shared/utils/get-initials';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -8,6 +10,7 @@ import type { SimilarMentorsSectionProps } from '../../types/similar-mentor.type
 import { MentorQueryFeedback } from './mentor-query-feedback';
 
 export function SimilarMentorsSection(props: SimilarMentorsSectionProps) {
+  const returnTo = getSafeReturnTo(props.returnTo);
   return (
     <section
       aria-labelledby="similar-mentors-title"
@@ -57,6 +60,13 @@ export function SimilarMentorsSection(props: SimilarMentorsSectionProps) {
               <CardContent className="flex flex-1 flex-col gap-5">
                 <div className="flex min-w-0 items-start gap-4">
                   <Avatar className="size-14 shrink-0">
+                    {mentor.photoUrl && (
+                      <AvatarImage
+                        src={mentor.photoUrl}
+                        alt={`Foto de ${mentor.fullName}`}
+                        className="object-cover"
+                      />
+                    )}
                     <AvatarFallback>
                       {getInitials(mentor.fullName)}
                     </AvatarFallback>
@@ -68,9 +78,7 @@ export function SimilarMentorsSection(props: SimilarMentorsSectionProps) {
                     >
                       {mentor.fullName}
                     </h3>
-                    <p className="mt-1 text-sm text-text-secondary">
-                      {mentor.roleLabel}
-                    </p>
+                    <p className="mt-1 text-sm text-text-secondary">Mentor</p>
                   </div>
                 </div>
                 <Badge
@@ -121,16 +129,16 @@ export function SimilarMentorsSection(props: SimilarMentorsSectionProps) {
                 </div>
               </CardContent>
               <CardFooter className="mt-auto bg-surface">
-                {/* Profile navigation is intentionally deferred to Task-10f. */}
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled
-                  className="min-h-11 w-full border-border-strong text-ink"
+                <Link
+                  href={`/mentors/${encodeURIComponent(mentor.id)}${returnTo ? `?returnTo=${encodeURIComponent(returnTo)}` : ''}`}
+                  className={buttonVariants({
+                    variant: 'outline',
+                    className: 'min-h-11 w-full border-border-strong text-ink',
+                  })}
                   aria-label={`Ver perfil de ${mentor.fullName}`}
                 >
                   Ver perfil
-                </Button>
+                </Link>
               </CardFooter>
             </Card>
           ))}
