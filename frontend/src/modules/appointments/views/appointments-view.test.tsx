@@ -159,8 +159,10 @@ describe("AppointmentsView", () => {
         status: "COMPLETED",
         counterpart: { id: "other-1", fullName: "Persona de la cita", role: role === "mentor" ? "student" : "mentor" },
       });
-      vi.mocked(appointmentsApi.getMyAppointments).mockImplementation(async (scope) =>
-        scope === "past" ? [completed, makeAppointment({ id: "cancelled-1", status: "CANCELLED" })] : [],
+      vi.mocked(appointmentsApi.getMyAppointments).mockImplementation(async ({ scope }) =>
+        scope === "past"
+          ? makePage([completed, makeAppointment({ id: "cancelled-1", status: "CANCELLED" })])
+          : makePage([]),
       );
       vi.spyOn(appointmentsApi, "getById").mockResolvedValue({ ...completed, meetingUrl: null });
       vi.spyOn(appointmentsApi, "getCounterpartPhoto").mockResolvedValue(null);
@@ -172,7 +174,7 @@ describe("AppointmentsView", () => {
       await user.click(screen.getByRole("tab", { name: "Pasadas" }));
       const cardBadge = await screen.findByText("Completada");
       expect(screen.getByText("Cancelada")).toBeInTheDocument();
-      expect(appointmentsApi.getMyAppointments).toHaveBeenCalledWith("past");
+      expect(appointmentsApi.getMyAppointments).toHaveBeenCalledWith({ scope: "past", page: 1 });
       await user.click(screen.getByRole("button", { name: /Persona de la cita/ }));
       const dialog = await screen.findByRole("dialog");
       const detailBadge = await within(dialog).findByText("Completada");
