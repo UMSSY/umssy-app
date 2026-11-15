@@ -19,23 +19,15 @@ import { saveOfflinePass } from '../services/offline-passes.service';
 import { offlinePassesStore } from '../utils/offline-passes-store';
 import { MyPassesView } from './my-passes-view';
 
-vi.mock('../services/registrations.service', () => ({
-  registrationsService: { getMine: vi.fn(), getPass: vi.fn() },
-}));
+vi.mock('../services/registrations.service', () => ({ registrationsService: { getMine: vi.fn(), getPass: vi.fn(), getFinished: vi.fn() } }));
 const getMine = vi.mocked(registrationsService.getMine);
-const pass = {
-  id: 'reg-1',
-  eventName: 'React',
-  date: '2026-10-20T00:00:00Z',
-  startTime: '1970-01-01T09:00:00Z',
-  endTime: '1970-01-01T12:00:00Z',
-  location: 'Aula 101',
-  status: 'Confirmada',
-};
+const getFinished = vi.mocked(registrationsService.getFinished);
+const pass = { id: 'reg-1', eventName: 'React', date: '2026-10-20T00:00:00Z', startTime: '1970-01-01T09:00:00Z', endTime: '1970-01-01T12:00:00Z', location: 'Aula 101', status: 'Confirmada' };
 beforeEach(async () => {
   vi.useFakeTimers({ now: new Date('2026-10-19T12:00:00Z'), toFake: ['Date'] });
   getMine.mockReset();
-  await saveAccessToken('session');
+  getFinished.mockReset();
+  await saveAccessToken("session");
   vi.mocked(registrationsService.getPass).mockImplementation(async (id) => {
     const rows = await getMine.mock.results.at(-1)?.value;
     const row = rows?.find((item: typeof pass) => item.id === id);
@@ -49,7 +41,95 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-describe('Mis pases', () => {
+describe("Mis pases", () => {
+  it('loads finished history lazily and keeps its cards separate from the current panel', async () => {
+    getMine.mockResolvedValue([pass]);
+    getFinished.mockResolvedValue({ items: [{ id: 'reg-history', title: 'Historia', date: '2026-08-10T00:00:00Z', startTime: pass.startTime, endTime: pass.endTime, location: pass.location }], total: 12, limit: 10, totalPages: 2 });
+    render(<MyPassesView />);
+    expect(getFinished).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('tab', { name: 'Historial' }));
+    expect(await screen.findByText('Historia')).toBeInTheDocument();
+    expect(screen.getByText('12 pases')).toBeInTheDocument();
+    expect(screen.getByText('ID Inscripción:')).toBeInTheDocument();
+    expect(screen.queryByRole('img', { name: 'Código QR del pase' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Historia/ })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Cargar más' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('tab', { name: 'Vigentes' }));
+    expect(await screen.findByText('1 pase')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('tab', { name: 'Historial' }));
+    await waitFor(() => expect(getFinished).toHaveBeenCalledTimes(2));
+  });
+  it('revalidates current passes when returning from history', async () => {
+    getMine.mockResolvedValue([pass]);
+    getFinished.mockResolvedValue({ items: [], total: 0, limit: 10, totalPages: 0 });
+    render(<MyPassesView />);
+    await screen.findByText('1 pase');
+    expect(getMine).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole('tab', { name: 'Historial' }));
+    await screen.findByText('Aún no tienes talleres finalizados');
+    fireEvent.click(screen.getByRole('tab', { name: 'Vigentes' }));
+    await waitFor(() => expect(getMine).toHaveBeenCalledTimes(2));
+  });
+  it('appends the next history page while keeping the backend total', async () => {
+    getMine.mockResolvedValue([]);
+    getFinished.mockImplementation(async (page) => ({
+      items: [{ id: `history-${page}`, title: `History ${page}`, date: pass.date, startTime: pass.startTime, endTime: pass.endTime, location: pass.location }],
+      total: 12,
+      limit: 10,
+      totalPages: 2,
+    }));
+    render(<MyPassesView />);
+    fireEvent.click(screen.getByRole('tab', { name: 'Historial' }));
+    expect(await screen.findByText('History 1')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Cargar más' }));
+    expect(await screen.findByText('History 2')).toBeInTheDocument();
+    expect(screen.getByText('History 1')).toBeInTheDocument();
+    expect(screen.getByText('12 pases')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Cargar más' })).not.toBeInTheDocument();
+  });
+  it('shows an empty history without replacing current passes', async () => {
+    getMine.mockResolvedValue([pass]);
+    getFinished.mockResolvedValue({ items: [], total: 0, limit: 10, totalPages: 0 });
+    render(<MyPassesView />);
+    fireEvent.click(screen.getByRole('tab', { name: 'Historial' }));
+    expect(await screen.findByText('Aún no tienes talleres finalizados')).toBeInTheDocument();
+    expect(screen.getByText('0 pases')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('tab', { name: 'Vigentes' }));
+    expect(await screen.findByText('1 pase')).toBeInTheDocument();
+  });
+  it('allows retrying a history error without affecting current passes', async () => {
+    getMine.mockResolvedValue([pass]);
+    getFinished.mockRejectedValueOnce(new Error('Network')).mockResolvedValueOnce({ items: [], total: 0, limit: 10, totalPages: 0 });
+    render(<MyPassesView />);
+    fireEvent.click(screen.getByRole('tab', { name: 'Historial' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('No fue posible cargar tu historial');
+    fireEvent.click(screen.getByRole('button', { name: 'Reintentar' }));
+    expect(await screen.findByText('Aún no tienes talleres finalizados')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('tab', { name: 'Vigentes' }));
+    expect(await screen.findByText('1 pase')).toBeInTheDocument();
+  });
+  it('aborts an unfinished history request when returning to current passes', async () => {
+    getMine.mockResolvedValue([pass]);
+    getFinished.mockImplementation(() => new Promise(() => undefined));
+    render(<MyPassesView />);
+    fireEvent.click(screen.getByRole('tab', { name: 'Historial' }));
+    await waitFor(() => expect(getFinished).toHaveBeenCalledTimes(1));
+    const signal = getFinished.mock.calls[0][2];
+    fireEvent.click(screen.getByRole('tab', { name: 'Vigentes' }));
+    await waitFor(() => expect(signal?.aborted).toBe(true));
+  });
+  it('shows history without requesting a QR or saving an offline pass', async () => {
+    getMine.mockResolvedValue([]);
+    getFinished.mockResolvedValue({ items: [{ id: 'history-only', title: 'History only', date: pass.date, startTime: pass.startTime, endTime: pass.endTime, location: pass.location }], total: 1, limit: 10, totalPages: 1 });
+    const saveSpy = vi.spyOn(offlinePassesStore, 'save');
+    render(<MyPassesView />);
+    fireEvent.click(screen.getByRole('tab', { name: 'Historial' }));
+    expect(await screen.findByText('History only')).toBeInTheDocument();
+    expect(registrationsService.getPass).not.toHaveBeenCalled();
+    expect(saveSpy).not.toHaveBeenCalled();
+    expect(screen.queryByRole('img', { name: 'Código QR del pase' })).not.toBeInTheDocument();
+    saveSpy.mockRestore();
+  });
   it('preserves different workshops with identical names and dates', async () => {
     getMine.mockResolvedValue([
       { ...pass, eventId: 'event-1' },
@@ -357,6 +437,19 @@ describe('Mis pases sin conexión', () => {
   afterEach(() => {
     vi.restoreAllMocks();
     onlineManager.setOnline(true);
+  });
+
+  it('keeps saved QR available when switching history tabs offline without requests', async () => {
+    await offlinePassesStore.save('user-a', [saved]);
+    goOffline();
+    render(<MyPassesView />);
+    await screen.findByRole('img', { name: 'Código QR del pase' });
+    fireEvent.click(screen.getByRole('tab', { name: 'Historial' }));
+    expect(await screen.findByText('El historial requiere conexión a Internet.')).toBeInTheDocument();
+    expect(getFinished).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('tab', { name: 'Vigentes' }));
+    expect(await screen.findByRole('img', { name: 'Código QR del pase' })).toBeInTheDocument();
+    expect(getMine).not.toHaveBeenCalled();
   });
 
   it('shows the saved passes and QR offline with the last update and blocked actions', async () => {

@@ -1,4 +1,6 @@
 import type { RegistrationScheduleEvent } from '../types/registration-schedule-event.types.js';
+import { BOLIVIA_OFFSET_MS } from '../../../common/constants/date-time.constants.js';
+import type { FinishedEventThreshold } from '../types/finished-event-threshold.types.js';
 import { Injectable } from '@nestjs/common';
 import type { Prisma } from '../../../prisma/client.js';
 import { EventNotFoundException } from '../exceptions/event-not-found.exception.js';
@@ -15,6 +17,42 @@ import type {
 @Injectable()
 export class EventsService {
   constructor(private readonly repository: EventsRepository) {}
+
+  getFinishedEventThreshold(now: Date = new Date()): FinishedEventThreshold {
+    const localNow = new Date(now.getTime() + BOLIVIA_OFFSET_MS);
+    return {
+      eventDate: new Date(
+        Date.UTC(
+          localNow.getUTCFullYear(),
+          localNow.getUTCMonth(),
+          localNow.getUTCDate(),
+        ),
+      ),
+      endTime: new Date(
+        Date.UTC(
+          1970,
+          0,
+          1,
+          localNow.getUTCHours(),
+          localNow.getUTCMinutes(),
+          localNow.getUTCSeconds(),
+          localNow.getUTCMilliseconds(),
+        ),
+      ),
+    };
+  }
+
+  isFinished(
+    event: Pick<RegistrationScheduleEvent, 'eventDate' | 'endTime'>,
+    now: Date = new Date(),
+  ): boolean {
+    const threshold = this.getFinishedEventThreshold(now);
+    return (
+      event.eventDate.getTime() < threshold.eventDate.getTime() ||
+      (event.eventDate.getTime() === threshold.eventDate.getTime() &&
+        event.endTime.getTime() <= threshold.endTime.getTime())
+    );
+  }
 
   async findAll(
     payload: GetEventsPayload,

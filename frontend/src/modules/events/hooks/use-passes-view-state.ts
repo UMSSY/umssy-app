@@ -8,10 +8,10 @@ import { useOnlineStatus } from "./use-online-status";
 
 import type { PassesViewState } from "../types/passes-view-state.types";
 
-export function usePassesViewState(): PassesViewState {
+export function usePassesViewState(isCurrentActive = true): PassesViewState {
   const accessToken = useRegistrationSession();
   const isOnline = useOnlineStatus();
-  const live = useMyPasses();
+  const live = useMyPasses(isCurrentActive);
   const { snapshot, isLoading: isSnapshotLoading } = useOfflinePassesSnapshot(accessToken, isOnline);
 
   const saved = snapshot?.passes ?? [];
