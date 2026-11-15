@@ -23,11 +23,16 @@ export const createCompanyAccessRequestSchema = z.object({
     .string()
     .trim()
     .regex(/^[67]\d{7}$|^[234]\d{6,7}$/, 'Teléfono de Bolivia inválido'),
-  websiteUrl: z
-    .string()
-    .trim()
-    .url('Ingresa una URL válida (ej. https://www.empresa.com)')
-    .max(255),
+  websiteUrl: z.preprocess(
+    (val) => (typeof val === 'string' ? val.trim() : ''),
+    z
+      .string()
+      .max(255)
+      .refine(
+        (val) => val === '' || /^https?:\/\/.+\..+/.test(val),
+        'Ingresa una URL válida (ej. https://www.empresa.com)',
+      ),
+  ),
   username: z
     .string()
     .trim()
