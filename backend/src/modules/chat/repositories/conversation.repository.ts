@@ -45,9 +45,16 @@ export class ConversationRepository {
     });
   }
 
-  async findByContextId(contextId: string) {
+  async findByContextId(contextId: string, userAId?: string, userBId?: string) {
+    const where: Record<string, unknown> = { contextId };
+    if (userAId && userBId) {
+      where.OR = [
+        { userAId, userBId },
+        { userAId: userBId, userBId: userAId },
+      ];
+    }
     return this.prisma.conversation.findFirst({
-      where: { contextId },
+      where,
       include: {
         userA: CONTACT_USER_SELECT,
         userB: CONTACT_USER_SELECT,
