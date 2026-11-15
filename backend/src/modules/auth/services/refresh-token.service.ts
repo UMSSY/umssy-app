@@ -59,7 +59,10 @@ export class RefreshTokenService {
       sub?: unknown;
       roleTag?: unknown;
     } | null>(accessToken);
-    if (typeof payload?.sub !== 'string' || typeof payload.roleTag !== 'string') {
+    if (
+      typeof payload?.sub !== 'string' ||
+      typeof payload.roleTag !== 'string'
+    ) {
       throw new UnauthorizedSessionException();
     }
 
@@ -201,5 +204,12 @@ export class RefreshTokenService {
   ) {
     const value: RefreshRevocationReason = REFRESH_REVOCATION_REASONS[reason];
     return this.refreshTokens.revokeFamily(familyId, value);
+  }
+
+  revokeAllForUser(userId: string) {
+    return this.refreshTokens.revokeAllForUser(
+      userId,
+      REFRESH_REVOCATION_REASONS.passwordChanged,
+    );
   }
 }

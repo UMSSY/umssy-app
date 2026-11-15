@@ -14,6 +14,7 @@ import { LOGIN_ROLE_PRIORITY } from '../constants/login-role-priority.constants.
 import { SESSION_MAX_MS } from '../constants/session.constants.js';
 import { MailService } from '../../mail/services/mail.service.js';
 import { loadMailTemplate } from '../../mail/helpers/load-mail-template.js';
+import { RefreshTokenService } from './refresh-token.service.js';
 import type { SessionResponse } from '../types/session-response.types.js';
 import type { LoginResponse } from '../types/login-response.types.js';
 import type { AuthenticatedUser } from '../../../common/types/authenticated-user.types.js';
@@ -34,6 +35,7 @@ export class AuthService {
     private readonly authRepository: AuthRepository,
     private readonly jwtService: JwtService,
     private readonly mailService: MailService,
+    private readonly refreshTokenService: RefreshTokenService,
   ) {}
 
   existsByEmail(email: string) {
@@ -190,6 +192,7 @@ export class AuthService {
       newPasswordHash,
       otp.id,
     );
+    await this.refreshTokenService.revokeAllForUser(user.id);
 
     return { ok: true, message: 'Contraseña actualizada correctamente.' };
   }
