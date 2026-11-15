@@ -59,7 +59,9 @@ describe('NotificationsRepository', () => {
     const count = await repository.countUnread('user-1');
 
     expect(mockPrisma.notification.count).toHaveBeenCalledWith({
-      where: { recipientId: 'user-1', readAt: null },
+      where: { recipientId: 'user-1', readAt: null,
+        type: { code: { notIn: ['CHAT_MESSAGE', 'CHAT_GROUP_MESSAGE'] } },
+       },
     });
     expect(count).toBe(5);
   });
@@ -67,7 +69,9 @@ describe('NotificationsRepository', () => {
   it('debe marcar todas las notificaciones como leídas', async () => {
     await repository.markAllAsRead('user-1');
     expect(mockPrisma.notification.updateMany).toHaveBeenCalledWith({
-      where: { recipientId: 'user-1', readAt: null },
+      where: { recipientId: 'user-1', readAt: null,
+        type: { code: { notIn: ['CHAT_MESSAGE', 'CHAT_GROUP_MESSAGE'] } },
+       },
       data: { readAt: expect.any(Date) },
     });
   });

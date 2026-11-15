@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useEffect, useSyncExternalStore } from "react";
+import { useContext, useEffect, useMemo, useSyncExternalStore } from "react";
 import {
   QueryClient,
   QueryClientContext,
@@ -33,19 +33,41 @@ import { isInboxNotification } from "../utils/is-inbox-notification";
 
 const getServerToken = () => null;
 const FALLBACK_QUERY_CLIENT = new QueryClient();
+const NOTIFICATIONS_SYNC_CHANNEL = "umssy_notifications_sync";
+const MAX_BACKEND_INBOX_LIMIT = 100;
+
+type NotificationsSyncMessage =
+  | { type: "MARK_READ"; notificationId: string; readAt: string }
+  | { type: "MARK_ALL_READ"; readAt: string };
 
 function isTestEnvironment(): boolean {
   try {
     if (process.env.NODE_ENV === "test") return true;
   } catch {}
   try {
-// @ts-expect-error: import.meta.env only exists in vite
-    if (typeof import.meta !== "undefined" && import.meta.env?.TEST) return true;
+    const meta = import.meta as unknown as { env?: { TEST?: boolean } };
+    if (meta.env?.TEST) return true;
   } catch {}
   try {
     if (typeof globalThis !== "undefined" && "__vitest_worker__" in globalThis) return true;
   } catch {}
   return false;
+}
+
+function broadcastNotificationsSync(message: NotificationsSyncMessage): void {
+  if (
+    typeof window === "undefined" ||
+    typeof window.BroadcastChannel === "undefined" ||
+    isTestEnvironment()
+  ) {
+    return;
+  }
+
+  try {
+    const channel = new window.BroadcastChannel(NOTIFICATIONS_SYNC_CHANNEL);
+    channel.postMessage(message);
+    channel.close();
+  } catch {}
 }
 
 export const NOTIFICATIONS_QUERY_KEYS = {
@@ -63,12 +85,71 @@ export function useNotificationsRealtimeSync(): void {
   useEffect(() => {
     if (!token || !queryClient || isTestEnvironment()) return;
 
-    let socket: Socket;
+    let channel: BroadcastChannel | null = null;
+    if (typeof window !== "undefined" && typeof window.BroadcastChannel !== "undefined") {
+      try {
+        channel = new window.BroadcastChannel(NOTIFICATIONS_SYNC_CHANNEL);
+        channel.onmessage = (event: MessageEvent<NotificationsSyncMessage>) => {
+          const payload = event.data;
+          if (!payload) return;
+
+          if (payload.type === "MARK_READ") {
+            let markedUnread = false;
+            queryClient.setQueriesData<NotificationListResponse>(
+              { queryKey: NOTIFICATIONS_QUERY_KEYS.lists() },
+              (existing) => {
+                if (!existing) return existing;
+                return {
+                  ...existing,
+                  data: existing.data.map((item) => {
+                    if (item.id === payload.notificationId) {
+                      if (!item.readAt) markedUnread = true;
+                      return { ...item, readAt: item.readAt ?? payload.readAt };
+                    }
+                    return item;
+                  }),
+                };
+              },
+            );
+
+            if (markedUnread) {
+              queryClient.setQueryData<UnreadCountResponse>(
+                NOTIFICATIONS_QUERY_KEYS.unreadCount,
+                (current) => ({ count: Math.max(0, (current?.count ?? 1) - 1) }),
+              );
+            } else {
+              void queryClient.invalidateQueries({
+                queryKey: NOTIFICATIONS_QUERY_KEYS.unreadCount,
+              });
+            }
+          }
+
+          if (payload.type === "MARK_ALL_READ") {
+            queryClient.setQueriesData<NotificationListResponse>(
+              { queryKey: NOTIFICATIONS_QUERY_KEYS.lists() },
+              (existing) => {
+                if (!existing) return existing;
+                return {
+                  ...existing,
+                  data: existing.data.map((item) =>
+                    item.readAt ? item : { ...item, readAt: payload.readAt },
+                  ),
+                };
+              },
+            );
+            queryClient.setQueryData<UnreadCountResponse>(
+              NOTIFICATIONS_QUERY_KEYS.unreadCount,
+              { count: 0 },
+            );
+          }
+        };
+      } catch {}
+    }
+
+    let socket: Socket | null = null;
     try {
       socket = getNotificationsSocket();
-    } catch {
-      return;
-    }
+    } catch {}
 
     const handleUnreadCountUpdated = (payload: UnreadCountResponse) => {
       if (typeof payload?.count === "number") {
@@ -78,36 +159,52 @@ export function useNotificationsRealtimeSync(): void {
       }
     };
 
-    const handleNewNotification = (notification: NotificationResponse) => {
-      if (!notification || !isInboxNotification(notification.typeCode)) return;
+    const handleNewNotification = (notification: Partial<NotificationResponse>) => {
+      if (!notification) return;
+
+      if (!notification.id || !notification.typeCode) {
+        void queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_QUERY_KEYS.all });
+        return;
+      }
+
+      if (!isInboxNotification(notification.typeCode)) return;
+
+      const fullNotification = notification as NotificationResponse;
 
       queryClient.setQueryData<UnreadCountResponse>(
         NOTIFICATIONS_QUERY_KEYS.unreadCount,
-        (current) => ({ count: (current?.count ?? 0) + (notification.readAt ? 0 : 1) }),
+        (current) => ({ count: (current?.count ?? 0) + (fullNotification.readAt ? 0 : 1) }),
       );
 
       queryClient.setQueriesData<NotificationListResponse>(
         { queryKey: NOTIFICATIONS_QUERY_KEYS.lists() },
         (existing) => {
           if (!existing) return existing;
-          const alreadyExists = existing.data.some((item) => item.id === notification.id);
+          const alreadyExists = existing.data.some((item) => item.id === fullNotification.id);
           if (alreadyExists) return existing;
 
           return {
             ...existing,
-            data: [notification, ...existing.data].slice(0, existing.limit),
+            data: [fullNotification, ...existing.data].slice(0, existing.limit),
             total: typeof existing.total === "number" ? existing.total + 1 : undefined,
           };
         },
       );
     };
 
-    socket.on(UNREAD_COUNT_UPDATED_EVENT, handleUnreadCountUpdated);
-    socket.on(NOTIFICATION_NEW_EVENT, handleNewNotification);
+    if (socket) {
+      socket.on(UNREAD_COUNT_UPDATED_EVENT, handleUnreadCountUpdated);
+      socket.on(NOTIFICATION_NEW_EVENT, handleNewNotification);
+    }
 
     return () => {
-      socket.off(UNREAD_COUNT_UPDATED_EVENT, handleUnreadCountUpdated);
-      socket.off(NOTIFICATION_NEW_EVENT, handleNewNotification);
+      if (channel) {
+        channel.close();
+      }
+      if (socket) {
+        socket.off(UNREAD_COUNT_UPDATED_EVENT, handleUnreadCountUpdated);
+        socket.off(NOTIFICATION_NEW_EVENT, handleNewNotification);
+      }
     };
   }, [token, queryClient]);
 }
@@ -122,7 +219,7 @@ export function useUnreadNotificationsCount() {
       queryKey: NOTIFICATIONS_QUERY_KEYS.unreadCount,
       queryFn: getUnreadCount,
       enabled: Boolean(token && queryClient && !isTest),
-      retry: isTest ? false : 3, // <--- Evita que los reintentos causen timeouts en Vitest
+      retry: isTest ? false : 3,
     },
     queryClient ?? FALLBACK_QUERY_CLIENT,
   );
@@ -141,8 +238,8 @@ export function useNotificationsInbox(options: UseNotificationsInboxOptions = {}
   const isTest = isTestEnvironment();
 
   const listQuery = useQuery({
-    queryKey: NOTIFICATIONS_QUERY_KEYS.list(filter, page, limit),
-    queryFn: () => getNotifications({ filter, page, limit }),
+    queryKey: NOTIFICATIONS_QUERY_KEYS.list("ALL", 1, MAX_BACKEND_INBOX_LIMIT),
+    queryFn: () => getNotifications({ filter: "ALL", page: 1, limit: MAX_BACKEND_INBOX_LIMIT }),
     enabled: Boolean(token && !isTest),
     retry: isTest ? false : 3,
   });
@@ -179,15 +276,16 @@ export function useNotificationsInbox(options: UseNotificationsInboxOptions = {}
           (current) => ({ count: Math.max(0, (current?.count ?? 1) - 1) }),
         );
       }
+
+      broadcastNotificationsSync({ type: "MARK_READ", notificationId, readAt });
     },
   });
 
   const markAllAsReadMutation = useMutation({
     mutationFn: async (targetFilter?: NotificationInboxFilter) => {
       await markAllNotificationsAsRead(targetFilter);
-      return targetFilter ?? "ALL";
     },
-    onSuccess: (activeFilter) => {
+    onSuccess: () => {
       const readAt = new Date().toISOString();
 
       queryClient.setQueriesData<NotificationListResponse>(
@@ -196,40 +294,44 @@ export function useNotificationsInbox(options: UseNotificationsInboxOptions = {}
           if (!existing) return existing;
           return {
             ...existing,
-            data: existing.data.map((item) => {
-              if (item.readAt) return item;
-              if (
-                activeFilter === "ALL" ||
-                getNotificationCategory(item.typeCode) === activeFilter
-              ) {
-                return { ...item, readAt };
-              }
-              return item;
-            }),
+            data: existing.data.map((item) =>
+              item.readAt ? item : { ...item, readAt },
+            ),
           };
         },
       );
 
-      if (activeFilter === "ALL") {
-        queryClient.setQueryData<UnreadCountResponse>(
-          NOTIFICATIONS_QUERY_KEYS.unreadCount,
-          { count: 0 },
-        );
-      } else {
-        queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_QUERY_KEYS.unreadCount });
-      }
+      queryClient.setQueryData<UnreadCountResponse>(
+        NOTIFICATIONS_QUERY_KEYS.unreadCount,
+        { count: 0 },
+      );
+
+      broadcastNotificationsSync({ type: "MARK_ALL_READ", readAt });
     },
   });
 
-  const visibleNotifications = (listQuery.data?.data ?? []).filter((item) =>
-    isInboxNotification(item.typeCode),
-  );
+  const filteredNotifications = useMemo(() => {
+    const inboxItems = (listQuery.data?.data ?? []).filter((item) =>
+      isInboxNotification(item.typeCode),
+    );
+
+    if (filter === "ALL") {
+      return inboxItems;
+    }
+
+    return inboxItems.filter((item) => getNotificationCategory(item.typeCode) === filter);
+  }, [listQuery.data?.data, filter]);
+
+  const paginatedNotifications = useMemo(() => {
+    const startIndex = (page - 1) * limit;
+    return filteredNotifications.slice(startIndex, startIndex + limit);
+  }, [filteredNotifications, page, limit]);
 
   return {
-    notifications: visibleNotifications,
-    page: listQuery.data?.page ?? page,
-    limit: listQuery.data?.limit ?? limit,
-    total: listQuery.data?.total,
+    notifications: paginatedNotifications,
+    page,
+    limit,
+    total: filteredNotifications.length,
     isLoading: listQuery.isLoading,
     isError: listQuery.isError,
     refetch: listQuery.refetch,
