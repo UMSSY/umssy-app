@@ -48,7 +48,7 @@ export class NotificationsService {
 
     const typeRecord = await this.notificationsRepository.findTypeByCode(type);
     if (!typeRecord) {
-      throw new NotFoundException(`NotificationType ${type} no encontrado en el catÃ¡logo`);
+      throw new NotFoundException(`NotificationType ${type} no encontrado en el catálogo`);
     }
 
     const template = NOTIFICATION_TEMPLATES[type] as NotificationTemplateDefinition<NotificationType>;
@@ -108,7 +108,7 @@ export class NotificationsService {
           notificationIdsByRecipient,
         );
       } catch (e) {
-        this.logger.error('Fallo crÃ­tico en PushDispatcher', e);
+        this.logger.error('Fallo crítico en PushDispatcher', e);
         pushStatus = 'failed';
       }
     }
@@ -117,7 +117,7 @@ export class NotificationsService {
       try {
         emailStatus = await this.mailDispatcher.dispatchToUsers(emailTargets, title, body, actionUrl);
       } catch (e) {
-        this.logger.error('Fallo crÃ­tico en MailDispatcher', e);
+        this.logger.error('Fallo crítico en MailDispatcher', e);
         emailStatus = 'failed';
       }
     }

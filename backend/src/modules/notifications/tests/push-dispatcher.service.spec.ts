@@ -128,7 +128,7 @@ describe('PushDispatcherService', () => {
       expect(result).toBe('skipped');
     });
 
-    it('debe eliminar la suscripciÃ³n si el push service responde 410 (Gone)', async () => {
+    it('debe eliminar la suscripción si el push service responde 410 (Gone)', async () => {
       mockPushRepo.findManyByUserIds.mockResolvedValue([
         {
           endpoint: 'https://fcm...',
@@ -183,7 +183,7 @@ describe('PushDispatcherService', () => {
       expect(payload.body).toHaveLength(100);
     });
 
-    it('debe enviar un push por cada dispositivo mÃ³vil del usuario', async () => {
+    it('debe enviar un push por cada dispositivo móvil del usuario', async () => {
       mockPushRepo.findManyByUserIds.mockResolvedValue([androidSubscription, iphoneSubscription]);
 
       const result = await service.dispatchToUsers(['user-1'], 'Title', 'Body', '/url');
@@ -192,7 +192,7 @@ describe('PushDispatcherService', () => {
       expect(result).toBe('sent');
     });
 
-    it('debe enviar solo a los mÃ³viles cuando tambiÃ©n hay un escritorio', async () => {
+    it('debe enviar solo a los móviles cuando también hay un escritorio', async () => {
       mockPushRepo.findManyByUserIds.mockResolvedValue([androidSubscription, desktopSubscription]);
 
       const result = await service.dispatchToUsers(['user-1'], 'Title', 'Body', '/url');
@@ -201,7 +201,7 @@ describe('PushDispatcherService', () => {
       expect(result).toBe('sent');
     });
 
-    it('debe eliminar la suscripciÃ³n si el push service responde 404', async () => {
+    it('debe eliminar la suscripción si el push service responde 404', async () => {
       mockPushRepo.findManyByUserIds.mockResolvedValue([androidSubscription]);
       webpushMock.sendNotification.mockRejectedValueOnce(createPushError('Not Found', 404));
 
@@ -226,7 +226,7 @@ describe('PushDispatcherService', () => {
       );
     });
 
-    it('ante otro error no elimina la suscripciÃ³n, lo registra y continÃºa con las demÃ¡s', async () => {
+    it('ante otro error no elimina la suscripción, lo registra y continúa con las demás', async () => {
       const errorSpy = vi.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
       mockPushRepo.findManyByUserIds.mockResolvedValue([androidSubscription, iphoneSubscription]);
       webpushMock.sendNotification.mockRejectedValueOnce(createPushError('Server error', 500));

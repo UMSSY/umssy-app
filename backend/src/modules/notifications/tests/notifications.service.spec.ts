@@ -95,7 +95,7 @@ describe('NotificationsService', () => {
     service = module.get<NotificationsService>(NotificationsService);
   });
 
-  it('debe omitir la notificaciÃ³n si el actor es el mismo destinatario (Anti-Autor)', async () => {
+  it('debe omitir la notificación si el actor es el mismo destinatario (Anti-Autor)', async () => {
     const result = await service.notify({
       recipientIds: ['user-1'],
       actorId: 'user-1',
@@ -109,7 +109,7 @@ describe('NotificationsService', () => {
     expect(mockPushDispatcher.dispatchToUsers).not.toHaveBeenCalled();
   });
 
-  it('debe omitir la notificaciÃ³n si hay un bloqueo entre los usuarios', async () => {
+  it('debe omitir la notificación si hay un bloqueo entre los usuarios', async () => {
     mockUserLookupRepo.hasBlockBetween.mockResolvedValue(true);
 
     const result = await service.notify({
@@ -124,7 +124,7 @@ describe('NotificationsService', () => {
     expect(mockNotificationsRepo.createMany).not.toHaveBeenCalled();
   });
 
-  it('debe lanzar NotFoundException si el tipo no estÃ¡ en la BD', async () => {
+  it('debe lanzar NotFoundException si el tipo no está en la BD', async () => {
     mockNotificationsRepo.findTypeByCode.mockResolvedValue(null);
 
     await expect(
@@ -177,7 +177,7 @@ describe('NotificationsService', () => {
     );
   });
 
-  it('debe aislar fallos de canal (si push falla, el resto continÃºa)', async () => {
+  it('debe aislar fallos de canal (si push falla, el resto continúa)', async () => {
     mockPreferencesRepo.findManyByUserIds.mockResolvedValue([
       { userId: 'user-2', pushEnabled: true, emailEnabled: true },
     ]);

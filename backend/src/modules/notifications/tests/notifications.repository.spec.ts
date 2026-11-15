@@ -44,7 +44,7 @@ describe('NotificationsRepository', () => {
     repository = module.get<NotificationsRepository>(NotificationsRepository);
   });
 
-  it('debe crear mÃºltiples notificaciones en lote', async () => {
+  it('debe crear múltiples notificaciones en lote', async () => {
     const created = [
       { id: 'n1', recipientId: '1' },
       { id: 'n2', recipientId: '2' },
@@ -62,7 +62,7 @@ describe('NotificationsRepository', () => {
     expect(result).toEqual(created);
   });
 
-  it('debe contar solo las notificaciones no leÃ­das', async () => {
+  it('debe contar solo las notificaciones no leídas', async () => {
     mockPrisma.notification.count.mockResolvedValue(5);
     const count = await repository.countUnread('user-1');
 
@@ -72,7 +72,7 @@ describe('NotificationsRepository', () => {
     expect(count).toBe(5);
   });
 
-  it('debe marcar todas las notificaciones como leÃ­das', async () => {
+  it('debe marcar todas las notificaciones como leídas', async () => {
     await repository.markAllAsRead('user-1');
     expect(mockPrisma.notification.updateMany).toHaveBeenCalledWith({
       where: { recipientId: 'user-1', readAt: null },

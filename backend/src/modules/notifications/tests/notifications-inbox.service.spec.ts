@@ -30,7 +30,7 @@ describe('NotificationsInboxService', () => {
   });
 
   describe('markAsRead', () => {
-    it('marca como leÃ­do un aviso propio sin leer', async () => {
+    it('marca como leído un aviso propio sin leer', async () => {
       mockRepo.findReadStateById.mockResolvedValue({ readAt: null });
 
       const result = await service.markAsRead('user-1', 'n1');
@@ -39,7 +39,7 @@ describe('NotificationsInboxService', () => {
       expect(result).toEqual({ ok: true });
     });
 
-    it('no vuelve a escribir un aviso que ya estaba leÃ­do', async () => {
+    it('no vuelve a escribir un aviso que ya estaba leído', async () => {
       mockRepo.findReadStateById.mockResolvedValue({ readAt: new Date() });
 
       const result = await service.markAsRead('user-1', 'n1');
