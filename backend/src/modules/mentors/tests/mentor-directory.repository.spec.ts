@@ -4,6 +4,14 @@ import { directoryPredicate } from '../repositories/mentor-directory.queries.js'
 import { MentorsRepository } from '../repositories/mentors.repository.js';
 
 describe('MentorsRepository directory page', () => {
+  it('busca por cargo, biografía, especialidad y habilidades con parámetros', () => {
+    const predicate = directoryPredicate({ search: "Cloud' OR true", available: true, area: '06d773ee-90d1-40c0-9744-c7c3601b84ef' }, new Date());
+    for (const field of ['we.position', 'u.about_me', 'ta.name', 's.name', 'ta.id::text']) expect(predicate.sql).toContain(field);
+    expect(predicate.sql).toContain('u.is_active = true');
+    expect(predicate.sql).toContain('u.is_available_for_mentoring = true');
+    expect(predicate.sql).not.toContain("Cloud'");
+    expect(predicate.values).toContain("Cloud'");
+  });
   const now = new Date('2026-10-24T12:00:00.000Z');
 
   const filters = {
@@ -83,8 +91,9 @@ describe('MentorsRepository directory page', () => {
       ),
     ).toEqual(Array(32).fill(0));
     for (const [query] of raw.mock.calls) {
-      expect(query.sql.length).toBeLessThan(1500);
-      expect(query.values.length).toBe(8);
+      expect(query.sql.length).toBeLessThan(4000);
+      expect(query.values.some((value: unknown) => value === 'u'.repeat(20) || value === 'u'.repeat(100))).toBe(true);
+      expect(query.sql).not.toContain('u'.repeat(20));
     }
   });
 

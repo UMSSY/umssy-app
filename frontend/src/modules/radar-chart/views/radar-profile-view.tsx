@@ -11,13 +11,17 @@ import type { AreaId } from "../types/area-detail.types";
 import { RadarEvidencePanel } from "../components/radar-evidence-panel";
 import { RadarSkillSources } from "../components/radar-skill-sources";
 import { useLiveRadar } from "../hooks/use-live-radar";
+import { RadarAreaActions } from "../components/radar-area-actions";
+import { SkillSimulationDialog } from "../components/skill-simulation-dialog";
 
 const DATE_FORMAT: Intl.DateTimeFormatOptions = { dateStyle: "medium", timeStyle: "short" };
 
 export function RadarProfileView() {
   const { data, loading, error, variation, previous, retry, retrying } = useLiveRadar();
   const [selectedArea, setSelectedArea] = useState<AreaId | null>(null);
+  const [evidenceArea, setEvidenceArea] = useState<AreaId | null>(null);
   const [comparing, setComparing] = useState(false);
+  const [simulationArea, setSimulationArea] = useState<AreaId | null>(null);
   const comparison = comparing ? previous : null;
   const areas = data?.areas ?? [];
   const selected = areas.find(area => area.id === selectedArea)
@@ -72,12 +76,12 @@ export function RadarProfileView() {
               previousPublishedAt={previous?.updatedAt}
               publishedAt={data.updatedAt}
               comparisonEnabled={Boolean(comparison)}
-              onComparisonChange={(enabled) => { setComparing(enabled); setSelectedArea(null); }}
+              onComparisonChange={(enabled) => { setComparing(enabled); setSelectedArea(null); setEvidenceArea(null); }}
               areas={data.version === 0 ? [] : areas}
               average={data.average}
-              onAreaClick={setSelectedArea}
+              onAreaClick={area => { setSelectedArea(area); if (!comparison) setEvidenceArea(area); }}
             />
-            <AreaBreakdownPanel areas={areas} average={data.average} />
+            <AreaBreakdownPanel areas={areas} average={data.average} selectedArea={selected?.id} onAreaClick={setSelectedArea} actions={selected ? <RadarAreaActions area={selected} onSimulate={() => setSimulationArea(selected.id)} /> : null} />
           </div>
           {comparison ? (
             <section aria-label="Comparación de publicaciones" className="rounded-lg border border-border bg-surface p-4">
@@ -94,9 +98,10 @@ export function RadarProfileView() {
               </div> : null}
             </section>
           ) : null}
-          {selectedArea && !comparison ? (
-            <RadarEvidencePanel key={`${data.userId}:${selectedArea}`} selected={selectedArea} radar={data} onClose={() => setSelectedArea(null)} />
+          {evidenceArea && !comparison && !simulationArea ? (
+            <RadarEvidencePanel key={`${data.userId}:${evidenceArea}`} selected={evidenceArea} radar={data} onClose={() => setEvidenceArea(null)} actions={selected ? <RadarAreaActions area={selected} onSimulate={() => { setEvidenceArea(null); setSimulationArea(selected.id); }} /> : null} />
           ) : null}
+          {simulationArea ? <SkillSimulationDialog key={simulationArea} areas={areas} initialArea={simulationArea} onClose={() => setSimulationArea(null)} /> : null}
           <p className="text-xs text-text-secondary">Las puntuaciones reflejan las habilidades aprobadas y sus evidencias.</p>
         </>
       ) : (!loading && !error ? <p className="text-text-secondary">Sin respuesta del servicio de afinidad.</p> : null)}

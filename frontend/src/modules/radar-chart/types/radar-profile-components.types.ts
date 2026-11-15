@@ -47,6 +47,9 @@ export interface AffinityRadarDotProps {
 }
 
 export interface AreaBreakdownPanelProps {
+  selectedArea?: AreaId;
+  onAreaClick?: (areaId: AreaId) => void;
+  actions?: ReactNode;
   areas: RadarAreaScore[];
   average: number;
   className?: string;

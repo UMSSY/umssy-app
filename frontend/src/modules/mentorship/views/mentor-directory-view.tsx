@@ -1,5 +1,8 @@
 "use client";
 import type { MentorDirectoryViewProps } from "../types/mentor-directory-view-props.types";
+import Link from "next/link";
+import { resolveRadarMentorArea } from "../utils/radar-mentor-area";
+import { RADAR_AXIS_NAMES } from "@/modules/radar-chart/constants/radar-axis-names.constants";
 
 import { useEffect, useMemo } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -41,7 +44,7 @@ export function MentorDirectoryView({
   const {
     page,
     search,
-    area,
+    area: rawArea,
     orientation,
     available: isAvailableOnly,
     sort: sortBy,
@@ -49,7 +52,19 @@ export function MentorDirectoryView({
 
   const { currentUserId } = useCurrentUserId();
 
-  const { technicalAreas, orientationTypes } = useMentorshipCatalogs();
+  const { technicalAreas, orientationTypes, isTechnicalAreasLoading, isTechnicalAreasError, retryTechnicalAreas } = useMentorshipCatalogs();
+  const radarAxis = RADAR_AXIS_NAMES.find(axis => axis.id === searchParams.get("radarArea"));
+  const resolvedArea = radarAxis ? resolveRadarMentorArea(radarAxis.id, technicalAreas) : undefined;
+  const area = rawArea || resolvedArea?.name || "";
+  const missingRadarArea = Boolean(radarAxis && !rawArea && !resolvedArea);
+
+  useEffect(() => {
+    if (!resolvedArea || rawArea) return;
+    const next = new URLSearchParams(queryString);
+    next.set("area", resolvedArea.name);
+    next.set("areaId", resolvedArea.id);
+    router.replace(`${pathname}?${next}`, { scroll: false });
+  }, [resolvedArea, rawArea, queryString, pathname, router]);
 
   const {
     data: directory,
@@ -60,18 +75,18 @@ export function MentorDirectoryView({
   } = useMentorDirectory({
     page,
     search,
-    area,
+    area: technicalAreas.find(item => item.id === searchParams.get("areaId") && item.name === area)?.id ?? (!rawArea ? resolvedArea?.id : undefined) ?? area,
     orientation,
     available: isAvailableOnly,
     sort: sortBy,
-  });
+  }, !missingRadarArea);
 
   const mentors = useMemo(
-    () => directory?.items ?? [],
-    [directory?.items],
+    () => missingRadarArea ? [] : directory?.items ?? [],
+    [directory?.items, missingRadarArea],
   );
 
-  const totalItems = directory?.totalItems ?? 0;
+  const totalItems = missingRadarArea ? 0 : directory?.totalItems ?? 0;
   const totalPages =
     directory?.totalPages ?? directoryState?.totalPages ?? 0;
 
@@ -138,6 +153,12 @@ export function MentorDirectoryView({
       new URLSearchParams(queryString),
       updates,
     );
+    if (updates.area !== undefined) {
+      next.delete("radarArea");
+      next.delete("areaId");
+      const selected = technicalAreas.find(item => item.name === updates.area);
+      if (selected) next.set("areaId", selected.id);
+    }
 
     const query = next.toString();
 
@@ -164,9 +185,13 @@ export function MentorDirectoryView({
         <header>
           <PageHeading
             title="Encuentra un mentor"
-            description="Busca por nombre o área de experiencia."
+            description="Busca por nombre, cargo o palabra clave."
           />
         </header>
+        <Link href="/profile/radar" className="text-sm text-accent underline">Volver al radar</Link>
+        {missingRadarArea ? <div className="rounded-lg border border-border bg-surface-soft p-4">
+          {isTechnicalAreasLoading ? <p role="status">Cargando especialidades...</p> : isTechnicalAreasError ? <div role="alert">No pudimos cargar las especialidades. <Button variant="outline" onClick={retryTechnicalAreas}>Reintentar</Button></div> : <p role="status">No hay mentores de {radarAxis?.name} en el catálogo disponible. Puedes seleccionar otra especialidad o volver al radar.</p>}
+        </div> : null}
 
         <div
           role="search"
@@ -253,7 +278,7 @@ export function MentorDirectoryView({
           </Button>
         </div>
 
-        {isPending || (isError && isFetching) ? (
+        {missingRadarArea ? null : isPending || (isError && isFetching) ? (
           <MentorQuerySkeleton />
         ) : isError ? (
           <MentorQueryFeedback

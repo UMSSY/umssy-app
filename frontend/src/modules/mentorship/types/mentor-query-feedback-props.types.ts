@@ -4,4 +4,5 @@ export type MentorQueryFeedbackProps = {
   onRetry?: () => void;
   onClearFilters?: () => void;
   showDirectoryLink?: boolean;
+  directoryHref?: string;
 };

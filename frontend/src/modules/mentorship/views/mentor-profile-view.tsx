@@ -44,6 +44,7 @@ export function MentorProfileView({
             void refetch();
           }}
           showDirectoryLink
+          directoryHref={returnTo}
         />
       </main>
     );
@@ -56,6 +57,7 @@ export function MentorProfileView({
           title="Mentor no encontrado"
           description="No se pudo encontrar el perfil solicitado."
           showDirectoryLink
+          directoryHref={returnTo}
         />
       </main>
     );
@@ -68,11 +70,14 @@ export function MentorProfileView({
           title="Perfil incompleto"
           description="Falta el nombre del mentor. El perfil completo todavía no está disponible."
           showDirectoryLink
+          directoryHref={returnTo}
         />
       </main>
     );
   }
   const professionalInterests = mentor.skills.filter((skill) => skill.name?.trim());
+  const directoryParams = new URL(returnTo, "http://localhost").searchParams;
+  const selectedArea = mentor.technicalAreas.find(area => area.id === directoryParams.get("areaId") || area.name === directoryParams.get("area"));
 
   return (
     <main className="bg-background">
@@ -95,11 +100,13 @@ export function MentorProfileView({
 
         <MentorProfileHeader
           mentor={mentor}
+          selectedAreaId={selectedArea?.id}
+          returnTo={selectedArea ? returnTo : undefined}
           showRequestAction={canVerifyIdentity && currentUserId !== mentor.id}
         />
 
         <div className="mt-6 grid min-w-0 grid-cols-12 gap-6">
-          <div className="col-span-8 flex min-w-0 flex-col gap-6">
+          <div className="col-span-12 flex min-w-0 flex-col gap-6 lg:col-span-8">
             {mentor.aboutMe && <MentorAbout description={mentor.aboutMe} />}
 
             <section className="rounded-xl border border-border bg-surface p-6">
@@ -130,7 +137,7 @@ export function MentorProfileView({
             />
           </div>
 
-          <div className="col-span-4 flex min-w-0 flex-col gap-6">
+          <div className="col-span-12 flex min-w-0 flex-col gap-6 lg:col-span-4">
             <MentorCareer mentor={mentor} />
 
             <MentorTechnicalAreas areas={mentor.technicalAreas} />

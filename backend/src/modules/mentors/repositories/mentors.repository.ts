@@ -260,7 +260,9 @@ export class MentorsRepository extends MentorIntakeRepository {
 
     if (filters.area) {
       where.mentorTechnicalAreas = {
-        some: { technicalArea: { name: filters.area } },
+        some: { technicalArea: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(filters.area)
+          ? { OR: [{ name: filters.area }, { id: filters.area }] }
+          : { name: filters.area } },
       };
     }
 

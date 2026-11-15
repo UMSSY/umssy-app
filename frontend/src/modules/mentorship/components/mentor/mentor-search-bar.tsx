@@ -3,6 +3,7 @@ import type { MentorSearchBarProps } from "../../types/mentor-search-bar-props.t
 
 import { useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
 
 const SEARCH_DEBOUNCE_MS = 300;
@@ -48,16 +49,19 @@ export function MentorSearchBar({
   }, [debouncedValue, onSearchChange, value]);
 
   return (
+    <div className="flex min-w-56 flex-1 items-end gap-2 self-end">
     <Input
       type="search"
       className="min-w-56 flex-1 self-end"
       aria-label="Buscar mentores por nombre"
-      placeholder="Buscar por nombre"
+      placeholder="Nombre, cargo o palabra clave"
       value={inputValue}
       onChange={(event) => {
         inputValueRef.current = event.target.value;
         setInputValue(event.target.value);
       }}
     />
+    {inputValue ? <Button type="button" variant="outline" onClick={() => { inputValueRef.current = ""; setInputValue(""); }}>Limpiar búsqueda</Button> : null}
+    </div>
   );
 }

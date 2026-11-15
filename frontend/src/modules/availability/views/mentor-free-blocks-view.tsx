@@ -16,7 +16,7 @@ import { availabilityApi } from "../services/availability.service";
 import type { MentorFreeBlocksViewProps } from "../types/mentor-free-blocks-view-props.types";
 import { formatWeekLabel } from "../utils/format-week-label";
 
-export function MentorFreeBlocksView({ mentorId }: MentorFreeBlocksViewProps) {
+export function MentorFreeBlocksView({ mentorId, selectedAreaId, returnTo }: MentorFreeBlocksViewProps) {
   const [weekStart, setWeekStart] = useState(() => getWeekRange(new Date()).startAt);
   const weekRange = getWeekRange(weekStart);
   const currentWeekStart = getWeekRange(new Date()).startAt;
@@ -27,7 +27,7 @@ export function MentorFreeBlocksView({ mentorId }: MentorFreeBlocksViewProps) {
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6">
-      <Link href={`/mentors/${mentorId}`} className="inline-flex items-center gap-2 text-sm text-accent underline-offset-4 hover:underline"><ChevronLeft className="size-4" aria-hidden="true" />Volver al perfil del mentor</Link>
+      <Link href={`/mentors/${mentorId}${returnTo ? `?returnTo=${encodeURIComponent(returnTo)}` : ""}`} className="inline-flex items-center gap-2 text-sm text-accent underline-offset-4 hover:underline"><ChevronLeft className="size-4" aria-hidden="true" />Volver al perfil del mentor</Link>
       <PageHeading title={MENTOR_FREE_BLOCKS_TEXT.heading} description="Revisa los horarios disponibles y selecciona un bloque." />
 
       <nav
@@ -81,6 +81,7 @@ export function MentorFreeBlocksView({ mentorId }: MentorFreeBlocksViewProps) {
         </section>
       ) : (
         <BlockSelection
+          selectedAreaId={selectedAreaId}
           mentorId={mentorId}
           blocks={blocks}
           weekRange={weekRange}

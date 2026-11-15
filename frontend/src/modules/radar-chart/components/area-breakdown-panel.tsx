@@ -1,4 +1,5 @@
 import { MAX_SCORE } from "@/modules/radar-chart/constants/radar-score.constants";
+import { Button } from "@/components/ui/button";
 import { useId } from "react";
 import { cn } from "@/lib/utils";
 import type { AreaLevel } from "../types/area-detail.types";
@@ -19,7 +20,7 @@ function toPercent(score: number): string {
   return `${Math.min(Math.max(score / MAX_SCORE, 0), 1) * 100}%`;
 }
 
-export function AreaBreakdownPanel({ areas, average, className }: AreaBreakdownPanelProps) {
+export function AreaBreakdownPanel({ areas, average, className, selectedArea, onAreaClick, actions }: AreaBreakdownPanelProps) {
   const titleId = useId();
 
   return (
@@ -35,7 +36,7 @@ export function AreaBreakdownPanel({ areas, average, className }: AreaBreakdownP
 
           return (
             <li key={area.id} data-testid={`area-breakdown-${area.id}`}>
-              <div className="flex items-center gap-2">
+              <Button type="button" variant="ghost" onClick={() => onAreaClick?.(area.id)} aria-pressed={selectedArea === area.id} aria-label={`Seleccionar ${area.name}`} className="flex h-auto w-full items-center gap-2 rounded-sm p-0 text-left focus-visible:outline-2 focus-visible:outline-accent">
                 <span className="min-w-0 flex-1 truncate text-sm font-medium text-ink">
                   {area.name}
                 </span>
@@ -43,7 +44,7 @@ export function AreaBreakdownPanel({ areas, average, className }: AreaBreakdownP
                 <span className="w-8 text-right font-heading text-base font-semibold text-ink tabular-nums">
                   {formatDecimal(area.score, 1)}
                 </span>
-              </div>
+              </Button>
               <div className="mt-2 h-1.5 rounded-full bg-border" aria-hidden="true">
                 <div
                   className={cn("h-full rounded-full", BAR_CLASS[level])}
@@ -54,6 +55,7 @@ export function AreaBreakdownPanel({ areas, average, className }: AreaBreakdownP
           );
         })}
       </ul>
+      {actions}
 
       <div className="mt-auto flex items-baseline justify-between gap-3 border-t border-border pt-4 max-lg:mt-6 lg:pt-5">
         <span className="text-xs font-semibold tracking-[0.12em] text-text-secondary uppercase">

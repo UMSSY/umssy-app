@@ -13,6 +13,7 @@ export function MentorQueryFeedback({
   onRetry,
   onClearFilters,
   showDirectoryLink = false,
+  directoryHref = "/mentorship/mentors",
 }: MentorQueryFeedbackProps) {
   const Icon = onRetry ? AlertCircle : Users;
 
@@ -50,7 +51,7 @@ export function MentorQueryFeedback({
 
           {showDirectoryLink && (
             <Link
-              href="/mentorship/mentors"
+              href={directoryHref}
               className={buttonVariants({ variant: "outline" })}
             >
               Volver al directorio

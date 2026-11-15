@@ -107,6 +107,36 @@ beforeEach(() => {
   navigationMocks.search = "";
 });
 
+it("limpia solo la búsqueda y mantiene la especialidad activa", async () => {
+  navigationMocks.search = "?area=Cloud&areaId=area-cloud&search=Ana";
+  vi.spyOn(directoryService, "getMentorDirectory").mockResolvedValue(makeDirectoryPage([]));
+  render(<MentorDirectoryView />);
+  fireEvent.click(screen.getByRole("button", { name: "Limpiar búsqueda" }));
+  await waitFor(() => expect(navigationMocks.replace).toHaveBeenCalled());
+  const destination = new URL(navigationMocks.replace.mock.lastCall![0], "http://localhost");
+  expect(destination.searchParams.get("area")).toBe("Cloud");
+  expect(destination.searchParams.get("areaId")).toBe("area-cloud");
+  expect(destination.searchParams.has("search")).toBe(false);
+});
+
+it("preselecciona el catálogo real desde el radar y conserva el contexto", async () => {
+  navigationMocks.search = "?radarArea=cloud-devops";
+  const get = vi.spyOn(directoryService, "getMentorDirectory").mockResolvedValue(makeDirectoryPage([]));
+  render(<MentorDirectoryView />);
+  await waitFor(() => expect(get).toHaveBeenCalledWith(expect.objectContaining({ area: "area-cloud", available: true }), expect.anything()));
+  expect(navigationMocks.replace).toHaveBeenCalledWith(expect.stringContaining("areaId=area-cloud"), { scroll: false });
+  expect(screen.getByRole("link", { name: "Volver al radar" })).toHaveAttribute("href", "/profile/radar");
+});
+
+it("no presenta otra especialidad cuando falta el área del radar en el catálogo", () => {
+  navigationMocks.search = "?radarArea=ciberseguridad";
+  const get = vi.spyOn(directoryService, "getMentorDirectory").mockResolvedValue(makeDirectoryPage(mentors));
+  render(<MentorDirectoryView />);
+  expect(screen.getByRole("status")).toHaveTextContent("No hay mentores de Ciberseguridad");
+  expect(get).not.toHaveBeenCalled();
+  expect(screen.queryByText(mentors[0].fullName)).not.toBeInTheDocument();
+});
+
 const ownId = "0424f370-00f0-43cf-9b8a-997af81840b9";
 const otherId = "0fa5e6de-63a4-430e-87fb-22f5eb700ecd";
 

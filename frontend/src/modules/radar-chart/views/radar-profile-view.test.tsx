@@ -2,7 +2,8 @@ import "@/shared/testing/indexed-db.mock";
 import { saveAccessToken } from "@/shared/services/storage/access-token-storage";
 import { cloneElement, type ReactElement } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import { RADAR_AXIS_NAMES } from "../constants/radar-axis-names.constants";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import AppLayout from "@/app/(app)/layout";
 import { stubMatchMedia } from "@/shared/testing/stub-match-media";
@@ -52,6 +53,18 @@ function setRadar(override: Partial<ReturnType<typeof useLiveRadar>> = {}) {
 
 describe("Radar personal integrado con Épica 2", () => {
   beforeEach(() => { stubMatchMedia(); setRadar(); });
+  it.each(RADAR_AXIS_NAMES)("selecciona $name desde el radar y el desglose aun con cero puntos", axis => {
+    renderWithQuery(<RadarProfileView />);
+    fireEvent.click(screen.getByRole("button", { name: `Ver detalle de ${axis.name}` }));
+    const dialog = screen.getByRole("dialog", { name: axis.name });
+    expect(within(dialog).getByRole("link", { name: "Ver mentores de esta área" })).toHaveAttribute("href", `/mentorship/mentors?radarArea=${axis.id}`);
+    fireEvent.click(screen.getByRole("button", { name: /Cerrar detalle del/ }));
+    fireEvent.click(screen.getByRole("button", { name: `Seleccionar ${axis.name}` }));
+    expect(screen.getByRole("region", { name: "Competencia seleccionada" })).toHaveTextContent(axis.name);
+    fireEvent.click(screen.getByRole("button", { name: "Simular habilidad" }));
+    expect(screen.getByRole("dialog", { name: "Proyecta una habilidad" })).toBeInTheDocument();
+    expect(screen.getByRole("spinbutton")).toHaveValue(0);
+  });
   afterEach(() => { cleanup(); vi.clearAllMocks(); sessionStorage.clear(); });
 
   it.each([[0, 0, 'Sin cambio'], [2, 0, 'Bajó 2 puntos'], [0, 2, 'Subió 2 puntos']])('compara el eje con diferencia %s', (previousScore, currentScore, label) => {
@@ -70,7 +83,7 @@ describe("Radar personal integrado con Épica 2", () => {
     fireEvent.click(screen.getByRole('button', { name: 'QA' }));
     expect(screen.getByText(label)).toBeInTheDocument();
     expect(screen.getByText(`Puntaje anterior: ${previousScore} / 10`)).toBeInTheDocument();
-    expect(screen.getByText(`Puntaje actual: ${currentScore} / 10`)).toBeInTheDocument();
+    expect(within(screen.getByRole('region', { name: 'Comparación de publicaciones' })).getByText(`Puntaje actual: ${currentScore} / 10`)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Ver detalle de QA' }));
     expect(screen.getByRole('button', { name: 'QA' })).toHaveAttribute('aria-pressed', 'true');
     expect(screen.getByText(/Anterior \(línea discontinua\)/)).toBeInTheDocument();

@@ -15,6 +15,7 @@ import { RequestAppointmentForm } from "./request-appointment-form";
 
 export function BlockSelection({
   mentorId,
+  selectedAreaId,
   blocks,
   weekRange,
   fetchFreeBlocks,
@@ -31,6 +32,7 @@ export function BlockSelection({
     clearSelection,
   } = useBlockSelection(fetchFreeBlocks);
   const mentorProfile = useMentorProfile(mentorId);
+  const selectedArea = selectedAreaId ? mentorProfile.data?.technicalAreas?.find(area => area.id === selectedAreaId) : undefined;
   const [isFormDirty, setIsFormDirty] = useState(false);
   const { createAppointment, isSubmitting } = useCreateAppointment((block) => {
     setIsFormDirty(false);
@@ -71,7 +73,9 @@ export function BlockSelection({
           isChecking={isChecking}
           error={error}
         >
+          {selectedArea ? <p className="mb-3 text-sm font-semibold text-ink">Área de mentoría: {selectedArea.name}. Se incluirá en tu solicitud.</p> : null}
           <RequestAppointmentForm
+            selectedAreaName={selectedArea?.name}
             key={selectedBlock?.id}
             orientationTypes={mentorProfile.data?.orientationTypes ?? []}
             isLoadingTopics={mentorProfile.isPending}

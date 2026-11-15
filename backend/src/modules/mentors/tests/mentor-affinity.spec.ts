@@ -361,7 +361,9 @@ describe('MentorAffinityService', () => {
     const detailsQuery = context.userFindMany.mock.calls[0][0];
     expect(candidateQuery.sql).toContain('u.is_active = true');
     expect(candidateQuery.sql).toContain('u.is_available_for_mentoring = true');
-    expect(candidateQuery.sql.match(/strpos\(/g)).toHaveLength(4);
+    expect(candidateQuery.sql).toContain('we.position');
+    expect(candidateQuery.sql).toContain('u.about_me');
+    expect(candidateQuery.sql).toContain('s.name');
     expect(candidateQuery.values).toEqual(
       expect.arrayContaining([
         'Backend',
