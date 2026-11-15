@@ -9,6 +9,7 @@ function buildRefreshTokens() {
       .mockResolvedValue({ refreshToken: 'refresh', refreshMaxAgeMs: 900_000 }),
     rotate: vi.fn(),
     revokeByToken: vi.fn().mockResolvedValue(undefined),
+    getAbsoluteExpiry: vi.fn().mockResolvedValue(null),
   };
 }
 
@@ -153,7 +154,10 @@ describe('AuthController', () => {
   });
 
   it('clears the access token cookie on logout', async () => {
-    const controller = new AuthController({} as any, buildRefreshTokens() as any);
+    const controller = new AuthController(
+      {} as any,
+      buildRefreshTokens() as any,
+    );
     const response = { clearCookie: vi.fn() };
 
     await controller.logout(response as any);
@@ -182,7 +186,7 @@ describe('AuthController', () => {
     );
   });
 
-  it('delegates session readback with the identity verified by the guard', () => {
+  it('delegates session readback with the identity verified by the guard', async () => {
     const user = {
       id: 'u-1',
       email: 'user@test.com',
@@ -193,8 +197,8 @@ describe('AuthController', () => {
       authService as any,
       buildRefreshTokens() as any,
     );
-    expect(controller.getSession(user)).toEqual(user);
-    expect(authService.getSession).toHaveBeenCalledWith(user);
+    await expect(controller.getSession(user)).resolves.toEqual(user);
+    expect(authService.getSession).toHaveBeenCalledWith(user, null);
   });
 
   it('delega requestPasswordReset al servicio', async () => {

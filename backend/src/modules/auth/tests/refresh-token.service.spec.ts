@@ -73,7 +73,9 @@ describe('RefreshTokenService', () => {
       expect(saved.userId).toBe('user-1');
       expect(saved.roleTag).toBe('titulado');
       expect(saved.userAgent).toBe('Mozilla/5.0');
-      expect(saved.absoluteExpiresAt).toEqual(new Date(NOW.getTime() + 8 * HOUR));
+      expect(saved.absoluteExpiresAt).toEqual(
+        new Date(NOW.getTime() + 8 * HOUR),
+      );
       expect(saved.expiresAt).toEqual(new Date(NOW.getTime() + 15 * MINUTE));
       expect(issued.refreshMaxAgeMs).toBe(15 * MINUTE);
     });
@@ -139,7 +141,9 @@ describe('RefreshTokenService', () => {
 
     it('shortens the new token near the absolute cap', async () => {
       repository.findByHash.mockResolvedValue(
-        storedToken({ absoluteExpiresAt: new Date(NOW.getTime() + 4 * MINUTE) }),
+        storedToken({
+          absoluteExpiresAt: new Date(NOW.getTime() + 4 * MINUTE),
+        }),
       );
 
       const session = await service.rotate('raw-token');
@@ -223,7 +227,9 @@ describe('RefreshTokenService', () => {
 
     it('revokes the family when the user is no longer active', async () => {
       repository.findByHash.mockResolvedValue(storedToken());
-      sessionService.getAuthenticatedUser.mockRejectedValue(new Error('inactive'));
+      sessionService.getAuthenticatedUser.mockRejectedValue(
+        new Error('inactive'),
+      );
 
       await expect(service.rotate('raw-token')).rejects.toBeInstanceOf(
         SessionRevokedException,
@@ -255,7 +261,10 @@ describe('RefreshTokenService', () => {
 
       await service.revokeByToken('raw-token');
 
-      expect(repository.revokeFamily).toHaveBeenCalledWith('family-1', 'logout');
+      expect(repository.revokeFamily).toHaveBeenCalledWith(
+        'family-1',
+        'logout',
+      );
     });
 
     it('does nothing without a cookie or with an unknown token', async () => {

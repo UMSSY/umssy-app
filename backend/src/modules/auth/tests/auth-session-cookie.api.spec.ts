@@ -44,6 +44,7 @@ describe('session cookie over HTTP', () => {
     startFromLogin: vi.fn(),
     rotate: vi.fn(),
     revokeByToken: vi.fn(),
+    getAbsoluteExpiry: vi.fn(),
   };
   const session = { getAuthenticatedUser: vi.fn() };
 
@@ -87,6 +88,7 @@ describe('session cookie over HTTP', () => {
       roles: ['titulado'],
     });
     refreshTokens.revokeByToken.mockResolvedValue(undefined);
+    refreshTokens.getAbsoluteExpiry.mockResolvedValue(null);
     authService.getSession.mockReturnValue({ id: userId });
     session.getAuthenticatedUser.mockResolvedValue({
       id: userId,
@@ -124,7 +126,8 @@ describe('session cookie over HTTP', () => {
       .post('/api/auth/login')
       .send({});
 
-    const cookies = (response.headers['set-cookie'] as unknown as string[]) ?? [];
+    const cookies =
+      (response.headers['set-cookie'] as unknown as string[]) ?? [];
     const refresh = cookies.find((item) => item.startsWith('umssy_refresh='));
     expect(refresh).toContain('umssy_refresh=refresh-1');
     expect(refresh).toContain('HttpOnly');
@@ -146,13 +149,14 @@ describe('session cookie over HTTP', () => {
       'refresh-1',
       'test-agent',
     );
-    const cookies = (response.headers['set-cookie'] as unknown as string[]) ?? [];
-    expect(cookies.some((item) => item.startsWith(`umssy_access=${token}`))).toBe(
-      true,
-    );
-    expect(cookies.some((item) => item.startsWith('umssy_refresh=refresh-2'))).toBe(
-      true,
-    );
+    const cookies =
+      (response.headers['set-cookie'] as unknown as string[]) ?? [];
+    expect(
+      cookies.some((item) => item.startsWith(`umssy_access=${token}`)),
+    ).toBe(true);
+    expect(
+      cookies.some((item) => item.startsWith('umssy_refresh=refresh-2')),
+    ).toBe(true);
   });
 
   it('refresh failure answers 401 with the code and clears both cookies', async () => {
@@ -164,9 +168,14 @@ describe('session cookie over HTTP', () => {
 
     expect(response.status).toBe(401);
     expect(JSON.stringify(response.body)).toContain('SESSION_REVOKED');
-    const cookies = (response.headers['set-cookie'] as unknown as string[]) ?? [];
-    expect(cookies.some((item) => item.startsWith('umssy_access=;'))).toBe(true);
-    expect(cookies.some((item) => item.startsWith('umssy_refresh=;'))).toBe(true);
+    const cookies =
+      (response.headers['set-cookie'] as unknown as string[]) ?? [];
+    expect(cookies.some((item) => item.startsWith('umssy_access=;'))).toBe(
+      true,
+    );
+    expect(cookies.some((item) => item.startsWith('umssy_refresh=;'))).toBe(
+      true,
+    );
   });
 
   it('accepts the cookie alone to read the session', async () => {
@@ -220,7 +229,10 @@ describe('session cookie over HTTP', () => {
 
     expect(response.status).toBe(204);
     expect(refreshTokens.revokeByToken).toHaveBeenCalledWith('refresh-1');
-    const cookies = (response.headers['set-cookie'] as unknown as string[]) ?? [];
-    expect(cookies.some((item) => item.startsWith('umssy_refresh=;'))).toBe(true);
+    const cookies =
+      (response.headers['set-cookie'] as unknown as string[]) ?? [];
+    expect(cookies.some((item) => item.startsWith('umssy_refresh=;'))).toBe(
+      true,
+    );
   });
 });

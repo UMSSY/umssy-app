@@ -50,8 +50,14 @@ export class AuthController {
   @Get('session')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  getSession(@CurrentUser() user: AuthenticatedUser) {
-    return this.authService.getSession(user);
+  async getSession(
+    @CurrentUser() user: AuthenticatedUser,
+    @Req() request?: Request,
+  ) {
+    const absoluteExpiresAt = await this.refreshTokens.getAbsoluteExpiry(
+      readRefreshCookie(request),
+    );
+    return this.authService.getSession(user, absoluteExpiresAt);
   }
 
   @Post('login')

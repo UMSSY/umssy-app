@@ -25,9 +25,9 @@ describe('evaluateRefreshToken', () => {
   });
 
   it('flags an already used token as reuse', () => {
-    expect(
-      evaluateRefreshToken(token({ usedAt: minutes(-1) }), NOW),
-    ).toEqual({ outcome: 'reuse' });
+    expect(evaluateRefreshToken(token({ usedAt: minutes(-1) }), NOW)).toEqual({
+      outcome: 'reuse',
+    });
   });
 
   it('reports a revoked token as SESSION_REVOKED', () => {

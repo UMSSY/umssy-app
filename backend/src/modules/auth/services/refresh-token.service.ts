@@ -154,13 +154,21 @@ export class RefreshTokenService {
     };
   }
 
-  // Logout: kills the whole family so the cookie cannot be used again.
   async revokeByToken(rawToken: string | undefined): Promise<void> {
     if (!rawToken) return;
     const current = await this.refreshTokens.findByHash(
       hashRefreshToken(rawToken),
     );
     if (current) await this.revokeFamily(current.familyId, 'logout');
+  }
+
+  async getAbsoluteExpiry(rawToken: string | undefined): Promise<Date | null> {
+    if (!rawToken) return null;
+    const current = await this.refreshTokens.findByHash(
+      hashRefreshToken(rawToken),
+    );
+    if (!current || current.revokedAt) return null;
+    return current.absoluteExpiresAt;
   }
 
   private async persist(

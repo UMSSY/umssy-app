@@ -11,7 +11,11 @@ import {
   TooManyAttemptsException,
 } from '../exceptions/index.js';
 import { LOGIN_ROLE_PRIORITY } from '../constants/login-role-priority.constants.js';
-import { SESSION_MAX_MS } from '../constants/session.constants.js';
+import {
+  SESSION_IDLE_SECONDS,
+  SESSION_MAX_MS,
+  SESSION_WARNING_SECONDS,
+} from '../constants/session.constants.js';
 import { MailService } from '../../mail/services/mail.service.js';
 import { loadMailTemplate } from '../../mail/helpers/load-mail-template.js';
 import { RefreshTokenService } from './refresh-token.service.js';
@@ -50,12 +54,18 @@ export class AuthService {
     return Math.max(payload.exp * 1000 - Date.now(), 0);
   }
 
-  getSession(user: AuthenticatedUser): SessionResponse {
+  getSession(
+    user: AuthenticatedUser,
+    absoluteExpiresAt: Date | null = null,
+  ): SessionResponse {
     return {
       id: user.id,
       email: user.email,
       roles: user.roles,
       company: user.company ?? null,
+      idleTimeoutSeconds: SESSION_IDLE_SECONDS,
+      warningSeconds: SESSION_WARNING_SECONDS,
+      absoluteExpiresAt: absoluteExpiresAt?.toISOString() ?? null,
     };
   }
 

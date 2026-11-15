@@ -202,6 +202,9 @@ describe('AuthService', () => {
       email: 'ana@umss.edu.bo',
       roles: ['titulado', 'mentor'],
       company: null,
+      idleTimeoutSeconds: 900,
+      warningSeconds: 180,
+      absoluteExpiresAt: null,
     });
   });
 
