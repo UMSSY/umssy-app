@@ -17,7 +17,7 @@ import { PassCard } from "../components/pass-card";
 import { PassDetail } from "../components/pass-detail";
 import { MyPassesEmptyState } from "../components/my-passes-empty-state";
 import { FinishedRegistrationCard } from "../components/finished-registration-card";
-import { useFinishedRegistrations } from "../hooks/use-finished-registrations";
+import { useMyPassesHistory } from "../hooks/use-my-passes";
 
 import type { MyPassesViewProps } from "../types/my-passes-view-props.types";
 
@@ -27,7 +27,7 @@ export function MyPassesView({ onOpenWorkshopChat }: MyPassesViewProps = {}) {
   const offlineReason = isOnline ? undefined : OFFLINE_PASSES_TEXTS.requiresConnection;
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("current");
-  const history = useFinishedRegistrations(activeTab === "history" && isOnline);
+  const history = useMyPassesHistory(activeTab === "history" && isOnline);
   const historyUnavailable = activeTab === "history" && !isOnline;
   const visibleCount = activeTab === "history" ? history.total : registrations.length;
   const showCount = activeTab === "history" ? !history.isLoading && (!history.error || history.registrations.length > 0) && !historyUnavailable : !isLoading && status !== "error" && status !== "no-offline-copy";
