@@ -1,9 +1,15 @@
-import { QueryClient } from "@tanstack/react-query";
+import { QueryClient } from '@tanstack/react-query';
 
 export function createQueryClient() {
   return new QueryClient({
     defaultOptions: {
-      queries: { retry: false, staleTime: 0, refetchOnWindowFocus: false },
+      queries: {
+        retry: false,
+        staleTime: 0,
+        refetchOnWindowFocus: false,
+        networkMode: 'offlineFirst',
+      },
+      mutations: { networkMode: 'always' },
     },
   });
 }

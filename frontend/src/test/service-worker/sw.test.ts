@@ -9,8 +9,8 @@ type Listener = (event: Record<string, unknown>) => void;
 type Route = () => Response;
 
 const ORIGIN = "https://umssy.test";
-const SHELL = "umssy-shell-v3";
-const ASSETS = "umssy-assets-v3";
+const SHELL = "umssy-shell-v4";
+const ASSETS = "umssy-assets-v4";
 const source = readFileSync(path.resolve(import.meta.dirname, "../../../public/sw.js"), "utf8");
 
 const keyOf = (input: RequestLike) =>
@@ -208,7 +208,7 @@ describe("service worker navigations", () => {
     await worker.navigate("/events/my-passes/");
     await worker.navigate("/chat");
     await worker.navigate("/dashboard");
-    expect(worker.caches.cachedUrls(SHELL)).toEqual(["/events/my-passes"]);
+    expect(worker.caches.cachedUrls(SHELL)).toEqual(["/events/my-passes", "/chat"]);
   });
 
   it("falls back to the cached route and then to offline.html without network", async () => {
@@ -250,7 +250,7 @@ describe("service worker navigations", () => {
     let resolveNetwork: (response: Response) => void = () => undefined;
     const worker = loadWorker();
     worker.fetch.mockImplementation(() => new Promise<Response>((resolve) => { resolveNetwork = resolve; }));
-    const pending = worker.navigate("/chat");
+    const pending = worker.navigate("/unknown-route");
     await vi.advanceTimersByTimeAsync(4000);
     resolveNetwork(html("late chat")());
     const result = await pending;

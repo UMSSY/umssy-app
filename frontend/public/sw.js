@@ -1,10 +1,59 @@
-const CACHE_VERSION = 'v3';
+const CACHE_VERSION = 'v4';
 const CACHE_PREFIX = 'umssy-';
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${CACHE_VERSION}`;
 const ASSETS_CACHE = `${CACHE_PREFIX}assets-${CACHE_VERSION}`;
 const OFFLINE_URL = '/offline.html';
 const NAVIGATION_TIMEOUT_MS = 4000;
 const SHELL_ROUTES = ['/', '/events/my-passes', '/dashboard'];
+const ADDITIONAL_ROUTES = [
+  "/affinity-radar/review-queue",
+  "/appointments",
+  "/backoffice/audit",
+  "/backoffice",
+  "/backoffice/reports/history",
+  "/backoffice/reports/registered-users",
+  "/backoffice/reports/rejected-users",
+  "/backoffice/solicitudes",
+  "/backoffice/surveys/create",
+  "/backoffice/surveys",
+  "/backoffice/surveys/statistics",
+  "/chat",
+  "/events/my-workshops",
+  "/events",
+  "/events/propose",
+  "/matching",
+  "/mentor/availability",
+  "/mentors/participation",
+  "/mentors/participation/technical-areas",
+  "/mentors/register/technical-areas",
+  "/mentorship/mentors",
+  "/mentorship/orientation",
+  "/mentorship",
+  "/profile/documents",
+  "/profile",
+  "/profile/personal-info",
+  "/profile/presentation",
+  "/profile/radar",
+  "/profile/settings",
+  "/profile/trajectory/certifications",
+  "/profile/trajectory/education",
+  "/profile/trajectory/experience",
+  "/profile/trajectory/skills",
+  "/recruiters/history",
+  "/recruiters/job-offers/new",
+  "/recruiters",
+  "/surveys",
+  "/vacancies/my-applications",
+  "/vacancies",
+  "/vacancies/recommended",
+  "/vacancies/vacancies",
+  "/forgot-password",
+  "/login",
+  "/request-access/activation",
+  "/request-access",
+  "/request-access/status",
+  "/workshops"
+];
 const STATIC_ASSETS = [
   '/manifest.json',
   '/icons/icon-umssy.svg',
@@ -37,7 +86,7 @@ const shellKey = (value) => {
   const url = sameOriginUrl(value);
   if (!url) return null;
   const path = normalizePath(url.pathname);
-  return SHELL_ROUTES.includes(path) ? new URL(path, self.location.origin).href : null;
+  return [...SHELL_ROUTES, ...ADDITIONAL_ROUTES].includes(path) ? new URL(path, self.location.origin).href : null;
 };
 
 const isStaticAsset = (pathname) => STATIC_ASSETS.includes(pathname);
@@ -99,7 +148,7 @@ const precache = async () => {
   }
   await Promise.all([
     Promise.allSettled(STATIC_ASSETS.map((url) => fetchAndCache(SHELL_CACHE, url))),
-    Promise.allSettled(SHELL_ROUTES.map(precacheRoute)),
+    Promise.allSettled([...SHELL_ROUTES, ...ADDITIONAL_ROUTES].map(precacheRoute)),
   ]);
 };
 
