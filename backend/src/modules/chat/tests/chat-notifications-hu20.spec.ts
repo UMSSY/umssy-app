@@ -80,13 +80,11 @@ describe('HU-20: Chat & Connection Notifications', () => {
     };
 
     mockNotificationsService = {
-      notify: vi
-        .fn()
-        .mockResolvedValue({
-          inAppCount: 1,
-          pushStatus: 'delivered',
-          emailStatus: 'skipped',
-        }),
+      notify: vi.fn().mockResolvedValue({
+        inAppCount: 1,
+        pushStatus: 'delivered',
+        emailStatus: 'skipped',
+      }),
     };
 
     mockUserLookupRepo = {
@@ -114,13 +112,11 @@ describe('HU-20: Chat & Connection Notifications', () => {
       findPendingRequest: vi.fn().mockResolvedValue(null),
       findAcceptedRequest: vi.fn().mockResolvedValue(null),
       findStatusByTitle: vi.fn().mockResolvedValue({ id: 'status-pending' }),
-      create: vi
-        .fn()
-        .mockResolvedValue({
-          id: 'req-1',
-          senderId: 'user-a',
-          receiverId: 'user-b',
-        }),
+      create: vi.fn().mockResolvedValue({
+        id: 'req-1',
+        senderId: 'user-a',
+        receiverId: 'user-b',
+      }),
       findById: vi.fn().mockResolvedValue({
         id: 'req-1',
         senderId: 'user-a',

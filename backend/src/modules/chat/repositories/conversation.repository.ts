@@ -30,15 +30,6 @@ export class ConversationRepository {
     });
   }
 
-  async findWithEventById(conversationId: string) {
-    return this.prisma.conversation.findUnique({
-      where: { id: conversationId },
-      include: {
-        event: { select: { id: true, title: true } },
-      },
-    });
-  }
-
   async findByOrderedPair(userAId: string, userBId: string) {
     return this.prisma.conversation.findFirst({
       where: { userAId, userBId, contextId: null },
