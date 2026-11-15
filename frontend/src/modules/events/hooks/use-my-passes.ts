@@ -72,9 +72,9 @@ export function useMyPassesHistory(isEnabled: boolean) {
   return {
     registrations: query.data?.pages.flatMap((page) => page.items) ?? [],
     total: query.data?.pages[0]?.total ?? 0,
-    error: query.isError && !query.isFetching ? getRegistrationErrorMessage(query.error) : null,
+    error: query.isError && !query.isFetching ? query.error : null,
     hasMore: Boolean(query.hasNextPage),
-    isLoading: isEnabled && query.isPending && query.isFetching,
+    isLoading: isEnabled && query.isFetching && !query.isFetchingNextPage,
     isLoadingMore: query.isFetchingNextPage,
     loadMore: () => { if (query.hasNextPage && !query.isFetching) void query.fetchNextPage(); },
     retry: () => { void query.refetch(); },

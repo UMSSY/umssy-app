@@ -87,7 +87,7 @@ describe("Mis pases", () => {
     getFinished.mockRejectedValueOnce(new Error('Network')).mockResolvedValueOnce({ items: [], total: 0, limit: 10, totalPages: 0 });
     render(<MyPassesView />);
     fireEvent.click(screen.getByRole('tab', { name: 'Historial' }));
-    expect(await screen.findByRole('alert')).toHaveTextContent('No pudimos completar la operación');
+    expect(await screen.findByRole('alert')).toHaveTextContent('No fue posible cargar tu historial');
     fireEvent.click(screen.getByRole('button', { name: 'Reintentar' }));
     expect(await screen.findByText('Aún no tienes talleres finalizados')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('tab', { name: 'Vigentes' }));

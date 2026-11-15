@@ -18,6 +18,7 @@ import { PassDetail } from "../components/pass-detail";
 import { MyPassesEmptyState } from "../components/my-passes-empty-state";
 import { FinishedRegistrationCard } from "../components/finished-registration-card";
 import { useMyPassesHistory } from "../hooks/use-my-passes";
+import { getHistoryErrorMessage } from "../utils/get-history-error-message";
 
 import type { MyPassesViewProps } from "../types/my-passes-view-props.types";
 
@@ -30,7 +31,7 @@ export function MyPassesView({ onOpenWorkshopChat }: MyPassesViewProps = {}) {
   const history = useMyPassesHistory(activeTab === "history" && isOnline);
   const historyUnavailable = activeTab === "history" && !isOnline;
   const visibleCount = activeTab === "history" ? history.total : registrations.length;
-  const showCount = activeTab === "history" ? !history.isLoading && (!history.error || history.registrations.length > 0) && !historyUnavailable : !isLoading && status !== "error" && status !== "no-offline-copy";
+  const showCount = activeTab === "history" ? !history.isLoading && !history.error && !historyUnavailable : !isLoading && status !== "error" && status !== "no-offline-copy";
   const description = showCount ? `${visibleCount} ${visibleCount === 1 ? "pase" : "pases"}` : activeTab === "history" && (history.error || historyUnavailable) ? "" : "Cargando tus inscripciones…";
 
   const selected = registrations.find((item) => item.id === selectedId) ?? registrations[0];
@@ -97,13 +98,12 @@ export function MyPassesView({ onOpenWorkshopChat }: MyPassesViewProps = {}) {
             <RequestFeedback message="El historial requiere conexión a Internet." isError onRetry={history.retry} />
           ) : history.isLoading ? (
             <RequestFeedback message="Cargando tu historial..." />
-          ) : history.error && history.registrations.length === 0 ? (
-            <RequestFeedback message={history.error} isError onRetry={history.retry} />
+          ) : history.error ? (
+            <RequestFeedback message={getHistoryErrorMessage(history.error)} isError onRetry={history.retry} />
           ) : history.registrations.length === 0 ? (
             <p className="py-8 text-sm text-text-secondary">Aún no tienes talleres finalizados</p>
           ) : (
             <div className="space-y-6">
-              {history.error ? <RequestFeedback message={history.error} isError onRetry={history.retry} /> : null}
               <ul aria-label="Talleres finalizados" className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 {history.registrations.map((registration) => (
                   <li key={registration.id} className="h-full"><FinishedRegistrationCard registration={registration} /></li>
