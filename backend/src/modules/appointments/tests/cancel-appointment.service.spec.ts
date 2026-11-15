@@ -37,6 +37,7 @@ describe('AppointmentsService.cancel', () => {
         operation({ client: TX }),
     ),
   };
+  const appointmentNotifications = { notifyCancelled: vi.fn() };
   const student = {
     id: STUDENT_ID,
     email: 'student@test.com',
@@ -77,6 +78,7 @@ describe('AppointmentsService.cancel', () => {
       {} as never,
       {} as never,
       transactions as never,
+      appointmentNotifications as never,
     );
   });
 
@@ -316,5 +318,48 @@ describe('AppointmentsService.cancel', () => {
     expect(
       appointmentsRepository.createAppointmentHistory,
     ).not.toHaveBeenCalled();
+  });
+
+  it('avisa la cancelación a la otra persona después del commit', async () => {
+    const cancelled = createAppointmentRecord({
+      status: { title: AppointmentStatusTitle.CANCELLED },
+    });
+
+    await service.cancel(student, APPOINTMENT_ID, { reason: 'Imprevisto' });
+
+    expect(
+      appointmentNotifications.notifyCancelled,
+    ).toHaveBeenCalledExactlyOnceWith(cancelled, STUDENT_ID);
+    expect(
+      appointmentsRepository.cancelAppointment.mock.invocationCallOrder[0],
+    ).toBeLessThan(
+      appointmentNotifications.notifyCancelled.mock.invocationCallOrder[0],
+    );
+  });
+
+  it('conserva la cancelación aunque falle el aviso', async () => {
+    appointmentNotifications.notifyCancelled.mockRejectedValueOnce(
+      new Error('Correo no disponible'),
+    );
+
+    const result = await service.cancel(student, APPOINTMENT_ID, {
+      reason: 'Imprevisto',
+    });
+
+    expect(result.status).toBe(AppointmentStatusTitle.CANCELLED);
+    expect(appointmentsRepository.cancelAppointment).toHaveBeenCalled();
+  });
+
+  it('no avisa de nuevo cuando la cita ya estaba cancelada', async () => {
+    appointmentsRepository.findById.mockResolvedValue(
+      createAppointmentRecord({
+        status: { title: AppointmentStatusTitle.CANCELLED },
+      }),
+    );
+
+    await service.cancel(student, APPOINTMENT_ID, { reason: 'Imprevisto' });
+
+    expect(appointmentsRepository.cancelAppointment).not.toHaveBeenCalled();
+    expect(appointmentNotifications.notifyCancelled).not.toHaveBeenCalled();
   });
 });
