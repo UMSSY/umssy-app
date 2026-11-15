@@ -150,5 +150,46 @@ describe("portfolioProjectsService", () => {
       expect(result).toEqual([]);
     });
   });
+
+  describe("syncPortfolioProjects", () => {
+    it("posts to sync endpoint and returns updated portfolio projects", async () => {
+      const mockProjects: PortfolioProjectItem[] = [
+        {
+          id: "proj-1",
+          provider: "github",
+          repoName: "umssy-app",
+          repoUrl: "https://github.com/UMSSY/umssy-app",
+          description: "Updated description",
+          language: "TypeScript",
+          starsCount: 20,
+          isOwner: true,
+          displayOrder: 0,
+        },
+      ];
+
+      vi.spyOn(apiClient, "post").mockResolvedValueOnce({
+        data: { statusCode: 200, data: mockProjects, ok: true, detail: "ok" },
+      });
+
+      const result = await portfolioProjectsService.syncPortfolioProjects();
+
+      expect(apiClient.post).toHaveBeenCalledWith(
+        "/profile/portfolio/projects/sync",
+        {},
+        { headers: { Authorization: "Bearer mock-token" } },
+      );
+      expect(result).toEqual(mockProjects);
+    });
+
+    it("returns an empty array when response data is nullish", async () => {
+      vi.spyOn(apiClient, "post").mockResolvedValueOnce({
+        data: { statusCode: 200, data: null, ok: true, detail: "ok" },
+      });
+
+      const result = await portfolioProjectsService.syncPortfolioProjects();
+
+      expect(result).toEqual([]);
+    });
+  });
 });
 

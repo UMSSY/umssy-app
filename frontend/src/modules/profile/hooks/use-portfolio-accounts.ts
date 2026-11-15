@@ -4,9 +4,14 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   PORTFOLIO_ACCOUNTS_QUERY_KEY,
 } from "../constants/portfolio-accounts.constants";
+import {
+  PORTFOLIO_PROJECTS_QUERY_KEY,
+  PORTFOLIO_REPOSITORIES_QUERY_KEY,
+} from "../constants/portfolio-projects.constants";
 import { portfolioAccountsService } from "../services/portfolio-accounts.service";
 import { assignWindowLocation } from "../utils/assign-window-location";
 import type {
+  PortfolioAccountDisconnectResponse,
   PortfolioAccountStatusResponse,
   PortfolioConnectedAccountResponse,
   PortfolioOAuthCallbackPayload,
@@ -58,6 +63,26 @@ export function useCompletePortfolioOAuth() {
       portfolioAccountsService.completeOAuthCallback(provider, payload),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: PORTFOLIO_ACCOUNTS_QUERY_KEY });
+    },
+  });
+}
+
+export function useDisconnectPortfolioAccount() {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    PortfolioAccountDisconnectResponse,
+    Error,
+    PortfolioProviderName
+  >({
+    mutationFn: (provider) =>
+      portfolioAccountsService.disconnectSocialAccount(provider),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: PORTFOLIO_ACCOUNTS_QUERY_KEY }),
+        queryClient.invalidateQueries({ queryKey: PORTFOLIO_PROJECTS_QUERY_KEY }),
+        queryClient.invalidateQueries({ queryKey: PORTFOLIO_REPOSITORIES_QUERY_KEY }),
+      ]);
     },
   });
 }

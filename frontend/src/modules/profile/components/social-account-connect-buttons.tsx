@@ -9,12 +9,15 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { isApiError } from "@/shared/services/api-client";
 import { FeedbackMessage } from "./feedback-message";
+import { ConfirmDeleteDialog } from "./confirm-delete-dialog";
 import {
   PORTFOLIO_ACCOUNT_MESSAGES,
+  PORTFOLIO_PROVIDER_LABELS,
   PORTFOLIO_PROVIDERS,
 } from "../constants/portfolio-accounts.constants";
 import {
   useCompletePortfolioOAuth,
+  useDisconnectPortfolioAccount,
   usePortfolioAccounts,
   useStartPortfolioOAuth,
 } from "../hooks/use-portfolio-accounts";
@@ -56,9 +59,11 @@ export function SocialAccountConnectButtons({ className }: SocialAccountConnectB
   const { accounts = [] } = usePortfolioAccounts();
   const startOAuth = useStartPortfolioOAuth();
   const completeOAuth = useCompletePortfolioOAuth();
+  const disconnectAccount = useDisconnectPortfolioAccount();
   const searchParams = useSearchParams();
 
   const [pendingProvider, setPendingProvider] = useState<PortfolioProviderName | null>(null);
+  const [providerToDisconnect, setProviderToDisconnect] = useState<PortfolioProviderName | null>(null);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const processedCodeRef = useRef<string | null>(null);
   const processedErrorRef = useRef<boolean>(false);
@@ -140,6 +145,31 @@ export function SocialAccountConnectButtons({ className }: SocialAccountConnectB
     );
   };
 
+  const handleConfirmDisconnect = () => {
+    if (!providerToDisconnect) {
+      return;
+    }
+    const provider = providerToDisconnect;
+    const providerLabel = PORTFOLIO_PROVIDER_LABELS[provider];
+
+    disconnectAccount.mutate(provider, {
+      onSuccess: () => {
+        setProviderToDisconnect(null);
+        setFeedback({
+          type: "success",
+          message: PORTFOLIO_ACCOUNT_MESSAGES.disconnectSuccess(providerLabel),
+        });
+      },
+      onError: () => {
+        setProviderToDisconnect(null);
+        setFeedback({
+          type: "error",
+          message: PORTFOLIO_ACCOUNT_MESSAGES.disconnectError,
+        });
+      },
+    });
+  };
+
   return (
     <div className={cn("flex flex-col gap-2", className)}>
       <Label className="text-[12.5px] font-semibold text-ink">
@@ -199,11 +229,25 @@ export function SocialAccountConnectButtons({ className }: SocialAccountConnectB
                     variant="ghost"
                     size="sm"
                     className="h-7 px-2 text-xs text-text-secondary hover:text-ink"
-                    disabled={isPending}
+                    disabled={isPending || disconnectAccount.isPending}
                     onClick={() => handleConnect(provider)}
                     aria-label={`Reconectar cuenta de ${providerLabel}`}
                   >
                     {PORTFOLIO_ACCOUNT_MESSAGES.reconnect}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-7 border-border-strong px-2 text-xs text-ink hover:bg-surface-soft"
+                    disabled={isPending || disconnectAccount.isPending}
+                    onClick={() => {
+                      setFeedback(null);
+                      setProviderToDisconnect(provider);
+                    }}
+                    aria-label={`Desconectar cuenta de ${providerLabel}`}
+                  >
+                    {PORTFOLIO_ACCOUNT_MESSAGES.disconnect}
                   </Button>
                 </div>
               </div>
@@ -238,6 +282,27 @@ export function SocialAccountConnectButtons({ className }: SocialAccountConnectB
           );
         })}
       </div>
+      <ConfirmDeleteDialog
+        isOpen={providerToDisconnect !== null}
+        title={
+          providerToDisconnect
+            ? PORTFOLIO_ACCOUNT_MESSAGES.disconnectTitle(
+                PORTFOLIO_PROVIDER_LABELS[providerToDisconnect],
+              )
+            : ""
+        }
+        message={
+          providerToDisconnect
+            ? PORTFOLIO_ACCOUNT_MESSAGES.disconnectDescription(
+                PORTFOLIO_PROVIDER_LABELS[providerToDisconnect],
+              )
+            : ""
+        }
+        confirmLabel={PORTFOLIO_ACCOUNT_MESSAGES.confirmDisconnect}
+        isDeleting={disconnectAccount.isPending}
+        onCancel={() => setProviderToDisconnect(null)}
+        onConfirm={handleConfirmDisconnect}
+      />
     </div>
   );
 }

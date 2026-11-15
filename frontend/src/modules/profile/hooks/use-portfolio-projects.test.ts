@@ -1,7 +1,10 @@
 import { renderHookWithQuery as renderHook } from "@/shared/testing/render-hook-with-query";
 import { act, cleanup, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { PORTFOLIO_PROJECTS_QUERY_KEY } from "../constants/portfolio-projects.constants";
+import {
+  PORTFOLIO_PROJECTS_QUERY_KEY,
+  PORTFOLIO_REPOSITORIES_QUERY_KEY,
+} from "../constants/portfolio-projects.constants";
 import { portfolioProjectsService } from "../services/portfolio-projects.service";
 import type {
   ExternalRepositoryItem,
@@ -11,6 +14,7 @@ import type {
 import {
   usePortfolioProjects,
   usePortfolioRepositories,
+  useSyncPortfolioProjects,
   useUpdatePortfolioProjects,
 } from "./use-portfolio-projects";
 
@@ -19,6 +23,7 @@ vi.mock("../services/portfolio-projects.service", () => ({
     getPortfolioProjects: vi.fn(),
     updatePortfolioProjects: vi.fn(),
     getAvailableRepositories: vi.fn(),
+    syncPortfolioProjects: vi.fn(),
   },
 }));
 
@@ -158,6 +163,47 @@ describe("use-portfolio-projects hooks", () => {
 
       expect(result.current.repositories).toEqual([]);
       expect(result.current.isError).toBe(true);
+    });
+  });
+
+  describe("useSyncPortfolioProjects", () => {
+    it("calls syncPortfolioProjects, updates cache data and invalidates projects and repositories", async () => {
+      const syncedProjects: PortfolioProjectItem[] = [
+        {
+          id: "p1",
+          provider: "github",
+          repoName: "project-alpha",
+          repoUrl: "https://github.com/user/project-alpha",
+          description: "Updated description",
+          language: "TypeScript",
+          starsCount: 25,
+          isOwner: true,
+          displayOrder: 0,
+        },
+      ];
+      vi.mocked(portfolioProjectsService.syncPortfolioProjects).mockResolvedValueOnce(
+        syncedProjects,
+      );
+
+      const { result, client } = renderHook(() => useSyncPortfolioProjects());
+      const setQueryDataSpy = vi.spyOn(client, "setQueryData");
+      const invalidateSpy = vi.spyOn(client, "invalidateQueries");
+
+      await act(async () => {
+        await result.current.mutateAsync();
+      });
+
+      expect(portfolioProjectsService.syncPortfolioProjects).toHaveBeenCalledTimes(1);
+      expect(setQueryDataSpy).toHaveBeenCalledWith(
+        PORTFOLIO_PROJECTS_QUERY_KEY,
+        syncedProjects,
+      );
+      expect(invalidateSpy).toHaveBeenCalledWith({
+        queryKey: PORTFOLIO_PROJECTS_QUERY_KEY,
+      });
+      expect(invalidateSpy).toHaveBeenCalledWith({
+        queryKey: PORTFOLIO_REPOSITORIES_QUERY_KEY,
+      });
     });
   });
 });

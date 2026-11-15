@@ -21,5 +21,14 @@ export const PORTFOLIO_ACCOUNT_MESSAGES = {
   genericError: "No se pudo conectar la cuenta. Inténtalo de nuevo.",
   sectionTitle: "Cuentas de desarrollo",
   sectionDescription: "Conecta tu cuenta para importar repositorios a tu portafolio.",
+  disconnect: "Desconectar",
+  disconnecting: "Desconectando...",
+  disconnectTitle: (providerLabel: string) => `¿Desvincular cuenta de ${providerLabel}?`,
+  disconnectDescription: (providerLabel: string) =>
+    `Al desvincular tu cuenta de ${providerLabel}, se eliminarán los proyectos asociados de tu portafolio.`,
+  disconnectSuccess: (providerLabel: string) =>
+    `Cuenta de ${providerLabel} desvinculada exitosamente.`,
+  disconnectError: "No se pudo desvincular la cuenta. Inténtalo de nuevo.",
+  confirmDisconnect: "Desvincular",
 };
 

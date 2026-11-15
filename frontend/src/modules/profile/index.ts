@@ -74,6 +74,7 @@ export {
   usePortfolioAccounts,
   useStartPortfolioOAuth,
   useCompletePortfolioOAuth,
+  useDisconnectPortfolioAccount,
 } from './hooks/use-portfolio-accounts';
 export { portfolioAccountsService } from './services/portfolio-accounts.service';
 export {
@@ -83,6 +84,7 @@ export {
   PORTFOLIO_ACCOUNT_MESSAGES,
 } from './constants/portfolio-accounts.constants';
 export type {
+  PortfolioAccountDisconnectResponse,
   PortfolioAccountStatusResponse,
   PortfolioConnectedAccountResponse,
   PortfolioOAuthCallbackPayload,
@@ -94,6 +96,7 @@ export {
   usePortfolioProjects,
   usePortfolioRepositories,
   useUpdatePortfolioProjects,
+  useSyncPortfolioProjects,
 } from "./hooks/use-portfolio-projects";
 export { portfolioProjectsService } from "./services/portfolio-projects.service";
 export {

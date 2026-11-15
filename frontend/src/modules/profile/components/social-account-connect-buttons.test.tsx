@@ -26,6 +26,7 @@ vi.mock("../services/portfolio-accounts.service", () => ({
     getSocialAccounts: vi.fn(),
     getOAuthAuthorizationUrl: vi.fn(),
     completeOAuthCallback: vi.fn(),
+    disconnectSocialAccount: vi.fn(),
   },
 }));
 
@@ -192,6 +193,120 @@ describe("SocialAccountConnectButtons", () => {
 
     expect(
       await screen.findByText(PORTFOLIO_ACCOUNT_MESSAGES.genericError),
+    ).toBeInTheDocument();
+  });
+
+  it("opens confirmation dialog when clicking disconnect and cancels without calling service", async () => {
+    vi.mocked(portfolioAccountsService.getSocialAccounts).mockResolvedValue([
+      {
+        provider: "github",
+        connected: true,
+        username: "valeriaquispe",
+        profileUrl: "https://github.com/valeriaquispe",
+      },
+      {
+        provider: "gitlab",
+        connected: false,
+        username: null,
+        profileUrl: null,
+      },
+    ]);
+
+    render(<SocialAccountConnectButtons />);
+
+    const disconnectButton = await screen.findByRole("button", {
+      name: "Desconectar cuenta de GitHub",
+    });
+    fireEvent.click(disconnectButton);
+
+    expect(
+      await screen.findByText("¿Desvincular cuenta de GitHub?"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Al desvincular tu cuenta de GitHub, se eliminarán los proyectos asociados de tu portafolio.",
+      ),
+    ).toBeInTheDocument();
+
+    const cancelButton = screen.getByRole("button", { name: "Cancelar" });
+    fireEvent.click(cancelButton);
+
+    await waitFor(() => {
+      expect(screen.queryByText("¿Desvincular cuenta de GitHub?")).not.toBeInTheDocument();
+    });
+    expect(portfolioAccountsService.disconnectSocialAccount).not.toHaveBeenCalled();
+  });
+
+  it("disconnects account on confirm and displays success message", async () => {
+    vi.mocked(portfolioAccountsService.getSocialAccounts).mockResolvedValue([
+      {
+        provider: "github",
+        connected: true,
+        username: "valeriaquispe",
+        profileUrl: "https://github.com/valeriaquispe",
+      },
+      {
+        provider: "gitlab",
+        connected: false,
+        username: null,
+        profileUrl: null,
+      },
+    ]);
+    vi.mocked(portfolioAccountsService.disconnectSocialAccount).mockResolvedValueOnce({
+      provider: "github",
+      connected: false,
+    });
+
+    render(<SocialAccountConnectButtons />);
+
+    const disconnectButton = await screen.findByRole("button", {
+      name: "Desconectar cuenta de GitHub",
+    });
+    fireEvent.click(disconnectButton);
+
+    const confirmButton = await screen.findByRole("button", { name: "Desvincular" });
+    fireEvent.click(confirmButton);
+
+    await waitFor(() => {
+      expect(portfolioAccountsService.disconnectSocialAccount).toHaveBeenCalledWith("github");
+    });
+
+    expect(
+      await screen.findByText("Cuenta de GitHub desvinculada exitosamente."),
+    ).toBeInTheDocument();
+  });
+
+  it("displays error feedback when disconnect fails", async () => {
+    vi.mocked(portfolioAccountsService.getSocialAccounts).mockResolvedValue([
+      {
+        provider: "gitlab",
+        connected: true,
+        username: "valeriaquispe",
+        profileUrl: "https://gitlab.com/valeriaquispe",
+      },
+      {
+        provider: "github",
+        connected: false,
+        username: null,
+        profileUrl: null,
+      },
+    ]);
+    vi.mocked(portfolioAccountsService.disconnectSocialAccount).mockRejectedValueOnce(
+      new Error("Server error"),
+    );
+
+    render(<SocialAccountConnectButtons />);
+
+    const disconnectButton = await screen.findByRole("button", {
+      name: "Desconectar cuenta de GitLab",
+    });
+    fireEvent.click(disconnectButton);
+
+    const confirmButton = await screen.findByRole("button", { name: "Desvincular" });
+    fireEvent.click(confirmButton);
+
+    expect(
+      await screen.findByText(PORTFOLIO_ACCOUNT_MESSAGES.disconnectError),
     ).toBeInTheDocument();
   });
 });

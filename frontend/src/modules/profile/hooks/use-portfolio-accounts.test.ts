@@ -2,6 +2,10 @@ import { renderHookWithQuery as renderHook } from "@/shared/testing/render-hook-
 import { act, cleanup, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { PORTFOLIO_ACCOUNTS_QUERY_KEY } from "../constants/portfolio-accounts.constants";
+import {
+  PORTFOLIO_PROJECTS_QUERY_KEY,
+  PORTFOLIO_REPOSITORIES_QUERY_KEY,
+} from "../constants/portfolio-projects.constants";
 import { portfolioAccountsService } from "../services/portfolio-accounts.service";
 import * as assignLocationModule from "../utils/assign-window-location";
 import type {
@@ -11,6 +15,7 @@ import type {
 } from "../types/portfolio-account.types";
 import {
   useCompletePortfolioOAuth,
+  useDisconnectPortfolioAccount,
   usePortfolioAccounts,
   useStartPortfolioOAuth,
 } from "./use-portfolio-accounts";
@@ -20,6 +25,7 @@ vi.mock("../services/portfolio-accounts.service", () => ({
     getSocialAccounts: vi.fn(),
     getOAuthAuthorizationUrl: vi.fn(),
     completeOAuthCallback: vi.fn(),
+    disconnectSocialAccount: vi.fn(),
   },
 }));
 
@@ -118,6 +124,33 @@ describe("use-portfolio-accounts hooks", () => {
       });
       expect(invalidateSpy).toHaveBeenCalledWith({
         queryKey: PORTFOLIO_ACCOUNTS_QUERY_KEY,
+      });
+    });
+  });
+
+  describe("useDisconnectPortfolioAccount", () => {
+    it("calls disconnectSocialAccount and invalidates accounts, projects, and repositories queries", async () => {
+      vi.mocked(portfolioAccountsService.disconnectSocialAccount).mockResolvedValueOnce({
+        provider: "github",
+        connected: false,
+      });
+
+      const { result, client } = renderHook(() => useDisconnectPortfolioAccount());
+      const invalidateSpy = vi.spyOn(client, "invalidateQueries");
+
+      await act(async () => {
+        await result.current.mutateAsync("github");
+      });
+
+      expect(portfolioAccountsService.disconnectSocialAccount).toHaveBeenCalledWith("github");
+      expect(invalidateSpy).toHaveBeenCalledWith({
+        queryKey: PORTFOLIO_ACCOUNTS_QUERY_KEY,
+      });
+      expect(invalidateSpy).toHaveBeenCalledWith({
+        queryKey: PORTFOLIO_PROJECTS_QUERY_KEY,
+      });
+      expect(invalidateSpy).toHaveBeenCalledWith({
+        queryKey: PORTFOLIO_REPOSITORIES_QUERY_KEY,
       });
     });
   });

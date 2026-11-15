@@ -27,6 +27,10 @@ export const PORTFOLIO_PROJECTS_MESSAGES = {
   contributorBadge: "Colaborador",
   viewOnGithub: "Ver en GitHub",
   viewOnGitlab: "Ver en GitLab",
+  syncButton: "Sincronizar",
+  syncing: "Sincronizando...",
+  syncSuccess: "Proyectos sincronizados exitosamente.",
+  syncError: "No se pudieron sincronizar los proyectos del portafolio.",
 };
 
 export const PORTFOLIO_SELECTION_MESSAGES = {
