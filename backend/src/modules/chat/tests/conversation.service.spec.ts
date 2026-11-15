@@ -534,6 +534,8 @@ describe('ConversationService', () => {
     expect(result.conversation.contextId).toBe('postulacion-123');
     expect(conversationRepositoryMock.findByContextId).toHaveBeenCalledWith(
       'postulacion-123',
+      'user-a',
+      'user-b',
     );
     expect(
       conversationRepositoryMock.createWithParticipants,
