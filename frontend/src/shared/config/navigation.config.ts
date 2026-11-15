@@ -21,6 +21,8 @@ export const SIDEBAR_NAVIGATION: NavigationItem[] = [
   { label: "Notificaciones de encuestas", icon: Bell, href: "/surveys", roles: getRouteRoles("/surveys") },
   { label: "Mi empresa", icon: Building2, activePathPatterns: [/^\/(?:recruiters|matching)(?:\/|$)/, /^\/area-detail(?:-interaction)?-preview\/?$/], children: getSectionItems("company") },
   { label: "Solicitudes", icon: Inbox, href: "/backoffice/solicitudes", roles: getRouteRoles("/backoffice") },
+  { label: "Solicitudes", icon: Inbox, href: "/backoffice/solicitudes", roles: getRouteRoles("/backoffice") },
+  { label: "Solicitudes de empresas", icon: Building2, href: "/backoffice/empresas", roles: getRouteRoles("/backoffice") },
   { label: "Revisión de radares", icon: Radar, href: "/affinity-radar/review-queue", roles: getRouteRoles("/affinity-radar/review-queue") },
   { label: "Reportes", icon: ChartNoAxesCombined, activePathPatterns: [/^\/backoffice\/reports(?:\/|$)/], children: getSectionItems("reports") },
   { label: "Registro de auditoría", icon: History, href: "/backoffice/audit", roles: getRouteRoles("/backoffice/audit") },
