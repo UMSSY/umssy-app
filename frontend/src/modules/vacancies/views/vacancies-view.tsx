@@ -89,7 +89,7 @@ export function VacanciesView({ initialVacancyId, onInitialClose }: VacanciesVie
                     <div><dt className="sr-only">Contrato</dt><dd className="flex items-center gap-1.5 text-ink-soft"><BriefcaseBusiness aria-hidden="true" className="size-4" />{vacancy.contractType}</dd></div>
                     {locationUrl ? <div><dt className="sr-only">Ubicación</dt><dd><a href={locationUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-accent underline-offset-4 hover:underline">Ver ubicación<span className="sr-only"> de {vacancy.title}</span><ExternalLink className="size-3.5" aria-hidden="true" /></a></dd></div> : null}
                   </dl>
-                  {vacancy.requirements.length > 0 ? <ul aria-label="Habilidades requeridas" className="mt-3 flex flex-wrap gap-2">{vacancy.requirements.map((requirement) => <li key={requirement}><Badge variant="outline">{requirement}</Badge></li>)}</ul> : null}
+                  {vacancy.requirements.length > 0 ? <ul aria-label="Habilidades requeridas" className="mt-3 flex flex-wrap gap-2">{vacancy.requirements.map((requirement) => <li key={requirement}><Badge className="bg-availability text-availability-foreground">{requirement}</Badge></li>)}</ul> : null}
                 </div>
                 <Link href={`/vacancies/${vacancy.id}`} onClick={(event) => openVacancy(event, vacancy.id)} className={buttonVariants({ variant: "ghost", className: "self-center text-accent hover:text-accent" })} aria-label={`Ver detalles de ${vacancy.title}`}>Ver detalles<ArrowRight aria-hidden="true" className="transition-transform duration-150 group-hover:translate-x-0.5" /></Link>
               </article>
