@@ -19,7 +19,7 @@ export function ProfileGuideWelcome({
       <div className="space-y-6">
         <div className="space-y-3">
           <p className="text-sm font-semibold text-app-header">
-            Tu comunidad, tu próximo paso
+            Guía de perfil
           </p>
           <DialogTitle className="font-heading text-3xl font-bold text-ink">
             ¡Hola, {firstName}!
