@@ -9,8 +9,8 @@ type Listener = (event: Record<string, unknown>) => void;
 type Route = () => Response;
 
 const ORIGIN = "https://umssy.test";
-const SHELL = "umssy-shell-v2";
-const ASSETS = "umssy-assets-v2";
+const SHELL = "umssy-shell-v3";
+const ASSETS = "umssy-assets-v3";
 const source = readFileSync(path.resolve(import.meta.dirname, "../../../public/sw.js"), "utf8");
 
 const keyOf = (input: RequestLike) =>
@@ -133,7 +133,7 @@ function loadWorker(routes: Record<string, Route> = {}) {
     self,
     install: () => dispatch("install"),
     activate: () => dispatch("activate"),
-    message: (data: unknown) => dispatch("message", { data }),
+    message: (data: unknown, ports: unknown[] = []) => dispatch("message", { data, ports }),
     get: (url: string, init?: Parameters<typeof request>[1]) => dispatch("fetch", { request: request(url, init) }),
     navigate: (url: string) => dispatch("fetch", { request: request(url, { mode: "navigate" }) }),
   };
@@ -351,5 +351,20 @@ describe("service worker lifecycle", () => {
     const worker = loadWorker();
     const result = await worker.message({ type: "OTHER" });
     expect(result.waits).toHaveLength(0);
+  });
+
+  it.each([true, false])("reports whether the required routes and chunks are ready (%s)", async (ready) => {
+    const worker = loadWorker({
+      "/": html(shellHtml),
+      "/dashboard": html(shellHtml),
+      "/events/my-passes": html(shellHtml),
+      "/_next/static/css/app.css": asset("css"),
+      "/_next/static/chunks/main.js": asset("main"),
+      ...(ready ? { "/_next/static/chunks/page.js": asset("page") } : {}),
+    });
+    const postMessage = vi.fn();
+    // Simulate the MessageChannel carried by the preparation request.
+    await worker.message({ type: "PREPARE_OFFLINE_PASSES" }, [{ postMessage }]);
+    expect(postMessage).toHaveBeenCalledWith(ready);
   });
 });

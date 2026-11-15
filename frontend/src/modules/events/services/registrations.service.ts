@@ -33,7 +33,7 @@ export const registrationsService = {
     return parseProposalSupportResponse(response.data, eventId);
   },
 
-  async getPass(registrationId: string, signal?: AbortSignal, accessToken = getAccessToken()): Promise<PassData> {
+  async getPass(registrationId: string, signal?: AbortSignal, accessToken = getAccessToken(), saveCopy = true): Promise<PassData> {
     const token = accessToken;
     if (!token)
       throw new Error('Debes iniciar sesión para consultar el pase.');
@@ -69,7 +69,7 @@ export const registrationsService = {
       status,
     };
     // A blocked browser store should not prevent showing a valid online pass.
-    await saveOfflinePass(pass, token, signal).catch(() => {});
+    if (saveCopy) await saveOfflinePass(pass, token, signal).catch(() => {});
     return pass;
   },
 };

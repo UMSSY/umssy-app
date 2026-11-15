@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v2';
+const CACHE_VERSION = 'v3';
 const CACHE_PREFIX = 'umssy-';
 const SHELL_CACHE = `${CACHE_PREFIX}shell-${CACHE_VERSION}`;
 const ASSETS_CACHE = `${CACHE_PREFIX}assets-${CACHE_VERSION}`;
@@ -67,9 +67,9 @@ const fetchAndCache = (cacheName, value) => {
   if (assetFetches.has(key)) return assetFetches.get(key);
   const pending = (async () => {
     const cache = await caches.open(cacheName);
-    if (await cache.match(key)) return;
+    if (await cache.match(key)) return true;
     const response = await fetch(new Request(key, { cache: 'reload', credentials: 'omit' }));
-    await putIfCacheable(cacheName, key, response);
+    return putIfCacheable(cacheName, key, response);
   })().finally(() => assetFetches.delete(key));
   assetFetches.set(key, pending);
   return pending;
@@ -87,8 +87,9 @@ const precacheRoute = async (route) => {
 const cacheShell = async (key, response) => {
   if (!isCacheable(response) || !response.headers.get('Content-Type')?.startsWith('text/html')) return;
   const html = await response.clone().text();
-  await Promise.allSettled(extractNextStaticUrls(html).map((url) => fetchAndCache(ASSETS_CACHE, url)));
-  await putIfCacheable(SHELL_CACHE, key, response);
+  const assets = await Promise.all(extractNextStaticUrls(html).map((url) => fetchAndCache(ASSETS_CACHE, url)));
+  if (assets.some((saved) => !saved)) return false;
+  return putIfCacheable(SHELL_CACHE, key, response);
 };
 
 const precache = async () => {
@@ -208,6 +209,13 @@ self.addEventListener('fetch', (event) => {
 
 self.addEventListener('message', (event) => {
   const data = event.data;
+  if (data?.type === 'PREPARE_OFFLINE_PASSES' && event.ports?.[0]) {
+    event.waitUntil(Promise.all(SHELL_ROUTES.map(precacheRoute)).then(
+      (routes) => event.ports[0].postMessage(routes.every(Boolean)),
+      () => event.ports[0].postMessage(false),
+    ));
+    return;
+  }
   if (!data || data.type !== CACHE_URLS_MESSAGE || !Array.isArray(data.urls)) return;
   const urls = data.urls
     .map((value) => (typeof value === 'string' ? sameOriginUrl(value) : null))

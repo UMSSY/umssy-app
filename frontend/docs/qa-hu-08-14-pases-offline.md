@@ -26,3 +26,10 @@ dirección HTTPS de QA.
 La vista y el guardado usan la misma copia por usuario. Al cargar el detalle
 en línea, `registrationsService.getPass` guarda el pase confirmado. La consulta
 de la lista vuelve a validar cuáles de los pases guardados siguen disponibles.
+
+Para comprobar la preparación automática en Chrome para Android, inicia
+sesión y espera «Pases listos sin conexión» en Inicio, sin abrir «Mis
+inscripciones». Pulsa «Instalar app» si Chrome ofrece la instalación. Cierra
+la PWA, activa modo avión y ábrela desde el ícono. Entra a «Mis inscripciones»
+y verifica el QR de un taller vigente. Usa también una cuenta sin pases para
+comprobar que una lista vacía confirmada completa la preparación.
