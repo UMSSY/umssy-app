@@ -34,6 +34,7 @@ export {
 export { formatNotificationTime } from "./utils/format-notification-time";
 export { getNotificationActionLabel } from "./utils/get-notification-action-label";
 export { NotificationOpenView } from "./views/notification-open-view";
+export { useNotificationToasts } from "./hooks/use-notification-toasts";
 export { getNotificationCatalogDefinition } from "./utils/get-notification-catalog-definition";
 export { getNotificationCategory } from "./utils/get-notification-category";
 export { getNotificationIcon } from "./utils/get-notification-icon";
