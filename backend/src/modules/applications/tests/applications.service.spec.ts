@@ -200,15 +200,19 @@ describe('ApplicationsService (T5.1 & T5.2 & HU-15)', () => {
     });
   });
 
-     describe('notifyStateChanged (HU-15)', () => {
+  describe('notifyStateChanged (HU-15)', () => {
+    const base = {
+      recipientId: 'user-1',
+      applicationId: 'app-1',
+      jobTitle: 'Dev',
+      companyName: 'Empresa A',
+    };
+
     it('AC-15.1: debe enviar la notificación APPLICATION_STATUS_CHANGED cuando el reclutador cambia el estado', async () => {
       await service.notifyStateChanged({
-        recipientId: 'user-1',
-        applicationId: 'app-1',
-        previousStatus: 'IN_REVIEW' as unknown as ApplicationStatus,
-        newStatus: 'INTERVIEW' as unknown as ApplicationStatus,
-        jobTitle: 'Dev',
-        companyName: 'Empresa A',
+        ...base,
+        previousStatus: ApplicationStatus.IN_REVIEW,
+        newStatus: ApplicationStatus.INTERVIEW,
       });
 
       expect(notificationsMock.notify).toHaveBeenCalledTimes(1);
@@ -220,10 +224,29 @@ describe('ApplicationsService (T5.1 & T5.2 & HU-15)', () => {
           companyName: 'Empresa A',
           newStatus: 'INTERVIEW',
         },
-                actionUrl: 'https://umssy.edu.bo/postulaciones/app-1',
-
+        actionUrl: 'https://umssy.edu.bo/vacancies/my-applications',
       });
     });
+
+    it.each([
+      [ApplicationStatus.ACCEPTED, 'ACCEPTED'],
+      [ApplicationStatus.REJECTED, 'REJECTED'],
+    ])(
+      'mapea el estado de BD "%s" al código del enum %s',
+      async (newStatus, code) => {
+        await service.notifyStateChanged({
+          ...base,
+          previousStatus: ApplicationStatus.INTERVIEW,
+          newStatus,
+        });
+
+        expect(notificationsMock.notify).toHaveBeenCalledWith(
+          expect.objectContaining({
+            payload: expect.objectContaining({ newStatus: code }),
+          }),
+        );
+      },
+    );
 
     it('AC-15.4: withdrawApplication NO genera ninguna notificación de cambio de estado', async () => {
       repositoryMock.findById.mockResolvedValue({
@@ -238,17 +261,36 @@ describe('ApplicationsService (T5.1 & T5.2 & HU-15)', () => {
       expect(notificationsMock.notify).not.toHaveBeenCalled();
     });
 
-    it('D-14: no notifica si el estado nuevo es idéntico al anterior', async () => {
+    it('AC-15.4: no notifica cuando el nuevo estado es Retirada', async () => {
       await service.notifyStateChanged({
-        recipientId: 'user-1',
-        applicationId: 'app-1',
-        previousStatus: 'IN_REVIEW' as unknown as ApplicationStatus,
-        newStatus: 'IN_REVIEW' as unknown as ApplicationStatus,
-        jobTitle: 'Dev',
-        companyName: 'Empresa A',
+        ...base,
+        previousStatus: ApplicationStatus.IN_REVIEW,
+        newStatus: ApplicationStatus.WITHDRAWN,
       });
 
       expect(notificationsMock.notify).not.toHaveBeenCalled();
+    });
+
+    it('D-14: no notifica si el estado nuevo es idéntico al anterior', async () => {
+      await service.notifyStateChanged({
+        ...base,
+        previousStatus: ApplicationStatus.IN_REVIEW,
+        newStatus: ApplicationStatus.IN_REVIEW,
+      });
+
+      expect(notificationsMock.notify).not.toHaveBeenCalled();
+    });
+
+    it('no propaga el error si el envío de la notificación falla', async () => {
+      notificationsMock.notify.mockRejectedValueOnce(new Error('push down'));
+
+      await expect(
+        service.notifyStateChanged({
+          ...base,
+          previousStatus: ApplicationStatus.IN_REVIEW,
+          newStatus: ApplicationStatus.ACCEPTED,
+        }),
+      ).resolves.toBeUndefined();
     });
   });
 });

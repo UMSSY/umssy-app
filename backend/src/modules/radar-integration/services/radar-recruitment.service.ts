@@ -10,6 +10,7 @@ import {
   mapRecruiterAreaEvidence,
 } from '../mappers/radar-recruitment.mapper.js';
 import { ApplicationsService } from '../../applications/services/applications.service.js';
+import { ApplicationStatus } from '../../applications/types/applications.types.js';
 import { RadarRecruitmentSourcesService } from './radar-recruitment-sources.service.js';
 import { Injectable } from '@nestjs/common';
 import { ForbiddenRoleException } from '../../../common/exceptions/forbidden-role.exception.js';
@@ -435,9 +436,13 @@ export class RadarRecruitmentService {
     if (!rows.length) {
       throw new RadarApplicationNotFoundException('Postulación inexistente');
     }
-    await this.allowedCompany(recruiterId, rows[0].company_id);
+    const context = rows[0];
+    await this.allowedCompany(recruiterId, context.company_id);
 
-    const target = decision === 'hired' ? 'Aceptada' : 'No seleccionado';
+    const target =
+      decision === 'hired'
+        ? ApplicationStatus.ACCEPTED
+        : ApplicationStatus.REJECTED;
     const updated = await this.applications.recordRecruiterDecision(
       applicationId,
       target,
@@ -448,11 +453,19 @@ export class RadarRecruitmentService {
       );
     }
     await this.audit(
-      rows[0].user_id,
+      context.user_id,
       recruiterId,
       `application.${decision}`,
       applicationId,
     );
+    await this.applicationActions.notifyStateChanged({
+      recipientId: context.user_id,
+      applicationId,
+      previousStatus: context.status_title as ApplicationStatus,
+      newStatus: target,
+      jobTitle: context.job_title,
+      companyName: context.company_name,
+    });
     return { id: updated[0].id, state: decision };
   }
 }

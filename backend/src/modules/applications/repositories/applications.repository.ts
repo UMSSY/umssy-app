@@ -1,4 +1,7 @@
-import { RECRUITMENT_APPLICATION_SELECT } from '../constants/recruitment-application-select.constants.js';
+import {
+  APPLICATION_DECISION_CONTEXT_SELECT,
+  RECRUITMENT_APPLICATION_SELECT,
+} from '../constants/recruitment-application-select.constants.js';
 import { Injectable } from '@nestjs/common';
 import { JobOfferStatus } from '../../job-offers/types/job-offer.enum.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
@@ -141,6 +144,12 @@ export class ApplicationsRepository {
     return this.prisma.jobApplication.findUnique({
       where: { id },
       select: RECRUITMENT_APPLICATION_SELECT,
+    });
+  }
+  findApplicationDecisionContext(id: string) {
+    return this.prisma.jobApplication.findUnique({
+      where: { id },
+      select: APPLICATION_DECISION_CONTEXT_SELECT,
     });
   }
   recordRecruiterDecision(applicationId: string, target: string) {
