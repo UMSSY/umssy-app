@@ -12,7 +12,10 @@ import { ApplicationContactRestrictedException } from '../exceptions/application
 import type { ApplicationContactResponse } from '../types/application-contact.types.js';
 import { ApplicationMapper } from '../mappers/application.mapper.js';
 import { JobRecommendationsService } from '../../matching/services/job-recommendations.service.js';
-import { StateChangedDto } from '../notifications/state-changed.dto.js';
+import {
+  StateChangedDto,
+  toApplicationStatusCode,
+} from '../notifications/state-changed.dto.js';
 import { NotificationsService } from '../../notifications/services/notifications.service.js';
 import { ConfigService } from '@nestjs/config';
 import { NotificationType } from '../../notifications/types/notification-type.enum.js';
@@ -177,15 +180,18 @@ export class ApplicationsService {
     jobTitle: string;
     companyName: string;
   }): Promise<void> {
+    // D-14: sin cambio real de estado no hay notificación.
     if (p.previousStatus === p.newStatus) return;
+    // AC-15.4: el retiro lo hace el propio postulante; no se le notifica.
+    if (p.newStatus === ApplicationStatus.WITHDRAWN) return;
 
     try {
       const context = StateChangedDto.parse({
         jobTitle: p.jobTitle,
         companyName: p.companyName,
-        newStatus: p.newStatus,
-        previousStatus: p.previousStatus,
-        actionUrl: `${this.config.getOrThrow('APP_URL')}/postulaciones/${p.applicationId}`,
+        newStatus: toApplicationStatusCode(p.newStatus),
+        previousStatus: toApplicationStatusCode(p.previousStatus),
+        actionUrl: `${this.config.getOrThrow('APP_URL')}/vacancies/my-applications`,
       });
 
       await this.withTimeout(
@@ -202,18 +208,11 @@ export class ApplicationsService {
         5000,
       );
     } catch (error) {
-      console.error('--- ERROR DETALLADO EN NOTIFY STATE CHANGED ---', error);
-
+      // La notificación es best-effort: nunca debe revertir el cambio de estado.
       this.logger.error(
         `No se pudo notificar el cambio de estado (application=${p.applicationId}, recipient=${p.recipientId})`,
         error instanceof Error ? error.stack : String(error),
       );
-      
-      if (process.env.NODE_ENV === 'test') {
-        if (!(error instanceof Error && error.message.includes('timeout'))) {
-          throw error; 
-        }
-      }
     }
   }
 
@@ -235,6 +234,10 @@ export class ApplicationsService {
 
   findRecruitmentApplication(id: string) {
     return this.repository.findRecruitmentApplication(id);
+  }
+
+  findApplicationDecisionContext(id: string) {
+    return this.repository.findApplicationDecisionContext(id);
   }
 
   recordRecruiterDecision(applicationId: string, target: string) {
