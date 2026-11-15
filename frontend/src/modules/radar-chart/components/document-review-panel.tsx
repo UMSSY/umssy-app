@@ -19,7 +19,7 @@ import {
 import { ConfirmActionDialog } from '@/shared/components/confirm-action-dialog';
 
 export function DocumentReviewPanel() {
-  useRadarReviewOperationRecovery();
+  useRadarReviewOperationRecovery('cv');
   const [filter, setFilter] = useState('pending');
   const labels = {
     approved: 'Aprobar documento',
@@ -61,23 +61,18 @@ export function DocumentReviewPanel() {
         return verificationApi.decide(id, decision);
       }
 
-      const operationId = await getRadarReviewOperationId(
-        'cv',
-        id,
-        decision,
-      );
+      const operationId = await getRadarReviewOperationId('cv', id, decision);
 
       let result: RadarReviewOperationResult;
 
       try {
-        result = await radarIntegrationApi.operationStatus(operationId);
+        result = await radarIntegrationApi.documentOperationStatus(operationId);
       } catch (error: unknown) {
         if (!isApiError(error) || error.response?.status !== 404) {
           throw error;
         }
 
-        result = await radarIntegrationApi.decision(
-          'cv',
+        result = await radarIntegrationApi.documentDecision(
           id,
           operationId,
           decision,
@@ -96,12 +91,7 @@ export function DocumentReviewPanel() {
         );
       }
 
-      await clearRadarReviewOperationId(
-        'cv',
-        id,
-        decision,
-        operationId,
-      );
+      await clearRadarReviewOperationId('cv', id, decision, operationId);
 
       return result;
     },
@@ -223,7 +213,7 @@ export function DocumentReviewPanel() {
             : ''
         }
         busy={mutation.isPending}
-          error={error}
+        error={error}
         onOpenChange={(v) => {
           if (!v) setConfirmation(null);
         }}

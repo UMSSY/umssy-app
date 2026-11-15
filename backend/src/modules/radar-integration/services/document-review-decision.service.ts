@@ -1,4 +1,4 @@
-﻿import { createHash } from 'node:crypto';
+import { createHash } from 'node:crypto';
 import { ConflictException, Injectable } from '@nestjs/common';
 import { TransactionService } from '../../../common/prisma/transaction.service.js';
 import { RadarReviewOperationConflictException } from '../exceptions/radar-review-operation-conflict.exception.js';
@@ -18,6 +18,33 @@ export class DocumentReviewDecisionService {
     private readonly transactions: TransactionService,
   ) {}
 
+  async operationStatus(adminId: string, operationId: string) {
+    return this.transactions.run(async (context) => {
+      await this.reviews.lockReviewOperation(operationId, context);
+
+      const existing = await this.reviews.findReviewOperation(
+        operationId,
+        context,
+      );
+
+      if (!existing.length) {
+        throw new RadarReviewNotFoundException('Operacion no encontrada');
+      }
+
+      const saved = existing[0];
+
+      if (
+        saved.admin_id !== adminId ||
+        saved.flow !== 'document-review' ||
+        saved.kind !== 'cv'
+      ) {
+        throw new RadarReviewNotFoundException('Operacion no encontrada');
+      }
+
+      return saved.response_data;
+    });
+  }
+
   async decide(
     adminId: string,
     documentId: string,
@@ -35,31 +62,24 @@ export class DocumentReviewDecisionService {
       .digest('hex');
 
     return this.transactions.run(async (context) => {
-      const inserted = await this.reviews.claimReviewOperation(
-        operationId,
-        adminId,
-        'cv',
-        documentId,
-        decision,
-        payloadHash,
-        context,
-      );
+      await this.reviews.lockReviewOperation(operationId, context);
+      const existing = await this.reviews.findReviewOperation(operationId, context);
 
-      if (!inserted) {
-        const existing = await this.reviews.findReviewOperation(
-          operationId,
-          context,
-        );
+      if (existing.length) {
+        const saved = existing[0];
 
-        if (!existing.length || existing[0].admin_id !== adminId) {
+        if (saved.admin_id !== adminId)
           throw new RadarReviewNotFoundException('Operacion no encontrada');
-        }
 
-        if (existing[0].payload_hash !== payloadHash) {
+        if (
+          saved.flow !== 'document-review' ||
+          saved.kind !== 'cv' ||
+          saved.target_id !== documentId ||
+          saved.payload_hash !== payloadHash
+        )
           throw new RadarReviewOperationConflictException();
-        }
 
-        return existing[0].response_data;
+        return saved.response_data;
       }
 
       const changed = await this.documents.decide(
@@ -98,7 +118,13 @@ export class DocumentReviewDecisionService {
       };
 
       await this.reviews.saveReviewOperationResult(
+        userId,
+        adminId,
         operationId,
+        'document-review',
+        'cv',
+        documentId,
+        payloadHash,
         result,
         context,
       );

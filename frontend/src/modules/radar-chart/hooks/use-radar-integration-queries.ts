@@ -19,20 +19,27 @@ export const radarQueryKeys = {
   notifications: () => [...radarQueryKeys.all, 'notifications'] as const,
 };
 
-export function useRadarReviewOperationRecovery() {
+export function useRadarReviewOperationRecovery(kind: RadarReviewKind) {
   const queryClient = useQueryClient();
 
   return useQuery({
-    queryKey: [...radarQueryKeys.all, 'operation-recovery'],
+    queryKey: [...radarQueryKeys.all, 'operation-recovery', kind],
     queryFn: async () => {
-      const operations = await listRadarReviewOperations();
+      const operations = (await listRadarReviewOperations()).filter(
+        (operation) => operation.kind === kind,
+      );
       let recovered = 0;
 
       for (const operation of operations) {
         try {
-          const result = await radarIntegrationApi.operationStatus(
-            operation.operationId,
-          );
+          const result =
+            operation.kind === 'cv'
+              ? await radarIntegrationApi.documentOperationStatus(
+                  operation.operationId,
+                )
+              : await radarIntegrationApi.operationStatus(
+                  operation.operationId,
+                );
 
           if (
             result.operationId !== operation.operationId ||
@@ -40,7 +47,8 @@ export function useRadarReviewOperationRecovery() {
             result.kind !== operation.kind ||
             result.targetId !== operation.targetId ||
             result.decision !== operation.decision
-          ) continue;
+          )
+            continue;
 
           await clearRadarReviewOperationId(
             operation.kind,
@@ -93,8 +101,7 @@ export function useRadarNotificationMutations() {
   const queryClient = useQueryClient();
 
   const openNotification = useMutation({
-    mutationFn: (id: string) =>
-      radarIntegrationApi.openNotification(id),
+    mutationFn: (id: string) => radarIntegrationApi.openNotification(id),
 
     onSuccess: async () => {
       await queryClient.invalidateQueries({
@@ -121,16 +128,10 @@ export function useRadarReviewMutations() {
       id,
       decision: action,
     }: ReviewDecisionVariables) => {
-      const operationId = await getRadarReviewOperationId(
-        kind,
-        id,
-        action,
-      );
+      const operationId = await getRadarReviewOperationId(kind, id, action);
 
       const validateResult = (
-        result: Awaited<
-          ReturnType<typeof radarIntegrationApi.operationStatus>
-        >,
+        result: Awaited<ReturnType<typeof radarIntegrationApi.operationStatus>>,
       ) => {
         if (
           result.operationId !== operationId ||
@@ -148,15 +149,13 @@ export function useRadarReviewMutations() {
       };
 
       try {
-        const saved = await radarIntegrationApi.operationStatus(operationId);
+        const saved =
+          kind === 'cv'
+            ? await radarIntegrationApi.documentOperationStatus(operationId)
+            : await radarIntegrationApi.operationStatus(operationId);
         const validated = validateResult(saved);
 
-        await clearRadarReviewOperationId(
-          kind,
-          id,
-          action,
-          operationId,
-        );
+        await clearRadarReviewOperationId(kind, id, action, operationId);
 
         return validated;
       } catch (error: unknown) {
@@ -174,20 +173,12 @@ export function useRadarReviewMutations() {
       }
 
       const result = validateResult(
-        await radarIntegrationApi.decision(
-          kind,
-          id,
-          operationId,
-          action,
-        ),
+        kind === 'cv'
+          ? await radarIntegrationApi.documentDecision(id, operationId, action)
+          : await radarIntegrationApi.decision(kind, id, operationId, action),
       );
 
-      await clearRadarReviewOperationId(
-        kind,
-        id,
-        action,
-        operationId,
-      );
+      await clearRadarReviewOperationId(kind, id, action, operationId);
 
       return result;
     },
@@ -199,8 +190,7 @@ export function useRadarReviewMutations() {
   });
 
   const reprocess = useMutation({
-    mutationFn: (id: string) =>
-      radarIntegrationApi.adminReprocessCv(id),
+    mutationFn: (id: string) => radarIntegrationApi.adminReprocessCv(id),
 
     onSuccess: async () => {
       await queryClient.invalidateQueries({

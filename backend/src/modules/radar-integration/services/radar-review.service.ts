@@ -79,31 +79,21 @@ export class RadarReviewService {
       changed: boolean;
       result: RadarReviewDecisionResult;
     }>(async (context) => {
-      const inserted = await this.repository.claimReviewOperation(
-        operationId,
-        adminId,
-        kind,
-        id,
-        action,
-        payloadHash,
-        context,
-      );
+      await this.repository.lockReviewOperation(operationId, context);
+      const existing = await this.repository.findReviewOperation(operationId, context);
 
-      if (!inserted) {
-        const existing = await this.repository.findReviewOperation(
-          operationId,
-          context,
-        );
-
-        if (!existing.length)
-          throw new RadarReviewNotFoundException('Operacion no encontrada');
-
+      if (existing.length) {
         const saved = existing[0];
 
         if (saved.admin_id !== adminId)
           throw new RadarReviewNotFoundException('Operacion no encontrada');
 
-        if (saved.payload_hash !== payloadHash)
+        if (
+          saved.flow !== 'radar-review' ||
+          saved.kind !== kind ||
+          saved.target_id !== id ||
+          saved.payload_hash !== payloadHash
+        )
           throw new RadarReviewOperationConflictException();
 
         return {
@@ -186,7 +176,13 @@ export class RadarReviewService {
       };
 
       await this.repository.saveReviewOperationResult(
+        userId,
+        adminId,
         operationId,
+        'radar-review',
+        kind,
+        id,
+        payloadHash,
         result,
         context,
       );
@@ -219,12 +215,14 @@ export class RadarReviewService {
 
   async operationStatus(adminId: string, operationId: string) {
     return this.transactions.run(async (context) => {
-      const rows = await this.repository.findReviewOperation(
-        operationId,
-        context,
-      );
+      await this.repository.lockReviewOperation(operationId, context);
+      const rows = await this.repository.findReviewOperation(operationId, context);
 
-      if (!rows.length || rows[0].admin_id !== adminId)
+      if (
+        !rows.length ||
+        rows[0].admin_id !== adminId ||
+        rows[0].flow !== 'radar-review'
+      )
         throw new RadarReviewNotFoundException('Operacion no encontrada');
 
       return rows[0].response_data;

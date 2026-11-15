@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+﻿import { Injectable } from '@nestjs/common';
 import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 
@@ -7,9 +7,9 @@ import type { CvReview } from '../types/cv-review.type.js';
 type ReviewOperationRecord = {
   id: string;
   admin_id: string;
+  flow: string;
   kind: string;
   target_id: string;
-  decision: string;
   payload_hash: string;
   response_data: unknown;
   created_at: Date;
@@ -33,35 +33,12 @@ export class RadarReviewRepository {
         ORDER BY e.submitted_at DESC LIMIT 300`;
   }
 
-  claimReviewOperation(
+  async lockReviewOperation(
     operationId: string,
-    adminId: string,
-    kind: string,
-    targetId: string,
-    decision: string,
-    payloadHash: string,
     context: TransactionContext,
-  ) {
-    return context.client.$executeRaw`
-      INSERT INTO radar_review_operations (
-        id,
-        admin_id,
-        kind,
-        target_id,
-        decision,
-        payload_hash,
-        response_data
-      )
-      VALUES (
-        ${operationId}::uuid,
-        ${adminId}::uuid,
-        ${kind},
-        ${targetId}::uuid,
-        ${decision},
-        ${payloadHash},
-        '{}'::jsonb
-      )
-      ON CONFLICT (id) DO NOTHING
+  ): Promise<void> {
+    await context.client.$queryRaw`
+      SELECT pg_advisory_xact_lock(hashtextextended(${operationId}, 0))
     `;
   }
 
@@ -72,28 +49,55 @@ export class RadarReviewRepository {
     return context.client.$queryRaw<ReviewOperationRecord[]>`
       SELECT
         id,
-        admin_id,
-        kind,
+        actor_id AS admin_id,
+        details->>'flow' AS flow,
+        details->>'kind' AS kind,
         target_id,
-        decision,
-        payload_hash,
-        response_data,
-        created_at
-      FROM radar_review_operations
-      WHERE id = ${operationId}::uuid
+        details->>'payloadHash' AS payload_hash,
+        details->'responseData' AS response_data,
+        occurred_at AS created_at
+      FROM radar_audit_events
+      WHERE event_type = 'radar.review.operation'
+        AND details->>'operationId' = ${operationId}
+      ORDER BY occurred_at DESC
       LIMIT 1
     `;
   }
 
   saveReviewOperationResult(
+    userId: string,
+    adminId: string,
     operationId: string,
+    flow: string,
+    kind: string,
+    targetId: string,
+    payloadHash: string,
     responseData: object,
     context: TransactionContext,
   ) {
+    const details = {
+      operationId,
+      flow,
+      kind,
+      payloadHash,
+      responseData,
+    };
+
     return context.client.$executeRaw`
-      UPDATE radar_review_operations
-      SET response_data = ${JSON.stringify(responseData)}::jsonb
-      WHERE id = ${operationId}::uuid
+      INSERT INTO radar_audit_events (
+        user_id,
+        actor_id,
+        event_type,
+        target_id,
+        details
+      )
+      VALUES (
+        ${userId}::uuid,
+        ${adminId}::uuid,
+        'radar.review.operation',
+        ${targetId}::uuid,
+        ${JSON.stringify(details)}::jsonb
+      )
     `;
   }
 

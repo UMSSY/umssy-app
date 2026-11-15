@@ -57,7 +57,7 @@ function setup() {
   const rows = [snapshot()];
   const db = {
     $queryRaw: vi.fn(),
-    $executeRaw: vi.fn().mockResolvedValue(1),
+    $executeRaw: vi.fn(async () => 1),
     userSkill: {
       findMany: vi.fn().mockResolvedValue([]),
       count: vi.fn().mockResolvedValue(0),
@@ -176,7 +176,7 @@ describe('Radar publication consistency', () => {
 
     const notificationCalls = db.$executeRaw.mock.calls.filter(
       ([strings]) =>
-        strings.join('').includes('INSERT INTO radar_notifications'),
+        strings.join('').includes('INSERT INTO notifications'),
     );
 
     expect(notificationCalls).toHaveLength(1);
@@ -274,7 +274,7 @@ describe('Radar publication consistency', () => {
     expect(insertions).toEqual([]);
     const notificationCalls = db.$executeRaw.mock.calls.filter(
       ([strings]) =>
-        strings.join('').includes('INSERT INTO radar_notifications'),
+        strings.join('').includes('INSERT INTO notifications'),
     );
 
     expect(notificationCalls).toHaveLength(0);
@@ -291,7 +291,7 @@ describe('Radar publication consistency', () => {
     expect(insertions).toEqual([]);
     const notificationCalls = db.$executeRaw.mock.calls.filter(
       ([strings]) =>
-        strings.join('').includes('INSERT INTO radar_notifications'),
+        strings.join('').includes('INSERT INTO notifications'),
     );
 
     expect(notificationCalls).toHaveLength(0);
@@ -307,7 +307,7 @@ describe('Radar publication consistency', () => {
 
     const notificationCalls = db.$executeRaw.mock.calls.filter(
       ([strings]) =>
-        strings.join('').includes('INSERT INTO radar_notifications'),
+        strings.join('').includes('INSERT INTO notifications'),
     );
 
     expect(notificationCalls).toHaveLength(0);

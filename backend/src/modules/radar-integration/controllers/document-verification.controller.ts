@@ -56,6 +56,15 @@ export class DocumentVerificationController {
       throw new BadRequestException('Filtro inválido');
     return this.store.reviews(filter);
   }
+    @UseGuards(RolesGuard)
+    @Roles('administrativo')
+    @Get('radar-document-reviews/operations/:operationId')
+    operationStatus(
+      @CurrentUserId() admin: string,
+      @Param('operationId', ParseUUIDPipe) operationId: string,
+    ) {
+      return this.decisionService.operationStatus(admin, operationId);
+    }
   @UseGuards(RolesGuard)
   @Roles('administrativo')
   @Get('radar-document-reviews/:id/file')

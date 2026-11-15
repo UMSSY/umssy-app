@@ -53,7 +53,7 @@ function setupCv() {
 function setupReview() {
   const cvs = { cvById: vi.fn() };
   const repository = {
-    claimReviewOperation: vi.fn().mockResolvedValue(1),
+    lockReviewOperation: vi.fn().mockResolvedValue(undefined),
     findReviewOperation: vi.fn().mockResolvedValue([]),
     saveReviewOperationResult: vi.fn().mockResolvedValue(1),
     listReviewQueue: vi.fn().mockResolvedValue([[], []]),

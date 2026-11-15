@@ -36,7 +36,7 @@ function formatEvidence(value: unknown): string {
 }
 
 export function SkillReviewPanel() {
-  useRadarReviewOperationRecovery();
+  useRadarReviewOperationRecovery('skill');
   const queue = useRadarReviews();
   const { decision } = useRadarReviewMutations();
 

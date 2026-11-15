@@ -1,4 +1,5 @@
 
+
 import { describe, expect, it, vi } from 'vitest';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { RadarNotificationsRepository } from '../repositories/radar-notifications.repository.js';
@@ -30,12 +31,12 @@ describe('RadarNotificationsRepository', () => {
     expect(result).toHaveLength(1);
     expect(result[0].snapshot_id).toBe(snapshotId);
     expect(db.$queryRaw.mock.calls[0][1]).toBe(userId);
-    expect(db.$queryRaw.mock.calls[0][0].join('')).toContain(
-      'WHERE n.user_id = ',
-    );
-    expect(db.$queryRaw.mock.calls[0][0].join('')).toContain(
-      'ORDER BY n.created_at DESC, n.id DESC',
-    );
+
+    const sql = db.$queryRaw.mock.calls[0][0].join('');
+
+    expect(sql).toContain('WHERE n.recipient_id = ');
+    expect(sql).toContain("nt.code = 'RADAR_PUBLISHED'");
+    expect(sql).toContain('ORDER BY n.created_at DESC, n.id DESC');
   });
 
   it('marks a notification as read only for its owner', async () => {
@@ -58,12 +59,14 @@ describe('RadarNotificationsRepository', () => {
       notificationId,
       userId,
     ]);
-    expect(db.$queryRaw.mock.calls[0][0].join('')).toContain(
-      'COALESCE(read_at, clock_timestamp())',
+
+    const sql = db.$queryRaw.mock.calls[0][0].join('');
+
+    expect(sql).toContain(
+      'COALESCE(n.read_at, clock_timestamp())',
     );
-    expect(db.$queryRaw.mock.calls[0][0].join('')).toContain(
-      'AND user_id = ',
-    );
+    expect(sql).toContain('AND n.recipient_id = ');
+    expect(sql).toContain("nt.code = 'RADAR_PUBLISHED'");
   });
 
   it('returns null when the notification does not belong to the user', async () => {
@@ -108,15 +111,16 @@ describe('RadarNotificationsRepository', () => {
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe(snapshotId);
     expect(result[0].source_revision).toBe(3);
+
     expect(db.$queryRaw.mock.calls[0].slice(1)).toEqual([
       notificationId,
       userId,
     ]);
-    expect(db.$queryRaw.mock.calls[0][0].join('')).toContain(
-      'WHERE n.id = ',
-    );
-    expect(db.$queryRaw.mock.calls[0][0].join('')).toContain(
-      'AND n.user_id = ',
-    );
+
+    const sql = db.$queryRaw.mock.calls[0][0].join('');
+
+    expect(sql).toContain('WHERE n.id = ');
+    expect(sql).toContain('AND n.recipient_id = ');
+    expect(sql).toContain("nt.code = 'RADAR_PUBLISHED'");
   });
 });

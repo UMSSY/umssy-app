@@ -1,4 +1,4 @@
-﻿import { createHash } from 'node:crypto';
+import { createHash } from 'node:crypto';
 import type { TransactionService } from '../../../common/prisma/transaction.service.js';
 import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
 import { describe, expect, it, vi } from 'vitest';
@@ -24,7 +24,7 @@ function setup() {
     decide: vi.fn().mockResolvedValue([{ userId: owner }]),
   };
   const reviews = {
-    claimReviewOperation: vi.fn().mockResolvedValue(1),
+    lockReviewOperation: vi.fn().mockResolvedValue(undefined),
     findReviewOperation: vi.fn().mockResolvedValue([]),
     saveReviewOperationResult: vi.fn().mockResolvedValue(1),
   };
@@ -89,10 +89,89 @@ describe('Decisiones administrativas de documentos CV', () => {
     );
 
     expect(reviews.saveReviewOperationResult).toHaveBeenCalledWith(
+      owner,
+      admin,
       operationId,
+      'document-review',
+      'cv',
+      documentId,
+      hashFor(decision),
       expect.objectContaining({ status: 'completed', decision }),
       expect.objectContaining({ client: expect.any(Object) }),
     );
+  });
+
+    describe('consulta de estado de operaciones', () => {
+    it('devuelve el resultado guardado de una operación del mismo administrador', async () => {
+      const { service, reviews } = setup();
+      const response = {
+        operationId,
+        status: 'completed',
+        kind: 'cv',
+        targetId: documentId,
+        decision: 'approved',
+      };
+
+      reviews.findReviewOperation.mockResolvedValue([{
+        admin_id: admin,
+        flow: 'document-review',
+        kind: 'cv',
+        target_id: documentId,
+        payload_hash: hashFor('approved'),
+        response_data: response,
+      }]);
+
+      await expect(
+        service.operationStatus(admin, operationId),
+      ).resolves.toEqual(response);
+
+      expect(reviews.lockReviewOperation).toHaveBeenCalledWith(
+        operationId,
+        expect.objectContaining({ client: expect.any(Object) }),
+      );
+    });
+
+    it('devuelve 404 cuando la operación no existe', async () => {
+      const { service } = setup();
+
+      await expect(
+        service.operationStatus(admin, operationId),
+      ).rejects.toThrow('Operacion no encontrada');
+    });
+
+    it('no permite consultar operaciones de otro administrador', async () => {
+      const { service, reviews } = setup();
+
+      reviews.findReviewOperation.mockResolvedValue([{
+        admin_id: otherAdmin,
+        flow: 'document-review',
+        kind: 'cv',
+        target_id: documentId,
+        payload_hash: hashFor('approved'),
+        response_data: { status: 'completed' },
+      }]);
+
+      await expect(
+        service.operationStatus(admin, operationId),
+      ).rejects.toThrow('Operacion no encontrada');
+    });
+
+    it('no permite recuperar operaciones del flujo radar-review', async () => {
+      const { service, reviews } = setup();
+
+      reviews.findReviewOperation.mockResolvedValue([{
+        admin_id: admin,
+        flow: 'radar-review',
+        kind: 'cv',
+        target_id: documentId,
+        payload_hash: hashFor('approved'),
+        response_data: { status: 'completed' },
+      }]);
+
+      await expect(
+        service.operationStatus(admin, operationId),
+      ).rejects.toThrow('Operacion no encontrada');
+    });
   });
 
   it('recupera una operación repetida sin duplicar la decisión ni la auditoría', async () => {
@@ -108,9 +187,11 @@ describe('Decisiones administrativas de documentos CV', () => {
       completedAt: '2026-11-15T00:00:00.000Z',
     };
 
-    reviews.claimReviewOperation.mockResolvedValue(0);
     reviews.findReviewOperation.mockResolvedValue([{
       admin_id: admin,
+      flow: 'document-review',
+      kind: 'cv',
+      target_id: documentId,
       payload_hash: hashFor('approved'),
       response_data: response,
     }]);
@@ -127,9 +208,11 @@ describe('Decisiones administrativas de documentos CV', () => {
   it('rechaza reutilizar el operationId con una decisión diferente', async () => {
     const { service, documents, reviews, access } = setup();
 
-    reviews.claimReviewOperation.mockResolvedValue(0);
     reviews.findReviewOperation.mockResolvedValue([{
       admin_id: admin,
+      flow: 'document-review',
+      kind: 'cv',
+      target_id: documentId,
       payload_hash: hashFor('approved'),
       response_data: { status: 'completed' },
     }]);
@@ -147,9 +230,11 @@ describe('Decisiones administrativas de documentos CV', () => {
   it('impide recuperar una operación perteneciente a otro administrador', async () => {
     const { service, documents, reviews, access } = setup();
 
-    reviews.claimReviewOperation.mockResolvedValue(0);
     reviews.findReviewOperation.mockResolvedValue([{
       admin_id: otherAdmin,
+      flow: 'document-review',
+      kind: 'cv',
+      target_id: documentId,
       payload_hash: hashFor('approved'),
       response_data: { status: 'completed' },
     }]);

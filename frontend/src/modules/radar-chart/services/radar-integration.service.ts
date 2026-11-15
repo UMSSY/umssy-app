@@ -1,19 +1,25 @@
-import { apiClient } from "@/shared/services/api-client";
-import type { ApiResponse } from "@/shared/types/api-response.types";
-import type { IntegrationRadar, ReviewRow } from "../types/radar-integration.types";
-import type { RadarNotification, OpenedRadarNotification } from '../types/radar-notification.types';
+import { apiClient } from '@/shared/services/api-client';
+import type { ApiResponse } from '@/shared/types/api-response.types';
+import type {
+  IntegrationRadar,
+  ReviewRow,
+} from '../types/radar-integration.types';
+import type {
+  RadarNotification,
+  OpenedRadarNotification,
+} from '../types/radar-notification.types';
 
-const root = "/profile/me/radar";
+const root = '/profile/me/radar';
 
-const extract = <T,>(response: { data: ApiResponse<T> }): T =>
+const extract = <T>(response: { data: ApiResponse<T> }): T =>
   response.data.data;
 
-export type RadarReviewKind = "cv" | "skill";
-export type RadarReviewDecision = "approved" | "rejected" | "revoked";
+export type RadarReviewKind = 'cv' | 'skill';
+export type RadarReviewDecision = 'approved' | 'rejected' | 'revoked';
 
 export interface RadarReviewOperationResult {
   operationId: string;
-  status: "completed";
+  status: 'completed';
   kind: RadarReviewKind;
   targetId: string;
   decision: RadarReviewDecision;
@@ -49,13 +55,13 @@ export const radarIntegrationApi = {
 
   rescanCurrentCv: async () =>
     extract(
-      await apiClient.post<
-        ApiResponse<{ cvId: string; submitted: boolean }>
-      >(`${root}/cv-rescans`),
+      await apiClient.post<ApiResponse<{ cvId: string; submitted: boolean }>>(
+        `${root}/cv-rescans`,
+      ),
     ),
 
   reviews: async () =>
-    extract(await apiClient.get<ApiResponse<ReviewRow[]>>("/radar-reviews")),
+    extract(await apiClient.get<ApiResponse<ReviewRow[]>>('/radar-reviews')),
 
   decision: async (
     kind: RadarReviewKind,
@@ -69,10 +75,30 @@ export const radarIntegrationApi = {
         { operationId, decision },
       ),
     ),
+
+  documentDecision: async (
+    id: string,
+    operationId: string,
+    decision: RadarReviewDecision,
+  ) =>
+    extract(
+      await apiClient.patch<ApiResponse<RadarReviewOperationResult>>(
+        `/radar-document-reviews/${id}`,
+        { operationId, decision },
+      ),
+    ),
+
   operationStatus: async (operationId: string) =>
     extract(
       await apiClient.get<ApiResponse<RadarReviewOperationResult>>(
         `/radar-reviews/operations/${operationId}`,
+      ),
+    ),
+
+  documentOperationStatus: async (operationId: string) =>
+    extract(
+      await apiClient.get<ApiResponse<RadarReviewOperationResult>>(
+        `/radar-document-reviews/operations/${operationId}`,
       ),
     ),
 
@@ -92,7 +118,7 @@ export const radarIntegrationApi = {
   adminCv: async (id: string) => {
     const response = await apiClient.get<Blob>(
       `/radar-reviews/cvs/${id}/file`,
-      { responseType: "blob" },
+      { responseType: 'blob' },
     );
     return response.data;
   },

@@ -67,11 +67,11 @@ describe('DocumentReviewPanel: recuperación de decisiones', () => {
     vi.spyOn(verificationApi, 'list').mockResolvedValue([row]);
 
     const status = vi
-      .spyOn(radarIntegrationApi, 'operationStatus')
+      .spyOn(radarIntegrationApi, 'documentOperationStatus')
       .mockRejectedValue(notFound);
 
     const decide = vi
-      .spyOn(radarIntegrationApi, 'decision')
+      .spyOn(radarIntegrationApi, 'documentDecision')
       .mockResolvedValue(operationResult);
 
     const user = userEvent.setup();
@@ -84,7 +84,6 @@ describe('DocumentReviewPanel: recuperación de decisiones', () => {
     await waitFor(() => {
       expect(status).toHaveBeenCalledWith(operationId);
       expect(decide).toHaveBeenCalledWith(
-        'cv',
         'v1',
         operationId,
         'approved',
@@ -102,12 +101,12 @@ describe('DocumentReviewPanel: recuperación de decisiones', () => {
     vi.spyOn(verificationApi, 'list').mockResolvedValue([row]);
 
     const status = vi
-      .spyOn(radarIntegrationApi, 'operationStatus')
+      .spyOn(radarIntegrationApi, 'documentOperationStatus')
       .mockRejectedValueOnce(notFound)
       .mockResolvedValue(operationResult);
 
     const decide = vi
-      .spyOn(radarIntegrationApi, 'decision')
+      .spyOn(radarIntegrationApi, 'documentDecision')
       .mockRejectedValueOnce(new Error('Conexión interrumpida'));
 
     const user = userEvent.setup();
@@ -139,12 +138,12 @@ describe('DocumentReviewPanel: recuperación de decisiones', () => {
     vi.spyOn(verificationApi, 'list').mockResolvedValue([row]);
 
     const status = vi
-      .spyOn(radarIntegrationApi, 'operationStatus')
+      .spyOn(radarIntegrationApi, 'documentOperationStatus')
       .mockRejectedValueOnce(unavailable)
       .mockRejectedValueOnce(notFound);
 
     const decide = vi
-      .spyOn(radarIntegrationApi, 'decision')
+      .spyOn(radarIntegrationApi, 'documentDecision')
       .mockResolvedValue(operationResult);
 
     const user = userEvent.setup();
@@ -166,7 +165,6 @@ describe('DocumentReviewPanel: recuperación de decisiones', () => {
 
     await waitFor(() => {
       expect(decide).toHaveBeenCalledWith(
-        'cv',
         'v1',
         operationId,
         'approved',

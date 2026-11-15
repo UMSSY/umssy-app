@@ -15,7 +15,7 @@ import type { TransactionContext } from '../../../common/types/transaction-conte
 function setup() {
   const client = {} as TransactionContext['client'];
   const repository = {
-    claimReviewOperation: vi.fn().mockResolvedValue(1),
+    lockReviewOperation: vi.fn().mockResolvedValue(undefined),
     findReviewOperation: vi.fn().mockResolvedValue([]),
     saveReviewOperationResult: vi.fn().mockResolvedValue(1),
     changeCvDecision: vi.fn().mockResolvedValue([{ user_id: 'owner' }]),
@@ -90,9 +90,11 @@ describe('Revisión administrativa transaccional', () => {
   it('recupera una operacion repetida sin duplicar la auditoria', async () => {
     const { service, repository, skills, access } = setup();
     const payloadHash = createHash('sha256').update(JSON.stringify({ kind: 'skill', targetId: 'evidence', decision: 'approved' })).digest('hex');
-    repository.claimReviewOperation.mockResolvedValue(0);
     repository.findReviewOperation.mockResolvedValue([{
       admin_id: 'admin',
+      flow: 'radar-review',
+      kind: 'skill',
+      target_id: 'evidence',
       payload_hash: payloadHash,
       response_data: { operationId: 'operation-1', status: 'completed', kind: 'skill', targetId: 'evidence', decision: 'approved', changed: true, userId: 'owner', completedAt: '2026-11-15T00:00:00.000Z' },
     }]);
@@ -114,6 +116,10 @@ describe('Revisión administrativa transaccional', () => {
     repository.findReviewOperation.mockResolvedValue([
       {
         admin_id: 'admin',
+        flow: 'radar-review',
+        kind: 'skill',
+        target_id: 'evidence',
+        payload_hash: 'hash-diferente',
         response_data: response,
       },
     ]);
@@ -130,11 +136,12 @@ describe('Revisión administrativa transaccional', () => {
 
   it('rechaza reutilizar el operationId con datos diferentes', async () => {
     const { service, repository, skills, access } = setup();
-
-    repository.claimReviewOperation.mockResolvedValue(0);
     repository.findReviewOperation.mockResolvedValue([
       {
         admin_id: 'admin',
+        flow: 'radar-review',
+        kind: 'skill',
+        target_id: 'evidence',
         payload_hash: 'hash-diferente',
         response_data: {
           operationId: 'operation-1',
@@ -165,6 +172,10 @@ describe('Revisión administrativa transaccional', () => {
     repository.findReviewOperation.mockResolvedValue([
       {
         admin_id: 'another-admin',
+        flow: 'radar-review',
+        kind: 'skill',
+        target_id: 'evidence',
+        payload_hash: 'hash',
         response_data: { status: 'completed' },
       },
     ]);
