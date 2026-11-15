@@ -38,6 +38,7 @@ export class PushDispatcherService implements OnModuleInit {
     body: string,
     actionUrl: string,
     groupKey?: string,
+    notificationIds?: ReadonlyMap<string, string>,
   ): Promise<'sent' | 'partial' | 'failed' | 'skipped'> {
     if (userIds.length === 0) return 'skipped';
 
@@ -48,19 +49,23 @@ export class PushDispatcherService implements OnModuleInit {
     let successCount = 0;
     let failedCount = 0;
 
-    const pushPayload: PushNotificationPayload = {
+    const basePayload: PushNotificationPayload = {
       title: title.substring(0, PUSH_TEXT_MAX_LENGTH),
       body: body.substring(0, PUSH_TEXT_MAX_LENGTH),
       icon: PUSH_NOTIFICATION_ICON,
       actionUrl,
       groupKey,
     };
-    const payload = JSON.stringify(pushPayload);
 
     for (const sub of subscriptions) {
       if (this.isDesktopUserAgent(sub.userAgent)) {
         continue;
       }
+
+      const pushPayload: PushNotificationPayload = {
+        ...basePayload,
+        notificationId: notificationIds?.get(sub.userId),
+      };
 
       try {
         await webpush.sendNotification(
@@ -68,7 +73,7 @@ export class PushDispatcherService implements OnModuleInit {
             endpoint: sub.endpoint,
             keys: { p256dh: sub.p256dh, auth: sub.auth },
           },
-          payload,
+          JSON.stringify(pushPayload),
         );
         successCount++;
       } catch (error: unknown) {
