@@ -1,10 +1,17 @@
 import { UNIQUE_CONSTRAINT_VIOLATION_CODE } from '../../../common/constants/prisma-errors.constants.js';
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Inject,
+  Injectable,
+  Optional,
+  forwardRef,
+} from '@nestjs/common';
 
 import { ConversationRepository } from '../repositories/conversation.repository.js';
 import { ConversationParticipantRepository } from '../repositories/conversation-participant.repository.js';
 import { UserLookupRepository } from '../repositories/user-lookup.repository.js';
 import { ConnectionRequestRepository } from '../repositories/connection-request.repository.js';
+import { ConnectionRequestService } from './connection-request.service.js';
 
 import { EducationsService } from '../../educations/services/educations.service.js';
 import { UserSkillService } from '../../skills/services/user-skill.service.js';
@@ -37,6 +44,9 @@ export class ConversationService {
     private readonly chatRolePolicyService: ChatRolePolicyService,
     private readonly educationsService: EducationsService,
     private readonly userSkillService: UserSkillService,
+    @Optional()
+    @Inject(forwardRef(() => ConnectionRequestService))
+    private readonly connectionRequestService?: ConnectionRequestService,
   ) {}
 
   async getOrCreate(
@@ -130,13 +140,19 @@ export class ConversationService {
       context?.contextType === 'POSTULACION' && Boolean(context?.contextId);
 
     if (!isPostulationContext) {
-      const acceptedRequest =
-        await this.connectionRequestRepository.findAcceptedRequest(
-          userAId,
-          userBId,
-        );
+      const hasAccepted = this.connectionRequestService
+        ? await this.connectionRequestService.hasAcceptedConnection(
+            userAId,
+            userBId,
+          )
+        : Boolean(
+            await this.connectionRequestRepository.findAcceptedRequest(
+              userAId,
+              userBId,
+            ),
+          );
 
-      if (!acceptedRequest) {
+      if (!hasAccepted) {
         throw new ForbiddenException(
           'Debes tener una solicitud de conexión aceptada para iniciar una conversación.',
         );

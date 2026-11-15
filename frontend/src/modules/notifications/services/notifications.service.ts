@@ -1,13 +1,10 @@
 import { apiClient } from "@/shared/services/api-client";
+import type { GetNotificationsParams } from "../types/get-notifications-params.types";
 import type { NotificationInboxFilter } from "../types/notification-inbox-filter.types";
 import type { NotificationListResponse } from "../types/notification-list-response.types";
 import type { UnreadCountResponse } from "../types/unread-count-response.types";
 
-export interface GetNotificationsParams {
-  page?: number;
-  limit?: number;
-  filter?: NotificationInboxFilter;
-}
+export type { GetNotificationsParams } from "../types/get-notifications-params.types";
 
 export async function getNotifications(
   params: GetNotificationsParams = {},
