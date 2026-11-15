@@ -1,3 +1,5 @@
+import { CANCELLATION_REASON_MAX_LENGTH } from './cancellation.constants.js';
+
 export const APPOINTMENT_MESSAGES = {
   invalidId: 'El id de la cita no es válido',
   invalidScope: 'El alcance debe ser upcoming o past',
@@ -9,7 +11,7 @@ export const APPOINTMENT_MESSAGES = {
   invalidTopic: 'El tema de la sesión no es válido',
   missingMessage: 'Escribe un mensaje para el mentor',
   messageTooLong: `El mensaje no puede superar los 300 caracteres`,
-  reasonTooLong: `El motivo no puede superar los 300 caracteres`,
+  reasonTooLong: `El motivo no puede superar los ${CANCELLATION_REASON_MAX_LENGTH} caracteres`,
   invalidReason: `El motivo de la cancelación no es válido`,
   unauthorizedSession: 'La sesión es requerida o no es válida',
   forbiddenAccess: 'El usuario no tiene acceso a las citas solicitadas',
