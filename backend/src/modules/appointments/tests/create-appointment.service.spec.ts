@@ -60,6 +60,7 @@ describe('AppointmentsService', () => {
   const availabilityService = { findBlockWithAppointments: vi.fn() };
   const blockedDatesService = { runOnUnblockedDay: vi.fn() };
   const mentorsService = { findOne: vi.fn() };
+  const appointmentNotifications = { notifyBooked: vi.fn() };
   const transactions = {
     run: <T>(operation: (context: { client: unknown }) => Promise<T>) =>
       operation({ client: TX }),
@@ -110,6 +111,7 @@ describe('AppointmentsService', () => {
       mentorsService as never,
       {} as never,
       transactions as never,
+      appointmentNotifications as never,
     );
   });
 
@@ -584,5 +586,31 @@ describe('AppointmentsService', () => {
     const result = await service.create(user, payload);
 
     expect(result).not.toHaveProperty('meetingUrl');
+  });
+
+  it('avisa la reserva al mentor y al titulado después de confirmar la cita', async () => {
+    const created = createAppointmentRecord();
+
+    await service.create(user, payload);
+
+    expect(
+      appointmentNotifications.notifyBooked,
+    ).toHaveBeenCalledExactlyOnceWith(created);
+    expect(
+      appointmentsRepository.createAppointment.mock.invocationCallOrder[0],
+    ).toBeLessThan(
+      appointmentNotifications.notifyBooked.mock.invocationCallOrder[0],
+    );
+  });
+
+  it('confirma la cita aunque falle el aviso de la reserva', async () => {
+    appointmentNotifications.notifyBooked.mockRejectedValueOnce(
+      new Error('Correo no disponible'),
+    );
+
+    const result = await service.create(user, payload);
+
+    expect(result.status).toBe(AppointmentStatusTitle.CONFIRMED);
+    expect(appointmentsRepository.createAppointment).toHaveBeenCalled();
   });
 });
