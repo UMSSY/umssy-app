@@ -82,6 +82,20 @@ describe("ReplaceCvDialog", () => {
     expect(screen.getByRole("button", { name: "Cancelar" })).toBeDisabled();
   });
 
+  it("shows the upload progress while replacing", async () => {
+    renderDialog({ isReplacing: true, uploadProgress: 80 });
+
+    expect(await screen.findByText("Subiendo... 80%")).toBeInTheDocument();
+    expect(screen.getByRole("progressbar", { name: "Progreso de la subida" })).toBeInTheDocument();
+  });
+
+  it("does not show the progress bar before confirming", async () => {
+    renderDialog();
+
+    await screen.findByRole("button", { name: "Subir" });
+    expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
+  });
+
   it("shows the error message inside the dialog", async () => {
     renderDialog({ errorMessage: "No se pudo subir tu CV. Intenta de nuevo." });
 

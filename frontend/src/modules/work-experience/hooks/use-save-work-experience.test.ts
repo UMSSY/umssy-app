@@ -1,7 +1,7 @@
 
 import { act, cleanup, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { SKILLS_PROFILE_QUERY_KEY } from "@/modules/skills";
+import { MY_SKILLS_QUERY_KEY } from "@/modules/skills";
 import { renderHookWithQuery as renderHook } from "@/shared/testing/render-hook-with-query";
 import { PROFILE_SKILLS_RADAR_QUERY_KEY } from "@/modules/profile";
 import { WORK_EXPERIENCE_FEEDBACK_MESSAGES } from "../config/work-experience-feedback.config";
@@ -124,7 +124,7 @@ describe("useSaveWorkExperience", () => {
 
     await waitFor(() => {
       expect(invalidate).toHaveBeenCalledWith({
-        queryKey: SKILLS_PROFILE_QUERY_KEY,
+        queryKey: MY_SKILLS_QUERY_KEY,
       });
 
       expect(invalidate).toHaveBeenCalledWith({
