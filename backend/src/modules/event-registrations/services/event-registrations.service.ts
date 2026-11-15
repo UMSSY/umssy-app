@@ -20,7 +20,9 @@ import { EventRegistrationsMapper } from '../mappers/event-registrations.mapper.
 import type {
   CreateEventRegistrationPayload,
   MyRegistrationResponse,
+  MyRegistrationsListResponse,
 } from '../types/event-registrations.types.js';
+import type { GetMyRegistrationsPayload } from '../types/get-my-registrations-payload.types.js';
 import { Injectable } from '@nestjs/common';
 import { randomBytes } from 'node:crypto';
 import { EventRegistrationsRepository } from '../repositories/event-registrations.repository.js';
@@ -69,7 +71,7 @@ export class EventRegistrationsService {
       }
       if (event.status.title !== PUBLISHED_STATUS_TITLE)
         throw new EventNotOpenException();
-      assertRegistrationOpen(event);
+      assertRegistrationOpen(event, this.eventsService.isFinished(event));
       const registeredEventIds = await this.repository.findConfirmedEventIds(
         tx,
         userId,
@@ -122,7 +124,7 @@ export class EventRegistrationsService {
         registration.eventId,
         tx,
       );
-      assertRegistrationOpen(event);
+      assertRegistrationOpen(event, this.eventsService.isFinished(event));
       return mapRegistration(
         await this.repository.cancel(tx, registrationId, new Date()),
       );
@@ -160,10 +162,34 @@ export class EventRegistrationsService {
     return this.eventsService.lockEventRow(tx, eventId);
   }
 
-  async findMine(userId: string): Promise<MyRegistrationResponse[]> {
-    return EventRegistrationsMapper.toMyRegistrationList(
-      await this.findByUserId(userId),
+  async findMine(
+    userId: string,
+    query?: GetMyRegistrationsPayload,
+  ): Promise<MyRegistrationResponse[] | MyRegistrationsListResponse> {
+    if (query?.scope !== 'finished') {
+      return EventRegistrationsMapper.toMyRegistrationList(
+        await this.findByUserId(userId),
+      );
+    }
+
+    const offset = (query.page - 1) * query.limit;
+    const threshold = this.eventsService.getFinishedEventThreshold();
+    const { items, total } = await this.repository.findFinishedByUserId(
+      userId,
+      threshold,
+      offset,
+      query.limit,
     );
+    return {
+      data: {
+        items: EventRegistrationsMapper.toMyRegistrationList(items),
+        total,
+        limit: query.limit,
+        totalPages: total === 0 ? 0 : Math.ceil(total / query.limit),
+      },
+      page: query.page,
+      offset,
+    };
   }
 
   findByUserId(userId: string) {
