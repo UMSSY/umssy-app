@@ -1,10 +1,43 @@
-export { DEFAULT_NOTIFICATION_CATALOG_DEFINITION, NOTIFICATION_CATALOG } from "./constants/notification-catalog.constants";
-export { NOTIFICATION_INBOX_FILTER_LABELS, NOTIFICATION_INBOX_FILTERS } from "./constants/notification-inbox-filters.constants";
+export {
+  DEFAULT_NOTIFICATION_CATALOG_DEFINITION,
+  NOTIFICATION_CATALOG,
+} from "./constants/notification-catalog.constants";
+export {
+  DEFAULT_NOTIFICATION_ACTION_LABEL,
+  NOTIFICATION_ACTION_LABELS,
+} from "./constants/notification-action-labels.constants";
+export {
+  NOTIFICATION_INBOX_FILTER_LABELS,
+  NOTIFICATION_INBOX_FILTERS,
+} from "./constants/notification-inbox-filters.constants";
+export {
+  NOTIFICATION_NEW_EVENT,
+  UNREAD_COUNT_UPDATED_EVENT,
+  VISIBILITY_CHANGED_EVENT,
+} from "./constants/notification-socket-events.constants";
 export { AppVisibilityReporter } from "./components/app-visibility-reporter";
+export { NotificationBell } from "./components/notification-bell";
+export { NotificationItem } from "./components/notification-item";
+export { NotificationsView } from "./views/notifications-view";
+export {
+  NOTIFICATIONS_QUERY_KEYS,
+  useNotificationsInbox,
+  useNotificationsRealtimeSync,
+  useUnreadNotificationsCount,
+} from "./hooks/use-notifications";
+export {
+  getNotifications,
+  getUnreadCount,
+  markAllNotificationsAsRead,
+  markNotificationAsRead,
+} from "./services/notifications.service";
+export { formatNotificationTime } from "./utils/format-notification-time";
+export { getNotificationActionLabel } from "./utils/get-notification-action-label";
 export { NotificationOpenView } from "./views/notification-open-view";
 export { getNotificationCatalogDefinition } from "./utils/get-notification-catalog-definition";
 export { getNotificationCategory } from "./utils/get-notification-category";
 export { getNotificationIcon } from "./utils/get-notification-icon";
+export { groupNotificationsByDate } from "./utils/group-notifications-by-date";
 export { isInboxNotification } from "./utils/is-inbox-notification";
 export { isInternalNotificationLink } from "./utils/is-internal-notification-link";
 export { isNotificationType } from "./utils/is-notification-type";
@@ -18,3 +51,4 @@ export type { NotificationResponse } from "./types/notification-response.types";
 export type { NotificationType } from "./types/notification-type.types";
 export type { PushSubscriptionPayload } from "./types/push-subscription-payload.types";
 export type { UnreadCountResponse } from "./types/unread-count-response.types";
+export { NotificationFloatingBell } from "./components/notification-floating-bell";

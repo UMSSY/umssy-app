@@ -4,6 +4,10 @@ import type { CreatedNotification } from '../types/created-notification.type.js'
 import type { NotificationResponse } from '../types/notification-response.type.js';
 import type { NotificationReadState } from '../types/notification-read-state.type.js';
 
+const INBOX_TYPE_FILTER = {
+  code: { notIn: ['CHAT_MESSAGE', 'CHAT_GROUP_MESSAGE'] },
+};
+
 @Injectable()
 export class NotificationsRepository {
   constructor(
@@ -40,7 +44,7 @@ export class NotificationsRepository {
     take: number,
   ): Promise<NotificationResponse[]> {
     const records = await this.prisma.notification.findMany({
-      where: { recipientId: userId },
+      where: { recipientId: userId, type: INBOX_TYPE_FILTER},
       orderBy: { createdAt: 'desc' },
       skip,
       take,
@@ -60,7 +64,7 @@ export class NotificationsRepository {
 
   async countUnread(userId: string): Promise<number> {
     return this.prisma.notification.count({
-      where: { recipientId: userId, readAt: null },
+      where: { recipientId: userId, readAt: null, type: INBOX_TYPE_FILTER },
     });
   }
 
@@ -76,14 +80,15 @@ export class NotificationsRepository {
 
   async markAsRead(id: string, userId: string): Promise<void> {
     await this.prisma.notification.updateMany({
-      where: { id, recipientId: userId, readAt: null },
+      where: { id, recipientId: userId, readAt: null, type: INBOX_TYPE_FILTER },
       data: { readAt: new Date() },
     });
   }
 
   async markAllAsRead(userId: string): Promise<void> {
     await this.prisma.notification.updateMany({
-      where: { recipientId: userId, readAt: null },
+      where: { recipientId: userId, readAt: null,
+        type: INBOX_TYPE_FILTER,},
       data: { readAt: new Date() },
     });
   }

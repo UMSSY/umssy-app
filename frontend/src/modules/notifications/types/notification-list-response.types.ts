@@ -4,4 +4,5 @@ export interface NotificationListResponse {
   data: NotificationResponse[];
   page: number;
   limit: number;
+  total?: number;
 }
