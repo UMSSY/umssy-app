@@ -382,7 +382,7 @@ describe('ProfileGuideProvider', () => {
       screen.getByRole('button', { name: 'Iniciar guardado de prueba' }),
     );
 
-    expect(screen.getByRole('button', { name: 'Anterior' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Volver a Datos de contacto' })).toBeDisabled();
     expect(
       screen.getByRole('button', { name: 'Continuar más tarde' }),
     ).toBeDisabled();
@@ -444,7 +444,7 @@ describe('ProfileGuideProvider', () => {
     ).toBeVisible();
   });
 
-  it.each(['Anterior', 'Continuar más tarde'])(
+  it.each(['Volver a Datos de contacto', 'Continuar más tarde'])(
     'confirms unsaved changes before %s',
     async (action) => {
       const user = userEvent.setup();
@@ -477,7 +477,7 @@ describe('ProfileGuideProvider', () => {
       await waitFor(() =>
         expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument(),
       );
-      if (action === 'Anterior') {
+      if (action === 'Volver a Datos de contacto') {
         expect(
           screen.getByRole('dialog', { name: 'Datos de contacto' }),
         ).toBeVisible();
@@ -870,7 +870,9 @@ describe('ProfileGuideProvider', () => {
       'fly',
     );
     expect(screen.getByRole('button', { name: 'Siguiente' })).toBeDisabled();
-    expect(screen.getByRole('button', { name: 'Anterior' })).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: 'Volver a Datos de contacto' }),
+    ).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Pausar guía' })).toBeDisabled();
     await user.click(screen.getByRole('button', { name: 'Siguiente' }));
     expect(state.arrivals).toHaveLength(1);
@@ -890,7 +892,9 @@ describe('ProfileGuideProvider', () => {
       'data-mascot-pose',
       'point',
     );
-    await user.click(screen.getByRole('button', { name: 'Anterior' }));
+    await user.click(
+      screen.getByRole('button', { name: 'Volver a Presentación' }),
+    );
 
     expect(state.arrivals).toHaveLength(2);
     expect(state.arrivals[1].side).toBe('left');

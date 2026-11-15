@@ -615,7 +615,9 @@ function ProfileGuideSessionProvider({
                     }
                   >
                     <ArrowLeft aria-hidden="true" />
-                    Anterior
+                    {index > 0
+                      ? `Volver a ${PROFILE_COMPLETENESS_SECTION_LABELS[PROFILE_COMPLETENESS_SECTION_IDS[index - 1]]}`
+                      : 'Anterior'}
                   </Button>
                 ) : (
                   <p className="text-sm font-semibold text-app-header">
