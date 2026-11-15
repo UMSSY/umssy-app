@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { SocialAccountAlreadyLinkedException } from '../exceptions/social-account-already-linked.exception.js';
+import { SocialAccountNotFoundException } from '../exceptions/social-account-not-found.exception.js';
 import { UnknownPortfolioProviderException } from '../exceptions/unknown-portfolio-provider.exception.js';
 import { SocialAccountRepository } from '../repositories/social-account.repository.js';
 
@@ -14,11 +15,13 @@ describe('SocialAccountRepository', () => {
     userSocialAccount: {
       findMany: ReturnType<typeof vi.fn>;
       findFirst: ReturnType<typeof vi.fn>;
+      findUnique: ReturnType<typeof vi.fn>;
       upsert: ReturnType<typeof vi.fn>;
     };
     portfolioProvider: {
       findUnique: ReturnType<typeof vi.fn>;
     };
+    $transaction: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
@@ -26,11 +29,13 @@ describe('SocialAccountRepository', () => {
       userSocialAccount: {
         findMany: vi.fn(),
         findFirst: vi.fn(),
+        findUnique: vi.fn(),
         upsert: vi.fn(),
       },
       portfolioProvider: {
         findUnique: vi.fn(),
       },
+      $transaction: vi.fn(),
     };
 
     repository = new SocialAccountRepository(
@@ -227,6 +232,80 @@ describe('SocialAccountRepository', () => {
 
       expect(result.username).toBe('octocat-updated');
       expect(result.profileUrl).toBeNull();
+    });
+  });
+
+  describe('disconnect', () => {
+    it('throws UnknownPortfolioProviderException when provider does not exist', async () => {
+      prismaMock.portfolioProvider.findUnique.mockResolvedValue(null);
+
+      await expect(
+        repository.disconnect(userId, 'github'),
+      ).rejects.toThrow(UnknownPortfolioProviderException);
+    });
+
+    it('throws SocialAccountNotFoundException when account does not exist', async () => {
+      prismaMock.portfolioProvider.findUnique.mockResolvedValue({
+        id: providerId,
+      });
+      prismaMock.userSocialAccount.findUnique.mockResolvedValue(null);
+
+      await expect(
+        repository.disconnect(userId, 'github'),
+      ).rejects.toThrow(SocialAccountNotFoundException);
+    });
+
+    it('deletes provider projects, deletes account, and reindexes remaining projects in a transaction', async () => {
+      prismaMock.portfolioProvider.findUnique.mockResolvedValue({
+        id: providerId,
+      });
+      prismaMock.userSocialAccount.findUnique.mockResolvedValue({
+        id: 'acc-1',
+      });
+
+      const txMock = {
+        userPortfolioProject: {
+          deleteMany: vi.fn().mockResolvedValue({ count: 2 }),
+          findMany: vi.fn().mockResolvedValue([
+            { id: 'proj-rem-1' },
+            { id: 'proj-rem-2' },
+          ]),
+          update: vi.fn().mockResolvedValue({}),
+        },
+        userSocialAccount: {
+          delete: vi.fn().mockResolvedValue({}),
+        },
+      };
+
+      prismaMock.$transaction.mockImplementation(async (callback) => {
+        return callback(txMock);
+      });
+
+      await repository.disconnect(userId, 'github');
+
+      expect(txMock.userPortfolioProject.deleteMany).toHaveBeenCalledWith({
+        where: {
+          userId,
+          providerId,
+        },
+      });
+      expect(txMock.userSocialAccount.delete).toHaveBeenCalledWith({
+        where: {
+          userId_providerId: {
+            userId,
+            providerId,
+          },
+        },
+      });
+      expect(txMock.userPortfolioProject.update).toHaveBeenCalledTimes(2);
+      expect(txMock.userPortfolioProject.update).toHaveBeenNthCalledWith(1, {
+        where: { id: 'proj-rem-1' },
+        data: { displayOrder: 0 },
+      });
+      expect(txMock.userPortfolioProject.update).toHaveBeenNthCalledWith(2, {
+        where: { id: 'proj-rem-2' },
+        data: { displayOrder: 1 },
+      });
     });
   });
 });
