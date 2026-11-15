@@ -1,7 +1,8 @@
 import '@/shared/testing/indexed-db.mock';
 import { renderWithQuery as render } from '@/shared/testing/render-with-query';
 import { cleanup, screen, waitFor, within } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import userEvent from '@testing-library/user-event';
 import { profileService } from '@/modules/profile/services/profile.service';
 import {
   clearAccessToken,
@@ -11,7 +12,12 @@ import {
 import * as service from '../services/mentor-profile.service';
 import { MENTOR_PROFILE_FIXTURE } from '../testing/mentor-profile.fixture';
 import { MentorProfileView } from './mentor-profile-view';
-import * as recommendations from '../components/mentor/similar-mentors-section';
+import * as similarService from '../services/similar-mentors.service';
+import { SIMILAR_MENTORS_FIXTURE } from '../testing/similar-mentors.fixture';
+
+beforeEach(() => {
+  vi.spyOn(similarService, 'getSimilarMentors').mockResolvedValue([]);
+});
 
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push: vi.fn() }) }));
 
@@ -37,10 +43,84 @@ function mockCurrentUser(id: string) {
 }
 
 describe('MentorProfileView', () => {
+  it.each([false, true])(
+    'recupera recomendaciones con refetch real, vacío=%s',
+    async (empty) => {
+      const user = userEvent.setup();
+      vi.spyOn(service, 'getMentorProfile').mockResolvedValue(
+        MENTOR_PROFILE_FIXTURE,
+      );
+      vi.mocked(similarService.getSimilarMentors)
+        .mockRejectedValueOnce(new Error('network'))
+        .mockResolvedValueOnce(empty ? [] : SIMILAR_MENTORS_FIXTURE);
+      render(<MentorProfileView mentorId={MENTOR_PROFILE_FIXTURE.id} />);
+      const section = await screen.findByRole('region', {
+        name: 'También podría interesarte',
+      });
+      expect(await within(section).findByRole('alert')).toHaveTextContent(
+        'No pudimos cargar los mentores similares',
+      );
+      expect(screen.getByRole('heading', { name: 'Ana Rojas' })).toBeVisible();
+      await user.click(
+        within(section).getByRole('button', { name: 'Reintentar' }),
+      );
+      if (empty) {
+        expect(await within(section).findByRole('status')).toHaveTextContent(
+          'No hay mentores similares disponibles',
+        );
+        expect(within(section).queryByRole('link')).not.toBeInTheDocument();
+      } else {
+        expect(await within(section).findAllByRole('link')).toHaveLength(3);
+      }
+      expect(similarService.getSimilarMentors).toHaveBeenCalledTimes(2);
+      expect(within(section).queryByRole('alert')).not.toBeInTheDocument();
+    },
+  );
+
+  it('cambia el perfil y las recomendaciones al cambiar el ID de la ruta', async () => {
+    const next = SIMILAR_MENTORS_FIXTURE[0];
+    const profile = vi
+      .spyOn(service, 'getMentorProfile')
+      .mockResolvedValueOnce(MENTOR_PROFILE_FIXTURE)
+      .mockResolvedValueOnce({
+        ...MENTOR_PROFILE_FIXTURE,
+        id: next.id,
+        fullName: next.fullName,
+      });
+    vi.mocked(similarService.getSimilarMentors)
+      .mockResolvedValueOnce([next])
+      .mockResolvedValueOnce([SIMILAR_MENTORS_FIXTURE[1]]);
+    const { rerender } = render(
+      <MentorProfileView mentorId={MENTOR_PROFILE_FIXTURE.id} />,
+    );
+    const link = await screen.findByRole('link', {
+      name: `Ver perfil de ${next.fullName}`,
+    });
+    expect(link.getAttribute('href')?.split('?')[0]).toBe(
+      `/mentors/${next.id}`,
+    );
+    rerender(<MentorProfileView mentorId={next.id} />);
+    expect(
+      await screen.findByRole('heading', { name: next.fullName, level: 1 }),
+    ).toBeVisible();
+    expect(
+      await screen.findByRole('link', {
+        name: `Ver perfil de ${SIMILAR_MENTORS_FIXTURE[1].fullName}`,
+      }),
+    ).toBeVisible();
+    expect(
+      screen.queryByRole('link', { name: `Ver perfil de ${next.fullName}` }),
+    ).not.toBeInTheDocument();
+    expect(profile).toHaveBeenLastCalledWith(next.id, expect.any(AbortSignal));
+    expect(similarService.getSimilarMentors).toHaveBeenLastCalledWith(
+      next.id,
+      expect.any(AbortSignal),
+    );
+  });
+
   it('mantiene el perfil visible mientras cargan los mentores similares', async () => {
-    const Section = recommendations.SimilarMentorsSection;
-    vi.spyOn(recommendations, 'SimilarMentorsSection').mockImplementation(
-      () => <Section status="loading" />,
+    vi.mocked(similarService.getSimilarMentors).mockReturnValue(
+      new Promise(() => {}),
     );
     vi.spyOn(service, 'getMentorProfile').mockResolvedValue(
       MENTOR_PROFILE_FIXTURE,
@@ -80,6 +160,7 @@ describe('MentorProfileView', () => {
     });
     render(<MentorProfileView mentorId={MENTOR_PROFILE_FIXTURE.id} />);
     expect(await screen.findByText('Perfil incompleto')).toBeInTheDocument();
+    expect(similarService.getSimilarMentors).not.toHaveBeenCalled();
     expect(screen.queryByText('Solicitar mentoría')).not.toBeInTheDocument();
   });
 
@@ -153,6 +234,7 @@ describe('MentorProfileView', () => {
     render(<MentorProfileView mentorId="not-a-valid-mentor-id" />);
 
     expect(await screen.findByText('Mentor no encontrado')).toBeInTheDocument();
+    expect(similarService.getSimilarMentors).not.toHaveBeenCalled();
     expect(
       screen.getByText('No se pudo encontrar el perfil solicitado.'),
     ).toBeInTheDocument();

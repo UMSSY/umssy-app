@@ -1,15 +1,8 @@
 import type { MentorDirectoryItem } from './mentor-directory.types';
 
-// UI-only role label. Reconcile with the backend contract in Task-10f.
-export interface SimilarMentor extends Pick<
-  MentorDirectoryItem,
-  'id' | 'fullName' | 'technicalAreas' | 'orientationTypes' | 'isAvailable'
-> {
-  roleLabel: 'Mentor' | 'Mentora';
-}
-
-export type SimilarMentorsSectionProps =
+export type SimilarMentorsSectionProps = { returnTo?: string } & (
   | { status: 'loading' }
   | { status: 'empty' }
-  | { status: 'success'; mentors: SimilarMentor[] }
-  | { status: 'error'; onRetry: () => void };
+  | { status: 'success'; mentors: MentorDirectoryItem[] }
+  | { status: 'error'; onRetry: () => void }
+);

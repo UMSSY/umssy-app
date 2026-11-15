@@ -1,11 +1,13 @@
-import type { SimilarMentor } from '../types/similar-mentor.types';
+import type { MentorDirectoryItem } from '../types/mentor-directory.types';
 
 // Layout fixtures only; never populate the API query cache with these records.
-export const SIMILAR_MENTORS_FIXTURE: SimilarMentor[] = [
+export const SIMILAR_MENTORS_FIXTURE: MentorDirectoryItem[] = [
   {
     id: 'demo-similar-mentor-lucia',
     fullName: 'Lucía Fernández Vargas',
-    roleLabel: 'Mentora',
+    headline: null,
+    photoUrl: null,
+    education: null,
     technicalAreas: ['Desarrollo web', 'Accesibilidad digital'],
     orientationTypes: [
       'Revisión de portafolio',
@@ -16,7 +18,9 @@ export const SIMILAR_MENTORS_FIXTURE: SimilarMentor[] = [
   {
     id: 'demo-similar-mentor-diego',
     fullName: 'Diego Rodríguez Salinas',
-    roleLabel: 'Mentor',
+    headline: null,
+    photoUrl: null,
+    education: null,
     technicalAreas: ['Ciencia de datos', 'Inteligencia artificial'],
     orientationTypes: ['Acompañamiento en proyectos de investigación'],
     isAvailable: false,
@@ -24,7 +28,9 @@ export const SIMILAR_MENTORS_FIXTURE: SimilarMentor[] = [
   {
     id: 'demo-similar-mentor-valeria',
     fullName: 'Valeria Gutiérrez de la Fuente',
-    roleLabel: 'Mentora',
+    headline: null,
+    photoUrl: null,
+    education: null,
     technicalAreas: [
       'Seguridad de la información',
       'Infraestructura en la nube',

@@ -10,6 +10,29 @@ import { SimilarMentorsSection } from './similar-mentors-section';
 afterEach(cleanup);
 
 describe('SimilarMentorsSection', () => {
+  it.each([
+    '/mentorship/mentors?area=backend',
+    'https://evil.test',
+    '//evil.test',
+    '/mentorship/mentors-evil',
+  ])('conserva únicamente un retorno seguro: %s', (returnTo) => {
+    render(
+      <SimilarMentorsSection
+        status="success"
+        mentors={SIMILAR_MENTORS_FIXTURE}
+        returnTo={returnTo}
+      />,
+    );
+    const suffix =
+      returnTo === '/mentorship/mentors?area=backend'
+        ? `?returnTo=${encodeURIComponent(returnTo)}`
+        : '';
+    for (const mentor of SIMILAR_MENTORS_FIXTURE) {
+      expect(
+        screen.getByRole('link', { name: `Ver perfil de ${mentor.fullName}` }),
+      ).toHaveAttribute('href', `/mentors/${mentor.id}${suffix}`);
+    }
+  });
   it.each([false, true])(
     'recupera error, carga y resultado vacío=%s',
     async (empty) => {
@@ -112,7 +135,7 @@ describe('SimilarMentorsSection', () => {
       expect(card).not.toBeNull();
       const content = within(card as HTMLElement);
       expect(content.getByText(['LF', 'DR', 'VG'][index])).toBeInTheDocument();
-      expect(content.getByText(mentor.roleLabel)).toBeInTheDocument();
+      expect(content.getByText('Mentor')).toBeInTheDocument();
       expect(content.getByText('Áreas técnicas')).toBeInTheDocument();
       expect(content.getByText('Tipos de orientación')).toBeInTheDocument();
       for (const label of [
@@ -127,12 +150,16 @@ describe('SimilarMentorsSection', () => {
         ),
       ).toBeInTheDocument();
       expect(
-        content.getByRole('button', {
+        content.getByRole('link', {
           name: `Ver perfil de ${mentor.fullName}`,
         }),
-      ).toBeDisabled();
+      ).toHaveAttribute('href', `/mentors/${mentor.id}`);
     }
-    expect(within(section).queryByRole('link')).not.toBeInTheDocument();
+    expect(
+      within(section)
+        .getAllByRole('heading', { level: 3 })
+        .map((heading) => heading.textContent),
+    ).toEqual(SIMILAR_MENTORS_FIXTURE.map((mentor) => mentor.fullName));
   });
 
   it('limita la maqueta a tres tarjetas aunque se agreguen más fixtures', () => {
@@ -188,7 +215,7 @@ describe('SimilarMentorsSection', () => {
         );
       }
     }
-    for (const button of screen.getAllByRole('button')) {
+    for (const button of screen.getAllByRole('link')) {
       expect(button).toHaveClass('min-h-11', 'w-full');
     }
   });
