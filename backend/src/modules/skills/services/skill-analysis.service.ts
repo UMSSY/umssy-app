@@ -61,4 +61,8 @@ export class SkillAnalysisService {
       plan.creates.length + plan.updates.length + plan.deleteIds.length > 0
     );
   }
+
+  findApprovedRecruitmentReferences(userId: string, ids: string[]) {
+    return this.repository.findApprovedRecruitmentReferences(userId, ids);
+  }
 }

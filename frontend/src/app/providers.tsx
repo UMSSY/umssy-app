@@ -7,6 +7,7 @@ import { AuthProvider } from "@/shared/contexts/auth-context";
 import { createQueryClient } from "@/shared/services/query-client";
 import { getAccessToken, subscribeAccessToken } from "@/shared/services/storage/access-token-storage";
 import { SocketProvider } from "@/modules/chat/contexts/socket-context";
+import { AppVisibilityReporter } from "@/modules/notifications";
 
 function SessionProviders({ children }: { children: ReactNode }) {
   const [queryClient] = useState(createQueryClient);
@@ -14,6 +15,7 @@ function SessionProviders({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
+        <AppVisibilityReporter />
         <SocketProvider>{children}</SocketProvider>
       </AuthProvider>
       <Toaster />
