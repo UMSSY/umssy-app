@@ -42,7 +42,7 @@ export function ApplicationsView() {
     [data],
   );
 
-  // If the last withdrawn application is reactivated, do not keep filtering an empty list.
+
   const viewingWithdrawn = showWithdrawn && withdrawnCount > 0;
   const visibleStatusFilter = showWithdrawn && !viewingWithdrawn ? "all" : statusFilter;
 
@@ -190,7 +190,7 @@ export function ApplicationsView() {
           reactivate(pendingReactivation.id, {
             onSuccess: () => {
               setPendingReactivation(null);
-              // Return to active applications when this was the last withdrawn one.
+              
               if (showWithdrawn && withdrawnCount <= 1) {
                 setShowWithdrawn(false);
                 setStatusFilter("all");
