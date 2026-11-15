@@ -27,18 +27,18 @@ import { getNotificationsSocket } from "../services/notifications-socket";
 import type { NotificationInboxFilter } from "../types/notification-inbox-filter.types";
 import type { NotificationListResponse } from "../types/notification-list-response.types";
 import type { NotificationResponse } from "../types/notification-response.types";
+import type { NotificationsSyncMessage } from "../types/notifications-sync-message.types";
 import type { UnreadCountResponse } from "../types/unread-count-response.types";
+import type { UseNotificationsInboxOptions } from "../types/use-notifications-inbox-options.types";
 import { getNotificationCategory } from "../utils/get-notification-category";
 import { isInboxNotification } from "../utils/is-inbox-notification";
+
+export type { UseNotificationsInboxOptions } from "../types/use-notifications-inbox-options.types";
 
 const getServerToken = () => null;
 const FALLBACK_QUERY_CLIENT = new QueryClient();
 const NOTIFICATIONS_SYNC_CHANNEL = "umssy_notifications_sync";
 const MAX_BACKEND_INBOX_LIMIT = 100;
-
-type NotificationsSyncMessage =
-  | { type: "MARK_READ"; notificationId: string; readAt: string }
-  | { type: "MARK_ALL_READ"; readAt: string };
 
 function isTestEnvironment(): boolean {
   try {
@@ -223,12 +223,6 @@ export function useUnreadNotificationsCount() {
     },
     queryClient ?? FALLBACK_QUERY_CLIENT,
   );
-}
-
-export interface UseNotificationsInboxOptions {
-  filter?: NotificationInboxFilter;
-  page?: number;
-  limit?: number;
 }
 
 export function useNotificationsInbox(options: UseNotificationsInboxOptions = {}) {
