@@ -31,7 +31,7 @@ export function OfflinePreparationProvider({
 
 export function OfflinePreparation() {
   const state = useContext(PreparationContext);
-  const install = usePwaInstall();
+  const { install, installed } = usePwaInstall();
   if (!state?.show) return null;
 
   const { query } = state;
@@ -60,10 +60,14 @@ export function OfflinePreparation() {
           Reintentar
         </Button>
       ) : null}
-      {!preparing && !failed && install ? (
-        <Button size="sm" onClick={install}>
-          Instalar app
-        </Button>
+      {!preparing && !failed && !installed ? (
+        install ? (
+          <Button size="sm" onClick={install}>
+            Instalar app
+          </Button>
+        ) : (
+          <p>En el menú del navegador, busca «Añadir a pantalla de inicio».</p>
+        )
       ) : null}
     </section>
   );
