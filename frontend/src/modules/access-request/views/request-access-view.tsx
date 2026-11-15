@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Building2, GraduationCap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   AccessRequestProvider,
@@ -22,29 +23,42 @@ function RequestAccessLayout({
 
   return (
     <RequestAccessShell currentStep={currentStep} header={<PublicHeader />}>
-      <div className="mb-4 flex justify-end">
-        <div className="inline-flex gap-1 rounded-lg border border-border bg-surface-soft p-1">
-          <Button type="button" size="sm">
-            Soy Titulado
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={onSwitchToCompany}
+      <div className="flex w-full flex-col">
+        <div className="mb-5 flex items-center justify-start">
+          <div
+            role="tablist"
+            aria-label="Tipo de solicitante"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-surface-soft p-1.5 shadow-2xs"
           >
-            Soy Empresa
-          </Button>
+            <Button
+              type="button"
+              size="sm"
+              className="gap-2 rounded-lg px-4 font-semibold"
+            >
+              <GraduationCap className="size-4" />
+              Soy Titulado
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="gap-2 rounded-lg px-4 font-medium text-text-secondary hover:text-ink"
+              onClick={onSwitchToCompany}
+            >
+              <Building2 className="size-4" />
+              Soy Empresa
+            </Button>
+          </div>
         </div>
-      </div>
 
-      {currentStep === 1 ? (
-        <PersonalDataForm />
-      ) : currentStep === 2 ? (
-        <DocumentStep />
-      ) : (
-        <ReviewStep />
-      )}
+        {currentStep === 1 ? (
+          <PersonalDataForm />
+        ) : currentStep === 2 ? (
+          <DocumentStep />
+        ) : (
+          <ReviewStep />
+        )}
+      </div>
     </RequestAccessShell>
   );
 }
@@ -55,18 +69,18 @@ export function RequestAccessView() {
   );
 
   return (
-    <main data-app-shell="true" className="min-h-screen bg-background">
-      {accountType === "company" ? (
-        <CompanyAccessRequestFlow
-          onSwitchToGraduate={() => setAccountType("graduate")}
-        />
-      ) : (
-        <AccessRequestProvider>
+    <AccessRequestProvider>
+      <main data-app-shell="true" className="min-h-screen bg-background">
+        {accountType === "company" ? (
+          <CompanyAccessRequestFlow
+            onSwitchToGraduate={() => setAccountType("graduate")}
+          />
+        ) : (
           <RequestAccessLayout
             onSwitchToCompany={() => setAccountType("company")}
           />
-        </AccessRequestProvider>
-      )}
-    </main>
+        )}
+      </main>
+    </AccessRequestProvider>
   );
 }
