@@ -1,9 +1,7 @@
 import { Injectable } from '@nestjs/common';
+import type { SocketVisibilityState } from '../types/socket-visibility-state.types.js';
 
-interface SocketVisibilityState {
-  conversationId: string | null;
-  isFocused: boolean;
-}
+export type { SocketVisibilityState } from '../types/socket-visibility-state.types.js';
 
 @Injectable()
 export class ChatVisibilityService {

@@ -1,22 +1,4 @@
-export type PushEnvironment =
-  | 'supported'
-  | 'desktop'
-  | 'ios-old'
-  | 'ios-not-installed'
-  | 'unsupported';
-
-export type PushPermissionState = 'default' | 'granted' | 'denied';
-
-export interface ActivateResult {
-  ok: boolean;
-  reason?: PushEnvironment | 'permission-denied' | 'network-error' | 'unknown';
-}
-
-export interface UsePushNotificationsResult {
-  environment: PushEnvironment;
-  permission: PushPermissionState;
-  isSubscribed: boolean;
-  isLoading: boolean;
-  activate: () => Promise<ActivateResult>;
-  deactivate: () => Promise<void>;
-}
+export type { PushEnvironment } from './push-environment.types';
+export type { PushPermissionState } from './push-permission-state.types';
+export type { ActivateResult } from './activate-result.types';
+export type { UsePushNotificationsResult } from './use-push-notifications-result.types';
