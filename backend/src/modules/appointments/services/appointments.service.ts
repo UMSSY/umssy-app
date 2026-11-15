@@ -60,6 +60,14 @@ export class AppointmentsService {
     if (!block) {
       throw new SlotUnavailableException();
     }
+    if (
+      await this.appointmentsRepository.hasMentorCancellation(
+        block.id,
+        block.mentorId,
+      )
+    ) {
+      throw new SlotUnavailableException();
+    }
     if (block.startAt.getTime() <= Date.now()) {
       throw new BlockInPastException();
     }
@@ -84,6 +92,15 @@ export class AppointmentsService {
           );
 
         if (!current) {
+          throw new SlotUnavailableException();
+        }
+        if (
+          await this.appointmentsRepository.hasMentorCancellation(
+            current.id,
+            current.mentorId,
+            tx,
+          )
+        ) {
           throw new SlotUnavailableException();
         }
         if (current.appointments.length > 0) {
@@ -264,6 +281,16 @@ export class AppointmentsService {
         )
       ) {
         return this.appointmentMapper.toResponse(current, user.id, now);
+      }
+      if (
+        !ACTIVE_APPOINTMENT_STATUS_TITLES.includes(
+          current.status.title as AppointmentStatusTitle,
+        )
+      ) {
+        throw new AppointmentNotCancellableException();
+      }
+      if (current.startAt.getTime() <= now.getTime()) {
+        throw new AppointmentNotCancellableException();
       }
 
       const previousStatusId =
