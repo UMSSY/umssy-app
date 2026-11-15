@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { MentorshipProjection } from "../components/mentorship-projection";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -17,7 +18,28 @@ const DATE_FORMAT: Intl.DateTimeFormatOptions = { dateStyle: "medium", timeStyle
 export function RadarProfileView() {
   const { data, loading, error, variation, previous, retry, retrying } = useLiveRadar();
   const [selectedArea, setSelectedArea] = useState<AreaId | null>(null);
+  const [projection, setProjection] = useState<{ areaId: AreaId; score: number } | null>(null);
+  const [simulationOpen, setSimulationOpen] = useState(false);
+  const [showEvidence, setShowEvidence] = useState(false);
   const [comparing, setComparing] = useState(false);
+  const selectedPanelRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (!selectedArea || showEvidence || simulationOpen) return;
+    const dismissOutside = (event: PointerEvent) => {
+      if (event.target instanceof Node && !selectedPanelRef.current?.contains(event.target)) {
+        setSelectedArea(null);
+      }
+    };
+    const dismissWithEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setSelectedArea(null);
+    };
+    document.addEventListener("pointerdown", dismissOutside);
+    document.addEventListener("keydown", dismissWithEscape);
+    return () => {
+      document.removeEventListener("pointerdown", dismissOutside);
+      document.removeEventListener("keydown", dismissWithEscape);
+    };
+  }, [selectedArea, showEvidence, simulationOpen]);
   const comparison = comparing ? previous : null;
   const areas = data?.areas ?? [];
   const selected = areas.find(area => area.id === selectedArea)
@@ -68,6 +90,7 @@ export function RadarProfileView() {
           {data.version === 0 ? <p role="status">Aún no tienes publicaciones. Tu radar está sin datos.</p> : !previous ? <p role="status">Tienes una publicación. Podrás compararla cuando se publique la próxima versión de tu radar.</p> : null}
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
             <AffinityRadarChart
+              projectedScores={projection && projection.areaId === selectedArea ? { [projection.areaId]: projection.score } : undefined}
               previousScores={previous?.scores}
               previousPublishedAt={previous?.updatedAt}
               publishedAt={data.updatedAt}
@@ -75,9 +98,18 @@ export function RadarProfileView() {
               onComparisonChange={(enabled) => { setComparing(enabled); setSelectedArea(null); }}
               areas={data.version === 0 ? [] : areas}
               average={data.average}
-              onAreaClick={setSelectedArea}
+              onAreaClick={(id) => { setSelectedArea(id); setShowEvidence(false); }}
             />
-            <AreaBreakdownPanel areas={areas} average={data.average} />
+            <div className="flex min-w-0 flex-col gap-4">
+            {selectedArea && selected ? <section ref={selectedPanelRef} aria-label="Área seleccionada" className="space-y-3 rounded-lg border border-border bg-surface p-5">
+              <p className="text-sm text-text-secondary">Área seleccionada</p><h2 className="font-semibold">{selected.name}</h2>
+              <p>{selected.score.toLocaleString("es-BO")} / 10</p>
+              <MentorshipProjection key={selected.id} area={selected} areas={areas} onProjectionChange={setProjection} onOpenChange={setSimulationOpen} />
+              <Link className="block rounded border p-3 text-center text-sm underline" href={`/mentorship/mentors?area=${encodeURIComponent(selected.name)}&from=radar`}>Ver mentores de esta área</Link>
+              <Button variant="outline" className="w-full" onClick={() => { setSelectedArea(selected.id); setShowEvidence(true); }}>Ver evidencias</Button>
+            </section> : null}
+              <AreaBreakdownPanel areas={areas} average={data.average} compact={Boolean(selectedArea)} selectedArea={selectedArea} onAreaClick={(id) => { setSelectedArea(id); setShowEvidence(false); }} />
+            </div>
           </div>
           {comparison ? (
             <section aria-label="Comparación de publicaciones" className="rounded-lg border border-border bg-surface p-4">
@@ -94,8 +126,8 @@ export function RadarProfileView() {
               </div> : null}
             </section>
           ) : null}
-          {selectedArea && !comparison ? (
-            <RadarEvidencePanel key={`${data.userId}:${selectedArea}`} selected={selectedArea} radar={data} onClose={() => setSelectedArea(null)} />
+          {selectedArea && showEvidence ? (
+            <RadarEvidencePanel key={`${data.userId}:${selectedArea}`} selected={selectedArea} radar={data} onClose={() => setShowEvidence(false)} />
           ) : null}
           <p className="text-xs text-text-secondary">Las puntuaciones reflejan las habilidades aprobadas y sus evidencias.</p>
         </>

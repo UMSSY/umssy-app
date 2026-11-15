@@ -108,3 +108,18 @@ describe("AffinityRadarChart", () => {
     expect(document.querySelector(".recharts-wrapper")).toBeNull();
   });
 });
+
+it("superpone la proyeccion verde sin cambiar el poligono actual", () => {
+  const before = structuredClone(RADAR_AREA_SCORES);
+  const view = render(<AffinityRadarChart areas={RADAR_AREA_SCORES} />);
+  const current = document.querySelector('.recharts-radar-polygon path')?.getAttribute('d');
+  view.rerender(<AffinityRadarChart areas={RADAR_AREA_SCORES} projectedScores={{ qa: 10 }} />);
+  const polygons = document.querySelectorAll('.recharts-radar-polygon path');
+  expect(polygons).toHaveLength(2);
+  expect(polygons[0].getAttribute('d')).toBe(current);
+  expect(polygons[1]).toHaveAttribute('stroke', 'var(--color-success)');
+  expect(polygons[1]).toHaveAttribute('stroke-dasharray', '4 3');
+  expect(RADAR_AREA_SCORES).toEqual(before);
+  view.rerender(<AffinityRadarChart areas={RADAR_AREA_SCORES} />);
+  expect(document.querySelectorAll('.recharts-radar')).toHaveLength(1);
+});
