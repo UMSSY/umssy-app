@@ -1,3 +1,5 @@
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 import type { UploadedDocumentFile } from '../../access-requests/types/uploaded-file.types.js';
 import { createHash, randomInt } from 'node:crypto';
 import {
@@ -33,6 +35,10 @@ export class CompanyAccessRequestsService {
     private readonly filesService: FilesService,
     private readonly textExtractor: DocumentTextExtractorService,
   ) {}
+
+  listCities() {
+    return this.repository.listCities();
+  }
 
   async create(dto: CreateCompanyAccessRequestDto) {
     const { existingCompany, existingUser, activeRequest } =
@@ -300,7 +306,12 @@ export class CompanyAccessRequestsService {
     companyName: string,
     documentFileId: string,
   ) {
-    try {
+        try {
+      const modelPath = join(process.cwd(), 'ocr-models', '4.0.0_best', 'spa.traineddata');
+      if (!existsSync(modelPath)) {
+        this.logger.warn(`Modelo OCR no encontrado en ${modelPath}; se omite verificación automática.`);
+        return;
+      }
       const file = await this.filesService.getContent(documentFileId);
       const extracted = await this.textExtractor.extract(file);
       const normalized = extracted.text
