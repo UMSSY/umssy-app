@@ -8,12 +8,14 @@ import { registrationsService } from '../services/registrations.service';
 import { offlinePassesStore } from '../utils/offline-passes-store';
 import { MyPassesView } from './my-passes-view';
 
-vi.mock('../services/registrations.service', () => ({ registrationsService: { getMine: vi.fn(), getPass: vi.fn() } }));
+vi.mock('../services/registrations.service', () => ({ registrationsService: { getMine: vi.fn(), getPass: vi.fn(), getFinished: vi.fn() } }));
 const getMine = vi.mocked(registrationsService.getMine);
+const getFinished = vi.mocked(registrationsService.getFinished);
 const pass = { id: 'reg-1', eventName: 'React', date: '2026-10-20T00:00:00Z', startTime: '1970-01-01T09:00:00Z', endTime: '1970-01-01T12:00:00Z', location: 'Aula 101', status: 'Confirmada' };
 beforeEach(async () => {
   vi.useFakeTimers({ now: new Date("2026-10-19T12:00:00Z"), toFake: ["Date"] });
   getMine.mockReset();
+  getFinished.mockReset();
   await saveAccessToken("session");
   vi.mocked(registrationsService.getPass).mockImplementation(async (id) => {
     const rows = await getMine.mock.results.at(-1)?.value;
@@ -25,6 +27,71 @@ beforeEach(async () => {
 afterEach(() => { cleanup(); clearAccessToken(); vi.useRealTimers(); });
 
 describe("Mis pases", () => {
+  it('loads finished history lazily and keeps its cards separate from the current panel', async () => {
+    getMine.mockResolvedValue([pass]);
+    getFinished.mockResolvedValue({ items: [{ ...pass, id: 'reg-history', eventName: 'Historia', date: '2026-08-10T00:00:00Z' }], total: 12, limit: 10, totalPages: 2 });
+    render(<MyPassesView />);
+    expect(getFinished).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('tab', { name: 'Historial' }));
+    expect(await screen.findByText('Historia')).toBeInTheDocument();
+    expect(screen.getByText('12 pases')).toBeInTheDocument();
+    expect(screen.getByText('ID Inscripción:')).toBeInTheDocument();
+    expect(screen.queryByRole('img', { name: 'Código QR del pase' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Historia/ })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Cargar más' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('tab', { name: 'Vigentes' }));
+    expect(await screen.findByText('1 pase')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('tab', { name: 'Historial' }));
+    expect(getFinished).toHaveBeenCalledTimes(1);
+  });
+  it('appends the next history page while keeping the backend total', async () => {
+    getMine.mockResolvedValue([]);
+    getFinished.mockImplementation(async (page) => ({
+      items: [{ ...pass, id: `history-${page}`, eventName: `History ${page}` }],
+      total: 12,
+      limit: 10,
+      totalPages: 2,
+    }));
+    render(<MyPassesView />);
+    fireEvent.click(screen.getByRole('tab', { name: 'Historial' }));
+    expect(await screen.findByText('History 1')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Cargar más' }));
+    expect(await screen.findByText('History 2')).toBeInTheDocument();
+    expect(screen.getByText('History 1')).toBeInTheDocument();
+    expect(screen.getByText('12 pases')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Cargar más' })).not.toBeInTheDocument();
+  });
+  it('shows an empty history without replacing current passes', async () => {
+    getMine.mockResolvedValue([pass]);
+    getFinished.mockResolvedValue({ items: [], total: 0, limit: 10, totalPages: 0 });
+    render(<MyPassesView />);
+    fireEvent.click(screen.getByRole('tab', { name: 'Historial' }));
+    expect(await screen.findByText('Aún no tienes talleres finalizados')).toBeInTheDocument();
+    expect(screen.getByText('0 pases')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('tab', { name: 'Vigentes' }));
+    expect(await screen.findByText('1 pase')).toBeInTheDocument();
+  });
+  it('allows retrying a history error without affecting current passes', async () => {
+    getMine.mockResolvedValue([pass]);
+    getFinished.mockRejectedValueOnce(new Error('Network')).mockResolvedValueOnce({ items: [], total: 0, limit: 10, totalPages: 0 });
+    render(<MyPassesView />);
+    fireEvent.click(screen.getByRole('tab', { name: 'Historial' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('No pudimos completar la operación');
+    fireEvent.click(screen.getByRole('button', { name: 'Reintentar' }));
+    expect(await screen.findByText('Aún no tienes talleres finalizados')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('tab', { name: 'Vigentes' }));
+    expect(await screen.findByText('1 pase')).toBeInTheDocument();
+  });
+  it('aborts an unfinished history request when returning to current passes', async () => {
+    getMine.mockResolvedValue([pass]);
+    getFinished.mockImplementation(() => new Promise(() => undefined));
+    render(<MyPassesView />);
+    fireEvent.click(screen.getByRole('tab', { name: 'Historial' }));
+    await waitFor(() => expect(getFinished).toHaveBeenCalledTimes(1));
+    const signal = getFinished.mock.calls[0][2];
+    fireEvent.click(screen.getByRole('tab', { name: 'Vigentes' }));
+    await waitFor(() => expect(signal?.aborted).toBe(true));
+  });
   it('preserves different workshops with identical names and dates', async () => {
     getMine.mockResolvedValue([{ ...pass, eventId: 'event-1' }, { ...pass, id: 'reg-2', eventId: 'event-2' }]);
     render(<MyPassesView />);
