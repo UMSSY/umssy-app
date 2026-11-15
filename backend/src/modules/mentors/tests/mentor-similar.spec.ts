@@ -133,6 +133,44 @@ describe('Mentores similares', () => {
     expect(findMany).toHaveBeenCalledTimes(1);
   });
 
+  it('omite al candidato que deja de estar activo antes de cargar su tarjeta', async () => {
+    const remaining: Awaited<
+      ReturnType<MentorsRepository['findDirectoryByIds']>
+    >[number] = {
+      id: 'remaining',
+      firstName: 'Ana',
+      lastName: 'Rojas',
+      headline: null,
+      photoVersion: null,
+      isAvailableForMentoring: false,
+      educations: [],
+      mentorTechnicalAreas: [{ technicalArea: { name: 'Backend' } }],
+      mentorOrientationTypes: [],
+    };
+    findMany
+      .mockResolvedValueOnce([
+        candidate('removed', ['a', 'b']),
+        candidate(remaining.id, ['a']),
+      ])
+      .mockResolvedValueOnce([remaining])
+      .mockResolvedValueOnce([]);
+
+    expect(await service.findSimilar(sourceId)).toEqual([
+      new MentorMapper().toDirectoryResponse(remaining),
+    ]);
+    expect(findMany.mock.calls[1][0].where).toMatchObject({
+      id: { in: ['removed', remaining.id] },
+      isActive: true,
+      roles: {
+        some: {
+          deletedAt: null,
+          startAt: { lte: expect.any(Date) },
+          role: { name: 'mentor' },
+        },
+      },
+    });
+  });
+
   it('devuelve vacío cuando el mentor no tiene áreas ni orientaciones activas', async () => {
     findFirst.mockResolvedValue(candidate(sourceId));
     expect(await service.findSimilar(sourceId)).toEqual([]);
