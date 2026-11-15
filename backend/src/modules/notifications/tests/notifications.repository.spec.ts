@@ -5,7 +5,8 @@ import { PrismaService } from '../../../common/prisma/prisma.service.js';
 
 interface MockPrisma {
   notification: {
-    createMany: ReturnType<typeof vi.fn>;
+    createManyAndReturn: ReturnType<typeof vi.fn>;
+    findFirst: ReturnType<typeof vi.fn>;
     findMany: ReturnType<typeof vi.fn>;
     count: ReturnType<typeof vi.fn>;
     updateMany: ReturnType<typeof vi.fn>;
@@ -22,7 +23,8 @@ describe('NotificationsRepository', () => {
   beforeEach(async () => {
     mockPrisma = {
       notification: {
-        createMany: vi.fn(),
+        createManyAndReturn: vi.fn(),
+        findFirst: vi.fn(),
         findMany: vi.fn(),
         count: vi.fn(),
         updateMany: vi.fn(),
@@ -43,15 +45,21 @@ describe('NotificationsRepository', () => {
   });
 
   it('debe crear múltiples notificaciones en lote', async () => {
-    mockPrisma.notification.createMany.mockResolvedValue({ count: 2 });
+    const created = [
+      { id: 'n1', recipientId: '1' },
+      { id: 'n2', recipientId: '2' },
+    ];
+    mockPrisma.notification.createManyAndReturn.mockResolvedValue(created);
 
     const result = await repository.createMany([
       { recipientId: '1', typeId: 't1', title: 'T', body: 'B', link: '/' },
       { recipientId: '2', typeId: 't1', title: 'T', body: 'B', link: '/' },
     ]);
 
-    expect(mockPrisma.notification.createMany).toHaveBeenCalled();
-    expect(result).toBe(2);
+    expect(mockPrisma.notification.createManyAndReturn).toHaveBeenCalledWith(
+      expect.objectContaining({ select: { id: true, recipientId: true } }),
+    );
+    expect(result).toEqual(created);
   });
 
   it('debe contar solo las notificaciones no leídas', async () => {
@@ -74,5 +82,17 @@ describe('NotificationsRepository', () => {
        },
       data: { readAt: expect.any(Date) },
     });
+  });
+
+  it('debe buscar el estado de lectura solo entre los avisos del usuario', async () => {
+    mockPrisma.notification.findFirst.mockResolvedValue({ readAt: null });
+
+    const result = await repository.findReadStateById('n1', 'user-1');
+
+    expect(mockPrisma.notification.findFirst).toHaveBeenCalledWith({
+      where: { id: 'n1', recipientId: 'user-1' },
+      select: { readAt: true },
+    });
+    expect(result).toEqual({ readAt: null });
   });
 });

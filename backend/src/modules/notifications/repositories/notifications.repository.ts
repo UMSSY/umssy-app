@@ -1,6 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
+import type { CreatedNotification } from '../types/created-notification.type.js';
 import type { NotificationResponse } from '../types/notification-response.type.js';
+import type { NotificationReadState } from '../types/notification-read-state.type.js';
 
 const INBOX_TYPE_FILTER = {
   code: { notIn: ['CHAT_MESSAGE', 'CHAT_GROUP_MESSAGE'] },
@@ -21,8 +23,8 @@ export class NotificationsRepository {
     body: string;
     link: string;
     groupKey?: string;
-  }[]): Promise<number> {
-    const result = await this.prisma.notification.createMany({
+  }[]): Promise<CreatedNotification[]> {
+    return this.prisma.notification.createManyAndReturn({
       data: data.map((item) => ({
         recipientId: item.recipientId,
         actorId: item.actorId,
@@ -32,8 +34,8 @@ export class NotificationsRepository {
         link: item.link,
         groupKey: item.groupKey,
       })),
+      select: { id: true, recipientId: true },
     });
-    return result.count;
   }
 
   async findManyByUser(
@@ -63,6 +65,16 @@ export class NotificationsRepository {
   async countUnread(userId: string): Promise<number> {
     return this.prisma.notification.count({
       where: { recipientId: userId, readAt: null, type: INBOX_TYPE_FILTER },
+    });
+  }
+
+  async findReadStateById(
+    id: string,
+    userId: string,
+  ): Promise<NotificationReadState | null> {
+    return this.prisma.notification.findFirst({
+      where: { id, recipientId: userId },
+      select: { readAt: true },
     });
   }
 

@@ -241,5 +241,29 @@ describe('PushDispatcherService', () => {
       );
       expect(result).toBe('partial');
     });
+
+    it('debe incluir en cada push el id del aviso de su destinatario', async () => {
+      mockPushRepo.findManyByUserIds.mockResolvedValue([
+        androidSubscription,
+        { ...iphoneSubscription, userId: 'user-2' },
+      ]);
+
+      await service.dispatchToUsers(
+        ['user-1', 'user-2'],
+        'Title',
+        'Body',
+        '/appointments',
+        undefined,
+        new Map([
+          ['user-1', 'notification-1'],
+          ['user-2', 'notification-2'],
+        ]),
+      );
+
+      const notificationIds = webpushMock.sendNotification.mock.calls.map(
+        ([, rawPayload]) => (JSON.parse(rawPayload as string) as PushNotificationPayload).notificationId,
+      );
+      expect(notificationIds).toEqual(['notification-1', 'notification-2']);
+    });
   });
 });
