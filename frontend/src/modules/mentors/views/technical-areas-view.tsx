@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Save } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
+import { useMentorProfileDraft } from "@/modules/mentorship";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,7 +29,11 @@ export function TechnicalAreasView() {
   const router = useRouter();
 
   const { areas, savedIds, isSaving, isLoading, hasLoadError, hasAccessError, save, retry } = useTechnicalAreas();
-  const [draftIds, setSelectedIds] = useState<string[] | null>(null);
+  const {
+    technicalAreaIds: draftIds,
+    setTechnicalAreaIds: setSelectedIds,
+    clearTechnicalAreaIds,
+  } = useMentorProfileDraft();
   const selectedIds = draftIds ?? savedIds;
   const [isDiscardModalOpen, setIsDiscardModalOpen] = useState(false);
 
@@ -53,6 +59,7 @@ export function TechnicalAreasView() {
 
     try {
       await save(selectedIds);
+      clearTechnicalAreaIds();
       showToast(false, "Áreas técnicas actualizadas correctamente");
     } catch {
       showToast(
@@ -197,7 +204,10 @@ export function TechnicalAreasView() {
             </AlertDialogCancel>
             <AlertDialogAction
               type="button"
-              onClick={() => router.push("/mentors/participation")}
+              onClick={() => {
+                clearTechnicalAreaIds();
+                router.push("/mentors/participation");
+              }}
               className="h-auto rounded-lg bg-critical-action px-4 py-2 text-critical-action-foreground hover:bg-critical-action/90 active:translate-y-0"
             >
               Descartar

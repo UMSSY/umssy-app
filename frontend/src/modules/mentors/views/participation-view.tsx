@@ -28,6 +28,7 @@ import {
 import {
   loadMentorshipWizardDraft,
   saveMentorshipWizardDraft,
+  useMentorProfileDraft,
 } from "@/modules/mentorship";
 
 const getServerToken = () => null;
@@ -50,6 +51,7 @@ export function ParticipationView({
   const router = useRouter();
   const client = useQueryClient();
   const { currentUserId, refreshRoles } = useAuth();
+  const { clearAllDrafts } = useMentorProfileDraft();
   const token = useSyncExternalStore(
     subscribeAccessToken,
     getAccessToken,
@@ -71,6 +73,10 @@ export function ParticipationView({
   const inFlight = useRef(false);
   const navigationFeedbackHandled = useRef(false);
 
+  useEffect(() => {
+    clearAllDrafts();
+  }, [clearAllDrafts]);
+  
   useEffect(() => {
     if (navigationFeedbackHandled.current || (!registered && !activated)) return;
     if (participation.isLoading || !request.isSuccess) return;
