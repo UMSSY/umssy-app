@@ -189,6 +189,10 @@ model User {
   socialAccounts       UserSocialAccount[]
   portfolioProjects    UserPortfolioProject[]
 
+  notificationPreferences NotificationPreference?
+  receivedNotifications   Notification[]           @relation("ReceivedNotifications")
+  triggeredNotifications  Notification[]           @relation("TriggeredNotifications")
+  pushSubscriptions       PushSubscription[]
   @@index([cityId])
   @@index([companyId])
   @@map("users")
@@ -1588,4 +1592,72 @@ model UserPortfolioProject {
   @@index([socialAccountId])
   @@index([providerId])
   @@map("user_portfolio_projects")
+}
+
+model NotificationType {
+  id          String   @id @default(uuid()) @db.Uuid
+  code        String   @unique @db.VarChar(50)
+  name        String   @db.VarChar(100)
+  sendsPush   Boolean  @default(false) @map("sends_push")
+  sendsEmail  Boolean  @default(false) @map("sends_email")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  notifications Notification[]
+
+  @@map("notification_types")
+}
+
+model Notification {
+  id          String   @id @default(uuid()) @db.Uuid
+  recipientId String   @map("recipient_id") @db.Uuid
+  actorId     String?  @map("actor_id") @db.Uuid
+  typeId      String   @map("type_id") @db.Uuid
+  title       String   @db.VarChar(120)
+  body        String   @db.VarChar(255)
+  link        String   @db.VarChar(500)
+  groupKey    String?  @map("group_key") @db.VarChar(100)
+  readAt      DateTime? @map("read_at") @db.Timestamptz(6)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  recipient User             @relation("ReceivedNotifications", fields: [recipientId], references: [id], onDelete: Cascade)
+  actor     User?            @relation("TriggeredNotifications", fields: [actorId], references: [id], onDelete: SetNull)
+  type      NotificationType @relation(fields: [typeId], references: [id], onDelete: Restrict)
+
+  @@index([recipientId, readAt])
+  @@index([recipientId, createdAt(sort: Desc)])
+  @@index([actorId])
+  @@index([typeId])
+  @@map("notifications")
+}
+
+model PushSubscription {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  endpoint   String   @unique @db.VarChar(500)
+  p256dh     String   @db.VarChar(255)
+  auth       String   @db.VarChar(255)
+  userAgent  String?  @map("user_agent") @db.VarChar(255)
+  lastUsedAt DateTime? @map("last_used_at") @db.Timestamptz(6)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("push_subscriptions")
+}
+
+model NotificationPreference {
+  userId       String   @id @map("user_id") @db.Uuid
+  pushEnabled  Boolean  @default(false) @map("push_enabled")
+  emailEnabled Boolean  @default(true) @map("email_enabled")
+  inAppEnabled Boolean  @default(true) @map("in_app_enabled")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notification_preferences")
 }
