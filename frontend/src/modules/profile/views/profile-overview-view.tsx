@@ -8,6 +8,7 @@ import { PresentationSummaryCard } from "../components/presentation-summary-card
 import { ProfileCompletionBanner } from "../components/profile-completion-banner";
 import { ProfilePageLayout } from "../components/profile-page-layout";
 import { ProfilePhotoFeedback } from "../components/profile-photo-feedback";
+import { PortfolioProfileSection } from "../components/portfolio-profile-section";
 import { PROFILE_FEEDBACK_MESSAGES } from "../constants/profile-feedback.constants";
 import { useProfile } from "../hooks/use-profile";
 import { useProfilePhoto } from "../hooks/use-profile-photo";
@@ -53,6 +54,7 @@ export function ProfileOverviewView() {
           <PresentationSummaryCard profile={summary} />
           <WorkExperienceProfileSection />
           <EducationProfileSection />
+          <PortfolioProfileSection />
           <CertificationProfileSection />
           </ProfileSurface>
         </div>

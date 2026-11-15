@@ -3,14 +3,16 @@ export { PresentationView } from './views/presentation-view';
 export { ProfileOverviewView } from './views/profile-overview-view';
 export { ProfileSettingsView } from './views/profile-settings-view';
 
-export { ConfirmDeleteDialog } from './components/confirm-delete-dialog';
-export { DetectedSkillsChips } from './components/detected-skills-chips';
-export { FeedbackMessage } from './components/feedback-message';
-export { FormField } from './components/form-field';
-export { ProfilePageLayout } from './components/profile-page-layout';
-export { ProfileCompletenessProgress } from './components/profile-completeness-progress';
-export { SectionCard } from './components/section-card';
-export { SocialAccountConnectButtons } from './components/social-account-connect-buttons';
+export { ConfirmDeleteDialog } from "./components/confirm-delete-dialog";
+export { DetectedSkillsChips } from "./components/detected-skills-chips";
+export { FeedbackMessage } from "./components/feedback-message";
+export { FormField } from "./components/form-field";
+export { ProfilePageLayout } from "./components/profile-page-layout";
+export { ProfileCompletenessProgress } from "./components/profile-completeness-progress";
+export { SectionCard } from "./components/section-card";
+export { SocialAccountConnectButtons } from "./components/social-account-connect-buttons";
+export { PortfolioProjectCard } from "./components/portfolio-project-card";
+export { PortfolioProfileSection } from "./components/portfolio-profile-section";
 
 export type { Feedback } from './types/feedback.types';
 export type { PersonalInfoValues } from './types/personal-info-values.types';
@@ -86,4 +88,22 @@ export type {
   PortfolioOAuthUrlResponse,
   PortfolioProviderName,
   SocialAccountConnectButtonsProps,
-} from './types/portfolio-account.types';
+} from "./types/portfolio-account.types";
+export {
+  usePortfolioProjects,
+  useUpdatePortfolioProjects,
+} from "./hooks/use-portfolio-projects";
+export { portfolioProjectsService } from "./services/portfolio-projects.service";
+export {
+  PORTFOLIO_PROJECTS_QUERY_KEY,
+  PORTFOLIO_PROJECTS_MESSAGES,
+  MAX_PORTFOLIO_PROJECTS,
+} from "./constants/portfolio-projects.constants";
+export type {
+  PortfolioProjectItem,
+  UpdatePortfolioProjectItemPayload,
+  UpdatePortfolioProjectsPayload,
+  PortfolioProjectCardProps,
+  PortfolioProfileSectionProps,
+} from "./types/portfolio-project.types";
+
