@@ -1,5 +1,5 @@
 import { io, type Socket } from "socket.io-client";
-import { resolveSocketEndpoint } from "@/modules/chat/services/chat-socket";
+import { resolveSocketEndpoint } from "@/shared/services/socket-endpoint";
 import { getAccessToken } from "@/shared/services/storage/access-token-storage";
 
 let sharedSocket: Socket | null = null;
