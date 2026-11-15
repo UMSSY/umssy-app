@@ -70,7 +70,7 @@ describe('NotificationsService', () => {
         sendsPush: true,
         sendsEmail: true,
       }),
-      createMany: vi.fn().mockResolvedValue(1),
+      createMany: vi.fn().mockResolvedValue([{ id: 'notification-1', recipientId: 'user-2' }]),
     };
     mockPreferencesRepo = { findManyByUserIds: vi.fn().mockResolvedValue([]) };
     mockUserLookupRepo = { hasBlockBetween: vi.fn().mockResolvedValue(false) };
@@ -143,8 +143,11 @@ describe('NotificationsService', () => {
       { userId: 'user-3', pushEnabled: false, emailEnabled: true },
     ]);
 
-    mockNotificationsRepo.createMany.mockImplementation((data: unknown[]) =>
-      Promise.resolve(data.length),
+    mockNotificationsRepo.createMany.mockImplementation(
+      (data: { recipientId: string }[]) =>
+        Promise.resolve(
+          data.map((item) => ({ id: `notification-${item.recipientId}`, recipientId: item.recipientId })),
+        ),
     );
 
     const result = await service.notify({
@@ -163,6 +166,7 @@ describe('NotificationsService', () => {
       expect.any(String),
       expect.any(String),
       undefined,
+      expect.any(Map),
     );
 
     expect(mockMailDispatcher.dispatchToUsers).toHaveBeenCalledWith(
@@ -215,7 +219,28 @@ describe('NotificationsService', () => {
       expect.any(String),
       expect.any(String),
       undefined,
+      expect.any(Map),
     );
     expect(mockGateway.emitToUser).toHaveBeenCalledTimes(2);
+  });
+
+  it('debe pasar al push el id del aviso creado para cada destinatario', async () => {
+    mockPreferencesRepo.findManyByUserIds.mockResolvedValue([
+      { userId: 'user-2', pushEnabled: true, emailEnabled: false },
+    ]);
+    mockNotificationsRepo.createMany.mockResolvedValue([
+      { id: 'notification-9', recipientId: 'user-2' },
+    ]);
+
+    await service.notify({
+      recipientIds: ['user-2'],
+      actorId: 'user-1',
+      type: NotificationType.APPOINTMENT_BOOKED,
+      payload: validPayload,
+      actionUrl: '/appointments',
+    });
+
+    const notificationIds = mockPushDispatcher.dispatchToUsers.mock.calls[0][5] as Map<string, string>;
+    expect(notificationIds.get('user-2')).toBe('notification-9');
   });
 });

@@ -11,6 +11,12 @@ self.addEventListener('activate', (event) => {
   const PUSH_DEFAULT_TITLE = 'UMSSY';
   const PUSH_DEFAULT_BODY = 'Tienes una nueva notificación';
   const PUSH_DEFAULT_ICON = '/icons/icon-192x192.png';
+  const PUSH_DEFAULT_URL = '/dashboard';
+  const NOTIFICATION_OPEN_PATH = '/notifications/open';
+
+  function isInternalPath(value) {
+    return typeof value === 'string' && value.startsWith('/') && !value.startsWith('//') && !value.includes('\\');
+  }
 
   function readPushPayload(event) {
     if (!event.data) return {};
@@ -31,7 +37,8 @@ self.addEventListener('activate', (event) => {
       icon: payload.icon || PUSH_DEFAULT_ICON,
       badge: PUSH_DEFAULT_ICON,
       data: {
-        actionUrl: payload.actionUrl || payload.url || '/',
+        actionUrl: payload.actionUrl || payload.url || PUSH_DEFAULT_URL,
+        notificationId: payload.notificationId || null,
       },
       tag: payload.groupKey || payload.tag || undefined,
     };
@@ -39,25 +46,37 @@ self.addEventListener('activate', (event) => {
     event.waitUntil(self.registration.showNotification(title, options));
   });
 
+  function resolveClickTarget(data) {
+    const actionUrl = isInternalPath(data.actionUrl) ? data.actionUrl : PUSH_DEFAULT_URL;
+    if (!data.notificationId) return actionUrl;
+
+    const params = new URLSearchParams({ id: data.notificationId, to: actionUrl });
+    return `${NOTIFICATION_OPEN_PATH}?${params.toString()}`;
+  }
+
+  async function focusOrOpenWindow(targetUrl) {
+    const windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    const appWindow = windows.find((client) => new URL(client.url).origin === self.location.origin);
+
+    if (appWindow) {
+      try {
+        await appWindow.focus();
+        await appWindow.navigate(targetUrl);
+        return;
+      } catch (error) {
+        console.error('Could not reuse the open UMSSY window', error);
+      }
+    }
+
+    if (self.clients.openWindow) {
+      await self.clients.openWindow(targetUrl);
+    }
+  }
+
   self.addEventListener('notificationclick', (event) => {
     event.notification.close();
 
-    const actionUrl = event.notification.data?.actionUrl || '/';
-
-    event.waitUntil(
-      self.clients
-        .matchAll({ type: 'window', includeUncontrolled: true })
-        .then((clientList) => {
-          for (const client of clientList) {
-            if ('focus' in client) {
-              client.navigate(actionUrl);
-              return client.focus();
-            }
-          }
-          if (self.clients.openWindow) {
-            return self.clients.openWindow(actionUrl);
-          }
-        }),
-    );
+    const targetUrl = resolveClickTarget(event.notification.data || {});
+    event.waitUntil(focusOrOpenWindow(targetUrl));
   });
 })();

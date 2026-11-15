@@ -4,4 +4,5 @@ export type PushNotificationPayload = {
   icon: string;
   actionUrl: string;
   groupKey?: string;
+  notificationId?: string;
 };
