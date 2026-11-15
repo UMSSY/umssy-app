@@ -13,6 +13,7 @@ export class UserSkillEvidenceRepository {
     userId: string,
     experienceId: string,
     skillIds: string[],
+    
   ): Promise<void> {
     const ref = buildExperienceRef(experienceId);
 
@@ -54,24 +55,24 @@ export class UserSkillEvidenceRepository {
             data: {
               userId,
               skillId,
-              source: 'manual',
+              source: 'nlp',
               evidenceRefs: [ref],
             },
           });
           continue;
         }
-        const needsPromotion = row.source !== 'manual';
+
         const needsRef = !readEvidenceRefs(row.evidenceRefs).includes(ref);
-        if (!needsPromotion && !needsRef) continue;
+        if (!needsRef) continue;
         await tx.userSkill.update({
-          where: { id: row.id },
-          data: {
-            ...(needsPromotion ? { source: 'manual' } : {}),
-            ...(needsRef
-              ? { evidenceRefs: appendEvidenceRef(row.evidenceRefs, ref) }
-              : {}),
+            where: { id: row.id },
+            data: {
+              evidenceRefs: appendEvidenceRef(row.evidenceRefs, ref),
           },
         });
+
+
+
       }
     });
   }

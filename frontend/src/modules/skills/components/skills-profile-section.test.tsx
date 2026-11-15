@@ -7,8 +7,17 @@ import { SkillsProfileSection } from "./skills-profile-section";
 
 vi.mock("../services/skills.service", () => ({ skillsService: { getCatalog: vi.fn(), getMySkills: vi.fn(), createCustomSkill: vi.fn(), saveMySkills: vi.fn() } }));
 vi.mock("./detected-skills-panel", () => ({ DetectedSkillsPanel: () => <div data-testid="detected-skills-panel" /> }));
-const PYTHON = { id: "python", name: "Python" };
-const SQL = { id: "sql", name: "SQL" };
+const PYTHON = {
+  id: "python",
+  name: "Python",
+  canRemove: true,
+};
+
+const SQL = {
+  id: "sql",
+  name: "SQL",
+  canRemove: true,
+};
 beforeEach(() => { vi.mocked(skillsService.getCatalog).mockResolvedValue([PYTHON, SQL]); vi.mocked(skillsService.getMySkills).mockResolvedValue([PYTHON]); });
 afterEach(() => { cleanup(); vi.clearAllMocks(); });
 
@@ -16,6 +25,20 @@ describe("SkillsProfileSection", () => {
   it("renders exactly one detected skills panel", () => {
     render(<SkillsProfileSection />);
     expect(screen.getAllByTestId("detected-skills-panel")).toHaveLength(1);
+  });
+  
+  it("does not show the remove action for a skill linked to experience evidence", async () => {
+    vi.mocked(skillsService.getMySkills).mockResolvedValue([
+      { ...PYTHON, canRemove: false },
+    ]);
+
+    render(<SkillsProfileSection />);
+
+    await screen.findByText("Python");
+
+    expect(
+      screen.queryByRole("button", { name: "Quitar Python" }),
+    ).not.toBeInTheDocument();
   });
 
   it("adds an existing skill directly and closes the small picker", async () => {
@@ -63,4 +86,5 @@ describe("SkillsProfileSection", () => {
     expect(skillsService.createCustomSkill).toHaveBeenCalledTimes(1);
     expect(skillsService.saveMySkills).toHaveBeenLastCalledWith([PYTHON.id, custom.id]);
   });
+  
 });
