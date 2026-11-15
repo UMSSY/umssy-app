@@ -33,3 +33,15 @@ inscripciones». Pulsa «Instalar app» si Chrome ofrece la instalación. Cierra
 la PWA, activa modo avión y ábrela desde el ícono. Entra a «Mis inscripciones»
 y verifica el QR de un taller vigente. Usa también una cuenta sin pases para
 comprobar que una lista vacía confirmada completa la preparación.
+
+## Navegación y datos ampliados
+
+- Con internet, entrar con una cuenta y esperar la preparación de pases. Se descargan también las páginas del catálogo autenticado, sus detalles, categorías y datos de sesión.
+- Activar modo avión y recargar Inicio, Login, Talleres y Mis inscripciones. La instalación prepara además las rutas fijas de la aplicación que devuelven HTML público cacheable.
+- En Talleres, abrir un detalle guardado. La copia corresponde a la cuenta activa. Los filtros nuevos que no tengan una consulta guardada pueden requerir conexión.
+- Seguir un enlace interno a una pantalla guardada. Si la pantalla no está guardada, debe mantenerse la pantalla actual y aparecer «Conéctate para abrir esta sección».
+- Intentar enviar una acción de servidor sin conexión. Debe aparecer «Necesitas conexión para realizar esta acción» y no debe enviarse automáticamente al reconectar.
+- Reabrir la aplicación offline con la sesión previamente guardada. Al reconectar, el backend valida la sesión y exige autenticación si responde 401.
+- Cambiar de cuenta y comprobar que no se recuperan datos del catálogo ni de sesión de la cuenta anterior.
+
+Pendientes de integración: Mis talleres requiere un endpoint de talleres gestionados. Los datos de otros módulos, las imágenes remotas y las páginas con identificadores dinámicos requieren su propia preparación. El catálogo público sin sesión conserva su consulta online. La cobertura anterior no equivale a disponer de todos los datos del proyecto offline.

@@ -6,6 +6,7 @@ import { prepareOfflineShell } from '@/shared/services/service-worker/prepare-of
 import { OFFLINE_PASSES_SNAPSHOT_QUERY_KEY } from '../constants/offline-passes.constants';
 import { prepareOfflinePasses } from '../services/prepare-offline-passes';
 import { prepareOfflineEvents } from '../services/prepare-offline-events';
+import { authService } from '@/modules/auth';
 import { useOnlineStatus } from './use-online-status';
 
 export function usePrepareOfflinePasses(allowed: boolean) {
@@ -29,6 +30,7 @@ export function usePrepareOfflinePasses(allowed: boolean) {
         prepareOfflineShell(signal),
         prepareOfflinePasses(token, signal),
         prepareOfflineEvents(token, signal),
+        authService.getSession(token),
       ]);
       void queryClient.invalidateQueries({
         queryKey: [OFFLINE_PASSES_SNAPSHOT_QUERY_KEY, token],
