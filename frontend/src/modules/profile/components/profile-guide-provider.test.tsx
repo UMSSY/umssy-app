@@ -406,7 +406,7 @@ describe('ProfileGuideProvider', () => {
     await user.click(screen.getByRole('button', { name: 'Finalizar' }));
 
     const finishDialog = await screen.findByRole('dialog', {
-      name: '¡Tu perfil está completo!',
+      name: '¡Felicidades, Romario!',
     });
     expect(finishDialog).toBeVisible();
     expect(
@@ -414,6 +414,7 @@ describe('ProfileGuideProvider', () => {
         name: 'Completitud del perfil',
       }),
     ).toHaveAttribute('aria-valuenow', '100');
+    expect(finishDialog).toHaveTextContent('100%Perfil completado');
     expect(
       within(finishDialog).queryByRole('button', { name: 'Pausar guía' }),
     ).not.toBeInTheDocument();
@@ -425,7 +426,7 @@ describe('ProfileGuideProvider', () => {
     expect(
       screen.queryByRole('button', { name: 'Abrir asistente de perfil' }),
     ).not.toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: 'Volver al inicio' }));
+    await user.click(screen.getByRole('button', { name: 'Volver a Inicio' }));
     await waitFor(() =>
       expect(state.write).toHaveBeenLastCalledWith(
         'user-a',
@@ -523,7 +524,7 @@ describe('ProfileGuideProvider', () => {
     ).toBeVisible();
     expect(screen.getByRole('button', { name: 'Finalizar' })).toBeDisabled();
     expect(
-      screen.queryByRole('dialog', { name: '¡Tu perfil está completo!' }),
+      screen.queryByRole('dialog', { name: '¡Felicidades, Romario!' }),
     ).not.toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Finalizar guía' }));
@@ -532,7 +533,7 @@ describe('ProfileGuideProvider', () => {
     );
 
     expect(
-      await screen.findByRole('dialog', { name: '¡Tu perfil está completo!' }),
+      await screen.findByRole('dialog', { name: '¡Felicidades, Romario!' }),
     ).toBeVisible();
     expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
     expect(state.push).not.toHaveBeenCalled();
@@ -540,6 +541,29 @@ describe('ProfileGuideProvider', () => {
     expect(
       screen.queryByRole('button', { name: 'Abrir asistente de perfil' }),
     ).not.toBeInTheDocument();
+  });
+
+  it('celebrates without a name when the profile has no first name', async () => {
+    const user = userEvent.setup();
+    state.profile = { ...PROFILE, firstName: '' };
+    state.sessions.set('user-a', session({ dismissed: true }));
+    state.completeness = completeness(
+      [...PROFILE_COMPLETENESS_SECTION_IDS],
+      100,
+    );
+    render(page());
+    await waitFor(() =>
+      expect(
+        screen.getByRole('button', { name: 'Continuar guía de prueba' }),
+      ).toBeEnabled(),
+    );
+    await user.click(
+      screen.getByRole('button', { name: 'Continuar guía de prueba' }),
+    );
+
+    expect(
+      await screen.findByRole('dialog', { name: '¡Felicidades!' }),
+    ).toBeVisible();
   });
 
   it('skips a section without changing its real completeness or refreshing it as saved', async () => {

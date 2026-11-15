@@ -35,6 +35,7 @@ import {
 } from '@/components/ui/progress';
 import { useAuth } from '@/shared/contexts/auth-context';
 import {
+  PROFILE_COMPLETENESS_MESSAGES,
   PROFILE_COMPLETENESS_SECTION_IDS,
   PROFILE_COMPLETENESS_SECTION_LABELS,
 } from '../constants/profile-completeness.constants';
@@ -427,15 +428,21 @@ function ProfileGuideSessionProvider({
                 <ProgressValue className="mx-auto font-heading text-4xl font-bold text-app-header">
                   {() => `${completeness?.percentage ?? 100}%`}
                 </ProgressValue>
+                <p className="mx-auto text-sm font-semibold text-app-header">
+                  {PROFILE_COMPLETENESS_MESSAGES.completedTitle}
+                </p>
               </Progress>
               <DialogTitle className="text-3xl font-bold text-ink">
-                ¡Tu perfil está completo!
+                {profile?.firstName
+                  ? `¡Felicidades, ${profile.firstName}!`
+                  : '¡Felicidades!'}
               </DialogTitle>
               <DialogDescription>
-                Ya estás listo para conectar con las oportunidades de UMSSY.
-                Puedes actualizar tu información cuando quieras.
+                ¡Tu perfil está completo! Ya estás listo para conectar con las
+                oportunidades de UMSSY. Puedes actualizar tu información cuando
+                quieras.
               </DialogDescription>
-              <Button onClick={finish}>Volver al inicio</Button>
+              <Button onClick={finish}>Volver a Inicio</Button>
             </div>
           ) : mode === 'wizard' ? (
             <div className="flex max-h-editor-dialog min-h-0 flex-col">
