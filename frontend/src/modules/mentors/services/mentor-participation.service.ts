@@ -1,7 +1,9 @@
+
 import type { MentorParticipationRequest } from "../types/mentor-participation-request.types";
 import type { MentorCapacity } from "../types/mentor-capacity.types";
 import type { MentorParticipationPreferences } from "../types/mentor-participation-preferences.types";
 import type { MyMentorParticipation } from "../types/my-mentor-participation.types";
+import type { MentorParticipationHistory } from "../types/mentor-participation-history.types";
 import {
   clearMentorIntakeIntentions,
   withMentorIntakeKey,
@@ -43,6 +45,7 @@ export const mentorParticipationService = {
     }
     return result;
   },
+
   async capacity(): Promise<MentorCapacity> {
     const response =
       await apiClient.get<ApiResponse<MentorCapacity>>("/mentors/capacity");
@@ -58,10 +61,21 @@ export const mentorParticipationService = {
     await apiClient.post("/mentors/me/leave");
     await clearMentorIntakeIntentions().catch(() => {});
   },
+
   async getCurrent(): Promise<MentorParticipationRequest | null> {
     const response = await apiClient.get<
       ApiResponse<MentorParticipationRequest | null>
     >(`${BASE_PATH}/me`);
+
+    return response.data.data;
+  },
+
+  async getHistory(
+    signal?: AbortSignal,
+  ): Promise<MentorParticipationHistory> {
+    const response = await apiClient.get<
+      ApiResponse<MentorParticipationHistory>
+    >(`${BASE_PATH}/me/history`, { signal });
 
     return response.data.data;
   },
