@@ -8,11 +8,16 @@ import { REQUEST_TIMEOUT_MS } from '../constants/events.constants';
 import { apiClient } from '@/shared/services/api-client';
 import { parseProposalSupportResponse } from '../utils/proposal-support-response';
 import type { ProposalSupportResponse } from '../types/proposal-support-response.types';
+import type { FinishedHistoryPage } from '../types/finished-history-page.types';
+import { toFinishedRegistrationItem } from '../utils/to-finished-registration-item';
 
 
 export const registrationsService = {
   getMine: registrationApi.getMine,
-  getFinished: registrationApi.getFinished,
+  async getFinished(page: number, limit = 10, signal?: AbortSignal, accessToken = getAccessToken()): Promise<FinishedHistoryPage> {
+    const response = await registrationApi.getFinished(page, limit, signal, accessToken);
+    return { ...response, items: response.items.map(toFinishedRegistrationItem) };
+  },
 
   async supportProposal(
     eventId: string,

@@ -34,6 +34,14 @@ describe('registrationsService' , () => {
       timeout: 10000,
     });
   });
+  it('discards unexpected pass credentials before returning history items', async () => {
+    vi.mocked(getAccessToken).mockReturnValue('signed-token');
+    vi.mocked(apiClient.get).mockResolvedValue({ data: { data: { items: [{ id: 'reg-1', eventName: 'Taller', date: '2026-09-20', startTime: '09:00', endTime: '12:00', location: 'Aula', status: 'Confirmada', qrToken: 'private-token', passCode: 'private-code' }], total: 1, limit: 10, totalPages: 1 } } });
+    const response = await registrationsService.getFinished(1);
+    expect(response.items).toEqual([{ id: 'reg-1', title: 'Taller', date: '2026-09-20', startTime: '09:00', endTime: '12:00', location: 'Aula' }]);
+    expect(JSON.stringify(response)).not.toContain('private-token');
+    expect(JSON.stringify(response)).not.toContain('private-code');
+  });
   it('envía el token de sesión y devuelve las inscripciones del backend', async () => {
     vi.mocked(getAccessToken).mockReturnValue('signed-token');
     const items = [

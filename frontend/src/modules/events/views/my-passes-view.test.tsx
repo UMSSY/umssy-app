@@ -29,7 +29,7 @@ afterEach(() => { cleanup(); clearAccessToken(); vi.useRealTimers(); });
 describe("Mis pases", () => {
   it('loads finished history lazily and keeps its cards separate from the current panel', async () => {
     getMine.mockResolvedValue([pass]);
-    getFinished.mockResolvedValue({ items: [{ ...pass, id: 'reg-history', eventName: 'Historia', date: '2026-08-10T00:00:00Z' }], total: 12, limit: 10, totalPages: 2 });
+    getFinished.mockResolvedValue({ items: [{ id: 'reg-history', title: 'Historia', date: '2026-08-10T00:00:00Z', startTime: pass.startTime, endTime: pass.endTime, location: pass.location }], total: 12, limit: 10, totalPages: 2 });
     render(<MyPassesView />);
     expect(getFinished).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole('tab', { name: 'Historial' }));
@@ -47,7 +47,7 @@ describe("Mis pases", () => {
   it('appends the next history page while keeping the backend total', async () => {
     getMine.mockResolvedValue([]);
     getFinished.mockImplementation(async (page) => ({
-      items: [{ ...pass, id: `history-${page}`, eventName: `History ${page}` }],
+      items: [{ id: `history-${page}`, title: `History ${page}`, date: pass.date, startTime: pass.startTime, endTime: pass.endTime, location: pass.location }],
       total: 12,
       limit: 10,
       totalPages: 2,

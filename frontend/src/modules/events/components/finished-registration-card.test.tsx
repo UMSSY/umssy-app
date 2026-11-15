@@ -4,7 +4,7 @@ import { FinishedRegistrationCard } from "./finished-registration-card";
 
 const registration = {
   id: "123e4567-e89b-12d3-a456-426614174000",
-  eventName: "Taller de historia",
+  title: "Taller de historia",
   date: "2026-09-20T00:00:00.000Z",
   startTime: "1970-01-01T09:00:00.000Z",
   endTime: "1970-01-01T12:00:00.000Z",
