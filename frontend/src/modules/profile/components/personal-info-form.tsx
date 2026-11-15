@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ChangeEvent, type FormEvent } from "react";
+import { useProfileCompletionFocus } from "../hooks/use-profile-completion-focus";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -36,6 +37,13 @@ export function PersonalInfoForm({
   const [values, setValues] = useState<PersonalInfoValues>(initialValues);
   const [localErrors, setErrors] = useState<PersonalInfoErrors>({});
   const errors = { ...localErrors, ...serverErrors };
+  useProfileCompletionFocus('contact', {
+    firstName: values.firstName,
+    lastName: values.lastName,
+    cityId: values.cityId,
+    phone: values.phone,
+    personalEmail: values.personalEmail,
+  }, !isSaving);
 
   const updateField = (field: keyof PersonalInfoValues, value: string) => {
     onEdit?.(field);

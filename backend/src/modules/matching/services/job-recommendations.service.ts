@@ -62,6 +62,8 @@ export class JobRecommendationsService {
       companyName: vacancy.company.title,
       modality: vacancy.modality.title,
       locationUrl: vacancy.locationUrl,
+      publishedAt: vacancy.publishedAt.toISOString(),
+      expiresAt: vacancy.expiresAt?.toISOString() ?? null,
       score,
       skills: requirements.skills.map(({ name }) => name),
       matchedSkills,
