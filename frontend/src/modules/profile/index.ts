@@ -11,6 +11,8 @@ export { ProfilePageLayout } from "./components/profile-page-layout";
 export { ProfileCompletenessProgress } from "./components/profile-completeness-progress";
 export { SectionCard } from "./components/section-card";
 export { SocialAccountConnectButtons } from "./components/social-account-connect-buttons";
+export { PortfolioProjectCard } from "./components/portfolio-project-card";
+export { PortfolioProfileSection } from "./components/portfolio-profile-section";
 
 export type { Feedback } from "./types/feedback.types";
 export type { PersonalInfoValues } from "./types/personal-info-values.types";
@@ -63,4 +65,21 @@ export type {
   PortfolioProviderName,
   SocialAccountConnectButtonsProps,
 } from "./types/portfolio-account.types";
+export {
+  usePortfolioProjects,
+  useUpdatePortfolioProjects,
+} from "./hooks/use-portfolio-projects";
+export { portfolioProjectsService } from "./services/portfolio-projects.service";
+export {
+  PORTFOLIO_PROJECTS_QUERY_KEY,
+  PORTFOLIO_PROJECTS_MESSAGES,
+  MAX_PORTFOLIO_PROJECTS,
+} from "./constants/portfolio-projects.constants";
+export type {
+  PortfolioProjectItem,
+  UpdatePortfolioProjectItemPayload,
+  UpdatePortfolioProjectsPayload,
+  PortfolioProjectCardProps,
+  PortfolioProfileSectionProps,
+} from "./types/portfolio-project.types";
 
