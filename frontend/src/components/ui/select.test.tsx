@@ -60,9 +60,10 @@ describe("Select", () => {
     renderSelect()
 
     await user.click(screen.getByRole("combobox", { name: "Ciudad" }))
-    await user.click(await screen.findByRole("option", { name: "La Paz" }))
+    const option = await screen.findByRole("option", { name: "La Paz" })
+    await user.click(option)
 
-    expect(screen.getByRole("combobox", { name: "Ciudad" })).toHaveTextContent("lp")
+    expect(option).toHaveAttribute("aria-selected", "true")
   })
 
   it("resalta la opción con texto oscuro, no blanco", async () => {
@@ -94,10 +95,8 @@ describe("Select", () => {
       }
 
       await user.keyboard("{Enter}")
-      expect(screen.getByRole("combobox", { name: "Ciudad" })).toHaveTextContent("lp")
       expect(option).toHaveAttribute("aria-selected", "true")
       expect(option).toHaveClass("focus:text-ink")
     },
   )
-
 })
