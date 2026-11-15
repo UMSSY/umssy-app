@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import { isApiError } from "@/shared/services/api-client";
 import {
@@ -10,13 +10,24 @@ import {
 } from "@/modules/registrations";
 import { registrationsService } from "../services/registrations.service";
 
-export function useMyPasses() {
+export function useMyPasses(isActive = true) {
   const accessToken = useRegistrationSession();
+  const queryClient = useQueryClient();
+  const wasActive = useRef(isActive);
   const query = useQuery({
     queryKey: [...REGISTRATION_QUERY_KEYS.passes, accessToken],
     queryFn: ({ signal }) => registrationsService.getMine(signal, accessToken),
   });
   const cause = query.error;
+  const refetch = query.refetch;
+  useEffect(() => {
+    if (!isActive) {
+      void queryClient.cancelQueries({ queryKey: [...REGISTRATION_QUERY_KEYS.passes, accessToken], exact: true });
+    } else if (!wasActive.current) {
+      void refetch();
+    }
+    wasActive.current = isActive;
+  }, [isActive, accessToken, queryClient, refetch]);
   return {
     registrations: query.data ?? [],
     isLoading: query.isFetching,

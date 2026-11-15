@@ -44,6 +44,17 @@ describe("Mis pases", () => {
     fireEvent.click(screen.getByRole('tab', { name: 'Historial' }));
     await waitFor(() => expect(getFinished).toHaveBeenCalledTimes(2));
   });
+  it('revalidates current passes when returning from history', async () => {
+    getMine.mockResolvedValue([pass]);
+    getFinished.mockResolvedValue({ items: [], total: 0, limit: 10, totalPages: 0 });
+    render(<MyPassesView />);
+    await screen.findByText('1 pase');
+    expect(getMine).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole('tab', { name: 'Historial' }));
+    await screen.findByText('Aún no tienes talleres finalizados');
+    fireEvent.click(screen.getByRole('tab', { name: 'Vigentes' }));
+    await waitFor(() => expect(getMine).toHaveBeenCalledTimes(2));
+  });
   it('appends the next history page while keeping the backend total', async () => {
     getMine.mockResolvedValue([]);
     getFinished.mockImplementation(async (page) => ({

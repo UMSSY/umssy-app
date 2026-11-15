@@ -22,11 +22,11 @@ import { useMyPassesHistory } from "../hooks/use-my-passes";
 import type { MyPassesViewProps } from "../types/my-passes-view-props.types";
 
 export function MyPassesView({ onOpenWorkshopChat }: MyPassesViewProps = {}) {
-  const { status, isOnline, passes: registrations, offlineQrTokens, lastUpdated, error, isConnectionError, retry } = usePassesViewState();
+  const [activeTab, setActiveTab] = useState("current");
+  const { status, isOnline, passes: registrations, offlineQrTokens, lastUpdated, error, isConnectionError, retry } = usePassesViewState(activeTab === "current");
   const isLoading = status === "loading";
   const offlineReason = isOnline ? undefined : OFFLINE_PASSES_TEXTS.requiresConnection;
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState("current");
   const history = useMyPassesHistory(activeTab === "history" && isOnline);
   const historyUnavailable = activeTab === "history" && !isOnline;
   const visibleCount = activeTab === "history" ? history.total : registrations.length;
