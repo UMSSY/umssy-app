@@ -1,10 +1,8 @@
 import { REPORT_PDF_TEXT } from '../constants/report-pdf.constants.js';
 import { USER_TYPE_LABELS } from '../constants/report-user-csv.constants.js';
 import type { RoleName } from '../../../common/enums/roles.enum.js';
-import type {
-  ReportPdfFilter,
-  ReportPdfFiltersInput,
-} from '../types/report-pdf.types.js';
+import type { ReportPdfFilter } from '../types/report-pdf-filter.types.js';
+import type { ReportPdfFiltersInput } from '../types/report-pdf-filters-input.types.js';
 
 const SECOND_SEMESTER_START_MONTH = '07';
 const FIRST_SEMESTER_START_MONTH = '01';

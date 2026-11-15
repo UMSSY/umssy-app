@@ -1,6 +1,6 @@
 import { REGISTERED_USERS_PDF } from '../constants/report-pdf.constants.js';
 import { ReportPdfService, formatReportDateTime } from '../services/report-pdf.service.js';
-import type { ReportPdfContent } from '../types/report-pdf.types.js';
+import type { ReportPdfContent } from '../types/report-pdf-content.types.js';
 
 const GENERATED_AT = new Date('2026-11-13T18:30:00.000Z');
 

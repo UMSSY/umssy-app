@@ -40,10 +40,8 @@ import type {
   ReportCsvFile,
   ReportUser,
 } from '../types/report-user.types.js';
-import type {
-  ReportPdfDefinition,
-  ReportPdfFile,
-} from '../types/report-pdf.types.js';
+import type { ReportPdfDefinition } from '../types/report-pdf-definition.types.js';
+import type { ReportPdfFile } from '../types/report-pdf-file.types.js';
 import { getAcademicPeriod } from '../utils/academic-period.js';
 
 const REGISTERED_USERS_CSV_PREFIX = 'usuarios-registrados';

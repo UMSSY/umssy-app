@@ -31,7 +31,7 @@ import {
 
 import { ReportHistoryService } from '../services/report-history.service.js';
 import { ReportsService } from '../services/reports.service.js';
-import type { ReportPdfFile } from '../types/report-pdf.types.js';
+import type { ReportPdfFile } from '../types/report-pdf-file.types.js';
 import type { ReportCsvFile } from '../types/report-user.types.js';
 
 function toCsvFile({ fileName, content }: ReportCsvFile): StreamableFile {
