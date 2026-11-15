@@ -11,6 +11,7 @@ import {
 import * as service from '../services/mentor-profile.service';
 import { MENTOR_PROFILE_FIXTURE } from '../testing/mentor-profile.fixture';
 import { MentorProfileView } from './mentor-profile-view';
+import * as recommendations from '../components/mentor/similar-mentors-section';
 
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push: vi.fn() }) }));
 
@@ -36,6 +37,30 @@ function mockCurrentUser(id: string) {
 }
 
 describe('MentorProfileView', () => {
+  it('mantiene el perfil visible mientras cargan los mentores similares', async () => {
+    const Section = recommendations.SimilarMentorsSection;
+    vi.spyOn(recommendations, 'SimilarMentorsSection').mockImplementation(
+      () => <Section status="loading" />,
+    );
+    vi.spyOn(service, 'getMentorProfile').mockResolvedValue(
+      MENTOR_PROFILE_FIXTURE,
+    );
+    render(<MentorProfileView mentorId={MENTOR_PROFILE_FIXTURE.id} />);
+    expect(
+      await screen.findByRole('heading', { name: 'Ana Rojas' }),
+    ).toBeVisible();
+    expect(screen.getByRole('heading', { name: 'Sobre mí' })).toBeVisible();
+    expect(
+      screen.getByRole('heading', { name: 'Trayectoria actual' }),
+    ).toBeVisible();
+    const section = screen.getByRole('region', {
+      name: 'También podría interesarte',
+    });
+    expect(section).toHaveAttribute('aria-busy', 'true');
+    expect(within(section).getByRole('status')).toHaveTextContent(
+      'Cargando mentores similares...',
+    );
+  });
   it('muestra intereses profesionales reales', async () => {
     vi.spyOn(service, 'getMentorProfile').mockResolvedValue(
       MENTOR_PROFILE_FIXTURE,

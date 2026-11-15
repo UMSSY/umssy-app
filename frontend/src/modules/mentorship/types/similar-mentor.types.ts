@@ -7,3 +7,9 @@ export interface SimilarMentor extends Pick<
 > {
   roleLabel: 'Mentor' | 'Mentora';
 }
+
+export type SimilarMentorsSectionProps =
+  | { status: 'loading' }
+  | { status: 'empty' }
+  | { status: 'success'; mentors: SimilarMentor[] }
+  | { status: 'error'; onRetry: () => void };
