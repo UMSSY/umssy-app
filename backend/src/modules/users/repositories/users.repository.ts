@@ -48,4 +48,11 @@ export class UsersRepository {
       select: { id: true },
     });
   }
+    async findEmailById(userId: string): Promise<string | null> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { email: true },
+    });
+    return user?.email ?? null;
+  }
 }

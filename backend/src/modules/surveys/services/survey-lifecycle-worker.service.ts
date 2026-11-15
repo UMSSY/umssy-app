@@ -1,0 +1,187 @@
+import {
+  Injectable,
+  Logger,
+  OnModuleDestroy,
+  OnModuleInit,
+} from '@nestjs/common';
+import { MailService } from '../../mail/services/mail.service.js';
+import { loadMailTemplate } from '../../mail/helpers/load-mail-template.js';
+import { SurveysRepository } from '../repositories/surveys.repository.js';
+import { SurveyVariationEvaluatorService } from './survey-variation-evaluator.service.js';
+import {
+  buildSurveyFrontendUrl,
+  formatSurveyClosureDate,
+} from '../utils/survey-frontend-url.js';
+
+const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
+const CHECK_INTERVAL_MS = 30_000;
+
+@Injectable()
+export class SurveyLifecycleWorkerService
+  implements OnModuleInit, OnModuleDestroy
+{
+  private readonly logger = new Logger(SurveyLifecycleWorkerService.name);
+  private timer?: ReturnType<typeof setInterval>;
+  private running = false;
+
+  constructor(
+    private readonly surveysRepository: SurveysRepository,
+    private readonly variationEvaluator: SurveyVariationEvaluatorService,
+    private readonly mailService: MailService,
+  ) {}
+
+  onModuleInit() {
+    if (process.env.NODE_ENV === 'test') return;
+    this.timer = setInterval(() => {
+      void this.tick();
+    }, CHECK_INTERVAL_MS);
+    this.timer.unref();
+    void this.tick();
+  }
+
+  onModuleDestroy() {
+    if (this.timer) clearInterval(this.timer);
+  }
+
+  async tick(now: Date = new Date()) {
+    if (this.running) return;
+    this.running = true;
+    try {
+      await this.processClosingSoonSurveys(now);
+      await this.processClosedSurveys(now);
+    } catch (error) {
+      this.logger.error(
+        'Error procesando el ciclo de vida de encuestas',
+        error instanceof Error ? error.stack : String(error),
+      );
+    } finally {
+      this.running = false;
+    }
+  }
+
+  async processClosingSoonSurveys(now: Date = new Date()) {
+    const thresholdDate = new Date(now.getTime() + THREE_DAYS_MS);
+    const surveys = await this.surveysRepository.findSurveysClosingSoon(
+      thresholdDate,
+      now,
+    );
+
+    for (const survey of surveys) {
+      try {
+        if (survey.createdBy?.email) {
+          const recipientName =
+            `${survey.createdBy.firstName} ${survey.createdBy.lastName}`.trim() ||
+            'Administrador';
+          const closesAtFormatted = survey.closesAt
+            ? formatSurveyClosureDate(survey.closesAt)
+            : '';
+          const responsesCount = String(survey._count.responses);
+          const actionUrl = buildSurveyFrontendUrl(
+            `/backoffice/surveys/statistics/${survey.id}`,
+          );
+
+          const mjml = await loadMailTemplate('survey-closing-soon');
+          await this.mailService.send({
+            to: survey.createdBy.email,
+            subject: `La encuesta «${survey.title}» cierra en 3 días`,
+            text: `Hola ${recipientName}, este es un aviso sobre una encuesta que creaste. La encuesta «${survey.title}» cierra el ${closesAtFormatted}. Respuestas hasta ahora: ${responsesCount}. Ver analíticas en: ${actionUrl}`,
+            mjml,
+            values: {
+              recipientName,
+              surveyTitle: survey.title,
+              closesAtFormatted,
+              responsesCount,
+              actionUrl,
+            },
+          });
+        }
+        await this.surveysRepository.markClosingSoonNotified(survey.id, now);
+      } catch (err) {
+        this.logger.error(
+          `Error notificando cierre próximo de encuesta ${survey.id}`,
+          err instanceof Error ? err.stack : String(err),
+        );
+      }
+    }
+  }
+
+  async processClosedSurveys(now: Date = new Date()) {
+    const surveys =
+      await this.surveysRepository.findSurveysExpiredForClosure(now);
+
+    for (const survey of surveys) {
+      try {
+        if (survey.createdBy?.email) {
+          const recipientName =
+            `${survey.createdBy.firstName} ${survey.createdBy.lastName}`.trim() ||
+            'Administrador';
+          const closesAtFormatted = survey.closesAt
+            ? formatSurveyClosureDate(survey.closesAt)
+            : '';
+          const responsesCount = String(survey._count.responses);
+          const actionUrl = buildSurveyFrontendUrl(
+            `/backoffice/surveys/statistics/${survey.id}`,
+          );
+
+          const mjml = await loadMailTemplate('survey-closed');
+          await this.mailService.send({
+            to: survey.createdBy.email,
+            subject: `La encuesta «${survey.title}» ya cerró`,
+            text: `Hola ${recipientName}, este es un aviso sobre una encuesta que creaste. El periodo de recepción de respuestas para la encuesta «${survey.title}» ha concluido. Cerró el: ${closesAtFormatted}. Respuestas recibidas: ${responsesCount} en total. Ver resultados en: ${actionUrl}`,
+            mjml,
+            values: {
+              recipientName,
+              surveyTitle: survey.title,
+              closesAtFormatted,
+              responsesCount,
+              actionUrl,
+            },
+          });
+        }
+
+        await this.surveysRepository.markClosedNotified(survey.id, now);
+
+        const isAlertEnabled = survey.alertConfig?.isEnabled ?? true;
+        if (isAlertEnabled) {
+          const evalResult = await this.variationEvaluator.evaluateSurvey(
+            survey.id,
+            {
+              academicPeriod: survey.academicPeriod,
+              closesAt: survey.closesAt,
+              threshold: survey.alertConfig?.threshold,
+              questionIds: survey.alertConfig?.questionIds as string[] | null,
+            },
+          );
+
+          if (evalResult.hasShifts && survey.createdBy?.email) {
+            const recipientName =
+              `${survey.createdBy.firstName} ${survey.createdBy.lastName}`.trim() ||
+              'Administrador';
+            const actionUrl = buildSurveyFrontendUrl(
+              `/backoffice/surveys/statistics/${survey.id}`,
+            );
+            const varMjml = await loadMailTemplate('survey-variation-alert');
+            await this.mailService.send({
+              to: survey.createdBy.email,
+              subject: `Alerta de variación significativa en «${survey.title}»`,
+              text: `Hola ${recipientName}, detectamos cambios significativos en los resultados de la encuesta «${survey.title}» frente al semestre anterior.\n${evalResult.summaryText}\nVer analíticas en: ${actionUrl}`,
+              mjml: varMjml,
+              values: {
+                recipientName,
+                surveyTitle: survey.title,
+                threshold: String(survey.alertConfig?.threshold ?? 10),
+                shiftsContent: evalResult.summaryText,
+                actionUrl,
+              },
+            });
+          }
+        }
+      } catch (err) {
+        this.logger.error(
+          `Error procesando cierre de encuesta ${survey.id}`,
+          err instanceof Error ? err.stack : String(err),
+        );
+      }
+    }
+  }
+}

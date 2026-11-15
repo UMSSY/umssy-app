@@ -427,4 +427,129 @@ export class SurveysRepository {
     );
     return { questionRows, optionRows };
   }
+
+  async findAlertConfig(surveyId: string) {
+    return this.prisma.surveyAlertConfig.findUnique({
+      where: { surveyId },
+    });
+  }
+
+  async findForAudience(surveyId: string) {
+    return this.prisma.survey.findUnique({
+      where: { id: surveyId },
+      select: {
+        id: true,
+        academicPeriod: true,
+        career: { select: { title: true, id: true } },
+        lastReminderSentAt: true,
+        _count: { select: { responses: true } },
+      },
+    });
+  }
+
+  async countAudience(survey: { careerId?: string | null }) {
+    const where: {
+      status: { title: { equals: string; mode: 'insensitive' } };
+      careerId?: string;
+    } = {
+      status: { title: { equals: 'approved', mode: 'insensitive' } },
+    };
+    if (survey.careerId) {
+      where.careerId = survey.careerId;
+    }
+    return this.prisma.accessRequest.count({ where });
+  }
+
+  async upsertAlertConfig(
+    surveyId: string,
+    data: {
+      isEnabled: boolean;
+      threshold: number;
+      questionIds?: string[] | null;
+    },
+  ) {
+    return this.prisma.surveyAlertConfig.upsert({
+      where: { surveyId },
+      create: {
+        surveyId,
+        isEnabled: data.isEnabled,
+        threshold: data.threshold,
+        questionIds: data.questionIds
+          ? JSON.parse(JSON.stringify(data.questionIds))
+          : null,
+      },
+      update: {
+        isEnabled: data.isEnabled,
+        threshold: data.threshold,
+        questionIds: data.questionIds
+          ? JSON.parse(JSON.stringify(data.questionIds))
+          : null,
+      },
+    });
+  }
+
+  async findSurveysClosingSoon(thresholdDate: Date, now: Date) {
+    return this.prisma.survey.findMany({
+      where: {
+        closesAt: { lte: thresholdDate, gt: now },
+        closingSoonNotifiedAt: null,
+        status: { title: SurveyStatus.PUBLISHED },
+      },
+      include: {
+        createdBy: {
+          select: { id: true, firstName: true, lastName: true, email: true },
+        },
+        _count: { select: { responses: true } },
+      },
+    });
+  }
+
+  async findSurveysExpiredForClosure(now: Date) {
+    return this.prisma.survey.findMany({
+      where: {
+        closesAt: { lte: now },
+        closedNotifiedAt: null,
+        status: { title: SurveyStatus.PUBLISHED },
+      },
+      include: {
+        createdBy: {
+          select: { id: true, firstName: true, lastName: true, email: true },
+        },
+        alertConfig: true,
+        questions: {
+          include: {
+            options: true,
+            answers: {
+              select: {
+                optionId: true,
+                response: { select: { submittedAt: true } },
+              },
+            },
+          },
+        },
+        _count: { select: { responses: true } },
+      },
+    });
+  }
+
+  async markClosingSoonNotified(surveyId: string, date: Date = new Date()) {
+    return this.prisma.survey.update({
+      where: { id: surveyId },
+      data: { closingSoonNotifiedAt: date },
+    });
+  }
+
+  async markClosedNotified(surveyId: string, date: Date = new Date()) {
+    return this.prisma.survey.update({
+      where: { id: surveyId },
+      data: { closedNotifiedAt: date },
+    });
+  }
+
+  async updateLastReminderSent(surveyId: string, date: Date = new Date()) {
+    return this.prisma.survey.update({
+      where: { id: surveyId },
+      data: { lastReminderSentAt: date },
+    });
+  }
 }
