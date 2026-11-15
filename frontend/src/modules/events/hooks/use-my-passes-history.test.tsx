@@ -69,4 +69,26 @@ describe("useMyPassesHistory", () => {
     resolveOld({ items: [{ id: "old", title: "Old", date: "2026-08-10", startTime: "09:00", endTime: "12:00", location: null }], total: 1, totalPages: 1, limit: 10 });
     await waitFor(() => expect(result.current.registrations[0]?.id).toBe("new"));
   });
+  it("cancels a pending next page before reloading page one", async () => {
+    await saveAccessToken("signed-token");
+    const first = { items: [{ id: "first", title: "First", date: "2026-09-10", startTime: "09:00", endTime: "12:00", location: null }], total: 2, totalPages: 2, limit: 10 };
+    const getFinished = vi.spyOn(registrationsService, "getFinished")
+      .mockResolvedValueOnce(first)
+      .mockImplementationOnce(() => new Promise(() => undefined))
+      .mockResolvedValueOnce({ ...first, items: [{ ...first.items[0], id: "fresh" }] });
+    const { result, rerender } = renderHookWithQuery(
+      ({ enabled }: { enabled: boolean }) => useMyPassesHistory(enabled),
+      { initialProps: { enabled: true } },
+    );
+
+    await waitFor(() => expect(result.current.registrations[0]?.id).toBe("first"));
+    result.current.loadMore();
+    await waitFor(() => expect(getFinished).toHaveBeenCalledTimes(2));
+    const nextPageSignal = getFinished.mock.calls[1][2];
+    rerender({ enabled: false });
+    await waitFor(() => expect(nextPageSignal?.aborted).toBe(true));
+    rerender({ enabled: true });
+    await waitFor(() => expect(result.current.registrations[0]?.id).toBe("fresh"));
+    expect(getFinished.mock.calls.map(([page]) => page)).toEqual([1, 2, 1]);
+  });
 });

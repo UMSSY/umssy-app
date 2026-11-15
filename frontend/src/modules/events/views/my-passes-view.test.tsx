@@ -103,6 +103,18 @@ describe("Mis pases", () => {
     fireEvent.click(screen.getByRole('tab', { name: 'Vigentes' }));
     await waitFor(() => expect(signal?.aborted).toBe(true));
   });
+  it('shows history without requesting a QR or saving an offline pass', async () => {
+    getMine.mockResolvedValue([]);
+    getFinished.mockResolvedValue({ items: [{ id: 'history-only', title: 'History only', date: pass.date, startTime: pass.startTime, endTime: pass.endTime, location: pass.location }], total: 1, limit: 10, totalPages: 1 });
+    const saveSpy = vi.spyOn(offlinePassesStore, 'save');
+    render(<MyPassesView />);
+    fireEvent.click(screen.getByRole('tab', { name: 'Historial' }));
+    expect(await screen.findByText('History only')).toBeInTheDocument();
+    expect(registrationsService.getPass).not.toHaveBeenCalled();
+    expect(saveSpy).not.toHaveBeenCalled();
+    expect(screen.queryByRole('img', { name: 'Código QR del pase' })).not.toBeInTheDocument();
+    saveSpy.mockRestore();
+  });
   it('preserves different workshops with identical names and dates', async () => {
     getMine.mockResolvedValue([{ ...pass, eventId: 'event-1' }, { ...pass, id: 'reg-2', eventId: 'event-2' }]);
     render(<MyPassesView />);
