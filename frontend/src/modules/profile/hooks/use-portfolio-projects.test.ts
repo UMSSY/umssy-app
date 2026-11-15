@@ -1,0 +1,111 @@
+import { renderHookWithQuery as renderHook } from "@/shared/testing/render-hook-with-query";
+import { act, cleanup, waitFor } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { PORTFOLIO_PROJECTS_QUERY_KEY } from "../constants/portfolio-projects.constants";
+import { portfolioProjectsService } from "../services/portfolio-projects.service";
+import type {
+  PortfolioProjectItem,
+  UpdatePortfolioProjectsPayload,
+} from "../types/portfolio-project.types";
+import {
+  usePortfolioProjects,
+  useUpdatePortfolioProjects,
+} from "./use-portfolio-projects";
+
+vi.mock("../services/portfolio-projects.service", () => ({
+  portfolioProjectsService: {
+    getPortfolioProjects: vi.fn(),
+    updatePortfolioProjects: vi.fn(),
+  },
+}));
+
+describe("use-portfolio-projects hooks", () => {
+  afterEach(() => {
+    cleanup();
+    vi.clearAllMocks();
+  });
+
+  describe("usePortfolioProjects", () => {
+    it("returns the portfolio projects list on success", async () => {
+      const mockProjects: PortfolioProjectItem[] = [
+        {
+          id: "p1",
+          provider: "github",
+          repoName: "project-alpha",
+          repoUrl: "https://github.com/user/project-alpha",
+          description: "Alpha project",
+          language: "TypeScript",
+          starsCount: 12,
+          isOwner: true,
+          displayOrder: 1,
+        },
+      ];
+      vi.mocked(portfolioProjectsService.getPortfolioProjects).mockResolvedValueOnce(mockProjects);
+
+      const { result } = renderHook(() => usePortfolioProjects());
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      expect(result.current.projects).toEqual(mockProjects);
+      expect(result.current.isError).toBe(false);
+    });
+
+    it("returns an empty array and error state when service fails", async () => {
+      vi.mocked(portfolioProjectsService.getPortfolioProjects).mockRejectedValueOnce(
+        new Error("Network Error"),
+      );
+
+      const { result } = renderHook(() => usePortfolioProjects());
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      expect(result.current.projects).toEqual([]);
+      expect(result.current.isError).toBe(true);
+    });
+  });
+
+  describe("useUpdatePortfolioProjects", () => {
+    it("updates projects and invalidates query cache", async () => {
+      const payload: UpdatePortfolioProjectsPayload = {
+        projects: [
+          {
+            provider: "github",
+            repoName: "project-beta",
+            repoUrl: "https://github.com/user/project-beta",
+            starsCount: 5,
+            isOwner: false,
+          },
+        ],
+      };
+      const updatedProjects: PortfolioProjectItem[] = [
+        {
+          id: "p2",
+          provider: "github",
+          repoName: "project-beta",
+          repoUrl: "https://github.com/user/project-beta",
+          description: null,
+          language: null,
+          starsCount: 5,
+          isOwner: false,
+          displayOrder: 1,
+        },
+      ];
+      vi.mocked(portfolioProjectsService.updatePortfolioProjects).mockResolvedValueOnce(
+        updatedProjects,
+      );
+
+      const { result, client } = renderHook(() => useUpdatePortfolioProjects());
+      const invalidateSpy = vi.spyOn(client, "invalidateQueries");
+
+      await act(async () => {
+        await result.current.mutateAsync(payload);
+      });
+
+      expect(portfolioProjectsService.updatePortfolioProjects).toHaveBeenCalledWith(payload);
+      expect(invalidateSpy).toHaveBeenCalledWith({
+        queryKey: PORTFOLIO_PROJECTS_QUERY_KEY,
+      });
+    });
+  });
+});
+
