@@ -14,6 +14,15 @@ export { getRolesLabel } from "./utils/get-session-role-label";
 
 export { SessionLogoutMenuItem } from "./components/session-logout-menu-item";
 export { LogoutConfirmDialog } from "./components/logout-confirm-dialog";
+export { SessionTimeoutModal } from "./components/session-timeout-modal";
+export { SessionInactivityGuard } from "./components/session-inactivity-guard";
+export { useSessionInactivity } from "./hooks/use-session-inactivity";
+export { formatCountdown } from "./utils/format-countdown";
+export {
+  DEFAULT_IDLE_TIMEOUT_SECONDS,
+  DEFAULT_WARNING_SECONDS,
+  DEFAULT_ABSOLUTE_TIMEOUT_HOURS,
+} from "./constants/session-timing.constants";
 export { resolvePostLoginPath } from "./utils/resolve-post-login-path";
 
 export { getSafeNextPath } from "./utils/safe-next-path";

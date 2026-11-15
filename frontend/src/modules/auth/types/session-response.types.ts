@@ -5,4 +5,7 @@ export interface SessionResponse {
   email: string;
   company?: { id: string; name: string } | null;
   roles: RoleTag[];
+  idleTimeoutSeconds?: number;
+  warningSeconds?: number;
+  absoluteExpiresAt?: string;
 }

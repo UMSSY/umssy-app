@@ -8,6 +8,10 @@ import { authService } from "@/modules/auth";
 import { saveAccessToken, clearAccessToken } from "@/shared/services/storage/access-token-storage";
 import { AuthProvider, useAuth } from "./auth-context";
 
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ replace: vi.fn(), push: vi.fn() }),
+}));
+
 afterEach(() => {
   cleanup();
   clearAccessToken();
