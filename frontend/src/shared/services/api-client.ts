@@ -6,6 +6,7 @@ import {
   clearAccessToken,
   initializeAccessTokenStorage,
 } from "@/shared/services/storage/access-token-storage";
+import { broadcastAuthEvent } from "@/shared/utils/auth-broadcast";
 
 export const apiClient = axios.create({
   baseURL: ENV_CONFIG.apiUrl,
@@ -36,6 +37,23 @@ apiClient.interceptors.response.use(
       // Una respuesta tardía de otra sesión no debe invalidar el token actual.
       if (token && authorization === `${BEARER_PREFIX}${token}`)
         clearAccessToken();
+
+      const responseCode = (error.response?.data as { code?: string } | undefined)?.code;
+      if (
+        responseCode === "SESSION_EXPIRED" ||
+        responseCode === "SESSION_REVOKED" ||
+        responseCode === "REFRESH_INVALID" ||
+        responseCode === "PASSWORD_CHANGED"
+      ) {
+        broadcastAuthEvent({ type: "SESSION_CLOSED", reason: responseCode });
+        if (
+          typeof window !== "undefined" &&
+          !window.location.pathname.includes("/session-closed") &&
+          !window.location.pathname.includes("/login")
+        ) {
+          window.location.replace(`/session-closed?reason=${responseCode}`);
+        }
+      }
     }
     return Promise.reject(error);
   },

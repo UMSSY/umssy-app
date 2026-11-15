@@ -1,6 +1,7 @@
 import { BEARER_PREFIX } from "@/shared/constants/auth.constants";
 import { ROLE_TAGS } from "@/shared/constants/roles.constants";
 import { apiClient } from "@/shared/services/api-client";
+import { broadcastAuthEvent } from "../utils/auth-broadcast";
 import type { ApiResponse } from "@/shared/types/api-response.types";
 import type { SessionResponse } from "../types/session-response.types";
 import type { LoginPayload, LoginResponse } from "../types/auth-types";
@@ -58,6 +59,7 @@ export const authService = {
     }
   },
   logout: async (): Promise<{ ok: boolean }> => {
+    broadcastAuthEvent({ type: "SESSION_CLOSED", reason: "SESSION_REVOKED" });
     try {
       const response = await apiClient.post<ApiResponse<{ ok: boolean }> | { ok: boolean }>("/auth/logout");
       const res = response.data;

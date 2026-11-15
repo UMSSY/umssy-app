@@ -12,6 +12,15 @@ const mockGetSession = vi.fn();
 const mockRefreshSession = vi.fn();
 const mockLogout = vi.fn();
 const mockEndSession = vi.fn();
+let mockBroadcastHandler: ((msg: { type: string; reason?: string }) => void) | null = null;
+const mockBroadcastAuthEvent = vi.fn();
+
+vi.mock("../utils/auth-broadcast", () => ({
+  broadcastAuthEvent: (msg: { type: string; reason?: string }) => mockBroadcastAuthEvent(msg),
+  useAuthBroadcastSync: (callback: (msg: { type: string; reason?: string }) => void) => {
+    mockBroadcastHandler = callback;
+  },
+}));
 
 vi.mock("../services/auth.service", () => ({
   authService: {
@@ -122,8 +131,24 @@ describe("SessionInactivityGuard", () => {
 
     expect(mockEndSession).toHaveBeenCalledTimes(1);
     expect(mockLogout).toHaveBeenCalledTimes(1);
+    expect(mockBroadcastAuthEvent).toHaveBeenCalledWith({
+      type: "SESSION_CLOSED",
+      reason: "SESSION_EXPIRED",
+    });
     expect(mockReplace).toHaveBeenCalledWith(
       expect.stringContaining("reason=SESSION_EXPIRED"),
     );
+  });
+
+  it("cierra la sesión y redirige a /session-closed al recibir evento de otra pestaña (CA10)", () => {
+    render(<SessionInactivityGuard />);
+
+    mockBroadcastHandler?.({
+      type: "SESSION_CLOSED",
+      reason: "SESSION_REVOKED",
+    });
+
+    expect(mockEndSession).toHaveBeenCalledTimes(1);
+    expect(mockReplace).toHaveBeenCalledWith("/session-closed?reason=SESSION_REVOKED");
   });
 });

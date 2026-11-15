@@ -1,5 +1,6 @@
 export { LoginView } from "./views/login-view";
 export { ForgotPasswordView } from "./views/forgot-password-view";
+export { SessionClosedView } from "./views/session-closed-view";
 export { useLogin } from "./hooks/use-login";
 export { authService } from "./services/auth.service";
 export { SessionGate } from "./components/session-gate";
@@ -11,6 +12,11 @@ export { getSessionRoles } from "./utils/get-session-roles";
 export type { SessionResponse } from "./types/session-response.types";
 export type { RoleTag, LoginResponse } from "./types/auth-types";
 export { getRolesLabel } from "./utils/get-session-role-label";
+export {
+  broadcastAuthEvent,
+  useAuthBroadcastSync,
+  AUTH_BROADCAST_CHANNEL,
+} from "./utils/auth-broadcast";
 
 export { SessionLogoutMenuItem } from "./components/session-logout-menu-item";
 export { LogoutConfirmDialog } from "./components/logout-confirm-dialog";

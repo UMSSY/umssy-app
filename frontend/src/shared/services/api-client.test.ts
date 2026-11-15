@@ -1,6 +1,7 @@
+import * as authBroadcast from "@/shared/utils/auth-broadcast";
 import "@/shared/testing/indexed-db.mock";
 import type { AxiosHeaders, AxiosRequestConfig } from "axios";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { apiClient } from "./api-client";
 import {
   clearAccessToken,
@@ -94,4 +95,34 @@ describe("apiClient session errors", () => {
       expect(getAccessToken()).toBe("valid-token");
     },
   );
+
+  it("broadcasts SESSION_CLOSED when 401 response includes a session closure code (CA7, CA10)", async () => {
+    const broadcastSpy = vi.spyOn(authBroadcast, "broadcastAuthEvent").mockImplementation(() => {});
+    await saveAccessToken("expired-token");
+
+    let rejected = false;
+    try {
+      await apiClient.get("/private-resource", {
+        adapter: async (config) => {
+          throw Object.assign(new Error("Revocado"), {
+            isAxiosError: true,
+            config,
+            response: {
+              status: 401,
+              data: { code: "SESSION_REVOKED", detail: "Sesión revocada" },
+            },
+          });
+        },
+      });
+    } catch {
+      rejected = true;
+    }
+
+    expect(rejected).toBe(true);
+    expect(broadcastSpy).toHaveBeenCalledWith({
+      type: "SESSION_CLOSED",
+      reason: "SESSION_REVOKED",
+    });
+    broadcastSpy.mockRestore();
+  });
 });
