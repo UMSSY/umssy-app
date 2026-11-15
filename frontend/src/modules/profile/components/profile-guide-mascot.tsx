@@ -12,6 +12,7 @@ import {
   PROFILE_GUIDE_MASCOT_SIZE_CLASSES,
   PROFILE_GUIDE_MASCOT_SIZES_PX,
   PROFILE_GUIDE_MESSAGES,
+  PROFILE_GUIDE_MIRROR_KEYFRAMES,
   PROFILE_GUIDE_POSE_CROSSFADE_CLASS,
   PROFILE_GUIDE_SWAY_KEYFRAMES,
 } from '../constants/profile-guide-animation.constants';
@@ -40,6 +41,7 @@ export function ProfileGuideMascot({
   const entranceRef = useRef<HTMLDivElement>(null);
   const floatRef = useRef<HTMLDivElement>(null);
   const swayRef = useRef<HTMLDivElement>(null);
+  const flyRef = useRef<HTMLImageElement>(null);
   const {
     layerRef: activityRef,
     overridePose,
@@ -56,6 +58,15 @@ export function ProfileGuideMascot({
     setFade({ current: displayedPose, previous: fade.current });
   }
   const isCrossfading = fade.previous !== null;
+
+  // Going backward the fly frame faces left, both in a step transition and
+  // when the parent moves the mascot itself with `pose="fly"`. It stays
+  // mirrored until it has faded out.
+  const isRestingFlyMirrored =
+    stepDirection === 'backward' &&
+    overridePose === null &&
+    (pose === 'fly' || fade.previous === 'fly');
+  const isMirrored = isFlyMirrored || isRestingFlyMirrored;
 
   const hasFrameAnimation = size !== 'sm' && !isReducedMotion;
   const isWaving = displayedPose === 'wave';
@@ -95,6 +106,14 @@ export function ProfileGuideMascot({
     animation.onfinish = playGreeting;
     return () => animation.cancel();
   }, [animate, entrance, playGreeting]);
+
+  useLayoutEffect(() => {
+    if (!isMirrored) return;
+    const animation = animate(flyRef.current, PROFILE_GUIDE_MIRROR_KEYFRAMES, {
+      fill: 'forwards',
+    });
+    return () => animation?.cancel();
+  }, [animate, isMirrored]);
 
   useEffect(() => {
     if (!isFloating) return;
@@ -147,6 +166,7 @@ export function ProfileGuideMascot({
                 return (
                   <Image
                     key={frame}
+                    ref={frame === 'fly' ? flyRef : undefined}
                     src={PROFILE_GUIDE_FRAME_SOURCES[frame]}
                     alt=""
                     aria-hidden="true"
@@ -162,7 +182,12 @@ export function ProfileGuideMascot({
                       isCrossfading
                         ? PROFILE_GUIDE_POSE_CROSSFADE_CLASS
                         : 'transition-none',
-                      frame === 'fly' && isFlyMirrored && '-scale-x-100',
+                      // Static fallback: `animate` is disabled with reduced
+                      // motion.
+                      frame === 'fly' &&
+                        isMirrored &&
+                        isReducedMotion &&
+                        '-scale-x-100',
                     )}
                   />
                 );

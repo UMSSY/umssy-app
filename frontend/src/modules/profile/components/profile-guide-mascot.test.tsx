@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   PROFILE_GUIDE_ENTRANCE_KEYFRAMES,
   PROFILE_GUIDE_JUMP_KEYFRAMES,
+  PROFILE_GUIDE_MIRROR_KEYFRAMES,
   PROFILE_GUIDE_SWAY_KEYFRAMES,
 } from '../constants/profile-guide-animation.constants';
 import {
@@ -283,9 +284,7 @@ describe('step transition', () => {
     expect(getTransforms(step)[1]).toContain('translateX(28px)');
     expect(step.options).toMatchObject({ duration: 650 });
     expect(getActiveFrames()).toEqual(['fly']);
-    expect(document.querySelector('[data-frame="fly"]')).not.toHaveClass(
-      '-scale-x-100',
-    );
+    expect(findAnimations(PROFILE_GUIDE_MIRROR_KEYFRAMES)).toHaveLength(0);
 
     advance(380);
     expect(getActiveFrames()).toEqual(['point']);
@@ -295,7 +294,7 @@ describe('step transition', () => {
     expect(getActiveFrames()).toEqual(['point']);
   });
 
-  it('flies to the left with the fly frame mirrored going backward', () => {
+  it('flies to the left facing left going backward', () => {
     const { rerender } = render(<ProfileGuideMascot pose="point" stepKey={2} />);
     rerender(
       <ProfileGuideMascot pose="point" stepKey={1} stepDirection="backward" />,
@@ -304,6 +303,71 @@ describe('step transition', () => {
     expect(getTransforms(findStepAnimations()[0])[1]).toContain(
       'translateX(-28px)',
     );
+    const fly = document.querySelector('[data-frame="fly"]');
+    const [mirror] = findAnimations(PROFILE_GUIDE_MIRROR_KEYFRAMES);
+    expect(fly).toHaveClass('opacity-100');
+    expect(fly).not.toHaveClass('-scale-x-100');
+    expect(mirror.target).toBe(fly);
+    expect(getTransforms(mirror)).toEqual(['scaleX(-1)', 'scaleX(-1)']);
+    expect(mirror.options).toMatchObject({ fill: 'forwards' });
+
+    // Still facing left while the fly frame fades out after landing.
+    advance(380);
+    expect(getActiveFrames()).toEqual(['point']);
+    expect(mirror.cancel).not.toHaveBeenCalled();
+
+    advance(270);
+    expect(mirror.cancel).toHaveBeenCalledTimes(1);
+  });
+
+  it('faces left while the parent flies it backward with the fly pose', () => {
+    const { rerender } = render(
+      <ProfileGuideMascot pose="point" stepKey="guide" isFloating={false} />,
+    );
+    rerender(
+      <ProfileGuideMascot
+        pose="fly"
+        stepKey="guide"
+        stepDirection="backward"
+        isFloating={false}
+      />,
+    );
+
+    const [mirror] = findAnimations(PROFILE_GUIDE_MIRROR_KEYFRAMES);
+    expect(mirror.target).toBe(document.querySelector('[data-frame="fly"]'));
+    expect(findStepAnimations()).toHaveLength(0);
+
+    // Keeps facing left until the fly frame has faded out, then faces right.
+    rerender(
+      <ProfileGuideMascot
+        pose="point"
+        stepKey="guide"
+        stepDirection="backward"
+        isFloating={false}
+      />,
+    );
+    expect(mirror.cancel).not.toHaveBeenCalled();
+    advance(260);
+    expect(mirror.cancel).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps facing right while the parent flies it forward', () => {
+    render(<ProfileGuideMascot pose="fly" stepKey="guide" isFloating={false} />);
+
+    expect(animations).toHaveLength(0);
+    expect(document.querySelector('[data-frame="fly"]')).not.toHaveClass(
+      '-scale-x-100',
+    );
+  });
+
+  it('mirrors the fly frame without animating with reduced motion', () => {
+    stubReducedMotion(true);
+    const { rerender } = render(<ProfileGuideMascot pose="point" stepKey={2} />);
+    rerender(
+      <ProfileGuideMascot pose="point" stepKey={1} stepDirection="backward" />,
+    );
+
+    expect(animations).toHaveLength(0);
     expect(document.querySelector('[data-frame="fly"]')).toHaveClass(
       '-scale-x-100',
       'opacity-100',
