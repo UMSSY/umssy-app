@@ -1,22 +1,45 @@
 "use client";
 
-import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import {
+  useEffect,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type DragEvent,
+  type FormEvent,
+} from "react";
+import {
+  ArrowLeft,
   Building2,
   Check,
   CheckCircle2,
   ChevronRight,
-  FileText,
+  Copy,
+  Eye,
+  Globe,
+  GraduationCap,
   ImagePlus,
+  Info,
   Loader2,
+  Mail,
+  Phone,
+  RefreshCw,
   ShieldCheck,
-  Upload,
+  Trash2,
+  User,
+  X,
 } from "lucide-react";
+import { cn } from "cn";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
+import { FormFieldset } from "@/shared/components/layout/form-fieldset";
+import { PageHeading } from "@/shared/components/layout/page-heading";
+import { DocumentDropzoneContent } from "../document/document-dropzone-content";
+import { DocumentPreviewContent } from "../document/document-preview-content";
+import { RequiredMark } from "../personal-data/required-mark";
 import { PublicHeader } from "../request-steps/public-header";
 import { companyAccessRequestService } from "../../services/company-access-request.service";
 import type {
@@ -28,6 +51,8 @@ import type {
 interface CompanyAccessRequestFlowProps {
   onSwitchToGraduate: () => void;
 }
+
+const ALLOWED_LOGO_TYPES = ["image/png", "image/jpeg", "image/webp"];
 
 const STEPS = [
   {
@@ -52,15 +77,38 @@ const STEPS = [
   },
 ];
 
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024 * 1024) {
+    return `${(bytes / 1024).toFixed(1)} KB`;
+  }
+  return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
+}
+
 export function CompanyAccessRequestFlow({
   onSwitchToGraduate,
 }: CompanyAccessRequestFlowProps) {
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [cities, setCities] = useState<CityItem[]>([]);
   const [draftId, setDraftId] = useState<string | null>(null);
-  const [submitted, setSubmitted] = useState<SubmitCompanyRequestResult | null>(
+    const [submitted, setSubmitted] = useState<SubmitCompanyRequestResult | null>(
     null,
   );
+  const [copiedCode, setCopiedCode] = useState(false);
+
+  async function handleCopyCode(code: string) {
+    try {
+      await navigator.clipboard.writeText(code);
+    } catch {
+      const input = document.createElement("input");
+      input.value = code;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand("copy");
+      document.body.removeChild(input);
+    }
+    setCopiedCode(true);
+    setTimeout(() => setCopiedCode(false), 2000);
+  }
 
   const [form, setForm] = useState<CreateCompanyRequestPayload>({
     companyName: "",
@@ -73,11 +121,30 @@ export function CompanyAccessRequestFlow({
     username: "",
   });
 
+  const logoInputRef = useRef<HTMLInputElement | null>(null);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [logoDimensions, setLogoDimensions] = useState<{
+    width: number;
+    height: number;
+  } | null>(null);
+  const [isLogoDragging, setIsLogoDragging] = useState(false);
+  const [isLogoModalOpen, setIsLogoModalOpen] = useState(false);
+  const [previewBg, setPreviewBg] = useState<"light" | "dark">("light");
+
   const [documentFile, setDocumentFile] = useState<File | null>(null);
+  const [documentPreviewUrl, setDocumentPreviewUrl] = useState<string | null>(
+    null,
+  );
+  const [documentError, setDocumentError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      if (documentPreviewUrl) URL.revokeObjectURL(documentPreviewUrl);
+    };
+  }, [documentPreviewUrl]);
 
   useEffect(() => {
     void companyAccessRequestService.getCities().then((res) => {
@@ -99,28 +166,100 @@ export function CompanyAccessRequestFlow({
     };
   }, [logoPreview]);
 
+  useEffect(() => {
+    if (!isLogoModalOpen) return;
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setIsLogoModalOpen(false);
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isLogoModalOpen]);
+
+  function processSelectedLogo(file: File) {
+    if (!ALLOWED_LOGO_TYPES.includes(file.type)) {
+      setError(
+        "Formato no válido para el logo. Solo se permiten imágenes PNG, JPG o WEBP.",
+      );
+      if (logoInputRef.current) logoInputRef.current.value = "";
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      setError("El logo no debe superar los 2 MB.");
+      if (logoInputRef.current) logoInputRef.current.value = "";
+      return;
+    }
+
+    setError(null);
+    if (logoPreview) URL.revokeObjectURL(logoPreview);
+    const objectUrl = URL.createObjectURL(file);
+    setLogoFile(file);
+    setLogoPreview(objectUrl);
+    setLogoDimensions(null);
+
+    const img = new window.Image();
+    img.onload = () => {
+      setLogoDimensions({ width: img.naturalWidth, height: img.naturalHeight });
+    };
+    img.src = objectUrl;
+  }
+
   function handleLogoChange(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 2 * 1024 * 1024) {
-      setError("El logo no debe superar los 2 MB.");
-      return;
-    }
-    setError(null);
-    setLogoFile(file);
-    if (logoPreview) URL.revokeObjectURL(logoPreview);
-    setLogoPreview(URL.createObjectURL(file));
+    processSelectedLogo(file);
   }
 
-  function handleDocumentChange(e: ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 10 * 1024 * 1024) {
-      setError("La carta de solicitud no debe superar los 10 MB.");
+  function handleLogoDrop(e: DragEvent<HTMLDivElement>) {
+    e.preventDefault();
+    setIsLogoDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      processSelectedLogo(file);
+    }
+  }
+
+  function handleRemoveLogo() {
+    if (logoPreview) URL.revokeObjectURL(logoPreview);
+    setLogoFile(null);
+    setLogoPreview(null);
+    setLogoDimensions(null);
+    setIsLogoModalOpen(false);
+    if (logoInputRef.current) {
+      logoInputRef.current.value = "";
+    }
+  }
+
+  const ALLOWED_DOCUMENT_TYPES = [
+    "application/pdf",
+    "image/jpeg",
+    "image/png",
+  ];
+
+  function handleDocumentSelected(file: File) {
+    if (!ALLOWED_DOCUMENT_TYPES.includes(file.type)) {
+      setDocumentError(
+        "Formato no permitido. Solo se aceptan archivos JPG, PNG o PDF.",
+      );
       return;
     }
+    if (file.size > 10 * 1024 * 1024) {
+      setDocumentError("El archivo supera el máximo de 10 MB.");
+      return;
+    }
+    setDocumentError(null);
     setError(null);
+    if (documentPreviewUrl) URL.revokeObjectURL(documentPreviewUrl);
     setDocumentFile(file);
+    setDocumentPreviewUrl(URL.createObjectURL(file));
+  }
+
+  function handleRemoveDocument() {
+    if (documentPreviewUrl) URL.revokeObjectURL(documentPreviewUrl);
+    setDocumentFile(null);
+    setDocumentPreviewUrl(null);
+    setDocumentError(null);
   }
 
   async function handleStep1Submit(e: FormEvent) {
@@ -128,7 +267,7 @@ export function CompanyAccessRequestFlow({
     setError(null);
     setSubmitting(true);
 
-    const created = await companyAccessRequestService.createDraft(form);
+    const created = await companyAccessRequestService.createDraft({ ...form, websiteUrl: (form.websiteUrl ?? "").trim() });
     if (!created.ok) {
       setError(created.message);
       setSubmitting(false);
@@ -185,388 +324,771 @@ export function CompanyAccessRequestFlow({
     <div className="flex min-h-screen flex-col">
       <PublicHeader />
 
-      <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col lg:flex-row">
-        <aside className="w-full border-b border-border bg-surface-soft px-6 py-8 lg:w-80 lg:border-r lg:border-b-0">
-          <h2 className="text-xl font-bold text-primary">
-            Solicitud de empresa
-          </h2>
-          <p className="mt-1 text-sm text-text-secondary">
-            Cuatro pasos para registrar tu empresa y publicar ofertas laborales.
-          </p>
+      <div className="flex flex-1 flex-col lg:flex-row">
+        <aside className="flex w-full shrink-0 flex-col gap-4 border-b border-sidebar-border bg-sidebar px-4 py-5 text-sidebar-foreground sm:px-6 lg:sticky lg:top-app-header lg:h-app-sidebar lg:w-72 lg:justify-between lg:gap-10 lg:self-start lg:overflow-y-auto lg:border-r lg:border-b-0 lg:px-6 lg:py-8">
+          <div>
+            <h2 className="font-tight text-xl font-bold text-accent lg:text-2xl">
+              Solicitud de empresa
+            </h2>
+            <p className="mt-2 hidden max-w-75 text-sm text-text-secondary lg:mb-[22px] lg:block">
+              Cuatro pasos para registrar tu empresa y publicar ofertas
+              laborales.
+            </p>
 
-          <ol className="mt-8 space-y-6">
-            {STEPS.map((item) => {
-              const active = step === item.number;
-              const done = step > item.number;
-              return (
-                <li key={item.number} className="flex items-start gap-3">
-                  <span
-                    className={`flex size-7 shrink-0 items-center justify-center rounded-full border text-xs font-bold ${
-                      done
-                        ? "border-primary bg-primary text-white"
-                        : active
-                          ? "border-primary bg-white text-primary"
-                          : "border-border bg-white text-text-secondary"
-                    }`}
-                  >
-                    {done ? <Check className="size-3.5" /> : item.number}
-                  </span>
-                  <div>
-                    <p
-                      className={`text-sm font-semibold ${
-                        active || done ? "text-ink" : "text-text-secondary"
-                      }`}
+            <nav aria-label="Pasos de la solicitud" className="mt-3 lg:mt-0">
+              <ol className="grid grid-cols-2 gap-x-3 gap-y-2 sm:grid-cols-4 lg:block">
+                {STEPS.map((item, index) => {
+                  const isActive = step === item.number;
+                  const isCompleted = step > item.number;
+                  const isLast = index === STEPS.length - 1;
+
+                  return (
+                    <li
+                      key={item.number}
+                      aria-current={isActive ? "step" : undefined}
                     >
-                      {item.title}
-                    </p>
-                    <p className="text-xs text-text-secondary">
-                      {item.description}
-                    </p>
-                  </div>
-                </li>
-              );
-            })}
-          </ol>
+                      <div className="flex items-center gap-2.5 lg:gap-3.5 lg:py-3">
+                        <span
+                          className={cn(
+                            "flex size-7 shrink-0 items-center justify-center rounded-full border text-sm font-semibold lg:size-7.5",
+                            isActive
+                              ? "border-accent bg-interaction text-accent"
+                              : isCompleted
+                                ? "border-accent bg-accent text-surface"
+                                : "border-border-strong text-text-secondary",
+                          )}
+                        >
+                          {isCompleted ? (
+                            <>
+                              <Check aria-hidden="true" className="size-4" />
+                              <span className="sr-only">Paso completado</span>
+                            </>
+                          ) : (
+                            item.number
+                          )}
+                        </span>
+                        <div className="min-w-0">
+                          <p
+                            className={cn(
+                              "text-sm leading-tight font-semibold",
+                              isActive ? "text-ink" : "text-ink-soft",
+                            )}
+                          >
+                            {item.title}
+                          </p>
+                          <p className="hidden text-sm text-text-secondary lg:block">
+                            {item.description}
+                          </p>
+                        </div>
+                      </div>
+                      {isLast ? null : (
+                        <span
+                          aria-hidden="true"
+                          className="ml-3.5 hidden h-[18px] w-[1.5px] bg-border lg:block"
+                        />
+                      )}
+                    </li>
+                  );
+                })}
+              </ol>
+            </nav>
+          </div>
 
-          <div className="mt-10 flex items-start gap-2.5 border-t border-border pt-6 text-xs text-text-secondary">
-            <ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" />
-            <p>
+          <div className="flex items-start gap-3 border-t border-sidebar-border pt-3 lg:pt-[18px]">
+            <ShieldCheck
+              aria-hidden="true"
+              className="size-5 shrink-0 text-accent"
+            />
+            <p className="text-sm text-ink-soft">
               Tu documentación empresarial es validada por la Dirección de
               Carrera de Ingeniería de Sistemas e Informática.
             </p>
           </div>
         </aside>
 
-        <section className="flex-1 px-6 py-8 lg:px-12">
-          <div className="mx-auto max-w-3xl">
-            <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-              <div>
-                <h1 className="text-2xl font-bold text-primary sm:text-3xl">
-                  Registra tu empresa en la comunidad
-                </h1>
-                <p className="mt-1 text-sm text-text-secondary">
-                  Conecta con titulados verificados de Ingeniería de Sistemas e
-                  Informática de la UMSS.
-                </p>
-              </div>
-
-              <div className="inline-flex gap-1 rounded-lg border border-border bg-surface-soft p-1">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={onSwitchToGraduate}
+        <section className="flex min-w-0 flex-1 flex-col px-4 py-6 md:p-8">
+          <div className="mx-auto flex w-full max-w-5xl justify-center">
+            <div className="flex w-full flex-col gap-5">
+              <div className="flex items-center justify-start">
+                <div
+                  role="tablist"
+                  aria-label="Tipo de solicitante"
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-surface-soft p-1.5 shadow-2xs"
                 >
-                  Soy Titulado
-                </Button>
-                <Button type="button" size="sm">
-                  Soy Empresa
-                </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="gap-2 rounded-lg px-4 font-medium text-text-secondary hover:text-ink"
+                    onClick={onSwitchToGraduate}
+                  >
+                    <GraduationCap className="size-4" />
+                    Soy Titulado
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    className="gap-2 rounded-lg px-4 font-semibold"
+                  >
+                    <Building2 className="size-4" />
+                    Soy Empresa
+                  </Button>
+                </div>
               </div>
-            </div>
 
-            {error ? (
-              <div
-                role="alert"
-                className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
-              >
-                {error}
-              </div>
-            ) : null}
+              {step === 1 ? (
+                <PageHeading
+                  title="Registra tu empresa en la comunidad"
+                  description="Conecta con titulados verificados de Ingeniería de Sistemas e Informática de la UMSS."
+                />
+              ) : null}
+              {step === 2 ? (
+                <PageHeading
+                  title="Carta de solicitud en hoja membretada"
+                  description={`Adjunta la carta oficial firmada y sellada dirigida a la Carrera de Ingeniería de Sistemas e Informática (UMSS) para validar a ${form.companyName.trim() || "tu empresa"}.`}
+                />
+              ) : null}
 
-            {step === 1 && (
-              <form
-                onSubmit={handleStep1Submit}
-                className="space-y-6 rounded-xl border border-border bg-surface p-6 shadow-xs"
-              >
-                <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-                  <label className="group relative flex size-24 shrink-0 cursor-pointer flex-col items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-border bg-surface-soft transition hover:border-primary">
-                    {logoPreview ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={logoPreview}
-                        alt="Vista previa del logo"
-                        className="size-full object-contain p-1.5"
+              {step !== 3 ? (
+                <p className="text-xs text-text-secondary">
+                  <span aria-hidden="true" className="font-semibold text-red-600">
+                    *
+                  </span>{" "}
+                  Campo obligatorio
+                </p>
+              ) : null}
+
+              {error ? (
+                <div
+                  role="alert"
+                  className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+                >
+                  {error}
+                </div>
+              ) : null}
+
+              {step === 1 && (
+                <form
+                  onSubmit={handleStep1Submit}
+                  className="space-y-6 rounded-lg border border-border bg-surface p-6"
+                >
+                  <FormFieldset title="Identidad corporativa">
+                    <div>
+                      <Label className="mb-1.5 text-xs font-semibold text-ink">
+                        Logo corporativo{" "}
+                        <span className="font-normal text-text-secondary">
+                          (opcional)
+                        </span>
+                      </Label>
+
+                      <Input
+                        ref={logoInputRef}
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp"
+                        className="hidden"
+                        onChange={handleLogoChange}
+                      />
+
+                      {logoPreview && logoFile ? (
+                        <div className="flex flex-col gap-4 rounded-xl border border-border bg-surface-soft/70 p-4 sm:flex-row sm:items-center sm:justify-between">
+                          <div className="flex items-center gap-4">
+                            <Button variant="ghost"
+                              type="button"
+                              onClick={() => setIsLogoModalOpen(true)}
+                              title="Ampliar vista previa"
+                              className="group relative flex size-24 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-border bg-white p-2 shadow-2xs transition hover:border-accent"
+                            >
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={logoPreview}
+                                alt="Vista previa del logo corporativo"
+                                className="size-full object-contain"
+                              />
+                              <span className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-1 bg-black/70 py-1 text-[10px] font-medium text-white opacity-0 transition group-hover:opacity-100">
+                                <Eye className="size-3" />
+                                Ampliar
+                              </span>
+                            </Button>
+
+                            <div className="min-w-0 space-y-1">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <p className="truncate text-sm font-semibold text-ink">
+                                  {logoFile.name}
+                                </p>
+                                <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
+                                  Imagen lista
+                                </span>
+                              </div>
+                              <p className="text-xs text-text-secondary">
+                                {logoFile.type.replace("image/", "").toUpperCase()}{" "}
+                                · {formatFileSize(logoFile.size)}
+                                {logoDimensions
+                                  ? ` · ${logoDimensions.width} × ${logoDimensions.height} px`
+                                  : ""}
+                              </p>
+                              <p className="text-xs text-text-secondary">
+                                Haz clic en la imagen o en &ldquo;Vista previa&rdquo;
+                                para inspeccionar su nitidez.
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setIsLogoModalOpen(true)}
+                              className="gap-1.5"
+                            >
+                              <Eye className="size-3.5" />
+                              Vista previa
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => logoInputRef.current?.click()}
+                              className="gap-1.5"
+                            >
+                              <RefreshCw className="size-3.5" />
+                              Cambiar
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={handleRemoveLogo}
+                              className="gap-1.5 text-red-600 hover:bg-red-50 hover:text-red-700"
+                            >
+                              <Trash2 className="size-3.5" />
+                              Retirar
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div
+                          role="button"
+                          tabIndex={0}
+                          onClick={() => logoInputRef.current?.click()}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              logoInputRef.current?.click();
+                            }
+                          }}
+                          onDragOver={(e) => {
+                            e.preventDefault();
+                            setIsLogoDragging(true);
+                          }}
+                          onDragLeave={() => setIsLogoDragging(false)}
+                          onDrop={handleLogoDrop}
+                          className={cn(
+                            "flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 text-center transition sm:flex-row sm:justify-start sm:gap-5 sm:text-left",
+                            isLogoDragging
+                              ? "border-accent bg-interaction/40"
+                              : "border-border bg-surface-soft/60 hover:border-accent hover:bg-surface-soft",
+                          )}
+                        >
+                          <div className="flex size-14 shrink-0 items-center justify-center rounded-xl border border-border bg-surface text-accent shadow-2xs">
+                            <ImagePlus className="size-6" />
+                          </div>
+                          <div className="mt-3 space-y-1 sm:mt-0">
+                            <p className="text-sm font-semibold text-ink">
+                              Seleccionar o arrastrar logotipo de la empresa
+                            </p>
+                            <p className="text-xs text-text-secondary">
+                              Solo imágenes en formato PNG, JPG o WEBP (máx. 2
+                              MB). Recomendado: formato cuadrado o horizontal
+                              con fondo transparente.
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div>
+                      <Label
+                        htmlFor="companyName"
+                        className="mb-1.5 text-xs font-semibold text-ink"
+                      >
+                        Nombre de la empresa
+                        <RequiredMark />
+                      </Label>
+                      <Input
+                        id="companyName"
+                        required
+                        placeholder="Ej. TecnoAndes Software S.R.L."
+                        className="h-11 rounded-md border-border bg-surface px-3 text-base text-ink focus-visible:border-accent focus-visible:ring-interaction"
+                        value={form.companyName}
+                        onChange={(e) =>
+                          setForm({ ...form, companyName: e.target.value })
+                        }
+                      />
+                    </div>
+
+                    <div className="grid gap-5 md:grid-cols-2">
+                      <div>
+                        <Label
+                          htmlFor="sector"
+                          className="mb-1.5 text-xs font-semibold text-ink"
+                        >
+                          Rubro o sector
+                          <RequiredMark />
+                        </Label>
+                        <Input
+                          id="sector"
+                          required
+                          placeholder="Ej. Desarrollo de Software / Fintech"
+                          className="h-11 rounded-md border-border bg-surface px-3 text-base text-ink focus-visible:border-accent focus-visible:ring-interaction"
+                          value={form.sector}
+                          onChange={(e) =>
+                            setForm({ ...form, sector: e.target.value })
+                          }
+                        />
+                      </div>
+
+                      <div>
+                        <Label
+                          htmlFor="cityId"
+                          className="mb-1.5 text-xs font-semibold text-ink"
+                        >
+                          Ciudad sede
+                          <RequiredMark />
+                        </Label>
+                        <NativeSelect
+                          id="cityId"
+                          required
+                          value={form.cityId}
+                          onChange={(e) =>
+                            setForm({ ...form, cityId: e.target.value })
+                          }
+                          className="h-11 w-full rounded-md border-border bg-surface px-3 text-base text-ink"
+                        >
+                          <option value="">Selecciona una ciudad</option>
+                          {cities.map((city) => (
+                            <option key={city.id} value={city.id}>
+                              {city.name}
+                            </option>
+                          ))}
+                        </NativeSelect>
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label
+                        htmlFor="websiteUrl"
+                        className="mb-1.5 text-xs font-semibold text-ink"
+                      >
+                        Sitio web oficial <span className="font-normal text-text-secondary">(opcional)</span>
+                      </Label>
+                      <div className="relative">
+                        <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-text-secondary">
+                          <Globe aria-hidden="true" className="size-4" />
+                        </span>
+                        <Input
+                          id="websiteUrl"
+                          type="url"
+                          placeholder="https://www.tuempresa.com"
+                          className="h-11 rounded-md border-border bg-surface pl-10 text-base text-ink focus-visible:border-accent focus-visible:ring-interaction"
+                          value={form.websiteUrl}
+                          onChange={(e) =>
+                            setForm({ ...form, websiteUrl: e.target.value })
+                          }
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label
+                        htmlFor="description"
+                        className="mb-1.5 text-xs font-semibold text-ink"
+                      >
+                        Descripción de la empresa
+                        <RequiredMark />
+                      </Label>
+                      <Textarea
+                        id="description"
+                        required
+                        rows={4}
+                        placeholder="Describe brevemente la actividad principal de tu empresa, áreas tecnológicas en las que trabajan y el perfil de talento que buscan..."
+                        className="rounded-md border-border bg-surface p-3 text-base text-ink focus-visible:border-accent focus-visible:ring-interaction"
+                        value={form.description}
+                        onChange={(e) =>
+                          setForm({ ...form, description: e.target.value })
+                        }
+                      />
+                    </div>
+                  </FormFieldset>
+
+                  <FormFieldset title="Contacto y cuenta de reclutador">
+                    <div>
+                      <Label
+                        htmlFor="email"
+                        className="mb-1.5 text-xs font-semibold text-ink"
+                      >
+                        Correo institucional
+                        <RequiredMark />
+                      </Label>
+                      <div className="relative">
+                        <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-text-secondary">
+                          <Mail aria-hidden="true" className="size-4" />
+                        </span>
+                        <Input
+                          id="email"
+                          type="email"
+                          required
+                          placeholder="rrhh@tuempresa.com"
+                          className="h-11 rounded-md border-border bg-surface pl-10 text-base text-ink focus-visible:border-accent focus-visible:ring-interaction"
+                          value={form.email}
+                          onChange={(e) =>
+                            setForm({ ...form, email: e.target.value })
+                          }
+                        />
+                      </div>
+                      <p className="mt-1.5 text-xs text-text-secondary">
+                        Aquí te enviaremos el resultado de la revisión y el
+                        código de activación de tu cuenta.
+                      </p>
+                    </div>
+
+                    <div className="grid gap-5 md:grid-cols-2">
+                      <div>
+                        <Label
+                          htmlFor="phone"
+                          className="mb-1.5 text-xs font-semibold text-ink"
+                        >
+                          Teléfono / Celular
+                          <RequiredMark />
+                        </Label>
+                        <div className="relative">
+                          <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-text-secondary">
+                            <Phone aria-hidden="true" className="size-4" />
+                          </span>
+                          <Input
+                            id="phone"
+                            required
+                            placeholder="Ej. 76419230"
+                            className="h-11 rounded-md border-border bg-surface pl-10 text-base text-ink focus-visible:border-accent focus-visible:ring-interaction"
+                            value={form.phone}
+                            onChange={(e) =>
+                              setForm({ ...form, phone: e.target.value })
+                            }
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <Label
+                          htmlFor="username"
+                          className="mb-1.5 text-xs font-semibold text-ink"
+                        >
+                          Usuario reclutador
+                          <RequiredMark />
+                        </Label>
+                        <div className="relative">
+                          <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-text-secondary">
+                            <User aria-hidden="true" className="size-4" />
+                          </span>
+                          <Input
+                            id="username"
+                            required
+                            placeholder="Ej. rrhh.tecnoandes"
+                            className="h-11 rounded-md border-border bg-surface pl-10 text-base text-ink focus-visible:border-accent focus-visible:ring-interaction"
+                            value={form.username}
+                            onChange={(e) =>
+                              setForm({ ...form, username: e.target.value })
+                            }
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </FormFieldset>
+
+                  <div className="flex justify-end pt-2">
+                    <Button
+                      type="submit"
+                      disabled={submitting}
+                      className="h-11 px-6 text-sm font-semibold"
+                    >
+                      {submitting ? (
+                        <>
+                          <Loader2 className="mr-2 size-4 animate-spin" />
+                          Guardando...
+                        </>
+                      ) : (
+                        <>
+                          Continuar al siguiente paso
+                          <ChevronRight className="ml-1.5 size-4" />
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </form>
+              )}
+
+                            {step === 2 && (
+                <form
+                  onSubmit={handleStep2Submit}
+                  className="grid w-full grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_300px]"
+                >
+                  <div className="flex flex-col gap-5">
+                    {documentFile && documentPreviewUrl ? (
+                      <DocumentPreviewContent
+                        document={{
+                          documentType: null,
+                          fileName: documentFile.name,
+                          fileSize: documentFile.size,
+                          mimeType: documentFile.type,
+                          previewUrl: documentPreviewUrl,
+                          progress: 100,
+                          error: documentError,
+                        }}
+                        isDisabled={submitting}
+                        onRemove={handleRemoveDocument}
                       />
                     ) : (
-                      <>
-                        <ImagePlus className="size-6 text-text-secondary group-hover:text-primary" />
-                        <span className="mt-1 text-[11px] font-medium text-text-secondary">
-                          Subir logo
-                        </span>
-                      </>
+                      <DocumentDropzoneContent
+                        isDisabled={submitting}
+                        error={documentError}
+                        onFileSelected={handleDocumentSelected}
+                      />
                     )}
-                    <Input
-                      type="file"
-                      accept="image/png,image/jpeg,image/webp,image/svg+xml"
-                      className="hidden"
-                      onChange={handleLogoChange}
-                    />
-                  </label>
 
-                  <div className="flex-1 space-y-1">
-                    <p className="text-sm font-semibold text-ink">
-                      Logo corporativo (opcional)
-                    </p>
-                    <p className="text-xs text-text-secondary">
-                      Formatos PNG, JPG, WEBP o SVG (máx. 2 MB). Aparecerá en tus
-                      vacantes publicadas.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-1.5">
-                    <Label htmlFor="companyName">Nombre de la empresa *</Label>
-                    <Input
-                      id="companyName"
-                      required
-                      placeholder="Ej. TecnoAndes Software S.R.L."
-                      value={form.companyName}
-                      onChange={(e) =>
-                        setForm({ ...form, companyName: e.target.value })
-                      }
-                    />
+                    <div className="flex w-full flex-wrap items-center justify-between gap-3 border-t border-border pt-5">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={() => setStep(1)}
+                        disabled={submitting}
+                        className="h-11 rounded-md px-5 text-sm font-semibold text-ink"
+                      >
+                        <ArrowLeft aria-hidden="true" className="mr-1.5 size-4" />
+                        Volver a datos de la empresa
+                      </Button>
+                      <Button
+                        type="submit"
+                        disabled={submitting || !documentFile}
+                        className="h-11 rounded-md bg-primary px-6 text-sm font-semibold text-primary-foreground hover:bg-brand-hover"
+                      >
+                        {submitting ? (
+                          <>
+                            <Loader2 className="mr-2 size-4 animate-spin" />
+                            Enviando solicitud...
+                          </>
+                        ) : (
+                          "Enviar solicitud de empresa"
+                        )}
+                      </Button>
+                    </div>
                   </div>
 
-                  <div className="space-y-1.5">
-                    <Label htmlFor="sector">Rubro o sector *</Label>
-                    <Input
-                      id="sector"
-                      required
-                      placeholder="Ej. Desarrollo de Software / Fintech"
-                      value={form.sector}
-                      onChange={(e) =>
-                        setForm({ ...form, sector: e.target.value })
-                      }
-                    />
-                  </div>
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-1.5">
-                    <Label htmlFor="cityId">Ciudad sede *</Label>
-                    <NativeSelect
-                      id="cityId"
-                      required
-                      value={form.cityId}
-                      onChange={(e) =>
-                        setForm({ ...form, cityId: e.target.value })
-                      }
-                      className="w-full"
-                    >
-                      <option value="">Selecciona una ciudad</option>
-                      {cities.map((city) => (
-                        <option key={city.id} value={city.id}>
-                          {city.name}
-                        </option>
+                  <aside className="h-fit rounded-lg border border-border bg-surface p-5">
+                    <h2 className="text-base font-bold text-ink">
+                      Para que tu solicitud se apruebe sin demoras
+                    </h2>
+                    <ul className="mt-3 flex flex-col gap-2.5">
+                      {[
+                        "Documento en hoja membretada oficial de la empresa.",
+                        "Dirigida a la Dirección de Carrera de Ingeniería de Sistemas e Informática (UMSS).",
+                        "Firmada y sellada por el representante legal o responsable de RR. HH.",
+                        "Archivo legible en formato PDF, JPG o PNG (máx. 10 MB).",
+                      ].map((tip) => (
+                        <li key={tip} className="flex gap-2 text-sm text-ink">
+                          <Check
+                            aria-hidden="true"
+                            className="mt-0.5 size-4 shrink-0 text-accent"
+                          />
+                          {tip}
+                        </li>
                       ))}
-                    </NativeSelect>
+                    </ul>
+                    <p className="mt-4 flex gap-2 border-t border-border pt-3 text-xs text-text-secondary">
+                      <Info
+                        aria-hidden="true"
+                        className="mt-0.5 size-4 shrink-0"
+                      />
+                      Si tu carta es observada, recibirás el motivo por correo y
+                      podrás subir una nueva.
+                    </p>
+                  </aside>
+                </form>
+              )}
+
+              {step === 3 && submitted && (
+                <div className="space-y-6 rounded-lg border border-border bg-surface p-8 text-center">
+                  <CheckCircle2 className="mx-auto size-12 text-emerald-600" />
+                  <div className="space-y-2">
+                    <h3 className="text-xl font-bold text-ink">
+                      ¡Solicitud empresarial enviada con éxito!
+                    </h3>
+                    <p className="mx-auto max-w-md text-sm text-text-secondary">
+                      Hemos recibido los datos de{" "}
+                      <strong>{form.companyName}</strong> y su carta de solicitud.
+                      Revisaremos la documentación en un plazo máximo de 48 horas
+                      hábiles.
+                    </p>
                   </div>
 
-                  <div className="space-y-1.5">
-                    <Label htmlFor="websiteUrl">Sitio web oficial *</Label>
-                    <Input
-                      id="websiteUrl"
-                      type="url"
-                      required
-                      placeholder="https://www.tuempresa.com"
-                      value={form.websiteUrl}
-                      onChange={(e) =>
-                        setForm({ ...form, websiteUrl: e.target.value })
-                      }
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label htmlFor="description">
-                    Descripción de la empresa *
-                  </Label>
-                  <Textarea
-                    id="description"
-                    required
-                    rows={3}
-                    placeholder="Describe brevemente la actividad principal de tu empresa y el perfil de talento que buscan..."
-                    value={form.description}
-                    onChange={(e) =>
-                      setForm({ ...form, description: e.target.value })
-                    }
-                  />
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-3">
-                  <div className="space-y-1.5">
-                    <Label htmlFor="email">Correo institucional *</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      required
-                      placeholder="rrhh@empresa.com"
-                      value={form.email}
-                      onChange={(e) =>
-                        setForm({ ...form, email: e.target.value })
-                      }
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <Label htmlFor="phone">Teléfono / Celular *</Label>
-                    <Input
-                      id="phone"
-                      required
-                      placeholder="Ej. 76419230"
-                      value={form.phone}
-                      onChange={(e) =>
-                        setForm({ ...form, phone: e.target.value })
-                      }
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <Label htmlFor="username">Usuario reclutador *</Label>
-                    <Input
-                      id="username"
-                      required
-                      placeholder="Ej. rrhh.tecnoandes"
-                      value={form.username}
-                      onChange={(e) =>
-                        setForm({ ...form, username: e.target.value })
-                      }
-                    />
-                  </div>
-                </div>
-
-                <div className="flex justify-end border-t border-border pt-4">
-                  <Button type="submit" disabled={submitting}>
-                    {submitting ? (
-                      <>
-                        <Loader2 className="mr-2 size-4 animate-spin" />
-                        Guardando...
-                      </>
-                    ) : (
-                      <>
-                        Continuar al siguiente paso
-                        <ChevronRight className="ml-1 size-4" />
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </form>
-            )}
-
-            {step === 2 && (
-              <form
-                onSubmit={handleStep2Submit}
-                className="space-y-6 rounded-xl border border-border bg-surface p-6 shadow-xs"
-              >
-                <div>
-                  <h3 className="text-lg font-semibold text-ink">
-                    Carta de solicitud en hoja membretada
-                  </h3>
-                  <p className="mt-1 text-sm text-text-secondary">
-                    Adjunta una carta oficial firmada y sellada dirigida a la
-                    Carrera de Ingeniería de Sistemas e Informática (UMSS)
-                    solicitando acceso para publicar vacantes.
-                  </p>
-                </div>
-
-                <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-border bg-surface-soft p-8 text-center transition hover:border-primary">
-                  {documentFile ? (
-                    <div className="flex flex-col items-center gap-2">
-                      <FileText className="size-10 text-primary" />
-                      <p className="text-sm font-semibold text-ink">
-                        {documentFile.name}
-                      </p>
-                      <p className="text-xs text-text-secondary">
-                        {(documentFile.size / 1024 / 1024).toFixed(2)} MB · Clic
-                        para reemplazar
-                      </p>
+                  <div className="mx-auto max-w-sm rounded-xl border border-border bg-surface-soft p-5">
+                    <p className="text-xs font-medium tracking-wider text-text-secondary uppercase">
+                      Código de seguimiento
+                    </p>
+                    <div className="mt-2.5 flex items-center justify-center gap-3">
+                      <span className="rounded-md border border-border bg-surface px-3.5 py-1.5 font-mono text-lg font-bold tracking-wide text-accent select-all">
+                        {submitted.requestCode}
+                      </span>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => void handleCopyCode(submitted.requestCode)}
+                        className="h-9 gap-1.5 px-3 font-medium"
+                      >
+                        {copiedCode ? (
+                          <>
+                            <Check className="size-4 text-emerald-600" />
+                            <span className="text-emerald-700">Copiado</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="size-4" />
+                            <span>Copiar</span>
+                          </>
+                        )}
+                      </Button>
                     </div>
-                  ) : (
-                    <div className="flex flex-col items-center gap-2">
-                      <Upload className="size-10 text-text-secondary" />
-                      <p className="text-sm font-semibold text-ink">
-                        Selecciona o arrastra tu carta membretada
-                      </p>
-                      <p className="text-xs text-text-secondary">
-                        Formatos permitidos: PDF, JPG o PNG (máximo 10 MB)
-                      </p>
-                    </div>
-                  )}
-                  <Input
-                    type="file"
-                    accept="application/pdf,image/jpeg,image/png"
-                    className="hidden"
-                    onChange={handleDocumentChange}
-                  />
-                </label>
-
-                <div className="flex items-center justify-between border-t border-border pt-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setStep(1)}
-                    disabled={submitting}
-                  >
-                    Volver atrás
-                  </Button>
-                  <Button type="submit" disabled={submitting || !documentFile}>
-                    {submitting ? (
-                      <>
-                        <Loader2 className="mr-2 size-4 animate-spin" />
-                        Enviando solicitud...
-                      </>
-                    ) : (
-                      "Enviar solicitud de empresa"
-                    )}
-                  </Button>
+                    <p className="mt-2.5 text-xs text-text-secondary">
+                      Guarda este código para consultar el estado de tu solicitud y
+                      activar tu cuenta cuando sea aprobada.
+                    </p>
+                  </div>
                 </div>
-              </form>
-            )}
-
-            {step === 3 && submitted && (
-              <div className="space-y-5 rounded-xl border border-border bg-surface p-8 text-center shadow-xs">
-                <CheckCircle2 className="mx-auto size-12 text-emerald-600" />
-                <h3 className="text-xl font-bold text-ink">
-                  ¡Solicitud empresarial enviada con éxito!
-                </h3>
-                <p className="mx-auto max-w-md text-sm text-text-secondary">
-                  Hemos recibido los datos de{" "}
-                  <strong>{form.companyName}</strong> y su carta de solicitud.
-                  Revisaremos la documentación en un plazo máximo de 48 horas
-                  hábiles.
-                </p>
-
-                <div className="mx-auto max-w-xs rounded-lg border border-border bg-surface-soft p-4">
-                  <p className="text-xs tracking-wider text-text-secondary uppercase">
-                    Código de seguimiento
-                  </p>
-                  <p className="mt-1 font-mono text-lg font-bold text-primary">
-                    {submitted.requestCode}
-                  </p>
-                </div>
-
-                <div className="pt-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      setStep(1);
-                      setSubmitted(null);
-                      setDraftId(null);
-                      setDocumentFile(null);
-                    }}
-                  >
-                    <Building2 className="mr-2 size-4" />
-                    Registrar otra empresa
-                  </Button>
-                </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </section>
       </div>
+
+      {isLogoModalOpen && logoPreview && logoFile ? (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="logo-preview-modal-title"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs"
+          onClick={() => setIsLogoModalOpen(false)}
+        >
+          <div
+            className="w-full max-w-lg overflow-hidden rounded-2xl border border-border bg-surface shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-border px-5 py-4">
+              <div>
+                <h3
+                  id="logo-preview-modal-title"
+                  className="text-base font-bold text-ink"
+                >
+                  Vista previa del logo corporativo
+                </h3>
+                <p className="text-xs text-text-secondary">
+                  {logoFile.name} · {formatFileSize(logoFile.size)}
+                  {logoDimensions
+                    ? ` · ${logoDimensions.width} × ${logoDimensions.height} px`
+                    : ""}
+                </p>
+              </div>
+              <Button variant="ghost" size="icon-sm"
+                type="button"
+                aria-label="Cerrar vista previa"
+                onClick={() => setIsLogoModalOpen(false)}
+                className="rounded-lg p-1.5 text-text-secondary transition hover:bg-surface-soft hover:text-ink"
+              >
+                <X className="size-5" />
+              </Button>
+            </div>
+
+            <div className="p-5">
+              <div className="mb-3 flex items-center justify-between">
+                <span className="text-xs font-medium text-text-secondary">
+                  Contraste de visualización:
+                </span>
+                <div className="inline-flex rounded-lg border border-border bg-surface-soft p-0.5 text-xs">
+                  <Button variant="ghost" size="sm"
+                    type="button"
+                    onClick={() => setPreviewBg("light")}
+                    className={cn(
+                      "rounded-md px-2.5 py-1 font-medium transition",
+                      previewBg === "light"
+                        ? "bg-surface text-ink shadow-2xs"
+                        : "text-text-secondary hover:text-ink",
+                    )}
+                  >
+                    Fondo claro
+                  </Button>
+                  <Button variant="ghost" size="sm"
+                    type="button"
+                    onClick={() => setPreviewBg("dark")}
+                    className={cn(
+                      "rounded-md px-2.5 py-1 font-medium transition",
+                      previewBg === "dark"
+                        ? "bg-surface text-ink shadow-2xs"
+                        : "text-text-secondary hover:text-ink",
+                    )}
+                  >
+                    Fondo oscuro
+                  </Button>
+                </div>
+              </div>
+
+              <div
+                className={cn(
+                  "flex h-64 items-center justify-center rounded-xl border border-border p-6 transition-colors",
+                  previewBg === "light" ? "bg-white" : "bg-slate-900",
+                )}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={logoPreview}
+                  alt="Vista previa ampliada del logo"
+                  className="max-h-full max-w-full object-contain"
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border bg-surface-soft/50 px-5 py-3.5">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={handleRemoveLogo}
+                className="gap-1.5 text-red-600 hover:bg-red-50 hover:text-red-700"
+              >
+                <Trash2 className="size-4" />
+                Retirar logo
+              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => logoInputRef.current?.click()}
+                  className="gap-1.5"
+                >
+                  <RefreshCw className="size-4" />
+                  Cambiar imagen
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => setIsLogoModalOpen(false)}
+                >
+                  Listo
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

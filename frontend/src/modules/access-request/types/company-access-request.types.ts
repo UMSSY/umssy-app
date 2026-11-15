@@ -10,7 +10,7 @@ export interface CreateCompanyRequestPayload {
   description: string;
   email: string;
   phone: string;
-  websiteUrl: string;
+  websiteUrl?: string;
   username: string;
 }
 
@@ -35,7 +35,7 @@ export interface CompanyAccessRequestItem {
   description: string;
   email: string;
   phone: string;
-  websiteUrl: string;
+  websiteUrl?: string;
   username: string;
   submittedAt: string | null;
   reviewedAt: string | null;
