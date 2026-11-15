@@ -91,7 +91,12 @@ export class NotificationsService {
     );
 
     for (const recipientId of validRecipients) {
-      this.notificationGateway.emitToUser(recipientId, 'notification:new', { title, body, actionUrl });
+        this.notificationGateway.emitToUser(recipientId, 'notification:new', {
+        typeCode: type,
+        title,
+        body,
+        actionUrl,
+      });
     }
 
     let pushStatus: NotifyResult['pushStatus'] = 'skipped';
