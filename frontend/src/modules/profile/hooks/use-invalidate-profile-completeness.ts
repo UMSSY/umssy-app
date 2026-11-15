@@ -8,6 +8,9 @@ export function useInvalidateProfileCompleteness() {
   const queryClient = useQueryClient();
 
   return useCallback(async () => {
+    await queryClient.cancelQueries({ queryKey: ["mentors", "profile-suggestions"] });
+    await queryClient.invalidateQueries({ queryKey: ["mentors", "profile-suggestions"] });
+    await queryClient.invalidateQueries({ queryKey: ["mentors", "participation"] });
     // Discard reads started before the write so they cannot restore an old percentage.
     await queryClient.cancelQueries({
       queryKey: PROFILE_COMPLETENESS_QUERY_KEY,
