@@ -45,7 +45,10 @@ export function useMyPassesHistory(isEnabled: boolean) {
   });
 
   useEffect(() => {
-    if (!isEnabled) void queryClient.cancelQueries({ queryKey, exact: true });
+    if (!isEnabled) {
+      void queryClient.cancelQueries({ queryKey, exact: true });
+      queryClient.removeQueries({ queryKey, exact: true });
+    }
   }, [isEnabled, queryClient, queryKey]);
 
   return {

@@ -42,7 +42,7 @@ describe("Mis pases", () => {
     fireEvent.click(screen.getByRole('tab', { name: 'Vigentes' }));
     expect(await screen.findByText('1 pase')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('tab', { name: 'Historial' }));
-    expect(getFinished).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(getFinished).toHaveBeenCalledTimes(2));
   });
   it('appends the next history page while keeping the backend total', async () => {
     getMine.mockResolvedValue([]);
