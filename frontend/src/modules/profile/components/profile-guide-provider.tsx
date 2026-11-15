@@ -9,7 +9,14 @@ import {
   useState,
 } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { ArrowLeft, ArrowRight, Check, ListChecks, X } from 'lucide-react';
+import {
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  ListChecks,
+  Minus,
+  X,
+} from 'lucide-react';
 import { cn } from 'cn';
 import { Button } from '@/components/ui/button';
 import {
@@ -326,11 +333,22 @@ function ProfileGuideSessionProvider({
         >
           <ProfileGuideBubble isOpen={bubbleOpen} popKey={celebrationKey}>
             <div className="space-y-3">
-              <p className="font-semibold text-ink">
-                {isComplete
-                  ? 'Tu perfil está completo'
-                  : 'Sigamos con tu perfil'}
-              </p>
+              <div className="flex items-start justify-between gap-3">
+                <p className="font-semibold text-ink">
+                  {isComplete
+                    ? 'Tu perfil está al día'
+                    : 'Sigamos con tu perfil'}
+                </p>
+                <Button
+                  size="icon-sm"
+                  variant="ghost"
+                  aria-label="Minimizar asistente"
+                  className="-mt-1 -mr-2 shrink-0"
+                  onClick={() => setBubbleOpen(false)}
+                >
+                  <Minus aria-hidden="true" />
+                </Button>
+              </div>
               <p className="text-sm text-text-secondary">
                 {isComplete
                   ? 'Puedes revisar tu trayectoria desde Mi perfil. Estoy aquí cuando me necesites.'
@@ -352,13 +370,6 @@ function ProfileGuideSessionProvider({
                 }}
               >
                 {isComplete ? 'Revisar mi perfil' : 'Continuar mi perfil'}
-              </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => setBubbleOpen(false)}
-              >
-                Ocultar ayuda
               </Button>
             </div>
           </ProfileGuideBubble>

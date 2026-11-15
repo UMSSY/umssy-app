@@ -763,6 +763,36 @@ describe('ProfileGuideProvider', () => {
     },
   );
 
+  it('minimizes the corner bubble with the minus button and restores it from the avatar', async () => {
+    const user = userEvent.setup();
+    state.sessions.set('user-a', session({ dismissed: true, completed: true }));
+    state.completeness = completeness(
+      [...PROFILE_COMPLETENESS_SECTION_IDS],
+      100,
+    );
+    render(page());
+    const avatar = await screen.findByRole('button', {
+      name: 'Abrir asistente de perfil',
+    });
+    expect(avatar).toHaveAttribute('aria-expanded', 'false');
+    await user.click(avatar);
+
+    expect(screen.getByText('Tu perfil está al día')).toBeVisible();
+    expect(avatar).toHaveAttribute('aria-expanded', 'true');
+    await user.click(
+      screen.getByRole('button', { name: 'Minimizar asistente' }),
+    );
+
+    expect(screen.queryByText('Tu perfil está al día')).not.toBeInTheDocument();
+    expect(avatar).toHaveAttribute('aria-expanded', 'false');
+    await user.click(avatar);
+
+    expect(screen.getByText('Tu perfil está al día')).toBeVisible();
+    await user.click(screen.getByRole('button', { name: 'Revisar mi perfil' }));
+    expect(state.push).toHaveBeenCalledWith('/profile');
+    expect(screen.queryByText('Tu perfil está al día')).not.toBeInTheDocument();
+  });
+
   it('keeps the pending checklist under the robot and updates the toggle label', async () => {
     const user = userEvent.setup();
     render(page());
