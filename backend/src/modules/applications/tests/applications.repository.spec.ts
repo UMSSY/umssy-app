@@ -148,6 +148,54 @@ describe('ApplicationsRepository', () => {
     });
   });
 
+  describe('findContactContext', () => {
+    it('debe traer la postulacion con su empresa y solo los reclutadores activos con rol empresa', async () => {
+      prismaMock.jobApplication.findUnique.mockResolvedValue({ id: 'app-1' });
+
+      const result = await repository.findContactContext('app-1');
+
+      expect(prismaMock.jobApplication.findUnique).toHaveBeenCalledWith({
+        where: { id: 'app-1' },
+        select: {
+          id: true,
+          userId: true,
+          jobOfferId: true,
+          status: { select: { title: true } },
+          jobOffer: {
+            select: {
+              title: true,
+              company: {
+                select: {
+                  id: true,
+                  title: true,
+                  recruiters: {
+                    where: {
+                      isActive: true,
+                      roles: {
+                        some: {
+                          deletedAt: null,
+                          startAt: { lte: expect.any(Date) },
+                          role: { name: 'empresa' },
+                        },
+                      },
+                    },
+                    select: { id: true, firstName: true, lastName: true },
+                    orderBy: [
+                      { firstName: 'asc' },
+                      { lastName: 'asc' },
+                      { id: 'asc' },
+                    ],
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+      expect(result).toEqual({ id: 'app-1' });
+    });
+  });
+
   describe('findById', () => {
     it('debe buscar por id', async () => {
       prismaMock.jobApplication.findUnique.mockResolvedValue({ id: 'app-1' });

@@ -9,12 +9,14 @@ import { ApplicationStatus } from '../types/applications.types.js';
 import { ApplicationNotFoundException } from '../exceptions/application-not-found.exception.js';
 import { ApplicationForbiddenException } from '../exceptions/application-forbidden.exception.js';
 import { ApplicationNotWithdrawableException } from '../exceptions/application-not-withdrawable.exception.js';
+import { ApplicationContactRestrictedException } from '../exceptions/application-contact-restricted.exception.js';
 
 describe('ApplicationsService (T5.1 & T5.2)', () => {
   let service: ApplicationsService;
   let repositoryMock: {
     findByUserId: ReturnType<typeof vi.fn>;
     findById: ReturnType<typeof vi.fn>;
+    findContactContext: ReturnType<typeof vi.fn>;
     withdraw: ReturnType<typeof vi.fn>;
     reactivateApplication: ReturnType<typeof vi.fn>;
   };
@@ -25,6 +27,7 @@ describe('ApplicationsService (T5.1 & T5.2)', () => {
     repositoryMock = {
       findByUserId: vi.fn(),
       findById: vi.fn(),
+      findContactContext: vi.fn(),
       withdraw: vi.fn().mockResolvedValue({ count: 1 }),
       reactivateApplication: vi.fn().mockResolvedValue({ count: 1 }),
     };
@@ -362,4 +365,99 @@ describe('ApplicationsService (T5.1 & T5.2)', () => {
     });
   });
 
+  describe('getApplicationContact', () => {
+    const contactRecord = (
+      overrides: { userId?: string; status?: string } = {},
+    ) => ({
+      id: 'app-1',
+      userId: overrides.userId ?? 'user-1',
+      jobOfferId: 'offer-1',
+      status: { title: overrides.status ?? ApplicationStatus.IN_REVIEW },
+      jobOffer: {
+        title: 'Desarrollador Backend',
+        company: {
+          id: 'company-1',
+          title: 'TechBolivia S.R.L.',
+          recruiters: [
+            { id: 'recruiter-1', firstName: 'Ana', lastName: 'Rojas' },
+            { id: 'recruiter-2', firstName: 'Luis', lastName: 'Mamani' },
+          ],
+        },
+      },
+    });
+
+    it('devuelve el contexto de contacto con la vacante, la empresa y sus reclutadores', async () => {
+      repositoryMock.findContactContext.mockResolvedValue(contactRecord());
+
+      const result = await service.getApplicationContact('app-1', 'user-1');
+
+      expect(repositoryMock.findContactContext).toHaveBeenCalledWith('app-1');
+      expect(result).toEqual({
+        applicationId: 'app-1',
+        jobOfferId: 'offer-1',
+        vacancyTitle: 'Desarrollador Backend',
+        companyId: 'company-1',
+        companyName: 'TechBolivia S.R.L.',
+        recruiters: [
+          { id: 'recruiter-1', fullName: 'Ana Rojas' },
+          { id: 'recruiter-2', fullName: 'Luis Mamani' },
+        ],
+      });
+    });
+
+    it.each([
+      ApplicationStatus.IN_REVIEW,
+      ApplicationStatus.INTERVIEW,
+      ApplicationStatus.ACCEPTED,
+    ])('permite el contacto cuando el estado es %s', async (status) => {
+      repositoryMock.findContactContext.mockResolvedValue(
+        contactRecord({ status }),
+      );
+
+      await expect(
+        service.getApplicationContact('app-1', 'user-1'),
+      ).resolves.toMatchObject({ applicationId: 'app-1' });
+    });
+
+    it.each([ApplicationStatus.REJECTED, ApplicationStatus.WITHDRAWN])(
+      'lanza ApplicationContactRestrictedException cuando el estado es %s',
+      async (status) => {
+        repositoryMock.findContactContext.mockResolvedValue(
+          contactRecord({ status }),
+        );
+
+        await expect(
+          service.getApplicationContact('app-1', 'user-1'),
+        ).rejects.toThrow(ApplicationContactRestrictedException);
+      },
+    );
+
+    it('lanza ApplicationNotFoundException si la postulacion no existe', async () => {
+      repositoryMock.findContactContext.mockResolvedValue(null);
+
+      await expect(
+        service.getApplicationContact('app-1', 'user-1'),
+      ).rejects.toThrow(ApplicationNotFoundException);
+    });
+
+    it('lanza ApplicationNotFoundException si la postulacion es de otro usuario', async () => {
+      repositoryMock.findContactContext.mockResolvedValue(
+        contactRecord({ userId: 'user-2' }),
+      );
+
+      await expect(
+        service.getApplicationContact('app-1', 'user-1'),
+      ).rejects.toThrow(ApplicationNotFoundException);
+    });
+
+    it('devuelve una lista vacia cuando la empresa no tiene reclutadores activos', async () => {
+      const record = contactRecord();
+      record.jobOffer.company.recruiters = [];
+      repositoryMock.findContactContext.mockResolvedValue(record);
+
+      const result = await service.getApplicationContact('app-1', 'user-1');
+
+      expect(result.recruiters).toEqual([]);
+    });
+  });
 });
