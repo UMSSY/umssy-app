@@ -7,7 +7,7 @@ import { SURVEY_ALERTS_TEXT } from "../constants/survey-participation.constants"
 import type { SurveyAlertsDialogProps } from "../types/survey-alerts-dialog-props.types";
 import { SurveyAlertsForm } from "./survey-alerts-form";
 
-export function SurveyAlertsDialog({ open, onOpenChange, questions, config, isLoading, isSaving, onSave }: SurveyAlertsDialogProps) {
+export function SurveyAlertsDialog({ open, onOpenChange, questions, config, isLoading, hasError, isSaving, onSave }: SurveyAlertsDialogProps) {
   return (
     <Dialog open={open} onOpenChange={(nextOpen) => !isSaving && onOpenChange(nextOpen)}>
       <DialogContent className="gap-5 p-6 sm:max-w-lg">
@@ -19,7 +19,11 @@ export function SurveyAlertsDialog({ open, onOpenChange, questions, config, isLo
           <DialogDescription className="text-text-secondary">{SURVEY_ALERTS_TEXT.description}</DialogDescription>
         </DialogHeader>
 
-        {isLoading || !config ? (
+        {hasError ? (
+          <p role="alert" className="rounded-lg border border-destructive/20 bg-destructive/5 p-3 text-sm text-destructive">
+            {SURVEY_ALERTS_TEXT.loadError}
+          </p>
+        ) : isLoading || !config ? (
           <div className="flex flex-col gap-3" aria-busy="true">
             <Skeleton className="h-10 w-full" />
             <Skeleton className="h-10 w-40" />

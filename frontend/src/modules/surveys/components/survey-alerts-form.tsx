@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { SURVEY_ALERT_THRESHOLD_MAX, SURVEY_ALERT_THRESHOLD_MIN, SURVEY_ALERTS_TEXT } from "../constants/survey-participation.constants";
 import type { SurveyAlertFormErrors } from "../types/survey-alert-form-errors.types";
-import type { SurveyAlertsFormProps } from "../types/survey-alerts-dialog-props.types";
+import type { SurveyAlertsFormProps } from "../types/survey-alerts-form-props.types";
 import { parseAlertThreshold, validateSurveyAlertForm } from "../utils/validate-survey-alert-form";
 
 export function SurveyAlertsForm({ questions, config, isSaving, onCancel, onSave }: SurveyAlertsFormProps) {
