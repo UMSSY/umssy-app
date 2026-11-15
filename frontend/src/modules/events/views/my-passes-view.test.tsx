@@ -29,7 +29,7 @@ afterEach(() => { cleanup(); clearAccessToken(); vi.useRealTimers(); });
 describe("Mis pases", () => {
   it('loads finished history lazily and keeps its cards separate from the current panel', async () => {
     getMine.mockResolvedValue([pass]);
-    getFinished.mockResolvedValue({ items: [{ ...pass, id: 'reg-history', eventName: 'Historia', date: '2026-08-10T00:00:00Z' }], total: 12, limit: 10, totalPages: 2 });
+    getFinished.mockResolvedValue({ items: [{ id: 'reg-history', title: 'Historia', date: '2026-08-10T00:00:00Z', startTime: pass.startTime, endTime: pass.endTime, location: pass.location }], total: 12, limit: 10, totalPages: 2 });
     render(<MyPassesView />);
     expect(getFinished).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole('tab', { name: 'Historial' }));
@@ -42,12 +42,23 @@ describe("Mis pases", () => {
     fireEvent.click(screen.getByRole('tab', { name: 'Vigentes' }));
     expect(await screen.findByText('1 pase')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('tab', { name: 'Historial' }));
-    expect(getFinished).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(getFinished).toHaveBeenCalledTimes(2));
+  });
+  it('revalidates current passes when returning from history', async () => {
+    getMine.mockResolvedValue([pass]);
+    getFinished.mockResolvedValue({ items: [], total: 0, limit: 10, totalPages: 0 });
+    render(<MyPassesView />);
+    await screen.findByText('1 pase');
+    expect(getMine).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole('tab', { name: 'Historial' }));
+    await screen.findByText('Aún no tienes talleres finalizados');
+    fireEvent.click(screen.getByRole('tab', { name: 'Vigentes' }));
+    await waitFor(() => expect(getMine).toHaveBeenCalledTimes(2));
   });
   it('appends the next history page while keeping the backend total', async () => {
     getMine.mockResolvedValue([]);
     getFinished.mockImplementation(async (page) => ({
-      items: [{ ...pass, id: `history-${page}`, eventName: `History ${page}` }],
+      items: [{ id: `history-${page}`, title: `History ${page}`, date: pass.date, startTime: pass.startTime, endTime: pass.endTime, location: pass.location }],
       total: 12,
       limit: 10,
       totalPages: 2,
@@ -76,7 +87,7 @@ describe("Mis pases", () => {
     getFinished.mockRejectedValueOnce(new Error('Network')).mockResolvedValueOnce({ items: [], total: 0, limit: 10, totalPages: 0 });
     render(<MyPassesView />);
     fireEvent.click(screen.getByRole('tab', { name: 'Historial' }));
-    expect(await screen.findByRole('alert')).toHaveTextContent('No pudimos completar la operación');
+    expect(await screen.findByRole('alert')).toHaveTextContent('No fue posible cargar tu historial');
     fireEvent.click(screen.getByRole('button', { name: 'Reintentar' }));
     expect(await screen.findByText('Aún no tienes talleres finalizados')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('tab', { name: 'Vigentes' }));
@@ -91,6 +102,18 @@ describe("Mis pases", () => {
     const signal = getFinished.mock.calls[0][2];
     fireEvent.click(screen.getByRole('tab', { name: 'Vigentes' }));
     await waitFor(() => expect(signal?.aborted).toBe(true));
+  });
+  it('shows history without requesting a QR or saving an offline pass', async () => {
+    getMine.mockResolvedValue([]);
+    getFinished.mockResolvedValue({ items: [{ id: 'history-only', title: 'History only', date: pass.date, startTime: pass.startTime, endTime: pass.endTime, location: pass.location }], total: 1, limit: 10, totalPages: 1 });
+    const saveSpy = vi.spyOn(offlinePassesStore, 'save');
+    render(<MyPassesView />);
+    fireEvent.click(screen.getByRole('tab', { name: 'Historial' }));
+    expect(await screen.findByText('History only')).toBeInTheDocument();
+    expect(registrationsService.getPass).not.toHaveBeenCalled();
+    expect(saveSpy).not.toHaveBeenCalled();
+    expect(screen.queryByRole('img', { name: 'Código QR del pase' })).not.toBeInTheDocument();
+    saveSpy.mockRestore();
   });
   it('preserves different workshops with identical names and dates', async () => {
     getMine.mockResolvedValue([{ ...pass, eventId: 'event-1' }, { ...pass, id: 'reg-2', eventId: 'event-2' }]);

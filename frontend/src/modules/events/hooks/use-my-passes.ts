@@ -1,6 +1,7 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useMemo, useRef } from "react";
+import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import { isApiError } from "@/shared/services/api-client";
 import {
   getRegistrationErrorMessage,
@@ -9,13 +10,24 @@ import {
 } from "@/modules/registrations";
 import { registrationsService } from "../services/registrations.service";
 
-export function useMyPasses() {
+export function useMyPasses(isActive = true) {
   const accessToken = useRegistrationSession();
+  const queryClient = useQueryClient();
+  const wasActive = useRef(isActive);
   const query = useQuery({
     queryKey: [...REGISTRATION_QUERY_KEYS.passes, accessToken],
     queryFn: ({ signal }) => registrationsService.getMine(signal, accessToken),
   });
   const cause = query.error;
+  const refetch = query.refetch;
+  useEffect(() => {
+    if (!isActive) {
+      void queryClient.cancelQueries({ queryKey: [...REGISTRATION_QUERY_KEYS.passes, accessToken], exact: true });
+    } else if (!wasActive.current) {
+      void refetch();
+    }
+    wasActive.current = isActive;
+  }, [isActive, accessToken, queryClient, refetch]);
   return {
     registrations: query.data ?? [],
     isLoading: query.isFetching,
@@ -25,6 +37,46 @@ export function useMyPasses() {
         : getRegistrationErrorMessage(cause)
       : null,
     isConnectionError: query.isError && !query.isFetching && isApiError(cause) && !cause.response,
+    retry: () => { void query.refetch(); },
+  };
+}
+
+export function useMyPassesHistory(isEnabled: boolean) {
+  const accessToken = useRegistrationSession();
+  const queryClient = useQueryClient();
+  const requestVersion = useRef(0);
+  const queryKey = useMemo(() => ["events", "finished-registrations", accessToken], [accessToken]);
+  const query = useInfiniteQuery({
+    queryKey,
+    initialPageParam: 1,
+    queryFn: async ({ pageParam, signal }) => {
+      const version = requestVersion.current;
+      const page = await registrationsService.getFinished(pageParam, 10, signal, accessToken);
+      if (version !== requestVersion.current) throw new DOMException("Request cancelled", "AbortError");
+      return page;
+    },
+    getNextPageParam: (lastPage, pages) => pages.length < lastPage.totalPages ? pages.length + 1 : undefined,
+    enabled: isEnabled && Boolean(accessToken),
+    staleTime: Infinity,
+    retry: false,
+  });
+
+  useEffect(() => {
+    if (!isEnabled) {
+      requestVersion.current += 1;
+      void queryClient.cancelQueries({ queryKey, exact: true });
+      queryClient.removeQueries({ queryKey, exact: true });
+    }
+  }, [isEnabled, queryClient, queryKey]);
+
+  return {
+    registrations: query.data?.pages.flatMap((page) => page.items) ?? [],
+    total: query.data?.pages[0]?.total ?? 0,
+    error: query.isError && !query.isFetching ? query.error : null,
+    hasMore: Boolean(query.hasNextPage),
+    isLoading: isEnabled && query.isFetching && !query.isFetchingNextPage,
+    isLoadingMore: query.isFetchingNextPage,
+    loadMore: () => { if (query.hasNextPage && !query.isFetching) void query.fetchNextPage(); },
     retry: () => { void query.refetch(); },
   };
 }
