@@ -10,6 +10,7 @@ vi.mock("../services/skills.service", () => ({
     getMySkills: vi.fn(),
     createCustomSkill: vi.fn(),
     saveMySkills: vi.fn(),
+    removeMySkill: vi.fn(),
   },
 }));
 
@@ -195,6 +196,34 @@ describe("useSkills", () => {
     });
 
     expect(result.current.isSaving).toBe(false);
+    expect(result.current.selectedSkills).toEqual([PYTHON]);
+  });
+
+  it("removes a saved skill through the delete endpoint and refreshes the list", async () => {
+    vi.mocked(skillsService.getMySkills).mockResolvedValue([PYTHON, SQL]);
+    vi.mocked(skillsService.removeMySkill).mockResolvedValue([PYTHON]);
+    const { result } = await renderLoadedHook();
+
+    let removed = false;
+    await act(async () => {
+      removed = await result.current.removeSavedSkill(SQL.id);
+    });
+
+    expect(removed).toBe(true);
+    expect(skillsService.removeMySkill).toHaveBeenCalledWith(SQL.id);
+    expect(skillsService.saveMySkills).not.toHaveBeenCalled();
+    expect(result.current.selectedSkills).toEqual([PYTHON]);
+  });
+
+  it("keeps the list and reports an error when the removal fails", async () => {
+    vi.mocked(skillsService.removeMySkill).mockRejectedValue({ response: { status: 409 } });
+    const { result } = await renderLoadedHook();
+
+    await act(async () => {
+      await result.current.removeSavedSkill(PYTHON.id);
+    });
+
+    expect(result.current.feedback?.type).toBe("error");
     expect(result.current.selectedSkills).toEqual([PYTHON]);
   });
 });

@@ -69,19 +69,13 @@ export function SkillsProfileSection() {
             Volver a intentar
           </Button>
         ) : selectedSkills.length > 0 ? (
-          <ul className="flex flex-wrap gap-2">
+          <ul className="flex min-w-0 flex-wrap gap-2">
             {selectedSkills.map((skill) => (
-              <li key={skill.id}>
+              <li key={skill.id} className="max-w-full min-w-0">
                 <SkillBadge
                   skill={skill}
                   disabled={skills.isSaving}
-                  onRemove={(id) => {
-                    const updatedSkills = selectedSkills.filter(
-                      (item) => item.id !== id,
-                    );
-
-                    void skills.saveSkills(updatedSkills);
-                  }}
+                  onRemove={(id) => void skills.removeSavedSkill(id)}
                 />
               </li>
             ))}

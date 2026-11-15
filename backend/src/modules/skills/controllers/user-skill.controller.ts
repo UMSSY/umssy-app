@@ -1,7 +1,10 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  Param,
+  ParseUUIDPipe,
   Post,
   Put,
   StandardSchemaValidationPipe,
@@ -12,7 +15,10 @@ import {
 import {
   ApiBearerAuth,
   ApiBody,
+  ApiConflictResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
+  ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
 import { CurrentUserId } from '../../../common/decorators/current-user-id.decorator.js';
@@ -24,7 +30,7 @@ import {
   updateUserSkillsSchema,
   type UpdateUserSkillsRequest,
 } from '../requests/update-user-skills.request.js';
-import type { SkillResponse } from '../responses/skill.response.js';
+import type { OwnSkillResponse } from '../responses/own-skill.response.js';
 import { UserSkillService } from '../services/user-skill.service.js';
 
 @ApiTags('skills')
@@ -42,7 +48,7 @@ export class UserSkillController {
 
   @Get()
   @ApiOkResponse({ description: 'Skills of the authenticated user' })
-  getUserSkills(@CurrentUserId() userId: string): Promise<SkillResponse[]> {
+  getUserSkills(@CurrentUserId() userId: string): Promise<OwnSkillResponse[]> {
     return this.userSkillService.getUserSkills(userId);
   }
 
@@ -52,7 +58,7 @@ export class UserSkillController {
   updateUserSkills(
     @CurrentUserId() userId: string,
     @Body({ schema: updateUserSkillsSchema }) request: UpdateUserSkillsRequest,
-  ): Promise<SkillResponse[]> {
+  ): Promise<OwnSkillResponse[]> {
     return this.userSkillService.updateUserSkills(userId, request);
   }
 
@@ -62,7 +68,25 @@ export class UserSkillController {
   addSkills(
     @CurrentUserId() userId: string,
     @Body({ schema: updateUserSkillsSchema }) request: UpdateUserSkillsRequest,
-  ): Promise<SkillResponse[]> {
+  ): Promise<OwnSkillResponse[]> {
     return this.userSkillService.addSkills(userId, request);
+  }
+
+  @Delete(':skillId')
+  @ApiParam({ name: 'skillId', type: String, format: 'uuid' })
+  @ApiOkResponse({
+    description:
+      'Manual skill without links removed; returns the remaining skills',
+  })
+  @ApiNotFoundResponse({ description: 'The user does not have that skill' })
+  @ApiConflictResponse({
+    description:
+      'The skill is linked to an experience or another source and cannot be removed',
+  })
+  removeSkill(
+    @CurrentUserId() userId: string,
+    @Param('skillId', new ParseUUIDPipe({ version: '4' })) skillId: string,
+  ): Promise<OwnSkillResponse[]> {
+    return this.userSkillService.removeSkill(userId, skillId);
   }
 }

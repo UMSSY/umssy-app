@@ -37,6 +37,8 @@ export const CUSTOM_SKILL_HINT = `Máximo ${SKILL_NAME_MAX_LENGTH} caracteres.`;
 export const SKILLS_ERROR_MESSAGES = {
   load: "No se pudieron cargar tus habilidades. Intenta de nuevo más tarde.",
   save: "No se pudieron guardar tus habilidades. Intenta de nuevo.",
+  remove: "No se pudo quitar la habilidad. Intenta de nuevo.",
+  removeLinked: "Esta habilidad está respaldada por tu perfil y no se puede quitar a mano. Recarga para ver su estado actual.",
 } as const;
 
 export const SKILLS_ERROR_MESSAGES_BY_STATUS: Record<number, string> = {
@@ -48,6 +50,7 @@ export const SKILLS_ERROR_MESSAGES_BY_STATUS: Record<number, string> = {
 
 export const SKILLS_SUCCESS_MESSAGES = {
   saved: "Tus habilidades se guardaron correctamente.",
+  removed: "La habilidad se quitó correctamente.",
 } as const;
 
 export const SKILLS_VALIDATION_MESSAGES = {

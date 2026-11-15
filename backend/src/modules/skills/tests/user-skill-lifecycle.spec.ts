@@ -184,6 +184,8 @@ class InMemoryProfileSkills {
           name: row.skill.name,
           isCustom: false,
         },
+        source: row.source,
+        evidenceRefs: row.evidenceRefs,
       }));
   }
 }

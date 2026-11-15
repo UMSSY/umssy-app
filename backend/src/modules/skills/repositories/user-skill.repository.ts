@@ -1,11 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { USER_SKILL_SOURCES } from '../constants/user-skill.constants.js';
+import type { OwnUserSkillRecord } from '../types/own-user-skill-record.type.js';
 import type { UserSkillRecord } from '../types/user-skill-record.type.js';
+import { summarizeSkillOrigin } from '../utils/summarize-skill-origin.js';
 import { planManualSkillChanges } from '../utils/plan-manual-skill-changes.js';
 import { skillSelect } from './skill.repository.js';
 
 const userSkillSelect = { skill: { select: skillSelect } } as const;
+const ownUserSkillSelect = {
+  skill: { select: skillSelect },
+  source: true,
+  evidenceRefs: true,
+} as const;
 const sourceRowSelect = {
   id: true,
   skillId: true,
@@ -18,10 +25,6 @@ export class UserSkillRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   findAllByUserId(userId: string): Promise<UserSkillRecord[]> {
-    return this.findByUserId(userId);
-  }
-
-  findByUserId(userId: string): Promise<UserSkillRecord[]> {
     return this.prisma.userSkill.findMany({
       where: { userId },
       orderBy: { skill: { name: 'asc' } },
@@ -29,10 +32,36 @@ export class UserSkillRepository {
     });
   }
 
+  findByUserId(userId: string): Promise<OwnUserSkillRecord[]> {
+    return this.prisma.userSkill.findMany({
+      where: { userId },
+      orderBy: { skill: { name: 'asc' } },
+      select: ownUserSkillSelect,
+    });
+  }
+
+  async removeIfRemovable(
+    userId: string,
+    skillId: string,
+  ): Promise<'deleted' | 'not-found' | 'not-removable'> {
+    return this.prisma.$transaction(async (tx) => {
+      const row = await tx.userSkill.findFirst({
+        where: { userId, skillId },
+        select: { id: true, source: true, evidenceRefs: true },
+      });
+      if (!row) return 'not-found';
+      if (!summarizeSkillOrigin(row.source, row.evidenceRefs).isRemovable) {
+        return 'not-removable';
+      }
+      await tx.userSkill.deleteMany({ where: { userId, id: row.id } });
+      return 'deleted';
+    });
+  }
+
   async replaceForUser(
     userId: string,
     skillIds: string[],
-  ): Promise<UserSkillRecord[]> {
+  ): Promise<OwnUserSkillRecord[]> {
     await this.prisma.$transaction(async (tx) => {
       const rows = await tx.userSkill.findMany({
         where: { userId },
@@ -75,7 +104,7 @@ export class UserSkillRepository {
   async addSkillsForUser(
     userId: string,
     skillIds: string[],
-  ): Promise<UserSkillRecord[]> {
+  ): Promise<OwnUserSkillRecord[]> {
     if (skillIds.length === 0) {
       return this.findByUserId(userId);
     }

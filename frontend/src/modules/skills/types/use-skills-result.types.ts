@@ -11,6 +11,7 @@ export interface UseSkillsResult {
   addSkill: (skill: SkillItem) => void;
   removeSkill: (skillId: string) => void;
   createCustomSkill: (name: string) => void;
+  removeSavedSkill: (skillId: string) => Promise<boolean>;
   saveSkills: (selection?: SkillItem[]) => Promise<boolean>;
   reload: () => Promise<void>;
 }

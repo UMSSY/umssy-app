@@ -51,6 +51,14 @@ export const skillsService = {
     );
     return (response.data.data ?? []).map(toSkillItem);
   },
+  removeMySkill: async (skillId: string): Promise<SkillItem[]> => {
+    const response = await apiClient.delete<ApiResponse<SkillResponse[]>>(
+      `${MY_SKILLS_ENDPOINT}/${skillId}`,
+      { headers: getAuthHeaders() },
+    );
+    return (response.data.data ?? []).map(toSkillItem);
+  },
+
   getDetectedSkills: async (): Promise<DetectedSkillsSummary> => {
     return toDetectedSkillsSummary(await profileSkillsRadarService.getSkills());
   },

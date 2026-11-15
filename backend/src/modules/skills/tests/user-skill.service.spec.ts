@@ -3,6 +3,7 @@ import type { ProfileSkillsAnalysisService } from '../../nlp/services/profile-sk
 import { ProfileNotFoundException } from '../../profile/exceptions/profile-not-found.exception.js';
 import type { ProfileService } from '../../profile/services/profile.service.js';
 import { DuplicateSkillException } from '../exceptions/duplicate-skill.exception.js';
+import { SkillNotRemovableException } from '../exceptions/skill-not-removable.exception.js';
 import { SkillNotFoundException } from '../exceptions/skill-not-found.exception.js';
 import { SkillMapper } from '../mappers/skill.mapper.js';
 import type { SkillRepository } from '../repositories/skill.repository.js';
@@ -16,6 +17,11 @@ const sqlId = '44444444-4444-4444-8444-444444444444';
 
 const python = { id: pythonId, name: 'Python', isCustom: false };
 const sql = { id: sqlId, name: 'SQL', isCustom: false };
+const manualOrigin = {
+  origin: 'manual',
+  linkedExperienceCount: 0,
+  isRemovable: true,
+};
 
 describe('UserSkillService', () => {
   let service: UserSkillService;
@@ -25,6 +31,7 @@ describe('UserSkillService', () => {
     findByUserId: ReturnType<typeof vi.fn>;
     replaceForUser: ReturnType<typeof vi.fn>;
     addSkillsForUser: ReturnType<typeof vi.fn>;
+    removeIfRemovable: ReturnType<typeof vi.fn>;
   };
   let profileService: { ensureProfileExists: ReturnType<typeof vi.fn> };
   let skillsAnalysis: { refreshAfterChange: ReturnType<typeof vi.fn> };
@@ -36,6 +43,7 @@ describe('UserSkillService', () => {
       findByUserId: vi.fn(),
       replaceForUser: vi.fn(),
       addSkillsForUser: vi.fn(),
+      removeIfRemovable: vi.fn(),
     };
     profileService = {
       ensureProfileExists: vi.fn().mockResolvedValue({ id: userId }),
@@ -88,9 +96,13 @@ describe('UserSkillService', () => {
 
   describe('getUserSkills', () => {
     it('returns the skills of the token user', async () => {
-      userSkillRepository.findByUserId.mockResolvedValue([{ skill: python }]);
+      userSkillRepository.findByUserId.mockResolvedValue([
+        { skill: python, source: 'manual', evidenceRefs: [] },
+      ]);
 
-      await expect(service.getUserSkills(userId)).resolves.toEqual([python]);
+      await expect(service.getUserSkills(userId)).resolves.toEqual([
+        { ...python, ...manualOrigin },
+      ]);
       expect(userSkillRepository.findByUserId).toHaveBeenCalledWith(userId);
     });
 
@@ -110,13 +122,16 @@ describe('UserSkillService', () => {
     it('replaces the skills of the token user', async () => {
       skillRepository.findByIds.mockResolvedValue([python, sql]);
       userSkillRepository.replaceForUser.mockResolvedValue([
-        { skill: python },
-        { skill: sql },
+        { skill: python, source: 'manual', evidenceRefs: [] },
+        { skill: sql, source: 'manual', evidenceRefs: [] },
       ]);
 
       await expect(
         service.updateUserSkills(userId, { skillIds: [pythonId, sqlId] }),
-      ).resolves.toEqual([python, sql]);
+      ).resolves.toEqual([
+        { ...python, ...manualOrigin },
+        { ...sql, ...manualOrigin },
+      ]);
       expect(userSkillRepository.replaceForUser).toHaveBeenCalledWith(userId, [
         pythonId,
         sqlId,
@@ -191,13 +206,16 @@ describe('UserSkillService', () => {
     it('appends skills without modifying existing sources and triggers analysis', async () => {
       skillRepository.findByIds.mockResolvedValue([sql]);
       userSkillRepository.addSkillsForUser.mockResolvedValue([
-        { skill: python, source: 'nlp' },
-        { skill: sql, source: 'manual' },
+        { skill: python, source: 'nlp', evidenceRefs: [] },
+        { skill: sql, source: 'manual', evidenceRefs: [] },
       ]);
 
       const result = await service.addSkills(userId, { skillIds: [sqlId] });
 
-      expect(result).toEqual([python, sql]);
+      expect(result).toEqual([
+        { ...python, origin: 'other', linkedExperienceCount: 0, isRemovable: false },
+        { ...sql, ...manualOrigin },
+      ]);
       expect(userSkillRepository.addSkillsForUser).toHaveBeenCalledWith(
         userId,
         [sqlId],
@@ -219,6 +237,42 @@ describe('UserSkillService', () => {
         service.addSkills(userId, { skillIds: [sqlId] }),
       ).rejects.toBeInstanceOf(SkillNotFoundException);
       expect(userSkillRepository.addSkillsForUser).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('removeSkill', () => {
+    it('removes a manual skill without links and returns the remaining list', async () => {
+      userSkillRepository.removeIfRemovable.mockResolvedValue('deleted');
+      userSkillRepository.findByUserId.mockResolvedValue([
+        { skill: sql, source: 'manual', evidenceRefs: [] },
+      ]);
+
+      await expect(service.removeSkill(userId, pythonId)).resolves.toEqual([
+        { ...sql, ...manualOrigin },
+      ]);
+      expect(userSkillRepository.removeIfRemovable).toHaveBeenCalledWith(
+        userId,
+        pythonId,
+      );
+      expect(skillsAnalysis.refreshAfterChange).toHaveBeenCalledWith(userId);
+    });
+
+    it('rejects a skill that is linked to an experience', async () => {
+      userSkillRepository.removeIfRemovable.mockResolvedValue('not-removable');
+
+      await expect(
+        service.removeSkill(userId, pythonId),
+      ).rejects.toBeInstanceOf(SkillNotRemovableException);
+      expect(skillsAnalysis.refreshAfterChange).not.toHaveBeenCalled();
+    });
+
+    it('fails when the user does not have the skill', async () => {
+      userSkillRepository.removeIfRemovable.mockResolvedValue('not-found');
+
+      await expect(
+        service.removeSkill(userId, pythonId),
+      ).rejects.toBeInstanceOf(SkillNotFoundException);
+      expect(skillsAnalysis.refreshAfterChange).not.toHaveBeenCalled();
     });
   });
 });

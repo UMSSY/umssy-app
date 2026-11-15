@@ -51,7 +51,8 @@ export function useSkills(): UseSkillsResult {
     const skillIds = [...new Set(resolvedSkills.map(({ id }) => id))];
     return skillsService.saveMySkills(skillIds);
   } });
-  const isSaving = mutation.isPending;
+  const removeMutation = useMutation({ mutationFn: (skillId: string) => skillsService.removeMySkill(skillId) });
+  const isSaving = mutation.isPending || removeMutation.isPending;
   async function reload(): Promise<void> {
     setSelectedSkills(null);
     setFeedback(null);
@@ -114,6 +115,39 @@ export function useSkills(): UseSkillsResult {
     }
   }
 
+  async function removeSavedSkill(skillId: string): Promise<boolean> {
+    if (hasLoadError || isLoading || isSaving || savingRef.current) {
+      return false;
+    }
+
+    savingRef.current = true;
+    setFeedback(null);
+
+    try {
+      const remaining = await removeMutation.mutateAsync(skillId);
+      queryClient.setQueryData<SkillsProfileResponse>(SKILLS_PROFILE_QUERY_KEY, (current) => ({
+        catalog: current?.catalog ?? catalogSkills, selected: remaining ?? [],
+      }));
+      setSelectedSkills(null);
+      setFeedback({ type: "success", message: SKILLS_SUCCESS_MESSAGES.removed });
+      return true;
+    } catch (error) {
+      const isLinked = (error as { response?: { status?: number } })?.response?.status === 409;
+      if (isLinked) {
+        void queryClient.invalidateQueries({ queryKey: SKILLS_PROFILE_QUERY_KEY });
+      }
+      setFeedback({
+        type: "error",
+        message: isLinked
+          ? SKILLS_ERROR_MESSAGES.removeLinked
+          : getSkillsErrorMessage(error, SKILLS_ERROR_MESSAGES.remove),
+      });
+      return false;
+    } finally {
+      savingRef.current = false;
+    }
+  }
+
   return {
     catalogSkills,
     selectedSkills,
@@ -124,6 +158,7 @@ export function useSkills(): UseSkillsResult {
     addSkill,
     removeSkill,
     createCustomSkill,
+    removeSavedSkill,
     saveSkills,
     reload,
   };

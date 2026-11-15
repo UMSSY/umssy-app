@@ -11,6 +11,7 @@ vi.mock("@/shared/services/api-client", async (importOriginal) => ({
     get: vi.fn(),
     post: vi.fn(),
     put: vi.fn(),
+    delete: vi.fn(),
   },
 }));
 
@@ -92,5 +93,26 @@ describe("skillsService", () => {
     vi.mocked(apiClient.get).mockRejectedValue(error);
 
     await expect(skillsService.getCatalog()).rejects.toBe(error);
+  });
+
+  it("maps the origin fields of the current user skills", async () => {
+    vi.mocked(apiClient.get).mockResolvedValue(
+      wrapResponse([
+        { ...PYTHON_RESPONSE, origin: "experience", linkedExperienceCount: 2, isRemovable: false },
+      ]),
+    );
+
+    await expect(skillsService.getMySkills()).resolves.toEqual([
+      { ...PYTHON_ITEM, origin: "experience", linkedExperienceCount: 2, isRemovable: false },
+    ]);
+  });
+
+  it("removes a manual skill by id and returns the remaining skills", async () => {
+    vi.mocked(apiClient.delete).mockResolvedValue(wrapResponse([PYTHON_RESPONSE]));
+
+    await expect(skillsService.removeMySkill("skill-9")).resolves.toEqual([PYTHON_ITEM]);
+    expect(apiClient.delete).toHaveBeenCalledWith("/profile/me/skills/skill-9", {
+      headers: { Authorization: "Bearer test-access-token" },
+    });
   });
 });

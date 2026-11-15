@@ -8,7 +8,9 @@ import { SkillMapper } from '../mappers/skill.mapper.js';
 import { SkillRepository } from '../repositories/skill.repository.js';
 import { UserSkillRepository } from '../repositories/user-skill.repository.js';
 import type { UpdateUserSkillsRequest } from '../requests/update-user-skills.request.js';
+import type { OwnSkillResponse } from '../responses/own-skill.response.js';
 import type { SkillResponse } from '../responses/skill.response.js';
+import { SkillNotRemovableException } from '../exceptions/skill-not-removable.exception.js';
 
 @Injectable()
 export class UserSkillService {
@@ -36,19 +38,19 @@ export class UserSkillService {
     );
   }
 
-  async getUserSkills(userId: string): Promise<SkillResponse[]> {
+  async getUserSkills(userId: string): Promise<OwnSkillResponse[]> {
     await this.ensureProfileExists(userId);
 
     const records = await this.userSkillRepository.findByUserId(userId);
     return records.map((record) =>
-      this.skillMapper.toUserSkillResponse(record),
+      this.skillMapper.toOwnSkillResponse(record),
     );
   }
 
   async updateUserSkills(
     userId: string,
     request: UpdateUserSkillsRequest,
-  ): Promise<SkillResponse[]> {
+  ): Promise<OwnSkillResponse[]> {
     await this.ensureProfileExists(userId);
 
     const { skillIds } = request;
@@ -69,14 +71,14 @@ export class UserSkillService {
     );
     await this.skillsAnalysis.refreshAfterChange(userId);
     return records.map((record) =>
-      this.skillMapper.toUserSkillResponse(record),
+      this.skillMapper.toOwnSkillResponse(record),
     );
   }
 
   async addSkills(
     userId: string,
     request: UpdateUserSkillsRequest,
-  ): Promise<SkillResponse[]> {
+  ): Promise<OwnSkillResponse[]> {
     await this.ensureProfileExists(userId);
 
     const { skillIds } = request;
@@ -97,8 +99,26 @@ export class UserSkillService {
     );
     await this.skillsAnalysis.refreshAfterChange(userId);
     return records.map((record) =>
-      this.skillMapper.toUserSkillResponse(record),
+      this.skillMapper.toOwnSkillResponse(record),
     );
+  }
+
+  async removeSkill(
+    userId: string,
+    skillId: string,
+  ): Promise<OwnSkillResponse[]> {
+    await this.ensureProfileExists(userId);
+
+    const result = await this.userSkillRepository.removeIfRemovable(
+      userId,
+      skillId,
+    );
+    if (result === 'not-found') throw new SkillNotFoundException();
+    if (result === 'not-removable') throw new SkillNotRemovableException();
+
+    await this.skillsAnalysis.refreshAfterChange(userId);
+    const records = await this.userSkillRepository.findByUserId(userId);
+    return records.map((record) => this.skillMapper.toOwnSkillResponse(record));
   }
 
   private async ensureProfileExists(userId: string): Promise<void> {

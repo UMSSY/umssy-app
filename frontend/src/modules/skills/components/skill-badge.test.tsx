@@ -34,4 +34,34 @@ describe("SkillBadge", () => {
 
     expect(handleRemove).toHaveBeenCalledWith("skill-1");
   });
+
+  it("AC-10.1: hides the X for a skill linked to an experience", () => {
+    render(
+      <SkillBadge
+        skill={{ id: "skill-1", name: "SQL", origin: "experience", linkedExperienceCount: 2, isRemovable: false }}
+        onRemove={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText("SQL")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Quitar SQL" })).not.toBeInTheDocument();
+    expect(screen.getByText("Respaldada por 2 experiencias laborales")).toBeInTheDocument();
+  });
+
+  it("AC-10.2: shows the X for a manual skill without links", () => {
+    render(
+      <SkillBadge
+        skill={{ id: "skill-1", name: "SQL", origin: "manual", linkedExperienceCount: 0, isRemovable: true }}
+        onRemove={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "Quitar SQL" })).toBeInTheDocument();
+  });
+
+  it("uses a larger touch target for the X on mobile", () => {
+    render(<SkillBadge skill={{ id: "skill-1", name: "SQL" }} onRemove={vi.fn()} />);
+
+    expect(screen.getByRole("button", { name: "Quitar SQL" })).toHaveClass("size-8", "sm:size-5");
+  });
 });

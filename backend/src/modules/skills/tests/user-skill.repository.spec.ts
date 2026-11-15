@@ -7,12 +7,14 @@ const skillId = '33333333-3333-4333-8333-333333333333';
 const otherSkillId = '44444444-4444-4444-8444-444444444444';
 const detectedSkillId = '55555555-5555-4555-8555-555555555555';
 const select = { skill: { select: { id: true, name: true, isCustom: true } } };
+const ownSelect = { ...select, source: true, evidenceRefs: true };
 
 describe('UserSkillRepository', () => {
   let repository: UserSkillRepository;
   let userSkill: { findMany: ReturnType<typeof vi.fn> };
   let tx: {
     userSkill: {
+      findFirst: ReturnType<typeof vi.fn>;
       findMany: ReturnType<typeof vi.fn>;
       deleteMany: ReturnType<typeof vi.fn>;
       updateMany: ReturnType<typeof vi.fn>;
@@ -25,6 +27,7 @@ describe('UserSkillRepository', () => {
     userSkill = { findMany: vi.fn() };
     tx = {
       userSkill: {
+        findFirst: vi.fn(),
         findMany: vi.fn().mockResolvedValue([]),
         deleteMany: vi.fn(),
         updateMany: vi.fn(),
@@ -68,7 +71,7 @@ describe('UserSkillRepository', () => {
     expect(userSkill.findMany).toHaveBeenCalledWith({
       where: { userId },
       orderBy: { skill: { name: 'asc' } },
-      select,
+      select: ownSelect,
     });
   });
 
@@ -154,5 +157,44 @@ describe('UserSkillRepository', () => {
       data: { source: 'nlp' },
     });
     expect(tx.userSkill.createMany).not.toHaveBeenCalled();
+  });
+
+  describe('removeIfRemovable', () => {
+    it('AC-10.3: deletes a manual skill without evidence', async () => {
+      tx.userSkill.findFirst.mockResolvedValue({
+        id: 'row-1',
+        source: 'manual',
+        evidenceRefs: [],
+      });
+
+      await expect(repository.removeIfRemovable(userId, skillId)).resolves.toBe(
+        'deleted',
+      );
+      expect(tx.userSkill.deleteMany).toHaveBeenCalledWith({
+        where: { userId, id: 'row-1' },
+      });
+    });
+
+    it('keeps a skill linked to an experience', async () => {
+      tx.userSkill.findFirst.mockResolvedValue({
+        id: 'row-1',
+        source: 'manual',
+        evidenceRefs: ['work_experience:exp-1'],
+      });
+
+      await expect(repository.removeIfRemovable(userId, skillId)).resolves.toBe(
+        'not-removable',
+      );
+      expect(tx.userSkill.deleteMany).not.toHaveBeenCalled();
+    });
+
+    it('reports a skill the user does not have', async () => {
+      tx.userSkill.findFirst.mockResolvedValue(null);
+
+      await expect(repository.removeIfRemovable(userId, skillId)).resolves.toBe(
+        'not-found',
+      );
+      expect(tx.userSkill.deleteMany).not.toHaveBeenCalled();
+    });
   });
 });

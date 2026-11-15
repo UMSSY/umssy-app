@@ -27,4 +27,15 @@ describe('SkillMapper', () => {
       isCustom: true,
     });
   });
+
+  it('exposes a removable chip for a manual skill without evidence', () => {
+    expect(
+      mapper.toOwnSkillResponse({ skill, source: 'manual', evidenceRefs: [] }),
+    ).toEqual({
+      ...skill,
+      origin: 'manual',
+      linkedExperienceCount: 0,
+      isRemovable: true,
+    });
+  });
 });
