@@ -8,12 +8,50 @@ import type {
 
 @Injectable()
 export class CompanyAccessRequestsRepository {
-  constructor(private readonly prisma: PrismaService) {}
+    constructor(private readonly prisma: PrismaService) {}
+
+  async listCities() {
+    const defaultCities = [
+      'Cochabamba',
+      'La Paz',
+      'Santa Cruz de la Sierra',
+      'Sucre',
+      'Oruro',
+      'Potosí',
+      'Tarija',
+      'Trinidad',
+      'Cobija',
+      'El Alto',
+      'Sacaba',
+      'Quillacollo',
+    ];
+
+    let cities = await this.prisma.city.findMany({
+      where: { NOT: { title: { startsWith: 'Seed:' } } },
+      orderBy: { title: 'asc' },
+      select: { id: true, title: true },
+    });
+
+    if (cities.length === 0) {
+      await this.prisma.city.createMany({
+        data: defaultCities.map((title) => ({ title })),
+        skipDuplicates: true,
+      });
+      cities = await this.prisma.city.findMany({
+        where: { NOT: { title: { startsWith: 'Seed:' } } },
+        orderBy: { title: 'asc' },
+        select: { id: true, title: true },
+      });
+    }
+
+    return cities.map((city) => ({
+      id: city.id,
+      name: city.title,
+    }));
+  }
 
   async createDraft(dto: CreateCompanyAccessRequestDto) {
-    const draftStatus = await this.prisma.accessRequestStatus.findUniqueOrThrow({
-      where: { title: 'DRAFT' },
-    });
+    const draftStatus = await this.prisma.accessRequestStatus.upsert({ where: { title: 'DRAFT' }, update: {}, create: { title: 'DRAFT' } });
 
     return this.prisma.companyAccessRequest.create({
       data: {
@@ -88,9 +126,7 @@ export class CompanyAccessRequestsRepository {
 
   async submitWithGeneratedCode(id: string) {
     const pendingStatus =
-      await this.prisma.accessRequestStatus.findUniqueOrThrow({
-        where: { title: 'PENDING' },
-      });
+      await this.prisma.accessRequestStatus.upsert({ where: { title: 'PENDING' }, update: {}, create: { title: 'PENDING' } });
     const year = new Date().getFullYear();
     const count = await this.prisma.companyAccessRequest.count({
       where: { requestCode: { startsWith: `EMP-${year}-` } },
@@ -121,9 +157,7 @@ export class CompanyAccessRequestsRepository {
 
   async markInReview(id: string, reviewerId: string) {
     const inReviewStatus =
-      await this.prisma.accessRequestStatus.findUniqueOrThrow({
-        where: { title: 'IN_REVIEW' },
-      });
+      await this.prisma.accessRequestStatus.upsert({ where: { title: 'IN_REVIEW' }, update: {}, create: { title: 'IN_REVIEW' } });
     return this.prisma.companyAccessRequest.update({
       where: { id },
       data: {
@@ -203,12 +237,8 @@ export class CompanyAccessRequestsRepository {
       });
 
       const [approvedStatus, companyRole] = await Promise.all([
-        tx.accessRequestStatus.findUniqueOrThrow({
-          where: { title: 'APPROVED' },
-        }),
-        tx.role.findUniqueOrThrow({
-          where: { name: 'empresa' },
-        }),
+        tx.accessRequestStatus.upsert({ where: { title: 'APPROVED' }, update: {}, create: { title: 'APPROVED' } }),
+        tx.role.upsert({ where: { name: 'empresa' }, update: {}, create: { name: 'empresa' } }),
       ]);
 
       const company = await tx.company.create({
@@ -286,9 +316,7 @@ export class CompanyAccessRequestsRepository {
 
   async rejectCompanyRequest(id: string, reviewerId: string, reason: string) {
     const rejectedStatus =
-      await this.prisma.accessRequestStatus.findUniqueOrThrow({
-        where: { title: 'REJECTED' },
-      });
+      await this.prisma.accessRequestStatus.upsert({ where: { title: 'REJECTED' }, update: {}, create: { title: 'REJECTED' } });
 
     return this.prisma.companyAccessRequest.update({
       where: { id },

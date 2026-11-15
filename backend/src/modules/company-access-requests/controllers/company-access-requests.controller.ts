@@ -47,6 +47,11 @@ export class CompanyAccessRequestsController {
 
   // --- RUTAS PÚBLICAS DE REGISTRO Y ACTIVACIÓN DE EMPRESA ---
 
+  @Get('cities')
+  listCities() {
+    return this.companyRequestsService.listCities();
+  }
+
   @Post('company-access-requests')
   create(
     @Body(new ZodValidationPipe(createCompanyAccessRequestSchema))
