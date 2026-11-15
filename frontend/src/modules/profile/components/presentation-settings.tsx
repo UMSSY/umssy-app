@@ -12,7 +12,12 @@ import { toPresentationValues } from '../utils/to-presentation-values';
 export function PresentationSettings({
   guide,
 }: { guide?: ProfileGuideStepProps } = {}) {
-  const { profile, isLoading, error: loadError, setProfile } = useProfile();
+  const {
+    profile,
+    isLoading,
+    error: loadError,
+    setProfile,
+  } = useProfile({ forGuide: Boolean(guide) });
   const { savePresentation, isSaving, feedback, fieldErrors, clearFeedback } =
     useSaveProfile(setProfile);
   const onBusyChange = guide?.onBusyChange;

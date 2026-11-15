@@ -1,6 +1,13 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { ArrowLeft, ArrowRight, Check, ListChecks, X } from 'lucide-react';
 import { cn } from 'cn';
@@ -49,6 +56,8 @@ import { ProfileGuideCelebration } from './profile-guide-celebration';
 import { ProfileGuideMascot } from './profile-guide-mascot';
 import { ProfileGuideStepContent } from './profile-guide-step-content';
 import { ProfileGuideWelcome } from './profile-guide-welcome';
+import { useProfileGuideTravel } from '../hooks/use-profile-guide-travel';
+import { preloadProfileGuideStep } from '../utils/profile-guide-step-loaders';
 
 export function ProfileGuideProvider({ children }: ProfileGuideProviderProps) {
   const { currentUserId, roles, isLoading } = useAuth();
@@ -67,8 +76,8 @@ function ProfileGuideSessionProvider({
 }: ProfileGuideProviderProps & { userId: string }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { profile } = useProfile();
-  const { completeness, error, reload } = useProfileCompleteness(false);
+  const { profile } = useProfile({ forGuide: true });
+  const { completeness, error } = useProfileCompleteness(false);
   const [session, setSession] = useState<ProfileGuideSession | null>(null);
   const sessionRef = useRef<ProfileGuideSession>(createProfileGuideSession());
   const writesRef = useRef(Promise.resolve());
@@ -89,8 +98,27 @@ function ProfileGuideSessionProvider({
   const [discardOpen, setDiscardOpen] = useState(false);
   const pendingActionRef = useRef<(() => void) | null>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
+  const [side, setSide] = useState<'left' | 'right'>('right');
+  const [travelKey, setTravelKey] = useState(0);
+  const [isTraveling, setIsTraveling] = useState(false);
+  const travelingRef = useRef(false);
+  const pendingTravelRef = useRef<(() => void) | null>(null);
+  const onArrive = useCallback(() => {
+    const action = pendingTravelRef.current;
+    pendingTravelRef.current = null;
+    travelingRef.current = false;
+    setIsTraveling(false);
+    action?.();
+  }, []);
+  const { mascotRef, captureOrigin } = useProfileGuideTravel({
+    travelKey,
+    side,
+    onArrive,
+  });
   const enabled = Boolean(session && profile?.id === userId && completeness);
   const isComplete = completeness?.percentage === 100;
+  const hasFinished = isComplete && session?.completed === true;
+  const isBlocked = busy || isTraveling;
   const showWelcome =
     enabled &&
     mode === 'idle' &&
@@ -99,6 +127,10 @@ function ProfileGuideSessionProvider({
     !session?.dismissed;
   const isOpen = showWelcome || mode !== 'idle';
   const index = PROFILE_COMPLETENESS_SECTION_IDS.indexOf(step);
+  const warmStep =
+    mode === 'idle' && completeness && session
+      ? getProfileGuideResumeStep(completeness, session)
+      : PROFILE_COMPLETENESS_SECTION_IDS[index + 1];
   const sectionComplete = Boolean(
     completeness?.sections.find((section) => section.id === step)?.isCompleted,
   );
@@ -134,6 +166,19 @@ function ProfileGuideSessionProvider({
     if (mode === 'wizard') headingRef.current?.focus();
   }, [mode, step, editorVersion]);
 
+  useEffect(() => {
+    if (!enabled) return;
+    let cancelled = false;
+    // Preparar el siguiente módulo fuera del evento de clic evita esperas al aterrizar.
+    const timer = window.setTimeout(() => {
+      if (!cancelled && warmStep) void preloadProfileGuideStep(warmStep);
+    }, 0);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [enabled, warmStep]);
+
   function persist(patch: Partial<ProfileGuideSession>) {
     const next = { ...sessionRef.current, ...patch };
     sessionRef.current = next;
@@ -160,8 +205,7 @@ function ProfileGuideSessionProvider({
     setDirty(false);
     setSaved(true);
     setCelebrationKey((value) => value + 1);
-    void reload();
-  }, [reload]);
+  }, []);
 
   function resetEditor() {
     onDirtyChange(false);
@@ -171,7 +215,7 @@ function ProfileGuideSessionProvider({
   }
 
   function guarded(action: () => void) {
-    if (busyRef.current) return;
+    if (busyRef.current || travelingRef.current) return;
     if (dirtyRef.current) {
       pendingActionRef.current = action;
       setDiscardOpen(true);
@@ -179,15 +223,26 @@ function ProfileGuideSessionProvider({
   }
 
   function moveTo(next: ProfileCompletenessSectionId) {
-    setDirection(
-      PROFILE_COMPLETENESS_SECTION_IDS.indexOf(next) < index
-        ? 'backward'
-        : 'forward',
-    );
-    resetEditor();
-    setStep(next);
-    setShowPending(false);
-    persist({ lastStep: next, dismissed: true });
+    const backward = PROFILE_COMPLETENESS_SECTION_IDS.indexOf(next) < index;
+    const commit = () => {
+      resetEditor();
+      setStep(next);
+      setShowPending(false);
+      persist({ lastStep: next, dismissed: true });
+    };
+    void preloadProfileGuideStep(next);
+    if (mode !== 'wizard' || next === step) {
+      setSide('right');
+      commit();
+      return;
+    }
+    captureOrigin();
+    pendingTravelRef.current = commit;
+    travelingRef.current = true;
+    setIsTraveling(true);
+    setDirection(backward ? 'backward' : 'forward');
+    setSide(backward ? 'left' : 'right');
+    setTravelKey((value) => value + 1);
   }
 
   function start(requested?: ProfileCompletenessSectionId) {
@@ -209,7 +264,13 @@ function ProfileGuideSessionProvider({
   }
 
   function next() {
-    if (busyRef.current || dirtyRef.current || !sectionComplete || error)
+    if (
+      busyRef.current ||
+      travelingRef.current ||
+      dirtyRef.current ||
+      !sectionComplete ||
+      error
+    )
       return;
     if (isComplete) setMode('finish');
     else if (index < PROFILE_COMPLETENESS_SECTION_IDS.length - 1)
@@ -237,15 +298,26 @@ function ProfileGuideSessionProvider({
     router.push('/dashboard');
   }
 
+  const startRef = useRef(start);
+  useLayoutEffect(() => {
+    startRef.current = start;
+  });
+  const openGuide = useCallback(
+    (requested?: ProfileCompletenessSectionId) => startRef.current(requested),
+    [],
+  );
+  const contextValue = useMemo(
+    () => ({ isEnabled: enabled, isComplete, hasFinished, start: openGuide }),
+    [enabled, isComplete, hasFinished, openGuide],
+  );
+
   return (
-    <ProfileGuideContext.Provider
-      value={{ isEnabled: enabled, isComplete, start }}
-    >
+    <ProfileGuideContext.Provider value={contextValue}>
       {children}
-      {enabled && !isOpen ? (
+      {enabled && hasFinished && !isOpen ? (
         <aside
           aria-label="Asistente de perfil UMSSY"
-          className="fixed right-4 bottom-24 z-40 flex max-w-xs flex-col items-end gap-2 sm:right-6"
+          className="fixed right-4 bottom-4 z-40 flex max-w-xs flex-col items-end gap-2 sm:right-6 sm:bottom-6"
         >
           <ProfileGuideBubble isOpen={bubbleOpen} popKey={celebrationKey}>
             <div className="space-y-3">
@@ -302,12 +374,14 @@ function ProfileGuideSessionProvider({
         onOpenChange={(open) => {
           if (!open) {
             if (mode === 'finish') finish();
+            else if (isComplete) guarded(() => setMode('finish'));
             else pause();
           }
         }}
       >
         <DialogContent
           showCloseButton={false}
+          overlayClassName="bg-black/25 supports-backdrop-filter:backdrop-blur-none"
           finalFocus={() =>
             document.querySelector<HTMLElement>(
               '[data-profile-guide-trigger]',
@@ -321,9 +395,15 @@ function ProfileGuideSessionProvider({
           <Button
             variant="ghost"
             size="icon-sm"
-            aria-label="Pausar guía"
-            disabled={busy}
-            onClick={mode === 'finish' ? finish : pause}
+            aria-label={isComplete ? 'Finalizar guía' : 'Pausar guía'}
+            disabled={isBlocked}
+            onClick={
+              mode === 'finish'
+                ? finish
+                : isComplete
+                  ? () => guarded(() => setMode('finish'))
+                  : pause
+            }
             className="absolute top-3 right-3 z-10"
           >
             <X aria-hidden="true" />
@@ -377,8 +457,20 @@ function ProfileGuideSessionProvider({
                 </DialogDescription>
               </header>
               <div className="min-h-0 flex-1 overflow-y-auto">
-                <div className="grid gap-6 p-5 sm:p-7 lg:grid-cols-[minmax(0,1fr)_15rem]">
-                  <div className="min-w-0 space-y-5">
+                <div
+                  className={cn(
+                    'grid gap-6 p-5 sm:p-7',
+                    side === 'left'
+                      ? 'lg:grid-cols-[15rem_minmax(0,1fr)]'
+                      : 'lg:grid-cols-[minmax(0,1fr)_15rem]',
+                  )}
+                >
+                  <div
+                    className={cn(
+                      'min-w-0 space-y-5',
+                      side === 'left' && 'lg:order-last',
+                    )}
+                  >
                     <ProfileCompletenessProgress showChecklist={false} />
                     {storageError ? (
                       <p role="status" className="text-sm text-text-secondary">
@@ -388,7 +480,11 @@ function ProfileGuideSessionProvider({
                     ) : null}
                     <div
                       key={`${step}-${editorVersion}`}
-                      className="animate-in duration-300 fade-in slide-in-from-left-2 motion-reduce:animate-none"
+                      aria-hidden={isTraveling || undefined}
+                      className={cn(
+                        'motion-reduce:animate-none',
+                        isTraveling && 'pointer-events-none invisible',
+                      )}
                     >
                       <ProfileGuideStepContent
                         step={step}
@@ -398,103 +494,149 @@ function ProfileGuideSessionProvider({
                       />
                     </div>
                   </div>
-                  <aside className="order-first grid grid-cols-[auto_minmax(0,1fr)] items-center gap-4 rounded-xl bg-interaction p-4 text-center lg:sticky lg:top-0 lg:order-last lg:flex lg:flex-col lg:self-start">
-                    <ProfileGuideMascot
-                      pose="point"
-                      size="md"
-                      entrance="pop"
-                      stepKey={step}
-                      stepDirection={direction}
-                      celebrationKey={celebrationKey}
-                      isTalking={dirty}
-                    />
-                    <p
-                      role="status"
-                      aria-live="polite"
-                      className="text-sm text-ink"
+                  <aside
+                    data-assistant-side={side}
+                    aria-label="Ayuda de la guía"
+                    className={cn(
+                      'order-first flex flex-col items-center gap-4 rounded-xl p-4 text-center lg:sticky lg:top-0 lg:self-start',
+                      side === 'right' ? 'lg:order-last' : 'lg:order-first',
+                      !isTraveling && 'bg-interaction',
+                    )}
+                  >
+                    <div
+                      className={cn(
+                        'flex w-full',
+                        side === 'left'
+                          ? 'justify-start lg:justify-center'
+                          : 'justify-end lg:justify-center',
+                      )}
                     >
-                      {busy
-                        ? 'Estoy guardando tu información...'
-                        : dirty
-                          ? 'Cuando termines, guarda tus cambios para continuar.'
-                          : error
-                            ? 'Tus datos guardados se conservan. Reintenta consultar el progreso para continuar.'
-                            : saved
-                              ? sectionComplete
-                                ? '¡Cambios guardados! Ya puedes continuar.'
-                                : 'Cambios guardados. Aún falta información para completar esta sección. Puedes agregarla u omitirla.'
-                              : sectionComplete
-                                ? 'Esta sección ya está completa. Puedes revisarla o continuar.'
-                                : 'Completemos esta sección juntos. Tú decides cuándo continuar.'}
-                    </p>
-                    <Button
-                      variant="outline"
-                      className="col-span-2"
-                      disabled={busy}
-                      aria-expanded={showPending}
-                      onClick={() => setShowPending((value) => !value)}
+                      <div
+                        ref={mascotRef}
+                        className="relative z-20 size-32 shrink-0 will-change-transform"
+                      >
+                        <ProfileGuideMascot
+                          pose={isTraveling ? 'fly' : 'point'}
+                          size="md"
+                          stepKey="guide"
+                          stepDirection={direction}
+                          celebrationKey={celebrationKey}
+                          isFloating={!isTraveling}
+                        />
+                      </div>
+                    </div>
+                    <div
+                      className={cn(
+                        'w-full space-y-4',
+                        isTraveling && 'invisible',
+                      )}
                     >
-                      <ListChecks aria-hidden="true" />
-                      Ver pendientes
-                    </Button>
+                      <p
+                        role="status"
+                        aria-live="polite"
+                        className="text-sm text-ink"
+                      >
+                        {busy
+                          ? 'Estoy guardando tu información...'
+                          : dirty
+                            ? 'Cuando termines, guarda tus cambios para continuar.'
+                            : error
+                              ? 'Tus datos guardados se conservan. Reintenta consultar el progreso para continuar.'
+                              : saved
+                                ? sectionComplete
+                                  ? '¡Cambios guardados! Ya puedes continuar.'
+                                  : 'Cambios guardados. Aún falta información para completar esta sección. Puedes agregarla u omitirla.'
+                                : sectionComplete
+                                  ? 'Esta sección ya está completa. Puedes revisarla o continuar.'
+                                  : 'Completemos esta sección juntos. Tú decides cuándo continuar.'}
+                      </p>
+                      <Button
+                        variant="outline"
+                        className="col-span-2"
+                        disabled={isBlocked}
+                        aria-expanded={showPending}
+                        aria-controls="profile-guide-pending"
+                        onClick={() => setShowPending((value) => !value)}
+                      >
+                        <ListChecks aria-hidden="true" />
+                        {showPending ? 'Ocultar pendientes' : 'Ver pendientes'}
+                      </Button>
+                      {showPending ? (
+                        <section
+                          id="profile-guide-pending"
+                          aria-label="Pendientes de la guía"
+                          className="grid w-full gap-2 border-t border-border pt-3 text-left"
+                        >
+                          {PROFILE_COMPLETENESS_SECTION_IDS.map((id) => {
+                            const completed = completeness?.sections.find(
+                              (section) => section.id === id,
+                            )?.isCompleted;
+                            return (
+                              <Button
+                                key={id}
+                                variant="outline"
+                                disabled={isBlocked}
+                                aria-current={id === step ? 'step' : undefined}
+                                className="h-auto justify-start text-left whitespace-normal"
+                                onClick={() => guarded(() => moveTo(id))}
+                              >
+                                {completed ? (
+                                  <Check aria-hidden="true" />
+                                ) : (
+                                  <ArrowRight aria-hidden="true" />
+                                )}
+                                {PROFILE_COMPLETENESS_SECTION_LABELS[id]} ·{' '}
+                                {completed ? 'Completada' : 'Pendiente'}
+                              </Button>
+                            );
+                          })}
+                        </section>
+                      ) : null}
+                    </div>
                   </aside>
                 </div>
-                {showPending ? (
-                  <section
-                    aria-label="Pendientes de la guía"
-                    className="grid gap-2 border-t border-border p-5 sm:grid-cols-2 sm:px-7"
-                  >
-                    {PROFILE_COMPLETENESS_SECTION_IDS.map((id) => {
-                      const completed = completeness?.sections.find(
-                        (section) => section.id === id,
-                      )?.isCompleted;
-                      return (
-                        <Button
-                          key={id}
-                          variant="outline"
-                          disabled={busy}
-                          aria-current={id === step ? 'step' : undefined}
-                          className="h-auto justify-start text-left whitespace-normal"
-                          onClick={() => guarded(() => moveTo(id))}
-                        >
-                          {completed ? (
-                            <Check aria-hidden="true" />
-                          ) : (
-                            <ArrowRight aria-hidden="true" />
-                          )}
-                          {PROFILE_COMPLETENESS_SECTION_LABELS[id]} ·{' '}
-                          {completed ? 'Completada' : 'Pendiente'}
-                        </Button>
-                      );
-                    })}
-                  </section>
-                ) : null}
               </div>
               <footer className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-border bg-surface-soft p-5 sm:px-7">
-                <Button
-                  variant="outline"
-                  disabled={busy || index === 0}
-                  onClick={() =>
-                    guarded(() =>
-                      moveTo(PROFILE_COMPLETENESS_SECTION_IDS[index - 1]),
-                    )
-                  }
-                >
-                  <ArrowLeft aria-hidden="true" />
-                  Anterior
-                </Button>
-                <div className="flex flex-wrap gap-2">
-                  <Button variant="ghost" disabled={busy} onClick={pause}>
-                    Continuar más tarde
+                {!isComplete ? (
+                  <Button
+                    variant="outline"
+                    disabled={isBlocked || index === 0}
+                    onClick={() =>
+                      guarded(() =>
+                        moveTo(PROFILE_COMPLETENESS_SECTION_IDS[index - 1]),
+                      )
+                    }
+                  >
+                    <ArrowLeft aria-hidden="true" />
+                    Anterior
                   </Button>
+                ) : (
+                  <p className="text-sm font-semibold text-app-header">
+                    Tu perfil está completo.
+                  </p>
+                )}
+                <div className="flex flex-wrap gap-2">
+                  {!isComplete ? (
+                    <Button
+                      variant="ghost"
+                      disabled={isBlocked}
+                      onClick={pause}
+                    >
+                      Continuar más tarde
+                    </Button>
+                  ) : null}
                   {!sectionComplete ? (
-                    <Button variant="outline" disabled={busy} onClick={skip}>
+                    <Button
+                      variant="outline"
+                      disabled={isBlocked}
+                      onClick={skip}
+                    >
                       Omitir por ahora
                     </Button>
                   ) : null}
                   <Button
                     disabled={
-                      busy || dirty || !sectionComplete || Boolean(error)
+                      isBlocked || dirty || !sectionComplete || Boolean(error)
                     }
                     onClick={next}
                   >

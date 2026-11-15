@@ -16,6 +16,8 @@ import type { ProfileCompletenessSectionId } from '../types/profile-completeness
 import type { ProfileGuideSession } from '../types/profile-guide-session.types';
 import type { ProfileResponse } from '../types/profile-response.types';
 import { PROFILE_COMPLETENESS_SECTION_IDS } from '../constants/profile-completeness.constants';
+import { useProfileGuide } from '../contexts/profile-guide-context';
+import type { ProfileGuideTravelOptions } from '../types/profile-guide-travel-options.types';
 import { ProfileGuideProvider } from './profile-guide-provider';
 
 const state = vi.hoisted(() => ({
@@ -33,6 +35,10 @@ const state = vi.hoisted(() => ({
   read: vi.fn(),
   write: vi.fn(),
   sessions: new Map<string, ProfileGuideSession>(),
+  preloadStep: vi.fn(),
+  captureOrigin: vi.fn(),
+  controlledTravel: false,
+  arrivals: [] as { key: number; side: 'left' | 'right'; arrive: () => void }[],
 }));
 
 vi.mock('next/navigation', () => ({
@@ -62,11 +68,36 @@ vi.mock('../services/profile-guide-storage', () => ({
   }),
   profileGuideStorage: { read: state.read, write: state.write },
 }));
+vi.mock('../utils/profile-guide-step-loaders', () => ({
+  preloadProfileGuideStep: state.preloadStep,
+}));
+vi.mock('../hooks/use-profile-guide-travel', async () => {
+  const { useLayoutEffect, useRef } = await import('react');
+  return {
+    useProfileGuideTravel({
+      travelKey,
+      side,
+      onArrive,
+    }: ProfileGuideTravelOptions) {
+      const mascotRef = useRef<HTMLDivElement | null>(null);
+      const seenKey = useRef(0);
+      useLayoutEffect(() => {
+        if (!travelKey || seenKey.current === travelKey) return;
+        seenKey.current = travelKey;
+        state.arrivals.push({ key: travelKey, side, arrive: onArrive });
+        if (!state.controlledTravel) onArrive();
+      }, [onArrive, side, travelKey]);
+      return { mascotRef, captureOrigin: state.captureOrigin };
+    },
+  };
+});
 vi.mock('./profile-guide-welcome-hero', () => ({
   ProfileGuideWelcomeHero: () => <span aria-hidden="true" />,
 }));
 vi.mock('./profile-guide-mascot', () => ({
-  ProfileGuideMascot: () => <span aria-hidden="true" />,
+  ProfileGuideMascot: ({ pose }: { pose: string }) => (
+    <span aria-hidden="true" data-mascot-pose={pose} />
+  ),
 }));
 vi.mock('./profile-guide-celebration', () => ({
   ProfileGuideCelebration: () => <span aria-hidden="true" />,
@@ -156,10 +187,26 @@ function session(
   };
 }
 
+function TestGuideEntry() {
+  const guide = useProfileGuide();
+  return (
+    <button
+      type="button"
+      disabled={!guide?.isEnabled}
+      onClick={() => guide?.start()}
+    >
+      Continuar guía de prueba
+    </button>
+  );
+}
+
 function page() {
   return (
     <ProfileGuideProvider>
-      <main>Contenido del dashboard</main>
+      <main>
+        Contenido del dashboard
+        <TestGuideEntry />
+      </main>
     </ProfileGuideProvider>
   );
 }
@@ -190,6 +237,9 @@ beforeEach(() => {
   state.completeness = completeness(['contact']);
   state.error = null;
   state.sessions.clear();
+  state.arrivals = [];
+  state.controlledTravel = false;
+  state.preloadStep.mockResolvedValue(undefined);
   state.reload.mockResolvedValue(undefined);
   state.read.mockImplementation(
     async (userId: string) => state.sessions.get(userId) ?? session(),
@@ -256,8 +306,15 @@ describe('ProfileGuideProvider', () => {
   it('automatically welcomes only on the dashboard', async () => {
     state.pathname = '/profile/settings';
     const view = render(page());
-    await screen.findByRole('button', { name: 'Abrir asistente de perfil' });
+    await waitFor(() =>
+      expect(
+        screen.getByRole('button', { name: 'Continuar guía de prueba' }),
+      ).toBeEnabled(),
+    );
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Abrir asistente de perfil' }),
+    ).not.toBeInTheDocument();
 
     state.pathname = '/dashboard';
     view.rerender(page());
@@ -300,7 +357,7 @@ describe('ProfileGuideProvider', () => {
     await user.click(
       screen.getByRole('button', { name: 'Confirmar guardado de prueba' }),
     );
-    expect(state.reload).toHaveBeenCalledTimes(1);
+    expect(state.reload).not.toHaveBeenCalled();
     expect(screen.getByRole('button', { name: 'Siguiente' })).toBeDisabled();
 
     state.completeness = completeness(['contact', 'presentation'], 50);
@@ -340,6 +397,12 @@ describe('ProfileGuideProvider', () => {
       100,
     );
     view.rerender(page());
+    expect(
+      screen.queryByRole('button', { name: 'Continuar más tarde' }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Pausar guía' }),
+    ).not.toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Finalizar' }));
 
     const finishDialog = await screen.findByRole('dialog', {
@@ -351,6 +414,17 @@ describe('ProfileGuideProvider', () => {
         name: 'Completitud del perfil',
       }),
     ).toHaveAttribute('aria-valuenow', '100');
+    expect(
+      within(finishDialog).queryByRole('button', { name: 'Pausar guía' }),
+    ).not.toBeInTheDocument();
+    expect(
+      within(finishDialog).queryByRole('button', {
+        name: 'Continuar más tarde',
+      }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Abrir asistente de perfil' }),
+    ).not.toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Volver al inicio' }));
     await waitFor(() =>
       expect(state.write).toHaveBeenLastCalledWith(
@@ -364,6 +438,9 @@ describe('ProfileGuideProvider', () => {
       ),
     );
     expect(state.push).toHaveBeenCalledWith('/dashboard');
+    expect(
+      await screen.findByRole('button', { name: 'Abrir asistente de perfil' }),
+    ).toBeVisible();
   });
 
   it.each(['Anterior', 'Continuar más tarde'])(
@@ -408,12 +485,62 @@ describe('ProfileGuideProvider', () => {
           expect(screen.queryByRole('dialog')).not.toBeInTheDocument(),
         );
         expect(
-          screen.getByRole('button', { name: 'Abrir asistente de perfil' }),
-        ).toBeVisible();
+          screen.queryByRole('button', { name: 'Abrir asistente de perfil' }),
+        ).not.toBeInTheDocument();
+        expect(
+          screen.getByRole('button', { name: 'Continuar guía de prueba' }),
+        ).toBeEnabled();
       }
       expect(state.push).not.toHaveBeenCalled();
     },
   );
+
+  it('confirms unsaved edits before closing a guide whose refreshed profile is already complete', async () => {
+    const user = userEvent.setup();
+    const view = render(page());
+    await startGuide(user);
+    await user.click(
+      screen.getByRole('button', { name: 'Editar datos de prueba' }),
+    );
+    state.completeness = completeness(
+      [...PROFILE_COMPLETENESS_SECTION_IDS],
+      100,
+    );
+    view.rerender(page());
+
+    await user.click(screen.getByRole('button', { name: 'Finalizar guía' }));
+    const confirmation = await screen.findByRole('alertdialog', {
+      name: '¿Descartar los cambios sin guardar?',
+    });
+    await user.click(
+      within(confirmation).getByRole('button', { name: 'Seguir editando' }),
+    );
+    await waitFor(() =>
+      expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument(),
+    );
+    expect(
+      screen.getByRole('dialog', { name: 'Presentación' }),
+    ).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Finalizar' })).toBeDisabled();
+    expect(
+      screen.queryByRole('dialog', { name: '¡Tu perfil está completo!' }),
+    ).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Finalizar guía' }));
+    await user.click(
+      await screen.findByRole('button', { name: 'Descartar cambios' }),
+    );
+
+    expect(
+      await screen.findByRole('dialog', { name: '¡Tu perfil está completo!' }),
+    ).toBeVisible();
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+    expect(state.push).not.toHaveBeenCalled();
+    expect(state.reload).not.toHaveBeenCalled();
+    expect(
+      screen.queryByRole('button', { name: 'Abrir asistente de perfil' }),
+    ).not.toBeInTheDocument();
+  });
 
   it('skips a section without changing its real completeness or refreshing it as saved', async () => {
     const user = userEvent.setup();
@@ -453,9 +580,14 @@ describe('ProfileGuideProvider', () => {
     view.unmount();
     render(page());
 
+    await waitFor(() =>
+      expect(
+        screen.getByRole('button', { name: 'Continuar guía de prueba' }),
+      ).toBeEnabled(),
+    );
     expect(
-      await screen.findByRole('button', { name: 'Abrir asistente de perfil' }),
-    ).toBeVisible();
+      screen.queryByRole('button', { name: 'Abrir asistente de perfil' }),
+    ).not.toBeInTheDocument();
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
@@ -470,11 +602,13 @@ describe('ProfileGuideProvider', () => {
       session({ dismissed: true, lastStep: 'education' }),
     );
     const view = render(page());
-    await user.click(
-      await screen.findByRole('button', { name: 'Abrir asistente de perfil' }),
+    await waitFor(() =>
+      expect(
+        screen.getByRole('button', { name: 'Continuar guía de prueba' }),
+      ).toBeEnabled(),
     );
     await user.click(
-      screen.getByRole('button', { name: 'Continuar mi perfil' }),
+      screen.getByRole('button', { name: 'Continuar guía de prueba' }),
     );
     expect(
       await screen.findByRole('dialog', { name: 'Habilidades' }),
@@ -486,11 +620,13 @@ describe('ProfileGuideProvider', () => {
     state.auth = { ...state.auth, currentUserId: 'user-b' };
     state.profile = { ...PROFILE, id: 'user-b', firstName: 'Ana' };
     view.rerender(page());
-    await user.click(
-      await screen.findByRole('button', { name: 'Abrir asistente de perfil' }),
+    await waitFor(() =>
+      expect(
+        screen.getByRole('button', { name: 'Continuar guía de prueba' }),
+      ).toBeEnabled(),
     );
     await user.click(
-      screen.getByRole('button', { name: 'Continuar mi perfil' }),
+      screen.getByRole('button', { name: 'Continuar guía de prueba' }),
     );
 
     expect(
@@ -513,9 +649,14 @@ describe('ProfileGuideProvider', () => {
     );
     render(page());
 
+    await waitFor(() =>
+      expect(
+        screen.getByRole('button', { name: 'Continuar guía de prueba' }),
+      ).toBeEnabled(),
+    );
     expect(
-      await screen.findByRole('button', { name: 'Abrir asistente de perfil' }),
-    ).toBeVisible();
+      screen.queryByRole('button', { name: 'Abrir asistente de perfil' }),
+    ).not.toBeInTheDocument();
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(state.push).not.toHaveBeenCalled();
   });
@@ -523,7 +664,11 @@ describe('ProfileGuideProvider', () => {
   it('waits for the matching profile when the previous account is still cached', async () => {
     state.sessions.set('user-a', session({ dismissed: true }));
     const view = render(page());
-    await screen.findByRole('button', { name: 'Abrir asistente de perfil' });
+    await waitFor(() =>
+      expect(
+        screen.getByRole('button', { name: 'Continuar guía de prueba' }),
+      ).toBeEnabled(),
+    );
 
     state.auth = { ...state.auth, currentUserId: 'user-b' };
     view.rerender(page());
@@ -556,5 +701,187 @@ describe('ProfileGuideProvider', () => {
     view.rerender(page());
 
     expect(screen.getByRole('button', { name: 'Siguiente' })).toBeDisabled();
+  });
+
+  it.each([
+    { completed: false, percentage: 35, visible: false },
+    { completed: true, percentage: 35, visible: false },
+    { completed: false, percentage: 100, visible: false },
+    { completed: true, percentage: 100, visible: true },
+  ])(
+    'shows the corner assistant only after 100% and finishing (completed: $completed, percentage: $percentage)',
+    async ({ completed, percentage, visible }) => {
+      state.sessions.set('user-a', session({ dismissed: true, completed }));
+      state.completeness = completeness(
+        percentage === 100
+          ? [...PROFILE_COMPLETENESS_SECTION_IDS]
+          : ['contact'],
+        percentage,
+      );
+      render(page());
+      await waitFor(() =>
+        expect(
+          screen.getByRole('button', { name: 'Continuar guía de prueba' }),
+        ).toBeEnabled(),
+      );
+
+      const trigger = screen.queryByRole('button', {
+        name: 'Abrir asistente de perfil',
+      });
+      if (visible) {
+        expect(trigger).toBeVisible();
+        expect(
+          screen.getByRole('complementary', {
+            name: 'Asistente de perfil UMSSY',
+          }),
+        ).toHaveClass('bottom-4');
+      } else expect(trigger).not.toBeInTheDocument();
+    },
+  );
+
+  it('keeps the pending checklist under the robot and updates the toggle label', async () => {
+    const user = userEvent.setup();
+    render(page());
+    await startGuide(user);
+    const assistant = screen.getByRole('complementary', {
+      name: 'Ayuda de la guía',
+    });
+    const show = within(assistant).getByRole('button', {
+      name: 'Ver pendientes',
+    });
+    expect(show).toHaveAttribute('aria-expanded', 'false');
+    await user.click(show);
+
+    const list = within(assistant).getByRole('region', {
+      name: 'Pendientes de la guía',
+    });
+    const hide = within(assistant).getByRole('button', {
+      name: 'Ocultar pendientes',
+    });
+    expect(hide).toHaveAttribute('aria-expanded', 'true');
+    expect(hide).toHaveAttribute('aria-controls', list.id);
+    expect(within(list).getAllByRole('button')).toHaveLength(7);
+    expect(
+      within(list).getByRole('button', {
+        name: 'Datos de contacto · Completada',
+      }),
+    ).toBeVisible();
+    expect(
+      within(list).getByRole('button', { name: 'Presentación · Pendiente' }),
+    ).toHaveAttribute('aria-current', 'step');
+    await user.click(hide);
+
+    expect(
+      within(assistant).queryByRole('region', {
+        name: 'Pendientes de la guía',
+      }),
+    ).not.toBeInTheDocument();
+    expect(
+      within(assistant).getByRole('button', { name: 'Ver pendientes' }),
+    ).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('uses the dirty-change confirmation before jumping through the robot checklist', async () => {
+    const user = userEvent.setup();
+    render(page());
+    await startGuide(user);
+    await user.click(
+      screen.getByRole('button', { name: 'Editar datos de prueba' }),
+    );
+    await user.click(screen.getByRole('button', { name: 'Ver pendientes' }));
+    const list = screen.getByRole('region', { name: 'Pendientes de la guía' });
+    await user.click(
+      within(list).getByRole('button', { name: 'Habilidades · Pendiente' }),
+    );
+
+    const confirmation = await screen.findByRole('alertdialog', {
+      name: '¿Descartar los cambios sin guardar?',
+    });
+    expect(state.captureOrigin).not.toHaveBeenCalled();
+    await user.click(
+      within(confirmation).getByRole('button', { name: 'Descartar cambios' }),
+    );
+
+    expect(
+      await screen.findByRole('dialog', { name: 'Habilidades' }),
+    ).toBeVisible();
+    expect(
+      screen.queryByRole('region', { name: 'Pendientes de la guía' }),
+    ).not.toBeInTheDocument();
+    expect(state.push).not.toHaveBeenCalled();
+  });
+
+  it('moves the same robot layer to the correct side before swapping the next or previous form', async () => {
+    const user = userEvent.setup();
+    state.controlledTravel = true;
+    const view = render(page());
+    await startGuide(user);
+    state.completeness = completeness(['contact', 'presentation'], 50);
+    view.rerender(page());
+    const oldEditor = screen.getByRole('region', {
+      name: 'Editor de presentation',
+    });
+    const mascotLayer = screen
+      .getByRole('complementary', { name: 'Ayuda de la guía' })
+      .querySelector('[data-mascot-pose]')?.parentElement;
+    await user.click(screen.getByRole('button', { name: 'Siguiente' }));
+
+    expect(state.captureOrigin).toHaveBeenCalledTimes(1);
+    expect(state.arrivals).toHaveLength(1);
+    expect(state.arrivals[0].side).toBe('right');
+    expect(screen.getByRole('dialog', { name: 'Presentación' })).toBeVisible();
+    expect(oldEditor).toBeInTheDocument();
+    expect(
+      screen.queryByRole('region', { name: 'Editor de education' }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('complementary', { name: 'Ayuda de la guía' }),
+    ).toHaveAttribute('data-assistant-side', 'right');
+    expect(mascotLayer).toHaveAttribute(
+      'class',
+      expect.stringContaining('will-change-transform'),
+    );
+    expect(mascotLayer?.querySelector('[data-mascot-pose]')).toHaveAttribute(
+      'data-mascot-pose',
+      'fly',
+    );
+    expect(screen.getByRole('button', { name: 'Siguiente' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Anterior' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Pausar guía' })).toBeDisabled();
+    await user.click(screen.getByRole('button', { name: 'Siguiente' }));
+    expect(state.arrivals).toHaveLength(1);
+
+    act(() => state.arrivals[0].arrive());
+
+    expect(
+      await screen.findByRole('dialog', { name: 'Formación académica' }),
+    ).toBeVisible();
+    expect(oldEditor).not.toBeInTheDocument();
+    expect(mascotLayer).toBe(
+      screen
+        .getByRole('complementary', { name: 'Ayuda de la guía' })
+        .querySelector('[data-mascot-pose]')?.parentElement,
+    );
+    expect(mascotLayer?.querySelector('[data-mascot-pose]')).toHaveAttribute(
+      'data-mascot-pose',
+      'point',
+    );
+    await user.click(screen.getByRole('button', { name: 'Anterior' }));
+
+    expect(state.arrivals).toHaveLength(2);
+    expect(state.arrivals[1].side).toBe('left');
+    expect(
+      screen.getByRole('dialog', { name: 'Formación académica' }),
+    ).toBeVisible();
+    expect(
+      screen.getByRole('complementary', { name: 'Ayuda de la guía' }),
+    ).toHaveAttribute('data-assistant-side', 'left');
+    act(() => state.arrivals[1].arrive());
+
+    expect(
+      await screen.findByRole('dialog', { name: 'Presentación' }),
+    ).toBeVisible();
+    expect(state.captureOrigin).toHaveBeenCalledTimes(2);
+    expect(state.push).not.toHaveBeenCalled();
   });
 });

@@ -16,7 +16,12 @@ import { toPersonalInfoValues } from '../utils/to-personal-info-values';
 export function PersonalInfoSettings({
   guide,
 }: { guide?: ProfileGuideStepProps } = {}) {
-  const { profile, isLoading, error: loadError, setProfile } = useProfile();
+  const {
+    profile,
+    isLoading,
+    error: loadError,
+    setProfile,
+  } = useProfile({ forGuide: Boolean(guide) });
   const { cities, error: citiesError } = useCities();
   const { savePersonalInfo, isSaving, feedback, fieldErrors, clearFeedback } =
     useSaveProfile(setProfile);

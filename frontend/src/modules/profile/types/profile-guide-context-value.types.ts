@@ -3,5 +3,6 @@ import type { ProfileCompletenessSectionId } from './profile-completeness-sectio
 export interface ProfileGuideContextValue {
   isEnabled: boolean;
   isComplete: boolean;
+  hasFinished?: boolean;
   start: (step?: ProfileCompletenessSectionId) => void;
 }

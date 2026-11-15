@@ -23,9 +23,11 @@ export function ProfileCompletenessProgress({
   showChecklist = true,
   refetchOnMount = showChecklist,
   hideWhenComplete = false,
+  showGuideAction = true,
 }: ProfileCompletenessProgressProps) {
   const guide = useProfileGuide();
-  const { completeness, isLoading, error, reload } = useProfileCompleteness(refetchOnMount);
+  const { completeness, isLoading, error, reload } =
+    useProfileCompleteness(refetchOnMount);
   const isComplete =
     completeness?.percentage === PROFILE_COMPLETENESS_LIMITS.max;
   const { isOpen, panelId, containerRef, triggerRef, toggle } =
@@ -63,7 +65,13 @@ export function ProfileCompletenessProgress({
     );
   }
 
-  if (!completeness || (hideWhenComplete && guide?.isEnabled && isComplete))
+  if (
+    !completeness ||
+    (hideWhenComplete &&
+      guide?.isEnabled &&
+      isComplete &&
+      guide.hasFinished !== false)
+  )
     return null;
   const { percentage } = completeness;
   const title = isComplete
@@ -116,10 +124,13 @@ export function ProfileCompletenessProgress({
           />
         ) : null}
       </div>
-      {showChecklist && guide?.isEnabled && !isComplete ? (
+      {showChecklist &&
+      showGuideAction &&
+      guide?.isEnabled &&
+      (!isComplete || guide.hasFinished === false) ? (
         <div className="px-4 pb-4 sm:px-5">
           <Button data-profile-guide-trigger onClick={() => guide.start()}>
-            Continuar mi perfil
+            {isComplete ? 'Finalizar mi perfil' : 'Continuar mi perfil'}
           </Button>
         </div>
       ) : null}
