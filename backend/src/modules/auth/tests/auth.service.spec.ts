@@ -257,7 +257,7 @@ describe('AuthService', () => {
         lastName: 'Perez',
         isActive: true,
       });
-     
+
       authRepository.findLatestOtp.mockResolvedValue({
         id: 'otp-recent',
         createdAt: new Date(Date.now() - 30 * 1000),
@@ -281,7 +281,7 @@ describe('AuthService', () => {
         lastName: 'Perez',
         isActive: true,
       });
-      
+
       authRepository.findLatestOtp.mockResolvedValue({
         id: 'otp-old',
         createdAt: new Date(Date.now() - 130 * 1000),

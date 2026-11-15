@@ -59,7 +59,10 @@ export class RefreshTokenService {
       sub?: unknown;
       roleTag?: unknown;
     } | null>(accessToken);
-    if (typeof payload?.sub !== 'string' || typeof payload.roleTag !== 'string') {
+    if (
+      typeof payload?.sub !== 'string' ||
+      typeof payload.roleTag !== 'string'
+    ) {
       throw new UnauthorizedSessionException();
     }
 

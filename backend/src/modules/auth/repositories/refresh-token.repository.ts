@@ -24,7 +24,6 @@ export class RefreshTokenRepository {
     return this.prisma.refreshToken.findUnique({ where: { tokenHash } });
   }
 
-  
   rotate(currentId: string, next: NewRefreshToken): Promise<boolean> {
     return this.prisma.$transaction(async (tx) => {
       const consumed = await tx.refreshToken.updateMany({
@@ -43,7 +42,7 @@ export class RefreshTokenRepository {
       data: { revokedAt: new Date(), revokedReason: reason },
     });
   }
-    revokeAllForUser(userId: string, reason: RefreshRevocationReason) {
+  revokeAllForUser(userId: string, reason: RefreshRevocationReason) {
     return this.prisma.refreshToken.updateMany({
       where: { userId, revokedAt: null },
       data: { revokedAt: new Date(), revokedReason: reason },
