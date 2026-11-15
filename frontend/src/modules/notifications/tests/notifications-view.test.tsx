@@ -4,9 +4,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NotificationsView } from "../views/notifications-view";
 import {
   useNotificationsInbox,
-  useNotificationsRealtimeSync,
   useUnreadNotificationsCount,
 } from "../hooks/use-notifications";
+import { useNotificationUnreadCount } from "../hooks/use-notification-unread-count";
 
 const pushMock = vi.fn();
 
@@ -17,8 +17,11 @@ vi.mock("next/navigation", () => ({
 
 vi.mock("../hooks/use-notifications", () => ({
   useNotificationsInbox: vi.fn(),
-  useNotificationsRealtimeSync: vi.fn(),
   useUnreadNotificationsCount: vi.fn(),
+}));
+
+vi.mock("../hooks/use-notification-unread-count", () => ({
+  useNotificationUnreadCount: vi.fn(),
 }));
 
 describe("NotificationsView", () => {
@@ -31,6 +34,10 @@ describe("NotificationsView", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(useNotificationUnreadCount).mockReturnValue({
+      unreadCount: 2,
+      isLoading: false,
+    });
     vi.mocked(useUnreadNotificationsCount).mockReturnValue({
       data: { count: 2 },
     } as ReturnType<typeof useUnreadNotificationsCount>);
@@ -76,7 +83,6 @@ describe("NotificationsView", () => {
     expect(screen.getByText("2 sin leer")).toBeInTheDocument();
     expect(screen.getByText("Nueva encuesta publicada")).toBeInTheDocument();
     expect(screen.getByText("Oferta de mentoría asignada")).toBeInTheDocument();
-    expect(useNotificationsRealtimeSync).toHaveBeenCalled();
   });
 
   it("marca como leída y navega al hacer clic en el botón de acción de un aviso no leído", async () => {
