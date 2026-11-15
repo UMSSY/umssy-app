@@ -36,9 +36,11 @@ describe('ProfileGuideWelcome', () => {
     ).toBeVisible();
     expect(screen.getByText('Guía de perfil')).toBeVisible();
     expect(screen.getByText('¡Bienvenido a UMSSY!')).toBeVisible();
-    ['Completa tu perfil.', 'Destaca tu trayectoria.', 'Conecta con oportunidades.'].forEach(
-      (item) => expect(screen.getByText(item)).toBeVisible(),
-    );
+    [
+      'Completa tu perfil.',
+      'Destaca tu trayectoria.',
+      'Conecta con oportunidades.',
+    ].forEach((item) => expect(screen.getByText(item)).toBeVisible());
     expect(screen.getByTestId('welcome-hero')).toBeInTheDocument();
   });
 
