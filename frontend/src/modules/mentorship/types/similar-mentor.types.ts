@@ -9,6 +9,7 @@ export interface SimilarMentor extends Pick<
 }
 
 export type SimilarMentorsSectionProps =
-  | { status: 'loading' | 'empty' }
+  | { status: 'loading' }
+  | { status: 'empty' }
   | { status: 'success'; mentors: SimilarMentor[] }
   | { status: 'error'; onRetry: () => void };
