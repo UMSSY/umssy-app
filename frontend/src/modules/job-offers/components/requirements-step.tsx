@@ -5,7 +5,6 @@ import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Toggle } from "@/components/ui/toggle";
 import { cn } from "@/lib/utils";
 import { DetectedSkillsChips } from "@/modules/profile/components/detected-skills-chips";
 import {
@@ -20,6 +19,7 @@ import { useRequirementsSkillsPreview } from "../hooks/use-requirements-skills-p
 import { useSkillsCatalog } from "../hooks/use-skills-catalog";
 import type { SkillOption } from "../types/skill-option.types";
 import { FieldError } from "./field-error";
+import { SelectedSkillChip } from "./selected-skill-chip";
 import { SkillSearchDialog } from "./skill-search-dialog";
 import { StepActions } from "./step-actions";
 import type { RequirementsStepProps } from "../types/requirements-step-props.types";
@@ -60,15 +60,9 @@ export function RequirementsStep({
 
   const isSelected = (skill: SkillOption) => conditions.skills.some((item) => item.id === skill.id);
 
-  const toggleSkill = (skill: SkillOption) => {
-    if (isSelected(skill)) {
-      dismissedSkillIdsRef.current.add(skill.id);
-      updateField("skills", conditions.skills.filter((item) => item.id !== skill.id));
-      return;
-    }
-    if (isSkillLimitReached) return;
-    dismissedSkillIdsRef.current.delete(skill.id);
-    updateField("skills", [...conditions.skills, skill]);
+  const removeSkill = (skill: SkillOption) => {
+    dismissedSkillIdsRef.current.add(skill.id);
+    updateField("skills", conditions.skills.filter((item) => item.id !== skill.id));
   };
 
   const addSkill = (skill: SkillOption) => {
@@ -118,7 +112,7 @@ export function RequirementsStep({
           <div className="mb-4 flex items-center gap-2">
             <Info className="size-4 shrink-0 text-accent" aria-hidden="true" />
             <p className="text-sm text-text-secondary">
-              Selecciona las habilidades que necesita el puesto. {REQUIREMENTS_SKILLS_TEXT.autoSelectHint}
+              {REQUIREMENTS_SKILLS_TEXT.skillsIntro} {REQUIREMENTS_SKILLS_TEXT.autoSelectHint}
             </p>
           </div>
 
@@ -135,30 +129,22 @@ export function RequirementsStep({
             </div>
           )}
 
-          {catalog.status === "ready" && (
-            <div className="flex flex-wrap gap-2.5">
-              {catalog.skills.map((skill) => {
-                const selected = isSelected(skill);
-                return (
-                  <Toggle
-                    key={skill.id}
-                    variant="outline"
-                    pressed={selected}
-                    disabled={!selected && isSkillLimitReached}
-                    onPressedChange={() => toggleSkill(skill)}
-                    className="h-auto rounded-full px-4 py-1.5 text-sm font-medium text-text-secondary data-[pressed]:border-primary data-[pressed]:bg-primary data-[pressed]:text-primary-foreground"
-                  >
-                    {skill.name}
-                  </Toggle>
-                );
-              })}
+          <div className="flex flex-wrap items-center gap-2.5">
+            {conditions.skills.map((skill) => (
+              <SelectedSkillChip key={skill.id} skill={skill} onRemove={removeSkill} />
+            ))}
+            {catalog.status === "ready" && (
               <SkillSearchDialog
                 catalog={catalog.skills}
                 selected={conditions.skills}
                 isDisabled={isSkillLimitReached}
                 onAdd={addSkill}
               />
-            </div>
+            )}
+          </div>
+
+          {conditions.skills.length === 0 && catalog.status === "ready" && (
+            <p className="mt-3 text-sm text-text-secondary">{REQUIREMENTS_SKILLS_TEXT.emptySelection}</p>
           )}
 
           {isSkillLimitReached && (
