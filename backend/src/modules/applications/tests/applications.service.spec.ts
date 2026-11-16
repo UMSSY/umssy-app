@@ -76,6 +76,15 @@ describe('ApplicationsService (T5.1 & T5.2 & HU-15)', () => {
       expect(matching.scoresForOffers).not.toHaveBeenCalled();
     });
 
+    it('no oculta errores inesperados del servicio de afinidad', async () => {
+      repositoryMock.findByUserId.mockResolvedValue([
+        { id: 'app-1', jobOfferId: 'offer-1' },
+      ]);
+      matching.scoresForOffers.mockRejectedValue(new Error('fallo en el calculo'));
+      await expect(service.findMyApplications('user-1', { sortOrder: 'desc' }))
+        .rejects.toThrow('fallo en el calculo');
+    });
+
     it('debe devolver el contrato del cliente con fechas ISO y afinidad calculada', async () => {
       const mockApps = [
         {

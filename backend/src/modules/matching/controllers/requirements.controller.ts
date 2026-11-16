@@ -3,7 +3,7 @@ import { ApiBearerAuth, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { RequirementTermsBodyDto } from '../requests/requirement-terms.schema.js';
 import { RequirementTermsService } from '../services/requirement-terms.service.js';
-import type { RequirementTermsResponse } from '../types/matching.types.js';
+import type { DetectedSkillResponse } from '../types/matching.types.js';
 
 @ApiTags('matching')
 @ApiBearerAuth()
@@ -15,7 +15,7 @@ export class RequirementsController {
 
   @Post('terms')
   @HttpCode(HttpStatus.OK)
-  extractTerms(@Body() body: RequirementTermsBodyDto): RequirementTermsResponse {
-    return (this.requirementTermsService as any).extract(body.text);
+  extractTerms(@Body() body: RequirementTermsBodyDto): Promise<DetectedSkillResponse[]> {
+    return this.requirementTermsService.extractAndMatchRequirements(body.text);
   }
 }
