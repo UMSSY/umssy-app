@@ -65,8 +65,8 @@ export class CompanyAccessRequestsController {
     FileInterceptor('file', { limits: { fileSize: 2 * 1024 * 1024 } }),
   )
   attachLogo(
-  @Param('id', ParseUUIDPipe) id: string,
-  @UploadedFile() file: UploadedDocumentFile | undefined,
+    @Param('id', ParseUUIDPipe) id: string,
+    @UploadedFile() file: UploadedDocumentFile | undefined,
   ) {
     return this.companyRequestsService.attachLogo(id, file);
   }
@@ -77,10 +77,10 @@ export class CompanyAccessRequestsController {
     FileInterceptor('file', { limits: { fileSize: 10 * 1024 * 1024 } }),
   )
   attachDocument(
-  @Param('id', ParseUUIDPipe) id: string,
-  @UploadedFile() file: UploadedDocumentFile | undefined,
+    @Param('id', ParseUUIDPipe) id: string,
+    @UploadedFile() file: UploadedDocumentFile | undefined,
   ) {
-  return this.companyRequestsService.attachDocument(id, file);
+    return this.companyRequestsService.attachDocument(id, file);
   }
 
   @Post('company-access-requests/:id/submit')

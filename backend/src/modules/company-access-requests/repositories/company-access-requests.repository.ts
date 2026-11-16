@@ -8,7 +8,7 @@ import type {
 
 @Injectable()
 export class CompanyAccessRequestsRepository {
-    constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async listCities() {
     const defaultCities = [
@@ -51,7 +51,11 @@ export class CompanyAccessRequestsRepository {
   }
 
   async createDraft(dto: CreateCompanyAccessRequestDto) {
-    const draftStatus = await this.prisma.accessRequestStatus.upsert({ where: { title: 'DRAFT' }, update: {}, create: { title: 'DRAFT' } });
+    const draftStatus = await this.prisma.accessRequestStatus.upsert({
+      where: { title: 'DRAFT' },
+      update: {},
+      create: { title: 'DRAFT' },
+    });
 
     return this.prisma.companyAccessRequest.create({
       data: {
@@ -125,8 +129,11 @@ export class CompanyAccessRequestsRepository {
   }
 
   async submitWithGeneratedCode(id: string) {
-    const pendingStatus =
-      await this.prisma.accessRequestStatus.upsert({ where: { title: 'PENDING' }, update: {}, create: { title: 'PENDING' } });
+    const pendingStatus = await this.prisma.accessRequestStatus.upsert({
+      where: { title: 'PENDING' },
+      update: {},
+      create: { title: 'PENDING' },
+    });
     const year = new Date().getFullYear();
     const count = await this.prisma.companyAccessRequest.count({
       where: { requestCode: { startsWith: `EMP-${year}-` } },
@@ -156,8 +163,11 @@ export class CompanyAccessRequestsRepository {
   }
 
   async markInReview(id: string, reviewerId: string) {
-    const inReviewStatus =
-      await this.prisma.accessRequestStatus.upsert({ where: { title: 'IN_REVIEW' }, update: {}, create: { title: 'IN_REVIEW' } });
+    const inReviewStatus = await this.prisma.accessRequestStatus.upsert({
+      where: { title: 'IN_REVIEW' },
+      update: {},
+      create: { title: 'IN_REVIEW' },
+    });
     return this.prisma.companyAccessRequest.update({
       where: { id },
       data: {
@@ -237,8 +247,16 @@ export class CompanyAccessRequestsRepository {
       });
 
       const [approvedStatus, companyRole] = await Promise.all([
-        tx.accessRequestStatus.upsert({ where: { title: 'APPROVED' }, update: {}, create: { title: 'APPROVED' } }),
-        tx.role.upsert({ where: { name: 'empresa' }, update: {}, create: { name: 'empresa' } }),
+        tx.accessRequestStatus.upsert({
+          where: { title: 'APPROVED' },
+          update: {},
+          create: { title: 'APPROVED' },
+        }),
+        tx.role.upsert({
+          where: { name: 'empresa' },
+          update: {},
+          create: { name: 'empresa' },
+        }),
       ]);
 
       const company = await tx.company.create({
@@ -315,8 +333,11 @@ export class CompanyAccessRequestsRepository {
   }
 
   async rejectCompanyRequest(id: string, reviewerId: string, reason: string) {
-    const rejectedStatus =
-      await this.prisma.accessRequestStatus.upsert({ where: { title: 'REJECTED' }, update: {}, create: { title: 'REJECTED' } });
+    const rejectedStatus = await this.prisma.accessRequestStatus.upsert({
+      where: { title: 'REJECTED' },
+      update: {},
+      create: { title: 'REJECTED' },
+    });
 
     return this.prisma.companyAccessRequest.update({
       where: { id },

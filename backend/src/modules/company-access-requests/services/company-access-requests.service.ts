@@ -12,6 +12,9 @@ import {
 import * as bcrypt from 'bcrypt';
 import { FilesService } from '../../files/services/files.service.js';
 import { DocumentTextExtractorService } from '../../access-requests/services/document-text-extractor.service.js';
+import { MailService } from '../../mail/services/mail.service.js';
+import { loadMailTemplate } from '../../mail/helpers/load-mail-template.js';
+import { buildFrontendUrl } from '../../access-requests/mail/helpers/frontend-url.js';
 import { CompanyAccessRequestsRepository } from '../repositories/company-access-requests.repository.js';
 import type {
   ActivateCompanyAccountDto,
@@ -34,6 +37,7 @@ export class CompanyAccessRequestsService {
     private readonly repository: CompanyAccessRequestsRepository,
     private readonly filesService: FilesService,
     private readonly textExtractor: DocumentTextExtractorService,
+    private readonly mailService: MailService,
   ) {}
 
   listCities() {
@@ -116,7 +120,11 @@ export class CompanyAccessRequestsService {
     }
 
     const submitted = await this.repository.submitWithGeneratedCode(id);
-    void this.evaluateLetterheadOcr(id, current.companyName, current.documentFileId);
+    void this.evaluateLetterheadOcr(
+      id,
+      current.companyName,
+      current.documentFileId,
+    );
 
     return {
       id: submitted.id,
@@ -223,6 +231,31 @@ export class CompanyAccessRequestsService {
       `[OTP EMPRESA] Código de activación para ${current.email} (${updated.requestCode}): ${rawCode}`,
     );
 
+    try {
+      const activationUrl = buildFrontendUrl('/request-access/activation', {
+        code: updated.requestCode ?? '',
+        email: current.email,
+      });
+      const expiresInMinutes = '1440';
+      await this.mailService.send({
+        to: current.email,
+        subject: 'Tu código de activación de UMSSY para empresa',
+        text: `Tu solicitud de acceso para ${current.companyName} fue aprobada. Tu código de activación es ${rawCode} y vence en 24 horas. Actívalo en ${activationUrl}`,
+        mjml: await loadMailTemplate('activation-code'),
+        values: {
+          code: rawCode,
+          expiresInMinutes,
+          activationUrl,
+        },
+      });
+    } catch (mailError) {
+      this.logger.warn(
+        `No se pudo enviar el correo de activación a ${current.email}: ${
+          mailError instanceof Error ? mailError.message : String(mailError)
+        }`,
+      );
+    }
+
     return {
       id: updated.id,
       status: 'APPROVED',
@@ -246,6 +279,31 @@ export class CompanyAccessRequestsService {
     }
 
     await this.repository.rejectCompanyRequest(id, reviewerId, reason);
+
+    try {
+      const requestStatusUrl = buildFrontendUrl('/request-access/status', {
+        code: current.requestCode ?? '',
+        email: current.email,
+      });
+      await this.mailService.send({
+        to: current.email,
+        subject: 'Tu solicitud de acceso a UMSSY fue observada',
+        text: `Tu solicitud de acceso para ${current.companyName} (${current.requestCode}) fue observada.\n\nMotivo del rechazo:\n${reason}\n\nConsulta el estado en: ${requestStatusUrl}`,
+        mjml: await loadMailTemplate('access-request-rejection'),
+        values: {
+          reason,
+          requestCode: current.requestCode ?? '',
+          requestStatusUrl,
+        },
+      });
+    } catch (mailError) {
+      this.logger.warn(
+        `No se pudo enviar el correo de rechazo a ${current.email}: ${
+          mailError instanceof Error ? mailError.message : String(mailError)
+        }`,
+      );
+    }
+
     return { id, status: 'REJECTED', rejectionReason: reason };
   }
 
@@ -272,11 +330,7 @@ export class CompanyAccessRequestsService {
       dto.requestCode,
       dto.email,
     );
-    if (
-      !found ||
-      found.status.title !== 'APPROVED' ||
-      !found.approvedUserId
-    ) {
+    if (!found || found.status.title !== 'APPROVED' || !found.approvedUserId) {
       throw new BadRequestException('Solicitud no válida para activación');
     }
 
@@ -306,10 +360,17 @@ export class CompanyAccessRequestsService {
     companyName: string,
     documentFileId: string,
   ) {
-        try {
-      const modelPath = join(process.cwd(), 'ocr-models', '4.0.0_best', 'spa.traineddata');
+    try {
+      const modelPath = join(
+        process.cwd(),
+        'ocr-models',
+        '4.0.0_best',
+        'spa.traineddata',
+      );
       if (!existsSync(modelPath)) {
-        this.logger.warn(`Modelo OCR no encontrado en ${modelPath}; se omite verificación automática.`);
+        this.logger.warn(
+          `Modelo OCR no encontrado en ${modelPath}; se omite verificación automática.`,
+        );
         return;
       }
       const file = await this.filesService.getContent(documentFileId);
