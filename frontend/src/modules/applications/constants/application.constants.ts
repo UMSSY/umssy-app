@@ -35,7 +35,7 @@ const CLOSED_BADGE_CLASS = "bg-brand-soft text-danger";
 export const APPLICATION_STATUS_BADGE_CLASSES: Record<ApplicationStatus, string> = {
   "En revisión": IN_PROGRESS_BADGE_CLASS,
   Entrevista: IN_PROGRESS_BADGE_CLASS,
-  Aceptada: "bg-success-soft text-success-soft-foreground",
+  Aceptada: "bg-surface-soft text-ink",
   "No seleccionado": CLOSED_BADGE_CLASS,
   Retirada: CLOSED_BADGE_CLASS,
 };

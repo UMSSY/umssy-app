@@ -8,7 +8,7 @@ describe("ApplicationStatusBadge", () => {
   it.each([
     ["En revisión", "bg-availability"],
     ["Entrevista", "bg-availability"],
-    ["Aceptada", "bg-success-soft"],
+    ["Aceptada", "bg-surface-soft"],
     ["No seleccionado", "bg-brand-soft"],
     ["Retirada", "bg-brand-soft"],
   ] as const)("shows %s with the color of its status", (status, colorClass) => {
