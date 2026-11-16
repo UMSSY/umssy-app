@@ -27,12 +27,14 @@ import {
   createCompanyAccessRequestSchema,
   listCompanyAccessRequestsQuerySchema,
   rejectCompanyAccessRequestSchema,
+  reportInconsistencySchema,
   requestCorrectionSchema,
   updateCompanyAccessRequestSchema,
   type ActivateCompanyAccountDto,
   type CreateCompanyAccessRequestDto,
   type ListCompanyAccessRequestsQuery,
   type RejectCompanyAccessRequestDto,
+  type ReportInconsistencyDto,
   type RequestCorrectionDto,
   type UpdateCompanyAccessRequestDto,
 } from '../requests/create-company-access-request.schema.js';
@@ -95,6 +97,27 @@ export class CompanyAccessRequestsController {
   @Get('company-access-requests/status/:code')
   getStatus(@Param('code') code: string, @Query('email') email: string) {
     return this.companyRequestsService.getStatus(code, email ?? '');
+  }
+
+  @Get('company-access-requests/activation-status')
+  getActivationStatus(
+    @Query('email') email?: string,
+    @Query('code') code?: string,
+    @Query('otp') otp?: string,
+  ) {
+    return this.companyRequestsService.getActivationStatus(
+      email ?? '',
+      code,
+      otp,
+    );
+  }
+
+  @Post('company-access-requests/report-inconsistency')
+  reportInconsistency(
+    @Body(new ZodValidationPipe(reportInconsistencySchema))
+    body: ReportInconsistencyDto,
+  ) {
+    return this.companyRequestsService.reportInconsistency(body);
   }
 
   @Post('company-access-requests/activate')

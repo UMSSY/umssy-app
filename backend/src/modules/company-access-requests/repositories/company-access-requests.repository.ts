@@ -135,10 +135,18 @@ export class CompanyAccessRequestsRepository {
       create: { title: 'PENDING' },
     });
     const year = new Date().getFullYear();
-    const count = await this.prisma.companyAccessRequest.count({
+    const latest = await this.prisma.companyAccessRequest.findFirst({
       where: { requestCode: { startsWith: `EMP-${year}-` } },
+      orderBy: { requestCode: 'desc' },
+      select: { requestCode: true },
     });
-    const requestCode = `EMP-${year}-${String(count + 1).padStart(4, '0')}`;
+    let nextSeq = 1;
+    if (latest?.requestCode) {
+      const parts = latest.requestCode.split('-');
+      const num = parseInt(parts[parts.length - 1], 10);
+      if (!isNaN(num)) nextSeq = num + 1;
+    }
+    const requestCode = `EMP-${year}-${String(nextSeq).padStart(4, '0')}`;
 
     return this.prisma.companyAccessRequest.update({
       where: { id },
@@ -409,6 +417,56 @@ export class CompanyAccessRequestsRepository {
         data: { password: passwordHash, isActive: true },
       });
       return { requestId, activated: true };
+    });
+  }
+
+  findByEmailForActivation(email: string) {
+    return this.prisma.companyAccessRequest.findFirst({
+      where: {
+        email: email.trim().toLowerCase(),
+      },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        status: true,
+        city: true,
+        approvedUser: true,
+        activationOtps: {
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+        },
+      },
+    });
+  }
+
+  async recordInconsistencyReport(
+    requestCode: string,
+    email: string,
+    observation: string,
+  ) {
+    const request = await this.prisma.companyAccessRequest.findFirst({
+      where: {
+        requestCode: requestCode.trim().toUpperCase(),
+        email: email.trim().toLowerCase(),
+      },
+    });
+    if (!request) {
+      return null;
+    }
+    const timestamp = new Date().toLocaleString('es-BO');
+    const existing = request.rejectionReason
+      ? `${request.rejectionReason}\n\n`
+      : '';
+    const updatedNote =
+      `${existing}[OBSERVACIÓN DEL POSTULANTE - ${timestamp}]: ${observation}`.slice(
+        0,
+        500,
+      );
+
+    return this.prisma.companyAccessRequest.update({
+      where: { id: request.id },
+      data: {
+        rejectionReason: updatedNote,
+      },
     });
   }
 

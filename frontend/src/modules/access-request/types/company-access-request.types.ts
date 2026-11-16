@@ -95,3 +95,45 @@ export interface CompanyRequestsSummary {
   approvedCount: number;
   rejectedCount: number;
 }
+
+export interface CompanyOfficialData {
+  requestCode: string;
+  companyName: string;
+  city: string;
+  sector: string;
+  email: string;
+  phone: string;
+  websiteUrl?: string;
+  description?: string;
+  username: string;
+}
+
+export interface CompanyActivationStatusResult {
+  state:
+    | 'INVALID'
+    | 'NOT_FOUND'
+    | 'PENDING'
+    | 'REJECTED'
+    | 'OBSERVED'
+    | 'ALREADY_ACTIVATED'
+    | 'EXPIRED'
+    | 'REQUIRES_CODE'
+    | 'INVALID_CODE'
+    | 'READY';
+  message?: string;
+  email?: string;
+  data?: CompanyOfficialData;
+}
+
+export interface ActivateCompanyAccountPayload {
+  requestCode: string;
+  email: string;
+  code: string;
+  password: string;
+}
+
+export interface ReportInconsistencyPayload {
+  requestCode: string;
+  email: string;
+  observation: string;
+}

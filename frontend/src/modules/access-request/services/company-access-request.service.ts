@@ -1,11 +1,14 @@
 import { apiClient } from '@/shared/services/api-client';
 import type { ApiResult } from '../types/api-result.types';
 import type {
+  ActivateCompanyAccountPayload,
   CityItem,
   CompanyAccessRequestItem,
+  CompanyActivationStatusResult,
   CompanyRequestsSummary,
   CreateCompanyRequestPayload,
   RejectCompanyPayload,
+  ReportInconsistencyPayload,
   RequestCorrectionPayload,
   SubmitCompanyRequestResult,
   UpdateCompanyPayload,
@@ -171,4 +174,30 @@ export const companyAccessRequestService = {
     });
     return res.status === 200 ? (res.data as Blob) : null;
   },
+
+  getActivationStatus: (params: {
+    email?: string;
+    code?: string;
+    otp?: string;
+  }) =>
+    request<CompanyActivationStatusResult>(
+      'get',
+      '/company-access-requests/activation-status',
+      undefined,
+      params,
+    ),
+
+  reportInconsistency: (payload: ReportInconsistencyPayload) =>
+    request<{ reported: boolean; message: string }>(
+      'post',
+      '/company-access-requests/report-inconsistency',
+      payload,
+    ),
+
+  activateAccount: (payload: ActivateCompanyAccountPayload) =>
+    request<{ requestId: string; activated: boolean }>(
+      'post',
+      '/company-access-requests/activate',
+      payload,
+    ),
 };

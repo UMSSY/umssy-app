@@ -20,6 +20,7 @@ import type {
   CreateCompanyAccessRequestDto,
   ListCompanyAccessRequestsQuery,
   RejectCompanyAccessRequestDto,
+  ReportInconsistencyDto,
   RequestCorrectionDto,
   UpdateCompanyAccessRequestDto,
 } from '../requests/create-company-access-request.schema.js';
@@ -261,15 +262,18 @@ export class CompanyAccessRequestsService {
     );
 
     try {
-      const activationUrl = buildFrontendUrl('/request-access/activation', {
-        code: updated.requestCode ?? '',
-        email: current.email,
-      });
+      const activationUrl = buildFrontendUrl(
+        '/request-access/activacion-empresa',
+        {
+          email: current.email,
+          otp: rawCode,
+        },
+      );
       const expiresInMinutes = '1440';
       await this.mailService.send({
         to: current.email,
         subject: 'Tu código de activación de UMSSY para empresa',
-        text: `Tu solicitud de acceso para ${current.companyName} fue aprobada. Tu código de activación es ${rawCode} y vence en 24 horas. Actívalo en ${activationUrl}`,
+        text: `Tu solicitud de acceso para ${current.companyName} (${updated.requestCode}) fue aprobada.\n\nCódigo de activación: ${rawCode}\nCódigo de seguimiento: ${updated.requestCode}\nVence en 24 horas.\n\nPara activar tu cuenta y configurar tus credenciales de acceso, ingresa al siguiente enlace oficial:\n${activationUrl}\n\nEn la pantalla se te solicitará ingresar obligatoriamente tu código de seguimiento institucional (${updated.requestCode}) para validar tu identidad.`,
         mjml: await loadMailTemplate('activation-code'),
         values: {
           code: rawCode,
@@ -464,6 +468,127 @@ export class CompanyAccessRequestsService {
       found.approvedUserId,
       passwordHash,
     );
+  }
+
+  async getActivationStatus(email: string, code?: string, otp?: string) {
+    if (!email || !email.trim()) {
+      return {
+        state: 'INVALID',
+        message:
+          'Enlace incompleto o no válido. Debe ingresar mediante el enlace oficial enviado a su correo electrónico.',
+      };
+    }
+
+    const current = await this.repository.findByEmailForActivation(email);
+    if (!current) {
+      return {
+        state: 'NOT_FOUND',
+        message:
+          'No se encontró ninguna solicitud de empresa asociada a este correo electrónico.',
+      };
+    }
+
+    if (current.status.title === 'REJECTED') {
+      return {
+        state: 'REJECTED',
+        message:
+          'La solicitud de registro de empresa fue rechazada por la administración institucional.',
+      };
+    }
+
+    if (current.status.title === 'OBSERVED') {
+      return {
+        state: 'OBSERVED',
+        message:
+          'La solicitud de empresa requiere subsanación antes de proceder a la activación.',
+      };
+    }
+
+    if (current.status.title !== 'APPROVED') {
+      return {
+        state: 'PENDING',
+        message:
+          'La solicitud de empresa aún se encuentra en revisión institucional.',
+      };
+    }
+
+    // Verificar si ya fue activada
+    const isUserActive = current.approvedUser?.isActive === true;
+    const latestOtp = current.activationOtps[0];
+    const isOtpUsed = latestOtp ? latestOtp.usedAt !== null : false;
+
+    if (isUserActive || isOtpUsed) {
+      return {
+        state: 'ALREADY_ACTIVATED',
+        message:
+          'Esta cuenta institucional ya ha sido registrada y activada con éxito anteriormente. Por motivos de seguridad, no se permite volver a registrarla ni modificar sus credenciales.',
+      };
+    }
+
+    // Verificar expiración del OTP (24 horas)
+    if (!latestOtp || latestOtp.expiresAt < new Date()) {
+      return {
+        state: 'EXPIRED',
+        message:
+          'El enlace o código de activación ha expirado (plazo de 24 horas vencido). Por favor comuníquese con soporte institucional para solicitar una nueva activación.',
+      };
+    }
+
+    // Paso de seguridad: requerir código de seguimiento
+    if (!code || !code.trim()) {
+      return {
+        state: 'REQUIRES_CODE',
+        email: current.email,
+        message: 'Ingrese su código de seguimiento para validar su identidad.',
+      };
+    }
+
+    if (
+      code.trim().toUpperCase() !== current.requestCode?.trim().toUpperCase()
+    ) {
+      return {
+        state: 'INVALID_CODE',
+        email: current.email,
+        message:
+          'El código de seguimiento ingresado no coincide con la solicitud registrada.',
+      };
+    }
+
+    // Código de seguimiento verificado correctamente: retornar datos oficiales (solo lectura)
+    return {
+      state: 'READY',
+      email: current.email,
+      data: {
+        requestCode: current.requestCode,
+        companyName: current.companyName,
+        city: current.city?.title ?? 'Cochabamba',
+        sector: current.sector,
+        email: current.email,
+        phone: current.phone,
+        websiteUrl: current.websiteUrl,
+        description: current.description,
+        username: current.username,
+      },
+    };
+  }
+
+  async reportInconsistency(dto: ReportInconsistencyDto) {
+    const updated = await this.repository.recordInconsistencyReport(
+      dto.requestCode,
+      dto.email,
+      dto.observation,
+    );
+    if (!updated) {
+      throw new NotFoundException('Solicitud no encontrada');
+    }
+    this.logger.log(
+      `[INCONSISTENCIA REPORTADA] ${dto.requestCode} (${dto.email}): ${dto.observation}`,
+    );
+    return {
+      reported: true,
+      message:
+        'Reporte de inconsistencia registrado formalmente para revisión administrativa.',
+    };
   }
 
   async evaluateLetterheadOcr(requestId: string) {

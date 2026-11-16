@@ -111,6 +111,16 @@ export const activateCompanyAccountSchema = z.object({
     .max(72),
 });
 
+export const reportInconsistencySchema = z.object({
+  requestCode: z.string().trim().min(1),
+  email: z.string().trim().toLowerCase().email(),
+  observation: z
+    .string()
+    .trim()
+    .min(5, 'La observación debe tener al menos 5 caracteres')
+    .max(500),
+});
+
 export type CreateCompanyAccessRequestDto = z.infer<
   typeof createCompanyAccessRequestSchema
 >;
@@ -127,3 +137,4 @@ export type ListCompanyAccessRequestsQuery = z.infer<
 export type ActivateCompanyAccountDto = z.infer<
   typeof activateCompanyAccountSchema
 >;
+export type ReportInconsistencyDto = z.infer<typeof reportInconsistencySchema>;
