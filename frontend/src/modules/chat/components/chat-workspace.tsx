@@ -195,6 +195,58 @@ export function ChatWorkspace({
   }, [conversations, isLoading, handleSelectConversation]);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const navigateToParam = (searchString: string) => {
+      const searchParams = new URLSearchParams(searchString);
+      const conversationIdParam = searchParams.get("conversationId");
+      const tabParam = searchParams.get("tab");
+
+      if (tabParam === "requests") {
+        clearSelectedConversation();
+        if (receivedRequests.length > 0) {
+          setSelectedRequestId(receivedRequests[0].id);
+        }
+        return;
+      }
+
+      if (conversationIdParam) {
+        const targetConv = conversations.find((c) => c.id === conversationIdParam);
+        if (targetConv) {
+          handledConversationParamRef.current = conversationIdParam;
+          setSelectedRequestId(null);
+          handleSelectConversation(targetConv);
+        } else if (!isLoading && conversations.length > 0) {
+          toast.error("Conversación no encontrada o sin acceso.");
+        }
+      }
+    };
+
+    const handleCustomNavigate = (e: Event) => {
+      const customEvent = e as CustomEvent<{ actionUrl?: string }>;
+      const actionUrl = customEvent.detail?.actionUrl;
+      if (actionUrl) {
+        const queryIndex = actionUrl.indexOf("?");
+        if (queryIndex !== -1) {
+          navigateToParam(actionUrl.slice(queryIndex));
+        }
+      }
+    };
+
+    const handlePopState = () => {
+      navigateToParam(window.location.search);
+    };
+
+    window.addEventListener("app:navigate", handleCustomNavigate);
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("app:navigate", handleCustomNavigate);
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [conversations, isLoading, receivedRequests, handleSelectConversation, clearSelectedConversation]);
+
+  useEffect(() => {
     if (typeof window === "undefined") {
       return;
     }

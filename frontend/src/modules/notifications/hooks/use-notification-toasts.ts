@@ -43,6 +43,28 @@ export function useNotificationToasts(): void {
     const handleNewNotification = (data: NotificationNewSocketPayload) => {
       if (!data || typeof data.title !== 'string') return;
 
+      if (typeof window !== 'undefined' && data.actionUrl) {
+        try {
+          const url = new URL(data.actionUrl, window.location.origin);
+          const targetConvId = url.searchParams.get('conversationId');
+          const activeConvId = (
+            window as unknown as { __activeConversationId?: string | null }
+          ).__activeConversationId;
+          const currentParams = new URLSearchParams(window.location.search);
+          const currentUrlConvId = currentParams.get('conversationId');
+
+          if (
+            targetConvId &&
+            document.visibilityState === 'visible' &&
+            (targetConvId === activeConvId || targetConvId === currentUrlConvId)
+          ) {
+            return;
+          }
+        } catch {
+          // If URL parsing fails, proceed normally
+        }
+      }
+
       const actionLabel = getNotificationActionLabel(data.typeCode ?? '');
 
       toast(data.title, {
@@ -57,6 +79,13 @@ export function useNotificationToasts(): void {
                     router.push(data.actionUrl);
                   } else if (typeof window !== 'undefined') {
                     window.location.assign(data.actionUrl);
+                  }
+                  if (typeof window !== 'undefined') {
+                    window.dispatchEvent(
+                      new CustomEvent('app:navigate', {
+                        detail: { actionUrl: data.actionUrl },
+                      }),
+                    );
                   }
                 }
               },

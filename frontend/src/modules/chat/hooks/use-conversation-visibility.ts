@@ -7,7 +7,11 @@ export function useConversationVisibility(conversationId: string | null) {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    let socket;
+    (
+      window as unknown as { __activeConversationId?: string | null }
+    ).__activeConversationId = conversationId;
+
+    let socket: ReturnType<typeof getChatSocket> | undefined;
     try {
       socket = getChatSocket();
     } catch {
@@ -15,30 +19,38 @@ export function useConversationVisibility(conversationId: string | null) {
     }
 
     const notifyVisibility = () => {
-      const isFocused =
-        document.visibilityState === 'visible' &&
-        (typeof document.hasFocus === 'function' ? document.hasFocus() : true);
+      const isVisible = document.visibilityState === 'visible';
+      const isOpen = Boolean(conversationId) && isVisible;
 
-      socket.emit('visibility:changed', {
+      socket?.emit('visibility:changed', {
         conversationId,
-        isFocused,
+        isFocused: isVisible,
+        isOpen,
       });
     };
 
     notifyVisibility();
 
+    socket?.on('connect', notifyVisibility);
+
     const handleFocus = () => notifyVisibility();
     const handleBlur = () => {
-      socket.emit('visibility:changed', {
-        conversationId,
-        isFocused: false,
-      });
+      if (document.visibilityState === 'hidden') {
+        socket?.emit('visibility:changed', {
+          conversationId,
+          isFocused: false,
+          isOpen: false,
+        });
+      } else {
+        notifyVisibility();
+      }
     };
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
-        socket.emit('visibility:changed', {
+        socket?.emit('visibility:changed', {
           conversationId,
           isFocused: false,
+          isOpen: false,
         });
       } else {
         notifyVisibility();
@@ -49,15 +61,24 @@ export function useConversationVisibility(conversationId: string | null) {
     window.addEventListener('blur', handleBlur);
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
-        return () => {
+    return () => {
+      (
+        window as unknown as { __activeConversationId?: string | null }
+      ).__activeConversationId = null;
+      socket?.off('connect', notifyVisibility);
       window.removeEventListener('focus', handleFocus);
       window.removeEventListener('blur', handleBlur);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
 
-      socket.emit('visibility:changed', {
-        conversationId: null,
-        isFocused: false,
-      });
+      try {
+        socket?.emit('visibility:changed', {
+          conversationId: null,
+          isFocused: false,
+          isOpen: false,
+        });
+      } catch {
+        // Socket may not be available or connected
+      }
     };
   }, [conversationId]);
 }
