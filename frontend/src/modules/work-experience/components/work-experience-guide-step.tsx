@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { FeedbackMessage } from '@/modules/profile';
+import { ConfirmDeleteDialog, FeedbackMessage } from '@/modules/profile';
+import { useProfileGuideEditor } from '@/shared/hooks/use-profile-guide-editor';
 import type { ProfileGuideStepProps } from '@/shared/types/profile-guide-step-props.types';
 import { useDeleteWorkExperience } from '../hooks/use-delete-work-experience';
 import { useSaveWorkExperience } from '../hooks/use-save-work-experience';
@@ -22,76 +22,44 @@ export function WorkExperienceGuideStep({
   const { experiences, isLoading, error, reload } = useWorkExperiences({
     forGuide: true,
   });
-  const [editingExperience, setEditingExperience] =
-    useState<WorkExperienceItem | null>(null);
-  const [pendingDelete, setPendingDelete] = useState<WorkExperienceItem | null>(
-    null,
-  );
-  const [isFormOpen, setIsFormOpen] = useState(true);
-  const [hasChanges, setHasChanges] = useState(false);
-  const [formVersion, setFormVersion] = useState(0);
-  const writingRef = useRef(false);
-
-  function resetForm() {
-    setEditingExperience(null);
-    setIsFormOpen(false);
-    setHasChanges(false);
-    setFormVersion((version) => version + 1);
-    onDirtyChange(false);
-  }
-
+  const editor = useProfileGuideEditor<WorkExperienceItem>({
+    onDirtyChange,
+    onBusyChange,
+  });
+  const { editingItem: editingExperience, pendingDelete, isFormOpen, hasChanges, formVersion, isBusy } = editor;
   const saveMutation = useSaveWorkExperience(
     () => {
-      resetForm();
+      editor.resetForm();
       onSaved();
       void reload();
     },
     { forGuide: true },
   );
   const deleteMutation = useDeleteWorkExperience(() => {
-    if (editingExperience?.id === pendingDelete?.id) resetForm();
-    setPendingDelete(null);
+    editor.completeDelete();
     void reload();
   });
-  const isBusy = saveMutation.isSaving || deleteMutation.isDeleting;
-
-  useEffect(() => {
-    onBusyChange(isBusy);
-    return () => onBusyChange(false);
-  }, [isBusy, onBusyChange]);
-
   function openForm(experience: WorkExperienceItem | null) {
-    if (isBusy || hasChanges) return;
+    if (!editor.openForm(experience)) return;
     saveMutation.clearFeedback();
     deleteMutation.clearFeedback();
-    setPendingDelete(null);
-    setEditingExperience(experience);
-    setFormVersion((version) => version + 1);
-    setIsFormOpen(true);
   }
 
   async function handleSubmit(values: WorkExperienceFormValues) {
-    if (writingRef.current || isBusy) return;
-    writingRef.current = true;
-    deleteMutation.clearFeedback();
-    try {
+    await editor.runWrite(async () => {
+      deleteMutation.clearFeedback();
       await saveMutation.save(
         toWorkExperiencePayload(values),
         editingExperience?.id,
       );
-    } finally {
-      writingRef.current = false;
-    }
+    });
   }
 
   async function confirmDelete() {
-    if (!pendingDelete || writingRef.current || isBusy) return;
-    writingRef.current = true;
-    try {
+    if (!pendingDelete) return;
+    await editor.runWrite(async () => {
       await deleteMutation.deleteWorkExperience(pendingDelete);
-    } finally {
-      writingRef.current = false;
-    }
+    });
   }
 
   return (
@@ -127,48 +95,23 @@ export function WorkExperienceGuideStep({
           feedback={saveMutation.feedback}
           saveLabel="Guardar cambios"
           onValuesChange={() => {
-            setHasChanges(true);
-            onDirtyChange(true);
+            editor.setDirty(true);
           }}
           onSubmit={handleSubmit}
           onCancel={() => {
-            if (isBusy) return;
+            if (!editor.cancelForm()) return;
             saveMutation.clearFeedback();
-            resetForm();
           }}
         />
       ) : null}
-      {pendingDelete ? (
-        <div
-          role="group"
-          aria-label="Confirmar eliminación de experiencia"
-          className="space-y-3 rounded-md border border-border bg-surface-soft p-4"
-        >
-          <p className="text-sm text-ink">
-            ¿Eliminar «{pendingDelete.position}» de tu experiencia?
-          </p>
-          <div className="flex flex-wrap gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              disabled={isBusy}
-              onClick={() => setPendingDelete(null)}
-            >
-              Conservar experiencia
-            </Button>
-            <Button
-              type="button"
-              variant="destructive"
-              disabled={isBusy}
-              onClick={() => void confirmDelete()}
-            >
-              {deleteMutation.isDeleting
-                ? 'Eliminando...'
-                : 'Eliminar experiencia'}
-            </Button>
-          </div>
-        </div>
-      ) : null}
+      <ConfirmDeleteDialog
+        isOpen={pendingDelete !== null}
+        title="Eliminar experiencia"
+        message={`Se eliminará "${pendingDelete?.position ?? ''}" de tu perfil. Esta acción no se puede deshacer.`}
+        isDeleting={isBusy}
+        onConfirm={() => void confirmDelete()}
+        onCancel={editor.cancelDelete}
+      />
       <WorkExperienceListCard
         experiences={experiences}
         isLoading={isLoading}
@@ -182,9 +125,9 @@ export function WorkExperienceGuideStep({
         onAdd={() => openForm(null)}
         onEdit={openForm}
         onDelete={(experience) => {
+          if (!editor.requestDelete(experience)) return;
           saveMutation.clearFeedback();
           deleteMutation.clearFeedback();
-          setPendingDelete(experience);
         }}
       />
     </section>

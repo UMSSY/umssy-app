@@ -1,4 +1,4 @@
-import { act, cleanup, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { renderWithQuery } from '@/shared/testing/render-with-query';
@@ -54,6 +54,19 @@ afterEach(() => {
 });
 
 describe('CertificationGuideStep', () => {
+  it('requires the existing delete dialog confirmation before removing a certification', async () => {
+    vi.mocked(certificationsService.deleteCertification).mockResolvedValue();
+    const { user } = renderGuide();
+    await user.click(await screen.findByRole('button', { name: 'Eliminar CCNA' }));
+    const dialog = screen.getByRole('alertdialog', { name: 'Eliminar certificación' });
+    expect(certificationsService.deleteCertification).not.toHaveBeenCalled();
+    await user.click(within(dialog).getByRole('button', { name: 'Cancelar' }));
+    expect(certificationsService.deleteCertification).not.toHaveBeenCalled();
+    await user.click(screen.getByRole('button', { name: 'Eliminar CCNA' }));
+    await user.click(within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Eliminar' }));
+    await waitFor(() => expect(certificationsService.deleteCertification).toHaveBeenCalledExactlyOnceWith(CERTIFICATION.id));
+  });
+
   it('keeps the inline draft after a failed save and reports success only after persistence', async () => {
     vi.mocked(certificationsService.updateCertification).mockRejectedValueOnce(
       new Error('unavailable'),

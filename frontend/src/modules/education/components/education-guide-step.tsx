@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { FeedbackMessage } from '@/modules/profile';
+import { useProfileGuideEditor } from '@/shared/hooks/use-profile-guide-editor';
 import type { ProfileGuideStepProps } from '@/shared/types/profile-guide-step-props.types';
 import { useDeleteEducation } from '../hooks/use-delete-education';
 import { useEducations } from '../hooks/use-educations';
@@ -14,6 +14,7 @@ import { toEducationPayload } from '../utils/to-education-payload';
 import { toEducationUpdatePayload } from '../utils/to-education-update-payload';
 import { EducationForm } from './education-form';
 import { EducationListCard } from './education-list-card';
+import { EducationDeleteDialog } from './education-delete-dialog';
 
 export function EducationGuideStep({
   onSaved,
@@ -23,56 +24,29 @@ export function EducationGuideStep({
   const { educations, isLoading, error, reload } = useEducations({
     forGuide: true,
   });
-  const [editingEducation, setEditingEducation] =
-    useState<EducationItem | null>(null);
-  const [pendingDelete, setPendingDelete] = useState<EducationItem | null>(
-    null,
-  );
-  const [isFormOpen, setIsFormOpen] = useState(true);
-  const [hasChanges, setHasChanges] = useState(false);
-  const [formVersion, setFormVersion] = useState(0);
-  const writingRef = useRef(false);
-
-  function resetForm() {
-    setEditingEducation(null);
-    setIsFormOpen(false);
-    setHasChanges(false);
-    setFormVersion((version) => version + 1);
-    onDirtyChange(false);
-  }
-
+  const editor = useProfileGuideEditor<EducationItem>({
+    onDirtyChange,
+    onBusyChange,
+  });
+  const { editingItem: editingEducation, pendingDelete, isFormOpen, hasChanges, formVersion, isBusy } = editor;
   const saveMutation = useSaveEducation(async () => {
-    resetForm();
+    editor.resetForm();
     onSaved();
     await reload();
   });
   const deleteMutation = useDeleteEducation(async () => {
-    if (editingEducation?.id === pendingDelete?.id) resetForm();
-    setPendingDelete(null);
+    editor.completeDelete();
     await reload();
   });
-  const isBusy = saveMutation.isSaving || deleteMutation.isDeleting;
-
-  useEffect(() => {
-    onBusyChange(isBusy);
-    return () => onBusyChange(false);
-  }, [isBusy, onBusyChange]);
-
   function openForm(education: EducationItem | null) {
-    if (isBusy || hasChanges) return;
+    if (!editor.openForm(education)) return;
     saveMutation.clearFeedback();
     deleteMutation.clearFeedback();
-    setPendingDelete(null);
-    setEditingEducation(education);
-    setFormVersion((version) => version + 1);
-    setIsFormOpen(true);
   }
 
   async function handleSubmit(values: EducationFormValues) {
-    if (writingRef.current || isBusy) return;
-    writingRef.current = true;
-    deleteMutation.clearFeedback();
-    try {
+    await editor.runWrite(async () => {
+      deleteMutation.clearFeedback();
       if (editingEducation) {
         await saveMutation.save(
           toEducationUpdatePayload(values, editingEducation),
@@ -81,19 +55,14 @@ export function EducationGuideStep({
       } else {
         await saveMutation.save(toEducationPayload(values));
       }
-    } finally {
-      writingRef.current = false;
-    }
+    });
   }
 
   async function confirmDelete() {
-    if (!pendingDelete || writingRef.current || isBusy) return;
-    writingRef.current = true;
-    try {
+    if (!pendingDelete) return;
+    await editor.runWrite(async () => {
       await deleteMutation.deleteEducation(pendingDelete);
-    } finally {
-      writingRef.current = false;
-    }
+    });
   }
 
   return (
@@ -122,48 +91,23 @@ export function EducationGuideStep({
           feedback={saveMutation.feedback}
           saveLabel="Guardar cambios"
           onValuesChange={() => {
-            setHasChanges(true);
-            onDirtyChange(true);
+            editor.setDirty(true);
           }}
           onSubmit={handleSubmit}
           onCancel={() => {
-            if (isBusy) return;
+            if (!editor.cancelForm()) return;
             saveMutation.clearFeedback();
-            resetForm();
           }}
         />
       ) : null}
-      {pendingDelete ? (
-        <div
-          role="group"
-          aria-label="Confirmar eliminación de formación"
-          className="space-y-3 rounded-md border border-border bg-surface-soft p-4"
-        >
-          <p className="text-sm text-ink">
-            ¿Eliminar «{pendingDelete.degree}» de tu formación?
-          </p>
-          <div className="flex flex-wrap gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              disabled={isBusy}
-              onClick={() => setPendingDelete(null)}
-            >
-              Conservar formación
-            </Button>
-            <Button
-              type="button"
-              variant="destructive"
-              disabled={isBusy}
-              onClick={() => void confirmDelete()}
-            >
-              {deleteMutation.isDeleting
-                ? 'Eliminando...'
-                : 'Eliminar formación'}
-            </Button>
-          </div>
-        </div>
-      ) : null}
+      <EducationDeleteDialog
+        isOpen={pendingDelete !== null}
+        degree={pendingDelete?.degree ?? ''}
+        isDeleting={isBusy}
+        feedback={deleteMutation.feedback}
+        onConfirm={() => void confirmDelete()}
+        onCancel={editor.cancelDelete}
+      />
       <EducationListCard
         educations={educations}
         isLoading={isLoading}
@@ -178,9 +122,9 @@ export function EducationGuideStep({
         onAdd={() => openForm(null)}
         onEdit={openForm}
         onDelete={(education) => {
+          if (!editor.requestDelete(education)) return;
           saveMutation.clearFeedback();
           deleteMutation.clearFeedback();
-          setPendingDelete(education);
         }}
       />
     </section>
