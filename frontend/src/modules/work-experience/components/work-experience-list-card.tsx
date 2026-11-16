@@ -22,12 +22,12 @@ export function WorkExperienceListCard({
 }: WorkExperienceListCardProps) {
   const groups = groupWorkExperiences(experiences);
 
-  const [collapsedGroups, setCollapsedGroups] = useState<
+  const [expandedGroups, setExpandedGroups] = useState<
     Record<string, boolean>
   >({});
 
   const toggleGroup = (groupId: string) => {
-    setCollapsedGroups((previous) => ({
+    setExpandedGroups((previous) => ({
       ...previous,
       [groupId]: !previous[groupId],
     }));
@@ -65,9 +65,9 @@ export function WorkExperienceListCard({
             const groupId = group.id;
             const positionsId = `${groupId}-positions`;
             const isCollapsible = group.positions.length > 1;
-            const isCollapsed = isCollapsible && (collapsedGroups[groupId] ?? false);
+            const isCollapsed = isCollapsible && !expandedGroups[groupId];
             const headerClassName =
-              'flex w-full items-center gap-3 rounded-lg bg-interaction p-3 text-left';
+              'flex h-auto w-full items-center gap-3 rounded-lg bg-interaction p-3 text-left whitespace-normal';
             const headerContent = (
               <>
                 <span
