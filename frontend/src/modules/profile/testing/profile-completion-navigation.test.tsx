@@ -6,7 +6,7 @@ import { renderWithQuery as render } from '@/shared/testing/render-with-query';
 import {
   EducationProfileSection,
   educationsService,
-} from '@/modules/education';
+} from '@/modules/educations';
 import {
   WorkExperienceProfileSection,
   workExperienceService,
@@ -16,13 +16,13 @@ import {
   certificationsService,
 } from '@/modules/certifications';
 import { SkillsProfileSection, skillsService } from '@/modules/skills';
-import { DEGREE_CATALOG_FIXTURE } from '@/modules/education/testing/degree-catalog.fixture';
+import { DEGREE_CATALOG_FIXTURE } from '@/modules/educations/testing/degree-catalog.fixture';
 import { PersonalInfoForm } from '../components/personal-info-form';
 import { PresentationForm } from '../components/presentation-form';
 import { ProfileCompletenessChecklist } from '../components/profile-completeness-checklist';
 import { createProfileCompleteness } from './profile-completeness.fixture';
 
-vi.mock('@/modules/education/services/educations.service', () => ({
+vi.mock('@/modules/educations/services/educations.service', () => ({
   educationsService: {
     getEducations: vi.fn(),
     getInstitutions: vi.fn(),
