@@ -10,7 +10,7 @@ import { ApplicationNotFoundException } from '../exceptions/application-not-foun
 import { ApplicationForbiddenException } from '../exceptions/application-forbidden.exception.js';
 import { ApplicationNotWithdrawableException } from '../exceptions/application-not-withdrawable.exception.js';
 import { ApplicationContactRestrictedException } from '../exceptions/application-contact-restricted.exception.js';
-import type { ApplicationContactResponse } from '../types/application-contact.types.js';
+import type { ApplicationContactResponse } from '../types/application-contact-response.types.js';
 import { ApplicationMapper } from '../mappers/application.mapper.js';
 import { JobRecommendationsService } from '../../matching/services/job-recommendations.service.js';
 import { StateChangedDto } from '../notifications/state-changed.dto.js';
@@ -23,6 +23,7 @@ import type { NotifyStateChangedParams } from '../notifications/state-changed.ty
 import type { ApplicationDecisionContext } from '../types/application-decision-context.types.js';
 import { JobOffersService } from '../../job-offers/services/job-offers.service.js';
 import { NotificationsService } from '../../notifications/services/notifications.service.js';
+import { UsersService } from '../../users/services/users.service.js';
 import { ConfigService } from '@nestjs/config';
 import { NotificationType } from '../../notifications/types/notification-type.enum.js';
 
@@ -43,6 +44,7 @@ export class ApplicationsService {
     private readonly notifications: NotificationsService,
     private readonly config: ConfigService,
     private readonly jobOffers: JobOffersService,
+    private readonly users: UsersService,
   ) {}
 
   async findMyApplications(
@@ -147,12 +149,15 @@ export class ApplicationsService {
     id: string,
     userId: string,
   ): Promise<ApplicationContactResponse> {
-    const application = await this.repository.findContactContext(id);
+    const application = await this.findApplicationDecisionContext(id);
     if (!application || application.userId !== userId)
       throw new ApplicationNotFoundException();
-    if (!CONTACTABLE_STATUSES.includes(application.status.title))
+    if (!CONTACTABLE_STATUSES.includes(application.statusTitle))
       throw new ApplicationContactRestrictedException();
-    return this.mapper.toContactResponse(application);
+    const recruiters = await this.users.findActiveRecruitersByCompany(
+      application.companyId,
+    );
+    return this.mapper.toContactResponse(application, recruiters);
   }
 
   async withdrawApplication(id: string, userId: string): Promise<void> {

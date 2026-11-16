@@ -8,7 +8,6 @@ import {
 } from "@/modules/matching";
 import {
   PROFILE_SKILLS_RADAR_QUERY_KEY,
-  profileSkillsRadarService,
   useInvalidateProfileCompleteness,
   type Feedback,
 } from "@/modules/profile";
@@ -59,12 +58,6 @@ export function useSaveWorkExperience(onSaved: () => void) {
         setAnalysis(result);
       } catch {
         setAnalysis(null);
-      }
-
-      try {
-        await profileSkillsRadarService.analyzeSkills();
-      } catch {
-        // El guardado no debe fallar si el análisis del radar no está disponible.
       }
 
       await refreshSkills();

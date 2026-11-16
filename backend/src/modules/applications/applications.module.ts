@@ -9,6 +9,7 @@ import { ApplicationsRepository } from './repositories/applications.repository.j
 import { PrismaModule } from '../../common/prisma/prisma.module.js';
 import { JobOffersModule } from '../job-offers/job-offers.module.js';
 import { NotificationsModule } from '../notifications/notifications.module.js';
+import { UsersModule } from '../users/users.module.js';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { NotificationsModule } from '../notifications/notifications.module.js';
     JwtAuthModule,
     NotificationsModule,
     JobOffersModule,
+    UsersModule,
   ],
   controllers: [ApplicationsController],
   providers: [

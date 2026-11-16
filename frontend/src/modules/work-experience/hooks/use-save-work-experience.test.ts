@@ -3,7 +3,10 @@ import { act, cleanup, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MY_SKILLS_QUERY_KEY } from "@/modules/skills";
 import { renderHookWithQuery as renderHook } from "@/shared/testing/render-hook-with-query";
-import { PROFILE_SKILLS_RADAR_QUERY_KEY } from "@/modules/profile";
+import {
+  PROFILE_SKILLS_RADAR_QUERY_KEY,
+  profileSkillsRadarService,
+} from "@/modules/profile";
 import { WORK_EXPERIENCE_FEEDBACK_MESSAGES } from "../config/work-experience-feedback.config";
 import { workExperienceService } from "../services/work-experience.service";
 import type { WorkExperienceItem } from "../types/work-experience-item.types";
@@ -131,6 +134,22 @@ describe("useSaveWorkExperience", () => {
         queryKey: PROFILE_SKILLS_RADAR_QUERY_KEY,
       });
     });
+  });
+
+  it("does not ask for the full skills analysis again because the backend already refreshes it", async () => {
+    const analyzeSkills = vi.spyOn(profileSkillsRadarService, "analyzeSkills");
+    const { result, client } = renderHook(() => useSaveWorkExperience(vi.fn()));
+    const invalidate = vi.spyOn(client, "invalidateQueries");
+
+    await act(() => result.current.save(PAYLOAD));
+    await waitFor(() =>
+      expect(invalidate).toHaveBeenCalledWith({
+        queryKey: MY_SKILLS_QUERY_KEY,
+      }),
+    );
+    await waitFor(() => expect(result.current.isAnalyzing).toBe(false));
+
+    expect(analyzeSkills).not.toHaveBeenCalled();
   });
 
   it("keeps the experience saved and shows success feedback", async () => {
