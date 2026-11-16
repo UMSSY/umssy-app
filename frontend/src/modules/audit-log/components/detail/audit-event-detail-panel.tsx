@@ -34,7 +34,7 @@ export function AuditEventDetailPanel({ event, onClose, children }: AuditEventDe
 
           <p className="mt-2 flex items-center gap-1.5 text-[12.5px] text-text-secondary">
             <Lock className="size-3.5" strokeWidth={1.75} aria-hidden="true" />
-            Solo lectura{detail ? ` · ${detail.code}` : ""}
+            Solo lectura{event ? ` · ${event.code}` : ""}
           </p>
 
           {event ? (
@@ -118,9 +118,7 @@ export function AuditEventDetailPanel({ event, onClose, children }: AuditEventDe
 
         <SheetFooter className="mt-auto flex-row items-center justify-between gap-4 border-t border-border p-6">
           <span className="text-[12.5px] text-text-secondary">Este evento no se puede editar ni borrar.</span>
-          <SheetClose render={<Button type="button" variant="outline" className="border-border bg-surface text-ink" />}>
-            Cerrar
-          </SheetClose>
+          <SheetClose render={<Button type="button" />}>Cerrar</SheetClose>
         </SheetFooter>
 
         <EvidenceViewerDialog

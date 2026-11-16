@@ -463,6 +463,11 @@ export type Notification = Prisma.NotificationModel
  */
 export type PushSubscription = Prisma.PushSubscriptionModel
 /**
+ * Model RefreshToken
+ * 
+ */
+export type RefreshToken = Prisma.RefreshTokenModel
+/**
  * Model NotificationPreference
  * 
  */
