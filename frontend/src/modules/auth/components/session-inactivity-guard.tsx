@@ -8,8 +8,24 @@ import { buildLoginUrl } from "../utils/safe-next-path";
 import { useSessionInactivity } from "../hooks/use-session-inactivity";
 import { SessionTimeoutModal } from "./session-timeout-modal";
 
+function useOptionalRouter() {
+  try {
+    return useRouter();
+  } catch {
+    return null;
+  }
+}
+
 export function SessionInactivityGuard() {
-  const router = useRouter();
+  const router = useOptionalRouter();
+
+  const navigateTo = (path: string) => {
+    if (router) {
+      router.replace(path);
+    } else if (typeof window !== "undefined") {
+      window.location.assign(path);
+    }
+  };
 
   // Lee la sesión activa del servidor para obtener los tiempos dinámicos del backend
   const { data: session } = useQuery({
@@ -26,16 +42,16 @@ export function SessionInactivityGuard() {
       const currentPath = `${window.location.pathname}${window.location.search}`;
       const loginUrl = buildLoginUrl(currentPath);
       const separator = loginUrl.includes("?") ? "&" : "?";
-      router.replace(`${loginUrl}${separator}reason=SESSION_EXPIRED`);
+      navigateTo(`${loginUrl}${separator}reason=SESSION_EXPIRED`);
     } else {
-      router.replace("/login?reason=SESSION_EXPIRED");
+      navigateTo("/login?reason=SESSION_EXPIRED");
     }
   };
 
   const handleCloseSession = () => {
     endSession();
     void authService.logout();
-    router.replace("/login");
+    navigateTo("/login");
   };
 
   const { isWarningOpen, secondsLeft, isRefreshing, stayConnected } =

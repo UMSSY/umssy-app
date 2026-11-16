@@ -6,6 +6,7 @@ import { afterEach, expect, it, vi } from "vitest";
 import { Providers } from "./providers";
 import { clearAccessToken, saveAccessToken } from "@/shared/services/storage/access-token-storage";
 
+vi.mock("next/navigation", () => ({ useRouter: () => ({ replace: vi.fn(), push: vi.fn(), refresh: vi.fn() }) }));
 vi.mock("@/components/ui/sonner", () => ({ Toaster: () => null }));
 vi.mock("@/modules/auth/services/auth.service", () => ({ authService: { getSession: vi.fn().mockResolvedValue({ id: 'qa', roles: ['titulado'] }) } }));
 
