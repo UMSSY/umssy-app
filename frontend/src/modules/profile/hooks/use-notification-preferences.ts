@@ -3,7 +3,7 @@ import {
   getNotificationPreferences,
   updateNotificationPreferences,
 } from '../services/notification-preferences.service';
-import type { UpdateNotificationPreferencePayload } from '../types/notification-preference.types';
+import type { UpdateNotificationPreferencePayload } from '../types/update-notification-preference-payload.types';
 
 export const NOTIFICATION_PREFERENCES_QUERY_KEY = ['notification-preferences'] as const;
 

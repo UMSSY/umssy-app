@@ -8,12 +8,10 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 
 vi.mock("next/navigation", () => ({ usePathname: () => "/backoffice/solicitudes" }));
 
-vi.mock("@/modules/notifications/hooks/use-notifications-realtime-sync", () => ({
+vi.mock("@/modules/notifications/hooks/use-notifications", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/modules/notifications/hooks/use-notifications")>()),
   useNotificationsRealtimeSync: vi.fn(),
-}));
-
-vi.mock("@/modules/notifications/hooks/use-notification-unread-count", () => ({
-  useNotificationUnreadCount: () => ({ unreadCount: 0, isLoading: false }),
+  useUnreadNotificationsCount: () => ({ data: { count: 0 } }),
 }));
 
 const ITEMS = [{ label: "Solicitudes", icon: Inbox, href: "/backoffice/solicitudes" }];

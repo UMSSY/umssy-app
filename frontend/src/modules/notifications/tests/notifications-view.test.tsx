@@ -6,7 +6,6 @@ import {
   useNotificationsInbox,
   useUnreadNotificationsCount,
 } from "../hooks/use-notifications";
-import { useNotificationUnreadCount } from "../hooks/use-notification-unread-count";
 
 const pushMock = vi.fn();
 
@@ -20,10 +19,6 @@ vi.mock("../hooks/use-notifications", () => ({
   useUnreadNotificationsCount: vi.fn(),
 }));
 
-vi.mock("../hooks/use-notification-unread-count", () => ({
-  useNotificationUnreadCount: vi.fn(),
-}));
-
 describe("NotificationsView", () => {
   const markAsReadMock = vi.fn().mockResolvedValue(undefined);
   const markAllAsReadMock = vi.fn().mockResolvedValue(undefined);
@@ -34,10 +29,6 @@ describe("NotificationsView", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(useNotificationUnreadCount).mockReturnValue({
-      unreadCount: 2,
-      isLoading: false,
-    });
     vi.mocked(useUnreadNotificationsCount).mockReturnValue({
       data: { count: 2 },
     } as ReturnType<typeof useUnreadNotificationsCount>);

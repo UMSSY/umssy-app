@@ -1,9 +1,5 @@
 import { ENV_CONFIG } from '@/shared/config/env.config';
-
-export interface SocketEndpoint {
-  serverUrl: string;
-  path?: string;
-}
+import type { SocketEndpoint } from '@/shared/types/socket-endpoint.types';
 
 const SOCKET_IO_PATH = '/api/socket.io';
 
