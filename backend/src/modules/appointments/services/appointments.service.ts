@@ -26,6 +26,7 @@ import {
 import { AppointmentNotFoundException } from '../exceptions/appointment-not-found.exception.js';
 import { AppointmentNotOwnedException } from '../exceptions/appointment-not-owned.exception.js';
 import { AppointmentMapper } from '../mappers/appointment.mapper.js';
+import { AppointmentNotificationsService } from '../notifications/appointment-notifications.service.js';
 import { AppointmentsRepository } from '../repositories/appointments.repository.js';
 import type { CancelAppointmentDto } from '../requests/cancel-appointment.request.js';
 import type { CreateAppointmentDto } from '../requests/create-appointment.request.js';
@@ -47,6 +48,7 @@ export class AppointmentsService {
     private readonly mentorsService: MentorsService,
     private readonly profilePhotoService: ProfilePhotoService,
     private readonly transactions: TransactionService,
+    private readonly appointmentNotifications: AppointmentNotificationsService,
   ) {}
 
   async create(
@@ -78,7 +80,9 @@ export class AppointmentsService {
       throw new BlockAlreadyBookedException();
     }
 
-    return this.blockedDatesService
+    let created: AppointmentRecord | undefined;
+
+    const response = await this.blockedDatesService
       .runOnUnblockedDay(block.mentorId, block.startAt, async (tx) => {
         await this.appointmentsRepository.lockParticipants(
           [user.id, block.mentorId],
@@ -165,6 +169,8 @@ export class AppointmentsService {
           tx,
         );
 
+        created = appointment;
+
         return this.appointmentMapper.toResponse(
           appointment,
           user.id,
@@ -177,6 +183,12 @@ export class AppointmentsService {
         }
         throw error;
       });
+
+    if (created) {
+      await this.appointmentNotifications.notifyBooked(created);
+    }
+
+    return response;
   }
 
   async findMine(
