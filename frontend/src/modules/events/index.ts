@@ -1,5 +1,6 @@
 export { EventsView } from './views/events-view';
 export { MyWorkshopsView } from './views/my-workshops-view';
+export { AttendanceHandoffView } from './views/attendance-handoff-view';
 export { ProposeWorkshopView } from './views/propose-workshop-view';
 export { EventCard } from './components/event-card';
 export { EventDetailPanel } from './components/event-detail-panel';

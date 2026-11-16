@@ -22,6 +22,7 @@ describe('Mis talleres', () => {
     expect(screen.getByRole('button', { name: 'Activos (1)' })).toHaveAttribute('aria-pressed', 'true');
     expect(screen.getByText('Manejo de IA')).toBeInTheDocument();
     expect(screen.queryByText('React básico')).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Registrar asistencias' })).toHaveAttribute('href', '/events/my-workshops/a/attendance');
 
     fireEvent.click(screen.getByRole('button', { name: 'Finalizados (1)' }));
     expect(screen.getByText('React básico')).toBeInTheDocument();
