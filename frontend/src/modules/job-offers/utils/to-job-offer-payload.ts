@@ -4,8 +4,12 @@ import type { ContractType } from "../types/contract-type.types";
 import type { Modality } from "../types/modality.types";
 import type { CreateJobOfferPayload } from "../types/create-job-offer-payload.types";
 import { parseSalary } from "./parse-salary";
+import { toExpiresAtIso } from "./to-expires-at-iso";
 
-export function toJobOfferPayload(conditions: VacancyConditions): CreateJobOfferPayload {
+export function toJobOfferPayload(
+  conditions: VacancyConditions,
+  expiresAt: Date | null = null,
+): CreateJobOfferPayload {
   const salary = conditions.contractType === INTERNSHIP_CONTRACT_TYPE
     ? { min: null, max: null }
     : parseSalary(conditions.salary);
@@ -22,5 +26,6 @@ export function toJobOfferPayload(conditions: VacancyConditions): CreateJobOffer
     languages: conditions.languages.trim(),
     locationUrl: conditions.mapsLink.trim(),
     skillIds: conditions.skills.map((skill) => skill.id),
+    ...(expiresAt ? { expiresAt: toExpiresAtIso(expiresAt) } : {}),
   };
 }
