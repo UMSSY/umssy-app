@@ -1,3 +1,5 @@
+import { SkillEvidenceSourcesService } from './skill-evidence-sources.service.js';
+import { skillSourceRefs } from '../utils/skill-source-refs.js';
 import { Injectable } from '@nestjs/common';
 import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
 import { SkillAnalysisRepository } from '../repositories/skill-analysis.repository.js';
@@ -8,7 +10,10 @@ import { planSkillReconciliation } from '../utils/plan-skill-reconciliation.js';
 
 @Injectable()
 export class SkillAnalysisService {
-  constructor(private readonly repository: SkillAnalysisRepository) {}
+  constructor(
+    private readonly repository: SkillAnalysisRepository,
+    private readonly sources: SkillEvidenceSourcesService,
+  ) {}
 
   hasProfileSkills(userId: string): Promise<boolean> {
     return this.repository.hasProfileSkills(userId);
@@ -34,8 +39,19 @@ export class SkillAnalysisService {
     return this.repository.findCatalog();
   }
 
-  countPendingPublicationSkills(userId: string): Promise<number> {
-    return this.repository.countPendingPublicationSkills(userId);
+  async countPendingPublicationSkills(userId: string): Promise<number> {
+    const [rows, snapshot] = await Promise.all([
+      this.repository.findProfileSkillRows(userId),
+      this.sources.load(userId),
+    ]);
+    return rows.filter(
+      (row) =>
+        row.verificationStatus === 'pending' &&
+        (row.source === 'manual' ||
+          skillSourceRefs(row.evidenceRefs).some((ref) =>
+            snapshot.live.has(`${ref.type}:${ref.id}`),
+          )),
+    ).length;
   }
 
   findProfileSkillRows(userId: string): Promise<ProfileSkillRowResponse[]> {
@@ -55,11 +71,42 @@ export class SkillAnalysisService {
 
     const plan = planSkillReconciliation(rows, detected);
 
-    const decisions = await this.repository.applyReconciliation(
-      userId,
-      plan,
-      context,
-    );
+    await this.repository.applyReconciliation(userId, plan, context);
+
+    const snapshot = await this.sources.load(userId, context);
+    const current = await this.repository.findProfileSkillRows(userId, context);
+    const updates = current.flatMap((row) => {
+      const refs = skillSourceRefs(row.evidenceRefs);
+      const written =
+        row.source === 'manual' ||
+        refs.some((ref) => snapshot.written.has(`${ref.type}:${ref.id}`));
+      const eligible =
+        written ||
+        (row.source === 'nlp' &&
+          refs.some((ref) =>
+            snapshot.approved.get(`${ref.type}:${ref.id}`)?.has(row.skillId),
+          ));
+      if (
+        eligible &&
+        (row.verificationStatus === 'pending' ||
+          (written && ['revoked', 'rejected'].includes(row.verificationStatus)))
+      )
+        return [{ id: row.id, approved: true, expectedStatus:row.verificationStatus, expectedAuto:row.radarAutoVerified ?? false }];
+      if (
+        !eligible &&
+        row.verificationStatus === 'approved' &&
+        row.radarAutoVerified
+      )
+        return [{ id: row.id, approved: false, expectedStatus:row.verificationStatus, expectedAuto:row.radarAutoVerified ?? false }];
+      return [];
+    });
+    const decisions = updates.length
+      ? await this.repository.applyVerificationDecisions(
+          userId,
+          updates,
+          context,
+        )
+      : 0;
 
     return (
       decisions > 0 ||

@@ -21,4 +21,12 @@ export class CertificationSourcesService {
   findRecruitmentEvidence(userId: string, ids: string[]) {
     return this.repository.findRecruitmentEvidence(userId, ids);
   }
+  async findVerificationIssuer(userId: string, id: string) {
+    const row = await this.repository.findById(id);
+    return row?.userId === userId ? row.issuingOrganization : null;
+  }
+
+  findEvidenceRows(userId: string, context?: TransactionContext) {
+    return this.repository.findEvidenceRows(userId, context);
+  }
 }

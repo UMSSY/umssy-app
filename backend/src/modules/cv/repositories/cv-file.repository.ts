@@ -1,3 +1,4 @@
+import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { CvFileStorage } from '../types/cv-file-storage.type.js';
@@ -57,5 +58,19 @@ export class CvFileRepository implements CvFileStorage {
       where: { id: cvId },
       select: { id: true, userId: true, cvPdfData: true, cvFileName: true },
     });
+  }
+  findEvidenceRows(userId: string, context?: TransactionContext) {
+    const client = context?.client ?? this.prisma;
+    return client.$queryRaw<
+      { id: string; hasDocument: boolean }[]
+    >`SELECT id, cv_pdf_data IS NOT NULL AS "hasDocument" FROM user_cv_file WHERE user_id=${userId}::uuid`;
+  }
+  async currentCvReference(userId: string) {
+    const [row] = await this.prisma.$queryRaw<
+      { id: string; hasDocument: boolean }[]
+    >`
+      SELECT id,cv_pdf_data IS NOT NULL AS "hasDocument" FROM user_cv_file WHERE user_id=${userId}::uuid
+      ORDER BY COALESCE(cv_uploaded_at,created_at) DESC,id DESC LIMIT 1`;
+    return row;
   }
 }

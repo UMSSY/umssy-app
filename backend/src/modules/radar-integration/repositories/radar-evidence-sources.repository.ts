@@ -23,7 +23,9 @@ export class RadarEvidenceSourcesRepository {
   }
 
   findCertificateSkills(userId: string) {
-    return this.prisma.$queryRaw<{id:string; type:'certification'; text:string}[]>`
+    return this.prisma.$queryRaw<
+      { id: string; type: 'certification'; text: string }[]
+    >`
       SELECT d.source_id AS id,d.source_type AS type,string_agg(skill->>'name', '. ') AS text
       FROM radar_document_verifications d CROSS JOIN LATERAL jsonb_array_elements(d.skills) skill
       WHERE d.user_id=${userId}::uuid AND d.active AND d.source_type='certification' AND d.status IN ('approved','manual_approved')
@@ -32,14 +34,10 @@ export class RadarEvidenceSourcesRepository {
 
   async findCurrentCvText(
     userId: string,
+    cvId: string,
   ): Promise<{ id: string; type: 'cv'; text: string }[]> {
-    // Se elige primero el documento vigente para evitar reutilizar un CV anterior
-    // cuando el reemplazo no se puede leer.
-    const unresolved = await this.prisma.$queryRaw<{id:string}[]>`
-      SELECT source_id AS id FROM radar_document_verifications WHERE user_id=${userId}::uuid
-      AND source_type='cv' AND active AND status NOT IN ('approved','manual_approved','legacy')`;
     const current = await this.prisma.radarCvEvidence.findFirst({
-      where: { userId, ...(unresolved.length > 0 && { cvId: { notIn: unresolved.map(row=>row.id) } }) },
+      where: { userId, cvId },
       orderBy: [{ submittedAt: 'desc' }, { cvId: 'desc' }],
       select: {
         cvId: true,
@@ -48,6 +46,16 @@ export class RadarEvidenceSourcesRepository {
         reviewState: { select: { title: true } },
       },
     });
+    if (!current) return [];
+    const [verification] = await this.prisma.$queryRaw<{ status: string }[]>`
+      SELECT status FROM radar_document_verifications WHERE user_id=${userId}::uuid
+      AND source_type='cv' AND source_id=${current.cvId}::uuid AND active
+      ORDER BY created_at DESC,id DESC LIMIT 1`;
+    if (
+      verification &&
+      !['approved', 'manual_approved', 'legacy'].includes(verification.status)
+    )
+      return [];
     if (
       !current ||
       current.extractionState.title !== 'ready' ||
@@ -55,5 +63,13 @@ export class RadarEvidenceSourcesRepository {
     )
       return [];
     return [{ id: current.cvId, type: 'cv', text: current.extractedText }];
+  }
+  findApprovedDocumentSkills(userId: string, context?: TransactionContext) {
+    const client = context?.client ?? this.prisma;
+    return client.$queryRaw<
+      { sourceType: string; sourceId: string; skills: { id: string }[] }[]
+    >`
+      SELECT source_type AS "sourceType",source_id AS "sourceId",skills FROM radar_document_verifications
+      WHERE user_id=${userId}::uuid AND active AND status IN ('approved','manual_approved')`;
   }
 }

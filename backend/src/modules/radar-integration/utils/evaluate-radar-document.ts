@@ -10,7 +10,6 @@ const words = (value: string) =>
     .replace(/[^a-z0-9]+/g, ' ')
     .trim();
 
-// OCR confidence is independent of the name, document type and catalog checks.
 export function evaluateRadarDocument(
   job: Pick<
     VerificationJob,

@@ -21,7 +21,9 @@ const current = {
 describe('RadarEvidenceSourcesRepository', () => {
   it('devuelve el texto del CV vigente listo para analizar', async () => {
     const { repository } = build(current);
-    await expect(repository.findCurrentCvText('user')).resolves.toEqual([
+    await expect(
+      repository.findCurrentCvText('user', 'current-cv'),
+    ).resolves.toEqual([
       { id: 'current-cv', type: 'cv', text: 'Texto vigente' },
     ]);
   });
@@ -34,11 +36,13 @@ describe('RadarEvidenceSourcesRepository', () => {
     'no reutiliza un CV anterior cuando el vigente no es válido',
     async (row) => {
       const { repository, findFirst } = build(row);
-      await expect(repository.findCurrentCvText('user')).resolves.toEqual([]);
+      await expect(
+        repository.findCurrentCvText('user', 'current-cv'),
+      ).resolves.toEqual([]);
       expect(findFirst).toHaveBeenCalledOnce();
       expect(findFirst).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: { userId: 'user' },
+          where: { userId: 'user', cvId: 'current-cv' },
           orderBy: [{ submittedAt: 'desc' }, { cvId: 'desc' }],
         }),
       );

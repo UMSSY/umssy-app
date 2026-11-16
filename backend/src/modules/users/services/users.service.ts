@@ -21,4 +21,7 @@ export class UsersService {
   findEmailById(userId: string): Promise<string | null> {
     return this.usersRepository.findEmailById(userId);
   }
+  findDocumentOwners(ids: string[]) {
+    return this.usersRepository.findDocumentOwners(ids);
+  }
 }

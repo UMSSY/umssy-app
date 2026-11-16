@@ -42,8 +42,8 @@ export class WorkExperienceRepository {
     });
   }
 
-  findPublicationEvidenceIds(userId: string, context: TransactionContext) {
-    return context.client.workExperience.findMany({
+  findPublicationEvidenceIds(userId: string, context?: TransactionContext) {
+    return (context?.client ?? this.prisma).workExperience.findMany({
       where: { userId },
       select: { id: true },
     });

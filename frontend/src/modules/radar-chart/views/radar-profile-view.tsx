@@ -1,5 +1,6 @@
 "use client";
 
+import type { Projection } from '../types/mentorship-projection.types';
 import { MentorshipProjection } from "../components/mentorship-projection";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
@@ -18,7 +19,7 @@ const DATE_FORMAT: Intl.DateTimeFormatOptions = { dateStyle: "medium", timeStyle
 export function RadarProfileView() {
   const { data, loading, error, variation, previous, retry, retrying } = useLiveRadar();
   const [selectedArea, setSelectedArea] = useState<AreaId | null>(null);
-  const [projection, setProjection] = useState<{ areaId: AreaId; score: number } | null>(null);
+  const [projection, setProjection] = useState<Projection>(null);
   const [simulationOpen, setSimulationOpen] = useState(false);
   const [showEvidence, setShowEvidence] = useState(false);
   const [comparing, setComparing] = useState(false);

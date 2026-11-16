@@ -97,4 +97,7 @@ export class CertificationRecordsService {
   findRecruitmentEvidence(userId: string, ids: string[]) {
     return this.repository.findRecruitmentEvidence(userId, ids);
   }
+  findEvidenceRows(userId: string, context?: TransactionContext) {
+    return this.repository.findEvidenceRows(userId, context);
+  }
 }

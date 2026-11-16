@@ -39,8 +39,8 @@ export class EducationsRepository {
     });
   }
 
-  findPublicationEvidenceIds(userId: string, context: TransactionContext) {
-    return context.client.education.findMany({
+  findPublicationEvidenceIds(userId: string, context?: TransactionContext) {
+    return (context?.client ?? this.prisma).education.findMany({
       where: { userId },
       select: { id: true },
     });

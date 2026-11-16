@@ -1,3 +1,4 @@
+import type { SkillEvidenceSourcesService } from '../services/skill-evidence-sources.service.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
 import type { SkillAnalysisRepository } from '../repositories/skill-analysis.repository.js';
@@ -11,14 +12,23 @@ describe('SkillAnalysisService', () => {
     findCatalog: vi.fn(),
     findProfileSkillRows: vi.fn(),
     applyReconciliation: vi.fn(),
+    applyVerificationDecisions: vi.fn(),
   };
+  const sources = { load: vi.fn() };
   const service = new SkillAnalysisService(
     repository as unknown as SkillAnalysisRepository,
+    sources as unknown as SkillEvidenceSourcesService,
   );
 
   beforeEach(() => {
     vi.resetAllMocks();
     repository.findProfileSkillRows.mockResolvedValue([]);
+    repository.applyVerificationDecisions.mockResolvedValue(1);
+    sources.load.mockResolvedValue({
+      live: new Set(),
+      written: new Set(),
+      approved: new Map(),
+    });
   });
 
   it('reconciles manual evidence, removes unsupported detections and preserves approved skills', async () => {

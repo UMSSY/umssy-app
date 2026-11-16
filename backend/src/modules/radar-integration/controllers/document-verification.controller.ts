@@ -1,10 +1,7 @@
 import {
-  BadRequestException,
   Body,
-  ConflictException,
   Controller,
   Get,
-  NotFoundException,
   Param,
   ParseUUIDPipe,
   Patch,
@@ -16,12 +13,12 @@ import { CurrentUserId } from '../../../common/decorators/current-user-id.decora
 import { Roles } from '../../../common/decorators/roles.decorator.js';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../../../common/guards/roles.guard.js';
-import { DocumentVerificationRepository } from '../repositories/document-verification.repository.js';
+import { DocumentVerificationService } from '../services/document-verification.service.js';
 
 @Controller()
 @UseGuards(JwtAuthGuard)
 export class DocumentVerificationController {
-  constructor(private readonly store: DocumentVerificationRepository) {}
+  constructor(private readonly store: DocumentVerificationService) {}
   @Get('profile/me/document-verifications')
   history(@CurrentUserId() owner: string) {
     return this.store.history(owner);
@@ -30,11 +27,9 @@ export class DocumentVerificationController {
   async acknowledge(
     @CurrentUserId() owner: string,
     @Param('id', ParseUUIDPipe) id: string,
-    @Body('status') status: unknown,
+    @Body() body: unknown,
   ) {
-    if (typeof status !== 'string') throw new BadRequestException();
-    await this.store.acknowledge(owner, id, status);
-    return { id };
+    return this.store.acknowledge(owner, id, body);
   }
   @Get('profile/me/document-verifications/:id/file')
   preview(
@@ -46,11 +41,10 @@ export class DocumentVerificationController {
   @UseGuards(RolesGuard)
   @Roles('administrativo')
   @Get('radar-document-reviews')
-  queue(@Query('filter') filter = 'pending') {
-    if (!['pending', 'approved', 'rejected', 'all'].includes(filter))
-      throw new BadRequestException('Filtro inválido');
-    return this.store.reviews(filter);
+  queue(@Query() query: unknown) {
+    return this.store.reviews(query);
   }
+
   @UseGuards(RolesGuard)
   @Roles('administrativo')
   @Get('radar-document-reviews/:id/file')
@@ -63,24 +57,12 @@ export class DocumentVerificationController {
   async decide(
     @CurrentUserId() admin: string,
     @Param('id', ParseUUIDPipe) id: string,
-    @Body('decision') decision: unknown,
+    @Body() body: unknown,
   ) {
-    if (decision === 'reprocess' || decision === 'revoke') {
-      if (!(await this.store.revise(admin, id, decision)))
-        throw new ConflictException('Esta versión ya cambió.');
-      return { id };
-    }
-    if (decision !== 'approved' && decision !== 'rejected')
-      throw new BadRequestException('Decisión inválida');
-    if (!(await this.store.decide(admin, id, decision === 'approved')))
-      throw new ConflictException(
-        'La versión ya tiene una decisión o fue reemplazada.',
-      );
-    return { id };
+    return this.store.decide(admin, id, body);
   }
   private async file(id: string, owner?: string) {
-    const [row] = await this.store.file(id, owner);
-    if (!row) throw new NotFoundException('El archivo no está disponible.');
+    const row = await this.store.file(id, owner);
     return new StreamableFile(Buffer.from(row.content), {
       type: row.mime,
       disposition: 'inline',

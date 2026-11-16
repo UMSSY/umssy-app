@@ -1,46 +1,38 @@
-"use client";
+'use client';
 
-import { useRef, useState, type ChangeEvent } from "react";
-import { Input } from "@/components/ui/input";
-import { FeedbackMessage, useProfile } from "@/modules/profile";
-import { ProfilePageLayout } from "@/modules/profile";
-import { CvExtractionDialog } from "../components/cv-extraction-dialog";
-import { CvGenerateCard } from "../components/cv-generate-card";
-import { CvHistoryDialog } from "../components/cv-history-dialog";
-import { CvUploadCard } from "../components/cv-upload-card";
-import { CvViewerDialog } from "../components/cv-viewer-dialog";
-import { DeleteCvDialog } from "../components/delete-cv-dialog";
-import { ReplaceCvDialog } from "../components/replace-cv-dialog";
-import { SavedCvCard } from "../components/saved-cv-card";
-import { CV_APPLY_TEXTS } from "../constants/cv-apply.constants";
-import { CV_ERROR_MESSAGES } from "../constants/cv-error-messages.constants";
-import { CV_FILE_INPUT_ACCEPT } from "../constants/cv-upload.constants";
-import { useCvDocument } from "../hooks/use-cv-document";
-import { useApplyCvExtraction } from "../hooks/use-apply-cv-extraction";
-import { useCvExtraction } from "../hooks/use-cv-extraction";
-import { useCvFeedback } from "../hooks/use-cv-feedback";
-import { useCvViewer } from "../hooks/use-cv-viewer";
-import type { SavedCv } from "../types/saved-cv.types";
-import { getCvErrorMessage } from "../utils/get-cv-error-message";
-import { isCvFileRejection } from "../utils/is-cv-file-rejection";
-import { validateCvFile } from "../utils/validate-cv-file";
+import { useRef, useState, type ChangeEvent } from 'react';
+import { Input } from '@/components/ui/input';
+import { FeedbackMessage, useProfile } from '@/modules/profile';
+import { ProfilePageLayout } from '@/modules/profile';
+import { CvExtractionDialog } from '../components/cv-extraction-dialog';
+import { CvGenerateCard } from '../components/cv-generate-card';
+import { CvHistoryDialog } from '../components/cv-history-dialog';
+import { CvUploadCard } from '../components/cv-upload-card';
+import { CvViewerDialog } from '../components/cv-viewer-dialog';
+import { DeleteCvDialog } from '../components/delete-cv-dialog';
+import { ReplaceCvDialog } from '../components/replace-cv-dialog';
+import { SavedCvCard } from '../components/saved-cv-card';
+import { CV_APPLY_TEXTS } from '../constants/cv-apply.constants';
+import { CV_ERROR_MESSAGES } from '../constants/cv-error-messages.constants';
+import { CV_FILE_INPUT_ACCEPT } from '../constants/cv-upload.constants';
+import { useCvDocument } from '../hooks/use-cv-document';
+import { useApplyCvExtraction } from '../hooks/use-apply-cv-extraction';
+import { useCvExtraction } from '../hooks/use-cv-extraction';
+import { useCvFeedback } from '../hooks/use-cv-feedback';
+import { useCvViewer } from '../hooks/use-cv-viewer';
+import type { SavedCv } from '../types/saved-cv.types';
+import { getCvErrorMessage } from '../utils/get-cv-error-message';
+import { isCvFileRejection } from '../utils/is-cv-file-rejection';
+import { validateCvFile } from '../utils/validate-cv-file';
 
-import { useQuery } from "@tanstack/react-query";
-import { useAuth } from "@/shared/contexts/auth-context";
-import { Button } from "@/components/ui/button";
-import { verificationApi } from "../services/document-verification.service";
-import { VerificationDashboard } from "../components/verification-dashboard";
+import { Button } from '@/components/ui/button';
+
+import { VerificationDashboard } from '../components/verification-dashboard';
+
+import { useDocumentVerifications } from '../hooks/use-document-verifications';
 
 export function DocumentsCvView() {
-  const { currentUserId } = useAuth();
-  const history = useQuery({
-    queryKey: ["documents", "verifications", currentUserId],
-    enabled: Boolean(currentUserId),
-    queryFn: () => verificationApi.list(),
-    refetchInterval: (q) =>
-      q.state.data?.some((d) => d.active && !d.synced) ? 1500 : 15000,
-    refetchOnReconnect: 'always',
-  });
+  const history = useDocumentVerifications();
   if (history.isError && !history.data)
     return (
       <>
