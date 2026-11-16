@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Eye, Save, X } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
-import { DiscardChangesDialog, useMentorProfileDraft } from "@/modules/mentorship";
+import { DiscardChangesDialog, PROFILE_CHANGES_SAVED_MESSAGE, PROFILE_CHANGES_SAVE_ERROR_MESSAGE, PROFILE_SELECTION_REQUIRED_MESSAGE, useMentorProfileDraft, } from "@/modules/mentorship";
 
 import { WorkspacePage } from "@/shared/components/layout/workspace-page";
 import { Button } from "@/components/ui/button";
@@ -24,7 +24,7 @@ export function TechnicalAreasView() {
 
   const [isDiscardModalOpen, setIsDiscardModalOpen] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-
+  const [validationMessage, setValidationMessage] = useState<string | null>(null);
   const {
     areas,
     savedIds,
@@ -70,12 +70,14 @@ export function TechnicalAreasView() {
     !isOrientationLoading &&
     !hasOrientationLoadError;
 
-  const handleToggleArea = (id: string) =>
+  const handleToggleArea = (id: string) => {
+    setValidationMessage(null);
     setSelectedIds((previous) =>
       (previous ?? savedIds).includes(id)
         ? (previous ?? savedIds).filter((item) => item !== id)
         : [...(previous ?? savedIds), id],
     );
+  };
 
   const showToast = (isError: boolean, text: string) => {
     if (isError) notify.error(text);
@@ -83,17 +85,22 @@ export function TechnicalAreasView() {
   };
 
   const handleSubmit = async () => {
-    if (!hasChanges || hasNoSelection || hasAccessError || isSaving) return;
+    if (hasAccessError || isSaving) return;
+
+    if (hasNoSelection) {
+      setValidationMessage(PROFILE_SELECTION_REQUIRED_MESSAGE);
+      return;
+    }
+
+    if (!hasChanges) return;
 
     try {
       await save(selectedIds);
       clearTechnicalAreaIds();
-      showToast(false, "Áreas técnicas actualizadas correctamente");
+      setValidationMessage(null);
+      showToast(false, PROFILE_CHANGES_SAVED_MESSAGE);
     } catch {
-      showToast(
-        true,
-        "No se pudieron guardar los cambios. Intente nuevamente.",
-      );
+      showToast(true, PROFILE_CHANGES_SAVE_ERROR_MESSAGE);
     }
   };
 
@@ -131,18 +138,18 @@ export function TechnicalAreasView() {
       title="Editar áreas técnicas"
       description="Indica las áreas en las que puedes brindar orientación."
     >
-      {!isLoading &&
-        !hasLoadError &&
-        !hasAccessError &&
-        (hasNoSelection ? (
-          <Alert className="mb-4 rounded-lg border border-danger/30 bg-interaction p-3 text-sm text-danger">
-            Debe seleccionarse al menos un área para continuar
-          </Alert>
-        ) : (
+      {!isLoading && !hasLoadError && !hasAccessError && (
+        <>
+          {validationMessage && (
+            <Alert className="mb-4 rounded-lg border border-danger/30 bg-interaction p-3 text-sm text-danger">
+              {validationMessage}
+            </Alert>
+          )}
           <div className="mb-4 rounded-lg bg-surface-soft p-3 text-sm text-ink-soft">
             {selectedIds.length} seleccionadas
           </div>
-        ))}
+        </>
+      )}
 
       {isLoading && (
         <p role="status" aria-live="polite" className="py-8 text-center">
@@ -219,8 +226,7 @@ export function TechnicalAreasView() {
             type="button"
             onClick={handleSubmit}
             disabled={
-              !hasChanges ||
-              hasNoSelection ||
+              (!hasChanges && !hasNoSelection) ||
               isSaving ||
               isLoading ||
               hasLoadError ||

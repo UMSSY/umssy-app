@@ -37,6 +37,11 @@ import { useMentorProfileDraft } from "../hooks/use-mentor-profile-draft";
 import { useCurrentUserId } from "../hooks/use-current-user-id";
 import { MentorProfilePreview } from "../components/preview/mentor-profile-preview";
 import { useTechnicalAreas } from "@/modules/mentors/hooks/use-technical-areas";
+import {
+  PROFILE_CHANGES_SAVED_MESSAGE,
+  PROFILE_CHANGES_SAVE_ERROR_MESSAGE,
+  PROFILE_SELECTION_REQUIRED_MESSAGE,
+} from "../constants/profile-changes-messages.constants";
 
 export function OrientationConfigView() {
   const {
@@ -88,11 +93,18 @@ export function OrientationConfigView() {
     );
   };
 
+  const handleRequestSave = () => {
+    if (selectedIds.length === 0) {
+      setErrorMessage(PROFILE_SELECTION_REQUIRED_MESSAGE);
+      return;
+    }
+    setIsConfirmDialogOpen(true);
+  };
+
   const handleSave = async () => {
     if (selectedIds.length === 0) {
-      setErrorMessage(
-        "Debe seleccionar al menos un tipo de orientación antes de guardar.",
-      );
+      setErrorMessage(PROFILE_SELECTION_REQUIRED_MESSAGE);
+      setIsConfirmDialogOpen(false);
       return;
     }
 
@@ -102,11 +114,9 @@ export function OrientationConfigView() {
       await save(idsToSave);
       clearOrientationTypeIds();
       setErrorMessage(null);
-      toast.success("Tipos de orientación actualizados correctamente");
+      toast.success(PROFILE_CHANGES_SAVED_MESSAGE);
     } catch {
-      setErrorMessage(
-        "No se pudieron guardar los cambios. Intente nuevamente.",
-      );
+      setErrorMessage(PROFILE_CHANGES_SAVE_ERROR_MESSAGE);
     } finally {
       setIsConfirmDialogOpen(false);
     }
@@ -115,6 +125,9 @@ export function OrientationConfigView() {
   const hasChanges =
     selectedIds.length !== savedIds.length ||
     selectedIds.some((id) => !savedIds.includes(id));
+
+  const isSaveDisabled =
+    isSaving || hasLoadError || (!hasChanges && selectedIds.length > 0);
 
   const handleCancel = () => {
     if (hasChanges) {
@@ -330,13 +343,8 @@ export function OrientationConfigView() {
 
                 <Button
                   type="button"
-                  onClick={() => setIsConfirmDialogOpen(true)}
-                  disabled={
-                    !hasChanges ||
-                    selectedIds.length === 0 ||
-                    isSaving ||
-                    hasLoadError
-                  }
+                  onClick={handleRequestSave}
+                  disabled={isSaveDisabled}
                   className="h-10 rounded-lg bg-primary px-6 text-sm font-semibold text-primary-foreground shadow-none hover:bg-brand-hover active:translate-y-0 disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isSaving ? "Guardando..." : "Guardar cambios"}
