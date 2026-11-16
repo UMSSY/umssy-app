@@ -28,7 +28,16 @@ export class NotificationsService {
   ) {}
 
   async notify(request: NotifyRequest): Promise<NotifyResult> {
-    const { recipientIds, actorId, type, payload, actionUrl, groupKey } = request;
+    const {
+      recipientIds,
+      actorId,
+      type,
+      payload,
+      actionUrl,
+      groupKey,
+      channels,
+    } = request;
+    const includeInApp = !channels || channels.includes('IN_APP');
 
     const finalRecipients = recipientIds.filter((id) => id !== actorId);
     if (finalRecipients.length === 0) {
@@ -76,29 +85,33 @@ export class NotificationsService {
       if (typeRecord.sendsEmail && emailEnabled) emailTargets.push(recipientId);
     }
 
-    const createdNotifications = await this.notificationsRepository.createMany(
-      validRecipients.map((id) => ({
-        recipientId: id,
-        actorId: actorId,
-        typeId: typeRecord.id, 
-        title,
-        body,
-        link: actionUrl,
-        groupKey,
-      })),
-    );
+    const createdNotifications = includeInApp
+      ? await this.notificationsRepository.createMany(
+          validRecipients.map((id) => ({
+            recipientId: id,
+            actorId: actorId,
+            typeId: typeRecord.id,
+            title,
+            body,
+            link: actionUrl,
+            groupKey,
+          })),
+        )
+      : [];
     const inAppCount = createdNotifications.length;
     const notificationIdsByRecipient = new Map(
       createdNotifications.map((notification) => [notification.recipientId, notification.id]),
     );
 
-    for (const recipientId of validRecipients) {
+    if (includeInApp) {
+      for (const recipientId of validRecipients) {
         this.notificationGateway.emitToUser(recipientId, 'notification:new', {
-        typeCode: type,
-        title,
-        body,
-        actionUrl,
-      });
+          typeCode: type,
+          title,
+          body,
+          actionUrl,
+        });
+      }
     }
 
     let pushStatus: NotifyResult['pushStatus'] = 'skipped';
