@@ -9,16 +9,16 @@ describe('RequirementsController', () => {
     expect(Reflect.getMetadata(GUARDS_METADATA, RequirementsController)).toEqual([JwtAuthGuard]);
   });
 
-  it('delega la extraccion al servicio con el texto del body', () => {
-    const response = { tokens: ['python'], terms: ['python'], skills: ['Python'], institutions: [] };
-    const requirementTermsService = { extract: vi.fn().mockReturnValue(response) };
+  it('delega la extraccion al metodo real y devuelve habilidades detectadas', async () => {
+    const response = [{ id: 'skill-1', name: 'Python' }];
+    const requirementTermsService = {
+      extractAndMatchRequirements: vi.fn().mockResolvedValue(response),
+    };
     const controller = new RequirementsController(
       requirementTermsService as unknown as RequirementTermsService,
     );
 
-    const result = controller.extractTerms({ text: 'Python' });
-
-    expect(requirementTermsService.extract).toHaveBeenCalledWith('Python');
-    expect(result).toEqual(response);
+    await expect(controller.extractTerms({ text: 'Python' })).resolves.toEqual(response);
+    expect(requirementTermsService.extractAndMatchRequirements).toHaveBeenCalledWith('Python');
   });
 });

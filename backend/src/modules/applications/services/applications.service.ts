@@ -1,5 +1,6 @@
 import { ConflictException, Injectable, Logger } from '@nestjs/common';
 import { ApplicationsRepository } from '../repositories/applications.repository.js';
+import type { ApplicationRecord } from '../types/application-record.types.js';
 import type { FindApplicationsQueryDto } from '../requests/find-applications.request.js';
 import {
   ApplicationStatus,
@@ -51,20 +52,11 @@ export class ApplicationsService {
     const records = await this.repository.findByUserId(userId, query);
     if (!records || !records.length) return [];
 
-    const offerIds = records.map(
-      (record: any) => record.jobOfferId ?? record.jobOffer?.id,
-    );
+    const offerIds = records.map((record: ApplicationRecord) => record.jobOfferId);
+    const scoresMap = await this.matching.scoresForOffers(userId, offerIds);
 
-    let scoresMap = new Map<string, number>();
-    try {
-      scoresMap = await this.matching.scoresForOffers(userId, offerIds);
-    } catch {
-      scoresMap = new Map();
-    }
-
-    const responses: ApplicationItemResponse[] = records.map((record: any) => {
-      const offerId = record.jobOfferId ?? record.jobOffer?.id;
-      const score = scoresMap.get(offerId) ?? 0;
+    const responses: ApplicationItemResponse[] = records.map((record: ApplicationRecord) => {
+      const score = scoresMap.get(record.jobOfferId) ?? 0;
       return this.mapper.toResponse(record, score);
     });
 
