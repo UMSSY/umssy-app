@@ -14,15 +14,15 @@ vi.mock('../repositories/mentor-offers.queries.js', () => ({
 describe('capacidad HU-7-1', () => {
   it.each([
     [0, 0],
-    [1, 0],
-    [2, 0],
-    [3, 1],
+    [1, 1],
+    [2, 1],
+    [3, 2],
     [5, 2],
-    [9, 3],
+    [9, 4],
     [10, 4],
     [25, 10],
   ])(
-    'aplica el 40 %% de %i titulados con redondeo hacia abajo',
+    'aplica el 40 %% de %i titulados redondeando hacia arriba',
     (approvedGraduates, capacity) => {
       expect(
         mentorCapacity({
@@ -67,6 +67,17 @@ describe('capacidad HU-7-1', () => {
     });
   });
 
+  it('redondea hacia arriba los cupos fraccionarios según el porcentaje configurado', () => {
+    expect(
+      mentorCapacity({
+        approvedGraduates: 341,
+        activeMentors: 0,
+        reservedOffers: 0,
+        percentage: 35,
+      }).capacity,
+    ).toBe(120);
+  });
+
   it('conserva participaciones ocupadas al reducir el límite', () => {
     expect(
       mentorCapacity({
@@ -99,7 +110,7 @@ describe('capacidad HU-7-1', () => {
         if (sql.includes('AS "hasPendingRequest"'))
           return [{ hasPendingRequest: false, hasOffer: false }];
         return [
-          { approvedGraduates: 3, activeMentors: mentors, reservedOffers },
+          { approvedGraduates: 2, activeMentors: mentors, reservedOffers },
         ];
       },
       userRole: { create: writes },
