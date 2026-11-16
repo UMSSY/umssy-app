@@ -22,6 +22,7 @@ import { SlotAvailability } from "../components/participation/slot-availability"
 import { ActivateParticipationModal } from "../components/participation/activate-participation-modal";
 import { DeactivateParticipationModal } from "../components/participation/deactivate-participation-modal";
 import { MentorRequestHistoryDetails } from "../components/participation/mentor-request-history-details";
+import { MentorRequestHistoryEmptyState } from "../components/participation/mentor-request-history-empty-state";
 import { useParticipation } from "../hooks/use-participation";
 import {
   participationErrorCode,
@@ -437,6 +438,10 @@ export function ParticipationView({
           </Alert>
         )}
 
+        {history.isSuccess && historyItems.length === 0 && (
+          <MentorRequestHistoryEmptyState />
+        )}
+
         {history.isSuccess && historyItems.length > 0 && (
           <div className="space-y-4">
             <p role="status" className="text-sm text-muted-foreground">
@@ -553,9 +558,7 @@ export function ParticipationView({
                   <Button
                     type="button"
                     variant="outline"
-                    disabled={
-                      currentHistoryPage === totalHistoryPages
-                    }
+                    disabled={currentHistoryPage === totalHistoryPages}
                     onClick={() =>
                       changeHistoryPage(currentHistoryPage + 1)
                     }
