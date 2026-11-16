@@ -5,7 +5,7 @@ import { companiesService } from "../services/companies.service";
 export function useFeaturedCompanies() {
   return useQuery({
     queryKey: ["featured-companies"],
-    queryFn: () => companiesService.getFeaturedCompanies(),
+    queryFn: ({ signal }) => companiesService.getFeaturedCompanies(signal),
     staleTime: 60_000,
   });
 }
