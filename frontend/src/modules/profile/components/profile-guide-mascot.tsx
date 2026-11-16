@@ -48,7 +48,6 @@ export function ProfileGuideMascot({
     isFlyMirrored,
   } = useProfileGuideMascotActivity({ stepKey, stepDirection, celebrationKey });
 
-  // Poses crossfade; `previous` stays mounted until the fade is over.
   const displayedPose = overridePose ?? pose;
   const [fade, setFade] = useState<{
     current: ProfileGuidePose;
@@ -59,9 +58,6 @@ export function ProfileGuideMascot({
   }
   const isCrossfading = fade.previous !== null;
 
-  // Going backward the fly frame faces left, both in a step transition and
-  // when the parent moves the mascot itself with `pose="fly"`. It stays
-  // mirrored until it has faded out.
   const isRestingFlyMirrored =
     stepDirection === 'backward' &&
     overridePose === null &&
@@ -182,8 +178,6 @@ export function ProfileGuideMascot({
                       isCrossfading
                         ? PROFILE_GUIDE_POSE_CROSSFADE_CLASS
                         : 'transition-none',
-                      // Static fallback: `animate` is disabled with reduced
-                      // motion.
                       frame === 'fly' &&
                         isMirrored &&
                         isReducedMotion &&

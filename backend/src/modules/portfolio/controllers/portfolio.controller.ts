@@ -54,6 +54,7 @@ import type { ExternalRepositoryResponse } from '../responses/external-repositor
 import type { OAuthUrlResponse } from '../responses/oauth-url.response.js';
 import type { PortfolioProjectResponse } from '../responses/portfolio-project.response.js';
 import type { SocialAccountStatusResponse } from '../responses/social-account-status.response.js';
+import type { SocialAccountDisconnectResponse } from '../responses/social-account-disconnect.response.js';
 import type { SocialAccountResponse } from '../responses/social-account.response.js';
 import { PortfolioService } from '../services/portfolio.service.js';
 import { SocialOAuthService } from '../services/social-oauth.service.js';
@@ -96,7 +97,8 @@ export class PortfolioController {
   })
   @ApiBody(toApiBody(updatePortfolioProjectsSchema))
   @ApiOkResponse({
-    description: 'Updated featured portfolio projects of the authenticated user',
+    description:
+      'Updated featured portfolio projects of the authenticated user',
   })
   @ApiBadRequestResponse({
     description:
@@ -153,7 +155,7 @@ export class PortfolioController {
     @CurrentUserId() userId: string,
     @Param('provider', { schema: portfolioProviderParamSchema })
     provider: PortfolioProvider,
-  ): Promise<{ provider: PortfolioProvider; connected: false }> {
+  ): Promise<SocialAccountDisconnectResponse> {
     return this.portfolioService.disconnectSocialAccount(userId, provider);
   }
 
@@ -219,7 +221,8 @@ export class PortfolioController {
   })
   @ApiQuery({ name: 'search', required: false, type: String })
   @ApiOkResponse({
-    description: 'List of external repositories ordered by most recently updated',
+    description:
+      'List of external repositories ordered by most recently updated',
   })
   getRepositories(
     @CurrentUserId() userId: string,

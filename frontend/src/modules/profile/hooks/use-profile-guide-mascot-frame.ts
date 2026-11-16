@@ -30,11 +30,6 @@ function getServerIsDocumentVisible(): boolean {
   return true;
 }
 
-/**
- * Frame-by-frame animation of the wave pose: greeting cycle, blinking and
- * talking. It runs on chained timeouts that stop while the frames are disabled
- * or the tab is hidden.
- */
 export function useProfileGuideMascotFrame({
   isEnabled,
   isTalking,
@@ -50,8 +45,6 @@ export function useProfileGuideMascotFrame({
     mode: MascotFrameMode;
   }>({ frame: 'wave', mode: 'idle' });
 
-  // A greeting never survives a pose change or a talk: it is dropped instead
-  // of replaying later.
   const resetKey = `${isEnabled}:${isTalking}`;
   const [seenResetKey, setSeenResetKey] = useState(resetKey);
   if (seenResetKey !== resetKey) {

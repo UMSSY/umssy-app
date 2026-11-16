@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { MAX_PORTFOLIO_PROJECTS } from '../constants/portfolio.constants.js';
-import { PORTFOLIO_PROVIDERS } from '../constants/portfolio-provider.constants.js';
 import { PortfolioProviderEnum } from '../enums/portfolio-provider.enum.js';
 import { DuplicatePortfolioProjectException } from '../exceptions/duplicate-portfolio-project.exception.js';
 import { MaxPortfolioProjectsExceededException } from '../exceptions/max-portfolio-projects-exceeded.exception.js';
+import { SocialAccountMapper } from '../mappers/social-account.mapper.js';
+import type { SocialAccountDisconnectResponse } from '../responses/social-account-disconnect.response.js';
+import type { PortfolioProjectMetadataUpdate } from '../types/portfolio-project-metadata-update.type.js';
 import { PortfolioProjectMapper } from '../mappers/portfolio-project.mapper.js';
 import { PortfolioRepository } from '../repositories/portfolio.repository.js';
 import { SocialAccountRepository } from '../repositories/social-account.repository.js';
@@ -23,6 +25,7 @@ export class PortfolioService {
     private readonly portfolioProjectMapper: PortfolioProjectMapper,
     private readonly socialAccountRepository: SocialAccountRepository,
     private readonly providerRepositoriesService: ProviderRepositoriesService,
+    private readonly socialAccountMapper: SocialAccountMapper,
   ) {}
 
   async getProjects(userId: string): Promise<PortfolioProjectResponse[]> {
@@ -49,28 +52,15 @@ export class PortfolioService {
 
   async getAccounts(userId: string): Promise<SocialAccountStatusResponse[]> {
     const accounts = await this.socialAccountRepository.findByUserId(userId);
-    const accountMap = new Map(accounts.map((account) => [account.provider, account]));
-
-    return PORTFOLIO_PROVIDERS.map((provider) => {
-      const account = accountMap.get(provider);
-      return {
-        provider,
-        connected: Boolean(account),
-        username: account ? account.username : null,
-        profileUrl: account ? account.profileUrl : null,
-      };
-    });
+    return this.socialAccountMapper.toStatusList(accounts);
   }
 
   async disconnectSocialAccount(
     userId: string,
     provider: PortfolioProvider,
-  ): Promise<{ provider: PortfolioProvider; connected: false }> {
+  ): Promise<SocialAccountDisconnectResponse> {
     await this.socialAccountRepository.disconnect(userId, provider);
-    return {
-      provider,
-      connected: false,
-    };
+    return this.socialAccountMapper.toDisconnectedResponse(provider);
   }
 
   async syncProjects(userId: string): Promise<PortfolioProjectResponse[]> {
@@ -80,68 +70,36 @@ export class PortfolioService {
     }
 
     const accounts = await this.socialAccountRepository.findByUserId(userId);
-    const providersNeeded = new Set(savedProjects.map((p) => p.provider));
-
-    const remoteReposByProvider = new Map<
-      PortfolioProvider,
-      Map<string, ExternalRepositoryResponse>
-    >();
-
-    for (const account of accounts) {
-      if (!providersNeeded.has(account.provider)) {
-        continue;
-      }
-
-      let repos: ExternalRepositoryResponse[] = [];
-      if (account.provider === PortfolioProviderEnum.GITHUB) {
-        repos = await this.providerRepositoriesService.fetchGitHubRepositories(
-          account.username,
-        );
-      } else if (account.provider === PortfolioProviderEnum.GITLAB) {
-        repos = await this.providerRepositoriesService.fetchGitLabRepositories(
-          account.externalId,
-          account.username,
-        );
-      }
-
-      const repoMap = new Map<string, ExternalRepositoryResponse>();
-      for (const repo of repos) {
-        repoMap.set((repo.repoName ?? '').trim().toLowerCase(), repo);
-      }
-      remoteReposByProvider.set(account.provider, repoMap);
-    }
-
-    const updatedProjects: NormalizedPortfolioProject[] = [];
-
-    for (const saved of savedProjects) {
-      const providerRepos = remoteReposByProvider.get(saved.provider);
-      if (!providerRepos) {
-        continue;
-      }
-
-      const normalizedName = (saved.repoName ?? '').trim().toLowerCase();
-      const matched = providerRepos.get(normalizedName);
-      if (!matched) {
-        continue;
-      }
-
-      updatedProjects.push({
-        provider: saved.provider,
-        repoName: (matched.repoName ?? '').trim(),
-        repoUrl: (matched.repoUrl ?? '').trim(),
-        description: this.normalizeOptionalText(matched.description),
-        language: this.normalizeOptionalText(matched.language),
-        starsCount: matched.starsCount,
-        isOwner: matched.isOwner,
-        displayOrder: updatedProjects.length,
-      });
-    }
-
-    const persisted = await this.portfolioRepository.replaceForUser(
-      userId,
-      updatedProjects,
+    const accountsByProvider = new Map(
+      accounts.map((account) => [account.provider, account]),
+    );
+    const results = await Promise.all(
+      savedProjects.map(async (saved) => {
+        const account = accountsByProvider.get(saved.provider);
+        if (!account) return null;
+        const remote =
+          saved.provider === PortfolioProviderEnum.GITHUB
+            ? await this.providerRepositoriesService.fetchGitHubRepository(
+                saved.repoUrl,
+                account.username,
+              )
+            : await this.providerRepositoriesService.fetchGitLabRepository(
+                saved.repoUrl,
+                account.username,
+              );
+        return remote
+          ? this.portfolioProjectMapper.toMetadataUpdate(saved.id, remote)
+          : null;
+      }),
+    );
+    const updates = results.filter(
+      (result): result is PortfolioProjectMetadataUpdate => result !== null,
     );
 
+    const persisted =
+      updates.length > 0
+        ? await this.portfolioRepository.syncMetadataForUser(userId, updates)
+        : await this.portfolioRepository.findByUserId(userId);
     return this.portfolioProjectMapper.toResponseList(persisted);
   }
 

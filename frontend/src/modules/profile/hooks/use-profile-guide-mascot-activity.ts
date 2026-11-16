@@ -21,11 +21,6 @@ function readTransform(element: Element): string | null {
   return transform && transform !== 'none' ? transform : null;
 }
 
-/**
- * Step transition (`stepKey`) and brief celebration (`celebrationKey`). Both
- * run only when their key changes after mount. With reduced motion the pose
- * still changes, without any movement.
- */
 export function useProfileGuideMascotActivity({
   stepKey,
   stepDirection,

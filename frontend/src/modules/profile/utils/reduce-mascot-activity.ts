@@ -16,10 +16,6 @@ function startMascotAction(
   return { current: { ...action, id }, queued, lastId: id };
 }
 
-/**
- * A step restarts a running step. Anything else waits in a single-slot queue
- * where the most recent request replaces the previous one.
- */
 export function requestMascotAction(
   state: MascotActivityState,
   action: MascotAction,

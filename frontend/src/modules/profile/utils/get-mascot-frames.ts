@@ -5,7 +5,6 @@ import {
 import type { MascotFramesInput } from '../types/mascot-frames-input.types';
 import type { ProfileGuideFrameId } from '../types/profile-guide-frame-id.types';
 
-/** Frames to mount, in a stable order, so no unused image is downloaded. */
 export function getMascotFrames({
   pose,
   previousPose,
