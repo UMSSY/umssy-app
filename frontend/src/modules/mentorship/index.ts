@@ -21,3 +21,4 @@ export type { OrientationTypeResponse } from "./types/orientation-type-response.
 export { loadMentorshipWizardDraft, saveMentorshipWizardDraft } from "./services/mentorship-wizard-draft.service";
 
 export { useMentorshipCatalogs } from "./hooks/use-mentorship-catalogs";
+export { DiscardChangesDialog } from "./components/preview/discard-changes-dialog";

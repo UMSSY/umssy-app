@@ -5,9 +5,11 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { DiscardChangesDialog } from "../components/preview/discard-changes-dialog";
 import { PageHeading } from "@/shared/components/layout";
 import { Label } from "@/components/ui/label";
-import { AlertCircle, Eye } from "lucide-react";
+import { AlertCircle, Eye, X } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
 import {
   AlertDialog,
@@ -56,13 +58,14 @@ export function OrientationConfigView() {
     hasAccessError: hasTechnicalAreasAccessError,
   } = useTechnicalAreas();
 
+  const router = useRouter();
   const { currentUserId } = useCurrentUserId();
 
   const {
     orientationTypeIds: draftIds,
     technicalAreaIds: draftTechnicalAreaIds,
     setOrientationTypeIds: setSelectedIds,
-    clearOrientationTypeIds,
+    clearOrientationTypeIds, clearAllDrafts,
   } = useMentorProfileDraft();
 
   const selectedIds = draftIds ?? savedIds;
@@ -112,6 +115,21 @@ export function OrientationConfigView() {
   const hasChanges =
     selectedIds.length !== savedIds.length ||
     selectedIds.some((id) => !savedIds.includes(id));
+
+  const handleCancel = () => {
+    if (hasChanges) {
+      setIsDiscardDialogOpen(true);
+      return;
+    }
+    router.push("/mentors/participation");
+  };
+
+  const handleConfirmDiscard = () => {
+    clearAllDrafts();
+    setErrorMessage(null);
+    setIsDiscardDialogOpen(false);
+    router.push("/mentors/participation");
+  };
 
   const canOpenPreview =
     Boolean(currentUserId) &&
@@ -287,21 +305,16 @@ export function OrientationConfigView() {
             </CardContent>
 
             <CardFooter className="mx-4 flex flex-wrap items-center justify-between gap-4 border-t border-border bg-transparent px-0 py-4 sm:mx-8 sm:pb-8">
-              <Link
-                href="/mentors/participation"
-                onClick={(event) => {
-                  if (hasChanges) {
-                    event.preventDefault();
-                    setIsDiscardDialogOpen(true);
-                  }
-                }}
-                className={buttonVariants({
-                  className:
-                    "h-10 rounded-lg bg-surface-soft px-6 text-sm font-semibold text-ink hover:bg-interaction active:translate-y-0",
-                })}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleCancel}
+                disabled={isSaving}
+                className="h-10 gap-2 rounded-lg px-6 text-sm font-semibold"
               >
-                Volver
-              </Link>
+                <X size={16} />
+                Cancelar
+              </Button>
 
               <div className="flex flex-wrap items-center gap-3">
                 <Button
@@ -369,43 +382,11 @@ export function OrientationConfigView() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog
+      <DiscardChangesDialog
         open={isDiscardDialogOpen}
-        onOpenChange={(open) => {
-          if (!isSaving) setIsDiscardDialogOpen(open);
-        }}
-      >
-        <AlertDialogContent className="max-w-md gap-0 rounded-lg border border-border bg-surface p-8 text-ink shadow-none ring-0 data-[size=default]:max-w-md data-[size=default]:sm:max-w-md">
-          <AlertDialogHeader className="place-items-start text-left">
-            <AlertDialogTitle className="font-tight text-2xl font-bold text-ink">
-              ¿Descartar cambios?
-            </AlertDialogTitle>
-            <AlertDialogDescription className="mt-2 text-base text-text-secondary">
-              Tienes cambios sin guardar. Si vuelves a tu participación, se
-              perderán.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="mx-0 mt-8 mb-0 flex-row justify-end gap-3 border-t-0 bg-transparent p-0">
-            <AlertDialogCancel
-              type="button"
-              disabled={isSaving}
-              className="h-10 border-border-strong bg-surface px-6 text-sm font-semibold text-ink hover:bg-surface-soft"
-            >
-              Seguir editando
-            </AlertDialogCancel>
-            <AlertDialogAction
-              nativeButton={false}
-              type="button"
-              render={<Link href="/mentors/participation" />}
-              onClick={clearOrientationTypeIds}
-              disabled={isSaving}
-              className="h-10 bg-critical-action px-6 text-sm font-semibold text-critical-action-foreground hover:bg-brand-hover"
-            >
-              Descartar cambios
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        onCancel={() => setIsDiscardDialogOpen(false)}
+        onConfirm={handleConfirmDiscard}
+      />
     </main>
   );
 }
