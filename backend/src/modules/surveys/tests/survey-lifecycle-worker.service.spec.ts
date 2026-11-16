@@ -346,9 +346,10 @@ describe('SurveyLifecycleWorkerService', () => {
           to: 'ana.gomez@umss.edu',
           subject:
             'Alerta de variación significativa en «Encuesta Inserción Laboral»',
+          mjml: expect.stringContaining('Opción 1'),
           values: expect.objectContaining({
             threshold: '15',
-            shiftsContent: 'Variación detectada: Opción 1 +20 pp',
+            periodsLabel: 'Comparación entre II-2025 y I-2026',
           }),
         }),
       );

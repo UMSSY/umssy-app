@@ -5,6 +5,7 @@ import {
   OnModuleInit,
 } from '@nestjs/common';
 import { MailService } from '../../mail/services/mail.service.js';
+import { buildVariationShiftsMjml } from '../../mail/helpers/build-variation-shifts-mjml.js';
 import { loadMailTemplate } from '../../mail/helpers/load-mail-template.js';
 import { getAcademicPeriod } from '../../reports/utils/academic-period.js';
 import { SurveysRepository } from '../repositories/surveys.repository.js';
@@ -221,7 +222,10 @@ export class SurveyLifecycleWorkerService
     const actionUrl = buildSurveyFrontendUrl(
       `/backoffice/surveys/statistics/${survey.id}`,
     );
-    const mjml = await loadMailTemplate('survey-variation-alert');
+    const template = await loadMailTemplate('survey-variation-alert');
+    const mjml = template.replace('[[shifts]]', () =>
+      buildVariationShiftsMjml(evaluation.shifts),
+    );
 
     await this.mailService.send({
       to: survey.createdBy.email,
@@ -232,7 +236,7 @@ export class SurveyLifecycleWorkerService
         recipientName,
         surveyTitle: survey.title,
         threshold: String(survey.alertConfig?.threshold ?? 10),
-        shiftsContent: evaluation.summaryText,
+        periodsLabel: `Comparación entre ${evaluation.previousPeriod} y ${evaluation.currentPeriod}`,
         actionUrl,
       },
     });
