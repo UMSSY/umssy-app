@@ -7,11 +7,9 @@ import {
   AlertCircle,
   ArrowLeft,
   Building2,
-  Check,
   CheckCircle2,
   ChevronDown,
   ChevronUp,
-  Clock,
   Download,
   ExternalLink,
   Eye,
@@ -25,7 +23,6 @@ import {
   Pencil,
   Phone,
   RotateCcw,
-  Save,
   ShieldCheck,
   X,
   XCircle,
@@ -47,6 +44,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
@@ -133,11 +137,13 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
   const [submitting, setSubmitting] = useState(false);
   const [isDocMinimized, setIsDocMinimized] = useState(false);
 
-  // Modales
-  const [showApproveDialog, setShowApproveDialog] = useState(false);
-  const [showCorrectionDialog, setShowCorrectionDialog] = useState(false);
-  const [showRejectDialog, setShowRejectDialog] = useState(false);
-  const [showEditDialog, setShowEditDialog] = useState(false);
+  // Panel lateral deslizable (Sheet) de resolución y ficha
+  const [showResolutionSheet, setShowResolutionSheet] = useState(false);
+  const [activeAction, setActiveAction] = useState<
+    'APPROVE' | 'CORRECTION' | 'REJECT' | null
+  >(null);
+
+  // Modal para inspección de logotipo
   const [showLogoModal, setShowLogoModal] = useState(false);
   const [logoBg, setLogoBg] = useState<'light' | 'dark' | 'checkered'>('light');
 
@@ -153,8 +159,11 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
   );
   const [rejectionDetails, setRejectionDetails] = useState('');
 
-  // Edición de ficha
+  // Edición y restablecimiento de ficha
+  const [isEditingFicha, setIsEditingFicha] = useState(false);
   const [editForm, setEditForm] = useState<UpdateCompanyPayload>({});
+  const [initialSnapshot, setInitialSnapshot] =
+    useState<UpdateCompanyPayload | null>(null);
   const [isSavingEdit, setIsSavingEdit] = useState(false);
   const [reEvaluatingOcr, setReEvaluatingOcr] = useState(false);
 
@@ -176,7 +185,8 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
         return;
       }
       setItem(detailRes.data);
-      setEditForm({
+
+      const formPayload: UpdateCompanyPayload = {
         companyName: detailRes.data.companyName,
         sector: detailRes.data.sector,
         description: detailRes.data.description,
@@ -184,7 +194,10 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
         phone: detailRes.data.phone,
         websiteUrl: detailRes.data.websiteUrl ?? '',
         username: detailRes.data.username,
-      });
+      };
+
+      setEditForm(formPayload);
+      setInitialSnapshot((prev) => prev ?? { ...formPayload });
 
       const [docBlob, logoBlob] = await Promise.all([
         companyAccessRequestService.getDocumentBlob(id),
@@ -221,11 +234,11 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
     setError(null);
     const res = await companyAccessRequestService.approve(id);
     setSubmitting(false);
-    setShowApproveDialog(false);
     if (!res.ok) {
       setError(res.message);
       return;
     }
+    setShowResolutionSheet(false);
     router.push('/backoffice/empresas');
   }
 
@@ -238,15 +251,15 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
       customDetails: correctionDetails.trim(),
     });
     setSubmitting(false);
-    setShowCorrectionDialog(false);
     if (!res.ok) {
       setError(res.message);
       return;
     }
+    setActiveAction(null);
+    setShowResolutionSheet(false);
     setSuccessMessage(
       'Se ha notificado a la empresa la solicitud de subsanación por correo electrónico.',
     );
-    // Actualizar datos del item localmente
     const refreshed = await companyAccessRequestService.getDetail(id);
     if (refreshed.ok) setItem(refreshed.data);
   }
@@ -260,11 +273,11 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
       customDetails: rejectionDetails.trim(),
     });
     setSubmitting(false);
-    setShowRejectDialog(false);
     if (!res.ok) {
       setError(res.message);
       return;
     }
+    setShowResolutionSheet(false);
     router.push('/backoffice/empresas');
   }
 
@@ -277,7 +290,7 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
       setError(res.message);
       return;
     }
-    setShowEditDialog(false);
+    setIsEditingFicha(false);
     setSuccessMessage(
       'Ficha oficial actualizada y contraste OCR recalculado exitosamente.',
     );
@@ -293,6 +306,45 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
         websiteUrl: refreshed.data.websiteUrl ?? '',
         username: refreshed.data.username,
       });
+    }
+  }
+
+  async function handleResetInitialData() {
+    if (!initialSnapshot) return;
+    const initial = initialSnapshot;
+    setEditForm({ ...initial });
+
+    const isDifferentFromSaved =
+      item?.companyName !== initial.companyName ||
+      item?.sector !== initial.sector ||
+      item?.email !== initial.email ||
+      item?.phone !== initial.phone ||
+      (item?.websiteUrl ?? '') !== (initial.websiteUrl ?? '') ||
+      item?.description !== initial.description ||
+      item?.username !== initial.username;
+
+    if (isDifferentFromSaved) {
+      setIsSavingEdit(true);
+      setError(null);
+      const res = await companyAccessRequestService.updateDraft(id, initial);
+      setIsSavingEdit(false);
+      if (!res.ok) {
+        setError(res.message);
+        return;
+      }
+      const refreshed = await companyAccessRequestService.getDetail(id);
+      if (refreshed.ok) {
+        setItem(refreshed.data);
+      }
+      setIsEditingFicha(false);
+      setSuccessMessage(
+        'Los datos se han restablecido a los valores iniciales del registro original.',
+      );
+    } else {
+      setIsEditingFicha(false);
+      setSuccessMessage(
+        'Los campos se han restablecido a sus valores originales.',
+      );
     }
   }
 
@@ -354,7 +406,6 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
   const ocr = item.ocrFieldResults;
   const cityName = item.city.title || item.city.name || 'No especificada';
 
-  // Obtener estado por atributo desde el nuevo modelo de OCR
   const getFieldComparison = (
     fieldKey: keyof NonNullable<typeof ocr>,
     fallbackDeclared: string,
@@ -363,7 +414,6 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
     if (detail && typeof detail === 'object' && 'declared' in detail) {
       return detail;
     }
-    // Fallback si viene del formato legado de 3 booleanos
     if (fieldKey === 'companyName') {
       const isMatched = Boolean(ocr?.companyNameMatched);
       return {
@@ -443,7 +493,6 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
   const confirmedCount = comparisonList.filter((c) => c.data.matched).length;
   const unconfirmedCount = comparisonList.length - confirmedCount;
 
-  // Calculamos el score OCR en porcentaje (%)
   const ocrPercentage =
     item.ocrMatchScore !== null && item.ocrMatchScore !== undefined
       ? item.ocrMatchScore
@@ -461,17 +510,19 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
     textClass: 'text-primary',
   };
 
-  const formattedWebsite = item.websiteUrl?.trim();
-  const safeWebUrl = formattedWebsite
-    ? formattedWebsite.startsWith('http://') ||
-      formattedWebsite.startsWith('https://')
-      ? formattedWebsite
-      : `https://${formattedWebsite}`
-    : null;
+  const isDataModifiedFromInitial =
+    Boolean(initialSnapshot) &&
+    (item.companyName !== initialSnapshot?.companyName ||
+      item.sector !== initialSnapshot?.sector ||
+      item.email !== initialSnapshot?.email ||
+      item.phone !== initialSnapshot?.phone ||
+      (item.websiteUrl ?? '') !== (initialSnapshot?.websiteUrl ?? '') ||
+      item.description !== initialSnapshot?.description ||
+      item.username !== initialSnapshot?.username);
 
   return (
     <main className="mx-auto w-full max-w-7xl space-y-8 pb-16">
-      {/* ─── Encabezado principal y navegación ─── */}
+      {/* ─── Encabezado principal con botón para emitir resolución ─── */}
       <header className="rounded-xl border border-border bg-surface p-6 shadow-xs">
         <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-text-secondary">
           <Link
@@ -488,61 +539,95 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
           </div>
         </div>
 
-        <div className="mt-4 flex items-start gap-4">
-          {logoUrl ? (
-            <div
-              className="group relative cursor-pointer overflow-hidden rounded-xl border border-border bg-white p-1.5 shadow-2xs transition-transform hover:scale-105"
-              onClick={() => setShowLogoModal(true)}
-              title="Hacer clic para ver el logo en detalle"
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={logoUrl}
-                alt={`Logo de ${item.companyName}`}
-                className="size-16 object-contain"
-              />
-              <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
-                <Maximize2 className="size-5 text-white" />
-              </div>
-            </div>
-          ) : (
-            <div
-              className="flex size-16 shrink-0 items-center justify-center rounded-xl border border-border bg-surface-soft text-primary shadow-2xs"
-              title="Logotipo opcional no adjuntado"
-            >
-              <Building2 className="size-8" />
-            </div>
-          )}
-
-          <div>
-            <div className="flex flex-wrap items-center gap-2.5">
-              <h1 className="text-2xl font-bold tracking-tight text-ink md:text-3xl">
-                {item.companyName}
-              </h1>
-              <span
-                className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-0.5 text-xs font-semibold ${statusConfig.bgClass}`}
+        <div className="mt-4 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-start gap-4">
+            {logoUrl ? (
+              <div
+                className="group relative cursor-pointer overflow-hidden rounded-xl border border-border bg-white p-1.5 shadow-2xs transition-transform hover:scale-105"
+                onClick={() => setShowLogoModal(true)}
+                title="Hacer clic para ver el logo en detalle"
               >
-                <Eye className={`size-3.5 ${statusConfig.textClass}`} />
-                {statusConfig.label}
-              </span>
-            </div>
-            <p className="mt-1 text-sm text-text-secondary">
-              <span className="font-medium text-ink">{item.sector}</span> ·{' '}
-              {cityName}
-              {item.submittedAt && (
-                <span>
-                  {' '}
-                  · Solicitud enviada el{' '}
-                  {new Date(item.submittedAt).toLocaleDateString('es-BO', {
-                    day: '2-digit',
-                    month: 'long',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={logoUrl}
+                  alt={`Logo de ${item.companyName}`}
+                  className="size-16 object-contain"
+                />
+                <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
+                  <Maximize2 className="size-5 text-white" />
+                </div>
+              </div>
+            ) : (
+              <div
+                className="flex size-16 shrink-0 items-center justify-center rounded-xl border border-border bg-surface-soft text-primary shadow-2xs"
+                title="Logotipo opcional no adjuntado"
+              >
+                <Building2 className="size-8" />
+              </div>
+            )}
+
+            <div>
+              <div className="flex flex-wrap items-center gap-2.5">
+                <h1 className="text-2xl font-bold tracking-tight text-ink md:text-3xl">
+                  {item.companyName}
+                </h1>
+                <span
+                  className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-0.5 text-xs font-semibold ${statusConfig.bgClass}`}
+                >
+                  <Eye className={`size-3.5 ${statusConfig.textClass}`} />
+                  {statusConfig.label}
                 </span>
-              )}
-            </p>
+              </div>
+              <p className="mt-1 text-sm text-text-secondary">
+                <span className="font-medium text-ink">{item.sector}</span> ·{' '}
+                {cityName}
+                {item.submittedAt && (
+                  <span>
+                    {' '}
+                    · Solicitud enviada el{' '}
+                    {new Date(item.submittedAt).toLocaleDateString('es-BO', {
+                      day: '2-digit',
+                      month: 'long',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </span>
+                )}
+              </p>
+            </div>
+          </div>
+
+          {/* Acciones principales en cabecera */}
+          <div className="flex flex-wrap items-center gap-3">
+            <div
+              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-bold ${
+                ocrPercentage >= 60
+                  ? 'border-emerald-300 bg-emerald-50 text-emerald-800'
+                  : 'border-rose-300 bg-rose-50 text-rose-800'
+              }`}
+              title="Afinidad global del documento evaluada por OCR"
+            >
+              <ShieldCheck
+                className={`size-4 ${
+                  ocrPercentage >= 60 ? 'text-emerald-600' : 'text-rose-600'
+                }`}
+              />
+              <span>{ocrPercentage}% Afinidad OCR</span>
+            </div>
+
+            {canResolve && (
+              <Button
+                type="button"
+                onClick={() => {
+                  setActiveAction(null);
+                  setShowResolutionSheet(true);
+                }}
+                className="h-10 bg-primary px-5 text-sm font-semibold text-white shadow-xs hover:bg-primary/90"
+              >
+                Emitir resolución
+              </Button>
+            )}
           </div>
         </div>
       </header>
@@ -580,271 +665,7 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
       )}
 
       {/* ─────────────────────────────────────────────────────────────────────────────
-          1. DOCUMENTO DE RESPALDO (CARTA MEMBRETADA) CON VISOR MINIMIZABLE
-          Permite al admin ocultar o expandir el visor para no scrollear innecesariamente
-          ───────────────────────────────────────────────────────────────────────────── */}
-      <section className="space-y-3" aria-labelledby="section-document">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <FileText className="size-5 text-primary" />
-            <h2 id="section-document" className="text-lg font-bold text-ink">
-              Documento de Respaldo Oficial (Carta Membretada)
-            </h2>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setIsDocMinimized(!isDocMinimized)}
-              className="gap-1.5 text-xs font-semibold"
-            >
-              {isDocMinimized ? (
-                <>
-                  <ChevronDown className="size-3.5" /> Expandir visor
-                </>
-              ) : (
-                <>
-                  <ChevronUp className="size-3.5" /> Minimizar visor
-                </>
-              )}
-            </Button>
-            {docUrl && (
-              <a
-                href={docUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-semibold text-primary transition-colors hover:bg-surface-soft"
-              >
-                <ExternalLink className="size-3.5" /> Abrir en nueva pestaña
-              </a>
-            )}
-          </div>
-        </div>
-
-        <Card className="overflow-hidden border-border bg-surface shadow-xs">
-          <CardContent className="p-0">
-            {isDocMinimized ? (
-              <div className="flex items-center justify-between border-b border-border bg-surface-soft/60 px-5 py-3">
-                <div className="flex items-center gap-3">
-                  <FileText className="size-5 text-primary" />
-                  <div>
-                    <p className="text-xs font-semibold text-ink">
-                      carta-solicitud-{item.requestCode ?? 'doc'}.
-                      {docIsImage ? 'png' : 'pdf'}
-                    </p>
-                    <p className="text-[11px] text-text-secondary">
-                      Visor minimizado temporalmente para optimizar la
-                      comparativa y acciones de dictamen.
-                    </p>
-                  </div>
-                </div>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="xs"
-                  onClick={() => setIsDocMinimized(false)}
-                  className="gap-1 text-xs"
-                >
-                  <Maximize2 className="size-3.5" /> Expandir visor
-                </Button>
-              </div>
-            ) : docUrl ? (
-              <DocumentViewer
-                url={docUrl}
-                mimeType={docMimeType}
-                fileName={`carta-solicitud-${item.requestCode ?? 'doc'}.${docIsImage ? 'png' : 'pdf'}`}
-                caption="Carta formal con membrete y sello presentada para la solicitud de acceso institucional a UMSSY."
-              />
-            ) : (
-              <div className="flex h-64 flex-col items-center justify-center p-8 text-center text-text-secondary">
-                <FileText className="mb-2 size-12 text-slate-300" />
-                <p className="text-sm font-medium">
-                  No se pudo cargar la vista previa del documento adjunto.
-                </p>
-                <p className="mt-1 text-xs text-text-secondary">
-                  El archivo podría estar en procesamiento o no encontrarse
-                  disponible.
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </section>
-
-      {/* ─────────────────────────────────────────────────────────────────────────────
-          2. FICHA OFICIAL PARA REGISTRO EN PLATAFORMA (DATOS DEFINITIVOS & EDICIÓN)
-          Muestra los datos que se guardarán, porcentaje de afinidad y botón para editar
-          ───────────────────────────────────────────────────────────────────────────── */}
-      <section className="space-y-4" aria-labelledby="section-official-card">
-        <Card className="border-border bg-surface shadow-xs">
-          <CardHeader className="border-b border-border pb-4">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-center gap-2.5">
-                <Building2 className="size-5 text-primary" />
-                <div>
-                  <CardTitle
-                    id="section-official-card"
-                    className="text-base font-bold text-ink"
-                  >
-                    Ficha Oficial para Registro en Plataforma
-                  </CardTitle>
-                  <CardDescription className="text-xs text-text-secondary">
-                    Información definitiva que se guardará en la base de datos y
-                    dará de alta a la empresa y su reclutador.
-                  </CardDescription>
-                </div>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-3">
-                {/* Badge de afinidad / coincidencia documental */}
-                <div
-                  className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-bold ${
-                    ocrPercentage >= 60
-                      ? 'border-emerald-300 bg-emerald-50 text-emerald-800'
-                      : 'border-rose-300 bg-rose-50 text-rose-800'
-                  }`}
-                  title="Nivel de concordancia de la ficha con el documento membretado"
-                >
-                  <ShieldCheck
-                    className={`size-4 ${
-                      ocrPercentage >= 60 ? 'text-emerald-600' : 'text-rose-600'
-                    }`}
-                  />
-                  <span>{ocrPercentage}% Afinidad Documental</span>
-                </div>
-
-                {canResolve && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowEditDialog(true)}
-                    className="gap-1.5 border-border text-xs font-semibold hover:bg-surface-soft"
-                  >
-                    <Pencil className="size-3.5 text-primary" />
-                    Editar datos del registro
-                  </Button>
-                )}
-              </div>
-            </div>
-          </CardHeader>
-
-          <CardContent className="pt-5">
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
-              <div className="rounded-lg border border-border/80 bg-surface-soft/40 p-3.5">
-                <span className="text-[11px] font-semibold tracking-wider text-text-secondary uppercase">
-                  Razón Social / Nombre Comercial
-                </span>
-                <p className="mt-1 font-bold text-ink">{item.companyName}</p>
-              </div>
-
-              <div className="rounded-lg border border-border/80 bg-surface-soft/40 p-3.5">
-                <span className="text-[11px] font-semibold tracking-wider text-text-secondary uppercase">
-                  Rubro / Sector
-                </span>
-                <p className="mt-1 font-bold text-ink">{item.sector}</p>
-              </div>
-
-              <div className="rounded-lg border border-border/80 bg-surface-soft/40 p-3.5">
-                <span className="text-[11px] font-semibold tracking-wider text-text-secondary uppercase">
-                  Ciudad Sede
-                </span>
-                <p className="mt-1 font-bold text-ink">{cityName}</p>
-              </div>
-
-              <div className="rounded-lg border border-border/80 bg-surface-soft/40 p-3.5">
-                <span className="text-[11px] font-semibold tracking-wider text-text-secondary uppercase">
-                  Correo Electrónico Institucional
-                </span>
-                <p className="mt-1 font-bold text-ink">{item.email}</p>
-              </div>
-
-              <div className="rounded-lg border border-border/80 bg-surface-soft/40 p-3.5">
-                <span className="text-[11px] font-semibold tracking-wider text-text-secondary uppercase">
-                  Teléfono de Contacto
-                </span>
-                <p className="mt-1 font-bold text-ink">{item.phone}</p>
-              </div>
-
-              <div className="rounded-lg border border-border/80 bg-surface-soft/40 p-3.5">
-                <span className="text-[11px] font-semibold tracking-wider text-text-secondary uppercase">
-                  Usuario Reclutador a Crear
-                </span>
-                <p className="mt-1 font-mono font-bold text-primary">
-                  @{item.username}
-                </p>
-              </div>
-
-              <div className="rounded-lg border border-border/80 bg-surface-soft/40 p-3.5 lg:col-span-3">
-                <span className="text-[11px] font-semibold tracking-wider text-text-secondary uppercase">
-                  Sitio Web Oficial
-                </span>
-                <p className="mt-1 font-mono text-xs font-semibold text-ink">
-                  {item.websiteUrl || 'No especificado'}
-                </p>
-              </div>
-
-              <div className="rounded-lg border border-border/80 bg-surface-soft/40 p-3.5 lg:col-span-3">
-                <span className="text-[11px] font-semibold tracking-wider text-text-secondary uppercase">
-                  Descripción Institucional
-                </span>
-                <p className="mt-1 text-xs leading-relaxed text-ink">
-                  {item.description}
-                </p>
-              </div>
-            </div>
-
-            {/* Acciones de dictamen oficiales tras revisar la ficha y el documento */}
-            {canResolve && (
-              <div className="mt-6 flex flex-col gap-4 rounded-xl border border-border/80 bg-surface-soft/60 p-4 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <h3 className="text-sm font-bold text-ink">
-                    Dictamen de la Solicitud
-                  </h3>
-                  <p className="text-xs text-text-secondary">
-                    Habiendo verificado la información oficial a registrar y la
-                    carta membretada:
-                  </p>
-                </div>
-                <div className="flex shrink-0 flex-wrap items-center gap-2.5">
-                  <Button
-                    type="button"
-                    onClick={() => setShowApproveDialog(true)}
-                    disabled={submitting}
-                    className="h-10 bg-emerald-600 px-4 font-semibold text-white shadow-xs hover:bg-emerald-700"
-                  >
-                    <Check className="mr-1.5 size-4" /> Aprobar y Dar de Alta
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setShowCorrectionDialog(true)}
-                    disabled={submitting}
-                    className="h-10 border-indigo-200 bg-indigo-50/60 px-4 font-medium text-indigo-700 shadow-xs hover:bg-indigo-100 hover:text-indigo-800"
-                  >
-                    <RotateCcw className="mr-1.5 size-4 text-indigo-600" />{' '}
-                    Solicitar Subsanación
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setShowRejectDialog(true)}
-                    disabled={submitting}
-                    className="h-10 border-rose-200 bg-rose-50/60 px-4 font-medium text-rose-700 shadow-xs hover:bg-rose-100 hover:text-rose-800"
-                  >
-                    <X className="mr-1.5 size-4 text-rose-600" /> Rechazar
-                  </Button>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </section>
-
-      {/* ─────────────────────────────────────────────────────────────────────────────
-          3. CONTRASTE DE DATOS Y VERIFICACIÓN OCR (BLOQUES COMPARATIVOS)
-          Compara campo por campo, verde si coincide, rojo opaco si no, sin amarillo
+          1. CONTRASTE DE DATOS Y VERIFICACIÓN OCR (LO PRIMERO QUE SE AUDITA)
           ───────────────────────────────────────────────────────────────────────────── */}
       <section className="space-y-6" aria-labelledby="section-contrast">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3">
@@ -1040,13 +861,103 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
       </section>
 
       {/* ─────────────────────────────────────────────────────────────────────────────
-          4. SECCIÓN DE DATOS OPCIONALES: LOGOTIPO CORPORATIVO Y SITIO WEB
+          2. DOCUMENTO DE RESPALDO (CARTA MEMBRETADA)
+          ───────────────────────────────────────────────────────────────────────────── */}
+      <section className="space-y-3" aria-labelledby="section-document">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <FileText className="size-5 text-primary" />
+            <h2 id="section-document" className="text-lg font-bold text-ink">
+              Documento de Respaldo Oficial (Carta Membretada)
+            </h2>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setIsDocMinimized(!isDocMinimized)}
+              className="gap-1.5 text-xs font-semibold"
+            >
+              {isDocMinimized ? (
+                <>
+                  <ChevronDown className="size-3.5" /> Expandir visor
+                </>
+              ) : (
+                <>
+                  <ChevronUp className="size-3.5" /> Minimizar visor
+                </>
+              )}
+            </Button>
+            {docUrl && (
+              <a
+                href={docUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-semibold text-primary transition-colors hover:bg-surface-soft"
+              >
+                <ExternalLink className="size-3.5" /> Abrir en nueva pestaña
+              </a>
+            )}
+          </div>
+        </div>
+
+        <Card className="overflow-hidden border-border bg-surface shadow-xs">
+          <CardContent className="p-0">
+            {isDocMinimized ? (
+              <div className="flex items-center justify-between border-b border-border bg-surface-soft/60 px-5 py-3">
+                <div className="flex items-center gap-3">
+                  <FileText className="size-5 text-primary" />
+                  <div>
+                    <p className="text-xs font-semibold text-ink">
+                      carta-solicitud-{item.requestCode ?? 'doc'}.
+                      {docIsImage ? 'png' : 'pdf'}
+                    </p>
+                    <p className="text-[11px] text-text-secondary">
+                      Visor minimizado temporalmente.
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="xs"
+                  onClick={() => setIsDocMinimized(false)}
+                  className="gap-1 text-xs"
+                >
+                  <Maximize2 className="size-3.5" /> Expandir visor
+                </Button>
+              </div>
+            ) : docUrl ? (
+              <DocumentViewer
+                url={docUrl}
+                mimeType={docMimeType}
+                fileName={`carta-solicitud-${item.requestCode ?? 'doc'}.${docIsImage ? 'png' : 'pdf'}`}
+                caption="Carta formal con membrete y sello presentada para la solicitud de acceso institucional a UMSSY."
+              />
+            ) : (
+              <div className="flex h-64 flex-col items-center justify-center p-8 text-center text-text-secondary">
+                <FileText className="mb-2 size-12 text-slate-300" />
+                <p className="text-sm font-medium">
+                  No se pudo cargar la vista previa del documento adjunto.
+                </p>
+                <p className="mt-1 text-xs text-text-secondary">
+                  El archivo podría estar en procesamiento o no encontrarse
+                  disponible.
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* ─────────────────────────────────────────────────────────────────────────────
+          3. LOGOTIPO CORPORATIVO
           ───────────────────────────────────────────────────────────────────────────── */}
       <section
         className="grid grid-cols-1 gap-6 md:grid-cols-2"
         aria-labelledby="section-optional-data"
       >
-        {/* Card: Logotipo Corporativo Detallado */}
         <Card className="border-border bg-surface shadow-xs">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
@@ -1061,8 +972,7 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
               </Badge>
             </div>
             <CardDescription className="text-xs text-text-secondary">
-              Inspección visual del logotipo que representará a la empresa en la
-              plataforma.
+              Inspección visual del logotipo institucional.
             </CardDescription>
           </CardHeader>
 
@@ -1111,103 +1021,79 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
                       size="xs"
                       onClick={() => setLogoBg('checkered')}
                     >
-                      Malla
+                      Mosaico
                     </Button>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setShowLogoModal(true)}
-                      className="gap-1.5 text-xs"
-                    >
-                      <Maximize2 className="size-3.5" /> Ver en tamaño completo
-                    </Button>
-                    <a
-                      href={logoUrl}
-                      download={`logo-${item.requestCode ?? 'empresa'}.png`}
-                      className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border px-3 text-xs font-medium text-ink transition-colors hover:bg-surface-soft"
-                    >
-                      <Download className="size-3.5" /> Descargar
-                    </a>
-                  </div>
+                  <a
+                    href={logoUrl}
+                    download={`logo-${item.requestCode ?? 'empresa'}.png`}
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+                  >
+                    <Download className="size-3" /> Descargar imagen
+                  </a>
                 </div>
               </div>
             ) : (
-              <div className="flex h-44 flex-col items-center justify-center rounded-xl border border-dashed border-border bg-surface-soft/50 p-6 text-center text-text-secondary">
-                <Building2 className="mb-2 size-8 text-text-secondary/60" />
-                <p className="text-sm font-semibold text-ink">
-                  Sin logotipo adjuntado
-                </p>
-                <p className="mt-1 text-xs text-text-secondary">
-                  La empresa no subió un logo durante su registro. Podrá
-                  cargarlo posteriormente desde su perfil.
+              <div className="flex h-36 flex-col items-center justify-center rounded-xl border border-dashed border-border bg-surface-soft/40 p-4 text-center text-text-secondary">
+                <ImageIcon className="mb-1.5 size-8 text-slate-300" />
+                <p className="text-xs">
+                  La empresa optó por no suministrar un isotipo o logotipo
+                  oficial al momento de su registro inicial.
                 </p>
               </div>
             )}
           </CardContent>
         </Card>
 
-        {/* Card: Sitio Web Corporativo con Redirección */}
+        {/* Tarjeta de estado de expediente y resumen */}
         <Card className="border-border bg-surface shadow-xs">
           <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Globe className="size-5 text-primary" />
-                <CardTitle className="text-base font-bold text-ink">
-                  Sitio Web Corporativo
-                </CardTitle>
-              </div>
-              <Badge variant="outline" className="text-xs">
-                {safeWebUrl ? 'Especificado' : 'Opcional (No especificado)'}
-              </Badge>
-            </div>
+            <CardTitle className="text-base font-bold text-ink">
+              Resumen del Trámite Institucional
+            </CardTitle>
             <CardDescription className="text-xs text-text-secondary">
-              Verificación del portal oficial de la empresa para comprobar su
-              existencia en línea.
+              Metadatos del proceso administrativo de registro.
             </CardDescription>
           </CardHeader>
+          <CardContent className="space-y-3 text-xs">
+            <div className="flex justify-between border-b border-border/60 pb-2">
+              <span className="text-text-secondary">Estado actual:</span>
+              <span className="font-semibold text-ink">
+                {statusConfig.label}
+              </span>
+            </div>
+            <div className="flex justify-between border-b border-border/60 pb-2">
+              <span className="text-text-secondary">Código único:</span>
+              <span className="font-mono font-semibold text-ink">
+                {item.requestCode ?? 'Sin código'}
+              </span>
+            </div>
+            <div className="flex justify-between border-b border-border/60 pb-2">
+              <span className="text-text-secondary">Fecha de ingreso:</span>
+              <span className="font-medium text-ink">
+                {item.submittedAt
+                  ? new Date(item.submittedAt).toLocaleString('es-BO')
+                  : 'No disponible'}
+              </span>
+            </div>
+            <div className="flex justify-between pb-1">
+              <span className="text-text-secondary">Afinidad OCR:</span>
+              <span className="font-bold text-ink">{ocrPercentage}%</span>
+            </div>
 
-          <CardContent className="space-y-4">
-            {safeWebUrl ? (
-              <div className="flex flex-col justify-between gap-4 rounded-xl border border-border bg-surface-soft/40 p-4">
-                <div className="space-y-1">
-                  <span className="text-xs font-medium text-text-secondary">
-                    URL declarada:
-                  </span>
-                  <p className="truncate font-mono text-sm font-semibold text-primary">
-                    {item.websiteUrl}
-                  </p>
-                  <p className="text-xs text-text-secondary">
-                    Haz clic en el botón inferior para abrir la página en una
-                    nueva pestaña y verificar que responda con normalidad.
-                  </p>
-                </div>
-
-                <div className="pt-2">
-                  <a
-                    href={safeWebUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-primary/90"
-                  >
-                    <ExternalLink className="size-4" />
-                    Probar y abrir sitio web en otra ventana
-                  </a>
-                </div>
-              </div>
-            ) : (
-              <div className="flex h-44 flex-col items-center justify-center rounded-xl border border-dashed border-border bg-surface-soft/50 p-6 text-center text-text-secondary">
-                <Globe className="mb-2 size-8 text-text-secondary/60" />
-                <p className="text-sm font-semibold text-ink">
-                  Sin dirección web registrada
-                </p>
-                <p className="mt-1 text-xs text-text-secondary">
-                  No se proporcionó un enlace web durante el registro. Este dato
-                  es opcional y no impide la aprobación del trámite.
-                </p>
+            {canResolve && (
+              <div className="pt-2">
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setActiveAction(null);
+                    setShowResolutionSheet(true);
+                  }}
+                  className="w-full bg-primary font-semibold text-white shadow-xs hover:bg-primary/90"
+                >
+                  Abrir panel de resolución
+                </Button>
               </div>
             )}
           </CardContent>
@@ -1215,511 +1101,565 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
       </section>
 
       {/* ─────────────────────────────────────────────────────────────────────────────
-          5. HISTORIAL Y AUDITORÍA
+          PANEL LATERAL DESLIZABLE (DRAWER / SHEET) DE RESOLUCIÓN & FICHA OFICIAL
+          Mantiene visible el 60% de la pantalla para seguir consultando el documento
           ───────────────────────────────────────────────────────────────────────────── */}
-      <Card className="border-border bg-surface shadow-xs">
-        <CardHeader className="pb-3">
-          <div className="flex items-center gap-2">
-            <Clock className="size-5 text-primary" />
-            <CardTitle className="text-base font-bold text-ink">
-              Historial del Trámite
-            </CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3 text-xs">
-            <div className="flex items-start gap-3 rounded-lg border border-border/60 bg-surface-soft/30 p-3">
-              <span className="mt-0.5 size-2 rounded-full bg-primary" />
-              <div className="flex-1">
-                <p className="font-semibold text-ink">Solicitud ingresada</p>
-                <p className="text-text-secondary">
-                  Generada con el código{' '}
-                  <span className="font-mono font-medium text-ink">
-                    {item.requestCode}
-                  </span>{' '}
-                  para la empresa {item.companyName}.
-                </p>
+      <Sheet open={showResolutionSheet} onOpenChange={setShowResolutionSheet}>
+        <SheetContent
+          side="right"
+          className="flex size-full flex-col overflow-hidden p-0 data-[side=right]:sm:max-w-xl data-[side=right]:md:max-w-2xl"
+        >
+          {/* Cabecera del Panel */}
+          <SheetHeader className="shrink-0 border-b border-border bg-surface p-5">
+            <div className="flex flex-wrap items-center justify-between gap-2 pr-6">
+              <div>
+                <SheetTitle className="text-lg font-bold text-ink">
+                  Resolución de Solicitud
+                </SheetTitle>
+                <SheetDescription className="text-xs text-text-secondary">
+                  Expediente: <strong>{item.companyName}</strong> (
+                  {item.requestCode})
+                </SheetDescription>
               </div>
-              {item.submittedAt && (
-                <span className="text-text-secondary">
-                  {new Date(item.submittedAt).toLocaleDateString('es-BO')}
-                </span>
+              <div
+                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-bold ${
+                  ocrPercentage >= 60
+                    ? 'border-emerald-300 bg-emerald-50 text-emerald-800'
+                    : 'border-rose-300 bg-rose-50 text-rose-800'
+                }`}
+              >
+                <ShieldCheck className="size-3.5" />
+                <span>{ocrPercentage}% Afinidad</span>
+              </div>
+            </div>
+          </SheetHeader>
+
+          {/* Cuerpo del Panel con scroll propio */}
+          <div className="flex-1 space-y-6 overflow-y-auto p-5">
+            {/* 1. FICHA OFICIAL DE ALTA */}
+            <div className="rounded-xl border border-border bg-surface p-4 shadow-2xs">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/80 pb-3">
+                <div className="flex items-center gap-2">
+                  <Building2 className="size-4 text-primary" />
+                  <h3 className="text-sm font-bold text-ink">
+                    Ficha Oficial para Registro en Plataforma
+                  </h3>
+                </div>
+                <div className="flex items-center gap-2">
+                  {!isEditingFicha ? (
+                    <>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="xs"
+                        onClick={() => setIsEditingFicha(true)}
+                        className="gap-1 text-xs font-semibold text-primary"
+                      >
+                        <Pencil className="size-3" /> Editar datos
+                      </Button>
+                      {isDataModifiedFromInitial && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="xs"
+                          onClick={() => void handleResetInitialData()}
+                          disabled={isSavingEdit}
+                          className="gap-1 text-xs font-medium text-slate-600 hover:text-slate-900"
+                          title="Restablecer datos a como los envió originalmente la empresa"
+                        >
+                          <RotateCcw className="size-3" /> Restablecer datos
+                          iniciales
+                        </Button>
+                      )}
+                    </>
+                  ) : (
+                    <div className="flex items-center gap-1.5">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="xs"
+                        onClick={() => setIsEditingFicha(false)}
+                        disabled={isSavingEdit}
+                        className="text-xs"
+                      >
+                        Cancelar
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="xs"
+                        onClick={() => void handleResetInitialData()}
+                        disabled={isSavingEdit}
+                        className="gap-1 text-xs text-slate-700"
+                      >
+                        <RotateCcw className="size-3" /> Restablecer
+                      </Button>
+                      <Button
+                        type="button"
+                        size="xs"
+                        onClick={() => void handleSaveEdit()}
+                        disabled={isSavingEdit}
+                        className="gap-1 bg-primary text-xs text-white"
+                      >
+                        {isSavingEdit ? (
+                          <>
+                            <Loader2 className="size-3 animate-spin" />{' '}
+                            Guardando...
+                          </>
+                        ) : (
+                          'Guardar cambios'
+                        )}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {isDataModifiedFromInitial && !isEditingFicha && (
+                <div className="mt-2.5 flex items-center justify-between rounded-md border border-blue-200 bg-blue-50/70 px-3 py-1.5 text-xs text-blue-900">
+                  <span>
+                    Ficha con modificaciones aplicadas por el revisor
+                    administrativo.
+                  </span>
+                  <Button
+                    type="button"
+                    variant="link"
+                    size="xs"
+                    onClick={() => void handleResetInitialData()}
+                    className="h-auto p-0 font-bold text-blue-900 underline hover:text-blue-950"
+                  >
+                    Restablecer valores iniciales
+                  </Button>
+                </div>
+              )}
+
+              {/* Vista de datos / Formulario de edición */}
+              {!isEditingFicha ? (
+                <div className="mt-3.5 grid grid-cols-1 gap-3 text-xs sm:grid-cols-2">
+                  <div className="rounded-lg border border-border/80 bg-surface-soft/40 p-2.5">
+                    <span className="text-[10px] font-semibold text-text-secondary uppercase">
+                      Razón Social / Nombre Comercial
+                    </span>
+                    <p className="mt-0.5 font-bold text-ink">
+                      {item.companyName}
+                    </p>
+                  </div>
+
+                  <div className="rounded-lg border border-border/80 bg-surface-soft/40 p-2.5">
+                    <span className="text-[10px] font-semibold text-text-secondary uppercase">
+                      Rubro / Sector
+                    </span>
+                    <p className="mt-0.5 font-bold text-ink">{item.sector}</p>
+                  </div>
+
+                  <div className="rounded-lg border border-border/80 bg-surface-soft/40 p-2.5">
+                    <span className="text-[10px] font-semibold text-text-secondary uppercase">
+                      Ciudad Sede
+                    </span>
+                    <p className="mt-0.5 font-bold text-ink">{cityName}</p>
+                  </div>
+
+                  <div className="rounded-lg border border-border/80 bg-surface-soft/40 p-2.5">
+                    <span className="text-[10px] font-semibold text-text-secondary uppercase">
+                      Correo Electrónico Institucional
+                    </span>
+                    <p className="mt-0.5 font-bold text-ink">{item.email}</p>
+                  </div>
+
+                  <div className="rounded-lg border border-border/80 bg-surface-soft/40 p-2.5">
+                    <span className="text-[10px] font-semibold text-text-secondary uppercase">
+                      Teléfono de Contacto
+                    </span>
+                    <p className="mt-0.5 font-bold text-ink">{item.phone}</p>
+                  </div>
+
+                  <div className="rounded-lg border border-border/80 bg-surface-soft/40 p-2.5">
+                    <span className="text-[10px] font-semibold text-text-secondary uppercase">
+                      Usuario Reclutador a Crear
+                    </span>
+                    <p className="mt-0.5 font-mono font-bold text-primary">
+                      @{item.username}
+                    </p>
+                  </div>
+
+                  <div className="col-span-full rounded-lg border border-border/80 bg-surface-soft/40 p-2.5">
+                    <span className="text-[10px] font-semibold text-text-secondary uppercase">
+                      Sitio Web Oficial
+                    </span>
+                    <p className="mt-0.5 font-mono font-medium text-ink">
+                      {item.websiteUrl || 'No especificado (Opcional)'}
+                    </p>
+                  </div>
+
+                  <div className="col-span-full rounded-lg border border-border/80 bg-surface-soft/40 p-2.5">
+                    <span className="text-[10px] font-semibold text-text-secondary uppercase">
+                      Descripción Institucional
+                    </span>
+                    <p className="mt-0.5 leading-relaxed text-ink">
+                      {item.description}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="mt-3.5 space-y-3 text-xs">
+                  <div>
+                    <Label className="text-xs font-semibold">
+                      Razón Social / Nombre Comercial *
+                    </Label>
+                    <Input
+                      value={editForm.companyName ?? ''}
+                      onChange={(e) =>
+                        setEditForm((prev) => ({
+                          ...prev,
+                          companyName: e.target.value,
+                        }))
+                      }
+                      className="mt-1 text-xs"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                    <div>
+                      <Label className="text-xs font-semibold">
+                        Rubro / Sector *
+                      </Label>
+                      <Input
+                        value={editForm.sector ?? ''}
+                        onChange={(e) =>
+                          setEditForm((prev) => ({
+                            ...prev,
+                            sector: e.target.value,
+                          }))
+                        }
+                        className="mt-1 text-xs"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs font-semibold">
+                        Teléfono de Contacto *
+                      </Label>
+                      <Input
+                        value={editForm.phone ?? ''}
+                        onChange={(e) =>
+                          setEditForm((prev) => ({
+                            ...prev,
+                            phone: e.target.value,
+                          }))
+                        }
+                        className="mt-1 text-xs"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                    <div>
+                      <Label className="text-xs font-semibold">
+                        Correo Electrónico *
+                      </Label>
+                      <Input
+                        value={editForm.email ?? ''}
+                        onChange={(e) =>
+                          setEditForm((prev) => ({
+                            ...prev,
+                            email: e.target.value,
+                          }))
+                        }
+                        className="mt-1 text-xs"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs font-semibold">
+                        Usuario Reclutador *
+                      </Label>
+                      <Input
+                        value={editForm.username ?? ''}
+                        onChange={(e) =>
+                          setEditForm((prev) => ({
+                            ...prev,
+                            username: e.target.value,
+                          }))
+                        }
+                        className="mt-1 text-xs"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label className="text-xs font-semibold">
+                      Sitio Web Oficial
+                    </Label>
+                    <Input
+                      value={editForm.websiteUrl ?? ''}
+                      onChange={(e) =>
+                        setEditForm((prev) => ({
+                          ...prev,
+                          websiteUrl: e.target.value,
+                        }))
+                      }
+                      placeholder="https://ejemplo.com"
+                      className="mt-1 text-xs"
+                    />
+                  </div>
+
+                  <div>
+                    <Label className="text-xs font-semibold">
+                      Descripción Institucional *
+                    </Label>
+                    <Textarea
+                      rows={2}
+                      value={editForm.description ?? ''}
+                      onChange={(e) =>
+                        setEditForm((prev) => ({
+                          ...prev,
+                          description: e.target.value,
+                        }))
+                      }
+                      className="mt-1 text-xs"
+                    />
+                  </div>
+                </div>
               )}
             </div>
 
-            {item.reviewedAt && (
-              <div className="flex items-start gap-3 rounded-lg border border-border/60 bg-surface-soft/30 p-3">
-                <span
-                  className={`mt-0.5 size-2 rounded-full ${
-                    item.status.title === 'APPROVED'
-                      ? 'bg-emerald-600'
-                      : item.status.title === 'OBSERVED'
-                        ? 'bg-indigo-600'
-                        : 'bg-rose-600'
-                  }`}
-                />
-                <div className="flex-1">
-                  <p className="font-semibold text-ink">
-                    Dictamen emitido:{' '}
-                    {STATUS_CONFIG[item.status.title]?.label ??
-                      item.status.title}
-                  </p>
-                  {item.rejectionReason && (
-                    <p className="mt-1 font-medium text-rose-700 dark:text-rose-400">
-                      Observación / Motivo: {item.rejectionReason}
-                    </p>
-                  )}
+            {/* 2. FORMULARIO DINÁMICO DE ACCIÓN (SEGÚN LA ACCIÓN SELECCIONADA) */}
+            {activeAction === 'APPROVE' && (
+              <div className="rounded-xl border border-emerald-300 bg-emerald-50/80 p-4.5 text-xs text-emerald-950 dark:border-emerald-900/60 dark:bg-emerald-950/30 dark:text-emerald-200">
+                <h4 className="text-sm font-bold text-emerald-900 dark:text-emerald-100">
+                  Confirmación de Aprobación y Alta
+                </h4>
+                <p className="mt-1.5 leading-relaxed text-emerald-800 dark:text-emerald-300">
+                  Al confirmar, se creará formalmente la empresa en el sistema y
+                  el usuario reclutador{' '}
+                  <strong className="font-mono text-emerald-950 dark:text-white">
+                    @{item.username}
+                  </strong>
+                  . Se enviará de inmediato el código de activación
+                  institucional al correo <strong>{item.email}</strong>.
+                </p>
+
+                <div className="mt-4 flex items-center justify-end gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setActiveAction(null)}
+                    disabled={submitting}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => void handleApprove()}
+                    disabled={submitting}
+                    className="bg-emerald-600 font-semibold text-white hover:bg-emerald-700"
+                  >
+                    {submitting ? 'Aprobando...' : 'Confirmar aprobación'}
+                  </Button>
                 </div>
-                <span className="text-text-secondary">
-                  {new Date(item.reviewedAt).toLocaleDateString('es-BO')}
-                </span>
+              </div>
+            )}
+
+            {activeAction === 'CORRECTION' && (
+              <div className="space-y-3.5 rounded-xl border border-blue-300 bg-blue-50/80 p-4.5 text-xs text-blue-950 dark:border-blue-900/60 dark:bg-blue-950/30 dark:text-blue-200">
+                <div>
+                  <h4 className="text-sm font-bold text-blue-950 dark:text-blue-100">
+                    Solicitud de Subsanación Documental
+                  </h4>
+                  <p className="mt-1 text-[11px] text-blue-800 dark:text-blue-300">
+                    La solicitud pasará a estado de observación y el
+                    representante podrá ingresar con su código{' '}
+                    <strong>{item.requestCode}</strong> para corregir.
+                  </p>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-blue-950 dark:text-blue-200">
+                    Motivo principal de la observación:
+                  </Label>
+                  <RadioGroup
+                    value={correctionCategory}
+                    onValueChange={setCorrectionCategory}
+                    className="space-y-1.5"
+                  >
+                    {CORRECTION_REASONS.map((reason) => (
+                      <label
+                        key={reason}
+                        className="flex cursor-pointer items-center gap-2 rounded-lg border border-blue-200 bg-white/90 p-2 text-xs text-ink hover:bg-white dark:border-blue-900/50 dark:bg-slate-900/60"
+                      >
+                        <RadioGroupItem value={reason} />
+                        <span>{reason}</span>
+                      </label>
+                    ))}
+                  </RadioGroup>
+                </div>
+
+                <div className="space-y-1">
+                  <Label className="text-xs font-semibold text-blue-950 dark:text-blue-200">
+                    Detalle específico e instrucciones para la empresa *
+                  </Label>
+                  <Textarea
+                    rows={3}
+                    value={correctionDetails}
+                    onChange={(e) => setCorrectionDetails(e.target.value)}
+                    placeholder="Describe con precisión qué debe corregir o adjuntar..."
+                    className="bg-white text-xs dark:bg-slate-900"
+                  />
+                  <p className="text-[11px] text-text-secondary">
+                    Mínimo 5 caracteres ({correctionDetails.trim().length}{' '}
+                    ingresados).
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-end gap-2 pt-1">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setActiveAction(null)}
+                    disabled={submitting}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => void handleCorrection()}
+                    disabled={submitting || correctionDetails.trim().length < 5}
+                    className="bg-blue-600 font-semibold text-white hover:bg-blue-700"
+                  >
+                    {submitting ? 'Enviando...' : 'Enviar subsanación'}
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {activeAction === 'REJECT' && (
+              <div className="space-y-3.5 rounded-xl border border-rose-300 bg-rose-50/80 p-4.5 text-xs text-rose-950 dark:border-rose-900/60 dark:bg-rose-950/30 dark:text-rose-200">
+                <div>
+                  <h4 className="text-sm font-bold text-rose-950 dark:text-rose-100">
+                    Rechazo Definitivo de la Solicitud
+                  </h4>
+                  <p className="mt-1 text-[11px] text-rose-800 dark:text-rose-300">
+                    Esta acción concluye el trámite y enviará la notificación
+                    formal al correo <strong>{item.email}</strong>.
+                  </p>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-rose-950 dark:text-rose-200">
+                    Causal institucional de rechazo:
+                  </Label>
+                  <RadioGroup
+                    value={rejectionCategory}
+                    onValueChange={setRejectionCategory}
+                    className="space-y-1.5"
+                  >
+                    {REJECTION_REASONS.map((reason) => (
+                      <label
+                        key={reason}
+                        className="flex cursor-pointer items-center gap-2 rounded-lg border border-rose-200 bg-white/90 p-2 text-xs text-ink hover:bg-white dark:border-rose-900/50 dark:bg-slate-900/60"
+                      >
+                        <RadioGroupItem value={reason} />
+                        <span>{reason}</span>
+                      </label>
+                    ))}
+                  </RadioGroup>
+                </div>
+
+                <div className="space-y-1">
+                  <Label className="text-xs font-semibold text-rose-950 dark:text-rose-200">
+                    Fundamentación oficial del rechazo *
+                  </Label>
+                  <Textarea
+                    rows={3}
+                    value={rejectionDetails}
+                    onChange={(e) => setRejectionDetails(e.target.value)}
+                    placeholder="Detalla los motivos formales del dictamen..."
+                    className="bg-white text-xs dark:bg-slate-900"
+                  />
+                  <p className="text-[11px] text-text-secondary">
+                    Mínimo 5 caracteres ({rejectionDetails.trim().length}{' '}
+                    ingresados).
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-end gap-2 pt-1">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setActiveAction(null)}
+                    disabled={submitting}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => void handleReject()}
+                    disabled={submitting || rejectionDetails.trim().length < 5}
+                    className="bg-rose-600 font-semibold text-white hover:bg-rose-700"
+                  >
+                    {submitting ? 'Rechazando...' : 'Confirmar rechazo'}
+                  </Button>
+                </div>
               </div>
             )}
           </div>
-        </CardContent>
-      </Card>
 
-      {/* ─────────────────────────────────────────────────────────────────────────────
-          MODAL: EDITAR FICHA OFICIAL PARA REGISTRO
-          ───────────────────────────────────────────────────────────────────────────── */}
-      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="flex max-h-[85vh] flex-col overflow-hidden p-5 sm:max-w-3xl">
-          <DialogHeader className="shrink-0 border-b border-border pr-8 pb-3">
-            <DialogTitle className="flex items-center gap-2 text-base font-bold text-ink">
-              <Pencil className="size-4.5 text-primary" />
-              Editar Ficha Oficial de Registro
-            </DialogTitle>
-            <DialogDescription className="text-xs text-text-secondary">
-              Ajusta los datos que se guardarán definitivamente en la
-              plataforma. Al guardar, el OCR recalculará la afinidad con el
-              documento en vivo.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="flex-1 overflow-y-auto py-2 pr-1">
-            <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
-              <div className="space-y-1.5 sm:col-span-2">
-                <Label htmlFor="edit-companyName" className="text-xs font-bold">
-                  Razón Social / Nombre Comercial *
-                </Label>
-                <Input
-                  id="edit-companyName"
-                  value={editForm.companyName ?? ''}
-                  onChange={(e) =>
-                    setEditForm({ ...editForm, companyName: e.target.value })
-                  }
-                  className="text-xs"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="edit-sector" className="text-xs font-bold">
-                  Rubro / Sector *
-                </Label>
-                <Input
-                  id="edit-sector"
-                  value={editForm.sector ?? ''}
-                  onChange={(e) =>
-                    setEditForm({ ...editForm, sector: e.target.value })
-                  }
-                  className="text-xs"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="edit-username" className="text-xs font-bold">
-                  Usuario Reclutador (@) *
-                </Label>
-                <Input
-                  id="edit-username"
-                  value={editForm.username ?? ''}
-                  onChange={(e) =>
-                    setEditForm({ ...editForm, username: e.target.value })
-                  }
-                  className="font-mono text-xs"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="edit-email" className="text-xs font-bold">
-                  Correo Institucional *
-                </Label>
-                <Input
-                  id="edit-email"
-                  type="email"
-                  value={editForm.email ?? ''}
-                  onChange={(e) =>
-                    setEditForm({ ...editForm, email: e.target.value })
-                  }
-                  className="text-xs"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="edit-phone" className="text-xs font-bold">
-                  Teléfono de Contacto *
-                </Label>
-                <Input
-                  id="edit-phone"
-                  value={editForm.phone ?? ''}
-                  onChange={(e) =>
-                    setEditForm({ ...editForm, phone: e.target.value })
-                  }
-                  className="text-xs"
-                />
-              </div>
-
-              <div className="space-y-1.5 sm:col-span-2">
-                <Label htmlFor="edit-websiteUrl" className="text-xs font-bold">
-                  Sitio Web Corporativo (Opcional)
-                </Label>
-                <Input
-                  id="edit-websiteUrl"
-                  value={editForm.websiteUrl ?? ''}
-                  onChange={(e) =>
-                    setEditForm({ ...editForm, websiteUrl: e.target.value })
-                  }
-                  placeholder="https://www.empresa.com"
-                  className="text-xs"
-                />
-              </div>
-
-              <div className="space-y-1.5 sm:col-span-2">
-                <Label htmlFor="edit-description" className="text-xs font-bold">
-                  Descripción Institucional *
-                </Label>
-                <Textarea
-                  id="edit-description"
-                  rows={3}
-                  value={editForm.description ?? ''}
-                  onChange={(e) =>
-                    setEditForm({ ...editForm, description: e.target.value })
-                  }
-                  className="text-xs"
-                />
-              </div>
-            </div>
-          </div>
-
-          <DialogFooter className="flex shrink-0 flex-row items-center justify-end gap-2 border-t border-border bg-popover pt-3">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setShowEditDialog(false)}
-              disabled={isSavingEdit}
-            >
-              Cancelar
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              onClick={() => void handleSaveEdit()}
-              disabled={isSavingEdit}
-              className="bg-primary text-white hover:bg-primary/90"
-            >
-              {isSavingEdit ? (
-                <>
-                  <Loader2 className="mr-2 size-3.5 animate-spin" /> Guardando y
-                  recalculando...
-                </>
-              ) : (
-                <>
-                  <Save className="mr-1.5 size-3.5" /> Guardar Corrección
-                </>
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* ─────────────────────────────────────────────────────────────────────────────
-          MODAL: SOLICITAR SUBSANACIÓN DE REGISTRO
-          ───────────────────────────────────────────────────────────────────────────── */}
-      <Dialog
-        open={showCorrectionDialog}
-        onOpenChange={setShowCorrectionDialog}
-      >
-        <DialogContent className="flex max-h-[85vh] flex-col overflow-hidden p-5 sm:max-w-2xl">
-          <DialogHeader className="shrink-0 border-b border-border pr-8 pb-3">
-            <DialogTitle className="flex items-center gap-2 text-base font-bold text-indigo-700">
-              <RotateCcw className="size-4.5 text-indigo-600" />
-              Solicitar Subsanación de Registro
-            </DialogTitle>
-            <DialogDescription className="text-xs text-text-secondary">
-              Se enviará un correo a{' '}
-              <strong className="text-ink">{item.email}</strong> indicando qué
-              observaciones debe corregir para continuar con su trámite.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="flex-1 space-y-3.5 overflow-y-auto py-2 pr-1 text-xs">
-            <div className="space-y-1.5">
-              <span className="font-bold text-ink">
-                Motivo principal de la observación:
-              </span>
-              <RadioGroup
-                value={correctionCategory}
-                onValueChange={(val) => {
-                  if (typeof val === 'string') setCorrectionCategory(val);
-                }}
-                className="grid grid-cols-1 gap-2 sm:grid-cols-2"
-              >
-                {CORRECTION_REASONS.map((reason) => (
-                  <label
-                    key={reason}
-                    className={`flex cursor-pointer items-start gap-2.5 rounded-lg border p-2.5 transition-colors ${
-                      correctionCategory === reason
-                        ? 'border-indigo-400 bg-indigo-50/70 font-medium text-indigo-950 dark:border-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-200'
-                        : 'border-border text-ink hover:bg-surface-soft'
-                    }`}
+          {/* Pie Fijo del Panel con los 3 botones principales */}
+          {canResolve && (
+            <div className="shrink-0 border-t border-border bg-surface p-4">
+              {activeAction === null ? (
+                <div className="flex w-full items-center gap-2">
+                  <Button
+                    type="button"
+                    onClick={() => setActiveAction('APPROVE')}
+                    disabled={submitting || isSavingEdit}
+                    className="h-10 flex-1 bg-emerald-600 font-semibold text-white hover:bg-emerald-700"
                   >
-                    <RadioGroupItem
-                      value={reason}
-                      className="mt-0.5 shrink-0"
-                    />
-                    <span className="text-[11px] leading-snug">{reason}</span>
-                  </label>
-                ))}
-              </RadioGroup>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label
-                htmlFor="correction-details"
-                className="font-bold text-ink"
-              >
-                Detalle específico e instrucciones para la empresa *
-              </Label>
-              <Textarea
-                id="correction-details"
-                rows={3}
-                placeholder="Indica con claridad las correcciones requeridas (ej: 'El documento adjunto no cuenta con el sello institucional. Por favor, reenvíe la carta membretada firmada y sellada por gerencia')..."
-                value={correctionDetails}
-                onChange={(e) => setCorrectionDetails(e.target.value)}
-                className="text-xs"
-              />
-              <p className="text-[11px] text-text-secondary">
-                Mínimo 5 caracteres ({correctionDetails.trim().length}{' '}
-                ingresados).
-              </p>
-            </div>
-
-            <div className="rounded-lg border border-indigo-200 bg-indigo-50/60 p-2.5 text-[11px] text-indigo-900 dark:border-indigo-900/50 dark:bg-indigo-950/30 dark:text-indigo-300">
-              <p>
-                Al enviar la solicitud de subsanación, el estado pasará a{' '}
-                <strong>Subsanación solicitada</strong> y el representante de la
-                empresa podrá consultar las indicaciones ingresando su código{' '}
-                <strong>{item.requestCode}</strong>.
-              </p>
-            </div>
-          </div>
-
-          <DialogFooter className="flex shrink-0 flex-row items-center justify-end gap-2 border-t border-border bg-popover pt-3">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setShowCorrectionDialog(false)}
-              disabled={submitting}
-            >
-              Cancelar
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              onClick={() => void handleCorrection()}
-              disabled={submitting || correctionDetails.trim().length < 5}
-              className="bg-indigo-600 text-white hover:bg-indigo-700"
-            >
-              {submitting ? (
-                <>
-                  <Loader2 className="mr-2 size-3.5 animate-spin" /> Enviando...
-                </>
-              ) : (
-                'Enviar Solicitud de Subsanación'
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* ─────────────────────────────────────────────────────────────────────────────
-          MODAL: APROBACIÓN DE SOLICITUD
-          ───────────────────────────────────────────────────────────────────────────── */}
-      <Dialog open={showApproveDialog} onOpenChange={setShowApproveDialog}>
-        <DialogContent className="flex max-h-[85vh] flex-col overflow-hidden p-5 sm:max-w-xl">
-          <DialogHeader className="shrink-0 border-b border-border pr-8 pb-3">
-            <DialogTitle className="flex items-center gap-2 text-base font-bold text-ink">
-              <CheckCircle2 className="size-4.5 text-emerald-600" />
-              Aprobar Solicitud de Empresa
-            </DialogTitle>
-            <DialogDescription className="text-xs text-text-secondary">
-              Estás por dictaminar favorablemente la solicitud de{' '}
-              <strong className="text-ink">{item.companyName}</strong>.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="flex-1 space-y-3 overflow-y-auto py-2 pr-1 text-xs">
-            <p className="text-text-secondary">
-              Al confirmar la aprobación, el sistema ejecutará automáticamente:
-            </p>
-            <ul className="space-y-2 rounded-lg bg-surface-soft p-3">
-              <li className="flex items-center gap-2 font-medium text-ink">
-                <Check className="size-4 shrink-0 text-emerald-600" />
-                Creación del registro de empresa y su perfil oficial.
-              </li>
-              <li className="flex items-center gap-2 font-medium text-ink">
-                <Check className="size-4 shrink-0 text-emerald-600" />
-                Creación del usuario reclutador asociado (@{item.username}).
-              </li>
-              <li className="flex items-center gap-2 font-medium text-ink">
-                <Check className="size-4 shrink-0 text-emerald-600" />
-                Generación del código OTP de activación temporal (24h).
-              </li>
-              <li className="flex items-center gap-2 font-medium text-ink">
-                <Check className="size-4 shrink-0 text-emerald-600" />
-                Envío de correo con código y enlace a{' '}
-                <span className="font-semibold text-primary">{item.email}</span>
-                .
-              </li>
-            </ul>
-          </div>
-
-          <DialogFooter className="flex shrink-0 flex-row items-center justify-end gap-2 border-t border-border bg-popover pt-3">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setShowApproveDialog(false)}
-              disabled={submitting}
-            >
-              Cancelar
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              onClick={() => void handleApprove()}
-              disabled={submitting}
-              className="bg-emerald-600 text-white hover:bg-emerald-700"
-            >
-              {submitting ? (
-                <>
-                  <Loader2 className="mr-2 size-3.5 animate-spin" />{' '}
-                  Aprobando...
-                </>
-              ) : (
-                'Confirmar Aprobación'
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* ─────────────────────────────────────────────────────────────────────────────
-          MODAL: RECHAZO DE SOLICITUD
-          ───────────────────────────────────────────────────────────────────────────── */}
-      <Dialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
-        <DialogContent className="flex max-h-[85vh] flex-col overflow-hidden p-5 sm:max-w-2xl">
-          <DialogHeader className="shrink-0 border-b border-border pr-8 pb-3">
-            <DialogTitle className="flex items-center gap-2 text-base font-bold text-destructive">
-              <XCircle className="size-4.5 text-destructive" />
-              Rechazar Solicitud de Empresa
-            </DialogTitle>
-            <DialogDescription className="text-xs text-text-secondary">
-              Selecciona el motivo y fundamentación del dictamen negativo para{' '}
-              <strong className="text-ink">{item.companyName}</strong>.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="flex-1 space-y-3.5 overflow-y-auto py-2 pr-1 text-xs">
-            <div className="space-y-1.5">
-              <span className="font-bold text-ink">Motivo del rechazo:</span>
-              <RadioGroup
-                value={rejectionCategory}
-                onValueChange={(val) => {
-                  if (typeof val === 'string') setRejectionCategory(val);
-                }}
-                className="grid grid-cols-1 gap-2 sm:grid-cols-2"
-              >
-                {REJECTION_REASONS.map((reason) => (
-                  <label
-                    key={reason}
-                    className={`flex cursor-pointer items-start gap-2.5 rounded-lg border p-2.5 transition-colors ${
-                      rejectionCategory === reason
-                        ? 'border-rose-400 bg-rose-50/70 font-medium text-rose-950 dark:border-rose-800 dark:bg-rose-950/40 dark:text-rose-200'
-                        : 'border-border text-ink hover:bg-surface-soft'
-                    }`}
+                    Aprobar
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={() => setActiveAction('CORRECTION')}
+                    disabled={submitting || isSavingEdit}
+                    className="h-10 flex-1 bg-blue-600 font-semibold text-white hover:bg-blue-700"
                   >
-                    <RadioGroupItem
-                      value={reason}
-                      className="mt-0.5 shrink-0"
-                    />
-                    <span className="text-[11px] leading-snug">{reason}</span>
-                  </label>
-                ))}
-              </RadioGroup>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="reject-details" className="font-bold text-ink">
-                Justificación administrativa formal *
-              </Label>
-              <Textarea
-                id="reject-details"
-                rows={3}
-                placeholder="Fundamentación formal del rechazo para constancia en el expediente y notificación por correo..."
-                value={rejectionDetails}
-                onChange={(e) => setRejectionDetails(e.target.value)}
-                className="text-xs"
-              />
-              <p className="text-[11px] text-text-secondary">
-                Mínimo 5 caracteres ({rejectionDetails.trim().length}{' '}
-                ingresados).
-              </p>
-            </div>
-
-            <div className="rounded-lg border border-rose-200 bg-rose-50/60 p-2.5 text-[11px] text-rose-900 dark:border-rose-900/50 dark:bg-rose-950/30 dark:text-rose-300">
-              <p>
-                Esta acción concluye el trámite y enviará la notificación formal
-                al correo <strong>{item.email}</strong>.
-              </p>
-            </div>
-          </div>
-
-          <DialogFooter className="flex shrink-0 flex-row items-center justify-end gap-2 border-t border-border bg-popover pt-3">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setShowRejectDialog(false)}
-              disabled={submitting}
-            >
-              Cancelar
-            </Button>
-            <Button
-              type="button"
-              variant="destructive"
-              size="sm"
-              onClick={() => void handleReject()}
-              disabled={submitting || rejectionDetails.trim().length < 5}
-            >
-              {submitting ? (
-                <>
-                  <Loader2 className="mr-2 size-3.5 animate-spin" />{' '}
-                  Rechazando...
-                </>
+                    Solicitar subsanación
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={() => setActiveAction('REJECT')}
+                    disabled={submitting || isSavingEdit}
+                    className="h-10 flex-1 bg-rose-600 font-semibold text-white hover:bg-rose-700"
+                  >
+                    Rechazar
+                  </Button>
+                </div>
               ) : (
-                'Confirmar Rechazo'
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-text-secondary">
+                    Completando acción seleccionada...
+                  </span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setActiveAction(null)}
+                    className="text-xs font-medium"
+                  >
+                    Cambiar de acción
+                  </Button>
+                </div>
               )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
 
-      {/* ─────────────────────────────────────────────────────────────────────────────
-          MODAL: INSPECCIÓN DE LOGOTIPO EN TAMAÑO COMPLETO
-          ───────────────────────────────────────────────────────────────────────────── */}
+      {/* Modal de inspección de logotipo en pantalla completa */}
       {logoUrl && (
         <Dialog open={showLogoModal} onOpenChange={setShowLogoModal}>
           <DialogContent className="flex max-h-[85vh] flex-col overflow-hidden p-5 sm:max-w-xl">
