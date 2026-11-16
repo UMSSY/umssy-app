@@ -100,9 +100,7 @@ describe("WorkExperienceView", () => {
         isCurrent: true,
       }),
     );
-    expect(await screen.findByRole("status")).toHaveTextContent(
-      WORK_EXPERIENCE_FEEDBACK_MESSAGES.createSuccess,
-    );
+    expect(await screen.findByText(WORK_EXPERIENCE_FEEDBACK_MESSAGES.createSuccess)).toBeVisible();
     await waitFor(() =>
       expect(workExperienceService.getWorkExperiences).toHaveBeenCalledTimes(2),
     );
@@ -126,9 +124,7 @@ describe("WorkExperienceView", () => {
       "experience-2",
       expect.objectContaining({ companyName: "Tecnored", endDate: "2024-12-01" }),
     );
-    expect(await screen.findByRole("status")).toHaveTextContent(
-      WORK_EXPERIENCE_FEEDBACK_MESSAGES.updateSuccess,
-    );
+    expect(await screen.findByText(WORK_EXPERIENCE_FEEDBACK_MESSAGES.updateSuccess)).toBeVisible();
   });
 
   it("shows an error when an experience cannot be saved", async () => {
@@ -174,9 +170,7 @@ describe("WorkExperienceView", () => {
     );
 
     expect(workExperienceService.deleteWorkExperience).toHaveBeenCalledWith("experience-2");
-    expect(await screen.findByRole("status")).toHaveTextContent(
-      WORK_EXPERIENCE_FEEDBACK_MESSAGES.deleteSuccess,
-    );
+    expect(await screen.findByText(WORK_EXPERIENCE_FEEDBACK_MESSAGES.deleteSuccess)).toBeVisible();
     await waitFor(() =>
       expect(workExperienceService.getWorkExperiences).toHaveBeenCalledTimes(2),
     );
@@ -197,7 +191,7 @@ describe("WorkExperienceView", () => {
       within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Eliminar" }),
     );
 
-    expect(await screen.findByRole("status")).toHaveTextContent(WORK_EXPERIENCE_FEEDBACK_MESSAGES.deleteSuccess);
+    expect(await screen.findByText(WORK_EXPERIENCE_FEEDBACK_MESSAGES.deleteSuccess)).toBeVisible();
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 

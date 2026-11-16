@@ -17,7 +17,15 @@ export class NotificationsInboxService {
   }
 
   async markAsRead(userId: string, id: string) {
-    await this.notificationsRepository.markAsRead(id, userId);
+    // Un aviso ajeno responde igual que uno inexistente para no revelar que existe.
+    const notification = await this.notificationsRepository.findReadStateById(id, userId);
+    if (!notification) {
+      throw new NotFoundException('Notificación no encontrada');
+    }
+
+    if (!notification.readAt) {
+      await this.notificationsRepository.markAsRead(id, userId);
+    }
     return { ok: true };
   }
 

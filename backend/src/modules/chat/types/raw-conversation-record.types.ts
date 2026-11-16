@@ -6,6 +6,9 @@ export interface RawConversationRecord {
   id: string;
   userAId: string | null;
   userBId: string | null;
+  eventId?: string | null;
+  contextType?: string | null;
+  contextId?: string | null;
   createdAt?: Date;
   updatedAt: Date;
   userA: RawConversationUser | null;

@@ -13,6 +13,7 @@ export class UsersRepository {
       select: {
         id: true,
         isActive: true,
+        companyId: true,
         roles: {
           where: { deletedAt: null },
           select: {

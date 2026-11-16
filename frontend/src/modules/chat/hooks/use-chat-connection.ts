@@ -6,6 +6,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { getChatSocket } from "../services/chat-socket";
 import { joinChatConversation } from "../services/join-chat-conversation";
 import { synchronizeMessages } from "../services/synchronize-messages";
+import { markConversationAsRead } from "../services/chat-api";
 import type {
   ChatConnectionState,
   ChatConnectionStatus,
@@ -169,6 +170,10 @@ export function useChatConnection(conversationId: string | null) {
 
     const onMessage = (message: ChatMessageEvent) => {
       if (!message?.conversationId) return;
+
+      if (message.conversationId === conversationId) {
+        void markConversationAsRead(conversationId);
+      }
 
       void client.invalidateQueries({
         queryKey: ["chat", "conversations"],
