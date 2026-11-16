@@ -4,7 +4,7 @@ import { act, cleanup, fireEvent, screen, waitFor, within } from "@testing-libra
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { clearAccessToken, saveAccessToken } from "@/shared/services/storage/access-token-storage";
 import { buildLoginUrl } from "@/modules/auth";
-import { registrationsService as registrationApi } from "@/modules/registrations";
+import { registrationsService as registrationApi } from "@/modules/event-registrations";
 import { toast } from "sonner";
 import { useEvent } from "../hooks/use-event";
 import { useEvents } from "../hooks/use-events";
