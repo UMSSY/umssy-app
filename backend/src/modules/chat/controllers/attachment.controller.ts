@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Optional,
   Param,
   ParseUUIDPipe,
   Post,
@@ -34,6 +35,7 @@ import {
   type SendAttachmentMessageDto,
 } from '../requests/send-attachment-message.schema.js';
 import { AttachmentService } from '../services/attachment.service.js';
+import { ChatGateway } from '../gateways/chat.gateway.js';
 import type { AttachmentResponse } from '../responses/attachment.response.js';
 
 @ApiTags('Chat')
@@ -43,7 +45,11 @@ import type { AttachmentResponse } from '../responses/attachment.response.js';
 @Roles('titulado', 'estudiante', 'mentor', 'empresa')
 @UseInterceptors(ResponseInterceptor)
 export class AttachmentController {
-  constructor(private readonly attachmentService: AttachmentService) {}
+  constructor(
+    private readonly attachmentService: AttachmentService,
+    @Optional()
+    private readonly chatGateway?: ChatGateway,
+  ) {}
 
   @Post('attachments')
   @ApiOperation({
@@ -87,13 +93,19 @@ export class AttachmentController {
       },
     }),
   )
-  uploadAndSend(
+  async uploadAndSend(
     @CurrentUserId() userId: string,
     @UploadedFile() file: MulterFile | undefined,
     @Body(new ZodValidationPipe(sendAttachmentMessageSchema))
     body: SendAttachmentMessageDto,
   ) {
-    return this.attachmentService.uploadAndSend(userId, file, body);
+    const result = await this.attachmentService.uploadAndSend(
+      userId,
+      file,
+      body,
+    );
+    this.chatGateway?.broadcastMessage(result);
+    return result;
   }
 
   @Get('attachments/:id/file')
