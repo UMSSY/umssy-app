@@ -233,7 +233,16 @@ When a new GitHub task is created (Frontend, Backend, or General), the form requ
 - Creating issues outside the team's board is prohibited. DevOps will delete any issue left outside its project board.
 - Blank issues are prohibited. Always use the appropriate template: fullstack, backend, or frontend.
 
-## 4. APPENDICES
+## 4. DOCUMENTATION STANDARDS
+
+- Every module must have one README at `docs/<module>/README.md`, matching its directory name in `src/modules/`. This requirement applies to all modules. Document the complete module, including its backend and frontend responsibilities, in the same README; do not separate documentation by application layer.
+- Each module README must document its purpose, key flows, business rules, dependencies, and main endpoints it exposes or consumes.
+- Changes to a module must include corresponding updates to its documentation. Deprecation documentation is not required.
+- Architecture, database relationships, and key flows must be represented with Mermaid diagrams inside the relevant READMEs. Sequence diagrams must use Mermaid `sequenceDiagram`; standalone diagrams or images do not replace the required embedded diagrams.
+- Every documentation README must include a **Sprint History** section. Documenting Sprint 3 functionality is mandatory; documenting Sprints 1 and 2 is optional.
+- Database documentation must live in `backend/prisma/README.md`, alongside `schema.prisma`, and follow the backend database documentation standard.
+
+## 5. APPENDICES
 
 Recommended reading for workflow concepts such as commit conventions:
 

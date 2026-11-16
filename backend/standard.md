@@ -213,3 +213,10 @@ model EventRegistration {
   @@map("event_registrations")
 }
 ```
+
+### 2.8 Database Documentation
+
+- Database documentation must be maintained in `backend/prisma/README.md`, alongside `schema.prisma`.
+- It must explain models/tables, fields and data types, primary and foreign keys, relationships and cardinalities, constraints, indexes, and deletion behavior. Foreign keys must identify the referenced model and field.
+- Database relationship diagrams must use Mermaid and be embedded in this README.
+- The README must include **Sprint History**, with Sprint 3 functionality documented.
