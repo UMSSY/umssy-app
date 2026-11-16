@@ -753,8 +753,8 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
           </CardContent>
         </Card>
 
-        {/* Cuadrícula de Bloques Comparativos: Tarjetas en blanco formal con pequeño label */}
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        {/* Lista de Bloques Comparativos: Una fila por dato, 50% declarado y 50% OCR */}
+        <div className="flex flex-col gap-4">
           {comparisonList.map((comp) => {
             const IconComponent = comp.icon;
             const isMatched = comp.data.matched;
@@ -763,77 +763,82 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
             return (
               <div
                 key={comp.id}
-                className="flex flex-col justify-between rounded-xl border border-border bg-surface p-4 shadow-2xs"
+                className="flex flex-col rounded-xl border border-border bg-surface p-4 shadow-2xs sm:p-5"
               >
-                <div>
-                  <div className="flex items-center justify-between gap-2 border-b border-border/60 pb-2.5">
-                    <div className="flex items-center gap-2">
-                      <IconComponent className="size-4 text-primary" />
-                      <span className="text-xs font-bold text-ink">
-                        {comp.label}
-                      </span>
-                    </div>
-                    <span
-                      className={`inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[11px] font-semibold ${
-                        isMatched
-                          ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-300'
-                          : hasDetectedText
-                            ? 'border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-300'
-                            : 'border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400'
-                      }`}
-                    >
-                      {isMatched ? (
-                        <>
-                          <CheckCircle2 className="size-3 text-emerald-600 dark:text-emerald-400" />
-                          Coincide
-                        </>
-                      ) : hasDetectedText ? (
-                        <>
-                          <AlertCircle className="size-3 text-rose-600 dark:text-rose-400" />
-                          Discrepancia
-                        </>
-                      ) : (
-                        <>
-                          <XCircle className="size-3 text-slate-500" />
-                          No detectado
-                        </>
-                      )}
+                {/* Cabecera del campo con icono, etiqueta y estado */}
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 pb-3">
+                  <div className="flex items-center gap-2">
+                    <IconComponent className="size-4 text-primary" />
+                    <span className="text-xs font-bold text-ink sm:text-sm">
+                      {comp.label}
                     </span>
                   </div>
+                  <span
+                    className={`inline-flex items-center gap-1 rounded-md border px-2.5 py-0.5 text-xs font-semibold ${
+                      isMatched
+                        ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-300'
+                        : hasDetectedText
+                          ? 'border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-300'
+                          : 'border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400'
+                    }`}
+                  >
+                    {isMatched ? (
+                      <>
+                        <CheckCircle2 className="size-3 text-emerald-600 dark:text-emerald-400" />
+                        Coincide
+                      </>
+                    ) : hasDetectedText ? (
+                      <>
+                        <AlertCircle className="size-3 text-rose-600 dark:text-rose-400" />
+                        Discrepancia
+                      </>
+                    ) : (
+                      <>
+                        <XCircle className="size-3 text-slate-500" />
+                        No detectado
+                      </>
+                    )}
+                  </span>
+                </div>
 
-                  <div className="mt-3 space-y-2.5 text-xs">
-                    <div>
-                      <span className="font-semibold text-text-secondary">
-                        Dato Declarado en Formulario:
-                      </span>
-                      <p className="mt-0.5 font-bold text-ink">
-                        {comp.data.declared}
-                      </p>
+                {/* Comparación lado a lado: 50% Llenado en Registro vs 50% Extraído de Carta (OCR) */}
+                <div className="mt-3.5 grid grid-cols-1 items-stretch gap-4 md:grid-cols-2">
+                  {/* Lado izquierdo: Dato Declarado en Formulario */}
+                  <div className="flex flex-col">
+                    <span className="text-xs font-semibold text-text-secondary">
+                      Dato Declarado en Formulario:
+                    </span>
+                    <div className="mt-1 flex flex-1 items-start rounded-md border border-border/80 bg-surface-soft/40 p-2.5 text-xs font-semibold text-ink">
+                      <span>{comp.data.declared || 'No especificado'}</span>
                     </div>
+                  </div>
 
-                    <div>
-                      <span className="font-semibold text-text-secondary">
-                        Texto Extraído del Documento (OCR):
-                      </span>
-                      {comp.data.detectedText ? (
-                        <div className="mt-1 rounded-md border border-border/80 bg-surface-soft/60 p-2.5 text-xs leading-relaxed font-normal text-ink">
-                          &ldquo;{comp.data.detectedText}&rdquo;
-                        </div>
-                      ) : (
-                        <p className="mt-1 rounded-md border border-border/60 bg-surface-soft/30 p-2.5 text-xs text-text-secondary italic">
+                  {/* Lado derecho: Texto Extraído del Documento (OCR) */}
+                  <div className="flex flex-col">
+                    <span className="text-xs font-semibold text-text-secondary">
+                      Texto Extraído del Documento (OCR):
+                    </span>
+                    {comp.data.detectedText ? (
+                      <div className="mt-1 flex flex-1 items-start rounded-md border border-border/80 bg-surface-soft/60 p-2.5 text-xs leading-relaxed font-normal text-ink">
+                        <span>&ldquo;{comp.data.detectedText}&rdquo;</span>
+                      </div>
+                    ) : (
+                      <div className="mt-1 flex flex-1 items-start rounded-md border border-border/60 bg-surface-soft/30 p-2.5 text-xs text-text-secondary italic">
+                        <span>
                           No se identificó este dato en el contenido escaneado
                           de la carta.
-                        </p>
-                      )}
-                    </div>
-
-                    {comp.data.statusMessage && (
-                      <p className="text-[11px] text-text-secondary">
-                        {comp.data.statusMessage}
-                      </p>
+                        </span>
+                      </div>
                     )}
                   </div>
                 </div>
+
+                {/* Mensaje de estado explicativo al pie de la fila */}
+                {comp.data.statusMessage && (
+                  <p className="mt-3 border-t border-border/40 pt-2.5 text-[11px] text-text-secondary">
+                    {comp.data.statusMessage}
+                  </p>
+                )}
               </div>
             );
           })}
