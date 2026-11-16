@@ -1,7 +1,9 @@
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
+const { push } = vi.hoisted(() => ({ push: vi.fn() }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
 import { toast } from "sonner";
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
-import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   getMentorOrientationTypes,
@@ -183,7 +185,7 @@ describe("OrientationConfigView", () => {
     fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
     expect(screen.getByRole("alertdialog")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "Cancelar" }));
+    fireEvent.click(within(screen.getByRole("alertdialog")).getByRole("button", { name: "Cancelar" }));
 
     await waitFor(() =>
       expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument(),
@@ -351,25 +353,51 @@ describe("OrientationConfigView", () => {
     writeStorage.mockRestore();
   });
 
-  it("mantiene Volver dirigido a Mi participación", async () => {
-    render(<OrientationConfigView />);
-
-    expect(await screen.findByRole("link", { name: "Volver" })).toHaveAttribute(
-      "href",
-      "/mentors/participation",
-    );
-  });
-  it("confirms leaving only when there are unsaved changes", async () => {
+    it("Cancelar sin cambios regresa directo a Mi participación", async () => {
     render(<OrientationConfigView />);
     await screen.findByRole("checkbox", { name: "Orientación profesional" });
-    expect(screen.getByRole("button", { name: "Guardar cambios" })).toBeDisabled();
+
+    fireEvent.click(screen.getByRole("button", { name: "Cancelar" }));
+
+    expect(push).toHaveBeenCalledWith("/mentors/participation");
+    expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+  });
+
+  it("Cancelar con cambios pide confirmar y Seguir editando conserva las selecciones", async () => {
+    render(<OrientationConfigView />);
+    await screen.findByRole("checkbox", { name: "Orientación profesional" });
+
     fireEvent.click(checkbox("Orientación profesional"));
-    fireEvent.click(screen.getByRole("link", { name: "Volver" }));
-    expect(screen.getByRole("alertdialog")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "¿Descartar cambios?" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Cancelar" }));
+    expect(
+      screen.getByRole("heading", {
+        name: "¿Desea descartar los cambios realizados?",
+      }),
+    ).toBeInTheDocument();
+
     fireEvent.click(screen.getByRole("button", { name: "Seguir editando" }));
-    await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
+
+    await waitFor(() =>
+      expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument(),
+    );
+    expect(push).not.toHaveBeenCalled();
     expect(checkbox("Orientación profesional")).toBeChecked();
+    expect(updateMentorOrientationTypes).not.toHaveBeenCalled();
+  });
+
+  it("confirmar el descarte elimina el borrador, navega y no llama al backend", async () => {
+    render(<OrientationConfigView />);
+    await screen.findByRole("checkbox", { name: "Orientación profesional" });
+
+    fireEvent.click(checkbox("Orientación profesional"));
+    fireEvent.click(screen.getByRole("button", { name: "Cancelar" }));
+    fireEvent.click(screen.getByRole("button", { name: "Descartar cambios" }));
+
+    expect(push).toHaveBeenCalledWith("/mentors/participation");
+    await waitFor(() =>
+      expect(checkbox("Orientación profesional")).not.toBeChecked(),
+    );
+    expectOrientationStyle("Búsqueda de empleo", "saved");
     expect(updateMentorOrientationTypes).not.toHaveBeenCalled();
   });
 });

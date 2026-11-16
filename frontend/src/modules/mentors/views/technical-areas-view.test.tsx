@@ -144,36 +144,50 @@ describe("TechnicalAreasView", () => {
     expect(updateMentorTechnicalAreas).not.toHaveBeenCalled();
   });
 
-  it("Volver sin cambios regresa directo a Mi participación", async () => {
+    it("Cancelar sin cambios regresa directo a Mi participación", async () => {
     render(<TechnicalAreasView />);
     await screen.findByText("2 seleccionadas");
 
-    fireEvent.click(button(/Volver/));
+    fireEvent.click(button("Cancelar"));
 
     expect(push).toHaveBeenCalledWith("/mentors/participation");
+    expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
   });
 
-  it("confirma antes de salir con cambios sin guardar", async () => {
+  it("Cancelar con cambios pide confirmar y Seguir editando conserva las selecciones", async () => {
     render(<TechnicalAreasView />);
     await screen.findByText("2 seleccionadas");
 
     fireEvent.click(card(/QA/));
-    fireEvent.click(button(/Volver/));
-    expect(screen.getByText("¿Descartar cambios?")).toBeInTheDocument();
+    fireEvent.click(button("Cancelar"));
+    expect(
+      screen.getByText("¿Desea descartar los cambios realizados?"),
+    ).toBeInTheDocument();
 
     fireEvent.click(button("Seguir editando"));
-    expect(screen.queryByText("¿Descartar cambios?")).not.toBeInTheDocument();
+
+    await waitFor(() =>
+      expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument(),
+    );
     expect(push).not.toHaveBeenCalled();
+    expect(card(/QA/)).toHaveAttribute("aria-checked", "true");
+    expect(screen.getByText("3 seleccionadas")).toBeInTheDocument();
   });
 
-  it("descarta los cambios y regresa a Mi participación", async () => {
+  it("confirmar el descarte elimina el borrador, navega y no llama al backend", async () => {
     render(<TechnicalAreasView />);
     await screen.findByText("2 seleccionadas");
 
     fireEvent.click(card(/QA/));
-    fireEvent.click(button(/Volver/));
-    await act(async () => fireEvent.click(button("Descartar")));
+    fireEvent.click(button("Cancelar"));
+    await act(async () => fireEvent.click(button("Descartar cambios")));
 
     expect(push).toHaveBeenCalledWith("/mentors/participation");
+    await waitFor(() =>
+      expect(card(/QA/)).toHaveAttribute("aria-checked", "false"),
+    );
+    expect(screen.getByText("2 seleccionadas")).toBeInTheDocument();
+    expect(updateMentorTechnicalAreas).not.toHaveBeenCalled();
   });
+
 });
