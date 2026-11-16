@@ -24,6 +24,7 @@ import { BlockedDatesService } from '../../availability/services/blocked-dates.s
 import { MentorsService } from '../../mentors/services/mentors.service.js';
 import { AppointmentsModule } from '../appointments.module.js';
 import { AppointmentNotificationsService } from '../notifications/appointment-notifications.service.js';
+import { PushDispatcherService } from '../../notifications/services/push-dispatcher.service.js';
 import { AppointmentsRepository } from '../repositories/appointments.repository.js';
 import type { AppointmentRecord } from '../types/appointment-record.types.js';
 import {
@@ -87,6 +88,8 @@ describe('Estado «Completada» de las citas (integración HTTP)', () => {
       .useValue(seed.mentorsService)
       .overrideProvider(AppointmentNotificationsService)
       .useValue({ notifyBooked: vi.fn(), notifyCancelled: vi.fn() })
+      .overrideProvider(PushDispatcherService)
+      .useValue({ dispatchToUsers: vi.fn() })
       .overrideProvider(PrismaService)
       .useValue({})
       .compile();
