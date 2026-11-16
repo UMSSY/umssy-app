@@ -48,7 +48,14 @@ function StatefulStep({ initial }: { initial: Partial<VacancyConditions> }) {
 
 const typeDescription = (value: string) =>
   fireEvent.change(screen.getByLabelText(/Descripción del puesto/), { target: { value } });
-const isPressed = (name: string) => screen.getByRole("button", { name }).getAttribute("aria-pressed") === "true";
+const hasSkill = (name: string) => screen.queryByRole("button", { name: `Quitar ${name}` }) !== null;
+
+function addFromDialog(search: string, name: string) {
+  fireEvent.click(screen.getByRole("button", { name: "+ Añadir habilidad" }));
+  fireEvent.change(screen.getByLabelText(/Buscar tecnología/), { target: { value: search } });
+  fireEvent.click(screen.getByRole("button", { name }));
+  fireEvent.click(screen.getByRole("button", { name: "Añadir habilidad" }));
+}
 
 const catalogReady = (skills = [PYTHON, DOCKER, KUBERNETES]) => ({ skills, status: "ready" as const, reload: vi.fn() });
 
@@ -76,27 +83,26 @@ describe("RequirementsStep", () => {
     vi.clearAllMocks();
   });
 
-  it("muestra el catálogo de tecnologías y el botón para buscar", () => {
+  it("muestra solo las habilidades seleccionadas y el botón para añadir", () => {
+    renderStep({ conditions: { ...EMPTY_CONDITIONS, skills: [PYTHON, DOCKER] } });
+
+    expect(screen.getByText("Python")).toBeInTheDocument();
+    expect(screen.getByText("Docker")).toBeInTheDocument();
+    expect(screen.queryByText("Kubernetes")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "+ Añadir habilidad" })).toBeInTheDocument();
+  });
+
+  it("no despliega el catálogo completo cuando no hay habilidades", () => {
     renderStep();
 
-    ["Python", "Docker", "Kubernetes", "+ Añadir habilidad"].forEach((name) =>
-      expect(screen.getByRole("button", { name })).toBeInTheDocument(),
-    );
+    ["Python", "Docker", "Kubernetes"].forEach((name) => expect(screen.queryByText(name)).not.toBeInTheDocument());
+    expect(screen.getByText(/Todavía no hay habilidades/)).toBeInTheDocument();
   });
 
-  it("selecciona una tecnología con un clic", () => {
-    const { updateField } = renderStep();
-
-    fireEvent.click(screen.getByRole("button", { name: "Python" }));
-
-    expect(updateField).toHaveBeenCalledWith("skills", [PYTHON]);
-  });
-
-  it("deselecciona una tecnología al volver a hacer clic", () => {
+  it("quita una habilidad con su X", () => {
     const { updateField } = renderStep({ conditions: { ...EMPTY_CONDITIONS, skills: [PYTHON, DOCKER] } });
 
-    expect(screen.getByRole("button", { name: "Python" })).toHaveAttribute("aria-pressed", "true");
-    fireEvent.click(screen.getByRole("button", { name: "Python" }));
+    fireEvent.click(screen.getByRole("button", { name: "Quitar Python" }));
 
     expect(updateField).toHaveBeenCalledWith("skills", [DOCKER]);
   });
@@ -104,10 +110,7 @@ describe("RequirementsStep", () => {
   it("agrega la tecnología elegida en el pop up sin duplicarla", () => {
     const { updateField } = renderStep({ conditions: { ...EMPTY_CONDITIONS, skills: [DOCKER] } });
 
-    fireEvent.click(screen.getByRole("button", { name: "+ Añadir habilidad" }));
-    fireEvent.change(screen.getByLabelText(/Buscar tecnología/), { target: { value: "pyth" } });
-    fireEvent.click(screen.getByRole("button", { name: "Python" }));
-    fireEvent.click(screen.getByRole("button", { name: "Añadir habilidad" }));
+    addFromDialog("pyth", "Python");
 
     expect(updateField).toHaveBeenCalledWith("skills", [DOCKER, PYTHON]);
   });
@@ -117,21 +120,20 @@ describe("RequirementsStep", () => {
     vi.mocked(useSkillsCatalog).mockReturnValue(catalogReady(catalog));
     const { updateField } = renderStep({ conditions: { ...EMPTY_CONDITIONS, skills: catalog.slice(0, 10) } });
 
-    expect(screen.getByRole("button", { name: "Tech 10" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "+ Añadir habilidad" })).toBeDisabled();
     expect(screen.getByText(/máximo de 10 habilidades/)).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Tech 10" }));
+    expect(screen.queryByText("Tech 10")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Quitar Tech 0" })).toBeEnabled();
     expect(updateField).not.toHaveBeenCalled();
-    expect(screen.getByRole("button", { name: "Tech 0" })).toBeEnabled();
   });
 
-  it("presenta el apartado de todas las habilidades con el catálogo completo", () => {
+  it("presenta el apartado de todas las habilidades sin listar el catálogo", () => {
     renderStep();
 
     expect(screen.getByRole("heading", { level: 3, name: "Todas las habilidades" })).toBeInTheDocument();
-    expect(screen.getByText(/Las habilidades detectadas en la descripción se marcan solas/)).toBeInTheDocument();
+    expect(screen.getByText(/se agregan solas/)).toBeInTheDocument();
     ["Python", "Docker", "Kubernetes"].forEach((name) =>
-      expect(screen.getByRole("button", { name })).toBeInTheDocument(),
+      expect(screen.queryByRole("button", { name })).not.toBeInTheDocument(),
     );
   });
 
@@ -158,69 +160,69 @@ describe("RequirementsStep", () => {
     expect(screen.queryByText("Habilidades detectadas automáticamente")).not.toBeInTheDocument();
   });
 
-  it("avisa si la detección falla y deja elegir las habilidades a mano", () => {
+  it("avisa si la detección falla y deja añadir las habilidades a mano", () => {
     vi.mocked(useRequirementsSkillsPreview).mockReturnValue(preview({ isError: true }));
     const { updateField } = renderStep({ conditions: { ...EMPTY_CONDITIONS, description: "Buscamos Python" } });
 
     expect(screen.getByText(/No se pudieron detectar habilidades en este momento/)).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Python" }));
+    addFromDialog("pyth", "Python");
 
     expect(updateField).toHaveBeenCalledWith("skills", [PYTHON]);
   });
 
-  it("marca por sí solas las habilidades detectadas al escribir la descripción", () => {
+  it("agrega solas las habilidades detectadas al escribir la descripción", () => {
     detectWhenTextMentions("Python", DETECTED_PYTHON);
     render(<StatefulStep initial={{}} />);
 
-    expect(isPressed("Python")).toBe(false);
+    expect(hasSkill("Python")).toBe(false);
     typeDescription("Necesitamos Python");
 
-    expect(isPressed("Python")).toBe(true);
-    expect(isPressed("Docker")).toBe(false);
+    expect(hasSkill("Python")).toBe(true);
+    expect(hasSkill("Docker")).toBe(false);
   });
 
   it("no cambia las habilidades al abrir una vacante con la descripción ya escrita", () => {
     detectWhenTextMentions("Python", DETECTED_PYTHON);
     render(<StatefulStep initial={{ description: "Necesitamos Python", skills: [DOCKER] }} />);
 
-    expect(isPressed("Python")).toBe(false);
-    expect(isPressed("Docker")).toBe(true);
+    expect(hasSkill("Python")).toBe(false);
+    expect(hasSkill("Docker")).toBe(true);
   });
 
   it("respeta la habilidad que el usuario quita después de la detección", () => {
     detectWhenTextMentions("Python", DETECTED_PYTHON);
     render(<StatefulStep initial={{}} />);
     typeDescription("Necesitamos Python");
-    expect(isPressed("Python")).toBe(true);
+    expect(hasSkill("Python")).toBe(true);
 
-    fireEvent.click(screen.getByRole("button", { name: "Python" }));
+    fireEvent.click(screen.getByRole("button", { name: "Quitar Python" }));
     typeDescription("Necesitamos Python y trabajo en equipo");
 
-    expect(isPressed("Python")).toBe(false);
+    expect(hasSkill("Python")).toBe(false);
   });
 
-  it("vuelve a marcar una habilidad quitada si el usuario la elige de nuevo", () => {
+  it("vuelve a agregar una habilidad quitada si el usuario la añade de nuevo", () => {
     detectWhenTextMentions("Python", DETECTED_PYTHON);
     render(<StatefulStep initial={{}} />);
     typeDescription("Necesitamos Python");
-    fireEvent.click(screen.getByRole("button", { name: "Python" }));
-    expect(isPressed("Python")).toBe(false);
+    fireEvent.click(screen.getByRole("button", { name: "Quitar Python" }));
+    expect(hasSkill("Python")).toBe(false);
 
-    fireEvent.click(screen.getByRole("button", { name: "Python" }));
+    addFromDialog("pyth", "Python");
 
-    expect(isPressed("Python")).toBe(true);
+    expect(hasSkill("Python")).toBe(true);
   });
 
-  it("no marca habilidades detectadas por encima del máximo de 10", () => {
+  it("no agrega habilidades detectadas por encima del máximo de 10", () => {
     const selected = Array.from({ length: 9 }, (_, index) => ({ id: `id-${index}`, name: `Tech ${index}` }));
     detectWhenTextMentions("Python", DETECTED_THREE);
     render(<StatefulStep initial={{ skills: selected }} />);
 
     typeDescription("Necesitamos Python, Docker y Kubernetes");
 
-    expect(isPressed("Python")).toBe(true);
-    expect(isPressed("Docker")).toBe(false);
-    expect(isPressed("Kubernetes")).toBe(false);
+    expect(hasSkill("Python")).toBe(true);
+    expect(hasSkill("Docker")).toBe(false);
+    expect(hasSkill("Kubernetes")).toBe(false);
     expect(screen.getByText(/máximo de 10 habilidades/)).toBeInTheDocument();
   });
 
@@ -258,6 +260,7 @@ describe("RequirementsStep", () => {
     renderStep();
 
     expect(screen.getByText("Cargando habilidades...")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "+ Añadir habilidad" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Python" })).not.toBeInTheDocument();
   });
 
