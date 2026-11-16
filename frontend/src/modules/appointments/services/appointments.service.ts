@@ -5,16 +5,16 @@ import { getAppointmentDocumentEndpoint, getAppointmentEndpoint, getCounterpartP
 import type { Appointment } from "../types/appointment.types";
 import type { AppointmentDetail } from "../types/appointment-detail.types";
 import type { AppointmentDocument } from "../types/appointment-document.types";
-import type { AppointmentScope } from "../types/appointment-scope.types";
 import type { CreateAppointmentInput } from "../types/create-appointment-input.types";
 import type { MyAppointmentsPage } from "../types/my-appointments-page.types";
+import type { MyAppointmentsQueryParams } from "../types/my-appointments-query-params.types";
 
 export const appointmentsApi = {
-  getMyAppointments: async (scope: AppointmentScope): Promise<Appointment[]> => {
+  getMyAppointments: async ({ scope, page }: MyAppointmentsQueryParams): Promise<MyAppointmentsPage> => {
     const response = await apiClient.get<ApiResponse<MyAppointmentsPage>>("/appointments/me", {
-      params: { scope },
+      params: { scope, page },
     });
-    return response.data.data.items;
+    return response.data.data;
   },
 
   getById: async (appointmentId: string): Promise<AppointmentDetail> => {

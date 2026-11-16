@@ -12,7 +12,7 @@ import {
 import { cn } from "@/lib/utils";
 import type { SectionCardProps } from "../types/section-card-props.types";
 
-export function SectionCard({ title, description, action, children, className, contentClassName }: SectionCardProps) {
+export function SectionCard({ title, description, icon, action, children, className, contentClassName }: SectionCardProps) {
   const isEmbedded = useProfileSurface();
   if (isEmbedded) return <section className={cn("border-t border-border px-8 py-7", className)}>
     <header className="mb-5 flex items-start justify-between gap-4">
@@ -29,7 +29,10 @@ export function SectionCard({ title, description, action, children, className, c
       )}
     >
       <CardHeader className="gap-1.5 rounded-t-lg border-b border-accent/15 bg-interaction px-5 py-4">
-        <CardTitle className="font-tight text-lg font-bold text-accent">{title}</CardTitle>
+        <CardTitle className="flex items-center gap-2 font-tight text-lg font-bold text-accent">
+          {icon}
+          {title}
+        </CardTitle>
         {description ? (
           <CardDescription className="text-sm leading-relaxed text-availability-foreground">{description}</CardDescription>
         ) : null}

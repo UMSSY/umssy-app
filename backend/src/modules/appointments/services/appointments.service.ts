@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import type { AuthenticatedUser } from '../../../common/types/authenticated-user.types.js';
 import { TransactionService } from '../../../common/prisma/transaction.service.js';
 import { AppointmentStatusTitle } from '../../availability/enums/appointment-status-title.enum.js';
@@ -26,7 +26,6 @@ import {
 import { AppointmentNotFoundException } from '../exceptions/appointment-not-found.exception.js';
 import { AppointmentNotOwnedException } from '../exceptions/appointment-not-owned.exception.js';
 import { AppointmentMapper } from '../mappers/appointment.mapper.js';
-import { AppointmentNotificationsService } from '../notifications/appointment-notifications.service.js';
 import { AppointmentsRepository } from '../repositories/appointments.repository.js';
 import type { CancelAppointmentDto } from '../requests/cancel-appointment.request.js';
 import type { CreateAppointmentDto } from '../requests/create-appointment.request.js';
@@ -40,8 +39,6 @@ import { buildMeetingUrl, canShareMeetingUrl } from '../utils/meeting-url.js';
 
 @Injectable()
 export class AppointmentsService {
-  private readonly logger = new Logger(AppointmentsService.name);
-
   constructor(
     private readonly appointmentsRepository: AppointmentsRepository,
     private readonly appointmentMapper: AppointmentMapper,
@@ -50,7 +47,6 @@ export class AppointmentsService {
     private readonly mentorsService: MentorsService,
     private readonly profilePhotoService: ProfilePhotoService,
     private readonly transactions: TransactionService,
-    private readonly appointmentNotifications: AppointmentNotificationsService,
   ) {}
 
   async create(
@@ -82,9 +78,7 @@ export class AppointmentsService {
       throw new BlockAlreadyBookedException();
     }
 
-    let created: AppointmentRecord | undefined;
-
-    const response = await this.blockedDatesService
+    return this.blockedDatesService
       .runOnUnblockedDay(block.mentorId, block.startAt, async (tx) => {
         await this.appointmentsRepository.lockParticipants(
           [user.id, block.mentorId],
@@ -171,8 +165,6 @@ export class AppointmentsService {
           tx,
         );
 
-        created = appointment;
-
         return this.appointmentMapper.toResponse(
           appointment,
           user.id,
@@ -185,19 +177,6 @@ export class AppointmentsService {
         }
         throw error;
       });
-
-    if (created) {
-      try {
-        await this.appointmentNotifications.notifyBooked(created);
-      } catch (error) {
-        this.logger.error(
-          'No se pudo enviar el aviso de la cita confirmada',
-          error,
-        );
-      }
-    }
-
-    return response;
   }
 
   async findMine(
@@ -283,9 +262,7 @@ export class AppointmentsService {
         ? appointment.studentId
         : appointment.mentorId;
 
-    let cancelledRecord: AppointmentRecord | undefined;
-
-    const response = await this.transactions.run(async ({ client }) => {
+    return this.transactions.run(async ({ client }) => {
       await this.appointmentsRepository.lockParticipants(
         [user.id, counterpartId],
         client,
@@ -298,12 +275,14 @@ export class AppointmentsService {
       if (!current) {
         throw new AppointmentNotFoundException();
       }
+
+      const currentNow = new Date();
       if (
         CANCELLED_APPOINTMENT_STATUS_TITLES.includes(
           current.status.title as AppointmentStatusTitle,
         )
       ) {
-        return this.appointmentMapper.toResponse(current, user.id, now);
+        return this.appointmentMapper.toResponse(current, user.id, currentNow);
       }
       if (
         !ACTIVE_APPOINTMENT_STATUS_TITLES.includes(
@@ -312,8 +291,13 @@ export class AppointmentsService {
       ) {
         throw new AppointmentNotCancellableException();
       }
-      if (current.startAt.getTime() <= now.getTime()) {
+      if (current.startAt.getTime() <= currentNow.getTime()) {
         throw new AppointmentNotCancellableException();
+      }
+
+      const currentTimeLeft = current.startAt.getTime() - currentNow.getTime();
+      if (!reason && currentTimeLeft < CANCELLATION_REASON_WINDOW_MS) {
+        throw new CancelReasonRequiredException();
       }
 
       const previousStatusId =
@@ -327,11 +311,11 @@ export class AppointmentsService {
       );
 
       const cancelled = await this.appointmentsRepository.cancelAppointment(
-        appointment.id,
+        current.id,
         {
           statusId: newStatusId,
           cancelledById: user.id,
-          cancelledAt: now,
+          cancelledAt: currentNow,
           cancellationReason: reason,
         },
         client,
@@ -339,7 +323,7 @@ export class AppointmentsService {
 
       await this.appointmentsRepository.createAppointmentHistory(
         {
-          appointmentId: appointment.id,
+          appointmentId: current.id,
           previousStatusId,
           newStatusId,
           changedById: user.id,
@@ -347,26 +331,8 @@ export class AppointmentsService {
         client,
       );
 
-      cancelledRecord = cancelled;
-
-      return this.appointmentMapper.toResponse(cancelled, user.id, now);
+      return this.appointmentMapper.toResponse(cancelled, user.id, currentNow);
     });
-
-    if (cancelledRecord) {
-      try {
-        await this.appointmentNotifications.notifyCancelled(
-          cancelledRecord,
-          user.id,
-        );
-      } catch (error) {
-        this.logger.error(
-          'No se pudo enviar el aviso de la cita cancelada',
-          error,
-        );
-      }
-    }
-
-    return response;
   }
 
   async getCounterpartPhoto(
