@@ -1,12 +1,13 @@
+
 "use client";
+
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-
 import Link from "next/link";
 import { useState } from "react";
 import { PageHeading } from "@/shared/components/layout";
 import { Label } from "@/components/ui/label";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Eye } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
 import {
   AlertDialog,
@@ -28,23 +29,55 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+
 import { useOrientationConfig } from "../hooks/use-orientation-config";
 import { useMentorProfileDraft } from "../hooks/use-mentor-profile-draft";
+import { useCurrentUserId } from "../hooks/use-current-user-id";
+import { MentorProfilePreview } from "../components/preview/mentor-profile-preview";
+import { useTechnicalAreas } from "@/modules/mentors/hooks/use-technical-areas";
 
 export function OrientationConfigView() {
-  const { orientationTypes, savedIds, isLoading, isSaving, hasLoadError, isMentorActive, retry, save } = useOrientationConfig();
+  const {
+    orientationTypes,
+    savedIds,
+    isLoading,
+    isSaving,
+    hasLoadError,
+    isMentorActive,
+    retry,
+    save,
+  } = useOrientationConfig();
+
+  const {
+    areas,
+    savedIds: savedTechnicalAreaIds,
+    isLoading: isTechnicalAreasLoading,
+    hasLoadError: hasTechnicalAreasLoadError,
+    hasAccessError: hasTechnicalAreasAccessError,
+  } = useTechnicalAreas();
+
+  const { currentUserId } = useCurrentUserId();
+
   const {
     orientationTypeIds: draftIds,
+    technicalAreaIds: draftTechnicalAreaIds,
     setOrientationTypeIds: setSelectedIds,
     clearOrientationTypeIds,
   } = useMentorProfileDraft();
+
   const selectedIds = draftIds ?? savedIds;
+
+  const selectedTechnicalIds =
+    draftTechnicalAreaIds ?? savedTechnicalAreaIds;
+
   const [isDiscardDialogOpen, setIsDiscardDialogOpen] = useState(false);
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleCheckboxChange = (id: string) => {
     setErrorMessage(null);
+
     setSelectedIds((previous) =>
       (previous ?? savedIds).includes(id)
         ? (previous ?? savedIds).filter((item) => item !== id)
@@ -61,6 +94,7 @@ export function OrientationConfigView() {
     }
 
     const idsToSave = [...selectedIds];
+
     try {
       await save(idsToSave);
       clearOrientationTypeIds();
@@ -75,7 +109,33 @@ export function OrientationConfigView() {
     }
   };
 
-  const hasChanges = selectedIds.length !== savedIds.length || selectedIds.some((id) => !savedIds.includes(id));
+  const hasChanges =
+    selectedIds.length !== savedIds.length ||
+    selectedIds.some((id) => !savedIds.includes(id));
+
+  const canOpenPreview =
+    Boolean(currentUserId) &&
+    isMentorActive &&
+    !isLoading &&
+    !hasLoadError &&
+    !isTechnicalAreasLoading &&
+    !hasTechnicalAreasLoadError &&
+    !hasTechnicalAreasAccessError;
+
+  if (isPreviewOpen && currentUserId && canOpenPreview) {
+    return (
+      <MentorProfilePreview
+        mentorId={currentUserId}
+        technicalAreas={areas.filter((area) =>
+          selectedTechnicalIds.includes(area.id)
+        )}
+        orientationTypes={orientationTypes.filter((orientation) =>
+          selectedIds.includes(orientation.id)
+        )}
+        onBack={() => setIsPreviewOpen(false)}
+      />
+    );
+  }
 
   if (isLoading) {
     return (
@@ -114,8 +174,8 @@ export function OrientationConfigView() {
               Editar tipos de orientación
             </CardTitle>
             <p className="mt-3 text-sm text-text-secondary">
-              Primero debes activar tu participación como mentor para editar los
-              tipos de orientación que deseas brindar.
+              Primero debes activar tu participación como mentor para editar
+              los tipos de orientación que deseas brindar.
             </p>
           </CardHeader>
           <CardFooter className="mt-6 border-0 bg-transparent p-6 pt-0 sm:p-8 sm:pt-0">
@@ -178,7 +238,7 @@ export function OrientationConfigView() {
                       <Label
                         key={option.id}
                         className={cn(
-                          "group flex cursor-pointer items-center justify-between gap-3 rounded-lg border p-4 transition-colors ",
+                          "group flex cursor-pointer items-center justify-between gap-3 rounded-lg border p-4 transition-colors",
                           !isSelected
                             ? "border-transparent bg-surface-soft/50 hover:bg-interaction"
                             : isSaved
@@ -210,7 +270,7 @@ export function OrientationConfigView() {
                             }
                             aria-labelledby={`orientation-label-${option.id}`}
                             className={cn(
-                              "size-5 border-0 bg-border text-transparent data-checked:text-accent-foreground [&_[data-slot=checkbox-indicator]>svg]:size-4 ",
+                              "size-5 border-0 bg-border text-transparent data-checked:text-accent-foreground [&_[data-slot=checkbox-indicator]>svg]:size-4",
                               !isSelected
                                 ? ""
                                 : isSaved
@@ -225,11 +285,15 @@ export function OrientationConfigView() {
                 </div>
               )}
             </CardContent>
-            <CardFooter className="mx-4 flex items-center justify-between gap-4 border-t border-border bg-transparent px-0 py-4 sm:mx-8 sm:pb-8">
+
+            <CardFooter className="mx-4 flex flex-wrap items-center justify-between gap-4 border-t border-border bg-transparent px-0 py-4 sm:mx-8 sm:pb-8">
               <Link
                 href="/mentors/participation"
                 onClick={(event) => {
-                  if (hasChanges) { event.preventDefault(); setIsDiscardDialogOpen(true); }
+                  if (hasChanges) {
+                    event.preventDefault();
+                    setIsDiscardDialogOpen(true);
+                  }
                 }}
                 className={buttonVariants({
                   className:
@@ -238,19 +302,33 @@ export function OrientationConfigView() {
               >
                 Volver
               </Link>
-              <Button
-                type="button"
-                onClick={() => setIsConfirmDialogOpen(true)}
-                disabled={
-                  !hasChanges ||
-                  selectedIds.length === 0 ||
-                  isSaving ||
-                  hasLoadError
-                }
-                className="h-10 rounded-lg bg-primary px-6 text-sm font-semibold text-primary-foreground shadow-none hover:bg-brand-hover active:translate-y-0 disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {isSaving ? "Guardando..." : "Guardar cambios"}
-              </Button>
+
+              <div className="flex flex-wrap items-center gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsPreviewOpen(true)}
+                  disabled={!canOpenPreview}
+                  className="h-10 gap-2 rounded-lg px-5"
+                >
+                  <Eye size={16} />
+                  Vista previa
+                </Button>
+
+                <Button
+                  type="button"
+                  onClick={() => setIsConfirmDialogOpen(true)}
+                  disabled={
+                    !hasChanges ||
+                    selectedIds.length === 0 ||
+                    isSaving ||
+                    hasLoadError
+                  }
+                  className="h-10 rounded-lg bg-primary px-6 text-sm font-semibold text-primary-foreground shadow-none hover:bg-brand-hover active:translate-y-0 disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {isSaving ? "Guardando..." : "Guardar cambios"}
+                </Button>
+              </div>
             </CardFooter>
           </Card>
         </div>

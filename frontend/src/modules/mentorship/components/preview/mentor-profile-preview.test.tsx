@@ -1,3 +1,4 @@
+
 import { renderWithQuery as render } from '@/shared/testing/render-with-query';
 import { cleanup, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -126,7 +127,7 @@ describe('MentorProfilePreview', () => {
     }
   });
 
-  it('presenta dos opciones para volver a editar', () => {
+  it('presenta una sola opción inferior para volver a editar', () => {
     useMentorProfileMock.mockReturnValue({
       data: MENTOR_PROFILE_FIXTURE,
       isPending: false,
@@ -138,10 +139,10 @@ describe('MentorProfilePreview', () => {
 
     expect(
       screen.getAllByRole('button', { name: 'Volver a editar' }),
-    ).toHaveLength(2);
+    ).toHaveLength(1);
   });
 
-  it('permite regresar al formulario desde ambas opciones', async () => {
+  it('permite regresar al formulario desde el botón inferior', async () => {
     const user = userEvent.setup();
 
     useMentorProfileMock.mockReturnValue({
@@ -153,17 +154,35 @@ describe('MentorProfilePreview', () => {
 
     render(<MentorProfilePreview {...defaultProps} />);
 
-    const backButtons = screen.getAllByRole('button', {
-      name: 'Volver a editar',
-    });
-
-    await user.click(backButtons[0]);
+    await user.click(
+      screen.getByRole('button', { name: 'Volver a editar' }),
+    );
 
     expect(onBack).toHaveBeenCalledTimes(1);
+  });
 
-    await user.click(backButtons[1]);
+  it('permite personalizar el texto del botón de retorno', () => {
+    useMentorProfileMock.mockReturnValue({
+      data: MENTOR_PROFILE_FIXTURE,
+      isPending: false,
+      isError: false,
+      refetch: vi.fn(),
+    });
 
-    expect(onBack).toHaveBeenCalledTimes(2);
+    render(
+      <MentorProfilePreview
+        {...defaultProps}
+        backLabel="Volver"
+      />,
+    );
+
+    expect(
+      screen.getByRole('button', { name: 'Volver' }),
+    ).toBeVisible();
+
+    expect(
+      screen.queryByRole('button', { name: 'Volver a editar' }),
+    ).not.toBeInTheDocument();
   });
 
   it('no muestra controles para guardar cambios ni editar el perfil', () => {

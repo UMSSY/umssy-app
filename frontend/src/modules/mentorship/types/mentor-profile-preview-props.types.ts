@@ -6,4 +6,5 @@ export type MentorProfilePreviewProps = {
   technicalAreas: TechnicalAreaResponse[];
   orientationTypes: OrientationTypeResponse[];
   onBack: () => void;
+  backLabel?: string;
 };
