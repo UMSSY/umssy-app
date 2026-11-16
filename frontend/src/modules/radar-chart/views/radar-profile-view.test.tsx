@@ -2,7 +2,7 @@ import "@/shared/testing/indexed-db.mock";
 import { saveAccessToken } from "@/shared/services/storage/access-token-storage";
 import { cloneElement, type ReactElement } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import AppLayout from "@/app/(app)/layout";
 import { stubMatchMedia } from "@/shared/testing/stub-match-media";
@@ -23,6 +23,9 @@ vi.mock("@/modules/auth", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/modules/auth")>();
   return { ...actual, SessionUserCard: () => null };
 });
+vi.mock("@/modules/mentorship/services/mentor-directory.service", () => ({
+  getMentorDirectory: vi.fn().mockResolvedValue({ items: [], totalItems: 0, totalPages: 0, page: 1, pageSize: 6, effectiveSort: "default" }),
+}));
 vi.mock("../hooks/use-live-radar", () => ({ useLiveRadar: vi.fn() }));
 const {
   useRadarNotificationsMock,
@@ -136,9 +139,53 @@ describe("Radar personal integrado con Épica 2", () => {
     expect(screen.getByTestId("radar-dot-data-ai")).toBeInTheDocument();
   });
 
+  it("conecta un área con cero puntos al directorio y permite simularla", () => {
+    renderWithQuery(<RadarProfileView />);
+    fireEvent.click(screen.getByRole("button", { name: "Seleccionar QA" }));
+    expect(screen.getByRole("link", { name: "Ver mentores de esta área" })).toHaveAttribute("href", "/mentorship/mentors?area=QA&from=radar");
+    expect(screen.queryByRole("heading", { name: "Proyecci\u00f3n con mentor\u00eda" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Simular habilidad" }));
+    expect(screen.getByRole("heading", { name: "Proyecci\u00f3n con mentor\u00eda" })).toBeInTheDocument();
+    expect(screen.queryByRole("spinbutton")).not.toBeInTheDocument();
+  });
+
+  it("muestra el desglose al inicio y lo restaura al pulsar fuera del panel", () => {
+    renderWithQuery(<RadarProfileView />);
+    expect(screen.queryByRole("heading", { name: "Proyecci\u00f3n con mentor\u00eda" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Seleccionar QA" }));
+    const simulate = screen.getByRole("button", { name: "Simular habilidad" });
+    fireEvent.pointerDown(simulate);
+    expect(simulate).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Seleccionar QA" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Seleccionar QA" })).toHaveAttribute("aria-pressed", "true");
+    const breakdown = screen.getByRole("heading", { name: /Desglose por/ }).closest("aside")!;
+    expect(simulate.compareDocumentPosition(breakdown) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(breakdown).not.toHaveAttribute("aria-hidden");
+    fireEvent.pointerDown(screen.getByRole("heading", { name: "Radar de afinidad" }));
+    expect(screen.queryByRole("heading", { name: "Proyecci\u00f3n con mentor\u00eda" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Seleccionar QA" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Seleccionar QA" }));
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(screen.getByRole("button", { name: "Seleccionar QA" })).toBeInTheDocument();
+  });
+
+  it("abre la simulacion en un popup y conserva el area al interactuar y cerrar", async () => {
+    renderWithQuery(<RadarProfileView />);
+    fireEvent.click(screen.getByRole("button", { name: "Seleccionar QA" }));
+    fireEvent.click(screen.getByRole("button", { name: "Simular habilidad" }));
+    const dialog = await screen.findByRole("dialog", { name: "Simular habilidad: QA" });
+    fireEvent.pointerDown(dialog);
+    expect(dialog).toBeInTheDocument();
+    fireEvent.keyDown(dialog, { key: "Escape", code: "Escape" });
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    expect(screen.getByRole("button", { name: "Seleccionar QA" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "Simular habilidad" })).toBeInTheDocument();
+  });
+
   it("abre el detalle del eje seleccionado y permite cerrarlo", () => {
     renderWithQuery(<RadarProfileView />);
     fireEvent.click(screen.getByRole("button", { name: "Ver detalle de QA" }));
+    fireEvent.click(screen.getByRole("button", { name: "Ver evidencias" }));
     expect(screen.getByRole("dialog", { name: "QA" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Cerrar detalle del área" }));
     expect(screen.queryByRole("dialog", { name: "QA" })).not.toBeInTheDocument();

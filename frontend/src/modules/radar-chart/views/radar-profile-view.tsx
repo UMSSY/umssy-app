@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { MentorshipProjection } from "../components/mentorship-projection";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,9 @@ export function RadarProfileView() {
   const { openNotification } = useRadarNotificationMutations();
 
   const [selectedArea, setSelectedArea] = useState<AreaId | null>(null);
+  const [projection, setProjection] = useState<{ areaId: AreaId; score: number } | null>(null);
+  const [simulationOpen, setSimulationOpen] = useState(false);
+  const [showEvidence, setShowEvidence] = useState(false);
   const [comparing, setComparing] = useState(false);
   const [openedRadar, setOpenedRadar] = useState<IntegrationRadar | null>(null);
 

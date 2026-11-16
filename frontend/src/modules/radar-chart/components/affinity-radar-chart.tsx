@@ -26,6 +26,7 @@ const SERIES_LABEL = 'Puntaje de afinidad del perfil';
 
 export function AffinityRadarChart({
   areas,
+  projectedScores,
   previousScores,
   comparisonEnabled = false,
   onComparisonChange,
@@ -118,6 +119,7 @@ export function AffinityRadarChart({
                 data={areas.map((area) => ({
                   ...area,
                   previousScore: previousScores?.[area.id],
+                  projectedScore: projectedScores?.[area.id] ?? area.score,
                 }))}
                 outerRadius={radius}
                 accessibilityLayer={false}
@@ -181,10 +183,23 @@ export function AffinityRadarChart({
                     />
                   )}
                 />
+                {projectedScores ? <Radar
+                  name="Proyección con mentoría"
+                  dataKey="projectedScore"
+                  stroke="var(--color-success)"
+                  strokeWidth={2}
+                  strokeDasharray="4 3"
+                  fill="var(--color-success)"
+                  fillOpacity={0.1}
+                  isAnimationActive={false}
+                  dot={false}
+                  style={{ pointerEvents: 'none' }}
+                /> : null}
               </RadarChart>
             </ResponsiveContainer>
           </div>
           <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs text-text-secondary">
+            {projectedScores ? <p className="flex items-center gap-2"><span aria-hidden="true" className="w-5 border-t-2 border-dashed border-success" />Proyección con mentoría (línea verde discontinua)</p> : null}
             <p className="flex items-center gap-2">
               <span
                 className="h-2.5 w-5 rounded-sm border border-accent bg-accent/15"

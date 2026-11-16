@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { MAX_SCORE } from "@/modules/radar-chart/constants/radar-score.constants";
 import { useId } from "react";
 import { cn } from "@/lib/utils";
@@ -19,8 +20,26 @@ function toPercent(score: number): string {
   return `${Math.min(Math.max(score / MAX_SCORE, 0), 1) * 100}%`;
 }
 
-export function AreaBreakdownPanel({ areas, average, className }: AreaBreakdownPanelProps) {
+export function AreaBreakdownPanel({ areas, average, className, onAreaClick, compact = false, selectedArea }: AreaBreakdownPanelProps) {
   const titleId = useId();
+
+  if (compact) return (
+    <RadarCard as="aside" aria-labelledby={titleId} className={cn("p-4", className)}>
+      <h2 id={titleId} className="font-semibold text-ink">Desglose por área</h2>
+      <ul className="mt-2 space-y-1">
+        {areas.map(area => <li key={area.id} data-testid={`area-breakdown-${area.id}`}>
+          <Button type="button" variant="ghost" aria-label={`Seleccionar ${area.name}`} aria-pressed={selectedArea === area.id}
+            className="h-auto min-h-9 w-full justify-between gap-2 px-2 py-1 text-sm" onClick={() => onAreaClick?.(area.id)}>
+            <span className="min-w-0 text-left whitespace-normal">{area.name}</span>
+            <span className="shrink-0 tabular-nums">{formatDecimal(area.score, 1)} / 10</span>
+          </Button>
+        </li>)}
+      </ul>
+      <p className="mt-2 flex justify-between gap-2 border-t border-border pt-2 text-xs text-text-secondary">
+        <span>Media global</span><span className="font-semibold tabular-nums">{formatDecimal(average, 2)} / 10</span>
+      </p>
+    </RadarCard>
+  );
 
   return (
     <RadarCard as="aside" aria-labelledby={titleId} className={cn("flex flex-col p-6", className)}>
@@ -36,9 +55,7 @@ export function AreaBreakdownPanel({ areas, average, className }: AreaBreakdownP
           return (
             <li key={area.id} data-testid={`area-breakdown-${area.id}`}>
               <div className="flex items-center gap-2">
-                <span className="min-w-0 flex-1 truncate text-sm font-medium text-ink">
-                  {area.name}
-                </span>
+                <Button variant="ghost" type="button" aria-label={`Seleccionar ${area.name}`} className="min-h-12 min-w-0 flex-1 text-left text-sm font-medium text-ink hover:underline" onClick={() => onAreaClick?.(area.id)}>{area.name}</Button>
                 <AreaLevelBadge level={level} />
                 <span className="w-8 text-right font-heading text-base font-semibold text-ink tabular-nums">
                   {formatDecimal(area.score, 1)}
