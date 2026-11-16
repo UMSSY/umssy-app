@@ -53,6 +53,7 @@ export function ParticipationView({
   const router = useRouter();
   const client = useQueryClient();
   const { currentUserId, refreshRoles } = useAuth();
+
   const token = useSyncExternalStore(
     subscribeAccessToken,
     getAccessToken,
@@ -60,6 +61,7 @@ export function ParticipationView({
   );
 
   const participation = useParticipation(token);
+
   const request = useQuery({
     queryKey: ["mentor-participation-requests", token],
     queryFn: () => mentorParticipationService.getCurrent(),
@@ -70,26 +72,40 @@ export function ParticipationView({
   });
 
   const [activeTab, setActiveTab] = useState<ParticipationTab>("current");
+
+  const history = useQuery({
+    queryKey: ["mentor-participation-history", token],
+    queryFn: ({ signal }) => mentorParticipationService.getHistory(signal),
+    enabled: Boolean(token) && activeTab === "history",
+    retry: false,
+    staleTime: 30_000,
+  });
+
   const [modal, setModal] = useState<"activate" | "deactivate" | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<unknown>(null);
   const [hasDraftStorageError, setHasDraftStorageError] = useState(false);
+
   const inFlight = useRef(false);
   const navigationFeedbackHandled = useRef(false);
 
   useEffect(() => {
     if (navigationFeedbackHandled.current || (!registered && !activated)) return;
     if (participation.isLoading || !request.isSuccess) return;
+
     navigationFeedbackHandled.current = true;
 
     const url = new URL(window.location.href);
+
     const hasActivationFeedback =
       activated && url.searchParams.get("activated") === "1";
+
     const hasRegistrationFeedback =
       registered && url.searchParams.get("registered") === "1";
 
     url.searchParams.delete("registered");
     url.searchParams.delete("activated");
+
     window.history.replaceState(
       window.history.state,
       "",
@@ -117,21 +133,30 @@ export function ParticipationView({
 
   const deactivate = async () => {
     if (inFlight.current) return;
+
     inFlight.current = true;
     setSubmitting(true);
     setError(null);
 
     try {
       await mentorParticipationService.leave();
+
       await Promise.allSettled([
         refreshRoles(),
-        client.invalidateQueries({ queryKey: ["mentors", "participation"] }),
+        client.invalidateQueries({
+          queryKey: ["mentors", "participation"],
+        }),
         client.invalidateQueries({
           queryKey: ["mentor-participation-requests"],
         }),
-        client.invalidateQueries({ queryKey: ["mentorship", "directory"] }),
-        client.invalidateQueries({ queryKey: ["mentorship", "profile"] }),
+        client.invalidateQueries({
+          queryKey: ["mentorship", "directory"],
+        }),
+        client.invalidateQueries({
+          queryKey: ["mentorship", "profile"],
+        }),
       ]);
+
       setModal(null);
       notifySuccess("Participación desactivada correctamente");
     } catch (failure) {
@@ -148,6 +173,7 @@ export function ParticipationView({
   const isActive = state?.status === "ACTIVE";
   const hasHistory = state?.status === "DEACTIVATED";
   const currentRequest = request.data;
+
   const hasOpenRequest = ["PENDING", "OFFERED"].includes(
     currentRequest?.status ?? "",
   );
@@ -159,6 +185,7 @@ export function ParticipationView({
           <h1 className="text-2xl font-semibold tracking-tight">
             Participación como mentor
           </h1>
+
           <p className="text-sm text-muted-foreground">
             Consulta tu participación y revisa tus solicitudes de cupo.
           </p>
@@ -208,7 +235,11 @@ export function ParticipationView({
           (!participation.isLoading && !state)) && (
           <Alert variant="destructive">
             <p>No se pudo cargar tu participación como mentor.</p>
-            <Button variant="outline" onClick={() => participation.retry()}>
+
+            <Button
+              variant="outline"
+              onClick={() => participation.retry()}
+            >
               Reintentar participación
             </Button>
           </Alert>
@@ -221,7 +252,11 @@ export function ParticipationView({
         {request.isError && (
           <Alert variant="destructive">
             <p>No se pudo consultar tu solicitud de cupo.</p>
-            <Button variant="outline" onClick={() => void request.refetch()}>
+
+            <Button
+              variant="outline"
+              onClick={() => void request.refetch()}
+            >
               Reintentar solicitud
             </Button>
           </Alert>
@@ -267,15 +302,19 @@ export function ParticipationView({
               request={currentRequest}
               onConfirmed={() => {
                 void refreshRoles();
+
                 void client.invalidateQueries({
                   queryKey: ["mentors", "participation"],
                 });
+
                 void client.invalidateQueries({
                   queryKey: ["mentorship", "directory"],
                 });
+
                 void client.invalidateQueries({
                   queryKey: ["mentorship", "profile"],
                 });
+
                 notifySuccess("Participación activada correctamente");
               }}
             />
@@ -317,10 +356,37 @@ export function ParticipationView({
         <h2 className="text-xl font-semibold">
           Historial de solicitudes
         </h2>
-        <p className="text-sm text-muted-foreground">
-          Aquí podrás consultar las solicitudes de cupo que realizaste
-          como mentor.
-        </p>
+
+        {history.isPending && activeTab === "history" && (
+          <p
+            role="status"
+            className="text-sm text-muted-foreground"
+          >
+            Cargando historial de solicitudes...
+          </p>
+        )}
+
+        {history.isError && (
+          <Alert variant="destructive">
+            <p>No se pudo consultar el historial de solicitudes.</p>
+
+            <Button
+              variant="outline"
+              onClick={() => void history.refetch()}
+            >
+              Reintentar
+            </Button>
+          </Alert>
+        )}
+
+        {history.isSuccess && history.data.length > 0 && (
+          <p
+            role="status"
+            className="text-sm text-muted-foreground"
+          >
+            Solicitudes registradas: {history.data.length}
+          </p>
+        )}
       </div>
 
       <DeactivateParticipationModal
@@ -350,12 +416,14 @@ export function ParticipationView({
             }
 
             try {
-              if (!currentUserId)
+              if (!currentUserId) {
                 throw new Error("Identidad no disponible");
+              }
 
-              const draft = await loadMentorshipWizardDraft(currentUserId);
+              const draft =
+                await loadMentorshipWizardDraft(currentUserId);
 
-              if (!draft)
+              if (!draft) {
                 await saveMentorshipWizardDraft(currentUserId, {
                   currentStep: 1,
                   wantsToParticipate: true,
@@ -366,6 +434,7 @@ export function ParticipationView({
                     state?.orientations ?? []
                   ).map((orientation) => orientation.id),
                 });
+              }
 
               setModal(null);
               router.push("/mentorship");
