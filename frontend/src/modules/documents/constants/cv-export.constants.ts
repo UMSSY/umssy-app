@@ -32,8 +32,6 @@ export const CV_EXPORT_DEFAULT_SECTIONS: CvExportSections = {
 
 export const CV_EXPORT_REPOSITORIES_SECTION_KEY: CvExportSectionKey = "includeProjects";
 
-export const CV_EXPORT_PORTFOLIO_COUNT_QUERY_KEY = ["documents", "cv-export", "portfolio-count"] as const;
-
 export const CV_EXPORT_LOW_COMPLETENESS_THRESHOLD = 50;
 
 export const CV_EXPORT_INCOMPLETE_PROFILE_MESSAGES = {

@@ -1,5 +1,6 @@
+import { portfolioProjectsService } from "@/modules/profile/services/portfolio-projects.service";
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
-import { cleanup, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { documentsService } from "../services/documents.service";
@@ -20,11 +21,14 @@ vi.mock("@/modules/profile", async (importOriginal) => {
   };
 });
 
+vi.mock("@/modules/profile/services/portfolio-projects.service", () => ({
+  portfolioProjectsService: { getPortfolioProjects: vi.fn().mockResolvedValue([]) },
+}));
+
 vi.mock("../services/documents.service", () => ({
   documentsService: {
     generateCv: vi.fn(),
     uploadCv: vi.fn(),
-    getPortfolioProjectCount: vi.fn(),
   },
 }));
 
@@ -59,7 +63,7 @@ describe("CvExportDialog", () => {
     vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => undefined);
     vi.mocked(documentsService.generateCv).mockResolvedValue({ file: PDF, fileName: FILE_NAME });
     vi.mocked(documentsService.uploadCv).mockResolvedValue(null);
-    vi.mocked(documentsService.getPortfolioProjectCount).mockResolvedValue(6);
+    vi.mocked(portfolioProjectsService.getPortfolioProjects).mockResolvedValue(Array.from({ length: 6 }, (_, index) => ({ id: String(index), provider: "github", repoName: "app", repoUrl: "https://github.com/user/app", description: null, language: null, starsCount: 0, isOwner: true, displayOrder: index })));
     useProfileCompletenessMock.mockReturnValue({
       completeness: null,
       isLoading: false,
@@ -206,14 +210,14 @@ describe("CvExportDialog", () => {
   });
 
   it("hides the repositories badge when the user has no portfolio projects", async () => {
-    vi.mocked(documentsService.getPortfolioProjectCount).mockResolvedValue(0);
+    vi.mocked(portfolioProjectsService.getPortfolioProjects).mockResolvedValue([]);
     await renderDialog();
 
     expect(screen.queryByText(/repositorio/)).not.toBeInTheDocument();
   });
 
   it("hides the repositories badge when the portfolio cannot be loaded", async () => {
-    vi.mocked(documentsService.getPortfolioProjectCount).mockRejectedValue(new Error("Network Error"));
+    vi.mocked(portfolioProjectsService.getPortfolioProjects).mockRejectedValue(new Error("Network Error"));
     await renderDialog();
 
     expect(screen.queryByText(/repositorio/)).not.toBeInTheDocument();
@@ -252,6 +256,35 @@ describe("CvExportDialog", () => {
     await user.click(screen.getByRole("button", { name: "Descargar CV en PDF" }));
 
     await waitFor(() => expect(downloadFileMock).toHaveBeenCalledWith(PDF, "CV.pdf"));
+  });
+
+  it("prevents another download and closing the dialog while saving the generated CV", async () => {
+    let resolveUpload!: (value: null) => void;
+    vi.mocked(documentsService.uploadCv).mockReturnValueOnce(new Promise(resolve => { resolveUpload = resolve; }));
+    const { user, onClose } = await renderDialog();
+    await user.dblClick(screen.getByRole("button", { name: "Descargar CV en PDF" }));
+    await waitFor(() => expect(documentsService.uploadCv).toHaveBeenCalledTimes(1));
+    expect(documentsService.generateCv).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("button", { name: "Descargar CV en PDF" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Cancelar" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Cerrar" })).toBeDisabled();
+    await user.keyboard("{Escape}");
+    expect(onClose).not.toHaveBeenCalled();
+
+    await act(async () => { resolveUpload(null); });
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+  });
+
+  it("keeps the dialog open after saving fails and lets the user retry without regenerating", async () => {
+    vi.mocked(documentsService.uploadCv).mockRejectedValueOnce(new Error("Upload failed"));
+    const { user, onClose } = await renderDialog();
+    await user.click(screen.getByRole("button", { name: "Descargar CV en PDF" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("No se pudo descargar el CV");
+    expect(onClose).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("button", { name: "Descargar CV en PDF" }));
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+    expect(documentsService.uploadCv).toHaveBeenCalledTimes(2);
+    expect(documentsService.generateCv).toHaveBeenCalledTimes(1);
   });
 
   it("previews the institutional layout of the generated cv", async () => {

@@ -177,21 +177,6 @@ describe("documentsService", () => {
     });
   });
 
-  it("counts the featured portfolio projects of the user", async () => {
-    vi.mocked(apiClient.get).mockResolvedValue(wrapResponse([{ id: "p-1" }, { id: "p-2" }]));
-
-    await expect(documentsService.getPortfolioProjectCount()).resolves.toBe(2);
-    expect(apiClient.get).toHaveBeenCalledWith("/profile/portfolio/projects", {
-      headers: AUTH_HEADERS,
-    });
-  });
-
-  it("counts zero portfolio projects when the response has no data", async () => {
-    vi.mocked(apiClient.get).mockResolvedValue(wrapResponse(null));
-
-    await expect(documentsService.getPortfolioProjectCount()).resolves.toBe(0);
-  });
-
   it("deletes the chosen cv by its id", async () => {
     vi.mocked(apiClient.delete).mockResolvedValue(wrapResponse(null));
 
