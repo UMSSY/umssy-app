@@ -12,6 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { SURVEY_ALERTS_TEXT } from "../constants/survey-participation.constants";
 import type { SurveyAlertFormErrors } from "../types/survey-alert-form-errors.types";
 import type { SurveyAlertsFormProps } from "../types/survey-alerts-form-props.types";
+import { hasAlertFormChanges } from "../utils/has-alert-form-changes";
 import { sanitizeAlertThreshold } from "../utils/sanitize-alert-threshold";
 import { parseAlertThreshold, validateSurveyAlertForm } from "../utils/validate-survey-alert-form";
 
@@ -20,11 +21,14 @@ export function SurveyAlertsForm({ questions, config, isSaving, onCancel, onSave
   const availableIds = (questions ?? []).map((question) => question.id);
   const [enabled, setEnabled] = useState(config.enabled);
   const [threshold, setThreshold] = useState(String(config.threshold));
-  const [questionIds, setQuestionIds] = useState<string[]>(
-    config.questionIds ? config.questionIds.filter((id) => availableIds.includes(id)) : availableIds,
-  );
+  const savedQuestionIds = config.questionIds ? config.questionIds.filter((id) => availableIds.includes(id)) : availableIds;
+  const [questionIds, setQuestionIds] = useState<string[]>(savedQuestionIds);
   const [errors, setErrors] = useState<SurveyAlertFormErrors>({});
   const isDisabled = !enabled || isSaving;
+  const hasChanges = hasAlertFormChanges(
+    { enabled, threshold, questionIds },
+    { enabled: config.enabled, threshold: String(config.threshold), questionIds: savedQuestionIds },
+  );
   const thresholdId = `${fieldId}-threshold`;
   const thresholdHintId = `${fieldId}-threshold-hint`;
   const thresholdErrorId = `${fieldId}-threshold-error`;
@@ -172,7 +176,7 @@ export function SurveyAlertsForm({ questions, config, isSaving, onCancel, onSave
         <Button type="button" variant="outline" onClick={onCancel} disabled={isSaving}>
           {SURVEY_ALERTS_TEXT.cancel}
         </Button>
-        <Button type="button" onClick={() => void handleSave()} disabled={isSaving}>
+        <Button type="button" onClick={() => void handleSave()} disabled={isSaving || !hasChanges}>
           {isSaving && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}
           {isSaving ? SURVEY_ALERTS_TEXT.saving : SURVEY_ALERTS_TEXT.save}
         </Button>

@@ -240,6 +240,7 @@ describe("SurveyAnalyticsView - participación y alertas", () => {
     await renderLoaded();
     const dialog = await openAlerts(user);
 
+    await user.click(within(dialog).getByRole("checkbox", { name: /¿Qué competencias usas/ }));
     await user.click(within(dialog).getByRole("button", { name: "Guardar" }));
 
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith(SURVEY_ALERTS_TEXT.saveError, expect.anything()));

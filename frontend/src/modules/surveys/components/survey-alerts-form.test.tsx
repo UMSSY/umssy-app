@@ -27,6 +27,43 @@ function thresholdInput() {
   return screen.getByRole("textbox", { name: "Umbral de cambio" });
 }
 
+describe("SurveyAlertsForm - botón Guardar", () => {
+  afterEach(() => cleanup());
+
+  it("permanece deshabilitado mientras los valores sean idénticos a los guardados", () => {
+    renderForm();
+
+    expect(screen.getByRole("button", { name: "Guardar" })).toBeDisabled();
+  });
+
+  it("se habilita al cambiar el umbral y vuelve a deshabilitarse al restaurar el valor guardado", async () => {
+    const user = userEvent.setup();
+    renderForm();
+
+    await user.clear(thresholdInput());
+    await user.type(thresholdInput(), "25");
+    expect(screen.getByRole("button", { name: "Guardar" })).toBeEnabled();
+
+    await user.clear(thresholdInput());
+    await user.type(thresholdInput(), "10");
+    expect(screen.getByRole("button", { name: "Guardar" })).toBeDisabled();
+  });
+
+  it("se habilita al cambiar el interruptor o las preguntas elegidas", async () => {
+    const user = userEvent.setup();
+    renderForm();
+
+    await user.click(screen.getByRole("checkbox", { name: /¿Qué competencias usas/ }));
+    expect(screen.getByRole("button", { name: "Guardar" })).toBeEnabled();
+
+    await user.click(screen.getByRole("checkbox", { name: /¿Qué competencias usas/ }));
+    expect(screen.getByRole("button", { name: "Guardar" })).toBeDisabled();
+
+    await user.click(screen.getByRole("switch", { name: "Activar alertas" }));
+    expect(screen.getByRole("button", { name: "Guardar" })).toBeEnabled();
+  });
+});
+
 describe("SurveyAlertsForm - campo de umbral", () => {
   afterEach(() => cleanup());
 
