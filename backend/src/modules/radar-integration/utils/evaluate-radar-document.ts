@@ -1,5 +1,5 @@
 import type {
-  VerificationJob,
+  VerificationDocumentContext,
   VerificationResult,
   DocumentSkill,
 } from '../types/document-verification.type.js';
@@ -10,10 +10,9 @@ const words = (value: string) =>
     .replace(/[^a-z0-9]+/g, ' ')
     .trim();
 
-// OCR confidence is independent of the name, document type and catalog checks.
 export function evaluateRadarDocument(
   job: Pick<
-    VerificationJob,
+    VerificationDocumentContext,
     'firstName' | 'lastName' | 'sourceType' | 'duplicate' | 'issuer'
   >,
   text: string,

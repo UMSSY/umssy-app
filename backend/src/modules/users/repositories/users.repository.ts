@@ -5,6 +5,12 @@ import { PrismaService } from '../../../common/prisma/prisma.service.js';
 export class UsersRepository {
   constructor(private readonly prisma: PrismaService) {}
 
+  findNamesByIds(ids: string[]) {
+    return this.prisma.user.findMany({
+      where: { id: { in: ids } },
+      select: { id: true, firstName: true, lastName: true },
+    });
+  }
   findManyWithActiveRoles(ids: string[]) {
     return this.prisma.user.findMany({
       where: { id: { in: ids } },
@@ -48,7 +54,7 @@ export class UsersRepository {
       select: { id: true },
     });
   }
-    async findEmailById(userId: string): Promise<string | null> {
+  async findEmailById(userId: string): Promise<string | null> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       select: { email: true },

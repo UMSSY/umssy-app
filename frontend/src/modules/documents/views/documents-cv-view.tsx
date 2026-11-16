@@ -1,46 +1,37 @@
-"use client";
+'use client';
 
-import { useRef, useState, type ChangeEvent } from "react";
-import { Input } from "@/components/ui/input";
-import { FeedbackMessage, useProfile } from "@/modules/profile";
-import { ProfilePageLayout } from "@/modules/profile";
-import { CvExtractionDialog } from "../components/cv-extraction-dialog";
-import { CvGenerateCard } from "../components/cv-generate-card";
-import { CvHistoryDialog } from "../components/cv-history-dialog";
-import { CvUploadCard } from "../components/cv-upload-card";
-import { CvViewerDialog } from "../components/cv-viewer-dialog";
-import { DeleteCvDialog } from "../components/delete-cv-dialog";
-import { ReplaceCvDialog } from "../components/replace-cv-dialog";
-import { SavedCvCard } from "../components/saved-cv-card";
-import { CV_APPLY_TEXTS } from "../constants/cv-apply.constants";
-import { CV_ERROR_MESSAGES } from "../constants/cv-error-messages.constants";
-import { CV_FILE_INPUT_ACCEPT } from "../constants/cv-upload.constants";
-import { useCvDocument } from "../hooks/use-cv-document";
-import { useApplyCvExtraction } from "../hooks/use-apply-cv-extraction";
-import { useCvExtraction } from "../hooks/use-cv-extraction";
-import { useCvFeedback } from "../hooks/use-cv-feedback";
-import { useCvViewer } from "../hooks/use-cv-viewer";
-import type { SavedCv } from "../types/saved-cv.types";
-import { getCvErrorMessage } from "../utils/get-cv-error-message";
-import { isCvFileRejection } from "../utils/is-cv-file-rejection";
-import { validateCvFile } from "../utils/validate-cv-file";
+import { useDocumentVerifications } from '../hooks/use-document-verifications';
 
-import { useQuery } from "@tanstack/react-query";
-import { useAuth } from "@/shared/contexts/auth-context";
-import { Button } from "@/components/ui/button";
-import { verificationApi } from "../services/document-verification.service";
-import { VerificationDashboard } from "../components/verification-dashboard";
+import { useRef, useState, type ChangeEvent } from 'react';
+import { Input } from '@/components/ui/input';
+import { FeedbackMessage, useProfile } from '@/modules/profile';
+import { ProfilePageLayout } from '@/modules/profile';
+import { CvExtractionDialog } from '../components/cv-extraction-dialog';
+import { CvGenerateCard } from '../components/cv-generate-card';
+import { CvHistoryDialog } from '../components/cv-history-dialog';
+import { CvUploadCard } from '../components/cv-upload-card';
+import { CvViewerDialog } from '../components/cv-viewer-dialog';
+import { DeleteCvDialog } from '../components/delete-cv-dialog';
+import { ReplaceCvDialog } from '../components/replace-cv-dialog';
+import { SavedCvCard } from '../components/saved-cv-card';
+import { CV_APPLY_TEXTS } from '../constants/cv-apply.constants';
+import { CV_ERROR_MESSAGES } from '../constants/cv-error-messages.constants';
+import { CV_FILE_INPUT_ACCEPT } from '../constants/cv-upload.constants';
+import { useCvDocument } from '../hooks/use-cv-document';
+import { useApplyCvExtraction } from '../hooks/use-apply-cv-extraction';
+import { useCvExtraction } from '../hooks/use-cv-extraction';
+import { useCvFeedback } from '../hooks/use-cv-feedback';
+import { useCvViewer } from '../hooks/use-cv-viewer';
+import type { SavedCv } from '../types/saved-cv.types';
+import { getCvErrorMessage } from '../utils/get-cv-error-message';
+import { isCvFileRejection } from '../utils/is-cv-file-rejection';
+import { validateCvFile } from '../utils/validate-cv-file';
+
+import { Button } from '@/components/ui/button';
+import { VerificationDashboard } from '../components/verification-dashboard';
 
 export function DocumentsCvView() {
-  const { currentUserId } = useAuth();
-  const history = useQuery({
-    queryKey: ["documents", "verifications", currentUserId],
-    enabled: Boolean(currentUserId),
-    queryFn: () => verificationApi.list(),
-    refetchInterval: (q) =>
-      q.state.data?.some((d) => d.active && !d.synced) ? 1500 : 15000,
-    refetchOnReconnect: 'always',
-  });
+  const history = useDocumentVerifications();
   if (history.isError && !history.data)
     return (
       <>
@@ -88,7 +79,9 @@ export function LegacyDocumentsCvView() {
   const cvApply = useApplyCvExtraction();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [pendingReplacement, setPendingReplacement] = useState<File | null>(null);
+  const [pendingReplacement, setPendingReplacement] = useState<File | null>(
+    null,
+  );
   const [replaceError, setReplaceError] = useState<string | null>(null);
   const { feedback, setFeedback } = useCvFeedback();
   const [cvToDelete, setCvToDelete] = useState<SavedCv | null>(null);
@@ -105,7 +98,7 @@ export function LegacyDocumentsCvView() {
 
     if (validationError) {
       setSelectedFile(null);
-      setFeedback({ type: "error", message: validationError });
+      setFeedback({ type: 'error', message: validationError });
       return;
     }
 
@@ -122,7 +115,7 @@ export function LegacyDocumentsCvView() {
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    event.target.value = "";
+    event.target.value = '';
 
     if (file) {
       selectFile(file);
@@ -135,12 +128,18 @@ export function LegacyDocumentsCvView() {
     try {
       await uploadCv(file);
       setSelectedFile(null);
-      setFeedback({ type: "success", message: "Tu CV se cargó correctamente." });
+      setFeedback({
+        type: 'success',
+        message: 'Tu CV se cargó correctamente.',
+      });
     } catch (error) {
       if (isCvFileRejection(error)) {
         setSelectedFile(null);
       }
-      setFeedback({ type: "error", message: getCvErrorMessage(error, CV_ERROR_MESSAGES.upload) });
+      setFeedback({
+        type: 'error',
+        message: getCvErrorMessage(error, CV_ERROR_MESSAGES.upload),
+      });
     }
   };
 
@@ -155,13 +154,16 @@ export function LegacyDocumentsCvView() {
     try {
       await uploadCv(file);
       closeReplaceDialog();
-      setFeedback({ type: "success", message: "Tu nueva versión del CV se cargó correctamente." });
+      setFeedback({
+        type: 'success',
+        message: 'Tu nueva versión del CV se cargó correctamente.',
+      });
     } catch (error) {
       const message = getCvErrorMessage(error, CV_ERROR_MESSAGES.upload);
 
       if (isCvFileRejection(error)) {
         closeReplaceDialog();
-        setFeedback({ type: "error", message });
+        setFeedback({ type: 'error', message });
       } else {
         setReplaceError(message);
       }
@@ -185,7 +187,7 @@ export function LegacyDocumentsCvView() {
 
     if (results.every(({ isApplied }) => isApplied)) {
       closeCvExtraction();
-      setFeedback({ type: "success", message: CV_APPLY_TEXTS.success });
+      setFeedback({ type: 'success', message: CV_APPLY_TEXTS.success });
       return;
     }
 
@@ -197,7 +199,7 @@ export function LegacyDocumentsCvView() {
     const openError = await openCv(cv);
 
     if (openError) {
-      setFeedback({ type: "error", message: openError });
+      setFeedback({ type: 'error', message: openError });
     }
   };
 
@@ -211,9 +213,12 @@ export function LegacyDocumentsCvView() {
 
     try {
       await deleteCv(cv.id);
-      setFeedback({ type: "success", message: "El CV se eliminó." });
+      setFeedback({ type: 'success', message: 'El CV se eliminó.' });
     } catch (error) {
-      setFeedback({ type: "error", message: getCvErrorMessage(error, CV_ERROR_MESSAGES.delete) });
+      setFeedback({
+        type: 'error',
+        message: getCvErrorMessage(error, CV_ERROR_MESSAGES.delete),
+      });
     }
   };
 

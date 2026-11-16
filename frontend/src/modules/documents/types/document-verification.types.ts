@@ -1,13 +1,5 @@
-export type VerificationStatus =
-  | 'queued'
-  | 'reading'
-  | 'approved'
-  | 'review'
-  | 'low_confidence'
-  | 'manual_approved'
-  | 'manual_rejected'
-  | 'cancelled'
-  | 'legacy';
+import type { VerificationStatus } from './verification-status.types';
+import type { DocumentSkill } from './document-skill.types';
 export interface DocumentVerification {
   id: string;
   sourceId: string;
@@ -26,19 +18,6 @@ export interface DocumentVerification {
   available: boolean;
   createdAt: string;
   decidedAt: string | null;
-  skills: { id: string; name: string; areaId: string }[];
+  skills: DocumentSkill[];
   ownerName?: string;
 }
-export const verificationLabels: Record<VerificationStatus, string> = {
-  queued: 'En cola',
-  reading: 'En proceso',
-  approved: 'Aprobado automáticamente',
-  review: 'En revisión administrativa',
-  low_confidence: 'Rechazado por baja confianza',
-  manual_approved: 'Aprobado por administración',
-  manual_rejected: 'Rechazado por administración',
-  cancelled: 'Análisis interrumpido por retiro del archivo',
-  legacy: 'Anterior a la verificación automática',
-};
-export const isApproved = (status: VerificationStatus) =>
-  status === 'approved' || status === 'manual_approved';

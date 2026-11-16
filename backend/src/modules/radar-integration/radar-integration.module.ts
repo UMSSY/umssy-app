@@ -1,3 +1,4 @@
+import { DocumentReviewService } from './services/document-review.service.js';
 import { RadarConsentsModule } from './radar-consents.module.js';
 import { RadarApplicationsService } from './services/radar-applications.service.js';
 import { JobOffersModule } from '../job-offers/job-offers.module.js';
@@ -62,9 +63,15 @@ import { RadarNotificationsService } from './services/radar-notifications.servic
     RadarEvidenceSourcesModule,
     MatchingModule,
   ],
-  controllers: [DocumentVerificationController, RadarIntegrationController, RadarRecruitmentController],
+  controllers: [
+    DocumentVerificationController,
+    RadarIntegrationController,
+    RadarRecruitmentController,
+  ],
   providers: [
-    DocumentVerificationRepository, DocumentVerificationService,
+    DocumentVerificationRepository,
+    DocumentVerificationService,
+    DocumentReviewService,
     DocumentReviewDecisionService,
     RadarPublicationRepository,
     RadarRecruitmentRepository,

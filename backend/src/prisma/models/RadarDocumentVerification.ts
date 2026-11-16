@@ -53,6 +53,7 @@ export type RadarDocumentVerificationMinAggregateOutputType = {
   confidence: number | null
   reason: string | null
   createdAt: Date | null
+  updatedAt: Date | null
   decidedAt: Date | null
   reviewerId: string | null
   noticeRead: boolean | null
@@ -77,6 +78,7 @@ export type RadarDocumentVerificationMaxAggregateOutputType = {
   confidence: number | null
   reason: string | null
   createdAt: Date | null
+  updatedAt: Date | null
   decidedAt: Date | null
   reviewerId: string | null
   noticeRead: boolean | null
@@ -102,6 +104,7 @@ export type RadarDocumentVerificationCountAggregateOutputType = {
   reason: number
   skills: number
   createdAt: number
+  updatedAt: number
   decidedAt: number
   reviewerId: number
   noticeRead: number
@@ -141,6 +144,7 @@ export type RadarDocumentVerificationMinAggregateInputType = {
   confidence?: true
   reason?: true
   createdAt?: true
+  updatedAt?: true
   decidedAt?: true
   reviewerId?: true
   noticeRead?: true
@@ -165,6 +169,7 @@ export type RadarDocumentVerificationMaxAggregateInputType = {
   confidence?: true
   reason?: true
   createdAt?: true
+  updatedAt?: true
   decidedAt?: true
   reviewerId?: true
   noticeRead?: true
@@ -190,6 +195,7 @@ export type RadarDocumentVerificationCountAggregateInputType = {
   reason?: true
   skills?: true
   createdAt?: true
+  updatedAt?: true
   decidedAt?: true
   reviewerId?: true
   noticeRead?: true
@@ -303,6 +309,7 @@ export type RadarDocumentVerificationGroupByOutputType = {
   reason: string
   skills: runtime.JsonValue
   createdAt: Date
+  updatedAt: Date
   decidedAt: Date | null
   reviewerId: string | null
   noticeRead: boolean
@@ -352,6 +359,7 @@ export type RadarDocumentVerificationWhereInput = {
   reason?: Prisma.StringFilter<"RadarDocumentVerification"> | string
   skills?: Prisma.JsonFilter<"RadarDocumentVerification">
   createdAt?: Prisma.DateTimeFilter<"RadarDocumentVerification"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"RadarDocumentVerification"> | Date | string
   decidedAt?: Prisma.DateTimeNullableFilter<"RadarDocumentVerification"> | Date | string | null
   reviewerId?: Prisma.UuidNullableFilter<"RadarDocumentVerification"> | string | null
   noticeRead?: Prisma.BoolFilter<"RadarDocumentVerification"> | boolean
@@ -362,6 +370,8 @@ export type RadarDocumentVerificationWhereInput = {
   retryAt?: Prisma.DateTimeFilter<"RadarDocumentVerification"> | Date | string
   owner?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   reviewer?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  statusEntry?: Prisma.XOR<Prisma.RadarDocumentStatusScalarRelationFilter, Prisma.RadarDocumentStatusWhereInput>
+  sourceTypeEntry?: Prisma.XOR<Prisma.RadarDocumentSourceTypeScalarRelationFilter, Prisma.RadarDocumentSourceTypeWhereInput>
 }
 
 export type RadarDocumentVerificationOrderByWithRelationInput = {
@@ -380,6 +390,7 @@ export type RadarDocumentVerificationOrderByWithRelationInput = {
   reason?: Prisma.SortOrder
   skills?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   decidedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   reviewerId?: Prisma.SortOrderInput | Prisma.SortOrder
   noticeRead?: Prisma.SortOrder
@@ -390,6 +401,8 @@ export type RadarDocumentVerificationOrderByWithRelationInput = {
   retryAt?: Prisma.SortOrder
   owner?: Prisma.UserOrderByWithRelationInput
   reviewer?: Prisma.UserOrderByWithRelationInput
+  statusEntry?: Prisma.RadarDocumentStatusOrderByWithRelationInput
+  sourceTypeEntry?: Prisma.RadarDocumentSourceTypeOrderByWithRelationInput
 }
 
 export type RadarDocumentVerificationWhereUniqueInput = Prisma.AtLeast<{
@@ -411,6 +424,7 @@ export type RadarDocumentVerificationWhereUniqueInput = Prisma.AtLeast<{
   reason?: Prisma.StringFilter<"RadarDocumentVerification"> | string
   skills?: Prisma.JsonFilter<"RadarDocumentVerification">
   createdAt?: Prisma.DateTimeFilter<"RadarDocumentVerification"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"RadarDocumentVerification"> | Date | string
   decidedAt?: Prisma.DateTimeNullableFilter<"RadarDocumentVerification"> | Date | string | null
   reviewerId?: Prisma.UuidNullableFilter<"RadarDocumentVerification"> | string | null
   noticeRead?: Prisma.BoolFilter<"RadarDocumentVerification"> | boolean
@@ -421,6 +435,8 @@ export type RadarDocumentVerificationWhereUniqueInput = Prisma.AtLeast<{
   retryAt?: Prisma.DateTimeFilter<"RadarDocumentVerification"> | Date | string
   owner?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   reviewer?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  statusEntry?: Prisma.XOR<Prisma.RadarDocumentStatusScalarRelationFilter, Prisma.RadarDocumentStatusWhereInput>
+  sourceTypeEntry?: Prisma.XOR<Prisma.RadarDocumentSourceTypeScalarRelationFilter, Prisma.RadarDocumentSourceTypeWhereInput>
 }, "id">
 
 export type RadarDocumentVerificationOrderByWithAggregationInput = {
@@ -439,6 +455,7 @@ export type RadarDocumentVerificationOrderByWithAggregationInput = {
   reason?: Prisma.SortOrder
   skills?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   decidedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   reviewerId?: Prisma.SortOrderInput | Prisma.SortOrder
   noticeRead?: Prisma.SortOrder
@@ -473,6 +490,7 @@ export type RadarDocumentVerificationScalarWhereWithAggregatesInput = {
   reason?: Prisma.StringWithAggregatesFilter<"RadarDocumentVerification"> | string
   skills?: Prisma.JsonWithAggregatesFilter<"RadarDocumentVerification">
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"RadarDocumentVerification"> | Date | string
+  updatedAt?: Prisma.DateTimeWithAggregatesFilter<"RadarDocumentVerification"> | Date | string
   decidedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"RadarDocumentVerification"> | Date | string | null
   reviewerId?: Prisma.UuidNullableWithAggregatesFilter<"RadarDocumentVerification"> | string | null
   noticeRead?: Prisma.BoolWithAggregatesFilter<"RadarDocumentVerification"> | boolean
@@ -485,7 +503,6 @@ export type RadarDocumentVerificationScalarWhereWithAggregatesInput = {
 
 export type RadarDocumentVerificationCreateInput = {
   id?: string
-  sourceType: string
   sourceId: string
   filename: string
   mime: string
@@ -493,11 +510,11 @@ export type RadarDocumentVerificationCreateInput = {
   sizeBytes: number
   active?: boolean
   digest: string
-  status?: string
   confidence?: number | null
   reason?: string
   skills?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
+  updatedAt?: Date | string
   decidedAt?: Date | string | null
   noticeRead?: boolean
   publishedIds?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -507,6 +524,8 @@ export type RadarDocumentVerificationCreateInput = {
   retryAt?: Date | string
   owner: Prisma.UserCreateNestedOneWithoutDocumentVerificationsInput
   reviewer?: Prisma.UserCreateNestedOneWithoutReviewedDocumentsInput
+  statusEntry?: Prisma.RadarDocumentStatusCreateNestedOneWithoutDocumentsInput
+  sourceTypeEntry: Prisma.RadarDocumentSourceTypeCreateNestedOneWithoutDocumentsInput
 }
 
 export type RadarDocumentVerificationUncheckedCreateInput = {
@@ -525,6 +544,7 @@ export type RadarDocumentVerificationUncheckedCreateInput = {
   reason?: string
   skills?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
+  updatedAt?: Date | string
   decidedAt?: Date | string | null
   reviewerId?: string | null
   noticeRead?: boolean
@@ -537,7 +557,6 @@ export type RadarDocumentVerificationUncheckedCreateInput = {
 
 export type RadarDocumentVerificationUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  sourceType?: Prisma.StringFieldUpdateOperationsInput | string
   sourceId?: Prisma.StringFieldUpdateOperationsInput | string
   filename?: Prisma.StringFieldUpdateOperationsInput | string
   mime?: Prisma.StringFieldUpdateOperationsInput | string
@@ -545,11 +564,11 @@ export type RadarDocumentVerificationUpdateInput = {
   sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   digest?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
   confidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   reason?: Prisma.StringFieldUpdateOperationsInput | string
   skills?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   decidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   noticeRead?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedIds?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -559,6 +578,8 @@ export type RadarDocumentVerificationUpdateInput = {
   retryAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   owner?: Prisma.UserUpdateOneRequiredWithoutDocumentVerificationsNestedInput
   reviewer?: Prisma.UserUpdateOneWithoutReviewedDocumentsNestedInput
+  statusEntry?: Prisma.RadarDocumentStatusUpdateOneRequiredWithoutDocumentsNestedInput
+  sourceTypeEntry?: Prisma.RadarDocumentSourceTypeUpdateOneRequiredWithoutDocumentsNestedInput
 }
 
 export type RadarDocumentVerificationUncheckedUpdateInput = {
@@ -577,6 +598,7 @@ export type RadarDocumentVerificationUncheckedUpdateInput = {
   reason?: Prisma.StringFieldUpdateOperationsInput | string
   skills?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   decidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   noticeRead?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -603,6 +625,7 @@ export type RadarDocumentVerificationCreateManyInput = {
   reason?: string
   skills?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
+  updatedAt?: Date | string
   decidedAt?: Date | string | null
   reviewerId?: string | null
   noticeRead?: boolean
@@ -615,7 +638,6 @@ export type RadarDocumentVerificationCreateManyInput = {
 
 export type RadarDocumentVerificationUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  sourceType?: Prisma.StringFieldUpdateOperationsInput | string
   sourceId?: Prisma.StringFieldUpdateOperationsInput | string
   filename?: Prisma.StringFieldUpdateOperationsInput | string
   mime?: Prisma.StringFieldUpdateOperationsInput | string
@@ -623,11 +645,11 @@ export type RadarDocumentVerificationUpdateManyMutationInput = {
   sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   digest?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
   confidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   reason?: Prisma.StringFieldUpdateOperationsInput | string
   skills?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   decidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   noticeRead?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedIds?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -653,6 +675,7 @@ export type RadarDocumentVerificationUncheckedUpdateManyInput = {
   reason?: Prisma.StringFieldUpdateOperationsInput | string
   skills?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   decidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   noticeRead?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -689,6 +712,7 @@ export type RadarDocumentVerificationCountOrderByAggregateInput = {
   reason?: Prisma.SortOrder
   skills?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   decidedAt?: Prisma.SortOrder
   reviewerId?: Prisma.SortOrder
   noticeRead?: Prisma.SortOrder
@@ -720,6 +744,7 @@ export type RadarDocumentVerificationMaxOrderByAggregateInput = {
   confidence?: Prisma.SortOrder
   reason?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   decidedAt?: Prisma.SortOrder
   reviewerId?: Prisma.SortOrder
   noticeRead?: Prisma.SortOrder
@@ -744,6 +769,7 @@ export type RadarDocumentVerificationMinOrderByAggregateInput = {
   confidence?: Prisma.SortOrder
   reason?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   decidedAt?: Prisma.SortOrder
   reviewerId?: Prisma.SortOrder
   noticeRead?: Prisma.SortOrder
@@ -851,9 +877,92 @@ export type NullableFloatFieldUpdateOperationsInput = {
   divide?: number
 }
 
+export type RadarDocumentVerificationCreateNestedManyWithoutStatusEntryInput = {
+  create?: Prisma.XOR<Prisma.RadarDocumentVerificationCreateWithoutStatusEntryInput, Prisma.RadarDocumentVerificationUncheckedCreateWithoutStatusEntryInput> | Prisma.RadarDocumentVerificationCreateWithoutStatusEntryInput[] | Prisma.RadarDocumentVerificationUncheckedCreateWithoutStatusEntryInput[]
+  connectOrCreate?: Prisma.RadarDocumentVerificationCreateOrConnectWithoutStatusEntryInput | Prisma.RadarDocumentVerificationCreateOrConnectWithoutStatusEntryInput[]
+  createMany?: Prisma.RadarDocumentVerificationCreateManyStatusEntryInputEnvelope
+  connect?: Prisma.RadarDocumentVerificationWhereUniqueInput | Prisma.RadarDocumentVerificationWhereUniqueInput[]
+}
+
+export type RadarDocumentVerificationUncheckedCreateNestedManyWithoutStatusEntryInput = {
+  create?: Prisma.XOR<Prisma.RadarDocumentVerificationCreateWithoutStatusEntryInput, Prisma.RadarDocumentVerificationUncheckedCreateWithoutStatusEntryInput> | Prisma.RadarDocumentVerificationCreateWithoutStatusEntryInput[] | Prisma.RadarDocumentVerificationUncheckedCreateWithoutStatusEntryInput[]
+  connectOrCreate?: Prisma.RadarDocumentVerificationCreateOrConnectWithoutStatusEntryInput | Prisma.RadarDocumentVerificationCreateOrConnectWithoutStatusEntryInput[]
+  createMany?: Prisma.RadarDocumentVerificationCreateManyStatusEntryInputEnvelope
+  connect?: Prisma.RadarDocumentVerificationWhereUniqueInput | Prisma.RadarDocumentVerificationWhereUniqueInput[]
+}
+
+export type RadarDocumentVerificationUpdateManyWithoutStatusEntryNestedInput = {
+  create?: Prisma.XOR<Prisma.RadarDocumentVerificationCreateWithoutStatusEntryInput, Prisma.RadarDocumentVerificationUncheckedCreateWithoutStatusEntryInput> | Prisma.RadarDocumentVerificationCreateWithoutStatusEntryInput[] | Prisma.RadarDocumentVerificationUncheckedCreateWithoutStatusEntryInput[]
+  connectOrCreate?: Prisma.RadarDocumentVerificationCreateOrConnectWithoutStatusEntryInput | Prisma.RadarDocumentVerificationCreateOrConnectWithoutStatusEntryInput[]
+  upsert?: Prisma.RadarDocumentVerificationUpsertWithWhereUniqueWithoutStatusEntryInput | Prisma.RadarDocumentVerificationUpsertWithWhereUniqueWithoutStatusEntryInput[]
+  createMany?: Prisma.RadarDocumentVerificationCreateManyStatusEntryInputEnvelope
+  set?: Prisma.RadarDocumentVerificationWhereUniqueInput | Prisma.RadarDocumentVerificationWhereUniqueInput[]
+  disconnect?: Prisma.RadarDocumentVerificationWhereUniqueInput | Prisma.RadarDocumentVerificationWhereUniqueInput[]
+  delete?: Prisma.RadarDocumentVerificationWhereUniqueInput | Prisma.RadarDocumentVerificationWhereUniqueInput[]
+  connect?: Prisma.RadarDocumentVerificationWhereUniqueInput | Prisma.RadarDocumentVerificationWhereUniqueInput[]
+  update?: Prisma.RadarDocumentVerificationUpdateWithWhereUniqueWithoutStatusEntryInput | Prisma.RadarDocumentVerificationUpdateWithWhereUniqueWithoutStatusEntryInput[]
+  updateMany?: Prisma.RadarDocumentVerificationUpdateManyWithWhereWithoutStatusEntryInput | Prisma.RadarDocumentVerificationUpdateManyWithWhereWithoutStatusEntryInput[]
+  deleteMany?: Prisma.RadarDocumentVerificationScalarWhereInput | Prisma.RadarDocumentVerificationScalarWhereInput[]
+}
+
+export type RadarDocumentVerificationUncheckedUpdateManyWithoutStatusEntryNestedInput = {
+  create?: Prisma.XOR<Prisma.RadarDocumentVerificationCreateWithoutStatusEntryInput, Prisma.RadarDocumentVerificationUncheckedCreateWithoutStatusEntryInput> | Prisma.RadarDocumentVerificationCreateWithoutStatusEntryInput[] | Prisma.RadarDocumentVerificationUncheckedCreateWithoutStatusEntryInput[]
+  connectOrCreate?: Prisma.RadarDocumentVerificationCreateOrConnectWithoutStatusEntryInput | Prisma.RadarDocumentVerificationCreateOrConnectWithoutStatusEntryInput[]
+  upsert?: Prisma.RadarDocumentVerificationUpsertWithWhereUniqueWithoutStatusEntryInput | Prisma.RadarDocumentVerificationUpsertWithWhereUniqueWithoutStatusEntryInput[]
+  createMany?: Prisma.RadarDocumentVerificationCreateManyStatusEntryInputEnvelope
+  set?: Prisma.RadarDocumentVerificationWhereUniqueInput | Prisma.RadarDocumentVerificationWhereUniqueInput[]
+  disconnect?: Prisma.RadarDocumentVerificationWhereUniqueInput | Prisma.RadarDocumentVerificationWhereUniqueInput[]
+  delete?: Prisma.RadarDocumentVerificationWhereUniqueInput | Prisma.RadarDocumentVerificationWhereUniqueInput[]
+  connect?: Prisma.RadarDocumentVerificationWhereUniqueInput | Prisma.RadarDocumentVerificationWhereUniqueInput[]
+  update?: Prisma.RadarDocumentVerificationUpdateWithWhereUniqueWithoutStatusEntryInput | Prisma.RadarDocumentVerificationUpdateWithWhereUniqueWithoutStatusEntryInput[]
+  updateMany?: Prisma.RadarDocumentVerificationUpdateManyWithWhereWithoutStatusEntryInput | Prisma.RadarDocumentVerificationUpdateManyWithWhereWithoutStatusEntryInput[]
+  deleteMany?: Prisma.RadarDocumentVerificationScalarWhereInput | Prisma.RadarDocumentVerificationScalarWhereInput[]
+}
+
+export type RadarDocumentVerificationCreateNestedManyWithoutSourceTypeEntryInput = {
+  create?: Prisma.XOR<Prisma.RadarDocumentVerificationCreateWithoutSourceTypeEntryInput, Prisma.RadarDocumentVerificationUncheckedCreateWithoutSourceTypeEntryInput> | Prisma.RadarDocumentVerificationCreateWithoutSourceTypeEntryInput[] | Prisma.RadarDocumentVerificationUncheckedCreateWithoutSourceTypeEntryInput[]
+  connectOrCreate?: Prisma.RadarDocumentVerificationCreateOrConnectWithoutSourceTypeEntryInput | Prisma.RadarDocumentVerificationCreateOrConnectWithoutSourceTypeEntryInput[]
+  createMany?: Prisma.RadarDocumentVerificationCreateManySourceTypeEntryInputEnvelope
+  connect?: Prisma.RadarDocumentVerificationWhereUniqueInput | Prisma.RadarDocumentVerificationWhereUniqueInput[]
+}
+
+export type RadarDocumentVerificationUncheckedCreateNestedManyWithoutSourceTypeEntryInput = {
+  create?: Prisma.XOR<Prisma.RadarDocumentVerificationCreateWithoutSourceTypeEntryInput, Prisma.RadarDocumentVerificationUncheckedCreateWithoutSourceTypeEntryInput> | Prisma.RadarDocumentVerificationCreateWithoutSourceTypeEntryInput[] | Prisma.RadarDocumentVerificationUncheckedCreateWithoutSourceTypeEntryInput[]
+  connectOrCreate?: Prisma.RadarDocumentVerificationCreateOrConnectWithoutSourceTypeEntryInput | Prisma.RadarDocumentVerificationCreateOrConnectWithoutSourceTypeEntryInput[]
+  createMany?: Prisma.RadarDocumentVerificationCreateManySourceTypeEntryInputEnvelope
+  connect?: Prisma.RadarDocumentVerificationWhereUniqueInput | Prisma.RadarDocumentVerificationWhereUniqueInput[]
+}
+
+export type RadarDocumentVerificationUpdateManyWithoutSourceTypeEntryNestedInput = {
+  create?: Prisma.XOR<Prisma.RadarDocumentVerificationCreateWithoutSourceTypeEntryInput, Prisma.RadarDocumentVerificationUncheckedCreateWithoutSourceTypeEntryInput> | Prisma.RadarDocumentVerificationCreateWithoutSourceTypeEntryInput[] | Prisma.RadarDocumentVerificationUncheckedCreateWithoutSourceTypeEntryInput[]
+  connectOrCreate?: Prisma.RadarDocumentVerificationCreateOrConnectWithoutSourceTypeEntryInput | Prisma.RadarDocumentVerificationCreateOrConnectWithoutSourceTypeEntryInput[]
+  upsert?: Prisma.RadarDocumentVerificationUpsertWithWhereUniqueWithoutSourceTypeEntryInput | Prisma.RadarDocumentVerificationUpsertWithWhereUniqueWithoutSourceTypeEntryInput[]
+  createMany?: Prisma.RadarDocumentVerificationCreateManySourceTypeEntryInputEnvelope
+  set?: Prisma.RadarDocumentVerificationWhereUniqueInput | Prisma.RadarDocumentVerificationWhereUniqueInput[]
+  disconnect?: Prisma.RadarDocumentVerificationWhereUniqueInput | Prisma.RadarDocumentVerificationWhereUniqueInput[]
+  delete?: Prisma.RadarDocumentVerificationWhereUniqueInput | Prisma.RadarDocumentVerificationWhereUniqueInput[]
+  connect?: Prisma.RadarDocumentVerificationWhereUniqueInput | Prisma.RadarDocumentVerificationWhereUniqueInput[]
+  update?: Prisma.RadarDocumentVerificationUpdateWithWhereUniqueWithoutSourceTypeEntryInput | Prisma.RadarDocumentVerificationUpdateWithWhereUniqueWithoutSourceTypeEntryInput[]
+  updateMany?: Prisma.RadarDocumentVerificationUpdateManyWithWhereWithoutSourceTypeEntryInput | Prisma.RadarDocumentVerificationUpdateManyWithWhereWithoutSourceTypeEntryInput[]
+  deleteMany?: Prisma.RadarDocumentVerificationScalarWhereInput | Prisma.RadarDocumentVerificationScalarWhereInput[]
+}
+
+export type RadarDocumentVerificationUncheckedUpdateManyWithoutSourceTypeEntryNestedInput = {
+  create?: Prisma.XOR<Prisma.RadarDocumentVerificationCreateWithoutSourceTypeEntryInput, Prisma.RadarDocumentVerificationUncheckedCreateWithoutSourceTypeEntryInput> | Prisma.RadarDocumentVerificationCreateWithoutSourceTypeEntryInput[] | Prisma.RadarDocumentVerificationUncheckedCreateWithoutSourceTypeEntryInput[]
+  connectOrCreate?: Prisma.RadarDocumentVerificationCreateOrConnectWithoutSourceTypeEntryInput | Prisma.RadarDocumentVerificationCreateOrConnectWithoutSourceTypeEntryInput[]
+  upsert?: Prisma.RadarDocumentVerificationUpsertWithWhereUniqueWithoutSourceTypeEntryInput | Prisma.RadarDocumentVerificationUpsertWithWhereUniqueWithoutSourceTypeEntryInput[]
+  createMany?: Prisma.RadarDocumentVerificationCreateManySourceTypeEntryInputEnvelope
+  set?: Prisma.RadarDocumentVerificationWhereUniqueInput | Prisma.RadarDocumentVerificationWhereUniqueInput[]
+  disconnect?: Prisma.RadarDocumentVerificationWhereUniqueInput | Prisma.RadarDocumentVerificationWhereUniqueInput[]
+  delete?: Prisma.RadarDocumentVerificationWhereUniqueInput | Prisma.RadarDocumentVerificationWhereUniqueInput[]
+  connect?: Prisma.RadarDocumentVerificationWhereUniqueInput | Prisma.RadarDocumentVerificationWhereUniqueInput[]
+  update?: Prisma.RadarDocumentVerificationUpdateWithWhereUniqueWithoutSourceTypeEntryInput | Prisma.RadarDocumentVerificationUpdateWithWhereUniqueWithoutSourceTypeEntryInput[]
+  updateMany?: Prisma.RadarDocumentVerificationUpdateManyWithWhereWithoutSourceTypeEntryInput | Prisma.RadarDocumentVerificationUpdateManyWithWhereWithoutSourceTypeEntryInput[]
+  deleteMany?: Prisma.RadarDocumentVerificationScalarWhereInput | Prisma.RadarDocumentVerificationScalarWhereInput[]
+}
+
 export type RadarDocumentVerificationCreateWithoutOwnerInput = {
   id?: string
-  sourceType: string
   sourceId: string
   filename: string
   mime: string
@@ -861,11 +970,11 @@ export type RadarDocumentVerificationCreateWithoutOwnerInput = {
   sizeBytes: number
   active?: boolean
   digest: string
-  status?: string
   confidence?: number | null
   reason?: string
   skills?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
+  updatedAt?: Date | string
   decidedAt?: Date | string | null
   noticeRead?: boolean
   publishedIds?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -874,6 +983,8 @@ export type RadarDocumentVerificationCreateWithoutOwnerInput = {
   lease?: string | null
   retryAt?: Date | string
   reviewer?: Prisma.UserCreateNestedOneWithoutReviewedDocumentsInput
+  statusEntry?: Prisma.RadarDocumentStatusCreateNestedOneWithoutDocumentsInput
+  sourceTypeEntry: Prisma.RadarDocumentSourceTypeCreateNestedOneWithoutDocumentsInput
 }
 
 export type RadarDocumentVerificationUncheckedCreateWithoutOwnerInput = {
@@ -891,6 +1002,7 @@ export type RadarDocumentVerificationUncheckedCreateWithoutOwnerInput = {
   reason?: string
   skills?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
+  updatedAt?: Date | string
   decidedAt?: Date | string | null
   reviewerId?: string | null
   noticeRead?: boolean
@@ -913,7 +1025,6 @@ export type RadarDocumentVerificationCreateManyOwnerInputEnvelope = {
 
 export type RadarDocumentVerificationCreateWithoutReviewerInput = {
   id?: string
-  sourceType: string
   sourceId: string
   filename: string
   mime: string
@@ -921,11 +1032,11 @@ export type RadarDocumentVerificationCreateWithoutReviewerInput = {
   sizeBytes: number
   active?: boolean
   digest: string
-  status?: string
   confidence?: number | null
   reason?: string
   skills?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
+  updatedAt?: Date | string
   decidedAt?: Date | string | null
   noticeRead?: boolean
   publishedIds?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -934,6 +1045,8 @@ export type RadarDocumentVerificationCreateWithoutReviewerInput = {
   lease?: string | null
   retryAt?: Date | string
   owner: Prisma.UserCreateNestedOneWithoutDocumentVerificationsInput
+  statusEntry?: Prisma.RadarDocumentStatusCreateNestedOneWithoutDocumentsInput
+  sourceTypeEntry: Prisma.RadarDocumentSourceTypeCreateNestedOneWithoutDocumentsInput
 }
 
 export type RadarDocumentVerificationUncheckedCreateWithoutReviewerInput = {
@@ -952,6 +1065,7 @@ export type RadarDocumentVerificationUncheckedCreateWithoutReviewerInput = {
   reason?: string
   skills?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
+  updatedAt?: Date | string
   decidedAt?: Date | string | null
   noticeRead?: boolean
   publishedIds?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -1006,6 +1120,7 @@ export type RadarDocumentVerificationScalarWhereInput = {
   reason?: Prisma.StringFilter<"RadarDocumentVerification"> | string
   skills?: Prisma.JsonFilter<"RadarDocumentVerification">
   createdAt?: Prisma.DateTimeFilter<"RadarDocumentVerification"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"RadarDocumentVerification"> | Date | string
   decidedAt?: Prisma.DateTimeNullableFilter<"RadarDocumentVerification"> | Date | string | null
   reviewerId?: Prisma.UuidNullableFilter<"RadarDocumentVerification"> | string | null
   noticeRead?: Prisma.BoolFilter<"RadarDocumentVerification"> | boolean
@@ -1032,6 +1147,162 @@ export type RadarDocumentVerificationUpdateManyWithWhereWithoutReviewerInput = {
   data: Prisma.XOR<Prisma.RadarDocumentVerificationUpdateManyMutationInput, Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerInput>
 }
 
+export type RadarDocumentVerificationCreateWithoutStatusEntryInput = {
+  id?: string
+  sourceId: string
+  filename: string
+  mime: string
+  content?: runtime.Bytes | null
+  sizeBytes: number
+  active?: boolean
+  digest: string
+  confidence?: number | null
+  reason?: string
+  skills?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  decidedAt?: Date | string | null
+  noticeRead?: boolean
+  publishedIds?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  radarVersion?: number | null
+  synced?: boolean
+  lease?: string | null
+  retryAt?: Date | string
+  owner: Prisma.UserCreateNestedOneWithoutDocumentVerificationsInput
+  reviewer?: Prisma.UserCreateNestedOneWithoutReviewedDocumentsInput
+  sourceTypeEntry: Prisma.RadarDocumentSourceTypeCreateNestedOneWithoutDocumentsInput
+}
+
+export type RadarDocumentVerificationUncheckedCreateWithoutStatusEntryInput = {
+  id?: string
+  userId: string
+  sourceType: string
+  sourceId: string
+  filename: string
+  mime: string
+  content?: runtime.Bytes | null
+  sizeBytes: number
+  active?: boolean
+  digest: string
+  confidence?: number | null
+  reason?: string
+  skills?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  decidedAt?: Date | string | null
+  reviewerId?: string | null
+  noticeRead?: boolean
+  publishedIds?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  radarVersion?: number | null
+  synced?: boolean
+  lease?: string | null
+  retryAt?: Date | string
+}
+
+export type RadarDocumentVerificationCreateOrConnectWithoutStatusEntryInput = {
+  where: Prisma.RadarDocumentVerificationWhereUniqueInput
+  create: Prisma.XOR<Prisma.RadarDocumentVerificationCreateWithoutStatusEntryInput, Prisma.RadarDocumentVerificationUncheckedCreateWithoutStatusEntryInput>
+}
+
+export type RadarDocumentVerificationCreateManyStatusEntryInputEnvelope = {
+  data: Prisma.RadarDocumentVerificationCreateManyStatusEntryInput | Prisma.RadarDocumentVerificationCreateManyStatusEntryInput[]
+  skipDuplicates?: boolean
+}
+
+export type RadarDocumentVerificationUpsertWithWhereUniqueWithoutStatusEntryInput = {
+  where: Prisma.RadarDocumentVerificationWhereUniqueInput
+  update: Prisma.XOR<Prisma.RadarDocumentVerificationUpdateWithoutStatusEntryInput, Prisma.RadarDocumentVerificationUncheckedUpdateWithoutStatusEntryInput>
+  create: Prisma.XOR<Prisma.RadarDocumentVerificationCreateWithoutStatusEntryInput, Prisma.RadarDocumentVerificationUncheckedCreateWithoutStatusEntryInput>
+}
+
+export type RadarDocumentVerificationUpdateWithWhereUniqueWithoutStatusEntryInput = {
+  where: Prisma.RadarDocumentVerificationWhereUniqueInput
+  data: Prisma.XOR<Prisma.RadarDocumentVerificationUpdateWithoutStatusEntryInput, Prisma.RadarDocumentVerificationUncheckedUpdateWithoutStatusEntryInput>
+}
+
+export type RadarDocumentVerificationUpdateManyWithWhereWithoutStatusEntryInput = {
+  where: Prisma.RadarDocumentVerificationScalarWhereInput
+  data: Prisma.XOR<Prisma.RadarDocumentVerificationUpdateManyMutationInput, Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutStatusEntryInput>
+}
+
+export type RadarDocumentVerificationCreateWithoutSourceTypeEntryInput = {
+  id?: string
+  sourceId: string
+  filename: string
+  mime: string
+  content?: runtime.Bytes | null
+  sizeBytes: number
+  active?: boolean
+  digest: string
+  confidence?: number | null
+  reason?: string
+  skills?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  decidedAt?: Date | string | null
+  noticeRead?: boolean
+  publishedIds?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  radarVersion?: number | null
+  synced?: boolean
+  lease?: string | null
+  retryAt?: Date | string
+  owner: Prisma.UserCreateNestedOneWithoutDocumentVerificationsInput
+  reviewer?: Prisma.UserCreateNestedOneWithoutReviewedDocumentsInput
+  statusEntry?: Prisma.RadarDocumentStatusCreateNestedOneWithoutDocumentsInput
+}
+
+export type RadarDocumentVerificationUncheckedCreateWithoutSourceTypeEntryInput = {
+  id?: string
+  userId: string
+  sourceId: string
+  filename: string
+  mime: string
+  content?: runtime.Bytes | null
+  sizeBytes: number
+  active?: boolean
+  digest: string
+  status?: string
+  confidence?: number | null
+  reason?: string
+  skills?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  decidedAt?: Date | string | null
+  reviewerId?: string | null
+  noticeRead?: boolean
+  publishedIds?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  radarVersion?: number | null
+  synced?: boolean
+  lease?: string | null
+  retryAt?: Date | string
+}
+
+export type RadarDocumentVerificationCreateOrConnectWithoutSourceTypeEntryInput = {
+  where: Prisma.RadarDocumentVerificationWhereUniqueInput
+  create: Prisma.XOR<Prisma.RadarDocumentVerificationCreateWithoutSourceTypeEntryInput, Prisma.RadarDocumentVerificationUncheckedCreateWithoutSourceTypeEntryInput>
+}
+
+export type RadarDocumentVerificationCreateManySourceTypeEntryInputEnvelope = {
+  data: Prisma.RadarDocumentVerificationCreateManySourceTypeEntryInput | Prisma.RadarDocumentVerificationCreateManySourceTypeEntryInput[]
+  skipDuplicates?: boolean
+}
+
+export type RadarDocumentVerificationUpsertWithWhereUniqueWithoutSourceTypeEntryInput = {
+  where: Prisma.RadarDocumentVerificationWhereUniqueInput
+  update: Prisma.XOR<Prisma.RadarDocumentVerificationUpdateWithoutSourceTypeEntryInput, Prisma.RadarDocumentVerificationUncheckedUpdateWithoutSourceTypeEntryInput>
+  create: Prisma.XOR<Prisma.RadarDocumentVerificationCreateWithoutSourceTypeEntryInput, Prisma.RadarDocumentVerificationUncheckedCreateWithoutSourceTypeEntryInput>
+}
+
+export type RadarDocumentVerificationUpdateWithWhereUniqueWithoutSourceTypeEntryInput = {
+  where: Prisma.RadarDocumentVerificationWhereUniqueInput
+  data: Prisma.XOR<Prisma.RadarDocumentVerificationUpdateWithoutSourceTypeEntryInput, Prisma.RadarDocumentVerificationUncheckedUpdateWithoutSourceTypeEntryInput>
+}
+
+export type RadarDocumentVerificationUpdateManyWithWhereWithoutSourceTypeEntryInput = {
+  where: Prisma.RadarDocumentVerificationScalarWhereInput
+  data: Prisma.XOR<Prisma.RadarDocumentVerificationUpdateManyMutationInput, Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutSourceTypeEntryInput>
+}
+
 export type RadarDocumentVerificationCreateManyOwnerInput = {
   id?: string
   sourceType: string
@@ -1047,6 +1318,7 @@ export type RadarDocumentVerificationCreateManyOwnerInput = {
   reason?: string
   skills?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
+  updatedAt?: Date | string
   decidedAt?: Date | string | null
   reviewerId?: string | null
   noticeRead?: boolean
@@ -1073,6 +1345,7 @@ export type RadarDocumentVerificationCreateManyReviewerInput = {
   reason?: string
   skills?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
+  updatedAt?: Date | string
   decidedAt?: Date | string | null
   noticeRead?: boolean
   publishedIds?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -1084,7 +1357,6 @@ export type RadarDocumentVerificationCreateManyReviewerInput = {
 
 export type RadarDocumentVerificationUpdateWithoutOwnerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  sourceType?: Prisma.StringFieldUpdateOperationsInput | string
   sourceId?: Prisma.StringFieldUpdateOperationsInput | string
   filename?: Prisma.StringFieldUpdateOperationsInput | string
   mime?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1092,11 +1364,11 @@ export type RadarDocumentVerificationUpdateWithoutOwnerInput = {
   sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   digest?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
   confidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   reason?: Prisma.StringFieldUpdateOperationsInput | string
   skills?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   decidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   noticeRead?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedIds?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -1105,6 +1377,8 @@ export type RadarDocumentVerificationUpdateWithoutOwnerInput = {
   lease?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   retryAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reviewer?: Prisma.UserUpdateOneWithoutReviewedDocumentsNestedInput
+  statusEntry?: Prisma.RadarDocumentStatusUpdateOneRequiredWithoutDocumentsNestedInput
+  sourceTypeEntry?: Prisma.RadarDocumentSourceTypeUpdateOneRequiredWithoutDocumentsNestedInput
 }
 
 export type RadarDocumentVerificationUncheckedUpdateWithoutOwnerInput = {
@@ -1122,6 +1396,7 @@ export type RadarDocumentVerificationUncheckedUpdateWithoutOwnerInput = {
   reason?: Prisma.StringFieldUpdateOperationsInput | string
   skills?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   decidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   noticeRead?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1147,6 +1422,7 @@ export type RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerInput = {
   reason?: Prisma.StringFieldUpdateOperationsInput | string
   skills?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   decidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   noticeRead?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1159,7 +1435,6 @@ export type RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerInput = {
 
 export type RadarDocumentVerificationUpdateWithoutReviewerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  sourceType?: Prisma.StringFieldUpdateOperationsInput | string
   sourceId?: Prisma.StringFieldUpdateOperationsInput | string
   filename?: Prisma.StringFieldUpdateOperationsInput | string
   mime?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1167,11 +1442,11 @@ export type RadarDocumentVerificationUpdateWithoutReviewerInput = {
   sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   digest?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
   confidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   reason?: Prisma.StringFieldUpdateOperationsInput | string
   skills?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   decidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   noticeRead?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedIds?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -1180,6 +1455,8 @@ export type RadarDocumentVerificationUpdateWithoutReviewerInput = {
   lease?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   retryAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   owner?: Prisma.UserUpdateOneRequiredWithoutDocumentVerificationsNestedInput
+  statusEntry?: Prisma.RadarDocumentStatusUpdateOneRequiredWithoutDocumentsNestedInput
+  sourceTypeEntry?: Prisma.RadarDocumentSourceTypeUpdateOneRequiredWithoutDocumentsNestedInput
 }
 
 export type RadarDocumentVerificationUncheckedUpdateWithoutReviewerInput = {
@@ -1198,6 +1475,7 @@ export type RadarDocumentVerificationUncheckedUpdateWithoutReviewerInput = {
   reason?: Prisma.StringFieldUpdateOperationsInput | string
   skills?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   decidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   noticeRead?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedIds?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -1223,7 +1501,216 @@ export type RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerInput = {
   reason?: Prisma.StringFieldUpdateOperationsInput | string
   skills?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   decidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  noticeRead?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  publishedIds?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  radarVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  synced?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lease?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  retryAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type RadarDocumentVerificationCreateManyStatusEntryInput = {
+  id?: string
+  userId: string
+  sourceType: string
+  sourceId: string
+  filename: string
+  mime: string
+  content?: runtime.Bytes | null
+  sizeBytes: number
+  active?: boolean
+  digest: string
+  confidence?: number | null
+  reason?: string
+  skills?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  decidedAt?: Date | string | null
+  reviewerId?: string | null
+  noticeRead?: boolean
+  publishedIds?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  radarVersion?: number | null
+  synced?: boolean
+  lease?: string | null
+  retryAt?: Date | string
+}
+
+export type RadarDocumentVerificationUpdateWithoutStatusEntryInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceId?: Prisma.StringFieldUpdateOperationsInput | string
+  filename?: Prisma.StringFieldUpdateOperationsInput | string
+  mime?: Prisma.StringFieldUpdateOperationsInput | string
+  content?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  digest?: Prisma.StringFieldUpdateOperationsInput | string
+  confidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  reason?: Prisma.StringFieldUpdateOperationsInput | string
+  skills?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  decidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  noticeRead?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  publishedIds?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  radarVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  synced?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lease?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  retryAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  owner?: Prisma.UserUpdateOneRequiredWithoutDocumentVerificationsNestedInput
+  reviewer?: Prisma.UserUpdateOneWithoutReviewedDocumentsNestedInput
+  sourceTypeEntry?: Prisma.RadarDocumentSourceTypeUpdateOneRequiredWithoutDocumentsNestedInput
+}
+
+export type RadarDocumentVerificationUncheckedUpdateWithoutStatusEntryInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceType?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceId?: Prisma.StringFieldUpdateOperationsInput | string
+  filename?: Prisma.StringFieldUpdateOperationsInput | string
+  mime?: Prisma.StringFieldUpdateOperationsInput | string
+  content?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  digest?: Prisma.StringFieldUpdateOperationsInput | string
+  confidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  reason?: Prisma.StringFieldUpdateOperationsInput | string
+  skills?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  decidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  noticeRead?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  publishedIds?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  radarVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  synced?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lease?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  retryAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type RadarDocumentVerificationUncheckedUpdateManyWithoutStatusEntryInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceType?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceId?: Prisma.StringFieldUpdateOperationsInput | string
+  filename?: Prisma.StringFieldUpdateOperationsInput | string
+  mime?: Prisma.StringFieldUpdateOperationsInput | string
+  content?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  digest?: Prisma.StringFieldUpdateOperationsInput | string
+  confidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  reason?: Prisma.StringFieldUpdateOperationsInput | string
+  skills?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  decidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  noticeRead?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  publishedIds?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  radarVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  synced?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lease?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  retryAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type RadarDocumentVerificationCreateManySourceTypeEntryInput = {
+  id?: string
+  userId: string
+  sourceId: string
+  filename: string
+  mime: string
+  content?: runtime.Bytes | null
+  sizeBytes: number
+  active?: boolean
+  digest: string
+  status?: string
+  confidence?: number | null
+  reason?: string
+  skills?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  decidedAt?: Date | string | null
+  reviewerId?: string | null
+  noticeRead?: boolean
+  publishedIds?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  radarVersion?: number | null
+  synced?: boolean
+  lease?: string | null
+  retryAt?: Date | string
+}
+
+export type RadarDocumentVerificationUpdateWithoutSourceTypeEntryInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceId?: Prisma.StringFieldUpdateOperationsInput | string
+  filename?: Prisma.StringFieldUpdateOperationsInput | string
+  mime?: Prisma.StringFieldUpdateOperationsInput | string
+  content?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  digest?: Prisma.StringFieldUpdateOperationsInput | string
+  confidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  reason?: Prisma.StringFieldUpdateOperationsInput | string
+  skills?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  decidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  noticeRead?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  publishedIds?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  radarVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  synced?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lease?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  retryAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  owner?: Prisma.UserUpdateOneRequiredWithoutDocumentVerificationsNestedInput
+  reviewer?: Prisma.UserUpdateOneWithoutReviewedDocumentsNestedInput
+  statusEntry?: Prisma.RadarDocumentStatusUpdateOneRequiredWithoutDocumentsNestedInput
+}
+
+export type RadarDocumentVerificationUncheckedUpdateWithoutSourceTypeEntryInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceId?: Prisma.StringFieldUpdateOperationsInput | string
+  filename?: Prisma.StringFieldUpdateOperationsInput | string
+  mime?: Prisma.StringFieldUpdateOperationsInput | string
+  content?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  digest?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  confidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  reason?: Prisma.StringFieldUpdateOperationsInput | string
+  skills?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  decidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  noticeRead?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  publishedIds?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  radarVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  synced?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lease?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  retryAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type RadarDocumentVerificationUncheckedUpdateManyWithoutSourceTypeEntryInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceId?: Prisma.StringFieldUpdateOperationsInput | string
+  filename?: Prisma.StringFieldUpdateOperationsInput | string
+  mime?: Prisma.StringFieldUpdateOperationsInput | string
+  content?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  digest?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  confidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  reason?: Prisma.StringFieldUpdateOperationsInput | string
+  skills?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  decidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   noticeRead?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedIds?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   radarVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1250,6 +1737,7 @@ export type RadarDocumentVerificationSelect<ExtArgs extends runtime.Types.Extens
   reason?: boolean
   skills?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
   decidedAt?: boolean
   reviewerId?: boolean
   noticeRead?: boolean
@@ -1260,6 +1748,8 @@ export type RadarDocumentVerificationSelect<ExtArgs extends runtime.Types.Extens
   retryAt?: boolean
   owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   reviewer?: boolean | Prisma.RadarDocumentVerification$reviewerArgs<ExtArgs>
+  statusEntry?: boolean | Prisma.RadarDocumentStatusDefaultArgs<ExtArgs>
+  sourceTypeEntry?: boolean | Prisma.RadarDocumentSourceTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["radarDocumentVerification"]>
 
 export type RadarDocumentVerificationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1278,6 +1768,7 @@ export type RadarDocumentVerificationSelectCreateManyAndReturn<ExtArgs extends r
   reason?: boolean
   skills?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
   decidedAt?: boolean
   reviewerId?: boolean
   noticeRead?: boolean
@@ -1288,6 +1779,8 @@ export type RadarDocumentVerificationSelectCreateManyAndReturn<ExtArgs extends r
   retryAt?: boolean
   owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   reviewer?: boolean | Prisma.RadarDocumentVerification$reviewerArgs<ExtArgs>
+  statusEntry?: boolean | Prisma.RadarDocumentStatusDefaultArgs<ExtArgs>
+  sourceTypeEntry?: boolean | Prisma.RadarDocumentSourceTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["radarDocumentVerification"]>
 
 export type RadarDocumentVerificationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1306,6 +1799,7 @@ export type RadarDocumentVerificationSelectUpdateManyAndReturn<ExtArgs extends r
   reason?: boolean
   skills?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
   decidedAt?: boolean
   reviewerId?: boolean
   noticeRead?: boolean
@@ -1316,6 +1810,8 @@ export type RadarDocumentVerificationSelectUpdateManyAndReturn<ExtArgs extends r
   retryAt?: boolean
   owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   reviewer?: boolean | Prisma.RadarDocumentVerification$reviewerArgs<ExtArgs>
+  statusEntry?: boolean | Prisma.RadarDocumentStatusDefaultArgs<ExtArgs>
+  sourceTypeEntry?: boolean | Prisma.RadarDocumentSourceTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["radarDocumentVerification"]>
 
 export type RadarDocumentVerificationSelectScalar = {
@@ -1334,6 +1830,7 @@ export type RadarDocumentVerificationSelectScalar = {
   reason?: boolean
   skills?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
   decidedAt?: boolean
   reviewerId?: boolean
   noticeRead?: boolean
@@ -1344,18 +1841,24 @@ export type RadarDocumentVerificationSelectScalar = {
   retryAt?: boolean
 }
 
-export type RadarDocumentVerificationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "sourceType" | "sourceId" | "filename" | "mime" | "content" | "sizeBytes" | "active" | "digest" | "status" | "confidence" | "reason" | "skills" | "createdAt" | "decidedAt" | "reviewerId" | "noticeRead" | "publishedIds" | "radarVersion" | "synced" | "lease" | "retryAt", ExtArgs["result"]["radarDocumentVerification"]>
+export type RadarDocumentVerificationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "sourceType" | "sourceId" | "filename" | "mime" | "content" | "sizeBytes" | "active" | "digest" | "status" | "confidence" | "reason" | "skills" | "createdAt" | "updatedAt" | "decidedAt" | "reviewerId" | "noticeRead" | "publishedIds" | "radarVersion" | "synced" | "lease" | "retryAt", ExtArgs["result"]["radarDocumentVerification"]>
 export type RadarDocumentVerificationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   reviewer?: boolean | Prisma.RadarDocumentVerification$reviewerArgs<ExtArgs>
+  statusEntry?: boolean | Prisma.RadarDocumentStatusDefaultArgs<ExtArgs>
+  sourceTypeEntry?: boolean | Prisma.RadarDocumentSourceTypeDefaultArgs<ExtArgs>
 }
 export type RadarDocumentVerificationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   reviewer?: boolean | Prisma.RadarDocumentVerification$reviewerArgs<ExtArgs>
+  statusEntry?: boolean | Prisma.RadarDocumentStatusDefaultArgs<ExtArgs>
+  sourceTypeEntry?: boolean | Prisma.RadarDocumentSourceTypeDefaultArgs<ExtArgs>
 }
 export type RadarDocumentVerificationIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   reviewer?: boolean | Prisma.RadarDocumentVerification$reviewerArgs<ExtArgs>
+  statusEntry?: boolean | Prisma.RadarDocumentStatusDefaultArgs<ExtArgs>
+  sourceTypeEntry?: boolean | Prisma.RadarDocumentSourceTypeDefaultArgs<ExtArgs>
 }
 
 export type $RadarDocumentVerificationPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1363,6 +1866,8 @@ export type $RadarDocumentVerificationPayload<ExtArgs extends runtime.Types.Exte
   objects: {
     owner: Prisma.$UserPayload<ExtArgs>
     reviewer: Prisma.$UserPayload<ExtArgs> | null
+    statusEntry: Prisma.$RadarDocumentStatusPayload<ExtArgs>
+    sourceTypeEntry: Prisma.$RadarDocumentSourceTypePayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1380,6 +1885,7 @@ export type $RadarDocumentVerificationPayload<ExtArgs extends runtime.Types.Exte
     reason: string
     skills: runtime.JsonValue
     createdAt: Date
+    updatedAt: Date
     decidedAt: Date | null
     reviewerId: string | null
     noticeRead: boolean
@@ -1784,6 +2290,8 @@ export interface Prisma__RadarDocumentVerificationClient<T, Null = never, ExtArg
   readonly [Symbol.toStringTag]: "PrismaPromise"
   owner<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   reviewer<T extends Prisma.RadarDocumentVerification$reviewerArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.RadarDocumentVerification$reviewerArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  statusEntry<T extends Prisma.RadarDocumentStatusDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.RadarDocumentStatusDefaultArgs<ExtArgs>>): Prisma.Prisma__RadarDocumentStatusClient<runtime.Types.Result.GetResult<Prisma.$RadarDocumentStatusPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  sourceTypeEntry<T extends Prisma.RadarDocumentSourceTypeDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.RadarDocumentSourceTypeDefaultArgs<ExtArgs>>): Prisma.Prisma__RadarDocumentSourceTypeClient<runtime.Types.Result.GetResult<Prisma.$RadarDocumentSourceTypePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1828,6 +2336,7 @@ export interface RadarDocumentVerificationFieldRefs {
   readonly reason: Prisma.FieldRef<"RadarDocumentVerification", 'String'>
   readonly skills: Prisma.FieldRef<"RadarDocumentVerification", 'Json'>
   readonly createdAt: Prisma.FieldRef<"RadarDocumentVerification", 'DateTime'>
+  readonly updatedAt: Prisma.FieldRef<"RadarDocumentVerification", 'DateTime'>
   readonly decidedAt: Prisma.FieldRef<"RadarDocumentVerification", 'DateTime'>
   readonly reviewerId: Prisma.FieldRef<"RadarDocumentVerification", 'String'>
   readonly noticeRead: Prisma.FieldRef<"RadarDocumentVerification", 'Boolean'>

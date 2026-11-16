@@ -1,3 +1,4 @@
+import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { CvFileStorage } from '../types/cv-file-storage.type.js';
@@ -8,6 +9,13 @@ const cvIdSelect = { id: true } as const;
 
 @Injectable()
 export class CvFileRepository implements CvFileStorage {
+  findVerificationSources(userId: string, context?: TransactionContext) {
+    return (context?.client ?? this.prisma).userCvFile.findMany({
+      where: { userId, cvPdfData: { not: null } },
+      select: { id: true },
+    });
+  }
+
   constructor(private readonly prisma: PrismaService) {}
 
   async create(
@@ -47,7 +55,11 @@ export class CvFileRepository implements CvFileStorage {
   currentCv(userId: string) {
     return this.prisma.userCvFile.findFirst({
       where: { userId },
-      orderBy: { cvUploadedAt: 'desc' },
+      orderBy: [
+        { cvUploadedAt: { sort: 'desc', nulls: 'last' } },
+        { createdAt: 'desc' },
+        { id: 'desc' },
+      ],
       select: { id: true, cvPdfData: true },
     });
   }

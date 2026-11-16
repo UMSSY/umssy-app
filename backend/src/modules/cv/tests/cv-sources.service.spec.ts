@@ -32,7 +32,11 @@ describe('CV source projections', () => {
     expect(await repository.currentCv('owner')).toBeNull();
     expect(findFirst).toHaveBeenCalledWith({
       where: { userId: 'owner' },
-      orderBy: { cvUploadedAt: 'desc' },
+      orderBy: [
+        { cvUploadedAt: { sort: 'desc', nulls: 'last' } },
+        { createdAt: 'desc' },
+        { id: 'desc' },
+      ],
       select: { id: true, cvPdfData: true },
     });
   });

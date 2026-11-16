@@ -1,38 +1,44 @@
+
 'use client';
+
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { isApiError } from '@/shared/services/api-client';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import {
+  verificationApi,
+  verificationLabels,
+  type DocumentVerification,
+} from '@/modules/documents/public';
 import { useRadarReviewOperationRecovery } from '../hooks/use-radar-integration-queries';
 import { radarIntegrationApi } from '../services/radar-integration.service';
+import type { RadarReviewOperationResult } from '../services/radar-integration.service';
 import {
   clearRadarReviewOperationId,
   getRadarReviewOperationId,
 } from '../services/radar-review-idempotency';
-import type { RadarReviewOperationResult } from '../services/radar-integration.service';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
-import { verificationApi } from '@/modules/documents/services/document-verification.service';
-import {
-  verificationLabels,
-  type DocumentVerification,
-} from '@/modules/documents/types/document-verification.types';
 import { ConfirmActionDialog } from '@/shared/components/confirm-action-dialog';
+
+const labels = {
+  approved: 'Aprobar documento',
+  rejected: 'Rechazar documento',
+  revoke: 'Revocar aprobación',
+  reprocess: 'Reprocesar archivo',
+} as const;
+
+type Decision = keyof typeof labels;
 
 export function DocumentReviewPanel() {
   useRadarReviewOperationRecovery('cv');
+
   const [filter, setFilter] = useState('pending');
-  const labels = {
-    approved: 'Aprobar documento',
-    rejected: 'Rechazar documento',
-    revoke: 'Revocar aprobación',
-    reprocess: 'Reprocesar archivo',
-  } as const;
-  type Decision = keyof typeof labels;
   const queue = useQuery({
     queryKey: ['radar-integration', 'document-reviews', filter],
     queryFn: () => verificationApi.list(true, filter),
     refetchInterval: 15000,
   });
+
   const [selected, setSelected] = useState<string | null>(null);
   const [confirmation, setConfirmation] = useState<{
     id: string;
@@ -40,15 +46,18 @@ export function DocumentReviewPanel() {
     name: string;
   } | null>(null);
   const [error, setError] = useState('');
-  const [preview, setPreview] = useState<{ url: string; name: string } | null>(
-    null,
-  );
+  const [preview, setPreview] = useState<{
+    url: string;
+    name: string;
+  } | null>(null);
+
   useEffect(
     () => () => {
       if (preview) URL.revokeObjectURL(preview.url);
     },
     [preview],
   );
+
   const mutation = useMutation({
     mutationFn: async ({
       id,
@@ -56,17 +65,23 @@ export function DocumentReviewPanel() {
     }: {
       id: string;
       decision: Decision;
+      name: string;
     }) => {
       if (decision !== 'approved' && decision !== 'rejected') {
         return verificationApi.decide(id, decision);
       }
 
-      const operationId = await getRadarReviewOperationId('cv', id, decision);
+      const operationId = await getRadarReviewOperationId(
+        'cv',
+        id,
+        decision,
+      );
 
       let result: RadarReviewOperationResult;
 
       try {
-        result = await radarIntegrationApi.documentOperationStatus(operationId);
+        result =
+          await radarIntegrationApi.documentOperationStatus(operationId);
       } catch (error: unknown) {
         if (!isApiError(error) || error.response?.status !== 404) {
           throw error;
@@ -87,7 +102,7 @@ export function DocumentReviewPanel() {
         result.decision !== decision
       ) {
         throw new Error(
-          'El resultado recuperado no coincide con la decision solicitada.',
+          'El resultado recuperado no coincide con la decisión solicitada.',
         );
       }
 
@@ -101,13 +116,15 @@ export function DocumentReviewPanel() {
     },
     onError: () => {
       setError(
-        'No se pudo confirmar la decision. Puedes reintentar; se conservara el identificador de la operacion.',
+        'No se pudo confirmar la decisión. Puedes reintentar; se conservará el identificador de la operación.',
       );
     },
     onSettled: () => queue.refetch(),
   });
+
   const rows = queue.data ?? [];
   const item = rows.find((d) => d.id === selected) ?? rows[0];
+
   const actions: Decision[] = !item
     ? []
     : item.status === 'legacy'
@@ -117,18 +134,26 @@ export function DocumentReviewPanel() {
         : ['approved', 'manual_approved'].includes(item.status)
           ? ['revoke']
           : [];
+
   async function open(row: DocumentVerification) {
     try {
       const file = await verificationApi.file(row.id, true);
-      setPreview({ url: URL.createObjectURL(file), name: row.filename });
+      setPreview({
+        url: URL.createObjectURL(file),
+        name: row.filename,
+      });
       setError('');
     } catch {
       setError('El respaldo no está disponible.');
     }
   }
+
   return (
     <section className="rounded-xl border p-4">
-      <h2 className="text-lg font-bold">Documentos que requieren revisión</h2>
+      <h2 className="text-lg font-bold">
+        Documentos que requieren revisión
+      </h2>
+
       <div className="my-3 flex flex-wrap gap-2">
         {[
           ['pending', 'Pendientes'],
@@ -145,6 +170,7 @@ export function DocumentReviewPanel() {
           </Button>
         ))}
       </div>
+
       {queue.isLoading ? (
         <p>Cargando documentos…</p>
       ) : queue.isError ? (
@@ -168,6 +194,7 @@ export function DocumentReviewPanel() {
               </li>
             ))}
           </ul>
+
           <div>
             <strong>{item.filename}</strong>
             <p>
@@ -177,6 +204,7 @@ export function DocumentReviewPanel() {
               Habilidades:{' '}
               {item.skills.map((s) => s.name).join(', ') || 'Sin detecciones'}
             </p>
+
             <div className="mt-3 flex flex-wrap gap-2">
               <Button
                 variant="outline"
@@ -185,6 +213,7 @@ export function DocumentReviewPanel() {
               >
                 {item.available ? 'Visualizar respaldo' : 'No está disponible'}
               </Button>
+
               {actions.map((decision) => (
                 <Button
                   key={decision}
@@ -204,6 +233,7 @@ export function DocumentReviewPanel() {
           </div>
         </div>
       )}
+
       <ConfirmActionDialog
         open={!!confirmation}
         title="Confirmar decisión"
@@ -221,6 +251,7 @@ export function DocumentReviewPanel() {
           if (confirmation) mutation.mutate(confirmation);
         }}
       />
+
       <Dialog
         open={!!preview}
         onOpenChange={(v) => {
