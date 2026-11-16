@@ -38,6 +38,8 @@ export class NotificationsService {
       channels,
     } = request;
     const includeInApp = !channels || channels.includes('IN_APP');
+    const includePush = !channels || channels.includes('PUSH');
+    const includeEmail = !channels || channels.includes('EMAIL');
 
     const finalRecipients = recipientIds.filter((id) => id !== actorId);
     if (finalRecipients.length === 0) {
@@ -117,7 +119,7 @@ export class NotificationsService {
     let pushStatus: NotifyResult['pushStatus'] = 'skipped';
     let emailStatus: NotifyResult['emailStatus'] = 'skipped';
 
-    if (pushTargets.length > 0) {
+    if (includePush && pushTargets.length > 0) {
       try {
         pushStatus = await this.pushDispatcher.dispatchToUsers(
           pushTargets,
@@ -133,7 +135,7 @@ export class NotificationsService {
       }
     }
 
-    if (emailTargets.length > 0) {
+    if (includeEmail && emailTargets.length > 0) {
       try {
         emailStatus = await this.mailDispatcher.dispatchToUsers(emailTargets, title, body, actionUrl);
       } catch (e) {
