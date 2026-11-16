@@ -14,6 +14,7 @@ import {
   subscribeAccessToken,
   isAccessTokenReady,
 } from "@/shared/services/storage/access-token-storage";
+import { setCurrentSessionUserId } from "@/shared/services/storage/session-user-id-storage";
 import type { AuthContextValue } from "@/shared/types/auth-context-value.types";
 import type { AuthProviderProps } from "@/shared/types/auth-provider-props.types";
 
@@ -39,6 +40,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     if (isApiError(session.error) && session.error.response?.status === 401) endSession();
   }, [session.error]);
+
+  useEffect(() => {
+    if (session.data?.id) {
+      setCurrentSessionUserId(session.data.id);
+    }
+  }, [session.data?.id]);
 
   async function refreshRoles() {
     if (!accessToken) return;
