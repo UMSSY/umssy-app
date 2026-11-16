@@ -93,6 +93,6 @@ describe('HeatmapsService', () => {
 
     expect(careers.listCareers).toHaveBeenCalledWith('desc');
     expect(result.baseCount).toBe(1);
-    expect(result.columns[0]?.label).toBe('Ing. de Sistemas (n=1)');
+    expect(result.columns[0]).toMatchObject({ label: 'Ing. de Sistemas', sublabel: '(n = 1)' });
   });
 });
