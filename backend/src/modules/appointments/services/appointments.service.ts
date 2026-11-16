@@ -283,7 +283,9 @@ export class AppointmentsService {
         ? appointment.studentId
         : appointment.mentorId;
 
-    return this.transactions.run(async ({ client }) => {
+    let cancelledRecord: AppointmentRecord | undefined;
+
+    const response = await this.transactions.run(async ({ client }) => {
       await this.appointmentsRepository.lockParticipants(
         [user.id, counterpartId],
         client,
@@ -352,8 +354,26 @@ export class AppointmentsService {
         client,
       );
 
+      cancelledRecord = cancelled;
+
       return this.appointmentMapper.toResponse(cancelled, user.id, currentNow);
     });
+
+    if (cancelledRecord) {
+      try {
+        await this.appointmentNotifications.notifyCancelled(
+          cancelledRecord,
+          user.id,
+        );
+      } catch (error) {
+        this.logger.error(
+          'No se pudo enviar el aviso de la cita cancelada',
+          error,
+        );
+      }
+    }
+
+    return response;
   }
 
   async getCounterpartPhoto(
