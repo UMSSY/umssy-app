@@ -274,7 +274,7 @@ export class CompanyAccessRequestsService {
           otp: rawCode,
         },
       );
-      const expiresInMinutes = '48 horas';
+      const expiresInMinutes = '2880';
       await this.mailService.send({
         to: current.email,
         subject: 'Tu código de activación de UMSSY para empresa',
@@ -282,7 +282,7 @@ export class CompanyAccessRequestsService {
         mjml: await loadMailTemplate('activation-code'),
         values: {
           code: rawCode,
-          expiresInMinutes: '48 horas',
+          expiresInMinutes,
           activationUrl,
         },
       });
