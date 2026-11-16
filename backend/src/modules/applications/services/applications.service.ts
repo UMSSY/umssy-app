@@ -12,10 +12,15 @@ import { ApplicationContactRestrictedException } from '../exceptions/application
 import type { ApplicationContactResponse } from '../types/application-contact.types.js';
 import { ApplicationMapper } from '../mappers/application.mapper.js';
 import { JobRecommendationsService } from '../../matching/services/job-recommendations.service.js';
+import { StateChangedDto } from '../notifications/state-changed.dto.js';
+import { toApplicationStatusCode } from '../notifications/state-changed.mapper.js';
 import {
-  StateChangedDto,
-  toApplicationStatusCode,
-} from '../notifications/state-changed.dto.js';
+  NOTIFY_TIMEOUT_MS,
+  STATE_CHANGED_ACTION_PATH,
+} from '../notifications/state-changed.constants.js';
+import type { NotifyStateChangedParams } from '../notifications/state-changed.types.js';
+import type { ApplicationDecisionContext } from '../types/application-decision-context.types.js';
+import { JobOffersService } from '../../job-offers/services/job-offers.service.js';
 import { NotificationsService } from '../../notifications/services/notifications.service.js';
 import { ConfigService } from '@nestjs/config';
 import { NotificationType } from '../../notifications/types/notification-type.enum.js';
@@ -36,6 +41,7 @@ export class ApplicationsService {
     private readonly matching: JobRecommendationsService,
     private readonly notifications: NotificationsService,
     private readonly config: ConfigService,
+    private readonly jobOffers: JobOffersService,
   ) {}
 
   async findMyApplications(
@@ -172,17 +178,8 @@ export class ApplicationsService {
     if (!result.count) throw new ApplicationNotWithdrawableException();
   }
 
-  public async notifyStateChanged(p: {
-    recipientId: string;
-    applicationId: string;
-    previousStatus: ApplicationStatus;
-    newStatus: ApplicationStatus;
-    jobTitle: string;
-    companyName: string;
-  }): Promise<void> {
-    // D-14: sin cambio real de estado no hay notificación.
+  public async notifyStateChanged(p: NotifyStateChangedParams): Promise<void> {
     if (p.previousStatus === p.newStatus) return;
-    // AC-15.4: el retiro lo hace el propio postulante; no se le notifica.
     if (p.newStatus === ApplicationStatus.WITHDRAWN) return;
 
     try {
@@ -191,7 +188,7 @@ export class ApplicationsService {
         companyName: p.companyName,
         newStatus: toApplicationStatusCode(p.newStatus),
         previousStatus: toApplicationStatusCode(p.previousStatus),
-        actionUrl: `${this.config.getOrThrow('APP_URL')}/vacancies/my-applications`,
+        actionUrl: `${this.config.getOrThrow('APP_URL')}${STATE_CHANGED_ACTION_PATH}`,
       });
 
       await this.withTimeout(
@@ -205,10 +202,9 @@ export class ApplicationsService {
           },
           actionUrl: context.actionUrl,
         }),
-        5000,
+        NOTIFY_TIMEOUT_MS,
       );
     } catch (error) {
-      // La notificación es best-effort: nunca debe revertir el cambio de estado.
       this.logger.error(
         `No se pudo notificar el cambio de estado (application=${p.applicationId}, recipient=${p.recipientId})`,
         error instanceof Error ? error.stack : String(error),
@@ -236,8 +232,24 @@ export class ApplicationsService {
     return this.repository.findRecruitmentApplication(id);
   }
 
-  findApplicationDecisionContext(id: string) {
-    return this.repository.findApplicationDecisionContext(id);
+  async findApplicationDecisionContext(
+    id: string,
+  ): Promise<ApplicationDecisionContext | null> {
+    const application = await this.repository.findApplicationDecisionContext(id);
+    if (!application) return null;
+
+    const offer = await this.jobOffers.findOfferSummary(application.jobOfferId);
+    if (!offer) return null;
+
+    return {
+      id: application.id,
+      userId: application.userId,
+      statusTitle: application.status.title,
+      jobOfferId: application.jobOfferId,
+      companyId: offer.companyId,
+      jobTitle: offer.title,
+      companyName: offer.companyName,
+    };
   }
 
   recordRecruiterDecision(applicationId: string, target: string) {

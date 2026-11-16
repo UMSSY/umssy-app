@@ -91,10 +91,10 @@ export class RadarApplicationsService {
       ? [
           {
             user_id: application.userId,
-            company_id: application.jobOffer.companyId,
-            status_title: application.status.title,
-            job_title: application.jobOffer.title,
-            company_name: application.jobOffer.company.title,
+            company_id: application.companyId,
+            status_title: application.statusTitle,
+            job_title: application.jobTitle,
+            company_name: application.companyName,
           },
         ]
       : [];

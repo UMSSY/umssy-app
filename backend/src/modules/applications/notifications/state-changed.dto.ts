@@ -1,29 +1,5 @@
 import { z } from 'zod';
-import { ApplicationStatus } from '../types/applications.types.js';
-
-export const APPLICATION_STATUS_CODES = [
-  'IN_REVIEW',
-  'INTERVIEW',
-  'ACCEPTED',
-  'REJECTED',
-  'WITHDRAWN',
-] as const;
-
-export type ApplicationStatusCode = (typeof APPLICATION_STATUS_CODES)[number];
-
-const STATUS_CODE_BY_TITLE: Record<ApplicationStatus, ApplicationStatusCode> = {
-  [ApplicationStatus.IN_REVIEW]: 'IN_REVIEW',
-  [ApplicationStatus.INTERVIEW]: 'INTERVIEW',
-  [ApplicationStatus.ACCEPTED]: 'ACCEPTED',
-  [ApplicationStatus.REJECTED]: 'REJECTED',
-  [ApplicationStatus.WITHDRAWN]: 'WITHDRAWN',
-};
-
-export function toApplicationStatusCode(
-  title: string,
-): ApplicationStatusCode | undefined {
-  return STATUS_CODE_BY_TITLE[title as ApplicationStatus];
-}
+import { APPLICATION_STATUS_CODES } from './state-changed.constants.js';
 
 export const StateChangedDto = z
   .object({
@@ -34,5 +10,3 @@ export const StateChangedDto = z
     actionUrl: z.string().url(),
   })
   .strict();
-
-export type StateChangedPayload = z.infer<typeof StateChangedDto>;
