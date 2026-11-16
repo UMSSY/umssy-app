@@ -30,6 +30,7 @@ import {
   MEETING_ROOM_PREFIX,
 } from '../constants/meeting-url.constants.js';
 import { AppointmentNotificationsService } from '../notifications/appointment-notifications.service.js';
+import { PushDispatcherService } from '../../notifications/services/push-dispatcher.service.js';
 import { AppointmentsRepository } from '../repositories/appointments.repository.js';
 import {
   InMemoryOverlapSeed,
@@ -84,6 +85,8 @@ describe('GET /appointments/:id (integración HTTP del enlace de la reunión)', 
       .useValue(seed.mentorsService)
       .overrideProvider(AppointmentNotificationsService)
       .useValue({ notifyBooked: vi.fn(), notifyCancelled: vi.fn() })
+      .overrideProvider(PushDispatcherService)
+      .useValue({ dispatchToUsers: vi.fn() })
       .overrideProvider(PrismaService)
       .useValue({})
       .compile();
