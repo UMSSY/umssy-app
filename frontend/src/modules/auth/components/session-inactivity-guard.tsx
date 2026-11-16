@@ -37,7 +37,7 @@ export function SessionInactivityGuard() {
     ) {
       endSession();
       const reason = message.reason || "SESSION_REVOKED";
-      router.replace(`/session-closed?reason=${reason}`);
+      navigateTo(`/session-closed?reason=${reason}`);
     }
   });
 
