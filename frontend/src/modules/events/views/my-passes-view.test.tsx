@@ -479,6 +479,57 @@ describe("Mis pases", () => {
       await screen.findByRole('img', { name: 'Código QR del pase' }),
     ).toBeInTheDocument();
   });
+
+  it('shows the cancel button next to chat only for confirmed registrations before Bolivia start time', async () => {
+    vi.setSystemTime(new Date('2026-10-20T12:59:59Z'));
+    getMine.mockResolvedValue([
+      pass,
+      { ...pass, id: 'reg-pending', eventName: 'Pendiente', status: 'PENDING' },
+    ]);
+    render(<MyPassesView />);
+    const cancelButtons = await screen.findAllByRole('button', {
+      name: 'Cancelar inscripción',
+    });
+    expect(cancelButtons).toHaveLength(1);
+    expect(cancelButtons[0]).toHaveTextContent('Cancelar');
+    expect(cancelButtons[0]).toBeEnabled();
+  });
+
+  it('hides the cancel button at the exact Bolivia workshop start time without reloading', async () => {
+    vi.setSystemTime(new Date('2026-10-20T12:59:59.900Z'));
+    getMine.mockResolvedValue([pass]);
+    render(<MyPassesView />);
+    expect(
+      await screen.findByRole('button', { name: 'Cancelar inscripción' }),
+    ).toBeInTheDocument();
+
+    vi.setSystemTime(new Date('2026-10-20T13:00:00Z'));
+    await waitFor(() =>
+      expect(
+        screen.queryByRole('button', { name: 'Cancelar inscripción' }),
+      ).not.toBeInTheDocument(),
+    );
+  });
+
+  it('disables the cancel button when offline', async () => {
+    const userToken = `h.${btoa(JSON.stringify({ sub: 'user-offline' }))}.s`;
+    await saveAccessToken(userToken);
+    await offlinePassesStore.save('user-offline', [
+      { ...pass, qrToken: 'c'.repeat(64) },
+    ]);
+    vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
+    onlineManager.setOnline(false);
+
+    render(<MyPassesView />);
+    const cancelButton = await screen.findByRole('button', {
+      name: 'Cancelar inscripción',
+    });
+    expect(cancelButton).toBeDisabled();
+    expect(cancelButton).toHaveAttribute('title', 'Requiere conexión a Internet');
+
+    vi.restoreAllMocks();
+    onlineManager.setOnline(true);
+  });
 });
 
 describe('Mis pases sin conexión', () => {

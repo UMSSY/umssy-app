@@ -101,6 +101,7 @@ export function MyPassesView({ onOpenWorkshopChat }: MyPassesViewProps = {}) {
                     registrationId={item.id}
                     onOpenChat={onOpenWorkshopChat}
                     chatDisabledReason={offlineReason}
+                    cancelDisabledReason={offlineReason}
                     isAvailableOffline={
                       status === 'live' && item.id in offlineQrTokens
                     }
