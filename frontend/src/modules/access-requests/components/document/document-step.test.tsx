@@ -250,7 +250,7 @@ describe("archivos del paso 2", () => {
   const files = ["document-dropzone.tsx", "document-preview-card.tsx", "document-step.tsx"];
 
   it.each(files)("%s no tiene colores hex ni capture ni los términos prohibidos", (name) => {
-    const source = readFileSync(path.resolve(process.cwd(), "src/modules/access-request/components/document", name), "utf8");
+    const source = readFileSync(path.resolve(process.cwd(), "src/modules/access-requests/components/document", name), "utf8");
 
     expect(source).not.toMatch(/#[0-9a-fA-F]{3,8}\b/);
     expect(source).not.toMatch(/capture/i);

@@ -1,6 +1,6 @@
 import "@/shared/testing/indexed-db.mock";
 import { saveAccessToken, clearAccessToken } from "@/shared/services/storage/access-token-storage";
-import { registrationsService } from "@/modules/registrations";
+import { registrationsService } from "@/modules/event-registrations";
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";

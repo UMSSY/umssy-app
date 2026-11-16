@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { educationsService } from "@/modules/education/services/educations.service";
+import { educationsService } from "@/modules/educations/services/educations.service";
 import { profileService } from "@/modules/profile/services/profile.service";
 import type { ProfileResponse } from "@/modules/profile";
 import { skillsService } from "@/modules/skills/services/skills.service";
@@ -16,7 +16,7 @@ import { runCvApplyTasks } from "./run-cv-apply-tasks";
 vi.mock("@/modules/profile/services/profile.service", () => ({
   profileService: { updatePersonalInfo: vi.fn(), updatePresentation: vi.fn() },
 }));
-vi.mock("@/modules/education/services/educations.service", () => ({
+vi.mock("@/modules/educations/services/educations.service", () => ({
   educationsService: { createEducation: vi.fn() },
 }));
 vi.mock("@/modules/work-experience/services/work-experience.service", () => ({

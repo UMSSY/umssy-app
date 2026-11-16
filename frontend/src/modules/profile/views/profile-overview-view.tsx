@@ -15,10 +15,10 @@ import { useProfilePhoto } from "../hooks/use-profile-photo";
 import { isProfileComplete } from "../utils/is-profile-complete";
 import { toProfileSummary } from "../utils/to-profile-summary";
 
-const EducationProfileSection = dynamic(() => import("@/modules/education").then((module) => module.EducationProfileSection));
+const EducationProfileSection = dynamic(() => import("@/modules/educations").then((module) => module.EducationProfileSection));
 const WorkExperienceProfileSection = dynamic(() => import("@/modules/work-experience").then((module) => module.WorkExperienceProfileSection));
 const CertificationProfileSection = dynamic(() => import("@/modules/certifications").then((module) => module.CertificationProfileSection));
-const CvExportButton = dynamic(() => import("@/modules/documents").then((module) => module.CvExportButton));
+const CvExportButton = dynamic(() => import("@/modules/cv").then((module) => module.CvExportButton));
 const SkillsProfileSection = dynamic(() => import("@/modules/skills").then((module) => module.SkillsProfileSection));
 
 export function ProfileOverviewView() {

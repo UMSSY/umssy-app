@@ -8,7 +8,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MAX_FILE_SIZE_BYTES } from "@/modules/profile/config/file-upload.config";
 import type { ProfileResponse } from "@/modules/profile";
 import { profileService } from "@/modules/profile/services/profile.service";
-import { educationsService } from "@/modules/education/services/educations.service";
+import { educationsService } from "@/modules/educations/services/educations.service";
 import { skillsService } from "@/modules/skills/services/skills.service";
 import { documentsService } from "../services/documents.service";
 import type { CvPage } from "../types/cv-page.types";
@@ -39,7 +39,7 @@ vi.mock("@/modules/skills/services/skills.service", () => ({
   skillsService: { getMySkills: vi.fn(), saveMySkills: vi.fn(), addSkills: vi.fn() },
 }));
 
-vi.mock("@/modules/education/services/educations.service", () => ({
+vi.mock("@/modules/educations/services/educations.service", () => ({
   educationsService: { getInstitutions: vi.fn(), getDegrees: vi.fn(), createEducation: vi.fn() },
 }));
 

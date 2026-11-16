@@ -14,7 +14,7 @@ vi.mock("@/modules/profile/services/profile.service", () => ({
   },
 }));
 
-vi.mock("@/modules/education/services/educations.service", () => ({
+vi.mock("@/modules/educations/services/educations.service", () => ({
   educationsService: {
     getInstitutions: vi.fn().mockResolvedValue([
       { name: "Universidad Mayor de San Simón (UMSS)", aliases: ["UMSS"] },

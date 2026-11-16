@@ -1,4 +1,4 @@
-import { DEGREE_CATALOG_FIXTURE } from "@/modules/education/testing/degree-catalog.fixture";
+import { DEGREE_CATALOG_FIXTURE } from "@/modules/educations/testing/degree-catalog.fixture";
 import { describe, expect, it } from 'vitest';
 import { getEducationDegrees, resolveEducationDegree } from './resolve-education-degree';
 

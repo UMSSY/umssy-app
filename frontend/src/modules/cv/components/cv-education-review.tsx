@@ -9,7 +9,7 @@ import {
   resolveEducationInstitution,
   useEducationDegrees,
   useEducationInstitutions,
-} from "@/modules/education";
+} from "@/modules/educations";
 import { FormField } from "@/modules/profile";
 import { DateField } from "@/shared/components/date-field";
 import { CV_REVIEW_TEXTS } from "../constants/cv-extraction.constants";

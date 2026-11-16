@@ -1,6 +1,6 @@
 import type { PersonalInfoValues } from "@/modules/profile";
 import { PROFILE_ME_QUERY_KEY, PROFILE_SKILLS_RADAR_QUERY_KEY } from "@/modules/profile";
-import { EDUCATIONS_QUERY_KEY } from "@/modules/education";
+import { EDUCATIONS_QUERY_KEY } from "@/modules/educations";
 import { WORK_EXPERIENCES_QUERY_KEY } from "@/modules/work-experience";
 import { MY_SKILLS_QUERY_KEY } from "@/modules/skills";
 import type { CvContactField } from "../types/cv-contact-field.types";

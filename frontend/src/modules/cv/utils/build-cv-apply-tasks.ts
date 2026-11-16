@@ -1,4 +1,4 @@
-import { educationsService } from "@/modules/education";
+import { educationsService } from "@/modules/educations";
 import type { ProfileResponse } from "@/modules/profile";
 import { profileService } from "@/modules/profile";
 import { skillsService } from "@/modules/skills";

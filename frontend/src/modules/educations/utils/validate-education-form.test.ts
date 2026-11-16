@@ -1,4 +1,4 @@
-import { DEGREE_CATALOG_FIXTURE } from "@/modules/education/testing/degree-catalog.fixture";
+import { DEGREE_CATALOG_FIXTURE } from "@/modules/educations/testing/degree-catalog.fixture";
 import { describe, expect, it } from "vitest";
 import type { EducationFormValues } from "../types/education-form-values.types";
 import { validateEducationForm as validate } from "./validate-education-form";

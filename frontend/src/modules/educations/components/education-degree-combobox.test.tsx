@@ -1,4 +1,4 @@
-import { DEGREE_CATALOG_FIXTURE } from "@/modules/education/testing/degree-catalog.fixture";
+import { DEGREE_CATALOG_FIXTURE } from "@/modules/educations/testing/degree-catalog.fixture";
 import { Button as TestButton } from "@/components/ui/button";
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import { useState } from 'react';
