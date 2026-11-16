@@ -14,6 +14,28 @@ export interface CreateCompanyRequestPayload {
   username: string;
 }
 
+export interface UpdateCompanyPayload {
+  companyName?: string;
+  sector?: string;
+  cityId?: string;
+  description?: string;
+  email?: string;
+  phone?: string;
+  websiteUrl?: string;
+  username?: string;
+}
+
+export interface RequestCorrectionPayload {
+  reasonCategory: string;
+  customDetails: string;
+}
+
+export interface RejectCompanyPayload {
+  reason?: string;
+  reasonCategory?: string;
+  customDetails?: string;
+}
+
 export interface SubmitCompanyRequestResult {
   id: string;
   requestCode: string;
@@ -22,10 +44,26 @@ export interface SubmitCompanyRequestResult {
 }
 
 export type CompanyRequestStatus =
-  | "PENDING"
-  | "IN_REVIEW"
-  | "APPROVED"
-  | "REJECTED";
+  'PENDING' | 'IN_REVIEW' | 'APPROVED' | 'REJECTED' | 'OBSERVED' | string;
+
+export interface CompanyOcrFieldDetail {
+  declared: string;
+  detectedText: string | null;
+  matched: boolean;
+}
+
+export interface CompanyOcrAnalysisResults {
+  companyName?: CompanyOcrFieldDetail;
+  city?: CompanyOcrFieldDetail;
+  email?: CompanyOcrFieldDetail;
+  phone?: CompanyOcrFieldDetail;
+  websiteUrl?: CompanyOcrFieldDetail;
+  sector?: CompanyOcrFieldDetail;
+  requestIntent?: CompanyOcrFieldDetail;
+  companyNameMatched?: boolean;
+  departmentMatched?: boolean;
+  requestIntentMatched?: boolean;
+}
 
 export interface CompanyAccessRequestItem {
   id: string;
@@ -41,16 +79,12 @@ export interface CompanyAccessRequestItem {
   reviewedAt: string | null;
   rejectionReason: string | null;
   ocrMatchScore: number | null;
-  ocrFieldResults: {
-    companyNameMatched?: boolean;
-    departmentMatched?: boolean;
-    requestIntentMatched?: boolean;
-  } | null;
+  ocrFieldResults: CompanyOcrAnalysisResults | null;
   logoFileId: string | null;
   documentFileId: string | null;
   approvedCompanyId: string | null;
   status: { id: string; title: CompanyRequestStatus };
-  city: { id: string; name: string };
+  city: { id: string; name?: string; title?: string };
 }
 
 export interface CompanyRequestsSummary {

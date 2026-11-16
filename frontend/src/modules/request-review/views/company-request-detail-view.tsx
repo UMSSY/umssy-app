@@ -9,6 +9,8 @@ import {
   Building2,
   Check,
   CheckCircle2,
+  ChevronDown,
+  ChevronUp,
   Clock,
   Download,
   ExternalLink,
@@ -17,7 +19,13 @@ import {
   Globe,
   ImageIcon,
   Loader2,
+  Mail,
+  MapPin,
   Maximize2,
+  Pencil,
+  Phone,
+  RotateCcw,
+  Save,
   ShieldCheck,
   X,
   XCircle,
@@ -39,18 +47,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Textarea } from '@/components/ui/textarea';
 import { companyAccessRequestService } from '@/modules/access-request/services/company-access-request.service';
-import type { CompanyAccessRequestItem } from '@/modules/access-request/types/company-access-request.types';
+import type {
+  CompanyAccessRequestItem,
+  CompanyOcrFieldDetail,
+  UpdateCompanyPayload,
+} from '@/modules/access-request/types/company-access-request.types';
 import { DocumentViewer } from '../components/detail/document-viewer';
 
 const STATUS_CONFIG: Record<
@@ -66,8 +73,8 @@ const STATUS_CONFIG: Record<
     label: 'Pendiente',
     variant: 'secondary',
     bgClass:
-      'bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-400',
-    textClass: 'text-amber-600',
+      'bg-slate-100 border-slate-300 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
+    textClass: 'text-slate-600',
   },
   IN_REVIEW: {
     label: 'En revisión',
@@ -75,6 +82,13 @@ const STATUS_CONFIG: Record<
     bgClass:
       'bg-blue-500/10 border-blue-500/30 text-blue-700 dark:text-blue-400',
     textClass: 'text-blue-600',
+  },
+  OBSERVED: {
+    label: 'Subsanación solicitada',
+    variant: 'secondary',
+    bgClass:
+      'bg-rose-50 border-rose-300 text-rose-800 dark:bg-rose-950/40 dark:text-rose-300',
+    textClass: 'text-rose-600',
   },
   APPROVED: {
     label: 'Aprobada',
@@ -92,6 +106,22 @@ const STATUS_CONFIG: Record<
   },
 };
 
+const CORRECTION_REASONS = [
+  'Carta membretada sin firma o sello institucional',
+  'Discrepancia entre la razón social declarada y el documento',
+  'Falta información de contacto corporativo verificable',
+  'Documento ilegible, incompleto o de baja resolución',
+  'Otro motivo de observación',
+];
+
+const REJECTION_REASONS = [
+  'Empresa no verificable o inexistente',
+  'Documentación no auténtica o con inconsistencias graves',
+  'Actividad o rubro incompatible con las políticas universitarias',
+  'Reincidencia en envío de datos apócrifos',
+  'Otro motivo de rechazo',
+];
+
 export function CompanyRequestDetailView({ id }: { id: string }) {
   const router = useRouter();
   const [item, setItem] = useState<CompanyAccessRequestItem | null>(null);
@@ -101,12 +131,34 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [isDocMinimized, setIsDocMinimized] = useState(false);
+
+  // Modales
   const [showApproveDialog, setShowApproveDialog] = useState(false);
+  const [showCorrectionDialog, setShowCorrectionDialog] = useState(false);
   const [showRejectDialog, setShowRejectDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
   const [showLogoModal, setShowLogoModal] = useState(false);
   const [logoBg, setLogoBg] = useState<'light' | 'dark' | 'checkered'>('light');
-  const [rejectReason, setRejectReason] = useState('');
+
+  // Subsanación
+  const [correctionCategory, setCorrectionCategory] = useState(
+    CORRECTION_REASONS[0],
+  );
+  const [correctionDetails, setCorrectionDetails] = useState('');
+
+  // Rechazo
+  const [rejectionCategory, setRejectionCategory] = useState(
+    REJECTION_REASONS[0],
+  );
+  const [rejectionDetails, setRejectionDetails] = useState('');
+
+  // Edición de ficha
+  const [editForm, setEditForm] = useState<UpdateCompanyPayload>({});
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
+
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -123,6 +175,15 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
         return;
       }
       setItem(detailRes.data);
+      setEditForm({
+        companyName: detailRes.data.companyName,
+        sector: detailRes.data.sector,
+        description: detailRes.data.description,
+        email: detailRes.data.email,
+        phone: detailRes.data.phone,
+        websiteUrl: detailRes.data.websiteUrl ?? '',
+        username: detailRes.data.username,
+      });
 
       const [docBlob, logoBlob] = await Promise.all([
         companyAccessRequestService.getDocumentBlob(id),
@@ -167,14 +228,36 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
     router.push('/backoffice/empresas');
   }
 
-  async function handleReject() {
-    if (rejectReason.trim().length < 5) return;
+  async function handleCorrection() {
+    if (correctionDetails.trim().length < 5) return;
     setSubmitting(true);
     setError(null);
-    const res = await companyAccessRequestService.reject(
-      id,
-      rejectReason.trim(),
+    const res = await companyAccessRequestService.requestCorrection(id, {
+      reasonCategory: correctionCategory,
+      customDetails: correctionDetails.trim(),
+    });
+    setSubmitting(false);
+    setShowCorrectionDialog(false);
+    if (!res.ok) {
+      setError(res.message);
+      return;
+    }
+    setSuccessMessage(
+      'Se ha notificado a la empresa la solicitud de subsanación por correo electrónico.',
     );
+    // Actualizar datos del item localmente
+    const refreshed = await companyAccessRequestService.getDetail(id);
+    if (refreshed.ok) setItem(refreshed.data);
+  }
+
+  async function handleReject() {
+    if (rejectionDetails.trim().length < 5) return;
+    setSubmitting(true);
+    setError(null);
+    const res = await companyAccessRequestService.reject(id, {
+      reasonCategory: rejectionCategory,
+      customDetails: rejectionDetails.trim(),
+    });
     setSubmitting(false);
     setShowRejectDialog(false);
     if (!res.ok) {
@@ -182,6 +265,34 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
       return;
     }
     router.push('/backoffice/empresas');
+  }
+
+  async function handleSaveEdit() {
+    setIsSavingEdit(true);
+    setError(null);
+    const res = await companyAccessRequestService.updateDraft(id, editForm);
+    setIsSavingEdit(false);
+    if (!res.ok) {
+      setError(res.message);
+      return;
+    }
+    setShowEditDialog(false);
+    setSuccessMessage(
+      'Ficha oficial actualizada y contraste OCR recalculado exitosamente.',
+    );
+    const refreshed = await companyAccessRequestService.getDetail(id);
+    if (refreshed.ok) {
+      setItem(refreshed.data);
+      setEditForm({
+        companyName: refreshed.data.companyName,
+        sector: refreshed.data.sector,
+        description: refreshed.data.description,
+        email: refreshed.data.email,
+        phone: refreshed.data.phone,
+        websiteUrl: refreshed.data.websiteUrl ?? '',
+        username: refreshed.data.username,
+      });
+    }
   }
 
   if (loading) {
@@ -222,20 +333,107 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
   }
 
   const ocr = item.ocrFieldResults;
-  const matchedCount = [
-    ocr?.companyNameMatched,
-    ocr?.departmentMatched,
-    ocr?.requestIntentMatched,
-  ].filter(Boolean).length;
+  const cityName = item.city.title || item.city.name || 'No especificada';
+
+  // Obtener estado por atributo desde el nuevo modelo de OCR
+  const getFieldComparison = (
+    fieldKey: keyof NonNullable<typeof ocr>,
+    fallbackDeclared: string,
+  ): CompanyOcrFieldDetail => {
+    const detail = ocr?.[fieldKey] as CompanyOcrFieldDetail | undefined;
+    if (detail && typeof detail === 'object' && 'declared' in detail) {
+      return detail;
+    }
+    // Fallback si viene del formato legado de 3 booleanos
+    if (fieldKey === 'companyName') {
+      const isMatched = Boolean(ocr?.companyNameMatched);
+      return {
+        declared: fallbackDeclared,
+        detectedText: isMatched ? fallbackDeclared : null,
+        matched: isMatched,
+      };
+    }
+    if (fieldKey === 'requestIntent') {
+      const isMatched = Boolean(ocr?.requestIntentMatched);
+      return {
+        declared: 'Carta formal de solicitud de acceso a UMSSY',
+        detectedText: isMatched
+          ? 'Petición formal de acceso a la carrera/plataforma UMSS'
+          : null,
+        matched: isMatched,
+      };
+    }
+    return {
+      declared: fallbackDeclared,
+      detectedText: null,
+      matched: false,
+    };
+  };
+
+  const comparisonList = [
+    {
+      id: 'companyName',
+      label: 'Razón Social / Nombre de la Empresa',
+      icon: Building2,
+      data: getFieldComparison('companyName', item.companyName),
+    },
+    {
+      id: 'city',
+      label: 'Ciudad Sede',
+      icon: MapPin,
+      data: getFieldComparison('city', cityName),
+    },
+    {
+      id: 'email',
+      label: 'Correo Electrónico Institucional',
+      icon: Mail,
+      data: getFieldComparison('email', item.email),
+    },
+    {
+      id: 'phone',
+      label: 'Teléfono de Contacto',
+      icon: Phone,
+      data: getFieldComparison('phone', item.phone),
+    },
+    {
+      id: 'websiteUrl',
+      label: 'Sitio Web Corporativo',
+      icon: Globe,
+      data: getFieldComparison(
+        'websiteUrl',
+        item.websiteUrl || 'No especificado (Opcional)',
+      ),
+    },
+    {
+      id: 'sector',
+      label: 'Rubro / Sector Económico',
+      icon: Building2,
+      data: getFieldComparison('sector', item.sector),
+    },
+    {
+      id: 'requestIntent',
+      label: 'Intención Formal de Solicitud de Acceso',
+      icon: FileText,
+      data: getFieldComparison(
+        'requestIntent',
+        'Solicitud formal de cuenta institucional para reclutador en UMSSY',
+      ),
+    },
+  ];
+
+  const confirmedCount = comparisonList.filter((c) => c.data.matched).length;
+  const unconfirmedCount = comparisonList.length - confirmedCount;
 
   // Calculamos el score OCR en porcentaje (%)
   const ocrPercentage =
     item.ocrMatchScore !== null && item.ocrMatchScore !== undefined
       ? item.ocrMatchScore
-      : Math.round((matchedCount / 3) * 100);
+      : Math.round((confirmedCount / comparisonList.length) * 100);
 
   const canResolve =
-    item.status.title === 'PENDING' || item.status.title === 'IN_REVIEW';
+    item.status.title === 'PENDING' ||
+    item.status.title === 'IN_REVIEW' ||
+    item.status.title === 'OBSERVED';
 
   const statusConfig = STATUS_CONFIG[item.status.title] ?? {
     label: item.status.title,
@@ -253,7 +451,7 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
     : null;
 
   return (
-    <main className="mx-auto w-full max-w-7xl space-y-8 pb-12">
+    <main className="mx-auto w-full max-w-7xl space-y-8 pb-16">
       {/* ─── Encabezado principal y navegación ─── */}
       <header className="rounded-xl border border-border bg-surface p-6 shadow-xs">
         <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-text-secondary">
@@ -312,7 +510,7 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
               </div>
               <p className="mt-1 text-sm text-text-secondary">
                 <span className="font-medium text-ink">{item.sector}</span> ·{' '}
-                {item.city.name}
+                {cityName}
                 {item.submittedAt && (
                   <span>
                     {' '}
@@ -330,70 +528,144 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
             </div>
           </div>
 
-          {/* Acciones principales de dictamen en el encabezado */}
+          {/* Acciones principales de dictamen simétricas y estilizadas */}
           {canResolve && (
-            <div className="flex shrink-0 flex-wrap items-center gap-3">
+            <div className="flex shrink-0 flex-wrap items-center gap-2.5">
               <Button
                 type="button"
                 onClick={() => setShowApproveDialog(true)}
                 disabled={submitting}
-                className="bg-primary font-medium text-white shadow-xs hover:bg-primary/90"
+                className="h-10 bg-emerald-600 px-4 font-semibold text-white shadow-xs hover:bg-emerald-700"
               >
-                <Check className="mr-1.5 size-4" /> Aprobar solicitud
+                <Check className="mr-1.5 size-4" /> Aprobar y Dar de Alta
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowCorrectionDialog(true)}
+                disabled={submitting}
+                className="h-10 border-indigo-200 bg-indigo-50/60 px-4 font-medium text-indigo-700 shadow-xs hover:bg-indigo-100 hover:text-indigo-800"
+              >
+                <RotateCcw className="mr-1.5 size-4 text-indigo-600" />{' '}
+                Solicitar Subsanación
               </Button>
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setShowRejectDialog(true)}
                 disabled={submitting}
-                className="border-border font-medium hover:bg-surface-soft"
+                className="h-10 border-rose-200 bg-rose-50/60 px-4 font-medium text-rose-700 shadow-xs hover:bg-rose-100 hover:text-rose-800"
               >
-                <X className="mr-1.5 size-4 text-destructive" /> Rechazar
+                <X className="mr-1.5 size-4 text-rose-600" /> Rechazar
               </Button>
             </div>
           )}
         </div>
       </header>
 
-      {/* Alerta de error global si aplica */}
+      {/* Alertas de retroalimentación global */}
       {error && (
         <div
           role="alert"
-          className="flex items-center gap-3 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-900"
+          className="flex items-center gap-3 rounded-xl border border-rose-300 bg-rose-50 p-4 text-sm text-rose-900"
         >
           <AlertCircle className="size-5 shrink-0 text-rose-600" />
           <p>{error}</p>
         </div>
       )}
 
+      {successMessage && (
+        <div
+          role="alert"
+          className="flex items-center justify-between gap-3 rounded-xl border border-emerald-300 bg-emerald-50 p-4 text-sm text-emerald-900"
+        >
+          <div className="flex items-center gap-2.5">
+            <CheckCircle2 className="size-5 shrink-0 text-emerald-600" />
+            <p className="font-medium">{successMessage}</p>
+          </div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="xs"
+            onClick={() => setSuccessMessage(null)}
+            className="text-emerald-800 hover:bg-emerald-100"
+          >
+            <X className="size-4" />
+          </Button>
+        </div>
+      )}
+
       {/* ─────────────────────────────────────────────────────────────────────────────
-          1. SECCIÓN SUPERIOR: DOCUMENTO DE RESPALDO (CARTA MEMBRETADA)
-          Colocado en la parte superior, amplio y legible
+          1. DOCUMENTO DE RESPALDO (CARTA MEMBRETADA) CON VISOR MINIMIZABLE
+          Permite al admin ocultar o expandir el visor para no scrollear innecesariamente
           ───────────────────────────────────────────────────────────────────────────── */}
       <section className="space-y-3" aria-labelledby="section-document">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <FileText className="size-5 text-primary" />
             <h2 id="section-document" className="text-lg font-bold text-ink">
               Documento de Respaldo Oficial (Carta Membretada)
             </h2>
           </div>
-          {docUrl && (
-            <a
-              href={docUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setIsDocMinimized(!isDocMinimized)}
+              className="gap-1.5 text-xs font-semibold"
             >
-              <ExternalLink className="size-3.5" /> Abrir documento en nueva
-              pestaña
-            </a>
-          )}
+              {isDocMinimized ? (
+                <>
+                  <ChevronDown className="size-3.5" /> Expandir visor
+                </>
+              ) : (
+                <>
+                  <ChevronUp className="size-3.5" /> Minimizar visor
+                </>
+              )}
+            </Button>
+            {docUrl && (
+              <a
+                href={docUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-semibold text-primary transition-colors hover:bg-surface-soft"
+              >
+                <ExternalLink className="size-3.5" /> Abrir en nueva pestaña
+              </a>
+            )}
+          </div>
         </div>
 
         <Card className="overflow-hidden border-border bg-surface shadow-xs">
           <CardContent className="p-0">
-            {docUrl ? (
+            {isDocMinimized ? (
+              <div className="flex items-center justify-between border-b border-border bg-surface-soft/60 px-5 py-3">
+                <div className="flex items-center gap-3">
+                  <FileText className="size-5 text-primary" />
+                  <div>
+                    <p className="text-xs font-semibold text-ink">
+                      carta-solicitud-{item.requestCode ?? 'doc'}.
+                      {docIsImage ? 'png' : 'pdf'}
+                    </p>
+                    <p className="text-[11px] text-text-secondary">
+                      Visor minimizado temporalmente para optimizar la
+                      comparativa y acciones de dictamen.
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="xs"
+                  onClick={() => setIsDocMinimized(false)}
+                  className="gap-1 text-xs"
+                >
+                  <Maximize2 className="size-3.5" /> Expandir visor
+                </Button>
+              </div>
+            ) : docUrl ? (
               <DocumentViewer
                 url={docUrl}
                 mimeType={docMimeType}
@@ -401,7 +673,7 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
                 caption="Carta formal con membrete y sello presentada para la solicitud de acceso institucional a UMSSY."
               />
             ) : (
-              <div className="flex h-96 flex-col items-center justify-center p-8 text-center text-text-secondary">
+              <div className="flex h-64 flex-col items-center justify-center p-8 text-center text-text-secondary">
                 <FileText className="mb-2 size-12 text-slate-300" />
                 <p className="text-sm font-medium">
                   No se pudo cargar la vista previa del documento adjunto.
@@ -417,8 +689,134 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
       </section>
 
       {/* ─────────────────────────────────────────────────────────────────────────────
-          2. SECCIÓN INFERIOR: CONTRASTE PROFESIONAL Y VALIDACIÓN OCR
-          Colocado debajo del documento para cotejar datos declarados vs documento
+          2. FICHA OFICIAL PARA REGISTRO EN PLATAFORMA (DATOS DEFINITIVOS & EDICIÓN)
+          Muestra los datos que se guardarán, porcentaje de afinidad y botón para editar
+          ───────────────────────────────────────────────────────────────────────────── */}
+      <section className="space-y-4" aria-labelledby="section-official-card">
+        <Card className="border-border bg-surface shadow-xs">
+          <CardHeader className="border-b border-border pb-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-2.5">
+                <Building2 className="size-5 text-primary" />
+                <div>
+                  <CardTitle
+                    id="section-official-card"
+                    className="text-base font-bold text-ink"
+                  >
+                    Ficha Oficial para Registro en Plataforma
+                  </CardTitle>
+                  <CardDescription className="text-xs text-text-secondary">
+                    Información definitiva que se guardará en la base de datos y
+                    dará de alta a la empresa y su reclutador.
+                  </CardDescription>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3">
+                {/* Badge de afinidad / coincidencia documental */}
+                <div
+                  className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-bold ${
+                    ocrPercentage >= 60
+                      ? 'border-emerald-300 bg-emerald-50 text-emerald-800'
+                      : 'border-rose-300 bg-rose-50 text-rose-800'
+                  }`}
+                  title="Nivel de concordancia de la ficha con el documento membretado"
+                >
+                  <ShieldCheck
+                    className={`size-4 ${
+                      ocrPercentage >= 60 ? 'text-emerald-600' : 'text-rose-600'
+                    }`}
+                  />
+                  <span>{ocrPercentage}% Afinidad Documental</span>
+                </div>
+
+                {canResolve && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowEditDialog(true)}
+                    className="gap-1.5 border-border text-xs font-semibold hover:bg-surface-soft"
+                  >
+                    <Pencil className="size-3.5 text-primary" />
+                    Editar datos del registro
+                  </Button>
+                )}
+              </div>
+            </div>
+          </CardHeader>
+
+          <CardContent className="pt-5">
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+              <div className="rounded-lg border border-border/80 bg-surface-soft/40 p-3.5">
+                <span className="text-[11px] font-semibold tracking-wider text-text-secondary uppercase">
+                  Razón Social / Nombre Comercial
+                </span>
+                <p className="mt-1 font-bold text-ink">{item.companyName}</p>
+              </div>
+
+              <div className="rounded-lg border border-border/80 bg-surface-soft/40 p-3.5">
+                <span className="text-[11px] font-semibold tracking-wider text-text-secondary uppercase">
+                  Rubro / Sector
+                </span>
+                <p className="mt-1 font-bold text-ink">{item.sector}</p>
+              </div>
+
+              <div className="rounded-lg border border-border/80 bg-surface-soft/40 p-3.5">
+                <span className="text-[11px] font-semibold tracking-wider text-text-secondary uppercase">
+                  Ciudad Sede
+                </span>
+                <p className="mt-1 font-bold text-ink">{cityName}</p>
+              </div>
+
+              <div className="rounded-lg border border-border/80 bg-surface-soft/40 p-3.5">
+                <span className="text-[11px] font-semibold tracking-wider text-text-secondary uppercase">
+                  Correo Electrónico Institucional
+                </span>
+                <p className="mt-1 font-bold text-ink">{item.email}</p>
+              </div>
+
+              <div className="rounded-lg border border-border/80 bg-surface-soft/40 p-3.5">
+                <span className="text-[11px] font-semibold tracking-wider text-text-secondary uppercase">
+                  Teléfono de Contacto
+                </span>
+                <p className="mt-1 font-bold text-ink">{item.phone}</p>
+              </div>
+
+              <div className="rounded-lg border border-border/80 bg-surface-soft/40 p-3.5">
+                <span className="text-[11px] font-semibold tracking-wider text-text-secondary uppercase">
+                  Usuario Reclutador a Crear
+                </span>
+                <p className="mt-1 font-mono font-bold text-primary">
+                  @{item.username}
+                </p>
+              </div>
+
+              <div className="rounded-lg border border-border/80 bg-surface-soft/40 p-3.5 lg:col-span-3">
+                <span className="text-[11px] font-semibold tracking-wider text-text-secondary uppercase">
+                  Sitio Web Oficial
+                </span>
+                <p className="mt-1 font-mono text-xs font-semibold text-ink">
+                  {item.websiteUrl || 'No especificado'}
+                </p>
+              </div>
+
+              <div className="rounded-lg border border-border/80 bg-surface-soft/40 p-3.5 lg:col-span-3">
+                <span className="text-[11px] font-semibold tracking-wider text-text-secondary uppercase">
+                  Descripción Institucional
+                </span>
+                <p className="mt-1 text-xs leading-relaxed text-ink">
+                  {item.description}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* ─────────────────────────────────────────────────────────────────────────────
+          3. CONTRASTE DE DATOS Y VERIFICACIÓN OCR (BLOQUES COMPARATIVOS)
+          Compara campo por campo, verde si coincide, rojo opaco si no, sin amarillo
           ───────────────────────────────────────────────────────────────────────────── */}
       <section className="space-y-6" aria-labelledby="section-contrast">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3">
@@ -427,19 +825,19 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
               Contraste de Datos y Verificación OCR
             </h2>
             <p className="text-xs text-text-secondary">
-              Cotejo minucioso entre la información declarada en el formulario y
-              el contenido extraído del documento adjunto.
+              Cotejo minucioso campo por campo entre los datos del registro y el
+              contenido extraído del documento adjunto.
             </p>
           </div>
 
-          <div className="flex items-center gap-3 text-xs font-medium">
-            <span className="inline-flex items-center gap-1 text-emerald-700 dark:text-emerald-400">
-              <CheckCircle2 className="size-4" />
-              {matchedCount} criterios confirmados
+          <div className="flex items-center gap-3 text-xs font-semibold">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-emerald-800">
+              <CheckCircle2 className="size-4 text-emerald-600" />
+              {confirmedCount} criterios confirmados
             </span>
-            <span className="inline-flex items-center gap-1 text-amber-700 dark:text-amber-400">
-              <AlertCircle className="size-4" />
-              {3 - matchedCount} por verificar
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-rose-300 bg-rose-50 px-3 py-1 text-rose-800">
+              <XCircle className="size-4 text-rose-600" />
+              {unconfirmedCount} por verificar o no detectados
             </span>
           </div>
         </div>
@@ -460,18 +858,18 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
                 </span>
                 <Badge
                   variant={
-                    ocrPercentage >= 70
+                    ocrPercentage >= 60
                       ? 'default'
-                      : ocrPercentage >= 40
+                      : ocrPercentage >= 35
                         ? 'secondary'
                         : 'destructive'
                   }
                   className="font-semibold"
                 >
-                  {ocrPercentage >= 70
+                  {ocrPercentage >= 60
                     ? 'Alta Coincidencia'
-                    : ocrPercentage >= 40
-                      ? 'Coincidencia Media'
+                    : ocrPercentage >= 35
+                      ? 'Coincidencia Parcial'
                       : 'Baja Coincidencia'}
                 </Badge>
               </div>
@@ -485,279 +883,98 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
             <div className="w-full">
               <Progress value={ocrPercentage} className="h-2.5" />
             </div>
-
-            {/* Píldoras de verificación desglosadas */}
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-              <div
-                className={`flex items-start gap-2.5 rounded-lg border p-3 text-xs ${
-                  ocr?.companyNameMatched
-                    ? 'border-emerald-200 bg-emerald-50/60 text-emerald-950 dark:border-emerald-900/50 dark:bg-emerald-950/20 dark:text-emerald-300'
-                    : 'border-amber-200 bg-amber-50/60 text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/20 dark:text-amber-300'
-                }`}
-              >
-                {ocr?.companyNameMatched ? (
-                  <CheckCircle2 className="size-4 shrink-0 text-emerald-600" />
-                ) : (
-                  <AlertCircle className="size-4 shrink-0 text-amber-600" />
-                )}
-                <div>
-                  <p className="font-semibold">Nombre de la Empresa</p>
-                  <p className="mt-0.5 text-text-secondary">
-                    {ocr?.companyNameMatched
-                      ? 'Identificado en el texto de la carta'
-                      : 'No identificado en el documento'}
-                  </p>
-                </div>
-              </div>
-
-              <div
-                className={`flex items-start gap-2.5 rounded-lg border p-3 text-xs ${
-                  ocr?.departmentMatched
-                    ? 'border-emerald-200 bg-emerald-50/60 text-emerald-950 dark:border-emerald-900/50 dark:bg-emerald-950/20 dark:text-emerald-300'
-                    : 'border-amber-200 bg-amber-50/60 text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/20 dark:text-amber-300'
-                }`}
-              >
-                {ocr?.departmentMatched ? (
-                  <CheckCircle2 className="size-4 shrink-0 text-emerald-600" />
-                ) : (
-                  <AlertCircle className="size-4 shrink-0 text-amber-600" />
-                )}
-                <div>
-                  <p className="font-semibold">Destinatario / Carrera</p>
-                  <p className="mt-0.5 text-text-secondary">
-                    {ocr?.departmentMatched
-                      ? 'Menciona Sistemas / Informática / UMSS'
-                      : 'Sin mención explícita a la carrera'}
-                  </p>
-                </div>
-              </div>
-
-              <div
-                className={`flex items-start gap-2.5 rounded-lg border p-3 text-xs ${
-                  ocr?.requestIntentMatched
-                    ? 'border-emerald-200 bg-emerald-50/60 text-emerald-950 dark:border-emerald-900/50 dark:bg-emerald-950/20 dark:text-emerald-300'
-                    : 'border-amber-200 bg-amber-50/60 text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/20 dark:text-amber-300'
-                }`}
-              >
-                {ocr?.requestIntentMatched ? (
-                  <CheckCircle2 className="size-4 shrink-0 text-emerald-600" />
-                ) : (
-                  <AlertCircle className="size-4 shrink-0 text-amber-600" />
-                )}
-                <div>
-                  <p className="font-semibold">Intención de la Solicitud</p>
-                  <p className="mt-0.5 text-text-secondary">
-                    {ocr?.requestIntentMatched
-                      ? 'Petición explícita de acceso detectada'
-                      : 'Petición no identificada con claridad'}
-                  </p>
-                </div>
-              </div>
-            </div>
           </CardContent>
         </Card>
 
-        {/* Tabla comparativa estructurada */}
-        <Card className="overflow-hidden border-border bg-surface shadow-xs">
-          <CardHeader className="border-b border-border pb-4">
-            <CardTitle className="text-base font-bold text-ink">
-              Tabla Comparativa de Información
-            </CardTitle>
-            <CardDescription className="text-xs text-text-secondary">
-              Detalle de cada atributo registrado frente a la validación en el
-              documento adjunto.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader className="bg-surface-soft">
-                <TableRow>
-                  <TableHead className="w-1/4 font-semibold text-text-secondary">
-                    Campo
-                  </TableHead>
-                  <TableHead className="w-1/3 font-semibold text-text-secondary">
-                    Dato Declarado
-                  </TableHead>
-                  <TableHead className="w-1/3 font-semibold text-text-secondary">
-                    Evidencia en Documento (OCR)
-                  </TableHead>
-                  <TableHead className="w-28 text-right font-semibold text-text-secondary">
-                    Estado
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {/* 1. Razón Social */}
-                <TableRow>
-                  <TableCell className="font-medium text-ink">
-                    Razón Social / Empresa
-                  </TableCell>
-                  <TableCell className="font-semibold text-ink">
-                    {item.companyName}
-                  </TableCell>
-                  <TableCell className="text-xs text-text-secondary">
-                    {ocr?.companyNameMatched ? (
-                      <span className="text-emerald-700 dark:text-emerald-400">
-                        Coincidencia exacta o parcial detectada en la carta
-                      </span>
-                    ) : (
-                      <span className="text-amber-700 dark:text-amber-400">
-                        No se identificó el nombre en el texto extraído
-                      </span>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {ocr?.companyNameMatched ? (
-                      <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
-                        <CheckCircle2 className="size-3.5" /> Coincide
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700 dark:bg-amber-950/40 dark:text-amber-300">
-                        <AlertCircle className="size-3.5" /> Revisar
-                      </span>
-                    )}
-                  </TableCell>
-                </TableRow>
+        {/* Cuadrícula de Bloques Comparativos Separados */}
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          {comparisonList.map((comp) => {
+            const IconComponent = comp.icon;
+            const isMatched = comp.data.matched;
 
-                {/* 2. Destinatario */}
-                <TableRow>
-                  <TableCell className="font-medium text-ink">
-                    Destinatario Institucional
-                  </TableCell>
-                  <TableCell className="text-ink">
-                    Ing. Sistemas / Informática · UMSS
-                  </TableCell>
-                  <TableCell className="text-xs text-text-secondary">
-                    {ocr?.departmentMatched ? (
-                      <span className="text-emerald-700 dark:text-emerald-400">
-                        Referencia institucional formal identificada
+            return (
+              <div
+                key={comp.id}
+                className={`flex flex-col justify-between rounded-xl border p-4.5 shadow-2xs transition-all ${
+                  isMatched
+                    ? 'border-emerald-300 bg-emerald-50/40 text-emerald-950 dark:border-emerald-900/60 dark:bg-emerald-950/20 dark:text-emerald-200'
+                    : 'border-rose-300 bg-rose-50/40 text-rose-950 dark:border-rose-900/60 dark:bg-rose-950/20 dark:text-rose-200'
+                }`}
+              >
+                <div>
+                  <div className="flex items-center justify-between gap-2 border-b border-border/50 pb-2.5">
+                    <div className="flex items-center gap-2">
+                      <IconComponent
+                        className={`size-4 ${
+                          isMatched ? 'text-emerald-700' : 'text-rose-700'
+                        }`}
+                      />
+                      <span className="text-xs font-bold text-ink">
+                        {comp.label}
                       </span>
-                    ) : (
-                      <span className="text-amber-700 dark:text-amber-400">
-                        Sin mención clara a la carrera o universidad
-                      </span>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {ocr?.departmentMatched ? (
-                      <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
-                        <CheckCircle2 className="size-3.5" /> Coincide
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700 dark:bg-amber-950/40 dark:text-amber-300">
-                        <AlertCircle className="size-3.5" /> Revisar
-                      </span>
-                    )}
-                  </TableCell>
-                </TableRow>
-
-                {/* 3. Propósito */}
-                <TableRow>
-                  <TableCell className="font-medium text-ink">
-                    Intención de Solicitud
-                  </TableCell>
-                  <TableCell className="text-ink">
-                    Acceso y registro de cuenta empresarial
-                  </TableCell>
-                  <TableCell className="text-xs text-text-secondary">
-                    {ocr?.requestIntentMatched ? (
-                      <span className="text-emerald-700 dark:text-emerald-400">
-                        Palabras clave de solicitud formal reconocidas
-                      </span>
-                    ) : (
-                      <span className="text-amber-700 dark:text-amber-400">
-                        Vocabulario de solicitud no reconocido
-                      </span>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {ocr?.requestIntentMatched ? (
-                      <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
-                        <CheckCircle2 className="size-3.5" /> Coincide
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700 dark:bg-amber-950/40 dark:text-amber-300">
-                        <AlertCircle className="size-3.5" /> Revisar
-                      </span>
-                    )}
-                  </TableCell>
-                </TableRow>
-
-                {/* 4. Rubro y Ciudad */}
-                <TableRow>
-                  <TableCell className="font-medium text-ink">
-                    Rubro y Ubicación
-                  </TableCell>
-                  <TableCell className="text-ink">
-                    {item.sector} · {item.city.name}
-                  </TableCell>
-                  <TableCell className="text-xs text-text-secondary">
-                    Dato declarativo en registro
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <span className="inline-flex items-center gap-1 rounded-md bg-surface-soft px-2 py-0.5 text-xs font-medium text-ink">
-                      Declarado
+                    </div>
+                    <span
+                      className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-bold ${
+                        isMatched
+                          ? 'border-emerald-300 bg-emerald-100/90 text-emerald-800'
+                          : 'border-rose-300 bg-rose-100/90 text-rose-800'
+                      }`}
+                    >
+                      {isMatched ? (
+                        <>
+                          <CheckCircle2 className="size-3 text-emerald-600" />{' '}
+                          Coincide
+                        </>
+                      ) : (
+                        <>
+                          <XCircle className="size-3 text-rose-600" /> No
+                          detectado
+                        </>
+                      )}
                     </span>
-                  </TableCell>
-                </TableRow>
+                  </div>
 
-                {/* 5. Contacto corporativo */}
-                <TableRow>
-                  <TableCell className="font-medium text-ink">
-                    Correo y Teléfono
-                  </TableCell>
-                  <TableCell className="text-ink">
-                    {item.email} · {item.phone}
-                  </TableCell>
-                  <TableCell className="text-xs text-text-secondary">
-                    Canal corporativo de contacto
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <span className="inline-flex items-center gap-1 rounded-md bg-surface-soft px-2 py-0.5 text-xs font-medium text-ink">
-                      Declarado
-                    </span>
-                  </TableCell>
-                </TableRow>
+                  <div className="mt-3 space-y-2.5 text-xs">
+                    <div>
+                      <span className="font-semibold text-text-secondary">
+                        Dato Declarado en Formulario:
+                      </span>
+                      <p className="mt-0.5 font-bold text-ink">
+                        {comp.data.declared}
+                      </p>
+                    </div>
 
-                {/* 6. Usuario inicial */}
-                <TableRow>
-                  <TableCell className="font-medium text-ink">
-                    Usuario Reclutador
-                  </TableCell>
-                  <TableCell className="font-mono text-ink">
-                    @{item.username}
-                  </TableCell>
-                  <TableCell className="text-xs text-text-secondary">
-                    Cuenta administrativa a crear
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <span className="inline-flex items-center gap-1 rounded-md bg-surface-soft px-2 py-0.5 text-xs font-medium text-ink">
-                      Pendiente
-                    </span>
-                  </TableCell>
-                </TableRow>
-
-                {/* 7. Descripción */}
-                <TableRow>
-                  <TableCell className="font-medium text-ink">
-                    Descripción Institucional
-                  </TableCell>
-                  <TableCell
-                    colSpan={3}
-                    className="text-xs leading-relaxed text-ink"
-                  >
-                    {item.description}
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+                    <div>
+                      <span className="font-semibold text-text-secondary">
+                        Texto Extraído del Documento (OCR):
+                      </span>
+                      {comp.data.detectedText ? (
+                        <p
+                          className={`mt-1 rounded-md border p-2 font-mono text-[11px] leading-relaxed ${
+                            isMatched
+                              ? 'border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-800/40 dark:bg-emerald-950/40 dark:text-emerald-200'
+                              : 'border-rose-200 bg-rose-50 text-rose-900 dark:border-rose-800/40 dark:bg-rose-950/40 dark:text-rose-200'
+                          }`}
+                        >
+                          &ldquo;{comp.data.detectedText}&rdquo;
+                        </p>
+                      ) : (
+                        <p className="mt-1 rounded-md border border-rose-200 bg-rose-50/80 p-2 text-[11px] text-rose-800 italic dark:border-rose-800/40 dark:bg-rose-950/40 dark:text-rose-300">
+                          No se identificó este dato en el contenido escaneado
+                          de la carta.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </section>
 
       {/* ─────────────────────────────────────────────────────────────────────────────
-          3. SECCIÓN DE DATOS OPCIONALES: LOGOTIPO CORPORATIVO Y SITIO WEB
-          Inspección detallada del logo y redirección con prueba de portal web
+          4. SECCIÓN DE DATOS OPCIONALES: LOGOTIPO CORPORATIVO Y SITIO WEB
           ───────────────────────────────────────────────────────────────────────────── */}
       <section
         className="grid grid-cols-1 gap-6 md:grid-cols-2"
@@ -859,8 +1076,8 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
                   Sin logotipo adjuntado
                 </p>
                 <p className="mt-1 text-xs text-text-secondary">
-                  La empresa no subió un logo durante su registro. Este dato es
-                  opcional y podrá cargarlo posteriormente en su perfil.
+                  La empresa no subió un logo durante su registro. Podrá
+                  cargarlo posteriormente desde su perfil.
                 </p>
               </div>
             )}
@@ -899,7 +1116,7 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
                   </p>
                   <p className="text-xs text-text-secondary">
                     Haz clic en el botón inferior para abrir la página en una
-                    nueva pestaña y verificar si responde correctamente.
+                    nueva pestaña y verificar que responda con normalidad.
                   </p>
                 </div>
 
@@ -923,7 +1140,7 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
                 </p>
                 <p className="mt-1 text-xs text-text-secondary">
                   No se proporcionó un enlace web durante el registro. Este dato
-                  es opcional y no impide la aprobación del acceso.
+                  es opcional y no impide la aprobación del trámite.
                 </p>
               </div>
             )}
@@ -932,7 +1149,7 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
       </section>
 
       {/* ─────────────────────────────────────────────────────────────────────────────
-          4. HISTORIAL Y SECCIÓN DE AUDITORÍA
+          5. HISTORIAL Y AUDITORÍA
           ───────────────────────────────────────────────────────────────────────────── */}
       <Card className="border-border bg-surface shadow-xs">
         <CardHeader className="pb-3">
@@ -970,7 +1187,9 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
                   className={`mt-0.5 size-2 rounded-full ${
                     item.status.title === 'APPROVED'
                       ? 'bg-emerald-600'
-                      : 'bg-rose-600'
+                      : item.status.title === 'OBSERVED'
+                        ? 'bg-indigo-600'
+                        : 'bg-rose-600'
                   }`}
                 />
                 <div className="flex-1">
@@ -981,7 +1200,7 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
                   </p>
                   {item.rejectionReason && (
                     <p className="mt-1 font-medium text-rose-700 dark:text-rose-400">
-                      Motivo de observación: {item.rejectionReason}
+                      Observación / Motivo: {item.rejectionReason}
                     </p>
                   )}
                 </div>
@@ -993,6 +1212,258 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
           </div>
         </CardContent>
       </Card>
+
+      {/* ─────────────────────────────────────────────────────────────────────────────
+          MODAL: EDITAR FICHA OFICIAL PARA REGISTRO
+          ───────────────────────────────────────────────────────────────────────────── */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-lg font-bold text-ink">
+              <Pencil className="size-5 text-primary" />
+              Editar Ficha Oficial de Registro
+            </DialogTitle>
+            <DialogDescription className="text-xs text-text-secondary">
+              Ajusta los datos que se guardarán definitivamente en la
+              plataforma. Al guardar, el OCR recalculará la afinidad con el
+              documento.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid grid-cols-1 gap-4 py-2 sm:grid-cols-2">
+            <div className="space-y-1.5 sm:col-span-2">
+              <Label htmlFor="edit-companyName" className="text-xs font-bold">
+                Razón Social / Nombre Comercial *
+              </Label>
+              <Input
+                id="edit-companyName"
+                value={editForm.companyName ?? ''}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, companyName: e.target.value })
+                }
+                className="text-xs"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="edit-sector" className="text-xs font-bold">
+                Rubro / Sector *
+              </Label>
+              <Input
+                id="edit-sector"
+                value={editForm.sector ?? ''}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, sector: e.target.value })
+                }
+                className="text-xs"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="edit-username" className="text-xs font-bold">
+                Usuario Reclutador (@) *
+              </Label>
+              <Input
+                id="edit-username"
+                value={editForm.username ?? ''}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, username: e.target.value })
+                }
+                className="font-mono text-xs"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="edit-email" className="text-xs font-bold">
+                Correo Institucional *
+              </Label>
+              <Input
+                id="edit-email"
+                type="email"
+                value={editForm.email ?? ''}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, email: e.target.value })
+                }
+                className="text-xs"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="edit-phone" className="text-xs font-bold">
+                Teléfono de Contacto *
+              </Label>
+              <Input
+                id="edit-phone"
+                value={editForm.phone ?? ''}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, phone: e.target.value })
+                }
+                className="text-xs"
+              />
+            </div>
+
+            <div className="space-y-1.5 sm:col-span-2">
+              <Label htmlFor="edit-websiteUrl" className="text-xs font-bold">
+                Sitio Web Corporativo (Opcional)
+              </Label>
+              <Input
+                id="edit-websiteUrl"
+                value={editForm.websiteUrl ?? ''}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, websiteUrl: e.target.value })
+                }
+                placeholder="https://www.empresa.com"
+                className="text-xs"
+              />
+            </div>
+
+            <div className="space-y-1.5 sm:col-span-2">
+              <Label htmlFor="edit-description" className="text-xs font-bold">
+                Descripción Institucional *
+              </Label>
+              <Textarea
+                id="edit-description"
+                rows={3}
+                value={editForm.description ?? ''}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, description: e.target.value })
+                }
+                className="text-xs"
+              />
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowEditDialog(false)}
+              disabled={isSavingEdit}
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              onClick={() => void handleSaveEdit()}
+              disabled={isSavingEdit}
+              className="bg-primary text-white hover:bg-primary/90"
+            >
+              {isSavingEdit ? (
+                <>
+                  <Loader2 className="mr-2 size-4 animate-spin" /> Guardando y
+                  recalculando...
+                </>
+              ) : (
+                <>
+                  <Save className="mr-1.5 size-4" /> Guardar Corrección
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ─────────────────────────────────────────────────────────────────────────────
+          MODAL: SOLICITAR SUBSANACIÓN DE REGISTRO
+          ───────────────────────────────────────────────────────────────────────────── */}
+      <Dialog
+        open={showCorrectionDialog}
+        onOpenChange={setShowCorrectionDialog}
+      >
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-lg font-bold text-indigo-700">
+              <RotateCcw className="size-5 text-indigo-600" />
+              Solicitar Subsanación de Registro
+            </DialogTitle>
+            <DialogDescription className="text-xs text-text-secondary">
+              Se enviará un correo a{' '}
+              <strong className="text-ink">{item.email}</strong> indicando qué
+              observaciones debe corregir para continuar con su trámite.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2 text-xs">
+            <div className="space-y-2">
+              <span className="font-bold text-ink">
+                Motivo principal de la observación:
+              </span>
+              <RadioGroup
+                value={correctionCategory}
+                onValueChange={(val) => {
+                  if (typeof val === 'string') setCorrectionCategory(val);
+                }}
+                className="space-y-1.5"
+              >
+                {CORRECTION_REASONS.map((reason) => (
+                  <label
+                    key={reason}
+                    className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-border p-2.5 transition-colors hover:bg-surface-soft"
+                  >
+                    <RadioGroupItem value={reason} />
+                    <span className="font-medium text-ink">{reason}</span>
+                  </label>
+                ))}
+              </RadioGroup>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label
+                htmlFor="correction-details"
+                className="font-bold text-ink"
+              >
+                Detalle específico e instrucciones para la empresa *
+              </Label>
+              <Textarea
+                id="correction-details"
+                rows={4}
+                placeholder="Indica con claridad las correcciones requeridas (ej: 'El documento adjunto no cuenta con el sello institucional. Por favor, reenvíe la carta membretada firmada y sellada por gerencia')..."
+                value={correctionDetails}
+                onChange={(e) => setCorrectionDetails(e.target.value)}
+                className="text-xs"
+              />
+              <p className="text-[11px] text-text-secondary">
+                Mínimo 5 caracteres ({correctionDetails.trim().length}{' '}
+                ingresados).
+              </p>
+            </div>
+
+            <div className="rounded-lg border border-indigo-200 bg-indigo-50/70 p-3 text-[11px] text-indigo-900">
+              <p className="font-medium">
+                Al enviar la solicitud de subsanación, el estado pasará a{' '}
+                <strong>Subsanación solicitada</strong> y el representante de la
+                empresa podrá consultar las indicaciones ingresando su código{' '}
+                <strong>{item.requestCode}</strong>.
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowCorrectionDialog(false)}
+              disabled={submitting}
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              onClick={() => void handleCorrection()}
+              disabled={submitting || correctionDetails.trim().length < 5}
+              className="bg-indigo-600 text-white hover:bg-indigo-700"
+            >
+              {submitting ? (
+                <>
+                  <Loader2 className="mr-2 size-4 animate-spin" /> Enviando...
+                </>
+              ) : (
+                'Enviar Solicitud de Subsanación'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* ─────────────────────────────────────────────────────────────────────────────
           MODAL: APROBACIÓN DE SOLICITUD
@@ -1049,7 +1520,7 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
               type="button"
               onClick={() => void handleApprove()}
               disabled={submitting}
-              className="bg-primary text-white hover:bg-primary/90"
+              className="bg-emerald-600 text-white hover:bg-emerald-700"
             >
               {submitting ? (
                 <>
@@ -1074,30 +1545,50 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
               Rechazar Solicitud de Empresa
             </DialogTitle>
             <DialogDescription className="text-xs text-text-secondary">
-              Ingresa el motivo fundamentado del rechazo. Este mensaje será
-              notificado por correo a{' '}
-              <strong className="text-ink">{item.email}</strong>.
+              Selecciona el motivo y fundamentación del dictamen negativo para{' '}
+              <strong className="text-ink">{item.companyName}</strong>.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-2 py-2">
-            <label
-              htmlFor="reject-reason"
-              className="text-xs font-semibold text-ink"
-            >
-              Motivo del rechazo <span className="text-destructive">*</span>
-            </label>
-            <Textarea
-              id="reject-reason"
-              rows={4}
-              placeholder="Explica qué requisito no se cumplió o qué corrección debe realizar la empresa en su carta membretada..."
-              value={rejectReason}
-              onChange={(e) => setRejectReason(e.target.value)}
-              className="text-xs"
-            />
-            <p className="text-[11px] text-text-secondary">
-              Mínimo 5 caracteres ({rejectReason.trim().length} ingresados).
-            </p>
+          <div className="space-y-4 py-2 text-xs">
+            <div className="space-y-2">
+              <span className="font-bold text-ink">Motivo del rechazo:</span>
+              <RadioGroup
+                value={rejectionCategory}
+                onValueChange={(val) => {
+                  if (typeof val === 'string') setRejectionCategory(val);
+                }}
+                className="space-y-1.5"
+              >
+                {REJECTION_REASONS.map((reason) => (
+                  <label
+                    key={reason}
+                    className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-border p-2.5 transition-colors hover:bg-surface-soft"
+                  >
+                    <RadioGroupItem value={reason} />
+                    <span className="font-medium text-ink">{reason}</span>
+                  </label>
+                ))}
+              </RadioGroup>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="reject-details" className="font-bold text-ink">
+                Justificación administrativa formal *
+              </Label>
+              <Textarea
+                id="reject-details"
+                rows={3}
+                placeholder="Fundamentación formal del rechazo para constancia en el expediente y notificación por correo..."
+                value={rejectionDetails}
+                onChange={(e) => setRejectionDetails(e.target.value)}
+                className="text-xs"
+              />
+              <p className="text-[11px] text-text-secondary">
+                Mínimo 5 caracteres ({rejectionDetails.trim().length}{' '}
+                ingresados).
+              </p>
+            </div>
           </div>
 
           <DialogFooter className="gap-2 sm:gap-0">
@@ -1113,7 +1604,7 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
               type="button"
               variant="destructive"
               onClick={() => void handleReject()}
-              disabled={submitting || rejectReason.trim().length < 5}
+              disabled={submitting || rejectionDetails.trim().length < 5}
             >
               {submitting ? (
                 <>

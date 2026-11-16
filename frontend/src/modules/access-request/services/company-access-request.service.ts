@@ -1,19 +1,22 @@
-import { apiClient } from "@/shared/services/api-client";
-import type { ApiResult } from "../types/api-result.types";
+import { apiClient } from '@/shared/services/api-client';
+import type { ApiResult } from '../types/api-result.types';
 import type {
   CityItem,
   CompanyAccessRequestItem,
   CompanyRequestsSummary,
   CreateCompanyRequestPayload,
+  RejectCompanyPayload,
+  RequestCorrectionPayload,
   SubmitCompanyRequestResult,
-} from "../types/company-access-request.types";
+  UpdateCompanyPayload,
+} from '../types/company-access-request.types';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 function unwrap<T>(raw: unknown): T {
-  if (isRecord(raw) && "data" in raw && raw.data !== undefined) {
+  if (isRecord(raw) && 'data' in raw && raw.data !== undefined) {
     return raw.data as T;
   }
   return raw as T;
@@ -21,11 +24,11 @@ function unwrap<T>(raw: unknown): T {
 
 function extractErrorMessage(body: unknown, fallback: string): string {
   if (!isRecord(body)) return fallback;
-  if (typeof body.detail === "string") return body.detail;
-  if (typeof body.message === "string") return body.message;
+  if (typeof body.detail === 'string') return body.detail;
+  if (typeof body.message === 'string') return body.message;
   if (Array.isArray(body.message) && body.message.length > 0) {
     const first = body.message[0];
-    if (isRecord(first) && typeof first.message === "string") {
+    if (isRecord(first) && typeof first.message === 'string') {
       return first.message;
     }
   }
@@ -33,7 +36,7 @@ function extractErrorMessage(body: unknown, fallback: string): string {
 }
 
 async function request<T>(
-  method: "get" | "post" | "patch",
+  method: 'get' | 'post' | 'patch',
   url: string,
   data?: unknown,
   params?: Record<string, string | number | undefined>,
@@ -55,7 +58,7 @@ async function request<T>(
       fieldErrors: {},
       message: extractErrorMessage(
         response.data,
-        "No se pudo completar la operación.",
+        'No se pudo completar la operación.',
       ),
     };
   } catch {
@@ -63,22 +66,22 @@ async function request<T>(
       ok: false,
       status: 0,
       fieldErrors: {},
-      message: "Error de conexión con el servidor.",
+      message: 'Error de conexión con el servidor.',
     };
   }
 }
 
 export const companyAccessRequestService = {
-  getCities: () => request<CityItem[]>("get", "/cities"),
+  getCities: () => request<CityItem[]>('get', '/cities'),
 
   createDraft: (payload: CreateCompanyRequestPayload) =>
-    request<{ id: string }>("post", "/company-access-requests", payload),
+    request<{ id: string }>('post', '/company-access-requests', payload),
 
   uploadLogo: (id: string, file: File) => {
     const form = new FormData();
-    form.append("file", file);
+    form.append('file', file);
     return request<{ id: string; logoFileId: string }>(
-      "post",
+      'post',
       `/company-access-requests/${id}/logo`,
       form,
     );
@@ -86,9 +89,9 @@ export const companyAccessRequestService = {
 
   uploadDocument: (id: string, file: File) => {
     const form = new FormData();
-    form.append("file", file);
+    form.append('file', file);
     return request<{ id: string; documentFileId: string }>(
-      "post",
+      'post',
       `/company-access-requests/${id}/document`,
       form,
     );
@@ -96,7 +99,7 @@ export const companyAccessRequestService = {
 
   submit: (id: string) =>
     request<SubmitCompanyRequestResult>(
-      "post",
+      'post',
       `/company-access-requests/${id}/submit`,
     ),
 
@@ -107,40 +110,48 @@ export const companyAccessRequestService = {
     search?: string;
   }) =>
     request<{ rows: CompanyAccessRequestItem[]; total: number }>(
-      "get",
-      "/company-access-requests",
+      'get',
+      '/company-access-requests',
       undefined,
       params,
     ),
 
   getSummary: () =>
-    request<CompanyRequestsSummary>(
-      "get",
-      "/company-access-requests/summary",
-    ),
+    request<CompanyRequestsSummary>('get', '/company-access-requests/summary'),
 
   getDetail: (id: string) =>
+    request<CompanyAccessRequestItem>('get', `/company-access-requests/${id}`),
+
+  updateDraft: (id: string, payload: UpdateCompanyPayload) =>
     request<CompanyAccessRequestItem>(
-      "get",
+      'patch',
       `/company-access-requests/${id}`,
+      payload,
+    ),
+
+  requestCorrection: (id: string, payload: RequestCorrectionPayload) =>
+    request<CompanyAccessRequestItem>(
+      'post',
+      `/company-access-requests/${id}/request-correction`,
+      payload,
     ),
 
   approve: (id: string) =>
     request<{ id: string; status: string }>(
-      "patch",
+      'patch',
       `/company-access-requests/${id}/approve`,
     ),
 
-  reject: (id: string, reason: string) =>
+  reject: (id: string, payload: RejectCompanyPayload | string) =>
     request<{ id: string; status: string }>(
-      "patch",
+      'patch',
       `/company-access-requests/${id}/reject`,
-      { reason },
+      typeof payload === 'string' ? { reason: payload } : payload,
     ),
 
   getDocumentBlob: async (id: string): Promise<Blob | null> => {
     const res = await apiClient.get(`/company-access-requests/${id}/document`, {
-      responseType: "blob",
+      responseType: 'blob',
       validateStatus: () => true,
     });
     return res.status === 200 ? (res.data as Blob) : null;
@@ -148,7 +159,7 @@ export const companyAccessRequestService = {
 
   getLogoBlob: async (id: string): Promise<Blob | null> => {
     const res = await apiClient.get(`/company-access-requests/${id}/logo`, {
-      responseType: "blob",
+      responseType: 'blob',
       validateStatus: () => true,
     });
     return res.status === 200 ? (res.data as Blob) : null;
