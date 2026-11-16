@@ -1,6 +1,6 @@
 # HU-08-12 · Contrato de asistencia en línea
 
-Este contrato fija la integración FE/BE. La tarea 12.1 añade el esquema de entrada y la autorización interna; **el endpoint se habilita en 12.2**, cuando exista persistencia idempotente. No se debe presentar la simulación del escáner como un registro real antes de esa integración.
+Este contrato fija la integración FE/BE. La tarea 12.1 añade el esquema de entrada y la autorización interna. La tarea 12.2 habilita el endpoint y registra asistencias idempotentes; la ventana horaria se añadirá en 12.3. El escáner frontend todavía debe integrarse con este endpoint en 12.5.
 
 ## Decisiones basadas en el sistema actual
 
@@ -14,7 +14,7 @@ Este contrato fija la integración FE/BE. La tarea 12.1 añade el esquema de ent
 
 `POST /api/events/:eventId/attendances/check-ins` con sesión Bearer válida, sin caché. `eventId` es UUID. Cuerpo JSON estricto: `{ "reference": "v1:<64 hex>" }`, `{ "reference": "<64 hex>" }` o `{ "reference": "<UUID de inscripción>" }`. La referencia nunca se envía en la URL ni se registra en logs. No se aceptan `userId`, `registrationId` como campo adicional ni un taller alternativo enviados por el cliente.
 
-El backend primero comprueba el rol y la titularidad del taller seleccionado. Solo después busca el pase **dentro de ese taller**. Una referencia de otro taller y una inexistente son indistinguibles para la respuesta externa.
+El backend primero comprueba el rol y la titularidad del taller seleccionado. Solo después busca el pase **dentro de ese taller**. Una referencia de otro taller y una inexistente son indistinguibles para la respuesta externa. En la transacción bloquea la fila de inscripción, repite la validación y crea la asistencia con `checkedInById` de la sesión y `checkedInAt` del servidor. La restricción única por `registrationId` garantiza que un nuevo intento devuelva `duplicate` con la fecha original, sin modificar la fila existente.
 
 ## Respuestas previstas
 
