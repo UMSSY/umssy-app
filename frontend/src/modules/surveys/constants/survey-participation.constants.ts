@@ -2,6 +2,7 @@ import type { SurveyResponseRateLevel } from "../types/survey-response-rate-leve
 
 export const SURVEY_ALERT_THRESHOLD_MIN = 1;
 export const SURVEY_ALERT_THRESHOLD_MAX = 50;
+export const SURVEY_ALERT_THRESHOLD_MAX_LENGTH = String(SURVEY_ALERT_THRESHOLD_MAX).length;
 
 export const SURVEY_RESPONSE_RATE_LEVEL_THRESHOLDS = {
   lowMax: 35,
