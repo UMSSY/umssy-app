@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { HeatmapCareerOption } from "./heatmap-career-option.types";
 import type { HeatmapExportFormat } from "./heatmap-export-format.types";
 import type { HeatmapFilters } from "./heatmap-filters.types";
@@ -14,4 +15,5 @@ export interface HeatmapToolbarProps {
   onClearDateRange: () => void;
   onExport: (format: HeatmapExportFormat) => void;
   canExport: boolean;
+  aside?: ReactNode;
 }

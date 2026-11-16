@@ -38,7 +38,7 @@ export class HeatmapsService {
 
     switch (type) {
       case 'skills-by-career':
-        return buildCareerHeatmap(graduatesInMonth, careers);
+        return buildCareerHeatmap(graduatesInMonth, careers, query.careerId);
       case 'skills-by-salary':
         return buildSalaryHeatmap(graduatesInMonth);
       case 'employability':

@@ -9,6 +9,7 @@ import { WorkspacePage } from "@/shared/components/layout";
 import { downloadFile } from "@/shared/utils/download-file";
 import { HeatmapBaseIndicator } from "../components/heatmap-base-indicator";
 import { HeatmapDateRangeDialog } from "../components/heatmap-date-range-dialog";
+import { HeatmapHelpIcon } from "../components/heatmap-help-icon";
 import { HeatmapLegend } from "../components/heatmap-legend";
 import { HeatmapMatrix } from "../components/heatmap-matrix";
 import { HeatmapQuickRead } from "../components/heatmap-quick-read";
@@ -60,6 +61,7 @@ export function HeatmapView({ type }: HeatmapViewProps) {
         onClearDateRange={() => setSemesterRange(undefined)}
         onExport={handleExport}
         canExport={canExport}
+        aside={config.baseHelp && data && !hasError ? <HeatmapBaseIndicator baseCount={data.baseCount} baseLabel={data.baseLabel} help={config.baseHelp} /> : undefined}
       />
 
       {hasError ? (
@@ -72,7 +74,7 @@ export function HeatmapView({ type }: HeatmapViewProps) {
         </div>
       ) : (
         <>
-          {data && <HeatmapBaseIndicator baseCount={data.baseCount} baseLabel={data.baseLabel} />}
+          {data && !config.baseHelp && <HeatmapBaseIndicator baseCount={data.baseCount} baseLabel={data.baseLabel} />}
           <HeatmapMatrix
             columns={data?.columns ?? []}
             rows={data?.rows ?? []}
@@ -82,8 +84,21 @@ export function HeatmapView({ type }: HeatmapViewProps) {
             caption={config.title}
             isLoading={isLoading}
             emptyMessage={config.emptyMessage}
+            toneMode={config.toneMode}
+            tooltipVariant={config.tooltipVariant}
+            percentageDecimals={config.percentageDecimals}
           />
-          <HeatmapLegend />
+          {config.cellHint ? (
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <HeatmapLegend variant={config.legendVariant} />
+              <p className="inline-flex items-center gap-1.5 text-xs text-text-secondary">
+                <HeatmapHelpIcon text={config.cellHint} />
+                <span>{config.cellHint}</span>
+              </p>
+            </div>
+          ) : (
+            <HeatmapLegend variant={config.legendVariant} />
+          )}
           {data && data.baseCount > 0 && <HeatmapQuickRead summary={data.quickReadSummary} />}
         </>
       )}

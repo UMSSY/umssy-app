@@ -15,7 +15,7 @@ const cellOf = (data: HeatmapResponse, skillId: string, columnId: string) =>
   data.rows.find((row) => row.skillId === skillId)?.cells.find((cell) => cell.columnId === columnId);
 
 describe('buildCareerHeatmap (HU5)', () => {
-  it('calcula conteo y porcentaje sobre el total evaluado de cada carrera', () => {
+  it('calcula conteo y porcentaje (un decimal) sobre el total evaluado de cada carrera', () => {
     const data = buildCareerHeatmap(
       [
         graduate({ skills: [SQL] }),
@@ -23,24 +23,68 @@ describe('buildCareerHeatmap (HU5)', () => {
         graduate({ skills: [PYTHON] }),
         graduate({ skills: [GIT] }),
         graduate({ careerId: 'career-informatics', skills: [SQL] }),
+        graduate({ careerId: 'career-informatics', skills: [GIT] }),
+        graduate({ careerId: 'career-informatics', skills: [GIT] }),
         graduate({ careerId: 'career-informatics', skills: [] }),
       ],
       CAREERS,
     );
 
-    expect(data.baseCount).toBe(5);
-    expect(data.columns.map((column) => column.label)).toEqual(['Ing. de Sistemas (n=4)', 'Ing. Informática (n=1)']);
+    expect(data.baseCount).toBe(7);
+    expect(data.columns).toEqual([
+      { id: 'career-systems', label: 'Ing. de Sistemas', sublabel: '(n = 4)', total: 4 },
+      { id: 'career-informatics', label: 'Ing. Informática', sublabel: '(n = 3)', total: 3 },
+    ]);
     expect(cellOf(data, SQL.id, 'career-systems')).toMatchObject({ count: 2, total: 4, percentage: 50 });
-    expect(cellOf(data, SQL.id, 'career-informatics')).toMatchObject({ count: 1, total: 1, percentage: 100 });
-    expect(data.rows[0]!.skillId).toBe(SQL.id);
-    expect(data.quickReadSummary).toContain('SQL');
+    expect(cellOf(data, SQL.id, 'career-informatics')).toMatchObject({ count: 1, total: 3, percentage: 33.3 });
+    expect(cellOf(data, GIT.id, 'career-informatics')).toMatchObject({ count: 2, total: 3, percentage: 66.7 });
   });
 
-  it('marca como vacías las celdas de carreras sin egresados y omite la lectura rápida', () => {
+  it('resume en la lectura rápida las habilidades predominantes de cada carrera', () => {
+    const data = buildCareerHeatmap(
+      [
+        graduate({ skills: [SQL, PYTHON] }),
+        graduate({ skills: [SQL] }),
+        graduate({ skills: [GIT] }),
+        graduate({ careerId: 'career-informatics', skills: [GIT, PYTHON] }),
+        graduate({ careerId: 'career-informatics', skills: [GIT] }),
+      ],
+      CAREERS,
+    );
+
+    expect(data.quickReadSummary).toBe(
+      'En Ing. de Sistemas, SQL (66,7%) y Git (33,3%) tienen mayor presencia. ' +
+        'En Ing. Informática, Git (100,0%) y Python (50,0%) tienen mayor presencia.',
+    );
+  });
+
+  it('marca como vacías las celdas de carreras sin egresados y solo resume las carreras con datos', () => {
     const data = buildCareerHeatmap([graduate({ skills: [SQL] })], CAREERS);
 
     expect(cellOf(data, SQL.id, 'career-informatics')).toMatchObject({ isEmpty: true });
+    expect(data.quickReadSummary).toBe('En Ing. de Sistemas, SQL (100,0%) tiene mayor presencia.');
+  });
+
+  it('omite la lectura rápida cuando no hay egresados con habilidades', () => {
+    const data = buildCareerHeatmap([graduate({ skills: [] })], CAREERS);
+
+    expect(data.baseCount).toBe(0);
     expect(data.quickReadSummary).toBeUndefined();
+  });
+
+  it('muestra solo la carrera filtrada y excluye de la base a egresados de otras carreras', () => {
+    const data = buildCareerHeatmap(
+      [
+        graduate({ skills: [SQL] }),
+        graduate({ careerId: 'career-informatics', skills: [SQL] }),
+        graduate({ careerId: 'career-other', skills: [SQL] }),
+      ],
+      CAREERS,
+      'career-informatics',
+    );
+
+    expect(data.columns.map((column) => column.id)).toEqual(['career-informatics']);
+    expect(data.baseCount).toBe(1);
   });
 });
 

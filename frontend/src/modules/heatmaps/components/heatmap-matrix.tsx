@@ -7,7 +7,19 @@ import type { HeatmapMatrixProps } from "../types/heatmap-matrix-props.types";
 import { HeatmapCell } from "./heatmap-cell";
 import { HeatmapExtraValue } from "./heatmap-extra-value";
 
-export function HeatmapMatrix({ columns, rows, extraColumnsConfig, cellFormat, cellUnit, caption, isLoading = false, emptyMessage }: HeatmapMatrixProps) {
+export function HeatmapMatrix({
+  columns,
+  rows,
+  extraColumnsConfig,
+  cellFormat,
+  cellUnit,
+  caption,
+  isLoading = false,
+  emptyMessage,
+  toneMode,
+  tooltipVariant,
+  percentageDecimals,
+}: HeatmapMatrixProps) {
   const extras = extraColumnsConfig ?? [];
   const safeColumns = columns ?? [];
   const safeRows = rows ?? [];
@@ -67,6 +79,9 @@ export function HeatmapMatrix({ columns, rows, extraColumnsConfig, cellFormat, c
                     skillName={row.skillName}
                     cellFormat={cellFormat}
                     cellUnit={cellUnit}
+                    toneMode={toneMode}
+                    tooltipVariant={tooltipVariant}
+                    percentageDecimals={percentageDecimals}
                   />
                 </TableCell>
               ))}
