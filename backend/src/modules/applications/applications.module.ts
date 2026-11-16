@@ -7,6 +7,7 @@ import { ApplicationsController } from './controllers/applications.controller.js
 import { ApplicationsService } from './services/applications.service.js';
 import { ApplicationsRepository } from './repositories/applications.repository.js';
 import { PrismaModule } from '../../common/prisma/prisma.module.js';
+import { JobOffersModule } from '../job-offers/job-offers.module.js';
 import { NotificationsModule } from '../notifications/notifications.module.js';
 
 @Module({
@@ -16,6 +17,7 @@ import { NotificationsModule } from '../notifications/notifications.module.js';
     MatchingModule,
     JwtAuthModule,
     NotificationsModule,
+    JobOffersModule,
   ],
   controllers: [ApplicationsController],
   providers: [
