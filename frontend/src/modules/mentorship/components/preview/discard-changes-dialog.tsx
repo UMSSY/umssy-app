@@ -46,7 +46,7 @@ export function DiscardChangesDialog({
           <AlertDialogAction
             type="button"
             onClick={onConfirm}
-            className="h-10 rounded-lg bg-critical-action px-4 text-sm font-semibold text-critical-action-foreground hover:bg-critical-action/90 active:translate-y-0"
+            className="h-10 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground hover:bg-brand-hover active:translate-y-0"
           >
             Descartar cambios
           </AlertDialogAction>
