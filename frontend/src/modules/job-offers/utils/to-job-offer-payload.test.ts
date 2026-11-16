@@ -39,4 +39,15 @@ describe("toJobOfferPayload", () => {
     expect(payload.title).toBe("DevOps");
     expect(payload.languages).toBe("Español");
   });
+
+  it("envía la fecha de cierre a las 23:59 de Bolivia en formato ISO UTC", () => {
+    const payload = toJobOfferPayload(VALID_CONDITIONS, new Date(2026, 11, 15));
+
+    expect(payload.expiresAt).toBe("2026-12-16T03:59:00.000Z");
+  });
+
+  it("no envía expiresAt cuando la vacante no tiene fecha de cierre", () => {
+    expect(toJobOfferPayload(VALID_CONDITIONS)).not.toHaveProperty("expiresAt");
+    expect(toJobOfferPayload(VALID_CONDITIONS, null)).not.toHaveProperty("expiresAt");
+  });
 });
