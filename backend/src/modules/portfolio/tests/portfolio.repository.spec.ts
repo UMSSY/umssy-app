@@ -4,7 +4,6 @@ import { UnknownPortfolioProviderException } from '../exceptions/unknown-portfol
 import { UnsupportedPortfolioProviderException } from '../exceptions/unsupported-portfolio-provider.exception.js';
 import { PortfolioRepository } from '../repositories/portfolio.repository.js';
 import type { NormalizedPortfolioProject } from '../types/normalized-portfolio-project.type.js';
-import type { PortfolioProjectEntity } from '../types/portfolio-project-entity.type.js';
 
 const userId = '11111111-1111-4111-8111-111111111111';
 
@@ -27,6 +26,7 @@ describe('PortfolioRepository', () => {
     findMany: ReturnType<typeof vi.fn>;
     deleteMany: ReturnType<typeof vi.fn>;
     createMany: ReturnType<typeof vi.fn>;
+    updateMany: ReturnType<typeof vi.fn>;
   };
   let portfolioProvider: {
     findMany: ReturnType<typeof vi.fn>;
@@ -42,6 +42,7 @@ describe('PortfolioRepository', () => {
       findMany: vi.fn(),
       deleteMany: vi.fn(),
       createMany: vi.fn(),
+      updateMany: vi.fn(),
     };
     portfolioProvider = {
       findMany: vi.fn().mockResolvedValue([
@@ -53,11 +54,12 @@ describe('PortfolioRepository', () => {
       userPortfolioProject,
       portfolioProvider,
       $transaction: vi.fn(
-        (callback: (tx: {
-          userPortfolioProject: typeof userPortfolioProject;
-          portfolioProvider: typeof portfolioProvider;
-        }) => Promise<unknown>) =>
-          callback({ userPortfolioProject, portfolioProvider }),
+        (
+          callback: (tx: {
+            userPortfolioProject: typeof userPortfolioProject;
+            portfolioProvider: typeof portfolioProvider;
+          }) => Promise<unknown>,
+        ) => callback({ userPortfolioProject, portfolioProvider }),
       ),
     };
     repository = new PortfolioRepository(prisma as unknown as PrismaService);
@@ -228,5 +230,56 @@ describe('PortfolioRepository', () => {
     await expect(
       repository.replaceForUser(userId, [buildNormalized(0)]),
     ).rejects.toThrow(UnknownPortfolioProviderException);
+  });
+
+  it('updates metadata by user and ID without deleting, recreating or reordering selections', async () => {
+    userPortfolioProject.updateMany.mockResolvedValue({ count: 1 });
+    userPortfolioProject.findMany.mockResolvedValue([
+      {
+        ...buildNormalized(4),
+        id: 'saved-id',
+        userId,
+        provider: { name: 'github' },
+      },
+    ]);
+    const update = {
+      id: 'saved-id',
+      repoName: 'updated',
+      repoUrl: 'https://github.com/owner/updated',
+      description: null,
+      language: 'Rust',
+      starsCount: 15,
+      isOwner: true,
+    };
+    const result = await repository.syncMetadataForUser(userId, [update]);
+    const { id, ...metadata } = update;
+    expect(userPortfolioProject.updateMany).toHaveBeenCalledWith({
+      where: { id, userId },
+      data: metadata,
+    });
+    expect(result[0].id).toBe('saved-id');
+    expect(result[0].displayOrder).toBe(4);
+    expect(userPortfolioProject.deleteMany).not.toHaveBeenCalled();
+    expect(userPortfolioProject.createMany).not.toHaveBeenCalled();
+  });
+
+  it('does not resurrect a project deleted or disconnected while remote metadata was loading', async () => {
+    userPortfolioProject.updateMany.mockResolvedValue({ count: 0 });
+    userPortfolioProject.findMany.mockResolvedValue([]);
+    await expect(
+      repository.syncMetadataForUser(userId, [
+        {
+          id: 'deleted-id',
+          repoName: 'app',
+          repoUrl: 'https://github.com/owner/app',
+          description: null,
+          language: null,
+          starsCount: 0,
+          isOwner: false,
+        },
+      ]),
+    ).resolves.toEqual([]);
+    expect(userPortfolioProject.createMany).not.toHaveBeenCalled();
+    expect(userPortfolioProject.deleteMany).not.toHaveBeenCalled();
   });
 });
