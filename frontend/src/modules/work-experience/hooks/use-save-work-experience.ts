@@ -2,9 +2,17 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { PROFILE_SKILLS_RADAR_QUERY_KEY } from "@/modules/profile";
-import { SKILLS_PROFILE_QUERY_KEY } from "@/modules/skills";
-import type { Feedback } from "@/modules/profile";
+import {
+  skillsAnalysisService,
+  type SkillsAnalysisResult,
+} from "@/modules/matching";
+import {
+  PROFILE_SKILLS_RADAR_QUERY_KEY,
+  profileSkillsRadarService,
+  useInvalidateProfileCompleteness,
+  type Feedback,
+} from "@/modules/profile";
+import { MY_SKILLS_QUERY_KEY } from "@/modules/skills";
 import { WORK_EXPERIENCE_FEEDBACK_MESSAGES } from "../config/work-experience-feedback.config";
 import { workExperienceService } from "../services/work-experience.service";
 import type { WorkExperienceItem } from "../types/work-experience-item.types";
@@ -23,12 +31,42 @@ export function useSaveWorkExperience(onSaved: () => void) {
   async function refreshSkills(): Promise<void> {
     await Promise.all([
       queryClient.invalidateQueries({
-        queryKey: SKILLS_PROFILE_QUERY_KEY,
+        queryKey: MY_SKILLS_QUERY_KEY,
       }),
       queryClient.invalidateQueries({
         queryKey: PROFILE_SKILLS_RADAR_QUERY_KEY,
       }),
     ]);
+  }
+
+  async function analyze(
+    saved: WorkExperienceItem,
+    payload: WorkExperiencePayload,
+  ): Promise<void> {
+    setIsAnalyzing(true);
+
+    try {
+      try {
+        const result = await skillsAnalysisService.previewExperience(
+          saved.id,
+          payload.description,
+        );
+
+        setAnalysis(result);
+      } catch {
+        setAnalysis(null);
+      }
+
+      try {
+        await profileSkillsRadarService.analyzeSkills();
+      } catch {
+        // El guardado no debe fallar si el análisis del radar no está disponible.
+      }
+
+      await refreshSkills();
+    } finally {
+      setIsAnalyzing(false);
+    }
   }
 
   async function save(

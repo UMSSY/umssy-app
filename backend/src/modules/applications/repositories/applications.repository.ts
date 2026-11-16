@@ -1,8 +1,15 @@
-import { RECRUITMENT_APPLICATION_SELECT } from '../constants/recruitment-application-select.constants.js';
+import {
+  APPLICATION_DECISION_CONTEXT_SELECT,
+  RECRUITMENT_APPLICATION_SELECT,
+} from '../constants/recruitment-application-select.constants.js';
 import { Injectable } from '@nestjs/common';
+import { JobOfferStatus } from '../../job-offers/types/job-offer.enum.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
+import type { RoleName } from '../../../common/enums/roles.enum.js';
 import type { Prisma } from '../../../prisma/client.js';
 import type { FindApplicationsQueryDto } from '../requests/find-applications.request.js';
+
+const RECRUITER_ROLE: RoleName = 'empresa';
 
 @Injectable()
 export class ApplicationsRepository {
@@ -44,6 +51,69 @@ export class ApplicationsRepository {
     });
   }
 
+  reactivateApplication(id: string, userId: string, now: Date) {
+    return this.prisma.$transaction(async (tx) => {
+      const status = await tx.jobApplicationStatus.findUniqueOrThrow({
+        where: { title: 'En revisión' },
+        select: { id: true },
+      });
+
+      return tx.jobApplication.updateMany({
+        where: {
+          id,
+          userId,
+          status: { title: 'Retirada' },
+          jobOffer: {
+            status: { title: JobOfferStatus.PUBLISHED },
+            OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
+          },
+        },
+        data: { statusId: status.id, appliedAt: now },
+      });
+    });
+  }
+
+  findContactContext(id: string) {
+    return this.prisma.jobApplication.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        userId: true,
+        jobOfferId: true,
+        status: { select: { title: true } },
+        jobOffer: {
+          select: {
+            title: true,
+            company: {
+              select: {
+                id: true,
+                title: true,
+                recruiters: {
+                  where: {
+                    isActive: true,
+                    roles: {
+                      some: {
+                        deletedAt: null,
+                        startAt: { lte: new Date() },
+                        role: { name: RECRUITER_ROLE },
+                      },
+                    },
+                  },
+                  select: { id: true, firstName: true, lastName: true },
+                  orderBy: [
+                    { firstName: 'asc' },
+                    { lastName: 'asc' },
+                    { id: 'asc' },
+                  ],
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
   withdraw(id: string, userId: string, statuses: string[], title: string) {
     return this.prisma.$transaction(async (tx) => {
       const status = await tx.jobApplicationStatus.findUniqueOrThrow({
@@ -74,6 +144,12 @@ export class ApplicationsRepository {
     return this.prisma.jobApplication.findUnique({
       where: { id },
       select: RECRUITMENT_APPLICATION_SELECT,
+    });
+  }
+  findApplicationDecisionContext(id: string) {
+    return this.prisma.jobApplication.findUnique({
+      where: { id },
+      select: APPLICATION_DECISION_CONTEXT_SELECT,
     });
   }
   recordRecruiterDecision(applicationId: string, target: string) {

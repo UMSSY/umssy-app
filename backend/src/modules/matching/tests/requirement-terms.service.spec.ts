@@ -46,7 +46,9 @@ describe('RequirementTermsService', () => {
     const result = await service.extractAndMatchRequirements(
       'Conocimientos en Python y pytón',
     );
-    const pythonSkills = result.filter((s) => s.name.toLowerCase().includes('python'));
+    const pythonSkills = result.filter((s) =>
+      s.name.toLowerCase().includes('python'),
+    );
     expect(pythonSkills.length).toBeGreaterThanOrEqual(1);
   });
 
