@@ -33,6 +33,10 @@ describe("apiClient authorization", () => {
     clearAccessToken();
   });
 
+  it("configures withCredentials to true to transmit HttpOnly session cookies", () => {
+    expect(apiClient.defaults.withCredentials).toBe(true);
+  });
+
   it("adds a Bearer token when an access token exists", async () => {
     await saveAccessToken("stored-token");
 
