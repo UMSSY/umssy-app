@@ -2,8 +2,8 @@ import { cleanup, screen, waitFor } from '@testing-library/react';
 import { renderWithQuery as render } from '@/shared/testing/render-with-query';
 import userEvent from '@testing-library/user-event';
 import { afterEach, expect, it, vi } from 'vitest';
-import { verificationApi } from '@/modules/documents/services/document-verification.service';
-import type { DocumentVerification } from '@/modules/documents/types/document-verification.types';
+import { verificationApi } from '@/modules/cv/services/document-verification.service';
+import type { DocumentVerification } from '@/modules/cv/types/document-verification.types';
 import { ReviewQueueView } from './review-queue-view';
 
 const row: DocumentVerification = {

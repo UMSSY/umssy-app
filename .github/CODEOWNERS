@@ -1,4 +1,7 @@
 README.md @umssy/DevOps
+/standard.md @umssy/DevOps
+/backend/standard.md @umssy/DevOps
+/frontend/standard.md @umssy/DevOps
 .github/ @umssy/DevOps
 .husky/ @umssy/DevOps
 scripts/ @umssy/DevOps
