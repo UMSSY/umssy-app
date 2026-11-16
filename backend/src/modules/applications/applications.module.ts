@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ApplicationMapper } from './mappers/application.mapper.js';
 import { MatchingModule } from '../matching/matching.module.js';
@@ -17,7 +17,7 @@ import { UsersModule } from '../users/users.module.js';
     PrismaModule,
     MatchingModule,
     JwtAuthModule,
-    NotificationsModule,
+    forwardRef(() => NotificationsModule),
     JobOffersModule,
     UsersModule,
   ],
