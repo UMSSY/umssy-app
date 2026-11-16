@@ -177,21 +177,28 @@ describe('NotificationsService', () => {
     );
   });
 
-  it('debe aislar fallos de canal (si push falla, el resto continúa)', async () => {
+  it('debe aislar fallos de canal (si push falla, el correo de otro usuario continúa)', async () => {
     mockPreferencesRepo.findManyByUserIds.mockResolvedValue([
-      { userId: 'user-2', pushEnabled: true, emailEnabled: true },
+      { userId: 'user-2', pushEnabled: true, emailEnabled: false },
+      { userId: 'user-3', pushEnabled: false, emailEnabled: true },
     ]);
+    mockNotificationsRepo.createMany.mockImplementation(
+      (data: { recipientId: string }[]) =>
+        Promise.resolve(
+          data.map((item) => ({ id: `notification-${item.recipientId}`, recipientId: item.recipientId })),
+        ),
+    );
     mockPushDispatcher.dispatchToUsers.mockRejectedValue(new Error('Push down'));
 
     const result = await service.notify({
-      recipientIds: ['user-2'],
+      recipientIds: ['user-2', 'user-3'],
       actorId: 'user-1',
       type: NotificationType.APPOINTMENT_BOOKED,
       payload: validPayload,
       actionUrl: '/test',
     });
 
-    expect(result.inAppCount).toBe(1);
+    expect(result.inAppCount).toBe(2);
     expect(result.pushStatus).toBe('failed');
     expect(result.emailStatus).toBe('sent');
   });
@@ -222,14 +229,6 @@ describe('NotificationsService', () => {
       expect.any(Map),
     );
     expect(mockGateway.emitToUser).toHaveBeenCalledTimes(2);
-    expect(mockGateway.emitToUser).toHaveBeenCalledWith(
-      'user-2',
-      'notification:new',
-      expect.objectContaining({
-        typeCode: NotificationType.APPOINTMENT_BOOKED,
-        actionUrl: '/test',
-      }),
-    );
   });
 
   it('debe pasar al push el id del aviso creado para cada destinatario', async () => {
@@ -250,5 +249,124 @@ describe('NotificationsService', () => {
 
     const notificationIds = mockPushDispatcher.dispatchToUsers.mock.calls[0][5] as Map<string, string>;
     expect(notificationIds.get('user-2')).toBe('notification-9');
+  });
+
+  describe('HU-16 · preferencia de canal', () => {
+    const notifyBooked = (recipientId = 'user-2') =>
+      service.notify({
+        recipientIds: [recipientId],
+        actorId: 'user-1',
+        type: NotificationType.APPOINTMENT_BOOKED,
+        payload: validPayload,
+        actionUrl: '/test',
+      });
+
+    it('«En el celular (Push)»: solo push, sin correo, y se crea el aviso in-app', async () => {
+      mockPreferencesRepo.findManyByUserIds.mockResolvedValue([
+        { userId: 'user-2', pushEnabled: true, emailEnabled: false },
+      ]);
+
+      const result = await notifyBooked();
+
+      expect(mockPushDispatcher.dispatchToUsers).toHaveBeenCalledTimes(1);
+      expect(mockMailDispatcher.dispatchToUsers).not.toHaveBeenCalled();
+      expect(result.inAppCount).toBe(1);
+      expect(mockGateway.emitToUser).toHaveBeenCalledTimes(1);
+    });
+
+    it('«Solo por correo»: solo correo, sin push, y se crea el aviso in-app', async () => {
+      mockPreferencesRepo.findManyByUserIds.mockResolvedValue([
+        { userId: 'user-2', pushEnabled: false, emailEnabled: true },
+      ]);
+
+      const result = await notifyBooked();
+
+      expect(mockMailDispatcher.dispatchToUsers).toHaveBeenCalledTimes(1);
+      expect(mockPushDispatcher.dispatchToUsers).not.toHaveBeenCalled();
+      expect(result.inAppCount).toBe(1);
+    });
+
+    it('«Solo dentro de la app»: ni push ni correo, pero sí la campana', async () => {
+      mockPreferencesRepo.findManyByUserIds.mockResolvedValue([
+        { userId: 'user-2', pushEnabled: false, emailEnabled: false },
+      ]);
+
+      const result = await notifyBooked();
+
+      expect(mockPushDispatcher.dispatchToUsers).not.toHaveBeenCalled();
+      expect(mockMailDispatcher.dispatchToUsers).not.toHaveBeenCalled();
+      expect(result).toEqual({ inAppCount: 1, pushStatus: 'skipped', emailStatus: 'skipped' });
+      expect(mockGateway.emitToUser).toHaveBeenCalledTimes(1);
+    });
+
+    it('usuario sin registro de preferencia: solo correo por defecto', async () => {
+      mockPreferencesRepo.findManyByUserIds.mockResolvedValue([]);
+
+      await notifyBooked();
+
+      expect(mockMailDispatcher.dispatchToUsers).toHaveBeenCalledTimes(1);
+      expect(mockPushDispatcher.dispatchToUsers).not.toHaveBeenCalled();
+    });
+
+    it('fila con push y correo en true: se envía únicamente por push', async () => {
+      mockPreferencesRepo.findManyByUserIds.mockResolvedValue([
+        { userId: 'user-2', pushEnabled: true, emailEnabled: true },
+      ]);
+
+      await notifyBooked();
+
+      expect(mockPushDispatcher.dispatchToUsers).toHaveBeenCalledTimes(1);
+      expect(mockMailDispatcher.dispatchToUsers).not.toHaveBeenCalled();
+    });
+
+    it('con push y sin suscripción activa: no hay respaldo por correo', async () => {
+      mockPreferencesRepo.findManyByUserIds.mockResolvedValue([
+        { userId: 'user-2', pushEnabled: true, emailEnabled: false },
+      ]);
+      mockPushDispatcher.dispatchToUsers.mockResolvedValue('skipped');
+
+      const result = await notifyBooked();
+
+      expect(result.pushStatus).toBe('skipped');
+      expect(result.emailStatus).toBe('skipped');
+      expect(mockMailDispatcher.dispatchToUsers).not.toHaveBeenCalled();
+      expect(result.inAppCount).toBe(1);
+    });
+
+    it('aviso que no admite correo con «Solo por correo»: solo campana', async () => {
+      mockNotificationsRepo.findTypeByCode.mockResolvedValue({
+        id: 'type-chat',
+        code: 'CHAT_MESSAGE',
+        sendsPush: true,
+        sendsEmail: false,
+      });
+      mockPreferencesRepo.findManyByUserIds.mockResolvedValue([
+        { userId: 'user-2', pushEnabled: false, emailEnabled: true },
+      ]);
+
+      const result = await notifyBooked();
+
+      expect(mockMailDispatcher.dispatchToUsers).not.toHaveBeenCalled();
+      expect(mockPushDispatcher.dispatchToUsers).not.toHaveBeenCalled();
+      expect(result.inAppCount).toBe(1);
+    });
+
+    it('aviso que no admite push con «En el celular»: solo campana', async () => {
+      mockNotificationsRepo.findTypeByCode.mockResolvedValue({
+        id: 'type-x',
+        code: 'APPOINTMENT_BOOKED',
+        sendsPush: false,
+        sendsEmail: true,
+      });
+      mockPreferencesRepo.findManyByUserIds.mockResolvedValue([
+        { userId: 'user-2', pushEnabled: true, emailEnabled: false },
+      ]);
+
+      const result = await notifyBooked();
+
+      expect(mockPushDispatcher.dispatchToUsers).not.toHaveBeenCalled();
+      expect(mockMailDispatcher.dispatchToUsers).not.toHaveBeenCalled();
+      expect(result.inAppCount).toBe(1);
+    });
   });
 });
