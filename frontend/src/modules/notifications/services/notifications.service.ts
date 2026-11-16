@@ -1,19 +1,16 @@
 import { apiClient } from "@/shared/services/api-client";
+import type { GetNotificationsParams } from "../types/get-notifications-params.types";
 import type { NotificationInboxFilter } from "../types/notification-inbox-filter.types";
 import type { NotificationListResponse } from "../types/notification-list-response.types";
 import type { UnreadCountResponse } from "../types/unread-count-response.types";
 
-export interface GetNotificationsParams {
-  page?: number;
-  limit?: number;
-  filter?: NotificationInboxFilter;
-}
+export type { GetNotificationsParams } from "../types/get-notifications-params.types";
 
 export async function getNotifications(
   params: GetNotificationsParams = {},
 ): Promise<NotificationListResponse> {
   const { page = 1, limit = 8, filter = "ALL" } = params;
-  const response = await apiClient.get<NotificationListResponse>("/notifications", {
+  const response = await apiClient.get<{ data: NotificationListResponse }>("/notifications", {
     params: {
       page,
       limit,
@@ -21,21 +18,22 @@ export async function getNotifications(
     },
   });
 
+  const inner = response.data?.data;
   return {
-    data: Array.isArray(response.data?.data) ? response.data.data : [],
-    page: response.data?.page ?? page,
-    limit: response.data?.limit ?? limit,
-    total: response.data?.total,
+    data: Array.isArray(inner?.data) ? inner.data : [],
+    page: inner?.page ?? page,
+    limit: inner?.limit ?? limit,
+    total: inner?.total,
   };
 }
 
 export async function getUnreadCount(): Promise<UnreadCountResponse> {
-  const response = await apiClient.get<UnreadCountResponse>("/notifications/unread-count");
-  return { count: response.data?.count ?? 0 };
+  const response = await apiClient.get<{ data: UnreadCountResponse }>("/notifications/unread-count");
+  return { count: response.data?.data?.count ?? 0 };
 }
 
 export async function markNotificationAsRead(notificationId: string): Promise<void> {
-  await apiClient.patch(`/notifications/${notificationId}/read`);
+    await apiClient.patch(`/notifications/${encodeURIComponent(notificationId)}/read`);
 }
 
 export async function markAllNotificationsAsRead(

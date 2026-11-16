@@ -69,6 +69,7 @@ function setup(rolesA: string[], rolesB: string[]) {
   const conversations = {
     findById: vi.fn().mockResolvedValue(conversation),
     findByOrderedPair: vi.fn().mockResolvedValue(null),
+    findByContextId: vi.fn().mockResolvedValue(null),
     createWithParticipants: vi.fn().mockResolvedValue(conversation),
     touchLastMessage: vi.fn().mockResolvedValue(undefined),
   };
@@ -218,7 +219,7 @@ describe('HU8 tarea 3: roles permitidos', () => {
 
     await expect(
       context.policy.assertCanCommunicate(USER_A, USER_B),
-    ).resolves.toBeUndefined();
+    ).resolves.toEqual({ hasValidatedApplication: false });
 
     await expect(
       context.conversationService.getOrCreate(USER_A, USER_B),
@@ -384,7 +385,7 @@ describe('HU8 tarea 3: roles permitidos', () => {
         contextType: 'POSTULACION',
         contextId: 'postulacion-uuid-1',
       }),
-    ).resolves.toBeUndefined();
+    ).resolves.toEqual({ hasValidatedApplication: true });
 
     expect(
       context.applicationsService.validateApplicationForChat,
@@ -400,7 +401,7 @@ describe('HU8 tarea 3: roles permitidos', () => {
         contextType: 'POSTULACION',
         contextId: 'postulacion-uuid-2',
       }),
-    ).resolves.toBeUndefined();
+    ).resolves.toEqual({ hasValidatedApplication: true });
 
     expect(
       context.applicationsService.validateApplicationForChat,
@@ -409,11 +410,13 @@ describe('HU8 tarea 3: roles permitidos', () => {
 
   it('rechaza comunicacion entre estudiante y empresa cuando la postulacion no es valida o inactiva', async () => {
     const context = setup(['estudiante'], ['empresa']);
-    context.applicationsService.validateApplicationForChat.mockResolvedValueOnce({
-      isValid: false,
-      vacancyTitle: null,
-      companyName: null,
-    });
+    context.applicationsService.validateApplicationForChat.mockResolvedValueOnce(
+      {
+        isValid: false,
+        vacancyTitle: null,
+        companyName: null,
+      },
+    );
 
     await expect(
       context.policy.assertCanCommunicate(USER_A, USER_B, {
@@ -429,5 +432,60 @@ describe('HU8 tarea 3: roles permitidos', () => {
     await expect(
       context.policy.assertCanCommunicate(USER_A, USER_B),
     ).rejects.toBeInstanceOf(ChatRoleNotAllowedException);
+  });
+
+  it('rechaza el contexto de postulacion entre dos estudiantes sin consultar postulaciones', async () => {
+    const context = setup(['estudiante'], ['titulado']);
+
+    await expect(
+      context.policy.assertCanCommunicate(USER_A, USER_B, {
+        contextType: 'POSTULACION',
+        contextId: 'postulacion-uuid-1',
+      }),
+    ).rejects.toBeInstanceOf(ChatRoleNotAllowedException);
+
+    await expect(
+      context.conversationService.getOrCreate(USER_A, USER_B, {
+        contextType: 'POSTULACION',
+        contextId: 'postulacion-uuid-1',
+      }),
+    ).rejects.toBeInstanceOf(ChatRoleNotAllowedException);
+
+    expect(
+      context.applicationsService.validateApplicationForChat,
+    ).not.toHaveBeenCalled();
+    expect(context.connections.findAcceptedRequest).not.toHaveBeenCalled();
+    expect(context.conversations.createWithParticipants).not.toHaveBeenCalled();
+  });
+
+  it('rechaza el contexto de postulacion entre estudiante y empresa sin contextId', async () => {
+    const context = setup(['estudiante'], ['empresa']);
+
+    await expect(
+      context.policy.assertCanCommunicate(USER_A, USER_B, {
+        contextType: 'POSTULACION',
+      }),
+    ).rejects.toBeInstanceOf(ChatRoleNotAllowedException);
+
+    expect(
+      context.applicationsService.validateApplicationForChat,
+    ).not.toHaveBeenCalled();
+  });
+
+  it('crea la conversacion de postulacion sin conexion aceptada solo tras validar la postulacion', async () => {
+    const context = setup(['estudiante'], ['empresa']);
+    context.connections.findAcceptedRequest.mockResolvedValue(null);
+
+    await expect(
+      context.conversationService.getOrCreate(USER_A, USER_B, {
+        contextType: 'POSTULACION',
+        contextId: 'postulacion-uuid-1',
+      }),
+    ).resolves.toMatchObject({ id: CONVERSATION_ID });
+
+    expect(
+      context.applicationsService.validateApplicationForChat,
+    ).toHaveBeenCalledWith('postulacion-uuid-1', USER_A, 'company-uuid-1');
+    expect(context.connections.findAcceptedRequest).not.toHaveBeenCalled();
   });
 });

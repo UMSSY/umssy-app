@@ -3,6 +3,7 @@ import {
   ConflictException,
   Injectable,
   InternalServerErrorException,
+  Logger,
   NotFoundException,
   ForbiddenException,
   Inject,
@@ -20,6 +21,8 @@ import { NotificationType } from '../../notifications/types/notification-type.en
 
 @Injectable()
 export class ConnectionRequestService {
+  private readonly logger = new Logger(ConnectionRequestService.name);
+
   constructor(
     private readonly connectionRequestRepository: ConnectionRequestRepository,
     private readonly chatUserBlockRepository: ChatUserBlockRepository,
@@ -116,8 +119,11 @@ export class ConnectionRequestService {
           },
           actionUrl: '/chat?tab=requests',
         });
-      } catch {
-        // Notification failure should not block request creation
+      } catch (error) {
+        this.logger.error(
+          `Failed to send connection request notification to user ${receiverId}`,
+          error instanceof Error ? error.stack : String(error),
+        );
       }
     }
 
@@ -237,8 +243,11 @@ export class ConnectionRequestService {
           },
           actionUrl,
         });
-      } catch {
-        // Notification failure should not block request acceptance
+      } catch (error) {
+        this.logger.error(
+          `Failed to send connection request acceptance notification to user ${request.senderId}`,
+          error instanceof Error ? error.stack : String(error),
+        );
       }
     }
 

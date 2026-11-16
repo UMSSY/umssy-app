@@ -4,7 +4,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NotificationsView } from "../views/notifications-view";
 import {
   useNotificationsInbox,
-  useNotificationsRealtimeSync,
   useUnreadNotificationsCount,
 } from "../hooks/use-notifications";
 
@@ -17,7 +16,6 @@ vi.mock("next/navigation", () => ({
 
 vi.mock("../hooks/use-notifications", () => ({
   useNotificationsInbox: vi.fn(),
-  useNotificationsRealtimeSync: vi.fn(),
   useUnreadNotificationsCount: vi.fn(),
 }));
 
@@ -76,7 +74,6 @@ describe("NotificationsView", () => {
     expect(screen.getByText("2 sin leer")).toBeInTheDocument();
     expect(screen.getByText("Nueva encuesta publicada")).toBeInTheDocument();
     expect(screen.getByText("Oferta de mentoría asignada")).toBeInTheDocument();
-    expect(useNotificationsRealtimeSync).toHaveBeenCalled();
   });
 
   it("marca como leída y navega al hacer clic en el botón de acción de un aviso no leído", async () => {

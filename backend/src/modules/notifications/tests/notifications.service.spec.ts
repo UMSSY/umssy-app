@@ -222,6 +222,14 @@ describe('NotificationsService', () => {
       expect.any(Map),
     );
     expect(mockGateway.emitToUser).toHaveBeenCalledTimes(2);
+    expect(mockGateway.emitToUser).toHaveBeenCalledWith(
+      'user-2',
+      'notification:new',
+      expect.objectContaining({
+        typeCode: NotificationType.APPOINTMENT_BOOKED,
+        actionUrl: '/test',
+      }),
+    );
   });
 
   it('debe pasar al push el id del aviso creado para cada destinatario', async () => {
