@@ -6,9 +6,9 @@ import { ContactInfoCard } from "../components/contact-info-card";
 import { FeedbackMessage } from "../components/feedback-message";
 import { PresentationSummaryCard } from "../components/presentation-summary-card";
 import { ProfileCompletionBanner } from "../components/profile-completion-banner";
-import { ProfileCompletenessProgress } from "../components/profile-completeness-progress";
 import { ProfilePageLayout } from "../components/profile-page-layout";
 import { ProfilePhotoFeedback } from "../components/profile-photo-feedback";
+import { PortfolioProfileSection } from "../components/portfolio-profile-section";
 import { PROFILE_FEEDBACK_MESSAGES } from "../constants/profile-feedback.constants";
 import { useProfile } from "../hooks/use-profile";
 import { useProfilePhoto } from "../hooks/use-profile-photo";
@@ -32,7 +32,6 @@ export function ProfileOverviewView() {
       description="Tu información y trayectoria profesional, en un solo lugar."
       actions={profile ? <CvExportButton /> : undefined}
     >
-      <ProfileCompletenessProgress />
       {isLoading ? (
         <p role="status" className="text-sm text-text-secondary">
           {PROFILE_FEEDBACK_MESSAGES.loading}
@@ -55,6 +54,7 @@ export function ProfileOverviewView() {
           <PresentationSummaryCard profile={summary} />
           <WorkExperienceProfileSection />
           <EducationProfileSection />
+          <PortfolioProfileSection />
           <CertificationProfileSection />
           </ProfileSurface>
         </div>

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { FeedbackMessage, useProfileCompletionFocus } from "@/modules/profile";
+import { FeedbackMessage, ProfileCompletenessProgress, useProfileCompletionFocus } from "@/modules/profile";
 import { SKILL_NAME_MAX_LENGTH } from "../constants/skills.constants";
 import { formatSkillName } from "../utils/format-skill-name";
 import { validateCustomSkill } from "../utils/validate-custom-skill";
@@ -36,6 +36,7 @@ export function SkillPickerDialog({ catalogSkills, selectedSkills, isSaving, fee
     <DialogContent initialFocus={() => input ?? true} showCloseButton={false} aria-busy={isSaving} className="max-h-editor-dialog overflow-y-auto p-6 sm:max-w-md">
       <DialogClose render={<Button variant="ghost" size="icon-sm" className="absolute top-3 right-3" disabled={isSaving} aria-label="Cerrar habilidades" />}><X aria-hidden="true" /></DialogClose>
       <DialogHeader className="pr-8"><DialogTitle>Añadir habilidad</DialogTitle><DialogDescription>Elige una habilidad para añadirla directamente a tu perfil.</DialogDescription></DialogHeader>
+      <ProfileCompletenessProgress showChecklist={false} />
       <form noValidate onSubmit={(event) => void handleSubmit(event)} className="space-y-4">
         <div className="space-y-2"><Label htmlFor="skill-picker-query">Habilidad</Label><Input ref={setInput} id="skill-picker-query" value={query} maxLength={SKILL_NAME_MAX_LENGTH} placeholder="Buscar o escribir una habilidad" disabled={isSaving} aria-invalid={Boolean(error)} aria-describedby={error ? "skill-picker-error" : undefined} onChange={(event) => { setQuery(event.target.value); setError(null); }} />{error ? <p id="skill-picker-error" role="alert" className="text-sm text-danger">{error}</p> : null}</div>
         <ul aria-label="Habilidades disponibles" className="max-h-56 divide-y divide-border overflow-y-auto">
