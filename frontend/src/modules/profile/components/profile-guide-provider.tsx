@@ -182,7 +182,6 @@ function ProfileGuideSessionProvider({
   useEffect(() => {
     if (!enabled) return;
     let cancelled = false;
-    // Preparar el siguiente módulo fuera del evento de clic evita esperas al aterrizar.
     const timer = window.setTimeout(() => {
       if (!cancelled && warmStep) void preloadProfileGuideStep(warmStep);
     }, 0);
@@ -196,7 +195,6 @@ function ProfileGuideSessionProvider({
     const next = { ...sessionRef.current, ...patch };
     sessionRef.current = next;
     setSession(next);
-    // El orden de escritura evita restaurar un paso anterior al navegar rápido.
     writesRef.current = writesRef.current
       .then(() => profileGuideStorage.write(userId, next))
       .catch(() => {
