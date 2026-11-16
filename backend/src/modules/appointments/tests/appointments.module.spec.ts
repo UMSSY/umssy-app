@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { MODULE_METADATA } from '@nestjs/common/constants.js';
+import { ConfigModule } from '@nestjs/config';
 import { Test, type TestingModule } from '@nestjs/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AppModule } from '../../../app.module.js';
@@ -30,7 +31,11 @@ describe('AppointmentsModule', () => {
 
   beforeEach(async () => {
     moduleRef = await Test.createTestingModule({
-      imports: [PrismaModule, AppointmentsModule],
+      imports: [
+        ConfigModule.forRoot({ isGlobal: true, ignoreEnvFile: true }),
+        PrismaModule,
+        AppointmentsModule,
+      ],
       providers: [AppointmentsConsumer],
     })
       .overrideProvider(PrismaService)
