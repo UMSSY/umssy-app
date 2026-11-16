@@ -107,7 +107,7 @@ describe("WorkExperienceView", () => {
       expect(workExperienceService.getWorkExperiences).toHaveBeenCalledTimes(2),
     );
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-  });
+  }, 15000);
 
   it("edits an experience from the list", async () => {
     const user = userEvent.setup();

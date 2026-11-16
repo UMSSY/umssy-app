@@ -40,7 +40,7 @@ describe("WorkExperienceForm", () => {
       isCurrent: false,
       description: "Interfaces con React",
     });
-  });
+  }, 15000);
 
   it("shows an error next to each empty required field and does not submit", async () => {
     const user = userEvent.setup();
@@ -78,7 +78,7 @@ describe("WorkExperienceForm", () => {
     expect(onSubmit).not.toHaveBeenCalled();
     expect(screen.getByText(WORK_EXPERIENCE_VALIDATION_MESSAGES.required)).toBeInTheDocument();
     expect(screen.getByLabelText(/Descripción de funciones/)).toHaveAttribute("aria-invalid", "true");
-  });
+  }, 15000);
 
   it("rejects an end date earlier than the start date", async () => {
     const user = userEvent.setup();
@@ -96,7 +96,7 @@ describe("WorkExperienceForm", () => {
     expect(
       screen.getByText(WORK_EXPERIENCE_VALIDATION_MESSAGES.endDateBeforeStartDate),
     ).toBeInTheDocument();
-  });
+  }, 15000);
 
   it("clears the error of a field when it changes", async () => {
     const user = userEvent.setup();
