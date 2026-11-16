@@ -46,7 +46,7 @@ export const APPOINTMENT_CANCELLATION_RESPONSE_SCHEMA = {
     reason: {
       type: 'string' as const,
       nullable: true,
-      maxLength: 300,
+      maxLength: CANCELLATION_REASON_MAX_LENGTH,
       description: 'null si se canceló sin motivo',
     },
     cancelledAt: {
@@ -153,15 +153,12 @@ export const CANCEL_APPOINTMENT_DOCS = {
     'Pasa la cita a CANCELLED con quién canceló, la fecha y el motivo dentro de una transacción; con menos de 24 horas el motivo es obligatorio y una cita ya cancelada no se vuelve a cancelar',
   idDescription: 'Identificador de la cita',
   invalidIdDescription: 'El identificador de la cita no es válido',
-  reasonDescription:
-    'Motivo de la cancelación, opcional salvo cuando faltan menos de 24 horas (máximo 300 caracteres)',
+  reasonDescription: `Motivo de la cancelación, opcional salvo cuando faltan menos de 24 horas (máximo ${CANCELLATION_REASON_MAX_LENGTH} caracteres)`,
   okDescription: 'Cita cancelada',
-  badRequestDescription:
-    'El motivo supera los 300 caracteres o falta cuando es obligatorio',
+  badRequestDescription: `El motivo supera los ${CANCELLATION_REASON_MAX_LENGTH} caracteres o falta cuando es obligatorio`,
   forbiddenDescription: 'El usuario no participa en la cita',
   notFoundDescription: 'La cita no existe',
-  conflictDescription:
-    'La cita ya empezó o ya no está confirmada',
+  conflictDescription: 'La cita ya empezó o ya no está confirmada',
 } as const;
 
 export const FIND_MY_APPOINTMENTS_DOCS = {

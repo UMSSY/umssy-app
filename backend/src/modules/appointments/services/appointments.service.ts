@@ -275,12 +275,14 @@ export class AppointmentsService {
       if (!current) {
         throw new AppointmentNotFoundException();
       }
+
+      const currentNow = new Date();
       if (
         CANCELLED_APPOINTMENT_STATUS_TITLES.includes(
           current.status.title as AppointmentStatusTitle,
         )
       ) {
-        return this.appointmentMapper.toResponse(current, user.id, now);
+        return this.appointmentMapper.toResponse(current, user.id, currentNow);
       }
       if (
         !ACTIVE_APPOINTMENT_STATUS_TITLES.includes(
@@ -289,8 +291,13 @@ export class AppointmentsService {
       ) {
         throw new AppointmentNotCancellableException();
       }
-      if (current.startAt.getTime() <= now.getTime()) {
+      if (current.startAt.getTime() <= currentNow.getTime()) {
         throw new AppointmentNotCancellableException();
+      }
+
+      const currentTimeLeft = current.startAt.getTime() - currentNow.getTime();
+      if (!reason && currentTimeLeft < CANCELLATION_REASON_WINDOW_MS) {
+        throw new CancelReasonRequiredException();
       }
 
       const previousStatusId =
@@ -304,11 +311,11 @@ export class AppointmentsService {
       );
 
       const cancelled = await this.appointmentsRepository.cancelAppointment(
-        appointment.id,
+        current.id,
         {
           statusId: newStatusId,
           cancelledById: user.id,
-          cancelledAt: now,
+          cancelledAt: currentNow,
           cancellationReason: reason,
         },
         client,
@@ -316,7 +323,7 @@ export class AppointmentsService {
 
       await this.appointmentsRepository.createAppointmentHistory(
         {
-          appointmentId: appointment.id,
+          appointmentId: current.id,
           previousStatusId,
           newStatusId,
           changedById: user.id,
@@ -324,7 +331,7 @@ export class AppointmentsService {
         client,
       );
 
-      return this.appointmentMapper.toResponse(cancelled, user.id, now);
+      return this.appointmentMapper.toResponse(cancelled, user.id, currentNow);
     });
   }
 

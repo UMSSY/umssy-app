@@ -263,6 +263,51 @@ describe('POST /appointments (integración HTTP de cruces)', () => {
     });
   });
 
+  describe('bloques con una cita cancelada', () => {
+    const addCancelledForTarget = (
+      block: InMemoryBlock,
+      cancelledById: string,
+    ) =>
+      seed.addAppointment({
+        blockId: block.id,
+        mentorId: block.mentorId,
+        studentId: seed.studentId,
+        startAt: block.startAt,
+        endAt: block.endAt,
+        status: AppointmentStatusTitle.CANCELLED,
+        cancellation: {
+          cancelledById,
+          cancellationReason: 'No podré asistir',
+          cancelledAt: OVERLAP_HTTP_ANCHOR,
+        },
+      });
+
+    it('rechaza reservar el bloque que canceló el mentor (CA1)', async () => {
+      const block = target();
+      addCancelledForTarget(block, block.mentorId);
+
+      const response = await post(block.id);
+
+      expect(response.status).toBe(409);
+      expect(response.body).toMatchObject({
+        statusCode: 409,
+        ok: false,
+        code: APPOINTMENT_ERROR_CODES.slotUnavailable,
+        data: null,
+      });
+    });
+
+    it('permite reservar el bloque que canceló el titulado (CA3)', async () => {
+      const block = target();
+      addCancelledForTarget(block, seed.studentId);
+
+      const response = await post(block.id);
+
+      expect(response.status).toBe(201);
+      expect(response.body.data).toMatchObject({ blockId: block.id });
+    });
+  });
+
   describe('mentor que reserva con otro mentor', () => {
     it('rechaza el cruce cuando ya tiene una cita confirmada como mentor (CA2)', async () => {
       const block = target();
