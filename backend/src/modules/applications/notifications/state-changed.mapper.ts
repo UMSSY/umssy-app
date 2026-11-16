@@ -1,5 +1,5 @@
 import { STATUS_CODE_BY_TITLE } from './state-changed.constants.js';
-import type { ApplicationStatusCode } from './state-changed.types.js';
+import type { ApplicationStatusCode } from './application-status-code.types.js';
 import type { ApplicationStatus } from '../types/applications.types.js';
 
 export function toApplicationStatusCode(

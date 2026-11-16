@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ApplicationsRepository } from '../repositories/applications.repository.js';
 import type { ApplicationRecord } from '../types/application-record.types.js';
 import type { FindApplicationsQueryDto } from '../requests/find-applications.request.js';
@@ -9,6 +9,7 @@ import {
 import { ApplicationNotFoundException } from '../exceptions/application-not-found.exception.js';
 import { ApplicationForbiddenException } from '../exceptions/application-forbidden.exception.js';
 import { ApplicationNotWithdrawableException } from '../exceptions/application-not-withdrawable.exception.js';
+import { ApplicationNotReactivableException } from '../exceptions/application-not-reactivable.exception.js';
 import { ApplicationContactRestrictedException } from '../exceptions/application-contact-restricted.exception.js';
 import type { ApplicationContactResponse } from '../types/application-contact-response.types.js';
 import { ApplicationMapper } from '../mappers/application.mapper.js';
@@ -19,7 +20,7 @@ import {
   NOTIFY_TIMEOUT_MS,
   STATE_CHANGED_ACTION_PATH,
 } from '../notifications/state-changed.constants.js';
-import type { NotifyStateChangedParams } from '../notifications/state-changed.types.js';
+import type { NotifyStateChangedParams } from '../notifications/notify-state-changed-params.types.js';
 import type { ApplicationDecisionContext } from '../types/application-decision-context.types.js';
 import { JobOffersService } from '../../job-offers/services/job-offers.service.js';
 import { NotificationsService } from '../../notifications/services/notifications.service.js';
@@ -138,11 +139,7 @@ export class ApplicationsService {
       new Date(),
     );
 
-    if (result.count !== 1) {
-      throw new ConflictException(
-        'La postulación no puede reactivarse en su estado actual o la vacante ya no está disponible.',
-      );
-    }
+    if (result.count !== 1) throw new ApplicationNotReactivableException();
   }
 
   async getApplicationContact(

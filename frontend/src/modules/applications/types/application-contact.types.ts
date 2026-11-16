@@ -1,7 +1,4 @@
-export interface ApplicationContactRecruiter {
-  id: string;
-  fullName: string;
-}
+import type { ApplicationContactRecruiter } from "./application-contact-recruiter.types";
 
 export interface ApplicationContact {
   applicationId: string;
