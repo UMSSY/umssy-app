@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { SurveyAlertConfigDto } from '../types/survey-alert-config-dto.type.js';
 
 export const surveyAlertConfigSchema = z.object({
   enabled: z.boolean().optional(),
@@ -11,4 +12,4 @@ export const surveyAlertConfigSchema = z.object({
   questionIds: z.array(z.string()).nullable().optional(),
 });
 
-export type SurveyAlertConfigDto = z.infer<typeof surveyAlertConfigSchema>;
+export type { SurveyAlertConfigDto };

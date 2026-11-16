@@ -66,7 +66,7 @@ describe('SurveyMapper', () => {
   it('usa null en los campos opcionales ausentes de un borrador', () => {
     expect(
       mapper.toCreateData(
-        { title: 'Borrador', status: 'draft', questions: [] },
+        { title: 'Borrador', status: 'draft', questions: [] } as CreateSurveyRequest,
         'admin-1',
       ),
     ).toEqual({

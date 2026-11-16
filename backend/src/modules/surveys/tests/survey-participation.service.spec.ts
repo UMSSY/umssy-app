@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { MailService } from '../../mail/services/mail.service.js';
 import type { NotificationsService } from '../../notifications/services/notifications.service.js';
 import { NotificationType } from '../../notifications/types/notification-type.enum.js';
+import type { UsersService } from '../../users/services/users.service.js';
 import {
   SurveyNotFoundException,
   SurveyReminderDeliveryFailedException,
@@ -11,10 +11,6 @@ import {
 import type { SurveysRepository } from '../repositories/surveys.repository.js';
 import { SurveyParticipationService } from '../services/survey-participation.service.js';
 import type { SurveyParticipationTarget } from '../types/survey-participation-target.type.js';
-
-vi.mock('../../mail/helpers/load-mail-template.js', () => ({
-  loadMailTemplate: vi.fn().mockResolvedValue('<mjml />'),
-}));
 
 const NOW = new Date('2026-11-15T12:00:00.000Z');
 
@@ -29,12 +25,7 @@ const TARGET: SurveyParticipationTarget = {
   career: { id: 'career-1', title: 'Ingeniería de Sistemas' },
 };
 
-const EXPECTED_FILTER = {
-  surveyId: 'survey-1',
-  roles: ['titulado'],
-  careerId: 'career-1',
-  graduationYear: 2020,
-};
+const RESPONDED_IDS = Array.from({ length: 48 }, (_, i) => `user-resp-${i}`);
 
 const PENDING = [
   { id: 'user-2', email: 'ana@umss.edu.bo', firstName: 'Ana', lastName: 'Rojas' },
@@ -44,35 +35,38 @@ const PENDING = [
 describe('SurveyParticipationService', () => {
   let repository: {
     findParticipationTarget: ReturnType<typeof vi.fn>;
-    countEligibleRespondents: ReturnType<typeof vi.fn>;
-    findPendingRecipients: ReturnType<typeof vi.fn>;
+    findRespondedUserIds: ReturnType<typeof vi.fn>;
     updateLastReminderSent: ReturnType<typeof vi.fn>;
   };
-  let mailService: { send: ReturnType<typeof vi.fn> };
+  let usersService: {
+    countAudienceUsers: ReturnType<typeof vi.fn>;
+    findAudienceRecipients: ReturnType<typeof vi.fn>;
+  };
   let notificationsService: { notify: ReturnType<typeof vi.fn> };
   let service: SurveyParticipationService;
 
   beforeEach(() => {
     repository = {
       findParticipationTarget: vi.fn().mockResolvedValue(TARGET),
-      countEligibleRespondents: vi.fn(
-        (_filter: unknown, hasResponded?: boolean) =>
-          Promise.resolve(hasResponded ? 48 : 120),
-      ),
-      findPendingRecipients: vi.fn().mockResolvedValue(PENDING),
+      findRespondedUserIds: vi.fn().mockResolvedValue(RESPONDED_IDS),
       updateLastReminderSent: vi.fn().mockResolvedValue(undefined),
     };
-    mailService = { send: vi.fn().mockResolvedValue(undefined) };
+    usersService = {
+      countAudienceUsers: vi.fn().mockResolvedValue(120),
+      findAudienceRecipients: vi.fn().mockResolvedValue(PENDING),
+    };
     notificationsService = {
       notify: vi.fn().mockResolvedValue({
         inAppCount: 2,
         pushStatus: 'sent',
-        emailStatus: 'skipped',
+        emailStatus: 'sent',
+        emailsDelivered: 2,
+        emailsFailed: 0,
       }),
     };
     service = new SurveyParticipationService(
       repository as unknown as SurveysRepository,
-      mailService as unknown as MailService,
+      usersService as unknown as UsersService,
       notificationsService as unknown as NotificationsService,
     );
   });
@@ -89,17 +83,16 @@ describe('SurveyParticipationService', () => {
         lastReminderSentAt: '2026-11-05T14:00:00.000Z',
         canSendReminder: true,
       });
-      expect(repository.countEligibleRespondents).toHaveBeenCalledWith(
-        EXPECTED_FILTER,
-      );
-      expect(repository.countEligibleRespondents).toHaveBeenCalledWith(
-        EXPECTED_FILTER,
-        true,
-      );
+      expect(repository.findRespondedUserIds).toHaveBeenCalledWith('survey-1');
+      expect(usersService.countAudienceUsers).toHaveBeenCalledWith({
+        roles: ['titulado'],
+        careerId: 'career-1',
+        graduationYear: 2020,
+      });
     });
 
     it('deshabilita el recordatorio cuando no hay pendientes', async () => {
-      repository.countEligibleRespondents.mockResolvedValue(10);
+      usersService.countAudienceUsers.mockResolvedValue(48);
 
       await expect(
         service.getParticipation('survey-1', NOW),
@@ -120,22 +113,23 @@ describe('SurveyParticipationService', () => {
   });
 
   describe('sendReminders', () => {
-    it('envía correos y push solo a los pendientes y registra la fecha del recordatorio', async () => {
+    it('envía notificaciones a través de notify() solo a los pendientes y registra la fecha', async () => {
       const result = await service.sendReminders('survey-1', 'admin-1', NOW);
 
-      expect(repository.findPendingRecipients).toHaveBeenCalledWith(
-        EXPECTED_FILTER,
-      );
-      expect(mailService.send).toHaveBeenCalledTimes(2);
-      expect(mailService.send.mock.calls.map(([mail]) => mail.to)).toEqual([
-        'ana@umss.edu.bo',
-        'luis@umss.edu.bo',
-      ]);
+      expect(usersService.findAudienceRecipients).toHaveBeenCalledWith({
+        roles: ['titulado'],
+        careerId: 'career-1',
+        graduationYear: 2020,
+        excludedUserIds: RESPONDED_IDS,
+      });
       expect(notificationsService.notify).toHaveBeenCalledWith(
         expect.objectContaining({
           recipientIds: ['user-2', 'user-3'],
           actorId: 'admin-1',
           type: NotificationType.SURVEY_REMINDER,
+          payload: expect.objectContaining({
+            surveyTitle: 'Empleabilidad 2020',
+          }),
         }),
       );
       expect(repository.updateLastReminderSent).toHaveBeenCalledWith(
@@ -153,27 +147,42 @@ describe('SurveyParticipationService', () => {
     });
 
     it('devuelve la cantidad exacta entregada cuando algunos correos fallan', async () => {
-      mailService.send
-        .mockRejectedValueOnce(new Error('smtp'))
-        .mockResolvedValueOnce(undefined);
+      notificationsService.notify.mockResolvedValue({
+        inAppCount: 2,
+        pushStatus: 'sent',
+        emailStatus: 'partial',
+        emailsDelivered: 1,
+        emailsFailed: 1,
+      });
 
       await expect(
         service.sendReminders('survey-1', 'admin-1', NOW),
       ).resolves.toMatchObject({ emailsDelivered: 1, emailsFailed: 1 });
     });
 
-    it('no registra el recordatorio si ningún correo se entregó', async () => {
-      mailService.send.mockRejectedValue(new Error('smtp'));
+    it('no registra el recordatorio si el servicio unificado falla completamente', async () => {
+      notificationsService.notify.mockResolvedValue({
+        inAppCount: 0,
+        pushStatus: 'failed',
+        emailStatus: 'failed',
+        emailsDelivered: 0,
+        emailsFailed: 2,
+      });
 
       await expect(
         service.sendReminders('survey-1', 'admin-1', NOW),
       ).rejects.toThrow(SurveyReminderDeliveryFailedException);
       expect(repository.updateLastReminderSent).not.toHaveBeenCalled();
-      expect(notificationsService.notify).not.toHaveBeenCalled();
     });
 
-    it('informa el fallo de push sin ocultar los correos entregados', async () => {
-      notificationsService.notify.mockRejectedValue(new Error('catalog'));
+    it('informa el estado de push', async () => {
+      notificationsService.notify.mockResolvedValue({
+        inAppCount: 2,
+        pushStatus: 'failed',
+        emailStatus: 'sent',
+        emailsDelivered: 2,
+        emailsFailed: 0,
+      });
 
       await expect(
         service.sendReminders('survey-1', 'admin-1', NOW),
@@ -181,12 +190,12 @@ describe('SurveyParticipationService', () => {
     });
 
     it('rechaza el envío si todos ya respondieron', async () => {
-      repository.findPendingRecipients.mockResolvedValue([]);
+      usersService.findAudienceRecipients.mockResolvedValue([]);
 
       await expect(
         service.sendReminders('survey-1', 'admin-1', NOW),
       ).rejects.toThrow(SurveyWithoutPendingRespondentsException);
-      expect(mailService.send).not.toHaveBeenCalled();
+      expect(notificationsService.notify).not.toHaveBeenCalled();
     });
 
     it('rechaza el envío para encuestas cerradas', async () => {
@@ -198,7 +207,7 @@ describe('SurveyParticipationService', () => {
       await expect(
         service.sendReminders('survey-1', 'admin-1', NOW),
       ).rejects.toThrow(SurveyReminderNotAllowedException);
-      expect(repository.findPendingRecipients).not.toHaveBeenCalled();
+      expect(usersService.findAudienceRecipients).not.toHaveBeenCalled();
     });
   });
 });

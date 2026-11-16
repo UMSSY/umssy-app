@@ -132,7 +132,11 @@ describe('SurveysService', () => {
 
     const result = await service.create(
       'admin-1',
-      { title: 'Borrador', status: 'draft', questions: [] },
+      {
+        title: 'Borrador',
+        status: 'draft',
+        questions: [],
+      } as unknown as CreateSurveyRequest,
       NOW,
     );
 

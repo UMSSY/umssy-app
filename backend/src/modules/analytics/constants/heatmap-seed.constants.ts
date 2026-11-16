@@ -4,7 +4,6 @@ export const HEATMAP_SEED_GRADUATES = 160;
 export const HEATMAP_SEED_RANDOM_SEED = 2026;
 export const HEATMAP_SEED_FIRST_RESPONSE = '2022-01-10T12:00:00-04:00';
 export const HEATMAP_SEED_SURVEY_OPENS_AT = '2022-01-01T00:00:00-04:00';
-// Hash de la contraseña compartida por los usuarios de demostración.
 export const HEATMAP_SEED_PASSWORD_HASH =
   '$2b$10$SGuj5IRujU5usBlVbAoDReuM2PeOD74IjT/3GGnWk2FoiCVCKeWxm';
 

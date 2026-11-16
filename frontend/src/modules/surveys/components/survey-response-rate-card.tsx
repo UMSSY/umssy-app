@@ -1,4 +1,3 @@
-import { cn } from "cn";
 import { Loader2, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,8 +21,11 @@ export function SurveyResponseRateCard({ participation, isSendingReminder, onSen
           <div className="flex flex-col gap-1">
             <p className="text-xs font-medium text-text-secondary">{SURVEY_PARTICIPATION_TEXT.responseRateLabel}</p>
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-              <p className={cn("font-tight text-4xl font-bold tabular-nums", toneStyle.textClassName)}>{responseRate}%</p>
-              <p className="text-sm text-ink-soft">{SURVEY_PARTICIPATION_TEXT.respondedSummary(respondedCount, eligibleCount)}</p>
+              <p className="font-tight text-4xl font-bold text-accent tabular-nums">{responseRate}%</p>
+              <div className="flex flex-col">
+                <p className="text-sm text-ink-soft">{SURVEY_PARTICIPATION_TEXT.respondedSummary(respondedCount, eligibleCount)}</p>
+                <p className="text-xs text-text-secondary">{toneStyle.label}</p>
+              </div>
             </div>
           </div>
 
@@ -32,7 +34,7 @@ export function SurveyResponseRateCard({ participation, isSendingReminder, onSen
             data-tone={tone}
             aria-label={SURVEY_PARTICIPATION_TEXT.responseRateLabel}
             aria-valuetext={`${responseRate}% · ${toneStyle.label}`}
-            className={cn("**:data-[slot=progress-track]:h-2.5", toneStyle.meterClassName)}
+            className="**:data-[slot=progress-indicator]:bg-primary **:data-[slot=progress-track]:h-2.5"
           />
 
           <p className="text-xs text-text-secondary">{SURVEY_PARTICIPATION_TEXT.audience(audienceLabel)}</p>

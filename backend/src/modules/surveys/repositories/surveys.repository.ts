@@ -13,7 +13,6 @@ import {
 } from '../constants/survey.constants.js';
 import {
   SURVEY_PARTICIPATION_TARGET_SELECT,
-  SURVEY_REMINDER_RECIPIENT_SELECT,
 } from '../constants/survey-participation.constants.js';
 import { SurveysStorageUnavailableException } from '../exceptions/surveys-storage-unavailable.exception.js';
 import type { SurveyDetailResponse } from '../responses/survey-detail.response.js';
@@ -450,52 +449,14 @@ export class SurveysRepository {
     });
   }
 
-  countEligibleRespondents(
-    filter: SurveyAudienceFilter,
-    hasResponded?: boolean,
-  ): Promise<number> {
-    return this.prisma.user.count({
-      where: this.buildAudienceWhere(filter, hasResponded),
-    });
-  }
-
-  findPendingRecipients(
-    filter: SurveyAudienceFilter,
-  ): Promise<SurveyReminderRecipient[]> {
-    return this.prisma.user.findMany({
-      where: this.buildAudienceWhere(filter, false),
-      select: SURVEY_REMINDER_RECIPIENT_SELECT,
-      orderBy: { id: 'asc' },
-    });
-  }
-
-  private buildAudienceWhere(
-    { surveyId, roles, careerId, graduationYear }: SurveyAudienceFilter,
-    hasResponded?: boolean,
-  ): Prisma.UserWhereInput {
-    return {
-      isActive: true,
-      roles: {
-        some: { deletedAt: null, role: { name: { in: [...roles] } } },
-      },
-      ...(careerId || graduationYear
-        ? {
-            approvedAccessRequest: {
-              is: {
-                ...(careerId ? { careerId } : {}),
-                ...(graduationYear ? { graduationYear } : {}),
-              },
-            },
-          }
-        : {}),
-      ...(hasResponded === undefined
-        ? {}
-        : {
-            surveyResponses: hasResponded
-              ? { some: { surveyId } }
-              : { none: { surveyId } },
-          }),
-    };
+  findRespondedUserIds(surveyId: string): Promise<string[]> {
+    return this.prisma.surveyResponse
+      .findMany({
+        where: { surveyId },
+        select: { respondentId: true },
+        distinct: ['respondentId'],
+      })
+      .then((records) => records.map((record) => record.respondentId));
   }
 
   async upsertAlertConfig(

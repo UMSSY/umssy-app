@@ -35,7 +35,13 @@ import {
   isSurveyForGraduate,
 } from '../utils/is-survey-for-graduate.js';
 import { getScheduleError } from '../utils/survey-schedule.js';
-import type { SurveyAlertConfigDto } from '../requests/survey-alert-config.schema.js';
+import {
+  toSurveyAlertConfigResponse,
+  toSurveyAlertConfigSavedResponse,
+} from '../mappers/survey-alert-config.mapper.js';
+import type { SurveyAlertConfigResponse } from '../responses/survey-alert-config.response.js';
+import type { SurveyAlertConfigSavedResponse } from '../responses/survey-alert-config-saved.response.js';
+import type { SurveyAlertConfigDto } from '../types/survey-alert-config-dto.type.js';
 
 import { ReportHistoryService } from '../../reports/services/report-history.service.js';
 import { SurveyPdfService } from './survey-pdf.service.js';
@@ -254,35 +260,17 @@ export class SurveysService {
     return { success: true, message: 'Respuestas guardadas con éxito' };
   }
 
-  async getAlertConfig(surveyId: string): Promise<{
-    enabled: boolean;
-    threshold: number;
-    questionIds: string[] | null;
-  }> {
+  async getAlertConfig(
+    surveyId: string,
+  ): Promise<SurveyAlertConfigResponse> {
     const config = await this.surveysRepository.findAlertConfig(surveyId);
-    if (!config) {
-      return {
-        enabled: true,
-        threshold: 10,
-        questionIds: null,
-      };
-    }
-    return {
-      enabled: config.isEnabled,
-      threshold: config.threshold,
-      questionIds: (config.questionIds as string[] | null) ?? null,
-    };
+    return toSurveyAlertConfigResponse(config);
   }
 
   async saveAlertConfig(
     surveyId: string,
     dto: SurveyAlertConfigDto,
-  ): Promise<{
-    saved: boolean;
-    enabled: boolean;
-    threshold: number;
-    questionIds: string[] | null;
-  }> {
+  ): Promise<SurveyAlertConfigSavedResponse> {
     const survey = await this.surveysRepository.findStatus(surveyId);
     if (!survey) throw new SurveyNotFoundException();
 
@@ -292,12 +280,7 @@ export class SurveysService {
       threshold: dto.threshold,
       questionIds: dto.questionIds ?? null,
     });
-    return {
-      saved: true,
-      enabled: config.isEnabled,
-      threshold: config.threshold,
-      questionIds: (config.questionIds as string[] | null) ?? null,
-    };
+    return toSurveyAlertConfigSavedResponse(config);
   }
 
   private async ensureSurveyIsValid(

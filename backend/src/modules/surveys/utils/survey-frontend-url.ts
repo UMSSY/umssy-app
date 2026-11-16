@@ -1,3 +1,5 @@
+import { toBoliviaTime } from '../../../common/utils/date-time.js';
+
 const DEFAULT_FRONTEND_URL = 'http://localhost:3000';
 
 export function frontendBaseUrl(
@@ -16,10 +18,8 @@ export function buildSurveyFrontendUrl(path: string): string {
 }
 
 export function formatSurveyClosureDate(date: Date): string {
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const year = date.getFullYear();
-  const hours = String(date.getHours()).padStart(2, '0');
-  const minutes = String(date.getMinutes()).padStart(2, '0');
-  return `${day}/${month}/${year} ${hours}:${minutes}.`;
+  const { day, month, year, time } = toBoliviaTime(date);
+  const formattedDay = String(day).padStart(2, '0');
+  const formattedMonth = String(month).padStart(2, '0');
+  return `${formattedDay}/${formattedMonth}/${year} ${time}.`;
 }

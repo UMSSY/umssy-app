@@ -10,8 +10,12 @@ export class NotificationUserLookupRepository {
   ) {}
 
   findEmailByUserId(userId: string): Promise<string | null> {
-  return this.usersService.findEmailById(userId);
-}
+    return this.usersService.findEmailById(userId);
+  }
+
+  findUserRecipientById(userId: string) {
+    return this.usersService.findUserRecipientById(userId);
+  }
 
   async hasBlockBetween(actorId: string, recipientId: string): Promise<boolean> {
     return this.chatService.hasBlockBetween(actorId, recipientId);

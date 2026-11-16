@@ -10,6 +10,7 @@ import { SurveysRepository } from './repositories/surveys.repository.js';
 import { ReportsModule } from '../reports/reports.module.js';
 import { MailModule } from '../mail/mail.module.js';
 import { NotificationsModule } from '../notifications/notifications.module.js';
+import { UsersModule } from '../users/users.module.js';
 import { CareersService } from './services/careers.service.js';
 import { SurveyEmploymentResponsesService } from './services/survey-employment-responses.service.js';
 import { SurveyPdfService } from './services/survey-pdf.service.js';
@@ -19,7 +20,13 @@ import { SurveyVariationEvaluatorService } from './services/survey-variation-eva
 import { SurveyLifecycleWorkerService } from './services/survey-lifecycle-worker.service.js';
 
 @Module({
-  imports: [JwtAuthModule, ReportsModule, MailModule, NotificationsModule],
+  imports: [
+    JwtAuthModule,
+    ReportsModule,
+    MailModule,
+    NotificationsModule,
+    UsersModule,
+  ],
   controllers: [
     SurveyNotificationsController,
     SurveysController,

@@ -37,18 +37,12 @@ import {
   createSurveySchema,
   type CreateSurveyRequest,
 } from '../requests/create-survey.schema.js';
-import {
-  submitSurveyResponseSchema,
-  type SubmitSurveyResponseRequest,
-} from '../requests/submit-survey-response.schema.js';
-import {
-  surveyAlertConfigSchema,
-  type SurveyAlertConfigDto,
-} from '../requests/survey-alert-config.schema.js';
-import {
-  sendSurveyReminderSchema,
-  type SendSurveyReminderRequest,
-} from '../requests/send-survey-reminder.schema.js';
+import { submitSurveyResponseSchema } from '../requests/submit-survey-response.schema.js';
+import type { SubmitSurveyResponseRequest } from '../requests/submit-survey-response.schema.js';
+import { surveyAlertConfigSchema } from '../requests/survey-alert-config.schema.js';
+import type { SurveyAlertConfigDto } from '../types/survey-alert-config-dto.type.js';
+import { sendSurveyReminderSchema } from '../requests/send-survey-reminder.schema.js';
+import type { SendSurveyReminderRequest } from '../types/send-survey-reminder-request.type.js';
 import { surveyIdSchema } from '../requests/survey-id.schema.js';
 import {
   surveyStatisticsQuerySchema,
