@@ -14,8 +14,13 @@ export function getApplicationContactEndpoint(applicationId: string): string {
   return `/applications/${applicationId}/contact`;
 }
 
-export function getApplicationChatPath(applicationId: string): string {
-  return `/chat?applicationId=${encodeURIComponent(applicationId)}`;
+export function getApplicationChatPath(contactId: string, applicationId: string): string {
+  const params = new URLSearchParams({
+    contactId,
+    contextType: "POSTULACION",
+    contextId: applicationId,
+  });
+  return `/chat?${params.toString()}`;
 }
 
 export const APPLICATION_QUERY_KEYS = {
@@ -35,7 +40,7 @@ const CLOSED_BADGE_CLASS = "bg-brand-soft text-danger";
 export const APPLICATION_STATUS_BADGE_CLASSES: Record<ApplicationStatus, string> = {
   "En revisión": IN_PROGRESS_BADGE_CLASS,
   Entrevista: IN_PROGRESS_BADGE_CLASS,
-  Aceptada: "bg-success-soft text-success-soft-foreground",
+  Aceptada: "bg-surface-soft text-ink",
   "No seleccionado": CLOSED_BADGE_CLASS,
   Retirada: CLOSED_BADGE_CLASS,
 };

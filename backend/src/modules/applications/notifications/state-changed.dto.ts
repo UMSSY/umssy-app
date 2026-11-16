@@ -1,25 +1,12 @@
 import { z } from 'zod';
-
-export const APPLICATION_STATUSES = [
-  'SUBMITTED',
-  'IN_REVIEW',
-  'SHORTLISTED',
-  'INTERVIEW',
-  'OFFERED',
-  'REJECTED',
-  'WITHDRAWN',
-] as const;
-
-export type ApplicationStatus = (typeof APPLICATION_STATUSES)[number];
+import { APPLICATION_STATUS_CODES } from './state-changed.constants.js';
 
 export const StateChangedDto = z
   .object({
     jobTitle: z.string().trim().min(1).max(150),
     companyName: z.string().trim().min(1).max(150),
-    newStatus: z.enum(APPLICATION_STATUSES),
-    previousStatus: z.enum(APPLICATION_STATUSES).optional(),
+    newStatus: z.enum(APPLICATION_STATUS_CODES),
+    previousStatus: z.enum(APPLICATION_STATUS_CODES).optional(),
     actionUrl: z.string().url(),
   })
-  .strict(); 
-
-export type StateChangedPayload = z.infer<typeof StateChangedDto>;
+  .strict();

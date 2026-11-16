@@ -236,7 +236,7 @@ describe("ApplicationsView", () => {
     expect(screen.getAllByRole("listitem")).toHaveLength(2);
   });
 
-  it("hides the withdrawn applications until the person presses the withdrawn button", async () => {
+  it("shows only withdrawn applications when the person presses the withdrawn button", async () => {
     getMine.mockResolvedValue(APPLICATIONS);
 
     renderWithQuery(<ApplicationsView />);
@@ -253,8 +253,15 @@ describe("ApplicationsView", () => {
     expect(toggle).toHaveAttribute("aria-pressed", "false");
     await userEvent.click(toggle);
 
-    await waitFor(() => expect(vacancyColumn()).toEqual(["Analista de datos", "Backend Java", "Frontend React"]));
+    await waitFor(() => expect(vacancyColumn()).toEqual(["Frontend React"]));
     expect(toggle).toHaveAttribute("aria-pressed", "true");
+    expect(screen.queryByText("Backend Java")).not.toBeInTheDocument();
+    expect(screen.queryByText("Analista de datos")).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole("combobox", { name: "Mostrar:" }));
+    expect(screen.queryByRole("option", { name: "En revisión" })).not.toBeInTheDocument();
+    expect(await screen.findByRole("option", { name: "Retirada" })).toBeInTheDocument();
+    await userEvent.keyboard("{Escape}");
+    await waitFor(() => expect(screen.queryByRole("option")).not.toBeInTheDocument());
     await selectStatus("Retirada");
     expect(vacancyColumn()).toEqual(["Frontend React"]);
   });
@@ -272,6 +279,36 @@ describe("ApplicationsView", () => {
 
     await waitFor(() => expect(screen.getByRole("combobox", { name: "Mostrar:" })).toHaveTextContent("Todos"));
     expect(vacancyColumn()).toEqual(["Analista de datos", "Backend Java"]);
+  });
+
+  it("resets the status filter when switching to withdrawn applications", async () => {
+    getMine.mockResolvedValue(APPLICATIONS);
+
+    renderWithQuery(<ApplicationsView />);
+    await screen.findByText("Backend Java");
+    await selectStatus("Entrevista");
+    expect(vacancyColumn()).toEqual(["Analista de datos"]);
+
+    await userEvent.click(screen.getByRole("button", { name: "Postulaciones retiradas" }));
+    expect(vacancyColumn()).toEqual(["Frontend React"]);
+    expect(screen.getByRole("combobox", { name: "Mostrar:" })).toHaveTextContent("Todos");
+
+    await userEvent.click(screen.getByRole("button", { name: "Postulaciones retiradas" }));
+    expect(vacancyColumn()).toEqual(["Analista de datos", "Backend Java"]);
+  });
+
+  it("shows only withdrawn application cards on mobile", async () => {
+    isMobile.mockReturnValue(true);
+    getMine.mockResolvedValue(APPLICATIONS);
+
+    renderWithQuery(<ApplicationsView />);
+    await screen.findByText("Backend Java");
+    await userEvent.click(screen.getByRole("button", { name: "Postulaciones retiradas" }));
+
+    expect(screen.getByText("Frontend React")).toBeInTheDocument();
+    expect(screen.queryByText("Backend Java")).not.toBeInTheDocument();
+    expect(screen.queryByText("Analista de datos")).not.toBeInTheDocument();
+    expect(screen.getAllByRole("listitem")).toHaveLength(1);
   });
 
   it("does not offer the withdrawn button when there are no withdrawn applications", async () => {
@@ -320,7 +357,11 @@ describe("ApplicationsView", () => {
     fireEvent.click(await screen.findByRole("button", { name: "Contactar" }));
 
     await waitFor(() => expect(getContact).toHaveBeenCalledWith("application-7"));
-    await waitFor(() => expect(router.push).toHaveBeenCalledWith("/chat?applicationId=application-7"));
+    await waitFor(() =>
+  expect(router.push).toHaveBeenCalledWith(
+    "/chat?contactId=recruiter-1&contextType=POSTULACION&contextId=application-7",
+  ),
+);
   });
 
   it("goes to the chat from the cards on mobile", async () => {
@@ -331,7 +372,11 @@ describe("ApplicationsView", () => {
     renderWithQuery(<ApplicationsView />);
     fireEvent.click(await screen.findByRole("button", { name: "Contactar" }));
 
-    await waitFor(() => expect(router.push).toHaveBeenCalledWith("/chat?applicationId=application-7"));
+    await waitFor(() =>
+  expect(router.push).toHaveBeenCalledWith(
+    "/chat?contactId=recruiter-1&contextType=POSTULACION&contextId=application-7",
+  ),
+);
   });
 
   it("tells the person when an application no longer allows contacting the recruiter", async () => {
@@ -380,6 +425,47 @@ describe("ApplicationsView", () => {
 
     await waitFor(() => expect(reactivate).toHaveBeenCalledWith("application-7"));
     await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
+  });
+
+  it("returns to active applications after reactivating the last withdrawn one", async () => {
+    getMine.mockResolvedValueOnce([buildApplication({ id: "last", vacancyTitle: "Frontend React", status: "Retirada" })]);
+    getMine.mockResolvedValue([buildApplication({ id: "last", vacancyTitle: "Frontend React", status: "En revisión" })]);
+    reactivate.mockResolvedValue(undefined);
+
+    renderWithQuery(<ApplicationsView />);
+    await userEvent.click(await screen.findByRole("button", { name: "Postulaciones retiradas" }));
+    fireEvent.click(screen.getByRole("button", { name: "Volver a postular" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Confirmar postulación" }));
+
+    await waitFor(() => expect(reactivate).toHaveBeenCalledWith("last"));
+    await waitFor(() => expect(screen.queryByRole("button", { name: "Postulaciones retiradas" })).not.toBeInTheDocument());
+    expect(screen.getByText("Frontend React")).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: "Mostrar:" })).toHaveTextContent("Todos");
+    expect(screen.queryByText("No tienes postulaciones activas.")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Retirar" })).toBeInTheDocument();
+  });
+
+  it("keeps showing other withdrawn applications after reactivating one of several", async () => {
+    getMine.mockResolvedValueOnce([
+      buildApplication({ id: "first", vacancyTitle: "Frontend React", status: "Retirada" }),
+      buildApplication({ id: "second", vacancyTitle: "Backend Java", status: "Retirada" }),
+    ]);
+    getMine.mockResolvedValue([
+      buildApplication({ id: "first", vacancyTitle: "Frontend React", status: "En revisión" }),
+      buildApplication({ id: "second", vacancyTitle: "Backend Java", status: "Retirada" }),
+    ]);
+    reactivate.mockResolvedValue(undefined);
+
+    renderWithQuery(<ApplicationsView />);
+    await userEvent.click(await screen.findByRole("button", { name: "Postulaciones retiradas" }));
+    const firstRow = within(screen.getByRole("row", { name: /Frontend React/ }));
+    fireEvent.click(firstRow.getByRole("button", { name: "Volver a postular" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Confirmar postulación" }));
+
+    await waitFor(() => expect(reactivate).toHaveBeenCalledWith("first"));
+    await waitFor(() => expect(screen.queryByText("Frontend React")).not.toBeInTheDocument());
+    expect(screen.getByText("Backend Java")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Postulaciones retiradas" })).toHaveAttribute("aria-pressed", "true");
   });
 
   it("does not show an old reactivation error when the dialog is opened again", async () => {

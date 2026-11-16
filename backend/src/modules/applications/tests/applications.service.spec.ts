@@ -6,6 +6,7 @@ import { JobRecommendationsService } from '../../matching/services/job-recommend
 import { ApplicationsService } from '../services/applications.service.js';
 import { ApplicationsRepository } from '../repositories/applications.repository.js';
 import { NotificationsService } from '../../notifications/services/notifications.service.js';
+import { JobOffersService } from '../../job-offers/services/job-offers.service.js';
 import { NotificationType } from '../../notifications/types/notification-type.enum.js';
 import { ApplicationStatus } from '../types/applications.types.js';
 import { ApplicationNotFoundException } from '../exceptions/application-not-found.exception.js';
@@ -18,7 +19,9 @@ describe('ApplicationsService (T5.1 & T5.2 & HU-15)', () => {
     findByUserId: ReturnType<typeof vi.fn>;
     findById: ReturnType<typeof vi.fn>;
     withdraw: ReturnType<typeof vi.fn>;
+    findApplicationDecisionContext: ReturnType<typeof vi.fn>;
   };
+  let jobOffersMock: { findOfferSummary: ReturnType<typeof vi.fn> };
   let notificationsMock: { notify: ReturnType<typeof vi.fn> };
   let configMock: { getOrThrow: ReturnType<typeof vi.fn> };
   const matching = { scoresForOffers: vi.fn() };
@@ -29,7 +32,10 @@ describe('ApplicationsService (T5.1 & T5.2 & HU-15)', () => {
       findByUserId: vi.fn(),
       findById: vi.fn(),
       withdraw: vi.fn().mockResolvedValue({ count: 1 }),
+      findApplicationDecisionContext: vi.fn(),
     };
+
+    jobOffersMock = { findOfferSummary: vi.fn() };
 
     notificationsMock = {
       notify: vi.fn().mockResolvedValue({
@@ -51,6 +57,7 @@ describe('ApplicationsService (T5.1 & T5.2 & HU-15)', () => {
         { provide: ApplicationsRepository, useValue: repositoryMock },
         { provide: NotificationsService, useValue: notificationsMock },
         { provide: ConfigService, useValue: configMock },
+        { provide: JobOffersService, useValue: jobOffersMock },
       ],
     }).compile();
 
@@ -67,6 +74,15 @@ describe('ApplicationsService (T5.1 & T5.2 & HU-15)', () => {
 
       expect(result).toEqual([]);
       expect(matching.scoresForOffers).not.toHaveBeenCalled();
+    });
+
+    it('no oculta errores inesperados del servicio de afinidad', async () => {
+      repositoryMock.findByUserId.mockResolvedValue([
+        { id: 'app-1', jobOfferId: 'offer-1' },
+      ]);
+      matching.scoresForOffers.mockRejectedValue(new Error('fallo en el calculo'));
+      await expect(service.findMyApplications('user-1', { sortOrder: 'desc' }))
+        .rejects.toThrow('fallo en el calculo');
     });
 
     it('debe devolver el contrato del cliente con fechas ISO y afinidad calculada', async () => {
@@ -200,15 +216,19 @@ describe('ApplicationsService (T5.1 & T5.2 & HU-15)', () => {
     });
   });
 
-     describe('notifyStateChanged (HU-15)', () => {
+  describe('notifyStateChanged (HU-15)', () => {
+    const base = {
+      recipientId: 'user-1',
+      applicationId: 'app-1',
+      jobTitle: 'Dev',
+      companyName: 'Empresa A',
+    };
+
     it('AC-15.1: debe enviar la notificación APPLICATION_STATUS_CHANGED cuando el reclutador cambia el estado', async () => {
       await service.notifyStateChanged({
-        recipientId: 'user-1',
-        applicationId: 'app-1',
-        previousStatus: 'IN_REVIEW' as unknown as ApplicationStatus,
-        newStatus: 'INTERVIEW' as unknown as ApplicationStatus,
-        jobTitle: 'Dev',
-        companyName: 'Empresa A',
+        ...base,
+        previousStatus: ApplicationStatus.IN_REVIEW,
+        newStatus: ApplicationStatus.INTERVIEW,
       });
 
       expect(notificationsMock.notify).toHaveBeenCalledTimes(1);
@@ -220,10 +240,29 @@ describe('ApplicationsService (T5.1 & T5.2 & HU-15)', () => {
           companyName: 'Empresa A',
           newStatus: 'INTERVIEW',
         },
-                actionUrl: 'https://umssy.edu.bo/postulaciones/app-1',
-
+        actionUrl: 'https://umssy.edu.bo/vacancies/my-applications',
       });
     });
+
+    it.each([
+      [ApplicationStatus.ACCEPTED, 'ACCEPTED'],
+      [ApplicationStatus.REJECTED, 'REJECTED'],
+    ])(
+      'mapea el estado de BD "%s" al código del enum %s',
+      async (newStatus, code) => {
+        await service.notifyStateChanged({
+          ...base,
+          previousStatus: ApplicationStatus.INTERVIEW,
+          newStatus,
+        });
+
+        expect(notificationsMock.notify).toHaveBeenCalledWith(
+          expect.objectContaining({
+            payload: expect.objectContaining({ newStatus: code }),
+          }),
+        );
+      },
+    );
 
     it('AC-15.4: withdrawApplication NO genera ninguna notificación de cambio de estado', async () => {
       repositoryMock.findById.mockResolvedValue({
@@ -238,17 +277,89 @@ describe('ApplicationsService (T5.1 & T5.2 & HU-15)', () => {
       expect(notificationsMock.notify).not.toHaveBeenCalled();
     });
 
-    it('D-14: no notifica si el estado nuevo es idéntico al anterior', async () => {
+    it('AC-15.4: no notifica cuando el nuevo estado es Retirada', async () => {
       await service.notifyStateChanged({
-        recipientId: 'user-1',
-        applicationId: 'app-1',
-        previousStatus: 'IN_REVIEW' as unknown as ApplicationStatus,
-        newStatus: 'IN_REVIEW' as unknown as ApplicationStatus,
-        jobTitle: 'Dev',
-        companyName: 'Empresa A',
+        ...base,
+        previousStatus: ApplicationStatus.IN_REVIEW,
+        newStatus: ApplicationStatus.WITHDRAWN,
       });
 
       expect(notificationsMock.notify).not.toHaveBeenCalled();
+    });
+
+    it('D-14: no notifica si el estado nuevo es idéntico al anterior', async () => {
+      await service.notifyStateChanged({
+        ...base,
+        previousStatus: ApplicationStatus.IN_REVIEW,
+        newStatus: ApplicationStatus.IN_REVIEW,
+      });
+
+      expect(notificationsMock.notify).not.toHaveBeenCalled();
+    });
+
+    it('no propaga el error si el envío de la notificación falla', async () => {
+      notificationsMock.notify.mockRejectedValueOnce(new Error('push down'));
+
+      await expect(
+        service.notifyStateChanged({
+          ...base,
+          previousStatus: ApplicationStatus.IN_REVIEW,
+          newStatus: ApplicationStatus.ACCEPTED,
+        }),
+      ).resolves.toBeUndefined();
+    });
+  });
+
+  describe('findApplicationDecisionContext', () => {
+    it('compone el contexto con datos de la vacante obtenidos de JobOffersService', async () => {
+      repositoryMock.findApplicationDecisionContext.mockResolvedValue({
+        id: 'app-1',
+        userId: 'user-1',
+        jobOfferId: 'job-1',
+        status: { title: ApplicationStatus.INTERVIEW },
+      });
+      jobOffersMock.findOfferSummary.mockResolvedValue({
+        id: 'job-1',
+        title: 'Dev Backend',
+        companyId: 'company-1',
+        companyName: 'Empresa A',
+      });
+
+      await expect(
+        service.findApplicationDecisionContext('app-1'),
+      ).resolves.toEqual({
+        id: 'app-1',
+        userId: 'user-1',
+        statusTitle: ApplicationStatus.INTERVIEW,
+        jobOfferId: 'job-1',
+        companyId: 'company-1',
+        jobTitle: 'Dev Backend',
+        companyName: 'Empresa A',
+      });
+      expect(jobOffersMock.findOfferSummary).toHaveBeenCalledWith('job-1');
+    });
+
+    it('retorna null si la postulación no existe sin consultar la vacante', async () => {
+      repositoryMock.findApplicationDecisionContext.mockResolvedValue(null);
+
+      await expect(
+        service.findApplicationDecisionContext('missing'),
+      ).resolves.toBeNull();
+      expect(jobOffersMock.findOfferSummary).not.toHaveBeenCalled();
+    });
+
+    it('retorna null si la vacante ya no existe', async () => {
+      repositoryMock.findApplicationDecisionContext.mockResolvedValue({
+        id: 'app-1',
+        userId: 'user-1',
+        jobOfferId: 'job-1',
+        status: { title: ApplicationStatus.INTERVIEW },
+      });
+      jobOffersMock.findOfferSummary.mockResolvedValue(null);
+
+      await expect(
+        service.findApplicationDecisionContext('app-1'),
+      ).resolves.toBeNull();
     });
   });
 });

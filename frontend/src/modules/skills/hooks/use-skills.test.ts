@@ -142,6 +142,51 @@ describe("useSkills", () => {
     expect(skillsService.saveMySkills).toHaveBeenCalledWith([PYTHON.id]);
   });
 
+  it("keeps the skills backed by an experience or the CV out of the manual selection when saving", async () => {
+    const manual = { ...PYTHON, origins: ["manual" as const] };
+    const fromExperience = { ...SQL, origins: ["experience" as const] };
+    const fromCv = { ...DOCKER, origins: ["cv" as const] };
+    const manualWithExperience = {
+      id: "66666666-6666-4666-8666-666666666666",
+      name: "Java",
+      origins: ["manual" as const, "experience" as const],
+    };
+    vi.mocked(skillsService.getMySkills).mockResolvedValue([manual, fromExperience, fromCv, manualWithExperience]);
+    vi.mocked(skillsService.saveMySkills).mockResolvedValue([manual, fromExperience, fromCv, manualWithExperience]);
+    const { result } = await renderLoadedHook();
+
+    await act(() => result.current.saveSkills());
+
+    expect(skillsService.saveMySkills).toHaveBeenCalledWith([manual.id, manualWithExperience.id]);
+  });
+
+  it("sends a new skill picked from the catalog together with the manual ones", async () => {
+    const manual = { ...PYTHON, origins: ["manual" as const] };
+    const fromCv = { ...DOCKER, origins: ["cv" as const] };
+    vi.mocked(skillsService.getMySkills).mockResolvedValue([manual, fromCv]);
+    vi.mocked(skillsService.saveMySkills).mockResolvedValue([manual, SQL, fromCv]);
+    const { result } = await renderLoadedHook();
+
+    act(() => result.current.addSkill(SQL));
+    await act(() => result.current.saveSkills());
+
+    expect(skillsService.saveMySkills).toHaveBeenCalledWith([manual.id, SQL.id]);
+  });
+
+  it("removes a manual skill from the saved list (AC-10.3)", async () => {
+    const manual = { ...PYTHON, origins: ["manual" as const] };
+    const fromExperience = { ...SQL, origins: ["experience" as const] };
+    vi.mocked(skillsService.getMySkills).mockResolvedValue([manual, fromExperience]);
+    vi.mocked(skillsService.saveMySkills).mockResolvedValue([fromExperience]);
+    const { result } = await renderLoadedHook();
+
+    act(() => result.current.removeSkill(manual.id));
+    await act(() => result.current.saveSkills());
+
+    expect(skillsService.saveMySkills).toHaveBeenCalledWith([]);
+    expect(result.current.selectedSkills).toEqual([fromExperience]);
+  });
+
   it("shows an error message when saving fails", async () => {
     vi.mocked(skillsService.saveMySkills).mockRejectedValue({ response: { status: 409 } });
     const { result } = await renderLoadedHook();

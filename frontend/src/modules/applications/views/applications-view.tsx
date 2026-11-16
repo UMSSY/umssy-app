@@ -42,14 +42,20 @@ export function ApplicationsView() {
     [data],
   );
 
+
+  const viewingWithdrawn = showWithdrawn && withdrawnCount > 0;
+  const visibleStatusFilter = showWithdrawn && !viewingWithdrawn ? "all" : statusFilter;
+
   const visibleApplications = useMemo(() => {
-    const listed = showWithdrawn ? (data ?? []) : excludeWithdrawnApplications(data ?? []);
-    return sortApplications(filterApplicationsByStatus(listed, statusFilter), sort);
-  }, [data, showWithdrawn, statusFilter, sort]);
+    const listed = viewingWithdrawn
+      ? (data ?? []).filter((application) => application.status === WITHDRAWN_STATUS)
+      : excludeWithdrawnApplications(data ?? []);
+    return sortApplications(filterApplicationsByStatus(listed, visibleStatusFilter), sort);
+  }, [data, viewingWithdrawn, visibleStatusFilter, sort]);
 
   const handleShowWithdrawnChange = (pressed: boolean) => {
     setShowWithdrawn(pressed);
-    if (!pressed && statusFilter === WITHDRAWN_STATUS) setStatusFilter("all");
+    setStatusFilter("all");
   };
 
   const requestWithdraw = (applicationId: string) => {
@@ -109,12 +115,12 @@ export function ApplicationsView() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-3">
               <ApplicationsStatusSelect
-                value={statusFilter}
+                value={visibleStatusFilter}
                 onValueChange={setStatusFilter}
-                showWithdrawn={showWithdrawn}
+                showWithdrawn={viewingWithdrawn}
               />
               {withdrawnCount > 0 && (
-                <ShowWithdrawnToggle pressed={showWithdrawn} onPressedChange={handleShowWithdrawnChange} />
+                <ShowWithdrawnToggle pressed={viewingWithdrawn} onPressedChange={handleShowWithdrawnChange} />
               )}
             </div>
             <div className="ml-auto flex items-center gap-2">
@@ -143,7 +149,7 @@ export function ApplicationsView() {
 
           {visibleApplications.length === 0 && (
             <p className="text-sm text-text-secondary">
-              {statusFilter === "all"
+              {visibleStatusFilter === "all"
                 ? APPLICATION_MESSAGES.noActiveApplications
                 : APPLICATION_MESSAGES.noApplicationsInStatus}
             </p>
@@ -181,7 +187,16 @@ export function ApplicationsView() {
         onCancel={cancelReactivation}
         onConfirm={() => {
           if (!pendingReactivation || reactivatingId !== null) return;
-          reactivate(pendingReactivation.id, { onSuccess: () => setPendingReactivation(null) });
+          reactivate(pendingReactivation.id, {
+            onSuccess: () => {
+              setPendingReactivation(null);
+              
+              if (showWithdrawn && withdrawnCount <= 1) {
+                setShowWithdrawn(false);
+                setStatusFilter("all");
+              }
+            },
+          });
         }}
       />
       <WithdrawApplicationDialog

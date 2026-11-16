@@ -4,7 +4,7 @@ import { useState } from "react";
 import { EducationDeleteDialog } from "./education-delete-dialog";
 import { EducationForm } from "./education-form";
 import { EducationListCard } from "./education-list-card";
-import { FeedbackMessage } from "@/modules/profile";
+import { FeedbackMessage, useProfileCompletionRequest } from "@/modules/profile";
 import { RecordEditorDialog } from "@/shared/components/layout/record-editor-dialog";
 import { useDeleteEducation } from "../hooks/use-delete-education";
 import { useEducations } from "../hooks/use-educations";
@@ -64,6 +64,8 @@ export function EducationProfileSection() {
     setHasChanges(false);
     setIsFormOpen(true);
   };
+
+  useProfileCompletionRequest('education', !isLoading && !error && !isBusy, handleCreate);
 
   const handleDelete = (education: EducationItem) => {
     if (isBusy) return;

@@ -1,5 +1,6 @@
 import { ConflictException, Injectable, Logger } from '@nestjs/common';
 import { ApplicationsRepository } from '../repositories/applications.repository.js';
+import type { ApplicationRecord } from '../types/application-record.types.js';
 import type { FindApplicationsQueryDto } from '../requests/find-applications.request.js';
 import {
   ApplicationStatus,
@@ -13,6 +14,14 @@ import type { ApplicationContactResponse } from '../types/application-contact.ty
 import { ApplicationMapper } from '../mappers/application.mapper.js';
 import { JobRecommendationsService } from '../../matching/services/job-recommendations.service.js';
 import { StateChangedDto } from '../notifications/state-changed.dto.js';
+import { toApplicationStatusCode } from '../notifications/state-changed.mapper.js';
+import {
+  NOTIFY_TIMEOUT_MS,
+  STATE_CHANGED_ACTION_PATH,
+} from '../notifications/state-changed.constants.js';
+import type { NotifyStateChangedParams } from '../notifications/state-changed.types.js';
+import type { ApplicationDecisionContext } from '../types/application-decision-context.types.js';
+import { JobOffersService } from '../../job-offers/services/job-offers.service.js';
 import { NotificationsService } from '../../notifications/services/notifications.service.js';
 import { ConfigService } from '@nestjs/config';
 import { NotificationType } from '../../notifications/types/notification-type.enum.js';
@@ -33,6 +42,7 @@ export class ApplicationsService {
     private readonly matching: JobRecommendationsService,
     private readonly notifications: NotificationsService,
     private readonly config: ConfigService,
+    private readonly jobOffers: JobOffersService,
   ) {}
 
   async findMyApplications(
@@ -42,20 +52,11 @@ export class ApplicationsService {
     const records = await this.repository.findByUserId(userId, query);
     if (!records || !records.length) return [];
 
-    const offerIds = records.map(
-      (record: any) => record.jobOfferId ?? record.jobOffer?.id,
-    );
+    const offerIds = records.map((record: ApplicationRecord) => record.jobOfferId);
+    const scoresMap = await this.matching.scoresForOffers(userId, offerIds);
 
-    let scoresMap = new Map<string, number>();
-    try {
-      scoresMap = await this.matching.scoresForOffers(userId, offerIds);
-    } catch {
-      scoresMap = new Map();
-    }
-
-    const responses: ApplicationItemResponse[] = records.map((record: any) => {
-      const offerId = record.jobOfferId ?? record.jobOffer?.id;
-      const score = scoresMap.get(offerId) ?? 0;
+    const responses: ApplicationItemResponse[] = records.map((record: ApplicationRecord) => {
+      const score = scoresMap.get(record.jobOfferId) ?? 0;
       return this.mapper.toResponse(record, score);
     });
 
@@ -169,23 +170,17 @@ export class ApplicationsService {
     if (!result.count) throw new ApplicationNotWithdrawableException();
   }
 
-  public async notifyStateChanged(p: {
-    recipientId: string;
-    applicationId: string;
-    previousStatus: ApplicationStatus;
-    newStatus: ApplicationStatus;
-    jobTitle: string;
-    companyName: string;
-  }): Promise<void> {
+  public async notifyStateChanged(p: NotifyStateChangedParams): Promise<void> {
     if (p.previousStatus === p.newStatus) return;
+    if (p.newStatus === ApplicationStatus.WITHDRAWN) return;
 
     try {
       const context = StateChangedDto.parse({
         jobTitle: p.jobTitle,
         companyName: p.companyName,
-        newStatus: p.newStatus,
-        previousStatus: p.previousStatus,
-        actionUrl: `${this.config.getOrThrow('APP_URL')}/postulaciones/${p.applicationId}`,
+        newStatus: toApplicationStatusCode(p.newStatus),
+        previousStatus: toApplicationStatusCode(p.previousStatus),
+        actionUrl: `${this.config.getOrThrow('APP_URL')}${STATE_CHANGED_ACTION_PATH}`,
       });
 
       await this.withTimeout(
@@ -199,21 +194,13 @@ export class ApplicationsService {
           },
           actionUrl: context.actionUrl,
         }),
-        5000,
+        NOTIFY_TIMEOUT_MS,
       );
     } catch (error) {
-      console.error('--- ERROR DETALLADO EN NOTIFY STATE CHANGED ---', error);
-
       this.logger.error(
         `No se pudo notificar el cambio de estado (application=${p.applicationId}, recipient=${p.recipientId})`,
         error instanceof Error ? error.stack : String(error),
       );
-      
-      if (process.env.NODE_ENV === 'test') {
-        if (!(error instanceof Error && error.message.includes('timeout'))) {
-          throw error; 
-        }
-      }
     }
   }
 
@@ -235,6 +222,26 @@ export class ApplicationsService {
 
   findRecruitmentApplication(id: string) {
     return this.repository.findRecruitmentApplication(id);
+  }
+
+  async findApplicationDecisionContext(
+    id: string,
+  ): Promise<ApplicationDecisionContext | null> {
+    const application = await this.repository.findApplicationDecisionContext(id);
+    if (!application) return null;
+
+    const offer = await this.jobOffers.findOfferSummary(application.jobOfferId);
+    if (!offer) return null;
+
+    return {
+      id: application.id,
+      userId: application.userId,
+      statusTitle: application.status.title,
+      jobOfferId: application.jobOfferId,
+      companyId: offer.companyId,
+      jobTitle: offer.title,
+      companyName: offer.companyName,
+    };
   }
 
   recordRecruiterDecision(applicationId: string, target: string) {
