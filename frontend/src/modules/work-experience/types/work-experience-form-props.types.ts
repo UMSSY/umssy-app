@@ -8,6 +8,7 @@ export interface WorkExperienceFormProps {
   initialDetectedSkills?: DetectedSkill[];
   isPending?: boolean;
   feedback?: Feedback | null;
+  saveLabel?: string;
   onSubmit: (values: WorkExperienceFormValues) => void | Promise<void>;
   onValuesChange?: () => void;
   onCancel: () => void;
