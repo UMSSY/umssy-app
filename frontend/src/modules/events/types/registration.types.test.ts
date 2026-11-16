@@ -46,6 +46,14 @@ describe('formato de datos del pase', () => {
       Date.UTC(2025, 10, 15, 3, 30),
     );
   });
+  it('preserves seconds and milliseconds for exact event transitions', () => {
+    expect(
+      getRegistrationEventTimestamp(
+        '2025-11-14',
+        '1970-01-01T22:05:20.123Z',
+      ),
+    ).toBe(Date.UTC(2025, 10, 15, 2, 5, 20, 123));
+  });
   it('presents finished history without changing registration status', () => {
     expect(getFinishedRegistrationPresentation()).toEqual({ label: 'Finalizado', code: 'FINALIZED' });
     expect(formatRegistrationDate('2026-09-20')).toContain('20 de septiembre de 2026');

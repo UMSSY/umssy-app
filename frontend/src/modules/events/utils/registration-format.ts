@@ -21,25 +21,53 @@ export function getRegistrationEventTimestamp(
   time: string | null | undefined,
 ): number {
   const dateMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date?.split('T')[0] ?? '');
-  const clock = formatRegistrationTime(time);
-  const clockMatch = /^(\d{2}):(\d{2})$/.exec(clock);
-  if (!dateMatch || !clockMatch) return Number.NaN;
+  const clockMatch = /^(\d{2}):(\d{2})(?::(\d{2})(?:\.(\d{1,3}))?)?$/.exec(
+    time ?? '',
+  );
+  const timeValue = clockMatch ? null : time ? new Date(time) : null;
+  if (!dateMatch) return Number.NaN;
 
   const year = Number(dateMatch[1]);
   const month = Number(dateMatch[2]);
   const day = Number(dateMatch[3]);
-  const hour = Number(clockMatch[1]);
-  const minute = Number(clockMatch[2]);
+  let hour: number;
+  let minute: number;
+  let second: number;
+  let millisecond: number;
+  if (clockMatch) {
+    hour = Number(clockMatch[1]);
+    minute = Number(clockMatch[2]);
+    second = Number(clockMatch[3] ?? 0);
+    millisecond = Number((clockMatch[4] ?? '').padEnd(3, '0') || 0);
+  } else {
+    if (
+      !timeValue ||
+      !Number.isFinite(timeValue.getTime()) ||
+      !time?.includes('T')
+    ) {
+      return Number.NaN;
+    }
+    hour = timeValue.getUTCHours();
+    minute = timeValue.getUTCMinutes();
+    second = timeValue.getUTCSeconds();
+    millisecond = timeValue.getUTCMilliseconds();
+  }
   const calendarDate = new Date(Date.UTC(year, month - 1, day));
   if (
     calendarDate.getUTCFullYear() !== year ||
     calendarDate.getUTCMonth() !== month - 1 ||
-    calendarDate.getUTCDate() !== day
+    calendarDate.getUTCDate() !== day ||
+    hour > 23 ||
+    minute > 59 ||
+    second > 59
   ) {
     return Number.NaN;
   }
 
-  return Date.UTC(year, month - 1, day, hour, minute) + 4 * 60 * 60 * 1000;
+  return (
+    Date.UTC(year, month - 1, day, hour, minute, second, millisecond) +
+    4 * 60 * 60 * 1000
+  );
 }
 
 export function formatRegistrationTime(time: string | null | undefined) {

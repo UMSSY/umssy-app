@@ -86,7 +86,7 @@ export function MyPassesView({ onOpenWorkshopChat }: MyPassesViewProps = {}) {
       ) : !currentRegistrations.length ? (
         <MyPassesEmptyState />
       ) : (
-        <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
           <section aria-label="Tus inscripciones">
             <ul className="space-y-3">
               {currentRegistrations.map((item, index) => (

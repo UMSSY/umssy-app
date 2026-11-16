@@ -175,6 +175,11 @@ describe("Mis pases", () => {
     getMine.mockResolvedValue([pass]);
     render(<MyPassesView />);
     expect(await screen.findAllByText('En curso')).toHaveLength(2);
+    const status = within(screen.getByRole('button', { name: /React/ })).getByText(
+      'En curso',
+      { selector: 'div.rounded-md' },
+    );
+    expect(status).toHaveClass('bg-success', 'text-surface');
   });
 
   it('removes a closing selected pass and selects the next one without reordering', async () => {
@@ -285,6 +290,18 @@ describe("Mis pases", () => {
         name: 'Detalle de la inscripción',
       }),
     ).findByText('reg-1');
+    const passList = screen.getByRole('region', { name: 'Tus inscripciones' });
+    const passDetail = screen.getByRole('complementary', {
+      name: 'Detalle de la inscripción',
+    });
+    expect(passList.parentElement).toBe(passDetail.parentElement);
+    expect(passList.parentElement).toHaveClass(
+      'lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]',
+    );
+    expect(
+      passList.compareDocumentPosition(passDetail) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
     expect(screen.getAllByText('Aula 101')).toHaveLength(2);
     expect(screen.getByRole('button', { name: /React/ })).toHaveAttribute(
       'aria-pressed',

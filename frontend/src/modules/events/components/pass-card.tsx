@@ -45,7 +45,9 @@ export function PassCard({
       >
         <div
           className={cn("flex w-fit items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-semibold",
-            isSelected
+            effectiveStatus.code === 'IN_PROGRESS'
+              ? 'bg-success text-surface'
+              : isSelected
               ? 'text-accent-foreground/85'
               : effectiveStatus.isPast
               ? 'bg-muted text-muted-foreground'
