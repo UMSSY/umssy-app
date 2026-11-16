@@ -4,11 +4,14 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import {
   DEFAULT_IDLE_TIMEOUT_SECONDS,
   DEFAULT_WARNING_SECONDS,
+  DEFAULT_AUTO_REFRESH_INTERVAL_SECONDS,
 } from "../constants/session-timing.constants";
+import { executeSharedRefresh } from "../utils/session-refresh-lock";
 
 export interface UseSessionInactivityOptions {
   idleTimeoutSeconds?: number;
   warningSeconds?: number;
+  autoRefreshIntervalSeconds?: number;
   absoluteExpiresAt?: string;
   enabled?: boolean;
   onTimeout: () => void;
@@ -19,6 +22,7 @@ export interface UseSessionInactivityOptions {
 export function useSessionInactivity({
   idleTimeoutSeconds = DEFAULT_IDLE_TIMEOUT_SECONDS,
   warningSeconds = DEFAULT_WARNING_SECONDS,
+  autoRefreshIntervalSeconds = DEFAULT_AUTO_REFRESH_INTERVAL_SECONDS,
   absoluteExpiresAt,
   enabled = true,
   onTimeout,
@@ -30,6 +34,7 @@ export function useSessionInactivity({
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const lastActivityRef = useRef<number>(0);
+  const lastRefreshRef = useRef<number>(0);
   const isWarningOpenRef = useRef<boolean>(false);
   const onTimeoutRef = useRef(onTimeout);
   const onRefreshRef = useRef(onRefresh);
@@ -47,8 +52,12 @@ export function useSessionInactivity({
   }, [onRefresh]);
 
   useEffect(() => {
+    const now = Date.now();
     if (lastActivityRef.current === 0) {
-      lastActivityRef.current = Date.now();
+      lastActivityRef.current = now;
+    }
+    if (lastRefreshRef.current === 0) {
+      lastRefreshRef.current = now;
     }
   }, []);
 
@@ -137,6 +146,21 @@ export function useSessionInactivity({
         setIsWarningOpen((prev) => (prev ? false : prev));
         setSecondsLeft(warningSeconds);
       }
+
+      // Renovación automática periódica mientras haya actividad (~10 minutos)
+      const autoRefreshIntervalMs = autoRefreshIntervalSeconds * 1000;
+      const timeSinceLastRefresh = now - (lastRefreshRef.current || now);
+      const hadActivitySinceLastRefresh = lastActive > lastRefreshRef.current;
+
+      if (
+        timeSinceLastRefresh >= autoRefreshIntervalMs &&
+        hadActivitySinceLastRefresh &&
+        !isWarningOpenRef.current &&
+        onRefreshRef.current
+      ) {
+        lastRefreshRef.current = now;
+        void executeSharedRefresh(onRefreshRef.current);
+      }
     }, checkIntervalMs);
 
     return () => clearInterval(interval);
@@ -144,6 +168,7 @@ export function useSessionInactivity({
     enabled,
     idleTimeoutSeconds,
     warningSeconds,
+    autoRefreshIntervalSeconds,
     absoluteExpiresAt,
     checkIntervalMs,
   ]);
@@ -153,9 +178,11 @@ export function useSessionInactivity({
     setIsRefreshing(true);
     try {
       if (onRefreshRef.current) {
-        await onRefreshRef.current();
+        await executeSharedRefresh(onRefreshRef.current);
       }
-      lastActivityRef.current = Date.now();
+      const now = Date.now();
+      lastActivityRef.current = now;
+      lastRefreshRef.current = now;
       setIsWarningOpen(false);
       setSecondsLeft(warningSeconds);
     } finally {

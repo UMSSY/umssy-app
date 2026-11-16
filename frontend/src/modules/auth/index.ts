@@ -22,7 +22,9 @@ export {
   DEFAULT_IDLE_TIMEOUT_SECONDS,
   DEFAULT_WARNING_SECONDS,
   DEFAULT_ABSOLUTE_TIMEOUT_HOURS,
+  DEFAULT_AUTO_REFRESH_INTERVAL_SECONDS,
 } from "./constants/session-timing.constants";
+export { executeSharedRefresh } from "./utils/session-refresh-lock";
 export { resolvePostLoginPath } from "./utils/resolve-post-login-path";
 
 export { getSafeNextPath } from "./utils/safe-next-path";
