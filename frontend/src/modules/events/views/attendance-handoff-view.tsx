@@ -12,6 +12,7 @@ import { useManagedWorkshops } from '../hooks/use-managed-workshops';
 import { isManagedWorkshopFinished } from '../utils/managed-workshop-status';
 import { formatRegistrationDate, formatRegistrationTime } from '../utils/registration-format';
 import { AttendanceMobileScanner } from '../components/attendance-mobile-scanner';
+import { AttendanceDemoPass } from '../testing/attendance-demo-pass';
 
 interface AttendanceHandoffViewProps {
   workshopId: string;
@@ -63,6 +64,7 @@ export function AttendanceHandoffView({ workshopId }: AttendanceHandoffViewProps
                   {scanUrl && <a href={scanUrl} className="max-w-full text-sm break-all text-accent underline">{scanUrl}</a>}
                 </Card>
                 {isMobile && <div className="lg:hidden"><AttendanceMobileScanner /></div>}
+                {process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_MOCK_MANAGED_WORKSHOPS === 'true' && <AttendanceDemoPass />}
               </>}
     </main>
   );
