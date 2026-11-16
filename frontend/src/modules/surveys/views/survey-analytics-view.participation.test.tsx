@@ -199,7 +199,7 @@ describe("SurveyAnalyticsView - participación y alertas", () => {
     await user.click(within(dialog).getByRole("button", { name: "Desmarcar todas" }));
     await user.click(within(dialog).getByRole("button", { name: "Guardar" }));
 
-    expect(within(dialog).getByText(SURVEY_ALERTS_TEXT.thresholdError)).toBeInTheDocument();
+    expect(within(dialog).getByText(SURVEY_ALERTS_TEXT.thresholdMax)).toBeInTheDocument();
     expect(within(dialog).getByText(SURVEY_ALERTS_TEXT.questionsError)).toBeInTheDocument();
     expect(save).not.toHaveBeenCalled();
   });
