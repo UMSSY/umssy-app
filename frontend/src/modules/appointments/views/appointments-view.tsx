@@ -14,15 +14,26 @@ import { WorkspacePage } from "@/shared/components/layout";
 import { useAuth } from "@/shared/contexts/auth-context";
 import { AppointmentCard } from "../components/appointment-card";
 import { AppointmentDetailDialog } from "../components/appointment-detail-dialog";
+import { AppointmentsPagination } from "../components/appointments-pagination";
+import { DEFAULT_APPOINTMENTS_PAGE } from "../constants/appointments-pagination.constants";
 import { APPOINTMENTS_TEXT } from "../constants/appointments.constants";
 import { useAppointments } from "../hooks/use-appointments";
 import type { AppointmentScope } from "../types/appointment-scope.types";
 
 export function AppointmentsView() {
   const [scope, setScope] = useState<AppointmentScope>("upcoming");
+  const [page, setPage] = useState(DEFAULT_APPOINTMENTS_PAGE);
   const [selectedAppointmentId, setSelectedAppointmentId] = useState<string | null>(null);
   const { roles } = useAuth();
-  const { appointments, isLoading, error } = useAppointments(scope);
+  const {
+    appointments,
+    page: currentPage,
+    total,
+    pageSize,
+    isLoading,
+    isFetching,
+    error,
+  } = useAppointments(scope, page);
 
   const emptyMessage =
     scope === "upcoming"
@@ -35,6 +46,7 @@ export function AppointmentsView() {
   function handleScopeChange(value: unknown) {
     if (value === "upcoming" || value === "past") {
       setScope(value);
+      setPage(DEFAULT_APPOINTMENTS_PAGE);
     }
   }
 
@@ -106,16 +118,26 @@ export function AppointmentsView() {
               )}
             </div>
           ) : (
-            <ul className="grid min-w-0 grid-cols-1 gap-4">
-              {appointments.map((appointment) => (
-                <li key={appointment.id} className="min-w-0">
-                  <AppointmentCard
-                    appointment={appointment}
-                    onSelect={(selected) => setSelectedAppointmentId(selected.id)}
-                  />
-                </li>
-              ))}
-            </ul>
+            <div className="grid min-w-0 grid-cols-1 gap-4">
+              <ul className="grid min-w-0 grid-cols-1 gap-4">
+                {appointments.map((appointment) => (
+                  <li key={appointment.id} className="min-w-0">
+                    <AppointmentCard
+                      appointment={appointment}
+                      onSelect={(selected) => setSelectedAppointmentId(selected.id)}
+                    />
+                  </li>
+                ))}
+              </ul>
+
+              <AppointmentsPagination
+                page={currentPage}
+                pageSize={pageSize}
+                total={total}
+                isDisabled={isFetching}
+                onPageChange={setPage}
+              />
+            </div>
           )}
         </TabsContent>
       </Tabs>
