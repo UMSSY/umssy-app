@@ -17,7 +17,6 @@ import {
 export class AttendanceValidationService {
   constructor(private readonly repository: AttendanceValidationRepository) {}
 
-  // In 12.2, call within the check-in transaction and lock/recheck the registration before inserting.
   async resolveForCheckIn(
     eventId: string,
     actor: AuthenticatedUser,
