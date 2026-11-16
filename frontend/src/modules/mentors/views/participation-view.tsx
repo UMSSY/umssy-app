@@ -21,6 +21,7 @@ import { SlotOfferParticipation } from "../components/participation/slot-offer-p
 import { SlotAvailability } from "../components/participation/slot-availability";
 import { ActivateParticipationModal } from "../components/participation/activate-participation-modal";
 import { DeactivateParticipationModal } from "../components/participation/deactivate-participation-modal";
+import { MentorRequestHistoryDetails } from "../components/participation/mentor-request-history-details";
 import { useParticipation } from "../hooks/use-participation";
 import {
   participationErrorCode,
@@ -106,6 +107,9 @@ export function ParticipationView({
   });
 
   const [activeTab, setActiveTab] = useState<ParticipationTab>("current");
+  const [selectedHistoryId, setSelectedHistoryId] = useState<string | null>(
+    null,
+  );
 
   const history = useQuery({
     queryKey: ["mentor-participation-history", token],
@@ -211,6 +215,9 @@ export function ParticipationView({
   const hasOpenRequest = ["PENDING", "OFFERED"].includes(
     currentRequest?.status ?? "",
   );
+
+  const selectedHistoryRequest =
+    history.data?.find((item) => item.id === selectedHistoryId) ?? null;
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
@@ -411,13 +418,13 @@ export function ParticipationView({
         )}
 
         {history.isSuccess && history.data.length > 0 && (
-          <div className="space-y-3">
+          <div className="space-y-4">
             <p role="status" className="text-sm text-muted-foreground">
               Solicitudes registradas: {history.data.length}
             </p>
 
             <div className="overflow-x-auto rounded-lg border">
-              <table className="w-full min-w-[640px] text-left text-sm">
+              <table className="w-full min-w-[760px] text-left text-sm">
                 <caption className="sr-only">
                   Historial de solicitudes de cupo como mentor
                 </caption>
@@ -435,6 +442,9 @@ export function ParticipationView({
                     </th>
                     <th scope="col" className="px-4 py-3 font-medium">
                       Orientaciones
+                    </th>
+                    <th scope="col" className="px-4 py-3 font-medium">
+                      Acciones
                     </th>
                   </tr>
                 </thead>
@@ -461,6 +471,24 @@ export function ParticipationView({
                       <td className="px-4 py-3">
                         {item.orientationTypeIds.length}
                       </td>
+
+                      <td className="px-4 py-3">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          aria-expanded={selectedHistoryId === item.id}
+                          aria-controls="mentor-request-history-details"
+                          onClick={() =>
+                            setSelectedHistoryId((current) =>
+                              current === item.id ? null : item.id,
+                            )
+                          }
+                        >
+                          {selectedHistoryId === item.id
+                            ? "Ocultar detalles"
+                            : "Ver detalles"}
+                        </Button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -471,6 +499,15 @@ export function ParticipationView({
               Las columnas de áreas técnicas y orientaciones muestran
               la cantidad seleccionada en cada solicitud.
             </p>
+
+            {selectedHistoryRequest && (
+              <div id="mentor-request-history-details">
+                <MentorRequestHistoryDetails
+                  request={selectedHistoryRequest}
+                  onClose={() => setSelectedHistoryId(null)}
+                />
+              </div>
+            )}
           </div>
         )}
       </div>
