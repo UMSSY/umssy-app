@@ -3,9 +3,8 @@ import {
   NOTIFICATION_PAYLOAD_DATE_FORMATTERS,
 } from '../constants/notification-payload-dates.constants.js';
 import type { NotificationPayload } from '../types/notification-payload.type.js';
+import type { NotificationPayloadDateField } from '../types/notification-payload-date-field.type.js';
 import type { NotificationPayloadDateFormatter } from '../types/notification-payload-date-formatter.type.js';
-
-type NotificationPayloadDateField = keyof typeof NOTIFICATION_PAYLOAD_DATE_FORMATTERS;
 
 const DATE_FIELDS = Object.keys(
   NOTIFICATION_PAYLOAD_DATE_FORMATTERS,
