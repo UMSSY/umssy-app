@@ -184,6 +184,130 @@ describe('SurveyVariationEvaluatorService', () => {
     },
   );
 
+  describe('casos límite de los criterios de aceptación', () => {
+    const config = (questionIds: string[] | null = null) => ({
+      id: 'cfg-1',
+      surveyId: mockSurveyId,
+      isEnabled: true,
+      threshold: 10,
+      questionIds,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    const question = (
+      id: string,
+      options: Record<string, number>,
+    ) => ({
+      id,
+      statement: `Pregunta ${id}`,
+      options: Object.entries(options).map(([label, answers]) => ({
+        id: `${id}-${label}`,
+        label,
+        _count: { answers },
+      })),
+    });
+
+    const record = (responses: number, ...questions: unknown[]) =>
+      ({ _count: { responses }, questions }) as any;
+
+    it('CA 26: calcula la variación de una opción que pasa de 0% a 15%', async () => {
+      vi.mocked(repository.findAlertConfig!).mockResolvedValue(config());
+      vi.mocked(repository.findStatistics!)
+        .mockResolvedValueOnce(
+          record(20, question('q-1', { Empleado: 3, Buscando: 17 })),
+        )
+        .mockResolvedValueOnce(
+          record(20, question('q-1', { Empleado: 0, Buscando: 20 })),
+        );
+
+      const result = await service.evaluateSurvey(mockSurveyId, {
+        academicPeriod: 'II-2024',
+      });
+
+      expect(result.shifts[0]).toMatchObject({
+        optionLabel: 'Empleado',
+        previousPercentage: 0,
+        currentPercentage: 15,
+        difference: 15,
+        direction: 'up',
+      });
+    });
+
+    it('CA 27: omite una opción que no existía en el semestre anterior', async () => {
+      vi.mocked(repository.findAlertConfig!).mockResolvedValue(config());
+      vi.mocked(repository.findStatistics!)
+        .mockResolvedValueOnce(
+          record(20, question('q-1', { Empleado: 10, Nueva: 10 })),
+        )
+        .mockResolvedValueOnce(record(20, question('q-1', { Empleado: 20 })));
+
+      const result = await service.evaluateSurvey(mockSurveyId, {
+        academicPeriod: 'II-2024',
+      });
+
+      expect(result.shifts.map(({ optionLabel }) => optionLabel)).toEqual([
+        'Empleado',
+      ]);
+    });
+
+    it('CA 15: no avisa en la primera evaluación, cuando el semestre anterior no tiene respuestas', async () => {
+      vi.mocked(repository.findAlertConfig!).mockResolvedValue(config());
+      vi.mocked(repository.findStatistics!)
+        .mockResolvedValueOnce(
+          record(20, question('q-1', { Empleado: 10, Buscando: 10 })),
+        )
+        .mockResolvedValueOnce(record(0, question('q-1', { Empleado: 0, Buscando: 0 })));
+
+      const result = await service.evaluateSurvey(mockSurveyId, {
+        academicPeriod: 'II-2024',
+      });
+
+      expect(result.hasShifts).toBe(false);
+    });
+
+    it('CA 28: no genera una alerta de disminución del 100% cuando el semestre actual no tiene respuestas', async () => {
+      vi.mocked(repository.findAlertConfig!).mockResolvedValue(config());
+      vi.mocked(repository.findStatistics!)
+        .mockResolvedValueOnce(record(0, question('q-1', { Empleado: 0, Buscando: 0 })))
+        .mockResolvedValueOnce(
+          record(20, question('q-1', { Empleado: 20, Buscando: 0 })),
+        );
+
+      const result = await service.evaluateSurvey(mockSurveyId, {
+        academicPeriod: 'II-2024',
+      });
+
+      expect(result.hasShifts).toBe(false);
+      expect(result.shifts).toEqual([]);
+    });
+
+    it('evalúa únicamente las preguntas elegidas para vigilar', async () => {
+      vi.mocked(repository.findAlertConfig!).mockResolvedValue(config(['q-2']));
+      const current = record(
+        20,
+        question('q-1', { Empleado: 18, Buscando: 2 }),
+        question('q-2', { Empleado: 18, Buscando: 2 }),
+      );
+      const previous = record(
+        20,
+        question('q-1', { Empleado: 4, Buscando: 16 }),
+        question('q-2', { Empleado: 4, Buscando: 16 }),
+      );
+      vi.mocked(repository.findStatistics!)
+        .mockResolvedValueOnce(current)
+        .mockResolvedValueOnce(previous);
+
+      const result = await service.evaluateSurvey(mockSurveyId, {
+        academicPeriod: 'II-2024',
+      });
+
+      expect(new Set(result.shifts.map(({ questionId }) => questionId))).toEqual(
+        new Set(['q-2']),
+      );
+    });
+  });
+
   it.each(['2020', 'Todas'])(
     'debe evaluar con la fecha de cierre cuando la gestión de la encuesta es "%s" y no un semestre',
     async (academicPeriod) => {
