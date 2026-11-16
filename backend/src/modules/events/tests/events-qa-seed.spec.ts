@@ -5,6 +5,10 @@ import { describe, expect, it, vi } from 'vitest';
 import type { Prisma } from '../../../prisma/client.js';
 import { seedEvents } from '../seeds/events.seed.js';
 import {
+  EVENT_PASS_LIFECYCLE_FIXTURES,
+  seedEventPassLifecycleEvents,
+} from '../seeds/event-pass-lifecycle-fixtures.seed.js';
+import {
   SEED_CATEGORY_NAMES,
   SEED_EVENTS,
 } from '../constants/seed-events.constants.js';
@@ -28,7 +32,9 @@ describe('seedEvents', () => {
 
     await seedEvents(tx as unknown as Prisma.TransactionClient, 'creator');
 
-    expect(upsert).toHaveBeenCalledTimes(SEED_EVENTS.length);
+    expect(upsert).toHaveBeenCalledTimes(
+      SEED_EVENTS.length + EVENT_PASS_LIFECYCLE_FIXTURES.length,
+    );
     for (const event of SEED_EVENTS) {
       expect(event.capacity).toBeGreaterThanOrEqual(20);
       expect(event.capacity).toBeLessThanOrEqual(60);
@@ -50,6 +56,33 @@ describe('seedEvents', () => {
         }),
       );
     }
+  });
+
+  it('creates recognizable lifecycle passes with dates based on Bolivia time', async () => {
+    const upsert = vi.fn().mockResolvedValue({});
+    const count = await seedEventPassLifecycleEvents(
+      { event: { upsert } } as never,
+      {
+        createdById: 'creator',
+        categoryId: 'technology',
+        modalityId: 'in-person',
+        originId: 'institutional',
+        statusId: 'published',
+        now: new Date('2026-10-25T02:00:00.000Z'),
+      },
+    );
+
+    expect(count).toBe(2);
+    expect(upsert).toHaveBeenCalledTimes(2);
+    const [active, finished] = upsert.mock.calls.map(([args]) => args);
+    expect(active.where.id).toBe('fb69db6e-ded6-4eed-85ef-6135cf88fad4');
+    expect(active.create.title).toBe('[QA 08.5] Pase vigente');
+    expect(active.create.eventDate.toISOString().slice(0, 10)).toBe('2026-10-25');
+    expect(active.create.endTime.toISOString()).toBe('1970-01-01T10:00:00.000Z');
+    expect(finished.where.id).toBe('66f39ba1-ebc1-42b9-9169-e773f2eb3d2b');
+    expect(finished.create.title).toBe('[QA 08.5] Pase finalizado por horario');
+    expect(finished.create.eventDate.toISOString().slice(0, 10)).toBe('2026-10-23');
+    expect(finished.create.statusId).toBe('published');
   });
 
   it.each(['Empleabilidad', 'Investigación', 'Emprendimiento'])(

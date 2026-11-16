@@ -3,6 +3,8 @@ import {
   SEED_EVENTS,
   SEED_CATEGORY_NAMES,
 } from '../constants/seed-events.constants.js';
+import { seedEventPassLifecycleEvents } from './event-pass-lifecycle-fixtures.seed.js';
+
 export async function seedEvents(
   tx: Prisma.TransactionClient,
   createdById: string,
@@ -64,4 +66,12 @@ export async function seedEvents(
       },
     });
   }
+
+  await seedEventPassLifecycleEvents(tx, {
+    createdById,
+    categoryId: categories[0].id,
+    modalityId: modality.id,
+    originId: origin.id,
+    statusId: eventStatus.id,
+  });
 }

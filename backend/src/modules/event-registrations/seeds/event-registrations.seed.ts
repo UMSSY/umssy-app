@@ -3,6 +3,7 @@ import { repairSeededQrTokens } from './repair-seeded-qr-tokens.js';
 import { randomBytes } from 'node:crypto';
 import type { Prisma } from '../../../prisma/client.js';
 import { SEED_EVENTS } from '../../events/constants/seed-events.constants.js';
+import { EVENT_PASS_LIFECYCLE_FIXTURES } from '../../events/seeds/event-pass-lifecycle-fixtures.seed.js';
 
 export async function seedEventRegistrations(
   tx: Prisma.TransactionClient,
@@ -35,5 +36,23 @@ export async function seedEventRegistrations(
         },
       });
     }
+  }
+  for (const fixture of EVENT_PASS_LIFECYCLE_FIXTURES) {
+    await tx.eventRegistration.upsert({
+      where: { id: fixture.registrationId },
+      update: {
+        eventId: fixture.eventId,
+        userId,
+        statusId: regStatus.id,
+        cancelledAt: null,
+      },
+      create: {
+        id: fixture.registrationId,
+        eventId: fixture.eventId,
+        userId,
+        statusId: regStatus.id,
+        qrToken: randomBytes(32).toString('hex'),
+      },
+    });
   }
 }
