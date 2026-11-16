@@ -11,13 +11,31 @@ import {
   updateMentorOrientationTypes,
 } from "../services/orientation-type.service";
 import { OrientationConfigView } from "./orientation-config-view";
+import { getMentorTechnicalAreas } from "@/modules/mentors/services/technical-areas.service";
+import { getTechnicalAreas } from "../services/technical-area.service";
 
 vi.mock("../services/orientation-type.service", () => ({
   getOrientationTypes: vi.fn(),
   getMentorOrientationTypes: vi.fn(),
   updateMentorOrientationTypes: vi.fn(),
 }));
-
+vi.mock("@/modules/mentors/services/technical-areas.service", () => ({
+  getMentorTechnicalAreas: vi.fn(),
+  updateMentorTechnicalAreas: vi.fn(),
+}));
+vi.mock("../services/technical-area.service", () => ({
+  getTechnicalAreas: vi.fn(),
+}));
+vi.mock("../hooks/use-current-user-id", () => ({
+  useCurrentUserId: () => ({ currentUserId: "mentor-1" }),
+}));
+vi.mock("../components/preview/mentor-profile-preview", () => ({
+  MentorProfilePreview: ({ onBack }: { onBack: () => void }) => (
+    <button type="button" onClick={onBack}>
+      Volver a editar
+    </button>
+  ),
+}));
 const catalog = [
   {
     id: "0424f370-00f0-43cf-9b8a-997af81840b9",
@@ -74,13 +92,15 @@ describe("OrientationConfigView", () => {
       selectedOrientations,
     );
     vi.mocked(updateMentorOrientationTypes).mockResolvedValue();
+    vi.mocked(getTechnicalAreas).mockResolvedValue([]);
+    vi.mocked(getMentorTechnicalAreas).mockResolvedValue([]);
   });
 
   afterEach(cleanup);
 
   it("muestra loading mientras carga las consultas", () => {
-    vi.mocked(getOrientationTypes).mockReturnValue(new Promise(() => {}));
-    vi.mocked(getMentorOrientationTypes).mockReturnValue(new Promise(() => {}));
+    vi.mocked(getOrientationTypes).mockReturnValue(new Promise(() => { }));
+    vi.mocked(getMentorOrientationTypes).mockReturnValue(new Promise(() => { }));
 
     render(<OrientationConfigView />);
 
@@ -134,17 +154,27 @@ describe("OrientationConfigView", () => {
     expect(updateMentorOrientationTypes).not.toHaveBeenCalled();
   });
 
-  it("exige al menos una orientacion", async () => {
+  it("al guardar sin ninguna orientación muestra el mensaje y no guarda", async () => {
     vi.mocked(getMentorOrientationTypes).mockResolvedValue([catalog[0]]);
     render(<OrientationConfigView />);
     await screen.findByRole("checkbox", { name: "Búsqueda de empleo" });
 
     fireEvent.click(checkbox("Búsqueda de empleo"));
+    const saveButton = screen.getByRole("button", { name: "Guardar cambios" });
+    expect(saveButton).toBeEnabled();
+    fireEvent.click(saveButton);
 
     expect(
-      screen.getByRole("button", { name: "Guardar cambios" }),
-    ).toBeDisabled();
+      screen.getByText("Debe seleccionar al menos una opción"),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
     expect(updateMentorOrientationTypes).not.toHaveBeenCalled();
+    expect(toast.success).not.toHaveBeenCalled();
+
+    fireEvent.click(checkbox("Búsqueda de empleo"));
+    expect(
+      screen.queryByText("Debe seleccionar al menos una opción"),
+    ).not.toBeInTheDocument();
   });
 
   it("guarda exactamente los UUID seleccionados y muestra exito", async () => {
@@ -165,7 +195,7 @@ describe("OrientationConfigView", () => {
 
     await waitFor(() =>
       expect(toast.success).toHaveBeenCalledWith(
-        "Tipos de orientación actualizados correctamente",
+        "Se guardaron los cambios con éxito",
       ),
     );
     expect(updateMentorOrientationTypes).toHaveBeenCalledWith([
@@ -234,7 +264,7 @@ describe("OrientationConfigView", () => {
     );
     await waitFor(() =>
       expect(toast.success).toHaveBeenCalledWith(
-        "Tipos de orientación actualizados correctamente",
+        "Se guardaron los cambios con éxito",
       ),
     );
 
@@ -266,6 +296,7 @@ describe("OrientationConfigView", () => {
         "No se pudieron guardar los cambios. Intente nuevamente.",
       ),
     ).toBeInTheDocument();
+    expect(toast.success).not.toHaveBeenCalled();
     expectOrientationStyle("Orientación profesional", "new");
     expectOrientationStyle("Búsqueda de empleo", "saved");
     expectOrientationStyle("Orientación técnica", "unselected");
@@ -279,7 +310,7 @@ describe("OrientationConfigView", () => {
     );
     await waitFor(() =>
       expect(toast.success).toHaveBeenCalledWith(
-        "Tipos de orientación actualizados correctamente",
+        "Se guardaron los cambios con éxito",
       ),
     );
     expect(updateMentorOrientationTypes).toHaveBeenNthCalledWith(2, [
@@ -287,6 +318,41 @@ describe("OrientationConfigView", () => {
       catalog[1].id,
     ]);
     expectOrientationStyle("Orientación profesional", "saved");
+  });
+
+  it("guarda los cambios después de volver de la vista previa", async () => {
+    render(<OrientationConfigView />);
+    await screen.findByRole("checkbox", { name: "Orientación profesional" });
+
+    fireEvent.click(checkbox("Orientación profesional"));
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Vista previa" })).toBeEnabled(),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Vista previa" }));
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Volver a editar" }),
+    );
+
+    expect(
+      await screen.findByRole("checkbox", { name: "Orientación profesional" }),
+    ).toBeChecked();
+    expect(updateMentorOrientationTypes).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Sí, guardar cambios" }),
+    );
+
+    await waitFor(() =>
+      expect(toast.success).toHaveBeenCalledWith(
+        "Se guardaron los cambios con éxito",
+      ),
+    );
+    expect(updateMentorOrientationTypes).toHaveBeenCalledWith([
+      catalog[0].id,
+      catalog[2].id,
+      catalog[1].id,
+    ]);
   });
 
   it("muestra error de carga y reintenta ambas consultas", async () => {
@@ -344,7 +410,7 @@ describe("OrientationConfigView", () => {
 
     await waitFor(() =>
       expect(toast.success).toHaveBeenCalledWith(
-        "Tipos de orientación actualizados correctamente",
+        "Se guardaron los cambios con éxito",
       ),
     );
     expect(readStorage).not.toHaveBeenCalled();
@@ -353,7 +419,7 @@ describe("OrientationConfigView", () => {
     writeStorage.mockRestore();
   });
 
-    it("Cancelar sin cambios regresa directo a Mi participación", async () => {
+  it("Cancelar sin cambios regresa directo a Mi participación", async () => {
     render(<OrientationConfigView />);
     await screen.findByRole("checkbox", { name: "Orientación profesional" });
 

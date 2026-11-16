@@ -22,3 +22,8 @@ export { loadMentorshipWizardDraft, saveMentorshipWizardDraft } from "./services
 
 export { useMentorshipCatalogs } from "./hooks/use-mentorship-catalogs";
 export { DiscardChangesDialog } from "./components/preview/discard-changes-dialog";
+export {
+  PROFILE_CHANGES_SAVED_MESSAGE,
+  PROFILE_CHANGES_SAVE_ERROR_MESSAGE,
+  PROFILE_SELECTION_REQUIRED_MESSAGE,
+} from "./constants/profile-changes-messages.constants";
