@@ -9,8 +9,24 @@ import { useSessionInactivity } from "../hooks/use-session-inactivity";
 import { broadcastAuthEvent, useAuthBroadcastSync } from "../utils/auth-broadcast";
 import { SessionTimeoutModal } from "./session-timeout-modal";
 
+function useOptionalRouter() {
+  try {
+    return useRouter();
+  } catch {
+    return null;
+  }
+}
+
 export function SessionInactivityGuard() {
-  const router = useRouter();
+  const router = useOptionalRouter();
+
+  const navigateTo = (path: string) => {
+    if (router) {
+      router.replace(path);
+    } else if (typeof window !== "undefined") {
+      window.location.assign(path);
+    }
+  };
 
   // Sincroniza el cierre de sesión entre pestañas del navegador (CA10)
   useAuthBroadcastSync((message) => {
@@ -46,9 +62,9 @@ export function SessionInactivityGuard() {
       }
       const loginUrl = buildLoginUrl(currentPath);
       const separator = loginUrl.includes("?") ? "&" : "?";
-      router.replace(`${loginUrl}${separator}reason=SESSION_EXPIRED`);
+      navigateTo(`${loginUrl}${separator}reason=SESSION_EXPIRED`);
     } else {
-      router.replace("/login?reason=SESSION_EXPIRED");
+      navigateTo("/login?reason=SESSION_EXPIRED");
     }
   };
 
@@ -65,9 +81,9 @@ export function SessionInactivityGuard() {
       }
       const loginUrl = buildLoginUrl(currentPath);
       const separator = loginUrl.includes("?") ? "&" : "?";
-      router.replace(`${loginUrl}${separator}reason=SESSION_EXPIRED`);
+      navigateTo(`${loginUrl}${separator}reason=SESSION_EXPIRED`);
     } else {
-      router.replace("/login?reason=SESSION_EXPIRED");
+      navigateTo("/login?reason=SESSION_EXPIRED");
     }
   };
 
