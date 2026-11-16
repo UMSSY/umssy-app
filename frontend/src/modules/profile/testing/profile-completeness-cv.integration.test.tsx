@@ -126,7 +126,9 @@ describe('CV profile completeness', () => {
       new File(['%PDF'], 'cv.pdf', { type: 'application/pdf' }),
     );
     await user.click(screen.getByRole('button', { name: 'Confirmar carga' }));
-    await screen.findByRole('alert');
+    expect(
+      await screen.findByText('No se pudo subir tu CV. Intenta de nuevo.'),
+    ).toBeVisible();
     expect(bar).toHaveAttribute('aria-valuenow', '85');
     expect(api.completeness).toHaveBeenCalledOnce();
     await user.click(screen.getByRole('button', { name: 'Confirmar carga' }));
@@ -218,7 +220,9 @@ describe('CV profile completeness', () => {
         name: 'Eliminar',
       }),
     );
-    await screen.findByRole('alert');
+    expect(
+      await screen.findByText('No se pudo eliminar tu CV. Intenta de nuevo.'),
+    ).toBeVisible();
     expect(bar).toHaveAttribute('aria-valuenow', '100');
     expect(api.completeness).toHaveBeenCalledOnce();
     expect(
