@@ -11,7 +11,7 @@ import type { NotifyRequest } from '../types/notify-request.type.js';
 import type { NotifyResult } from '../types/notify-result.type.js';
 import { NotificationType } from '../types/notification-type.enum.js';
 import type { NotificationTemplateDefinition } from '../types/notification-template-definition.type.js';
-import { normalizeNotificationPayload } from '../utils/normalize-notification-payload.js';
+import { resolveNotificationChannel } from '../utils/resolve-notification-channel.js';
 
 @Injectable()
 export class NotificationsService {
@@ -56,24 +56,27 @@ export class NotificationsService {
     if (!template) {
       throw new NotFoundException(`Plantilla no encontrada para el tipo ${type}`);
     }
-
-    const normalizedPayload = normalizeNotificationPayload(payload);
-    const title = template.renderTitle(normalizedPayload);
-    const body = template.renderBody(normalizedPayload);
+    
+    const title = template.renderTitle(payload);
+    const body = template.renderBody(payload);
 
     const preferences = await this.preferencesRepository.findManyByUserIds(validRecipients);
-    
+    const preferenceByUserId = new Map(preferences.map((p) => [p.userId, p]));
+
     const pushTargets: string[] = [];
     const emailTargets: string[] = [];
 
     for (const recipientId of validRecipients) {
-      const userPref = preferences.find((p) => p.userId === recipientId);
-      const pushEnabled = userPref ? userPref.pushEnabled : false;
-      const emailEnabled = userPref ? userPref.emailEnabled : true;
+      // HU-16: la preferencia guardada define UN solo canal externo.
+      // La campana in-app no pasa por aquí: se crea siempre más abajo.
+      const channel = resolveNotificationChannel(preferenceByUserId.get(recipientId));
 
-      const appVisible = this.appVisibilityService.isVisible(recipientId);
-      if (typeRecord.sendsPush && pushEnabled && !appVisible) pushTargets.push(recipientId);
-      if (typeRecord.sendsEmail && emailEnabled) emailTargets.push(recipientId);
+      if (channel === 'push') {
+        const appVisible = this.appVisibilityService.isVisible(recipientId);
+        if (typeRecord.sendsPush && !appVisible) pushTargets.push(recipientId);
+      } else if (channel === 'email') {
+        if (typeRecord.sendsEmail) emailTargets.push(recipientId);
+      }
     }
 
     const createdNotifications = await this.notificationsRepository.createMany(
@@ -93,12 +96,7 @@ export class NotificationsService {
     );
 
     for (const recipientId of validRecipients) {
-        this.notificationGateway.emitToUser(recipientId, 'notification:new', {
-        typeCode: type,
-        title,
-        body,
-        actionUrl,
-      });
+      this.notificationGateway.emitToUser(recipientId, 'notification:new', { title, body, actionUrl });
     }
 
     let pushStatus: NotifyResult['pushStatus'] = 'skipped';
