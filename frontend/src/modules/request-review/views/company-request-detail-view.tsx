@@ -663,278 +663,289 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
       )}
 
       {/* ─────────────────────────────────────────────────────────────────────────────
-          1. CONTRASTE DE DATOS Y VERIFICACIÓN OCR
+          MODO AUDITOR: DOCUMENTO DE RESPALDO Y COTEJO OCR EN PARALELO LADO A LADO
           ───────────────────────────────────────────────────────────────────────────── */}
-      <section className="space-y-6" aria-labelledby="section-contrast">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3">
-          <div>
-            <h2 id="section-contrast" className="text-lg font-bold text-ink">
-              Contraste de Datos y Verificación OCR
-            </h2>
-            <p className="text-xs text-text-secondary">
-              Cotejo minucioso campo por campo entre los datos del registro y el
-              contenido extraído del documento adjunto.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2.5">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => void handleReEvaluateOcr()}
-              disabled={reEvaluatingOcr || submitting}
-              className="gap-1.5 text-xs font-semibold"
-            >
-              {reEvaluatingOcr ? (
-                <>
-                  <Loader2 className="size-3.5 animate-spin" /> Analizando
-                  OCR...
-                </>
-              ) : (
-                <>
-                  <RotateCcw className="size-3.5 text-primary" /> Re-analizar
-                  OCR
-                </>
-              )}
-            </Button>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1 text-xs font-semibold text-ink shadow-2xs">
-              <CheckCircle2 className="size-3.5 text-emerald-600" />
-              {confirmedCount} confirmados
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1 text-xs font-semibold text-ink shadow-2xs">
-              <XCircle className="size-3.5 text-rose-600" />
-              {unconfirmedCount} por verificar
-            </span>
-          </div>
-        </div>
-
-        {/* Tarjeta de métricas del Score OCR */}
-        <Card className="border-border bg-surface shadow-xs">
-          <CardHeader className="pb-3">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="size-5 text-primary" />
-                <CardTitle className="text-base font-bold text-ink">
-                  Porcentaje de Coincidencia OCR
-                </CardTitle>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-2xl font-extrabold text-ink">
-                  {ocrPercentage}%
-                </span>
-                <Badge
-                  variant={
-                    ocrPercentage >= 60
-                      ? 'default'
-                      : ocrPercentage >= 35
-                        ? 'secondary'
-                        : 'destructive'
-                  }
-                  className="font-semibold"
-                >
-                  {ocrPercentage >= 60
-                    ? 'Alta Coincidencia'
-                    : ocrPercentage >= 35
-                      ? 'Coincidencia Parcial'
-                      : 'Baja Coincidencia'}
-                </Badge>
-              </div>
-            </div>
-            <CardDescription className="text-xs text-text-secondary">
-              Nivel de certidumbre basado en el análisis del texto extraído de
-              la carta membretada.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="w-full">
-              <Progress value={ocrPercentage} className="h-2.5" />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Lista de Bloques Comparativos: Una fila por dato, 50% declarado y 50% OCR */}
-        <div className="flex flex-col gap-4">
-          {comparisonList.map((comp) => {
-            const IconComponent = comp.icon;
-            const isMatched = comp.data.matched;
-            const hasDetectedText = Boolean(comp.data.detectedText);
-
-            return (
-              <div
-                key={comp.id}
-                className="flex flex-col rounded-xl border border-border bg-surface p-4 shadow-2xs sm:p-5"
+      <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
+        {/* Columna Izquierda: Documento de Respaldo Oficial (Sticky en pantallas grandes) */}
+        <section
+          className="space-y-3 lg:sticky lg:top-6 lg:col-span-6"
+          aria-labelledby="section-document"
+        >
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <FileText className="size-5 text-primary" />
+              <h2
+                id="section-document"
+                className="text-base font-bold text-ink"
               >
-                {/* Cabecera del campo con icono, etiqueta y estado */}
-                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 pb-3">
-                  <div className="flex items-center gap-2">
-                    <IconComponent className="size-4 text-primary" />
-                    <span className="text-xs font-bold text-ink sm:text-sm">
-                      {comp.label}
+                Documento de Respaldo Oficial
+              </h2>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="xs"
+                onClick={() => setIsDocMinimized(!isDocMinimized)}
+                className="gap-1.5 text-xs font-semibold"
+              >
+                {isDocMinimized ? (
+                  <>
+                    <ChevronDown className="size-3.5" /> Expandir visor
+                  </>
+                ) : (
+                  <>
+                    <ChevronUp className="size-3.5" /> Minimizar visor
+                  </>
+                )}
+              </Button>
+              {docUrl && (
+                <a
+                  href={docUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1 text-xs font-semibold text-primary transition-colors hover:bg-surface-soft"
+                >
+                  <ExternalLink className="size-3.5" /> Abrir en nueva pestaña
+                </a>
+              )}
+            </div>
+          </div>
+
+          <Card className="overflow-hidden border-border bg-surface shadow-xs">
+            <CardContent className="p-0">
+              {isDocMinimized ? (
+                <div className="flex items-center justify-between border-b border-border bg-surface-soft/60 px-4 py-3">
+                  <div className="flex items-center gap-2.5">
+                    <FileText className="size-4 text-primary" />
+                    <div>
+                      <p className="text-xs font-semibold text-ink">
+                        carta-solicitud-{item.requestCode ?? 'doc'}.
+                        {docIsImage ? 'png' : 'pdf'}
+                      </p>
+                      <p className="text-[11px] text-text-secondary">
+                        Visor minimizado temporalmente.
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="xs"
+                    onClick={() => setIsDocMinimized(false)}
+                    className="gap-1 text-xs"
+                  >
+                    <Maximize2 className="size-3.5" /> Expandir visor
+                  </Button>
+                </div>
+              ) : docUrl ? (
+                <DocumentViewer
+                  url={docUrl}
+                  mimeType={docMimeType}
+                  fileName={`carta-solicitud-${item.requestCode ?? 'doc'}.${docIsImage ? 'png' : 'pdf'}`}
+                  caption="Carta formal con membrete y sello presentada para la solicitud de acceso institucional a UMSSY."
+                />
+              ) : (
+                <div className="flex h-64 flex-col items-center justify-center p-8 text-center text-text-secondary">
+                  <FileText className="mb-2 size-12 text-slate-300" />
+                  <p className="text-sm font-medium">
+                    No se pudo cargar la vista previa del documento adjunto.
+                  </p>
+                  <p className="mt-1 text-xs text-text-secondary">
+                    El archivo podría estar en procesamiento o no encontrarse
+                    disponible.
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </section>
+
+        {/* Columna Derecha: Contraste de Datos y Verificación OCR */}
+        <section
+          className="space-y-4 lg:col-span-6"
+          aria-labelledby="section-contrast"
+        >
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3">
+            <div>
+              <h2
+                id="section-contrast"
+                className="text-base font-bold text-ink"
+              >
+                Contraste de Datos y Verificación OCR
+              </h2>
+              <p className="text-xs text-text-secondary">
+                Cotejo minucioso campo por campo entre los datos del registro y
+                el contenido extraído del documento adjunto.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => void handleReEvaluateOcr()}
+                disabled={reEvaluatingOcr || submitting}
+                className="gap-1.5 text-xs font-semibold"
+              >
+                {reEvaluatingOcr ? (
+                  <>
+                    <Loader2 className="size-3.5 animate-spin" /> Analizando
+                    OCR...
+                  </>
+                ) : (
+                  <>
+                    <RotateCcw className="size-3.5 text-primary" /> Re-analizar
+                    OCR
+                  </>
+                )}
+              </Button>
+              <span className="inline-flex items-center gap-1 rounded-full border border-border bg-surface px-2.5 py-1 text-xs font-semibold text-ink shadow-2xs">
+                <CheckCircle2 className="size-3.5 text-emerald-600" />
+                {confirmedCount} confirmados
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-full border border-border bg-surface px-2.5 py-1 text-xs font-semibold text-ink shadow-2xs">
+                <XCircle className="size-3.5 text-rose-600" />
+                {unconfirmedCount} por verificar
+              </span>
+            </div>
+          </div>
+
+          {/* Tarjeta de métricas del Score OCR */}
+          <Card className="border-border bg-surface shadow-xs">
+            <CardHeader className="p-4 pb-2">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="size-5 text-primary" />
+                  <CardTitle className="text-sm font-bold text-ink">
+                    Porcentaje de Coincidencia OCR
+                  </CardTitle>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xl font-extrabold text-ink">
+                    {ocrPercentage}%
+                  </span>
+                  <Badge
+                    variant={
+                      ocrPercentage >= 60
+                        ? 'default'
+                        : ocrPercentage >= 35
+                          ? 'secondary'
+                          : 'destructive'
+                    }
+                    className="text-xs font-semibold"
+                  >
+                    {ocrPercentage >= 60
+                      ? 'Alta Coincidencia'
+                      : ocrPercentage >= 35
+                        ? 'Coincidencia Parcial'
+                        : 'Baja Coincidencia'}
+                  </Badge>
+                </div>
+              </div>
+              <CardDescription className="text-xs text-text-secondary">
+                Nivel de certidumbre basado en el análisis del texto extraído de
+                la carta membretada.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-4 pt-1">
+              <Progress value={ocrPercentage} className="h-2" />
+            </CardContent>
+          </Card>
+
+          {/* Lista de Bloques Comparativos: Una fila por dato, 50% declarado y 50% OCR */}
+          <div className="flex flex-col gap-3.5">
+            {comparisonList.map((comp) => {
+              const IconComponent = comp.icon;
+              const isMatched = comp.data.matched;
+              const hasDetectedText = Boolean(comp.data.detectedText);
+
+              return (
+                <div
+                  key={comp.id}
+                  className="flex flex-col rounded-xl border border-border bg-surface p-4 shadow-2xs"
+                >
+                  {/* Cabecera del campo con icono, etiqueta y estado */}
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 pb-2.5">
+                    <div className="flex items-center gap-2">
+                      <IconComponent className="size-4 text-primary" />
+                      <span className="text-xs font-bold text-ink sm:text-sm">
+                        {comp.label}
+                      </span>
+                    </div>
+                    <span
+                      className={`inline-flex items-center gap-1 rounded-md border px-2.5 py-0.5 text-xs font-semibold ${
+                        isMatched
+                          ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-300'
+                          : hasDetectedText
+                            ? 'border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-300'
+                            : 'border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400'
+                      }`}
+                    >
+                      {isMatched ? (
+                        <>
+                          <CheckCircle2 className="size-3 text-emerald-600 dark:text-emerald-400" />
+                          Coincide
+                        </>
+                      ) : hasDetectedText ? (
+                        <>
+                          <AlertCircle className="size-3 text-rose-600 dark:text-rose-400" />
+                          Discrepancia
+                        </>
+                      ) : (
+                        <>
+                          <XCircle className="size-3 text-slate-500" />
+                          No detectado
+                        </>
+                      )}
                     </span>
                   </div>
-                  <span
-                    className={`inline-flex items-center gap-1 rounded-md border px-2.5 py-0.5 text-xs font-semibold ${
-                      isMatched
-                        ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-300'
-                        : hasDetectedText
-                          ? 'border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-300'
-                          : 'border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400'
-                    }`}
-                  >
-                    {isMatched ? (
-                      <>
-                        <CheckCircle2 className="size-3 text-emerald-600 dark:text-emerald-400" />
-                        Coincide
-                      </>
-                    ) : hasDetectedText ? (
-                      <>
-                        <AlertCircle className="size-3 text-rose-600 dark:text-rose-400" />
-                        Discrepancia
-                      </>
-                    ) : (
-                      <>
-                        <XCircle className="size-3 text-slate-500" />
-                        No detectado
-                      </>
-                    )}
-                  </span>
-                </div>
 
-                {/* Comparación lado a lado: 50% Llenado en Registro vs 50% Extraído de Carta (OCR) */}
-                <div className="mt-3.5 grid grid-cols-1 items-stretch gap-4 md:grid-cols-2">
-                  {/* Lado izquierdo: Dato Declarado en Formulario */}
-                  <div className="flex flex-col">
-                    <span className="text-xs font-semibold text-text-secondary">
-                      Dato Declarado en Formulario:
-                    </span>
-                    <div className="mt-1 flex flex-1 items-start rounded-md border border-border/80 bg-surface-soft/40 p-2.5 text-xs font-semibold text-ink">
-                      <span>{comp.data.declared || 'No especificado'}</span>
+                  {/* Comparación lado a lado: 50% Llenado en Registro vs 50% Extraído de Carta (OCR) */}
+                  <div className="mt-3 grid grid-cols-1 items-stretch gap-3 sm:grid-cols-2">
+                    {/* Lado izquierdo: Dato Declarado en Formulario */}
+                    <div className="flex flex-col">
+                      <span className="text-xs font-semibold text-text-secondary">
+                        Dato Declarado en Formulario:
+                      </span>
+                      <div className="mt-1 flex flex-1 items-start rounded-md border border-border/80 bg-surface-soft/40 p-2.5 text-xs font-semibold text-ink">
+                        <span>{comp.data.declared || 'No especificado'}</span>
+                      </div>
+                    </div>
+
+                    {/* Lado derecho: Texto Extraído del Documento (OCR) */}
+                    <div className="flex flex-col">
+                      <span className="text-xs font-semibold text-text-secondary">
+                        Texto Extraído del Documento (OCR):
+                      </span>
+                      {comp.data.detectedText ? (
+                        <div className="mt-1 flex flex-1 items-start rounded-md border border-border/80 bg-surface-soft/60 p-2.5 text-xs leading-relaxed font-normal text-ink">
+                          <span>&ldquo;{comp.data.detectedText}&rdquo;</span>
+                        </div>
+                      ) : (
+                        <div className="mt-1 flex flex-1 items-start rounded-md border border-border/60 bg-surface-soft/30 p-2.5 text-xs text-text-secondary italic">
+                          <span>
+                            No se identificó este dato en el contenido escaneado
+                            de la carta.
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
 
-                  {/* Lado derecho: Texto Extraído del Documento (OCR) */}
-                  <div className="flex flex-col">
-                    <span className="text-xs font-semibold text-text-secondary">
-                      Texto Extraído del Documento (OCR):
-                    </span>
-                    {comp.data.detectedText ? (
-                      <div className="mt-1 flex flex-1 items-start rounded-md border border-border/80 bg-surface-soft/60 p-2.5 text-xs leading-relaxed font-normal text-ink">
-                        <span>&ldquo;{comp.data.detectedText}&rdquo;</span>
-                      </div>
-                    ) : (
-                      <div className="mt-1 flex flex-1 items-start rounded-md border border-border/60 bg-surface-soft/30 p-2.5 text-xs text-text-secondary italic">
-                        <span>
-                          No se identificó este dato en el contenido escaneado
-                          de la carta.
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Mensaje de estado explicativo al pie de la fila */}
-                {comp.data.statusMessage && (
-                  <p className="mt-3 border-t border-border/40 pt-2.5 text-[11px] text-text-secondary">
-                    {comp.data.statusMessage}
-                  </p>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* ─────────────────────────────────────────────────────────────────────────────
-          2. DOCUMENTO DE RESPALDO (CARTA MEMBRETADA)
-          ───────────────────────────────────────────────────────────────────────────── */}
-      <section className="space-y-3" aria-labelledby="section-document">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <FileText className="size-5 text-primary" />
-            <h2 id="section-document" className="text-lg font-bold text-ink">
-              Documento de Respaldo Oficial (Carta Membretada)
-            </h2>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setIsDocMinimized(!isDocMinimized)}
-              className="gap-1.5 text-xs font-semibold"
-            >
-              {isDocMinimized ? (
-                <>
-                  <ChevronDown className="size-3.5" /> Expandir visor
-                </>
-              ) : (
-                <>
-                  <ChevronUp className="size-3.5" /> Minimizar visor
-                </>
-              )}
-            </Button>
-            {docUrl && (
-              <a
-                href={docUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-semibold text-primary transition-colors hover:bg-surface-soft"
-              >
-                <ExternalLink className="size-3.5" /> Abrir en nueva pestaña
-              </a>
-            )}
-          </div>
-        </div>
-
-        <Card className="overflow-hidden border-border bg-surface shadow-xs">
-          <CardContent className="p-0">
-            {isDocMinimized ? (
-              <div className="flex items-center justify-between border-b border-border bg-surface-soft/60 px-5 py-3">
-                <div className="flex items-center gap-3">
-                  <FileText className="size-5 text-primary" />
-                  <div>
-                    <p className="text-xs font-semibold text-ink">
-                      carta-solicitud-{item.requestCode ?? 'doc'}.
-                      {docIsImage ? 'png' : 'pdf'}
+                  {/* Mensaje de estado explicativo al pie de la fila */}
+                  {comp.data.statusMessage && (
+                    <p className="mt-2.5 border-t border-border/40 pt-2 text-[11px] text-text-secondary">
+                      {comp.data.statusMessage}
                     </p>
-                    <p className="text-[11px] text-text-secondary">
-                      Visor minimizado temporalmente.
-                    </p>
-                  </div>
+                  )}
                 </div>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="xs"
-                  onClick={() => setIsDocMinimized(false)}
-                  className="gap-1 text-xs"
-                >
-                  <Maximize2 className="size-3.5" /> Expandir visor
-                </Button>
-              </div>
-            ) : docUrl ? (
-              <DocumentViewer
-                url={docUrl}
-                mimeType={docMimeType}
-                fileName={`carta-solicitud-${item.requestCode ?? 'doc'}.${docIsImage ? 'png' : 'pdf'}`}
-                caption="Carta formal con membrete y sello presentada para la solicitud de acceso institucional a UMSSY."
-              />
-            ) : (
-              <div className="flex h-64 flex-col items-center justify-center p-8 text-center text-text-secondary">
-                <FileText className="mb-2 size-12 text-slate-300" />
-                <p className="text-sm font-medium">
-                  No se pudo cargar la vista previa del documento adjunto.
-                </p>
-                <p className="mt-1 text-xs text-text-secondary">
-                  El archivo podría estar en procesamiento o no encontrarse
-                  disponible.
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </section>
+              );
+            })}
+          </div>
+        </section>
+      </div>
 
       {/* ─────────────────────────────────────────────────────────────────────────────
           3. LOGOTIPO CORPORATIVO Y RESUMEN
