@@ -10,6 +10,10 @@ vi.mock("@/modules/profile/services/profile.service", () => ({
   },
 }));
 
+vi.mock("@/modules/profile/services/portfolio-projects.service", () => ({
+  portfolioProjectsService: { getPortfolioProjects: vi.fn().mockResolvedValue([]) },
+}));
+
 vi.mock("../services/documents.service", () => ({
   documentsService: {
     generateCv: vi.fn(),

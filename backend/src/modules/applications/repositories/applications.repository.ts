@@ -48,6 +48,25 @@ export class ApplicationsRepository {
     });
   }
 
+  findApplicationForChat(id: string) {
+    return this.prisma.jobApplication.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        userId: true,
+        status: { select: { title: true } },
+        jobOffer: {
+          select: {
+            id: true,
+            title: true,
+            companyId: true,
+            company: { select: { id: true, title: true } },
+          },
+        },
+      },
+    });
+  }
+
   reactivateApplication(id: string, userId: string, now: Date) {
     return this.prisma.$transaction(async (tx) => {
       const status = await tx.jobApplicationStatus.findUniqueOrThrow({

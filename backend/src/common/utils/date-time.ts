@@ -87,3 +87,13 @@ export const formatBlockRange = (
   startAt: DateInput,
   endAt: DateInput,
 ): string => `${toBoliviaTime(startAt).time} - ${toBoliviaTime(endAt).time}`;
+
+export const formatBoliviaDate = (value: DateInput): string => {
+  const bolivia = toBoliviaTime(value);
+  const [year, month, day] = bolivia.date.split('-');
+  return `${day}/${month}/${year}`;
+};
+
+export const formatBoliviaTime = (value: DateInput): string => {
+  return toBoliviaTime(value).time;
+};
