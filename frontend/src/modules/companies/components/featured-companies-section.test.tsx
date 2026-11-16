@@ -29,7 +29,7 @@ describe("FeaturedCompaniesSection", () => {
       { id: "1", name: "Tecnosoft", description: "Software", activeVacanciesCount: 2 },
     ]);
     render(<FeaturedCompaniesSection />);
-    expect(await screen.findByRole("link", { name: "Ver vacantes de Tecnosoft" })).toHaveAttribute("href", "/jobs");
+    expect(await screen.findByRole("link", { name: "Ver vacantes de Tecnosoft" })).toHaveAttribute("href","/vacancies");
   });
 
   it("shows an empty message", async () => {
