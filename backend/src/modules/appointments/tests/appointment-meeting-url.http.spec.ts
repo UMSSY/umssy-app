@@ -1,4 +1,5 @@
 import type { INestApplication } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
@@ -64,7 +65,11 @@ describe('GET /appointments/:id (integración HTTP del enlace de la reunión)', 
     seed = new InMemoryOverlapSeed();
 
     const moduleRef = await Test.createTestingModule({
-      imports: [AppointmentsModule, AvailabilityModule],
+      imports: [
+        ConfigModule.forRoot({ isGlobal: true, ignoreEnvFile: true }),
+        AppointmentsModule,
+        AvailabilityModule,
+      ],
       providers: [
         { provide: APP_FILTER, useClass: DomainExceptionFilter },
         { provide: APP_INTERCEPTOR, useClass: ResponseInterceptor },
