@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   useEffect,
@@ -7,8 +7,10 @@ import {
   type ChangeEvent,
   type DragEvent,
   type FormEvent,
-} from "react";
+} from 'react';
 import {
+  AlertCircle,
+  AlertTriangle,
   ArrowLeft,
   Building2,
   Check,
@@ -24,56 +26,65 @@ import {
   Mail,
   Phone,
   RefreshCw,
+  ServerCrash,
   ShieldCheck,
   Trash2,
   User,
+  WifiOff,
   X,
-} from "lucide-react";
-import { cn } from "cn";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { NativeSelect } from "@/components/ui/native-select";
-import { Textarea } from "@/components/ui/textarea";
-import { FormFieldset } from "@/shared/components/layout/form-fieldset";
-import { PageHeading } from "@/shared/components/layout/page-heading";
-import { DocumentDropzoneContent } from "../document/document-dropzone-content";
-import { DocumentPreviewContent } from "../document/document-preview-content";
-import { RequiredMark } from "../personal-data/required-mark";
-import { PublicHeader } from "../request-steps/public-header";
-import { companyAccessRequestService } from "../../services/company-access-request.service";
+} from 'lucide-react';
+import { cn } from 'cn';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { NativeSelect } from '@/components/ui/native-select';
+import { Textarea } from '@/components/ui/textarea';
+import { FormFieldset } from '@/shared/components/layout/form-fieldset';
+import { PageHeading } from '@/shared/components/layout/page-heading';
+import { DocumentDropzoneContent } from '../document/document-dropzone-content';
+import { DocumentPreviewContent } from '../document/document-preview-content';
+import { RequiredMark } from '../personal-data/required-mark';
+import { PublicHeader } from '../request-steps/public-header';
+import { companyAccessRequestService } from '../../services/company-access-request.service';
 import type {
   CityItem,
   CreateCompanyRequestPayload,
   SubmitCompanyRequestResult,
-} from "../../types/company-access-request.types";
+} from '../../types/company-access-request.types';
 
 interface CompanyAccessRequestFlowProps {
   onSwitchToGraduate: () => void;
 }
 
-const ALLOWED_LOGO_TYPES = ["image/png", "image/jpeg", "image/webp"];
+const ALLOWED_LOGO_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
 
 const STEPS = [
   {
     number: 1,
-    title: "Datos de la empresa",
-    description: "Información institucional y logo corporativo",
+    title: 'Datos de la empresa',
+    description: 'Información institucional y logo corporativo',
   },
   {
     number: 2,
-    title: "Carta de solicitud",
-    description: "Documento formal en hoja membretada",
+    title: 'Carta de solicitud',
+    description: 'Documento formal en hoja membretada',
   },
   {
     number: 3,
-    title: "Revisión de la carrera",
-    description: "Hasta 48 horas hábiles",
+    title: 'Revisión de la carrera',
+    description: 'Hasta 48 horas hábiles',
   },
   {
     number: 4,
-    title: "Activación de cuenta",
-    description: "Código enviado a tu correo",
+    title: 'Activación de cuenta',
+    description: 'Código enviado a tu correo',
   },
 ];
 
@@ -90,7 +101,7 @@ export function CompanyAccessRequestFlow({
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [cities, setCities] = useState<CityItem[]>([]);
   const [draftId, setDraftId] = useState<string | null>(null);
-    const [submitted, setSubmitted] = useState<SubmitCompanyRequestResult | null>(
+  const [submitted, setSubmitted] = useState<SubmitCompanyRequestResult | null>(
     null,
   );
   const [copiedCode, setCopiedCode] = useState(false);
@@ -99,11 +110,11 @@ export function CompanyAccessRequestFlow({
     try {
       await navigator.clipboard.writeText(code);
     } catch {
-      const input = document.createElement("input");
+      const input = document.createElement('input');
       input.value = code;
       document.body.appendChild(input);
       input.select();
-      document.execCommand("copy");
+      document.execCommand('copy');
       document.body.removeChild(input);
     }
     setCopiedCode(true);
@@ -111,14 +122,14 @@ export function CompanyAccessRequestFlow({
   }
 
   const [form, setForm] = useState<CreateCompanyRequestPayload>({
-    companyName: "",
-    sector: "",
-    cityId: "",
-    description: "",
-    email: "",
-    phone: "",
-    websiteUrl: "",
-    username: "",
+    companyName: '',
+    sector: '',
+    cityId: '',
+    description: '',
+    email: '',
+    phone: '',
+    websiteUrl: '',
+    username: '',
   });
 
   const logoInputRef = useRef<HTMLInputElement | null>(null);
@@ -130,7 +141,7 @@ export function CompanyAccessRequestFlow({
   } | null>(null);
   const [isLogoDragging, setIsLogoDragging] = useState(false);
   const [isLogoModalOpen, setIsLogoModalOpen] = useState(false);
-  const [previewBg, setPreviewBg] = useState<"light" | "dark">("light");
+  const [previewBg, setPreviewBg] = useState<'light' | 'dark'>('light');
 
   const [documentFile, setDocumentFile] = useState<File | null>(null);
   const [documentPreviewUrl, setDocumentPreviewUrl] = useState<string | null>(
@@ -139,6 +150,78 @@ export function CompanyAccessRequestFlow({
   const [documentError, setDocumentError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [errorModal, setErrorModal] = useState<{
+    open: boolean;
+    title: string;
+    category: 'conflict' | 'validation' | 'server' | 'network';
+    message: string;
+    field?: 'email' | 'companyName' | 'activeRequest';
+    recommendation: string;
+  }>({
+    open: false,
+    title: '',
+    category: 'validation',
+    message: '',
+    recommendation: '',
+  });
+
+  function showErrorModal(result: {
+    status: number;
+    message: string;
+    code?: string;
+    conflictField?: 'email' | 'companyName' | 'activeRequest';
+  }) {
+    let title = 'No es posible procesar la solicitud';
+    let category: 'conflict' | 'validation' | 'server' | 'network' =
+      'validation';
+    let recommendation =
+      'Por favor verifica los datos ingresados e intenta nuevamente.';
+
+    if (
+      result.status === 409 ||
+      result.code === 'COMPANY_REGISTRATION_CONFLICT'
+    ) {
+      category = 'conflict';
+      title = 'Registro no disponible: Información ya existente';
+      if (result.conflictField === 'email') {
+        recommendation =
+          'Para garantizar la seguridad institucional de cada cuenta, cada usuario debe registrarse con un correo electrónico único. Si ya cuentas con acceso previo, por favor inicia sesión. De lo contrario, utiliza una dirección de correo corporativa diferente.';
+      } else if (result.conflictField === 'companyName') {
+        recommendation =
+          'La empresa indicada ya se encuentra registrada en la plataforma. Si perteneces a esta organización, solicita al administrador de tu empresa que te agregue como reclutador o comunícate con la administración de UMSSy.';
+      } else if (result.conflictField === 'activeRequest') {
+        recommendation =
+          'Actualmente existe una solicitud en proceso de evaluación con estos datos. El equipo de administración de UMSSy la revisará en un plazo máximo de 48 horas hábiles y te notificará por correo electrónico.';
+      } else {
+        recommendation =
+          'Los datos ingresados coinciden con registros ya existentes en el sistema. Por favor revisa la información o contacta a soporte.';
+      }
+    } else if (result.status === 0) {
+      category = 'network';
+      title = 'Problema de conexión con el servicio';
+      recommendation =
+        'No logramos establecer comunicación con los servidores en este momento. Por favor verifica tu conexión a internet o intenta enviar el formulario nuevamente en unos minutos.';
+    } else if (result.status >= 500) {
+      category = 'server';
+      title = 'Inconveniente temporal en la plataforma';
+      recommendation =
+        'Nuestros servidores experimentaron un problema momentáneo al procesar tu solicitud. Tus datos están a salvo. Por favor intenta nuevamente en unos momentos.';
+    } else {
+      category = 'validation';
+      title = 'Revisa los campos del formulario';
+      recommendation =
+        'Verifica que todos los campos requeridos hayan sido completados respetando los formatos indicados.';
+    }
+
+    setErrorModal({
+      open: true,
+      title,
+      category,
+      message: result.message,
+      field: result.conflictField,
+      recommendation,
+    });
+  }
 
   useEffect(() => {
     return () => {
@@ -169,25 +252,25 @@ export function CompanyAccessRequestFlow({
   useEffect(() => {
     if (!isLogoModalOpen) return;
     function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") {
+      if (event.key === 'Escape') {
         setIsLogoModalOpen(false);
       }
     }
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isLogoModalOpen]);
 
   function processSelectedLogo(file: File) {
     if (!ALLOWED_LOGO_TYPES.includes(file.type)) {
       setError(
-        "Formato no válido para el logo. Solo se permiten imágenes PNG, JPG o WEBP.",
+        'Formato no válido para el logo. Solo se permiten imágenes PNG, JPG o WEBP.',
       );
-      if (logoInputRef.current) logoInputRef.current.value = "";
+      if (logoInputRef.current) logoInputRef.current.value = '';
       return;
     }
     if (file.size > 2 * 1024 * 1024) {
-      setError("El logo no debe superar los 2 MB.");
-      if (logoInputRef.current) logoInputRef.current.value = "";
+      setError('El logo no debe superar los 2 MB.');
+      if (logoInputRef.current) logoInputRef.current.value = '';
       return;
     }
 
@@ -227,25 +310,21 @@ export function CompanyAccessRequestFlow({
     setLogoDimensions(null);
     setIsLogoModalOpen(false);
     if (logoInputRef.current) {
-      logoInputRef.current.value = "";
+      logoInputRef.current.value = '';
     }
   }
 
-  const ALLOWED_DOCUMENT_TYPES = [
-    "application/pdf",
-    "image/jpeg",
-    "image/png",
-  ];
+  const ALLOWED_DOCUMENT_TYPES = ['application/pdf', 'image/jpeg', 'image/png'];
 
   function handleDocumentSelected(file: File) {
     if (!ALLOWED_DOCUMENT_TYPES.includes(file.type)) {
       setDocumentError(
-        "Formato no permitido. Solo se aceptan archivos JPG, PNG o PDF.",
+        'Formato no permitido. Solo se aceptan archivos JPG, PNG o PDF.',
       );
       return;
     }
     if (file.size > 10 * 1024 * 1024) {
-      setDocumentError("El archivo supera el máximo de 10 MB.");
+      setDocumentError('El archivo supera el máximo de 10 MB.');
       return;
     }
     setDocumentError(null);
@@ -267,9 +346,13 @@ export function CompanyAccessRequestFlow({
     setError(null);
     setSubmitting(true);
 
-    const created = await companyAccessRequestService.createDraft({ ...form, websiteUrl: (form.websiteUrl ?? "").trim() });
+    const created = await companyAccessRequestService.createDraft({
+      ...form,
+      websiteUrl: (form.websiteUrl ?? '').trim(),
+    });
     if (!created.ok) {
       setError(created.message);
+      showErrorModal(created);
       setSubmitting(false);
       return;
     }
@@ -278,9 +361,13 @@ export function CompanyAccessRequestFlow({
     setDraftId(id);
 
     if (logoFile) {
-      const logoRes = await companyAccessRequestService.uploadLogo(id, logoFile);
+      const logoRes = await companyAccessRequestService.uploadLogo(
+        id,
+        logoFile,
+      );
       if (!logoRes.ok) {
         setError(logoRes.message);
+        showErrorModal(logoRes);
         setSubmitting(false);
         return;
       }
@@ -293,7 +380,12 @@ export function CompanyAccessRequestFlow({
   async function handleStep2Submit(e: FormEvent) {
     e.preventDefault();
     if (!draftId || !documentFile) {
-      setError("Debes adjuntar la carta de solicitud en hoja membretada.");
+      const msg = 'Debes adjuntar la carta de solicitud en hoja membretada.';
+      setError(msg);
+      showErrorModal({
+        status: 400,
+        message: msg,
+      });
       return;
     }
     setError(null);
@@ -305,6 +397,7 @@ export function CompanyAccessRequestFlow({
     );
     if (!uploadRes.ok) {
       setError(uploadRes.message);
+      showErrorModal(uploadRes);
       setSubmitting(false);
       return;
     }
@@ -313,6 +406,7 @@ export function CompanyAccessRequestFlow({
     setSubmitting(false);
     if (!submitRes.ok) {
       setError(submitRes.message);
+      showErrorModal(submitRes);
       return;
     }
 
@@ -345,17 +439,17 @@ export function CompanyAccessRequestFlow({
                   return (
                     <li
                       key={item.number}
-                      aria-current={isActive ? "step" : undefined}
+                      aria-current={isActive ? 'step' : undefined}
                     >
                       <div className="flex items-center gap-2.5 lg:gap-3.5 lg:py-3">
                         <span
                           className={cn(
-                            "flex size-7 shrink-0 items-center justify-center rounded-full border text-sm font-semibold lg:size-7.5",
+                            'flex size-7 shrink-0 items-center justify-center rounded-full border text-sm font-semibold lg:size-7.5',
                             isActive
-                              ? "border-accent bg-interaction text-accent"
+                              ? 'border-accent bg-interaction text-accent'
                               : isCompleted
-                                ? "border-accent bg-accent text-surface"
-                                : "border-border-strong text-text-secondary",
+                                ? 'border-accent bg-accent text-surface'
+                                : 'border-border-strong text-text-secondary',
                           )}
                         >
                           {isCompleted ? (
@@ -370,8 +464,8 @@ export function CompanyAccessRequestFlow({
                         <div className="min-w-0">
                           <p
                             className={cn(
-                              "text-sm leading-tight font-semibold",
-                              isActive ? "text-ink" : "text-ink-soft",
+                              'text-sm leading-tight font-semibold',
+                              isActive ? 'text-ink' : 'text-ink-soft',
                             )}
                           >
                             {item.title}
@@ -445,15 +539,18 @@ export function CompanyAccessRequestFlow({
               {step === 2 ? (
                 <PageHeading
                   title="Carta de solicitud en hoja membretada"
-                  description={`Adjunta la carta oficial firmada y sellada dirigida a la Carrera de Ingeniería de Sistemas e Informática (UMSS) para validar a ${form.companyName.trim() || "tu empresa"}.`}
+                  description={`Adjunta la carta oficial firmada y sellada dirigida a la Carrera de Ingeniería de Sistemas e Informática (UMSS) para validar a ${form.companyName.trim() || 'tu empresa'}.`}
                 />
               ) : null}
 
               {step !== 3 ? (
                 <p className="text-xs text-text-secondary">
-                  <span aria-hidden="true" className="font-semibold text-red-600">
+                  <span
+                    aria-hidden="true"
+                    className="font-semibold text-red-600"
+                  >
                     *
-                  </span>{" "}
+                  </span>{' '}
                   Campo obligatorio
                 </p>
               ) : null}
@@ -475,7 +572,7 @@ export function CompanyAccessRequestFlow({
                   <FormFieldset title="Identidad corporativa">
                     <div>
                       <Label className="mb-1.5 text-xs font-semibold text-ink">
-                        Logo corporativo{" "}
+                        Logo corporativo{' '}
                         <span className="font-normal text-text-secondary">
                           (opcional)
                         </span>
@@ -492,7 +589,8 @@ export function CompanyAccessRequestFlow({
                       {logoPreview && logoFile ? (
                         <div className="flex flex-col gap-4 rounded-xl border border-border bg-surface-soft/70 p-4 sm:flex-row sm:items-center sm:justify-between">
                           <div className="flex items-center gap-4">
-                            <Button variant="ghost"
+                            <Button
+                              variant="ghost"
                               type="button"
                               onClick={() => setIsLogoModalOpen(true)}
                               title="Ampliar vista previa"
@@ -520,15 +618,17 @@ export function CompanyAccessRequestFlow({
                                 </span>
                               </div>
                               <p className="text-xs text-text-secondary">
-                                {logoFile.type.replace("image/", "").toUpperCase()}{" "}
+                                {logoFile.type
+                                  .replace('image/', '')
+                                  .toUpperCase()}{' '}
                                 · {formatFileSize(logoFile.size)}
                                 {logoDimensions
                                   ? ` · ${logoDimensions.width} × ${logoDimensions.height} px`
-                                  : ""}
+                                  : ''}
                               </p>
                               <p className="text-xs text-text-secondary">
-                                Haz clic en la imagen o en &ldquo;Vista previa&rdquo;
-                                para inspeccionar su nitidez.
+                                Haz clic en la imagen o en &ldquo;Vista
+                                previa&rdquo; para inspeccionar su nitidez.
                               </p>
                             </div>
                           </div>
@@ -572,7 +672,7 @@ export function CompanyAccessRequestFlow({
                           tabIndex={0}
                           onClick={() => logoInputRef.current?.click()}
                           onKeyDown={(e) => {
-                            if (e.key === "Enter" || e.key === " ") {
+                            if (e.key === 'Enter' || e.key === ' ') {
                               e.preventDefault();
                               logoInputRef.current?.click();
                             }
@@ -584,10 +684,10 @@ export function CompanyAccessRequestFlow({
                           onDragLeave={() => setIsLogoDragging(false)}
                           onDrop={handleLogoDrop}
                           className={cn(
-                            "flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 text-center transition sm:flex-row sm:justify-start sm:gap-5 sm:text-left",
+                            'flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 text-center transition sm:flex-row sm:justify-start sm:gap-5 sm:text-left',
                             isLogoDragging
-                              ? "border-accent bg-interaction/40"
-                              : "border-border bg-surface-soft/60 hover:border-accent hover:bg-surface-soft",
+                              ? 'border-accent bg-interaction/40'
+                              : 'border-border bg-surface-soft/60 hover:border-accent hover:bg-surface-soft',
                           )}
                         >
                           <div className="flex size-14 shrink-0 items-center justify-center rounded-xl border border-border bg-surface text-accent shadow-2xs">
@@ -680,7 +780,10 @@ export function CompanyAccessRequestFlow({
                         htmlFor="websiteUrl"
                         className="mb-1.5 text-xs font-semibold text-ink"
                       >
-                        Sitio web oficial <span className="font-normal text-text-secondary">(opcional)</span>
+                        Sitio web oficial{' '}
+                        <span className="font-normal text-text-secondary">
+                          (opcional)
+                        </span>
                       </Label>
                       <div className="relative">
                         <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-text-secondary">
@@ -827,7 +930,7 @@ export function CompanyAccessRequestFlow({
                 </form>
               )}
 
-                            {step === 2 && (
+              {step === 2 && (
                 <form
                   onSubmit={handleStep2Submit}
                   className="grid w-full grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_300px]"
@@ -863,7 +966,10 @@ export function CompanyAccessRequestFlow({
                         disabled={submitting}
                         className="h-11 rounded-md px-5 text-sm font-semibold text-ink"
                       >
-                        <ArrowLeft aria-hidden="true" className="mr-1.5 size-4" />
+                        <ArrowLeft
+                          aria-hidden="true"
+                          className="mr-1.5 size-4"
+                        />
                         Volver a datos de la empresa
                       </Button>
                       <Button
@@ -877,7 +983,7 @@ export function CompanyAccessRequestFlow({
                             Enviando solicitud...
                           </>
                         ) : (
-                          "Enviar solicitud de empresa"
+                          'Enviar solicitud de empresa'
                         )}
                       </Button>
                     </div>
@@ -889,10 +995,10 @@ export function CompanyAccessRequestFlow({
                     </h2>
                     <ul className="mt-3 flex flex-col gap-2.5">
                       {[
-                        "Documento en hoja membretada oficial de la empresa.",
-                        "Dirigida a la Dirección de Carrera de Ingeniería de Sistemas e Informática (UMSS).",
-                        "Firmada y sellada por el representante legal o responsable de RR. HH.",
-                        "Archivo legible en formato PDF, JPG o PNG (máx. 10 MB).",
+                        'Documento en hoja membretada oficial de la empresa.',
+                        'Dirigida a la Dirección de Carrera de Ingeniería de Sistemas e Informática (UMSS).',
+                        'Firmada y sellada por el representante legal o responsable de RR. HH.',
+                        'Archivo legible en formato PDF, JPG o PNG (máx. 10 MB).',
                       ].map((tip) => (
                         <li key={tip} className="flex gap-2 text-sm text-ink">
                           <Check
@@ -923,10 +1029,10 @@ export function CompanyAccessRequestFlow({
                       ¡Solicitud empresarial enviada con éxito!
                     </h3>
                     <p className="mx-auto max-w-md text-sm text-text-secondary">
-                      Hemos recibido los datos de{" "}
-                      <strong>{form.companyName}</strong> y su carta de solicitud.
-                      Revisaremos la documentación en un plazo máximo de 48 horas
-                      hábiles.
+                      Hemos recibido los datos de{' '}
+                      <strong>{form.companyName}</strong> y su carta de
+                      solicitud. Revisaremos la documentación en un plazo máximo
+                      de 48 horas hábiles.
                     </p>
                   </div>
 
@@ -942,7 +1048,9 @@ export function CompanyAccessRequestFlow({
                         type="button"
                         variant="outline"
                         size="sm"
-                        onClick={() => void handleCopyCode(submitted.requestCode)}
+                        onClick={() =>
+                          void handleCopyCode(submitted.requestCode)
+                        }
                         className="h-9 gap-1.5 px-3 font-medium"
                       >
                         {copiedCode ? (
@@ -959,8 +1067,8 @@ export function CompanyAccessRequestFlow({
                       </Button>
                     </div>
                     <p className="mt-2.5 text-xs text-text-secondary">
-                      Guarda este código para consultar el estado de tu solicitud y
-                      activar tu cuenta cuando sea aprobada.
+                      Guarda este código para consultar el estado de tu
+                      solicitud y activar tu cuenta cuando sea aprobada.
                     </p>
                   </div>
                 </div>
@@ -994,10 +1102,12 @@ export function CompanyAccessRequestFlow({
                   {logoFile.name} · {formatFileSize(logoFile.size)}
                   {logoDimensions
                     ? ` · ${logoDimensions.width} × ${logoDimensions.height} px`
-                    : ""}
+                    : ''}
                 </p>
               </div>
-              <Button variant="ghost" size="icon-sm"
+              <Button
+                variant="ghost"
+                size="icon-sm"
                 type="button"
                 aria-label="Cerrar vista previa"
                 onClick={() => setIsLogoModalOpen(false)}
@@ -1013,26 +1123,30 @@ export function CompanyAccessRequestFlow({
                   Contraste de visualización:
                 </span>
                 <div className="inline-flex rounded-lg border border-border bg-surface-soft p-0.5 text-xs">
-                  <Button variant="ghost" size="sm"
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     type="button"
-                    onClick={() => setPreviewBg("light")}
+                    onClick={() => setPreviewBg('light')}
                     className={cn(
-                      "rounded-md px-2.5 py-1 font-medium transition",
-                      previewBg === "light"
-                        ? "bg-surface text-ink shadow-2xs"
-                        : "text-text-secondary hover:text-ink",
+                      'rounded-md px-2.5 py-1 font-medium transition',
+                      previewBg === 'light'
+                        ? 'bg-surface text-ink shadow-2xs'
+                        : 'text-text-secondary hover:text-ink',
                     )}
                   >
                     Fondo claro
                   </Button>
-                  <Button variant="ghost" size="sm"
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     type="button"
-                    onClick={() => setPreviewBg("dark")}
+                    onClick={() => setPreviewBg('dark')}
                     className={cn(
-                      "rounded-md px-2.5 py-1 font-medium transition",
-                      previewBg === "dark"
-                        ? "bg-surface text-ink shadow-2xs"
-                        : "text-text-secondary hover:text-ink",
+                      'rounded-md px-2.5 py-1 font-medium transition',
+                      previewBg === 'dark'
+                        ? 'bg-surface text-ink shadow-2xs'
+                        : 'text-text-secondary hover:text-ink',
                     )}
                   >
                     Fondo oscuro
@@ -1042,8 +1156,8 @@ export function CompanyAccessRequestFlow({
 
               <div
                 className={cn(
-                  "flex h-64 items-center justify-center rounded-xl border border-border p-6 transition-colors",
-                  previewBg === "light" ? "bg-white" : "bg-slate-900",
+                  'flex h-64 items-center justify-center rounded-xl border border-border p-6 transition-colors',
+                  previewBg === 'light' ? 'bg-white' : 'bg-slate-900',
                 )}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -1089,6 +1203,106 @@ export function CompanyAccessRequestFlow({
           </div>
         </div>
       ) : null}
+
+      <Dialog
+        open={errorModal.open}
+        onOpenChange={(isOpen) =>
+          setErrorModal((prev) => ({ ...prev, open: isOpen }))
+        }
+      >
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader className="gap-3">
+            <div className="flex items-center gap-3">
+              <div
+                className={cn(
+                  'flex size-11 shrink-0 items-center justify-center rounded-full',
+                  errorModal.category === 'conflict' &&
+                    'bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-400',
+                  errorModal.category === 'server' &&
+                    'bg-destructive/15 text-destructive',
+                  errorModal.category === 'network' &&
+                    'bg-muted text-muted-foreground',
+                  errorModal.category === 'validation' &&
+                    'bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-400',
+                )}
+              >
+                {errorModal.category === 'conflict' ? (
+                  <AlertTriangle className="size-5.5" />
+                ) : errorModal.category === 'server' ? (
+                  <ServerCrash className="size-5.5" />
+                ) : errorModal.category === 'network' ? (
+                  <WifiOff className="size-5.5" />
+                ) : (
+                  <AlertCircle className="size-5.5" />
+                )}
+              </div>
+              <div className="text-left">
+                <DialogTitle className="text-base font-semibold text-foreground">
+                  {errorModal.title}
+                </DialogTitle>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  {errorModal.category === 'conflict'
+                    ? 'Validación de información del sistema'
+                    : errorModal.category === 'server'
+                      ? 'Estado del servicio'
+                      : errorModal.category === 'network'
+                        ? 'Conectividad'
+                        : 'Revisión de formulario'}
+                </p>
+              </div>
+            </div>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            <div className="rounded-lg border border-border bg-muted/40 p-4">
+              <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+                Motivo del inconveniente
+              </p>
+              <p className="mt-1.5 text-sm font-medium text-foreground">
+                {errorModal.message}
+              </p>
+              {errorModal.field ? (
+                <div className="mt-3 flex items-center gap-2 border-t border-border/60 pt-2.5 text-xs text-muted-foreground">
+                  <span className="font-semibold text-foreground">
+                    Campo observado:
+                  </span>
+                  <span className="inline-flex items-center rounded-md border border-border bg-background px-2 py-0.5 font-medium text-foreground">
+                    {errorModal.field === 'email'
+                      ? 'Correo electrónico de contacto'
+                      : errorModal.field === 'companyName'
+                        ? 'Nombre comercial / Razón social'
+                        : errorModal.field === 'activeRequest'
+                          ? 'Solicitud previa en curso'
+                          : errorModal.field}
+                  </span>
+                </div>
+              ) : null}
+            </div>
+
+            <div className="space-y-1.5 rounded-lg border border-border/70 bg-surface-soft p-4">
+              <p className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
+                <Info className="size-3.5 text-primary" />
+                ¿Qué puedes hacer para continuar?
+              </p>
+              <p className="text-xs leading-relaxed text-muted-foreground">
+                {errorModal.recommendation}
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter className="sm:justify-end">
+            <Button
+              type="button"
+              onClick={() =>
+                setErrorModal((prev) => ({ ...prev, open: false }))
+              }
+              className="w-full sm:w-auto"
+            >
+              Entendido, revisar datos
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

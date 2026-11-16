@@ -3,12 +3,12 @@ import type { Prisma } from '../../../prisma/client.js';
 import { createHash, randomInt } from 'node:crypto';
 import {
   BadRequestException,
-  ConflictException,
   Injectable,
   Logger,
   NotFoundException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import { CompanyRegistrationConflictException } from '../exceptions/company-registration-conflict.exception.js';
 import { FilesService } from '../../files/services/files.service.js';
 import { MailService } from '../../mail/services/mail.service.js';
 import { loadMailTemplate } from '../../mail/helpers/load-mail-template.js';
@@ -52,16 +52,21 @@ export class CompanyAccessRequestsService {
       await this.repository.findDuplicates(dto.companyName, dto.email);
 
     if (existingCompany) {
-      throw new ConflictException('Esta empresa ya se encuentra registrada');
+      throw new CompanyRegistrationConflictException(
+        `La empresa "${dto.companyName}" ya se encuentra registrada en la plataforma.`,
+        'companyName',
+      );
     }
     if (existingUser) {
-      throw new ConflictException(
-        'El correo electrónico ya pertenece a una cuenta registrada',
+      throw new CompanyRegistrationConflictException(
+        `El correo electrónico "${dto.email}" ya pertenece a una cuenta registrada en la plataforma.`,
+        'email',
       );
     }
     if (activeRequest) {
-      throw new ConflictException(
-        'Ya existe una solicitud activa o aprobada para esta empresa o correo',
+      throw new CompanyRegistrationConflictException(
+        `Ya existe una solicitud activa o en revisión para "${activeRequest.companyName}" con el correo "${activeRequest.email}".`,
+        'activeRequest',
       );
     }
 

@@ -55,6 +55,21 @@ async function request<T>(
     if (response.status >= 200 && response.status < 300) {
       return { ok: true, data: unwrap<T>(response.data) };
     }
+    const errorBody = isRecord(response.data) ? response.data : null;
+    const errorData = errorBody && isRecord(errorBody.data) ? errorBody.data : null;
+    const conflictField =
+      errorData &&
+      typeof errorData.field === 'string' &&
+      (errorData.field === 'email' ||
+        errorData.field === 'companyName' ||
+        errorData.field === 'activeRequest')
+        ? errorData.field
+        : undefined;
+    const errorCode =
+      errorBody && typeof errorBody.code === 'string'
+        ? errorBody.code
+        : undefined;
+
     return {
       ok: false,
       status: response.status,
@@ -63,6 +78,8 @@ async function request<T>(
         response.data,
         'No se pudo completar la operación.',
       ),
+      code: errorCode,
+      conflictField,
     };
   } catch {
     return {
