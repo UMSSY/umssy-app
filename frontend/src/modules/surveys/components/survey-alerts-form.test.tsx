@@ -1,6 +1,7 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { SURVEY_ALERTS_TEXT } from "../constants/survey-participation.constants";
 import type { SurveyAlertsFormProps } from "../types/survey-alerts-form-props.types";
 import { SurveyAlertsForm } from "./survey-alerts-form";
 
@@ -28,6 +29,44 @@ function thresholdInput() {
 
 describe("SurveyAlertsForm - campo de umbral", () => {
   afterEach(() => cleanup());
+
+  it.each([
+    ["0", SURVEY_ALERTS_TEXT.thresholdMin],
+    ["51", SURVEY_ALERTS_TEXT.thresholdMax],
+  ])("bloquea el guardado con el valor %s y muestra su mensaje", async (value, message) => {
+    const user = userEvent.setup();
+    const props = renderForm();
+
+    await user.clear(thresholdInput());
+    await user.type(thresholdInput(), value);
+    await user.click(screen.getByRole("button", { name: "Guardar" }));
+
+    expect(screen.getByText(message)).toBeInTheDocument();
+    expect(props.onSave).not.toHaveBeenCalled();
+  });
+
+  it("marca el umbral como obligatorio y no guarda cuando está vacío", async () => {
+    const user = userEvent.setup();
+    const props = renderForm();
+
+    await user.clear(thresholdInput());
+    await user.click(screen.getByRole("button", { name: "Guardar" }));
+
+    expect(screen.getByText(SURVEY_ALERTS_TEXT.thresholdRequired)).toBeInTheDocument();
+    expect(thresholdInput()).toHaveAttribute("aria-invalid", "true");
+    expect(props.onSave).not.toHaveBeenCalled();
+  });
+
+  it.each(["1", "50"])("permite guardar con el valor límite %s", async (value) => {
+    const user = userEvent.setup();
+    const props = renderForm();
+
+    await user.clear(thresholdInput());
+    await user.type(thresholdInput(), value);
+    await user.click(screen.getByRole("button", { name: "Guardar" }));
+
+    expect(props.onSave).toHaveBeenCalledWith(expect.objectContaining({ threshold: Number(value) }));
+  });
 
   it("solo admite caracteres numéricos al escribir", async () => {
     const user = userEvent.setup();
