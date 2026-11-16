@@ -1,4 +1,6 @@
+
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -6,6 +8,7 @@ import {
   Headers,
   Patch,
   Post,
+  Query,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -20,6 +23,33 @@ import {
 } from '../requests/create-mentor-participation.schema.js';
 import { MentorParticipationService } from '../services/mentor-participation.service.js';
 import { requireMentorIdempotencyKey } from '../requests/mentor-idempotency-key.schema.js';
+
+const parsePositiveInteger = (
+  value: string | undefined,
+  defaultValue: number,
+  field: string,
+  maximum: number,
+): number => {
+  if (value === undefined) {
+    return defaultValue;
+  }
+
+  if (!/^[1-9]\d*$/.test(value)) {
+    throw new BadRequestException(
+      `El parámetro ${field} debe ser un número entero positivo`,
+    );
+  }
+
+  const parsed = Number(value);
+
+  if (!Number.isSafeInteger(parsed) || parsed > maximum) {
+    throw new BadRequestException(
+      `El parámetro ${field} debe estar entre 1 y ${maximum}`,
+    );
+  }
+
+  return parsed;
+};
 
 @Controller('mentor-participation/requests')
 @UseGuards(JwtAuthGuard)
@@ -43,8 +73,23 @@ export class MentorParticipationController {
   }
 
   @Get('me/history')
-  findMyHistory(@CurrentUser() user: AuthenticatedUser) {
-    return this.service.findMyHistory(user.id);
+  findMyHistory(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    if (page === undefined && limit === undefined) {
+      return this.service.findMyHistory(user.id);
+    }
+
+    const requestedPage = parsePositiveInteger(page, 1, 'page', 1000000);
+    const requestedLimit = parsePositiveInteger(limit, 10, 'limit', 100);
+
+    return this.service.findMyHistoryPaginated(
+      user.id,
+      requestedPage,
+      requestedLimit,
+    );
   }
 
   @Patch('me')
