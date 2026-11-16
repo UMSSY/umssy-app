@@ -357,7 +357,11 @@ describe("ApplicationsView", () => {
     fireEvent.click(await screen.findByRole("button", { name: "Contactar" }));
 
     await waitFor(() => expect(getContact).toHaveBeenCalledWith("application-7"));
-    await waitFor(() => expect(router.push).toHaveBeenCalledWith("/chat?applicationId=application-7"));
+    await waitFor(() =>
+  expect(router.push).toHaveBeenCalledWith(
+    "/chat?contactId=recruiter-1&contextType=POSTULACION&contextId=application-7",
+  ),
+);
   });
 
   it("goes to the chat from the cards on mobile", async () => {
@@ -368,7 +372,11 @@ describe("ApplicationsView", () => {
     renderWithQuery(<ApplicationsView />);
     fireEvent.click(await screen.findByRole("button", { name: "Contactar" }));
 
-    await waitFor(() => expect(router.push).toHaveBeenCalledWith("/chat?applicationId=application-7"));
+    await waitFor(() =>
+  expect(router.push).toHaveBeenCalledWith(
+    "/chat?contactId=recruiter-1&contextType=POSTULACION&contextId=application-7",
+  ),
+);
   });
 
   it("tells the person when an application no longer allows contacting the recruiter", async () => {
