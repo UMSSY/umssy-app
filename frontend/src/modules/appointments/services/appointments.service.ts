@@ -10,9 +10,9 @@ import type { MyAppointmentsPage } from "../types/my-appointments-page.types";
 import type { MyAppointmentsQueryParams } from "../types/my-appointments-query-params.types";
 
 export const appointmentsApi = {
-  getMyAppointments: async ({ scope, page }: MyAppointmentsQueryParams): Promise<MyAppointmentsPage> => {
+  getMyAppointments: async ({ scope, page, q }: MyAppointmentsQueryParams): Promise<MyAppointmentsPage> => {
     const response = await apiClient.get<ApiResponse<MyAppointmentsPage>>("/appointments/me", {
-      params: { scope, page },
+      params: { scope, page, q },
     });
     return response.data.data;
   },
