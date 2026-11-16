@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { FeedbackMessage } from '@/modules/profile';
+import { useProfileGuideEditor } from '@/shared/hooks/use-profile-guide-editor';
 import type { ProfileGuideStepProps } from '@/shared/types/profile-guide-step-props.types';
 import { DEFAULT_DOCUMENT_TITLE } from '../constants/certification-form.constants';
 import { useCertificationDocument } from '../hooks/use-certification-document';
@@ -16,6 +16,7 @@ import type { CreateCertificationDto } from '../types/create-certification-dto.t
 import { CertificationCard } from './certification-card';
 import { CertificationDocumentPreviewContent } from './certification-document-viewer';
 import { CertificationForm } from './certification-form';
+import { CertificationDeleteDialog } from './certification-delete-dialog';
 
 export function CertificationGuideStep({
   onSaved,
@@ -25,22 +26,16 @@ export function CertificationGuideStep({
   const { certifications, isLoading, error, reload } = useCertifications({
     forGuide: true,
   });
-  const [editor, setEditor] = useState<Certification | null | undefined>();
-  const [pendingDelete, setPendingDelete] = useState<Certification | null>(
-    null,
-  );
-  const [hasChanges, setHasChanges] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isFormBusy, setIsFormBusy] = useState(false);
   const document = useCertificationDocument();
   const remove = useDeleteCertification();
   const save = useSaveCertification({ onPersisted: () => {} });
-  const isBusy =
-    isLoading ||
-    isSaving ||
-    isFormBusy ||
-    remove.isDeleting ||
-    document.isOpening;
+  const editor = useProfileGuideEditor<Certification>({
+    isBusy: isLoading || remove.isDeleting || document.isOpening,
+    initiallyOpen: false,
+    onDirtyChange,
+    onBusyChange,
+  });
+  const { editingItem, pendingDelete, hasChanges, isBusy } = editor;
   const blockActions = isBusy || hasChanges;
   const feedback =
     save.feedback ??
@@ -48,51 +43,40 @@ export function CertificationGuideStep({
     document.feedback ??
     (error ? { type: 'error' as const, message: error } : null);
 
-  useEffect(() => {
-    onDirtyChange(hasChanges);
-  }, [hasChanges, onDirtyChange]);
-  useEffect(() => {
-    onBusyChange(isBusy);
-  }, [isBusy, onBusyChange]);
-
   function openEditor(certification: Certification | null) {
+    if (!editor.openForm(certification)) return;
     save.clearFeedback();
     remove.clearFeedback();
     document.clearFeedback();
-    setPendingDelete(null);
-    setHasChanges(false);
-    setEditor(certification);
   }
 
   function cancelEditor() {
-    setEditor(undefined);
-    setHasChanges(false);
-    setIsFormBusy(false);
+    editor.cancelForm();
   }
 
   async function saveCertification(
     values: CreateCertificationDto,
     change: CertificationDocumentChange,
   ) {
-    setIsSaving(true);
-    try {
-      const result = await save.save(editor?.id ?? null, values, change);
+    const result = await editor.runWrite(async () => {
+      const result = await save.save(editingItem?.id ?? null, values, change);
       if (result.status === 'failed') return result.fileError;
-      cancelEditor();
+      editor.resetForm();
       await reload();
       onSaved();
       return null;
-    } finally {
-      setIsSaving(false);
-    }
+    });
+    return result ?? null;
   }
 
   async function deleteCertification() {
     if (!pendingDelete) return;
-    if (await remove.deleteCertification(pendingDelete)) {
-      setPendingDelete(null);
-      await reload();
-    }
+    await editor.runWrite(async () => {
+      if (await remove.deleteCertification(pendingDelete)) {
+        editor.completeDelete();
+        await reload();
+      }
+    });
   }
 
   return (
@@ -130,63 +114,40 @@ export function CertificationGuideStep({
                 certification={certification}
                 isBusy={blockActions}
                 onEdit={openEditor}
-                onDelete={setPendingDelete}
+                onDelete={editor.requestDelete}
                 onViewDocument={(item) => void document.openDocument(item)}
               />
             </li>
           ))}
         </ul>
       ) : null}
-      {pendingDelete ? (
-        <div
-          role="group"
-          aria-label="Confirmar eliminación de certificación"
-          className="space-y-3 rounded-lg border border-border p-4"
-        >
-          <p className="text-sm text-ink">
-            ¿Eliminar {pendingDelete.name} de tu perfil?
-          </p>
-          <div className="flex flex-wrap gap-3">
-            <Button
-              type="button"
-              variant="destructive"
-              disabled={isBusy}
-              onClick={() => void deleteCertification()}
-            >
-              Eliminar certificación
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              disabled={isBusy}
-              onClick={() => setPendingDelete(null)}
-            >
-              Cancelar eliminación
-            </Button>
-          </div>
-        </div>
-      ) : null}
-      {editor !== undefined ? (
+      <CertificationDeleteDialog
+        certification={pendingDelete}
+        isDeleting={isBusy}
+        onConfirm={() => void deleteCertification()}
+        onCancel={editor.cancelDelete}
+      />
+      {editor.isFormOpen ? (
         <CertificationForm
-          key={editor?.id ?? 'new'}
+          key={editor.formVersion}
           initialData={
-            editor
+            editingItem
               ? {
-                  name: editor.name,
-                  issuingOrganization: editor.issuingOrganization,
-                  issueDate: editor.issueDate,
+                  name: editingItem.name,
+                  issuingOrganization: editingItem.issuingOrganization,
+                  issueDate: editingItem.issueDate,
                 }
               : undefined
           }
           currentDocumentName={
-            editor?.hasDocument
-              ? (editor.document?.fileName ?? DEFAULT_DOCUMENT_TITLE)
+            editingItem?.hasDocument
+              ? (editingItem.document?.fileName ?? DEFAULT_DOCUMENT_TITLE)
               : undefined
           }
           onSubmit={saveCertification}
           onCancel={cancelEditor}
-          onDirtyChange={setHasChanges}
-          onBusyChange={setIsFormBusy}
+          onDirtyChange={editor.setDirty}
+          onBusyChange={editor.setIsFormBusy}
           saveLabel="Guardar cambios"
         />
       ) : (

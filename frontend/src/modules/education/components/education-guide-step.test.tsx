@@ -4,6 +4,7 @@ import {
   fireEvent,
   screen,
   waitFor,
+  within,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -126,16 +127,14 @@ describe('EducationGuideStep', () => {
       screen.getByRole('button', { name: 'Eliminar Ingeniería Informática' }),
     );
     expect(educationsService.deleteEducation).not.toHaveBeenCalled();
-    await user.click(
-      screen.getByRole('button', { name: 'Conservar formación' }),
-    );
+    const confirmation = screen.getByRole('alertdialog');
+    expect(confirmation).toHaveAccessibleName('¿Eliminar esta formación?');
+    await user.click(within(confirmation).getByRole('button', { name: 'Cancelar' }));
     expect(educationsService.deleteEducation).not.toHaveBeenCalled();
     await user.click(
       screen.getByRole('button', { name: 'Eliminar Ingeniería Informática' }),
     );
-    await user.click(
-      screen.getByRole('button', { name: 'Eliminar formación' }),
-    );
+    await user.click(within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Eliminar' }));
     await waitFor(() =>
       expect(educationsService.deleteEducation).toHaveBeenCalledExactlyOnceWith(
         EDUCATION.id,

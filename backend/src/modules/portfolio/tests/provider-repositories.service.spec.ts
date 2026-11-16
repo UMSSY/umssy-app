@@ -1,6 +1,7 @@
 import type { ConfigService } from '@nestjs/config';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ExternalProviderUnavailableException } from '../exceptions/external-provider-unavailable.exception.js';
+import { ExternalRepositoryMapper } from '../mappers/external-repository.mapper.js';
 import { ProviderRepositoriesService } from '../services/provider-repositories.service.js';
 
 describe('ProviderRepositoriesService', () => {
@@ -17,6 +18,7 @@ describe('ProviderRepositoriesService', () => {
     };
     service = new ProviderRepositoriesService(
       configMock as unknown as ConfigService,
+      new ExternalRepositoryMapper(),
     );
   });
 

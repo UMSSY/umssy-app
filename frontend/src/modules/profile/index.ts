@@ -65,7 +65,6 @@ export { usePrefersReducedMotion } from './hooks/use-prefers-reduced-motion';
 export { useCountUp } from './hooks/use-count-up';
 export type { ProfileGuidePose } from './types/profile-guide-pose.types';
 export type { ProfileGuideStepDirection } from './types/profile-guide-step-direction.types';
-export { ProfileGuidePreviewView } from './views/profile-guide-preview-view';
 export { ProfileGuideProvider } from './components/profile-guide-provider';
 export { ProfileGuideDashboardCard } from './components/profile-guide-dashboard-card';
 export { useProfileGuide } from './contexts/profile-guide-context';
@@ -83,15 +82,13 @@ export {
   PORTFOLIO_PROVIDER_LABELS,
   PORTFOLIO_ACCOUNT_MESSAGES,
 } from './constants/portfolio-accounts.constants';
-export type {
-  PortfolioAccountDisconnectResponse,
-  PortfolioAccountStatusResponse,
-  PortfolioConnectedAccountResponse,
-  PortfolioOAuthCallbackPayload,
-  PortfolioOAuthUrlResponse,
-  PortfolioProviderName,
-  SocialAccountConnectButtonsProps,
-} from "./types/portfolio-account.types";
+export type { PortfolioAccountDisconnectResponse } from './types/portfolio-account-disconnect-response.types';
+export type { PortfolioAccountStatusResponse } from './types/portfolio-account-status-response.types';
+export type { PortfolioConnectedAccountResponse } from './types/portfolio-connected-account-response.types';
+export type { PortfolioOAuthCallbackPayload } from './types/portfolio-oauth-callback-payload.types';
+export type { PortfolioOAuthUrlResponse } from './types/portfolio-oauth-url-response.types';
+export type { PortfolioProviderName } from './types/portfolio-provider-name.types';
+export type { SocialAccountConnectButtonsProps } from './types/social-account-connect-buttons-props.types';
 export {
   usePortfolioProjects,
   usePortfolioRepositories,

@@ -1,11 +1,9 @@
 import { apiClient } from "@/shared/services/api-client";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { portfolioAccountsService } from "./portfolio-accounts.service";
-import type {
-  PortfolioAccountStatusResponse,
-  PortfolioConnectedAccountResponse,
-  PortfolioOAuthUrlResponse,
-} from "../types/portfolio-account.types";
+import type { PortfolioAccountStatusResponse } from "../types/portfolio-account-status-response.types";
+import type { PortfolioConnectedAccountResponse } from "../types/portfolio-connected-account-response.types";
+import type { PortfolioOAuthUrlResponse } from "../types/portfolio-oauth-url-response.types";
 
 vi.mock("@/shared/services/storage/access-token-storage", () => ({
   getAccessToken: vi.fn().mockReturnValue("mock-token"),

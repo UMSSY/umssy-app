@@ -1,3 +1,4 @@
+import { portfolioProjectsService } from "@/modules/profile/services/portfolio-projects.service";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { createQueryClient } from "@/shared/services/query-client";
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
@@ -21,6 +22,10 @@ vi.mock("@/shared/utils/download-file", () => ({
   downloadFile: vi.fn(),
 }));
 
+vi.mock("@/modules/profile/services/portfolio-projects.service", () => ({
+  portfolioProjectsService: { getPortfolioProjects: vi.fn().mockResolvedValue([]) },
+}));
+
 vi.mock("../services/documents.service", () => ({
   documentsService: {
     getCvs: vi.fn(),
@@ -29,7 +34,6 @@ vi.mock("../services/documents.service", () => ({
     deleteCv: vi.fn(),
     extractCvData: vi.fn(),
     generateCv: vi.fn(),
-    getPortfolioProjectCount: vi.fn(),
   },
 }));
 
@@ -185,7 +189,7 @@ describe("DocumentsCvView", () => {
       file: new Blob(["%PDF"], { type: PDF_TYPE }),
       fileName: "CV_Valeria_Quispe.pdf",
     });
-    vi.mocked(documentsService.getPortfolioProjectCount).mockResolvedValue(0);
+    vi.mocked(portfolioProjectsService.getPortfolioProjects).mockResolvedValue([]);
     vi.mocked(documentsService.deleteCv).mockImplementation((cvId: string) => {
       serverCvs = serverCvs.filter((cv) => cv.id !== cvId);
       if (serverCvs.length > 0) {

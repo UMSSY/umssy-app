@@ -60,13 +60,6 @@ export const documentsService = {
     return { file: response.data, fileName };
   },
 
-  getPortfolioProjectCount: async (): Promise<number> => {
-    const response = await apiClient.get<ApiResponse<unknown[] | null>>("/profile/portfolio/projects", {
-      headers: getAuthHeaders(),
-    });
-    return response.data.data?.length ?? 0;
-  },
-
   extractCvData: async (cvId: string): Promise<CvExtraction> => {
     const response = await apiClient.post<ApiResponse<CvExtractionResponse>>(
       `/profile/me/cvs/${encodeURIComponent(cvId)}/extraction`,

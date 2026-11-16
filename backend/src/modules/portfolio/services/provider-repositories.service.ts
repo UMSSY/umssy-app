@@ -1,41 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { PortfolioProviderEnum } from '../enums/portfolio-provider.enum.js';
+import { ExternalRepositoryMapper } from '../mappers/external-repository.mapper.js';
+import type { GitHubRepoDto } from '../types/github-repo-dto.type.js';
+import type { GitLabProjectDto } from '../types/gitlab-project-dto.type.js';
 import { ExternalProviderUnavailableException } from '../exceptions/external-provider-unavailable.exception.js';
 import type { ExternalRepositoryResponse } from '../responses/external-repository.response.js';
-
-interface GitHubRepoDto {
-  name?: string;
-  html_url?: string;
-  description?: string | null;
-  language?: string | null;
-  stargazers_count?: number;
-  private?: boolean;
-  owner?: {
-    login?: string;
-  };
-  updated_at?: string;
-}
-
-interface GitLabProjectDto {
-  name?: string;
-  web_url?: string;
-  description?: string | null;
-  star_count?: number;
-  visibility?: string;
-  namespace?: {
-    kind?: string;
-    path?: string;
-  };
-  last_activity_at?: string;
-  updated_at?: string;
-}
 
 const REQUEST_TIMEOUT_MS = 10000;
 
 @Injectable()
 export class ProviderRepositoriesService {
-  constructor(private readonly configService: ConfigService) {}
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly mapper: ExternalRepositoryMapper,
+  ) {}
 
   async fetchGitHubRepositories(
     username: string,
@@ -90,26 +68,7 @@ export class ProviderRepositoriesService {
       );
     }
 
-    const repos = payload as GitHubRepoDto[];
-
-    return repos
-      .filter((repo) => !repo.private)
-      .map((repo) => ({
-        provider: PortfolioProviderEnum.GITHUB,
-        repoName: (repo.name ?? '').trim(),
-        repoUrl: (repo.html_url ?? '').trim(),
-        description: repo.description ? (repo.description ?? '').trim() : null,
-        language: repo.language ? (repo.language ?? '').trim() : null,
-        starsCount:
-          typeof repo.stargazers_count === 'number'
-            ? repo.stargazers_count
-            : 0,
-        isOwner: Boolean(
-          repo.owner?.login &&
-            repo.owner.login.toLowerCase() === cleanUsername.toLowerCase(),
-        ),
-        updatedAt: this.toIsoDate(repo.updated_at),
-      }));
+    return this.mapper.fromGitHub(payload as GitHubRepoDto[], cleanUsername);
   }
 
   async fetchGitLabRepositories(
@@ -177,42 +136,6 @@ export class ProviderRepositoriesService {
       );
     }
 
-    const projects = payload as GitLabProjectDto[];
-
-    return projects
-      .filter(
-        (project) =>
-          !project.visibility || project.visibility.toLowerCase() === 'public',
-      )
-      .map((project) => ({
-        provider: PortfolioProviderEnum.GITLAB,
-        repoName: (project.name ?? '').trim(),
-        repoUrl: (project.web_url ?? '').trim(),
-        description: project.description
-          ? (project.description ?? '').trim()
-          : null,
-        language: null,
-        starsCount:
-          typeof project.star_count === 'number' ? project.star_count : 0,
-        isOwner: Boolean(
-          project.namespace?.kind === 'user' ||
-            (project.namespace?.path &&
-              cleanUsername &&
-              project.namespace.path.toLowerCase() ===
-                cleanUsername.toLowerCase()),
-        ),
-        updatedAt: this.toIsoDate(
-          project.last_activity_at ?? project.updated_at,
-        ),
-      }));
-  }
-
-  private toIsoDate(dateStr?: string): string {
-    if (!dateStr) {
-      return new Date().toISOString();
-    }
-    const parsed = new Date(dateStr);
-    return isNaN(parsed.getTime()) ? new Date().toISOString() : parsed.toISOString();
+    return this.mapper.fromGitLab(payload as GitLabProjectDto[], cleanUsername);
   }
 }
-

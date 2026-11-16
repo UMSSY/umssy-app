@@ -4,6 +4,7 @@ import {
   fireEvent,
   screen,
   waitFor,
+  within,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -150,7 +151,7 @@ describe('WorkExperienceGuideStep', () => {
     expect(screen.getByLabelText(/Empresa/)).toHaveValue('');
   });
 
-  it('keeps failed edits and leaves delete confirmation inside the guide', async () => {
+  it('keeps failed edits and reuses the accessible delete confirmation', async () => {
     vi.mocked(workExperienceService.updateWorkExperience).mockRejectedValue(
       new Error('No disponible'),
     );
@@ -174,17 +175,14 @@ describe('WorkExperienceGuideStep', () => {
       screen.getByRole('button', { name: 'Eliminar Desarrollador' }),
     );
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.getByRole('alertdialog')).toHaveAccessibleName('Eliminar experiencia');
     expect(workExperienceService.deleteWorkExperience).not.toHaveBeenCalled();
-    await user.click(
-      screen.getByRole('button', { name: 'Conservar experiencia' }),
-    );
+    await user.click(within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Cancelar' }));
     expect(workExperienceService.deleteWorkExperience).not.toHaveBeenCalled();
     await user.click(
       screen.getByRole('button', { name: 'Eliminar Desarrollador' }),
     );
-    await user.click(
-      screen.getByRole('button', { name: 'Eliminar experiencia' }),
-    );
+    await user.click(within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Eliminar' }));
     await waitFor(() =>
       expect(
         workExperienceService.deleteWorkExperience,

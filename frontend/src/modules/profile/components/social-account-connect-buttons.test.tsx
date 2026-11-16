@@ -5,11 +5,9 @@ import { PORTFOLIO_ACCOUNT_MESSAGES } from "../constants/portfolio-accounts.cons
 import { portfolioAccountsService } from "../services/portfolio-accounts.service";
 import { assignWindowLocation } from "../utils/assign-window-location";
 import { SocialAccountConnectButtons } from "./social-account-connect-buttons";
-import type {
-  PortfolioAccountStatusResponse,
-  PortfolioConnectedAccountResponse,
-  PortfolioOAuthUrlResponse,
-} from "../types/portfolio-account.types";
+import type { PortfolioAccountStatusResponse } from "../types/portfolio-account-status-response.types";
+import type { PortfolioConnectedAccountResponse } from "../types/portfolio-connected-account-response.types";
+import type { PortfolioOAuthUrlResponse } from "../types/portfolio-oauth-url-response.types";
 
 let currentSearchParams = new URLSearchParams();
 

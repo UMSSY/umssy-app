@@ -5,7 +5,7 @@ import type {
   PortfolioProjectItem,
   UpdatePortfolioProjectsPayload,
 } from "../types/portfolio-project.types";
-import type { PortfolioProviderName } from "../types/portfolio-account.types";
+import type { PortfolioProviderName } from "../types/portfolio-provider-name.types";
 import { getAuthHeaders } from "../utils/get-auth-headers";
 
 export const portfolioProjectsService = {
