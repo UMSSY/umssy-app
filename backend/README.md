@@ -1,3 +1,5 @@
+the project have standard too, you can read in: **[Backend Standards](./standard.md)**
+
 ## Description
 
 This repository contains the backend for the **UMSSY** application.
