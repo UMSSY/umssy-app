@@ -419,6 +419,47 @@ describe("ApplicationsView", () => {
     await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
   });
 
+  it("returns to active applications after reactivating the last withdrawn one", async () => {
+    getMine.mockResolvedValueOnce([buildApplication({ id: "last", vacancyTitle: "Frontend React", status: "Retirada" })]);
+    getMine.mockResolvedValue([buildApplication({ id: "last", vacancyTitle: "Frontend React", status: "En revisión" })]);
+    reactivate.mockResolvedValue(undefined);
+
+    renderWithQuery(<ApplicationsView />);
+    await userEvent.click(await screen.findByRole("button", { name: "Postulaciones retiradas" }));
+    fireEvent.click(screen.getByRole("button", { name: "Volver a postular" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Confirmar postulación" }));
+
+    await waitFor(() => expect(reactivate).toHaveBeenCalledWith("last"));
+    await waitFor(() => expect(screen.queryByRole("button", { name: "Postulaciones retiradas" })).not.toBeInTheDocument());
+    expect(screen.getByText("Frontend React")).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: "Mostrar:" })).toHaveTextContent("Todos");
+    expect(screen.queryByText("No tienes postulaciones activas.")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Retirar" })).toBeInTheDocument();
+  });
+
+  it("keeps showing other withdrawn applications after reactivating one of several", async () => {
+    getMine.mockResolvedValueOnce([
+      buildApplication({ id: "first", vacancyTitle: "Frontend React", status: "Retirada" }),
+      buildApplication({ id: "second", vacancyTitle: "Backend Java", status: "Retirada" }),
+    ]);
+    getMine.mockResolvedValue([
+      buildApplication({ id: "first", vacancyTitle: "Frontend React", status: "En revisión" }),
+      buildApplication({ id: "second", vacancyTitle: "Backend Java", status: "Retirada" }),
+    ]);
+    reactivate.mockResolvedValue(undefined);
+
+    renderWithQuery(<ApplicationsView />);
+    await userEvent.click(await screen.findByRole("button", { name: "Postulaciones retiradas" }));
+    const firstRow = within(screen.getByRole("row", { name: /Frontend React/ }));
+    fireEvent.click(firstRow.getByRole("button", { name: "Volver a postular" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Confirmar postulación" }));
+
+    await waitFor(() => expect(reactivate).toHaveBeenCalledWith("first"));
+    await waitFor(() => expect(screen.queryByText("Frontend React")).not.toBeInTheDocument());
+    expect(screen.getByText("Backend Java")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Postulaciones retiradas" })).toHaveAttribute("aria-pressed", "true");
+  });
+
   it("does not show an old reactivation error when the dialog is opened again", async () => {
     getMine.mockResolvedValue([buildApplication({ id: "application-7", status: "Retirada" })]);
     reactivate.mockRejectedValueOnce(new Error("Conflict"));
