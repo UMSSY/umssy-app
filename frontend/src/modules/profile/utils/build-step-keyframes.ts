@@ -11,10 +11,6 @@ const OVERSHOOT_PX = 6;
 const OVERSHOOT_TILT_DEG = 3;
 const OVERSHOOT_OFFSET = 0.8;
 
-/**
- * Outbound trip and springy return of the step transition. Backward mirrors
- * every X and rotation value. `fromTransform` resumes an interrupted trip.
- */
 export function buildStepKeyframes(
   direction: ProfileGuideStepDirection,
   fromTransform: string | null = null,

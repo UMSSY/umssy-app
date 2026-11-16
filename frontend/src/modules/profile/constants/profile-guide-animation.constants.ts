@@ -111,7 +111,7 @@ export const PROFILE_GUIDE_STEP_TRAVEL_PX = 28;
 export const PROFILE_GUIDE_REST_TRANSFORM =
   'translateX(0px) rotate(0deg) scale(1)';
 
-// Holds the fly frame facing left; the sprites are drawn facing right.
+// Source sprites face right.
 export const PROFILE_GUIDE_MIRROR_KEYFRAMES: Keyframe[] = [
   { transform: 'scaleX(-1)' },
   { transform: 'scaleX(-1)' },

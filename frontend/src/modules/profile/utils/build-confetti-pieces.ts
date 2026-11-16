@@ -9,10 +9,7 @@ const ANGLE_RANGE_DEG = 120;
 const GOLDEN_ANGLE_DEG = 137.5;
 const PEAK_OFFSET = 0.45;
 
-/**
- * Deterministic confetti: every value comes from the index, so the server and
- * the client render the same pieces without Math.random.
- */
+// Deterministic values prevent server/client hydration mismatches.
 export function buildConfettiPieces(
   count: number = PROFILE_GUIDE_CONFETTI.count,
 ): ProfileGuideConfettiPiece[] {
@@ -45,7 +42,6 @@ export function buildConfettiPieces(
   });
 }
 
-/** The piece rises, spreads and then falls while it fades out. */
 export function buildConfettiKeyframes(
   piece: ProfileGuideConfettiPiece,
 ): Keyframe[] {
