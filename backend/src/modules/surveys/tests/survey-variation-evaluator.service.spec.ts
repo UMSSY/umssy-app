@@ -134,6 +134,56 @@ describe('SurveyVariationEvaluatorService', () => {
     expect(result.summaryText).toContain('+20 pp');
   });
 
+  it.each([
+    [60, 40, false],
+    [61, 39, true],
+  ])(
+    'debe avisar solo cuando la variación supera el umbral: %i%% frente a 50%% con umbral de 10 puntos',
+    async (employed, searching, expectedShifts) => {
+      vi.mocked(repository.findAlertConfig!).mockResolvedValue({
+        id: 'cfg-1',
+        surveyId: mockSurveyId,
+        isEnabled: true,
+        threshold: 10,
+        questionIds: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      const statistics = (first: number, second: number) =>
+        ({
+          _count: { responses: 100 },
+          questions: [
+            {
+              id: 'q-1',
+              statement: '¿Cuál es tu situación laboral?',
+              options: [
+                { id: 'opt-1', label: 'Empleado', _count: { answers: first } },
+                {
+                  id: 'opt-2',
+                  label: 'Buscando empleo',
+                  _count: { answers: second },
+                },
+              ],
+            },
+          ],
+        }) as any;
+      vi.mocked(repository.findStatistics!).mockResolvedValueOnce(
+        statistics(employed, searching),
+      );
+      vi.mocked(repository.findStatistics!).mockResolvedValueOnce(
+        statistics(50, 50),
+      );
+
+      const result = await service.evaluateSurvey(mockSurveyId, {
+        academicPeriod: 'II-2024',
+        threshold: 10,
+      });
+
+      expect(result.hasShifts).toBe(expectedShifts);
+    },
+  );
+
   it.each(['2020', 'Todas'])(
     'debe evaluar con la fecha de cierre cuando la gestión de la encuesta es "%s" y no un semestre',
     async (academicPeriod) => {

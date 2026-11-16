@@ -116,7 +116,7 @@ export class SurveyVariationEvaluatorService {
         const diff = Number((currentPct - prevPct).toFixed(1));
         const absDiff = Math.abs(diff);
 
-        if (absDiff >= threshold) {
+        if (absDiff > threshold) {
           shifts.push({
             questionId: question.id,
             questionStatement: question.statement,
@@ -170,7 +170,7 @@ export class SurveyVariationEvaluatorService {
     if (shifts.length === 0) return '';
 
     const lines: string[] = [
-      `Variaciones detectadas entre ${previousPeriod} y ${currentPeriod} (umbral >= ${threshold} pp):`,
+      `Variaciones detectadas entre ${previousPeriod} y ${currentPeriod} (umbral de ${threshold} pp):`,
     ];
 
     let currentQuestion = '';
