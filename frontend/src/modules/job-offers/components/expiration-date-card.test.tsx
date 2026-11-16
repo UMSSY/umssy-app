@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it } from "vitest";
 import { useExpirationDate } from "../hooks/use-expiration-date";
@@ -38,4 +38,43 @@ describe("ExpirationDateCard", () => {
     expect(screen.queryByRole("grid")).not.toBeInTheDocument();
     expect(screen.getByText(/Sin fecha de cierre/i)).toBeInTheDocument();
   });
+
+  
+  it("al elegir un día pide confirmación con la fecha completa", async () => {
+    render(<Harness />);
+    await userEvent.click(screen.getByText("Establecer fecha de expiración"));
+    await pickFirstAvailableDay();
+
+    const dialog = await screen.findByRole("alertdialog");
+    expect(within(dialog).getByText("¿Confirmar fecha de cierre?")).toBeInTheDocument();
+    expect(within(dialog).getByText(/a las 23:59/)).toBeInTheDocument();
+  });
+
+  it("'Sí, confirmar' cierra el modal y oculta el calendario", async () => {
+    render(<Harness />);
+    await userEvent.click(screen.getByText("Establecer fecha de expiración"));
+    await pickFirstAvailableDay();
+    await userEvent.click(await screen.findByRole("button", { name: "Sí, confirmar" }));
+
+    expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+    expect(screen.queryByRole("grid")).not.toBeInTheDocument();
+  });
+
+  it("'No' cierra el modal y vuelve al calendario sin fecha marcada", async () => {
+    render(<Harness />);
+    await userEvent.click(screen.getByText("Establecer fecha de expiración"));
+    await pickFirstAvailableDay();
+    await userEvent.click(await screen.findByRole("button", { name: "No" }));
+
+    expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+    expect(screen.getByRole("grid")).toBeInTheDocument();
+    expect(screen.queryByRole("gridcell", { selected: true })).not.toBeInTheDocument();
+  });
 });
+
+async function pickFirstAvailableDay() {
+  const days = screen.getAllByRole("button").filter((button) => button.hasAttribute("data-day"));
+  const firstEnabled = days.find((day) => !day.hasAttribute("disabled"));
+  if (!firstEnabled) throw new Error("No hay días disponibles en el calendario");
+  await userEvent.click(firstEnabled);
+}

@@ -4,6 +4,8 @@ import { Info } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import type { ExpirationDate } from "../hooks/use-expiration-date";
+import { formatExpirationDate } from "../utils/format-expiration-date";
+import { ConfirmDialog } from "./confirm-dialog";
 import { ExpirationCalendar } from "./expiration-calendar";
 
 interface ExpirationDateCardProps {
@@ -11,7 +13,15 @@ interface ExpirationDateCardProps {
 }
 
 export function ExpirationDateCard({ expiration }: ExpirationDateCardProps) {
-  const { status, selectedDate, hasExpiration, toggleExpiration, selectDate } = expiration;
+  const {
+    status,
+    selectedDate,
+    hasExpiration,
+    toggleExpiration,
+    selectDate,
+    confirmDate,
+    rejectDate,
+  } = expiration;
   const showCalendar = status === "selecting" || status === "confirming";
 
   return (
@@ -48,6 +58,22 @@ export function ExpirationDateCard({ expiration }: ExpirationDateCardProps) {
           </p>
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={status === "confirming"}
+        title="¿Confirmar fecha de cierre?"
+        description={
+          <>
+            La vacante se cerrará el{" "}
+            <strong>{selectedDate ? formatExpirationDate(selectedDate) : ""}</strong> a las 23:59
+            (hora de Bolivia). ¿Estás de acuerdo?
+          </>
+        }
+        confirmLabel="Sí, confirmar"
+        cancelLabel="No"
+        onConfirm={confirmDate}
+        onCancel={rejectDate}
+      />
     </section>
   );
 }
