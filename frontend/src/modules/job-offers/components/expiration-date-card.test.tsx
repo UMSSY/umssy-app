@@ -4,9 +4,11 @@ import { afterEach, describe, expect, it } from "vitest";
 import { useExpirationDate } from "../hooks/use-expiration-date";
 import { ExpirationDateCard } from "./expiration-date-card";
 
+const TODAY = new Date(2026, 10, 15); // 15 de noviembre de 2026
+
 function Harness() {
   const expiration = useExpirationDate();
-  return <ExpirationDateCard expiration={expiration} />;
+  return <ExpirationDateCard expiration={expiration} today={TODAY} />;
 }
 
 afterEach(() => {
@@ -69,6 +71,29 @@ describe("ExpirationDateCard", () => {
     expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
     expect(screen.getByRole("grid")).toBeInTheDocument();
     expect(screen.queryByRole("gridcell", { selected: true })).not.toBeInTheDocument();
+  });
+
+    it("con la fecha confirmada muestra el resumen con los días que faltan", async () => {
+    render(<Harness />);
+    await userEvent.click(screen.getByText("Establecer fecha de expiración"));
+    await userEvent.click(screen.getByRole("button", { name: /20 de noviembre/i }));
+    await userEvent.click(await screen.findByRole("button", { name: "Sí, confirmar" }));
+
+    expect(screen.getByText(/se cerrará automáticamente el/i)).toBeInTheDocument();
+    expect(screen.getByText("viernes 20 de noviembre de 2026")).toBeInTheDocument();
+    expect(screen.getByText(/Faltan 5 días/)).toBeInTheDocument();
+  });
+
+  it("'Cambiar fecha' vuelve a mostrar el calendario con la fecha marcada", async () => {
+    render(<Harness />);
+    await userEvent.click(screen.getByText("Establecer fecha de expiración"));
+    await userEvent.click(screen.getByRole("button", { name: /20 de noviembre/i }));
+    await userEvent.click(await screen.findByRole("button", { name: "Sí, confirmar" }));
+    await userEvent.click(screen.getByRole("button", { name: "Cambiar fecha" }));
+
+    expect(screen.queryByText(/se cerrará automáticamente el/i)).not.toBeInTheDocument();
+    expect(screen.getByRole("grid")).toBeInTheDocument();
+    expect(screen.getByRole("gridcell", { selected: true })).toHaveTextContent("20");
   });
 });
 

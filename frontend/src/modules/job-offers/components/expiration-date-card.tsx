@@ -1,26 +1,31 @@
 "use client";
 
-import { Info } from "lucide-react";
+import { CalendarCheck, Info } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import type { ExpirationDate } from "../hooks/use-expiration-date";
-import { formatExpirationDate } from "../utils/format-expiration-date";
+import { formatDaysLeft, formatExpirationDate } from "../utils/format-expiration-date";
 import { ConfirmDialog } from "./confirm-dialog";
 import { ExpirationCalendar } from "./expiration-calendar";
 
 interface ExpirationDateCardProps {
   expiration: ExpirationDate;
+  /** Se puede pasar en los tests para fijar el "hoy". */
+  today?: Date;
 }
 
-export function ExpirationDateCard({ expiration }: ExpirationDateCardProps) {
+export function ExpirationDateCard({ expiration, today = new Date() }: ExpirationDateCardProps) {
   const {
     status,
     selectedDate,
+    confirmedDate,
     hasExpiration,
     toggleExpiration,
     selectDate,
     confirmDate,
     rejectDate,
+    changeDate,
   } = expiration;
   const showCalendar = status === "selecting" || status === "confirming";
 
@@ -51,11 +56,34 @@ export function ExpirationDateCard({ expiration }: ExpirationDateCardProps) {
       {showCalendar && (
         <div className="mt-4 space-y-2">
           <div className="w-fit rounded-lg border border-border">
-            <ExpirationCalendar selected={selectedDate ?? undefined} onSelect={selectDate} />
+            <ExpirationCalendar
+              selected={selectedDate ?? undefined}
+              onSelect={selectDate}
+              today={today}
+            />
           </div>
           <p className="text-xs text-text-secondary">
             La vacante se cerrará a las 23:59 (hora de Bolivia) del día que elijas.
           </p>
+        </div>
+      )}
+
+      {confirmedDate && (
+        <div className="mt-4 flex items-start gap-3 rounded-lg border border-border bg-interaction p-4">
+          <CalendarCheck aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-accent" />
+          <div className="space-y-1">
+            <p className="text-sm text-ink">
+              La vacante se cerrará automáticamente el{" "}
+              <strong>{formatExpirationDate(confirmedDate)}</strong> a las 23:59 (hora de Bolivia).
+            </p>
+            <p className="text-sm text-text-secondary">
+              {formatDaysLeft(confirmedDate, today)}. Al llegar la fecha dejará de mostrarse a los
+              egresados.
+            </p>
+            <Button type="button" variant="link" className="h-auto min-h-11 px-0" onClick={changeDate}>
+              Cambiar fecha
+            </Button>
+          </div>
         </div>
       )}
 
