@@ -3,10 +3,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import {
-  skillsAnalysisService,
-  type SkillsAnalysisResult,
-} from '@/modules/matching';
-import {
   PROFILE_SKILLS_RADAR_QUERY_KEY,
   useInvalidateProfileCompleteness,
   type Feedback,
@@ -32,38 +28,19 @@ export function useSaveWorkExperience(
   const [isSaving, setIsSaving] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
-  const [analysis, setAnalysis] = useState<SkillsAnalysisResult | null>(null);
 
   async function refreshSkills(): Promise<void> {
-    await Promise.all([
-      queryClient.invalidateQueries({
-        queryKey: MY_SKILLS_QUERY_KEY,
-      }),
-      queryClient.invalidateQueries({
-        queryKey: PROFILE_SKILLS_RADAR_QUERY_KEY,
-      }),
-    ]);
-  }
-
-  async function analyze(
-    saved: WorkExperienceItem,
-    payload: WorkExperiencePayload,
-  ): Promise<void> {
     setIsAnalyzing(true);
 
     try {
-      try {
-        const result = await skillsAnalysisService.previewExperience(
-          saved.id,
-          payload.description,
-        );
-
-        setAnalysis(result);
-      } catch {
-        setAnalysis(null);
-      }
-
-      await refreshSkills();
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: MY_SKILLS_QUERY_KEY,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: PROFILE_SKILLS_RADAR_QUERY_KEY,
+        }),
+      ]);
     } finally {
       setIsAnalyzing(false);
     }
@@ -75,16 +52,17 @@ export function useSaveWorkExperience(
   ): Promise<void> {
     setIsSaving(true);
     setFeedback(null);
-    setAnalysis(null);
 
     try {
-      const saved = id
-        ? await mutation.mutateAsync(() =>
-            workExperienceService.updateWorkExperience(id, payload),
-          )
-        : await mutation.mutateAsync(() =>
-            workExperienceService.createWorkExperience(payload),
-          );
+      if (id) {
+        await mutation.mutateAsync(() =>
+          workExperienceService.updateWorkExperience(id, payload),
+        );
+      } else {
+        await mutation.mutateAsync(() =>
+          workExperienceService.createWorkExperience(payload),
+        );
+      }
 
       setFeedback({
         type: 'success',
@@ -96,7 +74,7 @@ export function useSaveWorkExperience(
       onSaved();
 
       if (forGuide) void invalidateCompleteness().catch(() => {});
-      void analyze(saved, payload).catch(() => {});
+      void refreshSkills().catch(() => {});
     } catch {
       setFeedback({
         type: 'error',
@@ -111,14 +89,12 @@ export function useSaveWorkExperience(
 
   function clearFeedback(): void {
     setFeedback(null);
-    setAnalysis(null);
   }
 
   return {
     save,
     isSaving,
     isAnalyzing,
-    analysis,
     feedback,
     clearFeedback,
   };

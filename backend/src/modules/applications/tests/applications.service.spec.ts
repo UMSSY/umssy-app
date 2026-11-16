@@ -13,6 +13,7 @@ import { ApplicationStatus } from '../types/applications.types.js';
 import { ApplicationNotFoundException } from '../exceptions/application-not-found.exception.js';
 import { ApplicationForbiddenException } from '../exceptions/application-forbidden.exception.js';
 import { ApplicationNotWithdrawableException } from '../exceptions/application-not-withdrawable.exception.js';
+import { ApplicationNotReactivableException } from '../exceptions/application-not-reactivable.exception.js';
 import { ApplicationContactRestrictedException } from '../exceptions/application-contact-restricted.exception.js';
 
 describe('ApplicationsService (T5.1 & T5.2 & HU-15)', () => {
@@ -21,6 +22,7 @@ describe('ApplicationsService (T5.1 & T5.2 & HU-15)', () => {
     findByUserId: ReturnType<typeof vi.fn>;
     findById: ReturnType<typeof vi.fn>;
     withdraw: ReturnType<typeof vi.fn>;
+    reactivateApplication: ReturnType<typeof vi.fn>;
     findApplicationDecisionContext: ReturnType<typeof vi.fn>;
   };
   let jobOffersMock: { findOfferSummary: ReturnType<typeof vi.fn> };
@@ -35,6 +37,7 @@ describe('ApplicationsService (T5.1 & T5.2 & HU-15)', () => {
       findByUserId: vi.fn(),
       findById: vi.fn(),
       withdraw: vi.fn().mockResolvedValue({ count: 1 }),
+      reactivateApplication: vi.fn().mockResolvedValue({ count: 1 }),
       findApplicationDecisionContext: vi.fn(),
     };
 
@@ -219,6 +222,67 @@ describe('ApplicationsService (T5.1 & T5.2 & HU-15)', () => {
       await expect(
         service.withdrawApplication('app-1', 'user-1'),
       ).rejects.toThrow(ApplicationNotWithdrawableException);
+    });
+  });
+
+  describe('reactivateApplication', () => {
+    it('reactiva la postulación de su dueño', async () => {
+      repositoryMock.findById.mockResolvedValue({
+        id: 'app-1',
+        userId: 'user-1',
+      });
+
+      await expect(
+        service.reactivateApplication('app-1', 'user-1'),
+      ).resolves.toBeUndefined();
+      expect(repositoryMock.reactivateApplication).toHaveBeenCalledWith(
+        'app-1',
+        'user-1',
+        expect.any(Date),
+      );
+    });
+
+    it('lanza ApplicationNotFoundException si no existe', async () => {
+      repositoryMock.findById.mockResolvedValue(null);
+
+      await expect(
+        service.reactivateApplication('app-99', 'user-1'),
+      ).rejects.toThrow(ApplicationNotFoundException);
+      expect(repositoryMock.reactivateApplication).not.toHaveBeenCalled();
+    });
+
+    it('lanza ApplicationForbiddenException si es de otro usuario', async () => {
+      repositoryMock.findById.mockResolvedValue({
+        id: 'app-1',
+        userId: 'user-2',
+      });
+
+      await expect(
+        service.reactivateApplication('app-1', 'user-1'),
+      ).rejects.toThrow(ApplicationForbiddenException);
+      expect(repositoryMock.reactivateApplication).not.toHaveBeenCalled();
+    });
+
+    it('lanza ApplicationNotReactivableException con estado 409 si ya no se puede reactivar', async () => {
+      repositoryMock.findById.mockResolvedValue({
+        id: 'app-1',
+        userId: 'user-1',
+      });
+      repositoryMock.reactivateApplication.mockResolvedValue({ count: 0 });
+
+      const error: unknown = await service
+        .reactivateApplication('app-1', 'user-1')
+        .catch((caught: unknown) => caught);
+
+      expect(error).toBeInstanceOf(ApplicationNotReactivableException);
+      expect(error).toMatchObject({
+        statusCode: 409,
+        code: 'APPLICATION_NOT_REACTIVABLE',
+      });
+      expect(error).toHaveProperty(
+        'message',
+        'La postulación no puede reactivarse en su estado actual o la vacante ya no está disponible.',
+      );
     });
   });
 
