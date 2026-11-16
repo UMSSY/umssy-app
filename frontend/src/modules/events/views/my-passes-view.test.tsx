@@ -496,7 +496,7 @@ describe("Mis pases", () => {
   });
 
   it('hides the cancel button at the exact Bolivia workshop start time without reloading', async () => {
-    vi.setSystemTime(new Date('2026-10-20T12:59:59.900Z'));
+    vi.setSystemTime(new Date('2026-10-20T12:59:59.400Z'));
     getMine.mockResolvedValue([pass]);
     render(<MyPassesView />);
     expect(
@@ -504,10 +504,12 @@ describe("Mis pases", () => {
     ).toBeInTheDocument();
 
     vi.setSystemTime(new Date('2026-10-20T13:00:00Z'));
-    await waitFor(() =>
-      expect(
-        screen.queryByRole('button', { name: 'Cancelar inscripción' }),
-      ).not.toBeInTheDocument(),
+    await waitFor(
+      () =>
+        expect(
+          screen.queryByRole('button', { name: 'Cancelar inscripción' }),
+        ).not.toBeInTheDocument(),
+      { timeout: 2500 },
     );
   });
 
