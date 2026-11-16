@@ -33,7 +33,7 @@ export function RadarProfileView() {
   const [showEvidence, setShowEvidence] = useState(false);
   const [comparing, setComparing] = useState(false);
   const [openedRadar, setOpenedRadar] = useState<IntegrationRadar | null>(null);
-  const selectedPanelRef = useRef<HTMLElement>(null);
+  const selectedPanelRef = useRef<HTMLDivElement>(null);
 
   const handleOpenNotification = async (id: string) => {
     try {

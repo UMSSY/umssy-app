@@ -1,4 +1,3 @@
-
 import {
   BadRequestException,
   Body,
@@ -23,10 +22,8 @@ import { DocumentReviewService } from '../services/document-review.service.js';
 import { documentReviewDecisionSchema } from '../requests/radar-review.request.js';
 import {
   documentAcknowledgementSchema,
-  documentDecisionSchema,
   documentReviewFilterSchema,
   type DocumentAcknowledgementRequest,
-  type DocumentDecisionRequest,
   type DocumentReviewFilter,
 } from '../requests/document-verification.request.js';
 

@@ -153,9 +153,8 @@ describe('DocumentReviewPanel: recuperación de decisiones', () => {
     await user.click(screen.getByRole('button', { name: 'Aprobar documento' }));
     await user.click(screen.getByRole('button', { name: 'Confirmar' }));
 
-    expect(
-      await screen.findByText(/No se pudo confirmar la decision/),
-    ).toBeInTheDocument();
+    const errorMessage = await screen.findByRole('alert');
+    expect(errorMessage).toHaveTextContent(/No se pudo confirmar la decisi[oó]n/);
 
     expect(
       screen.getByRole('heading', { name: 'Confirmar decisión' }),
