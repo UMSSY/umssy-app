@@ -56,6 +56,25 @@ const formatRequestDate = (date: string) => {
   }).format(parsedDate);
 };
 
+const requestStatusStyles: Record<string, string> = {
+  PENDING:
+    "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200",
+  OFFERED:
+    "border-sky-200 bg-sky-50 text-sky-800 dark:border-sky-900 dark:bg-sky-950 dark:text-sky-200",
+  ACTIVE:
+    "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-200",
+  ENDED:
+    "border-slate-200 bg-slate-100 text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200",
+  CANCELLED:
+    "border-rose-200 bg-rose-50 text-rose-800 dark:border-rose-900 dark:bg-rose-950 dark:text-rose-200",
+  EXPIRED:
+    "border-zinc-200 bg-zinc-50 text-zinc-600 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300",
+};
+
+const getRequestStatusStyle = (status: string) =>
+  requestStatusStyles[status] ??
+  "border-border bg-muted text-muted-foreground";
+
 type ParticipationTab = "current" | "history";
 
 export function ParticipationView({
@@ -423,12 +442,16 @@ export function ParticipationView({
                 <tbody className="divide-y">
                   {history.data.map((item) => (
                     <tr key={item.id}>
-                      <td className="px-4 py-3 whitespace-nowrap">
+                      <td className="px-4 py-3">
                         {formatRequestDate(item.createdAt)}
                       </td>
 
                       <td className="px-4 py-3">
-                        {getMentorRequestStatusLabel(item.status)}
+                        <span
+                          className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${getRequestStatusStyle(item.status)}`}
+                        >
+                          {getMentorRequestStatusLabel(item.status)}
+                        </span>
                       </td>
 
                       <td className="px-4 py-3">
