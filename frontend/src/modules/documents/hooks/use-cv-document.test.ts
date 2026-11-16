@@ -258,4 +258,19 @@ describe("useCvDocument", () => {
     });
     await waitFor(() => expect(result.current.isUploading).toBe(false));
   });
+
+  it("keeps a persisted upload successful when a post-save refresh rejects", async () => {
+    vi.mocked(documentsService.uploadCv).mockResolvedValue(CURRENT_CV);
+    const { result, client } = renderHook(() => useCvDocument());
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    vi.spyOn(client, "invalidateQueries").mockRejectedValue(new Error("Refresh unavailable"));
+
+    await act(async () => {
+      await expect(
+        result.current.uploadCv(new File(["%PDF"], "CV.pdf", { type: "application/pdf" })),
+      ).resolves.toEqual(CURRENT_CV);
+    });
+
+    await waitFor(() => expect(result.current.isUploading).toBe(false));
+  });
 });

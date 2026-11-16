@@ -29,6 +29,7 @@ export function EducationForm({
   allowMissingEndDate = false,
   isPending = false,
   feedback = null,
+  saveLabel = EDUCATION_UI_TEXTS.saveButton,
   onSubmit,
   onCancel,
   onValuesChange,
@@ -299,7 +300,7 @@ export function EducationForm({
             ) : null}
             {isPending
               ? EDUCATION_UI_TEXTS.savingButton
-              : EDUCATION_UI_TEXTS.saveButton}
+              : saveLabel}
           </Button>
         </div>
       </form>

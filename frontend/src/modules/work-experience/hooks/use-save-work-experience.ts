@@ -1,29 +1,32 @@
-"use client";
+'use client';
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
 import {
   skillsAnalysisService,
   type SkillsAnalysisResult,
-} from "@/modules/matching";
-import { profileSkillsRadarService } from "@/modules/profile";
-import { PROFILE_SKILLS_RADAR_QUERY_KEY } from "@/modules/profile";
-import { useInvalidateProfileCompleteness } from "@/modules/profile";
-import { WORK_EXPERIENCE_FEEDBACK_MESSAGES } from "../config/work-experience-feedback.config";
-import { workExperienceService } from "../services/work-experience.service";
-import type { Feedback } from "@/modules/profile";
-import type { WorkExperienceItem } from "../types/work-experience-item.types";
-import type { WorkExperiencePayload } from "../types/work-experience-payload.types";
+} from '@/modules/matching';
+import { profileSkillsRadarService } from '@/modules/profile';
+import { PROFILE_SKILLS_RADAR_QUERY_KEY } from '@/modules/profile';
+import { useInvalidateProfileCompleteness } from '@/modules/profile';
+import { WORK_EXPERIENCE_FEEDBACK_MESSAGES } from '../config/work-experience-feedback.config';
+import { workExperienceService } from '../services/work-experience.service';
+import type { Feedback } from '@/modules/profile';
+import type { WorkExperienceItem } from '../types/work-experience-item.types';
+import type { WorkExperiencePayload } from '../types/work-experience-payload.types';
 
-const SKILLS_PROFILE_QUERY_KEY = ["skills", "profile"] as const;
+const SKILLS_PROFILE_QUERY_KEY = ['skills', 'profile'] as const;
 
-export function useSaveWorkExperience(onSaved: () => void) {
+export function useSaveWorkExperience(
+  onSaved: () => void,
+  { forGuide = false }: { forGuide?: boolean } = {},
+) {
   const queryClient = useQueryClient();
   const invalidateCompleteness = useInvalidateProfileCompleteness();
 
   const mutation = useMutation({
     mutationFn: (request: () => Promise<WorkExperienceItem>) => request(),
-    onSuccess: invalidateCompleteness,
+    onSuccess: forGuide ? undefined : invalidateCompleteness,
   });
 
   const [isSaving, setIsSaving] = useState(false);
@@ -62,8 +65,7 @@ export function useSaveWorkExperience(onSaved: () => void) {
 
       try {
         await profileSkillsRadarService.analyzeSkills();
-      } catch {
-      }
+      } catch {}
 
       await refreshSkills();
     } finally {
@@ -89,7 +91,7 @@ export function useSaveWorkExperience(onSaved: () => void) {
           );
 
       setFeedback({
-        type: "success",
+        type: 'success',
         message: id
           ? WORK_EXPERIENCE_FEEDBACK_MESSAGES.updateSuccess
           : WORK_EXPERIENCE_FEEDBACK_MESSAGES.createSuccess,
@@ -97,10 +99,11 @@ export function useSaveWorkExperience(onSaved: () => void) {
 
       onSaved();
 
-      void analyze(saved, payload);
+      if (forGuide) void invalidateCompleteness().catch(() => {});
+      void analyze(saved, payload).catch(() => {});
     } catch {
       setFeedback({
-        type: "error",
+        type: 'error',
         message: id
           ? WORK_EXPERIENCE_FEEDBACK_MESSAGES.updateError
           : WORK_EXPERIENCE_FEEDBACK_MESSAGES.createError,

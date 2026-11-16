@@ -22,7 +22,7 @@ export function useApplyCvExtraction() {
     onSuccess: async (results) => {
       setReport(buildCvApplyReport(results));
       if (!results.some(({ isApplied }) => isApplied)) return;
-      await Promise.all([
+      await Promise.allSettled([
         ...CV_APPLY_INVALIDATED_QUERY_KEYS.map((queryKey) => queryClient.invalidateQueries({ queryKey })),
         invalidateCompleteness(),
       ]);
