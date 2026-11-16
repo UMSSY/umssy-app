@@ -17,6 +17,10 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace }),
 }));
 
+vi.mock("@/modules/notifications/hooks/use-notifications-realtime-sync", () => ({
+  useNotificationsRealtimeSync: vi.fn(),
+}));
+
 vi.mock("@/modules/radar-chart/services/radar-integration.service", () => ({
   radarIntegrationApi: {
     reviews: vi.fn().mockResolvedValue([]),

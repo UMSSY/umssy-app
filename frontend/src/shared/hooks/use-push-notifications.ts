@@ -107,8 +107,8 @@ export function usePushNotifications(): UsePushNotificationsResult {
 
       const registration = await navigator.serviceWorker.ready;
 
-      const { data } = await apiClient.get<{ publicKey: string }>('/push/public-key');
-      const applicationServerKey = urlBase64ToUint8Array(data.publicKey);
+      const response = await apiClient.get<{ data: { publicKey: string } }>('/push/public-key');
+      const applicationServerKey = urlBase64ToUint8Array(response.data?.data?.publicKey ?? '');
 
       const subscription = await subscribeToPush(registration, applicationServerKey);
 

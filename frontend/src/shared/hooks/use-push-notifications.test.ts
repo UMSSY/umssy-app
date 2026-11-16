@@ -106,8 +106,8 @@ describe('usePushNotifications', () => {
     } as unknown as PushSubscription);
 
     vi.mocked(apiClientModule.apiClient.get).mockResolvedValue({
-      data: { publicKey: 'ZHVtbXkta2V5' },
-    } as unknown as { data: { publicKey: string } });
+      data: { data: { publicKey: 'ZHVtbXkta2V5' } },
+    } as unknown as { data: { data: { publicKey: string } } });
 
     vi.mocked(apiClientModule.apiClient.post).mockResolvedValue({} as unknown as unknown);
 

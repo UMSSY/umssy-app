@@ -32,20 +32,22 @@ describe("notifications.service", () => {
   it("obtiene la lista paginada de notificaciones sin filtro cuando es ALL", async () => {
     vi.mocked(apiClient.get).mockResolvedValue(
       createAxiosResponse({
-        data: [
-          {
-            id: "1",
-            title: "Aviso",
-            body: "Detalle",
-            link: "/dashboard",
-            readAt: null,
-            createdAt: "2026-11-15T10:00:00Z",
-            typeCode: "SURVEY_PUBLISHED",
-          },
-        ],
-        page: 1,
-        limit: 8,
-        total: 1,
+        data: {
+          data: [
+            {
+              id: "1",
+              title: "Aviso",
+              body: "Detalle",
+              link: "/dashboard",
+              readAt: null,
+              createdAt: "2026-11-15T10:00:00Z",
+              typeCode: "SURVEY_PUBLISHED",
+            },
+          ],
+          page: 1,
+          limit: 8,
+          total: 1,
+        },
       }),
     );
 
@@ -60,7 +62,7 @@ describe("notifications.service", () => {
 
   it("envía el parámetro filter cuando se filtra por categoría", async () => {
     vi.mocked(apiClient.get).mockResolvedValue(
-      createAxiosResponse({ data: [], page: 2, limit: 8 }),
+      createAxiosResponse({ data: { data: [], page: 2, limit: 8 } }),
     );
 
     await getNotifications({ page: 2, limit: 8, filter: "SURVEYS" });
@@ -71,7 +73,7 @@ describe("notifications.service", () => {
   });
 
   it("obtiene el contador de notificaciones sin leer", async () => {
-    vi.mocked(apiClient.get).mockResolvedValue(createAxiosResponse({ count: 7 }));
+    vi.mocked(apiClient.get).mockResolvedValue(createAxiosResponse({ data: { count: 7 } }));
 
     const result = await getUnreadCount();
 
@@ -85,6 +87,14 @@ describe("notifications.service", () => {
     await markNotificationAsRead("notif-42");
 
     expect(apiClient.patch).toHaveBeenCalledWith("/notifications/notif-42/read");
+  });
+
+  it("codifica el id al marcar una notificación como leída", async () => {
+    vi.mocked(apiClient.patch).mockResolvedValue(createAxiosResponse(undefined));
+
+    await markNotificationAsRead("id/raro");
+
+    expect(apiClient.patch).toHaveBeenCalledWith("/notifications/id%2Fraro/read");
   });
 
   it("marca todas las notificaciones como leídas", async () => {
