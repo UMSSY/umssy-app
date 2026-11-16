@@ -1,4 +1,5 @@
 import { Module, forwardRef } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PrismaModule } from '../../common/prisma/prisma.module.js';
 import { JwtAuthModule } from '../../common/guards/jwt-auth.module.js';
@@ -26,6 +27,7 @@ import { ChatModule } from '../chat/chat.module.js';
 
 @Module({
   imports: [
+    ConfigModule.forRoot(), 
     PrismaModule,
     JwtAuthModule,
     AuthModule, 
