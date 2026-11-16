@@ -3,6 +3,8 @@ import type { PublishedJobOffer, Vacancy } from "../types/vacancy.types";
 export function toVacancy(offer: PublishedJobOffer): Vacancy {
   return {
     id: offer.id,
+    publishedAt: offer.publishedAt,
+    expiresAt: offer.expiresAt,
     title: offer.title,
     companyName: offer.company.name,
     description: offer.description,

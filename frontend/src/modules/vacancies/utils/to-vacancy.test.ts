@@ -15,6 +15,7 @@ const OFFER: PublishedJobOffer = {
   salaryRange: "Bs 6.500 - 8.000",
   languages: "Español, Inglés",
   locationUrl: "https://maps.app.goo.gl/abc",
+  publishedAt: "2026-10-12T14:00:00.000Z",
   expiresAt: null,
   publishedAt: "2026-10-13T15:00:00.000Z",
   createdAt: "2026-10-12T15:00:00.000Z",
@@ -30,6 +31,8 @@ describe("toVacancy", () => {
   it("convierte una vacante publicada de la API al modelo del listado", () => {
     expect(toVacancy(OFFER)).toEqual({
       id: "offer-1",
+      publishedAt: OFFER.publishedAt,
+      expiresAt: OFFER.expiresAt,
       title: "DevOps Senior",
       companyName: "TechBolivia S.R.L.",
       description: "Infraestructura en la nube",

@@ -1,4 +1,5 @@
 "use client";
+import { VacancyDates } from "@/shared/components/vacancy-dates";
 import type { JobMatchDetailViewProps } from "../types/job-match-detail-view-props.types";
 
 import Link from "next/link";
@@ -34,10 +35,13 @@ export function JobMatchDetailView({ jobOfferId }: JobMatchDetailViewProps) {
         {JOB_MATCHING_MESSAGES.back}
       </Link>
       {data ? (
-        <PageHeading
-          title={data.title}
-          description={`${data.companyName} · ${data.modality}`}
-        />
+        <div className="space-y-3">
+          <PageHeading
+            title={data.title}
+            description={`${data.companyName} · ${data.modality}`}
+          />
+          <VacancyDates publishedAt={data.publishedAt} expiresAt={data.expiresAt} />
+        </div>
       ) : null}
 
       {data ? (

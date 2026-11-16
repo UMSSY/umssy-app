@@ -30,6 +30,8 @@ function vacancyRecord(
 ): JobMatchRecord {
   return {
     id: JOB_OFFER_ID,
+    publishedAt: new Date('2026-11-10T14:00:00.000Z'),
+    expiresAt: null,
     title: 'DevOps Senior',
     description: 'Infraestructura en la nube.',
     publishedAt: PUBLISHED_AT,
@@ -83,6 +85,8 @@ describe('JobMatchService', () => {
 
     await expect(service.getMatch(USER_ID, JOB_OFFER_ID)).resolves.toEqual({
       jobOfferId: JOB_OFFER_ID,
+      publishedAt: '2026-11-10T14:00:00.000Z',
+      expiresAt: null,
       title: 'DevOps Senior',
       companyName: 'TechBolivia',
       modality: 'Remoto',

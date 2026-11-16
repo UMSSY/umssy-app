@@ -18,6 +18,8 @@ export interface PublishedJobOffer {
 }
 
 export interface Vacancy {
+  publishedAt?: string;
+  expiresAt?: string | null;
   id: string;
   title: string;
   companyName: string;

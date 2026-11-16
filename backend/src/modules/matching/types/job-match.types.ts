@@ -8,6 +8,8 @@ export interface CandidateProfileRecord {
 }
 
 export interface JobMatchResponse {
+  publishedAt: string;
+  expiresAt: string | null;
   jobOfferId: string;
   title: string;
   companyName: string;

@@ -35,6 +35,8 @@ export class JobMatchService {
 
     return {
       jobOfferId: vacancy.id,
+      publishedAt: vacancy.publishedAt.toISOString(),
+      expiresAt: vacancy.expiresAt?.toISOString() ?? null,
       title: vacancy.title,
       companyName: vacancy.company.title,
       modality: vacancy.modality.title,

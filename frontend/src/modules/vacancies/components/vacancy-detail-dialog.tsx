@@ -1,4 +1,5 @@
 "use client";
+import { VacancyDates } from "@/shared/components/vacancy-dates";
 
 import { BriefcaseBusiness, CalendarDays, ExternalLink, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ export function VacancyDetailDialog({ vacancy, onClose }: VacancyDetailDialogPro
       <DialogClose render={<Button variant="ghost" size="icon-sm" className="absolute top-4 right-4" aria-label="Cerrar detalle de vacante" />}><X aria-hidden="true" /></DialogClose>
       <DialogHeader className="border-b border-border pr-8 pb-5"><DialogTitle className="text-2xl font-bold text-accent">{vacancy?.title ?? "Vacante no encontrada"}</DialogTitle><DialogDescription>{vacancy?.companyName ?? "La oferta solicitada no está disponible. Puedes explorar otras vacantes."}</DialogDescription></DialogHeader>
       {vacancy ? <>
+        <VacancyDates publishedAt={vacancy.publishedAt} expiresAt={vacancy.expiresAt} />
         <dl aria-label="Condiciones de la vacante" className="grid grid-cols-2 gap-5 rounded-lg bg-interaction p-5 text-sm">
           <div><dt className="text-xs text-availability-foreground">Salario</dt><dd className="mt-1 font-semibold text-accent">{vacancy.salary}</dd></div>
           <div><dt className="flex items-center gap-1 text-xs text-availability-foreground"><ModalityIcon modality={vacancy.modality} className="size-3.5" />Modalidad</dt><dd className="mt-1 text-ink">{vacancy.modality}</dd></div>

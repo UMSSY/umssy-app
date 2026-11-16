@@ -1,4 +1,5 @@
 "use client";
+import { VacancyDates } from "@/shared/components/vacancy-dates";
 
 import Link from "next/link";
 import { useState, type MouseEvent } from "react";
@@ -85,6 +86,7 @@ export function VacanciesView({ initialVacancyId, onInitialClose }: VacanciesVie
                 <div className="min-w-0">
                   <h2 className="text-lg font-semibold text-ink"><Link href={`/vacancies/${vacancy.id}`} onClick={(event) => openVacancy(event, vacancy.id)} className="underline-offset-4 hover:text-accent hover:underline">{vacancy.title}</Link></h2>
                   <p className="mt-1 text-sm font-medium text-ink-soft">{vacancy.companyName}</p>
+                  <div className="mt-2"><VacancyDates publishedAt={vacancy.publishedAt} expiresAt={vacancy.expiresAt} /></div>
                   <p className="mt-2 line-clamp-2 max-w-prose text-sm leading-relaxed text-text-secondary">{vacancy.description}</p>
                   <dl className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm">
                     <div><dt className="sr-only">Salario</dt><dd className="rounded-md bg-interaction px-2.5 py-1 font-semibold text-accent tabular-nums">{vacancy.salary}</dd></div>
