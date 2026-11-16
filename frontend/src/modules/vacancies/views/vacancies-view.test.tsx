@@ -254,4 +254,17 @@ describe("VacanciesView - tarjeta de vacante", () => {
       expect(screen.queryByRole("link", { name: /Ver ubicación/ })).toBeNull();
     },
   );
+
+  it("apila la tarjeta en pantallas pequeñas y la reparte en tres columnas desde md", async () => {
+    listPublished.mockResolvedValue([buildVacancy()]);
+    renderWithQuery(<VacanciesView />);
+
+    const card = (await screen.findByRole("link", { name: /^Ver detalles de / })).closest("article");
+
+    expect(card).toHaveClass("grid-cols-[auto_minmax(0,1fr)]", "md:grid-cols-[auto_minmax(0,1fr)_auto]");
+    expect(screen.getByRole("list", { name: "Fechas de la vacante" }).parentElement).toHaveClass(
+      "col-span-2",
+      "md:col-span-1",
+    );
+  });
 });
