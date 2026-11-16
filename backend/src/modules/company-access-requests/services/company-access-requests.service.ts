@@ -141,17 +141,48 @@ export class CompanyAccessRequestsService {
   }
 
   async getDetail(id: string, reviewerId: string) {
-    const current = await this.repository.findById(id);
+    let current = await this.repository.findById(id);
     if (!current || current.status.title === 'DRAFT') {
       throw new NotFoundException('Solicitud de empresa no encontrada');
     }
 
     if (current.status.title === 'PENDING') {
       await this.repository.markInReview(id, reviewerId);
-      return this.repository.findById(id);
+      current = await this.repository.findById(id);
+      if (!current) {
+        throw new NotFoundException('Solicitud de empresa no encontrada');
+      }
+    }
+
+    if (current.documentFileId && !current.ocrFieldResults) {
+      const analysis = await this.evaluateLetterheadOcr(id);
+      if (analysis) {
+        current.ocrMatchScore = analysis.matchScore;
+        current.ocrFieldResults =
+          analysis.fields as unknown as Prisma.JsonValue;
+      }
     }
 
     return current;
+  }
+
+  async reEvaluateOcr(id: string) {
+    const current = await this.repository.findById(id);
+    if (!current) {
+      throw new NotFoundException('Solicitud de empresa no encontrada');
+    }
+    if (!current.documentFileId) {
+      throw new BadRequestException(
+        'La solicitud no tiene documento adjunto para evaluar',
+      );
+    }
+
+    const analysis = await this.evaluateLetterheadOcr(id);
+    return {
+      id,
+      ocrMatchScore: analysis?.matchScore ?? 0,
+      ocrFieldResults: analysis?.fields ?? null,
+    };
   }
 
   async getDocument(id: string) {

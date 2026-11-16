@@ -50,6 +50,8 @@ export interface CompanyOcrFieldDetail {
   declared: string;
   detectedText: string | null;
   matched: boolean;
+  confidence?: number;
+  statusMessage?: string;
 }
 
 export interface CompanyOcrAnalysisResults {

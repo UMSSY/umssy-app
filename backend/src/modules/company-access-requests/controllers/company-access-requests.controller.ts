@@ -191,6 +191,13 @@ export class CompanyAccessRequestsController {
     return this.companyRequestsService.update(id, body);
   }
 
+  @Post('company-access-requests/:id/re-evaluate-ocr')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(BACKOFFICE_ROLE)
+  reEvaluateOcr(@Param('id', ParseUUIDPipe) id: string) {
+    return this.companyRequestsService.reEvaluateOcr(id);
+  }
+
   @Post('company-access-requests/:id/request-correction')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(BACKOFFICE_ROLE)

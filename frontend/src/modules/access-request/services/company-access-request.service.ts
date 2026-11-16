@@ -149,6 +149,13 @@ export const companyAccessRequestService = {
       typeof payload === 'string' ? { reason: payload } : payload,
     ),
 
+  reEvaluateOcr: (id: string) =>
+    request<{
+      id: string;
+      ocrMatchScore: number;
+      ocrFieldResults: CompanyAccessRequestItem['ocrFieldResults'];
+    }>('post', `/company-access-requests/${id}/re-evaluate-ocr`),
+
   getDocumentBlob: async (id: string): Promise<Blob | null> => {
     const res = await apiClient.get(`/company-access-requests/${id}/document`, {
       responseType: 'blob',

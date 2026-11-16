@@ -156,6 +156,7 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
   // Edición de ficha
   const [editForm, setEditForm] = useState<UpdateCompanyPayload>({});
   const [isSavingEdit, setIsSavingEdit] = useState(false);
+  const [reEvaluatingOcr, setReEvaluatingOcr] = useState(false);
 
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -292,6 +293,24 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
         websiteUrl: refreshed.data.websiteUrl ?? '',
         username: refreshed.data.username,
       });
+    }
+  }
+
+  async function handleReEvaluateOcr() {
+    setReEvaluatingOcr(true);
+    setError(null);
+    const res = await companyAccessRequestService.reEvaluateOcr(id);
+    setReEvaluatingOcr(false);
+    if (!res.ok) {
+      setError(res.message);
+      return;
+    }
+    setSuccessMessage(
+      'Contraste OCR recalculado y datos del documento extraídos exitosamente.',
+    );
+    const refreshed = await companyAccessRequestService.getDetail(id);
+    if (refreshed.ok) {
+      setItem(refreshed.data);
     }
   }
 
@@ -839,14 +858,34 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
             </p>
           </div>
 
-          <div className="flex items-center gap-3 text-xs font-semibold">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-emerald-800">
-              <CheckCircle2 className="size-4 text-emerald-600" />
-              {confirmedCount} criterios confirmados
+          <div className="flex flex-wrap items-center gap-2.5">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => void handleReEvaluateOcr()}
+              disabled={reEvaluatingOcr || submitting}
+              className="gap-1.5 text-xs font-semibold"
+            >
+              {reEvaluatingOcr ? (
+                <>
+                  <Loader2 className="size-3.5 animate-spin" /> Analizando
+                  OCR...
+                </>
+              ) : (
+                <>
+                  <RotateCcw className="size-3.5 text-primary" /> Re-analizar
+                  OCR
+                </>
+              )}
+            </Button>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800">
+              <CheckCircle2 className="size-3.5 text-emerald-600" />
+              {confirmedCount} confirmados
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-rose-300 bg-rose-50 px-3 py-1 text-rose-800">
-              <XCircle className="size-4 text-rose-600" />
-              {unconfirmedCount} por verificar o no detectados
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-rose-300 bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-800">
+              <XCircle className="size-3.5 text-rose-600" />
+              {unconfirmedCount} por verificar
             </span>
           </div>
         </div>
@@ -900,6 +939,7 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
           {comparisonList.map((comp) => {
             const IconComponent = comp.icon;
             const isMatched = comp.data.matched;
+            const hasDetectedText = Boolean(comp.data.detectedText);
 
             return (
               <div
@@ -926,7 +966,9 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
                       className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-bold ${
                         isMatched
                           ? 'border-emerald-300 bg-emerald-100/90 text-emerald-800'
-                          : 'border-rose-300 bg-rose-100/90 text-rose-800'
+                          : hasDetectedText
+                            ? 'border-rose-300 bg-rose-100/90 text-rose-800'
+                            : 'border-slate-300 bg-slate-100 text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300'
                       }`}
                     >
                       {isMatched ? (
@@ -934,9 +976,14 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
                           <CheckCircle2 className="size-3 text-emerald-600" />{' '}
                           Coincide
                         </>
+                      ) : hasDetectedText ? (
+                        <>
+                          <AlertCircle className="size-3 text-rose-600" />{' '}
+                          Discrepancia
+                        </>
                       ) : (
                         <>
-                          <XCircle className="size-3 text-rose-600" /> No
+                          <XCircle className="size-3 text-slate-500" /> No
                           detectado
                         </>
                       )}
@@ -974,6 +1021,16 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
                         </p>
                       )}
                     </div>
+
+                    {comp.data.statusMessage && (
+                      <p
+                        className={`text-[11px] font-medium ${
+                          isMatched ? 'text-emerald-700' : 'text-rose-700'
+                        }`}
+                      >
+                        {comp.data.statusMessage}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
