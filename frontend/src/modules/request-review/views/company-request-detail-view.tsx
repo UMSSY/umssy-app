@@ -127,29 +127,24 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
-  // Ventana flotante centrada (Modal Dialog) de resolución y dictamen
   const [showResolutionModal, setShowResolutionModal] = useState(false);
   const [activeAction, setActiveAction] = useState<
     'APPROVE' | 'CORRECTION' | 'REJECT' | null
   >(null);
 
-  // Modal para inspección de logotipo
   const [showLogoModal, setShowLogoModal] = useState(false);
   const [logoBg, setLogoBg] = useState<'light' | 'dark' | 'checkered'>('light');
 
-  // Subsanación
   const [correctionCategory, setCorrectionCategory] = useState(
     CORRECTION_REASONS[0],
   );
   const [correctionDetails, setCorrectionDetails] = useState('');
 
-  // Rechazo
   const [rejectionCategory, setRejectionCategory] = useState(
     REJECTION_REASONS[0],
   );
   const [rejectionDetails, setRejectionDetails] = useState('');
 
-  // Edición y restablecimiento de ficha
   const [isEditingFicha, setIsEditingFicha] = useState(false);
   const [editForm, setEditForm] = useState<UpdateCompanyPayload>({});
   const [initialSnapshot, setInitialSnapshot] =
@@ -512,7 +507,7 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
 
   return (
     <main className="mx-auto w-full max-w-7xl space-y-8 pb-16">
-      {/* ─── Encabezado principal ordenado y equilibrado ─── */}
+      
       <header className="rounded-xl border border-border bg-surface p-6 shadow-xs">
         <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-text-secondary">
           <Link
@@ -592,7 +587,7 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
             </div>
           </div>
 
-          {/* Botón de dictamen / resolución en la cabecera */}
+          
           {canResolve && (
             <div className="shrink-0 self-start sm:self-center">
               <Button
@@ -610,7 +605,7 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
         </div>
       </header>
 
-      {/* Alertas de retroalimentación discretas y formales */}
+      
       {error && (
         <div
           role="alert"
@@ -659,11 +654,9 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
         </div>
       )}
 
-      {/* ─────────────────────────────────────────────────────────────────────────────
-          MODO AUDITOR: DOCUMENTO DE RESPALDO Y COTEJO OCR EN PARALELO LADO A LADO
-          ───────────────────────────────────────────────────────────────────────────── */}
+      
       <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
-        {/* Columna Izquierda: Documento de Respaldo Oficial (Sticky en pantallas grandes) */}
+        
         <section
           className="space-y-3 lg:sticky lg:top-6 lg:col-span-6"
           aria-labelledby="section-document"
@@ -715,7 +708,7 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
           </Card>
         </section>
 
-        {/* Columna Derecha: Contraste de Datos y Verificación OCR */}
+        
         <section
           className="space-y-4 lg:col-span-6"
           aria-labelledby="section-contrast"
@@ -766,7 +759,7 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
             </div>
           </div>
 
-          {/* Tarjeta de métricas del Score OCR */}
+          
           <Card className="border-border bg-surface shadow-xs">
             <CardHeader className="p-4 pb-2">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -808,7 +801,7 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
             </CardContent>
           </Card>
 
-          {/* Lista de Bloques Comparativos: Una fila por dato, 50% declarado y 50% OCR */}
+          
           <div className="flex flex-col gap-3.5">
             {comparisonList.map((comp) => {
               const IconComponent = comp.icon;
@@ -820,7 +813,7 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
                   key={comp.id}
                   className="flex flex-col rounded-xl border border-border bg-surface p-3.5 shadow-2xs"
                 >
-                  {/* Cabecera del campo con icono, etiqueta y estado */}
+                  
                   <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 pb-2">
                     <div className="flex items-center gap-2">
                       <IconComponent className="size-4 text-primary" />
@@ -856,9 +849,9 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
                     </span>
                   </div>
 
-                  {/* Comparación lado a lado: Declarado vs Extraído (OCR) */}
+                  
                   <div className="mt-2.5 grid grid-cols-1 items-stretch gap-2.5 sm:grid-cols-2">
-                    {/* Lado izquierdo: Declarado */}
+                    
                     <div className="flex flex-col">
                       <span className="text-xs font-medium text-text-secondary">
                         Declarado:
@@ -868,7 +861,7 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
                       </div>
                     </div>
 
-                    {/* Lado derecho: Extraído (OCR) */}
+                    
                     <div className="flex flex-col">
                       <span className="text-xs font-medium text-text-secondary">
                         Extraído (OCR):
@@ -891,9 +884,7 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
         </section>
       </div>
 
-      {/* ─────────────────────────────────────────────────────────────────────────────
-          3. LOGOTIPO CORPORATIVO Y RESUMEN
-          ───────────────────────────────────────────────────────────────────────────── */}
+      
       <section
         className="grid grid-cols-1 gap-6 md:grid-cols-2"
         aria-labelledby="section-optional-data"
@@ -986,7 +977,7 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
           </CardContent>
         </Card>
 
-        {/* Tarjeta de estado de expediente y resumen */}
+        
         <Card className="border-border bg-surface shadow-xs">
           <CardHeader className="pb-3">
             <CardTitle className="text-base font-bold text-ink">
@@ -1040,12 +1031,10 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
         </Card>
       </section>
 
-      {/* ─────────────────────────────────────────────────────────────────────────────
-          VENTANA FLOTANTE CENTRADA (MODAL DIALOG): RESOLUCIÓN Y DICTAMEN DE SOLICITUD
-          ───────────────────────────────────────────────────────────────────────────── */}
+      
       <Dialog open={showResolutionModal} onOpenChange={setShowResolutionModal}>
         <DialogContent className="flex max-h-[88vh] w-full flex-col overflow-hidden p-0 sm:max-w-2xl md:max-w-3xl">
-          {/* Cabecera del Modal */}
+          
           <DialogHeader className="shrink-0 border-b border-border bg-surface p-5">
             <div className="flex flex-wrap items-center justify-between gap-3 pr-6">
               <div>
@@ -1065,9 +1054,9 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
             </div>
           </DialogHeader>
 
-          {/* Cuerpo del Modal con scroll propio */}
+          
           <div className="flex-1 space-y-5 overflow-y-auto p-5">
-            {/* 1. FICHA OFICIAL DE ALTA */}
+            
             <div className="rounded-xl border border-border bg-surface p-4 shadow-2xs">
               <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/80 pb-3">
                 <div className="flex items-center gap-2">
@@ -1164,7 +1153,7 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
                 </div>
               )}
 
-              {/* Vista de datos / Formulario de edición */}
+              
               {!isEditingFicha ? (
                 <div className="mt-3.5 grid grid-cols-1 gap-3 text-xs sm:grid-cols-2">
                   <div className="rounded-lg border border-border/80 bg-surface-soft/40 p-2.5">
@@ -1352,7 +1341,7 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
               )}
             </div>
 
-            {/* 2. FORMULARIO FORMAL DE ACCIÓN (CON FONDO BLANCO Y SÓLO PEQUEÑO LABEL) */}
+            
             {activeAction === 'APPROVE' && (
               <div className="rounded-xl border border-border bg-surface p-4.5 text-xs shadow-2xs">
                 <div className="flex items-center gap-2">
@@ -1550,7 +1539,7 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
             )}
           </div>
 
-          {/* Pie Fijo del Modal con los 3 botones principales */}
+          
           {canResolve && (
             <DialogFooter className="shrink-0 border-t border-border bg-surface p-4">
               {activeAction === null ? (
@@ -1601,7 +1590,7 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
         </DialogContent>
       </Dialog>
 
-      {/* Modal de inspección de logotipo en pantalla completa */}
+      
       {logoUrl && (
         <Dialog open={showLogoModal} onOpenChange={setShowLogoModal}>
           <DialogContent className="flex max-h-[85vh] flex-col overflow-hidden p-5 sm:max-w-xl">

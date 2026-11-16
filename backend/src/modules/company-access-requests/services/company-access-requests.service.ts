@@ -517,7 +517,6 @@ export class CompanyAccessRequestsService {
       };
     }
 
-    // Verificar si ya fue activada
     const isUserActive = current.approvedUser?.isActive === true;
     const latestOtp = current.activationOtps[0];
     const isOtpUsed = latestOtp ? latestOtp.usedAt !== null : false;
@@ -530,7 +529,6 @@ export class CompanyAccessRequestsService {
       };
     }
 
-    // Verificar expiración del OTP (24 horas)
     if (!latestOtp || latestOtp.expiresAt < new Date()) {
       return {
         state: 'EXPIRED',
@@ -539,7 +537,6 @@ export class CompanyAccessRequestsService {
       };
     }
 
-    // Paso de seguridad: requerir código de seguimiento
     if (!code || !code.trim()) {
       return {
         state: 'REQUIRES_CODE',
@@ -559,7 +556,6 @@ export class CompanyAccessRequestsService {
       };
     }
 
-    // Código de seguimiento verificado correctamente: retornar datos oficiales (solo lectura)
     return {
       state: 'READY',
       email: current.email,

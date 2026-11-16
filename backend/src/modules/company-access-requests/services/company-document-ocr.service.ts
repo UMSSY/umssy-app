@@ -123,7 +123,6 @@ export class CompanyDocumentOcrService {
           if (pageText && pageText.trim().length > 30) {
             textChunks.push(pageText.trim());
           } else {
-            // Escaneo o imagen incrustada sin capa de texto digital
             const pixmap = page.toPixmap(
               mupdf.Matrix.scale(2, 2),
               mupdf.ColorSpace.DeviceRGB,
@@ -197,16 +196,13 @@ export class CompanyDocumentOcrService {
     const normalizedFullText = this.normalize(text);
     const squashedFullText = this.squash(text);
 
-    // 1. Extraer pares clave-valor estructurados (tablas y etiquetas formales)
     const kv = this.extractKeyValuePairs(lines);
 
-    // 2. Extraer entidades globales
     const emails = this.extractEmails(text);
     const urls = this.extractUrls(text);
     const phones = this.extractPhones(text);
     const detectedCities = this.extractCities(lines);
 
-    // 3. Evaluar cada uno de los 7 campos
     const companyEvaluation = this.matchCompanyName(
       data.companyName,
       lines,
@@ -253,7 +249,6 @@ export class CompanyDocumentOcrService {
 
     const intentEvaluation = this.matchRequestIntent(lines, normalizedFullText);
 
-    // 4. Calcular ponderación de coincidencia
     const fields = {
       companyName: companyEvaluation,
       city: cityEvaluation,
@@ -299,7 +294,6 @@ export class CompanyDocumentOcrService {
         if (v) kv.set(k, v);
       }
 
-      // Soporte para tablas con cabecera en una línea y valor en la siguiente
       const normLine = this.normalize(line);
       if (
         (normLine === 'razon social' ||
@@ -401,7 +395,6 @@ export class CompanyDocumentOcrService {
       }
     }
 
-    // Cabecera membretada (primera o segunda línea relevante del documento)
     if (!detectedName && lines.length > 0) {
       const candidateHeader = lines.slice(0, 3).find((l) => {
         const nl = this.normalize(l);
@@ -472,7 +465,6 @@ export class CompanyDocumentOcrService {
         matched = true;
         detectedCityText = `${cityNameCap} (${foundCity.line})`;
       } else {
-        // Validación conurbación / área metropolitana boliviana (ej. Sacaba - Cochabamba, El Alto - La Paz)
         const metroChildren = METROPOLITAN_AREAS[foundCity.city] ?? [];
         if (metroChildren.includes(declaredCityNorm)) {
           matched = true;

@@ -51,8 +51,6 @@ export class CompanyAccessRequestsController {
     private readonly companyRequestsService: CompanyAccessRequestsService,
   ) {}
 
-  // --- RUTAS PÚBLICAS DE REGISTRO Y ACTIVACIÓN DE EMPRESA ---
-
   @Get('cities')
   listCities() {
     return this.companyRequestsService.listCities();
@@ -142,8 +140,6 @@ export class CompanyAccessRequestsController {
     });
     res.end(file.content);
   }
-
-  // --- RUTAS DE ADMINISTRADOR (BACKOFFICE) ---
 
   @Get('company-access-requests')
   @UseGuards(JwtAuthGuard, RolesGuard)

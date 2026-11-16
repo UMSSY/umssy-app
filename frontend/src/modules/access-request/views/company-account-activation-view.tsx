@@ -64,12 +64,10 @@ export function CompanyAccountActivationView() {
     null,
   );
 
-  // Paso 1: Código de seguimiento
   const [trackingCode, setTrackingCode] = useState(codeParam);
   const [codeError, setCodeError] = useState<string | null>(null);
   const [isVerifyingCode, startVerifyCode] = useTransition();
 
-  // Paso 2: Observación / Reporte de inconsistencia
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [reportObservation, setReportObservation] = useState('');
   const [reportStatus, setReportStatus] = useState<
@@ -77,18 +75,15 @@ export function CompanyAccountActivationView() {
   >('idle');
   const [reportMessage, setReportMessage] = useState('');
 
-  // Paso 3: Contraseña institucional
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // Paso 4: Modal de confirmación y envío
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [isActivating, setIsActivating] = useState(false);
   const [activationError, setActivationError] = useState<string | null>(null);
 
-  // Reglas de contraseña
   const hasMinLength = password.length >= 8;
   const hasUppercase = /[A-Z]/.test(password);
   const hasNumber = /[0-9]/.test(password);
@@ -261,7 +256,7 @@ export function CompanyAccountActivationView() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header Institucional */}
+      
       <header className="border-b border-border bg-card">
         <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-3">
@@ -281,9 +276,9 @@ export function CompanyAccountActivationView() {
         </div>
       </header>
 
-      {/* Contenido Principal */}
+      
       <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:py-12">
-        {/* ESTADO 1: CARGANDO */}
+        
         {loading && (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <LoaderCircle className="size-8 animate-spin text-primary" />
@@ -293,7 +288,7 @@ export function CompanyAccountActivationView() {
           </div>
         )}
 
-        {/* ESTADO 2: YA REGISTRADA Y ACTIVADA */}
+        
         {!loading && state === 'ALREADY_ACTIVATED' && (
           <div className="rounded-xl border border-border bg-card p-6 shadow-sm sm:p-8">
             <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
@@ -320,7 +315,7 @@ export function CompanyAccountActivationView() {
           </div>
         )}
 
-        {/* ESTADO 3: ENLACE O CÓDIGO EXPIRADO */}
+        
         {!loading && state === 'EXPIRED' && (
           <div className="rounded-xl border border-amber-200 bg-amber-50/50 p-6 shadow-sm sm:p-8">
             <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-amber-100 text-amber-700">
@@ -347,7 +342,7 @@ export function CompanyAccountActivationView() {
           </div>
         )}
 
-        {/* ESTADO 4: ENLACE NO VÁLIDO O NO ENCONTRADO */}
+        
         {!loading &&
           (state === 'INVALID' ||
             state === 'NOT_FOUND' ||
@@ -377,7 +372,7 @@ export function CompanyAccountActivationView() {
             </div>
           )}
 
-        {/* ESTADO 5: PASO DE SEGURIDAD (REQUERIR CÓDIGO DE SEGUIMIENTO) */}
+        
         {!loading && state === 'REQUIRES_CODE' && (
           <div className="rounded-xl border border-border bg-card p-6 shadow-sm sm:p-8">
             <div className="flex items-center gap-3 border-b border-border pb-5">
@@ -450,10 +445,10 @@ export function CompanyAccountActivationView() {
           </div>
         )}
 
-        {/* ESTADO 6: DATOS VERIFICADOS (REVISIÓN DE DATOS + DEFINIR CONTRASEÑA) */}
+        
         {!loading && state === 'READY' && officialData && (
           <div className="space-y-6">
-            {/* Header del formulario */}
+            
             <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">
                 <div>
@@ -481,7 +476,7 @@ export function CompanyAccountActivationView() {
                 sistema institucional UMSSY.
               </p>
 
-              {/* Grid de Datos Oficiales */}
+              
               <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div className="rounded-lg border border-border bg-neutral-50/50 p-3">
                   <span className="flex items-center gap-1.5 text-[11px] font-semibold text-muted-foreground uppercase">
@@ -544,7 +539,7 @@ export function CompanyAccountActivationView() {
                 </div>
               </div>
 
-              {/* Botón para reportar inconsistencia */}
+              
               <div className="mt-4 flex items-center justify-between border-t border-border pt-3">
                 <span className="text-xs text-muted-foreground">
                   ¿Detectó algún error en estos datos oficiales?
@@ -562,7 +557,7 @@ export function CompanyAccountActivationView() {
               </div>
             </div>
 
-            {/* Configuración de Credenciales */}
+            
             <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
               <div className="border-b border-border pb-4">
                 <h2 className="font-tight text-lg font-bold text-ink">
@@ -574,7 +569,7 @@ export function CompanyAccountActivationView() {
                 </p>
               </div>
 
-              {/* Usuario y Correo (Solo lectura) */}
+              
               <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <Label className="text-xs font-semibold text-muted-foreground">
@@ -595,7 +590,7 @@ export function CompanyAccountActivationView() {
                 </div>
               </div>
 
-              {/* Campos de Contraseña */}
+              
               <div className="mt-6 space-y-4">
                 <div>
                   <Label
@@ -633,7 +628,7 @@ export function CompanyAccountActivationView() {
                     </Button>
                   </div>
 
-                  {/* Checklist de reglas de contraseña */}
+                  
                   <div className="mt-2.5 space-y-1">
                     <div className="flex items-center gap-1.5 text-xs">
                       {hasMinLength ? (
@@ -753,7 +748,7 @@ export function CompanyAccountActivationView() {
                 </Alert>
               )}
 
-              {/* Botón de Terminar Registro */}
+              
               <div className="mt-8 flex justify-end border-t border-border pt-5">
                 <Button
                   type="button"
@@ -769,7 +764,7 @@ export function CompanyAccountActivationView() {
           </div>
         )}
 
-        {/* ESTADO 7: REGISTRO EXITOSO */}
+        
         {!loading && state === 'SUCCESS' && officialData && (
           <div className="rounded-xl border border-border bg-card p-6 shadow-sm sm:p-10">
             <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
@@ -784,7 +779,7 @@ export function CompanyAccountActivationView() {
               han quedado formalmente registrados en la plataforma UMSSY.
             </p>
 
-            {/* Resumen de datos registrados */}
+            
             <div className="mt-6 rounded-lg border border-border bg-neutral-50/60 p-5">
               <h2 className="text-xs font-bold tracking-wider text-muted-foreground uppercase">
                 Resumen de Datos Registrados
@@ -825,7 +820,7 @@ export function CompanyAccountActivationView() {
               </dl>
             </div>
 
-            {/* Aviso de inicio de sesión */}
+            
             <Alert className="mt-6 border-emerald-200 bg-emerald-50/50">
               <UserCheck className="size-4 text-emerald-600" />
               <AlertTitle className="text-xs font-bold text-emerald-800">
@@ -837,7 +832,7 @@ export function CompanyAccountActivationView() {
               </AlertDescription>
             </Alert>
 
-            {/* Botón de acción final */}
+            
             <div className="mt-8 flex justify-center">
               <Button
                 variant="institutional"
@@ -851,7 +846,7 @@ export function CompanyAccountActivationView() {
         )}
       </main>
 
-      {/* DIÁLOGO MODAL: REPORTAR INCONSISTENCIA EN DATOS */}
+      
       <Dialog open={isReportOpen} onOpenChange={setIsReportOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -917,7 +912,7 @@ export function CompanyAccountActivationView() {
         </DialogContent>
       </Dialog>
 
-      {/* DIÁLOGO MODAL: CONFIRMAR ACTIVACIÓN Y REGISTRO */}
+      
       <Dialog
         open={isConfirmModalOpen}
         onOpenChange={(open) => !isActivating && setIsConfirmModalOpen(open)}
