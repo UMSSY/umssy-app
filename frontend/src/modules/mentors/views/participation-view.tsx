@@ -41,6 +41,20 @@ const notifySuccess = (message: string) => {
   });
 };
 
+const formatRequestDate = (date: string) => {
+  const parsedDate = new Date(date);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return "Fecha no disponible";
+  }
+
+  return new Intl.DateTimeFormat("es-BO", {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+  }).format(parsedDate);
+};
+
 type ParticipationTab = "current" | "history";
 
 export function ParticipationView({
@@ -358,10 +372,7 @@ export function ParticipationView({
         </h2>
 
         {history.isPending && activeTab === "history" && (
-          <p
-            role="status"
-            className="text-sm text-muted-foreground"
-          >
+          <p role="status" className="text-sm text-muted-foreground">
             Cargando historial de solicitudes...
           </p>
         )}
@@ -380,12 +391,63 @@ export function ParticipationView({
         )}
 
         {history.isSuccess && history.data.length > 0 && (
-          <p
-            role="status"
-            className="text-sm text-muted-foreground"
-          >
-            Solicitudes registradas: {history.data.length}
-          </p>
+          <div className="space-y-3">
+            <p role="status" className="text-sm text-muted-foreground">
+              Solicitudes registradas: {history.data.length}
+            </p>
+
+            <div className="overflow-x-auto rounded-lg border">
+              <table className="w-full min-w-[640px] text-left text-sm">
+                <caption className="sr-only">
+                  Historial de solicitudes de cupo como mentor
+                </caption>
+
+                <thead className="border-b bg-muted/50">
+                  <tr>
+                    <th scope="col" className="px-4 py-3 font-medium">
+                      Fecha de solicitud
+                    </th>
+                    <th scope="col" className="px-4 py-3 font-medium">
+                      Estado
+                    </th>
+                    <th scope="col" className="px-4 py-3 font-medium">
+                      Áreas técnicas
+                    </th>
+                    <th scope="col" className="px-4 py-3 font-medium">
+                      Orientaciones
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody className="divide-y">
+                  {history.data.map((item) => (
+                    <tr key={item.id}>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        {formatRequestDate(item.createdAt)}
+                      </td>
+
+                      <td className="px-4 py-3">
+                        {item.status}
+                      </td>
+
+                      <td className="px-4 py-3">
+                        {item.technicalAreaIds.length}
+                      </td>
+
+                      <td className="px-4 py-3">
+                        {item.orientationTypeIds.length}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <p className="text-xs text-muted-foreground">
+              Las columnas de áreas técnicas y orientaciones muestran
+              la cantidad seleccionada en cada solicitud.
+            </p>
+          </div>
         )}
       </div>
 
