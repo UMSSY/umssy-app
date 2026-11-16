@@ -247,6 +247,31 @@ describe('NotificationsService', () => {
     });
   });
 
+  it('debe enviar solo la notificación en la aplicación cuando el reintento lo pide por canal', async () => {
+    mockPreferencesRepo.findManyByUserIds.mockResolvedValue([
+      { userId: 'user-2', pushEnabled: true, emailEnabled: true },
+    ]);
+
+    const result = await service.notify({
+      recipientIds: ['user-2'],
+      actorId: 'user-1',
+      type: NotificationType.APPOINTMENT_BOOKED,
+      payload: validPayload,
+      actionUrl: '/test',
+      channels: ['IN_APP'],
+    });
+
+    expect(mockNotificationsRepo.createMany).toHaveBeenCalledOnce();
+    expect(mockGateway.emitToUser).toHaveBeenCalledOnce();
+    expect(mockPushDispatcher.dispatchToUsers).not.toHaveBeenCalled();
+    expect(mockMailDispatcher.dispatchToUsers).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      inAppCount: 1,
+      pushStatus: 'skipped',
+      emailStatus: 'skipped',
+    });
+  });
+
   it('no debe enviar push a un destinatario con la app visible', async () => {
     mockPreferencesRepo.findManyByUserIds.mockResolvedValue([
       { userId: 'user-2', pushEnabled: true, emailEnabled: false },
