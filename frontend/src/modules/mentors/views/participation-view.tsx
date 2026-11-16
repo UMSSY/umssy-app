@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
@@ -40,6 +41,8 @@ const notifySuccess = (message: string) => {
   });
 };
 
+type ParticipationTab = "current" | "history";
+
 export function ParticipationView({
   registered = false,
   activated = false,
@@ -55,6 +58,7 @@ export function ParticipationView({
     getAccessToken,
     getServerToken,
   );
+
   const participation = useParticipation(token);
   const request = useQuery({
     queryKey: ["mentor-participation-requests", token],
@@ -64,6 +68,8 @@ export function ParticipationView({
     refetchInterval: 15_000,
     refetchOnWindowFocus: true,
   });
+
+  const [activeTab, setActiveTab] = useState<ParticipationTab>("current");
   const [modal, setModal] = useState<"activate" | "deactivate" | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<unknown>(null);
@@ -81,6 +87,7 @@ export function ParticipationView({
       activated && url.searchParams.get("activated") === "1";
     const hasRegistrationFeedback =
       registered && url.searchParams.get("registered") === "1";
+
     url.searchParams.delete("registered");
     url.searchParams.delete("activated");
     window.history.replaceState(
@@ -113,6 +120,7 @@ export function ParticipationView({
     inFlight.current = true;
     setSubmitting(true);
     setError(null);
+
     try {
       await mentorParticipationService.leave();
       await Promise.allSettled([
@@ -140,97 +148,181 @@ export function ParticipationView({
   const isActive = state?.status === "ACTIVE";
   const hasHistory = state?.status === "DEACTIVATED";
   const currentRequest = request.data;
-  const hasOpenRequest = ["PENDING", "OFFERED"].includes(currentRequest?.status ?? "");
+  const hasOpenRequest = ["PENDING", "OFFERED"].includes(
+    currentRequest?.status ?? "",
+  );
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
-      {participation.isLoading && <ParticipationLoading />}
-      {(participation.hasLoadError || (!participation.isLoading && !state)) && (
-        <Alert variant="destructive">
-          <p>No se pudo cargar tu participación como mentor.</p>
-          <Button variant="outline" onClick={() => participation.retry()}>
-            Reintentar participación
+      <div className="space-y-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Participación como mentor
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Consulta tu participación y revisa tus solicitudes de cupo.
+          </p>
+        </div>
+
+        <div
+          role="tablist"
+          aria-label="Secciones de participación como mentor"
+          className="flex flex-wrap gap-2 border-b pb-3"
+        >
+          <Button
+            id="participation-current-tab"
+            type="button"
+            role="tab"
+            aria-selected={activeTab === "current"}
+            aria-controls="participation-current-panel"
+            variant={activeTab === "current" ? "default" : "outline"}
+            onClick={() => setActiveTab("current")}
+          >
+            Mi participación
           </Button>
-        </Alert>
-      )}
-      {request.isPending && (
-        <p role="status">Consultando solicitudes de cupo…</p>
-      )}
-      {request.isError && (
-        <Alert variant="destructive">
-          <p>No se pudo consultar tu solicitud de cupo.</p>
-          <Button variant="outline" onClick={() => void request.refetch()}>
-            Reintentar solicitud
+
+          <Button
+            id="participation-history-tab"
+            type="button"
+            role="tab"
+            aria-selected={activeTab === "history"}
+            aria-controls="participation-history-panel"
+            variant={activeTab === "history" ? "default" : "outline"}
+            onClick={() => setActiveTab("history")}
+          >
+            Historial de solicitudes
           </Button>
-        </Alert>
-      )}
-      {(isActive || (hasHistory && !request.isPending && !hasOpenRequest)) && (
-        <ParticipationOverview
-          isActive={isActive}
-          actionEnabled={
-            isActive ||
-            (request.isSuccess &&
-              !["PENDING", "OFFERED"].includes(currentRequest?.status ?? ""))
-          }
-          areas={(state?.areas ?? []).map((area) => area.name)}
-          orientations={(state?.orientations ?? []).map(
-            (orientation) => orientation.name,
-          )}
-          onAction={() => {
-            setError(null);
-            setHasDraftStorageError(false);
-            setModal(isActive ? "deactivate" : "activate");
-          }}
-        />
-      )}
-      {!isActive && currentRequest?.status === "PENDING" && (
-        <PendingParticipation
-          request={currentRequest}
-          onCancelled={() => notifySuccess("Solicitud cancelada correctamente")}
-        />
-      )}
-      {!isActive &&
-        currentRequest?.status === "OFFERED" &&
-        (currentRequest.offer ? (
-          <SlotOfferParticipation
-            key={currentRequest.offer.id}
-            request={currentRequest}
-            onConfirmed={() => {
-              void refreshRoles();
-              void client.invalidateQueries({
-                queryKey: ["mentors", "participation"],
-              });
-              void client.invalidateQueries({
-                queryKey: ["mentorship", "directory"],
-              });
-              void client.invalidateQueries({
-                queryKey: ["mentorship", "profile"],
-              });
-              notifySuccess("Participación activada correctamente");
+        </div>
+      </div>
+
+      <div
+        id="participation-current-panel"
+        role="tabpanel"
+        aria-labelledby="participation-current-tab"
+        hidden={activeTab !== "current"}
+        className="space-y-6"
+      >
+        {participation.isLoading && <ParticipationLoading />}
+
+        {(participation.hasLoadError ||
+          (!participation.isLoading && !state)) && (
+          <Alert variant="destructive">
+            <p>No se pudo cargar tu participación como mentor.</p>
+            <Button variant="outline" onClick={() => participation.retry()}>
+              Reintentar participación
+            </Button>
+          </Alert>
+        )}
+
+        {request.isPending && (
+          <p role="status">Consultando solicitudes de cupo…</p>
+        )}
+
+        {request.isError && (
+          <Alert variant="destructive">
+            <p>No se pudo consultar tu solicitud de cupo.</p>
+            <Button variant="outline" onClick={() => void request.refetch()}>
+              Reintentar solicitud
+            </Button>
+          </Alert>
+        )}
+
+        {(isActive ||
+          (hasHistory && !request.isPending && !hasOpenRequest)) && (
+          <ParticipationOverview
+            isActive={isActive}
+            actionEnabled={
+              isActive ||
+              (request.isSuccess &&
+                !["PENDING", "OFFERED"].includes(
+                  currentRequest?.status ?? "",
+                ))
+            }
+            areas={(state?.areas ?? []).map((area) => area.name)}
+            orientations={(state?.orientations ?? []).map(
+              (orientation) => orientation.name,
+            )}
+            onAction={() => {
+              setError(null);
+              setHasDraftStorageError(false);
+              setModal(isActive ? "deactivate" : "activate");
             }}
           />
-        ) : (
-          <Alert variant="destructive">
-            No se pudo consultar la oferta. Actualiza la página.
-          </Alert>
-        ))}
-      {state &&
-        !participation.hasLoadError &&
-        request.isSuccess &&
-        !isActive &&
-        !hasHistory &&
-        !["PENDING", "OFFERED"].includes(currentRequest?.status ?? "") && (
-          <div className="space-y-6">
-            <SlotAvailability />
-            <ParticipationEmptyState />
-          </div>
         )}
-      {!isActive && currentRequest?.status === "EXPIRED" && (
-        <p role="status">
-          La oferta venció. Puedes revisar las condiciones vigentes en el proceso
-          de incorporación.
+
+        {!isActive && currentRequest?.status === "PENDING" && (
+          <PendingParticipation
+            request={currentRequest}
+            onCancelled={() =>
+              notifySuccess("Solicitud cancelada correctamente")
+            }
+          />
+        )}
+
+        {!isActive &&
+          currentRequest?.status === "OFFERED" &&
+          (currentRequest.offer ? (
+            <SlotOfferParticipation
+              key={currentRequest.offer.id}
+              request={currentRequest}
+              onConfirmed={() => {
+                void refreshRoles();
+                void client.invalidateQueries({
+                  queryKey: ["mentors", "participation"],
+                });
+                void client.invalidateQueries({
+                  queryKey: ["mentorship", "directory"],
+                });
+                void client.invalidateQueries({
+                  queryKey: ["mentorship", "profile"],
+                });
+                notifySuccess("Participación activada correctamente");
+              }}
+            />
+          ) : (
+            <Alert variant="destructive">
+              No se pudo consultar la oferta. Actualiza la página.
+            </Alert>
+          ))}
+
+        {state &&
+          !participation.hasLoadError &&
+          request.isSuccess &&
+          !isActive &&
+          !hasHistory &&
+          !["PENDING", "OFFERED"].includes(
+            currentRequest?.status ?? "",
+          ) && (
+            <div className="space-y-6">
+              <SlotAvailability />
+              <ParticipationEmptyState />
+            </div>
+          )}
+
+        {!isActive && currentRequest?.status === "EXPIRED" && (
+          <p role="status">
+            La oferta venció. Puedes revisar las condiciones vigentes en el
+            proceso de incorporación.
+          </p>
+        )}
+      </div>
+
+      <div
+        id="participation-history-panel"
+        role="tabpanel"
+        aria-labelledby="participation-history-tab"
+        hidden={activeTab !== "history"}
+        className="space-y-4"
+      >
+        <h2 className="text-xl font-semibold">
+          Historial de solicitudes
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          Aquí podrás consultar las solicitudes de cupo que realizaste
+          como mentor.
         </p>
-      )}
+      </div>
+
       <DeactivateParticipationModal
         isOpen={modal === "deactivate"}
         onClose={() => setModal(null)}
@@ -245,6 +337,7 @@ export function ParticipationView({
           (orientation) => orientation.name,
         )}
       />
+
       <ActivateParticipationModal
         isOpen={modal === "activate"}
         onClose={() => setModal(null)}
@@ -255,9 +348,13 @@ export function ParticipationView({
               router.push("/mentorship");
               return;
             }
+
             try {
-              if (!currentUserId) throw new Error("Identidad no disponible");
+              if (!currentUserId)
+                throw new Error("Identidad no disponible");
+
               const draft = await loadMentorshipWizardDraft(currentUserId);
+
               if (!draft)
                 await saveMentorshipWizardDraft(currentUserId, {
                   currentStep: 1,
@@ -265,10 +362,11 @@ export function ParticipationView({
                   selectedTechnicalAreaIds: (state?.areas ?? []).map(
                     (area) => area.id,
                   ),
-                  selectedOrientationTypeIds: (state?.orientations ?? []).map(
-                    (orientation) => orientation.id,
-                  ),
+                  selectedOrientationTypeIds: (
+                    state?.orientations ?? []
+                  ).map((orientation) => orientation.id),
                 });
+
               setModal(null);
               router.push("/mentorship");
             } catch {
