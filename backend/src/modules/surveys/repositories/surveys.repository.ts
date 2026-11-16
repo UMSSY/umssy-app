@@ -584,6 +584,42 @@ export class SurveysRepository {
     });
   }
 
+  // Encuestas publicadas con actividad en el semestre y alertas activas cuyo semestre aún no se evaluó.
+  async findSurveysPendingVariationEvaluation(
+    period: string,
+    range: SemesterRange,
+  ) {
+    return this.prisma.survey.findMany({
+      where: {
+        status: { title: SurveyStatus.PUBLISHED },
+        opensAt: { lt: range.end },
+        OR: [{ closesAt: null }, { closesAt: { gte: range.start } }],
+        AND: [
+          {
+            OR: [
+              { variationEvaluatedPeriod: null },
+              { variationEvaluatedPeriod: { not: period } },
+            ],
+          },
+        ],
+        NOT: { alertConfig: { is: { isEnabled: false } } },
+      },
+      include: {
+        createdBy: {
+          select: { id: true, firstName: true, lastName: true, email: true },
+        },
+        alertConfig: true,
+      },
+    });
+  }
+
+  async markVariationEvaluated(surveyId: string, period: string) {
+    return this.prisma.survey.update({
+      where: { id: surveyId },
+      data: { variationEvaluatedPeriod: period },
+    });
+  }
+
   async updateLastReminderSent(surveyId: string, date: Date = new Date()) {
     return this.prisma.survey.update({
       where: { id: surveyId },

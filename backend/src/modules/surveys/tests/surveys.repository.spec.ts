@@ -446,3 +446,81 @@ describe('SurveysRepository sin catálogos de encuestas', () => {
     });
   });
 });
+
+describe('SurveysRepository - evaluación de variaciones por semestre', () => {
+  const RANGE = {
+    start: new Date('2026-01-01T04:00:00.000Z'),
+    end: new Date('2026-07-01T04:00:00.000Z'),
+  };
+
+  function createVariationPrisma() {
+    return {
+      survey: {
+        findMany: vi.fn().mockResolvedValue([]),
+        update: vi.fn().mockResolvedValue({ id: 'survey-1' }),
+      },
+    };
+  }
+
+  it('busca encuestas publicadas con actividad en el semestre, alertas activas y semestre sin evaluar', async () => {
+    const prisma = createVariationPrisma();
+    const repository = new SurveysRepository(
+      prisma as unknown as PrismaService,
+    );
+
+    await repository.findSurveysPendingVariationEvaluation('I-2026', RANGE);
+
+    expect(prisma.survey.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          status: { title: 'published' },
+          opensAt: { lt: RANGE.end },
+          OR: [{ closesAt: null }, { closesAt: { gte: RANGE.start } }],
+          AND: [
+            {
+              OR: [
+                { variationEvaluatedPeriod: null },
+                { variationEvaluatedPeriod: { not: 'I-2026' } },
+              ],
+            },
+          ],
+          NOT: { alertConfig: { is: { isEnabled: false } } },
+        },
+      }),
+    );
+  });
+
+  it('incluye al creador y la configuración de alertas de cada encuesta', async () => {
+    const prisma = createVariationPrisma();
+    const repository = new SurveysRepository(
+      prisma as unknown as PrismaService,
+    );
+
+    await repository.findSurveysPendingVariationEvaluation('I-2026', RANGE);
+
+    expect(prisma.survey.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        include: {
+          createdBy: {
+            select: { id: true, firstName: true, lastName: true, email: true },
+          },
+          alertConfig: true,
+        },
+      }),
+    );
+  });
+
+  it('registra el semestre evaluado en la encuesta', async () => {
+    const prisma = createVariationPrisma();
+    const repository = new SurveysRepository(
+      prisma as unknown as PrismaService,
+    );
+
+    await repository.markVariationEvaluated('survey-1', 'I-2026');
+
+    expect(prisma.survey.update).toHaveBeenCalledWith({
+      where: { id: 'survey-1' },
+      data: { variationEvaluatedPeriod: 'I-2026' },
+    });
+  });
+});
