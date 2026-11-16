@@ -4,6 +4,7 @@ import { SurveyLifecycleWorkerService } from '../services/survey-lifecycle-worke
 import type { SurveysRepository } from '../repositories/surveys.repository.js';
 import type { SurveyVariationEvaluatorService } from '../services/survey-variation-evaluator.service.js';
 import type { MailService } from '../../mail/services/mail.service.js';
+import { getSemesterRange } from '../utils/academic-semester.js';
 
 describe('SurveyLifecycleWorkerService', () => {
   let worker: SurveyLifecycleWorkerService;
@@ -15,8 +16,10 @@ describe('SurveyLifecycleWorkerService', () => {
     repository = {
       findSurveysClosingSoon: vi.fn(),
       findSurveysExpiredForClosure: vi.fn(),
+      findSurveysPendingVariationEvaluation: vi.fn().mockResolvedValue([]),
       markClosingSoonNotified: vi.fn(),
       markClosedNotified: vi.fn(),
+      markVariationEvaluated: vi.fn(),
     };
     variationEvaluator = {
       evaluateSurvey: vi.fn(),
@@ -120,6 +123,19 @@ describe('SurveyLifecycleWorkerService', () => {
       await worker.tick();
       expect(repository.findSurveysClosingSoon).toHaveBeenCalledTimes(2);
     });
+
+    it('revisa también las variaciones del semestre que terminó', async () => {
+      vi.mocked(repository.findSurveysClosingSoon!).mockResolvedValue([]);
+      vi.mocked(repository.findSurveysExpiredForClosure!).mockResolvedValue(
+        [],
+      );
+
+      await worker.tick(new Date('2026-07-02T15:00:00Z'));
+
+      expect(
+        repository.findSurveysPendingVariationEvaluation,
+      ).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('continúa con las demás encuestas si falla una', async () => {
@@ -147,54 +163,6 @@ describe('SurveyLifecycleWorkerService', () => {
       's-2',
       expect.any(Date),
     );
-  });
-
-  it('normaliza questionIds antes de evaluar la variación', async () => {
-    vi.mocked(repository.findSurveysExpiredForClosure!).mockResolvedValue([
-      {
-        id: 'survey-closed-2',
-        title: 'Encuesta',
-        closesAt: new Date('2026-11-14T23:59:59Z'),
-        academicPeriod: 'II-2024',
-        createdBy: null,
-        alertConfig: {
-          isEnabled: true,
-          threshold: 15,
-          questionIds: ['q-1', 2, null, 'q-2'],
-        },
-        _count: { responses: 0 },
-      },
-      {
-        id: 'survey-closed-3',
-        title: 'Encuesta',
-        closesAt: null,
-        academicPeriod: null,
-        createdBy: null,
-        alertConfig: { isEnabled: true, threshold: 10, questionIds: 'q-1' },
-        _count: { responses: 0 },
-      },
-    ] as any);
-    vi.mocked(variationEvaluator.evaluateSurvey!).mockResolvedValue({
-      hasShifts: false,
-      shifts: [],
-      currentPeriod: '',
-      previousPeriod: '',
-      summaryText: '',
-    });
-
-    await worker.processClosedSurveys(new Date('2026-11-15T00:00:00Z'));
-
-    expect(variationEvaluator.evaluateSurvey).toHaveBeenNthCalledWith(
-      1,
-      'survey-closed-2',
-      expect.objectContaining({ questionIds: ['q-1', 'q-2'] }),
-    );
-    expect(variationEvaluator.evaluateSurvey).toHaveBeenNthCalledWith(
-      2,
-      'survey-closed-3',
-      expect.objectContaining({ questionIds: null }),
-    );
-    expect(mailService.send).not.toHaveBeenCalled();
   });
 
   it('debe notificar encuestas próximas a cerrar y marcarlas como notificadas', async () => {
@@ -230,12 +198,12 @@ describe('SurveyLifecycleWorkerService', () => {
     );
   });
 
-  it('debe notificar encuestas cerradas y enviar alerta de variación si aplica', async () => {
+  it('debe notificar encuestas cerradas sin evaluar variaciones, que se revisan al terminar el semestre', async () => {
     const mockSurvey = {
       id: 'survey-closed-1',
       title: 'Encuesta Inserción Laboral',
       closesAt: new Date('2026-11-14T23:59:59Z'),
-      academicPeriod: 'II-2024',
+      academicPeriod: '2020',
       createdBy: {
         id: 'user-1',
         firstName: 'Ana',
@@ -254,7 +222,24 @@ describe('SurveyLifecycleWorkerService', () => {
       mockSurvey as any,
     ]);
 
-    vi.mocked(variationEvaluator.evaluateSurvey!).mockResolvedValue({
+    await worker.processClosedSurveys(new Date('2026-11-15T00:00:00Z'));
+
+    expect(mailService.send).toHaveBeenCalledTimes(1);
+    expect(mailService.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: 'ana.gomez@umss.edu',
+        subject: 'La encuesta «Encuesta Inserción Laboral» ya cerró',
+      }),
+    );
+    expect(variationEvaluator.evaluateSurvey).not.toHaveBeenCalled();
+    expect(repository.markClosedNotified).toHaveBeenCalledWith(
+      'survey-closed-1',
+      expect.any(Date),
+    );
+  });
+
+  describe('processSemesterVariations', () => {
+    const SHIFTS = {
       hasShifts: true,
       shifts: [
         {
@@ -265,39 +250,167 @@ describe('SurveyLifecycleWorkerService', () => {
           currentPercentage: 60,
           previousPercentage: 40,
           difference: 20,
-          direction: 'up',
+          direction: 'up' as const,
         },
       ],
-      currentPeriod: 'II-2024',
-      previousPeriod: 'I-2024',
+      currentPeriod: 'I-2026',
+      previousPeriod: 'II-2025',
       summaryText: 'Variación detectada: Opción 1 +20 pp',
+    };
+    const NO_SHIFTS = {
+      hasShifts: false,
+      shifts: [],
+      currentPeriod: 'I-2026',
+      previousPeriod: 'II-2025',
+      summaryText: '',
+    };
+
+    function buildSurvey(overrides: Record<string, unknown> = {}) {
+      return {
+        id: 'survey-1',
+        title: 'Encuesta Inserción Laboral',
+        createdBy: {
+          id: 'user-1',
+          firstName: 'Ana',
+          lastName: 'Gómez',
+          email: 'ana.gomez@umss.edu',
+        },
+        alertConfig: { isEnabled: true, threshold: 15, questionIds: ['q-1'] },
+        ...overrides,
+      } as any;
+    }
+
+    it('evalúa el semestre que acaba de terminar el 1 de julio, en hora de Bolivia', async () => {
+      await worker.processSemesterVariations(new Date('2026-07-01T04:30:00Z'));
+
+      expect(
+        repository.findSurveysPendingVariationEvaluation,
+      ).toHaveBeenCalledWith('I-2026', getSemesterRange('I-2026'));
     });
 
-    await worker.processClosedSurveys(new Date('2026-11-15T00:00:00Z'));
+    it('evalúa el segundo semestre del año anterior el 1 de enero', async () => {
+      await worker.processSemesterVariations(new Date('2027-01-01T04:30:00Z'));
 
-    // Should send 2 emails: 1 for closure, 1 for variation alert
-    expect(mailService.send).toHaveBeenCalledTimes(2);
+      expect(
+        repository.findSurveysPendingVariationEvaluation,
+      ).toHaveBeenCalledWith('II-2026', getSemesterRange('II-2026'));
+    });
 
-    expect(mailService.send).toHaveBeenNthCalledWith(
-      1,
-      expect.objectContaining({
-        to: 'ana.gomez@umss.edu',
-        subject: 'La encuesta «Encuesta Inserción Laboral» ya cerró',
-      }),
-    );
+    it('no cambia de semestre antes de la medianoche de Bolivia', async () => {
+      await worker.processSemesterVariations(new Date('2026-07-01T03:30:00Z'));
 
-    expect(mailService.send).toHaveBeenNthCalledWith(
-      2,
-      expect.objectContaining({
-        to: 'ana.gomez@umss.edu',
-        subject:
-          'Alerta de variación significativa en «Encuesta Inserción Laboral»',
-      }),
-    );
+      expect(
+        repository.findSurveysPendingVariationEvaluation,
+      ).toHaveBeenCalledWith('II-2025', getSemesterRange('II-2025'));
+    });
 
-    expect(repository.markClosedNotified).toHaveBeenCalledWith(
-      'survey-closed-1',
-      expect.any(Date),
-    );
+    it('evalúa con el semestre, el umbral y las preguntas configurados', async () => {
+      vi.mocked(repository.findSurveysPendingVariationEvaluation!).mockResolvedValue(
+        [buildSurvey({ alertConfig: { isEnabled: true, threshold: 15, questionIds: ['q-1', 2, null, 'q-2'] } })],
+      );
+      vi.mocked(variationEvaluator.evaluateSurvey!).mockResolvedValue(NO_SHIFTS);
+
+      await worker.processSemesterVariations(new Date('2026-07-02T15:00:00Z'));
+
+      expect(variationEvaluator.evaluateSurvey).toHaveBeenCalledWith(
+        'survey-1',
+        { academicPeriod: 'I-2026', threshold: 15, questionIds: ['q-1', 'q-2'] },
+      );
+    });
+
+    it('usa todas las preguntas cuando la encuesta no tiene configuración', async () => {
+      vi.mocked(repository.findSurveysPendingVariationEvaluation!).mockResolvedValue(
+        [buildSurvey({ alertConfig: null })],
+      );
+      vi.mocked(variationEvaluator.evaluateSurvey!).mockResolvedValue(NO_SHIFTS);
+
+      await worker.processSemesterVariations(new Date('2026-07-02T15:00:00Z'));
+
+      expect(variationEvaluator.evaluateSurvey).toHaveBeenCalledWith(
+        'survey-1',
+        { academicPeriod: 'I-2026', threshold: undefined, questionIds: null },
+      );
+    });
+
+    it('envía un solo correo al creador con las variaciones y marca el semestre como evaluado', async () => {
+      vi.mocked(repository.findSurveysPendingVariationEvaluation!).mockResolvedValue(
+        [buildSurvey()],
+      );
+      vi.mocked(variationEvaluator.evaluateSurvey!).mockResolvedValue(SHIFTS);
+
+      await worker.processSemesterVariations(new Date('2026-07-02T15:00:00Z'));
+
+      expect(mailService.send).toHaveBeenCalledTimes(1);
+      expect(mailService.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          to: 'ana.gomez@umss.edu',
+          subject:
+            'Alerta de variación significativa en «Encuesta Inserción Laboral»',
+          values: expect.objectContaining({
+            threshold: '15',
+            shiftsContent: 'Variación detectada: Opción 1 +20 pp',
+          }),
+        }),
+      );
+      expect(repository.markVariationEvaluated).toHaveBeenCalledWith(
+        'survey-1',
+        'I-2026',
+      );
+    });
+
+    it('no envía correo cuando ninguna variación supera el umbral, pero marca el semestre como evaluado', async () => {
+      vi.mocked(repository.findSurveysPendingVariationEvaluation!).mockResolvedValue(
+        [buildSurvey()],
+      );
+      vi.mocked(variationEvaluator.evaluateSurvey!).mockResolvedValue(NO_SHIFTS);
+
+      await worker.processSemesterVariations(new Date('2026-07-02T15:00:00Z'));
+
+      expect(mailService.send).not.toHaveBeenCalled();
+      expect(repository.markVariationEvaluated).toHaveBeenCalledWith(
+        'survey-1',
+        'I-2026',
+      );
+    });
+
+    it('marca el semestre como evaluado aunque la encuesta no tenga creador con correo', async () => {
+      vi.mocked(repository.findSurveysPendingVariationEvaluation!).mockResolvedValue(
+        [buildSurvey({ createdBy: null })],
+      );
+      vi.mocked(variationEvaluator.evaluateSurvey!).mockResolvedValue(SHIFTS);
+
+      await worker.processSemesterVariations(new Date('2026-07-02T15:00:00Z'));
+
+      expect(mailService.send).not.toHaveBeenCalled();
+      expect(repository.markVariationEvaluated).toHaveBeenCalledTimes(1);
+    });
+
+    it('no marca el semestre cuando falla el envío y continúa con las demás encuestas', async () => {
+      vi.spyOn(Logger.prototype, 'error').mockImplementation(() => {});
+      vi.mocked(repository.findSurveysPendingVariationEvaluation!).mockResolvedValue(
+        [buildSurvey({ id: 'survey-1' }), buildSurvey({ id: 'survey-2' })],
+      );
+      vi.mocked(variationEvaluator.evaluateSurvey!).mockResolvedValue(SHIFTS);
+      vi.mocked(mailService.send!)
+        .mockRejectedValueOnce(new Error('smtp down'))
+        .mockResolvedValueOnce(undefined);
+
+      await worker.processSemesterVariations(new Date('2026-07-02T15:00:00Z'));
+
+      expect(mailService.send).toHaveBeenCalledTimes(2);
+      expect(repository.markVariationEvaluated).toHaveBeenCalledTimes(1);
+      expect(repository.markVariationEvaluated).toHaveBeenCalledWith(
+        'survey-2',
+        'I-2026',
+      );
+    });
+
+    it('no hace nada cuando no hay encuestas pendientes de evaluar', async () => {
+      await worker.processSemesterVariations(new Date('2026-07-02T15:00:00Z'));
+
+      expect(variationEvaluator.evaluateSurvey).not.toHaveBeenCalled();
+      expect(mailService.send).not.toHaveBeenCalled();
+      expect(repository.markVariationEvaluated).not.toHaveBeenCalled();
+    });
   });
 });

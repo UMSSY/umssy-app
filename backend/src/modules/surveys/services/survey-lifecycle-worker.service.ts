@@ -6,8 +6,14 @@ import {
 } from '@nestjs/common';
 import { MailService } from '../../mail/services/mail.service.js';
 import { loadMailTemplate } from '../../mail/helpers/load-mail-template.js';
+import { getAcademicPeriod } from '../../reports/utils/academic-period.js';
 import { SurveysRepository } from '../repositories/surveys.repository.js';
 import { SurveyVariationEvaluatorService } from './survey-variation-evaluator.service.js';
+import type { SurveyVariationEvaluationResult } from './survey-variation-evaluator.service.js';
+import {
+  getPreviousSemester,
+  getSemesterRange,
+} from '../utils/academic-semester.js';
 import {
   buildSurveyFrontendUrl,
   formatSurveyClosureDate,
@@ -19,6 +25,17 @@ const CHECK_INTERVAL_MS = 30_000;
 function toQuestionIds(value: unknown): string[] | null {
   if (!Array.isArray(value)) return null;
   return value.filter((item): item is string => typeof item === 'string');
+}
+
+interface VariationAlertSurvey {
+  id: string;
+  title: string;
+  alertConfig?: { threshold: number } | null;
+  createdBy?: {
+    firstName: string;
+    lastName: string;
+    email: string;
+  } | null;
 }
 
 @Injectable()
@@ -54,6 +71,7 @@ export class SurveyLifecycleWorkerService
     try {
       await this.processClosingSoonSurveys(now);
       await this.processClosedSurveys(now);
+      await this.processSemesterVariations(now);
     } catch (error) {
       this.logger.error(
         'Error procesando el ciclo de vida de encuestas',
@@ -145,42 +163,6 @@ export class SurveyLifecycleWorkerService
         }
 
         await this.surveysRepository.markClosedNotified(survey.id, now);
-
-        const isAlertEnabled = survey.alertConfig?.isEnabled ?? true;
-        if (isAlertEnabled) {
-          const evalResult = await this.variationEvaluator.evaluateSurvey(
-            survey.id,
-            {
-              academicPeriod: survey.academicPeriod,
-              closesAt: survey.closesAt,
-              threshold: survey.alertConfig?.threshold,
-              questionIds: toQuestionIds(survey.alertConfig?.questionIds),
-            },
-          );
-
-          if (evalResult.hasShifts && survey.createdBy?.email) {
-            const recipientName =
-              `${survey.createdBy.firstName} ${survey.createdBy.lastName}`.trim() ||
-              'Administrador';
-            const actionUrl = buildSurveyFrontendUrl(
-              `/backoffice/surveys/statistics/${survey.id}`,
-            );
-            const varMjml = await loadMailTemplate('survey-variation-alert');
-            await this.mailService.send({
-              to: survey.createdBy.email,
-              subject: `Alerta de variación significativa en «${survey.title}»`,
-              text: `Hola ${recipientName}, detectamos cambios significativos en los resultados de la encuesta «${survey.title}» frente al semestre anterior.\n${evalResult.summaryText}\nVer analíticas en: ${actionUrl}`,
-              mjml: varMjml,
-              values: {
-                recipientName,
-                surveyTitle: survey.title,
-                threshold: String(survey.alertConfig?.threshold ?? 10),
-                shiftsContent: evalResult.summaryText,
-                actionUrl,
-              },
-            });
-          }
-        }
       } catch (err) {
         this.logger.error(
           `Error procesando cierre de encuesta ${survey.id}`,
@@ -188,5 +170,71 @@ export class SurveyLifecycleWorkerService
         );
       }
     }
+  }
+
+  // Al terminar cada semestre compara ese semestre contra el anterior y avisa una sola vez por encuesta.
+  async processSemesterVariations(now: Date = new Date()) {
+    const currentPeriod = getAcademicPeriod(now.toISOString());
+    const period = currentPeriod ? getPreviousSemester(currentPeriod) : null;
+    const range = period ? getSemesterRange(period) : null;
+    if (!period || !range) return;
+
+    const surveys =
+      await this.surveysRepository.findSurveysPendingVariationEvaluation(
+        period,
+        range,
+      );
+
+    for (const survey of surveys) {
+      try {
+        const evaluation = await this.variationEvaluator.evaluateSurvey(
+          survey.id,
+          {
+            academicPeriod: period,
+            threshold: survey.alertConfig?.threshold,
+            questionIds: toQuestionIds(survey.alertConfig?.questionIds),
+          },
+        );
+
+        if (evaluation.hasShifts && survey.createdBy?.email) {
+          await this.sendVariationAlert(survey, evaluation);
+        }
+        await this.surveysRepository.markVariationEvaluated(survey.id, period);
+      } catch (err) {
+        this.logger.error(
+          `Error evaluando variaciones de la encuesta ${survey.id} en ${period}`,
+          err instanceof Error ? err.stack : String(err),
+        );
+      }
+    }
+  }
+
+  private async sendVariationAlert(
+    survey: VariationAlertSurvey,
+    evaluation: SurveyVariationEvaluationResult,
+  ) {
+    if (!survey.createdBy?.email) return;
+
+    const recipientName =
+      `${survey.createdBy.firstName} ${survey.createdBy.lastName}`.trim() ||
+      'Administrador';
+    const actionUrl = buildSurveyFrontendUrl(
+      `/backoffice/surveys/statistics/${survey.id}`,
+    );
+    const mjml = await loadMailTemplate('survey-variation-alert');
+
+    await this.mailService.send({
+      to: survey.createdBy.email,
+      subject: `Alerta de variación significativa en «${survey.title}»`,
+      text: `Hola ${recipientName}, detectamos cambios significativos en los resultados de la encuesta «${survey.title}» frente al semestre anterior.\n${evaluation.summaryText}\nVer analíticas en: ${actionUrl}`,
+      mjml,
+      values: {
+        recipientName,
+        surveyTitle: survey.title,
+        threshold: String(survey.alertConfig?.threshold ?? 10),
+        shiftsContent: evaluation.summaryText,
+        actionUrl,
+      },
+    });
   }
 }
