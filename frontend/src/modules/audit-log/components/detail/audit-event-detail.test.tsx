@@ -46,9 +46,8 @@ describe("AuditEventDetailPanel", () => {
     mockDetail(DETAIL);
     renderWithQuery(<AuditEventDetailPanel event={EVENT} onClose={vi.fn()} />);
 
-    expect(await screen.findByText(/EVT-2026-000812/)).toBeInTheDocument();
+    expect(await screen.findByText("SOL-2026-0018")).toBeInTheDocument();
     expect(screen.getByText("Solo lectura · EVT-2026-000812")).toBeInTheDocument();
-    expect(screen.getByText("SOL-2026-0018")).toBeInTheDocument();
     expect(screen.getByText(/Ingeniería de Sistemas · Titulación 2024/)).toBeInTheDocument();
     expect(screen.getByText("Admin Uno")).toBeInTheDocument();
     expect(screen.getByText(/hora de Bolivia/)).toBeInTheDocument();
