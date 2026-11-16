@@ -45,7 +45,6 @@ export class SkillAnalysisRepository {
       },
       include: {
         skill: true,
-        user: { select: { firstName: true, lastName: true } },
       },
       take: 300,
       orderBy: { createdAt: 'desc' },
@@ -75,24 +74,6 @@ export class SkillAnalysisRepository {
       where: { isCustom: false },
       select: { id: true, name: true, areaId: true },
     });
-  }
-
-  async countPendingPublicationSkills(userId: string): Promise<number> {
-    // Older reconciliations may have left pending NLP rows without a live source.
-    const [row] = await this.prisma.$queryRaw<{ count: number }[]>`
-      SELECT count(*)::int AS count FROM user_skills s
-      WHERE s.user_id=${userId}::uuid AND s.verification_status='pending'
-        AND (s.source='manual' OR EXISTS (
-          SELECT 1 FROM jsonb_array_elements(CASE WHEN jsonb_typeof(s.evidence_refs)='array'
-            THEN s.evidence_refs ELSE '[]'::jsonb END) ref
-          WHERE CASE ref->>'type'
-            WHEN 'cv' THEN EXISTS (SELECT 1 FROM user_cv_file c WHERE c.id::text=ref->>'id' AND c.user_id=s.user_id AND c.cv_pdf_data IS NOT NULL)
-            WHEN 'certification' THEN EXISTS (SELECT 1 FROM certifications c WHERE c.id::text=ref->>'id' AND c.user_id=s.user_id AND c.document_url IS NOT NULL)
-            WHEN 'education' THEN EXISTS (SELECT 1 FROM educations e WHERE e.id::text=ref->>'id' AND e.user_id=s.user_id)
-            WHEN 'work-experience' THEN EXISTS (SELECT 1 FROM work_experiences w WHERE w.id::text=ref->>'id' AND w.user_id=s.user_id)
-            WHEN 'presentation' THEN ref->>'id'=s.user_id::text
-            ELSE false END))`;
-    return row.count;
   }
 
   findProfileSkillRows(
@@ -153,27 +134,24 @@ export class SkillAnalysisRepository {
         skipDuplicates: true,
       });
     }
-    // Re-evaluate document-derived approvals when evidence changes or disappears.
-    return client.$executeRaw`
-      WITH written AS (
-        SELECT s.id FROM user_skills s WHERE s.user_id=${userId}::uuid AND
-          (s.source='manual' OR EXISTS (SELECT 1 FROM jsonb_array_elements(coalesce(s.evidence_refs,'[]'::jsonb)) ref
-            WHERE ref->>'type' IN ('presentation','education','work-experience')
-               OR (ref->>'type'='certification' AND EXISTS(SELECT 1 FROM certifications c
-                   WHERE c.id::text=ref->>'id' AND c.user_id=s.user_id AND c.document_url IS NULL))))
-      ), eligible AS (
-        SELECT id FROM written UNION
-        SELECT DISTINCT s.id FROM user_skills s JOIN radar_document_verifications d
-          ON d.user_id=s.user_id AND d.active AND d.status IN ('approved','manual_approved')
-        WHERE s.user_id=${userId}::uuid AND s.source='nlp' AND d.skills @> jsonb_build_array(jsonb_build_object('id',s.skill_id::text))
-          AND s.evidence_refs @> jsonb_build_array(jsonb_build_object('type',d.source_type,'id',d.source_id::text))
-      ), changes AS (
-        SELECT s.id, e.id IS NOT NULL AS eligible FROM user_skills s LEFT JOIN eligible e ON e.id=s.id
-        WHERE s.user_id=${userId}::uuid AND (((s.verification_status='pending' OR (s.verification_status IN ('revoked','rejected') AND s.id IN (SELECT id FROM written))) AND e.id IS NOT NULL)
-          OR (s.verification_status='approved' AND s.radar_auto_verified AND e.id IS NULL))
-      )
-      UPDATE user_skills s SET verification_status=CASE WHEN c.eligible THEN 'approved' ELSE 'pending' END,
-        radar_auto_verified=c.eligible,updated_at=clock_timestamp() FROM changes c WHERE c.id=s.id`;
+    return plan.creates.length + plan.updates.length + plan.deleteIds.length;
+  }
+
+  async applyAutomaticDecisions(
+    userId: string,
+    approvedIds: string[],
+    pendingIds: string[],
+    context: TransactionContext,
+  ) {
+    const approved = await context.client.userSkill.updateMany({
+      where: { userId, id: { in: approvedIds } },
+      data: { verificationStatus: 'approved', radarAutoVerified: true },
+    });
+    const pending = await context.client.userSkill.updateMany({
+      where: { userId, id: { in: pendingIds } },
+      data: { verificationStatus: 'pending', radarAutoVerified: false },
+    });
+    return approved.count + pending.count;
   }
 
   findApprovedRecruitmentReferences(userId: string, ids: string[]) {

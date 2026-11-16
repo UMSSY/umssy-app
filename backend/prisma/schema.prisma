@@ -1556,6 +1556,7 @@ model RadarDocumentVerification {
   reason String @default("")
   skills Json @default("[]")
   createdAt DateTime @default(dbgenerated("clock_timestamp()")) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(dbgenerated("clock_timestamp()")) @updatedAt @map("updated_at") @db.Timestamptz(6)
   decidedAt DateTime? @map("decided_at") @db.Timestamptz(6)
   reviewerId String? @map("reviewer_id") @db.Uuid
   noticeRead Boolean @default(false) @map("notice_read")
@@ -1568,6 +1569,12 @@ model RadarDocumentVerification {
   reviewer User? @relation("VerifiedDocumentReviewer",fields:[reviewerId],references:[id],onDelete:SetNull,onUpdate:NoAction)
   @@index([userId,createdAt(sort:Desc)],map:"radar_doc_owner_date")
   @@map("radar_document_verifications")
+  statusEntry RadarDocumentStatus @relation(fields:[status], references:[code], onDelete:Restrict, onUpdate:Cascade, map:"radar_document_status_fk")
+  sourceTypeEntry RadarDocumentSourceType @relation(fields:[sourceType], references:[code], onDelete:Restrict, onUpdate:Cascade, map:"radar_document_source_type_fk")
+  @@index([reviewerId],map:"radar_doc_reviewer")
+  @@index([status],map:"radar_doc_status")
+  @@index([sourceType],map:"radar_doc_source_type")
+
 }
 
 model PortfolioProvider {
@@ -1693,4 +1700,22 @@ model NotificationPreference {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("notification_preferences")
+}
+
+model RadarDocumentStatus {
+ code String @id
+ name String
+ createdAt DateTime @default(dbgenerated("clock_timestamp()")) @map("created_at") @db.Timestamptz(6)
+ updatedAt DateTime @default(dbgenerated("clock_timestamp()")) @updatedAt @map("updated_at") @db.Timestamptz(6)
+ documents RadarDocumentVerification[]
+ @@map("radar_document_statuses")
+}
+
+model RadarDocumentSourceType {
+ code String @id
+ name String
+ createdAt DateTime @default(dbgenerated("clock_timestamp()")) @map("created_at") @db.Timestamptz(6)
+ updatedAt DateTime @default(dbgenerated("clock_timestamp()")) @updatedAt @map("updated_at") @db.Timestamptz(6)
+ documents RadarDocumentVerification[]
+ @@map("radar_document_source_types")
 }

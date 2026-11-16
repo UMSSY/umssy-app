@@ -141,7 +141,9 @@ export const ModelName = {
   NotificationType: 'NotificationType',
   Notification: 'Notification',
   PushSubscription: 'PushSubscription',
-  NotificationPreference: 'NotificationPreference'
+  NotificationPreference: 'NotificationPreference',
+  RadarDocumentStatus: 'RadarDocumentStatus',
+  RadarDocumentSourceType: 'RadarDocumentSourceType'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1293,6 +1295,7 @@ export const RadarDocumentVerificationScalarFieldEnum = {
   reason: 'reason',
   skills: 'skills',
   createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
   decidedAt: 'decidedAt',
   reviewerId: 'reviewerId',
   noticeRead: 'noticeRead',
@@ -1405,6 +1408,26 @@ export const NotificationPreferenceScalarFieldEnum = {
 } as const
 
 export type NotificationPreferenceScalarFieldEnum = (typeof NotificationPreferenceScalarFieldEnum)[keyof typeof NotificationPreferenceScalarFieldEnum]
+
+
+export const RadarDocumentStatusScalarFieldEnum = {
+  code: 'code',
+  name: 'name',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RadarDocumentStatusScalarFieldEnum = (typeof RadarDocumentStatusScalarFieldEnum)[keyof typeof RadarDocumentStatusScalarFieldEnum]
+
+
+export const RadarDocumentSourceTypeScalarFieldEnum = {
+  code: 'code',
+  name: 'name',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RadarDocumentSourceTypeScalarFieldEnum = (typeof RadarDocumentSourceTypeScalarFieldEnum)[keyof typeof RadarDocumentSourceTypeScalarFieldEnum]
 
 
 export const SortOrder = {
