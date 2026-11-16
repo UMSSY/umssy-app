@@ -253,7 +253,7 @@ export class CompanyAccessRequestsService {
 
     const rawCode = String(randomInt(100000, 999999));
     const codeHash = createHash('sha256').update(rawCode).digest('hex');
-    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000);
 
     const updated = await this.repository.approveCompanyRequest(
       id,
@@ -274,15 +274,15 @@ export class CompanyAccessRequestsService {
           otp: rawCode,
         },
       );
-      const expiresInMinutes = '1440';
+      const expiresInMinutes = '48 horas';
       await this.mailService.send({
         to: current.email,
         subject: 'Tu código de activación de UMSSY para empresa',
-        text: `Tu solicitud de acceso para ${current.companyName} (${updated.requestCode}) fue aprobada.\n\nCódigo de activación: ${rawCode}\nCódigo de seguimiento: ${updated.requestCode}\nVence en 24 horas.\n\nPara activar tu cuenta y configurar tus credenciales de acceso, ingresa al siguiente enlace oficial:\n${activationUrl}\n\nEn la pantalla se te solicitará ingresar obligatoriamente tu código de seguimiento institucional (${updated.requestCode}) para validar tu identidad.`,
+        text: `Tu solicitud de acceso para ${current.companyName} (${updated.requestCode}) fue aprobada.\n\nCódigo de activación: ${rawCode}\nCódigo de seguimiento: ${updated.requestCode}\nVence en 48 horas.\n\nPara activar tu cuenta y configurar tus credenciales de acceso, ingresa al siguiente enlace oficial:\n${activationUrl}\n\nEn la pantalla se te solicitará ingresar obligatoriamente tu código de seguimiento institucional (${updated.requestCode}) para validar tu identidad.`,
         mjml: await loadMailTemplate('activation-code'),
         values: {
           code: rawCode,
-          expiresInMinutes,
+          expiresInMinutes: '48 horas',
           activationUrl,
         },
       });

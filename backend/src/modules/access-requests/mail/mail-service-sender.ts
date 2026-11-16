@@ -31,7 +31,7 @@ export class MailServiceSender implements MailSender {
       subject: 'Tu código de activación de UMSSY',
       text: `Tu solicitud de acceso fue aprobada. Tu código de activación es ${code} y vence en ${minutes} minutos. Actívalo en ${activationUrl}`,
       mjml: await loadMailTemplate('activation-code'),
-      values: { code, expiresInMinutes: String(minutes), activationUrl },
+      values: { code, expiresInMinutes: `${minutes} minutos`, activationUrl },
     });
   }
 
