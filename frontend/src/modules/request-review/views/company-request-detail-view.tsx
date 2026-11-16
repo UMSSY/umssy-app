@@ -8,8 +8,6 @@ import {
   ArrowLeft,
   Building2,
   CheckCircle2,
-  ChevronDown,
-  ChevronUp,
   Download,
   ExternalLink,
   Eye,
@@ -128,7 +126,6 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [isDocMinimized, setIsDocMinimized] = useState(false);
 
   // Ventana flotante centrada (Modal Dialog) de resolución y dictamen
   const [showResolutionModal, setShowResolutionModal] = useState(false);
@@ -681,64 +678,21 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
                 Documento de Respaldo Oficial
               </h2>
             </div>
-            <div className="flex items-center gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="xs"
-                onClick={() => setIsDocMinimized(!isDocMinimized)}
-                className="gap-1.5 text-xs font-semibold"
+            {docUrl && (
+              <a
+                href={docUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1 text-xs font-semibold text-primary transition-colors hover:bg-surface-soft"
               >
-                {isDocMinimized ? (
-                  <>
-                    <ChevronDown className="size-3.5" /> Expandir visor
-                  </>
-                ) : (
-                  <>
-                    <ChevronUp className="size-3.5" /> Minimizar visor
-                  </>
-                )}
-              </Button>
-              {docUrl && (
-                <a
-                  href={docUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1 text-xs font-semibold text-primary transition-colors hover:bg-surface-soft"
-                >
-                  <ExternalLink className="size-3.5" /> Abrir en nueva pestaña
-                </a>
-              )}
-            </div>
+                <ExternalLink className="size-3.5" /> Abrir en nueva pestaña
+              </a>
+            )}
           </div>
 
           <Card className="overflow-hidden border-border bg-surface shadow-xs">
             <CardContent className="p-0">
-              {isDocMinimized ? (
-                <div className="flex items-center justify-between border-b border-border bg-surface-soft/60 px-4 py-3">
-                  <div className="flex items-center gap-2.5">
-                    <FileText className="size-4 text-primary" />
-                    <div>
-                      <p className="text-xs font-semibold text-ink">
-                        carta-solicitud-{item.requestCode ?? 'doc'}.
-                        {docIsImage ? 'png' : 'pdf'}
-                      </p>
-                      <p className="text-[11px] text-text-secondary">
-                        Visor minimizado temporalmente.
-                      </p>
-                    </div>
-                  </div>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="xs"
-                    onClick={() => setIsDocMinimized(false)}
-                    className="gap-1 text-xs"
-                  >
-                    <Maximize2 className="size-3.5" /> Expandir visor
-                  </Button>
-                </div>
-              ) : docUrl ? (
+              {docUrl ? (
                 <DocumentViewer
                   url={docUrl}
                   mimeType={docMimeType}
