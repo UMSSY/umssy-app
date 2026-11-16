@@ -1217,126 +1217,129 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
           MODAL: EDITAR FICHA OFICIAL PARA REGISTRO
           ───────────────────────────────────────────────────────────────────────────── */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="sm:max-w-2xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-lg font-bold text-ink">
-              <Pencil className="size-5 text-primary" />
+        <DialogContent className="flex max-h-[85vh] flex-col overflow-hidden p-5 sm:max-w-3xl">
+          <DialogHeader className="shrink-0 border-b border-border pr-8 pb-3">
+            <DialogTitle className="flex items-center gap-2 text-base font-bold text-ink">
+              <Pencil className="size-4.5 text-primary" />
               Editar Ficha Oficial de Registro
             </DialogTitle>
             <DialogDescription className="text-xs text-text-secondary">
               Ajusta los datos que se guardarán definitivamente en la
               plataforma. Al guardar, el OCR recalculará la afinidad con el
-              documento.
+              documento en vivo.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid grid-cols-1 gap-4 py-2 sm:grid-cols-2">
-            <div className="space-y-1.5 sm:col-span-2">
-              <Label htmlFor="edit-companyName" className="text-xs font-bold">
-                Razón Social / Nombre Comercial *
-              </Label>
-              <Input
-                id="edit-companyName"
-                value={editForm.companyName ?? ''}
-                onChange={(e) =>
-                  setEditForm({ ...editForm, companyName: e.target.value })
-                }
-                className="text-xs"
-              />
-            </div>
+          <div className="flex-1 overflow-y-auto py-2 pr-1">
+            <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label htmlFor="edit-companyName" className="text-xs font-bold">
+                  Razón Social / Nombre Comercial *
+                </Label>
+                <Input
+                  id="edit-companyName"
+                  value={editForm.companyName ?? ''}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, companyName: e.target.value })
+                  }
+                  className="text-xs"
+                />
+              </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="edit-sector" className="text-xs font-bold">
-                Rubro / Sector *
-              </Label>
-              <Input
-                id="edit-sector"
-                value={editForm.sector ?? ''}
-                onChange={(e) =>
-                  setEditForm({ ...editForm, sector: e.target.value })
-                }
-                className="text-xs"
-              />
-            </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-sector" className="text-xs font-bold">
+                  Rubro / Sector *
+                </Label>
+                <Input
+                  id="edit-sector"
+                  value={editForm.sector ?? ''}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, sector: e.target.value })
+                  }
+                  className="text-xs"
+                />
+              </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="edit-username" className="text-xs font-bold">
-                Usuario Reclutador (@) *
-              </Label>
-              <Input
-                id="edit-username"
-                value={editForm.username ?? ''}
-                onChange={(e) =>
-                  setEditForm({ ...editForm, username: e.target.value })
-                }
-                className="font-mono text-xs"
-              />
-            </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-username" className="text-xs font-bold">
+                  Usuario Reclutador (@) *
+                </Label>
+                <Input
+                  id="edit-username"
+                  value={editForm.username ?? ''}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, username: e.target.value })
+                  }
+                  className="font-mono text-xs"
+                />
+              </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="edit-email" className="text-xs font-bold">
-                Correo Institucional *
-              </Label>
-              <Input
-                id="edit-email"
-                type="email"
-                value={editForm.email ?? ''}
-                onChange={(e) =>
-                  setEditForm({ ...editForm, email: e.target.value })
-                }
-                className="text-xs"
-              />
-            </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-email" className="text-xs font-bold">
+                  Correo Institucional *
+                </Label>
+                <Input
+                  id="edit-email"
+                  type="email"
+                  value={editForm.email ?? ''}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, email: e.target.value })
+                  }
+                  className="text-xs"
+                />
+              </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="edit-phone" className="text-xs font-bold">
-                Teléfono de Contacto *
-              </Label>
-              <Input
-                id="edit-phone"
-                value={editForm.phone ?? ''}
-                onChange={(e) =>
-                  setEditForm({ ...editForm, phone: e.target.value })
-                }
-                className="text-xs"
-              />
-            </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-phone" className="text-xs font-bold">
+                  Teléfono de Contacto *
+                </Label>
+                <Input
+                  id="edit-phone"
+                  value={editForm.phone ?? ''}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, phone: e.target.value })
+                  }
+                  className="text-xs"
+                />
+              </div>
 
-            <div className="space-y-1.5 sm:col-span-2">
-              <Label htmlFor="edit-websiteUrl" className="text-xs font-bold">
-                Sitio Web Corporativo (Opcional)
-              </Label>
-              <Input
-                id="edit-websiteUrl"
-                value={editForm.websiteUrl ?? ''}
-                onChange={(e) =>
-                  setEditForm({ ...editForm, websiteUrl: e.target.value })
-                }
-                placeholder="https://www.empresa.com"
-                className="text-xs"
-              />
-            </div>
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label htmlFor="edit-websiteUrl" className="text-xs font-bold">
+                  Sitio Web Corporativo (Opcional)
+                </Label>
+                <Input
+                  id="edit-websiteUrl"
+                  value={editForm.websiteUrl ?? ''}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, websiteUrl: e.target.value })
+                  }
+                  placeholder="https://www.empresa.com"
+                  className="text-xs"
+                />
+              </div>
 
-            <div className="space-y-1.5 sm:col-span-2">
-              <Label htmlFor="edit-description" className="text-xs font-bold">
-                Descripción Institucional *
-              </Label>
-              <Textarea
-                id="edit-description"
-                rows={3}
-                value={editForm.description ?? ''}
-                onChange={(e) =>
-                  setEditForm({ ...editForm, description: e.target.value })
-                }
-                className="text-xs"
-              />
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label htmlFor="edit-description" className="text-xs font-bold">
+                  Descripción Institucional *
+                </Label>
+                <Textarea
+                  id="edit-description"
+                  rows={3}
+                  value={editForm.description ?? ''}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, description: e.target.value })
+                  }
+                  className="text-xs"
+                />
+              </div>
             </div>
           </div>
 
-          <DialogFooter className="gap-2 sm:gap-0">
+          <DialogFooter className="flex shrink-0 flex-row items-center justify-end gap-2 border-t border-border bg-popover pt-3">
             <Button
               type="button"
               variant="outline"
+              size="sm"
               onClick={() => setShowEditDialog(false)}
               disabled={isSavingEdit}
             >
@@ -1344,18 +1347,19 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
             </Button>
             <Button
               type="button"
+              size="sm"
               onClick={() => void handleSaveEdit()}
               disabled={isSavingEdit}
               className="bg-primary text-white hover:bg-primary/90"
             >
               {isSavingEdit ? (
                 <>
-                  <Loader2 className="mr-2 size-4 animate-spin" /> Guardando y
+                  <Loader2 className="mr-2 size-3.5 animate-spin" /> Guardando y
                   recalculando...
                 </>
               ) : (
                 <>
-                  <Save className="mr-1.5 size-4" /> Guardar Corrección
+                  <Save className="mr-1.5 size-3.5" /> Guardar Corrección
                 </>
               )}
             </Button>
@@ -1370,10 +1374,10 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
         open={showCorrectionDialog}
         onOpenChange={setShowCorrectionDialog}
       >
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-lg font-bold text-indigo-700">
-              <RotateCcw className="size-5 text-indigo-600" />
+        <DialogContent className="flex max-h-[85vh] flex-col overflow-hidden p-5 sm:max-w-2xl">
+          <DialogHeader className="shrink-0 border-b border-border pr-8 pb-3">
+            <DialogTitle className="flex items-center gap-2 text-base font-bold text-indigo-700">
+              <RotateCcw className="size-4.5 text-indigo-600" />
               Solicitar Subsanación de Registro
             </DialogTitle>
             <DialogDescription className="text-xs text-text-secondary">
@@ -1383,8 +1387,8 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4 py-2 text-xs">
-            <div className="space-y-2">
+          <div className="flex-1 space-y-3.5 overflow-y-auto py-2 pr-1 text-xs">
+            <div className="space-y-1.5">
               <span className="font-bold text-ink">
                 Motivo principal de la observación:
               </span>
@@ -1393,15 +1397,22 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
                 onValueChange={(val) => {
                   if (typeof val === 'string') setCorrectionCategory(val);
                 }}
-                className="space-y-1.5"
+                className="grid grid-cols-1 gap-2 sm:grid-cols-2"
               >
                 {CORRECTION_REASONS.map((reason) => (
                   <label
                     key={reason}
-                    className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-border p-2.5 transition-colors hover:bg-surface-soft"
+                    className={`flex cursor-pointer items-start gap-2.5 rounded-lg border p-2.5 transition-colors ${
+                      correctionCategory === reason
+                        ? 'border-indigo-400 bg-indigo-50/70 font-medium text-indigo-950 dark:border-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-200'
+                        : 'border-border text-ink hover:bg-surface-soft'
+                    }`}
                   >
-                    <RadioGroupItem value={reason} />
-                    <span className="font-medium text-ink">{reason}</span>
+                    <RadioGroupItem
+                      value={reason}
+                      className="mt-0.5 shrink-0"
+                    />
+                    <span className="text-[11px] leading-snug">{reason}</span>
                   </label>
                 ))}
               </RadioGroup>
@@ -1416,7 +1427,7 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
               </Label>
               <Textarea
                 id="correction-details"
-                rows={4}
+                rows={3}
                 placeholder="Indica con claridad las correcciones requeridas (ej: 'El documento adjunto no cuenta con el sello institucional. Por favor, reenvíe la carta membretada firmada y sellada por gerencia')..."
                 value={correctionDetails}
                 onChange={(e) => setCorrectionDetails(e.target.value)}
@@ -1428,8 +1439,8 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
               </p>
             </div>
 
-            <div className="rounded-lg border border-indigo-200 bg-indigo-50/70 p-3 text-[11px] text-indigo-900">
-              <p className="font-medium">
+            <div className="rounded-lg border border-indigo-200 bg-indigo-50/60 p-2.5 text-[11px] text-indigo-900 dark:border-indigo-900/50 dark:bg-indigo-950/30 dark:text-indigo-300">
+              <p>
                 Al enviar la solicitud de subsanación, el estado pasará a{' '}
                 <strong>Subsanación solicitada</strong> y el representante de la
                 empresa podrá consultar las indicaciones ingresando su código{' '}
@@ -1438,10 +1449,11 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
             </div>
           </div>
 
-          <DialogFooter className="gap-2 sm:gap-0">
+          <DialogFooter className="flex shrink-0 flex-row items-center justify-end gap-2 border-t border-border bg-popover pt-3">
             <Button
               type="button"
               variant="outline"
+              size="sm"
               onClick={() => setShowCorrectionDialog(false)}
               disabled={submitting}
             >
@@ -1449,13 +1461,14 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
             </Button>
             <Button
               type="button"
+              size="sm"
               onClick={() => void handleCorrection()}
               disabled={submitting || correctionDetails.trim().length < 5}
               className="bg-indigo-600 text-white hover:bg-indigo-700"
             >
               {submitting ? (
                 <>
-                  <Loader2 className="mr-2 size-4 animate-spin" /> Enviando...
+                  <Loader2 className="mr-2 size-3.5 animate-spin" /> Enviando...
                 </>
               ) : (
                 'Enviar Solicitud de Subsanación'
@@ -1469,10 +1482,10 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
           MODAL: APROBACIÓN DE SOLICITUD
           ───────────────────────────────────────────────────────────────────────────── */}
       <Dialog open={showApproveDialog} onOpenChange={setShowApproveDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-lg font-bold text-ink">
-              <CheckCircle2 className="size-5 text-emerald-600" />
+        <DialogContent className="flex max-h-[85vh] flex-col overflow-hidden p-5 sm:max-w-xl">
+          <DialogHeader className="shrink-0 border-b border-border pr-8 pb-3">
+            <DialogTitle className="flex items-center gap-2 text-base font-bold text-ink">
+              <CheckCircle2 className="size-4.5 text-emerald-600" />
               Aprobar Solicitud de Empresa
             </DialogTitle>
             <DialogDescription className="text-xs text-text-secondary">
@@ -1481,25 +1494,25 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-3 py-2 text-xs">
+          <div className="flex-1 space-y-3 overflow-y-auto py-2 pr-1 text-xs">
             <p className="text-text-secondary">
               Al confirmar la aprobación, el sistema ejecutará automáticamente:
             </p>
             <ul className="space-y-2 rounded-lg bg-surface-soft p-3">
               <li className="flex items-center gap-2 font-medium text-ink">
-                <Check className="size-4 text-emerald-600" />
+                <Check className="size-4 shrink-0 text-emerald-600" />
                 Creación del registro de empresa y su perfil oficial.
               </li>
               <li className="flex items-center gap-2 font-medium text-ink">
-                <Check className="size-4 text-emerald-600" />
+                <Check className="size-4 shrink-0 text-emerald-600" />
                 Creación del usuario reclutador asociado (@{item.username}).
               </li>
               <li className="flex items-center gap-2 font-medium text-ink">
-                <Check className="size-4 text-emerald-600" />
+                <Check className="size-4 shrink-0 text-emerald-600" />
                 Generación del código OTP de activación temporal (24h).
               </li>
               <li className="flex items-center gap-2 font-medium text-ink">
-                <Check className="size-4 text-emerald-600" />
+                <Check className="size-4 shrink-0 text-emerald-600" />
                 Envío de correo con código y enlace a{' '}
                 <span className="font-semibold text-primary">{item.email}</span>
                 .
@@ -1507,10 +1520,11 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
             </ul>
           </div>
 
-          <DialogFooter className="gap-2 sm:gap-0">
+          <DialogFooter className="flex shrink-0 flex-row items-center justify-end gap-2 border-t border-border bg-popover pt-3">
             <Button
               type="button"
               variant="outline"
+              size="sm"
               onClick={() => setShowApproveDialog(false)}
               disabled={submitting}
             >
@@ -1518,13 +1532,15 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
             </Button>
             <Button
               type="button"
+              size="sm"
               onClick={() => void handleApprove()}
               disabled={submitting}
               className="bg-emerald-600 text-white hover:bg-emerald-700"
             >
               {submitting ? (
                 <>
-                  <Loader2 className="mr-2 size-4 animate-spin" /> Aprobando...
+                  <Loader2 className="mr-2 size-3.5 animate-spin" />{' '}
+                  Aprobando...
                 </>
               ) : (
                 'Confirmar Aprobación'
@@ -1538,10 +1554,10 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
           MODAL: RECHAZO DE SOLICITUD
           ───────────────────────────────────────────────────────────────────────────── */}
       <Dialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-lg font-bold text-destructive">
-              <XCircle className="size-5 text-destructive" />
+        <DialogContent className="flex max-h-[85vh] flex-col overflow-hidden p-5 sm:max-w-2xl">
+          <DialogHeader className="shrink-0 border-b border-border pr-8 pb-3">
+            <DialogTitle className="flex items-center gap-2 text-base font-bold text-destructive">
+              <XCircle className="size-4.5 text-destructive" />
               Rechazar Solicitud de Empresa
             </DialogTitle>
             <DialogDescription className="text-xs text-text-secondary">
@@ -1550,23 +1566,30 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4 py-2 text-xs">
-            <div className="space-y-2">
+          <div className="flex-1 space-y-3.5 overflow-y-auto py-2 pr-1 text-xs">
+            <div className="space-y-1.5">
               <span className="font-bold text-ink">Motivo del rechazo:</span>
               <RadioGroup
                 value={rejectionCategory}
                 onValueChange={(val) => {
                   if (typeof val === 'string') setRejectionCategory(val);
                 }}
-                className="space-y-1.5"
+                className="grid grid-cols-1 gap-2 sm:grid-cols-2"
               >
                 {REJECTION_REASONS.map((reason) => (
                   <label
                     key={reason}
-                    className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-border p-2.5 transition-colors hover:bg-surface-soft"
+                    className={`flex cursor-pointer items-start gap-2.5 rounded-lg border p-2.5 transition-colors ${
+                      rejectionCategory === reason
+                        ? 'border-rose-400 bg-rose-50/70 font-medium text-rose-950 dark:border-rose-800 dark:bg-rose-950/40 dark:text-rose-200'
+                        : 'border-border text-ink hover:bg-surface-soft'
+                    }`}
                   >
-                    <RadioGroupItem value={reason} />
-                    <span className="font-medium text-ink">{reason}</span>
+                    <RadioGroupItem
+                      value={reason}
+                      className="mt-0.5 shrink-0"
+                    />
+                    <span className="text-[11px] leading-snug">{reason}</span>
                   </label>
                 ))}
               </RadioGroup>
@@ -1589,12 +1612,20 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
                 ingresados).
               </p>
             </div>
+
+            <div className="rounded-lg border border-rose-200 bg-rose-50/60 p-2.5 text-[11px] text-rose-900 dark:border-rose-900/50 dark:bg-rose-950/30 dark:text-rose-300">
+              <p>
+                Esta acción concluye el trámite y enviará la notificación formal
+                al correo <strong>{item.email}</strong>.
+              </p>
+            </div>
           </div>
 
-          <DialogFooter className="gap-2 sm:gap-0">
+          <DialogFooter className="flex shrink-0 flex-row items-center justify-end gap-2 border-t border-border bg-popover pt-3">
             <Button
               type="button"
               variant="outline"
+              size="sm"
               onClick={() => setShowRejectDialog(false)}
               disabled={submitting}
             >
@@ -1603,12 +1634,14 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
             <Button
               type="button"
               variant="destructive"
+              size="sm"
               onClick={() => void handleReject()}
               disabled={submitting || rejectionDetails.trim().length < 5}
             >
               {submitting ? (
                 <>
-                  <Loader2 className="mr-2 size-4 animate-spin" /> Rechazando...
+                  <Loader2 className="mr-2 size-3.5 animate-spin" />{' '}
+                  Rechazando...
                 </>
               ) : (
                 'Confirmar Rechazo'
@@ -1623,8 +1656,8 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
           ───────────────────────────────────────────────────────────────────────────── */}
       {logoUrl && (
         <Dialog open={showLogoModal} onOpenChange={setShowLogoModal}>
-          <DialogContent className="sm:max-w-xl">
-            <DialogHeader>
+          <DialogContent className="flex max-h-[85vh] flex-col overflow-hidden p-5 sm:max-w-xl">
+            <DialogHeader className="shrink-0 border-b border-border pr-8 pb-3">
               <DialogTitle className="text-base font-bold text-ink">
                 Logotipo Corporativo: {item.companyName}
               </DialogTitle>
@@ -1634,16 +1667,16 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
               </DialogDescription>
             </DialogHeader>
 
-            <div className="flex max-h-[460px] items-center justify-center overflow-auto rounded-xl border border-border bg-slate-900/5 p-6">
+            <div className="my-2 flex max-h-[380px] flex-1 items-center justify-center overflow-auto rounded-xl border border-border bg-slate-900/5 p-4">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={logoUrl}
                 alt={`Logotipo completo de ${item.companyName}`}
-                className="max-h-[380px] max-w-full rounded object-contain"
+                className="max-h-[320px] max-w-full rounded object-contain"
               />
             </div>
 
-            <DialogFooter className="flex-row items-center justify-between sm:justify-between">
+            <DialogFooter className="flex shrink-0 flex-row items-center justify-between border-t border-border bg-popover pt-3">
               <a
                 href={logoUrl}
                 download={`logo-${item.requestCode ?? 'empresa'}.png`}
