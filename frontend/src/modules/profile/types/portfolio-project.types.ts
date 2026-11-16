@@ -1,4 +1,4 @@
-import type { PortfolioProviderName } from "./portfolio-account.types";
+import type { PortfolioProviderName } from "./portfolio-provider-name.types";
 
 export interface PortfolioProjectItem {
   id: string;

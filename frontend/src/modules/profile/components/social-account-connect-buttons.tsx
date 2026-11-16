@@ -22,11 +22,9 @@ import {
   useStartPortfolioOAuth,
 } from "../hooks/use-portfolio-accounts";
 import type { Feedback } from "../types/feedback.types";
-import type {
-  PortfolioAccountStatusResponse,
-  PortfolioProviderName,
-  SocialAccountConnectButtonsProps,
-} from "../types/portfolio-account.types";
+import type { PortfolioAccountStatusResponse } from "../types/portfolio-account-status-response.types";
+import type { PortfolioProviderName } from "../types/portfolio-provider-name.types";
+import type { SocialAccountConnectButtonsProps } from "../types/social-account-connect-buttons-props.types";
 
 function cleanUrlParams(): void {
   if (typeof window !== "undefined") {
@@ -201,7 +199,7 @@ export function SocialAccountConnectButtons({ className }: SocialAccountConnectB
                   <span className="text-sm font-medium text-ink">{providerLabel}</span>
                   <Badge
                     variant="outline"
-                    className="gap-1 border-emerald-500/30 bg-emerald-500/10 text-xs font-medium text-emerald-700 dark:text-emerald-400"
+                    className="gap-1 border-border bg-interaction text-xs font-medium text-app-header"
                   >
                     <Check className="size-4" aria-hidden="true" />
                     <span>{PORTFOLIO_ACCOUNT_MESSAGES.connected}</span>

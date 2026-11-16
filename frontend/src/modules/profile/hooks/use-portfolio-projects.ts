@@ -11,7 +11,7 @@ import type {
   PortfolioProjectItem,
   UpdatePortfolioProjectsPayload,
 } from "../types/portfolio-project.types";
-import type { PortfolioProviderName } from "../types/portfolio-account.types";
+import type { PortfolioProviderName } from "../types/portfolio-provider-name.types";
 
 export function usePortfolioProjects() {
   const query = useQuery<PortfolioProjectItem[]>({

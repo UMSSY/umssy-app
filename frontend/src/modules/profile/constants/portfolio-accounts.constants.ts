@@ -1,4 +1,4 @@
-import type { PortfolioProviderName } from "../types/portfolio-account.types";
+import type { PortfolioProviderName } from "../types/portfolio-provider-name.types";
 
 export const PORTFOLIO_ACCOUNTS_QUERY_KEY = ["profile", "portfolio", "accounts"] as const;
 

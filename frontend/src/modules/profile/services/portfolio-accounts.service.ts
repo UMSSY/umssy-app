@@ -1,13 +1,11 @@
 import { apiClient } from "@/shared/services/api-client";
 import type { ApiResponse } from "../types/api-response.types";
-import type {
-  PortfolioAccountDisconnectResponse,
-  PortfolioAccountStatusResponse,
-  PortfolioConnectedAccountResponse,
-  PortfolioOAuthCallbackPayload,
-  PortfolioOAuthUrlResponse,
-  PortfolioProviderName,
-} from "../types/portfolio-account.types";
+import type { PortfolioAccountDisconnectResponse } from "../types/portfolio-account-disconnect-response.types";
+import type { PortfolioAccountStatusResponse } from "../types/portfolio-account-status-response.types";
+import type { PortfolioConnectedAccountResponse } from "../types/portfolio-connected-account-response.types";
+import type { PortfolioOAuthCallbackPayload } from "../types/portfolio-oauth-callback-payload.types";
+import type { PortfolioOAuthUrlResponse } from "../types/portfolio-oauth-url-response.types";
+import type { PortfolioProviderName } from "../types/portfolio-provider-name.types";
 import { getAuthHeaders } from "../utils/get-auth-headers";
 
 export const portfolioAccountsService = {

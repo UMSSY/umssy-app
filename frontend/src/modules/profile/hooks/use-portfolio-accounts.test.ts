@@ -8,11 +8,9 @@ import {
 } from "../constants/portfolio-projects.constants";
 import { portfolioAccountsService } from "../services/portfolio-accounts.service";
 import * as assignLocationModule from "../utils/assign-window-location";
-import type {
-  PortfolioAccountStatusResponse,
-  PortfolioConnectedAccountResponse,
-  PortfolioOAuthUrlResponse,
-} from "../types/portfolio-account.types";
+import type { PortfolioAccountStatusResponse } from "../types/portfolio-account-status-response.types";
+import type { PortfolioConnectedAccountResponse } from "../types/portfolio-connected-account-response.types";
+import type { PortfolioOAuthUrlResponse } from "../types/portfolio-oauth-url-response.types";
 import {
   useCompletePortfolioOAuth,
   useDisconnectPortfolioAccount,

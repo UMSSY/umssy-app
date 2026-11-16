@@ -54,12 +54,9 @@ export function ProfileGuideBubble({
   const contentRef = useRef<HTMLDivElement>(null);
   const seenPopKeyRef = useRef(popKey);
 
-  // Stays rendered while the closing animation plays.
   const [isRendered, setIsRendered] = useState(isOpen);
   if (isOpen && !isRendered) setIsRendered(true);
 
-  // The bubble fades even with reduced motion, so it does not go through
-  // `animate`, which is disabled in that case.
   useLayoutEffect(() => {
     const bubble = bubbleRef.current;
     if (!bubble) return;
