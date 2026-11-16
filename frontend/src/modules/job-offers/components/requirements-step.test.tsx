@@ -1,10 +1,54 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { useState } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { useRequirementsSkillsPreview } from "../hooks/use-requirements-skills-preview";
 import { useSkillsCatalog } from "../hooks/use-skills-catalog";
 import { DOCKER, EMPTY_CONDITIONS, KUBERNETES, PYTHON } from "../testing/vacancy-fixtures";
+import type { SkillOption } from "../types/skill-option.types";
+import type { UpdateVacancyField } from "../types/update-vacancy-field.types";
+import type { VacancyConditions } from "../types/vacancy-conditions.types";
 import { RequirementsStep } from "./requirements-step";
 
 vi.mock("../hooks/use-skills-catalog", () => ({ useSkillsCatalog: vi.fn() }));
+vi.mock("../hooks/use-requirements-skills-preview", () => ({ useRequirementsSkillsPreview: vi.fn() }));
+
+const NO_SKILLS: SkillOption[] = [];
+const DETECTED_PYTHON = [PYTHON];
+const DETECTED_THREE = [PYTHON, DOCKER, KUBERNETES];
+
+const preview = (overrides: Partial<ReturnType<typeof useRequirementsSkillsPreview>> = {}) => ({
+  detectedSkills: NO_SKILLS,
+  processingTimeMs: undefined,
+  isAnalyzing: false,
+  isError: false,
+  ...overrides,
+});
+
+function detectWhenTextMentions(keyword: string, detected: SkillOption[]) {
+  vi.mocked(useRequirementsSkillsPreview).mockImplementation((description) =>
+    description.includes(keyword) ? preview({ detectedSkills: detected, processingTimeMs: 320 }) : preview(),
+  );
+}
+
+function StatefulStep({ initial }: { initial: Partial<VacancyConditions> }) {
+  const [conditions, setConditions] = useState<VacancyConditions>({ ...EMPTY_CONDITIONS, ...initial });
+  const updateField: UpdateVacancyField = (field, value) =>
+    setConditions((previous) => ({ ...previous, [field]: value }));
+
+  return (
+    <RequirementsStep
+      conditions={conditions}
+      errors={{}}
+      updateField={updateField}
+      onPrevious={vi.fn()}
+      onContinue={vi.fn()}
+    />
+  );
+}
+
+const typeDescription = (value: string) =>
+  fireEvent.change(screen.getByLabelText(/Descripción del puesto/), { target: { value } });
+const isPressed = (name: string) => screen.getByRole("button", { name }).getAttribute("aria-pressed") === "true";
 
 const catalogReady = (skills = [PYTHON, DOCKER, KUBERNETES]) => ({ skills, status: "ready" as const, reload: vi.fn() });
 
@@ -24,6 +68,7 @@ function renderStep(overrides: Partial<React.ComponentProps<typeof RequirementsS
 describe("RequirementsStep", () => {
   beforeEach(() => {
     vi.mocked(useSkillsCatalog).mockReturnValue(catalogReady());
+    vi.mocked(useRequirementsSkillsPreview).mockReturnValue(preview());
   });
 
   afterEach(() => {
@@ -78,6 +123,105 @@ describe("RequirementsStep", () => {
     fireEvent.click(screen.getByRole("button", { name: "Tech 10" }));
     expect(updateField).not.toHaveBeenCalled();
     expect(screen.getByRole("button", { name: "Tech 0" })).toBeEnabled();
+  });
+
+  it("presenta el apartado de todas las habilidades con el catálogo completo", () => {
+    renderStep();
+
+    expect(screen.getByRole("heading", { level: 3, name: "Todas las habilidades" })).toBeInTheDocument();
+    expect(screen.getByText(/Las habilidades detectadas en la descripción se marcan solas/)).toBeInTheDocument();
+    ["Python", "Docker", "Kubernetes"].forEach((name) =>
+      expect(screen.getByRole("button", { name })).toBeInTheDocument(),
+    );
+  });
+
+  it("muestra las habilidades detectadas en la descripción con el tiempo del análisis", () => {
+    vi.mocked(useRequirementsSkillsPreview).mockReturnValue(
+      preview({ detectedSkills: DETECTED_PYTHON, processingTimeMs: 320 }),
+    );
+    renderStep({ conditions: { ...EMPTY_CONDITIONS, description: "Buscamos Python" } });
+
+    expect(screen.getByText("Habilidades detectadas automáticamente")).toBeInTheDocument();
+    expect(screen.getByText("Análisis completado en 0.32 s")).toBeInTheDocument();
+  });
+
+  it("indica que está analizando mientras la consulta está en curso", () => {
+    vi.mocked(useRequirementsSkillsPreview).mockReturnValue(preview({ isAnalyzing: true }));
+    renderStep({ conditions: { ...EMPTY_CONDITIONS, description: "Buscamos Python" } });
+
+    expect(screen.getByRole("status")).toHaveTextContent("Analizando con NLP...");
+  });
+
+  it("no muestra el recuadro de detección cuando no hay habilidades detectadas", () => {
+    renderStep({ conditions: { ...EMPTY_CONDITIONS, description: "Buscamos personas responsables" } });
+
+    expect(screen.queryByText("Habilidades detectadas automáticamente")).not.toBeInTheDocument();
+  });
+
+  it("avisa si la detección falla y deja elegir las habilidades a mano", () => {
+    vi.mocked(useRequirementsSkillsPreview).mockReturnValue(preview({ isError: true }));
+    const { updateField } = renderStep({ conditions: { ...EMPTY_CONDITIONS, description: "Buscamos Python" } });
+
+    expect(screen.getByText(/No se pudieron detectar habilidades en este momento/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Python" }));
+
+    expect(updateField).toHaveBeenCalledWith("skills", [PYTHON]);
+  });
+
+  it("marca por sí solas las habilidades detectadas al escribir la descripción", () => {
+    detectWhenTextMentions("Python", DETECTED_PYTHON);
+    render(<StatefulStep initial={{}} />);
+
+    expect(isPressed("Python")).toBe(false);
+    typeDescription("Necesitamos Python");
+
+    expect(isPressed("Python")).toBe(true);
+    expect(isPressed("Docker")).toBe(false);
+  });
+
+  it("no cambia las habilidades al abrir una vacante con la descripción ya escrita", () => {
+    detectWhenTextMentions("Python", DETECTED_PYTHON);
+    render(<StatefulStep initial={{ description: "Necesitamos Python", skills: [DOCKER] }} />);
+
+    expect(isPressed("Python")).toBe(false);
+    expect(isPressed("Docker")).toBe(true);
+  });
+
+  it("respeta la habilidad que el usuario quita después de la detección", () => {
+    detectWhenTextMentions("Python", DETECTED_PYTHON);
+    render(<StatefulStep initial={{}} />);
+    typeDescription("Necesitamos Python");
+    expect(isPressed("Python")).toBe(true);
+
+    fireEvent.click(screen.getByRole("button", { name: "Python" }));
+    typeDescription("Necesitamos Python y trabajo en equipo");
+
+    expect(isPressed("Python")).toBe(false);
+  });
+
+  it("vuelve a marcar una habilidad quitada si el usuario la elige de nuevo", () => {
+    detectWhenTextMentions("Python", DETECTED_PYTHON);
+    render(<StatefulStep initial={{}} />);
+    typeDescription("Necesitamos Python");
+    fireEvent.click(screen.getByRole("button", { name: "Python" }));
+    expect(isPressed("Python")).toBe(false);
+
+    fireEvent.click(screen.getByRole("button", { name: "Python" }));
+
+    expect(isPressed("Python")).toBe(true);
+  });
+
+  it("no marca habilidades detectadas por encima del máximo de 10", () => {
+    const selected = Array.from({ length: 9 }, (_, index) => ({ id: `id-${index}`, name: `Tech ${index}` }));
+    detectWhenTextMentions("Python", DETECTED_THREE);
+    render(<StatefulStep initial={{ skills: selected }} />);
+
+    typeDescription("Necesitamos Python, Docker y Kubernetes");
+
+    expect(isPressed("Python")).toBe(true);
+    expect(isPressed("Docker")).toBe(false);
+    expect(isPressed("Kubernetes")).toBe(false);
+    expect(screen.getByText(/máximo de 10 habilidades/)).toBeInTheDocument();
   });
 
   it("actualiza la descripción conservando saltos de línea y respetando el tope", () => {
