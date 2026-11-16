@@ -469,97 +469,62 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
           </div>
         </div>
 
-        <div className="mt-4 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-start gap-4">
-            {logoUrl ? (
-              <div
-                className="group relative cursor-pointer overflow-hidden rounded-xl border border-border bg-white p-1.5 shadow-2xs transition-transform hover:scale-105"
-                onClick={() => setShowLogoModal(true)}
-                title="Hacer clic para ver el logo en detalle"
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={logoUrl}
-                  alt={`Logo de ${item.companyName}`}
-                  className="size-16 object-contain"
-                />
-                <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
-                  <Maximize2 className="size-5 text-white" />
-                </div>
+        <div className="mt-4 flex items-start gap-4">
+          {logoUrl ? (
+            <div
+              className="group relative cursor-pointer overflow-hidden rounded-xl border border-border bg-white p-1.5 shadow-2xs transition-transform hover:scale-105"
+              onClick={() => setShowLogoModal(true)}
+              title="Hacer clic para ver el logo en detalle"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={logoUrl}
+                alt={`Logo de ${item.companyName}`}
+                className="size-16 object-contain"
+              />
+              <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
+                <Maximize2 className="size-5 text-white" />
               </div>
-            ) : (
-              <div
-                className="flex size-16 shrink-0 items-center justify-center rounded-xl border border-border bg-surface-soft text-primary shadow-2xs"
-                title="Logotipo opcional no adjuntado"
-              >
-                <Building2 className="size-8" />
-              </div>
-            )}
-
-            <div>
-              <div className="flex flex-wrap items-center gap-2.5">
-                <h1 className="text-2xl font-bold tracking-tight text-ink md:text-3xl">
-                  {item.companyName}
-                </h1>
-                <span
-                  className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-0.5 text-xs font-semibold ${statusConfig.bgClass}`}
-                >
-                  <Eye className={`size-3.5 ${statusConfig.textClass}`} />
-                  {statusConfig.label}
-                </span>
-              </div>
-              <p className="mt-1 text-sm text-text-secondary">
-                <span className="font-medium text-ink">{item.sector}</span> ·{' '}
-                {cityName}
-                {item.submittedAt && (
-                  <span>
-                    {' '}
-                    · Solicitud enviada el{' '}
-                    {new Date(item.submittedAt).toLocaleDateString('es-BO', {
-                      day: '2-digit',
-                      month: 'long',
-                      year: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </span>
-                )}
-              </p>
             </div>
-          </div>
-
-          {/* Acciones principales de dictamen simétricas y estilizadas */}
-          {canResolve && (
-            <div className="flex shrink-0 flex-wrap items-center gap-2.5">
-              <Button
-                type="button"
-                onClick={() => setShowApproveDialog(true)}
-                disabled={submitting}
-                className="h-10 bg-emerald-600 px-4 font-semibold text-white shadow-xs hover:bg-emerald-700"
-              >
-                <Check className="mr-1.5 size-4" /> Aprobar y Dar de Alta
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setShowCorrectionDialog(true)}
-                disabled={submitting}
-                className="h-10 border-indigo-200 bg-indigo-50/60 px-4 font-medium text-indigo-700 shadow-xs hover:bg-indigo-100 hover:text-indigo-800"
-              >
-                <RotateCcw className="mr-1.5 size-4 text-indigo-600" />{' '}
-                Solicitar Subsanación
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setShowRejectDialog(true)}
-                disabled={submitting}
-                className="h-10 border-rose-200 bg-rose-50/60 px-4 font-medium text-rose-700 shadow-xs hover:bg-rose-100 hover:text-rose-800"
-              >
-                <X className="mr-1.5 size-4 text-rose-600" /> Rechazar
-              </Button>
+          ) : (
+            <div
+              className="flex size-16 shrink-0 items-center justify-center rounded-xl border border-border bg-surface-soft text-primary shadow-2xs"
+              title="Logotipo opcional no adjuntado"
+            >
+              <Building2 className="size-8" />
             </div>
           )}
+
+          <div>
+            <div className="flex flex-wrap items-center gap-2.5">
+              <h1 className="text-2xl font-bold tracking-tight text-ink md:text-3xl">
+                {item.companyName}
+              </h1>
+              <span
+                className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-0.5 text-xs font-semibold ${statusConfig.bgClass}`}
+              >
+                <Eye className={`size-3.5 ${statusConfig.textClass}`} />
+                {statusConfig.label}
+              </span>
+            </div>
+            <p className="mt-1 text-sm text-text-secondary">
+              <span className="font-medium text-ink">{item.sector}</span> ·{' '}
+              {cityName}
+              {item.submittedAt && (
+                <span>
+                  {' '}
+                  · Solicitud enviada el{' '}
+                  {new Date(item.submittedAt).toLocaleDateString('es-BO', {
+                    day: '2-digit',
+                    month: 'long',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </span>
+              )}
+            </p>
+          </div>
         </div>
       </header>
 
@@ -810,6 +775,50 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
                 </p>
               </div>
             </div>
+
+            {/* Acciones de dictamen oficiales tras revisar la ficha y el documento */}
+            {canResolve && (
+              <div className="mt-6 flex flex-col gap-4 rounded-xl border border-border/80 bg-surface-soft/60 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h3 className="text-sm font-bold text-ink">
+                    Dictamen de la Solicitud
+                  </h3>
+                  <p className="text-xs text-text-secondary">
+                    Habiendo verificado la información oficial a registrar y la
+                    carta membretada:
+                  </p>
+                </div>
+                <div className="flex shrink-0 flex-wrap items-center gap-2.5">
+                  <Button
+                    type="button"
+                    onClick={() => setShowApproveDialog(true)}
+                    disabled={submitting}
+                    className="h-10 bg-emerald-600 px-4 font-semibold text-white shadow-xs hover:bg-emerald-700"
+                  >
+                    <Check className="mr-1.5 size-4" /> Aprobar y Dar de Alta
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowCorrectionDialog(true)}
+                    disabled={submitting}
+                    className="h-10 border-indigo-200 bg-indigo-50/60 px-4 font-medium text-indigo-700 shadow-xs hover:bg-indigo-100 hover:text-indigo-800"
+                  >
+                    <RotateCcw className="mr-1.5 size-4 text-indigo-600" />{' '}
+                    Solicitar Subsanación
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowRejectDialog(true)}
+                    disabled={submitting}
+                    className="h-10 border-rose-200 bg-rose-50/60 px-4 font-medium text-rose-700 shadow-xs hover:bg-rose-100 hover:text-rose-800"
+                  >
+                    <X className="mr-1.5 size-4 text-rose-600" /> Rechazar
+                  </Button>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       </section>
