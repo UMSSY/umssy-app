@@ -41,12 +41,55 @@ export const createCompanyAccessRequestSchema = z.object({
     .regex(/^[a-zA-Z0-9._-]+$/, 'Solo letras, números, puntos y guiones'),
 });
 
-export const rejectCompanyAccessRequestSchema = z.object({
-  reason: z
+export const updateCompanyAccessRequestSchema = z.object({
+  companyName: z.string().trim().min(2).max(100).optional(),
+  sector: z.string().trim().min(2).max(100).optional(),
+  cityId: z.string().uuid().optional(),
+  description: z.string().trim().min(10).max(1000).optional(),
+  email: z.string().trim().toLowerCase().email().max(150).optional(),
+  phone: z
     .string()
     .trim()
-    .min(5, 'El motivo debe tener al menos 5 caracteres')
-    .max(500),
+    .regex(/^[67]\d{7}$|^[234]\d{6,7}$/, 'Teléfono de Bolivia inválido')
+    .optional(),
+  websiteUrl: z
+    .preprocess(
+      (val) => (typeof val === 'string' ? val.trim() : ''),
+      z
+        .string()
+        .max(255)
+        .refine(
+          (val) => val === '' || /^https?:\/\/.+\..+/.test(val),
+          'Ingresa una URL válida (ej. https://www.empresa.com)',
+        ),
+    )
+    .optional(),
+  username: z
+    .string()
+    .trim()
+    .min(3)
+    .max(100)
+    .regex(/^[a-zA-Z0-9._-]+$/)
+    .optional(),
+});
+
+export const requestCorrectionSchema = z.object({
+  reasonCategory: z
+    .string()
+    .trim()
+    .min(3, 'Selecciona una categoría de observación')
+    .max(150),
+  customDetails: z
+    .string()
+    .trim()
+    .min(10, 'El detalle de la observación debe tener al menos 10 caracteres')
+    .max(1000),
+});
+
+export const rejectCompanyAccessRequestSchema = z.object({
+  reason: z.string().trim().min(5).max(1000).optional(),
+  reasonCategory: z.string().trim().optional(),
+  customDetails: z.string().trim().optional(),
 });
 
 export const listCompanyAccessRequestsQuerySchema = z.object({
@@ -71,6 +114,10 @@ export const activateCompanyAccountSchema = z.object({
 export type CreateCompanyAccessRequestDto = z.infer<
   typeof createCompanyAccessRequestSchema
 >;
+export type UpdateCompanyAccessRequestDto = z.infer<
+  typeof updateCompanyAccessRequestSchema
+>;
+export type RequestCorrectionDto = z.infer<typeof requestCorrectionSchema>;
 export type RejectCompanyAccessRequestDto = z.infer<
   typeof rejectCompanyAccessRequestSchema
 >;

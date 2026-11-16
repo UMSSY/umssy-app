@@ -27,10 +27,14 @@ import {
   createCompanyAccessRequestSchema,
   listCompanyAccessRequestsQuerySchema,
   rejectCompanyAccessRequestSchema,
+  requestCorrectionSchema,
+  updateCompanyAccessRequestSchema,
   type ActivateCompanyAccountDto,
   type CreateCompanyAccessRequestDto,
   type ListCompanyAccessRequestsQuery,
   type RejectCompanyAccessRequestDto,
+  type RequestCorrectionDto,
+  type UpdateCompanyAccessRequestDto,
 } from '../requests/create-company-access-request.schema.js';
 import { CompanyAccessRequestsService } from '../services/company-access-requests.service.js';
 
@@ -176,6 +180,29 @@ export class CompanyAccessRequestsController {
     res.end(file.content);
   }
 
+  @Patch('company-access-requests/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(BACKOFFICE_ROLE)
+  update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body(new ZodValidationPipe(updateCompanyAccessRequestSchema))
+    body: UpdateCompanyAccessRequestDto,
+  ) {
+    return this.companyRequestsService.update(id, body);
+  }
+
+  @Post('company-access-requests/:id/request-correction')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(BACKOFFICE_ROLE)
+  requestCorrection(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body(new ZodValidationPipe(requestCorrectionSchema))
+    body: RequestCorrectionDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.companyRequestsService.requestCorrection(id, user.id, body);
+  }
+
   @Patch('company-access-requests/:id/approve')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(BACKOFFICE_ROLE)
@@ -195,6 +222,6 @@ export class CompanyAccessRequestsController {
     body: RejectCompanyAccessRequestDto,
     @CurrentUser() user: AuthenticatedUser,
   ) {
-    return this.companyRequestsService.reject(id, user.id, body.reason);
+    return this.companyRequestsService.reject(id, user.id, body);
   }
 }

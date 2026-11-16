@@ -350,6 +350,32 @@ export class CompanyAccessRequestsRepository {
     });
   }
 
+  async observeCompanyRequest(id: string, reviewerId: string, reason: string) {
+    const observedStatus = await this.prisma.accessRequestStatus.upsert({
+      where: { title: 'OBSERVED' },
+      update: {},
+      create: { title: 'OBSERVED' },
+    });
+
+    return this.prisma.companyAccessRequest.update({
+      where: { id },
+      data: {
+        statusId: observedStatus.id,
+        reviewedById: reviewerId,
+        reviewedAt: new Date(),
+        rejectionReason: reason,
+      },
+      include: {
+        status: true,
+        city: true,
+        documentFile: true,
+        logoFile: true,
+        openedBy: { select: { id: true, firstName: true, lastName: true } },
+        reviewedBy: { select: { id: true, firstName: true, lastName: true } },
+      },
+    });
+  }
+
   findByCodeAndEmail(requestCode: string, email: string) {
     return this.prisma.companyAccessRequest.findFirst({
       where: {
@@ -389,6 +415,21 @@ export class CompanyAccessRequestsRepository {
   findCompanyLogo(companyId: string) {
     return this.prisma.companyLogo.findUnique({
       where: { companyId },
+    });
+  }
+
+  async updateData(id: string, data: Prisma.CompanyAccessRequestUpdateInput) {
+    return this.prisma.companyAccessRequest.update({
+      where: { id },
+      data,
+      include: {
+        status: true,
+        city: true,
+        documentFile: true,
+        logoFile: true,
+        openedBy: { select: { id: true, firstName: true, lastName: true } },
+        reviewedBy: { select: { id: true, firstName: true, lastName: true } },
+      },
     });
   }
 }

@@ -1,6 +1,5 @@
-import { existsSync } from 'node:fs';
-import { join } from 'node:path';
 import type { UploadedDocumentFile } from '../../access-requests/types/uploaded-file.types.js';
+import type { Prisma } from '../../../prisma/client.js';
 import { createHash, randomInt } from 'node:crypto';
 import {
   BadRequestException,
@@ -11,15 +10,18 @@ import {
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { FilesService } from '../../files/services/files.service.js';
-import { DocumentTextExtractorService } from '../../access-requests/services/document-text-extractor.service.js';
 import { MailService } from '../../mail/services/mail.service.js';
 import { loadMailTemplate } from '../../mail/helpers/load-mail-template.js';
 import { buildFrontendUrl } from '../../access-requests/mail/helpers/frontend-url.js';
 import { CompanyAccessRequestsRepository } from '../repositories/company-access-requests.repository.js';
+import { CompanyDocumentOcrService } from './company-document-ocr.service.js';
 import type {
   ActivateCompanyAccountDto,
   CreateCompanyAccessRequestDto,
   ListCompanyAccessRequestsQuery,
+  RejectCompanyAccessRequestDto,
+  RequestCorrectionDto,
+  UpdateCompanyAccessRequestDto,
 } from '../requests/create-company-access-request.schema.js';
 
 const ALLOWED_LOGO_MIMES = new Set([
@@ -36,7 +38,7 @@ export class CompanyAccessRequestsService {
   constructor(
     private readonly repository: CompanyAccessRequestsRepository,
     private readonly filesService: FilesService,
-    private readonly textExtractor: DocumentTextExtractorService,
+    private readonly companyOcr: CompanyDocumentOcrService,
     private readonly mailService: MailService,
   ) {}
 
@@ -120,11 +122,7 @@ export class CompanyAccessRequestsService {
     }
 
     const submitted = await this.repository.submitWithGeneratedCode(id);
-    void this.evaluateLetterheadOcr(
-      id,
-      current.companyName,
-      current.documentFileId,
-    );
+    void this.evaluateLetterheadOcr(id);
 
     return {
       id: submitted.id,
@@ -264,21 +262,43 @@ export class CompanyAccessRequestsService {
     };
   }
 
-  async reject(id: string, reviewerId: string, reason: string) {
+  async update(id: string, dto: UpdateCompanyAccessRequestDto) {
+    const current = await this.repository.findById(id);
+    if (!current) {
+      throw new NotFoundException('Solicitud de empresa no encontrada');
+    }
+    if (current.status.title === 'APPROVED') {
+      throw new BadRequestException(
+        'No se puede modificar una solicitud que ya ha sido aprobada',
+      );
+    }
+
+    await this.repository.updateData(id, dto);
+    await this.evaluateLetterheadOcr(id);
+    return this.repository.findById(id);
+  }
+
+  async requestCorrection(
+    id: string,
+    reviewerId: string,
+    dto: RequestCorrectionDto,
+  ) {
     const current = await this.repository.findById(id);
     if (!current || current.status.title === 'DRAFT') {
       throw new NotFoundException('Solicitud de empresa no encontrada');
     }
-    if (
-      current.status.title !== 'IN_REVIEW' &&
-      current.status.title !== 'PENDING'
-    ) {
+    if (current.status.title === 'APPROVED') {
       throw new BadRequestException(
-        'La solicitud ya fue resuelta anteriormente',
+        'La solicitud ya fue aprobada y no admite observaciones',
       );
     }
 
-    await this.repository.rejectCompanyRequest(id, reviewerId, reason);
+    const composedReason = `[${dto.reasonCategory}] ${dto.customDetails}`;
+    const updated = await this.repository.observeCompanyRequest(
+      id,
+      reviewerId,
+      composedReason,
+    );
 
     try {
       const requestStatusUrl = buildFrontendUrl('/request-access/status', {
@@ -287,11 +307,71 @@ export class CompanyAccessRequestsService {
       });
       await this.mailService.send({
         to: current.email,
-        subject: 'Tu solicitud de acceso a UMSSY fue observada',
-        text: `Tu solicitud de acceso para ${current.companyName} (${current.requestCode}) fue observada.\n\nMotivo del rechazo:\n${reason}\n\nConsulta el estado en: ${requestStatusUrl}`,
+        subject: 'Observaciones a tu solicitud de registro de empresa en UMSSY',
+        text: `Tu solicitud de acceso para ${current.companyName} (${current.requestCode}) requiere subsanación.\n\nMotivo:\n${composedReason}\n\nConsulta el estado y realiza las correcciones en: ${requestStatusUrl}`,
         mjml: await loadMailTemplate('access-request-rejection'),
         values: {
-          reason,
+          reason: composedReason,
+          requestCode: current.requestCode ?? '',
+          requestStatusUrl,
+        },
+      });
+    } catch (mailError) {
+      this.logger.warn(
+        `No se pudo enviar el correo de subsanación a ${current.email}: ${
+          mailError instanceof Error ? mailError.message : String(mailError)
+        }`,
+      );
+    }
+
+    return updated;
+  }
+
+  async reject(
+    id: string,
+    reviewerId: string,
+    reasonOrDto: RejectCompanyAccessRequestDto | string,
+  ) {
+    const current = await this.repository.findById(id);
+    if (!current || current.status.title === 'DRAFT') {
+      throw new NotFoundException('Solicitud de empresa no encontrada');
+    }
+    if (
+      current.status.title !== 'IN_REVIEW' &&
+      current.status.title !== 'PENDING' &&
+      current.status.title !== 'OBSERVED'
+    ) {
+      throw new BadRequestException(
+        'La solicitud ya fue resuelta anteriormente',
+      );
+    }
+
+    let finalReason: string;
+    if (typeof reasonOrDto === 'string') {
+      finalReason = reasonOrDto;
+    } else if (reasonOrDto.reasonCategory && reasonOrDto.customDetails) {
+      finalReason = `[${reasonOrDto.reasonCategory}] ${reasonOrDto.customDetails}`;
+    } else {
+      finalReason =
+        reasonOrDto.reason ??
+        reasonOrDto.customDetails ??
+        'Solicitud no cumple con los requisitos institucionales.';
+    }
+
+    await this.repository.rejectCompanyRequest(id, reviewerId, finalReason);
+
+    try {
+      const requestStatusUrl = buildFrontendUrl('/request-access/status', {
+        code: current.requestCode ?? '',
+        email: current.email,
+      });
+      await this.mailService.send({
+        to: current.email,
+        subject: 'Dictamen de tu solicitud de registro de empresa en UMSSY',
+        text: `Tu solicitud de acceso para ${current.companyName} (${current.requestCode}) fue rechazada.\n\nMotivo del rechazo:\n${finalReason}\n\nConsulta el estado en: ${requestStatusUrl}`,
+        mjml: await loadMailTemplate('access-request-rejection'),
+        values: {
+          reason: finalReason,
           requestCode: current.requestCode ?? '',
           requestStatusUrl,
         },
@@ -304,7 +384,7 @@ export class CompanyAccessRequestsService {
       );
     }
 
-    return { id, status: 'REJECTED', rejectionReason: reason };
+    return { id, status: 'REJECTED', rejectionReason: finalReason };
   }
 
   async getStatus(code: string, email: string) {
@@ -355,63 +435,41 @@ export class CompanyAccessRequestsService {
     );
   }
 
-  private async evaluateLetterheadOcr(
-    requestId: string,
-    companyName: string,
-    documentFileId: string,
-  ) {
+  async evaluateLetterheadOcr(requestId: string) {
     try {
-      const modelPath = join(
-        process.cwd(),
-        'ocr-models',
-        '4.0.0_best',
-        'spa.traineddata',
-      );
-      if (!existsSync(modelPath)) {
-        this.logger.warn(
-          `Modelo OCR no encontrado en ${modelPath}; se omite verificación automática.`,
-        );
-        return;
+      const current = await this.repository.findById(requestId);
+      if (!current?.documentFileId) {
+        return null;
       }
-      const file = await this.filesService.getContent(documentFileId);
-      const extracted = await this.textExtractor.extract(file);
-      const normalized = extracted.text
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .toLowerCase();
 
-      const cleanCompany = companyName
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .toLowerCase();
+      const file = await this.filesService.getContent(current.documentFileId);
+      const analysis = await this.companyOcr.analyze(
+        file.content,
+        file.mimeType,
+        {
+          companyName: current.companyName,
+          city: current.city?.title ?? '',
+          email: current.email,
+          phone: current.phone,
+          websiteUrl: current.websiteUrl,
+          sector: current.sector,
+        },
+      );
 
-      const hasCompanyName = normalized.includes(cleanCompany);
-      const hasUniversityRef =
-        normalized.includes('sistemas') ||
-        normalized.includes('informatica') ||
-        normalized.includes('umss') ||
-        normalized.includes('san simon');
-      const hasRequestIntent =
-        normalized.includes('solicitud') ||
-        normalized.includes('acceso') ||
-        normalized.includes('plataforma');
+      await this.repository.saveOcrResult(
+        requestId,
+        analysis.matchScore,
+        analysis.fields as unknown as Prisma.InputJsonValue,
+      );
 
-      const score =
-        (hasCompanyName ? 50 : 0) +
-        (hasUniversityRef ? 30 : 0) +
-        (hasRequestIntent ? 20 : 0);
-
-      await this.repository.saveOcrResult(requestId, score, {
-        companyNameMatched: hasCompanyName,
-        departmentMatched: hasUniversityRef,
-        requestIntentMatched: hasRequestIntent,
-      });
+      return analysis;
     } catch (error) {
       this.logger.warn(
-        `No se pudo extraer texto OCR de la carta de empresa ${requestId}: ${
+        `No se pudo extraer o evaluar OCR de la carta de empresa ${requestId}: ${
           error instanceof Error ? error.message : String(error)
         }`,
       );
+      return null;
     }
   }
 
