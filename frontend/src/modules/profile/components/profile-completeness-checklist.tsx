@@ -109,7 +109,6 @@ export function ProfileCompletenessChecklist({
                       )
                         return;
 
-                      // Next's same-page pushState does not emit hashchange.
                       event.preventDefault();
                       const hash = `${PROFILE_COMPLETENESS_HASH_PREFIX}${id}`;
                       if (window.location.hash === hash) {

@@ -44,6 +44,5 @@ export async function preloadProfileGuideStep(
   step: ProfileCompletenessSectionId,
 ) {
   if (step === 'contact' || step === 'presentation') return;
-  // La precarga es especulativa; al abrir se permite reintentar un fallo.
   await loadProfileGuideStep(step).catch(() => undefined);
 }

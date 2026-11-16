@@ -9,7 +9,6 @@ const ANGLE_RANGE_DEG = 120;
 const GOLDEN_ANGLE_DEG = 137.5;
 const PEAK_OFFSET = 0.45;
 
-// Deterministic values prevent server/client hydration mismatches.
 export function buildConfettiPieces(
   count: number = PROFILE_GUIDE_CONFETTI.count,
 ): ProfileGuideConfettiPiece[] {
