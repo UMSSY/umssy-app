@@ -1,6 +1,6 @@
 import * as authBroadcast from "@/shared/utils/auth-broadcast";
 import "@/shared/testing/indexed-db.mock";
-import type { AxiosHeaders, AxiosRequestConfig } from "axios";
+import axios, { type AxiosHeaders, type AxiosRequestConfig } from "axios";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { apiClient } from "./api-client";
 import {
@@ -124,5 +124,37 @@ describe("apiClient session errors", () => {
       reason: "SESSION_REVOKED",
     });
     broadcastSpy.mockRestore();
+  });
+
+  it("retries request once after a successful token refresh on 401 without code", async () => {
+    let callCount = 0;
+    const postSpy = vi.spyOn(axios, "post").mockResolvedValueOnce({
+      data: { ok: true, accessToken: "new-access-token" },
+    });
+
+    const response = await apiClient.get("/protected", {
+      adapter: async (config) => {
+        callCount++;
+        if (callCount === 1) {
+          throw Object.assign(new Error("Token expired"), {
+            isAxiosError: true,
+            config,
+            response: { status: 401, data: {} },
+          });
+        }
+        return {
+          data: { success: true },
+          status: 200,
+          statusText: "OK",
+          headers: {},
+          config,
+        };
+      },
+    });
+
+    expect(callCount).toBe(2);
+    expect(response.data).toEqual({ success: true });
+    expect(postSpy).toHaveBeenCalled();
+    postSpy.mockRestore();
   });
 });
