@@ -1,4 +1,4 @@
-import { Bell, BookOpen, BriefcaseBusiness, Building2, CalendarClock, ClipboardList, FileText, GraduationCap, History, Inbox, ListChecks, MessageCircle, Radar, Search, ShieldCheck, Sparkles, SquarePlus, Ticket, UserRound, Users, Award } from "lucide-react";
+import { Bell, BookOpen, BriefcaseBusiness, Building2, CalendarClock, ClipboardList, FileText, GraduationCap, History, Inbox, ListChecks, MessageCircle, Radar, Search, ShieldCheck, Sparkles, SquarePlus, Ticket, UserRound, Users, Award, SlidersHorizontal } from "lucide-react";
 import type { WorkspaceArea, WorkspaceTask } from "@/shared/types/workspace-navigation.types";
 
 export const WORKSPACE_AREAS: readonly WorkspaceArea[] = [
@@ -11,6 +11,7 @@ export const WORKSPACE_AREAS: readonly WorkspaceArea[] = [
 
 export const WORKSPACE_TASKS: readonly WorkspaceTask[] = [
   { label: "Solicitudes de acceso", href: "/backoffice/solicitudes", icon: Inbox, area: "management", keywords: "aprobar rechazar documentos pendientes" },
+  { label: "Control de cupos", href: "/backoffice/mentor-capacity", icon: SlidersHorizontal, area: "management", keywords: "mentorías mentores porcentaje límite lista de espera ofertas FIFO" },
   { label: "Usuarios registrados", href: "/backoffice/reports/registered-users", icon: ListChecks, area: "management", keywords: "reporte exportar csv" },
   { label: "Usuarios rechazados", href: "/backoffice/reports/rejected-users", icon: FileText, area: "management", keywords: "reporte motivos" },
   { label: "Historial de reportes", href: "/backoffice/reports/history", icon: CalendarClock, area: "management" },

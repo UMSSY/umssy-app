@@ -886,6 +886,14 @@ model MentorSlotOffer {
   @@map("mentor_slot_offers")
 }
 
+model MentorCapacitySetting {
+  id         Int      @id
+  percentage Int      @default(40)
+  updatedAt  DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  @@map("mentor_capacity_settings")
+}
+
 model ActivationOtp {
   id              String    @id @default(uuid()) @db.Uuid
   accessRequestId String    @map("access_request_id") @db.Uuid
