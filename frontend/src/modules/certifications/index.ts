@@ -10,3 +10,4 @@ export { validateCertificateFile } from './utils/validate-certificate-file';
 export type { CertificationFormProps } from './types/certification-form-props.types';
 
 export { useCreateCertification } from './hooks/use-certification-mutations';
+export { CertificationGuideStep } from './components/certification-guide-step';

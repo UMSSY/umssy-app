@@ -34,6 +34,15 @@ const SAVED_CV = {
   isCurrent: true,
 };
 
+const CV_SECTIONS = {
+  includeContactInfo: true,
+  includeSummary: true,
+  includeWorkExperience: false,
+  includeEducation: true,
+  includeCertifications: false,
+  includeProjects: true,
+};
+
 function wrapResponse<T>(data: T) {
   return { data: { statusCode: 200, data, detail: "OK", ok: true } };
 }
@@ -141,13 +150,13 @@ describe("documentsService", () => {
       headers: { "content-disposition": 'attachment; filename="CV_Juan_Perez.pdf"' },
     });
 
-    await expect(documentsService.generateCv()).resolves.toEqual({
+    await expect(documentsService.generateCv(CV_SECTIONS)).resolves.toEqual({
       file: pdf,
       fileName: "CV_Juan_Perez.pdf",
     });
     expect(apiClient.post).toHaveBeenCalledWith(
       "/profile/cv/generate",
-      {},
+      { sections: CV_SECTIONS },
       {
         headers: AUTH_HEADERS,
         responseType: "blob",
@@ -162,7 +171,7 @@ describe("documentsService", () => {
       headers: {},
     });
 
-    await expect(documentsService.generateCv()).resolves.toEqual({
+    await expect(documentsService.generateCv(CV_SECTIONS)).resolves.toEqual({
       file: pdf,
       fileName: "CV.pdf",
     });

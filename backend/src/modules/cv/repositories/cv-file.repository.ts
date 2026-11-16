@@ -19,6 +19,18 @@ export class CvFileRepository implements CvFileStorage {
 
   constructor(private readonly prisma: PrismaService) {}
 
+  async hasByUserId(userId: string): Promise<boolean> {
+    const cv = await this.prisma.userCvFile.findFirst({
+      where: {
+        userId,
+        cvPdfData: { not: null },
+        cvUploadedAt: { not: null },
+      },
+      select: cvIdSelect,
+    });
+    return cv !== null;
+  }
+
   async create(
     userId: string,
     content: Buffer,
