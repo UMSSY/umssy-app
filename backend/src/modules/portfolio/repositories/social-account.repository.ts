@@ -1,32 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
-import type { Prisma } from '../../../prisma/client.js';
+import { SOCIAL_ACCOUNT_SELECT } from '../constants/social-account-select.constants.js';
 import { SocialAccountAlreadyLinkedException } from '../exceptions/social-account-already-linked.exception.js';
 import { SocialAccountNotFoundException } from '../exceptions/social-account-not-found.exception.js';
 import { UnknownPortfolioProviderException } from '../exceptions/unknown-portfolio-provider.exception.js';
 import type { PortfolioProvider } from '../types/portfolio-provider.type.js';
 import type { SocialAccountEntity } from '../types/social-account-entity.type.js';
+import type { SocialAccountRecord } from '../types/social-account-record.type.js';
 import type { UpsertSocialAccountInput } from '../types/upsert-social-account.type.js';
 import { parsePortfolioProvider } from '../utils/parse-portfolio-provider.util.js';
-
-const socialAccountSelect = {
-  id: true,
-  userId: true,
-  externalId: true,
-  username: true,
-  profileUrl: true,
-  createdAt: true,
-  updatedAt: true,
-  provider: {
-    select: {
-      name: true,
-    },
-  },
-} as const;
-
-type SocialAccountRecord = Prisma.UserSocialAccountGetPayload<{
-  select: typeof socialAccountSelect;
-}>;
 
 @Injectable()
 export class SocialAccountRepository {
@@ -35,7 +17,7 @@ export class SocialAccountRepository {
   async findByUserId(userId: string): Promise<SocialAccountEntity[]> {
     const rows = await this.prisma.userSocialAccount.findMany({
       where: { userId },
-      select: socialAccountSelect,
+      select: SOCIAL_ACCOUNT_SELECT,
       orderBy: { createdAt: 'asc' },
     });
     return rows.map((row) => this.toEntity(row));
@@ -92,16 +74,13 @@ export class SocialAccountRepository {
         username: normalizedUsername,
         profileUrl: normalizedProfileUrl,
       },
-      select: socialAccountSelect,
+      select: SOCIAL_ACCOUNT_SELECT,
     });
 
     return this.toEntity(row);
   }
 
-  async disconnect(
-    userId: string,
-    provider: PortfolioProvider,
-  ): Promise<void> {
+  async disconnect(userId: string, provider: PortfolioProvider): Promise<void> {
     const providerRecord = await this.prisma.portfolioProvider.findUnique({
       where: { name: provider },
       select: { id: true },
@@ -170,4 +149,3 @@ export class SocialAccountRepository {
     };
   }
 }
-
