@@ -11,11 +11,9 @@ import {
   HEATMAP_SEED_RANDOM_SEED,
   HEATMAP_SEED_SKILLS,
 } from '../constants/heatmap-seed.constants.js';
-import type {
-  HeatmapSeedGraduate,
-  HeatmapSeedSkill,
-  HeatmapSeedWorkExperience,
-} from '../types/heatmap-seed.types.js';
+import type { HeatmapSeedGraduate } from '../types/heatmap-seed-graduate.types.js';
+import type { HeatmapSeedSkill } from '../types/heatmap-seed-skill.types.js';
+import type { HeatmapSeedWorkExperience } from '../types/heatmap-seed-work-experience.types.js';
 import { createSeededRandom, pick, type RandomSource } from './seeded-random.util.js';
 
 function toDateOnly(time: number): Date {
