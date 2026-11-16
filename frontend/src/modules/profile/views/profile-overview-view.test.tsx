@@ -197,7 +197,7 @@ describe("ProfileOverviewView", () => {
 
 });
 
-vi.mock("@/modules/education", () => ({ EducationProfileSection: () => <section aria-label="Formación académica"><h2>Formación académica</h2></section> }));
+vi.mock("@/modules/educations", () => ({ EducationProfileSection: () => <section aria-label="Formación académica"><h2>Formación académica</h2></section> }));
 
 vi.mock("@/modules/work-experience", () => ({ WorkExperienceProfileSection: () => <section aria-label="Experiencia laboral"><h2>Experiencia laboral</h2></section> }));
 
@@ -205,4 +205,4 @@ vi.mock("@/modules/skills", () => ({ SkillsProfileSection: () => <section aria-l
 
 vi.mock("@/modules/certifications", () => ({ CertificationProfileSection: () => <section aria-label="Certificaciones"><h2>Certificaciones</h2></section> }));
 
-vi.mock("@/modules/documents", () => ({ CvExportButton: () => <button type="button">Descargar CV en PDF</button> }));
+vi.mock("@/modules/cv", () => ({ CvExportButton: () => <button type="button">Descargar CV en PDF</button> }));
