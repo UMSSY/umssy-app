@@ -48,6 +48,14 @@ export const SKILLS_CATALOG_MESSAGES = {
   retry: "Reintentar",
 } as const;
 
+export const REQUIREMENTS_DETECTION_DEBOUNCE_MS = 500;
+
+export const REQUIREMENTS_SKILLS_TEXT = {
+  allSkillsTitle: "Todas las habilidades",
+  autoSelectHint: "Las habilidades detectadas en la descripción se marcan solas y puedes quitarlas.",
+  detectionError: "No se pudieron detectar habilidades en este momento. Selecciónalas manualmente.",
+} as const;
+
 export const SKILL_SEARCH_TEXT = {
   trigger: "+ Añadir habilidad",
   title: "Buscar habilidad",

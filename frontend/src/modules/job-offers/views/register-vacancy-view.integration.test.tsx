@@ -15,6 +15,17 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 vi.mock("@/shared/services/api-client", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/shared/services/api-client")>()), apiClient: { get: vi.fn(), post: vi.fn(), put: vi.fn() } }));
+vi.mock("../hooks/use-requirements-skills-preview", () => {
+  const none: never[] = [];
+  return {
+    useRequirementsSkillsPreview: () => ({
+      detectedSkills: none,
+      processingTimeMs: undefined,
+      isAnalyzing: false,
+      isError: false,
+    }),
+  };
+});
 vi.mock("@/components/ui/select", () => ({
   Select: ({
     children,
