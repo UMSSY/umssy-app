@@ -213,4 +213,22 @@ describe('AppointmentsRepository', () => {
       ),
     ).resolves.toBeNull();
   });
+
+  it('detects that the mentor cancelled the appointment of the block', async () => {
+    const blockId = '55555555-5555-4555-8555-555555555555';
+    count.mockResolvedValueOnce(1);
+
+    await expect(
+      repository.hasMentorCancellation(blockId, MENTOR_ID),
+    ).resolves.toBe(true);
+    expect(count).toHaveBeenCalledExactlyOnceWith({
+      where: { blockId, cancelledById: MENTOR_ID },
+    });
+
+    count.mockResolvedValueOnce(0);
+
+    await expect(
+      repository.hasMentorCancellation(blockId, MENTOR_ID),
+    ).resolves.toBe(false);
+  });
 });

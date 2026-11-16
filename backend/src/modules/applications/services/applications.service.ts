@@ -54,15 +54,57 @@ export class ApplicationsService {
     );
     if (!result.count) throw new ApplicationNotWithdrawableException();
   }
+
+  async validateApplicationForChat(
+    applicationId: string,
+    studentUserId: string,
+    companyId: string,
+  ): Promise<{
+    isValid: boolean;
+    vacancyTitle: string | null;
+    companyName: string | null;
+  }> {
+    const record = await this.repository.findApplicationForChat(applicationId);
+    if (!record) {
+      return { isValid: false, vacancyTitle: null, companyName: null };
+    }
+
+    if (
+      record.userId !== studentUserId ||
+      record.jobOffer.companyId !== companyId
+    ) {
+      return { isValid: false, vacancyTitle: null, companyName: null };
+    }
+
+    const normalizedStatus = record.status.title.trim().toLowerCase();
+    const isInactive =
+      normalizedStatus.includes('rechazad') ||
+      normalizedStatus.includes('retirad') ||
+      normalizedStatus.includes('cancelad');
+
+    if (isInactive) {
+      return { isValid: false, vacancyTitle: null, companyName: null };
+    }
+
+    return {
+      isValid: true,
+      vacancyTitle: record.jobOffer.title,
+      companyName: record.jobOffer.company.title,
+    };
+  }
+
   findRecruitmentApplicationsByUser(userId: string) {
     return this.repository.findRecruitmentApplicationsByUser(userId);
   }
+
   findRecruitmentApplicants(jobId: string) {
     return this.repository.findRecruitmentApplicants(jobId);
   }
+
   findRecruitmentApplication(id: string) {
     return this.repository.findRecruitmentApplication(id);
   }
+
   recordRecruiterDecision(applicationId: string, target: string) {
     return this.repository.recordRecruiterDecision(applicationId, target);
   }

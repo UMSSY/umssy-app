@@ -17,7 +17,7 @@ import { CERTIFICATION_DOCUMENT_MESSAGES } from "../config/certification-documen
 import type { CertificationDocumentPreview } from "../types/certification-document-preview.types";
 import type { CertificationDocumentViewerProps } from "../types/certification-document-viewer-props.types";
 
-function DocumentPreviewContent({ preview }: { preview: CertificationDocumentPreview }) {
+export function CertificationDocumentPreviewContent({ preview }: { preview: CertificationDocumentPreview }) {
   if (preview.file.type.startsWith("image/")) {
     return (
       <div className="relative h-[60vh] w-full overflow-hidden rounded-lg border border-border">
@@ -78,7 +78,7 @@ function CertificationDocumentViewerBody({
             {preview.certificationName} · {preview.fileName}
           </DialogDescription>
         </DialogHeader>
-        <DocumentPreviewContent preview={preview} />
+        <CertificationDocumentPreviewContent preview={preview} />
         {downloadError ? (
           <p role="alert" className="text-sm text-danger">
             {downloadError}

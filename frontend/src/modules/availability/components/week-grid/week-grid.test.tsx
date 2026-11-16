@@ -304,4 +304,29 @@ describe("WeekGrid", () => {
     const button = screen.getByRole("button", { name: /^confirmada, 17:00/ });
     expect(button).toHaveTextContent("Cita17:00");
   });
+
+  it("al pasar de normal a compacta, reduce el alto de la grilla sin cambiar el horario del bloque", () => {
+    const morningBlock = makeBlock({
+      id: "6",
+      startAt: "2026-10-09T14:00:00.000Z",
+      endAt: "2026-10-09T14:30:00.000Z",
+      state: "free",
+    });
+    const { rerender } = render(
+      <WeekGrid blocks={[morningBlock]} weekRange={WEEK_RANGE} variant="owner" density="normal" />
+    );
+    const dayColumn = () => screen.getByRole("heading", { name: "LUN 5" }).nextElementSibling;
+    const blockItem = () => screen.getByRole("button", { name: "libre, 10:00 a 10:30" }).closest("li");
+
+    expect(dayColumn()).toHaveStyle({ height: `${15 * HOUR_HEIGHT_PX}px` });
+    expect(blockItem()).toHaveStyle({ top: `${3 * HOUR_HEIGHT_PX}px`, height: `${HOUR_HEIGHT_PX / 2}px` });
+
+    rerender(<WeekGrid blocks={[morningBlock]} weekRange={WEEK_RANGE} variant="owner" density="compact" />);
+
+    expect(dayColumn()).toHaveStyle({ height: `${15 * COMPACT_HOUR_HEIGHT_PX}px` });
+    expect(blockItem()).toHaveStyle({
+      top: `${3 * COMPACT_HOUR_HEIGHT_PX}px`,
+      height: `${COMPACT_HOUR_HEIGHT_PX / 2}px`,
+    });
+  });
 });

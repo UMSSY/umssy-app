@@ -55,10 +55,15 @@ describe('AppointmentsService', () => {
     lockParticipants: vi.fn(),
     hasOverlappingAppointment: vi.fn(),
     hasReservationOnDay: vi.fn(),
+    hasMentorCancellation: vi.fn(),
   };
   const availabilityService = { findBlockWithAppointments: vi.fn() };
   const blockedDatesService = { runOnUnblockedDay: vi.fn() };
   const mentorsService = { findOne: vi.fn() };
+  const transactions = {
+    run: <T>(operation: (context: { client: unknown }) => Promise<T>) =>
+      operation({ client: TX }),
+  };
   const user = {
     id: STUDENT_ID,
     email: 'student@test.com',
@@ -93,6 +98,7 @@ describe('AppointmentsService', () => {
     appointmentsRepository.findStatusIdByTitle.mockResolvedValue(STATUS_ID);
     appointmentsRepository.hasOverlappingAppointment.mockResolvedValue(false);
     appointmentsRepository.hasReservationOnDay.mockResolvedValue(false);
+    appointmentsRepository.hasMentorCancellation.mockResolvedValue(false);
     appointmentsRepository.createAppointment.mockResolvedValue(
       createAppointmentRecord(),
     );
@@ -103,6 +109,7 @@ describe('AppointmentsService', () => {
       blockedDatesService as never,
       mentorsService as never,
       {} as never,
+      transactions as never,
     );
   });
 
@@ -248,6 +255,37 @@ describe('AppointmentsService', () => {
     );
     expect(mentorsService.findOne).not.toHaveBeenCalled();
     expect(appointmentsRepository.createAppointment).not.toHaveBeenCalled();
+  });
+
+  it('responde 409 cuando el mentor canceló la cita de su bloque', async () => {
+    appointmentsRepository.hasMentorCancellation.mockResolvedValue(true);
+
+    await expect(service.create(user, payload)).rejects.toThrow(
+      SlotUnavailableException,
+    );
+    expect(blockedDatesService.runOnUnblockedDay).not.toHaveBeenCalled();
+    expect(appointmentsRepository.createAppointment).not.toHaveBeenCalled();
+  });
+
+  it('responde 409 sin crear la cita cuando el mentor canceló dentro del candado', async () => {
+    appointmentsRepository.hasMentorCancellation
+      .mockResolvedValueOnce(false)
+      .mockResolvedValueOnce(true);
+
+    await expect(service.create(user, payload)).rejects.toThrow(
+      SlotUnavailableException,
+    );
+    expect(blockedDatesService.runOnUnblockedDay).toHaveBeenCalled();
+    expect(appointmentsRepository.createAppointment).not.toHaveBeenCalled();
+  });
+
+  it('reserva el bloque cuya cita canceló el titulado', async () => {
+    appointmentsRepository.hasMentorCancellation.mockResolvedValue(false);
+
+    const result = await service.create(user, payload);
+
+    expect(result.status).toBe(AppointmentStatusTitle.CONFIRMED);
+    expect(appointmentsRepository.createAppointment).toHaveBeenCalled();
   });
 
   it('propaga el 404 cuando el mentor del bloque no está activo', async () => {

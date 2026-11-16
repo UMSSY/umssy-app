@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { Download, FileText } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button-variants";
 import {
@@ -26,9 +25,8 @@ import {
   APPOINTMENT_CANCELLATION_TEXT,
   APPOINTMENT_DETAIL_TEXT,
   APPOINTMENT_ROLE_LABELS,
-  APPOINTMENT_STATUS_CLASSES,
-  APPOINTMENT_STATUS_LABELS,
 } from "../constants/appointments.constants";
+import { AppointmentStatusBadge } from "./appointment-status-badge";
 import { useAppointment } from "../hooks/use-appointment";
 import { useCounterpartPhoto } from "../hooks/use-counterpart-photo";
 import { useDownloadAppointmentDocument } from "../hooks/use-download-appointment-document";
@@ -81,14 +79,14 @@ export function AppointmentDetailDialog({ appointmentId, onClose }: AppointmentD
                   {" · "}
                   {appointment.orientationType?.name ?? APPOINTMENTS_TEXT.noTopic}
                 </DialogDescription>
-                <Badge
-                  variant="outline"
-                  className={APPOINTMENT_STATUS_CLASSES[appointment.status]}
-                >
-                  {appointment.status === "CANCELLED"
-                    ? getCancellationLabel(appointment.cancellation)
-                    : APPOINTMENT_STATUS_LABELS[appointment.status]}
-                </Badge>
+                <AppointmentStatusBadge
+                  status={appointment.status}
+                  label={
+                    appointment.status === "CANCELLED"
+                      ? getCancellationLabel(appointment.cancellation)
+                      : undefined
+                  }
+                />
               </div>
             </DialogHeader>
 

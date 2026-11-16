@@ -115,6 +115,23 @@ describe("MentorAvailabilityView", () => {
     expect(screen.getByRole("button", { name: "Compacta" })).toHaveAttribute("aria-pressed", "true")
   })
 
+  it("conserva la densidad compacta al cambiar de semana", async () => {
+    vi.spyOn(availabilityApi, "getAvailabilityBlocks").mockResolvedValue([])
+    const user = userEvent.setup({ delay: null })
+    renderWithQuery(<MentorAvailabilityView />)
+
+    await user.click(screen.getByRole("button", { name: "Compacta" }))
+    fireEvent.click(screen.getByRole("button", { name: "Semana siguiente" }))
+
+    expect(screen.getByText("12 – 18 de octubre de 2026")).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Compacta" })).toHaveAttribute("aria-pressed", "true")
+
+    fireEvent.click(screen.getByRole("button", { name: "Semana anterior" }))
+
+    expect(screen.getByText("5 – 11 de octubre de 2026")).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Compacta" })).toHaveAttribute("aria-pressed", "true")
+  })
+
   it("Hoy vuelve a la semana actual", async () => {
     vi.spyOn(availabilityApi, "getAvailabilityBlocks").mockResolvedValue([])
     renderWithQuery(<MentorAvailabilityView />)

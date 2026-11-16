@@ -11,6 +11,7 @@ export class UsersRepository {
       select: {
         id: true,
         isActive: true,
+        companyId: true,
         roles: {
           where: { deletedAt: null },
           select: {
@@ -47,5 +48,12 @@ export class UsersRepository {
       data: { companyId },
       select: { id: true },
     });
+  }
+    async findEmailById(userId: string): Promise<string | null> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { email: true },
+    });
+    return user?.email ?? null;
   }
 }
