@@ -51,6 +51,37 @@ describe('capacidad HU-7-1', () => {
     ).toBe(0);
   });
 
+  it('calcula capacidad con el porcentaje configurado', () => {
+    expect(
+      mentorCapacity({
+        approvedGraduates: 340,
+        activeMentors: 68,
+        reservedOffers: 12,
+        percentage: 25,
+      }),
+    ).toMatchObject({
+      capacity: 85,
+      occupied: 80,
+      available: 5,
+      percentage: 25,
+    });
+  });
+
+  it('conserva participaciones ocupadas al reducir el límite', () => {
+    expect(
+      mentorCapacity({
+        approvedGraduates: 100,
+        activeMentors: 30,
+        reservedOffers: 10,
+        percentage: 20,
+      }),
+    ).toMatchObject({
+      capacity: 20,
+      occupied: 40,
+      available: 0,
+    });
+  });
+
   function fixture(eligible = true, alreadyMentor = false, reservedOffers = 0) {
     let mentors = 0;
     let held = Promise.resolve();

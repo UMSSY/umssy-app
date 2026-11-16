@@ -97,6 +97,7 @@ export const ModelName = {
   AccessRequest: 'AccessRequest',
   MentorParticipationRequest: 'MentorParticipationRequest',
   MentorSlotOffer: 'MentorSlotOffer',
+  MentorCapacitySetting: 'MentorCapacitySetting',
   ActivationOtp: 'ActivationOtp',
   MessageStatus: 'MessageStatus',
   ConnectionRequestStatus: 'ConnectionRequestStatus',
@@ -790,6 +791,15 @@ export const MentorSlotOfferScalarFieldEnum = {
 } as const
 
 export type MentorSlotOfferScalarFieldEnum = (typeof MentorSlotOfferScalarFieldEnum)[keyof typeof MentorSlotOfferScalarFieldEnum]
+
+
+export const MentorCapacitySettingScalarFieldEnum = {
+  id: 'id',
+  percentage: 'percentage',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MentorCapacitySettingScalarFieldEnum = (typeof MentorCapacitySettingScalarFieldEnum)[keyof typeof MentorCapacitySettingScalarFieldEnum]
 
 
 export const ActivationOtpScalarFieldEnum = {
