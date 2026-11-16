@@ -2,7 +2,7 @@ import type { AnchorHTMLAttributes, ReactNode } from "react";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NotificationBell } from "../components/notification-bell";
-import { useNotificationUnreadCount } from "../hooks/use-notification-unread-count";
+import { useUnreadNotificationsCount } from "../hooks/use-notifications";
 
 vi.mock("next/link", () => ({
   default: ({
@@ -19,9 +19,15 @@ vi.mock("next/link", () => ({
   ),
 }));
 
-vi.mock("../hooks/use-notification-unread-count", () => ({
-  useNotificationUnreadCount: vi.fn(),
+vi.mock("../hooks/use-notifications", () => ({
+  useUnreadNotificationsCount: vi.fn(),
 }));
+
+function mockUnreadCount(count: number) {
+  vi.mocked(useUnreadNotificationsCount).mockReturnValue({
+    data: { count },
+  } as ReturnType<typeof useUnreadNotificationsCount>);
+}
 
 describe("NotificationBell", () => {
   beforeEach(() => {
@@ -34,10 +40,7 @@ describe("NotificationBell", () => {
 
   describe("Variante default", () => {
     it("oculta el badge cuando el contador es 0", () => {
-      vi.mocked(useNotificationUnreadCount).mockReturnValue({
-        unreadCount: 0,
-        isLoading: false,
-      });
+      mockUnreadCount(0);
 
       render(<NotificationBell />);
 
@@ -47,10 +50,7 @@ describe("NotificationBell", () => {
     });
 
     it("muestra el contador exacto cuando hay notificaciones sin leer", () => {
-      vi.mocked(useNotificationUnreadCount).mockReturnValue({
-        unreadCount: 7,
-        isLoading: false,
-      });
+      mockUnreadCount(7);
 
       render(<NotificationBell />);
 
@@ -61,10 +61,7 @@ describe("NotificationBell", () => {
     });
 
     it("muestra 99+ cuando hay más de 99 notificaciones sin leer", () => {
-      vi.mocked(useNotificationUnreadCount).mockReturnValue({
-        unreadCount: 145,
-        isLoading: false,
-      });
+      mockUnreadCount(145);
 
       render(<NotificationBell />);
 
@@ -74,10 +71,7 @@ describe("NotificationBell", () => {
 
   describe("Variante floating", () => {
     it("oculta el badge cuando no hay notificaciones sin leer", () => {
-      vi.mocked(useNotificationUnreadCount).mockReturnValue({
-        unreadCount: 0,
-        isLoading: false,
-      });
+      mockUnreadCount(0);
 
       render(<NotificationBell variant="floating" />);
 
@@ -87,10 +81,7 @@ describe("NotificationBell", () => {
     });
 
     it("muestra el contador exacto cuando existen avisos sin leer", () => {
-      vi.mocked(useNotificationUnreadCount).mockReturnValue({
-        unreadCount: 7,
-        isLoading: false,
-      });
+      mockUnreadCount(7);
 
       render(<NotificationBell variant="floating" />);
 
@@ -101,10 +92,7 @@ describe("NotificationBell", () => {
     });
 
     it("muestra 99+ cuando el contador supera 99", () => {
-      vi.mocked(useNotificationUnreadCount).mockReturnValue({
-        unreadCount: 120,
-        isLoading: false,
-      });
+      mockUnreadCount(120);
 
       render(<NotificationBell variant="floating" />);
 

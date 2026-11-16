@@ -75,7 +75,9 @@ describe('HU-20: Chat & Connection Notifications', () => {
     };
 
     mockPolicyService = {
-      assertCanCommunicate: vi.fn().mockResolvedValue(undefined),
+      assertCanCommunicate: vi
+        .fn()
+        .mockResolvedValue({ hasValidatedApplication: false }),
     };
 
     mockMessageMapper = {

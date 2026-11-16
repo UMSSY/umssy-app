@@ -10,12 +10,10 @@ vi.mock("next/navigation", () => ({
   usePathname: () => "/backoffice/solicitudes",
   useRouter: () => ({ replace: vi.fn() }),
 }));
-vi.mock("@/modules/notifications/hooks/use-notifications-realtime-sync", () => ({
+vi.mock("@/modules/notifications/hooks/use-notifications", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/modules/notifications/hooks/use-notifications")>()),
   useNotificationsRealtimeSync: vi.fn(),
-}));
-
-vi.mock("@/modules/notifications/hooks/use-notification-unread-count", () => ({
-  useNotificationUnreadCount: () => ({ unreadCount: 0, isLoading: false }),
+  useUnreadNotificationsCount: () => ({ data: { count: 0 } }),
 }));
 
 vi.mock("@/modules/request-review/hooks/use-backoffice-session", () => ({

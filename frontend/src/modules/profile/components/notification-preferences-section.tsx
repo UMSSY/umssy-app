@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { usePushNotifications } from '@/shared/hooks/use-push-notifications';
 import { useNotificationPreferences } from '../hooks/use-notification-preferences';
-import type { NotificationChannel } from '../types/notification-preference.types';
+import type { NotificationChannel } from '../types/notification-channel.types';
 
 export function NotificationPreferencesSection() {
   const {

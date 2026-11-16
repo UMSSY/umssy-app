@@ -12,7 +12,7 @@ import { SessionUserCard } from "@/modules/auth";
 import { getAccessToken } from "@/shared/services/storage/access-token-storage";
 import { ChatDock, MessagingUiProvider } from "@/modules/chat";
 import { AppHeader } from "./app-header";
-import { useNotificationsRealtimeSync } from "@/modules/notifications/hooks/use-notifications-realtime-sync";
+import { useNotificationsRealtimeSync } from "@/modules/notifications";
 
 export function AppShell({
   children,

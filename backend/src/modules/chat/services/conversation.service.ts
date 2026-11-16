@@ -113,11 +113,12 @@ export class ConversationService {
       throw new UserBlockedException();
     }
 
-    await this.chatRolePolicyService.assertCanCommunicate(
-      normalizedCurrentUserId,
-      normalizedContactId,
-      context,
-    );
+    const { hasValidatedApplication } =
+      await this.chatRolePolicyService.assertCanCommunicate(
+        normalizedCurrentUserId,
+        normalizedContactId,
+        context,
+      );
 
     const existing = context?.contextId
       ? await this.conversationRepository.findByContextId(context.contextId, userAId, userBId)
@@ -136,10 +137,7 @@ export class ConversationService {
       };
     }
 
-    const isPostulationContext =
-      context?.contextType === 'POSTULACION' && Boolean(context?.contextId);
-
-    if (!isPostulationContext) {
+    if (!hasValidatedApplication) {
       const hasAccepted = this.connectionRequestService
         ? await this.connectionRequestService.hasAcceptedConnection(
             userAId,

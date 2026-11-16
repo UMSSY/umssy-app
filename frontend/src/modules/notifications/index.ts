@@ -44,6 +44,7 @@ export { isInternalNotificationLink } from "./utils/is-internal-notification-lin
 export { isNotificationType } from "./utils/is-notification-type";
 export { resolveNotificationLink } from "./utils/resolve-notification-link";
 export type { NotificationCatalogDefinition } from "./types/notification-catalog-definition.types";
+export type { NotificationBellProps } from "./types/notification-bell-props.types";
 export type { NotificationCategory } from "./types/notification-category.types";
 export type { NotificationInboxFilter } from "./types/notification-inbox-filter.types";
 export type { NotificationListResponse } from "./types/notification-list-response.types";
