@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import type { ApplicationRecord } from '../types/application-record.types.js';
-import type {
-  ApplicationContactRecord,
-  ApplicationContactResponse,
-} from '../types/application-contact.types.js';
+import type { ApplicationContactResponse } from '../types/application-contact-response.types.js';
+import type { ApplicationDecisionContext } from '../types/application-decision-context.types.js';
+import type { CompanyRecruiter } from '../../users/types/company-recruiter.types.js';
 import type { ApplicationItemResponse } from '../types/applications.types.js';
 @Injectable()
 export class ApplicationMapper {
@@ -23,16 +22,16 @@ export class ApplicationMapper {
   }
 
   toContactResponse(
-    record: ApplicationContactRecord,
+    context: ApplicationDecisionContext,
+    recruiters: CompanyRecruiter[],
   ): ApplicationContactResponse {
-    const { company } = record.jobOffer;
     return {
-      applicationId: record.id,
-      jobOfferId: record.jobOfferId,
-      vacancyTitle: record.jobOffer.title,
-      companyId: company.id,
-      companyName: company.title,
-      recruiters: company.recruiters.map((recruiter) => ({
+      applicationId: context.id,
+      jobOfferId: context.jobOfferId,
+      vacancyTitle: context.jobTitle,
+      companyId: context.companyId,
+      companyName: context.companyName,
+      recruiters: recruiters.map((recruiter) => ({
         id: recruiter.id,
         fullName: `${recruiter.firstName} ${recruiter.lastName}`,
       })),
