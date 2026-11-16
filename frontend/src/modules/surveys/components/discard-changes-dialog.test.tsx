@@ -23,6 +23,14 @@ describe("DiscardChangesDialog", () => {
     expect(onOpenChange).toHaveBeenCalledWith(false, expect.anything());
   });
 
+  it("muestra el texto de la encuesta por defecto y permite reemplazarlo", () => {
+    const { rerender } = render(<DiscardChangesDialog open onOpenChange={vi.fn()} onConfirm={vi.fn()} />);
+    expect(screen.getByText("Los cambios que realizó en la encuesta no se guardarán.")).toBeInTheDocument();
+
+    rerender(<DiscardChangesDialog open onOpenChange={vi.fn()} onConfirm={vi.fn()} description="Texto propio." />);
+    expect(screen.getByText("Texto propio.")).toBeInTheDocument();
+  });
+
   it("no se muestra cerrado", () => {
     render(<DiscardChangesDialog open={false} onOpenChange={vi.fn()} onConfirm={vi.fn()} />);
 
