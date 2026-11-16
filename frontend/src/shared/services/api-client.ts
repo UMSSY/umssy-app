@@ -4,46 +4,15 @@ import { ENV_CONFIG } from "@/shared/config/env.config";
 import {
   getAccessToken,
   clearAccessToken,
-  saveAccessToken,
   initializeAccessTokenStorage,
 } from "@/shared/services/storage/access-token-storage";
 import { broadcastAuthEvent } from "@/shared/utils/auth-broadcast";
+import { executeSharedRefresh } from "@/shared/utils/session-refresh-lock";
 
 export const apiClient = axios.create({
   baseURL: ENV_CONFIG.apiUrl,
   withCredentials: true,
 });
-
-let inFlightRefreshPromise: Promise<unknown> | null = null;
-
-async function executeTokenRefresh(): Promise<unknown> {
-  if (inFlightRefreshPromise) {
-    return inFlightRefreshPromise;
-  }
-
-  inFlightRefreshPromise = (async () => {
-    try {
-      const response = await axios.post(
-        `${ENV_CONFIG.apiUrl || ""}/auth/refresh`,
-        {},
-        { withCredentials: true },
-      );
-      const resData = response.data as {
-        data?: { accessToken?: string };
-        accessToken?: string;
-      };
-      const newToken = resData?.data?.accessToken || resData?.accessToken;
-      if (newToken) {
-        await saveAccessToken(newToken);
-      }
-      return response.data;
-    } finally {
-      inFlightRefreshPromise = null;
-    }
-  })();
-
-  return inFlightRefreshPromise;
-}
 
 apiClient.interceptors.request.use(async (config) => {
   await initializeAccessTokenStorage();
@@ -96,7 +65,10 @@ apiClient.interceptors.response.use(
       if (originalRequest && !originalRequest._retry && !isAuthUrl) {
         originalRequest._retry = true;
         try {
-          await executeTokenRefresh();
+          const success = await executeSharedRefresh(undefined, { wait: true });
+          if (!success) {
+            throw new Error("No se pudo renovar la sesión");
+          }
           const newToken = getAccessToken();
           if (newToken && originalRequest.headers) {
             if (typeof originalRequest.headers.set === "function") {
