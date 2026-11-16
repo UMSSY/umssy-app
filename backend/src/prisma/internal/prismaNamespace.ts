@@ -8161,6 +8161,7 @@ export const SurveyScalarFieldEnum = {
   closingSoonNotifiedAt: 'closingSoonNotifiedAt',
   closedNotifiedAt: 'closedNotifiedAt',
   lastReminderSentAt: 'lastReminderSentAt',
+  variationEvaluatedPeriod: 'variationEvaluatedPeriod',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
