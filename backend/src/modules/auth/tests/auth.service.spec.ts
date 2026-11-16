@@ -24,6 +24,9 @@ describe('AuthService', () => {
   };
   const jwtService = { sign: vi.fn() };
   const mailService = { send: vi.fn().mockResolvedValue(undefined) };
+  const refreshTokenService = {
+    revokeAllForUser: vi.fn(),
+  };
   let service: AuthService;
 
   beforeEach(() => {
@@ -32,6 +35,7 @@ describe('AuthService', () => {
       authRepository as any,
       jwtService as any,
       mailService as any,
+      refreshTokenService as any,
     );
   });
 
@@ -198,6 +202,9 @@ describe('AuthService', () => {
       email: 'ana@umss.edu.bo',
       roles: ['titulado', 'mentor'],
       company: null,
+      idleTimeoutSeconds: 900,
+      warningSeconds: 180,
+      absoluteExpiresAt: null,
     });
   });
 
@@ -253,7 +260,7 @@ describe('AuthService', () => {
         lastName: 'Perez',
         isActive: true,
       });
-      // OTP creado hace 30 segundos
+
       authRepository.findLatestOtp.mockResolvedValue({
         id: 'otp-recent',
         createdAt: new Date(Date.now() - 30 * 1000),
@@ -277,7 +284,7 @@ describe('AuthService', () => {
         lastName: 'Perez',
         isActive: true,
       });
-      // OTP creado hace 130 segundos (más de 2 minutos)
+
       authRepository.findLatestOtp.mockResolvedValue({
         id: 'otp-old',
         createdAt: new Date(Date.now() - 130 * 1000),
