@@ -43,13 +43,15 @@ export function ApplicationsView() {
   );
 
   const visibleApplications = useMemo(() => {
-    const listed = showWithdrawn ? (data ?? []) : excludeWithdrawnApplications(data ?? []);
+    const listed = showWithdrawn
+      ? (data ?? []).filter((application) => application.status === WITHDRAWN_STATUS)
+      : excludeWithdrawnApplications(data ?? []);
     return sortApplications(filterApplicationsByStatus(listed, statusFilter), sort);
   }, [data, showWithdrawn, statusFilter, sort]);
 
   const handleShowWithdrawnChange = (pressed: boolean) => {
     setShowWithdrawn(pressed);
-    if (!pressed && statusFilter === WITHDRAWN_STATUS) setStatusFilter("all");
+    setStatusFilter("all");
   };
 
   const requestWithdraw = (applicationId: string) => {
