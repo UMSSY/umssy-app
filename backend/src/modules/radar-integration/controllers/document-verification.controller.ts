@@ -19,10 +19,10 @@ import {
   documentDecisionSchema,
   documentAcknowledgementSchema,
   documentReviewFilterSchema,
-  type DocumentDecisionRequest,
-  type DocumentAcknowledgementRequest,
-  type DocumentReviewFilter,
 } from '../requests/document-verification.request.js';
+import type { DocumentDecisionRequest } from '../types/document-decision-request.type.js';
+import type { DocumentAcknowledgementRequest } from '../types/document-acknowledgement-request.type.js';
+import type { DocumentReviewFilter } from '../types/document-review-filter.type.js';
 
 @Controller()
 @UseGuards(JwtAuthGuard)

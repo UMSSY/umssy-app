@@ -25,22 +25,25 @@ export type AggregateRadarDocumentStatus = {
 }
 
 export type RadarDocumentStatusMinAggregateOutputType = {
-  code: string | null
-  name: string | null
+  id: string | null
+  title: string | null
+  description: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
 
 export type RadarDocumentStatusMaxAggregateOutputType = {
-  code: string | null
-  name: string | null
+  id: string | null
+  title: string | null
+  description: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
 
 export type RadarDocumentStatusCountAggregateOutputType = {
-  code: number
-  name: number
+  id: number
+  title: number
+  description: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -48,22 +51,25 @@ export type RadarDocumentStatusCountAggregateOutputType = {
 
 
 export type RadarDocumentStatusMinAggregateInputType = {
-  code?: true
-  name?: true
+  id?: true
+  title?: true
+  description?: true
   createdAt?: true
   updatedAt?: true
 }
 
 export type RadarDocumentStatusMaxAggregateInputType = {
-  code?: true
-  name?: true
+  id?: true
+  title?: true
+  description?: true
   createdAt?: true
   updatedAt?: true
 }
 
 export type RadarDocumentStatusCountAggregateInputType = {
-  code?: true
-  name?: true
+  id?: true
+  title?: true
+  description?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -142,8 +148,9 @@ export type RadarDocumentStatusGroupByArgs<ExtArgs extends runtime.Types.Extensi
 }
 
 export type RadarDocumentStatusGroupByOutputType = {
-  code: string
-  name: string
+  id: string
+  title: string
+  description: string
   createdAt: Date
   updatedAt: Date
   _count: RadarDocumentStatusCountAggregateOutputType | null
@@ -170,35 +177,39 @@ export type RadarDocumentStatusWhereInput = {
   AND?: Prisma.RadarDocumentStatusWhereInput | Prisma.RadarDocumentStatusWhereInput[]
   OR?: Prisma.RadarDocumentStatusWhereInput[]
   NOT?: Prisma.RadarDocumentStatusWhereInput | Prisma.RadarDocumentStatusWhereInput[]
-  code?: Prisma.StringFilter<"RadarDocumentStatus"> | string
-  name?: Prisma.StringFilter<"RadarDocumentStatus"> | string
+  id?: Prisma.UuidFilter<"RadarDocumentStatus"> | string
+  title?: Prisma.StringFilter<"RadarDocumentStatus"> | string
+  description?: Prisma.StringFilter<"RadarDocumentStatus"> | string
   createdAt?: Prisma.DateTimeFilter<"RadarDocumentStatus"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"RadarDocumentStatus"> | Date | string
   documents?: Prisma.RadarDocumentVerificationListRelationFilter
 }
 
 export type RadarDocumentStatusOrderByWithRelationInput = {
-  code?: Prisma.SortOrder
-  name?: Prisma.SortOrder
+  id?: Prisma.SortOrder
+  title?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   documents?: Prisma.RadarDocumentVerificationOrderByRelationAggregateInput
 }
 
 export type RadarDocumentStatusWhereUniqueInput = Prisma.AtLeast<{
-  code?: string
+  id?: string
+  title?: string
   AND?: Prisma.RadarDocumentStatusWhereInput | Prisma.RadarDocumentStatusWhereInput[]
   OR?: Prisma.RadarDocumentStatusWhereInput[]
   NOT?: Prisma.RadarDocumentStatusWhereInput | Prisma.RadarDocumentStatusWhereInput[]
-  name?: Prisma.StringFilter<"RadarDocumentStatus"> | string
+  description?: Prisma.StringFilter<"RadarDocumentStatus"> | string
   createdAt?: Prisma.DateTimeFilter<"RadarDocumentStatus"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"RadarDocumentStatus"> | Date | string
   documents?: Prisma.RadarDocumentVerificationListRelationFilter
-}, "code">
+}, "id" | "title">
 
 export type RadarDocumentStatusOrderByWithAggregationInput = {
-  code?: Prisma.SortOrder
-  name?: Prisma.SortOrder
+  id?: Prisma.SortOrder
+  title?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.RadarDocumentStatusCountOrderByAggregateInput
@@ -210,61 +221,69 @@ export type RadarDocumentStatusScalarWhereWithAggregatesInput = {
   AND?: Prisma.RadarDocumentStatusScalarWhereWithAggregatesInput | Prisma.RadarDocumentStatusScalarWhereWithAggregatesInput[]
   OR?: Prisma.RadarDocumentStatusScalarWhereWithAggregatesInput[]
   NOT?: Prisma.RadarDocumentStatusScalarWhereWithAggregatesInput | Prisma.RadarDocumentStatusScalarWhereWithAggregatesInput[]
-  code?: Prisma.StringWithAggregatesFilter<"RadarDocumentStatus"> | string
-  name?: Prisma.StringWithAggregatesFilter<"RadarDocumentStatus"> | string
+  id?: Prisma.UuidWithAggregatesFilter<"RadarDocumentStatus"> | string
+  title?: Prisma.StringWithAggregatesFilter<"RadarDocumentStatus"> | string
+  description?: Prisma.StringWithAggregatesFilter<"RadarDocumentStatus"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"RadarDocumentStatus"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"RadarDocumentStatus"> | Date | string
 }
 
 export type RadarDocumentStatusCreateInput = {
-  code: string
-  name: string
+  id?: string
+  title: string
+  description: string
   createdAt?: Date | string
   updatedAt?: Date | string
   documents?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutStatusEntryInput
 }
 
 export type RadarDocumentStatusUncheckedCreateInput = {
-  code: string
-  name: string
+  id?: string
+  title: string
+  description: string
   createdAt?: Date | string
   updatedAt?: Date | string
   documents?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutStatusEntryInput
 }
 
 export type RadarDocumentStatusUpdateInput = {
-  code?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   documents?: Prisma.RadarDocumentVerificationUpdateManyWithoutStatusEntryNestedInput
 }
 
 export type RadarDocumentStatusUncheckedUpdateInput = {
-  code?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   documents?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutStatusEntryNestedInput
 }
 
 export type RadarDocumentStatusCreateManyInput = {
-  code: string
-  name: string
+  id?: string
+  title: string
+  description: string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
 
 export type RadarDocumentStatusUpdateManyMutationInput = {
-  code?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type RadarDocumentStatusUncheckedUpdateManyInput = {
-  code?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -275,22 +294,25 @@ export type RadarDocumentStatusScalarRelationFilter = {
 }
 
 export type RadarDocumentStatusCountOrderByAggregateInput = {
-  code?: Prisma.SortOrder
-  name?: Prisma.SortOrder
+  id?: Prisma.SortOrder
+  title?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type RadarDocumentStatusMaxOrderByAggregateInput = {
-  code?: Prisma.SortOrder
-  name?: Prisma.SortOrder
+  id?: Prisma.SortOrder
+  title?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type RadarDocumentStatusMinOrderByAggregateInput = {
-  code?: Prisma.SortOrder
-  name?: Prisma.SortOrder
+  id?: Prisma.SortOrder
+  title?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -310,15 +332,17 @@ export type RadarDocumentStatusUpdateOneRequiredWithoutDocumentsNestedInput = {
 }
 
 export type RadarDocumentStatusCreateWithoutDocumentsInput = {
-  code: string
-  name: string
+  id?: string
+  title: string
+  description: string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
 
 export type RadarDocumentStatusUncheckedCreateWithoutDocumentsInput = {
-  code: string
-  name: string
+  id?: string
+  title: string
+  description: string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -340,15 +364,17 @@ export type RadarDocumentStatusUpdateToOneWithWhereWithoutDocumentsInput = {
 }
 
 export type RadarDocumentStatusUpdateWithoutDocumentsInput = {
-  code?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type RadarDocumentStatusUncheckedUpdateWithoutDocumentsInput = {
-  code?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -385,8 +411,9 @@ export type RadarDocumentStatusCountOutputTypeCountDocumentsArgs<ExtArgs extends
 
 
 export type RadarDocumentStatusSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  code?: boolean
-  name?: boolean
+  id?: boolean
+  title?: boolean
+  description?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   documents?: boolean | Prisma.RadarDocumentStatus$documentsArgs<ExtArgs>
@@ -394,27 +421,30 @@ export type RadarDocumentStatusSelect<ExtArgs extends runtime.Types.Extensions.I
 }, ExtArgs["result"]["radarDocumentStatus"]>
 
 export type RadarDocumentStatusSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  code?: boolean
-  name?: boolean
+  id?: boolean
+  title?: boolean
+  description?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["radarDocumentStatus"]>
 
 export type RadarDocumentStatusSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  code?: boolean
-  name?: boolean
+  id?: boolean
+  title?: boolean
+  description?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["radarDocumentStatus"]>
 
 export type RadarDocumentStatusSelectScalar = {
-  code?: boolean
-  name?: boolean
+  id?: boolean
+  title?: boolean
+  description?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type RadarDocumentStatusOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"code" | "name" | "createdAt" | "updatedAt", ExtArgs["result"]["radarDocumentStatus"]>
+export type RadarDocumentStatusOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "createdAt" | "updatedAt", ExtArgs["result"]["radarDocumentStatus"]>
 export type RadarDocumentStatusInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   documents?: boolean | Prisma.RadarDocumentStatus$documentsArgs<ExtArgs>
   _count?: boolean | Prisma.RadarDocumentStatusCountOutputTypeDefaultArgs<ExtArgs>
@@ -428,8 +458,9 @@ export type $RadarDocumentStatusPayload<ExtArgs extends runtime.Types.Extensions
     documents: Prisma.$RadarDocumentVerificationPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
-    code: string
-    name: string
+    id: string
+    title: string
+    description: string
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["radarDocumentStatus"]>
@@ -515,8 +546,8 @@ export interface RadarDocumentStatusDelegate<ExtArgs extends runtime.Types.Exten
    * // Get first 10 RadarDocumentStatuses
    * const radarDocumentStatuses = await prisma.radarDocumentStatus.findMany({ take: 10 })
    *
-   * // Only select the `code`
-   * const radarDocumentStatusWithCodeOnly = await prisma.radarDocumentStatus.findMany({ select: { code: true } })
+   * // Only select the `id`
+   * const radarDocumentStatusWithIdOnly = await prisma.radarDocumentStatus.findMany({ select: { id: true } })
    *
    */
   findMany<T extends RadarDocumentStatusFindManyArgs>(args?: Prisma.SelectSubset<T, RadarDocumentStatusFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RadarDocumentStatusPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
@@ -560,9 +591,9 @@ export interface RadarDocumentStatusDelegate<ExtArgs extends runtime.Types.Exten
    *   ]
    * })
    *
-   * // Create many RadarDocumentStatuses and only return the `code`
-   * const radarDocumentStatusWithCodeOnly = await prisma.radarDocumentStatus.createManyAndReturn({
-   *   select: { code: true },
+   * // Create many RadarDocumentStatuses and only return the `id`
+   * const radarDocumentStatusWithIdOnly = await prisma.radarDocumentStatus.createManyAndReturn({
+   *   select: { id: true },
    *   data: [
    *     // ... provide data here
    *   ]
@@ -651,9 +682,9 @@ export interface RadarDocumentStatusDelegate<ExtArgs extends runtime.Types.Exten
    *   ]
    * })
    *
-   * // Update zero or more RadarDocumentStatuses and only return the `code`
-   * const radarDocumentStatusWithCodeOnly = await prisma.radarDocumentStatus.updateManyAndReturn({
-   *   select: { code: true },
+   * // Update zero or more RadarDocumentStatuses and only return the `id`
+   * const radarDocumentStatusWithIdOnly = await prisma.radarDocumentStatus.updateManyAndReturn({
+   *   select: { id: true },
    *   where: {
    *     // ... provide filter here
    *   },
@@ -856,8 +887,9 @@ export interface Prisma__RadarDocumentStatusClient<T, Null = never, ExtArgs exte
  * Fields of the RadarDocumentStatus model
  */
 export interface RadarDocumentStatusFieldRefs {
-  readonly code: Prisma.FieldRef<"RadarDocumentStatus", 'String'>
-  readonly name: Prisma.FieldRef<"RadarDocumentStatus", 'String'>
+  readonly id: Prisma.FieldRef<"RadarDocumentStatus", 'String'>
+  readonly title: Prisma.FieldRef<"RadarDocumentStatus", 'String'>
+  readonly description: Prisma.FieldRef<"RadarDocumentStatus", 'String'>
   readonly createdAt: Prisma.FieldRef<"RadarDocumentStatus", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"RadarDocumentStatus", 'DateTime'>
 }

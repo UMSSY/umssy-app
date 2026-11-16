@@ -8550,7 +8550,7 @@ export type MentorOfferStatusScalarFieldEnum = (typeof MentorOfferStatusScalarFi
 export const RadarDocumentVerificationScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
-  sourceType: 'sourceType',
+  sourceTypeId: 'sourceTypeId',
   sourceId: 'sourceId',
   filename: 'filename',
   mime: 'mime',
@@ -8558,7 +8558,7 @@ export const RadarDocumentVerificationScalarFieldEnum = {
   sizeBytes: 'sizeBytes',
   active: 'active',
   digest: 'digest',
-  status: 'status',
+  statusId: 'statusId',
   confidence: 'confidence',
   reason: 'reason',
   skills: 'skills',
@@ -8679,8 +8679,9 @@ export type NotificationPreferenceScalarFieldEnum = (typeof NotificationPreferen
 
 
 export const RadarDocumentStatusScalarFieldEnum = {
-  code: 'code',
-  name: 'name',
+  id: 'id',
+  title: 'title',
+  description: 'description',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -8689,8 +8690,9 @@ export type RadarDocumentStatusScalarFieldEnum = (typeof RadarDocumentStatusScal
 
 
 export const RadarDocumentSourceTypeScalarFieldEnum = {
-  code: 'code',
-  name: 'name',
+  id: 'id',
+  title: 'title',
+  description: 'description',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

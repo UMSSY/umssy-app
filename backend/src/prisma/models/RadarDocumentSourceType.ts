@@ -25,22 +25,25 @@ export type AggregateRadarDocumentSourceType = {
 }
 
 export type RadarDocumentSourceTypeMinAggregateOutputType = {
-  code: string | null
-  name: string | null
+  id: string | null
+  title: string | null
+  description: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
 
 export type RadarDocumentSourceTypeMaxAggregateOutputType = {
-  code: string | null
-  name: string | null
+  id: string | null
+  title: string | null
+  description: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
 
 export type RadarDocumentSourceTypeCountAggregateOutputType = {
-  code: number
-  name: number
+  id: number
+  title: number
+  description: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -48,22 +51,25 @@ export type RadarDocumentSourceTypeCountAggregateOutputType = {
 
 
 export type RadarDocumentSourceTypeMinAggregateInputType = {
-  code?: true
-  name?: true
+  id?: true
+  title?: true
+  description?: true
   createdAt?: true
   updatedAt?: true
 }
 
 export type RadarDocumentSourceTypeMaxAggregateInputType = {
-  code?: true
-  name?: true
+  id?: true
+  title?: true
+  description?: true
   createdAt?: true
   updatedAt?: true
 }
 
 export type RadarDocumentSourceTypeCountAggregateInputType = {
-  code?: true
-  name?: true
+  id?: true
+  title?: true
+  description?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -142,8 +148,9 @@ export type RadarDocumentSourceTypeGroupByArgs<ExtArgs extends runtime.Types.Ext
 }
 
 export type RadarDocumentSourceTypeGroupByOutputType = {
-  code: string
-  name: string
+  id: string
+  title: string
+  description: string
   createdAt: Date
   updatedAt: Date
   _count: RadarDocumentSourceTypeCountAggregateOutputType | null
@@ -170,35 +177,39 @@ export type RadarDocumentSourceTypeWhereInput = {
   AND?: Prisma.RadarDocumentSourceTypeWhereInput | Prisma.RadarDocumentSourceTypeWhereInput[]
   OR?: Prisma.RadarDocumentSourceTypeWhereInput[]
   NOT?: Prisma.RadarDocumentSourceTypeWhereInput | Prisma.RadarDocumentSourceTypeWhereInput[]
-  code?: Prisma.StringFilter<"RadarDocumentSourceType"> | string
-  name?: Prisma.StringFilter<"RadarDocumentSourceType"> | string
+  id?: Prisma.UuidFilter<"RadarDocumentSourceType"> | string
+  title?: Prisma.StringFilter<"RadarDocumentSourceType"> | string
+  description?: Prisma.StringFilter<"RadarDocumentSourceType"> | string
   createdAt?: Prisma.DateTimeFilter<"RadarDocumentSourceType"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"RadarDocumentSourceType"> | Date | string
   documents?: Prisma.RadarDocumentVerificationListRelationFilter
 }
 
 export type RadarDocumentSourceTypeOrderByWithRelationInput = {
-  code?: Prisma.SortOrder
-  name?: Prisma.SortOrder
+  id?: Prisma.SortOrder
+  title?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   documents?: Prisma.RadarDocumentVerificationOrderByRelationAggregateInput
 }
 
 export type RadarDocumentSourceTypeWhereUniqueInput = Prisma.AtLeast<{
-  code?: string
+  id?: string
+  title?: string
   AND?: Prisma.RadarDocumentSourceTypeWhereInput | Prisma.RadarDocumentSourceTypeWhereInput[]
   OR?: Prisma.RadarDocumentSourceTypeWhereInput[]
   NOT?: Prisma.RadarDocumentSourceTypeWhereInput | Prisma.RadarDocumentSourceTypeWhereInput[]
-  name?: Prisma.StringFilter<"RadarDocumentSourceType"> | string
+  description?: Prisma.StringFilter<"RadarDocumentSourceType"> | string
   createdAt?: Prisma.DateTimeFilter<"RadarDocumentSourceType"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"RadarDocumentSourceType"> | Date | string
   documents?: Prisma.RadarDocumentVerificationListRelationFilter
-}, "code">
+}, "id" | "title">
 
 export type RadarDocumentSourceTypeOrderByWithAggregationInput = {
-  code?: Prisma.SortOrder
-  name?: Prisma.SortOrder
+  id?: Prisma.SortOrder
+  title?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.RadarDocumentSourceTypeCountOrderByAggregateInput
@@ -210,61 +221,69 @@ export type RadarDocumentSourceTypeScalarWhereWithAggregatesInput = {
   AND?: Prisma.RadarDocumentSourceTypeScalarWhereWithAggregatesInput | Prisma.RadarDocumentSourceTypeScalarWhereWithAggregatesInput[]
   OR?: Prisma.RadarDocumentSourceTypeScalarWhereWithAggregatesInput[]
   NOT?: Prisma.RadarDocumentSourceTypeScalarWhereWithAggregatesInput | Prisma.RadarDocumentSourceTypeScalarWhereWithAggregatesInput[]
-  code?: Prisma.StringWithAggregatesFilter<"RadarDocumentSourceType"> | string
-  name?: Prisma.StringWithAggregatesFilter<"RadarDocumentSourceType"> | string
+  id?: Prisma.UuidWithAggregatesFilter<"RadarDocumentSourceType"> | string
+  title?: Prisma.StringWithAggregatesFilter<"RadarDocumentSourceType"> | string
+  description?: Prisma.StringWithAggregatesFilter<"RadarDocumentSourceType"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"RadarDocumentSourceType"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"RadarDocumentSourceType"> | Date | string
 }
 
 export type RadarDocumentSourceTypeCreateInput = {
-  code: string
-  name: string
+  id?: string
+  title: string
+  description: string
   createdAt?: Date | string
   updatedAt?: Date | string
   documents?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutSourceTypeEntryInput
 }
 
 export type RadarDocumentSourceTypeUncheckedCreateInput = {
-  code: string
-  name: string
+  id?: string
+  title: string
+  description: string
   createdAt?: Date | string
   updatedAt?: Date | string
   documents?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutSourceTypeEntryInput
 }
 
 export type RadarDocumentSourceTypeUpdateInput = {
-  code?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   documents?: Prisma.RadarDocumentVerificationUpdateManyWithoutSourceTypeEntryNestedInput
 }
 
 export type RadarDocumentSourceTypeUncheckedUpdateInput = {
-  code?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   documents?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutSourceTypeEntryNestedInput
 }
 
 export type RadarDocumentSourceTypeCreateManyInput = {
-  code: string
-  name: string
+  id?: string
+  title: string
+  description: string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
 
 export type RadarDocumentSourceTypeUpdateManyMutationInput = {
-  code?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type RadarDocumentSourceTypeUncheckedUpdateManyInput = {
-  code?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -275,22 +294,25 @@ export type RadarDocumentSourceTypeScalarRelationFilter = {
 }
 
 export type RadarDocumentSourceTypeCountOrderByAggregateInput = {
-  code?: Prisma.SortOrder
-  name?: Prisma.SortOrder
+  id?: Prisma.SortOrder
+  title?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type RadarDocumentSourceTypeMaxOrderByAggregateInput = {
-  code?: Prisma.SortOrder
-  name?: Prisma.SortOrder
+  id?: Prisma.SortOrder
+  title?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type RadarDocumentSourceTypeMinOrderByAggregateInput = {
-  code?: Prisma.SortOrder
-  name?: Prisma.SortOrder
+  id?: Prisma.SortOrder
+  title?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -310,15 +332,17 @@ export type RadarDocumentSourceTypeUpdateOneRequiredWithoutDocumentsNestedInput 
 }
 
 export type RadarDocumentSourceTypeCreateWithoutDocumentsInput = {
-  code: string
-  name: string
+  id?: string
+  title: string
+  description: string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
 
 export type RadarDocumentSourceTypeUncheckedCreateWithoutDocumentsInput = {
-  code: string
-  name: string
+  id?: string
+  title: string
+  description: string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -340,15 +364,17 @@ export type RadarDocumentSourceTypeUpdateToOneWithWhereWithoutDocumentsInput = {
 }
 
 export type RadarDocumentSourceTypeUpdateWithoutDocumentsInput = {
-  code?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type RadarDocumentSourceTypeUncheckedUpdateWithoutDocumentsInput = {
-  code?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -385,8 +411,9 @@ export type RadarDocumentSourceTypeCountOutputTypeCountDocumentsArgs<ExtArgs ext
 
 
 export type RadarDocumentSourceTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  code?: boolean
-  name?: boolean
+  id?: boolean
+  title?: boolean
+  description?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   documents?: boolean | Prisma.RadarDocumentSourceType$documentsArgs<ExtArgs>
@@ -394,27 +421,30 @@ export type RadarDocumentSourceTypeSelect<ExtArgs extends runtime.Types.Extensio
 }, ExtArgs["result"]["radarDocumentSourceType"]>
 
 export type RadarDocumentSourceTypeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  code?: boolean
-  name?: boolean
+  id?: boolean
+  title?: boolean
+  description?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["radarDocumentSourceType"]>
 
 export type RadarDocumentSourceTypeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  code?: boolean
-  name?: boolean
+  id?: boolean
+  title?: boolean
+  description?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["radarDocumentSourceType"]>
 
 export type RadarDocumentSourceTypeSelectScalar = {
-  code?: boolean
-  name?: boolean
+  id?: boolean
+  title?: boolean
+  description?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type RadarDocumentSourceTypeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"code" | "name" | "createdAt" | "updatedAt", ExtArgs["result"]["radarDocumentSourceType"]>
+export type RadarDocumentSourceTypeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "createdAt" | "updatedAt", ExtArgs["result"]["radarDocumentSourceType"]>
 export type RadarDocumentSourceTypeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   documents?: boolean | Prisma.RadarDocumentSourceType$documentsArgs<ExtArgs>
   _count?: boolean | Prisma.RadarDocumentSourceTypeCountOutputTypeDefaultArgs<ExtArgs>
@@ -428,8 +458,9 @@ export type $RadarDocumentSourceTypePayload<ExtArgs extends runtime.Types.Extens
     documents: Prisma.$RadarDocumentVerificationPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
-    code: string
-    name: string
+    id: string
+    title: string
+    description: string
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["radarDocumentSourceType"]>
@@ -515,8 +546,8 @@ export interface RadarDocumentSourceTypeDelegate<ExtArgs extends runtime.Types.E
    * // Get first 10 RadarDocumentSourceTypes
    * const radarDocumentSourceTypes = await prisma.radarDocumentSourceType.findMany({ take: 10 })
    *
-   * // Only select the `code`
-   * const radarDocumentSourceTypeWithCodeOnly = await prisma.radarDocumentSourceType.findMany({ select: { code: true } })
+   * // Only select the `id`
+   * const radarDocumentSourceTypeWithIdOnly = await prisma.radarDocumentSourceType.findMany({ select: { id: true } })
    *
    */
   findMany<T extends RadarDocumentSourceTypeFindManyArgs>(args?: Prisma.SelectSubset<T, RadarDocumentSourceTypeFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RadarDocumentSourceTypePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
@@ -560,9 +591,9 @@ export interface RadarDocumentSourceTypeDelegate<ExtArgs extends runtime.Types.E
    *   ]
    * })
    *
-   * // Create many RadarDocumentSourceTypes and only return the `code`
-   * const radarDocumentSourceTypeWithCodeOnly = await prisma.radarDocumentSourceType.createManyAndReturn({
-   *   select: { code: true },
+   * // Create many RadarDocumentSourceTypes and only return the `id`
+   * const radarDocumentSourceTypeWithIdOnly = await prisma.radarDocumentSourceType.createManyAndReturn({
+   *   select: { id: true },
    *   data: [
    *     // ... provide data here
    *   ]
@@ -651,9 +682,9 @@ export interface RadarDocumentSourceTypeDelegate<ExtArgs extends runtime.Types.E
    *   ]
    * })
    *
-   * // Update zero or more RadarDocumentSourceTypes and only return the `code`
-   * const radarDocumentSourceTypeWithCodeOnly = await prisma.radarDocumentSourceType.updateManyAndReturn({
-   *   select: { code: true },
+   * // Update zero or more RadarDocumentSourceTypes and only return the `id`
+   * const radarDocumentSourceTypeWithIdOnly = await prisma.radarDocumentSourceType.updateManyAndReturn({
+   *   select: { id: true },
    *   where: {
    *     // ... provide filter here
    *   },
@@ -856,8 +887,9 @@ export interface Prisma__RadarDocumentSourceTypeClient<T, Null = never, ExtArgs 
  * Fields of the RadarDocumentSourceType model
  */
 export interface RadarDocumentSourceTypeFieldRefs {
-  readonly code: Prisma.FieldRef<"RadarDocumentSourceType", 'String'>
-  readonly name: Prisma.FieldRef<"RadarDocumentSourceType", 'String'>
+  readonly id: Prisma.FieldRef<"RadarDocumentSourceType", 'String'>
+  readonly title: Prisma.FieldRef<"RadarDocumentSourceType", 'String'>
+  readonly description: Prisma.FieldRef<"RadarDocumentSourceType", 'String'>
   readonly createdAt: Prisma.FieldRef<"RadarDocumentSourceType", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"RadarDocumentSourceType", 'DateTime'>
 }

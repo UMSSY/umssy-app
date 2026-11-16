@@ -14,6 +14,10 @@ export class RadarEvidenceSourcesService {
     return this.repository.findPublicationCvStates(userId, context);
   }
 
+  findUnapprovedCertificateIds(userId: string, context: TransactionContext) {
+    return this.repository.findUnapprovedCertificateIds(userId, context);
+  }
+
   findApprovedDocuments(userId: string, context: TransactionContext) {
     return this.repository.findApprovedDocuments(userId, context);
   }
@@ -23,7 +27,7 @@ export class RadarEvidenceSourcesService {
   }
 
   async findCurrentCvText(userId: string) {
-    const current = await this.cvs.currentCv(userId);
+    const current = await this.cvs.currentCvMetadata(userId);
     return current ? this.repository.findCurrentCvText(userId, current.id) : [];
   }
 }

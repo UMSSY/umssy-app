@@ -112,7 +112,7 @@ export function VerificationFlow({ doc }: VerificationFlowProps) {
                 className={cn(
                   'relative mx-auto mb-2 flex size-10 items-center justify-center rounded-full',
                   i < progress
-                    ? 'bg-accent text-primary-foreground'
+                    ? 'bg-accent text-accent-foreground'
                     : 'bg-muted text-muted-foreground',
                 )}
               >
@@ -120,7 +120,7 @@ export function VerificationFlow({ doc }: VerificationFlowProps) {
                 {i < progress && (
                   <Check
                     size={15}
-                    className="absolute -right-1 -bottom-1 rounded-full bg-accent p-0.5 text-primary-foreground"
+                    className="absolute -right-1 -bottom-1 rounded-full bg-accent p-0.5 text-accent-foreground"
                   />
                 )}
               </span>

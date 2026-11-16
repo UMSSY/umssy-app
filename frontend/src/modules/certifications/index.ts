@@ -8,3 +8,5 @@ export { certificationsService } from './services/certifications.service';
 export { CertificationForm } from './components/certification-form';
 export { validateCertificateFile } from './utils/validate-certificate-file';
 export type { CertificationFormProps } from './types/certification-form-props.types';
+
+export { useCreateCertification } from './hooks/use-certification-mutations';

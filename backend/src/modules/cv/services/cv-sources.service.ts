@@ -9,6 +9,10 @@ export class CvSourcesService {
   }
   constructor(private readonly repository: CvFileRepository) {}
 
+  currentCvMetadata(userId: string) {
+    return this.repository.currentCvMetadata(userId);
+  }
+
   currentCv(userId: string) {
     return this.repository.currentCv(userId);
   }

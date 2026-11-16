@@ -41,7 +41,7 @@ export type RadarDocumentVerificationSumAggregateOutputType = {
 export type RadarDocumentVerificationMinAggregateOutputType = {
   id: string | null
   userId: string | null
-  sourceType: string | null
+  sourceTypeId: string | null
   sourceId: string | null
   filename: string | null
   mime: string | null
@@ -49,7 +49,7 @@ export type RadarDocumentVerificationMinAggregateOutputType = {
   sizeBytes: number | null
   active: boolean | null
   digest: string | null
-  status: string | null
+  statusId: string | null
   confidence: number | null
   reason: string | null
   createdAt: Date | null
@@ -66,7 +66,7 @@ export type RadarDocumentVerificationMinAggregateOutputType = {
 export type RadarDocumentVerificationMaxAggregateOutputType = {
   id: string | null
   userId: string | null
-  sourceType: string | null
+  sourceTypeId: string | null
   sourceId: string | null
   filename: string | null
   mime: string | null
@@ -74,7 +74,7 @@ export type RadarDocumentVerificationMaxAggregateOutputType = {
   sizeBytes: number | null
   active: boolean | null
   digest: string | null
-  status: string | null
+  statusId: string | null
   confidence: number | null
   reason: string | null
   createdAt: Date | null
@@ -91,7 +91,7 @@ export type RadarDocumentVerificationMaxAggregateOutputType = {
 export type RadarDocumentVerificationCountAggregateOutputType = {
   id: number
   userId: number
-  sourceType: number
+  sourceTypeId: number
   sourceId: number
   filename: number
   mime: number
@@ -99,7 +99,7 @@ export type RadarDocumentVerificationCountAggregateOutputType = {
   sizeBytes: number
   active: number
   digest: number
-  status: number
+  statusId: number
   confidence: number
   reason: number
   skills: number
@@ -132,7 +132,7 @@ export type RadarDocumentVerificationSumAggregateInputType = {
 export type RadarDocumentVerificationMinAggregateInputType = {
   id?: true
   userId?: true
-  sourceType?: true
+  sourceTypeId?: true
   sourceId?: true
   filename?: true
   mime?: true
@@ -140,7 +140,7 @@ export type RadarDocumentVerificationMinAggregateInputType = {
   sizeBytes?: true
   active?: true
   digest?: true
-  status?: true
+  statusId?: true
   confidence?: true
   reason?: true
   createdAt?: true
@@ -157,7 +157,7 @@ export type RadarDocumentVerificationMinAggregateInputType = {
 export type RadarDocumentVerificationMaxAggregateInputType = {
   id?: true
   userId?: true
-  sourceType?: true
+  sourceTypeId?: true
   sourceId?: true
   filename?: true
   mime?: true
@@ -165,7 +165,7 @@ export type RadarDocumentVerificationMaxAggregateInputType = {
   sizeBytes?: true
   active?: true
   digest?: true
-  status?: true
+  statusId?: true
   confidence?: true
   reason?: true
   createdAt?: true
@@ -182,7 +182,7 @@ export type RadarDocumentVerificationMaxAggregateInputType = {
 export type RadarDocumentVerificationCountAggregateInputType = {
   id?: true
   userId?: true
-  sourceType?: true
+  sourceTypeId?: true
   sourceId?: true
   filename?: true
   mime?: true
@@ -190,7 +190,7 @@ export type RadarDocumentVerificationCountAggregateInputType = {
   sizeBytes?: true
   active?: true
   digest?: true
-  status?: true
+  statusId?: true
   confidence?: true
   reason?: true
   skills?: true
@@ -296,7 +296,7 @@ export type RadarDocumentVerificationGroupByArgs<ExtArgs extends runtime.Types.E
 export type RadarDocumentVerificationGroupByOutputType = {
   id: string
   userId: string
-  sourceType: string
+  sourceTypeId: string
   sourceId: string
   filename: string
   mime: string
@@ -304,7 +304,7 @@ export type RadarDocumentVerificationGroupByOutputType = {
   sizeBytes: number
   active: boolean
   digest: string
-  status: string
+  statusId: string
   confidence: number | null
   reason: string
   skills: runtime.JsonValue
@@ -346,7 +346,7 @@ export type RadarDocumentVerificationWhereInput = {
   NOT?: Prisma.RadarDocumentVerificationWhereInput | Prisma.RadarDocumentVerificationWhereInput[]
   id?: Prisma.UuidFilter<"RadarDocumentVerification"> | string
   userId?: Prisma.UuidFilter<"RadarDocumentVerification"> | string
-  sourceType?: Prisma.StringFilter<"RadarDocumentVerification"> | string
+  sourceTypeId?: Prisma.UuidFilter<"RadarDocumentVerification"> | string
   sourceId?: Prisma.UuidFilter<"RadarDocumentVerification"> | string
   filename?: Prisma.StringFilter<"RadarDocumentVerification"> | string
   mime?: Prisma.StringFilter<"RadarDocumentVerification"> | string
@@ -354,7 +354,7 @@ export type RadarDocumentVerificationWhereInput = {
   sizeBytes?: Prisma.IntFilter<"RadarDocumentVerification"> | number
   active?: Prisma.BoolFilter<"RadarDocumentVerification"> | boolean
   digest?: Prisma.StringFilter<"RadarDocumentVerification"> | string
-  status?: Prisma.StringFilter<"RadarDocumentVerification"> | string
+  statusId?: Prisma.UuidFilter<"RadarDocumentVerification"> | string
   confidence?: Prisma.FloatNullableFilter<"RadarDocumentVerification"> | number | null
   reason?: Prisma.StringFilter<"RadarDocumentVerification"> | string
   skills?: Prisma.JsonFilter<"RadarDocumentVerification">
@@ -377,7 +377,7 @@ export type RadarDocumentVerificationWhereInput = {
 export type RadarDocumentVerificationOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  sourceType?: Prisma.SortOrder
+  sourceTypeId?: Prisma.SortOrder
   sourceId?: Prisma.SortOrder
   filename?: Prisma.SortOrder
   mime?: Prisma.SortOrder
@@ -385,7 +385,7 @@ export type RadarDocumentVerificationOrderByWithRelationInput = {
   sizeBytes?: Prisma.SortOrder
   active?: Prisma.SortOrder
   digest?: Prisma.SortOrder
-  status?: Prisma.SortOrder
+  statusId?: Prisma.SortOrder
   confidence?: Prisma.SortOrderInput | Prisma.SortOrder
   reason?: Prisma.SortOrder
   skills?: Prisma.SortOrder
@@ -411,7 +411,7 @@ export type RadarDocumentVerificationWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.RadarDocumentVerificationWhereInput[]
   NOT?: Prisma.RadarDocumentVerificationWhereInput | Prisma.RadarDocumentVerificationWhereInput[]
   userId?: Prisma.UuidFilter<"RadarDocumentVerification"> | string
-  sourceType?: Prisma.StringFilter<"RadarDocumentVerification"> | string
+  sourceTypeId?: Prisma.UuidFilter<"RadarDocumentVerification"> | string
   sourceId?: Prisma.UuidFilter<"RadarDocumentVerification"> | string
   filename?: Prisma.StringFilter<"RadarDocumentVerification"> | string
   mime?: Prisma.StringFilter<"RadarDocumentVerification"> | string
@@ -419,7 +419,7 @@ export type RadarDocumentVerificationWhereUniqueInput = Prisma.AtLeast<{
   sizeBytes?: Prisma.IntFilter<"RadarDocumentVerification"> | number
   active?: Prisma.BoolFilter<"RadarDocumentVerification"> | boolean
   digest?: Prisma.StringFilter<"RadarDocumentVerification"> | string
-  status?: Prisma.StringFilter<"RadarDocumentVerification"> | string
+  statusId?: Prisma.UuidFilter<"RadarDocumentVerification"> | string
   confidence?: Prisma.FloatNullableFilter<"RadarDocumentVerification"> | number | null
   reason?: Prisma.StringFilter<"RadarDocumentVerification"> | string
   skills?: Prisma.JsonFilter<"RadarDocumentVerification">
@@ -442,7 +442,7 @@ export type RadarDocumentVerificationWhereUniqueInput = Prisma.AtLeast<{
 export type RadarDocumentVerificationOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  sourceType?: Prisma.SortOrder
+  sourceTypeId?: Prisma.SortOrder
   sourceId?: Prisma.SortOrder
   filename?: Prisma.SortOrder
   mime?: Prisma.SortOrder
@@ -450,7 +450,7 @@ export type RadarDocumentVerificationOrderByWithAggregationInput = {
   sizeBytes?: Prisma.SortOrder
   active?: Prisma.SortOrder
   digest?: Prisma.SortOrder
-  status?: Prisma.SortOrder
+  statusId?: Prisma.SortOrder
   confidence?: Prisma.SortOrderInput | Prisma.SortOrder
   reason?: Prisma.SortOrder
   skills?: Prisma.SortOrder
@@ -477,7 +477,7 @@ export type RadarDocumentVerificationScalarWhereWithAggregatesInput = {
   NOT?: Prisma.RadarDocumentVerificationScalarWhereWithAggregatesInput | Prisma.RadarDocumentVerificationScalarWhereWithAggregatesInput[]
   id?: Prisma.UuidWithAggregatesFilter<"RadarDocumentVerification"> | string
   userId?: Prisma.UuidWithAggregatesFilter<"RadarDocumentVerification"> | string
-  sourceType?: Prisma.StringWithAggregatesFilter<"RadarDocumentVerification"> | string
+  sourceTypeId?: Prisma.UuidWithAggregatesFilter<"RadarDocumentVerification"> | string
   sourceId?: Prisma.UuidWithAggregatesFilter<"RadarDocumentVerification"> | string
   filename?: Prisma.StringWithAggregatesFilter<"RadarDocumentVerification"> | string
   mime?: Prisma.StringWithAggregatesFilter<"RadarDocumentVerification"> | string
@@ -485,7 +485,7 @@ export type RadarDocumentVerificationScalarWhereWithAggregatesInput = {
   sizeBytes?: Prisma.IntWithAggregatesFilter<"RadarDocumentVerification"> | number
   active?: Prisma.BoolWithAggregatesFilter<"RadarDocumentVerification"> | boolean
   digest?: Prisma.StringWithAggregatesFilter<"RadarDocumentVerification"> | string
-  status?: Prisma.StringWithAggregatesFilter<"RadarDocumentVerification"> | string
+  statusId?: Prisma.UuidWithAggregatesFilter<"RadarDocumentVerification"> | string
   confidence?: Prisma.FloatNullableWithAggregatesFilter<"RadarDocumentVerification"> | number | null
   reason?: Prisma.StringWithAggregatesFilter<"RadarDocumentVerification"> | string
   skills?: Prisma.JsonWithAggregatesFilter<"RadarDocumentVerification">
@@ -531,7 +531,7 @@ export type RadarDocumentVerificationCreateInput = {
 export type RadarDocumentVerificationUncheckedCreateInput = {
   id?: string
   userId: string
-  sourceType: string
+  sourceTypeId: string
   sourceId: string
   filename: string
   mime: string
@@ -539,7 +539,7 @@ export type RadarDocumentVerificationUncheckedCreateInput = {
   sizeBytes: number
   active?: boolean
   digest: string
-  status?: string
+  statusId?: string
   confidence?: number | null
   reason?: string
   skills?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -585,7 +585,7 @@ export type RadarDocumentVerificationUpdateInput = {
 export type RadarDocumentVerificationUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  sourceType?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceTypeId?: Prisma.StringFieldUpdateOperationsInput | string
   sourceId?: Prisma.StringFieldUpdateOperationsInput | string
   filename?: Prisma.StringFieldUpdateOperationsInput | string
   mime?: Prisma.StringFieldUpdateOperationsInput | string
@@ -593,7 +593,7 @@ export type RadarDocumentVerificationUncheckedUpdateInput = {
   sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   digest?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  statusId?: Prisma.StringFieldUpdateOperationsInput | string
   confidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   reason?: Prisma.StringFieldUpdateOperationsInput | string
   skills?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -612,7 +612,7 @@ export type RadarDocumentVerificationUncheckedUpdateInput = {
 export type RadarDocumentVerificationCreateManyInput = {
   id?: string
   userId: string
-  sourceType: string
+  sourceTypeId: string
   sourceId: string
   filename: string
   mime: string
@@ -620,7 +620,7 @@ export type RadarDocumentVerificationCreateManyInput = {
   sizeBytes: number
   active?: boolean
   digest: string
-  status?: string
+  statusId?: string
   confidence?: number | null
   reason?: string
   skills?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -662,7 +662,7 @@ export type RadarDocumentVerificationUpdateManyMutationInput = {
 export type RadarDocumentVerificationUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  sourceType?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceTypeId?: Prisma.StringFieldUpdateOperationsInput | string
   sourceId?: Prisma.StringFieldUpdateOperationsInput | string
   filename?: Prisma.StringFieldUpdateOperationsInput | string
   mime?: Prisma.StringFieldUpdateOperationsInput | string
@@ -670,7 +670,7 @@ export type RadarDocumentVerificationUncheckedUpdateManyInput = {
   sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   digest?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  statusId?: Prisma.StringFieldUpdateOperationsInput | string
   confidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   reason?: Prisma.StringFieldUpdateOperationsInput | string
   skills?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -699,7 +699,7 @@ export type RadarDocumentVerificationOrderByRelationAggregateInput = {
 export type RadarDocumentVerificationCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  sourceType?: Prisma.SortOrder
+  sourceTypeId?: Prisma.SortOrder
   sourceId?: Prisma.SortOrder
   filename?: Prisma.SortOrder
   mime?: Prisma.SortOrder
@@ -707,7 +707,7 @@ export type RadarDocumentVerificationCountOrderByAggregateInput = {
   sizeBytes?: Prisma.SortOrder
   active?: Prisma.SortOrder
   digest?: Prisma.SortOrder
-  status?: Prisma.SortOrder
+  statusId?: Prisma.SortOrder
   confidence?: Prisma.SortOrder
   reason?: Prisma.SortOrder
   skills?: Prisma.SortOrder
@@ -732,7 +732,7 @@ export type RadarDocumentVerificationAvgOrderByAggregateInput = {
 export type RadarDocumentVerificationMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  sourceType?: Prisma.SortOrder
+  sourceTypeId?: Prisma.SortOrder
   sourceId?: Prisma.SortOrder
   filename?: Prisma.SortOrder
   mime?: Prisma.SortOrder
@@ -740,7 +740,7 @@ export type RadarDocumentVerificationMaxOrderByAggregateInput = {
   sizeBytes?: Prisma.SortOrder
   active?: Prisma.SortOrder
   digest?: Prisma.SortOrder
-  status?: Prisma.SortOrder
+  statusId?: Prisma.SortOrder
   confidence?: Prisma.SortOrder
   reason?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -757,7 +757,7 @@ export type RadarDocumentVerificationMaxOrderByAggregateInput = {
 export type RadarDocumentVerificationMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  sourceType?: Prisma.SortOrder
+  sourceTypeId?: Prisma.SortOrder
   sourceId?: Prisma.SortOrder
   filename?: Prisma.SortOrder
   mime?: Prisma.SortOrder
@@ -765,7 +765,7 @@ export type RadarDocumentVerificationMinOrderByAggregateInput = {
   sizeBytes?: Prisma.SortOrder
   active?: Prisma.SortOrder
   digest?: Prisma.SortOrder
-  status?: Prisma.SortOrder
+  statusId?: Prisma.SortOrder
   confidence?: Prisma.SortOrder
   reason?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -989,7 +989,7 @@ export type RadarDocumentVerificationCreateWithoutOwnerInput = {
 
 export type RadarDocumentVerificationUncheckedCreateWithoutOwnerInput = {
   id?: string
-  sourceType: string
+  sourceTypeId: string
   sourceId: string
   filename: string
   mime: string
@@ -997,7 +997,7 @@ export type RadarDocumentVerificationUncheckedCreateWithoutOwnerInput = {
   sizeBytes: number
   active?: boolean
   digest: string
-  status?: string
+  statusId?: string
   confidence?: number | null
   reason?: string
   skills?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -1052,7 +1052,7 @@ export type RadarDocumentVerificationCreateWithoutReviewerInput = {
 export type RadarDocumentVerificationUncheckedCreateWithoutReviewerInput = {
   id?: string
   userId: string
-  sourceType: string
+  sourceTypeId: string
   sourceId: string
   filename: string
   mime: string
@@ -1060,7 +1060,7 @@ export type RadarDocumentVerificationUncheckedCreateWithoutReviewerInput = {
   sizeBytes: number
   active?: boolean
   digest: string
-  status?: string
+  statusId?: string
   confidence?: number | null
   reason?: string
   skills?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -1107,7 +1107,7 @@ export type RadarDocumentVerificationScalarWhereInput = {
   NOT?: Prisma.RadarDocumentVerificationScalarWhereInput | Prisma.RadarDocumentVerificationScalarWhereInput[]
   id?: Prisma.UuidFilter<"RadarDocumentVerification"> | string
   userId?: Prisma.UuidFilter<"RadarDocumentVerification"> | string
-  sourceType?: Prisma.StringFilter<"RadarDocumentVerification"> | string
+  sourceTypeId?: Prisma.UuidFilter<"RadarDocumentVerification"> | string
   sourceId?: Prisma.UuidFilter<"RadarDocumentVerification"> | string
   filename?: Prisma.StringFilter<"RadarDocumentVerification"> | string
   mime?: Prisma.StringFilter<"RadarDocumentVerification"> | string
@@ -1115,7 +1115,7 @@ export type RadarDocumentVerificationScalarWhereInput = {
   sizeBytes?: Prisma.IntFilter<"RadarDocumentVerification"> | number
   active?: Prisma.BoolFilter<"RadarDocumentVerification"> | boolean
   digest?: Prisma.StringFilter<"RadarDocumentVerification"> | string
-  status?: Prisma.StringFilter<"RadarDocumentVerification"> | string
+  statusId?: Prisma.UuidFilter<"RadarDocumentVerification"> | string
   confidence?: Prisma.FloatNullableFilter<"RadarDocumentVerification"> | number | null
   reason?: Prisma.StringFilter<"RadarDocumentVerification"> | string
   skills?: Prisma.JsonFilter<"RadarDocumentVerification">
@@ -1176,7 +1176,7 @@ export type RadarDocumentVerificationCreateWithoutStatusEntryInput = {
 export type RadarDocumentVerificationUncheckedCreateWithoutStatusEntryInput = {
   id?: string
   userId: string
-  sourceType: string
+  sourceTypeId: string
   sourceId: string
   filename: string
   mime: string
@@ -1261,7 +1261,7 @@ export type RadarDocumentVerificationUncheckedCreateWithoutSourceTypeEntryInput 
   sizeBytes: number
   active?: boolean
   digest: string
-  status?: string
+  statusId?: string
   confidence?: number | null
   reason?: string
   skills?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -1305,7 +1305,7 @@ export type RadarDocumentVerificationUpdateManyWithWhereWithoutSourceTypeEntryIn
 
 export type RadarDocumentVerificationCreateManyOwnerInput = {
   id?: string
-  sourceType: string
+  sourceTypeId: string
   sourceId: string
   filename: string
   mime: string
@@ -1313,7 +1313,7 @@ export type RadarDocumentVerificationCreateManyOwnerInput = {
   sizeBytes: number
   active?: boolean
   digest: string
-  status?: string
+  statusId?: string
   confidence?: number | null
   reason?: string
   skills?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -1332,7 +1332,7 @@ export type RadarDocumentVerificationCreateManyOwnerInput = {
 export type RadarDocumentVerificationCreateManyReviewerInput = {
   id?: string
   userId: string
-  sourceType: string
+  sourceTypeId: string
   sourceId: string
   filename: string
   mime: string
@@ -1340,7 +1340,7 @@ export type RadarDocumentVerificationCreateManyReviewerInput = {
   sizeBytes: number
   active?: boolean
   digest: string
-  status?: string
+  statusId?: string
   confidence?: number | null
   reason?: string
   skills?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -1383,7 +1383,7 @@ export type RadarDocumentVerificationUpdateWithoutOwnerInput = {
 
 export type RadarDocumentVerificationUncheckedUpdateWithoutOwnerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  sourceType?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceTypeId?: Prisma.StringFieldUpdateOperationsInput | string
   sourceId?: Prisma.StringFieldUpdateOperationsInput | string
   filename?: Prisma.StringFieldUpdateOperationsInput | string
   mime?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1391,7 +1391,7 @@ export type RadarDocumentVerificationUncheckedUpdateWithoutOwnerInput = {
   sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   digest?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  statusId?: Prisma.StringFieldUpdateOperationsInput | string
   confidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   reason?: Prisma.StringFieldUpdateOperationsInput | string
   skills?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -1409,7 +1409,7 @@ export type RadarDocumentVerificationUncheckedUpdateWithoutOwnerInput = {
 
 export type RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  sourceType?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceTypeId?: Prisma.StringFieldUpdateOperationsInput | string
   sourceId?: Prisma.StringFieldUpdateOperationsInput | string
   filename?: Prisma.StringFieldUpdateOperationsInput | string
   mime?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1417,7 +1417,7 @@ export type RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerInput = {
   sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   digest?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  statusId?: Prisma.StringFieldUpdateOperationsInput | string
   confidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   reason?: Prisma.StringFieldUpdateOperationsInput | string
   skills?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -1462,7 +1462,7 @@ export type RadarDocumentVerificationUpdateWithoutReviewerInput = {
 export type RadarDocumentVerificationUncheckedUpdateWithoutReviewerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  sourceType?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceTypeId?: Prisma.StringFieldUpdateOperationsInput | string
   sourceId?: Prisma.StringFieldUpdateOperationsInput | string
   filename?: Prisma.StringFieldUpdateOperationsInput | string
   mime?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1470,7 +1470,7 @@ export type RadarDocumentVerificationUncheckedUpdateWithoutReviewerInput = {
   sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   digest?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  statusId?: Prisma.StringFieldUpdateOperationsInput | string
   confidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   reason?: Prisma.StringFieldUpdateOperationsInput | string
   skills?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -1488,7 +1488,7 @@ export type RadarDocumentVerificationUncheckedUpdateWithoutReviewerInput = {
 export type RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  sourceType?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceTypeId?: Prisma.StringFieldUpdateOperationsInput | string
   sourceId?: Prisma.StringFieldUpdateOperationsInput | string
   filename?: Prisma.StringFieldUpdateOperationsInput | string
   mime?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1496,7 +1496,7 @@ export type RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerInput = {
   sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   digest?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  statusId?: Prisma.StringFieldUpdateOperationsInput | string
   confidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   reason?: Prisma.StringFieldUpdateOperationsInput | string
   skills?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -1514,7 +1514,7 @@ export type RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerInput = {
 export type RadarDocumentVerificationCreateManyStatusEntryInput = {
   id?: string
   userId: string
-  sourceType: string
+  sourceTypeId: string
   sourceId: string
   filename: string
   mime: string
@@ -1566,7 +1566,7 @@ export type RadarDocumentVerificationUpdateWithoutStatusEntryInput = {
 export type RadarDocumentVerificationUncheckedUpdateWithoutStatusEntryInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  sourceType?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceTypeId?: Prisma.StringFieldUpdateOperationsInput | string
   sourceId?: Prisma.StringFieldUpdateOperationsInput | string
   filename?: Prisma.StringFieldUpdateOperationsInput | string
   mime?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1592,7 +1592,7 @@ export type RadarDocumentVerificationUncheckedUpdateWithoutStatusEntryInput = {
 export type RadarDocumentVerificationUncheckedUpdateManyWithoutStatusEntryInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  sourceType?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceTypeId?: Prisma.StringFieldUpdateOperationsInput | string
   sourceId?: Prisma.StringFieldUpdateOperationsInput | string
   filename?: Prisma.StringFieldUpdateOperationsInput | string
   mime?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1625,7 +1625,7 @@ export type RadarDocumentVerificationCreateManySourceTypeEntryInput = {
   sizeBytes: number
   active?: boolean
   digest: string
-  status?: string
+  statusId?: string
   confidence?: number | null
   reason?: string
   skills?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -1677,7 +1677,7 @@ export type RadarDocumentVerificationUncheckedUpdateWithoutSourceTypeEntryInput 
   sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   digest?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  statusId?: Prisma.StringFieldUpdateOperationsInput | string
   confidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   reason?: Prisma.StringFieldUpdateOperationsInput | string
   skills?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -1703,7 +1703,7 @@ export type RadarDocumentVerificationUncheckedUpdateManyWithoutSourceTypeEntryIn
   sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   digest?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  statusId?: Prisma.StringFieldUpdateOperationsInput | string
   confidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   reason?: Prisma.StringFieldUpdateOperationsInput | string
   skills?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -1724,7 +1724,7 @@ export type RadarDocumentVerificationUncheckedUpdateManyWithoutSourceTypeEntryIn
 export type RadarDocumentVerificationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
-  sourceType?: boolean
+  sourceTypeId?: boolean
   sourceId?: boolean
   filename?: boolean
   mime?: boolean
@@ -1732,7 +1732,7 @@ export type RadarDocumentVerificationSelect<ExtArgs extends runtime.Types.Extens
   sizeBytes?: boolean
   active?: boolean
   digest?: boolean
-  status?: boolean
+  statusId?: boolean
   confidence?: boolean
   reason?: boolean
   skills?: boolean
@@ -1755,7 +1755,7 @@ export type RadarDocumentVerificationSelect<ExtArgs extends runtime.Types.Extens
 export type RadarDocumentVerificationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
-  sourceType?: boolean
+  sourceTypeId?: boolean
   sourceId?: boolean
   filename?: boolean
   mime?: boolean
@@ -1763,7 +1763,7 @@ export type RadarDocumentVerificationSelectCreateManyAndReturn<ExtArgs extends r
   sizeBytes?: boolean
   active?: boolean
   digest?: boolean
-  status?: boolean
+  statusId?: boolean
   confidence?: boolean
   reason?: boolean
   skills?: boolean
@@ -1786,7 +1786,7 @@ export type RadarDocumentVerificationSelectCreateManyAndReturn<ExtArgs extends r
 export type RadarDocumentVerificationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
-  sourceType?: boolean
+  sourceTypeId?: boolean
   sourceId?: boolean
   filename?: boolean
   mime?: boolean
@@ -1794,7 +1794,7 @@ export type RadarDocumentVerificationSelectUpdateManyAndReturn<ExtArgs extends r
   sizeBytes?: boolean
   active?: boolean
   digest?: boolean
-  status?: boolean
+  statusId?: boolean
   confidence?: boolean
   reason?: boolean
   skills?: boolean
@@ -1817,7 +1817,7 @@ export type RadarDocumentVerificationSelectUpdateManyAndReturn<ExtArgs extends r
 export type RadarDocumentVerificationSelectScalar = {
   id?: boolean
   userId?: boolean
-  sourceType?: boolean
+  sourceTypeId?: boolean
   sourceId?: boolean
   filename?: boolean
   mime?: boolean
@@ -1825,7 +1825,7 @@ export type RadarDocumentVerificationSelectScalar = {
   sizeBytes?: boolean
   active?: boolean
   digest?: boolean
-  status?: boolean
+  statusId?: boolean
   confidence?: boolean
   reason?: boolean
   skills?: boolean
@@ -1841,7 +1841,7 @@ export type RadarDocumentVerificationSelectScalar = {
   retryAt?: boolean
 }
 
-export type RadarDocumentVerificationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "sourceType" | "sourceId" | "filename" | "mime" | "content" | "sizeBytes" | "active" | "digest" | "status" | "confidence" | "reason" | "skills" | "createdAt" | "updatedAt" | "decidedAt" | "reviewerId" | "noticeRead" | "publishedIds" | "radarVersion" | "synced" | "lease" | "retryAt", ExtArgs["result"]["radarDocumentVerification"]>
+export type RadarDocumentVerificationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "sourceTypeId" | "sourceId" | "filename" | "mime" | "content" | "sizeBytes" | "active" | "digest" | "statusId" | "confidence" | "reason" | "skills" | "createdAt" | "updatedAt" | "decidedAt" | "reviewerId" | "noticeRead" | "publishedIds" | "radarVersion" | "synced" | "lease" | "retryAt", ExtArgs["result"]["radarDocumentVerification"]>
 export type RadarDocumentVerificationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   reviewer?: boolean | Prisma.RadarDocumentVerification$reviewerArgs<ExtArgs>
@@ -1872,7 +1872,7 @@ export type $RadarDocumentVerificationPayload<ExtArgs extends runtime.Types.Exte
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     userId: string
-    sourceType: string
+    sourceTypeId: string
     sourceId: string
     filename: string
     mime: string
@@ -1880,7 +1880,7 @@ export type $RadarDocumentVerificationPayload<ExtArgs extends runtime.Types.Exte
     sizeBytes: number
     active: boolean
     digest: string
-    status: string
+    statusId: string
     confidence: number | null
     reason: string
     skills: runtime.JsonValue
@@ -2323,7 +2323,7 @@ export interface Prisma__RadarDocumentVerificationClient<T, Null = never, ExtArg
 export interface RadarDocumentVerificationFieldRefs {
   readonly id: Prisma.FieldRef<"RadarDocumentVerification", 'String'>
   readonly userId: Prisma.FieldRef<"RadarDocumentVerification", 'String'>
-  readonly sourceType: Prisma.FieldRef<"RadarDocumentVerification", 'String'>
+  readonly sourceTypeId: Prisma.FieldRef<"RadarDocumentVerification", 'String'>
   readonly sourceId: Prisma.FieldRef<"RadarDocumentVerification", 'String'>
   readonly filename: Prisma.FieldRef<"RadarDocumentVerification", 'String'>
   readonly mime: Prisma.FieldRef<"RadarDocumentVerification", 'String'>
@@ -2331,7 +2331,7 @@ export interface RadarDocumentVerificationFieldRefs {
   readonly sizeBytes: Prisma.FieldRef<"RadarDocumentVerification", 'Int'>
   readonly active: Prisma.FieldRef<"RadarDocumentVerification", 'Boolean'>
   readonly digest: Prisma.FieldRef<"RadarDocumentVerification", 'String'>
-  readonly status: Prisma.FieldRef<"RadarDocumentVerification", 'String'>
+  readonly statusId: Prisma.FieldRef<"RadarDocumentVerification", 'String'>
   readonly confidence: Prisma.FieldRef<"RadarDocumentVerification", 'Float'>
   readonly reason: Prisma.FieldRef<"RadarDocumentVerification", 'String'>
   readonly skills: Prisma.FieldRef<"RadarDocumentVerification", 'Json'>
