@@ -219,6 +219,33 @@ describe('WorkExperienceListCard', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('lets the company tab grow and wrap its text with the content', () => {
+    const experiences = [
+      createExperience(
+        'senior',
+        'Desarrollador Senior',
+        '2024-01-01',
+        null,
+        true,
+        'Tecnologías Bolivianas del Valle S.R.L.',
+      ),
+      createExperience(
+        'junior',
+        'Desarrollador Junior',
+        '2020-01-01',
+        '2022-12-31',
+        false,
+        'Tecnologías Bolivianas del Valle S.R.L.',
+      ),
+    ];
+
+    render(<WorkExperienceListCard experiences={experiences} />);
+
+    expect(
+      screen.getByRole('button', { name: /Tecnologías Bolivianas/ }),
+    ).toHaveClass('h-auto', 'whitespace-normal');
+  });
+
   it('does not offer to collapse a company with a single position and always shows it', () => {
     render(<WorkExperienceListCard experiences={[EXPERIENCE]} />);
 

@@ -67,7 +67,7 @@ export function WorkExperienceListCard({
             const isCollapsible = group.positions.length > 1;
             const isCollapsed = isCollapsible && !expandedGroups[groupId];
             const headerClassName =
-              'flex w-full items-center gap-3 rounded-lg bg-interaction p-3 text-left';
+              'flex h-auto w-full items-center gap-3 rounded-lg bg-interaction p-3 text-left whitespace-normal';
             const headerContent = (
               <>
                 <span
