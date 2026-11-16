@@ -14,8 +14,13 @@ export function getApplicationContactEndpoint(applicationId: string): string {
   return `/applications/${applicationId}/contact`;
 }
 
-export function getApplicationChatPath(applicationId: string): string {
-  return `/chat?applicationId=${encodeURIComponent(applicationId)}`;
+export function getApplicationChatPath(contactId: string, applicationId: string): string {
+  const params = new URLSearchParams({
+    contactId,
+    contextType: "POSTULACION",
+    contextId: applicationId,
+  });
+  return `/chat?${params.toString()}`;
 }
 
 export const APPLICATION_QUERY_KEYS = {
