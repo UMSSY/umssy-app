@@ -26,6 +26,7 @@ import {
   participationErrorCode,
   participationErrorMessage,
 } from "../utils/participation-error";
+import { getMentorRequestStatusLabel } from "../utils/mentor-request-status";
 import {
   loadMentorshipWizardDraft,
   saveMentorshipWizardDraft,
@@ -427,7 +428,7 @@ export function ParticipationView({
                       </td>
 
                       <td className="px-4 py-3">
-                        {item.status}
+                        {getMentorRequestStatusLabel(item.status)}
                       </td>
 
                       <td className="px-4 py-3">
