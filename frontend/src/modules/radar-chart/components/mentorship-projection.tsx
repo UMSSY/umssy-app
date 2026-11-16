@@ -10,20 +10,12 @@ import {
   DialogDescription,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { useMentorDirectory } from '@/modules/mentorship/hooks/use-mentor-directory';
-import type { RadarAreaScore } from '../types/radar-profile.types';
+import { useMentorDirectory } from '@/modules/mentorship';
+import type { ProjectionProps } from '../types/projection-props.types';
 
 const ILLUSTRATIVE_GAIN = 1;
 const format = (value: number) =>
   value.toLocaleString('es-BO', { maximumFractionDigits: 2 });
-
-type Projection = { areaId: RadarAreaScore['id']; score: number } | null;
-type ProjectionProps = {
-  area: RadarAreaScore;
-  areas: RadarAreaScore[];
-  onProjectionChange?: (projection: Projection) => void;
-  onOpenChange?: (open: boolean) => void;
-};
 
 export function MentorshipProjection(props: ProjectionProps) {
   const [expanded, setExpanded] = useState(false);

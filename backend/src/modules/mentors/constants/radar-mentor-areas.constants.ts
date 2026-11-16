@@ -1,6 +1,10 @@
-// Correspondences only: existing catalogs remain unchanged.
 const RADAR_MENTOR_AREAS: Record<string, string[]> = {
-  Desarrollo: ['Desarrollo', 'Desarrollo de Software', 'Backend', 'Desarrollo Web'],
+  Desarrollo: [
+    'Desarrollo',
+    'Desarrollo de Software',
+    'Backend',
+    'Desarrollo Web',
+  ],
   'Cloud/DevOps': ['Cloud/DevOps', 'Cloud & DevOps', 'Cloud'],
   'Data/AI': ['Data/AI', 'Datos & IA', 'Datos'],
   QA: ['QA', 'QA & Testing'],

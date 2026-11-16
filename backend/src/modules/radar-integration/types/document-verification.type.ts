@@ -10,14 +10,17 @@ export type VerificationJob = {
   content: Uint8Array;
   status: string;
   lease: string;
-  firstName: string;
-  lastName: string;
   duplicate: boolean;
-  issuer: string | null;
 };
 export type VerificationResult = {
   status: DocumentDecision;
   confidence: number | null;
   reason: string;
   skills: DocumentSkill[];
+};
+
+export type VerificationDocumentContext = VerificationJob & {
+  firstName: string;
+  lastName: string;
+  issuer: string | null;
 };

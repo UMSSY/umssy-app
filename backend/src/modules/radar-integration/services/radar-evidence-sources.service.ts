@@ -1,20 +1,29 @@
+import { CvSourcesService } from '../../cv/services/cv-sources.service.js';
 import { Injectable } from '@nestjs/common';
 import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
 import { RadarEvidenceSourcesRepository } from '../repositories/radar-evidence-sources.repository.js';
 
 @Injectable()
 export class RadarEvidenceSourcesService {
-  constructor(private readonly repository: RadarEvidenceSourcesRepository) {}
+  constructor(
+    private readonly repository: RadarEvidenceSourcesRepository,
+    private readonly cvs: CvSourcesService,
+  ) {}
 
   findPublicationCvStates(userId: string, context: TransactionContext) {
     return this.repository.findPublicationCvStates(userId, context);
+  }
+
+  findApprovedDocuments(userId: string, context: TransactionContext) {
+    return this.repository.findApprovedDocuments(userId, context);
   }
 
   findCertificateSkills(userId: string) {
     return this.repository.findCertificateSkills(userId);
   }
 
-  findCurrentCvText(userId: string) {
-    return this.repository.findCurrentCvText(userId);
+  async findCurrentCvText(userId: string) {
+    const current = await this.cvs.currentCv(userId);
+    return current ? this.repository.findCurrentCvText(userId, current.id) : [];
   }
 }
