@@ -33,6 +33,8 @@ import {
   saveMentorshipWizardDraft,
 } from "@/modules/mentorship";
 
+const HISTORY_PAGE_SIZE = 10;
+
 const getServerToken = () => null;
 
 const notifySuccess = (message: string) => {
@@ -110,6 +112,7 @@ export function ParticipationView({
   const [selectedHistoryId, setSelectedHistoryId] = useState<string | null>(
     null,
   );
+  const [historyPage, setHistoryPage] = useState(1);
 
   const history = useQuery({
     queryKey: ["mentor-participation-history", token],
@@ -205,6 +208,11 @@ export function ParticipationView({
     }
   };
 
+  const changeHistoryPage = (page: number) => {
+    setHistoryPage(page);
+    setSelectedHistoryId(null);
+  };
+
   if (!token) return <ParticipationLoading />;
 
   const state = participation.state;
@@ -216,8 +224,20 @@ export function ParticipationView({
     currentRequest?.status ?? "",
   );
 
+  const historyItems = history.data ?? [];
+  const totalHistoryPages = Math.max(
+    1,
+    Math.ceil(historyItems.length / HISTORY_PAGE_SIZE),
+  );
+  const currentHistoryPage = Math.min(historyPage, totalHistoryPages);
+  const historyStartIndex = (currentHistoryPage - 1) * HISTORY_PAGE_SIZE;
+  const visibleHistoryItems = historyItems.slice(
+    historyStartIndex,
+    historyStartIndex + HISTORY_PAGE_SIZE,
+  );
+
   const selectedHistoryRequest =
-    history.data?.find((item) => item.id === selectedHistoryId) ?? null;
+    visibleHistoryItems.find((item) => item.id === selectedHistoryId) ?? null;
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
@@ -417,10 +437,10 @@ export function ParticipationView({
           </Alert>
         )}
 
-        {history.isSuccess && history.data.length > 0 && (
+        {history.isSuccess && historyItems.length > 0 && (
           <div className="space-y-4">
             <p role="status" className="text-sm text-muted-foreground">
-              Solicitudes registradas: {history.data.length}
+              Solicitudes registradas: {historyItems.length}
             </p>
 
             <div className="overflow-x-auto rounded-lg border">
@@ -450,7 +470,7 @@ export function ParticipationView({
                 </thead>
 
                 <tbody className="divide-y">
-                  {history.data.map((item) => (
+                  {visibleHistoryItems.map((item) => (
                     <tr key={item.id}>
                       <td className="px-4 py-3">
                         {formatRequestDate(item.createdAt)}
@@ -499,6 +519,52 @@ export function ParticipationView({
               Las columnas de áreas técnicas y orientaciones muestran
               la cantidad seleccionada en cada solicitud.
             </p>
+
+            {totalHistoryPages > 1 && (
+              <nav
+                aria-label="Paginación del historial de solicitudes"
+                className="flex flex-wrap items-center justify-between gap-3 border-t pt-4"
+              >
+                <p
+                  role="status"
+                  className="text-sm text-muted-foreground"
+                >
+                  Mostrando {historyStartIndex + 1}–
+                  {Math.min(
+                    historyStartIndex + HISTORY_PAGE_SIZE,
+                    historyItems.length,
+                  )}{" "}
+                  de {historyItems.length} solicitudes. Página{" "}
+                  {currentHistoryPage} de {totalHistoryPages}.
+                </p>
+
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={currentHistoryPage === 1}
+                    onClick={() =>
+                      changeHistoryPage(currentHistoryPage - 1)
+                    }
+                  >
+                    Anterior
+                  </Button>
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={
+                      currentHistoryPage === totalHistoryPages
+                    }
+                    onClick={() =>
+                      changeHistoryPage(currentHistoryPage + 1)
+                    }
+                  >
+                    Siguiente
+                  </Button>
+                </div>
+              </nav>
+            )}
 
             {selectedHistoryRequest && (
               <div id="mentor-request-history-details">
