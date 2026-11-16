@@ -12,18 +12,12 @@ export const SURVEY_RESPONSE_RATE_THRESHOLDS = {
 export const SURVEY_RESPONSE_RATE_TONES = {
   danger: {
     label: "Participación baja",
-    meterClassName: "**:data-[slot=progress-indicator]:bg-danger",
-    textClassName: "text-danger",
   },
   warning: {
     label: "Participación media",
-    meterClassName: "**:data-[slot=progress-indicator]:bg-gold",
-    textClassName: "text-gold",
   },
   success: {
     label: "Participación esperada",
-    meterClassName: "**:data-[slot=progress-indicator]:bg-success",
-    textClassName: "text-success",
   },
 } as const satisfies Record<SurveyResponseRateTone, SurveyResponseRateToneStyle>;
 

@@ -127,7 +127,7 @@ describe('SurveysController', () => {
       title: 'Borrador',
       status: 'draft' as const,
       questions: [],
-    };
+    } as unknown as CreateSurveyRequest;
     const created = {
       id: 'survey-1',
       title: 'Borrador',

@@ -1,7 +1,6 @@
 import { AVERAGE_YEAR_MS } from '../constants/heatmap.constants.js';
 import type { WorkPeriod } from '../types/work-period.types.js';
 
-// Une periodos superpuestos para no contar dos veces el mismo tiempo trabajado.
 export function computeExperienceYears(
   periods: WorkPeriod[],
   now: Date,

@@ -55,4 +55,87 @@ export class UsersRepository {
     });
     return user?.email ?? null;
   }
+
+  findUserRecipientById(userId: string) {
+    return this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+      },
+    });
+  }
+
+  countAudienceUsers(filter: {
+    roles: readonly string[];
+    careerId?: string;
+    graduationYear?: number;
+    excludedUserIds?: string[];
+  }): Promise<number> {
+    return this.prisma.user.count({
+      where: {
+        isActive: true,
+        roles: {
+          some: { deletedAt: null, role: { name: { in: [...filter.roles] } } },
+        },
+        ...(filter.excludedUserIds && filter.excludedUserIds.length > 0
+          ? { id: { notIn: filter.excludedUserIds } }
+          : {}),
+        ...(filter.careerId || filter.graduationYear
+          ? {
+              approvedAccessRequest: {
+                is: {
+                  ...(filter.careerId ? { careerId: filter.careerId } : {}),
+                  ...(filter.graduationYear
+                    ? { graduationYear: filter.graduationYear }
+                    : {}),
+                },
+              },
+            }
+          : {}),
+      },
+    });
+  }
+
+  findAudienceRecipients(filter: {
+    roles: readonly string[];
+    careerId?: string;
+    graduationYear?: number;
+    excludedUserIds?: string[];
+  }): Promise<
+    Array<{ id: string; email: string; firstName: string; lastName: string }>
+  > {
+    return this.prisma.user.findMany({
+      where: {
+        isActive: true,
+        roles: {
+          some: { deletedAt: null, role: { name: { in: [...filter.roles] } } },
+        },
+        ...(filter.excludedUserIds && filter.excludedUserIds.length > 0
+          ? { id: { notIn: filter.excludedUserIds } }
+          : {}),
+        ...(filter.careerId || filter.graduationYear
+          ? {
+              approvedAccessRequest: {
+                is: {
+                  ...(filter.careerId ? { careerId: filter.careerId } : {}),
+                  ...(filter.graduationYear
+                    ? { graduationYear: filter.graduationYear }
+                    : {}),
+                },
+              },
+            }
+          : {}),
+      },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+      },
+      orderBy: { id: 'asc' },
+    });
+  }
 }

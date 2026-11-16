@@ -1,9 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { loadMailTemplate } from '../../mail/helpers/load-mail-template.js';
-import { MailService } from '../../mail/services/mail.service.js';
 import { NotificationsService } from '../../notifications/services/notifications.service.js';
 import { NotificationType } from '../../notifications/types/notification-type.enum.js';
-import type { NotifyResult } from '../../notifications/types/notify-result.type.js';
+import { UsersService } from '../../users/services/users.service.js';
 import {
   SURVEY_ANSWER_FRONTEND_PATH,
   SURVEY_REMINDER_GROUP_KEY_PREFIX,
@@ -19,8 +17,6 @@ import { SurveysRepository } from '../repositories/surveys.repository.js';
 import type { SurveyParticipationResponse } from '../responses/survey-participation.response.js';
 import type { SurveyReminderResponse } from '../responses/survey-reminder.response.js';
 import type { SurveyParticipationTarget } from '../types/survey-participation-target.type.js';
-import type { SurveyReminderDelivery } from '../types/survey-reminder-delivery.type.js';
-import type { SurveyReminderRecipient } from '../types/survey-reminder-recipient.type.js';
 import {
   buildSurveyFrontendUrl,
   formatSurveyClosureDate,
@@ -38,7 +34,7 @@ export class SurveyParticipationService {
 
   constructor(
     private readonly surveysRepository: SurveysRepository,
-    private readonly mailService: MailService,
+    private readonly usersService: UsersService,
     private readonly notificationsService: NotificationsService,
   ) {}
 
@@ -48,10 +44,16 @@ export class SurveyParticipationService {
   ): Promise<SurveyParticipationResponse> {
     const target = await this.findTarget(surveyId);
     const filter = buildSurveyAudienceFilter(target);
-    const [eligibleCount, respondedCount] = await Promise.all([
-      this.surveysRepository.countEligibleRespondents(filter),
-      this.surveysRepository.countEligibleRespondents(filter, true),
+    const [respondedUserIds, totalEligible] = await Promise.all([
+      this.surveysRepository.findRespondedUserIds(surveyId),
+      this.usersService.countAudienceUsers({
+        roles: filter.roles,
+        careerId: filter.careerId ?? undefined,
+        graduationYear: filter.graduationYear ?? undefined,
+      }),
     ]);
+    const respondedCount = respondedUserIds.length;
+    const eligibleCount = Math.max(totalEligible, respondedCount);
     const pendingCount = Math.max(eligibleCount - respondedCount, 0);
 
     return {
@@ -76,31 +78,74 @@ export class SurveyParticipationService {
     if (!isSurveyOpenForReminders(target, now))
       throw new SurveyReminderNotAllowedException();
 
-    const recipients = await this.surveysRepository.findPendingRecipients(
-      buildSurveyAudienceFilter(target),
-    );
+    const filter = buildSurveyAudienceFilter(target);
+    const respondedUserIds =
+      await this.surveysRepository.findRespondedUserIds(surveyId);
+
+    const recipients = await this.usersService.findAudienceRecipients({
+      roles: filter.roles,
+      careerId: filter.careerId ?? undefined,
+      graduationYear: filter.graduationYear ?? undefined,
+      excludedUserIds: respondedUserIds,
+    });
     if (recipients.length === 0)
       throw new SurveyWithoutPendingRespondentsException();
 
     const actionUrl = buildSurveyFrontendUrl(
       `${SURVEY_ANSWER_FRONTEND_PATH}/${target.id}`,
     );
-    const emails = await this.sendReminderEmails(target, recipients, actionUrl);
-    if (emails.delivered === 0) throw new SurveyReminderDeliveryFailedException();
+    const closesAtFormatted = target.closesAt
+      ? formatSurveyClosureDate(target.closesAt)
+      : SURVEY_REMINDER_MAIL_TEXTS.withoutClosingDate;
 
-    const pushStatus = await this.dispatchReminderPush(
-      target,
-      recipients,
-      actorId,
-      actionUrl,
-    );
+    let emailsDelivered = 0;
+    let emailsFailed = 0;
+    let pushStatus: SurveyReminderResponse['pushStatus'] = 'skipped';
+
+    try {
+      const notifyResult = await this.notificationsService.notify({
+        recipientIds: recipients.map((r) => r.id),
+        actorId,
+        type: NotificationType.SURVEY_REMINDER,
+        payload: {
+          surveyTitle: target.title,
+          closesAtFormatted,
+        },
+        actionUrl,
+        groupKey: `${SURVEY_REMINDER_GROUP_KEY_PREFIX}:${target.id}`,
+      });
+
+      emailsDelivered =
+        notifyResult.emailsDelivered ??
+        (notifyResult.emailStatus === 'sent' ? recipients.length : 0);
+      emailsFailed =
+        notifyResult.emailsFailed ??
+        (notifyResult.emailStatus === 'failed' ? recipients.length : 0);
+      pushStatus = notifyResult.pushStatus;
+
+      if (
+        emailsDelivered === 0 &&
+        recipients.length > 0 &&
+        notifyResult.emailStatus === 'failed'
+      ) {
+        throw new SurveyReminderDeliveryFailedException();
+      }
+    } catch (error) {
+      if (error instanceof SurveyReminderDeliveryFailedException) throw error;
+      this.logger.error(
+        `Error notificando recordatorio de la encuesta ${target.id}`,
+        error instanceof Error ? error.stack : String(error),
+      );
+      throw new SurveyReminderDeliveryFailedException();
+    }
+
     await this.surveysRepository.updateLastReminderSent(surveyId, now);
 
     return {
       surveyId,
       pendingCount: recipients.length,
-      emailsDelivered: emails.delivered,
-      emailsFailed: emails.failed,
+      emailsDelivered,
+      emailsFailed,
       pushStatus,
       sentAt: now.toISOString(),
     };
@@ -113,75 +158,5 @@ export class SurveyParticipationService {
       await this.surveysRepository.findParticipationTarget(surveyId);
     if (!target) throw new SurveyNotFoundException();
     return target;
-  }
-
-  private async sendReminderEmails(
-    target: SurveyParticipationTarget,
-    recipients: SurveyReminderRecipient[],
-    actionUrl: string,
-  ): Promise<SurveyReminderDelivery> {
-    const mjml = await loadMailTemplate('survey-reminder');
-    const closesAtFormatted = target.closesAt
-      ? formatSurveyClosureDate(target.closesAt)
-      : SURVEY_REMINDER_MAIL_TEXTS.withoutClosingDate;
-    const delivery: SurveyReminderDelivery = { delivered: 0, failed: 0 };
-
-    for (const recipient of recipients) {
-      const recipientName =
-        `${recipient.firstName} ${recipient.lastName}`.trim() ||
-        SURVEY_REMINDER_MAIL_TEXTS.recipientFallback;
-      try {
-        await this.mailService.send({
-          to: recipient.email,
-          subject: SURVEY_REMINDER_MAIL_TEXTS.subject(target.title),
-          text: SURVEY_REMINDER_MAIL_TEXTS.body(
-            recipientName,
-            target.title,
-            closesAtFormatted,
-            actionUrl,
-          ),
-          mjml,
-          values: {
-            recipientName,
-            surveyTitle: target.title,
-            closesAtFormatted,
-            actionUrl,
-          },
-        });
-        delivery.delivered++;
-      } catch (error) {
-        delivery.failed++;
-        this.logger.error(
-          `Error enviando recordatorio de la encuesta ${target.id} al usuario ${recipient.id}`,
-          error instanceof Error ? error.stack : String(error),
-        );
-      }
-    }
-    return delivery;
-  }
-
-  private async dispatchReminderPush(
-    target: SurveyParticipationTarget,
-    recipients: SurveyReminderRecipient[],
-    actorId: string,
-    actionUrl: string,
-  ): Promise<NotifyResult['pushStatus']> {
-    try {
-      const result = await this.notificationsService.notify({
-        recipientIds: recipients.map((recipient) => recipient.id),
-        actorId,
-        type: NotificationType.SURVEY_REMINDER,
-        payload: { surveyTitle: target.title },
-        actionUrl,
-        groupKey: `${SURVEY_REMINDER_GROUP_KEY_PREFIX}:${target.id}`,
-      });
-      return result.pushStatus;
-    } catch (error) {
-      this.logger.error(
-        `Error enviando notificaciones push del recordatorio de la encuesta ${target.id}`,
-        error instanceof Error ? error.stack : String(error),
-      );
-      return 'failed';
-    }
   }
 }

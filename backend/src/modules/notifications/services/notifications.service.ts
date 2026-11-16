@@ -89,6 +89,8 @@ export class NotificationsService {
 
     let pushStatus: NotifyResult['pushStatus'] = 'skipped';
     let emailStatus: NotifyResult['emailStatus'] = 'skipped';
+    let emailsDelivered = 0;
+    let emailsFailed = 0;
 
     if (pushTargets.length > 0) {
       try {
@@ -101,13 +103,37 @@ export class NotificationsService {
 
     if (emailTargets.length > 0) {
       try {
-        emailStatus = await this.mailDispatcher.dispatchToUsers(emailTargets, title, body, actionUrl);
+        if (typeof this.mailDispatcher.dispatchWithResult === 'function') {
+          const mailResult = await this.mailDispatcher.dispatchWithResult(
+            emailTargets,
+            title,
+            body,
+            actionUrl,
+            {
+              mailTemplateName: template.mailTemplateName,
+              payload: payload as Record<string, unknown>,
+            },
+          );
+          emailStatus = mailResult.status;
+          emailsDelivered = mailResult.delivered;
+          emailsFailed = mailResult.failed;
+        } else {
+          emailStatus = await this.mailDispatcher.dispatchToUsers(
+            emailTargets,
+            title,
+            body,
+            actionUrl,
+          );
+          if (emailStatus === 'sent') emailsDelivered = emailTargets.length;
+          else if (emailStatus === 'failed') emailsFailed = emailTargets.length;
+        }
       } catch (e) {
         this.logger.error('Fallo crítico en MailDispatcher', e);
         emailStatus = 'failed';
+        emailsFailed = emailTargets.length;
       }
     }
 
-    return { inAppCount, pushStatus, emailStatus };
+    return { inAppCount, pushStatus, emailStatus, emailsDelivered, emailsFailed };
   }
 }

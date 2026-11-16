@@ -49,6 +49,22 @@ export const NOTIFICATION_TEMPLATES: NotificationTemplateMap = {
   [NotificationType.SURVEY_REMINDER]: {
     renderTitle: () => 'Recordatorio de encuesta',
     renderBody: (p) => truncate(`Aún no respondiste la encuesta "${p.surveyTitle}".`),
+    mailTemplateName: 'survey-reminder',
+  },
+  [NotificationType.SURVEY_CLOSING_SOON]: {
+    renderTitle: (p) => `La encuesta «${p.surveyTitle}» cierra en 3 días`,
+    renderBody: (p) => truncate(`La encuesta «${p.surveyTitle}» cierra el ${p.closesAtFormatted}. Respuestas: ${p.responsesCount}.`),
+    mailTemplateName: 'survey-closing-soon',
+  },
+  [NotificationType.SURVEY_CLOSED]: {
+    renderTitle: (p) => `La encuesta «${p.surveyTitle}» ya cerró`,
+    renderBody: (p) => truncate(`La encuesta «${p.surveyTitle}» ha cerrado. Respuestas recibidas: ${p.responsesCount}.`),
+    mailTemplateName: 'survey-closed',
+  },
+  [NotificationType.SURVEY_VARIATION_ALERT]: {
+    renderTitle: (p) => `Variaciones significativas en «${p.surveyTitle}»`,
+    renderBody: (p) => truncate(`Se detectaron variaciones en la encuesta «${p.surveyTitle}». ${p.summaryText}`),
+    mailTemplateName: 'survey-variation-alert',
   },
 
   [NotificationType.APPLICATION_STATUS_CHANGED]: {

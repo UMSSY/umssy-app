@@ -3,13 +3,14 @@ import { afterEach, describe, expect, it, vi, beforeEach } from 'vitest';
 import { SurveyLifecycleWorkerService } from '../services/survey-lifecycle-worker.service.js';
 import type { SurveysRepository } from '../repositories/surveys.repository.js';
 import type { SurveyVariationEvaluatorService } from '../services/survey-variation-evaluator.service.js';
-import type { MailService } from '../../mail/services/mail.service.js';
+import type { NotificationsService } from '../../notifications/services/notifications.service.js';
+import { NotificationType } from '../../notifications/types/notification-type.enum.js';
 
 describe('SurveyLifecycleWorkerService', () => {
   let worker: SurveyLifecycleWorkerService;
   let repository: Partial<SurveysRepository>;
   let variationEvaluator: Partial<SurveyVariationEvaluatorService>;
-  let mailService: Partial<MailService>;
+  let notificationsService: { notify: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     repository = {
@@ -21,13 +22,17 @@ describe('SurveyLifecycleWorkerService', () => {
     variationEvaluator = {
       evaluateSurvey: vi.fn(),
     };
-    mailService = {
-      send: vi.fn(),
+    notificationsService = {
+      notify: vi.fn().mockResolvedValue({
+        inAppCount: 1,
+        pushStatus: 'sent',
+        emailStatus: 'sent',
+      }),
     };
     worker = new SurveyLifecycleWorkerService(
       repository as SurveysRepository,
       variationEvaluator as SurveyVariationEvaluatorService,
-      mailService as MailService,
+      notificationsService as unknown as NotificationsService,
     );
   });
 
@@ -124,24 +129,24 @@ describe('SurveyLifecycleWorkerService', () => {
 
   it('continúa con las demás encuestas si falla una', async () => {
     vi.spyOn(Logger.prototype, 'error').mockImplementation(() => {});
-    const buildSurvey = (id: string, email: string) => ({
+    const buildSurvey = (id: string) => ({
       id,
       title: `Encuesta ${id}`,
       closesAt: new Date('2026-11-18T10:00:00Z'),
-      createdBy: { id: 'user-1', firstName: 'Ana', lastName: 'Gómez', email },
+      createdById: `user-${id}`,
       _count: { responses: 1 },
     });
     vi.mocked(repository.findSurveysClosingSoon!).mockResolvedValue([
-      buildSurvey('s-1', 'fail@umss.edu'),
-      buildSurvey('s-2', 'ok@umss.edu'),
+      buildSurvey('s-1'),
+      buildSurvey('s-2'),
     ] as any);
-    vi.mocked(mailService.send!)
-      .mockRejectedValueOnce(new Error('smtp down'))
-      .mockResolvedValueOnce(undefined);
+    notificationsService.notify
+      .mockRejectedValueOnce(new Error('notify down'))
+      .mockResolvedValueOnce({ inAppCount: 1, pushStatus: 'sent', emailStatus: 'sent' });
 
     await worker.processClosingSoonSurveys(new Date('2026-11-15T10:00:00Z'));
 
-    expect(mailService.send).toHaveBeenCalledTimes(2);
+    expect(notificationsService.notify).toHaveBeenCalledTimes(2);
     expect(repository.markClosingSoonNotified).toHaveBeenCalledTimes(1);
     expect(repository.markClosingSoonNotified).toHaveBeenCalledWith(
       's-2',
@@ -156,7 +161,7 @@ describe('SurveyLifecycleWorkerService', () => {
         title: 'Encuesta',
         closesAt: new Date('2026-11-14T23:59:59Z'),
         academicPeriod: 'II-2024',
-        createdBy: null,
+        createdById: null,
         alertConfig: {
           isEnabled: true,
           threshold: 15,
@@ -169,7 +174,7 @@ describe('SurveyLifecycleWorkerService', () => {
         title: 'Encuesta',
         closesAt: null,
         academicPeriod: null,
-        createdBy: null,
+        createdById: null,
         alertConfig: { isEnabled: true, threshold: 10, questionIds: 'q-1' },
         _count: { responses: 0 },
       },
@@ -194,7 +199,7 @@ describe('SurveyLifecycleWorkerService', () => {
       'survey-closed-3',
       expect.objectContaining({ questionIds: null }),
     );
-    expect(mailService.send).not.toHaveBeenCalled();
+    expect(notificationsService.notify).not.toHaveBeenCalled();
   });
 
   it('debe notificar encuestas próximas a cerrar y marcarlas como notificadas', async () => {
@@ -202,12 +207,7 @@ describe('SurveyLifecycleWorkerService', () => {
       id: 'survey-closing-1',
       title: 'Encuesta Egresados 2024',
       closesAt: new Date('2026-11-18T10:00:00Z'),
-      createdBy: {
-        id: 'user-1',
-        firstName: 'Juan',
-        lastName: 'Pérez',
-        email: 'juan.perez@umss.edu',
-      },
+      createdById: 'user-1',
       _count: { responses: 42 },
     };
 
@@ -217,11 +217,14 @@ describe('SurveyLifecycleWorkerService', () => {
 
     await worker.processClosingSoonSurveys(new Date('2026-11-15T10:00:00Z'));
 
-    expect(mailService.send).toHaveBeenCalledTimes(1);
-    expect(mailService.send).toHaveBeenCalledWith(
+    expect(notificationsService.notify).toHaveBeenCalledTimes(1);
+    expect(notificationsService.notify).toHaveBeenCalledWith(
       expect.objectContaining({
-        to: 'juan.perez@umss.edu',
-        subject: 'La encuesta «Encuesta Egresados 2024» cierra en 3 días',
+        recipientIds: ['user-1'],
+        type: NotificationType.SURVEY_CLOSING_SOON,
+        payload: expect.objectContaining({
+          surveyTitle: 'Encuesta Egresados 2024',
+        }),
       }),
     );
     expect(repository.markClosingSoonNotified).toHaveBeenCalledWith(
@@ -236,12 +239,7 @@ describe('SurveyLifecycleWorkerService', () => {
       title: 'Encuesta Inserción Laboral',
       closesAt: new Date('2026-11-14T23:59:59Z'),
       academicPeriod: 'II-2024',
-      createdBy: {
-        id: 'user-1',
-        firstName: 'Ana',
-        lastName: 'Gómez',
-        email: 'ana.gomez@umss.edu',
-      },
+      createdById: 'user-1',
       alertConfig: {
         isEnabled: true,
         threshold: 10,
@@ -275,23 +273,29 @@ describe('SurveyLifecycleWorkerService', () => {
 
     await worker.processClosedSurveys(new Date('2026-11-15T00:00:00Z'));
 
-    // Should send 2 emails: 1 for closure, 1 for variation alert
-    expect(mailService.send).toHaveBeenCalledTimes(2);
+    // Should notify 2 times: 1 for closure, 1 for variation alert
+    expect(notificationsService.notify).toHaveBeenCalledTimes(2);
 
-    expect(mailService.send).toHaveBeenNthCalledWith(
+    expect(notificationsService.notify).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({
-        to: 'ana.gomez@umss.edu',
-        subject: 'La encuesta «Encuesta Inserción Laboral» ya cerró',
+        recipientIds: ['user-1'],
+        type: NotificationType.SURVEY_CLOSED,
+        payload: expect.objectContaining({
+          surveyTitle: 'Encuesta Inserción Laboral',
+        }),
       }),
     );
 
-    expect(mailService.send).toHaveBeenNthCalledWith(
+    expect(notificationsService.notify).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({
-        to: 'ana.gomez@umss.edu',
-        subject:
-          'Alerta de variación significativa en «Encuesta Inserción Laboral»',
+        recipientIds: ['user-1'],
+        type: NotificationType.SURVEY_VARIATION_ALERT,
+        payload: expect.objectContaining({
+          surveyTitle: 'Encuesta Inserción Laboral',
+          summaryText: 'Variación detectada: Opción 1 +20 pp',
+        }),
       }),
     );
 

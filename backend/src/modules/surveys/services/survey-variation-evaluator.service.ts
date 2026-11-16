@@ -6,25 +6,10 @@ import {
 } from '../utils/academic-semester.js';
 import { getAcademicPeriod } from '../../reports/utils/academic-period.js';
 import { distributePercentages } from '../utils/distribute-percentages.js';
+import type { VariationShift } from '../types/variation-shift.type.js';
+import type { SurveyVariationEvaluationResult } from '../types/survey-variation-evaluation-result.type.js';
 
-export interface VariationShift {
-  questionId: string;
-  questionStatement: string;
-  optionId: string;
-  optionLabel: string;
-  currentPercentage: number;
-  previousPercentage: number;
-  difference: number;
-  direction: 'up' | 'down';
-}
-
-export interface SurveyVariationEvaluationResult {
-  hasShifts: boolean;
-  shifts: VariationShift[];
-  currentPeriod: string;
-  previousPeriod: string;
-  summaryText: string;
-}
+export type { VariationShift, SurveyVariationEvaluationResult };
 
 @Injectable()
 export class SurveyVariationEvaluatorService {
