@@ -44,13 +44,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
@@ -137,8 +130,8 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
   const [submitting, setSubmitting] = useState(false);
   const [isDocMinimized, setIsDocMinimized] = useState(false);
 
-  // Panel lateral deslizable (Sheet) de resolución y ficha
-  const [showResolutionSheet, setShowResolutionSheet] = useState(false);
+  // Ventana flotante centrada (Modal Dialog) de resolución y dictamen
+  const [showResolutionModal, setShowResolutionModal] = useState(false);
   const [activeAction, setActiveAction] = useState<
     'APPROVE' | 'CORRECTION' | 'REJECT' | null
   >(null);
@@ -238,7 +231,7 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
       setError(res.message);
       return;
     }
-    setShowResolutionSheet(false);
+    setShowResolutionModal(false);
     router.push('/backoffice/empresas');
   }
 
@@ -256,7 +249,7 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
       return;
     }
     setActiveAction(null);
-    setShowResolutionSheet(false);
+    setShowResolutionModal(false);
     setSuccessMessage(
       'Se ha notificado a la empresa la solicitud de subsanación por correo electrónico.',
     );
@@ -277,7 +270,7 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
       setError(res.message);
       return;
     }
-    setShowResolutionSheet(false);
+    setShowResolutionModal(false);
     router.push('/backoffice/empresas');
   }
 
@@ -522,7 +515,7 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
 
   return (
     <main className="mx-auto w-full max-w-7xl space-y-8 pb-16">
-      {/* ─── Encabezado principal con botón para emitir resolución ─── */}
+      {/* ─── Encabezado principal ordenado y equilibrado ─── */}
       <header className="rounded-xl border border-border bg-surface p-6 shadow-xs">
         <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-text-secondary">
           <Link
@@ -533,13 +526,13 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
           </Link>
           <div className="flex items-center gap-2">
             <span className="text-text-secondary">Código de solicitud:</span>
-            <span className="rounded-md bg-surface-soft px-2.5 py-1 font-mono text-xs font-bold text-ink">
+            <span className="rounded-md bg-surface-soft px-2.5 py-1 text-xs font-bold text-ink">
               {item.requestCode ?? 'S/C'}
             </span>
           </div>
         </div>
 
-        <div className="mt-4 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-4">
             {logoUrl ? (
               <div
@@ -572,10 +565,14 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
                   {item.companyName}
                 </h1>
                 <span
-                  className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-0.5 text-xs font-semibold ${statusConfig.bgClass}`}
+                  className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${statusConfig.bgClass}`}
                 >
-                  <Eye className={`size-3.5 ${statusConfig.textClass}`} />
+                  <Eye className={`size-3 ${statusConfig.textClass}`} />
                   {statusConfig.label}
+                </span>
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface-soft px-2.5 py-0.5 text-xs font-semibold text-ink">
+                  <ShieldCheck className="size-3.5 text-emerald-600" />
+                  {ocrPercentage}% Afinidad OCR
                 </span>
               </div>
               <p className="mt-1 text-sm text-text-secondary">
@@ -598,74 +595,75 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
             </div>
           </div>
 
-          {/* Acciones principales en cabecera */}
-          <div className="flex flex-wrap items-center gap-3">
-            <div
-              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-bold ${
-                ocrPercentage >= 60
-                  ? 'border-emerald-300 bg-emerald-50 text-emerald-800'
-                  : 'border-rose-300 bg-rose-50 text-rose-800'
-              }`}
-              title="Afinidad global del documento evaluada por OCR"
-            >
-              <ShieldCheck
-                className={`size-4 ${
-                  ocrPercentage >= 60 ? 'text-emerald-600' : 'text-rose-600'
-                }`}
-              />
-              <span>{ocrPercentage}% Afinidad OCR</span>
-            </div>
-
-            {canResolve && (
+          {/* Botón de dictamen / resolución en la cabecera */}
+          {canResolve && (
+            <div className="shrink-0 self-start sm:self-center">
               <Button
                 type="button"
                 onClick={() => {
                   setActiveAction(null);
-                  setShowResolutionSheet(true);
+                  setShowResolutionModal(true);
                 }}
                 className="h-10 bg-primary px-5 text-sm font-semibold text-white shadow-xs hover:bg-primary/90"
               >
                 Emitir resolución
               </Button>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </header>
 
-      {/* Alertas de retroalimentación global */}
+      {/* Alertas de retroalimentación discretas y formales */}
       {error && (
         <div
           role="alert"
-          className="flex items-center gap-3 rounded-xl border border-rose-300 bg-rose-50 p-4 text-sm text-rose-900"
+          className="flex items-center justify-between gap-3 rounded-lg border border-border bg-surface p-3 text-xs text-ink shadow-xs"
         >
-          <AlertCircle className="size-5 shrink-0 text-rose-600" />
-          <p>{error}</p>
+          <div className="flex items-center gap-2.5">
+            <div className="flex size-5 shrink-0 items-center justify-center rounded-full bg-rose-100 text-rose-600 dark:bg-rose-950 dark:text-rose-400">
+              <AlertCircle className="size-3.5" />
+            </div>
+            <p className="font-medium text-rose-700 dark:text-rose-400">
+              {error}
+            </p>
+          </div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="xs"
+            onClick={() => setError(null)}
+            className="size-6 p-0 text-text-secondary hover:text-ink"
+          >
+            <X className="size-3.5" />
+          </Button>
         </div>
       )}
 
       {successMessage && (
         <div
-          role="alert"
-          className="flex items-center justify-between gap-3 rounded-xl border border-emerald-300 bg-emerald-50 p-4 text-sm text-emerald-900"
+          role="status"
+          className="flex items-center justify-between gap-3 rounded-lg border border-border bg-surface p-3 text-xs text-ink shadow-xs"
         >
           <div className="flex items-center gap-2.5">
-            <CheckCircle2 className="size-5 shrink-0 text-emerald-600" />
-            <p className="font-medium">{successMessage}</p>
+            <div className="flex size-5 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400">
+              <CheckCircle2 className="size-3.5" />
+            </div>
+            <p className="font-medium text-ink">{successMessage}</p>
           </div>
           <Button
             type="button"
             variant="ghost"
             size="xs"
             onClick={() => setSuccessMessage(null)}
-            className="text-emerald-800 hover:bg-emerald-100"
+            className="size-6 p-0 text-text-secondary hover:text-ink"
           >
-            <X className="size-4" />
+            <X className="size-3.5" />
           </Button>
         </div>
       )}
 
       {/* ─────────────────────────────────────────────────────────────────────────────
-          1. CONTRASTE DE DATOS Y VERIFICACIÓN OCR (LO PRIMERO QUE SE AUDITA)
+          1. CONTRASTE DE DATOS Y VERIFICACIÓN OCR
           ───────────────────────────────────────────────────────────────────────────── */}
       <section className="space-y-6" aria-labelledby="section-contrast">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3">
@@ -700,11 +698,11 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
                 </>
               )}
             </Button>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1 text-xs font-semibold text-ink shadow-2xs">
               <CheckCircle2 className="size-3.5 text-emerald-600" />
               {confirmedCount} confirmados
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-rose-300 bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-800">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1 text-xs font-semibold text-ink shadow-2xs">
               <XCircle className="size-3.5 text-rose-600" />
               {unconfirmedCount} por verificar
             </span>
@@ -755,7 +753,7 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
           </CardContent>
         </Card>
 
-        {/* Cuadrícula de Bloques Comparativos Separados */}
+        {/* Cuadrícula de Bloques Comparativos: Tarjetas en blanco formal con pequeño label */}
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {comparisonList.map((comp) => {
             const IconComponent = comp.icon;
@@ -765,47 +763,39 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
             return (
               <div
                 key={comp.id}
-                className={`flex flex-col justify-between rounded-xl border p-4.5 shadow-2xs transition-all ${
-                  isMatched
-                    ? 'border-emerald-300 bg-emerald-50/40 text-emerald-950 dark:border-emerald-900/60 dark:bg-emerald-950/20 dark:text-emerald-200'
-                    : 'border-rose-300 bg-rose-50/40 text-rose-950 dark:border-rose-900/60 dark:bg-rose-950/20 dark:text-rose-200'
-                }`}
+                className="flex flex-col justify-between rounded-xl border border-border bg-surface p-4 shadow-2xs"
               >
                 <div>
-                  <div className="flex items-center justify-between gap-2 border-b border-border/50 pb-2.5">
+                  <div className="flex items-center justify-between gap-2 border-b border-border/60 pb-2.5">
                     <div className="flex items-center gap-2">
-                      <IconComponent
-                        className={`size-4 ${
-                          isMatched ? 'text-emerald-700' : 'text-rose-700'
-                        }`}
-                      />
+                      <IconComponent className="size-4 text-primary" />
                       <span className="text-xs font-bold text-ink">
                         {comp.label}
                       </span>
                     </div>
                     <span
-                      className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-bold ${
+                      className={`inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[11px] font-semibold ${
                         isMatched
-                          ? 'border-emerald-300 bg-emerald-100/90 text-emerald-800'
+                          ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-300'
                           : hasDetectedText
-                            ? 'border-rose-300 bg-rose-100/90 text-rose-800'
-                            : 'border-slate-300 bg-slate-100 text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                            ? 'border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-300'
+                            : 'border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400'
                       }`}
                     >
                       {isMatched ? (
                         <>
-                          <CheckCircle2 className="size-3 text-emerald-600" />{' '}
+                          <CheckCircle2 className="size-3 text-emerald-600 dark:text-emerald-400" />
                           Coincide
                         </>
                       ) : hasDetectedText ? (
                         <>
-                          <AlertCircle className="size-3 text-rose-600" />{' '}
+                          <AlertCircle className="size-3 text-rose-600 dark:text-rose-400" />
                           Discrepancia
                         </>
                       ) : (
                         <>
-                          <XCircle className="size-3 text-slate-500" /> No
-                          detectado
+                          <XCircle className="size-3 text-slate-500" />
+                          No detectado
                         </>
                       )}
                     </span>
@@ -826,17 +816,11 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
                         Texto Extraído del Documento (OCR):
                       </span>
                       {comp.data.detectedText ? (
-                        <p
-                          className={`mt-1 rounded-md border p-2 font-mono text-[11px] leading-relaxed ${
-                            isMatched
-                              ? 'border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-800/40 dark:bg-emerald-950/40 dark:text-emerald-200'
-                              : 'border-rose-200 bg-rose-50 text-rose-900 dark:border-rose-800/40 dark:bg-rose-950/40 dark:text-rose-200'
-                          }`}
-                        >
+                        <div className="mt-1 rounded-md border border-border/80 bg-surface-soft/60 p-2.5 text-xs leading-relaxed font-normal text-ink">
                           &ldquo;{comp.data.detectedText}&rdquo;
-                        </p>
+                        </div>
                       ) : (
-                        <p className="mt-1 rounded-md border border-rose-200 bg-rose-50/80 p-2 text-[11px] text-rose-800 italic dark:border-rose-800/40 dark:bg-rose-950/40 dark:text-rose-300">
+                        <p className="mt-1 rounded-md border border-border/60 bg-surface-soft/30 p-2.5 text-xs text-text-secondary italic">
                           No se identificó este dato en el contenido escaneado
                           de la carta.
                         </p>
@@ -844,11 +828,7 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
                     </div>
 
                     {comp.data.statusMessage && (
-                      <p
-                        className={`text-[11px] font-medium ${
-                          isMatched ? 'text-emerald-700' : 'text-rose-700'
-                        }`}
-                      >
+                      <p className="text-[11px] text-text-secondary">
                         {comp.data.statusMessage}
                       </p>
                     )}
@@ -952,7 +932,7 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
       </section>
 
       {/* ─────────────────────────────────────────────────────────────────────────────
-          3. LOGOTIPO CORPORATIVO
+          3. LOGOTIPO CORPORATIVO Y RESUMEN
           ───────────────────────────────────────────────────────────────────────────── */}
       <section
         className="grid grid-cols-1 gap-6 md:grid-cols-2"
@@ -1065,7 +1045,7 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
             </div>
             <div className="flex justify-between border-b border-border/60 pb-2">
               <span className="text-text-secondary">Código único:</span>
-              <span className="font-mono font-semibold text-ink">
+              <span className="font-semibold text-ink">
                 {item.requestCode ?? 'Sin código'}
               </span>
             </div>
@@ -1088,11 +1068,11 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
                   type="button"
                   onClick={() => {
                     setActiveAction(null);
-                    setShowResolutionSheet(true);
+                    setShowResolutionModal(true);
                   }}
                   className="w-full bg-primary font-semibold text-white shadow-xs hover:bg-primary/90"
                 >
-                  Abrir panel de resolución
+                  Abrir ventana de resolución
                 </Button>
               </div>
             )}
@@ -1101,41 +1081,32 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
       </section>
 
       {/* ─────────────────────────────────────────────────────────────────────────────
-          PANEL LATERAL DESLIZABLE (DRAWER / SHEET) DE RESOLUCIÓN & FICHA OFICIAL
-          Mantiene visible el 60% de la pantalla para seguir consultando el documento
+          VENTANA FLOTANTE CENTRADA (MODAL DIALOG): RESOLUCIÓN Y DICTAMEN DE SOLICITUD
           ───────────────────────────────────────────────────────────────────────────── */}
-      <Sheet open={showResolutionSheet} onOpenChange={setShowResolutionSheet}>
-        <SheetContent
-          side="right"
-          className="flex size-full flex-col overflow-hidden p-0 data-[side=right]:sm:max-w-xl data-[side=right]:md:max-w-2xl"
-        >
-          {/* Cabecera del Panel */}
-          <SheetHeader className="shrink-0 border-b border-border bg-surface p-5">
-            <div className="flex flex-wrap items-center justify-between gap-2 pr-6">
+      <Dialog open={showResolutionModal} onOpenChange={setShowResolutionModal}>
+        <DialogContent className="flex max-h-[88vh] w-full flex-col overflow-hidden p-0 sm:max-w-2xl md:max-w-3xl">
+          {/* Cabecera del Modal */}
+          <DialogHeader className="shrink-0 border-b border-border bg-surface p-5">
+            <div className="flex flex-wrap items-center justify-between gap-3 pr-6">
               <div>
-                <SheetTitle className="text-lg font-bold text-ink">
+                <DialogTitle className="text-base font-bold text-ink">
                   Resolución de Solicitud
-                </SheetTitle>
-                <SheetDescription className="text-xs text-text-secondary">
-                  Expediente: <strong>{item.companyName}</strong> (
+                </DialogTitle>
+                <DialogDescription className="text-xs text-text-secondary">
+                  Expediente:{' '}
+                  <strong className="text-ink">{item.companyName}</strong> (
                   {item.requestCode})
-                </SheetDescription>
+                </DialogDescription>
               </div>
-              <div
-                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-bold ${
-                  ocrPercentage >= 60
-                    ? 'border-emerald-300 bg-emerald-50 text-emerald-800'
-                    : 'border-rose-300 bg-rose-50 text-rose-800'
-                }`}
-              >
-                <ShieldCheck className="size-3.5" />
-                <span>{ocrPercentage}% Afinidad</span>
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface-soft px-2.5 py-1 text-xs font-semibold text-ink">
+                <ShieldCheck className="size-3.5 text-emerald-600" />
+                <span>{ocrPercentage}% Afinidad OCR</span>
               </div>
             </div>
-          </SheetHeader>
+          </DialogHeader>
 
-          {/* Cuerpo del Panel con scroll propio */}
-          <div className="flex-1 space-y-6 overflow-y-auto p-5">
+          {/* Cuerpo del Modal con scroll propio */}
+          <div className="flex-1 space-y-5 overflow-y-auto p-5">
             {/* 1. FICHA OFICIAL DE ALTA */}
             <div className="rounded-xl border border-border bg-surface p-4 shadow-2xs">
               <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/80 pb-3">
@@ -1216,7 +1187,7 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
               </div>
 
               {isDataModifiedFromInitial && !isEditingFicha && (
-                <div className="mt-2.5 flex items-center justify-between rounded-md border border-blue-200 bg-blue-50/70 px-3 py-1.5 text-xs text-blue-900">
+                <div className="mt-2.5 flex items-center justify-between rounded-lg border border-border bg-surface-soft/60 px-3 py-1.5 text-xs text-ink">
                   <span>
                     Ficha con modificaciones aplicadas por el revisor
                     administrativo.
@@ -1226,7 +1197,7 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
                     variant="link"
                     size="xs"
                     onClick={() => void handleResetInitialData()}
-                    className="h-auto p-0 font-bold text-blue-900 underline hover:text-blue-950"
+                    className="h-auto p-0 font-bold text-primary underline"
                   >
                     Restablecer valores iniciales
                   </Button>
@@ -1277,7 +1248,7 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
                     <span className="text-[10px] font-semibold text-text-secondary uppercase">
                       Usuario Reclutador a Crear
                     </span>
-                    <p className="mt-0.5 font-mono font-bold text-primary">
+                    <p className="mt-0.5 font-semibold text-primary">
                       @{item.username}
                     </p>
                   </div>
@@ -1286,7 +1257,7 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
                     <span className="text-[10px] font-semibold text-text-secondary uppercase">
                       Sitio Web Oficial
                     </span>
-                    <p className="mt-0.5 font-mono font-medium text-ink">
+                    <p className="mt-0.5 font-normal text-ink">
                       {item.websiteUrl || 'No especificado (Opcional)'}
                     </p>
                   </div>
@@ -1421,20 +1392,23 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
               )}
             </div>
 
-            {/* 2. FORMULARIO DINÁMICO DE ACCIÓN (SEGÚN LA ACCIÓN SELECCIONADA) */}
+            {/* 2. FORMULARIO FORMAL DE ACCIÓN (CON FONDO BLANCO Y SÓLO PEQUEÑO LABEL) */}
             {activeAction === 'APPROVE' && (
-              <div className="rounded-xl border border-emerald-300 bg-emerald-50/80 p-4.5 text-xs text-emerald-950 dark:border-emerald-900/60 dark:bg-emerald-950/30 dark:text-emerald-200">
-                <h4 className="text-sm font-bold text-emerald-900 dark:text-emerald-100">
-                  Confirmación de Aprobación y Alta
-                </h4>
-                <p className="mt-1.5 leading-relaxed text-emerald-800 dark:text-emerald-300">
-                  Al confirmar, se creará formalmente la empresa en el sistema y
-                  el usuario reclutador{' '}
-                  <strong className="font-mono text-emerald-950 dark:text-white">
-                    @{item.username}
-                  </strong>
-                  . Se enviará de inmediato el código de activación
-                  institucional al correo <strong>{item.email}</strong>.
+              <div className="rounded-xl border border-border bg-surface p-4.5 text-xs shadow-2xs">
+                <div className="flex items-center gap-2">
+                  <span className="rounded-md border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-300">
+                    Dictamen: Aprobación
+                  </span>
+                  <h4 className="text-sm font-bold text-ink">
+                    Confirmación de Alta Oficial
+                  </h4>
+                </div>
+                <p className="mt-2 text-xs leading-relaxed text-text-secondary">
+                  Al confirmar, se registrará formalmente la empresa en el
+                  sistema y se creará el usuario reclutador{' '}
+                  <strong className="text-ink">@{item.username}</strong>. Se
+                  enviará de inmediato el código de activación institucional a{' '}
+                  <strong className="text-ink">{item.email}</strong>.
                 </p>
 
                 <div className="mt-4 flex items-center justify-end gap-2">
@@ -1461,20 +1435,24 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
             )}
 
             {activeAction === 'CORRECTION' && (
-              <div className="space-y-3.5 rounded-xl border border-blue-300 bg-blue-50/80 p-4.5 text-xs text-blue-950 dark:border-blue-900/60 dark:bg-blue-950/30 dark:text-blue-200">
-                <div>
-                  <h4 className="text-sm font-bold text-blue-950 dark:text-blue-100">
-                    Solicitud de Subsanación Documental
+              <div className="space-y-3.5 rounded-xl border border-border bg-surface p-4.5 text-xs shadow-2xs">
+                <div className="flex items-center gap-2">
+                  <span className="rounded-md border border-blue-200 bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-700 dark:border-blue-900/60 dark:bg-blue-950/40 dark:text-blue-300">
+                    Dictamen: Subsanación
+                  </span>
+                  <h4 className="text-sm font-bold text-ink">
+                    Solicitud de Observación Documental
                   </h4>
-                  <p className="mt-1 text-[11px] text-blue-800 dark:text-blue-300">
-                    La solicitud pasará a estado de observación y el
-                    representante podrá ingresar con su código{' '}
-                    <strong>{item.requestCode}</strong> para corregir.
-                  </p>
                 </div>
+                <p className="text-xs leading-relaxed text-text-secondary">
+                  La solicitud pasará a estado de observación y el representante
+                  podrá ingresar con su código{' '}
+                  <strong className="text-ink">{item.requestCode}</strong> para
+                  corregir los requisitos.
+                </p>
 
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold text-blue-950 dark:text-blue-200">
+                  <Label className="text-xs font-semibold text-ink">
                     Motivo principal de la observación:
                   </Label>
                   <RadioGroup
@@ -1485,7 +1463,7 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
                     {CORRECTION_REASONS.map((reason) => (
                       <label
                         key={reason}
-                        className="flex cursor-pointer items-center gap-2 rounded-lg border border-blue-200 bg-white/90 p-2 text-xs text-ink hover:bg-white dark:border-blue-900/50 dark:bg-slate-900/60"
+                        className="flex cursor-pointer items-center gap-2 rounded-lg border border-border bg-surface p-2 text-xs text-ink hover:bg-surface-soft"
                       >
                         <RadioGroupItem value={reason} />
                         <span>{reason}</span>
@@ -1495,7 +1473,7 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
                 </div>
 
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold text-blue-950 dark:text-blue-200">
+                  <Label className="text-xs font-semibold text-ink">
                     Detalle específico e instrucciones para la empresa *
                   </Label>
                   <Textarea
@@ -1503,7 +1481,7 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
                     value={correctionDetails}
                     onChange={(e) => setCorrectionDetails(e.target.value)}
                     placeholder="Describe con precisión qué debe corregir o adjuntar..."
-                    className="bg-white text-xs dark:bg-slate-900"
+                    className="text-xs"
                   />
                   <p className="text-[11px] text-text-secondary">
                     Mínimo 5 caracteres ({correctionDetails.trim().length}{' '}
@@ -1535,19 +1513,23 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
             )}
 
             {activeAction === 'REJECT' && (
-              <div className="space-y-3.5 rounded-xl border border-rose-300 bg-rose-50/80 p-4.5 text-xs text-rose-950 dark:border-rose-900/60 dark:bg-rose-950/30 dark:text-rose-200">
-                <div>
-                  <h4 className="text-sm font-bold text-rose-950 dark:text-rose-100">
-                    Rechazo Definitivo de la Solicitud
+              <div className="space-y-3.5 rounded-xl border border-border bg-surface p-4.5 text-xs shadow-2xs">
+                <div className="flex items-center gap-2">
+                  <span className="rounded-md border border-rose-200 bg-rose-50 px-2 py-0.5 text-xs font-semibold text-rose-700 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-300">
+                    Dictamen: Rechazo
+                  </span>
+                  <h4 className="text-sm font-bold text-ink">
+                    Fundamentación de Rechazo
                   </h4>
-                  <p className="mt-1 text-[11px] text-rose-800 dark:text-rose-300">
-                    Esta acción concluye el trámite y enviará la notificación
-                    formal al correo <strong>{item.email}</strong>.
-                  </p>
                 </div>
+                <p className="text-xs leading-relaxed text-text-secondary">
+                  Esta acción concluye el trámite de forma definitiva y enviará
+                  la notificación formal al correo{' '}
+                  <strong className="text-ink">{item.email}</strong>.
+                </p>
 
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold text-rose-950 dark:text-rose-200">
+                  <Label className="text-xs font-semibold text-ink">
                     Causal institucional de rechazo:
                   </Label>
                   <RadioGroup
@@ -1558,7 +1540,7 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
                     {REJECTION_REASONS.map((reason) => (
                       <label
                         key={reason}
-                        className="flex cursor-pointer items-center gap-2 rounded-lg border border-rose-200 bg-white/90 p-2 text-xs text-ink hover:bg-white dark:border-rose-900/50 dark:bg-slate-900/60"
+                        className="flex cursor-pointer items-center gap-2 rounded-lg border border-border bg-surface p-2 text-xs text-ink hover:bg-surface-soft"
                       >
                         <RadioGroupItem value={reason} />
                         <span>{reason}</span>
@@ -1568,7 +1550,7 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
                 </div>
 
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold text-rose-950 dark:text-rose-200">
+                  <Label className="text-xs font-semibold text-ink">
                     Fundamentación oficial del rechazo *
                   </Label>
                   <Textarea
@@ -1576,7 +1558,7 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
                     value={rejectionDetails}
                     onChange={(e) => setRejectionDetails(e.target.value)}
                     placeholder="Detalla los motivos formales del dictamen..."
-                    className="bg-white text-xs dark:bg-slate-900"
+                    className="text-xs"
                   />
                   <p className="text-[11px] text-text-secondary">
                     Mínimo 5 caracteres ({rejectionDetails.trim().length}{' '}
@@ -1608,11 +1590,11 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
             )}
           </div>
 
-          {/* Pie Fijo del Panel con los 3 botones principales */}
+          {/* Pie Fijo del Modal con los 3 botones principales */}
           {canResolve && (
-            <div className="shrink-0 border-t border-border bg-surface p-4">
+            <DialogFooter className="shrink-0 border-t border-border bg-surface p-4">
               {activeAction === null ? (
-                <div className="flex w-full items-center gap-2">
+                <div className="flex w-full items-center gap-2.5">
                   <Button
                     type="button"
                     onClick={() => setActiveAction('APPROVE')}
@@ -1639,25 +1621,25 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
                   </Button>
                 </div>
               ) : (
-                <div className="flex items-center justify-between">
+                <div className="flex w-full items-center justify-between">
                   <span className="text-xs text-text-secondary">
-                    Completando acción seleccionada...
+                    Configurando dictamen seleccionado...
                   </span>
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
                     onClick={() => setActiveAction(null)}
-                    className="text-xs font-medium"
+                    className="text-xs font-medium text-text-secondary hover:text-ink"
                   >
                     Cambiar de acción
                   </Button>
                 </div>
               )}
-            </div>
+            </DialogFooter>
           )}
-        </SheetContent>
-      </Sheet>
+        </DialogContent>
+      </Dialog>
 
       {/* Modal de inspección de logotipo en pantalla completa */}
       {logoUrl && (
