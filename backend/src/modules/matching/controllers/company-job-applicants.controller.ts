@@ -6,19 +6,12 @@ import {
   ParseUUIDPipe,
   UseGuards,
 } from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiForbiddenResponse,
-  ApiNotFoundResponse,
-  ApiOkResponse,
-  ApiOperation,
-  ApiTags,
-  ApiUnauthorizedResponse,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Roles } from '../../../common/decorators/roles.decorator.js';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../../../common/guards/roles.guard.js';
 import { JobOfferUnavailableException } from '../exceptions/job-offer-unavailable.exception.js';
+import { apiListJobOfferApplicants } from '../swagger/matching.swagger.js';
 import { CompanyJobApplicantsService } from '../services/company-job-applicants.service.js';
 import type { CompanyJobApplicantsResponse } from '../types/company-job-applicants.types.js';
 
@@ -26,10 +19,8 @@ const uuidPipe = new ParseUUIDPipe({
   exceptionFactory: () => new JobOfferUnavailableException(),
 });
 
-@ApiTags('job-applications')
+@ApiTags('matching')
 @ApiBearerAuth()
-@ApiForbiddenResponse({ description: 'La cuenta no pertenece a esta empresa' })
-@ApiUnauthorizedResponse({ description: 'A valid access token is required' })
 @UseGuards(JwtAuthGuard, RolesGuard, CompanyOwnershipGuard)
 @Roles('empresa')
 @Controller('companies/:companyId/job-offers/:jobOfferId/applications')
@@ -39,17 +30,7 @@ export class CompanyJobApplicantsController {
   ) {}
 
   @Get()
-  @ApiOperation({
-    summary:
-      'Lista cuántos y quiénes se postularon a una vacante de la empresa',
-  })
-  @ApiOkResponse({
-    description:
-      'Total de postulantes y su detalle, del más reciente al más antiguo',
-  })
-  @ApiNotFoundResponse({
-    description: 'La vacante no existe o no pertenece a la empresa',
-  })
+  @apiListJobOfferApplicants()
   listByOffer(
     @Param('companyId', uuidPipe) companyId: string,
     @Param('jobOfferId', uuidPipe) jobOfferId: string,

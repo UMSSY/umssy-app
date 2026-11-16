@@ -5,9 +5,10 @@ import { Roles } from '../../../common/decorators/roles.decorator.js';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../../../common/guards/roles.guard.js';
 import { JobRecommendationsService } from '../services/job-recommendations.service.js';
+import { apiListJobRecommendations } from '../swagger/matching.swagger.js';
 import type { JobRecommendations } from '../types/job-recommendation.types.js';
 
-@ApiTags('job-matching')
+@ApiTags('matching')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('titulado', 'estudiante')
@@ -16,7 +17,10 @@ export class JobRecommendationsController {
   constructor(private readonly service: JobRecommendationsService) {}
 
   @Get('recommendations')
-  recommendations(@CurrentUserId() userId: string): Promise<JobRecommendations> {
+  @apiListJobRecommendations()
+  recommendations(
+    @CurrentUserId() userId: string,
+  ): Promise<JobRecommendations> {
     return this.service.recommendations(userId);
   }
 }

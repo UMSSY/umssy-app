@@ -105,17 +105,19 @@ sequenceDiagram
   F-->>U: Dialog with three consents (CV, radar, contact)
   U->>F: Accepts all and confirms (one request even on double click)
   F->>A: POST /job-offers/:id/applications { consent, consentCv, consentContact }
-  A->>S: apply(userId, jobOfferId, consents)
-  alt a consent is missing
-    S-->>F: 400 JOB_APPLICATION_CONSENT_REQUIRED
-  else the vacancy is not open
-    S-->>F: 404 JOB_OFFER_UNAVAILABLE
-  else an active application already exists
-    S-->>F: 409 DUPLICATE_JOB_APPLICATION
+  alt a consent is not true
+    A-->>F: 400 VALIDATION_ERROR (rejected by the request schema)
   else
-    S->>R: create (or reactivate a withdrawn one) in status En revisión
-    S->>S: record the consents in the same transaction
-    S-->>F: 201 { id, jobOfferId, jobTitle, companyName, appliedAt, status }
+    A->>S: apply(userId, jobOfferId, consents)
+    alt the vacancy is not open
+      S-->>F: 404 JOB_OFFER_UNAVAILABLE
+    else an active application already exists
+      S-->>F: 409 DUPLICATE_JOB_APPLICATION
+    else
+      S->>R: create (or reactivate a withdrawn one) in status En revisión
+      S->>S: record the consents in the same transaction
+      S-->>F: 201 { id, jobOfferId, jobTitle, companyName, appliedAt, status }
+    end
   end
 ```
 
@@ -148,7 +150,7 @@ sequenceDiagram
 - Recommendations include only published and not expired vacancies with a score above 0, ordered by score (descending), then publication date (newest first), then id.
 - If the person has no skills, recommendations answer `isProfileComplete: false` and an empty list instead of an error.
 - "High affinity" in the client means a score of 70 or more.
-- Applying needs the three consents (`consent`, `consentCv`, `consentContact`) to be `true`; they are stored in `radar_application_consents` in the same transaction as the application.
+- Applying needs the three consents (`consent`, `consentCv`, `consentContact`) to be `true`. The request schema rejects anything else with a 400 `VALIDATION_ERROR` before the service runs; the consents are stored in `radar_application_consents` in the same transaction as the application.
 - The vacancy must be `Publicada` and not expired. There is one application per `(job_offer_id, user_id)`; applying again after withdrawing reactivates the same row, applying while it is active is a conflict. A simultaneous double click is turned into the same duplicate error when the unique constraint fires.
 - `GET /job-offers/:id/applications/me` answers `hasApplied: false` when there is no application or it was withdrawn.
 - Skill detection: an empty text gives an empty list, the text is limited to 5000 characters, a term only matches when it equals exactly one catalog skill (if two skills collapse to the same key, only an exact name match is accepted), and symbols are kept (`C++`, `C#`, `Node.js`, `.NET`).
@@ -156,16 +158,16 @@ sequenceDiagram
 
 ## Endpoints
 
-| Method | Path                                                        | Roles                          | Description                                   | Success                                            | Errors                                                                                               |
-| ------ | ----------------------------------------------------------- | ------------------------------ | --------------------------------------------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| GET    | `/job-offers/recommendations`                               | titulado, estudiante           | Vacancies ranked by affinity                  | 200 `{ isProfileComplete, items[] }`               | 401, 403                                                                                             |
-| GET    | `/job-offers/:id/match`                                     | titulado, estudiante           | Score and requirements of one vacancy         | 200 `JobMatchResponse`                             | 404 `JOB_OFFER_NOT_AVAILABLE`                                                                        |
-| POST   | `/job-offers/:id/applications`                              | titulado, estudiante           | Applies with consents                         | 201 `JobApplicationResponse`                       | 400 `JOB_APPLICATION_CONSENT_REQUIRED`, 404 `JOB_OFFER_UNAVAILABLE`, 409 `DUPLICATE_JOB_APPLICATION` |
-| GET    | `/job-offers/:id/applications/me`                           | titulado, estudiante           | Own application for the vacancy               | 200 `{ hasApplied, application }`                  | 401, 403                                                                                             |
-| GET    | `/companies/:companyId/job-offers/:jobOfferId/applications` | empresa (owner of the company) | Applicants of a vacancy                       | 200 `CompanyJobApplicantsResponse`                 | 403, 404 `JOB_OFFER_UNAVAILABLE`                                                                     |
-| POST   | `/work-experiences/:id/skills/preview`                      | any signed-in user             | Detects skills in `{ text }` without saving   | 200 `{ experienceId, skills[], processingTimeMs }` | 404 `WORK_EXPERIENCE_NOT_FOUND`                                                                      |
-| POST   | `/work-experiences/:id/skills/analysis`                     | any signed-in user             | Detects and saves the skills of an experience | 200 same body                                      | 404 `WORK_EXPERIENCE_NOT_FOUND`                                                                      |
-| POST   | `/matching/requirements/terms`                              | any signed-in user             | Catalog skills recognized in `{ text }`       | 200 `[{ id, name }]`                               | 400 text too long or missing                                                                         |
+| Method | Path                                                        | Roles                          | Description                                   | Success                                            | Errors                                                                               |
+| ------ | ----------------------------------------------------------- | ------------------------------ | --------------------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| GET    | `/job-offers/recommendations`                               | titulado, estudiante           | Vacancies ranked by affinity                  | 200 `{ isProfileComplete, items[] }`               | 401, 403                                                                             |
+| GET    | `/job-offers/:id/match`                                     | titulado, estudiante           | Score and requirements of one vacancy         | 200 `JobMatchResponse`                             | 404 `JOB_OFFER_NOT_AVAILABLE`                                                        |
+| POST   | `/job-offers/:id/applications`                              | titulado, estudiante           | Applies with consents                         | 201 `JobApplicationResponse`                       | 400 `VALIDATION_ERROR`, 404 `JOB_OFFER_UNAVAILABLE`, 409 `DUPLICATE_JOB_APPLICATION` |
+| GET    | `/job-offers/:id/applications/me`                           | titulado, estudiante           | Own application for the vacancy               | 200 `{ hasApplied, application }`                  | 401, 403                                                                             |
+| GET    | `/companies/:companyId/job-offers/:jobOfferId/applications` | empresa (owner of the company) | Applicants of a vacancy                       | 200 `CompanyJobApplicantsResponse`                 | 403, 404 `JOB_OFFER_UNAVAILABLE`                                                     |
+| POST   | `/work-experiences/:id/skills/preview`                      | any signed-in user             | Detects skills in `{ text }` without saving   | 200 `{ experienceId, skills[], processingTimeMs }` | 404 `WORK_EXPERIENCE_NOT_FOUND`                                                      |
+| POST   | `/work-experiences/:id/skills/analysis`                     | any signed-in user             | Detects and saves the skills of an experience | 200 same body                                      | 404 `WORK_EXPERIENCE_NOT_FOUND`                                                      |
+| POST   | `/matching/requirements/terms`                              | any signed-in user             | Catalog skills recognized in `{ text }`       | 200 `[{ id, name }]`                               | 400 text too long or missing                                                         |
 
 The match and recommendation items include `jobOfferId`, `title`, `companyName`, `modality`, `score`, `publishedAt` and `expiresAt`; recommendations also include `skills`, `matchedSkills` and `locationUrl`, and the match detail adds `description`, `hasPendingRequirements` and the list of requirements with status `Cumple` or `Pendiente`.
 

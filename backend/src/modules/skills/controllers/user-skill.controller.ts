@@ -9,23 +9,22 @@ import {
   UseInterceptors,
   UsePipes,
 } from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiBody,
-  ApiOkResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CurrentUserId } from '../../../common/decorators/current-user-id.decorator.js';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { ResponseInterceptor } from '../../../common/interceptors/response.interceptor.js';
 import { buildRequestValidationException } from '../../../common/utils/build-request-validation-exception.js';
-import { toApiBody } from '../../../common/utils/to-api-body.js';
 import {
   updateUserSkillsSchema,
   type UpdateUserSkillsRequest,
 } from '../requests/update-user-skills.request.js';
 import type { OwnSkillResponse } from '../responses/own-skill.response.js';
 import { UserSkillService } from '../services/user-skill.service.js';
+import {
+  apiAddOwnSkills,
+  apiGetOwnSkills,
+  apiReplaceOwnSkills,
+} from '../swagger/skills.swagger.js';
 
 @ApiTags('skills')
 @ApiBearerAuth()
@@ -41,14 +40,13 @@ export class UserSkillController {
   constructor(private readonly userSkillService: UserSkillService) {}
 
   @Get()
-  @ApiOkResponse({ description: 'Skills of the authenticated user' })
+  @apiGetOwnSkills()
   getUserSkills(@CurrentUserId() userId: string): Promise<OwnSkillResponse[]> {
     return this.userSkillService.getUserSkills(userId);
   }
 
   @Put()
-  @ApiBody(toApiBody(updateUserSkillsSchema))
-  @ApiOkResponse({ description: 'Saved skills of the authenticated user' })
+  @apiReplaceOwnSkills()
   updateUserSkills(
     @CurrentUserId() userId: string,
     @Body({ schema: updateUserSkillsSchema }) request: UpdateUserSkillsRequest,
@@ -57,8 +55,7 @@ export class UserSkillController {
   }
 
   @Post()
-  @ApiBody(toApiBody(updateUserSkillsSchema))
-  @ApiOkResponse({ description: 'Added skills of the authenticated user' })
+  @apiAddOwnSkills()
   addSkills(
     @CurrentUserId() userId: string,
     @Body({ schema: updateUserSkillsSchema }) request: UpdateUserSkillsRequest,

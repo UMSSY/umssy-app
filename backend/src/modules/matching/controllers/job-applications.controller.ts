@@ -14,17 +14,7 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import {
-  ApiBody,
-  ApiBearerAuth,
-  ApiConflictResponse,
-  ApiCreatedResponse,
-  ApiNotFoundResponse,
-  ApiOkResponse,
-  ApiOperation,
-  ApiTags,
-  ApiUnauthorizedResponse,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CurrentUserId } from '../../../common/decorators/current-user-id.decorator.js';
 import { Roles } from '../../../common/decorators/roles.decorator.js';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
@@ -35,15 +25,17 @@ import type {
   JobApplicationResponse,
   MyJobApplicationResponse,
 } from '../types/job-application.types.js';
-import { toApiBody } from '../../../common/utils/to-api-body.js';
+import {
+  apiApplyToJobOffer,
+  apiGetMyJobApplication,
+} from '../swagger/matching.swagger.js';
 
 const jobOfferIdPipe = new ParseUUIDPipe({
   exceptionFactory: () => new JobOfferUnavailableException(),
 });
 
-@ApiTags('job-applications')
+@ApiTags('matching')
 @ApiBearerAuth()
-@ApiUnauthorizedResponse({ description: 'A valid access token is required' })
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('titulado', 'estudiante')
 @Controller('job-offers/:id/applications')
@@ -53,20 +45,8 @@ export class JobApplicationsController {
   ) {}
 
   @Post()
-  @ApiBody(toApiBody(jobApplicationConsentsSchema))
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({
-    summary: 'Postula al usuario autenticado a una vacante publicada',
-  })
-  @ApiCreatedResponse({
-    description: 'Postulación registrada en estado "En revisión"',
-  })
-  @ApiNotFoundResponse({
-    description: 'La vacante no existe o no está disponible',
-  })
-  @ApiConflictResponse({
-    description: 'El usuario ya se postuló a esta vacante',
-  })
+  @apiApplyToJobOffer()
   apply(
     @Param('id', jobOfferIdPipe) jobOfferId: string,
     @CurrentUserId() userId: string,
@@ -77,12 +57,7 @@ export class JobApplicationsController {
   }
 
   @Get('me')
-  @ApiOperation({
-    summary: 'Indica si el usuario autenticado ya se postuló a la vacante',
-  })
-  @ApiOkResponse({
-    description: 'Postulación del usuario o null si aún no se postuló',
-  })
+  @apiGetMyJobApplication()
   findMine(
     @Param('id', jobOfferIdPipe) jobOfferId: string,
     @CurrentUserId() userId: string,

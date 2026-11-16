@@ -66,7 +66,7 @@ sequenceDiagram
   F->>C: POST /profile/me/skills { skillIds }
   C->>S: addSkills(userId, request)
   S->>S: reject duplicates (409) and unknown ids (404)
-  S->>S: planManualSkillChanges (a detected skill becomes manual too)
+  S->>S: add only the skills the profile does not have yet, as manual
   S->>N: refreshAfterChange(userId)
   S-->>F: 201 own skills with origins
 ```
@@ -94,10 +94,10 @@ sequenceDiagram
 
 - **Catalog.** `GET /skills` returns only non-custom skills ordered by name; `search` is a case-insensitive "contains" of up to 100 characters. Detection and vacancy publishing use this catalog.
 - **Custom skills.** The name is normalized (formatted, up to 50 characters, only letters, digits and ` + # . - _ / & ( )`, at least one letter, no character repeated more than 3 times in a row). Creating a name that already exists returns the existing skill instead of an error.
-- **Own skills.** At most 50 ids per request. Duplicated ids in the same request answer 409 `DuplicateSkillException`; an unknown id answers 404 `SkillNotFoundException`. `PUT` replaces the whole list, `POST` adds to it. Both ask the detection pipeline to refresh afterwards.
+- **Own skills.** At most 50 ids per request. Duplicated ids in the same request answer 409 `DuplicateSkillException`; an unknown id answers 404 `SkillNotFoundException`. `PUT` replaces the whole list; `POST` only adds the skills the profile does not have yet and leaves the existing ones untouched (a detected skill does not become manual). Both ask the detection pipeline to refresh afterwards.
 - **Origin of a skill** is derived, not stored: `manual` when its source is manual, `experience` when its evidence points to a work experience, `cv` when it points to the CV. A skill can have several origins.
 - **Removing a skill.** In the client the "X" appears only when the skill is manual and has no experience or CV evidence. A skill that is also supported by an experience cannot be removed even if the person added it by hand; if its only experience is deleted, the "X" comes back.
-- **Reconciliation of detected skills.** Rows that are neither detected, nor manual, nor approved are deleted; the rest keep their evidence updated; new detections create rows. When a person turns a detected skill into a manual one, or removes a manual skill that still has evidence, it is converted instead of deleted (`planManualSkillChanges`).
+- **Reconciliation of detected skills.** Rows that are neither detected, nor manual, nor approved are deleted; the rest keep their evidence updated; new detections create rows. When a person saves the list with `PUT` and turns a detected skill into a manual one, or removes a manual skill that still has evidence, it is converted instead of deleted (`planManualSkillChanges`).
 - A skill is "high relevance" when it has evidence references.
 - Detected skills that are still pending review do not increase the verified radar.
 - Chips of vacancy skills and experience skills use the light blue availability tokens.
@@ -106,13 +106,13 @@ sequenceDiagram
 
 All endpoints require a valid JWT (any role).
 
-| Method | Path                 | Description                                                          | Success                                          | Errors                                                      |
-| ------ | -------------------- | -------------------------------------------------------------------- | ------------------------------------------------ | ----------------------------------------------------------- |
-| GET    | `/skills`            | Catalog. Query: `search` (max 100)                                   | 200 `SkillResponse[]`                            | 400                                                         |
-| POST   | `/skills/custom`     | Creates a custom skill or returns the existing one. Body: `{ name }` | 201 `SkillResponse`                              | 400 invalid name                                            |
-| GET    | `/profile/me/skills` | Own skills with `origins`                                            | 200 `OwnSkillResponse[]`                         | 404 profile not found                                       |
-| PUT    | `/profile/me/skills` | Replaces the own skills. Body: `{ skillIds }` (max 50)               | 200 `OwnSkillResponse[]`                         | 404 `SkillNotFoundException`, 409 `DuplicateSkillException` |
-| POST   | `/profile/me/skills` | Adds skills. Same body                                               | 201 `OwnSkillResponse[]` (Swagger documents 200) | 404, 409                                                    |
+| Method | Path                 | Description                                                                      | Success                  | Errors                                                      |
+| ------ | -------------------- | -------------------------------------------------------------------------------- | ------------------------ | ----------------------------------------------------------- |
+| GET    | `/skills`            | Catalog. Query: `search` (max 100)                                               | 200 `SkillResponse[]`    | 400                                                         |
+| POST   | `/skills/custom`     | Creates a custom skill or returns the existing one. Body: `{ name }`             | 201 `SkillResponse`      | 400 invalid name                                            |
+| GET    | `/profile/me/skills` | Own skills with `origins`                                                        | 200 `OwnSkillResponse[]` | 404 profile not found                                       |
+| PUT    | `/profile/me/skills` | Replaces the own skills. Body: `{ skillIds }` (max 50)                           | 200 `OwnSkillResponse[]` | 404 `SkillNotFoundException`, 409 `DuplicateSkillException` |
+| POST   | `/profile/me/skills` | Adds the skills the profile does not have yet; the others are ignored. Same body | 201 `OwnSkillResponse[]` | 404, 409                                                    |
 
 The "Habilidades detectadas" panel uses `GET` and `POST /profile/me/skills/analysis`, which belong to the `nlp` module.
 

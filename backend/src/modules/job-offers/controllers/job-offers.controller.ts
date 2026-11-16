@@ -62,6 +62,10 @@ import type {
 } from '../responses/job-offer.response.js';
 import { JobOffersService } from '../services/job-offers.service.js';
 import {
+  apiListJobOfferSkillCatalog,
+  apiListPublishedJobOffers,
+} from '../swagger/job-offers.swagger.js';
+import {
   JobOfferContractType,
   JobOfferModality,
 } from '../types/job-offer.enum.js';
@@ -96,21 +100,13 @@ export class JobOffersController {
   constructor(private readonly jobOffersService: JobOffersService) {}
 
   @Get('job-offers')
-  @ApiOperation({
-    summary: 'Lista las vacantes publicadas y vigentes para los egresados',
-  })
-  @ApiOkResponse({
-    description: 'Vacantes publicadas, de la más reciente a la más antigua',
-  })
+  @apiListPublishedJobOffers()
   listPublished(): Promise<PublishedJobOfferResponse[]> {
     return this.jobOffersService.listPublished();
   }
 
   @Get('job-offers/skills')
-  @ApiOperation({
-    summary: 'Lista el catálogo cerrado de tecnologías para una vacante',
-  })
-  @ApiOkResponse({ description: 'Tecnologías verificadas del catálogo' })
+  @apiListJobOfferSkillCatalog()
   listSkillCatalog(): Promise<JobOfferSkillResponse[]> {
     return this.jobOffersService.listSkillCatalog();
   }

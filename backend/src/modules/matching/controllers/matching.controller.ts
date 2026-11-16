@@ -7,12 +7,7 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiNotFoundResponse,
-  ApiTags,
-  ApiUnauthorizedResponse,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CurrentUserId } from '../../../common/decorators/current-user-id.decorator.js';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { MatchingService } from '../services/matching.service.js';
@@ -20,11 +15,14 @@ import {
   AnalyzeExperienceBodyDto,
   AnalyzeExperienceParamsDto,
 } from '../requests/analyze-experience.schema.js';
+import {
+  apiAnalyzeExperienceSkills,
+  apiPreviewExperienceSkills,
+} from '../swagger/matching.swagger.js';
 import type { AnalyzeExperienceResponse } from '../types/matching.types.js';
 
-@ApiTags('work-experiences')
+@ApiTags('matching')
 @ApiBearerAuth()
-@ApiUnauthorizedResponse({ description: 'A valid access token is required' })
 @UseGuards(JwtAuthGuard)
 @Controller('work-experiences')
 export class MatchingController {
@@ -32,7 +30,7 @@ export class MatchingController {
 
   @Post(':id/skills/analysis')
   @HttpCode(HttpStatus.OK)
-  @ApiNotFoundResponse({ description: 'Work experience not found' })
+  @apiAnalyzeExperienceSkills()
   analyzeExperience(
     @CurrentUserId() userId: string,
     @Param() params: AnalyzeExperienceParamsDto,
@@ -46,7 +44,7 @@ export class MatchingController {
 
   @Post(':id/skills/preview')
   @HttpCode(HttpStatus.OK)
-  @ApiNotFoundResponse({ description: 'Work experience not found' })
+  @apiPreviewExperienceSkills()
   previewExperience(
     @CurrentUserId() userId: string,
     @Param() params: AnalyzeExperienceParamsDto,

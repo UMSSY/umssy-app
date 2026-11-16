@@ -9,18 +9,10 @@ import {
   UseInterceptors,
   UsePipes,
 } from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiBody,
-  ApiCreatedResponse,
-  ApiOkResponse,
-  ApiQuery,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { ResponseInterceptor } from '../../../common/interceptors/response.interceptor.js';
 import { buildRequestValidationException } from '../../../common/utils/build-request-validation-exception.js';
-import { toApiBody } from '../../../common/utils/to-api-body.js';
 import {
   createCustomSkillSchema,
   type CreateCustomSkillRequest,
@@ -31,6 +23,10 @@ import {
 } from '../requests/search-skills.request.js';
 import type { SkillResponse } from '../responses/skill.response.js';
 import { SkillCatalogService } from '../services/skill-catalog.service.js';
+import {
+  apiCreateCustomSkill,
+  apiListSkillCatalog,
+} from '../swagger/skills.swagger.js';
 
 @ApiTags('skills')
 @ApiBearerAuth()
@@ -46,8 +42,7 @@ export class SkillController {
   constructor(private readonly skillCatalogService: SkillCatalogService) {}
 
   @Get()
-  @ApiQuery({ name: 'search', required: false, type: String })
-  @ApiOkResponse({ description: 'Skills of the catalog that match the search' })
+  @apiListSkillCatalog()
   listCatalog(
     @Query({ schema: searchSkillsSchema }) request: SearchSkillsRequest,
   ): Promise<SkillResponse[]> {
@@ -55,10 +50,7 @@ export class SkillController {
   }
 
   @Post('custom')
-  @ApiBody(toApiBody(createCustomSkillSchema))
-  @ApiCreatedResponse({
-    description: 'Custom skill, or the existing skill with the same name',
-  })
+  @apiCreateCustomSkill()
   createCustomSkill(
     @Body({ schema: createCustomSkillSchema })
     request: CreateCustomSkillRequest,
