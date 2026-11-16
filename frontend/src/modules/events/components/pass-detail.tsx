@@ -2,18 +2,18 @@
 
 import { cn } from '@/lib/utils';
 
-import { useEventFinished } from '../hooks/use-event-finished';
+import { useEventTiming } from '../hooks/use-event-finished';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRegistrationSession } from '@/modules/registrations';
 import { Button } from '@/components/ui/button';
 import { PassQr } from './pass-qr';
-import { formatTimeRange } from '../utils/event-card';
 import { formatEventLocation } from '../utils/format-event-location';
 import { Card } from '@/components/ui/card';
 import { Calendar, MapPin, Check, Clock, Loader2 } from 'lucide-react';
 import {
   formatRegistrationDate,
   getEffectiveRegistrationStatus,
+  formatRegistrationTimeRange,
 } from '../utils/registration-format';
 import { registrationsService } from '../services/registrations.service';
 import type { PassDetailProps } from '../types/pass-detail-props.types';
@@ -45,9 +45,15 @@ export function PassDetail({ registration, offlineQrToken }: PassDetailProps) {
   const detail = pass.data ?? registration;
   const savedQrToken = pass.data ? undefined : offlineQrToken;
 
+  const timing = useEventTiming({
+    date: detail.date,
+    startTime: detail.startTime,
+    endTime: detail.endTime,
+  });
   const effectiveStatus = getEffectiveRegistrationStatus(
     detail.status,
-    useEventFinished({ eventDate: detail.date, endTime: detail.endTime }),
+    timing.isPast,
+    timing.isInProgress,
   );
 
   return (
@@ -76,7 +82,7 @@ export function PassDetail({ registration, offlineQrToken }: PassDetailProps) {
           </div>
           <div className="flex items-center gap-2 text-sm text-surface/85">
             <Clock className="size-4 shrink-0" aria-hidden="true" />
-            <span>{formatTimeRange(detail.startTime, detail.endTime)}</span>
+            <span>{formatRegistrationTimeRange(detail.startTime, detail.endTime)}</span>
           </div>
         </div>
 

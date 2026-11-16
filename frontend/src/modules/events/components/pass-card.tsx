@@ -1,9 +1,9 @@
 'use client';
 
-import { useEventFinished } from '../hooks/use-event-finished';
+import { useEventTiming } from '../hooks/use-event-finished';
 import { formatEventLocation } from '../utils/format-event-location';
 import { formatRegistrationDate, getEffectiveRegistrationStatus } from '../utils/registration-format';
-import { formatTimeRange } from '../utils/event-card';
+import { formatRegistrationTimeRange } from '../utils/registration-format';
 import { cn } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -26,8 +26,9 @@ export function PassCard({
   chatDisabledReason,
   isAvailableOffline,
 }: PassCardProps) {
-  const effectiveStatus = getEffectiveRegistrationStatus(status, useEventFinished({ eventDate: date, endTime: endTime ?? '' }));
-  const timeRange = (startTime || endTime) ? formatTimeRange(startTime ?? '', endTime ?? '') : null;
+  const timing = useEventTiming({ date, startTime: startTime ?? '', endTime: endTime ?? '' });
+  const effectiveStatus = getEffectiveRegistrationStatus(status, timing.isPast, timing.isInProgress);
+  const timeRange = (startTime || endTime) ? formatRegistrationTimeRange(startTime ?? '', endTime ?? '') : null;
 
   return (
     <Card className="relative gap-0 border-0 bg-transparent p-0 shadow-none">

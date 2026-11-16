@@ -141,31 +141,73 @@ describe("Mis pases", () => {
   });
 
   it.each([
-    ['2026-10-20T04:00:00Z', 'Confirmada', true],
-    ['2026-10-20T15:59:59Z', 'Confirmada', true],
-    ['2026-10-20T16:00:00Z', 'Finalizado', false],
-    ['2026-10-21T00:00:00Z', 'Finalizado', false],
-  ])('keeps card and ticket consistent at %s', async (now, status, hasQr) => {
+    ['2026-10-20T04:00:00Z', true, 'Confirmada'],
+    ['2026-10-20T15:59:00Z', true, 'En curso'],
+    ['2026-10-20T15:59:59Z', true, 'En curso'],
+    ['2026-10-20T16:00:00Z', false, null],
+    ['2026-10-21T00:00:00Z', false, null],
+  ])('shows the pass only before its Bolivia closing time at %s', async (now, isVisible, expectedStatus) => {
     vi.setSystemTime(new Date(now));
     getMine.mockResolvedValue([pass]);
     render(<MyPassesView />);
-    const panel = await screen.findByRole('complementary');
-    await within(panel).findByText(status);
-    expect(
-      within(screen.getByRole('button', { name: /React/ })).getByText(status),
-    ).toBeInTheDocument();
-    if (hasQr)
+    if (isVisible) {
+      const visibleStatus = expectedStatus ?? 'Confirmada';
+      const panel = await screen.findByRole('complementary');
+      await within(panel).findByText(visibleStatus);
+      expect(
+        within(screen.getByRole('button', { name: /React/ })).getByText(visibleStatus),
+      ).toBeInTheDocument();
       expect(
         await within(panel).findByRole('img', { name: 'Código QR del pase' }),
       ).toBeInTheDocument();
-    else {
+      expect(screen.getByText('1 pase')).toBeInTheDocument();
+    } else {
       expect(
-        await within(panel).findByText(/Pase finalizado/),
+        await screen.findByRole('region', { name: 'Aún no tienes inscripciones.' }),
       ).toBeInTheDocument();
-      expect(
-        within(panel).queryByRole('img', { name: 'Código QR del pase' }),
-      ).not.toBeInTheDocument();
+      expect(screen.getByText('0 pases')).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /React/ })).not.toBeInTheDocument();
     }
+  });
+
+  it('marks a confirmed pass as in progress after its Bolivia start time', async () => {
+    vi.setSystemTime(new Date('2026-10-20T15:00:00Z'));
+    getMine.mockResolvedValue([pass]);
+    render(<MyPassesView />);
+    expect(await screen.findAllByText('En curso')).toHaveLength(2);
+  });
+
+  it('removes a closing selected pass and selects the next one without reordering', async () => {
+    vi.setSystemTime(new Date('2026-10-20T15:59:59.900Z'));
+    getMine.mockResolvedValue([
+      { ...pass, id: 'reg-first', eventName: 'Primero', endTime: '1970-01-01T17:00:00Z' },
+      { ...pass, id: 'reg-closing', eventName: 'Cierra ahora' },
+      { ...pass, id: 'reg-next', eventName: 'Siguiente', endTime: '1970-01-01T18:00:00Z' },
+    ]);
+    render(<MyPassesView />);
+    await screen.findByText('3 pases');
+    fireEvent.click(screen.getByRole('button', { name: /Cierra ahora/ }));
+    expect(screen.getByRole('button', { name: /Cierra ahora/ })).toHaveAttribute('aria-pressed', 'true');
+
+    vi.setSystemTime(new Date('2026-10-20T16:00:00Z'));
+    await waitFor(() => expect(screen.getByText('2 pases')).toBeInTheDocument());
+
+    const remaining = within(screen.getByRole('region', { name: 'Tus inscripciones' })).getAllByRole('listitem');
+    expect(remaining).toHaveLength(2);
+    expect(remaining[0].textContent).toContain('Primero');
+    expect(remaining[1].textContent).toContain('Siguiente');
+    expect(screen.getByRole('button', { name: /Siguiente/ })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.queryByRole('button', { name: /Cierra ahora/ })).not.toBeInTheDocument();
+  });
+
+  it('moves the final pass to the empty state at its exact closing time', async () => {
+    vi.setSystemTime(new Date('2026-10-20T15:59:59.900Z'));
+    getMine.mockResolvedValue([pass]);
+    render(<MyPassesView />);
+    await screen.findByText('1 pase');
+    vi.setSystemTime(new Date('2026-10-20T16:00:00Z'));
+    await waitFor(() => expect(screen.getByText('0 pases')).toBeInTheDocument());
+    expect(screen.getByRole('region', { name: 'Aún no tienes inscripciones.' })).toBeInTheDocument();
   });
 
   it('keeps chat unavailable until the chat module is connected', async () => {
@@ -225,7 +267,7 @@ describe("Mis pases", () => {
       screen.getAllByText('Laboratorio 1, Facultad de Ciencias y Tecnología'),
     ).toHaveLength(2);
     expect(screen.queryByText(/, UMSS$/)).not.toBeInTheDocument();
-    expect(screen.getAllByText(/09:00 - 12:00 hrs/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/09:00 AM - 12:00 PM/).length).toBeGreaterThan(0);
   });
 
   it('muestra carga, datos reales y cambia el detalle al seleccionar otra inscripción', async () => {
@@ -249,7 +291,7 @@ describe("Mis pases", () => {
       'true',
     );
     expect(screen.getByText('2 pases')).toBeInTheDocument();
-    expect(screen.getAllByText(/09:00 - 12:00/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/09:00 AM - 12:00 PM/).length).toBeGreaterThan(0);
     fireEvent.click(screen.getByRole('button', { name: /Prisma/ }));
     expect(
       within(

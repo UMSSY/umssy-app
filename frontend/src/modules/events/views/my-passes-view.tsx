@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { CalendarDays } from "lucide-react";
 import { PageHeading } from "@/shared/components/layout/page-heading";
@@ -18,6 +18,7 @@ import { MyPassesEmptyState } from "../components/my-passes-empty-state";
 import { FinishedRegistrationCard } from "../components/finished-registration-card";
 import { useMyPassesHistory } from "../hooks/use-my-passes";
 import { getHistoryErrorMessage } from "../utils/get-history-error-message";
+import { getRegistrationEventTimestamp } from "../utils/registration-format";
 
 import type { MyPassesViewProps } from '../types/my-passes-view-props.types';
 
@@ -27,14 +28,35 @@ export function MyPassesView({ onOpenWorkshopChat }: MyPassesViewProps = {}) {
   const isLoading = status === "loading";
   const offlineReason = isOnline ? undefined : OFFLINE_PASSES_TEXTS.requiresConnection;
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedIndex, setSelectedIndex] = useState(0);
   const history = useMyPassesHistory(activeTab === "history" && isOnline);
   const historyUnavailable = activeTab === "history" && !isOnline;
-  const visibleCount = activeTab === "history" ? history.total : registrations.length;
-  const showCount = activeTab === "history" ? !history.isLoading && !history.error && !historyUnavailable : !isLoading && status !== "error" && status !== "no-offline-copy";
-  const description = showCount ? `${visibleCount} ${visibleCount === 1 ? "pase" : "pases"}` : activeTab === "history" && (history.error || historyUnavailable) ? "" : "Cargando tus inscripciones…";
+  const [now, setNow] = useState(Date.now);
+  const currentRegistrations = registrations.filter((registration) => {
+    const closesAt = getRegistrationEventTimestamp(registration.date, registration.endTime);
+    return !Number.isFinite(closesAt) || now < closesAt;
+  });
+  useEffect(() => {
+    const nextClose = registrations
+      .map((registration) => getRegistrationEventTimestamp(registration.date, registration.endTime))
+      .filter((closesAt) => Number.isFinite(closesAt) && closesAt > now)
+      .sort((left, right) => left - right)[0];
+    if (nextClose === undefined) return;
+
+    const timer = window.setTimeout(
+      () => setNow(Date.now()),
+      Math.min(2_147_483_647, Math.max(1, nextClose - Date.now())),
+    );
+    return () => window.clearTimeout(timer);
+  }, [now, registrations]);
 
   const selected =
-    registrations.find((item) => item.id === selectedId) ?? registrations[0];
+    currentRegistrations.find((item) => item.id === selectedId) ??
+    currentRegistrations[Math.min(selectedIndex, currentRegistrations.length - 1)];
+
+  const visibleCount = activeTab === "history" ? history.total : currentRegistrations.length;
+  const showCount = activeTab === "history" ? !history.isLoading && !history.error && !historyUnavailable : !isLoading && status !== "error" && status !== "no-offline-copy";
+  const description = showCount ? `${visibleCount} ${visibleCount === 1 ? "pase" : "pases"}` : activeTab === "history" && (history.error || historyUnavailable) ? "" : "Cargando tus inscripciones…";
 
   return (
     <main className="mx-auto w-full max-w-7xl space-y-6">
@@ -61,13 +83,13 @@ export function MyPassesView({ onOpenWorkshopChat }: MyPassesViewProps = {}) {
           {isConnectionError ? <NoOfflineCopyState /> : null}
           <RequestFeedback message={error} isError onRetry={retry} />
         </div>
-      ) : !registrations.length ? (
+      ) : !currentRegistrations.length ? (
         <MyPassesEmptyState />
       ) : (
         <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
           <section aria-label="Tus inscripciones">
             <ul className="space-y-3">
-              {registrations.map((item) => (
+              {currentRegistrations.map((item, index) => (
                 <li key={item.id}>
                   <PassCard
                     title={item.eventName}
@@ -83,7 +105,10 @@ export function MyPassesView({ onOpenWorkshopChat }: MyPassesViewProps = {}) {
                       status === 'live' && item.id in offlineQrTokens
                     }
                     isSelected={selected?.id === item.id}
-                    onClick={() => setSelectedId(item.id)}
+                    onClick={() => {
+                      setSelectedId(item.id);
+                      setSelectedIndex(index);
+                    }}
                   />
                 </li>
               ))}
