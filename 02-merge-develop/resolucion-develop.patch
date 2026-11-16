@@ -1,0 +1,1094 @@
+diff --git a/backend/src/modules/applications/repositories/applications.repository.ts b/backend/src/modules/applications/repositories/applications.repository.ts
+index a4f5a77d9..42d151558 100755
+--- a/backend/src/modules/applications/repositories/applications.repository.ts
++++ b/backend/src/modules/applications/repositories/applications.repository.ts
+@@ -48,6 +48,25 @@ export class ApplicationsRepository {
+     });
+   }
+ 
++  findApplicationForChat(id: string) {
++    return this.prisma.jobApplication.findUnique({
++      where: { id },
++      select: {
++        id: true,
++        userId: true,
++        status: { select: { title: true } },
++        jobOffer: {
++          select: {
++            id: true,
++            title: true,
++            companyId: true,
++            company: { select: { id: true, title: true } },
++          },
++        },
++      },
++    });
++  }
++
+   reactivateApplication(id: string, userId: string, now: Date) {
+     return this.prisma.$transaction(async (tx) => {
+       const status = await tx.jobApplicationStatus.findUniqueOrThrow({
+diff --git a/backend/src/modules/applications/services/applications.service.ts b/backend/src/modules/applications/services/applications.service.ts
+index eda8f7672..58c943bda 100755
+--- a/backend/src/modules/applications/services/applications.service.ts
++++ b/backend/src/modules/applications/services/applications.service.ts
+@@ -217,6 +217,44 @@ export class ApplicationsService {
+     return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+   }
+ 
++  async validateApplicationForChat(
++    applicationId: string,
++    studentUserId: string,
++    companyId: string,
++  ): Promise<{
++    isValid: boolean;
++    vacancyTitle: string | null;
++    companyName: string | null;
++  }> {
++    const record = await this.repository.findApplicationForChat(applicationId);
++    if (!record) {
++      return { isValid: false, vacancyTitle: null, companyName: null };
++    }
++
++    if (
++      record.userId !== studentUserId ||
++      record.jobOffer.companyId !== companyId
++    ) {
++      return { isValid: false, vacancyTitle: null, companyName: null };
++    }
++
++    const normalizedStatus = record.status.title.trim().toLowerCase();
++    const isInactive =
++      normalizedStatus.includes('rechazad') ||
++      normalizedStatus.includes('retirad') ||
++      normalizedStatus.includes('cancelad');
++
++    if (isInactive) {
++      return { isValid: false, vacancyTitle: null, companyName: null };
++    }
++
++    return {
++      isValid: true,
++      vacancyTitle: record.jobOffer.title,
++      companyName: record.jobOffer.company.title,
++    };
++  }
++
+   findRecruitmentApplicationsByUser(userId: string) {
+     return this.repository.findRecruitmentApplicationsByUser(userId);
+   }
+diff --git a/frontend/src/modules/profile/hooks/profile-completeness-sync.test.ts b/frontend/src/modules/profile/hooks/profile-completeness-sync.test.ts
+index 3d2f42dc2..dc9e67647 100644
+--- a/frontend/src/modules/profile/hooks/profile-completeness-sync.test.ts
++++ b/frontend/src/modules/profile/hooks/profile-completeness-sync.test.ts
+@@ -87,7 +87,7 @@ vi.mock('../services/profile-skills-radar.service', () => ({
+   profileSkillsRadarService: { analyzeSkills: vi.fn() },
+ }));
+ vi.mock('@/modules/matching/services/skills-analysis.service', () => ({
+-  skillsAnalysisService: { analyzeExperience: vi.fn() },
++  skillsAnalysisService: { previewExperience: vi.fn() },
+ }));
+ 
+ const education = {
+diff --git a/frontend/src/modules/profile/testing/profile-completeness-save.integration.test.tsx b/frontend/src/modules/profile/testing/profile-completeness-save.integration.test.tsx
+index 1d3ad47ec..3e2da6672 100644
+--- a/frontend/src/modules/profile/testing/profile-completeness-save.integration.test.tsx
++++ b/frontend/src/modules/profile/testing/profile-completeness-save.integration.test.tsx
+@@ -84,7 +84,6 @@ vi.mock('@/modules/work-experience/services/work-experience.service', () => ({
+ }));
+ vi.mock('@/modules/matching/services/skills-analysis.service', () => ({
+   skillsAnalysisService: {
+-    analyzeExperience: vi.fn().mockResolvedValue({ skills: [] }),
+     previewExperience: vi.fn().mockResolvedValue({ skills: [] }),
+   },
+ }));
+diff --git a/frontend/src/modules/skills/hooks/use-skills.test.ts b/frontend/src/modules/skills/hooks/use-skills.test.ts
+index 32b5e6df9..33b53a14b 100644
+--- a/frontend/src/modules/skills/hooks/use-skills.test.ts
++++ b/frontend/src/modules/skills/hooks/use-skills.test.ts
+@@ -1,10 +1,12 @@
+-import { renderHookWithQuery as renderHook } from "@/shared/testing/render-hook-with-query";
+-import { act, cleanup, waitFor } from "@testing-library/react";
+-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+-import { skillsService } from "../services/skills.service";
+-import { useSkills } from "./use-skills";
+-
+-vi.mock("../services/skills.service", () => ({
++import { renderHookWithQuery as renderHook } from '@/shared/testing/render-hook-with-query';
++import { act, cleanup, waitFor } from '@testing-library/react';
++import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
++import { skillsService } from '../services/skills.service';
++import { useSkills } from './use-skills';
++import { createQueryWrapper } from '@/shared/testing/create-query-wrapper';
++import { MY_SKILLS_QUERY_KEY } from '../constants/skills.constants';
++
++vi.mock('../services/skills.service', () => ({
+   skillsService: {
+     getCatalog: vi.fn(),
+     getMySkills: vi.fn(),
+@@ -13,9 +15,9 @@ vi.mock("../services/skills.service", () => ({
+   },
+ }));
+ 
+-const PYTHON = { id: "33333333-3333-4333-8333-333333333333", name: "Python" };
+-const SQL = { id: "44444444-4444-4444-8444-444444444444", name: "SQL" };
+-const DOCKER = { id: "55555555-5555-4555-8555-555555555555", name: "Docker" };
++const PYTHON = { id: '33333333-3333-4333-8333-333333333333', name: 'Python' };
++const SQL = { id: '44444444-4444-4444-8444-444444444444', name: 'SQL' };
++const DOCKER = { id: '55555555-5555-4555-8555-555555555555', name: 'Docker' };
+ 
+ async function renderLoadedHook() {
+   const hook = renderHook(() => useSkills());
+@@ -23,7 +25,7 @@ async function renderLoadedHook() {
+   return hook;
+ }
+ 
+-describe("useSkills", () => {
++describe('useSkills', () => {
+   beforeEach(() => {
+     vi.mocked(skillsService.getCatalog).mockResolvedValue([PYTHON, SQL]);
+     vi.mocked(skillsService.getMySkills).mockResolvedValue([PYTHON]);
+@@ -34,7 +36,42 @@ describe("useSkills", () => {
+     vi.clearAllMocks();
+   });
+ 
+-  it("loads the catalog and the saved skills of the user", async () => {
++  it('reuses guide suggestions and keeps the selected skills visible during a refresh', async () => {
++    const { wrapper, client } = createQueryWrapper();
++    const first = renderHook(() => useSkills({ forGuide: true }), { wrapper });
++    await waitFor(() =>
++      expect(first.result.current.selectedSkills).toEqual([PYTHON]),
++    );
++    first.unmount();
++    const second = renderHook(() => useSkills({ forGuide: true }), { wrapper });
++    expect(second.result.current.isLoading).toBe(false);
++    expect(skillsService.getCatalog).toHaveBeenCalledOnce();
++    expect(skillsService.getMySkills).toHaveBeenCalledOnce();
++    let finish!: (items: (typeof PYTHON)[]) => void;
++    vi.mocked(skillsService.getMySkills).mockReturnValueOnce(
++      new Promise((resolve) => {
++        finish = resolve;
++      }),
++    );
++    let refreshed!: Promise<void>;
++    act(() => {
++      refreshed = client.invalidateQueries({ queryKey: MY_SKILLS_QUERY_KEY });
++    });
++    await waitFor(() =>
++      expect(skillsService.getMySkills).toHaveBeenCalledTimes(2),
++    );
++    expect(second.result.current.isLoading).toBe(false);
++    expect(second.result.current.selectedSkills).toEqual([PYTHON]);
++    await act(async () => {
++      finish([SQL]);
++      await refreshed;
++    });
++    await waitFor(() =>
++      expect(second.result.current.selectedSkills).toEqual([SQL]),
++    );
++  });
++
++  it('loads the catalog and the saved skills of the user', async () => {
+     const { result } = await renderLoadedHook();
+ 
+     expect(result.current.catalogSkills).toEqual([PYTHON, SQL]);
+@@ -42,20 +79,24 @@ describe("useSkills", () => {
+     expect(result.current.feedback).toBeNull();
+   });
+ 
+-  it("shows an error message when the skills cannot be loaded", async () => {
+-    vi.mocked(skillsService.getMySkills).mockRejectedValue({ response: { status: 401 } });
++  it('shows an error message when the skills cannot be loaded', async () => {
++    vi.mocked(skillsService.getMySkills).mockRejectedValue({
++      response: { status: 401 },
++    });
+ 
+     const { result } = await renderLoadedHook();
+ 
+     expect(result.current.hasLoadError).toBe(true);
+     expect(result.current.feedback).toEqual({
+-      type: "error",
+-      message: "Tu sesión no es válida. Inicia sesión nuevamente.",
++      type: 'error',
++      message: 'Tu sesión no es válida. Inicia sesión nuevamente.',
+     });
+   });
+ 
+-  it("blocks saving and mutations when initial load fails", async () => {
+-    vi.mocked(skillsService.getMySkills).mockRejectedValue(new Error("Network Error"));
++  it('blocks saving and mutations when initial load fails', async () => {
++    vi.mocked(skillsService.getMySkills).mockRejectedValue(
++      new Error('Network Error'),
++    );
+ 
+     const { result } = await renderLoadedHook();
+ 
+@@ -65,15 +106,17 @@ describe("useSkills", () => {
+     act(() => result.current.addSkill(SQL));
+     expect(result.current.selectedSkills).toEqual([]);
+ 
+-    act(() => result.current.createCustomSkill("Docker"));
++    act(() => result.current.createCustomSkill('Docker'));
+     expect(result.current.selectedSkills).toEqual([]);
+ 
+     await act(() => result.current.saveSkills());
+     expect(skillsService.saveMySkills).not.toHaveBeenCalled();
+   });
+ 
+-  it("reloads the catalog and user skills when reload is called", async () => {
+-    vi.mocked(skillsService.getMySkills).mockRejectedValueOnce(new Error("Network Error"));
++  it('reloads the catalog and user skills when reload is called', async () => {
++    vi.mocked(skillsService.getMySkills).mockRejectedValueOnce(
++      new Error('Network Error'),
++    );
+ 
+     const { result } = await renderLoadedHook();
+     expect(result.current.hasLoadError).toBe(true);
+@@ -85,22 +128,24 @@ describe("useSkills", () => {
+     expect(result.current.selectedSkills).toEqual([PYTHON]);
+   });
+ 
+-  it("does not update the state after unmounting", async () => {
++  it('does not update the state after unmounting', async () => {
+     const { unmount } = renderHook(() => useSkills());
+     unmount();
+ 
+     await waitFor(() => expect(skillsService.getMySkills).toHaveBeenCalled());
+   });
+ 
+-  it("does not update the state when loading fails after unmounting", async () => {
+-    vi.mocked(skillsService.getMySkills).mockRejectedValue(new Error("Network Error"));
++  it('does not update the state when loading fails after unmounting', async () => {
++    vi.mocked(skillsService.getMySkills).mockRejectedValue(
++      new Error('Network Error'),
++    );
+     const { unmount } = renderHook(() => useSkills());
+     unmount();
+ 
+     await waitFor(() => expect(skillsService.getMySkills).toHaveBeenCalled());
+   });
+ 
+-  it("adds a skill only once and removes it without affecting the others", async () => {
++  it('adds a skill only once and removes it without affecting the others', async () => {
+     const { result } = await renderLoadedHook();
+ 
+     act(() => result.current.addSkill(SQL));
+@@ -111,72 +156,101 @@ describe("useSkills", () => {
+     expect(result.current.selectedSkills).toEqual([SQL]);
+   });
+ 
+-  it("registers the pending custom skills before saving the whole list", async () => {
++  it('registers the pending custom skills before saving the whole list', async () => {
+     vi.mocked(skillsService.createCustomSkill).mockResolvedValue(DOCKER);
+     vi.mocked(skillsService.saveMySkills).mockResolvedValue([DOCKER, PYTHON]);
+     const { result } = await renderLoadedHook();
+ 
+-    act(() => result.current.createCustomSkill("Docker"));
+-    expect(result.current.selectedSkills).toEqual([PYTHON, { id: "pending-docker", name: "Docker" }]);
++    act(() => result.current.createCustomSkill('Docker'));
++    expect(result.current.selectedSkills).toEqual([
++      PYTHON,
++      { id: 'pending-docker', name: 'Docker' },
++    ]);
+ 
+     await act(() => result.current.saveSkills());
+ 
+-    expect(skillsService.createCustomSkill).toHaveBeenCalledWith("Docker");
+-    expect(skillsService.saveMySkills).toHaveBeenCalledWith([PYTHON.id, DOCKER.id]);
++    expect(skillsService.createCustomSkill).toHaveBeenCalledWith('Docker');
++    expect(skillsService.saveMySkills).toHaveBeenCalledWith([
++      PYTHON.id,
++      DOCKER.id,
++    ]);
+     expect(result.current.selectedSkills).toEqual([DOCKER, PYTHON]);
+     expect(result.current.isSaving).toBe(false);
+     expect(result.current.feedback).toEqual({
+-      type: "success",
+-      message: "Tus habilidades se guardaron correctamente.",
++      type: 'success',
++      message: 'Tus habilidades se guardaron correctamente.',
+     });
+   });
+ 
+-  it("does not send the same id twice when a custom skill reuses a selected one", async () => {
++  it('does not send the same id twice when a custom skill reuses a selected one', async () => {
+     vi.mocked(skillsService.createCustomSkill).mockResolvedValue(PYTHON);
+     vi.mocked(skillsService.saveMySkills).mockResolvedValue([PYTHON]);
+     const { result } = await renderLoadedHook();
+ 
+-    act(() => result.current.createCustomSkill("Python"));
++    act(() => result.current.createCustomSkill('Python'));
+     await act(() => result.current.saveSkills());
+ 
+     expect(skillsService.saveMySkills).toHaveBeenCalledWith([PYTHON.id]);
+   });
+ 
+-  it("keeps the skills backed by an experience or the CV out of the manual selection when saving", async () => {
+-    const manual = { ...PYTHON, origins: ["manual" as const] };
+-    const fromExperience = { ...SQL, origins: ["experience" as const] };
+-    const fromCv = { ...DOCKER, origins: ["cv" as const] };
++  it('keeps the skills backed by an experience or the CV out of the manual selection when saving', async () => {
++    const manual = { ...PYTHON, origins: ['manual' as const] };
++    const fromExperience = { ...SQL, origins: ['experience' as const] };
++    const fromCv = { ...DOCKER, origins: ['cv' as const] };
+     const manualWithExperience = {
+-      id: "66666666-6666-4666-8666-666666666666",
+-      name: "Java",
+-      origins: ["manual" as const, "experience" as const],
++      id: '66666666-6666-4666-8666-666666666666',
++      name: 'Java',
++      origins: ['manual' as const, 'experience' as const],
+     };
+-    vi.mocked(skillsService.getMySkills).mockResolvedValue([manual, fromExperience, fromCv, manualWithExperience]);
+-    vi.mocked(skillsService.saveMySkills).mockResolvedValue([manual, fromExperience, fromCv, manualWithExperience]);
++    vi.mocked(skillsService.getMySkills).mockResolvedValue([
++      manual,
++      fromExperience,
++      fromCv,
++      manualWithExperience,
++    ]);
++    vi.mocked(skillsService.saveMySkills).mockResolvedValue([
++      manual,
++      fromExperience,
++      fromCv,
++      manualWithExperience,
++    ]);
+     const { result } = await renderLoadedHook();
+ 
+     await act(() => result.current.saveSkills());
+ 
+-    expect(skillsService.saveMySkills).toHaveBeenCalledWith([manual.id, manualWithExperience.id]);
++    expect(skillsService.saveMySkills).toHaveBeenCalledWith([
++      manual.id,
++      manualWithExperience.id,
++    ]);
+   });
+ 
+-  it("sends a new skill picked from the catalog together with the manual ones", async () => {
+-    const manual = { ...PYTHON, origins: ["manual" as const] };
+-    const fromCv = { ...DOCKER, origins: ["cv" as const] };
++  it('sends a new skill picked from the catalog together with the manual ones', async () => {
++    const manual = { ...PYTHON, origins: ['manual' as const] };
++    const fromCv = { ...DOCKER, origins: ['cv' as const] };
+     vi.mocked(skillsService.getMySkills).mockResolvedValue([manual, fromCv]);
+-    vi.mocked(skillsService.saveMySkills).mockResolvedValue([manual, SQL, fromCv]);
++    vi.mocked(skillsService.saveMySkills).mockResolvedValue([
++      manual,
++      SQL,
++      fromCv,
++    ]);
+     const { result } = await renderLoadedHook();
+ 
+     act(() => result.current.addSkill(SQL));
+     await act(() => result.current.saveSkills());
+ 
+-    expect(skillsService.saveMySkills).toHaveBeenCalledWith([manual.id, SQL.id]);
++    expect(skillsService.saveMySkills).toHaveBeenCalledWith([
++      manual.id,
++      SQL.id,
++    ]);
+   });
+ 
+-  it("removes a manual skill from the saved list (AC-10.3)", async () => {
+-    const manual = { ...PYTHON, origins: ["manual" as const] };
+-    const fromExperience = { ...SQL, origins: ["experience" as const] };
+-    vi.mocked(skillsService.getMySkills).mockResolvedValue([manual, fromExperience]);
++  it('removes a manual skill from the saved list (AC-10.3)', async () => {
++    const manual = { ...PYTHON, origins: ['manual' as const] };
++    const fromExperience = { ...SQL, origins: ['experience' as const] };
++    vi.mocked(skillsService.getMySkills).mockResolvedValue([
++      manual,
++      fromExperience,
++    ]);
+     vi.mocked(skillsService.saveMySkills).mockResolvedValue([fromExperience]);
+     const { result } = await renderLoadedHook();
+ 
+@@ -187,20 +261,22 @@ describe("useSkills", () => {
+     expect(result.current.selectedSkills).toEqual([fromExperience]);
+   });
+ 
+-  it("shows an error message when saving fails", async () => {
+-    vi.mocked(skillsService.saveMySkills).mockRejectedValue({ response: { status: 409 } });
++  it('shows an error message when saving fails', async () => {
++    vi.mocked(skillsService.saveMySkills).mockRejectedValue({
++      response: { status: 409 },
++    });
+     const { result } = await renderLoadedHook();
+ 
+     await act(() => result.current.saveSkills());
+ 
+     expect(result.current.feedback).toEqual({
+-      type: "error",
+-      message: "No puedes agregar la misma habilidad dos veces.",
++      type: 'error',
++      message: 'No puedes agregar la misma habilidad dos veces.',
+     });
+     expect(result.current.isSaving).toBe(false);
+   });
+ 
+-  it("clears the feedback when the selection changes", async () => {
++  it('clears the feedback when the selection changes', async () => {
+     vi.mocked(skillsService.saveMySkills).mockResolvedValue([PYTHON]);
+     const { result } = await renderLoadedHook();
+ 
+@@ -210,9 +286,9 @@ describe("useSkills", () => {
+     expect(result.current.feedback).toBeNull();
+   });
+ 
+-  it("blocks mutations (add, remove, custom create) while saveSkills is pending", async () => {
+-    let resolveSave!: (value: typeof PYTHON[]) => void;
+-    const savePromise = new Promise<typeof PYTHON[]>((resolve) => {
++  it('blocks mutations (add, remove, custom create) while saveSkills is pending', async () => {
++    let resolveSave!: (value: (typeof PYTHON)[]) => void;
++    const savePromise = new Promise<(typeof PYTHON)[]>((resolve) => {
+       resolveSave = resolve;
+     });
+     vi.mocked(skillsService.saveMySkills).mockReturnValue(savePromise);
+@@ -229,7 +305,7 @@ describe("useSkills", () => {
+     act(() => {
+       result.current.addSkill(SQL);
+       result.current.removeSkill(PYTHON.id);
+-      result.current.createCustomSkill("Docker");
++      result.current.createCustomSkill('Docker');
+     });
+ 
+     expect(result.current.selectedSkills).toEqual([PYTHON]);
+diff --git a/frontend/src/modules/skills/hooks/use-skills.ts b/frontend/src/modules/skills/hooks/use-skills.ts
+index 0906de3d6..fe005ecfc 100644
+--- a/frontend/src/modules/skills/hooks/use-skills.ts
++++ b/frontend/src/modules/skills/hooks/use-skills.ts
+@@ -1,39 +1,34 @@
+-"use client";
++'use client';
+ 
+-import { useRef, useState } from "react";
+-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
++import { useRef, useState } from 'react';
++import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+ import {
+   MY_SKILLS_QUERY_KEY,
+   PENDING_SKILL_ID_PREFIX,
+   SKILLS_ERROR_MESSAGES,
+   SKILLS_SUCCESS_MESSAGES,
+-} from "../constants/skills.constants";
+-import { skillsService } from "../services/skills.service";
+-import type { Feedback } from "@/modules/profile";
+-import { useInvalidateProfileCompleteness } from "@/modules/profile";
+-import type { SkillItem } from "../types/skill-item.types";
+-import type { SkillsProfileResponse } from "../types/skills-profile-response.types";
+-import type { UseSkillsResult } from "../types/use-skills-result.types";
+-import { getSkillsErrorMessage } from "../utils/get-skills-error-message";
+-import { isManualSkill } from "../utils/is-manual-skill";
+-
+-export function useSkills(): UseSkillsResult {
++} from '../constants/skills.constants';
++import { skillsService } from '../services/skills.service';
++import type { Feedback } from '@/modules/profile';
++import { useInvalidateProfileCompleteness } from '@/modules/profile';
++import type { SkillItem } from '../types/skill-item.types';
++import type { SkillsProfileResponse } from '../types/skills-profile-response.types';
++import type { UseSkillsResult } from '../types/use-skills-result.types';
++import { getSkillsErrorMessage } from '../utils/get-skills-error-message';
++import { isManualSkill } from '../utils/is-manual-skill';
++
++export function useSkills({
++  forGuide = false,
++}: { forGuide?: boolean } = {}): UseSkillsResult {
+   const queryClient = useQueryClient();
+   const invalidateCompleteness = useInvalidateProfileCompleteness();
+   const savingRef = useRef(false);
+   const customRequestsRef = useRef(new Map<string, Promise<SkillItem>>());
+-
+   function resolveSkill(skill: SkillItem): Promise<SkillItem> {
+-    if (!skill.id.startsWith(PENDING_SKILL_ID_PREFIX)) {
++    if (!skill.id.startsWith(PENDING_SKILL_ID_PREFIX))
+       return Promise.resolve(skill);
+-    }
+-
+     const existing = customRequestsRef.current.get(skill.id);
+-
+-    if (existing) {
+-      return existing;
+-    }
+-
++    if (existing) return existing;
+     const request = skillsService
+       .createCustomSkill(skill.name)
+       .then((created) => {
+@@ -44,74 +39,62 @@ export function useSkills(): UseSkillsResult {
+               ? {
+                   ...current,
+                   catalog: [
+-                    ...current.catalog.filter(
+-                      (item) => item.id !== created.id,
+-                    ),
++                    ...current.catalog.filter((item) => item.id !== created.id),
+                     created,
+                   ],
+                 }
+               : current,
+         );
+-
+         return created;
+       })
+       .catch((error) => {
+         customRequestsRef.current.delete(skill.id);
+         throw error;
+       });
+-
+     customRequestsRef.current.set(skill.id, request);
+-
+     return request;
+   }
+-
+   const query = useQuery({
+     queryKey: MY_SKILLS_QUERY_KEY,
++    staleTime: forGuide ? 30_000 : undefined,
+     queryFn: async () => {
+       const [catalog, selected] = await Promise.all([
+         skillsService.getCatalog(),
+         skillsService.getMySkills(),
+       ]);
+-
+       return { catalog, selected };
+     },
+   });
+-
+   const [draftSkills, setSelectedSkills] = useState<SkillItem[] | null>(null);
+   const selectedSkills = draftSkills ?? query.data?.selected ?? [];
+   const catalogSkills = query.data?.catalog ?? [];
+-  const isLoading = query.isFetching;
++  const savedIds = new Set(query.data?.selected.map((skill) => skill.id) ?? []);
++  const hasUnsavedChanges =
++    draftSkills !== null &&
++    (draftSkills.length !== savedIds.size ||
++      draftSkills.some((skill) => !savedIds.has(skill.id)));
++  const isLoading = forGuide
++    ? query.isPending || (query.isError && query.isFetching)
++    : query.isFetching;
+   const hasLoadError = query.isError;
+-
+   const [localFeedback, setFeedback] = useState<Feedback | null>(null);
+-
+   const feedback = query.error
+     ? {
+-        type: "error" as const,
+-        message: getSkillsErrorMessage(
+-          query.error,
+-          SKILLS_ERROR_MESSAGES.load,
+-        ),
++        type: 'error' as const,
++        message: getSkillsErrorMessage(query.error, SKILLS_ERROR_MESSAGES.load),
+       }
+     : localFeedback;
+-
+   const mutation = useMutation({
+     mutationFn: async (selection: SkillItem[]) => {
+-      const resolvedSkills = await Promise.all(
+-        selection.map(resolveSkill),
+-      );
+-
++      const resolvedSkills = await Promise.all(selection.map(resolveSkill));
+       const skillIds = [
+         ...new Set(resolvedSkills.filter(isManualSkill).map(({ id }) => id)),
+       ];
+-
+       return skillsService.saveMySkills(skillIds);
+     },
+     onSuccess: invalidateCompleteness,
+   });
+-
+   const isSaving = mutation.isPending;
+-
+   async function reload(): Promise<void> {
+     setSelectedSkills(null);
+     setFeedback(null);
+@@ -122,15 +105,11 @@ export function useSkills(): UseSkillsResult {
+     if (hasLoadError || isSaving) {
+       return;
+     }
+-
+     setSelectedSkills((current = []) =>
+-      (current ?? selectedSkills).some(
+-        (selected) => selected.id === skill.id,
+-      )
++      (current ?? selectedSkills).some((selected) => selected.id === skill.id)
+         ? current
+         : [...(current ?? selectedSkills), skill],
+     );
+-
+     setFeedback(null);
+   }
+ 
+@@ -138,13 +117,9 @@ export function useSkills(): UseSkillsResult {
+     if (hasLoadError || isSaving) {
+       return;
+     }
+-
+     setSelectedSkills((current = []) =>
+-      (current ?? selectedSkills).filter(
+-        (skill) => skill.id !== skillId,
+-      ),
++      (current ?? selectedSkills).filter((skill) => skill.id !== skillId),
+     );
+-
+     setFeedback(null);
+   }
+ 
+@@ -152,13 +127,10 @@ export function useSkills(): UseSkillsResult {
+     if (hasLoadError || isSaving) {
+       return;
+     }
+-
+-    const trimmedName = (name ?? "").trim();
+-
++    const trimmedName = (name ?? '').trim();
+     if (!trimmedName) {
+       return;
+     }
+-
+     addSkill({
+       id: `${PENDING_SKILL_ID_PREFIX}${trimmedName.toLowerCase()}`,
+       name: trimmedName,
+@@ -168,12 +140,7 @@ export function useSkills(): UseSkillsResult {
+   async function saveSkills(
+     selection: SkillItem[] = selectedSkills,
+   ): Promise<boolean> {
+-    if (
+-      hasLoadError ||
+-      isLoading ||
+-      isSaving ||
+-      savingRef.current
+-    ) {
++    if (hasLoadError || isLoading || isSaving || savingRef.current) {
+       return false;
+     }
+ 
+@@ -182,7 +149,6 @@ export function useSkills(): UseSkillsResult {
+ 
+     try {
+       const savedSkills = await mutation.mutateAsync(selection);
+-
+       queryClient.setQueryData<SkillsProfileResponse>(
+         MY_SKILLS_QUERY_KEY,
+         (current) => ({
+@@ -190,35 +156,26 @@ export function useSkills(): UseSkillsResult {
+           selected: savedSkills ?? [],
+         }),
+       );
+-
+       setSelectedSkills(null);
+-      setFeedback({
+-        type: "success",
+-        message: SKILLS_SUCCESS_MESSAGES.saved,
+-      });
+-
++      setFeedback({ type: 'success', message: SKILLS_SUCCESS_MESSAGES.saved });
+       return true;
+     } catch (error) {
+       setFeedback({
+-        type: "error",
+-        message: getSkillsErrorMessage(
+-          error,
+-          SKILLS_ERROR_MESSAGES.save,
+-        ),
++        type: 'error',
++        message: getSkillsErrorMessage(error, SKILLS_ERROR_MESSAGES.save),
+       });
+-
+       return false;
+     } finally {
+       savingRef.current = false;
+     }
+   }
+ 
+-
+   return {
+     catalogSkills,
+     selectedSkills,
+     isLoading,
+     isSaving,
++    hasUnsavedChanges,
+     hasLoadError,
+     feedback,
+     addSkill,
+diff --git a/frontend/src/modules/work-experience/components/work-experience-guide-step.test.tsx b/frontend/src/modules/work-experience/components/work-experience-guide-step.test.tsx
+index 00b47d35e..a36cdc811 100644
+--- a/frontend/src/modules/work-experience/components/work-experience-guide-step.test.tsx
++++ b/frontend/src/modules/work-experience/components/work-experience-guide-step.test.tsx
+@@ -24,7 +24,6 @@ vi.mock('../services/work-experience.service', () => ({
+ }));
+ vi.mock('@/modules/matching/services/skills-analysis.service', () => ({
+   skillsAnalysisService: {
+-    analyzeExperience: vi.fn().mockResolvedValue({ skills: [] }),
+     previewExperience: vi.fn().mockResolvedValue({ skills: [] }),
+   },
+ }));
+@@ -71,7 +70,7 @@ describe('WorkExperienceGuideStep', () => {
+       skills: [];
+       processingTimeMs: number;
+     }) => void;
+-    vi.mocked(skillsAnalysisService.analyzeExperience).mockReturnValueOnce(
++    vi.mocked(skillsAnalysisService.previewExperience).mockReturnValueOnce(
+       new Promise((resolve) => {
+         finishAnalysis = resolve;
+       }),
+diff --git a/frontend/src/modules/work-experience/hooks/use-save-work-experience.test.ts b/frontend/src/modules/work-experience/hooks/use-save-work-experience.test.ts
+index 94538c764..734502a4a 100644
+--- a/frontend/src/modules/work-experience/hooks/use-save-work-experience.test.ts
++++ b/frontend/src/modules/work-experience/hooks/use-save-work-experience.test.ts
+@@ -1,19 +1,19 @@
+-
+-import { act, cleanup, waitFor } from "@testing-library/react";
+-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+-import { MY_SKILLS_QUERY_KEY } from "@/modules/skills";
+-import { renderHookWithQuery as renderHook } from "@/shared/testing/render-hook-with-query";
++import { act, cleanup, waitFor } from '@testing-library/react';
++import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
++import { skillsAnalysisService } from '@/modules/matching/services/skills-analysis.service';
++import { MY_SKILLS_QUERY_KEY } from '@/modules/skills';
++import { renderHookWithQuery as renderHook } from '@/shared/testing/render-hook-with-query';
+ import {
+   PROFILE_SKILLS_RADAR_QUERY_KEY,
+   profileSkillsRadarService,
+-} from "@/modules/profile";
+-import { WORK_EXPERIENCE_FEEDBACK_MESSAGES } from "../config/work-experience-feedback.config";
+-import { workExperienceService } from "../services/work-experience.service";
+-import type { WorkExperienceItem } from "../types/work-experience-item.types";
+-import type { WorkExperiencePayload } from "../types/work-experience-payload.types";
+-import { useSaveWorkExperience } from "./use-save-work-experience";
+-
+-vi.mock("../services/work-experience.service", () => ({
++} from '@/modules/profile';
++import { WORK_EXPERIENCE_FEEDBACK_MESSAGES } from '../config/work-experience-feedback.config';
++import { workExperienceService } from '../services/work-experience.service';
++import type { WorkExperienceItem } from '../types/work-experience-item.types';
++import type { WorkExperiencePayload } from '../types/work-experience-payload.types';
++import { useSaveWorkExperience } from './use-save-work-experience';
++
++vi.mock('../services/work-experience.service', () => ({
+   workExperienceService: {
+     createWorkExperience: vi.fn(),
+     updateWorkExperience: vi.fn(),
+@@ -21,20 +21,29 @@ vi.mock("../services/work-experience.service", () => ({
+ }));
+ 
+ const PAYLOAD: WorkExperiencePayload = {
+-  companyName: "Synapse Labs",
+-  position: "Desarrolladora web junior",
+-  startDate: "2025-03-01",
++  companyName: 'Synapse Labs',
++  position: 'Desarrolladora web junior',
++  startDate: '2025-03-01',
+   endDate: null,
+   isCurrent: true,
+-  description: "Desarrollo con Python y Scrum",
++  description: 'Desarrollo con Python y Scrum',
+ };
+ 
+ const SAVED: WorkExperienceItem = {
+-  id: "experience-1",
++  id: 'experience-1',
+   ...PAYLOAD,
+ };
+ 
+-describe("useSaveWorkExperience", () => {
++const ANALYSIS = {
++  experienceId: 'experience-1',
++  skills: [
++    { id: 'skill-1', name: 'Python' },
++    { id: 'skill-2', name: 'Scrum' },
++  ],
++  processingTimeMs: 320,
++};
++
++describe('useSaveWorkExperience', () => {
+   beforeEach(() => {
+     vi.mocked(workExperienceService.createWorkExperience).mockResolvedValue(
+       SAVED,
+@@ -50,7 +59,71 @@ describe("useSaveWorkExperience", () => {
+     vi.resetAllMocks();
+   });
+ 
+-  it("creates the experience keeping the description as typed", async () => {
++  it('acknowledges a guide write before completeness refresh and finishes the preview after unmount', async () => {
++    let finishPreview!: (value: typeof ANALYSIS) => void;
++    vi.spyOn(skillsAnalysisService, 'previewExperience').mockReturnValueOnce(
++      new Promise((resolve) => {
++        finishPreview = resolve;
++      }),
++    );
++    const onSaved = vi.fn();
++    const { result, client, unmount } = renderHook(() =>
++      useSaveWorkExperience(onSaved, { forGuide: true }),
++    );
++    let finishRefresh!: () => void;
++    const refreshing = new Promise<void>((resolve) => {
++      finishRefresh = resolve;
++    });
++    const invalidations = vi
++      .spyOn(client, 'invalidateQueries')
++      .mockReturnValueOnce(refreshing);
++
++    await act(async () => {
++      await result.current.save(PAYLOAD);
++    });
++
++    expect(onSaved).toHaveBeenCalledOnce();
++    expect(result.current.feedback?.type).toBe('success');
++    expect(result.current.isSaving).toBe(false);
++    expect(result.current.isAnalyzing).toBe(true);
++    expect(invalidations).toHaveBeenCalledWith({
++      queryKey: ['profile', 'completeness'],
++    });
++    unmount();
++    await act(async () => {
++      finishRefresh();
++      finishPreview(ANALYSIS);
++    });
++    await waitFor(() =>
++      expect(invalidations).toHaveBeenCalledWith({
++        queryKey: MY_SKILLS_QUERY_KEY,
++      }),
++    );
++  });
++
++  it('keeps guide writes successful if a background invalidation fails', async () => {
++    vi.spyOn(skillsAnalysisService, 'previewExperience').mockResolvedValueOnce(
++      ANALYSIS,
++    );
++    const onSaved = vi.fn();
++    const { result, client } = renderHook(() =>
++      useSaveWorkExperience(onSaved, { forGuide: true }),
++    );
++    vi.spyOn(client, 'invalidateQueries').mockRejectedValue(
++      new Error('refresh unavailable'),
++    );
++
++    await act(async () => {
++      await result.current.save(PAYLOAD);
++    });
++    await waitFor(() => expect(result.current.isAnalyzing).toBe(false));
++
++    expect(onSaved).toHaveBeenCalledOnce();
++    expect(result.current.feedback?.type).toBe('success');
++    expect(result.current.isSaving).toBe(false);
++  });
++
++  it('creates the experience keeping the description as typed', async () => {
+     const onSaved = vi.fn();
+     const { result } = renderHook(() => useSaveWorkExperience(onSaved));
+ 
+@@ -63,16 +136,16 @@ describe("useSaveWorkExperience", () => {
+     expect(onSaved).toHaveBeenCalledTimes(1);
+ 
+     expect(result.current.feedback).toEqual({
+-      type: "success",
++      type: 'success',
+       message: WORK_EXPERIENCE_FEEDBACK_MESSAGES.createSuccess,
+     });
+ 
+     expect(result.current.isSaving).toBe(false);
+   });
+ 
+-  it("preserves capitalization, accents and punctuation in the description", async () => {
++  it('preserves capitalization, accents and punctuation in the description', async () => {
+     const description =
+-      "Lideré APIs en Node.js, C++ y C#. ¡Gestión de proyectos!";
++      'Lideré APIs en Node.js, C++ y C#. ¡Gestión de proyectos!';
+ 
+     const { result } = renderHook(() => useSaveWorkExperience(vi.fn()));
+ 
+@@ -89,7 +162,7 @@ describe("useSaveWorkExperience", () => {
+     });
+   });
+ 
+-  it("updates the experience and preserves a null description", async () => {
++  it('updates the experience and preserves a null description', async () => {
+     const { result } = renderHook(() => useSaveWorkExperience(vi.fn()));
+ 
+     await act(() =>
+@@ -98,12 +171,12 @@ describe("useSaveWorkExperience", () => {
+           ...PAYLOAD,
+           description: null,
+         },
+-        "experience-1",
++        'experience-1',
+       ),
+     );
+ 
+     expect(workExperienceService.updateWorkExperience).toHaveBeenCalledWith(
+-      "experience-1",
++      'experience-1',
+       {
+         ...PAYLOAD,
+         description: null,
+@@ -111,17 +184,15 @@ describe("useSaveWorkExperience", () => {
+     );
+ 
+     expect(result.current.feedback).toEqual({
+-      type: "success",
++      type: 'success',
+       message: WORK_EXPERIENCE_FEEDBACK_MESSAGES.updateSuccess,
+     });
+   });
+ 
+-  it("refreshes the skills queries after saving", async () => {
+-    const { result, client } = renderHook(() =>
+-      useSaveWorkExperience(vi.fn()),
+-    );
++  it('refreshes the skills queries after saving', async () => {
++    const { result, client } = renderHook(() => useSaveWorkExperience(vi.fn()));
+ 
+-    const invalidate = vi.spyOn(client, "invalidateQueries");
++    const invalidate = vi.spyOn(client, 'invalidateQueries');
+ 
+     await act(() => result.current.save(PAYLOAD));
+ 
+@@ -136,10 +207,10 @@ describe("useSaveWorkExperience", () => {
+     });
+   });
+ 
+-  it("does not ask for the full skills analysis again because the backend already refreshes it", async () => {
+-    const analyzeSkills = vi.spyOn(profileSkillsRadarService, "analyzeSkills");
++  it('does not ask for the full skills analysis again because the backend already refreshes it', async () => {
++    const analyzeSkills = vi.spyOn(profileSkillsRadarService, 'analyzeSkills');
+     const { result, client } = renderHook(() => useSaveWorkExperience(vi.fn()));
+-    const invalidate = vi.spyOn(client, "invalidateQueries");
++    const invalidate = vi.spyOn(client, 'invalidateQueries');
+ 
+     await act(() => result.current.save(PAYLOAD));
+     await waitFor(() =>
+@@ -152,7 +223,7 @@ describe("useSaveWorkExperience", () => {
+     expect(analyzeSkills).not.toHaveBeenCalled();
+   });
+ 
+-  it("keeps the experience saved and shows success feedback", async () => {
++  it('keeps the experience saved and shows success feedback', async () => {
+     const onSaved = vi.fn();
+ 
+     const { result } = renderHook(() => useSaveWorkExperience(onSaved));
+@@ -164,21 +235,19 @@ describe("useSaveWorkExperience", () => {
+     );
+ 
+     expect(onSaved).toHaveBeenCalledTimes(1);
+-    expect(result.current.feedback?.type).toBe("success");
++    expect(result.current.feedback?.type).toBe('success');
+   });
+ 
+-  it("does not refresh skills when the experience could not be saved", async () => {
++  it('does not refresh skills when the experience could not be saved', async () => {
+     vi.mocked(workExperienceService.createWorkExperience).mockRejectedValue(
+-      new Error("fail"),
++      new Error('fail'),
+     );
+ 
+     const onSaved = vi.fn();
+ 
+-    const { result, client } = renderHook(() =>
+-      useSaveWorkExperience(onSaved),
+-    );
++    const { result, client } = renderHook(() => useSaveWorkExperience(onSaved));
+ 
+-    const invalidate = vi.spyOn(client, "invalidateQueries");
++    const invalidate = vi.spyOn(client, 'invalidateQueries');
+ 
+     await act(() => result.current.save(PAYLOAD));
+ 
+@@ -186,14 +255,14 @@ describe("useSaveWorkExperience", () => {
+     expect(invalidate).not.toHaveBeenCalled();
+ 
+     expect(result.current.feedback).toEqual({
+-      type: "error",
++      type: 'error',
+       message: WORK_EXPERIENCE_FEEDBACK_MESSAGES.createError,
+     });
+ 
+     expect(result.current.isSaving).toBe(false);
+   });
+ 
+-  it("clears the feedback", async () => {
++  it('clears the feedback', async () => {
+     const { result } = renderHook(() => useSaveWorkExperience(vi.fn()));
+ 
+     await act(() => result.current.save(PAYLOAD));
+diff --git a/frontend/src/modules/work-experience/hooks/use-save-work-experience.ts b/frontend/src/modules/work-experience/hooks/use-save-work-experience.ts
+index bf89f0bc7..0e9aefc79 100644
+--- a/frontend/src/modules/work-experience/hooks/use-save-work-experience.ts
++++ b/frontend/src/modules/work-experience/hooks/use-save-work-experience.ts
+@@ -1,29 +1,32 @@
+-"use client";
++'use client';
+ 
+-import { useMutation, useQueryClient } from "@tanstack/react-query";
+-import { useState } from "react";
++import { useMutation, useQueryClient } from '@tanstack/react-query';
++import { useState } from 'react';
+ import {
+   skillsAnalysisService,
+   type SkillsAnalysisResult,
+-} from "@/modules/matching";
++} from '@/modules/matching';
+ import {
+   PROFILE_SKILLS_RADAR_QUERY_KEY,
+   useInvalidateProfileCompleteness,
+   type Feedback,
+-} from "@/modules/profile";
+-import { MY_SKILLS_QUERY_KEY } from "@/modules/skills";
+-import { WORK_EXPERIENCE_FEEDBACK_MESSAGES } from "../config/work-experience-feedback.config";
+-import { workExperienceService } from "../services/work-experience.service";
+-import type { WorkExperienceItem } from "../types/work-experience-item.types";
+-import type { WorkExperiencePayload } from "../types/work-experience-payload.types";
+-
+-export function useSaveWorkExperience(onSaved: () => void) {
++} from '@/modules/profile';
++import { MY_SKILLS_QUERY_KEY } from '@/modules/skills';
++import { WORK_EXPERIENCE_FEEDBACK_MESSAGES } from '../config/work-experience-feedback.config';
++import { workExperienceService } from '../services/work-experience.service';
++import type { WorkExperienceItem } from '../types/work-experience-item.types';
++import type { WorkExperiencePayload } from '../types/work-experience-payload.types';
++
++export function useSaveWorkExperience(
++  onSaved: () => void,
++  { forGuide = false }: { forGuide?: boolean } = {},
++) {
+   const queryClient = useQueryClient();
+   const invalidateCompleteness = useInvalidateProfileCompleteness();
+ 
+   const mutation = useMutation({
+     mutationFn: (request: () => Promise<WorkExperienceItem>) => request(),
+-    onSuccess: invalidateCompleteness,
++    onSuccess: forGuide ? undefined : invalidateCompleteness,
+   });
+ 
+   const [isSaving, setIsSaving] = useState(false);
+@@ -84,7 +87,7 @@ export function useSaveWorkExperience(onSaved: () => void) {
+           );
+ 
+       setFeedback({
+-        type: "success",
++        type: 'success',
+         message: id
+           ? WORK_EXPERIENCE_FEEDBACK_MESSAGES.updateSuccess
+           : WORK_EXPERIENCE_FEEDBACK_MESSAGES.createSuccess,
+@@ -92,10 +95,11 @@ export function useSaveWorkExperience(onSaved: () => void) {
+ 
+       onSaved();
+ 
+-      void analyze(saved, payload);
++      if (forGuide) void invalidateCompleteness().catch(() => {});
++      void analyze(saved, payload).catch(() => {});
+     } catch {
+       setFeedback({
+-        type: "error",
++        type: 'error',
+         message: id
+           ? WORK_EXPERIENCE_FEEDBACK_MESSAGES.updateError
+           : WORK_EXPERIENCE_FEEDBACK_MESSAGES.createError,
+@@ -118,4 +122,4 @@ export function useSaveWorkExperience(onSaved: () => void) {
+     feedback,
+     clearFeedback,
+   };
+-}
+\ No newline at end of file
++}
