@@ -16,6 +16,18 @@ export const HEATMAP_TEXT = {
   noSummary: "No hay datos suficientes para generar una lectura rápida.",
   cellTooltip: (count: number, total: number, unit: string, column: string, skill: string, percentage: number) =>
     `${count} de ${total} ${unit} de ${column} registran ${skill} (${percentage}%)`,
+  cellTooltipTitle: (skill: string, column: string) => `${skill} · ${column}`,
+  cellTooltipDetail: (count: number, total: number, unit: string, percentage: string) => `${count} de ${total} ${unit} (${percentage})`,
+  legendMin: "0%",
+  legendMax: "100%",
+  helpLabel: "Más información",
+} as const;
+
+export const HEATMAP_CONTINUOUS_TONE = {
+  minAlpha: 6,
+  darkTextFrom: 46,
+  lightText: "text-ink",
+  darkText: "text-white",
 } as const;
 
 export const HEATMAP_EXPORT_FORMAT_TEXTS: ExportFormatTexts = {

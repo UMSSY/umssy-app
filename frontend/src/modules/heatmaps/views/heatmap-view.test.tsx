@@ -78,11 +78,98 @@ describe("HeatmapView", () => {
     expect(screen.getByText(DATA.quickReadSummary ?? "")).toBeInTheDocument();
   });
 
-  it("muestra conteo primero y porcentaje entre paréntesis en HU5", async () => {
-    await renderView("skills-by-career");
-    expect(screen.getByText("66")).toBeInTheDocument();
-    expect(screen.getByText("(69%)")).toBeInTheDocument();
-    expect(screen.queryByRole("combobox", { name: "Carrera" })).not.toBeInTheDocument();
+  describe("HU5 - Mapa de calor de habilidades técnicas por carrera", () => {
+    const CAREER_DATA: HeatmapData = {
+      heatmapType: "skills-by-career",
+      baseCount: 220,
+      baseLabel: "egresados con habilidades técnicas registradas",
+      columns: [
+        { id: "career-systems", label: "Ing. de Sistemas", sublabel: "(n = 128)", total: 128 },
+        { id: "career-informatics", label: "Ing. Informática", sublabel: "(n = 92)", total: 92 },
+      ],
+      rows: [
+        {
+          skillId: "js",
+          skillName: "JavaScript",
+          cells: [
+            { columnId: "career-systems", count: 96, total: 128, percentage: 75 },
+            { columnId: "career-informatics", count: 20, total: 92, percentage: 21.7 },
+          ],
+        },
+      ],
+      quickReadSummary: "En Ing. de Sistemas, JavaScript (75,0%) tiene mayor presencia. En Ing. Informática, JavaScript (21,7%) tiene mayor presencia.",
+    };
+    const DARK_CELL = "JavaScript · Ing. de Sistemas. 96 de 128 egresados (75,0%)";
+    const LIGHT_CELL = "JavaScript · Ing. Informática. 20 de 92 egresados (21,7%)";
+
+    beforeEach(() => {
+      vi.mocked(heatmapsService.getHeatmap).mockResolvedValue({ statusCode: 200, ok: true, detail: "ok", data: CAREER_DATA });
+    });
+
+    it("muestra título, descripción y filtros con sus valores por defecto", async () => {
+      await renderView("skills-by-career");
+
+      expect(screen.getByRole("heading", { level: 1, name: "Mapa de calor de habilidades técnicas por carrera" })).toBeInTheDocument();
+      expect(screen.getByText("Compara la presencia de habilidades técnicas en los egresados de Ingeniería de Sistemas e Ingeniería informática.")).toBeInTheDocument();
+      expect(screen.getByRole("combobox", { name: "Carrera" })).toHaveTextContent("Todas (Sistemas e Informática)");
+      expect(screen.getByRole("combobox", { name: "Promoción (año de egreso)" })).toHaveTextContent("Todas");
+    });
+
+    it("muestra la base con ícono de ayuda y las cabeceras de carrera con n", async () => {
+      await renderView("skills-by-career");
+
+      expect(screen.getByText("Base: 220 egresados con habilidades técnicas registradas")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /^Más información: Egresados con encuesta respondida/ })).toBeInTheDocument();
+      expect(screen.getByRole("columnheader", { name: "Habilidad técnica" })).toBeInTheDocument();
+      expect(screen.getByRole("columnheader", { name: /Ing\. de Sistemas\s*\(n = 128\)/ })).toBeInTheDocument();
+      expect(screen.getByRole("columnheader", { name: /Ing\. Informática\s*\(n = 92\)/ })).toBeInTheDocument();
+    });
+
+    it("muestra conteo arriba y porcentaje con un decimal entre paréntesis debajo", async () => {
+      await renderView("skills-by-career");
+
+      expect(screen.getByText("96")).toBeInTheDocument();
+      expect(screen.getByText("(75,0%)")).toBeInTheDocument();
+      expect(screen.getByText("(21,7%)")).toBeInTheDocument();
+    });
+
+    it("usa texto blanco en celdas oscuras y texto oscuro en celdas claras", async () => {
+      await renderView("skills-by-career");
+
+      expect(screen.getByLabelText(DARK_CELL)).toHaveClass("text-white");
+      expect(screen.getByLabelText(LIGHT_CELL)).toHaveClass("text-ink");
+    });
+
+    it("muestra un tooltip de dos líneas con habilidad · carrera y la proporción", async () => {
+      const user = userEvent.setup();
+      await renderView("skills-by-career");
+
+      await user.hover(screen.getByLabelText(DARK_CELL));
+
+      expect(await screen.findByText("JavaScript · Ing. de Sistemas")).toBeInTheDocument();
+      expect(screen.getByText("96 de 128 egresados (75,0%)")).toBeInTheDocument();
+    });
+
+    it("muestra la leyenda 0%-100%, el texto de ayuda de celdas y la lectura rápida", async () => {
+      await renderView("skills-by-career");
+
+      const legend = screen.getByLabelText("Leyenda del mapa de calor");
+      expect(legend).toHaveTextContent("0%");
+      expect(legend).toHaveTextContent("100%");
+      expect(screen.getByText("Cada celda muestra la cantidad de egresados y el porcentaje que representa en su carrera.")).toBeInTheDocument();
+      expect(screen.getByRole("region", { name: "Lectura rápida" })).toHaveTextContent(CAREER_DATA.quickReadSummary ?? "");
+    });
+
+    it("filtra por carrera", async () => {
+      const user = userEvent.setup();
+      const getHeatmap = vi.mocked(heatmapsService.getHeatmap);
+      await renderView("skills-by-career");
+
+      await user.click(screen.getByRole("combobox", { name: "Carrera" }));
+      await user.click(await screen.findByRole("option", { name: "Licenciatura en Ingeniería de Sistemas" }));
+
+      await waitFor(() => expect(getHeatmap).toHaveBeenLastCalledWith("skills-by-career", { careerId: "career-systems" }));
+    });
   });
 
   it("muestra los filtros de carrera, gestión y meses en HU8 y filtra por la carrera de la BD", async () => {
