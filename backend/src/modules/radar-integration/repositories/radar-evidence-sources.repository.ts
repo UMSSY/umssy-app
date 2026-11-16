@@ -6,15 +6,36 @@ import type { TransactionContext } from '../../../common/types/transaction-conte
 export class RadarEvidenceSourcesRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  findApprovedDocuments(userId: string, context: TransactionContext) {
+  findUnapprovedCertificateIds(userId: string, context: TransactionContext) {
     return context.client.radarDocumentVerification.findMany({
       where: {
         userId,
         active: true,
-        status: { in: ['approved', 'manual_approved'] },
+        sourceTypeEntry: { title: 'certification' },
+        statusEntry: {
+          title: { notIn: ['legacy', 'approved', 'manual_approved'] },
+        },
       },
-      select: { sourceType: true, sourceId: true, skills: true },
+      select: { sourceId: true },
     });
+  }
+  async findApprovedDocuments(userId: string, context: TransactionContext) {
+    const rows = await context.client.radarDocumentVerification.findMany({
+      where: {
+        userId,
+        active: true,
+        statusEntry: { title: { in: ['approved', 'manual_approved'] } },
+      },
+      select: {
+        sourceTypeEntry: { select: { title: true } },
+        sourceId: true,
+        skills: true,
+      },
+    });
+    return rows.map(({ sourceTypeEntry, ...row }) => ({
+      ...row,
+      sourceType: sourceTypeEntry.title,
+    }));
   }
   async findPublicationCvStates(userId: string, context: TransactionContext) {
     const rows = await context.client.radarCvEvidence.findMany({
@@ -36,10 +57,10 @@ export class RadarEvidenceSourcesRepository {
     return this.prisma.$queryRaw<
       { id: string; type: 'certification'; text: string }[]
     >`
-      SELECT d.source_id AS id,d.source_type AS type,string_agg(skill->>'name', '. ') AS text
-      FROM radar_document_verifications d CROSS JOIN LATERAL jsonb_array_elements(d.skills) skill
-      WHERE d.user_id=${userId}::uuid AND d.active AND d.source_type='certification' AND d.status IN ('approved','manual_approved')
-      GROUP BY d.source_id,d.source_type`;
+      SELECT d.source_id AS id,t.title AS type,string_agg(skill->>'name', '. ') AS text
+      FROM radar_document_verifications d JOIN radar_document_source_types t ON t.id=d.source_type_id JOIN radar_document_statuses s ON s.id=d.status_id CROSS JOIN LATERAL jsonb_array_elements(d.skills) skill
+      WHERE d.user_id=${userId}::uuid AND d.active AND t.title='certification' AND s.title IN ('approved','manual_approved')
+      GROUP BY d.source_id,t.title`;
   }
 
   async findCurrentCvText(
@@ -58,13 +79,20 @@ export class RadarEvidenceSourcesRepository {
     });
     if (!current) return [];
     const verification = await this.prisma.radarDocumentVerification.findFirst({
-      where: { userId, sourceId: current.cvId, sourceType: 'cv', active: true },
+      where: {
+        userId,
+        sourceId: current.cvId,
+        sourceTypeEntry: { title: 'cv' },
+        active: true,
+      },
       orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
-      select: { status: true },
+      select: { statusEntry: { select: { title: true } } },
     });
     if (
       verification &&
-      !['approved', 'manual_approved', 'legacy'].includes(verification.status)
+      !['approved', 'manual_approved', 'legacy'].includes(
+        verification.statusEntry.title,
+      )
     )
       return [];
     if (

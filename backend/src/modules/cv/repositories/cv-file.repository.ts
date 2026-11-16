@@ -1,3 +1,4 @@
+import { CURRENT_CV_ORDER } from '../constants/current-cv-order.constants.js';
 import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
@@ -17,6 +18,18 @@ export class CvFileRepository implements CvFileStorage {
   }
 
   constructor(private readonly prisma: PrismaService) {}
+
+  async hasByUserId(userId: string): Promise<boolean> {
+    const cv = await this.prisma.userCvFile.findFirst({
+      where: {
+        userId,
+        cvPdfData: { not: null },
+        cvUploadedAt: { not: null },
+      },
+      select: cvIdSelect,
+    });
+    return cv !== null;
+  }
 
   async create(
     userId: string,
@@ -52,14 +65,18 @@ export class CvFileRepository implements CvFileStorage {
 
     return count > 0;
   }
+  currentCvMetadata(userId: string) {
+    return this.prisma.userCvFile.findFirst({
+      where: { userId },
+      orderBy: [...CURRENT_CV_ORDER],
+      select: { id: true },
+    });
+  }
+
   currentCv(userId: string) {
     return this.prisma.userCvFile.findFirst({
       where: { userId },
-      orderBy: [
-        { cvUploadedAt: { sort: 'desc', nulls: 'last' } },
-        { createdAt: 'desc' },
-        { id: 'desc' },
-      ],
+      orderBy: [...CURRENT_CV_ORDER],
       select: { id: true, cvPdfData: true },
     });
   }

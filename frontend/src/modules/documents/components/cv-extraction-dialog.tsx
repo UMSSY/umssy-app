@@ -1,5 +1,6 @@
 "use client";
 
+import { ProfileCompletenessProgress } from "@/modules/profile";
 import { LoaderCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -68,6 +69,7 @@ export function CvExtractionDialog({
           <DialogDescription className="text-sm text-text-secondary">{CV_REVIEW_TEXTS.description}</DialogDescription>
         </DialogHeader>
         <div className="max-h-[65vh] overflow-y-auto px-6 py-5">
+          <div className="mb-4"><ProfileCompletenessProgress showChecklist={false} /></div>
           {isExtracting ? (
             <div aria-busy="true" className="flex flex-col gap-3">
               <p className="flex items-center gap-2 text-sm text-text-secondary">

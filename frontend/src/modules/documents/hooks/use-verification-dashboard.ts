@@ -1,14 +1,15 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   certificationsService,
+  useCreateCertification,
   validateCertificateFile,
   type CertificationFormProps,
 } from '@/modules/certifications';
 import { RADAR_PERSONAL_QUERY_KEY } from '@/modules/radar-chart/public';
 import { verificationApi } from '../services/document-verification.service';
-import { documentsService } from '../services/documents.service';
+import { useCvMutations } from './use-cv-mutations';
 import { validateCvFile } from '../utils/validate-cv-file';
 import type { CvPreview } from '../types/cv-preview.types';
 import type { DocumentVerification } from '../types/document-verification.types';
@@ -25,8 +26,6 @@ export function useVerificationDashboard({
   const [target, setTarget] = useState('');
   const [remove, setRemove] = useState<DocumentVerification | null>(null);
   const [preview, setPreview] = useState<CvPreview | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
   const client = useQueryClient();
   const unread = rows.filter(
     (d) =>
@@ -55,11 +54,13 @@ export function useVerificationDashboard({
       client.invalidateQueries({ queryKey: RADAR_PERSONAL_QUERY_KEY }),
     ]);
   }
-  async function view(d: DocumentVerification) {
-    setError('');
-    setBusy(true);
-    try {
-      const file = await verificationApi.file(d.id);
+  const cvMutations = useCvMutations();
+  const previewMutation = useMutation({
+    mutationFn: async (doc: DocumentVerification) => ({
+      doc,
+      file: await verificationApi.file(doc.id),
+    }),
+    onSuccess: ({ doc: d, file }) => {
       setDetailId(null);
       setPreview({
         file,
@@ -73,72 +74,102 @@ export function useVerificationDashboard({
           sizeInBytes: d.sizeBytes,
         },
       });
-    } catch {
-      setError('El documento no está disponible.');
-    } finally {
-      setBusy(false);
-    }
-  }
-  async function saveFile(file: File) {
-    const problem =
-      mode === 'cv' ? validateCvFile(file) : validateCertificateFile(file);
-    if (problem) {
-      setError(problem);
-      return;
-    }
-    setBusy(true);
-    setError('');
-    try {
-      if (mode === 'cv') await documentsService.uploadCv(file);
-      else {
-        const version = certs.find((d) => d.id === target);
-        if (!version) {
-          setError(
-            'La versión seleccionada cambió. Selecciona el documento vigente.',
-          );
-          return;
-        }
-        await certificationsService.uploadDocument(
-          version.sourceId,
-          file,
-          version.id,
+    },
+  });
+  const uploadMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const problem =
+        mode === 'cv' ? validateCvFile(file) : validateCertificateFile(file);
+      if (problem) throw new Error(problem);
+      if (mode === 'cv') return cvMutations.uploadMutation.mutateAsync(file);
+      const version = certs.find((doc) => doc.id === target);
+      if (!version)
+        throw new Error(
+          'La versión seleccionada cambió. Selecciona el documento vigente.',
         );
-      }
+      return certificationsService.uploadDocument(
+        version.sourceId,
+        file,
+        version.id,
+      );
+    },
+    onSuccess: async () => {
       setUpload(false);
       setSelected(null);
       await changed();
-    } catch {
-      setError(
-        'No se pudo subir el archivo. Comprueba el formato y el máximo de 5 MB.',
-      );
-    } finally {
-      setBusy(false);
-    }
-  }
-  async function erase() {
-    if (!remove) return;
-    setError('');
-    setBusy(true);
-    try {
-      if (remove.sourceType === 'cv')
-        await documentsService.deleteCv(remove.sourceId);
-      else
-        await certificationsService.deleteDocument(remove.sourceId, remove.id);
+    },
+  });
+  const deleteMutation = useMutation({
+    mutationFn: (doc: DocumentVerification) =>
+      doc.sourceType === 'cv'
+        ? cvMutations.deleteMutation.mutateAsync(doc.sourceId)
+        : certificationsService.deleteDocument(doc.sourceId, doc.id),
+    onSuccess: async () => {
       setRemove(null);
       await changed();
-    } catch {
-      setError('No se pudo eliminar el documento. Puedes reintentar.');
-    } finally {
-      setBusy(false);
+    },
+  });
+  const creation = useCreateCertification({
+    onSuccess: async () => {
+      setUpload(false);
+      setSelected(null);
+      await changed();
+    },
+  });
+  const acknowledgementMutation = useMutation({
+    mutationFn: verificationApi.acknowledge,
+    onSuccess: refresh,
+  });
+  const mutations = [
+    previewMutation,
+    uploadMutation,
+    deleteMutation,
+    creation,
+    acknowledgementMutation,
+  ];
+  const busy = mutations.some((mutation) => mutation.isPending);
+  const error = previewMutation.isError
+    ? 'El documento no está disponible.'
+    : uploadMutation.isError
+      ? uploadMutation.error instanceof Error &&
+        !('response' in uploadMutation.error)
+        ? uploadMutation.error.message
+        : 'No se pudo subir el archivo. Comprueba el formato y el máximo de 5 MB.'
+      : deleteMutation.isError
+        ? 'No se pudo eliminar el documento. Puedes reintentar.'
+        : creation.error
+          ? 'No se pudo guardar la certificación.'
+          : acknowledgementMutation.isError
+            ? 'No se pudo confirmar la lectura del aviso.'
+            : '';
+  const clearErrors = () => {
+    for (const mutation of mutations) mutation.reset();
+  };
+  const view = (doc: DocumentVerification) => {
+    clearErrors();
+    previewMutation.mutate(doc);
+  };
+  const saveFile = (file: File) => {
+    clearErrors();
+    uploadMutation.mutate(file);
+  };
+  const erase = () => {
+    if (remove) {
+      clearErrors();
+      deleteMutation.mutate(remove);
     }
-  }
+  };
+  const acknowledge = (doc: DocumentVerification) => {
+    clearErrors();
+    acknowledgementMutation.mutate(doc);
+  };
   const openUpload = () => {
+    clearErrors();
     setUpload(true);
     setMode(chosen?.active ? chosen.sourceType : 'cv');
     setTarget(
       chosen?.sourceType === 'certification' && chosen.active ? chosen.id : '',
     );
-    setError('');
   };
   const createCertification: CertificationFormProps['onSubmit'] = async (
     values,
@@ -146,24 +177,14 @@ export function useVerificationDashboard({
   ) => {
     if (change.type !== 'replace')
       return 'Adjunta el respaldo de la certificación.';
+    clearErrors();
     try {
-      await certificationsService.createWithDocument(values, change.file);
-      setUpload(false);
-      setSelected(null);
-      await changed();
+      await creation.mutateAsync({ data: values, document: change.file });
       return null;
     } catch {
       return 'No se pudo guardar la certificación.';
     }
   };
-  async function acknowledge(doc: DocumentVerification) {
-    try {
-      await verificationApi.acknowledge(doc);
-      await refresh();
-    } catch {
-      setError('No se pudo confirmar la lectura del aviso.');
-    }
-  }
   return {
     selected,
     setSelected,

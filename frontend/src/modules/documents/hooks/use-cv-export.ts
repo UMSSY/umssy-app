@@ -3,11 +3,14 @@
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { documentsService } from "../services/documents.service";
+import type { CvExportSections } from "../types/cv-export-sections.types";
 import type { GeneratedCv } from "../types/generated-cv.types";
 import { getCvExportErrorMessage } from "../utils/get-cv-export-error-message";
 
 export function useCvExport() {
-  const mutation = useMutation({ mutationFn: () => documentsService.generateCv() });
+  const mutation = useMutation({
+    mutationFn: (sections: CvExportSections) => documentsService.generateCv(sections),
+  });
   const [generatedCv, setGeneratedCv] = useState<GeneratedCv | null>(null);
   const [error, setError] = useState<string | null>(null);
   const previewUrlRef = useRef<string | null>(null);
@@ -31,14 +34,20 @@ export function useCvExport() {
     setGeneratedCv(null);
   };
 
-  const generateCv = async (): Promise<GeneratedCv | null> => {
+  const discardCv = () => {
+    requestIdRef.current += 1;
+    releasePreview();
+    setError(null);
+  };
+
+  const generateCv = async (sections: CvExportSections): Promise<GeneratedCv | null> => {
     requestIdRef.current += 1;
     const requestId = requestIdRef.current;
     releasePreview();
     setError(null);
 
     try {
-      const { file, fileName } = await mutation.mutateAsync();
+      const { file, fileName } = await mutation.mutateAsync(sections);
 
       if (requestIdRef.current !== requestId) {
         return null;
@@ -62,5 +71,6 @@ export function useCvExport() {
     isGenerating: mutation.isPending,
     error,
     generateCv,
+    discardCv,
   };
 }

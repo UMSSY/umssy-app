@@ -6,7 +6,9 @@ function build(current: unknown, status?: string) {
   const findFirst = vi.fn().mockResolvedValue(current);
   const repository = new RadarEvidenceSourcesRepository({
     radarDocumentVerification: {
-      findFirst: vi.fn().mockResolvedValue(status ? { status } : null),
+      findFirst: vi
+        .fn()
+        .mockResolvedValue(status ? { statusEntry: { title: status } } : null),
     },
     radarCvEvidence: { findFirst },
   } as unknown as PrismaService);

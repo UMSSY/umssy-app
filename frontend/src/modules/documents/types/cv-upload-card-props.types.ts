@@ -1,4 +1,5 @@
 export interface CvUploadCardProps {
+  selectId?: string;
   selectedFile: File | null;
   hasSavedCv: boolean;
   isLoading?: boolean;

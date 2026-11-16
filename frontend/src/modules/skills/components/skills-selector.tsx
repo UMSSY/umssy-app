@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import { LoaderCircle, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -27,12 +27,16 @@ export function SkillsSelector({
   hasLoadError = false,
   onRetry,
   feedback = null,
+  onCustomDraftChange,
+  saveLabel = SKILLS_UI_TEXTS.saveButton,
 }: SkillsSelectorProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [customSkillName, setCustomSkillName] = useState("");
   const [customSkillError, setCustomSkillError] = useState("");
 
   const isMutateDisabled = isSaving || hasLoadError;
+  const hasCustomDraft = customSkillName.trim().length > 0;
+  useEffect(() => { onCustomDraftChange?.(hasCustomDraft); }, [hasCustomDraft, onCustomDraftChange]);
 
   const selectedIds = useMemo(
     () => new Set((selectedSkills ?? []).map((skill) => skill.id)),
@@ -204,7 +208,7 @@ export function SkillsSelector({
             className={cn("h-10 bg-primary px-4 text-sm text-primary-foreground hover:bg-brand-hover", "w-full")}
           >
             {isSaving ? <LoaderCircle aria-hidden="true" className="animate-spin" /> : null}
-            {isSaving ? SKILLS_UI_TEXTS.savingButton : SKILLS_UI_TEXTS.saveButton}
+            {isSaving ? SKILLS_UI_TEXTS.savingButton : saveLabel}
           </Button>
         </div>
       </SectionCard>

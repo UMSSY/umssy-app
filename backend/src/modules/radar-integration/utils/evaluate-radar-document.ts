@@ -1,8 +1,6 @@
-import type {
-  VerificationDocumentContext,
-  VerificationResult,
-  DocumentSkill,
-} from '../types/document-verification.type.js';
+import type { VerificationDocumentContext } from '../types/verification-document-context.type.js';
+import type { VerificationResult } from '../types/verification-result.type.js';
+import type { DocumentSkill } from '../types/document-skill.type.js';
 import { normalizeTerm } from '../../nlp/utils/normalize-term.js';
 
 const words = (value: string) =>
