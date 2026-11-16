@@ -16,10 +16,9 @@ describe('SurveyLifecycleWorkerService', () => {
     repository = {
       findSurveysClosingSoon: vi.fn(),
       findSurveysExpiredForClosure: vi.fn(),
-      findSurveysPendingVariationEvaluation: vi.fn().mockResolvedValue([]),
+      findSurveysForVariationEvaluation: vi.fn().mockResolvedValue([]),
       markClosingSoonNotified: vi.fn(),
       markClosedNotified: vi.fn(),
-      markVariationEvaluated: vi.fn(),
     };
     variationEvaluator = {
       evaluateSurvey: vi.fn(),
@@ -124,16 +123,16 @@ describe('SurveyLifecycleWorkerService', () => {
       expect(repository.findSurveysClosingSoon).toHaveBeenCalledTimes(2);
     });
 
-    it('revisa también las variaciones del semestre que terminó', async () => {
+    it('revisa también las variaciones cuando empieza un semestre', async () => {
       vi.mocked(repository.findSurveysClosingSoon!).mockResolvedValue([]);
       vi.mocked(repository.findSurveysExpiredForClosure!).mockResolvedValue(
         [],
       );
 
-      await worker.tick(new Date('2026-07-02T15:00:00Z'));
+      await worker.tick(new Date('2026-07-01T15:00:00Z'));
 
       expect(
-        repository.findSurveysPendingVariationEvaluation,
+        repository.findSurveysForVariationEvaluation,
       ).toHaveBeenCalledTimes(1);
     });
   });
@@ -280,37 +279,46 @@ describe('SurveyLifecycleWorkerService', () => {
       } as any;
     }
 
+    const JULY_1 = new Date('2026-07-01T15:00:00Z');
+
     it('evalúa el semestre que acaba de terminar el 1 de julio, en hora de Bolivia', async () => {
       await worker.processSemesterVariations(new Date('2026-07-01T04:30:00Z'));
 
       expect(
-        repository.findSurveysPendingVariationEvaluation,
-      ).toHaveBeenCalledWith('I-2026', getSemesterRange('I-2026'));
+        repository.findSurveysForVariationEvaluation,
+      ).toHaveBeenCalledWith(getSemesterRange('I-2026'));
     });
 
     it('evalúa el segundo semestre del año anterior el 1 de enero', async () => {
       await worker.processSemesterVariations(new Date('2027-01-01T04:30:00Z'));
 
       expect(
-        repository.findSurveysPendingVariationEvaluation,
-      ).toHaveBeenCalledWith('II-2026', getSemesterRange('II-2026'));
+        repository.findSurveysForVariationEvaluation,
+      ).toHaveBeenCalledWith(getSemesterRange('II-2026'));
     });
 
-    it('no cambia de semestre antes de la medianoche de Bolivia', async () => {
-      await worker.processSemesterVariations(new Date('2026-07-01T03:30:00Z'));
+    it.each([
+      '2026-07-01T03:30:00Z',
+      '2026-07-02T15:00:00Z',
+      '2026-11-16T15:00:00Z',
+      '2026-02-01T15:00:00Z',
+    ])('no evalúa nada en un día que no es inicio de semestre (%s)', async (iso) => {
+      await worker.processSemesterVariations(new Date(iso));
 
       expect(
-        repository.findSurveysPendingVariationEvaluation,
-      ).toHaveBeenCalledWith('II-2025', getSemesterRange('II-2025'));
+        repository.findSurveysForVariationEvaluation,
+      ).not.toHaveBeenCalled();
+      expect(variationEvaluator.evaluateSurvey).not.toHaveBeenCalled();
+      expect(mailService.send).not.toHaveBeenCalled();
     });
 
-    it('evalúa con el semestre, el umbral y las preguntas configurados', async () => {
-      vi.mocked(repository.findSurveysPendingVariationEvaluation!).mockResolvedValue(
+    it('evalúa con el umbral y las preguntas configurados', async () => {
+      vi.mocked(repository.findSurveysForVariationEvaluation!).mockResolvedValue(
         [buildSurvey({ alertConfig: { isEnabled: true, threshold: 15, questionIds: ['q-1', 2, null, 'q-2'] } })],
       );
       vi.mocked(variationEvaluator.evaluateSurvey!).mockResolvedValue(NO_SHIFTS);
 
-      await worker.processSemesterVariations(new Date('2026-07-02T15:00:00Z'));
+      await worker.processSemesterVariations(JULY_1);
 
       expect(variationEvaluator.evaluateSurvey).toHaveBeenCalledWith(
         'survey-1',
@@ -319,12 +327,12 @@ describe('SurveyLifecycleWorkerService', () => {
     });
 
     it('usa todas las preguntas cuando la encuesta no tiene configuración', async () => {
-      vi.mocked(repository.findSurveysPendingVariationEvaluation!).mockResolvedValue(
+      vi.mocked(repository.findSurveysForVariationEvaluation!).mockResolvedValue(
         [buildSurvey({ alertConfig: null })],
       );
       vi.mocked(variationEvaluator.evaluateSurvey!).mockResolvedValue(NO_SHIFTS);
 
-      await worker.processSemesterVariations(new Date('2026-07-02T15:00:00Z'));
+      await worker.processSemesterVariations(JULY_1);
 
       expect(variationEvaluator.evaluateSurvey).toHaveBeenCalledWith(
         'survey-1',
@@ -332,13 +340,13 @@ describe('SurveyLifecycleWorkerService', () => {
       );
     });
 
-    it('envía un solo correo al creador con las variaciones y marca el semestre como evaluado', async () => {
-      vi.mocked(repository.findSurveysPendingVariationEvaluation!).mockResolvedValue(
+    it('envía un solo correo al creador con las variaciones', async () => {
+      vi.mocked(repository.findSurveysForVariationEvaluation!).mockResolvedValue(
         [buildSurvey()],
       );
       vi.mocked(variationEvaluator.evaluateSurvey!).mockResolvedValue(SHIFTS);
 
-      await worker.processSemesterVariations(new Date('2026-07-02T15:00:00Z'));
+      await worker.processSemesterVariations(JULY_1);
 
       expect(mailService.send).toHaveBeenCalledTimes(1);
       expect(mailService.send).toHaveBeenCalledWith(
@@ -353,65 +361,79 @@ describe('SurveyLifecycleWorkerService', () => {
           }),
         }),
       );
-      expect(repository.markVariationEvaluated).toHaveBeenCalledWith(
-        'survey-1',
-        'I-2026',
-      );
     });
 
-    it('no envía correo cuando ninguna variación supera el umbral, pero marca el semestre como evaluado', async () => {
-      vi.mocked(repository.findSurveysPendingVariationEvaluation!).mockResolvedValue(
+    it('no repite el correo en las siguientes revisiones del mismo día', async () => {
+      vi.mocked(repository.findSurveysForVariationEvaluation!).mockResolvedValue(
+        [buildSurvey()],
+      );
+      vi.mocked(variationEvaluator.evaluateSurvey!).mockResolvedValue(SHIFTS);
+
+      await worker.processSemesterVariations(JULY_1);
+      await worker.processSemesterVariations(new Date('2026-07-01T15:00:30Z'));
+      await worker.processSemesterVariations(new Date('2026-07-01T22:00:00Z'));
+
+      expect(variationEvaluator.evaluateSurvey).toHaveBeenCalledTimes(1);
+      expect(mailService.send).toHaveBeenCalledTimes(1);
+    });
+
+    it('vuelve a avisar en el semestre siguiente aunque el servidor siga encendido', async () => {
+      vi.mocked(repository.findSurveysForVariationEvaluation!).mockResolvedValue(
+        [buildSurvey()],
+      );
+      vi.mocked(variationEvaluator.evaluateSurvey!).mockResolvedValue(SHIFTS);
+
+      await worker.processSemesterVariations(JULY_1);
+      await worker.processSemesterVariations(new Date('2027-01-01T15:00:00Z'));
+
+      expect(mailService.send).toHaveBeenCalledTimes(2);
+    });
+
+    it('no envía correo cuando ninguna variación supera el umbral', async () => {
+      vi.mocked(repository.findSurveysForVariationEvaluation!).mockResolvedValue(
         [buildSurvey()],
       );
       vi.mocked(variationEvaluator.evaluateSurvey!).mockResolvedValue(NO_SHIFTS);
 
-      await worker.processSemesterVariations(new Date('2026-07-02T15:00:00Z'));
+      await worker.processSemesterVariations(JULY_1);
 
       expect(mailService.send).not.toHaveBeenCalled();
-      expect(repository.markVariationEvaluated).toHaveBeenCalledWith(
-        'survey-1',
-        'I-2026',
-      );
     });
 
-    it('marca el semestre como evaluado aunque la encuesta no tenga creador con correo', async () => {
-      vi.mocked(repository.findSurveysPendingVariationEvaluation!).mockResolvedValue(
+    it('no envía correo cuando la encuesta no tiene creador con correo', async () => {
+      vi.mocked(repository.findSurveysForVariationEvaluation!).mockResolvedValue(
         [buildSurvey({ createdBy: null })],
       );
       vi.mocked(variationEvaluator.evaluateSurvey!).mockResolvedValue(SHIFTS);
 
-      await worker.processSemesterVariations(new Date('2026-07-02T15:00:00Z'));
+      await worker.processSemesterVariations(JULY_1);
 
       expect(mailService.send).not.toHaveBeenCalled();
-      expect(repository.markVariationEvaluated).toHaveBeenCalledTimes(1);
     });
 
-    it('no marca el semestre cuando falla el envío y continúa con las demás encuestas', async () => {
+    it('reintenta en la siguiente revisión si falló el envío y continúa con las demás encuestas', async () => {
       vi.spyOn(Logger.prototype, 'error').mockImplementation(() => {});
-      vi.mocked(repository.findSurveysPendingVariationEvaluation!).mockResolvedValue(
+      vi.mocked(repository.findSurveysForVariationEvaluation!).mockResolvedValue(
         [buildSurvey({ id: 'survey-1' }), buildSurvey({ id: 'survey-2' })],
       );
       vi.mocked(variationEvaluator.evaluateSurvey!).mockResolvedValue(SHIFTS);
       vi.mocked(mailService.send!)
         .mockRejectedValueOnce(new Error('smtp down'))
-        .mockResolvedValueOnce(undefined);
+        .mockResolvedValue(undefined);
 
-      await worker.processSemesterVariations(new Date('2026-07-02T15:00:00Z'));
-
+      await worker.processSemesterVariations(JULY_1);
       expect(mailService.send).toHaveBeenCalledTimes(2);
-      expect(repository.markVariationEvaluated).toHaveBeenCalledTimes(1);
-      expect(repository.markVariationEvaluated).toHaveBeenCalledWith(
-        'survey-2',
-        'I-2026',
-      );
+
+      await worker.processSemesterVariations(new Date('2026-07-01T15:00:30Z'));
+      // survey-1 se reintenta y survey-2 ya no se repite
+      expect(mailService.send).toHaveBeenCalledTimes(3);
     });
 
-    it('no hace nada cuando no hay encuestas pendientes de evaluar', async () => {
-      await worker.processSemesterVariations(new Date('2026-07-02T15:00:00Z'));
+    it('no hace nada cuando no hay encuestas con alertas activas', async () => {
+      await worker.processSemesterVariations(JULY_1);
 
       expect(variationEvaluator.evaluateSurvey).not.toHaveBeenCalled();
       expect(mailService.send).not.toHaveBeenCalled();
-      expect(repository.markVariationEvaluated).not.toHaveBeenCalled();
     });
   });
 });

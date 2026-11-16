@@ -15,6 +15,7 @@ import {
   getPreviousSemester,
   getSemesterRange,
 } from '../utils/academic-semester.js';
+import { getSemesterStartDay } from '../utils/is-semester-start-day.js';
 import {
   buildSurveyFrontendUrl,
   formatSurveyClosureDate,
@@ -46,6 +47,8 @@ export class SurveyLifecycleWorkerService
   private readonly logger = new Logger(SurveyLifecycleWorkerService.name);
   private timer?: ReturnType<typeof setInterval>;
   private running = false;
+  // Encuestas ya evaluadas desde que arrancó el servidor, con clave "semestre:encuesta".
+  private readonly evaluatedVariations = new Set<string>();
 
   constructor(
     private readonly surveysRepository: SurveysRepository,
@@ -173,20 +176,23 @@ export class SurveyLifecycleWorkerService
     }
   }
 
-  // Al terminar cada semestre compara ese semestre contra el anterior y avisa una sola vez por encuesta.
+  // Solo el primer día de cada semestre (1 de enero y 1 de julio, hora de Bolivia) compara el semestre
+  // que terminó contra el anterior. Cada encuesta se avisa una sola vez mientras el servidor siga encendido.
   async processSemesterVariations(now: Date = new Date()) {
+    if (!getSemesterStartDay(now)) return;
+
     const currentPeriod = getAcademicPeriod(now.toISOString());
     const period = currentPeriod ? getPreviousSemester(currentPeriod) : null;
     const range = period ? getSemesterRange(period) : null;
     if (!period || !range) return;
 
     const surveys =
-      await this.surveysRepository.findSurveysPendingVariationEvaluation(
-        period,
-        range,
-      );
+      await this.surveysRepository.findSurveysForVariationEvaluation(range);
 
     for (const survey of surveys) {
+      const key = `${period}:${survey.id}`;
+      if (this.evaluatedVariations.has(key)) continue;
+
       try {
         const evaluation = await this.variationEvaluator.evaluateSurvey(
           survey.id,
@@ -200,7 +206,7 @@ export class SurveyLifecycleWorkerService
         if (evaluation.hasShifts && survey.createdBy?.email) {
           await this.sendVariationAlert(survey, evaluation);
         }
-        await this.surveysRepository.markVariationEvaluated(survey.id, period);
+        this.evaluatedVariations.add(key);
       } catch (err) {
         this.logger.error(
           `Error evaluando variaciones de la encuesta ${survey.id} en ${period}`,

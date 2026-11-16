@@ -462,13 +462,13 @@ describe('SurveysRepository - evaluación de variaciones por semestre', () => {
     };
   }
 
-  it('busca encuestas publicadas con actividad en el semestre, alertas activas y semestre sin evaluar', async () => {
+  it('busca encuestas publicadas con actividad en el semestre y alertas activas', async () => {
     const prisma = createVariationPrisma();
     const repository = new SurveysRepository(
       prisma as unknown as PrismaService,
     );
 
-    await repository.findSurveysPendingVariationEvaluation('I-2026', RANGE);
+    await repository.findSurveysForVariationEvaluation(RANGE);
 
     expect(prisma.survey.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -476,14 +476,6 @@ describe('SurveysRepository - evaluación de variaciones por semestre', () => {
           status: { title: 'published' },
           opensAt: { lt: RANGE.end },
           OR: [{ closesAt: null }, { closesAt: { gte: RANGE.start } }],
-          AND: [
-            {
-              OR: [
-                { variationEvaluatedPeriod: null },
-                { variationEvaluatedPeriod: { not: 'I-2026' } },
-              ],
-            },
-          ],
           NOT: { alertConfig: { is: { isEnabled: false } } },
         },
       }),
@@ -496,7 +488,7 @@ describe('SurveysRepository - evaluación de variaciones por semestre', () => {
       prisma as unknown as PrismaService,
     );
 
-    await repository.findSurveysPendingVariationEvaluation('I-2026', RANGE);
+    await repository.findSurveysForVariationEvaluation(RANGE);
 
     expect(prisma.survey.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -508,19 +500,5 @@ describe('SurveysRepository - evaluación de variaciones por semestre', () => {
         },
       }),
     );
-  });
-
-  it('registra el semestre evaluado en la encuesta', async () => {
-    const prisma = createVariationPrisma();
-    const repository = new SurveysRepository(
-      prisma as unknown as PrismaService,
-    );
-
-    await repository.markVariationEvaluated('survey-1', 'I-2026');
-
-    expect(prisma.survey.update).toHaveBeenCalledWith({
-      where: { id: 'survey-1' },
-      data: { variationEvaluatedPeriod: 'I-2026' },
-    });
   });
 });
