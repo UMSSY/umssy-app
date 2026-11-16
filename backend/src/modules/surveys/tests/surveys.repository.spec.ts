@@ -40,7 +40,7 @@ function createPrisma() {
     tx,
     survey: { findFirst: vi.fn(), findMany: vi.fn(), findUnique: vi.fn() },
     career: { findMany: vi.fn(), findUnique: vi.fn() },
-    user: { findUnique: vi.fn() },
+    user: { findUnique: vi.fn(), count: vi.fn(), findMany: vi.fn() },
     accessRequest: { findFirst: vi.fn() },
     $transaction: vi.fn((operation: (client: typeof tx) => unknown) =>
       operation(tx),
@@ -372,6 +372,77 @@ describe('SurveysRepository sin catálogos de encuestas', () => {
     );
     await expect(repository.create(BASE_DATA)).rejects.toMatchObject({
       statusCode: 503,
+    });
+  });
+
+  describe('audiencia de participación', () => {
+    const FILTER = {
+      surveyId: 'survey-1',
+      roles: ['titulado'] as const,
+      careerId: 'career-1',
+      graduationYear: 2020,
+    };
+    const AUDIENCE_WHERE = {
+      isActive: true,
+      roles: {
+        some: { deletedAt: null, role: { name: { in: ['titulado'] } } },
+      },
+      approvedAccessRequest: {
+        is: { careerId: 'career-1', graduationYear: 2020 },
+      },
+    };
+
+    it('cuenta solo usuarios activos con el rol, la carrera y la gestión objetivo', async () => {
+      const prisma = createPrisma();
+      prisma.user.count.mockResolvedValue(120);
+      const repository = new SurveysRepository(
+        prisma as unknown as PrismaService,
+      );
+
+      await expect(repository.countEligibleRespondents(FILTER)).resolves.toBe(
+        120,
+      );
+      expect(prisma.user.count).toHaveBeenCalledWith({ where: AUDIENCE_WHERE });
+    });
+
+    it('cuenta respondidos como usuarios distintos con respuesta a la encuesta', async () => {
+      const prisma = createPrisma();
+      const repository = new SurveysRepository(
+        prisma as unknown as PrismaService,
+      );
+
+      await repository.countEligibleRespondents(FILTER, true);
+
+      expect(prisma.user.count).toHaveBeenCalledWith({
+        where: {
+          ...AUDIENCE_WHERE,
+          surveyResponses: { some: { surveyId: 'survey-1' } },
+        },
+      });
+    });
+
+    it('excluye a quienes ya respondieron al buscar destinatarios pendientes', async () => {
+      const prisma = createPrisma();
+      prisma.user.findMany.mockResolvedValue([]);
+      const repository = new SurveysRepository(
+        prisma as unknown as PrismaService,
+      );
+
+      await repository.findPendingRecipients({
+        ...FILTER,
+        careerId: null,
+        graduationYear: null,
+      });
+
+      expect(prisma.user.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            isActive: true,
+            roles: AUDIENCE_WHERE.roles,
+            surveyResponses: { none: { surveyId: 'survey-1' } },
+          },
+        }),
+      );
     });
   });
 });

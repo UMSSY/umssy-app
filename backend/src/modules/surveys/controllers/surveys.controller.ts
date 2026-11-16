@@ -45,6 +45,10 @@ import {
   surveyAlertConfigSchema,
   type SurveyAlertConfigDto,
 } from '../requests/survey-alert-config.schema.js';
+import {
+  sendSurveyReminderSchema,
+  type SendSurveyReminderRequest,
+} from '../requests/send-survey-reminder.schema.js';
 import { surveyIdSchema } from '../requests/survey-id.schema.js';
 import {
   surveyStatisticsQuerySchema,
@@ -53,8 +57,11 @@ import {
 
 import type { SurveyCreatedResponse } from '../responses/survey-created.response.js';
 import type { SurveyDetailResponse } from '../responses/survey-detail.response.js';
+import type { SurveyParticipationResponse } from '../responses/survey-participation.response.js';
+import type { SurveyReminderResponse } from '../responses/survey-reminder.response.js';
 import type { SurveyStatisticsResponse } from '../responses/survey-statistics.response.js';
 import type { SurveySummaryResponse } from '../responses/survey-summary.response.js';
+import { SurveyParticipationService } from '../services/survey-participation.service.js';
 import { SurveysService } from '../services/surveys.service.js';
 
 @ApiTags('Encuestas')
@@ -62,7 +69,10 @@ import { SurveysService } from '../services/surveys.service.js';
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(SURVEYS_ROLE)
 export class SurveysController {
-  constructor(private readonly surveysService: SurveysService) {}
+  constructor(
+    private readonly surveysService: SurveysService,
+    private readonly surveyParticipationService: SurveyParticipationService,
+  ) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -218,26 +228,32 @@ export class SurveysController {
     return this.surveysService.saveAlertConfig(id, request);
   }
 
-  @Get(':id/audience')
+  @Get(':id/participation')
   @ApiOperation({
-    summary: 'Obtiene datos de audiencia y tasa de respuesta de la encuesta',
+    summary:
+      'Obtiene la cobertura de participación de la audiencia objetivo de la encuesta',
   })
-  @ApiOkResponse({ description: 'Datos de audiencia' })
-  getAudience(
+  @ApiOkResponse({ description: 'Estado de participación de la encuesta' })
+  getParticipation(
     @Param('id', new ZodValidationPipe(surveyIdSchema)) id: string,
-  ) {
-    return this.surveysService.getAudience(id);
+  ): Promise<SurveyParticipationResponse> {
+    return this.surveyParticipationService.getParticipation(id);
   }
 
   @Post(':id/reminders')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Envía un recordatorio a los usuarios pendientes de responder',
+    summary:
+      'Envía recordatorios por correo y push solo a la audiencia que aún no respondió',
   })
-  @ApiOkResponse({ description: 'Recordatorio enviado' })
-  sendReminder(
+  @ApiBody(toApiBody(sendSurveyReminderSchema))
+  @ApiOkResponse({ description: 'Resultado del envío de recordatorios' })
+  sendReminders(
     @Param('id', new ZodValidationPipe(surveyIdSchema)) id: string,
-    @Body() body: { pendingResponses?: number },
-  ) {
-    return this.surveysService.sendReminder(id, body?.pendingResponses ?? 0);
+    @Body(new ZodValidationPipe(sendSurveyReminderSchema))
+    _request: SendSurveyReminderRequest,
+    @CurrentUserId() userId: string,
+  ): Promise<SurveyReminderResponse> {
+    return this.surveyParticipationService.sendReminders(id, userId);
   }
 }

@@ -5,7 +5,7 @@ import { SurveyQuestionType, SurveyStatus, SurveyTargetAudience } from '../../su
 import {
   EMPLOYMENT_STATUS_QUESTION,
   MONTHLY_SALARY_QUESTION,
-} from '../constants/heatmap.constants.js';
+} from '../../surveys/constants/survey-employment.constants.js';
 import {
   HEATMAP_SEED_PASSWORD_HASH,
   HEATMAP_SEED_SURVEY,

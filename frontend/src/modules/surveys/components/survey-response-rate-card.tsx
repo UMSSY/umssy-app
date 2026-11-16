@@ -1,49 +1,67 @@
+import { cn } from "cn";
 import { Loader2, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { SURVEY_PARTICIPATION_TEXT } from "../constants/survey-participation.constants";
+import { SURVEY_PARTICIPATION_TEXT, SURVEY_RESPONSE_RATE_TONES } from "../constants/survey-participation.constants";
 import type { SurveyResponseRateCardProps } from "../types/survey-response-rate-card-props.types";
+import { getResponseRateTone } from "../utils/get-response-rate-tone";
 import { formatIsoDisplayDate } from "../utils/survey-dates";
 
 export function SurveyResponseRateCard({ participation, isSendingReminder, onSendReminder }: SurveyResponseRateCardProps) {
-  const { responseRate, responsesReceived, totalAudience, pendingResponses, audienceLabel, lastReminderAt } = participation;
-  const hasPending = pendingResponses > 0;
+  const { responseRate, respondedCount, eligibleCount, pendingCount, audienceLabel, lastReminderSentAt, canSendReminder } =
+    participation;
+  const tone = getResponseRateTone(responseRate);
+  const toneStyle = SURVEY_RESPONSE_RATE_TONES[tone];
+  const hasPending = pendingCount > 0;
 
   return (
     <Card className="gap-4 shadow-xs" aria-label={SURVEY_PARTICIPATION_TEXT.responseRateLabel}>
-      <CardContent className="flex flex-col gap-4">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div>
+      <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex min-w-0 flex-1 flex-col gap-3">
+          <div className="flex flex-col gap-1">
             <p className="text-xs font-medium text-text-secondary">{SURVEY_PARTICIPATION_TEXT.responseRateLabel}</p>
-            <p className="font-tight text-4xl font-bold text-accent tabular-nums">{responseRate}%</p>
+            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <p className={cn("font-tight text-4xl font-bold tabular-nums", toneStyle.textClassName)}>{responseRate}%</p>
+              <p className="text-sm text-ink-soft">{SURVEY_PARTICIPATION_TEXT.respondedSummary(respondedCount, eligibleCount)}</p>
+            </div>
           </div>
-          <p className="text-sm text-ink-soft">{SURVEY_PARTICIPATION_TEXT.respondedSummary(responsesReceived, totalAudience)}</p>
+
+          <Progress
+            value={responseRate}
+            data-tone={tone}
+            aria-label={SURVEY_PARTICIPATION_TEXT.responseRateLabel}
+            aria-valuetext={`${responseRate}% · ${toneStyle.label}`}
+            className={cn("**:data-[slot=progress-track]:h-2.5", toneStyle.meterClassName)}
+          />
+
+          <p className="text-xs text-text-secondary">{SURVEY_PARTICIPATION_TEXT.audience(audienceLabel)}</p>
         </div>
 
-        <Progress
-          value={responseRate}
-          aria-label={SURVEY_PARTICIPATION_TEXT.responseRateLabel}
-          className="**:data-[slot=progress-indicator]:bg-primary **:data-[slot=progress-track]:h-2.5"
-        />
-
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-xs text-text-secondary">{SURVEY_PARTICIPATION_TEXT.audience(audienceLabel)}</p>
-          <div className="flex flex-col items-start gap-1 sm:items-end">
-            <Button type="button" size="sm" onClick={onSendReminder} disabled={!hasPending || isSendingReminder} className="cursor-pointer gap-1.5 text-xs">
-              {isSendingReminder ? <Loader2 className="size-3.5 animate-spin" aria-hidden="true" /> : <Send className="size-3.5" aria-hidden="true" />}
-              {isSendingReminder
-                ? SURVEY_PARTICIPATION_TEXT.sendingReminder
-                : hasPending
-                  ? SURVEY_PARTICIPATION_TEXT.sendReminder(pendingResponses)
-                  : SURVEY_PARTICIPATION_TEXT.noPending}
-            </Button>
-            <p className="text-xs text-text-secondary">
-              {lastReminderAt
-                ? SURVEY_PARTICIPATION_TEXT.lastReminder(formatIsoDisplayDate(lastReminderAt))
-                : SURVEY_PARTICIPATION_TEXT.noReminder}
-            </p>
-          </div>
+        <div className="flex shrink-0 flex-col items-start gap-1 sm:items-end">
+          <Button
+            type="button"
+            size="sm"
+            onClick={onSendReminder}
+            disabled={!canSendReminder || isSendingReminder}
+            className="cursor-pointer gap-1.5 text-xs"
+          >
+            {isSendingReminder ? (
+              <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+            ) : (
+              <Send className="size-3.5" aria-hidden="true" />
+            )}
+            {isSendingReminder
+              ? SURVEY_PARTICIPATION_TEXT.sendingReminder
+              : hasPending
+                ? SURVEY_PARTICIPATION_TEXT.sendReminder(pendingCount)
+                : SURVEY_PARTICIPATION_TEXT.noPending}
+          </Button>
+          <p className="text-xs text-text-secondary">
+            {lastReminderSentAt
+              ? SURVEY_PARTICIPATION_TEXT.lastReminder(formatIsoDisplayDate(lastReminderSentAt))
+              : SURVEY_PARTICIPATION_TEXT.noReminder}
+          </p>
         </div>
       </CardContent>
     </Card>

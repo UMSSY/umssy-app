@@ -1,4 +1,4 @@
-import type { ReportPdfDefinition } from '../types/report-pdf.types.js';
+import type { ReportPdfDefinition } from '../types/report-pdf-definition.types.js';
 
 export const REPORT_PDF_PAGE = {
   width: 841.89,

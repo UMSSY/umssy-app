@@ -4,7 +4,8 @@ import {
   HEATMAP_EXTRA_COLUMNS,
 } from '../constants/heatmap.constants.js';
 import type { HeatmapGraduate } from '../types/heatmap-graduate.types.js';
-import type { HeatmapResponse, HeatmapRow } from '../types/heatmap.types.js';
+import type { HeatmapResponse } from '../types/heatmap-response.types.js';
+import type { HeatmapRow } from '../types/heatmap-row.types.js';
 import { buildCell, toPercentage } from './heatmap-math.util.js';
 import { allSkills, hasSkill, selectTopSkills } from './heatmap-skills.util.js';
 

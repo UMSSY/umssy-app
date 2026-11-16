@@ -1,6 +1,7 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
-import type { GeneratedReport, ReportType } from "../types/generated-report.types";
+import type { GeneratedReport } from "../types/generated-report.types";
+import type { ReportType } from "../types/report-type.types";
 import { ReportHistoryTable } from "./report-history-table";
 
 function buildReport(reportType: ReportType): GeneratedReport {

@@ -16,6 +16,11 @@ import {
 const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
 const CHECK_INTERVAL_MS = 30_000;
 
+function toQuestionIds(value: unknown): string[] | null {
+  if (!Array.isArray(value)) return null;
+  return value.filter((item): item is string => typeof item === 'string');
+}
+
 @Injectable()
 export class SurveyLifecycleWorkerService
   implements OnModuleInit, OnModuleDestroy
@@ -35,7 +40,7 @@ export class SurveyLifecycleWorkerService
     this.timer = setInterval(() => {
       void this.tick();
     }, CHECK_INTERVAL_MS);
-    this.timer.unref();
+    if (typeof this.timer.unref === 'function') this.timer.unref();
     void this.tick();
   }
 
@@ -149,7 +154,7 @@ export class SurveyLifecycleWorkerService
               academicPeriod: survey.academicPeriod,
               closesAt: survey.closesAt,
               threshold: survey.alertConfig?.threshold,
-              questionIds: survey.alertConfig?.questionIds as string[] | null,
+              questionIds: toQuestionIds(survey.alertConfig?.questionIds),
             },
           );
 

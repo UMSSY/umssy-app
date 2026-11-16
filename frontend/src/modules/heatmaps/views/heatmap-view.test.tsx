@@ -8,7 +8,7 @@ import { HEATMAP_FILTER_TEXT, HEATMAP_LAST_YEAR } from "../constants/heatmap-fil
 import { HEATMAP_TEXT } from "../constants/heatmap-text.constants";
 import { surveysService } from "@/modules/surveys";
 import { heatmapsService } from "../services/heatmaps.service";
-import type { HeatmapData } from "../types/heatmap.types";
+import type { HeatmapData } from "../types/heatmap-data.types";
 import { HeatmapView } from "./heatmap-view";
 
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn(), info: vi.fn() } }));

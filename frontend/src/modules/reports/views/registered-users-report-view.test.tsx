@@ -5,7 +5,8 @@ import { toast } from "sonner";
 import type { ApiResponse, PaginatedData } from "@/shared/types/api-response.types";
 import * as downloadFileModule from "@/shared/utils/download-file";
 import { reportsService } from "../services/reports.service";
-import type { RegisteredUser, RegisteredUsersParams } from "../types/registered-user.types";
+import type { RegisteredUser } from "../types/registered-user.types";
+import type { RegisteredUsersParams } from "../types/registered-users-params.types";
 import { RegisteredUsersReportView } from "./registered-users-report-view";
 
 const REGISTERED_USERS: RegisteredUser[] = [

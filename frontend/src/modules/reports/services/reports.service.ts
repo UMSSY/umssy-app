@@ -6,18 +6,15 @@ import {
   REJECTED_USERS_CSV_FALLBACK_NAME,
   SLOW_REQUEST_THRESHOLD_MS,
 } from "../constants/reports.constants";
-import type { GeneratedReport, ReportHistoryParams } from "../types/generated-report.types";
-import type {
-  ExportedFile,
-  RegisteredUser,
-  RegisteredUsersExportParams,
-  RegisteredUsersParams,
-} from "../types/registered-user.types";
-import type {
-  RejectedUser,
-  RejectedUsersExportParams,
-  RejectedUsersParams,
-} from "../types/rejected-user.types";
+import type { GeneratedReport } from "../types/generated-report.types";
+import type { ReportHistoryParams } from "../types/report-history-params.types";
+import type { ExportedFile } from "../types/exported-file.types";
+import type { RegisteredUser } from "../types/registered-user.types";
+import type { RegisteredUsersExportParams } from "../types/registered-users-export-params.types";
+import type { RegisteredUsersParams } from "../types/registered-users-params.types";
+import type { RejectedUser } from "../types/rejected-user.types";
+import type { RejectedUsersExportParams } from "../types/rejected-users-export-params.types";
+import type { RejectedUsersParams } from "../types/rejected-users-params.types";
 
 async function downloadCsv(url: string, params: object, fallbackName: string): Promise<ExportedFile> {
   const response = await apiClient.get<Blob>(url, { params, responseType: "blob" });

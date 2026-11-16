@@ -8,11 +8,9 @@ import {
   REPORT_PDF_PAGE,
   REPORT_PDF_TEXT,
 } from '../constants/report-pdf.constants.js';
-import type {
-  ReportPdfColumn,
-  ReportPdfContent,
-  ReportPdfFilter,
-} from '../types/report-pdf.types.js';
+import type { ReportPdfColumn } from '../types/report-pdf-column.types.js';
+import type { ReportPdfContent } from '../types/report-pdf-content.types.js';
+import type { ReportPdfFilter } from '../types/report-pdf-filter.types.js';
 
 const { width: PAGE_WIDTH, height: PAGE_HEIGHT, margin: MARGIN } = REPORT_PDF_PAGE;
 const CONTENT_WIDTH = PAGE_WIDTH - MARGIN * 2;

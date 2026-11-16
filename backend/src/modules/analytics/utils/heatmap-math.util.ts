@@ -1,4 +1,4 @@
-import type { HeatmapCell } from '../types/heatmap.types.js';
+import type { HeatmapCell } from '../types/heatmap-cell.types.js';
 
 export function toPercentage(count: number, total: number): number {
   return total > 0 ? Math.round((count / total) * 100) : 0;

@@ -300,56 +300,6 @@ export class SurveysService {
     };
   }
 
-  async getAudience(surveyId: string): Promise<{
-    surveyId: string;
-    totalAudience: number;
-    audienceLabel: string;
-    lastReminderAt: string | null;
-  }> {
-    const survey = await this.surveysRepository.findForAudience(surveyId);
-    if (!survey) throw new SurveyNotFoundException();
-
-    const totalAudience = await this.surveysRepository.countAudience({
-      careerId: survey.career?.id,
-    });
-    const careerLabel = survey.career?.title ?? 'Todas las carreras';
-    const periodLabel = survey.academicPeriod ?? 'General';
-    const audienceLabel = `${careerLabel} · ${periodLabel}`;
-
-    return {
-      surveyId,
-      totalAudience:
-        totalAudience > 0
-          ? totalAudience
-          : Math.max(1, survey._count.responses),
-      audienceLabel,
-      lastReminderAt: survey.lastReminderSentAt?.toISOString() ?? null,
-    };
-  }
-
-  async sendReminder(
-    surveyId: string,
-    pendingResponses: number,
-  ): Promise<{
-    sent: boolean;
-    pendingResponses: number;
-    message: string;
-    sentAt: string;
-  }> {
-    const survey = await this.surveysRepository.findStatus(surveyId);
-    if (!survey) throw new SurveyNotFoundException();
-
-    const now = new Date();
-    await this.surveysRepository.updateLastReminderSent(surveyId, now);
-
-    return {
-      sent: true,
-      pendingResponses,
-      message: `Recordatorio enviado a ${pendingResponses} titulados pendientes.`,
-      sentAt: now.toISOString(),
-    };
-  }
-
   private async ensureSurveyIsValid(
     data: UpdateSurveyData,
     request: CreateSurveyRequest,

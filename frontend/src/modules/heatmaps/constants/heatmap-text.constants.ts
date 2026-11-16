@@ -1,3 +1,5 @@
+import type { ExportFormatTexts } from "@/shared/types/export-format-texts.types";
+
 export const HEATMAP_TEXT = {
   rowHeader: "Habilidad técnica",
   base: (count: number, label: string) => `Base: ${count} ${label}`,
@@ -9,16 +11,17 @@ export const HEATMAP_TEXT = {
   loadError: "No se pudo cargar el mapa de calor. Inténtalo de nuevo.",
   retry: "Reintentar",
   export: "Exportar",
-  exportPdf: "Exportar PDF",
-  exportPdfHint: "Documento con el mapa de calor",
-  exportCsv: "Exportar CSV",
-  exportCsvHint: "Datos planos para análisis",
   pdfPending: "Exportación PDF pendiente de integración.",
   csvReady: "CSV generado correctamente.",
   noSummary: "No hay datos suficientes para generar una lectura rápida.",
   cellTooltip: (count: number, total: number, unit: string, column: string, skill: string, percentage: number) =>
     `${count} de ${total} ${unit} de ${column} registran ${skill} (${percentage}%)`,
 } as const;
+
+export const HEATMAP_EXPORT_FORMAT_TEXTS: ExportFormatTexts = {
+  pdf: { label: "Exportar PDF", description: "Documento con el mapa de calor" },
+  csv: { label: "Exportar CSV", description: "Datos planos para análisis" },
+};
 
 export const HEATMAP_TONE_SCALE = [
   { max: 15, className: "bg-primary/5 text-ink", legend: "0-15%" },

@@ -14,7 +14,7 @@ import { ReportTableFooter } from "../components/report-table-footer";
 import { UserTypeFilter } from "../components/user-type-filter";
 import { useExportRegisteredUsersCsv } from "../hooks/use-export-registered-users-csv";
 import { useRegisteredUsers } from "../hooks/use-registered-users";
-import type { AcademicPeriod } from "../types/registered-user.types";
+import type { AcademicPeriod } from "../types/academic-period.types";
 import type { RoleTag } from "@/modules/auth";
 
 export function RegisteredUsersReportView() {

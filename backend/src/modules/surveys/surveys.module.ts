@@ -5,17 +5,21 @@ import { SurveyNotificationsController } from './controllers/survey-notification
 import { SurveysController } from './controllers/surveys.controller.js';
 import { SurveyMapper } from './mappers/survey.mapper.js';
 import { CareersRepository } from './repositories/careers.repository.js';
+import { SurveyEmploymentResponsesRepository } from './repositories/survey-employment-responses.repository.js';
 import { SurveysRepository } from './repositories/surveys.repository.js';
 import { ReportsModule } from '../reports/reports.module.js';
 import { MailModule } from '../mail/mail.module.js';
+import { NotificationsModule } from '../notifications/notifications.module.js';
 import { CareersService } from './services/careers.service.js';
+import { SurveyEmploymentResponsesService } from './services/survey-employment-responses.service.js';
 import { SurveyPdfService } from './services/survey-pdf.service.js';
+import { SurveyParticipationService } from './services/survey-participation.service.js';
 import { SurveysService } from './services/surveys.service.js';
 import { SurveyVariationEvaluatorService } from './services/survey-variation-evaluator.service.js';
 import { SurveyLifecycleWorkerService } from './services/survey-lifecycle-worker.service.js';
 
 @Module({
-  imports: [JwtAuthModule, ReportsModule, MailModule],
+  imports: [JwtAuthModule, ReportsModule, MailModule, NotificationsModule],
   controllers: [
     SurveyNotificationsController,
     SurveysController,
@@ -23,6 +27,7 @@ import { SurveyLifecycleWorkerService } from './services/survey-lifecycle-worker
   ],
   providers: [
     SurveysService,
+    SurveyParticipationService,
     CareersService,
     SurveysRepository,
     CareersRepository,
@@ -30,6 +35,9 @@ import { SurveyLifecycleWorkerService } from './services/survey-lifecycle-worker
     SurveyPdfService,
     SurveyVariationEvaluatorService,
     SurveyLifecycleWorkerService,
+    SurveyEmploymentResponsesService,
+    SurveyEmploymentResponsesRepository,
   ],
+  exports: [CareersService, SurveyEmploymentResponsesService],
 })
 export class SurveysModule {}

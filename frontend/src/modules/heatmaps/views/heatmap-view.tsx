@@ -17,8 +17,9 @@ import { HEATMAP_TEXT } from "../constants/heatmap-text.constants";
 import { HEATMAP_VIEW_CONFIGS } from "../constants/heatmap-views.constants";
 import { useHeatmap } from "../hooks/use-heatmap";
 import { useHeatmapFilters } from "../hooks/use-heatmap-filters";
-import type { HeatmapExportFormat, HeatmapViewProps } from "../types/heatmap-component-props.types";
-import type { HeatmapSemesterRange } from "../types/heatmap-filters.types";
+import type { HeatmapExportFormat } from "../types/heatmap-export-format.types";
+import type { HeatmapViewProps } from "../types/heatmap-view-props.types";
+import type { HeatmapSemesterRange } from "../types/heatmap-semester-range.types";
 import { heatmapToCsv } from "../utils/heatmap-to-csv";
 
 export function HeatmapView({ type }: HeatmapViewProps) {

@@ -1,4 +1,5 @@
-import { MS_PER_YEAR } from '../constants/heatmap.constants.js';
+import { DAY_MS } from '../../../common/constants/date-time.constants.js';
+import { AVERAGE_YEAR_MS } from '../constants/heatmap.constants.js';
 import {
   HEATMAP_SEED_CAREERS,
   HEATMAP_SEED_COMPANIES,
@@ -17,8 +18,6 @@ import type {
 } from '../types/heatmap-seed.types.js';
 import { createSeededRandom, pick, type RandomSource } from './seeded-random.util.js';
 
-const DAY_MS = 86_400_000;
-
 function toDateOnly(time: number): Date {
   const date = new Date(time);
   date.setUTCHours(0, 0, 0, 0);
@@ -32,7 +31,7 @@ function planWorkExperiences(
 ): HeatmapSeedWorkExperience[] {
   if (years === null) return [];
   const segments = years < 2 ? 1 : 1 + Math.floor(random() * 3);
-  const segmentMs = (years * MS_PER_YEAR) / segments;
+  const segmentMs = (years * AVERAGE_YEAR_MS) / segments;
   const isCurrent = random() < 0.8;
   let end = anchor.getTime() - (isCurrent ? 0 : Math.floor(random() * 300) * DAY_MS);
 

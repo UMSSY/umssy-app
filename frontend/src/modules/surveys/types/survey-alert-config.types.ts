@@ -3,9 +3,3 @@ export interface SurveyAlertConfig {
   threshold: number;
   questionIds: string[] | null;
 }
-
-export interface SurveyAlertConfigPayload {
-  enabled: boolean;
-  threshold: number;
-  questionIds: string[];
-}

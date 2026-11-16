@@ -9,7 +9,7 @@ import { CONNECTION_ERROR_MESSAGE, REJECTED_USERS_PAGE_SIZE, REPORT_ALERT_DURATI
 import { REPORTS_QUERY_KEYS } from "../constants/reports-query-keys.constants";
 import { reportsService } from "../services/reports.service";
 import { useReportSnapshot } from "./use-report-snapshot";
-import type { AcademicPeriod } from "../types/registered-user.types";
+import type { AcademicPeriod } from "../types/academic-period.types";
 import type { RoleTag } from "@/modules/auth";
 
 function notifyRequestError(error: unknown, id: string) {

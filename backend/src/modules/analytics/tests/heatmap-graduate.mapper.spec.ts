@@ -1,32 +1,34 @@
-import { EMPLOYMENT_STATUS_QUESTION, MONTHLY_SALARY_QUESTION } from '../constants/heatmap.constants.js';
 import { toHeatmapGraduates } from '../mappers/heatmap-graduate.mapper.js';
-import { record } from './heatmap-fixtures.js';
+import { selectLatestResponsePerRespondent } from '../utils/select-latest-responses.util.js';
+import { employmentResponse } from './heatmap-fixtures.js';
 
 const NOW = new Date('2026-01-01T00:00:00.000Z');
 
 describe('toHeatmapGraduates', () => {
   it('traduce respuestas, habilidades NLP y experiencia del titulado', () => {
     const [graduate] = toHeatmapGraduates(
-      [
-        record({
-          answers: [
-            { question: { statement: EMPLOYMENT_STATUS_QUESTION }, option: { label: 'Independiente' } },
-            { question: { statement: MONTHLY_SALARY_QUESTION }, option: { label: 'Más de Bs 12.000' } },
-          ],
-          respondent: {
-            approvedAccessRequest: { careerId: 'career-informatics' },
-            userSkills: [
-              { source: 'nlp', skill: { id: 's1', name: 'SQL' } },
-              { source: 'manual', skill: { id: 's2', name: 'Git' } },
-            ],
-            workExperiences: [{ startDate: new Date('2024-01-01'), endDate: null }],
-          },
-        }),
-      ],
+      {
+        responses: [
+          employmentResponse({
+            employmentStatusLabel: 'Independiente',
+            monthlySalaryLabel: 'Más de Bs 12.000',
+          }),
+        ],
+        careers: [{ userId: 'user-1', careerId: 'career-informatics' }],
+        skills: [
+          { userId: 'user-1', skillId: 's1', skillName: 'SQL', source: 'nlp' },
+          { userId: 'user-1', skillId: 's2', skillName: 'Git', source: 'manual' },
+          { userId: 'user-2', skillId: 's3', skillName: 'Java', source: 'manual' },
+        ],
+        workPeriods: [
+          { userId: 'user-1', startDate: new Date('2024-01-01'), endDate: null },
+        ],
+      },
       NOW,
     );
 
     expect(graduate).toMatchObject({
+      userId: 'user-1',
       careerId: 'career-informatics',
       employmentStatus: 'self-employed',
       salaryRange: 'over-12000',
@@ -38,17 +40,39 @@ describe('toHeatmapGraduates', () => {
     });
   });
 
-  it('conserva solo la respuesta más reciente y descarta usuarios sin carrera aprobada', () => {
+  it('descarta titulados sin carrera aprobada y etiquetas desconocidas', () => {
     const graduates = toHeatmapGraduates(
-      [
-        record({ submittedAt: new Date('2024-01-01'), answers: [{ question: { statement: EMPLOYMENT_STATUS_QUESTION }, option: { label: 'Buscando empleo' } }] }),
-        record({ submittedAt: new Date('2025-01-01'), answers: [{ question: { statement: EMPLOYMENT_STATUS_QUESTION }, option: { label: 'Empleado en su área' } }] }),
-        record({ respondentId: 'user-2', respondent: { approvedAccessRequest: null, userSkills: [], workExperiences: [] } }),
-      ],
+      {
+        responses: [
+          employmentResponse({ employmentStatusLabel: 'Otra opción' }),
+          employmentResponse({ respondentId: 'user-2' }),
+        ],
+        careers: [{ userId: 'user-1', careerId: 'career-systems' }],
+        skills: [],
+        workPeriods: [],
+      },
       NOW,
     );
 
     expect(graduates).toHaveLength(1);
-    expect(graduates[0]).toMatchObject({ employmentStatus: 'employed-in-field', salaryRange: null, experienceYears: null });
+    expect(graduates[0]).toMatchObject({
+      employmentStatus: null,
+      salaryRange: null,
+      experienceYears: null,
+      skills: [],
+    });
+  });
+});
+
+describe('selectLatestResponsePerRespondent', () => {
+  it('conserva solo la respuesta más reciente de cada titulado', () => {
+    const latest = selectLatestResponsePerRespondent([
+      employmentResponse({ submittedAt: new Date('2025-01-01'), employmentStatusLabel: 'Empleado en su área' }),
+      employmentResponse({ submittedAt: new Date('2024-01-01'), employmentStatusLabel: 'Buscando empleo' }),
+      employmentResponse({ respondentId: 'user-2' }),
+    ]);
+
+    expect(latest).toHaveLength(2);
+    expect(latest[0]?.employmentStatusLabel).toBe('Empleado en su área');
   });
 });

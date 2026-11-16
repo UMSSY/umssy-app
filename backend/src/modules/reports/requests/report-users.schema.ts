@@ -63,7 +63,6 @@ const exportPaginationSchema = z.object({
   page: z.coerce.number().int().min(1).optional(),
   limit: z.coerce.number().int().min(1).max(DEFAULT_PAGE_SIZE).optional(),
 });
-// Define si la exportación se entrega como CSV o como PDF institucional generado en el servidor.
 const exportFormatSchema = z.enum(['csv', 'pdf']).optional();
 
 function hasCompleteExportPagination(query: { page?: number; limit?: number }): boolean {

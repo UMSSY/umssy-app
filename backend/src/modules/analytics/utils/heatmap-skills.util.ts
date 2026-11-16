@@ -1,8 +1,6 @@
 import { MAX_HEATMAP_SKILL_ROWS } from '../constants/heatmap.constants.js';
-import type {
-  HeatmapGraduate,
-  HeatmapSkill,
-} from '../types/heatmap-graduate.types.js';
+import type { HeatmapGraduate } from '../types/heatmap-graduate.types.js';
+import type { HeatmapSkill } from '../types/heatmap-skill.types.js';
 
 export type SkillSelector = (graduate: HeatmapGraduate) => HeatmapSkill[];
 

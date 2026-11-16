@@ -3,7 +3,8 @@ import { ROLES_KEY } from '../../../common/constants/roles.constants.js';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../../../common/guards/roles.guard.js';
 import { HeatmapsController } from '../controllers/heatmaps.controller.js';
-import { heatmapParamsSchema, heatmapQuerySchema } from '../requests/heatmap-request.schema.js';
+import { heatmapParamsSchema } from '../requests/heatmap-params.schema.js';
+import { heatmapQuerySchema } from '../requests/heatmap-query.schema.js';
 import type { HeatmapsService } from '../services/heatmaps.service.js';
 
 describe('HeatmapsController', () => {

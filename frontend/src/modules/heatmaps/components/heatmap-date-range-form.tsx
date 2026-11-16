@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { DialogFooter } from "@/components/ui/dialog";
 import { ReportFilterSelect } from "@/modules/reports";
 import { HEATMAP_FILTER_TEXT, HEATMAP_FIRST_YEAR, HEATMAP_LAST_YEAR, HEATMAP_SEMESTER_OPTIONS, HEATMAP_YEAR_OPTIONS } from "../constants/heatmap-filters.constants";
-import type { HeatmapDateRangeFormProps } from "../types/heatmap-component-props.types";
-import type { HeatmapSemester, HeatmapSemesterRange } from "../types/heatmap-filters.types";
+import type { HeatmapDateRangeFormProps } from "../types/heatmap-date-range-form-props.types";
+import type { HeatmapSemester } from "../types/heatmap-semester.types";
+import type { HeatmapSemesterRange } from "../types/heatmap-semester-range.types";
 import { isValidSemesterRange } from "../utils/semester-range-to-timestamps";
 
 const DEFAULT_RANGE: HeatmapSemesterRange = { startYear: HEATMAP_FIRST_YEAR, startSemester: 1, endYear: HEATMAP_LAST_YEAR, endSemester: 2 };

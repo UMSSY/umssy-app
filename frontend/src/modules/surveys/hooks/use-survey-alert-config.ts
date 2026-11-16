@@ -3,7 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { SURVEYS_QUERY_KEYS } from "../constants/surveys-query-keys.constants";
 import { surveyParticipationService } from "../services/survey-participation.service";
-import type { SurveyAlertConfigPayload } from "../types/survey-alert-config.types";
+import type { SurveyAlertConfigPayload } from "../types/survey-alert-config-payload.types";
 
 export function useSurveyAlertConfig(id: string) {
   const queryClient = useQueryClient();
@@ -20,6 +20,7 @@ export function useSurveyAlertConfig(id: string) {
   return {
     config: config.data?.data,
     isLoading: config.isPending,
+    hasError: config.isError,
     saveConfig: save.mutateAsync,
     isSaving: save.isPending,
   };

@@ -3,8 +3,9 @@
 import { useCallback } from "react";
 import { REGISTERED_USERS_CSV_FALLBACK_NAME, REGISTERED_USERS_PAGE_SIZE } from "../constants/reports.constants";
 import { reportsService } from "../services/reports.service";
-import type { AcademicPeriod } from "../types/registered-user.types";
-import type { ReportExportFormat, ReportExportScope } from "../types/report-export.types";
+import type { AcademicPeriod } from "../types/academic-period.types";
+import type { ReportExportFormat } from "../types/report-export-format.types";
+import type { ReportExportScope } from "../types/report-export-scope.types";
 import type { RoleTag } from "@/modules/auth";
 import { useExportReportCsv } from "./use-export-report-csv";
 

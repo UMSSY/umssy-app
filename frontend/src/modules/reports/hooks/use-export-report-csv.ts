@@ -5,8 +5,9 @@ import { toast } from "sonner";
 import { downloadFile } from "@/shared/utils/download-file";
 import { saveFile, selectCsvDestination } from "@/shared/utils/save-file";
 import { REPORT_ALERT_DURATION_MS } from "../constants/reports.constants";
-import type { ExportedFile } from "../types/registered-user.types";
-import type { ReportExportFormat, ReportExportScope } from "../types/report-export.types";
+import type { ExportedFile } from "../types/exported-file.types";
+import type { ReportExportFormat } from "../types/report-export-format.types";
+import type { ReportExportScope } from "../types/report-export-scope.types";
 
 export function useExportReportCsv(
   exportReport: (scope: ReportExportScope, format: ReportExportFormat) => Promise<ExportedFile>,

@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { HEATMAP_TEXT } from "../constants/heatmap-text.constants";
-import type { HeatmapExtraValueProps } from "../types/heatmap-component-props.types";
+import type { HeatmapExtraValueProps } from "../types/heatmap-extra-value-props.types";
 
 export function HeatmapExtraValue({ value, config }: HeatmapExtraValueProps) {
   if (!value || (value.badgeText === undefined && value.count === undefined && value.percentage === undefined)) {

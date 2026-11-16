@@ -1,4 +1,5 @@
-import type { HeatmapGraduate, HeatmapGraduateRecord } from '../types/heatmap-graduate.types.js';
+import type { SurveyEmploymentResponse } from '../../surveys/responses/survey-employment-response.response.js';
+import type { HeatmapGraduate } from '../types/heatmap-graduate.types.js';
 
 let sequence = 0;
 
@@ -21,16 +22,14 @@ export function graduate(overrides: Partial<HeatmapGraduate> = {}): HeatmapGradu
   };
 }
 
-export function record(overrides: Partial<HeatmapGraduateRecord> = {}): HeatmapGraduateRecord {
+export function employmentResponse(
+  overrides: Partial<SurveyEmploymentResponse> = {},
+): SurveyEmploymentResponse {
   return {
     respondentId: 'user-1',
     submittedAt: new Date('2025-03-01T14:00:00.000Z'),
-    answers: [],
-    respondent: {
-      approvedAccessRequest: { careerId: 'career-systems' },
-      userSkills: [],
-      workExperiences: [],
-    },
+    employmentStatusLabel: null,
+    monthlySalaryLabel: null,
     ...overrides,
   };
 }

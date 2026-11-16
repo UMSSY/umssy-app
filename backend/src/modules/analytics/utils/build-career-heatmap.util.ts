@@ -1,9 +1,8 @@
 import { HEATMAP_BASE_LABELS } from '../constants/heatmap.constants.js';
-import type {
-  HeatmapCareer,
-  HeatmapGraduate,
-} from '../types/heatmap-graduate.types.js';
-import type { HeatmapResponse, HeatmapRow } from '../types/heatmap.types.js';
+import type { HeatmapCareer } from '../types/heatmap-career.types.js';
+import type { HeatmapGraduate } from '../types/heatmap-graduate.types.js';
+import type { HeatmapResponse } from '../types/heatmap-response.types.js';
+import type { HeatmapRow } from '../types/heatmap-row.types.js';
 import { shortenCareerTitle } from './heatmap-dates.util.js';
 import { buildCell } from './heatmap-math.util.js';
 import { allSkills, countWithSkill, selectTopSkills } from './heatmap-skills.util.js';

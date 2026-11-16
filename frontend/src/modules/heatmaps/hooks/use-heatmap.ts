@@ -4,7 +4,7 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { HEATMAPS_QUERY_KEYS } from "../constants/heatmap-text.constants";
 import { heatmapsService, toHeatmapQueryParams } from "../services/heatmaps.service";
 import type { HeatmapFilters } from "../types/heatmap-filters.types";
-import type { HeatmapType } from "../types/heatmap.types";
+import type { HeatmapType } from "../types/heatmap-type.types";
 
 export function useHeatmap(type: HeatmapType, filters: HeatmapFilters) {
   const query = useQuery({

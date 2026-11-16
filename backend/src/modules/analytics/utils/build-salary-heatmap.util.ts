@@ -1,6 +1,7 @@
 import { HEATMAP_BASE_LABELS, SALARY_RANGES } from '../constants/heatmap.constants.js';
 import type { HeatmapGraduate } from '../types/heatmap-graduate.types.js';
-import type { HeatmapResponse, HeatmapRow } from '../types/heatmap.types.js';
+import type { HeatmapResponse } from '../types/heatmap-response.types.js';
+import type { HeatmapRow } from '../types/heatmap-row.types.js';
 import { buildCell } from './heatmap-math.util.js';
 import { countWithSkill, nlpSkills, selectTopSkills } from './heatmap-skills.util.js';
 

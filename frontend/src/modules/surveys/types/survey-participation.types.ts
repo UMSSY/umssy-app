@@ -1,8 +1,10 @@
 export interface SurveyParticipation {
+  surveyId: string;
+  respondedCount: number;
+  eligibleCount: number;
+  pendingCount: number;
   responseRate: number;
-  responsesReceived: number;
-  totalAudience: number;
-  pendingResponses: number;
   audienceLabel: string;
-  lastReminderAt: string | null;
+  lastReminderSentAt: string | null;
+  canSendReminder: boolean;
 }

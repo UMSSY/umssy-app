@@ -1,12 +1,11 @@
 import { Grid3x3 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { HEATMAP_SKELETON_ROWS } from "../constants/heatmap-matrix.constants";
 import { HEATMAP_TEXT } from "../constants/heatmap-text.constants";
-import type { HeatmapMatrixProps } from "../types/heatmap-component-props.types";
+import type { HeatmapMatrixProps } from "../types/heatmap-matrix-props.types";
 import { HeatmapCell } from "./heatmap-cell";
 import { HeatmapExtraValue } from "./heatmap-extra-value";
-
-const SKELETON_ROWS = 6;
 
 export function HeatmapMatrix({ columns, rows, extraColumnsConfig, cellFormat, cellUnit, caption, isLoading = false, emptyMessage }: HeatmapMatrixProps) {
   const extras = extraColumnsConfig ?? [];
@@ -16,7 +15,7 @@ export function HeatmapMatrix({ columns, rows, extraColumnsConfig, cellFormat, c
   if (isLoading) {
     return (
       <div className="flex flex-col gap-2 rounded-lg border border-border bg-surface p-4" aria-busy="true" aria-label="Cargando mapa de calor">
-        {Array.from({ length: SKELETON_ROWS }, (_, index) => (
+        {Array.from({ length: HEATMAP_SKELETON_ROWS }, (_, index) => (
           <Skeleton key={index} className="h-12 w-full" />
         ))}
       </div>

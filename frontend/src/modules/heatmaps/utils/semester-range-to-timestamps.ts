@@ -1,5 +1,6 @@
 import { BOLIVIA_UTC_OFFSET, HEATMAP_SEMESTER_BOUNDS } from "../constants/heatmap-filters.constants";
-import type { HeatmapDateRange, HeatmapSemesterRange } from "../types/heatmap-filters.types";
+import type { HeatmapDateRange } from "../types/heatmap-date-range.types";
+import type { HeatmapSemesterRange } from "../types/heatmap-semester-range.types";
 
 export function semesterRangeToTimestamps(range: HeatmapSemesterRange): HeatmapDateRange {
   return {
