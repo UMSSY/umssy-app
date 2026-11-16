@@ -27,6 +27,12 @@ export const HOME_WORKSHOPS = {
   action: { href: "/request-access", label: "Ver todos los talleres" },
 } as const;
 
+export const HOME_COMPANIES = {
+  title: "Empresas destacadas",
+  gateText: "Solicita acceso para ver todas las empresas y postular a sus ofertas.",
+  action: { href: "/request-access", label: "Ver todas las empresas" },
+} as const;
+
 export const HOME_AUDIENCES = {
   title: "Para quién es",
   items: [

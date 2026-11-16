@@ -11,6 +11,8 @@ import { HomeAudiences } from "../components/home-audiences";
 import { HomeSteps } from "../components/home-steps";
 import { HomeSectionHeading } from "../components/home-section-heading";
 import { HOME_SECTION_INNER_CLASS, HOME_WORKSHOPS } from "../constants/home.constants";
+import { FeaturedCompaniesSection } from "@/modules/companies";
+import { HOME_COMPANIES } from "../constants/home.constants";
 
 export function HomeView() {
   return (
@@ -32,6 +34,18 @@ export function HomeView() {
           </div>
         </section>
         <HomeAudiences />
+        <section className="bg-accent text-surface">
+          <div className={HOME_SECTION_INNER_CLASS}>
+            <div className="mb-14">
+              <HomeSectionHeading title={HOME_COMPANIES.title} />
+            </div>
+            <FeaturedCompaniesSection />
+            <div className="mt-14 flex flex-col items-center gap-6 border-t border-surface/20 pt-10 text-center">
+              <p className="max-w-xl text-lg leading-relaxed text-surface/80">{HOME_COMPANIES.gateText}</p>
+              <Link href={HOME_COMPANIES.action.href} className={cn(buttonVariants({ size: "lg" }), PUBLIC_SLANT_BUTTON_CLASS, "bg-danger text-surface hover:bg-danger/85")}>{HOME_COMPANIES.action.label}<ArrowRight aria-hidden="true" /></Link>
+            </div>
+          </div>
+        </section>
         <HomeSteps />
       </main>
       <PublicFooter />
