@@ -13,6 +13,7 @@ import { MentorPhotoController } from '../controllers/mentor-photo.controller.js
 import { MentorOffersController } from '../controllers/mentor-offers.controller.js';
 import { MentorExitController } from '../controllers/mentor-exit.controller.js';
 import { MentorParticipationController } from '../controllers/mentor-participation.controller.js';
+import { MentorCapacityAdminController } from '../controllers/mentor-capacity-admin.controller.js';
 
 describe('MentorsModule profile suggestions configuration', () => {
   it('registers the suggestions service once alongside its existing repository', () => {
@@ -50,6 +51,7 @@ describe('MentorsModule profile suggestions configuration', () => {
       MentorOffersController,
       MentorExitController,
       MentorParticipationController,
+      MentorCapacityAdminController,
     ]);
   });
 });
