@@ -132,6 +132,17 @@ backend/
     └── jest-e2e.json
 ```
 
+### 1.6 Endpoint Documentation (OpenAPI / Swagger)
+
+Every endpoint must be documented using OpenAPI for Swagger. The documentation must include:
+
+- Method, path, unique operation ID, module tag, summary, and purpose.
+- Authentication and required roles or permissions.
+- Path parameters, query parameters, headers, and request body.
+- Schemas with required fields, constraints, formats, enums, and examples.
+- Every applicable success and error status, with response schemas and examples.
+- Pagination, filtering, sorting, file uploads/downloads, and relevant response headers.
+
 ## 2. DATABASE STANDARDS AND ARCHITECTURE (PRISMA & POSTGRESQL)
 
 ### 2.1 Governance
