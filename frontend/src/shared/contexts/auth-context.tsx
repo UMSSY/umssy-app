@@ -3,7 +3,12 @@
 import { createContext, useContext, useEffect, useSyncExternalStore } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { isApiError } from "@/shared/services/api-client";
-import { authService, endSession, getSessionRoles } from "@/modules/auth";
+import {
+  authService,
+  endSession,
+  getSessionRoles,
+  SessionInactivityGuard,
+} from "@/modules/auth";
 import {
   getAccessToken,
   subscribeAccessToken,
@@ -61,6 +66,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }}
     >
       {children}
+      {Boolean(accessToken || session.data?.id) ? (
+        <SessionInactivityGuard />
+      ) : null}
     </AuthContext.Provider>
   );
 }

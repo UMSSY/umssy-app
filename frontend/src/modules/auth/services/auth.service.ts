@@ -45,6 +45,30 @@ export const authService = {
     });
     return response.data.data;
   },
+  refreshSession: async (): Promise<{ ok: boolean }> => {
+    try {
+      const response = await apiClient.post<ApiResponse<{ ok: boolean }> | { ok: boolean }>("/auth/refresh");
+      const res = response.data;
+      if (res && typeof res === "object" && "data" in res && res.data) {
+        return res.data;
+      }
+      return (res as { ok: boolean }) ?? { ok: true };
+    } catch (err: unknown) {
+      extractApiError(err, "No se pudo renovar la sesión");
+    }
+  },
+  logout: async (): Promise<{ ok: boolean }> => {
+    try {
+      const response = await apiClient.post<ApiResponse<{ ok: boolean }> | { ok: boolean }>("/auth/logout");
+      const res = response.data;
+      if (res && typeof res === "object" && "data" in res && res.data) {
+        return res.data;
+      }
+      return (res as { ok: boolean }) ?? { ok: true };
+    } catch {
+      return { ok: true };
+    }
+  },
   login: async (payload: LoginPayload): Promise<LoginResponse> => {
     if (!apiClient.defaults.baseURL) {
       throw new Error("La URL del backend no está configurada. Revisa las variables NEXT_PUBLIC_API_URL del frontend.");
