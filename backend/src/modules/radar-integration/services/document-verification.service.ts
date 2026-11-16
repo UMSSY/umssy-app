@@ -15,7 +15,7 @@ import { DocumentVerificationRepository } from '../repositories/document-verific
 import { evaluateRadarDocument } from '../utils/evaluate-radar-document.js';
 import { MAX_NLP_SOURCE_LENGTH } from '../../nlp/constants/nlp-validation.constants.js';
 import { AREA_IDS } from '../utils/radar-scoring.js';
-import type { VerificationJob } from '../types/document-verification.type.js';
+import type { VerificationJob } from '../types/verification-job.type.js';
 import { RadarPublicationService } from './radar-publication.service.js';
 
 @Injectable()

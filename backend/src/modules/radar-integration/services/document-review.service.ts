@@ -3,6 +3,7 @@ import { UsersService } from '../../users/services/users.service.js';
 import { DocumentVerificationRepository } from '../repositories/document-verification.repository.js';
 import { DocumentVerificationConflictException } from '../exceptions/document-verification-conflict.exception.js';
 import { DocumentVerificationFileNotFoundException } from '../exceptions/document-verification-file-not-found.exception.js';
+
 import type { DocumentReviewFilter } from '../requests/document-verification.request.js';
 
 @Injectable()

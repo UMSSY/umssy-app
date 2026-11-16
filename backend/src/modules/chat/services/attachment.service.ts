@@ -1,5 +1,5 @@
 import { MAX_FILE_UPLOAD_SIZE_BYTES } from '../../../common/constants/file-upload.constants.js';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject, Optional, forwardRef } from '@nestjs/common';
 import type { MulterFile } from '../../../common/types/multer-file.type.js';
 import { FileValidationService } from '../../../common/services/file-validation.service.js';
 import { EmptyFileException } from '../../../common/exceptions/empty-file.exception.js';
@@ -24,6 +24,7 @@ import { MessageRepository } from '../repositories/message.repository.js';
 import { MessageStatusService } from './message-status.service.js';
 import { BlockService } from './block.service.js';
 import { ChatRolePolicyService } from './chat-role-policy.service.js';
+import { MessageService } from './message.service.js';
 import type { SendAttachmentMessageDto } from '../requests/send-attachment-message.schema.js';
 import type { AttachmentFileDownload } from '../types/attachment.types.js';
 import type { AttachmentResponse } from '../responses/attachment.response.js';
@@ -40,6 +41,9 @@ export class AttachmentService {
     private readonly fileValidationService: FileValidationService,
     private readonly blockService: BlockService,
     private readonly chatRolePolicyService: ChatRolePolicyService,
+    @Optional()
+    @Inject(forwardRef(() => MessageService))
+    private readonly messageService?: MessageService,
   ) {}
 
   async uploadAndSend(
@@ -109,6 +113,10 @@ export class AttachmentService {
       await this.chatRolePolicyService.assertCanCommunicate(
         userId,
         otherParticipantId,
+        {
+          contextType: conversation.contextType ?? undefined,
+          contextId: conversation.contextId ?? undefined,
+        },
       );
     }
 
@@ -150,6 +158,14 @@ export class AttachmentService {
     );
 
     await this.participantRepository.markRead(dto.conversationId, userId, now);
+
+    if (this.messageService) {
+      await this.messageService.dispatchMessageNotification({
+        conversationId: dto.conversationId,
+        senderId: userId,
+        previewText: isImage ? 'Imagen' : 'Documento PDF',
+      });
+    }
 
     return this.attachmentMapper.toMessageResponse({
       message,
