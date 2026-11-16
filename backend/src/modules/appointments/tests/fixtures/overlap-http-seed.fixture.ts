@@ -308,6 +308,8 @@ export class InMemoryOverlapSeed {
         Promise.resolve(this.hasOverlapping(userId, startAt, endAt)),
       hasReservationOnDay: (userId: string, day: BoliviaDayRange) =>
         Promise.resolve(this.hasReservationOnDay(userId, day)),
+      hasMentorCancellation: (blockId: string, mentorId: string) =>
+        Promise.resolve(this.hasMentorCancellation(blockId, mentorId)),
       countMine: (
         userId: string,
         scope: MyAppointmentsQuery['scope'],
@@ -645,6 +647,14 @@ export class InMemoryOverlapSeed {
         DAILY_APPOINTMENT_LIMIT_STATUS_TITLES.includes(
           appointment.status.title as AppointmentStatusTitle,
         ),
+    );
+  }
+
+  private hasMentorCancellation(blockId: string, mentorId: string): boolean {
+    return this.appointments.some(
+      (appointment) =>
+        appointment.blockId === blockId &&
+        appointment.cancelledById === mentorId,
     );
   }
 
