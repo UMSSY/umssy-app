@@ -12,6 +12,13 @@ import type { NotifyResult } from '../types/notify-result.type.js';
 import { NotificationType } from '../types/notification-type.enum.js';
 import type { NotificationTemplateDefinition } from '../types/notification-template-definition.type.js';
 import { normalizeNotificationPayload } from '../utils/normalize-notification-payload.js';
+import { truncateNotificationText } from '../utils/truncate-notification-text.js';
+
+// Los mensajes de chat nunca se envían por correo, aunque el catálogo cambie.
+const EMAIL_EXCLUDED_TYPES: ReadonlySet<NotificationType> = new Set([
+  NotificationType.CHAT_MESSAGE,
+  NotificationType.CHAT_GROUP_MESSAGE,
+]);
 
 @Injectable()
 export class NotificationsService {
@@ -58,8 +65,9 @@ export class NotificationsService {
     }
 
     const normalizedPayload = normalizeNotificationPayload(payload);
-    const title = template.renderTitle(normalizedPayload);
-    const body = template.renderBody(normalizedPayload);
+    const title = truncateNotificationText(template.renderTitle(normalizedPayload));
+    const body = truncateNotificationText(template.renderBody(normalizedPayload));
+    const typeSendsEmail = typeRecord.sendsEmail && !EMAIL_EXCLUDED_TYPES.has(type);
 
     const preferences = await this.preferencesRepository.findManyByUserIds(validRecipients);
     
@@ -73,7 +81,7 @@ export class NotificationsService {
 
       const appVisible = this.appVisibilityService.isVisible(recipientId);
       if (typeRecord.sendsPush && pushEnabled && !appVisible) pushTargets.push(recipientId);
-      if (typeRecord.sendsEmail && emailEnabled) emailTargets.push(recipientId);
+      if (typeSendsEmail && emailEnabled) emailTargets.push(recipientId);
     }
 
     const createdNotifications = await this.notificationsRepository.createMany(

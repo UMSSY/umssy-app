@@ -196,6 +196,70 @@ describe('NotificationsService', () => {
     expect(result.emailStatus).toBe('sent');
   });
 
+  it('no debe enviar correo para mensajes de chat aunque el catálogo lo marque', async () => {
+    mockNotificationsRepo.findTypeByCode.mockResolvedValue({
+      id: 'type-chat',
+      code: 'CHAT_MESSAGE',
+      sendsPush: true,
+      sendsEmail: true,
+    });
+    mockPreferencesRepo.findManyByUserIds.mockResolvedValue([
+      { userId: 'user-2', pushEnabled: true, emailEnabled: true },
+    ]);
+
+    const result = await service.notify({
+      recipientIds: ['user-2'],
+      actorId: 'user-1',
+      type: NotificationType.CHAT_MESSAGE,
+      payload: { senderName: 'Ana', previewText: 'Hola', messageCount: 1 },
+      actionUrl: '/chat?conversationId=c1',
+    });
+
+    expect(result.inAppCount).toBe(1);
+    expect(result.emailStatus).toBe('skipped');
+    expect(mockMailDispatcher.dispatchToUsers).not.toHaveBeenCalled();
+  });
+
+  it('no debe enviar correo si el tipo tiene sendsEmail = false', async () => {
+    mockNotificationsRepo.findTypeByCode.mockResolvedValue({
+      id: 'type-123',
+      code: 'APPOINTMENT_BOOKED',
+      sendsPush: true,
+      sendsEmail: false,
+    });
+
+    const result = await service.notify({
+      recipientIds: ['user-2'],
+      actorId: 'user-1',
+      type: NotificationType.APPOINTMENT_BOOKED,
+      payload: validPayload,
+      actionUrl: '/test',
+    });
+
+    expect(result.emailStatus).toBe('skipped');
+    expect(mockMailDispatcher.dispatchToUsers).not.toHaveBeenCalled();
+  });
+
+  it('un fallo del correo no afecta a la notificación in-app ni al push', async () => {
+    mockPreferencesRepo.findManyByUserIds.mockResolvedValue([
+      { userId: 'user-2', pushEnabled: true, emailEnabled: true },
+    ]);
+    mockMailDispatcher.dispatchToUsers.mockRejectedValue(new Error('SMTP down'));
+
+    const result = await service.notify({
+      recipientIds: ['user-2'],
+      actorId: 'user-1',
+      type: NotificationType.APPOINTMENT_BOOKED,
+      payload: validPayload,
+      actionUrl: '/test',
+    });
+
+    expect(result.inAppCount).toBe(1);
+    expect(result.pushStatus).toBe('sent');
+    expect(result.emailStatus).toBe('failed');
+    expect(mockGateway.emitToUser).toHaveBeenCalled();
+  });
+
   it('no debe enviar push a un destinatario con la app visible', async () => {
     mockPreferencesRepo.findManyByUserIds.mockResolvedValue([
       { userId: 'user-2', pushEnabled: true, emailEnabled: false },

@@ -2,8 +2,7 @@ import { NotificationType } from '../types/notification-type.enum.js';
 
 import type { NotificationTemplateMap } from '../types/notification-template-map.type.js';
 
-const truncate = (text: string, max: number = 100) =>
-  text.length > max ? `${text.substring(0, max - 3)}...` : text;
+import { truncateNotificationText as truncate } from '../utils/truncate-notification-text.js';
 
 export const NOTIFICATION_TEMPLATES: NotificationTemplateMap = {
   [NotificationType.CHAT_MESSAGE]: {
