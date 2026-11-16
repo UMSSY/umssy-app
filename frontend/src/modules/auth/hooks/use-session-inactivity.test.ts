@@ -157,4 +157,59 @@ describe("useSessionInactivity", () => {
     });
     expect(onTimeout).toHaveBeenCalledTimes(1);
   });
+
+  it("renueva automáticamente el token periódicamente si hubo actividad del usuario", async () => {
+    const onTimeout = vi.fn();
+    const onRefresh = vi.fn().mockResolvedValue(undefined);
+
+    renderHook(() =>
+      useSessionInactivity({
+        idleTimeoutSeconds: 15 * 60,
+        warningSeconds: 3 * 60,
+        autoRefreshIntervalSeconds: 10 * 60, // 10 min
+        checkIntervalMs: 1000,
+        onTimeout,
+        onRefresh,
+      }),
+    );
+
+    // Simula interacción del usuario en el minuto 5
+    act(() => {
+      vi.advanceTimersByTime(5 * 60 * 1000);
+      window.dispatchEvent(new MouseEvent("click"));
+    });
+
+    expect(onRefresh).not.toHaveBeenCalled();
+
+    // Avanza hasta el minuto 10 (cumple el intervalo de 10 min y hubo actividad)
+    await act(async () => {
+      vi.advanceTimersByTime(5 * 60 * 1000 + 1000);
+    });
+
+    expect(onRefresh).toHaveBeenCalledTimes(1);
+  });
+
+  it("no renueva automáticamente si el usuario no tuvo interacción durante el intervalo", async () => {
+    const onTimeout = vi.fn();
+    const onRefresh = vi.fn().mockResolvedValue(undefined);
+
+    renderHook(() =>
+      useSessionInactivity({
+        idleTimeoutSeconds: 15 * 60,
+        warningSeconds: 3 * 60,
+        autoRefreshIntervalSeconds: 10 * 60, // 10 min
+        checkIntervalMs: 1000,
+        onTimeout,
+        onRefresh,
+      }),
+    );
+
+    // No hay clics ni interacción, solo corre el tiempo por 10 min
+    await act(async () => {
+      vi.advanceTimersByTime(10 * 60 * 1000 + 1000);
+    });
+
+    // No debe renovar porque no hubo actividad nueva
+    expect(onRefresh).not.toHaveBeenCalled();
+  });
 });
