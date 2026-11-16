@@ -1,20 +1,28 @@
 import { Logger } from '@nestjs/common';
 import {
+  ConnectedSocket,
+  MessageBody,
   OnGatewayConnection,
+  OnGatewayDisconnect,
   OnGatewayInit,
+  SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
 import { SessionService } from '../../../common/services/session.service.js';
+import { VisibilityChangedSchema } from '../requests/visibility-changed.schema.js';
+import { AppVisibilityService } from '../services/app-visibility.service.js';
 
 @WebSocketGateway({
   namespace: '/notifications',
   path: '/api/socket.io',
   cors: { origin: '*' },
 })
-export class NotificationGateway implements OnGatewayInit, OnGatewayConnection {
+export class NotificationGateway
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+{
   @WebSocketServer()
   server!: Server;
 
@@ -23,6 +31,7 @@ export class NotificationGateway implements OnGatewayInit, OnGatewayConnection {
   constructor(
     private readonly jwtService: JwtService,
     private readonly sessionService: SessionService,
+    private readonly appVisibilityService: AppVisibilityService,
   ) {}
 
   afterInit(server: Server) {
@@ -65,6 +74,31 @@ export class NotificationGateway implements OnGatewayInit, OnGatewayConnection {
         error instanceof Error ? error.stack : String(error),
       );
     }
+  }
+
+  handleDisconnect(client: Socket): void {
+    const user = client.data.user;
+    if (!user) return;
+
+    this.appVisibilityService.removeConnection(user.id, client.id);
+  }
+
+  @SubscribeMessage('visibility:changed')
+  handleVisibilityChanged(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() body: unknown,
+  ): void {
+    const user = client.data.user;
+    if (!user) return;
+
+    const parsed = VisibilityChangedSchema.safeParse(body);
+    if (!parsed.success) return;
+
+    this.appVisibilityService.setVisibility(
+      user.id,
+      client.id,
+      parsed.data.visible,
+    );
   }
 
   emitToUser(userId: string, event: string, payload: unknown): void {
