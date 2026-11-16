@@ -7,13 +7,9 @@ import { UnsupportedPortfolioProviderException } from '../exceptions/unsupported
 import { SocialAccountRepository } from '../repositories/social-account.repository.js';
 import type { OAuthUrlResponse } from '../responses/oauth-url.response.js';
 import type { SocialAccountResponse } from '../responses/social-account.response.js';
+import { SocialAccountMapper } from '../mappers/social-account.mapper.js';
+import type { ExternalUserProfile } from '../types/external-user-profile.type.js';
 import type { PortfolioProvider } from '../types/portfolio-provider.type.js';
-
-interface ExternalUserProfile {
-  externalId: string;
-  username: string;
-  profileUrl: string | null;
-}
 
 const REQUEST_TIMEOUT_MS = 10000;
 
@@ -22,6 +18,7 @@ export class SocialOAuthService {
   constructor(
     private readonly configService: ConfigService,
     private readonly socialAccountRepository: SocialAccountRepository,
+    private readonly mapper: SocialAccountMapper,
   ) {}
 
   getAuthorizationUrl(
@@ -92,13 +89,7 @@ export class SocialOAuthService {
       profileUrl: profile.profileUrl,
     });
 
-    return {
-      id: account.id,
-      provider: account.provider,
-      username: account.username,
-      profileUrl: account.profileUrl,
-      connected: true,
-    };
+    return this.mapper.toResponse(account);
   }
 
   private async exchangeCodeForProfile(

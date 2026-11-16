@@ -4,6 +4,7 @@ import { ExternalProviderUnavailableException } from '../exceptions/external-pro
 import { OAuthExchangeFailedException } from '../exceptions/oauth-exchange-failed.exception.js';
 import { UnsupportedPortfolioProviderException } from '../exceptions/unsupported-portfolio-provider.exception.js';
 import type { SocialAccountRepository } from '../repositories/social-account.repository.js';
+import { SocialAccountMapper } from '../mappers/social-account.mapper.js';
 import { SocialOAuthService } from '../services/social-oauth.service.js';
 import type { PortfolioProvider } from '../types/portfolio-provider.type.js';
 
@@ -49,6 +50,7 @@ describe('SocialOAuthService', () => {
     service = new SocialOAuthService(
       configMock as unknown as ConfigService,
       socialAccountRepositoryMock as unknown as SocialAccountRepository,
+      new SocialAccountMapper(),
     );
   });
 
