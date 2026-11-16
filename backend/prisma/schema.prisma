@@ -1551,7 +1551,7 @@ model RadarDocumentVerification {
   sizeBytes Int @map("size_bytes")
   active Boolean @default(true)
   digest String
-  statusId String @default("a0000000-0000-4000-8000-000000000001") @map("status_id") @db.Uuid
+  statusId String @default(dbgenerated("'a0000000-0000-4000-8000-000000000001'::uuid")) @map("status_id") @db.Uuid
   confidence Float?
   reason String @default("")
   skills Json @default("[]")
