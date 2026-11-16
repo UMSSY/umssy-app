@@ -33,6 +33,7 @@ export function RadarProfileView() {
   const [showEvidence, setShowEvidence] = useState(false);
   const [comparing, setComparing] = useState(false);
   const [openedRadar, setOpenedRadar] = useState<IntegrationRadar | null>(null);
+  const selectedPanelRef = useRef<HTMLElement>(null);
 
   const handleOpenNotification = async (id: string) => {
     try {
@@ -49,6 +50,36 @@ export function RadarProfileView() {
   const displayVariation = openedRadar ? openedRadar.variation : variation;
   const comparison = comparing ? displayPrevious : null;
   const areas = displayedData?.areas ?? [];
+
+  useEffect(() => {
+    if (!selectedArea) return;
+
+    const dismissOutside = (event: PointerEvent) => {
+      if (simulationOpen || showEvidence) return;
+      if (
+        event.target instanceof Node &&
+        !selectedPanelRef.current?.contains(event.target)
+      ) {
+        setSelectedArea(null);
+      }
+    };
+
+    const dismissWithEscape = (event: KeyboardEvent) => {
+      if (simulationOpen || showEvidence) return;
+      if (event.key === "Escape") {
+        setSelectedArea(null);
+      }
+    };
+
+    document.addEventListener("pointerdown", dismissOutside);
+    document.addEventListener("keydown", dismissWithEscape);
+
+    return () => {
+      document.removeEventListener("pointerdown", dismissOutside);
+      document.removeEventListener("keydown", dismissWithEscape);
+    };
+  }, [selectedArea, simulationOpen, showEvidence]);
+
   const selected = areas.find(area => area.id === selectedArea)
     ?? areas.find(area => comparison && area.score !== comparison.scores[area.id])
     ?? areas[0];
@@ -169,6 +200,7 @@ export function RadarProfileView() {
           {displayedData.version === 0 ? <p role="status">Aún no tienes publicaciones. Tu radar está sin datos.</p> : !displayPrevious ? <p role="status">Tienes una publicación. Podrás compararla cuando se publique la próxima versión de tu radar.</p> : null}
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
             <AffinityRadarChart
+              projectedScores={projection ? { [projection.areaId]: projection.score } : undefined}
               previousScores={displayPrevious?.scores}
               previousPublishedAt={displayPrevious?.updatedAt}
               publishedAt={displayedData.updatedAt}
@@ -178,7 +210,50 @@ export function RadarProfileView() {
               average={displayedData.average}
               onAreaClick={setSelectedArea}
             />
-            <AreaBreakdownPanel areas={areas} average={displayedData.average} />
+            <div ref={selectedPanelRef} className="flex flex-col gap-4">
+              {selectedArea && !comparison && areas.find(area => area.id === selectedArea) ? (
+                <section
+                  aria-label={`Área seleccionada: ${areas.find(area => area.id === selectedArea)!.name}`}
+                  className="rounded-lg border border-border bg-surface p-4"
+                >
+                  <h2 className="text-base font-semibold text-ink">
+                    {areas.find(area => area.id === selectedArea)!.name}
+                  </h2>
+                  <p className="mt-1 text-sm text-text-secondary">
+                    Explora oportunidades de mentoría y la evidencia de esta área.
+                  </p>
+                  <Link
+                    href={`/mentorship/mentors?area=${selectedArea.toUpperCase()}&from=radar`}
+                    className="mt-3 block text-sm font-medium text-accent underline underline-offset-4"
+                  >
+                    Ver mentores de esta área
+                  </Link>
+                  <div className="mt-3">
+                    <MentorshipProjection
+                      area={areas.find(area => area.id === selectedArea)!}
+                      areas={areas}
+                      onProjectionChange={setProjection}
+                      onOpenChange={setSimulationOpen}
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="mt-2 w-full"
+                    onClick={() => setShowEvidence(true)}
+                  >
+                    Ver evidencias
+                  </Button>
+                </section>
+              ) : null}
+              <AreaBreakdownPanel
+                areas={areas}
+                average={displayedData.average}
+                compact
+                selectedArea={selectedArea}
+                onAreaClick={setSelectedArea}
+              />
+            </div>
           </div>
           {comparison ? (
             <section aria-label="Comparación de publicaciones" className="rounded-lg border border-border bg-surface p-4">
@@ -195,8 +270,13 @@ export function RadarProfileView() {
               </div> : null}
             </section>
           ) : null}
-          {selectedArea && !comparison ? (
-            <RadarEvidencePanel key={`${displayedData.userId}:${selectedArea}`} selected={selectedArea} radar={displayedData} onClose={() => setSelectedArea(null)} />
+          {showEvidence && selectedArea && !comparison ? (
+            <RadarEvidencePanel
+              key={`${displayedData.userId}:${selectedArea}`}
+              selected={selectedArea}
+              radar={displayedData}
+              onClose={() => setShowEvidence(false)}
+            />
           ) : null}
           <p className="text-xs text-text-secondary">Las puntuaciones reflejan las habilidades aprobadas y sus evidencias.</p>
         </>
