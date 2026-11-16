@@ -5,13 +5,14 @@ import type { AuthenticatedUser } from '../../../common/types/authenticated-user
 
 const EVENT_ID = '33333333-3333-4333-8333-333333333333';
 const OWNER_ID = '11111111-1111-4111-8111-111111111111';
+const REGISTRATION_ID = '22222222-2222-4222-8222-222222222222';
 const TOKEN = 'a'.repeat(64);
 const ACTOR: AuthenticatedUser = { id: OWNER_ID, email: 'owner@example.test', roles: ['titulado'] };
 
 function setup() {
   const findWorkshop = vi.fn().mockResolvedValue({ id: EVENT_ID });
   const findPass = vi.fn().mockResolvedValue({
-    id: 'registration-1', cancelledAt: null, status: { title: 'Confirmada' },
+    id: REGISTRATION_ID, cancelledAt: null, status: { title: 'Confirmada' },
   });
   const db = { event: { findFirst: findWorkshop }, eventRegistration: { findFirst: findPass } };
   const service = new AttendanceValidationService(new AttendanceValidationRepository(db as never));
@@ -22,7 +23,7 @@ describe('AttendanceValidationService', () => {
   it('resolves an active pass only for its published workshop creator', async () => {
     const { service, findWorkshop, findPass } = setup();
     await expect(service.resolveForCheckIn(EVENT_ID, ACTOR, `V1:${TOKEN.toUpperCase()}`))
-      .resolves.toEqual({ registrationId: 'registration-1' });
+      .resolves.toEqual({ registrationId: REGISTRATION_ID });
     expect(findWorkshop).toHaveBeenCalledWith({
       where: { id: EVENT_ID, createdById: OWNER_ID, status: { title: 'Publicado' } },
       select: { id: true },
@@ -33,18 +34,29 @@ describe('AttendanceValidationService', () => {
     });
   });
 
-  it('rejects a caller without the titulado role before any database read', async () => {
-    const { service, findWorkshop, findPass } = setup();
-    await expect(service.resolveForCheckIn(EVENT_ID, { ...ACTOR, roles: ['administrativo'] }, TOKEN))
-      .rejects.toMatchObject({ statusCode: 403, code: 'FORBIDDEN_ROLE' });
-    expect(findWorkshop).not.toHaveBeenCalled();
-    expect(findPass).not.toHaveBeenCalled();
+  it('looks up a manual UUID only within the workshop managed by the actor', async () => {
+    const { service, findPass } = setup();
+    await expect(service.resolveForCheckIn(EVENT_ID, ACTOR, REGISTRATION_ID))
+      .resolves.toEqual({ registrationId: REGISTRATION_ID });
+    expect(findPass).toHaveBeenCalledWith(expect.objectContaining({
+      where: { eventId: EVENT_ID, id: REGISTRATION_ID },
+    }));
   });
 
-  it('rejects a missing or unassigned workshop without looking up the QR', async () => {
+  it.each(['administrativo', 'mentor'])(
+    'rejects a caller with only the %s role before any database read', async (role) => {
+      const { service, findWorkshop, findPass } = setup();
+      await expect(service.resolveForCheckIn(EVENT_ID, { ...ACTOR, roles: [role] }, TOKEN))
+        .rejects.toMatchObject({ statusCode: 403, code: 'FORBIDDEN_ROLE' });
+      expect(findWorkshop).not.toHaveBeenCalled();
+      expect(findPass).not.toHaveBeenCalled();
+    },
+  );
+
+  it('rejects a missing or unassigned workshop without looking up the reference', async () => {
     const { service, findWorkshop, findPass } = setup();
     findWorkshop.mockResolvedValue(null);
-    await expect(service.resolveForCheckIn(EVENT_ID, ACTOR, TOKEN))
+    await expect(service.resolveForCheckIn(EVENT_ID, ACTOR, REGISTRATION_ID))
       .rejects.toMatchObject({ statusCode: 403, code: 'ATTENDANCE_ACCESS_DENIED' });
     expect(findPass).not.toHaveBeenCalled();
   });
@@ -59,24 +71,30 @@ describe('AttendanceValidationService', () => {
     expect(findPass).not.toHaveBeenCalled();
   });
 
-  it('uses the same generic error for an absent pass or a QR from another workshop', async () => {
-    const { service, findPass } = setup();
-    findPass.mockResolvedValue(null);
-    await expect(service.resolveForCheckIn(EVENT_ID, ACTOR, TOKEN))
-      .rejects.toMatchObject({ statusCode: 422, code: 'ATTENDANCE_PASS_INVALID', message: 'Pase inválido.' });
-    expect(findPass).toHaveBeenCalledWith(expect.objectContaining({ where: { eventId: EVENT_ID, qrToken: TOKEN } }));
-  });
+  it.each([TOKEN, REGISTRATION_ID])(
+    'uses the same generic error for an absent pass or a reference from another workshop', async (reference) => {
+      const { service, findPass } = setup();
+      findPass.mockResolvedValue(null);
+      await expect(service.resolveForCheckIn(EVENT_ID, ACTOR, reference))
+        .rejects.toMatchObject({ statusCode: 422, code: 'ATTENDANCE_PASS_INVALID', message: 'Pase inválido.' });
+      expect(findPass).toHaveBeenCalledWith(expect.objectContaining({
+        where: { eventId: EVENT_ID, ...(reference === TOKEN ? { qrToken: TOKEN } : { id: REGISTRATION_ID }) },
+      }));
+    },
+  );
 
-  it('distinguishes a cancelled pass only within the authorized workshop', async () => {
-    const { service, findPass } = setup();
-    findPass.mockResolvedValue({ id: 'registration-1', cancelledAt: new Date(), status: { title: 'Cancelada' } });
-    await expect(service.resolveForCheckIn(EVENT_ID, ACTOR, TOKEN))
-      .rejects.toMatchObject({ statusCode: 422, code: 'ATTENDANCE_PASS_CANCELLED' });
-  });
+  it.each([TOKEN, REGISTRATION_ID])(
+    'distinguishes a cancelled pass only within the authorized workshop', async (reference) => {
+      const { service, findPass } = setup();
+      findPass.mockResolvedValue({ id: REGISTRATION_ID, cancelledAt: new Date(), status: { title: 'Cancelada' } });
+      await expect(service.resolveForCheckIn(EVENT_ID, ACTOR, reference))
+        .rejects.toMatchObject({ statusCode: 422, code: 'ATTENDANCE_PASS_CANCELLED' });
+    },
+  );
 
   it('rejects other non-confirmed registration statuses', async () => {
     const { service, findPass } = setup();
-    findPass.mockResolvedValue({ id: 'registration-1', cancelledAt: null, status: { title: 'Pendiente' } });
+    findPass.mockResolvedValue({ id: REGISTRATION_ID, cancelledAt: null, status: { title: 'Pendiente' } });
     await expect(service.resolveForCheckIn(EVENT_ID, ACTOR, TOKEN))
       .rejects.toMatchObject({ statusCode: 422, code: 'ATTENDANCE_PASS_INVALID' });
   });
@@ -84,10 +102,10 @@ describe('AttendanceValidationService', () => {
   it('can execute both reads on the same transaction supplied by the check-in service', async () => {
     const { service, db } = setup();
     const eventFindFirst = vi.fn().mockResolvedValue({ id: EVENT_ID });
-    const registrationFindFirst = vi.fn().mockResolvedValue({ id: 'registration-2', cancelledAt: null, status: { title: 'Confirmada' } });
+    const registrationFindFirst = vi.fn().mockResolvedValue({ id: REGISTRATION_ID, cancelledAt: null, status: { title: 'Confirmada' } });
     const tx = { event: { findFirst: eventFindFirst }, eventRegistration: { findFirst: registrationFindFirst } };
     await expect(service.resolveForCheckIn(EVENT_ID, ACTOR, TOKEN, tx as never))
-      .resolves.toEqual({ registrationId: 'registration-2' });
+      .resolves.toEqual({ registrationId: REGISTRATION_ID });
     expect(eventFindFirst).toHaveBeenCalledOnce();
     expect(registrationFindFirst).toHaveBeenCalledOnce();
     expect(db.event.findFirst).not.toHaveBeenCalled();

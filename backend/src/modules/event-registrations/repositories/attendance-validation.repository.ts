@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import type { Prisma } from '../../../prisma/client.js';
 import { PUBLISHED_STATUS_TITLE } from '../../events/constants/events.constants.js';
+import type { AttendanceReference } from '../requests/attendance-check-in.request.js';
 
 @Injectable()
 export class AttendanceValidationRepository {
@@ -18,9 +19,12 @@ export class AttendanceValidationRepository {
     });
   }
 
-  findPassInWorkshop(eventId: string, qrToken: string, tx: Prisma.TransactionClient = this.prisma) {
+  findPassInWorkshop(eventId: string, reference: AttendanceReference, tx: Prisma.TransactionClient = this.prisma) {
     return tx.eventRegistration.findFirst({
-      where: { eventId, qrToken },
+      where: {
+        eventId,
+        ...(reference.kind === 'qrToken' ? { qrToken: reference.value } : { id: reference.value }),
+      },
       select: {
         id: true,
         cancelledAt: true,

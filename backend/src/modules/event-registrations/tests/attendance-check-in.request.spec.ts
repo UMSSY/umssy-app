@@ -5,20 +5,27 @@ import {
 } from '../requests/attendance-check-in.request.js';
 
 const TOKEN = 'a'.repeat(64);
+const REGISTRATION_ID = '11111111-2222-4333-8444-555555555555';
 
 describe('attendance check-in request contract', () => {
   it.each([TOKEN, `v1:${TOKEN}`, `V1:${TOKEN.toUpperCase()}`])(
-    'accepts a real pass reference and normalizes it without exposing the prefix',
+    'accepts a real pass QR or token and normalizes it without exposing the prefix',
     (reference) => {
       expect(AttendanceCheckInBodySchema.parse({ reference })).toEqual({
-        reference: TOKEN,
+        reference: { kind: 'qrToken', value: TOKEN },
       });
     },
   );
 
+  it('accepts a registration UUID as a manual reference', () => {
+    expect(AttendanceCheckInBodySchema.parse({ reference: ` ${REGISTRATION_ID.toUpperCase()} ` })).toEqual({
+      reference: { kind: 'registrationId', value: REGISTRATION_ID },
+    });
+  });
+
   it.each([
     '', 'v1:', 'abc', 'K7M4-R9TX-2Q8P',
-    '11111111-2222-4333-8444-555555555555',
+    '11111111-2222-3333-4444-55555555555',
     '<script>alert(1)</script>', `v2:${TOKEN}`, `${TOKEN}extra`,
   ])('rejects an unsupported or malformed reference: %s', (reference) => {
     expect(AttendanceCheckInBodySchema.safeParse({ reference }).success).toBe(false);
