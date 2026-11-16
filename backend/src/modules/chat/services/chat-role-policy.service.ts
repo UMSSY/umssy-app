@@ -3,7 +3,10 @@ import { Injectable } from '@nestjs/common';
 import { UsersService } from '../../users/services/users.service.js';
 import { ApplicationsService } from '../../applications/services/applications.service.js';
 
+import { CHAT_APPLICATION_CONTEXT_TYPE } from '../constants/chat-role-policy.constants.js';
 import { ChatRoleNotAllowedException } from '../exceptions/chat.exceptions.js';
+import type { ChatCommunicationAuthorization } from '../types/chat-communication-authorization.types.js';
+import type { ChatCommunicationContext } from '../types/chat-communication-context.types.js';
 
 const STUDENT_ROLES = new Set(['estudiante', 'titulado']);
 
@@ -17,11 +20,8 @@ export class ChatRolePolicyService {
   async assertCanCommunicate(
     userId: string,
     contactId: string,
-    context?: {
-      contextType?: string | null;
-      contextId?: string | null;
-    },
-  ): Promise<void> {
+    context?: ChatCommunicationContext,
+  ): Promise<ChatCommunicationAuthorization> {
     const ids = [userId.trim().toLowerCase(), contactId.trim().toLowerCase()];
 
     if (ids[0] === ids[1]) {
@@ -50,11 +50,6 @@ export class ChatRolePolicyService {
     const isSecondStudent =
       secondRoles.length > 0 &&
       secondRoles.every((name) => STUDENT_ROLES.has(name));
-
-    if (isFirstStudent && isSecondStudent) {
-      return;
-    }
-
     const isFirstCompany =
       firstRoles.length > 0 && firstRoles.every((name) => name === 'empresa');
     const isSecondCompany =
@@ -63,11 +58,11 @@ export class ChatRolePolicyService {
     const hasStudentAndCompany =
       (isFirstStudent && isSecondCompany) || (isFirstCompany && isSecondStudent);
 
-    if (
-      hasStudentAndCompany &&
-      context?.contextType === 'POSTULACION' &&
-      context?.contextId
-    ) {
+    if (context?.contextType === CHAT_APPLICATION_CONTEXT_TYPE) {
+      if (!hasStudentAndCompany || !context.contextId) {
+        return this.deny();
+      }
+
       const student = isFirstStudent ? firstUser : secondUser;
       const companyUser = isFirstCompany ? firstUser : secondUser;
 
@@ -82,9 +77,15 @@ export class ChatRolePolicyService {
           companyUser.companyId,
         );
 
-      if (application.isValid) {
-        return;
+      if (!application.isValid) {
+        return this.deny();
       }
+
+      return { hasValidatedApplication: true };
+    }
+
+    if (isFirstStudent && isSecondStudent) {
+      return { hasValidatedApplication: false };
     }
 
     return this.deny();

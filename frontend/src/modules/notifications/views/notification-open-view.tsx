@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { isApiError } from "@/shared/services/api-client";
 import { NOTIFICATION_UNAVAILABLE_MESSAGE } from "../constants/notification-open.constants";
-import { markNotificationAsRead } from "../services/notification-read.service";
+import { markNotificationAsRead } from "../services/notifications.service";
 import { parseNotificationOpenParams } from "../utils/parse-notification-open-params";
 
 export function NotificationOpenView() {
@@ -21,7 +21,6 @@ export function NotificationOpenView() {
           await markNotificationAsRead(notificationId);
         } catch (error) {
           const status = isApiError(error) ? error.response?.status : undefined;
-          // Con 401 la sesión expiró: SessionGate lleva al login conservando esta URL.
           if (status === 401) return;
           if (status === 404) toast.info(NOTIFICATION_UNAVAILABLE_MESSAGE);
         }

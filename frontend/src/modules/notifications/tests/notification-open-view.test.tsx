@@ -2,13 +2,13 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { toast } from "sonner";
 import { NotificationOpenView } from "../views/notification-open-view";
-import { markNotificationAsRead } from "../services/notification-read.service";
+import { markNotificationAsRead } from "../services/notifications.service";
 
 const replace = vi.fn();
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ replace }) }));
 vi.mock("sonner", () => ({ toast: { info: vi.fn() } }));
-vi.mock("../services/notification-read.service", () => ({ markNotificationAsRead: vi.fn() }));
+vi.mock("../services/notifications.service", () => ({ markNotificationAsRead: vi.fn() }));
 
 function openWith(search: string) {
   window.history.pushState({}, "", `/notifications/open${search}`);

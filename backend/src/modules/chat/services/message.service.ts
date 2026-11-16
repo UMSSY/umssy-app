@@ -1,6 +1,12 @@
 import { MessageMapper } from '../mappers/message.mapper.js';
 
-import { Inject, Injectable, Optional, forwardRef } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  Logger,
+  Optional,
+  forwardRef,
+} from '@nestjs/common';
 import { MessageRepository } from '../repositories/message.repository.js';
 import { ConversationRepository } from '../repositories/conversation.repository.js';
 import { ConversationParticipantRepository } from '../repositories/conversation-participant.repository.js';
@@ -11,6 +17,7 @@ import { BlockService } from './block.service.js';
 import { ChatVisibilityService } from './chat-visibility.service.js';
 import { NotificationsService } from '../../notifications/services/notifications.service.js';
 import { NotificationType } from '../../notifications/types/notification-type.enum.js';
+import { EventsService } from '../../events/services/events.service.js';
 import {
   ConversationNotFoundException,
   InvalidMessageContentException,
@@ -23,6 +30,8 @@ import { countCharacters } from '../utils/unicode-counter.js';
 
 @Injectable()
 export class MessageService {
+  private readonly logger = new Logger(MessageService.name);
+
   constructor(
     private readonly messageRepository: MessageRepository,
     private readonly conversationRepository: ConversationRepository,
@@ -40,6 +49,9 @@ export class MessageService {
     @Optional()
     @Inject(forwardRef(() => UserLookupRepository))
     private readonly userLookupRepository?: UserLookupRepository,
+    @Optional()
+    @Inject(forwardRef(() => EventsService))
+    private readonly eventsService?: EventsService,
   ) {}
 
   async send(params: {
@@ -228,11 +240,11 @@ export class MessageService {
 
       if (isGroup) {
         let groupName = 'Grupo de chat';
-        const withEvent = await this.conversationRepository.findWithEventById(
-          params.conversationId,
-        );
-        if (withEvent?.event?.title) {
-          groupName = withEvent.event.title;
+        if (conversation.eventId && this.eventsService) {
+          const event = await this.eventsService.findById(conversation.eventId);
+          if (event?.title) {
+            groupName = event.title;
+          }
         }
 
         await this.notificationsService.notify({
@@ -262,8 +274,11 @@ export class MessageService {
           groupKey: params.conversationId,
         });
       }
-    } catch {
-      // Non-blocking for messaging flow
+    } catch (error) {
+      this.logger.error(
+        `Failed to dispatch message notification for conversation ${params.conversationId}`,
+        error instanceof Error ? error.stack : String(error),
+      );
     }
   }
 
