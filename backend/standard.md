@@ -114,6 +114,7 @@ backend/
 │       │   │   └── register.request.ts         # Zod schema for the registration body
 │       │   ├── types/                          # Inferred types, internal contracts, and enums
 │       │   │   └── auth.types.ts               # Internal domain interfaces and types
+│       │   ├── notification/                   # Domain notification templates
 │       │   ├── exceptions/
 │       │   │   └── auth.exceptions.ts          # InvalidCredentialsException
 │       │   ├── interceptors/                   # Only when the domain needs its own interceptor
@@ -124,9 +125,11 @@ backend/
 │       │       ├── auth.mapper.spec.ts
 │       │       └── auth.controller.spec.ts
 │       ├── users/
+│       │   ├── notification/                   # Domain notification templates
 │       │   └── seeds/
 │       │       └── users.seed.ts               # Initial module data
 │       └── mentors/
+│           └── notification/                   # Domain notification templates
 └── test/                                      # End-to-end and integration tests
     ├── mentors.e2e-spec.ts
     └── jest-e2e.json
@@ -142,6 +145,13 @@ Every endpoint must be documented using OpenAPI for Swagger. The documentation m
 - Schemas with required fields, constraints, formats, enums, and examples.
 - Every applicable success and error status, with response schemas and examples.
 - Pagination, filtering, sorting, file uploads/downloads, and relevant response headers.
+
+### 1.7 Notification Restrictions
+
+- All domain notifications must use `NotificationsService.notify()`. Implementing another notification system or sending notifications directly through Web Push, SMTP, Socket.io, `web-push`, or `nodemailer` outside this service is prohibited.
+- Every domain module must contain a `notification/` folder for its notification templates. Templates must remain in the module that owns the business event.
+- Consumers must validate notification payloads with Zod, use `NotificationType` instead of raw strings, and dispatch only after a successful domain transaction. New notification types must be coordinated with the Notifications module maintainers.
+- Consumers must not implement delivery channels, batch dispatch loops, global notification rules, notification UI, or email layouts, or directly modify `Notification`, `PushSubscription`, or `NotificationPreference`.
 
 ## 2. DATABASE STANDARDS AND ARCHITECTURE (PRISMA & POSTGRESQL)
 
