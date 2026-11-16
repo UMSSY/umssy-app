@@ -35,6 +35,7 @@ import type { AppointmentDetailDialogProps } from "../types/appointment-detail-d
 import {
   canRebookAfterCancellation,
   getCancellationLabel,
+  isCancellationAttributed,
 } from "../utils/appointment-cancellation.utils";
 import {
   formatAppointmentDate,
@@ -84,6 +85,12 @@ export function AppointmentDetailDialog({ appointmentId, onClose }: AppointmentD
                   label={
                     appointment.status === "CANCELLED"
                       ? getCancellationLabel(appointment.cancellation)
+                      : undefined
+                  }
+                  className={
+                    appointment.status === "CANCELLED" &&
+                    isCancellationAttributed(appointment.cancellation)
+                      ? "text-destructive"
                       : undefined
                   }
                 />

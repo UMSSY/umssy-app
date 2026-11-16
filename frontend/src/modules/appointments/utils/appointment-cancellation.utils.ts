@@ -10,6 +10,10 @@ export function getCancellationLabel(cancellation: AppointmentCancellation | nul
   return APPOINTMENT_CANCELLATION_TEXT.fallback;
 }
 
+export function isCancellationAttributed(cancellation: AppointmentCancellation | null): boolean {
+  return getCancellationLabel(cancellation) !== APPOINTMENT_CANCELLATION_TEXT.fallback;
+}
+
 export function canRebookAfterCancellation(appointment: Appointment): boolean {
   return (
     appointment.status === "CANCELLED" &&

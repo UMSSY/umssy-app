@@ -208,6 +208,20 @@ describe("AppointmentDetailDialog: cita cancelada", () => {
     expect(await screen.findByText("Cancelada por ti")).toBeInTheDocument()
   })
 
+  it("pinta en rojo el texto de cancelación cuando se sabe quién canceló", async () => {
+    vi.spyOn(appointmentsApi, "getById").mockResolvedValue(
+      makeAppointment({
+        status: "CANCELLED",
+        meetingUrl: null,
+        cancellation: { cancelledBy: "MENTOR", cancelledByMe: true, reason: null, cancelledAt: "2026-10-10T00:00:00.000Z" },
+      }),
+    )
+
+    renderDialog()
+
+    expect(await screen.findByText("Cancelada por ti")).toHaveClass("text-destructive")
+  })
+
   it("muestra el motivo de la cancelación cuando existe", async () => {
     vi.spyOn(appointmentsApi, "getById").mockResolvedValue(
       makeAppointment({

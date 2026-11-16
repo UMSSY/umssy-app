@@ -146,6 +146,29 @@ describe("AppointmentCard", () => {
     expect(screen.getByText("Cancelada por el titulado")).toBeInTheDocument();
   });
 
+  it("pinta en rojo el texto de cancelación cuando se sabe quién canceló", () => {
+    render(
+      <AppointmentCard
+        appointment={makeAppointment({
+          status: "CANCELLED",
+          cancellation: { cancelledBy: "MENTOR", cancelledByMe: true, reason: null, cancelledAt: "2026-10-25T00:00:00.000Z" },
+        })}
+      />,
+    );
+
+    expect(screen.getByText("Cancelada por ti")).toHaveClass("text-destructive");
+  });
+
+  it("no pinta en rojo el «Cancelada» genérico sin dato de quién canceló", () => {
+    render(
+      <AppointmentCard
+        appointment={makeAppointment({ status: "CANCELLED", cancellation: null })}
+      />,
+    );
+
+    expect(screen.getByText("Cancelada")).not.toHaveClass("text-destructive");
+  });
+
   it.each(["mentor", "student"] as const)(
     "muestra Completada con estilo neutro para una cita con %s",
     (role) => {

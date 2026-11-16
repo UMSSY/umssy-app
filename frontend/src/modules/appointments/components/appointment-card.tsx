@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { cn } from "cn";
 import { BOLIVIA_TIME_LABEL } from "@/shared/constants/date-time.constants";
 import {
   formatBlockRange,
@@ -13,13 +14,16 @@ import {
 } from "../constants/appointments.constants";
 import { AppointmentStatusBadge } from "./appointment-status-badge";
 import type { AppointmentCardProps } from "../types/appointment-card-props.types";
-import { getCancellationLabel } from "../utils/appointment-cancellation.utils";
+import {
+  getCancellationLabel,
+  isCancellationAttributed,
+} from "../utils/appointment-cancellation.utils";
 
 export function AppointmentCard({ appointment, onSelect }: AppointmentCardProps) {
-  const statusLabel =
-    appointment.status === "CANCELLED"
-      ? getCancellationLabel(appointment.cancellation)
-      : APPOINTMENT_STATUS_LABELS[appointment.status];
+  const isCancelled = appointment.status === "CANCELLED";
+  const statusLabel = isCancelled
+    ? getCancellationLabel(appointment.cancellation)
+    : APPOINTMENT_STATUS_LABELS[appointment.status];
 
   return (
     <Button
@@ -52,7 +56,10 @@ export function AppointmentCard({ appointment, onSelect }: AppointmentCardProps)
           <AppointmentStatusBadge
             status={appointment.status}
             label={statusLabel}
-            className="col-start-1 row-start-2 w-fit justify-self-start sm:col-start-2 sm:row-span-3 sm:row-start-1 sm:justify-self-end"
+            className={cn(
+              "col-start-1 row-start-2 w-fit justify-self-start sm:col-start-2 sm:row-span-3 sm:row-start-1 sm:justify-self-end",
+              isCancelled && isCancellationAttributed(appointment.cancellation) && "text-destructive",
+            )}
           />
 
           <span className="col-start-1 row-start-3 text-sm wrap-anywhere text-text-secondary sm:row-start-2">
@@ -67,7 +74,7 @@ export function AppointmentCard({ appointment, onSelect }: AppointmentCardProps)
           </span>
         </span>
 
-        {appointment.status === "CANCELLED" && appointment.cancellation?.reason ? (
+        {isCancelled && appointment.cancellation?.reason ? (
           <span className="block text-sm wrap-anywhere text-text-secondary italic">
             {appointment.cancellation.reason}
           </span>
