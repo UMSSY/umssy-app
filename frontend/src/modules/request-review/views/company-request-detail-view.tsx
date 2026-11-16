@@ -864,10 +864,10 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
               return (
                 <div
                   key={comp.id}
-                  className="flex flex-col rounded-xl border border-border bg-surface p-4 shadow-2xs"
+                  className="flex flex-col rounded-xl border border-border bg-surface p-3.5 shadow-2xs"
                 >
                   {/* Cabecera del campo con icono, etiqueta y estado */}
-                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 pb-2.5">
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 pb-2">
                     <div className="flex items-center gap-2">
                       <IconComponent className="size-4 text-primary" />
                       <span className="text-xs font-bold text-ink sm:text-sm">
@@ -902,44 +902,34 @@ export function CompanyRequestDetailView({ id }: { id: string }) {
                     </span>
                   </div>
 
-                  {/* Comparación lado a lado: 50% Llenado en Registro vs 50% Extraído de Carta (OCR) */}
-                  <div className="mt-3 grid grid-cols-1 items-stretch gap-3 sm:grid-cols-2">
-                    {/* Lado izquierdo: Dato Declarado en Formulario */}
+                  {/* Comparación lado a lado: Declarado vs Extraído (OCR) */}
+                  <div className="mt-2.5 grid grid-cols-1 items-stretch gap-2.5 sm:grid-cols-2">
+                    {/* Lado izquierdo: Declarado */}
                     <div className="flex flex-col">
-                      <span className="text-xs font-semibold text-text-secondary">
-                        Dato Declarado en Formulario:
+                      <span className="text-xs font-medium text-text-secondary">
+                        Declarado:
                       </span>
-                      <div className="mt-1 flex flex-1 items-start rounded-md border border-border/80 bg-surface-soft/40 p-2.5 text-xs font-semibold text-ink">
+                      <div className="mt-1 flex min-h-[42px] flex-1 items-center justify-start rounded-md border border-border/80 bg-surface-soft/40 p-2.5 text-left text-xs leading-normal font-medium text-ink">
                         <span>{comp.data.declared || 'No especificado'}</span>
                       </div>
                     </div>
 
-                    {/* Lado derecho: Texto Extraído del Documento (OCR) */}
+                    {/* Lado derecho: Extraído (OCR) */}
                     <div className="flex flex-col">
-                      <span className="text-xs font-semibold text-text-secondary">
-                        Texto Extraído del Documento (OCR):
+                      <span className="text-xs font-medium text-text-secondary">
+                        Extraído (OCR):
                       </span>
                       {comp.data.detectedText ? (
-                        <div className="mt-1 flex flex-1 items-start rounded-md border border-border/80 bg-surface-soft/60 p-2.5 text-xs leading-relaxed font-normal text-ink">
-                          <span>&ldquo;{comp.data.detectedText}&rdquo;</span>
+                        <div className="mt-1 flex min-h-[42px] flex-1 items-center justify-start rounded-md border border-border/80 bg-surface-soft/40 p-2.5 text-left text-xs leading-normal font-medium text-ink">
+                          <span>{comp.data.detectedText}</span>
                         </div>
                       ) : (
-                        <div className="mt-1 flex flex-1 items-start rounded-md border border-border/60 bg-surface-soft/30 p-2.5 text-xs text-text-secondary italic">
-                          <span>
-                            No se identificó este dato en el contenido escaneado
-                            de la carta.
-                          </span>
+                        <div className="mt-1 flex min-h-[42px] flex-1 items-center justify-start rounded-md border border-border/60 bg-surface-soft/30 p-2.5 text-left text-xs font-medium text-text-secondary italic">
+                          <span>No detectado en el documento</span>
                         </div>
                       )}
                     </div>
                   </div>
-
-                  {/* Mensaje de estado explicativo al pie de la fila */}
-                  {comp.data.statusMessage && (
-                    <p className="mt-2.5 border-t border-border/40 pt-2 text-[11px] text-text-secondary">
-                      {comp.data.statusMessage}
-                    </p>
-                  )}
                 </div>
               );
             })}
