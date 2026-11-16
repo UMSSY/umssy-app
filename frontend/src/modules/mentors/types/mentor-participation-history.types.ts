@@ -1,4 +1,5 @@
-﻿export type MentorParticipationHistoryItem = {
+﻿
+export type MentorParticipationHistoryItem = {
   id: string;
   userId: string;
   status: string;
@@ -11,3 +12,11 @@
 };
 
 export type MentorParticipationHistory = MentorParticipationHistoryItem[];
+
+export type MentorParticipationHistoryPage = {
+  items: MentorParticipationHistory;
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+};

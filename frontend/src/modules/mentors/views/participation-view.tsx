@@ -3,16 +3,24 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
+import { isAxiosError } from "axios";
 import { toast } from "sonner";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/shared/contexts/auth-context";
+import { PageBreadcrumb } from "@/shared/components/layout/page-breadcrumb";
 import {
   getAccessToken,
   subscribeAccessToken,
 } from "@/shared/services/storage/access-token-storage";
 import { mentorParticipationService } from "../services/mentor-participation.service";
+import { PARTICIPATION_BREADCRUMB_ITEMS } from "../constants/participation-breadcrumb.constants";
 import { ParticipationEmptyState } from "../components/participation/participation-empty-state";
 import { ParticipationLoading } from "../components/participation/participation-loading";
 import { ParticipationOverview } from "../components/participation/participation-overview";
@@ -35,6 +43,17 @@ import {
 } from "@/modules/mentorship";
 
 const HISTORY_PAGE_SIZE = 10;
+
+const HISTORY_BREADCRUMB_ITEMS = [
+  ...PARTICIPATION_BREADCRUMB_ITEMS.slice(0, -1),
+  {
+    label: "Mi participación",
+    href: "/mentors/participation",
+  },
+  {
+    label: "Historial de solicitudes",
+  },
+];
 
 const getServerToken = () => null;
 
@@ -79,6 +98,20 @@ const getRequestStatusStyle = (status: string) =>
   requestStatusStyles[status] ??
   "border-border bg-muted text-muted-foreground";
 
+const getHistoryErrorMessage = (error: unknown) => {
+  if (isAxiosError(error)) {
+    if (!error.response) {
+      return "No se pudo conectar con el servidor. Verifica tu conexión e inténtalo nuevamente.";
+    }
+
+    if (error.response.status >= 500) {
+      return "El servidor presentó un problema al consultar el historial. Inténtalo nuevamente.";
+    }
+  }
+
+  return "No se pudo consultar el historial de solicitudes. Inténtalo nuevamente.";
+};
+
 type ParticipationTab = "current" | "history";
 
 export function ParticipationView({
@@ -116,11 +149,17 @@ export function ParticipationView({
   const [historyPage, setHistoryPage] = useState(1);
 
   const history = useQuery({
-    queryKey: ["mentor-participation-history", token],
-    queryFn: ({ signal }) => mentorParticipationService.getHistory(signal),
+    queryKey: ["mentor-participation-history", token, historyPage],
+    queryFn: ({ signal }) =>
+      mentorParticipationService.getHistoryPaginated(
+        historyPage,
+        HISTORY_PAGE_SIZE,
+        signal,
+      ),
     enabled: Boolean(token) && activeTab === "history",
     retry: false,
     staleTime: 30_000,
+    placeholderData: keepPreviousData,
   });
 
   const [modal, setModal] = useState<"activate" | "deactivate" | null>(null);
@@ -132,7 +171,8 @@ export function ParticipationView({
   const navigationFeedbackHandled = useRef(false);
 
   useEffect(() => {
-    if (navigationFeedbackHandled.current || (!registered && !activated)) return;
+    if (navigationFeedbackHandled.current || (!registered && !activated))
+      return;
     if (participation.isLoading || !request.isSuccess) return;
 
     navigationFeedbackHandled.current = true;
@@ -225,23 +265,27 @@ export function ParticipationView({
     currentRequest?.status ?? "",
   );
 
-  const historyItems = history.data ?? [];
-  const totalHistoryPages = Math.max(
-    1,
-    Math.ceil(historyItems.length / HISTORY_PAGE_SIZE),
-  );
-  const currentHistoryPage = Math.min(historyPage, totalHistoryPages);
+  const historyItems = history.data?.items ?? [];
+  const totalHistoryRequests = history.data?.total ?? 0;
+  const totalHistoryPages = Math.max(1, history.data?.totalPages ?? 1);
+  const currentHistoryPage = history.data?.page ?? historyPage;
   const historyStartIndex = (currentHistoryPage - 1) * HISTORY_PAGE_SIZE;
-  const visibleHistoryItems = historyItems.slice(
-    historyStartIndex,
-    historyStartIndex + HISTORY_PAGE_SIZE,
-  );
+  const isChangingHistoryPage =
+    history.isFetching && history.data !== undefined;
 
   const selectedHistoryRequest =
-    visibleHistoryItems.find((item) => item.id === selectedHistoryId) ?? null;
+    historyItems.find((item) => item.id === selectedHistoryId) ?? null;
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
+      <PageBreadcrumb
+        items={
+          activeTab === "history"
+            ? HISTORY_BREADCRUMB_ITEMS
+            : PARTICIPATION_BREADCRUMB_ITEMS
+        }
+      />
+
       <div className="space-y-4">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">
@@ -420,35 +464,91 @@ export function ParticipationView({
         </h2>
 
         {history.isPending && activeTab === "history" && (
-          <p role="status" className="text-sm text-muted-foreground">
-            Cargando historial de solicitudes...
-          </p>
+          <div
+            role="status"
+            aria-label="Cargando historial de solicitudes"
+            className="space-y-4"
+          >
+            <p className="text-sm text-muted-foreground">
+              Cargando historial de solicitudes...
+            </p>
+
+            <div className="animate-pulse overflow-hidden rounded-lg border">
+              <div className="h-12 bg-muted/70" />
+              <div className="divide-y">
+                {Array.from({ length: 4 }, (_, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center gap-6 px-4 py-5"
+                  >
+                    <div className="h-4 w-28 rounded bg-muted" />
+                    <div className="h-5 w-24 rounded-full bg-muted" />
+                    <div className="h-4 w-12 rounded bg-muted" />
+                    <div className="h-4 w-12 rounded bg-muted" />
+                    <div className="ml-auto h-8 w-24 rounded bg-muted" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         )}
 
         {history.isError && (
           <Alert variant="destructive">
-            <p>No se pudo consultar el historial de solicitudes.</p>
+            <div className="space-y-3">
+              <p role="alert">{getHistoryErrorMessage(history.error)}</p>
 
-            <Button
-              variant="outline"
-              onClick={() => void history.refetch()}
-            >
-              Reintentar
-            </Button>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => void history.refetch()}
+                >
+                  Reintentar
+                </Button>
+
+                {historyPage > 1 && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => changeHistoryPage(1)}
+                  >
+                    Volver a la primera página
+                  </Button>
+                )}
+              </div>
+            </div>
           </Alert>
         )}
 
-        {history.isSuccess && historyItems.length === 0 && (
+        {history.isSuccess && totalHistoryRequests === 0 && (
           <MentorRequestHistoryEmptyState />
         )}
 
-        {history.isSuccess && historyItems.length > 0 && (
+        {history.isSuccess && totalHistoryRequests > 0 && (
           <div className="space-y-4">
-            <p role="status" className="text-sm text-muted-foreground">
-              Solicitudes registradas: {historyItems.length}
-            </p>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p role="status" className="text-sm text-muted-foreground">
+                Solicitudes registradas: {totalHistoryRequests}
+              </p>
 
-            <div className="overflow-x-auto rounded-lg border">
+              {isChangingHistoryPage && (
+                <p
+                  role="status"
+                  aria-live="polite"
+                  className="text-sm text-muted-foreground"
+                >
+                  Cargando página {historyPage}...
+                </p>
+              )}
+            </div>
+
+            <div
+              aria-busy={history.isFetching}
+              className={`overflow-x-auto rounded-lg border transition-opacity ${
+                isChangingHistoryPage ? "opacity-60" : "opacity-100"
+              }`}
+            >
               <table className="w-full min-w-[760px] text-left text-sm">
                 <caption className="sr-only">
                   Historial de solicitudes de cupo como mentor
@@ -475,7 +575,7 @@ export function ParticipationView({
                 </thead>
 
                 <tbody className="divide-y">
-                  {visibleHistoryItems.map((item) => (
+                  {historyItems.map((item) => (
                     <tr key={item.id}>
                       <td className="px-4 py-3">
                         {formatRequestDate(item.createdAt)}
@@ -501,6 +601,7 @@ export function ParticipationView({
                         <Button
                           type="button"
                           variant="outline"
+                          disabled={isChangingHistoryPage}
                           aria-expanded={selectedHistoryId === item.id}
                           aria-controls="mentor-request-history-details"
                           onClick={() =>
@@ -530,46 +631,51 @@ export function ParticipationView({
                 aria-label="Paginación del historial de solicitudes"
                 className="flex flex-wrap items-center justify-between gap-3 border-t pt-4"
               >
-                <p
-                  role="status"
-                  className="text-sm text-muted-foreground"
-                >
+                <p role="status" className="text-sm text-muted-foreground">
                   Mostrando {historyStartIndex + 1}–
                   {Math.min(
-                    historyStartIndex + HISTORY_PAGE_SIZE,
-                    historyItems.length,
+                    historyStartIndex + historyItems.length,
+                    totalHistoryRequests,
                   )}{" "}
-                  de {historyItems.length} solicitudes. Página{" "}
-                  {currentHistoryPage} de {totalHistoryPages}.
+                  de {totalHistoryRequests} solicitudes.
                 </p>
 
                 <div className="flex items-center gap-2">
                   <Button
                     type="button"
                     variant="outline"
-                    disabled={currentHistoryPage === 1}
+                    disabled={currentHistoryPage === 1 || history.isFetching}
                     onClick={() =>
                       changeHistoryPage(currentHistoryPage - 1)
                     }
                   >
+                    <ChevronLeft aria-hidden="true" className="size-4" />
                     Anterior
                   </Button>
+
+                  <span className="px-2 text-sm font-medium" aria-live="polite">
+                    Página {currentHistoryPage} de {totalHistoryPages}
+                  </span>
 
                   <Button
                     type="button"
                     variant="outline"
-                    disabled={currentHistoryPage === totalHistoryPages}
+                    disabled={
+                      currentHistoryPage >= totalHistoryPages ||
+                      history.isFetching
+                    }
                     onClick={() =>
                       changeHistoryPage(currentHistoryPage + 1)
                     }
                   >
                     Siguiente
+                    <ChevronRight aria-hidden="true" className="size-4" />
                   </Button>
                 </div>
               </nav>
             )}
 
-            {selectedHistoryRequest && (
+            {selectedHistoryRequest && !isChangingHistoryPage && (
               <div id="mentor-request-history-details">
                 <MentorRequestHistoryDetails
                   request={selectedHistoryRequest}

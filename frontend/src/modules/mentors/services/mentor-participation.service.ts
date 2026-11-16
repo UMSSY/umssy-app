@@ -3,7 +3,10 @@ import type { MentorParticipationRequest } from "../types/mentor-participation-r
 import type { MentorCapacity } from "../types/mentor-capacity.types";
 import type { MentorParticipationPreferences } from "../types/mentor-participation-preferences.types";
 import type { MyMentorParticipation } from "../types/my-mentor-participation.types";
-import type { MentorParticipationHistory } from "../types/mentor-participation-history.types";
+import type {
+  MentorParticipationHistory,
+  MentorParticipationHistoryPage,
+} from "../types/mentor-participation-history.types";
 import {
   clearMentorIntakeIntentions,
   withMentorIntakeKey,
@@ -76,6 +79,21 @@ export const mentorParticipationService = {
     const response = await apiClient.get<
       ApiResponse<MentorParticipationHistory>
     >(`${BASE_PATH}/me/history`, { signal });
+
+    return response.data.data;
+  },
+
+  async getHistoryPaginated(
+    page: number,
+    limit: number,
+    signal?: AbortSignal,
+  ): Promise<MentorParticipationHistoryPage> {
+    const response = await apiClient.get<
+      ApiResponse<MentorParticipationHistoryPage>
+    >(`${BASE_PATH}/me/history`, {
+      params: { page, limit },
+      signal,
+    });
 
     return response.data.data;
   },
