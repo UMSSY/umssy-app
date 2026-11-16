@@ -42,7 +42,7 @@ describe("next.config security headers (HU15 - CA3)", () => {
     expect(permissions?.value).toContain("geolocation=()");
   });
 
-  it("configura CSP con soporte para Google Fonts, imágenes y connect-src de la API", () => {
+  it("configura CSP con soporte para Google Fonts, imágenes, visores de PDF y connect-src", () => {
     const csp = securityHeaders.find((h) => h.key === "Content-Security-Policy");
     const value = csp?.value ?? "";
 
@@ -50,6 +50,8 @@ describe("next.config security headers (HU15 - CA3)", () => {
     expect(value).toContain("https://fonts.googleapis.com");
     expect(value).toContain("https://fonts.gstatic.com");
     expect(value).toContain("img-src 'self' data: blob: https:");
+    expect(value).toContain("object-src 'self' blob:");
+    expect(value).toContain("frame-src 'self' blob: data:");
     expect(value).toContain("connect-src");
     expect(value).toContain("http://localhost:8080");
     expect(value).toContain("frame-ancestors 'none'");
