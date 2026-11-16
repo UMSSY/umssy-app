@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import type { AuthenticatedUser } from '../../../common/types/authenticated-user.types.js';
 import { TransactionService } from '../../../common/prisma/transaction.service.js';
 import { AppointmentStatusTitle } from '../../availability/enums/appointment-status-title.enum.js';
@@ -40,6 +40,8 @@ import { buildMeetingUrl, canShareMeetingUrl } from '../utils/meeting-url.js';
 
 @Injectable()
 export class AppointmentsService {
+  private readonly logger = new Logger(AppointmentsService.name);
+
   constructor(
     private readonly appointmentsRepository: AppointmentsRepository,
     private readonly appointmentMapper: AppointmentMapper,
@@ -185,7 +187,14 @@ export class AppointmentsService {
       });
 
     if (created) {
-      await this.appointmentNotifications.notifyBooked(created);
+      try {
+        await this.appointmentNotifications.notifyBooked(created);
+      } catch (error) {
+        this.logger.error(
+          'No se pudo enviar el aviso de la cita confirmada',
+          error,
+        );
+      }
     }
 
     return response;
