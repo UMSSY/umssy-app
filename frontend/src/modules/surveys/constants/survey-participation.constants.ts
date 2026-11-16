@@ -74,6 +74,7 @@ export const SURVEY_ALERTS_TEXT = {
   saveError: "No se pudo guardar la configuración de alertas. Inténtalo de nuevo.",
   loadError: "No se pudo cargar la configuración de alertas. Inténtalo de nuevo más tarde.",
   thresholdError: `El umbral debe estar entre ${SURVEY_ALERT_THRESHOLD_MIN} y ${SURVEY_ALERT_THRESHOLD_MAX} puntos porcentuales.`,
+  discardDescription: "Los cambios que realizó en la configuración de alertas no se guardarán.",
   thresholdRequired: "El umbral de cambio es obligatorio.",
   thresholdMin: `El umbral mínimo es ${SURVEY_ALERT_THRESHOLD_MIN} punto porcentual.`,
   thresholdMax: `El umbral máximo es ${SURVEY_ALERT_THRESHOLD_MAX} puntos porcentuales.`,

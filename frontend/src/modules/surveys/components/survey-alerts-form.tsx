@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { Info, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,7 @@ import { hasAlertFormChanges } from "../utils/has-alert-form-changes";
 import { sanitizeAlertThreshold } from "../utils/sanitize-alert-threshold";
 import { parseAlertThreshold, validateSurveyAlertForm } from "../utils/validate-survey-alert-form";
 
-export function SurveyAlertsForm({ questions, config, isSaving, onCancel, onSave }: SurveyAlertsFormProps) {
+export function SurveyAlertsForm({ questions, config, isSaving, onCancel, onSave, onDirtyChange }: SurveyAlertsFormProps) {
   const fieldId = useId();
   const availableIds = (questions ?? []).map((question) => question.id);
   const [enabled, setEnabled] = useState(config.enabled);
@@ -29,6 +29,10 @@ export function SurveyAlertsForm({ questions, config, isSaving, onCancel, onSave
     { enabled, threshold, questionIds },
     { enabled: config.enabled, threshold: String(config.threshold), questionIds: savedQuestionIds },
   );
+  useEffect(() => {
+    onDirtyChange?.(hasChanges);
+  }, [hasChanges, onDirtyChange]);
+
   const thresholdId = `${fieldId}-threshold`;
   const thresholdHintId = `${fieldId}-threshold-hint`;
   const thresholdErrorId = `${fieldId}-threshold-error`;
