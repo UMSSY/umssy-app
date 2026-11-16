@@ -1,6 +1,7 @@
 import { cleanup, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { ProfileGuideContext } from '../contexts/profile-guide-context';
 import { PROFILE_COMPLETENESS_SECTION_IDS } from '../constants/profile-completeness.constants';
 import { createProfileCompleteness } from '../testing/profile-completeness.fixture';
 import type { ProfileCompletenessSection } from '../types/profile-completeness-section.types';
@@ -16,7 +17,20 @@ function renderChecklist(data?: readonly ProfileCompletenessSection[] | null) {
 }
 
 describe('ProfileCompletenessChecklist', () => {
-  it('renders all six sections in a stable order with their saved status', () => {
+  it('opens a pending section in the guide without changing the current route', async () => {
+    const start = vi.fn();
+    const before = window.location.href;
+    render(
+      <ProfileGuideContext.Provider value={{ isEnabled: true, isComplete: false, start }}>
+        <ProfileCompletenessChecklist sections={sections} />
+      </ProfileGuideContext.Provider>,
+    );
+    await userEvent.setup().click(screen.getByRole('link', { name: 'Completar Formación académica' }));
+    expect(start).toHaveBeenCalledExactlyOnceWith('education');
+    expect(window.location.href).toBe(before);
+  });
+
+  it('renders all seven sections in a stable order with their saved status', () => {
     const panel = renderChecklist([...sections].reverse());
     expect(
       panel
@@ -29,10 +43,11 @@ describe('ProfileCompletenessChecklist', () => {
       'Experiencia laboral: Pendiente',
       'Habilidades: Pendiente',
       'Certificaciones: Pendiente',
+      'Documentos y CV: Pendiente',
     ]);
     expect(panel.getAllByText('Completada')).toHaveLength(1);
-    expect(panel.getAllByText('Pendiente')).toHaveLength(5);
-    expect(panel.getByText('1 de 6 secciones completadas')).toBeVisible();
+    expect(panel.getAllByText('Pendiente')).toHaveLength(6);
+    expect(panel.getByText('1 de 7 secciones completadas')).toBeVisible();
   });
 
   it.each([
@@ -40,15 +55,15 @@ describe('ProfileCompletenessChecklist', () => {
     {
       completed: PROFILE_COMPLETENESS_SECTION_IDS,
       status: 'Completada',
-      count: 6,
+      count: 7,
     },
   ])('shows $count completed sections', ({ completed, status, count }) => {
     const panel = renderChecklist(
       createProfileCompleteness(completed).sections,
     );
-    expect(panel.getAllByText(status)).toHaveLength(6);
+    expect(panel.getAllByText(status)).toHaveLength(7);
     expect(
-      panel.getByText(`${count} de 6 secciones completadas`),
+      panel.getByText(`${count} de 7 secciones completadas`),
     ).toBeVisible();
   });
 
@@ -60,7 +75,7 @@ describe('ProfileCompletenessChecklist', () => {
     });
     await user.click(item);
     expect(item).toHaveTextContent('Pendiente');
-    expect(panel.getByText('1 de 6 secciones completadas')).toBeVisible();
+    expect(panel.getByText('1 de 7 secciones completadas')).toBeVisible();
     expect(panel.queryByRole('checkbox')).not.toBeInTheDocument();
   });
 
@@ -75,6 +90,7 @@ describe('ProfileCompletenessChecklist', () => {
       '/profile#complete-work-experience',
       '/profile#complete-skills',
       '/profile#complete-certifications',
+      '/profile/documents#complete-cv',
     ]);
     for (const link of links) {
       await user.tab();
@@ -85,7 +101,7 @@ describe('ProfileCompletenessChecklist', () => {
 
   it('only makes pending sections navigable', () => {
     const panel = renderChecklist(sections);
-    expect(panel.getAllByRole('link')).toHaveLength(5);
+    expect(panel.getAllByRole('link')).toHaveLength(6);
     expect(
       within(
         panel.getByRole('listitem', {

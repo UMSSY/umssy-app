@@ -6,6 +6,7 @@ export interface EducationFormProps {
   allowMissingEndDate?: boolean;
   isPending?: boolean;
   feedback?: Feedback | null;
+  saveLabel?: string;
   onSubmit: (values: EducationFormValues) => void | Promise<void>;
   onValuesChange?: () => void;
   onCancel: () => void;

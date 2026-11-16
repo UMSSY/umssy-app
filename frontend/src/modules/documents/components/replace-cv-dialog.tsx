@@ -10,7 +10,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Progress } from "@/components/ui/progress";
-import { formatFileSize } from "@/modules/profile";
+import { formatFileSize, ProfileCompletenessProgress } from "@/modules/profile";
 import { CV_UPLOAD_PROGRESS } from "../constants/cv-upload.constants";
 import type { ReplaceCvDialogProps } from "../types/replace-cv-dialog-props.types";
 
@@ -38,6 +38,7 @@ export function ReplaceCvDialog({
               : "El archivo seleccionado será tu CV vigente. Tu CV actual pasará al historial."}
           </AlertDialogDescription>
         </AlertDialogHeader>
+        <div className="mt-4"><ProfileCompletenessProgress showChecklist={false} /></div>
         {file ? (
           <p className="mt-5 flex items-center gap-3 rounded-xl border border-border bg-surface-soft px-4 py-3 text-sm break-all text-ink">
             <FileText aria-hidden="true" className="size-5 shrink-0 text-ink-soft" />

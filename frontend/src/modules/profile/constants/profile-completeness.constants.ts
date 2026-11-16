@@ -15,6 +15,7 @@ export const PROFILE_COMPLETENESS_SECTION_IDS = [
   'work-experience',
   'skills',
   'certifications',
+  'cv',
 ] as const;
 
 export const PROFILE_COMPLETENESS_MESSAGES = {
@@ -44,4 +45,5 @@ export const PROFILE_COMPLETENESS_SECTION_LABELS = {
   'work-experience': 'Experiencia laboral',
   skills: 'Habilidades',
   certifications: 'Certificaciones',
+  cv: 'Documentos y CV',
 } as const;
