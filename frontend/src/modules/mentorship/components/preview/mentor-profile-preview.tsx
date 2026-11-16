@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { MentorProfilePreviewProps } from '../../types/mentor-profile-preview-props.types';
@@ -14,6 +15,7 @@ export function MentorProfilePreview({
   technicalAreas,
   orientationTypes,
   onBack,
+  backLabel = 'Volver a editar',
 }: MentorProfilePreviewProps) {
   const {
     data: mentor,
@@ -43,7 +45,7 @@ export function MentorProfilePreview({
           </Button>
 
           <Button type="button" variant="outline" onClick={onBack}>
-            Volver a editar
+            {backLabel}
           </Button>
         </div>
       </main>
@@ -57,26 +59,22 @@ export function MentorProfilePreview({
   return (
     <main className="bg-background">
       <div className="mx-auto w-full max-w-7xl min-w-0 space-y-6 px-4 py-6 sm:px-6">
-        {/* Aviso de vista previa */}
+        {/* Aviso azul de vista previa */}
         <section
-          className="rounded-xl border border-border bg-surface-soft p-4"
+          className="rounded-xl border border-blue-200 bg-blue-50 p-4"
           aria-label="Aviso de vista previa"
         >
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <span className="rounded-md bg-interaction px-3 py-1 text-xs font-bold tracking-wide text-ink">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="rounded-md bg-blue-100 px-3 py-1 text-xs font-bold tracking-wide text-blue-900">
               MODO VISTA PREVIA
             </span>
-
-            <Button type="button" variant="outline" onClick={onBack}>
-              Volver a editar
-            </Button>
           </div>
 
-          <p className="mt-3 text-sm font-medium text-ink">
+          <p className="mt-3 text-sm font-medium text-blue-950">
             Estás viendo una vista previa de tu perfil.
           </p>
 
-          <p className="mt-1 text-sm text-text-secondary">
+          <p className="mt-1 text-sm text-blue-800">
             Revisa cómo se mostrarán tus áreas técnicas y tipos de orientación
             antes de confirmar los cambios.
           </p>
@@ -87,7 +85,6 @@ export function MentorProfilePreview({
 
         <div className="grid min-w-0 grid-cols-1 gap-6 lg:grid-cols-12">
           <div className="flex min-w-0 flex-col gap-6 lg:col-span-8">
-            {/* Sobre mí */}
             <MentorAbout
               description={
                 mentor.aboutMe?.trim() ||
@@ -119,7 +116,7 @@ export function MentorProfilePreview({
               )}
             </section>
 
-            {/* Tipos de orientación seleccionados */}
+            {/* Tipos de orientación */}
             <section className="rounded-xl border border-border bg-surface p-6">
               <h2 className="text-xl font-bold text-ink">
                 Tipos de orientación
@@ -153,12 +150,11 @@ export function MentorProfilePreview({
           {/* Trayectoria y áreas técnicas */}
           <div className="flex min-w-0 flex-col gap-6 lg:col-span-4">
             <MentorCareer mentor={mentor} />
-
             <MentorTechnicalAreas areas={technicalAreas} />
           </div>
         </div>
 
-        {/* Información y retorno al formulario */}
+        {/* Retorno */}
         <section className="rounded-xl border border-border bg-surface-soft p-5">
           <p className="text-sm font-medium text-ink">
             ¿Deseas realizar algún cambio?
@@ -171,7 +167,7 @@ export function MentorProfilePreview({
 
           <div className="mt-4 flex justify-end">
             <Button type="button" onClick={onBack}>
-              Volver a editar
+              {backLabel}
             </Button>
           </div>
         </section>

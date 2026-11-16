@@ -1,10 +1,11 @@
+
 "use client";
 
 import { toast as notify } from "sonner";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, Eye, Save } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
 import { useMentorProfileDraft } from "@/modules/mentorship";
 
@@ -24,23 +25,60 @@ import { buttonVariants } from "@/components/ui/button-variants";
 
 import { TechnicalAreaCard } from "../components/technical-area-card";
 import { useTechnicalAreas } from "../hooks/use-technical-areas";
+import { useOrientationConfig } from "@/modules/mentorship/hooks/use-orientation-config";
+import { useCurrentUserId } from "@/modules/mentorship/hooks/use-current-user-id";
+import { MentorProfilePreview } from "@/modules/mentorship/components/preview/mentor-profile-preview";
 
 export function TechnicalAreasView() {
   const router = useRouter();
 
-  const { areas, savedIds, isSaving, isLoading, hasLoadError, hasAccessError, save, retry } = useTechnicalAreas();
+  const [isDiscardModalOpen, setIsDiscardModalOpen] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
+  const {
+    areas,
+    savedIds,
+    isSaving,
+    isLoading,
+    hasLoadError,
+    hasAccessError,
+    save,
+    retry,
+  } = useTechnicalAreas();
+
+  const {
+    orientationTypes,
+    savedIds: savedOrientationIds,
+    isLoading: isOrientationLoading,
+    hasLoadError: hasOrientationLoadError,
+  } = useOrientationConfig();
+
+  const { currentUserId } = useCurrentUserId();
+
   const {
     technicalAreaIds: draftIds,
+    orientationTypeIds: draftOrientationIds,
     setTechnicalAreaIds: setSelectedIds,
     clearTechnicalAreaIds,
   } = useMentorProfileDraft();
+
   const selectedIds = draftIds ?? savedIds;
-  const [isDiscardModalOpen, setIsDiscardModalOpen] = useState(false);
+  const selectedOrientationIds =
+    draftOrientationIds ?? savedOrientationIds;
 
   const hasChanges =
     selectedIds.length !== savedIds.length ||
     selectedIds.some((id) => !savedIds.includes(id));
+
   const hasNoSelection = selectedIds.length === 0;
+
+  const canOpenPreview =
+    Boolean(currentUserId) &&
+    !isLoading &&
+    !hasLoadError &&
+    !hasAccessError &&
+    !isOrientationLoading &&
+    !hasOrientationLoadError;
 
   const handleToggleArea = (id: string) =>
     setSelectedIds((previous) =>
@@ -55,7 +93,7 @@ export function TechnicalAreasView() {
   };
 
   const handleSubmit = async () => {
-    if (hasNoSelection || hasAccessError) return;
+    if (!hasChanges || hasNoSelection || hasAccessError || isSaving) return;
 
     try {
       await save(selectedIds);
@@ -66,7 +104,6 @@ export function TechnicalAreasView() {
         true,
         "No se pudieron guardar los cambios. Intente nuevamente.",
       );
-
     }
   };
 
@@ -74,6 +111,21 @@ export function TechnicalAreasView() {
     if (hasChanges) setIsDiscardModalOpen(true);
     else router.push("/mentors/participation");
   };
+
+  if (isPreviewOpen && currentUserId) {
+    return (
+      <MentorProfilePreview
+        mentorId={currentUserId}
+        technicalAreas={areas.filter((area) =>
+          selectedIds.includes(area.id)
+        )}
+        orientationTypes={orientationTypes.filter((orientation) =>
+          selectedOrientationIds.includes(orientation.id)
+        )}
+        onBack={() => setIsPreviewOpen(false)}
+      />
+    );
+  }
 
   return (
     <WorkspacePage
@@ -102,13 +154,7 @@ export function TechnicalAreasView() {
       {hasLoadError && (
         <Alert className="flex items-center justify-between gap-4 rounded-lg border border-danger/30 bg-interaction p-4 text-danger">
           <span>No se pudieron cargar las áreas técnicas.</span>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => {
-              retry();
-            }}
-          >
+          <Button type="button" variant="outline" onClick={retry}>
             Reintentar
           </Button>
         </Alert>
@@ -148,7 +194,7 @@ export function TechnicalAreasView() {
         </fieldset>
       )}
 
-      <div className="mt-6 flex items-center justify-between">
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
         <Button
           type="button"
           onClick={handleGoBack}
@@ -156,26 +202,40 @@ export function TechnicalAreasView() {
         >
           <ArrowLeft size={16} /> Volver
         </Button>
-        <Button
-          type="button"
-          onClick={handleSubmit}
-          disabled={
-            hasNoSelection ||
-            isSaving ||
-            isLoading ||
-            hasLoadError ||
-            hasAccessError
-          }
-          className="h-auto gap-2 rounded-lg bg-primary px-6 py-2 font-medium text-primary-foreground hover:bg-brand-hover active:translate-y-0 disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {isSaving ? (
-            "Guardando..."
-          ) : (
-            <>
-              <Save size={16} /> Guardar cambios
-            </>
-          )}
-        </Button>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setIsPreviewOpen(true)}
+            disabled={!canOpenPreview}
+            className="h-auto gap-2 rounded-lg px-4 py-2"
+          >
+            <Eye size={16} /> Vista previa
+          </Button>
+
+          <Button
+            type="button"
+            onClick={handleSubmit}
+            disabled={
+  !hasChanges ||
+  hasNoSelection ||
+  isSaving ||
+  isLoading ||
+  hasLoadError ||
+  hasAccessError
+}
+            className="h-auto gap-2 rounded-lg bg-primary px-6 py-2 font-medium text-primary-foreground hover:bg-brand-hover active:translate-y-0 disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isSaving ? (
+              "Guardando..."
+            ) : (
+              <>
+                <Save size={16} /> Guardar cambios
+              </>
+            )}
+          </Button>
+        </div>
       </div>
 
       <AlertDialog
@@ -195,6 +255,7 @@ export function TechnicalAreasView() {
               Tienes cambios sin guardar. Si sales, se perderán.
             </AlertDialogDescription>
           </AlertDialogHeader>
+
           <AlertDialogFooter className="-mx-0 -mb-0 flex-row justify-end gap-2 rounded-none border-0 bg-transparent p-0">
             <AlertDialogCancel
               onClick={() => setIsDiscardModalOpen(false)}
@@ -202,6 +263,7 @@ export function TechnicalAreasView() {
             >
               Seguir editando
             </AlertDialogCancel>
+
             <AlertDialogAction
               type="button"
               onClick={() => {

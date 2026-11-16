@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
@@ -30,6 +31,8 @@ import {
   saveMentorshipWizardDraft,
   useMentorProfileDraft,
 } from "@/modules/mentorship";
+import { useCurrentUserId } from "@/modules/mentorship/hooks/use-current-user-id";
+import { MentorProfilePreview } from "@/modules/mentorship/components/preview/mentor-profile-preview";
 
 const getServerToken = () => null;
 
@@ -50,14 +53,20 @@ export function ParticipationView({
 }) {
   const router = useRouter();
   const client = useQueryClient();
-  const { currentUserId, refreshRoles } = useAuth();
+  const { currentUserId: authUserId, refreshRoles } = useAuth();
+  const { currentUserId } = useCurrentUserId();
   const { clearAllDrafts } = useMentorProfileDraft();
+
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
   const token = useSyncExternalStore(
     subscribeAccessToken,
     getAccessToken,
     getServerToken,
   );
+
   const participation = useParticipation(token);
+
   const request = useQuery({
     queryKey: ["mentor-participation-requests", token],
     queryFn: () => mentorParticipationService.getCurrent(),
@@ -66,20 +75,23 @@ export function ParticipationView({
     refetchInterval: 15_000,
     refetchOnWindowFocus: true,
   });
+
   const [modal, setModal] = useState<"activate" | "deactivate" | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<unknown>(null);
   const [hasDraftStorageError, setHasDraftStorageError] = useState(false);
+
   const inFlight = useRef(false);
   const navigationFeedbackHandled = useRef(false);
 
   useEffect(() => {
     clearAllDrafts();
   }, [clearAllDrafts]);
-  
+
   useEffect(() => {
     if (navigationFeedbackHandled.current || (!registered && !activated)) return;
     if (participation.isLoading || !request.isSuccess) return;
+
     navigationFeedbackHandled.current = true;
 
     const url = new URL(window.location.href);
@@ -87,8 +99,10 @@ export function ParticipationView({
       activated && url.searchParams.get("activated") === "1";
     const hasRegistrationFeedback =
       registered && url.searchParams.get("registered") === "1";
+
     url.searchParams.delete("registered");
     url.searchParams.delete("activated");
+
     window.history.replaceState(
       window.history.state,
       "",
@@ -116,21 +130,32 @@ export function ParticipationView({
 
   const deactivate = async () => {
     if (inFlight.current) return;
+
     inFlight.current = true;
     setSubmitting(true);
     setError(null);
+
     try {
       await mentorParticipationService.leave();
+
       await Promise.allSettled([
         refreshRoles(),
-        client.invalidateQueries({ queryKey: ["mentors", "participation"] }),
+        client.invalidateQueries({
+          queryKey: ["mentors", "participation"],
+        }),
         client.invalidateQueries({
           queryKey: ["mentor-participation-requests"],
         }),
-        client.invalidateQueries({ queryKey: ["mentorship", "directory"] }),
-        client.invalidateQueries({ queryKey: ["mentorship", "profile"] }),
+        client.invalidateQueries({
+          queryKey: ["mentorship", "directory"],
+        }),
+        client.invalidateQueries({
+          queryKey: ["mentorship", "profile"],
+        }),
       ]);
+
       setModal(null);
+      setIsPreviewOpen(false);
       notifySuccess("Participación desactivada correctamente");
     } catch (failure) {
       setError(failure);
@@ -146,12 +171,35 @@ export function ParticipationView({
   const isActive = state?.status === "ACTIVE";
   const hasHistory = state?.status === "DEACTIVATED";
   const currentRequest = request.data;
-  const hasOpenRequest = ["PENDING", "OFFERED"].includes(currentRequest?.status ?? "");
+  const hasOpenRequest = ["PENDING", "OFFERED"].includes(
+    currentRequest?.status ?? "",
+  );
+
+  // Vista previa del perfil desde Mi participación.
+  if (isPreviewOpen && isActive && state && currentUserId) {
+    return (
+      <MentorProfilePreview
+        mentorId={currentUserId}
+        technicalAreas={state.areas.map((area) => ({
+          ...area,
+          description: null,
+        }))}
+        orientationTypes={state.orientations.map((orientation) => ({
+          ...orientation,
+          description: null,
+        }))}
+        onBack={() => setIsPreviewOpen(false)}
+        backLabel="Volver"
+      />
+    );
+  }
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
       {participation.isLoading && <ParticipationLoading />}
-      {(participation.hasLoadError || (!participation.isLoading && !state)) && (
+
+      {(participation.hasLoadError ||
+        (!participation.isLoading && !state)) && (
         <Alert variant="destructive">
           <p>No se pudo cargar tu participación como mentor.</p>
           <Button variant="outline" onClick={() => participation.retry()}>
@@ -159,9 +207,11 @@ export function ParticipationView({
           </Button>
         </Alert>
       )}
+
       {request.isPending && (
         <p role="status">Consultando solicitudes de cupo…</p>
       )}
+
       {request.isError && (
         <Alert variant="destructive">
           <p>No se pudo consultar tu solicitud de cupo.</p>
@@ -170,7 +220,9 @@ export function ParticipationView({
           </Button>
         </Alert>
       )}
-      {(isActive || (hasHistory && !request.isPending && !hasOpenRequest)) && (
+
+      {(isActive ||
+        (hasHistory && !request.isPending && !hasOpenRequest)) && (
         <ParticipationOverview
           isActive={isActive}
           actionEnabled={
@@ -182,6 +234,13 @@ export function ParticipationView({
           orientations={(state?.orientations ?? []).map(
             (orientation) => orientation.name,
           )}
+          onPreview={() => {
+            if (!currentUserId) {
+              toast.error("No se pudo identificar tu perfil de mentor.");
+              return;
+            }
+            setIsPreviewOpen(true);
+          }}
           onAction={() => {
             setError(null);
             setHasDraftStorageError(false);
@@ -189,12 +248,16 @@ export function ParticipationView({
           }}
         />
       )}
+
       {!isActive && currentRequest?.status === "PENDING" && (
         <PendingParticipation
           request={currentRequest}
-          onCancelled={() => notifySuccess("Solicitud cancelada correctamente")}
+          onCancelled={() =>
+            notifySuccess("Solicitud cancelada correctamente")
+          }
         />
       )}
+
       {!isActive &&
         currentRequest?.status === "OFFERED" &&
         (currentRequest.offer ? (
@@ -220,6 +283,7 @@ export function ParticipationView({
             No se pudo consultar la oferta. Actualiza la página.
           </Alert>
         ))}
+
       {state &&
         !participation.hasLoadError &&
         request.isSuccess &&
@@ -231,12 +295,14 @@ export function ParticipationView({
             <ParticipationEmptyState />
           </div>
         )}
+
       {!isActive && currentRequest?.status === "EXPIRED" && (
         <p role="status">
-          La oferta venció. Puedes revisar las condiciones vigentes en el proceso
-          de incorporación.
+          La oferta venció. Puedes revisar las condiciones vigentes en el
+          proceso de incorporación.
         </p>
       )}
+
       <DeactivateParticipationModal
         isOpen={modal === "deactivate"}
         onClose={() => setModal(null)}
@@ -251,6 +317,7 @@ export function ParticipationView({
           (orientation) => orientation.name,
         )}
       />
+
       <ActivateParticipationModal
         isOpen={modal === "activate"}
         onClose={() => setModal(null)}
@@ -261,11 +328,14 @@ export function ParticipationView({
               router.push("/mentorship");
               return;
             }
+
             try {
-              if (!currentUserId) throw new Error("Identidad no disponible");
-              const draft = await loadMentorshipWizardDraft(currentUserId);
-              if (!draft)
-                await saveMentorshipWizardDraft(currentUserId, {
+              if (!authUserId) throw new Error("Identidad no disponible");
+
+              const draft = await loadMentorshipWizardDraft(authUserId);
+
+              if (!draft) {
+                await saveMentorshipWizardDraft(authUserId, {
                   currentStep: 1,
                   wantsToParticipate: true,
                   selectedTechnicalAreaIds: (state?.areas ?? []).map(
@@ -275,6 +345,8 @@ export function ParticipationView({
                     (orientation) => orientation.id,
                   ),
                 });
+              }
+
               setModal(null);
               router.push("/mentorship");
             } catch {
