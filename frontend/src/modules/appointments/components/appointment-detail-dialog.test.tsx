@@ -52,6 +52,16 @@ describe("AppointmentDetailDialog", () => {
     cleanup()
   })
 
+  it("abre la confirmación de cancelación desde el pie del detalle sin cerrar la cita", async () => {
+    vi.spyOn(Date, "now").mockReturnValue(new Date("2026-10-13T01:00:00Z").getTime())
+    const { user, onClose } = renderDialog()
+    await user.click(await screen.findByRole("button", { name: "Cancelar cita" }))
+    expect(screen.getByRole("alertdialog")).toBeInTheDocument()
+    await user.click(screen.getByRole("button", { name: "Volver" }))
+    expect(onClose).not.toHaveBeenCalled()
+    expect(screen.getByRole("dialog")).toBeInTheDocument()
+  })
+
   it("no se abre sin una cita elegida", () => {
     renderDialog(null)
 
