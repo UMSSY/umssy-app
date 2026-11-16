@@ -4,8 +4,8 @@ import {
   getPreviousSemester,
   getSemesterRange,
 } from '../utils/academic-semester.js';
-import { getAcademicPeriod } from '../../reports/utils/academic-period.js';
 import { distributePercentages } from '../utils/distribute-percentages.js';
+import { resolveVariationPeriod } from '../utils/resolve-variation-period.js';
 
 export interface VariationShift {
   questionId: string;
@@ -49,13 +49,13 @@ export class SurveyVariationEvaluatorService {
     const monitoredQuestionIds =
       options?.questionIds ?? (config?.questionIds as string[] | null) ?? null;
 
-    const currentPeriod =
-      options?.academicPeriod ??
-      (options?.closesAt
-        ? getAcademicPeriod(options.closesAt.toISOString())
-        : undefined) ??
-      getAcademicPeriod(new Date().toISOString()) ??
-      'I-2024';
+    const currentPeriod = resolveVariationPeriod({
+      academicPeriod: options?.academicPeriod,
+      closesAt: options?.closesAt,
+    });
+    if (!currentPeriod) {
+      return this.emptyResult('', '');
+    }
 
     const previousPeriod = getPreviousSemester(currentPeriod);
     if (!previousPeriod) {
