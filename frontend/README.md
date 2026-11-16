@@ -1,3 +1,5 @@
+the project have standard too, you can read in: **[Frontend Standards](./standard.md)**
+
 ## Local Environment Setup
 
 Node.js 22 and pnpm 12.4.2 are required. From the repository root, install

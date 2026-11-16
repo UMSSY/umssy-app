@@ -1,8 +1,8 @@
 import { act, cleanup, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { renderHookWithQuery } from '@/shared/testing/render-hook-with-query';
-import { useSaveEducation } from '@/modules/education/hooks/use-save-education';
-import { useDeleteEducation } from '@/modules/education/hooks/use-delete-education';
+import { useSaveEducation } from '@/modules/educations/hooks/use-save-education';
+import { useDeleteEducation } from '@/modules/educations/hooks/use-delete-education';
 import { useSaveWorkExperience } from '@/modules/work-experience/hooks/use-save-work-experience';
 import { useDeleteWorkExperience } from '@/modules/work-experience/hooks/use-delete-work-experience';
 import {
@@ -51,7 +51,7 @@ vi.mock('../services/profile.service', () => ({
     updatePresentation: api.presentation,
   },
 }));
-vi.mock('@/modules/education/services/educations.service', () => ({
+vi.mock('@/modules/educations/services/educations.service', () => ({
   educationsService: {
     createEducation: api.createEducation,
     updateEducation: api.updateEducation,

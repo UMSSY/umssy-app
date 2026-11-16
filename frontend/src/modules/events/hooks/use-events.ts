@@ -1,7 +1,7 @@
 "use client";
 
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
-import { useRegistrationSession } from "@/modules/registrations";
+import { useRegistrationSession } from "@/modules/event-registrations";
 import { eventsService } from "../services/events.service";
 import { NO_EVENT_FILTERS } from "../constants/events.constants";
 import type { EventFiltersPayload } from "../types/event-filters.types";
