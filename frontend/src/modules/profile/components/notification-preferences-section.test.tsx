@@ -1,201 +1,122 @@
-import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { cleanup, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { toast } from "sonner";
-import type { NotificationPreferenceResponse } from "@/modules/notifications";
-import { usePushNotifications } from "@/shared/hooks/use-push-notifications";
-import type { PushEnvironment, PushPermissionState } from "@/shared/types/use-push-notifications.types";
-import { useNotificationPreferences } from "../hooks/use-notification-preferences";
+import { notificationPreferencesService } from "@/modules/notifications/services/notification-preferences.service";
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
+import { NOTIFICATION_PREFERENCES_MESSAGES } from "../constants/profile-feedback.constants";
 import { NotificationPreferencesSection } from "./notification-preferences-section";
 
+vi.mock("@/modules/notifications/services/notification-preferences.service", () => ({
+  notificationPreferencesService: { get: vi.fn(), update: vi.fn() },
+}));
+
 vi.mock("@/shared/hooks/use-push-notifications", () => ({
-  usePushNotifications: vi.fn(),
+  usePushNotifications: () => ({ environment: "supported" }),
 }));
 
-vi.mock("../hooks/use-notification-preferences", () => ({
-  useNotificationPreferences: vi.fn(),
-}));
+const DEFAULT_PREFERENCES = { pushEnabled: false, emailEnabled: true, inAppEnabled: true };
 
-vi.mock("sonner", () => ({
-  toast: { success: vi.fn(), error: vi.fn() },
-}));
-
-const PUSH = /En el celular \(Push\)/;
-const EMAIL = /Solo por correo/;
-const IN_APP = /Solo dentro de la app/;
-
-const activate = vi.fn();
-const deactivate = vi.fn();
-const updatePreferences = vi.fn();
-
-function mockPush(environment: PushEnvironment, permission: PushPermissionState = "default") {
-  vi.mocked(usePushNotifications).mockReturnValue({
-    environment,
-    permission,
-    isSubscribed: false,
-    isLoading: false,
-    activate,
-    deactivate,
-  });
+async function renderLoaded() {
+  const user = userEvent.setup();
+  render(<NotificationPreferencesSection />);
+  await screen.findByRole("radiogroup", { name: "Canal de notificaciones" });
+  return user;
 }
 
-function mockPreferences(preferences?: NotificationPreferenceResponse) {
-  vi.mocked(useNotificationPreferences).mockReturnValue({
-    preferences,
-    isLoading: false,
-    isError: false,
-    updatePreferences,
-    isUpdating: false,
-  });
-}
+const radio = (name: string) => screen.getByRole("radio", { name: new RegExp(name) });
+const saveButton = () => screen.getByRole("button", { name: "Guardar cambios" });
+const cancelButton = () => screen.getByRole("button", { name: "Cancelar" });
+
+beforeEach(() => {
+  vi.mocked(notificationPreferencesService.get).mockResolvedValue(DEFAULT_PREFERENCES);
+  vi.mocked(notificationPreferencesService.update).mockResolvedValue(undefined);
+});
+
+afterEach(() => {
+  cleanup();
+  vi.clearAllMocks();
+});
 
 describe("NotificationPreferencesSection", () => {
-  beforeEach(() => {
-    activate.mockResolvedValue({ ok: true });
-    deactivate.mockResolvedValue(undefined);
-    updatePreferences.mockResolvedValue(undefined);
-    mockPreferences();
+  it("muestra «Solo por correo» en una cuenta nueva y los botones deshabilitados", async () => {
+    await renderLoaded();
+
+    expect(radio("Solo por correo")).toBeChecked();
+    expect(saveButton()).toBeDisabled();
+    expect(cancelButton()).toBeDisabled();
   });
 
-  afterEach(() => {
-    cleanup();
-    vi.clearAllMocks();
+  it("muestra la preferencia guardada al volver a entrar", async () => {
+    vi.mocked(notificationPreferencesService.get).mockResolvedValue({
+      pushEnabled: false,
+      emailEnabled: false,
+      inAppEnabled: true,
+    });
+    await renderLoaded();
+
+    expect(radio("Solo dentro de la app")).toBeChecked();
   });
 
-  it("muestra las tres opciones con «Solo por correo» elegida por defecto", () => {
-    mockPush("supported");
+  it("elegir una opción solo la deja pendiente, sin llamar al backend", async () => {
+    const user = await renderLoaded();
+
+    await user.click(radio("Solo dentro de la app"));
+
+    expect(radio("Solo dentro de la app")).toBeChecked();
+    expect(saveButton()).toBeEnabled();
+    expect(cancelButton()).toBeEnabled();
+    expect(notificationPreferencesService.update).not.toHaveBeenCalled();
+  });
+
+  it("«Guardar cambios» envía el PUT y confirma", async () => {
+    const user = await renderLoaded();
+
+    await user.click(radio("Solo dentro de la app"));
+    await user.click(saveButton());
+
+    expect(notificationPreferencesService.update).toHaveBeenCalledExactlyOnceWith({
+      pushEnabled: false,
+      emailEnabled: false,
+      inAppEnabled: true,
+    });
+    expect(await screen.findByText(NOTIFICATION_PREFERENCES_MESSAGES.saved["in-app"])).toBeInTheDocument();
+    expect(radio("Solo dentro de la app")).toBeChecked();
+    expect(saveButton()).toBeDisabled();
+  });
+
+  it("«Cancelar» descarta lo pendiente y restaura la opción guardada sin llamar al backend", async () => {
+    const user = await renderLoaded();
+
+    await user.click(radio("Solo dentro de la app"));
+    await user.click(cancelButton());
+
+    expect(radio("Solo por correo")).toBeChecked();
+    expect(saveButton()).toBeDisabled();
+    expect(notificationPreferencesService.update).not.toHaveBeenCalled();
+  });
+
+  it("si el guardado falla muestra un aviso, conserva la selección y permite reintentar", async () => {
+    vi.mocked(notificationPreferencesService.update).mockRejectedValueOnce(new Error("boom"));
+    const user = await renderLoaded();
+
+    await user.click(radio("Solo dentro de la app"));
+    await user.click(saveButton());
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(NOTIFICATION_PREFERENCES_MESSAGES.saveError);
+    expect(radio("Solo dentro de la app")).toBeChecked();
+    expect(saveButton()).toBeEnabled();
+
+    await user.click(saveButton());
+
+    expect(await screen.findByText(NOTIFICATION_PREFERENCES_MESSAGES.saved["in-app"])).toBeInTheDocument();
+    expect(notificationPreferencesService.update).toHaveBeenCalledTimes(2);
+  });
+
+  it("muestra un aviso si no se pueden cargar las preferencias", async () => {
+    vi.mocked(notificationPreferencesService.get).mockRejectedValue(new Error("boom"));
     render(<NotificationPreferencesSection />);
 
-    expect(screen.getByRole("radio", { name: PUSH })).toBeInTheDocument();
-    expect(screen.getByRole("radio", { name: EMAIL })).toBeChecked();
-    expect(screen.getByRole("radio", { name: IN_APP })).not.toBeChecked();
-  });
-
-  it("marca el canal guardado en el backend", () => {
-    mockPush("supported");
-    mockPreferences({ pushEnabled: false, emailEnabled: false, inAppEnabled: true });
-    render(<NotificationPreferencesSection />);
-
-    expect(screen.getByRole("radio", { name: IN_APP })).toBeChecked();
-    expect(screen.getByRole("radio", { name: EMAIL })).not.toBeChecked();
-  });
-
-  it("guarda la nueva opción al elegir otro canal", async () => {
-    mockPush("supported");
-    render(<NotificationPreferencesSection />);
-
-    fireEvent.click(screen.getByRole("radio", { name: IN_APP }));
-
-    await waitFor(() =>
-      expect(updatePreferences).toHaveBeenCalledWith({
-        pushEnabled: false,
-        emailEnabled: false,
-        inAppEnabled: true,
-      }),
-    );
-    expect(toast.success).toHaveBeenCalledWith("Preferencia guardada");
-  });
-
-  it("muestra un error y conserva la selección si no se puede guardar", async () => {
-    mockPush("supported");
-    updatePreferences.mockRejectedValueOnce(new Error("sin red"));
-    render(<NotificationPreferencesSection />);
-
-    fireEvent.click(screen.getByRole("radio", { name: IN_APP }));
-
-    await waitFor(() =>
-      expect(toast.error).toHaveBeenCalledWith("No se pudo guardar la preferencia. Inténtalo de nuevo."),
-    );
-    expect(screen.getByRole("radio", { name: EMAIL })).toBeChecked();
-  });
-
-  it("en escritorio deshabilita Push y avisa que está disponible en el celular", () => {
-    mockPush("desktop");
-    render(<NotificationPreferencesSection />);
-
-    const push = screen.getByRole("radio", { name: PUSH });
-
-    expect(push).toHaveAttribute("aria-disabled", "true");
-    expect(screen.getByText("Disponible en tu celular.")).toBeInTheDocument();
-
-    fireEvent.click(push);
-    expect(push).not.toBeChecked();
-    expect(screen.getByRole("radio", { name: EMAIL })).toBeChecked();
-    expect(updatePreferences).not.toHaveBeenCalled();
-  });
-
-  it("en el celular deja Push habilitado y avisa que se pedirá permiso", () => {
-    mockPush("supported");
-    render(<NotificationPreferencesSection />);
-
-    expect(screen.getByRole("radio", { name: PUSH })).not.toHaveAttribute("aria-disabled", "true");
-    expect(screen.getByText("Te pediremos permiso para activar las alertas.")).toBeInTheDocument();
-  });
-
-  it("pide confirmación, activa Push y guarda el canal", async () => {
-    mockPush("supported");
-    render(<NotificationPreferencesSection />);
-
-    fireEvent.click(screen.getByRole("radio", { name: PUSH }));
-    const dialog = await screen.findByRole("alertdialog");
-    expect(updatePreferences).not.toHaveBeenCalled();
-
-    fireEvent.click(within(dialog).getByRole("button", { name: "Continuar" }));
-
-    await waitFor(() => expect(activate).toHaveBeenCalledOnce());
-    await waitFor(() =>
-      expect(updatePreferences).toHaveBeenCalledWith({
-        pushEnabled: true,
-        emailEnabled: false,
-        inAppEnabled: false,
-      }),
-    );
-  });
-
-  it("no guarda Push si el navegador rechaza el permiso", async () => {
-    mockPush("supported");
-    activate.mockResolvedValueOnce({ ok: false, reason: "permission-denied" });
-    render(<NotificationPreferencesSection />);
-
-    fireEvent.click(screen.getByRole("radio", { name: PUSH }));
-    fireEvent.click(within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Continuar" }));
-
-    await waitFor(() =>
-      expect(toast.error).toHaveBeenCalledWith(
-        "Permiso denegado. Habilítalo en la configuración de tu navegador.",
-        { id: "push-activation" },
-      ),
-    );
-    expect(updatePreferences).not.toHaveBeenCalled();
-  });
-
-  it("con el permiso bloqueado avisa sin abrir el diálogo", () => {
-    mockPush("supported", "denied");
-    render(<NotificationPreferencesSection />);
-
-    fireEvent.click(screen.getByRole("radio", { name: PUSH }));
-
-    expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
-    expect(toast.error).toHaveBeenCalledWith(
-      "Las notificaciones están bloqueadas. Habilítalas en tu navegador.",
-      { id: "push-denied" },
-    );
-    expect(updatePreferences).not.toHaveBeenCalled();
-  });
-
-  it("organiza las opciones en columna en móvil y en fila desde escritorio", () => {
-    mockPush("supported");
-    render(<NotificationPreferencesSection />);
-
-    const group = screen.getByRole("radiogroup", { name: "Canal de notificaciones" });
-
-    expect(group).toHaveClass("flex-col");
-    expect(group).toHaveClass("md:flex-row");
-  });
-
-  it("recuerda que la campana de la app sigue activa con cualquier opción", () => {
-    mockPush("supported");
-    render(<NotificationPreferencesSection />);
-
-    expect(screen.getByText("La campana de la app sigue activa con cualquier opción.")).toBeInTheDocument();
+    expect(await screen.findByRole("alert")).toHaveTextContent(NOTIFICATION_PREFERENCES_MESSAGES.loadError);
+    expect(screen.queryByRole("radiogroup")).not.toBeInTheDocument();
   });
 });

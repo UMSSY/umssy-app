@@ -54,3 +54,4 @@ export type { NotificationResponse } from "./types/notification-response.types";
 export type { NotificationType } from "./types/notification-type.types";
 export type { PushSubscriptionPayload } from "./types/push-subscription-payload.types";
 export type { UnreadCountResponse } from "./types/unread-count-response.types";
+export { useNotificationPreferences } from "./hooks/use-notification-preferences";
