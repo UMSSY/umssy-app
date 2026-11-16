@@ -11,14 +11,26 @@ import { RequestFeedback } from '../components/request-feedback';
 import { useManagedWorkshops } from '../hooks/use-managed-workshops';
 import { isManagedWorkshopFinished } from '../utils/managed-workshop-status';
 import { formatRegistrationDate, formatRegistrationTime } from '../utils/registration-format';
+import { AttendanceMobileScanner } from '../components/attendance-mobile-scanner';
+import { AttendanceDemoPass } from '../testing/attendance-demo-pass';
 
 interface AttendanceHandoffViewProps {
   workshopId: string;
 }
 
+const subscribeViewport = (callback: () => void) => {
+  if (typeof window.matchMedia !== 'function') return () => {};
+  const query = window.matchMedia('(max-width: 1023px)');
+  query.addEventListener('change', callback);
+  return () => query.removeEventListener('change', callback);
+};
+const isMobileViewport = () => typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 1023px)').matches;
+const serverViewport = () => false;
+
 export function AttendanceHandoffView({ workshopId }: AttendanceHandoffViewProps) {
   const { workshops, isLoading, error, retry } = useManagedWorkshops();
   const origin = useSyncExternalStore(() => () => {}, () => window.location.origin, () => '');
+  const isMobile = useSyncExternalStore(subscribeViewport, isMobileViewport, serverViewport);
   const scanUrl = origin ? new URL(`/events/my-workshops/${encodeURIComponent(workshopId)}/attendance`, origin).toString() : '';
   const [now, setNow] = useState(Date.now);
   const workshop = workshops.find((item) => item.id === workshopId);
@@ -51,11 +63,8 @@ export function AttendanceHandoffView({ workshopId }: AttendanceHandoffViewProps
                   {scanUrl && <QRCodeSVG xmlns="http://www.w3.org/2000/svg" value={scanUrl} level="M" marginSize={4} size={220} role="img" title="Enlace para continuar en el celular" aria-label="Código QR para continuar en el celular" />}
                   {scanUrl && <a href={scanUrl} className="max-w-full text-sm break-all text-accent underline">{scanUrl}</a>}
                 </Card>
-                <Card className="items-center gap-3 border-border bg-surface p-8 text-center lg:hidden">
-                  <Smartphone aria-hidden="true" className="size-12 text-accent" />
-                  <h2 className="text-xl font-semibold text-ink">Vista de escaneo</h2>
-                  <p className="text-sm text-text-secondary">La cámara y el registro de asistencias estarán disponibles en la siguiente tarea.</p>
-                </Card>
+                {isMobile && <div className="lg:hidden"><AttendanceMobileScanner /></div>}
+                {process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_MOCK_MANAGED_WORKSHOPS === 'true' && <AttendanceDemoPass />}
               </>}
     </main>
   );
