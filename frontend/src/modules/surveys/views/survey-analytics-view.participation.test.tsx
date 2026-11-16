@@ -175,7 +175,7 @@ describe("SurveyAnalyticsView - participación y alertas", () => {
     const dialog = await openAlerts(user);
 
     expect(within(dialog).getByRole("switch", { name: "Activar alertas" })).toBeChecked();
-    expect(within(dialog).getByRole("spinbutton", { name: "Umbral de cambio" })).toHaveValue(10);
+    expect(within(dialog).getByRole("textbox", { name: "Umbral de cambio" })).toHaveValue("10");
     expect(within(dialog).getByText("1 de 2")).toBeInTheDocument();
 
     await user.click(within(dialog).getByRole("button", { name: "Marcar todas" }));
@@ -191,7 +191,7 @@ describe("SurveyAnalyticsView - participación y alertas", () => {
     await renderLoaded();
     const dialog = await openAlerts(user);
 
-    const threshold = within(dialog).getByRole("spinbutton", { name: "Umbral de cambio" });
+    const threshold = within(dialog).getByRole("textbox", { name: "Umbral de cambio" });
     await user.clear(threshold);
     await user.type(threshold, "60");
     await user.click(within(dialog).getByRole("button", { name: "Desmarcar todas" }));
