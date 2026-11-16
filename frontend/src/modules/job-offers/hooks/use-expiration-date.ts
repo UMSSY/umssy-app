@@ -55,3 +55,5 @@ export function useExpirationDate() {
     resetExpiration,
   };
 }
+
+export type ExpirationDate = ReturnType<typeof useExpirationDate>;

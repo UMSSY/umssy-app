@@ -4,6 +4,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { INTERNSHIP_CONTRACT_TYPE, SALARY_TO_BE_AGREED } from "../constants/job-offers.constants";
 import { ExpandableText } from "./expandable-text";
+import { ExpirationDateCard } from "./expiration-date-card";
 import { JobOfferHighlights } from "./job-offer-highlights";
 import { StepActions } from "./step-actions";
 import type { PreviewStepProps } from "../types/preview-step-props.types";
@@ -15,6 +16,7 @@ export function PreviewStep({
   isSubmitting,
   error,
   isEditMode,
+   expiration,
   onPrevious,
   onConfirm,
 }: PreviewStepProps) {
@@ -95,7 +97,7 @@ export function PreviewStep({
           ))}
         </ul>
       </div>
-
+      {expiration && !isEditMode && <ExpirationDateCard expiration={expiration} />}
       {error && (
         <Alert variant="destructive" className="mx-auto mt-6 max-w-3xl">
           <AlertTitle>{error.message}</AlertTitle>

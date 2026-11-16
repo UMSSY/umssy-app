@@ -19,8 +19,10 @@ import { useLeaveGuard } from "../hooks/use-leave-guard";
 import { usePublishJobOffer } from "../hooks/use-publish-job-offer";
 import type { RegisterVacancyViewProps } from "../types/register-vacancy-view-props.types";
 import { useCurrentCompany } from "../hooks/use-current-company";
+import { useExpirationDate } from "../hooks/use-expiration-date";
 
 export function RegisterVacancyView({ jobOfferId }: RegisterVacancyViewProps) {
+  const expiration = useExpirationDate();
   const isEditMode = !!jobOfferId;
   const company = useCurrentCompany();
   const router = useRouter();
@@ -66,12 +68,14 @@ export function RegisterVacancyView({ jobOfferId }: RegisterVacancyViewProps) {
     setIsDiscardDialogOpen(false);
     publication.reset();
     reset();
+    expiration.resetExpiration();
     router.push("/recruiters");
   };
 
   const handleFinish = () => {
     publication.reset();
     reset();
+    expiration.resetExpiration();
   };
 
   if (isLoading) {
@@ -152,6 +156,7 @@ export function RegisterVacancyView({ jobOfferId }: RegisterVacancyViewProps) {
               error={publication.error}
               onPrevious={goBack}
               isEditMode={isEditMode}
+              expiration={expiration}
               onConfirm={() => void publication.submit(conditions)}
             />
           )}
