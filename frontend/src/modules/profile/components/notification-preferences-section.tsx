@@ -1,12 +1,8 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Bell, Smartphone, Mail, Monitor, AlertCircle } from 'lucide-react';
-import { toast } from 'sonner';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
+import { useState } from "react";
+import { Bell } from "lucide-react";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,209 +12,146 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { usePushNotifications } from '@/shared/hooks/use-push-notifications';
-import { useNotificationPreferences } from '../hooks/use-notification-preferences';
-import type { NotificationChannel } from '../types/notification-channel.types';
+} from "@/components/ui/alert-dialog";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { cn } from "@/lib/utils";
+import type { NotificationChannel } from "@/modules/notifications";
+import { usePushNotifications } from "@/shared/hooks/use-push-notifications";
+import { NOTIFICATION_CHANNEL_OPTIONS } from "../constants/notification-channel-options.constants";
+import { useNotificationPreferences } from "../hooks/use-notification-preferences";
+import { getNotificationChannel } from "../utils/get-notification-channel";
+import { toNotificationPreferencePayload } from "../utils/to-notification-preference-payload";
+import { SectionCard } from "./section-card";
+
+const PUSH_DESCRIPTION_BY_ENVIRONMENT = {
+  supported: "Te pediremos permiso para activar las alertas.",
+  desktop: "Disponible en tu celular.",
+  "ios-old": "Requiere iOS 16.4 o superior.",
+  "ios-not-installed": "Instala UMSSY en tu pantalla de inicio.",
+  unsupported: "Disponible en tu celular.",
+} as const;
 
 export function NotificationPreferencesSection() {
-  const {
-    environment,
-    permission,
-    isSubscribed,
-    isLoading: isPushLoading,
-    activate,
-    deactivate,
-  } = usePushNotifications();
+  const { environment, permission, isSubscribed, isLoading: isPushLoading, activate, deactivate } =
+    usePushNotifications();
+  const { preferences, isLoading: isPreferencesLoading, updatePreferences, isUpdating } =
+    useNotificationPreferences();
+  const [isPermissionDialogOpen, setIsPermissionDialogOpen] = useState(false);
 
-  const {
-    preferences,
-    isLoading: isPrefsLoading,
-    updatePreferences,
-    isUpdating,
-  } = useNotificationPreferences();
+  const selectedChannel = getNotificationChannel(preferences);
+  const isPushAvailable = environment === "supported";
+  const isBusy = isPreferencesLoading || isUpdating || isPushLoading;
 
-  const [showPermissionDialog, setShowPermissionDialog] = useState(false);
-
-  const selectedChannel: NotificationChannel = preferences
-    ? preferences.pushEnabled
-      ? 'push'
-      : preferences.emailEnabled
-        ? 'email'
-        : 'in-app'
-    : 'in-app';
-
-  const handleChannelChange = async (channel: NotificationChannel) => {
+  const saveChannel = async (channel: NotificationChannel) => {
     try {
-      await updatePreferences({
-        pushEnabled: channel === 'push',
-        emailEnabled: channel === 'email',
-        inAppEnabled: channel === 'in-app',
-      });
-      toast.success('Preferencia guardada');
+      if (channel !== "push" && isSubscribed) await deactivate();
+      await updatePreferences(toNotificationPreferencePayload(channel));
+      toast.success("Preferencia guardada");
     } catch {
-      toast.error('Error al guardar la preferencia');
+      toast.error("No se pudo guardar la preferencia. Inténtalo de nuevo.");
     }
   };
 
-  const handlePushToggle = async (checked: boolean) => {
-    if (checked) {
-      if (permission === 'denied') {
-        toast.error('Las notificaciones están bloqueadas. Habilítalas en tu navegador.', {
-          id: 'push-denied',
-        });
-        return;
-      }
-      setShowPermissionDialog(true);
-    } else {
-      await deactivate();
-      await updatePreferences({
-        pushEnabled: false,
-        emailEnabled: preferences?.emailEnabled ?? true,
-        inAppEnabled: preferences?.inAppEnabled ?? false,
+  const handleChannelChange = (channel: NotificationChannel) => {
+    if (channel === selectedChannel) return;
+
+    if (channel !== "push") {
+      void saveChannel(channel);
+      return;
+    }
+
+    if (permission === "denied") {
+      toast.error("Las notificaciones están bloqueadas. Habilítalas en tu navegador.", {
+        id: "push-denied",
       });
-      toast.success('Notificaciones push desactivadas');
+      return;
     }
+
+    setIsPermissionDialogOpen(true);
   };
 
-  const confirmActivation = async () => {
-    setShowPermissionDialog(false);
+  const confirmPushActivation = async () => {
+    setIsPermissionDialogOpen(false);
     const result = await activate();
-    
-    if (result.ok) {
-      await updatePreferences({
-        pushEnabled: true,
-        emailEnabled: false,
-        inAppEnabled: false,
-      });
-      toast.success('¡Notificaciones activadas!', { id: 'push-success' });
-    } else {
-      if (result.reason === 'permission-denied') {
-        toast.error('Permiso denegado. Habilítalo en la configuración de tu navegador.', { id: 'push-denied' });
-      } else if (result.reason === 'network-error') {
-        toast.error('Error de conexión. Inténtalo de nuevo.', { id: 'push-network' });
-      }
-    }
-  };
 
-  const isPushDisabled = environment !== 'supported';
-  const isBusy = isPrefsLoading || isUpdating || isPushLoading;
+    if (result.ok) {
+      await saveChannel("push");
+      return;
+    }
+
+    toast.error(
+      result.reason === "permission-denied"
+        ? "Permiso denegado. Habilítalo en la configuración de tu navegador."
+        : "No se pudieron activar las notificaciones. Inténtalo de nuevo.",
+      { id: "push-activation" },
+    );
+  };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Bell className="size-5" />
-          Preferencias de notificaciones
-        </CardTitle>
-        <CardDescription>
-          Elige cómo quieres recibir tus notificaciones.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <RadioGroup 
-          value={selectedChannel} 
-          onValueChange={(v) => handleChannelChange(v as NotificationChannel)} 
-          className="grid grid-cols-1 gap-4 md:grid-cols-3"
-          disabled={isBusy}
-        >
-          <div className="relative">
-            <RadioGroupItem value="push" id="channel-push" className="peer sr-only" />
+    <SectionCard
+      title="Preferencias de notificaciones"
+      description="Elige cómo quieres recibir tus notificaciones."
+      icon={<Bell aria-hidden="true" className="size-5" />}
+    >
+      <RadioGroup
+        value={selectedChannel}
+        onValueChange={(value) => handleChannelChange(value as NotificationChannel)}
+        aria-label="Canal de notificaciones"
+        aria-busy={isBusy}
+        className="flex flex-col gap-3 md:flex-row"
+      >
+        {NOTIFICATION_CHANNEL_OPTIONS.map(({ value, label, icon: Icon }) => {
+          const isDisabled = isBusy || (value === "push" && !isPushAvailable);
+          const description = value === "push" ? PUSH_DESCRIPTION_BY_ENVIRONMENT[environment] : null;
+
+          return (
             <Label
-              htmlFor="channel-push"
-              className={`flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 peer-data-[state=checked]:border-primary hover:bg-accent hover:text-accent-foreground [&:has([data-state=checked])]:border-primary ${
-                isPushDisabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
-              }`}
+              key={value}
+              className={cn(
+                "flex items-center gap-3 rounded-lg border-2 border-border bg-surface p-4 transition-colors md:flex-1",
+                "has-data-checked:border-primary has-data-checked:bg-interaction",
+                "has-focus-visible:ring-3 has-focus-visible:ring-ring/50",
+                isDisabled ? "cursor-not-allowed bg-muted opacity-60" : "cursor-pointer hover:bg-accent/5",
+              )}
             >
-              <Smartphone className="mb-3 size-6" />
-              <div className="space-y-1 text-center">
-                <span className="block font-medium">En el celular (Push)</span>
-                <span className="block text-xs text-muted-foreground">
-                  {environment === 'desktop' && 'Disponible en la app móvil'}
-                  {environment === 'ios-old' && 'Requiere iOS 16.4+'}
-                  {environment === 'ios-not-installed' && 'Instala UMSSY en inicio'}
-                  {environment === 'supported' && (isSubscribed ? 'Activo' : 'Toca para activar')}
-                </span>
-              </div>
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-interaction text-accent">
+                <Icon aria-hidden="true" className="size-5" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block font-semibold text-ink">{label}</span>
+                {description ? (
+                  <span className="mt-0.5 block text-sm font-normal text-text-secondary">{description}</span>
+                ) : null}
+              </span>
+              <RadioGroupItem value={value} disabled={isDisabled} aria-label={label} />
             </Label>
-            
-            {environment === 'supported' && (
-              <div className="absolute top-2 right-2">
-                <Switch
-                  checked={isSubscribed}
-                  onCheckedChange={handlePushToggle}
-                  disabled={isBusy}
-                  aria-label="Activar notificaciones push"
-                />
-              </div>
-            )}
-          </div>
+          );
+        })}
+      </RadioGroup>
 
-          <div className="relative">
-            <RadioGroupItem value="email" id="channel-email" className="peer sr-only" />
-            <Label
-              htmlFor="channel-email"
-              className="flex cursor-pointer flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 peer-data-[state=checked]:border-primary hover:bg-accent hover:text-accent-foreground [&:has([data-state=checked])]:border-primary"
-            >
-              <Mail className="mb-3 size-6" />
-              <div className="space-y-1 text-center">
-                <span className="block font-medium">Solo por correo</span>
-                <span className="block text-xs text-muted-foreground">Recibe un email</span>
-              </div>
-            </Label>
-          </div>
+      <p className="mt-4 flex items-center gap-3 rounded-lg bg-interaction px-4 py-3 text-sm text-ink">
+        <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+          <Bell aria-hidden="true" className="size-4" />
+        </span>
+        La campana de la app sigue activa con cualquier opción.
+      </p>
 
-          <div className="relative">
-            <RadioGroupItem value="in-app" id="channel-in-app" className="peer sr-only" />
-            <Label
-              htmlFor="channel-in-app"
-              className="flex cursor-pointer flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 peer-data-[state=checked]:border-primary hover:bg-accent hover:text-accent-foreground [&:has([data-state=checked])]:border-primary"
-            >
-              <Monitor className="mb-3 size-6" />
-              <div className="space-y-1 text-center">
-                <span className="block font-medium">Solo dentro de la app</span>
-                <span className="block text-xs text-muted-foreground">En la campana</span>
-              </div>
-            </Label>
-          </div>
-        </RadioGroup>
-
-        {environment === 'desktop' && (
-          <div className="flex items-center gap-2 rounded-md bg-muted p-3 text-sm text-muted-foreground">
-            <AlertCircle className="size-4" />
-            Las notificaciones Push en segundo plano no están disponibles en navegadores de escritorio.
-          </div>
-        )}
-        {environment === 'ios-old' && (
-          <div className="flex items-center gap-2 rounded-md bg-muted p-3 text-sm text-muted-foreground">
-            <AlertCircle className="size-4" />
-            Para recibir notificaciones en iOS, necesitas iOS 16.4 o superior.
-          </div>
-        )}
-        {environment === 'ios-not-installed' && (
-          <div className="flex items-center gap-2 rounded-md bg-muted p-3 text-sm text-muted-foreground">
-            <AlertCircle className="size-4" />
-            Para recibir notificaciones en iOS, instala UMSSY desde Safari en tu pantalla de inicio.
-          </div>
-        )}
-      </CardContent>
-
-      <AlertDialog open={showPermissionDialog} onOpenChange={setShowPermissionDialog}>
+      <AlertDialog open={isPermissionDialogOpen} onOpenChange={setIsPermissionDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Activar notificaciones en el celular</AlertDialogTitle>
             <AlertDialogDescription>
-              UMSSY te enviará alertas importantes incluso cuando la app esté cerrada. A continuación, tu navegador te pedirá permiso.
+              UMSSY te enviará alertas importantes incluso cuando la app esté cerrada. A continuación, tu
+              navegador te pedirá permiso.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmActivation}>
-              Continuar
-            </AlertDialogAction>
+            <AlertDialogAction onClick={() => void confirmPushActivation()}>Continuar</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </Card>
+    </SectionCard>
   );
 }

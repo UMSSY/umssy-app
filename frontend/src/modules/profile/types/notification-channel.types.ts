@@ -1,1 +1,0 @@
-export type NotificationChannel = 'push' | 'email' | 'in-app';
