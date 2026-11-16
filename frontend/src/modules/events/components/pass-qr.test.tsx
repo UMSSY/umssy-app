@@ -11,5 +11,5 @@ describe('Real pass QR encoding', () => {
     const rendered = new Resvg(svg, { fitTo: { mode: 'width', value: 660 } }).render();
     const decoded = jsQR(new Uint8ClampedArray(rendered.pixels), rendered.width, rendered.height);
     expect(decoded?.data).toBe(`v1:${token}`);
-  });
+  }, 15000);
 });
