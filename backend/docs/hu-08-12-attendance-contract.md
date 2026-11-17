@@ -1,13 +1,13 @@
 # HU-08-12 · Contrato de asistencia en línea
 
-Este contrato fija la integración FE/BE. La tarea 12.1 añade el esquema de entrada y la autorización interna. La tarea 12.2 habilita el endpoint y registra asistencias idempotentes; la ventana horaria se añadirá en 12.3. El escáner frontend todavía debe integrarse con este endpoint en 12.5.
+Este contrato fija la integración FE/BE. La tarea 12.1 añade el esquema de entrada y la autorización interna. La tarea 12.2 habilita el endpoint y registra asistencias idempotentes; la tarea 12.3 comprueba la sesión, los permisos y la ventana horaria antes de persistir. El escáner frontend todavía debe integrarse con este endpoint en 12.5.
 
 ## Decisiones basadas en el sistema actual
 
 - Responsable autorizado: usuario activo con rol `titulado` que figura en `Event.createdById` de un taller `Publicado`. Actualmente solo el titulado crea talleres; el rol `mentor` por sí solo no habilita el escaneo. `moderatedById` es revisión de propuestas, no permiso de escaneo. No se concede acceso general a otros titulados o administradores.
 - El pase real muestra `v1:` seguido del `qrToken` hexadecimal de 64 caracteres. El registro acepta ese valor, el token sin prefijo y el UUID de `EventRegistration.id` como referencia manual. El UUID se comprueba dentro del taller gestionado y solo sirve si la inscripción está confirmada.
 - El código corto todavía no tiene contrato ni columna de persistencia. La propuesta de generarlo al emitir el pase y revelarlo con «Usar código» necesita acuerdo FE/BE antes de habilitarlo. Debe ser aleatorio, único, no derivado del UUID y protegido contra intentos masivos; ocultarlo en la interfaz no lo convierte por sí solo en una credencial secreta. Por ahora el backend rechaza códigos cortos aunque el escáner de demostración los reconozca.
-- Ventana pendiente para 12.3: permitir escaneo únicamente el mismo día local del taller en Bolivia (UTC−4) y cerrarlo al alcanzar la hora de finalización. QA definirá si se abre a las 00:00, dos horas antes o al inicio. No se codifica una apertura provisional en 12.1.
+- Ventana implementada en 12.3: desde la hora de inicio inclusive hasta la hora de fin exclusiva, en la fecha local del taller en Bolivia (UTC−4). Esta apertura puntual es la opción conservadora mientras QA confirma si debe abrirse a las 00:00 o dos horas antes. El servidor usa su propio reloj y repite la comprobación tras bloquear la inscripción; la fecha usada para comprobar es la misma que se persiste.
 - Una cancelación invalida el QR. La reactivación existente emite un nuevo token; el anterior no vuelve a ser válido. El UUID de la inscripción permanece estable y, al volver a confirmarse, vuelve a ser aceptado como entrada manual. La asistencia previa de una inscripción reactivada requiere una regla de negocio explícita si se permite cancelar después del check-in.
 
 ## Solicitud prevista
@@ -25,7 +25,7 @@ El backend primero comprueba el rol y la titularidad del taller seleccionado. So
 | 400 | `VALIDATION_ERROR` | Error | Formato o campos no admitidos. |
 | 401 | `UNAUTHENTICATED` | Error / iniciar sesión | Sesión ausente o expirada. |
 | 403 | `FORBIDDEN_ROLE` o `ATTENDANCE_ACCESS_DENIED` | Error | Rol no permitido o taller no gestionado. |
-| 409 | `ATTENDANCE_OUTSIDE_WINDOW` | Error | Regla de 12.3. |
+| 409 | `ATTENDANCE_OUTSIDE_WINDOW` | Error | Antes del inicio o desde el fin del taller, según el horario local de Bolivia. |
 | 422 | `ATTENDANCE_PASS_INVALID` | Inválido | Referencia inexistente, otro taller o inscripción no confirmada. |
 | 422 | `ATTENDANCE_PASS_CANCELLED` | Inválido | Inscripción cancelada del taller autorizado. |
 
