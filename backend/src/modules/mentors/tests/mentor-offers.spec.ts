@@ -40,7 +40,7 @@ function fixture(
           {
             approvedGraduates: 3,
             activeMentors: 0,
-            reservedOffers: options.reservedOffers ?? 1,
+            reservedOffers: options.reservedOffers ?? 2,
           },
         ];
       if (sql.includes('AS eligible'))

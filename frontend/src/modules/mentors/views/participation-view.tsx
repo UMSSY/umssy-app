@@ -40,7 +40,10 @@ import { getMentorRequestStatusLabel } from "../utils/mentor-request-status";
 import {
   loadMentorshipWizardDraft,
   saveMentorshipWizardDraft,
+  useMentorProfileDraft,
 } from "@/modules/mentorship";
+import { useCurrentUserId } from "@/modules/mentorship/hooks/use-current-user-id";
+import { MentorProfilePreview } from "@/modules/mentorship/components/preview/mentor-profile-preview";
 
 const HISTORY_PAGE_SIZE = 10;
 
@@ -123,7 +126,11 @@ export function ParticipationView({
 }) {
   const router = useRouter();
   const client = useQueryClient();
-  const { currentUserId, refreshRoles } = useAuth();
+  const { currentUserId: authUserId, refreshRoles } = useAuth();
+  const { currentUserId } = useCurrentUserId();
+  const { clearAllDrafts } = useMentorProfileDraft();
+
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   const token = useSyncExternalStore(
     subscribeAccessToken,
@@ -169,6 +176,10 @@ export function ParticipationView({
 
   const inFlight = useRef(false);
   const navigationFeedbackHandled = useRef(false);
+
+  useEffect(() => {
+    clearAllDrafts();
+  }, [clearAllDrafts]);
 
   useEffect(() => {
     if (navigationFeedbackHandled.current || (!registered && !activated))
@@ -240,6 +251,7 @@ export function ParticipationView({
       ]);
 
       setModal(null);
+      setIsPreviewOpen(false);
       notifySuccess("Participación desactivada correctamente");
     } catch (failure) {
       setError(failure);
@@ -275,6 +287,25 @@ export function ParticipationView({
 
   const selectedHistoryRequest =
     historyItems.find((item) => item.id === selectedHistoryId) ?? null;
+
+  // Vista previa del perfil desde Mi participación.
+  if (isPreviewOpen && isActive && state && currentUserId) {
+    return (
+      <MentorProfilePreview
+        mentorId={currentUserId}
+        technicalAreas={state.areas.map((area) => ({
+          ...area,
+          description: null,
+        }))}
+        orientationTypes={state.orientations.map((orientation) => ({
+          ...orientation,
+          description: null,
+        }))}
+        onBack={() => setIsPreviewOpen(false)}
+        backLabel="Volver"
+      />
+    );
+  }
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
@@ -383,6 +414,14 @@ export function ParticipationView({
             orientations={(state?.orientations ?? []).map(
               (orientation) => orientation.name,
             )}
+            onPreview={() => {
+              if (!currentUserId) {
+                toast.error("No se pudo identificar tu perfil de mentor.");
+                return;
+              }
+
+              setIsPreviewOpen(true);
+            }}
             onAction={() => {
               setError(null);
               setHasDraftStorageError(false);
@@ -714,15 +753,15 @@ export function ParticipationView({
             }
 
             try {
-              if (!currentUserId) {
+              if (!authUserId) {
                 throw new Error("Identidad no disponible");
               }
 
               const draft =
-                await loadMentorshipWizardDraft(currentUserId);
+                await loadMentorshipWizardDraft(authUserId);
 
               if (!draft) {
-                await saveMentorshipWizardDraft(currentUserId, {
+                await saveMentorshipWizardDraft(authUserId, {
                   currentStep: 1,
                   wantsToParticipate: true,
                   selectedTechnicalAreaIds: (state?.areas ?? []).map(

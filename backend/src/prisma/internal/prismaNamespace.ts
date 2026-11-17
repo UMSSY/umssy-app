@@ -443,6 +443,7 @@ export const ModelName = {
   AccessRequest: 'AccessRequest',
   MentorParticipationRequest: 'MentorParticipationRequest',
   MentorSlotOffer: 'MentorSlotOffer',
+  MentorCapacitySetting: 'MentorCapacitySetting',
   ActivationOtp: 'ActivationOtp',
   MessageStatus: 'MessageStatus',
   ConnectionRequestStatus: 'ConnectionRequestStatus',
@@ -502,7 +503,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "appointmentStatus" | "proposalStatus" | "eventModality" | "eventOrigin" | "eventStatus" | "registrationStatus" | "city" | "company" | "user" | "role" | "userRole" | "education" | "workExperience" | "radarArea" | "skill" | "jobOfferSkill" | "userSkill" | "certification" | "userCvFile" | "profileSkillProcessingState" | "technicalArea" | "orientationType" | "mentorTechnicalArea" | "mentorOrientationType" | "availabilityBlock" | "blockedDate" | "appointment" | "appointmentDocument" | "timeProposal" | "appointmentHistory" | "eventCategory" | "event" | "eventRegistration" | "eventAttendance" | "jobOffer" | "jobOfferModality" | "jobOfferContractType" | "jobOfferStatus" | "adminExportHistory" | "accessRequestStatus" | "accessRequestDocumentType" | "file" | "career" | "accessRequest" | "mentorParticipationRequest" | "mentorSlotOffer" | "activationOtp" | "messageStatus" | "connectionRequestStatus" | "attachmentType" | "conversation" | "conversationParticipant" | "message" | "messageAttachment" | "chatUserBlock" | "connectionRequest" | "userPresence" | "passwordResetOtp" | "mentorParticipationAttemptLimit" | "jobApplicationStatus" | "jobApplication" | "radarApplicationConsent" | "surveyStatus" | "surveyQuestionType" | "surveyTargetAudience" | "survey" | "surveyQuestion" | "surveyQuestionOption" | "surveyResponse" | "surveyAnswer" | "auditAction" | "auditEvent" | "documentValidation" | "mentorIntakeAttempt" | "mentorParticipationSanction" | "mentorIntakeOperation" | "radarCvEvidence" | "radarScoreSnapshot" | "radarAuditEvent" | "radarCvExtractionStatus" | "radarCvReviewStatus" | "mentorParticipationStatus" | "mentorOfferStatus" | "portfolioProvider" | "userSocialAccount" | "userPortfolioProject" | "notificationType" | "notification" | "pushSubscription" | "notificationPreference"
+    modelProps: "appointmentStatus" | "proposalStatus" | "eventModality" | "eventOrigin" | "eventStatus" | "registrationStatus" | "city" | "company" | "user" | "role" | "userRole" | "education" | "workExperience" | "radarArea" | "skill" | "jobOfferSkill" | "userSkill" | "certification" | "userCvFile" | "profileSkillProcessingState" | "technicalArea" | "orientationType" | "mentorTechnicalArea" | "mentorOrientationType" | "availabilityBlock" | "blockedDate" | "appointment" | "appointmentDocument" | "timeProposal" | "appointmentHistory" | "eventCategory" | "event" | "eventRegistration" | "eventAttendance" | "jobOffer" | "jobOfferModality" | "jobOfferContractType" | "jobOfferStatus" | "adminExportHistory" | "accessRequestStatus" | "accessRequestDocumentType" | "file" | "career" | "accessRequest" | "mentorParticipationRequest" | "mentorSlotOffer" | "mentorCapacitySetting" | "activationOtp" | "messageStatus" | "connectionRequestStatus" | "attachmentType" | "conversation" | "conversationParticipant" | "message" | "messageAttachment" | "chatUserBlock" | "connectionRequest" | "userPresence" | "passwordResetOtp" | "mentorParticipationAttemptLimit" | "jobApplicationStatus" | "jobApplication" | "radarApplicationConsent" | "surveyStatus" | "surveyQuestionType" | "surveyTargetAudience" | "survey" | "surveyQuestion" | "surveyQuestionOption" | "surveyResponse" | "surveyAnswer" | "auditAction" | "auditEvent" | "documentValidation" | "mentorIntakeAttempt" | "mentorParticipationSanction" | "mentorIntakeOperation" | "radarCvEvidence" | "radarScoreSnapshot" | "radarAuditEvent" | "radarCvExtractionStatus" | "radarCvReviewStatus" | "mentorParticipationStatus" | "mentorOfferStatus" | "portfolioProvider" | "userSocialAccount" | "userPortfolioProject" | "notificationType" | "notification" | "pushSubscription" | "notificationPreference"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -3907,6 +3908,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.MentorSlotOfferCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.MentorSlotOfferCountAggregateOutputType> | number
+        }
+      }
+    }
+    MentorCapacitySetting: {
+      payload: Prisma.$MentorCapacitySettingPayload<ExtArgs>
+      fields: Prisma.MentorCapacitySettingFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MentorCapacitySettingFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorCapacitySettingPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MentorCapacitySettingFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorCapacitySettingPayload>
+        }
+        findFirst: {
+          args: Prisma.MentorCapacitySettingFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorCapacitySettingPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MentorCapacitySettingFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorCapacitySettingPayload>
+        }
+        findMany: {
+          args: Prisma.MentorCapacitySettingFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorCapacitySettingPayload>[]
+        }
+        create: {
+          args: Prisma.MentorCapacitySettingCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorCapacitySettingPayload>
+        }
+        createMany: {
+          args: Prisma.MentorCapacitySettingCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MentorCapacitySettingCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorCapacitySettingPayload>[]
+        }
+        delete: {
+          args: Prisma.MentorCapacitySettingDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorCapacitySettingPayload>
+        }
+        update: {
+          args: Prisma.MentorCapacitySettingUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorCapacitySettingPayload>
+        }
+        deleteMany: {
+          args: Prisma.MentorCapacitySettingDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MentorCapacitySettingUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MentorCapacitySettingUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorCapacitySettingPayload>[]
+        }
+        upsert: {
+          args: Prisma.MentorCapacitySettingUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorCapacitySettingPayload>
+        }
+        aggregate: {
+          args: Prisma.MentorCapacitySettingAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMentorCapacitySetting>
+        }
+        groupBy: {
+          args: Prisma.MentorCapacitySettingGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MentorCapacitySettingGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MentorCapacitySettingCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MentorCapacitySettingCountAggregateOutputType> | number
         }
       }
     }
@@ -7838,6 +7913,15 @@ export const MentorSlotOfferScalarFieldEnum = {
 export type MentorSlotOfferScalarFieldEnum = (typeof MentorSlotOfferScalarFieldEnum)[keyof typeof MentorSlotOfferScalarFieldEnum]
 
 
+export const MentorCapacitySettingScalarFieldEnum = {
+  id: 'id',
+  percentage: 'percentage',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MentorCapacitySettingScalarFieldEnum = (typeof MentorCapacitySettingScalarFieldEnum)[keyof typeof MentorCapacitySettingScalarFieldEnum]
+
+
 export const ActivationOtpScalarFieldEnum = {
   id: 'id',
   accessRequestId: 'accessRequestId',
@@ -8777,6 +8861,7 @@ export type GlobalOmitConfig = {
   accessRequest?: Prisma.AccessRequestOmit
   mentorParticipationRequest?: Prisma.MentorParticipationRequestOmit
   mentorSlotOffer?: Prisma.MentorSlotOfferOmit
+  mentorCapacitySetting?: Prisma.MentorCapacitySettingOmit
   activationOtp?: Prisma.ActivationOtpOmit
   messageStatus?: Prisma.MessageStatusOmit
   connectionRequestStatus?: Prisma.ConnectionRequestStatusOmit

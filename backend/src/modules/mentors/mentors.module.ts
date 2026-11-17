@@ -20,6 +20,9 @@ import { MentorExitService } from './services/mentor-exit.service.js';
 import { MentorParticipationController } from './controllers/mentor-participation.controller.js';
 import { MentorParticipationService } from './services/mentor-participation.service.js';
 import { MentorParticipationRepository } from './repositories/mentor-participation.repository.js';
+import { MentorCapacityAdminController } from './controllers/mentor-capacity-admin.controller.js';
+import { MentorCapacityAdminRepository } from './repositories/mentor-capacity-admin.repository.js';
+import { MentorCapacityAdminService } from './services/mentor-capacity-admin.service.js';
 
 @Module({
   imports: [AuthModule, ProfileModule, SkillsModule],
@@ -29,6 +32,7 @@ import { MentorParticipationRepository } from './repositories/mentor-participati
     MentorOffersController,
     MentorExitController,
     MentorParticipationController,
+    MentorCapacityAdminController,
   ],
   providers: [
     MentorsService,
@@ -44,6 +48,8 @@ import { MentorParticipationRepository } from './repositories/mentor-participati
     MentorExitService,
     MentorParticipationService,
     MentorParticipationRepository,
+    MentorCapacityAdminRepository,
+    MentorCapacityAdminService,
   ],
   exports: [MentorsService, MentorProfileSuggestionsService],
 })

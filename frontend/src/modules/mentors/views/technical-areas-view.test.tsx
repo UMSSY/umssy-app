@@ -15,6 +15,10 @@ import {
 } from "../services/technical-areas.service";
 import { TechnicalAreasView } from "./technical-areas-view";
 import { getTechnicalAreas } from "@/modules/mentorship/services/technical-area.service";
+import {
+  getMentorOrientationTypes,
+  getOrientationTypes,
+} from "@/modules/mentorship/services/orientation-type.service";
 
 const { push } = vi.hoisted(() => ({ push: vi.fn() }));
 
@@ -25,6 +29,22 @@ vi.mock("../services/technical-areas.service", () => ({
 }));
 vi.mock("@/modules/mentorship/services/technical-area.service", () => ({
   getTechnicalAreas: vi.fn(),
+}));
+
+vi.mock("@/modules/mentorship/services/orientation-type.service", () => ({
+  getOrientationTypes: vi.fn(),
+  getMentorOrientationTypes: vi.fn(),
+  updateMentorOrientationTypes: vi.fn(),
+}));
+vi.mock("@/modules/mentorship/hooks/use-current-user-id", () => ({
+  useCurrentUserId: () => ({ currentUserId: "mentor-1" }),
+}));
+vi.mock("@/modules/mentorship/components/preview/mentor-profile-preview", () => ({
+  MentorProfilePreview: ({ onBack }: { onBack: () => void }) => (
+    <button type="button" onClick={onBack}>
+      Volver a editar
+    </button>
+  ),
 }));
 
 const catalog = [
@@ -55,6 +75,8 @@ describe("TechnicalAreasView", () => {
     vi.mocked(getTechnicalAreas).mockResolvedValue(catalog);
     vi.mocked(getMentorTechnicalAreas).mockResolvedValue(selectedAreas);
     vi.mocked(updateMentorTechnicalAreas).mockResolvedValue();
+    vi.mocked(getOrientationTypes).mockResolvedValue([]);
+    vi.mocked(getMentorOrientationTypes).mockResolvedValue([]);
   });
 
   afterEach(cleanup);
@@ -71,17 +93,25 @@ describe("TechnicalAreasView", () => {
     expect(card(/QA/)).toHaveAttribute("aria-checked", "false");
   });
 
-  it("desmarcar todo muestra la alerta y bloquea Guardar", async () => {
+  it("desmarcar todo y presionar Guardar muestra el mensaje sin guardar", async () => {
     render(<TechnicalAreasView />);
     await screen.findByText("2 seleccionadas");
 
     fireEvent.click(card(/Backend/));
     fireEvent.click(card(/Cloud/));
 
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(button(/Guardar cambios/)).toBeEnabled();
+    fireEvent.click(button(/Guardar cambios/));
+
     expect(screen.getByRole("alert")).toHaveTextContent(
-      "Debe seleccionarse al menos un área",
+      "Debe seleccionar al menos una opción",
     );
-    expect(button(/Guardar cambios/)).toBeDisabled();
+    expect(updateMentorTechnicalAreas).not.toHaveBeenCalled();
+    expect(toast.success).not.toHaveBeenCalled();
+
+    fireEvent.click(card(/QA/));
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
   it("guarda UUID reales y muestra el mensaje de exito", async () => {
@@ -93,7 +123,7 @@ describe("TechnicalAreasView", () => {
 
     await waitFor(() =>
       expect(toast.success).toHaveBeenCalledWith(
-        "Áreas técnicas actualizadas correctamente",
+        "Se guardaron los cambios con éxito",
       ),
     );
     expect(updateMentorTechnicalAreas).toHaveBeenCalledWith([
@@ -114,10 +144,37 @@ describe("TechnicalAreasView", () => {
     fireEvent.click(button(/Guardar cambios/));
 
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith("No se pudieron guardar los cambios. Intente nuevamente."));
+    expect(toast.success).not.toHaveBeenCalled();
     expect(card(/QA/)).toHaveAttribute("aria-checked", "true");
     expect(screen.getByText("3 seleccionadas")).toBeInTheDocument();
   });
+  it("guarda los cambios después de volver de la vista previa", async () => {
+    render(<TechnicalAreasView />);
+    await screen.findByText("2 seleccionadas");
 
+    fireEvent.click(card(/QA/));
+    await waitFor(() => expect(button("Vista previa")).toBeEnabled());
+    fireEvent.click(button("Vista previa"));
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Volver a editar" }),
+    );
+
+    expect(await screen.findByText("3 seleccionadas")).toBeInTheDocument();
+    expect(updateMentorTechnicalAreas).not.toHaveBeenCalled();
+
+    fireEvent.click(button(/Guardar cambios/));
+
+    await waitFor(() =>
+      expect(toast.success).toHaveBeenCalledWith(
+        "Se guardaron los cambios con éxito",
+      ),
+    );
+    expect(updateMentorTechnicalAreas).toHaveBeenCalledWith([
+      catalog[0].id,
+      catalog[2].id,
+      catalog[1].id,
+    ]);
+  });
   it("muestra error de carga y permite reintentar", async () => {
     vi.mocked(getTechnicalAreas)
       .mockRejectedValueOnce(new Error("offline"))
@@ -144,36 +201,50 @@ describe("TechnicalAreasView", () => {
     expect(updateMentorTechnicalAreas).not.toHaveBeenCalled();
   });
 
-  it("Volver sin cambios regresa directo a Mi participación", async () => {
+  it("Cancelar sin cambios regresa directo a Mi participación", async () => {
     render(<TechnicalAreasView />);
     await screen.findByText("2 seleccionadas");
 
-    fireEvent.click(button(/Volver/));
+    fireEvent.click(button("Cancelar"));
 
     expect(push).toHaveBeenCalledWith("/mentors/participation");
+    expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
   });
 
-  it("confirma antes de salir con cambios sin guardar", async () => {
+  it("Cancelar con cambios pide confirmar y Seguir editando conserva las selecciones", async () => {
     render(<TechnicalAreasView />);
     await screen.findByText("2 seleccionadas");
 
     fireEvent.click(card(/QA/));
-    fireEvent.click(button(/Volver/));
-    expect(screen.getByText("¿Descartar cambios?")).toBeInTheDocument();
+    fireEvent.click(button("Cancelar"));
+    expect(
+      screen.getByText("¿Desea descartar los cambios realizados?"),
+    ).toBeInTheDocument();
 
     fireEvent.click(button("Seguir editando"));
-    expect(screen.queryByText("¿Descartar cambios?")).not.toBeInTheDocument();
+
+    await waitFor(() =>
+      expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument(),
+    );
     expect(push).not.toHaveBeenCalled();
+    expect(card(/QA/)).toHaveAttribute("aria-checked", "true");
+    expect(screen.getByText("3 seleccionadas")).toBeInTheDocument();
   });
 
-  it("descarta los cambios y regresa a Mi participación", async () => {
+  it("confirmar el descarte elimina el borrador, navega y no llama al backend", async () => {
     render(<TechnicalAreasView />);
     await screen.findByText("2 seleccionadas");
 
     fireEvent.click(card(/QA/));
-    fireEvent.click(button(/Volver/));
-    await act(async () => fireEvent.click(button("Descartar")));
+    fireEvent.click(button("Cancelar"));
+    await act(async () => fireEvent.click(button("Descartar cambios")));
 
     expect(push).toHaveBeenCalledWith("/mentors/participation");
+    await waitFor(() =>
+      expect(card(/QA/)).toHaveAttribute("aria-checked", "false"),
+    );
+    expect(screen.getByText("2 seleccionadas")).toBeInTheDocument();
+    expect(updateMentorTechnicalAreas).not.toHaveBeenCalled();
   });
+
 });
