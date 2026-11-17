@@ -72,7 +72,9 @@ export class AppointmentNotificationsService {
         recipientIds: [recipientIdOfRequest],
         type: NotificationType.APPOINTMENT_CANCELLED,
         payload: {
-          counterpartName: this.fullName(canceller),
+          counterpartName: this.fullName(
+            this.participantOf(appointment, recipientId),
+          ),
           cancelledByName: this.fullName(canceller),
           date,
           time,
