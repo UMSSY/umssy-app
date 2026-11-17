@@ -22,6 +22,12 @@ describe("AppointmentsSearchBar", () => {
     ).toHaveAttribute("placeholder", "Buscar por nombre");
   });
 
+  it("limita el texto al largo máximo que acepta el backend", () => {
+    render(<AppointmentsSearchBar value="" onSearchChange={vi.fn()} />);
+
+    expect(screen.getByRole("searchbox")).toHaveAttribute("maxLength", "100");
+  });
+
   it("actualiza la búsqueda al dejar de escribir sin presionar Enter", () => {
     vi.useFakeTimers();
     const onSearchChange = vi.fn();

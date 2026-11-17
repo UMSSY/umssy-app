@@ -4,7 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
 import { APPOINTMENTS_TEXT } from "../constants/appointments.constants";
-import { APPOINTMENTS_SEARCH_DEBOUNCE_MS } from "../constants/appointments-search.constants";
+import {
+  APPOINTMENTS_SEARCH_DEBOUNCE_MS,
+  APPOINTMENTS_SEARCH_MAX_LENGTH,
+} from "../constants/appointments-search.constants";
 import type { AppointmentsSearchBarProps } from "../types/appointments-search-bar-props.types";
 
 export function AppointmentsSearchBar({
@@ -53,6 +56,7 @@ export function AppointmentsSearchBar({
       className="min-w-56"
       aria-label={APPOINTMENTS_TEXT.searchLabel}
       placeholder={APPOINTMENTS_TEXT.searchPlaceholder}
+      maxLength={APPOINTMENTS_SEARCH_MAX_LENGTH}
       value={inputValue}
       onChange={(event) => {
         inputValueRef.current = event.target.value;
