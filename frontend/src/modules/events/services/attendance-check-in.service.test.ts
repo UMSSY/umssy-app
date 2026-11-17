@@ -30,7 +30,11 @@ describe('attendanceCheckInService', () => {
       const signal = new AbortController().signal;
       vi.mocked(apiClient.post).mockResolvedValue({
         status,
-        data: { data: { result, checkedInAt: '2026-11-16T14:00:00.000Z' } },
+        data: {
+          statusCode: status,
+          ok: true,
+          data: { result, checkedInAt: '2026-11-16T14:00:00.000Z' },
+        },
       });
       await expect(
         attendanceCheckInService.checkIn(EVENT_ID, REFERENCE, signal),
@@ -63,17 +67,51 @@ describe('attendanceCheckInService', () => {
   it('rejects a success response with the wrong HTTP status or payload', async () => {
     vi.mocked(apiClient.post).mockResolvedValueOnce({
       status: 200,
-      data: { data: { result: 'registered' } },
+      data: {
+        statusCode: 200,
+        ok: true,
+        data: { result: 'registered', checkedInAt: '2026-11-16T14:00:00.000Z' },
+      },
     });
     await expect(
       attendanceCheckInService.checkIn(EVENT_ID, REFERENCE),
     ).rejects.toThrow('Invalid attendance response');
     vi.mocked(apiClient.post).mockResolvedValueOnce({
       status: 201,
-      data: { data: { result: 'other' } },
+      data: {
+        statusCode: 201,
+        ok: true,
+        data: { result: 'other', checkedInAt: '2026-11-16T14:00:00.000Z' },
+      },
     });
     await expect(
       attendanceCheckInService.checkIn(EVENT_ID, REFERENCE),
     ).rejects.toThrow('Invalid attendance response');
+    for (const body of [
+      {
+        statusCode: 200,
+        ok: true,
+        data: { result: 'registered', checkedInAt: '2026-11-16T14:00:00.000Z' },
+      },
+      {
+        statusCode: 201,
+        ok: false,
+        data: { result: 'registered', checkedInAt: '2026-11-16T14:00:00.000Z' },
+      },
+      { statusCode: 201, ok: true, data: { result: 'registered' } },
+      {
+        statusCode: 201,
+        ok: true,
+        data: { result: 'registered', checkedInAt: 'not-a-date' },
+      },
+    ]) {
+      vi.mocked(apiClient.post).mockResolvedValueOnce({
+        status: 201,
+        data: body,
+      });
+      await expect(
+        attendanceCheckInService.checkIn(EVENT_ID, REFERENCE),
+      ).rejects.toThrow('Invalid attendance response');
+    }
   });
 });
