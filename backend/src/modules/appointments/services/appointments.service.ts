@@ -187,14 +187,14 @@ export class AppointmentsService {
       });
 
     if (created) {
-      try {
-        await this.appointmentNotifications.notifyBooked(created);
-      } catch (error) {
+      void Promise.resolve(
+        this.appointmentNotifications.notifyBooked(created),
+      ).catch((error: unknown) => {
         this.logger.error(
           'No se pudo enviar el aviso de la cita confirmada',
           error,
         );
-      }
+      });
     }
 
     return response;
@@ -360,17 +360,17 @@ export class AppointmentsService {
     });
 
     if (cancelledRecord) {
-      try {
-        await this.appointmentNotifications.notifyCancelled(
+      void Promise.resolve(
+        this.appointmentNotifications.notifyCancelled(
           cancelledRecord,
           user.id,
-        );
-      } catch (error) {
+        ),
+      ).catch((error: unknown) => {
         this.logger.error(
           'No se pudo enviar el aviso de la cita cancelada',
           error,
         );
-      }
+      });
     }
 
     return response;
