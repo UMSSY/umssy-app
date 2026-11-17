@@ -1,84 +1,44 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { AttendanceQrCamera } from './attendance-qr-camera';
-import { parseAttendanceReference } from '../utils/attendance-reference';
 import { AttendanceResultPanel } from './attendance-result-panel';
-import type { AttendancePanelState } from '../types/attendance-panel-state.types';
-import { attendanceCheckInService } from '../services/attendance-check-in.service';
-import { getAttendanceCheckInError } from '../utils/attendance-check-in-error';
+import { useAttendanceCheckIn } from '../hooks/use-attendance-check-in';
+import type { AttendanceMobileScannerProps } from '../types/attendance-mobile-scanner-props.types';
 
-export function AttendanceMobileScanner({
-  workshopId,
-}: {
-  workshopId: string;
-}) {
+export function AttendanceMobileScanner({ workshopId }: AttendanceMobileScannerProps) {
   const [reference, setReference] = useState('');
-  const [panel, setPanel] = useState<AttendancePanelState | null>(null);
-  const requestRef = useRef<AbortController | null>(null);
-  const pendingRef = useRef(false);
-  useEffect(
-    () => () => {
-      requestRef.current?.abort();
-    },
-    [],
-  );
+  const { panel, capture, dismiss: dismissCheckIn } = useAttendanceCheckIn(workshopId);
 
   function dismiss() {
-    setPanel(null);
+    dismissCheckIn();
     setReference('');
   }
 
-  function capture(value: string) {
-    if (pendingRef.current || panel) return true;
-    const parsed = parseAttendanceReference(value);
+  function submit(value: string) {
     setReference('');
-    if (!parsed) {
-      setPanel({
-        kind: 'invalid',
-        message:
-          'Formato de pase no reconocido. Ingresa una referencia válida o vuelve a escanear.',
-      });
-      return true;
-    }
-    pendingRef.current = true;
-    setPanel({ kind: 'verifying' });
-    const controller = new AbortController();
-    requestRef.current = controller;
-    void attendanceCheckInService
-      .checkIn(workshopId, parsed, controller.signal)
-      .then((result) => {
-        if (!controller.signal.aborted) setPanel({ kind: result });
-      })
-      .catch((error: unknown) => {
-        if (!controller.signal.aborted)
-          setPanel(getAttendanceCheckInError(error));
-      })
-      .finally(() => {
-        if (requestRef.current === controller) requestRef.current = null;
-        pendingRef.current = false;
-      });
-    return true;
+    return capture(value);
   }
 
   return (
     <div className="space-y-5">
-      <AttendanceQrCamera paused={Boolean(panel)} onDetected={capture} />
+      <AttendanceQrCamera paused={Boolean(panel)} onDetected={submit} />
       <form
         className="space-y-3 rounded-lg border border-border bg-surface p-4"
         onSubmit={(event) => {
           event.preventDefault();
-          capture(reference);
+          submit(reference);
         }}
       >
-        <label
+        <Label
           htmlFor="manual-attendance-reference"
           className="block text-sm font-semibold text-ink"
         >
           Ingresar referencia manualmente
-        </label>
+        </Label>
         <p className="text-sm text-text-secondary">
           Si la cámara no lee el pase, escribe el token del pase o el ID de
           inscripción.

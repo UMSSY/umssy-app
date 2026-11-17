@@ -9,6 +9,7 @@ import { AttendancePassCancelledException } from '../exceptions/attendance-pass-
 import { AttendancePassInvalidException } from '../exceptions/attendance-pass-invalid.exception.js';
 import { assertAttendanceWindow } from '../utils/assert-attendance-window.js';
 import { AttendanceValidationRepository } from '../repositories/attendance-validation.repository.js';
+import { EventsService } from '../../events/services/events.service.js';
 import {
   AttendanceCheckInBodySchema,
   AttendanceCheckInParamsSchema,
@@ -16,7 +17,7 @@ import {
 
 @Injectable()
 export class AttendanceValidationService {
-  constructor(private readonly repository: AttendanceValidationRepository) {}
+  constructor(private readonly repository: AttendanceValidationRepository, private readonly eventsService: EventsService) {}
 
   async resolveForCheckIn(
     eventId: string,
@@ -28,7 +29,7 @@ export class AttendanceValidationService {
     if (!actor.roles.includes('titulado')) throw new ForbiddenRoleException();
     if (!AttendanceCheckInParamsSchema.safeParse({ eventId }).success) throw new ValidationException();
 
-    const workshop = await this.repository.findManagedWorkshop(eventId, actor.id, tx);
+    const workshop = await this.eventsService.findManagedWorkshop(eventId, actor.id, tx);
     if (!workshop) throw new AttendanceAccessDeniedException();
 
     const parsed = AttendanceCheckInBodySchema.safeParse({ reference });

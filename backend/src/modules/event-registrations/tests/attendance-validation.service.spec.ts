@@ -20,7 +20,14 @@ function setup() {
     id: REGISTRATION_ID, cancelledAt: null, status: { title: 'Confirmada' },
   });
   const db = { event: { findFirst: findWorkshop }, eventRegistration: { findFirst: findPass } };
-  const service = new AttendanceValidationService(new AttendanceValidationRepository(db as never));
+  const service = new AttendanceValidationService(
+    new AttendanceValidationRepository(db as never),
+    { findManagedWorkshop: (eventId: string, userId: string, tx?: typeof db) =>
+      (tx ?? db).event.findFirst({
+        where: { id: eventId, createdById: userId, status: { title: 'Publicado' } },
+        select: { id: true, eventDate: true, startTime: true, endTime: true },
+      }) } as never,
+  );
   return { service, findWorkshop, findPass, db };
 }
 

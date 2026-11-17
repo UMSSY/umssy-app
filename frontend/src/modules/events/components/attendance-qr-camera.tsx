@@ -4,11 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import jsQR from 'jsqr';
 import { Camera, Flashlight, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-
-interface AttendanceQrCameraProps {
-  paused: boolean;
-  onDetected: (value: string) => boolean;
-}
+import type { AttendanceQrCameraProps } from '../types/attendance-qr-camera-props.types';
 
 export function AttendanceQrCamera({ paused, onDetected }: AttendanceQrCameraProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -115,7 +111,7 @@ export function AttendanceQrCamera({ paused, onDetected }: AttendanceQrCameraPro
     <div className="relative overflow-hidden rounded-lg bg-black text-white">
       <video ref={videoRef} playsInline muted autoPlay aria-label="Vista de la cámara para escanear pases" className="aspect-[3/4] w-full object-cover sm:aspect-video" />
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 flex items-center justify-center">
-        <div className="aspect-square w-[70%] max-w-72 rounded-2xl border-4 border-sky-400 shadow-[0_0_0_999px_rgba(0,0,0,0.4)]" />
+        <div className="aspect-square w-[70%] max-w-72 rounded-2xl border-4 border-accent ring-[999px] ring-ink/40" />
       </div>
       <div className="absolute inset-x-0 bottom-0 space-y-3 bg-gradient-to-t from-black/80 to-transparent p-4 text-center">
         <p className="text-sm">{status === 'ready' ? paused ? 'Lectura pausada' : 'Coloca el código QR dentro del marco' : status === 'loading' ? 'Abriendo cámara...' : error}</p>

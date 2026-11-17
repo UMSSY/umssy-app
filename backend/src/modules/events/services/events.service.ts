@@ -8,30 +8,26 @@ import { EventNotFoundException } from '../exceptions/event-not-found.exception.
 import { EventsRepository } from '../repositories/events.repository.js';
 import { mapEventsToListResponse } from '../mappers/events.mapper.js';
 import { mapEventDetailToResponse } from '../mappers/event-detail.mapper.js';
+import { mapManagedWorkshops } from '../mappers/managed-workshops.mapper.js';
+import type { ManagedWorkshopResponse } from '../types/managed-workshop-response.types.js';
 import type { GetEventsPayload } from '../types/get-events-payload.types.js';
 import type {
   EventDetailResponse,
   EventsListResponse,
   FindEventsPayload,
 } from '../types/events.types.js';
-import { formatUtcDate } from '../utils/event-date-time.js';
 
 @Injectable()
 export class EventsService {
   constructor(private readonly repository: EventsRepository) {}
 
-  async findManaged(userId: string) {
+  async findManaged(userId: string): Promise<ManagedWorkshopResponse[]> {
     const events = await this.repository.findManaged(userId);
-    return events.map((event) => ({
-      id: event.id,
-      title: event.title,
-      eventDate: formatUtcDate(event.eventDate),
-      startTime: event.startTime.toISOString().slice(11, 23),
-      // Keep the exact check-in boundary used by the backend, including QA fixtures.
-      endTime: event.endTime.toISOString().slice(11, 23),
-      location: event.location,
-      ...(event.coverMimeType && { coverUrl: `/events/${event.id}/cover` }),
-    }));
+    return mapManagedWorkshops(events);
+  }
+
+  findManagedWorkshop(eventId: string, userId: string, tx?: Prisma.TransactionClient) {
+    return this.repository.findManagedWorkshop(eventId, userId, tx);
   }
 
   getFinishedEventThreshold(now: Date = new Date()): FinishedEventThreshold {

@@ -47,6 +47,19 @@ sequenceDiagram
 
 Check-in errors distinguish malformed input (400), missing session (401), forbidden role or ownership (403), closed window (409), and invalid or cancelled pass (422). Responses do not list participants or expose the submitted reference.
 
+## Registration listing performance and acceptance evidence
+
+A local benchmark used PostgreSQL 18.6, Node 22.23.3, Nest HTTP and real repositories with 60 registrations: 5 current, 50 finished and 5 cancelled. Each query was sampled 20 times after 3 warmups, sequentially without compression. The test replaces JWT/session lookup with a controlled actor, so these figures exclude authentication, proxy, external network and concurrent traffic. They are not staging or production latency guarantees.
+
+| Query | Before: rows / JSON bytes / p50 / p95 | After: rows / JSON bytes / p50 / p95 |
+| --- | --- | --- |
+| Current registrations | 55 / 18,758 / 3.993 ms / 5.745 ms | 5 / 1,762 / 3.082 ms / 4.808 ms |
+| Finished history, first page | 10 / 3,534 / 4.698 ms / 5.583 ms | 10 / 3,534 / 5.350 ms / 6.657 ms |
+
+The current-list query now filters published, unfinished workshops in the database before materializing registrations. This reduced materialized current-list rows by 90.9% and JSON bytes by 90.6% in the local fixture. History behavior was retained; its timing variation is not evidence of an improvement. The benchmark is `backend/test/registrations-performance.e2e-spec.ts` and requires an explicitly enabled fresh temporary database. It does not run by default.
+
+Local acceptance checks covered exact current and history IDs, ordering and pagination, a workshop reaching its closing instant, QR stability, cancellation, another user's data, and frontend loading, empty and error states. The recorded run passed 594 frontend tests, 318 backend tests and 3 PostgreSQL-backed tests. No staging deployment or staging measurement was performed for that run.
+
 ## Sprint History
 
 ### Sprint 3
