@@ -15,7 +15,7 @@ import { ProfilePhotoService } from '../../profile/services/profile-photo.servic
 import { AppointmentsModule } from '../appointments.module.js';
 import { AppointmentsController } from '../controllers/appointments.controller.js';
 import { AppointmentMapper } from '../mappers/appointment.mapper.js';
-import { AppointmentNotificationsService } from '../notifications/appointment-notifications.service.js';
+import { AppointmentNotificationsService } from '../notification/appointment-notifications.service.js';
 import { PushDispatcherService } from '../../notifications/services/push-dispatcher.service.js';
 import { AppointmentNotificationsRepository } from '../repositories/appointment-notifications.repository.js';
 import { AppointmentsRepository } from '../repositories/appointments.repository.js';

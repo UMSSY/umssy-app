@@ -137,7 +137,16 @@ export class NotificationsService {
 
     if (includeEmail && emailTargets.length > 0) {
       try {
-        emailStatus = await this.mailDispatcher.dispatchToUsers(emailTargets, title, body, actionUrl);
+        const { renderEmail } = template;
+        emailStatus = await this.mailDispatcher.dispatchToUsers(
+          emailTargets,
+          title,
+          body,
+          actionUrl,
+          renderEmail
+            ? (absoluteActionUrl) => renderEmail(normalizedPayload, absoluteActionUrl)
+            : undefined,
+        );
       } catch (e) {
         this.logger.error('Fallo crítico en MailDispatcher', e);
         emailStatus = 'failed';

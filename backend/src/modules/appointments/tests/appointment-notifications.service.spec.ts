@@ -10,7 +10,8 @@ import {
 import { AppointmentNotificationChannel } from '../enums/appointment-notification-channel.enum.js';
 import { AppointmentNotificationEvent } from '../enums/appointment-notification-event.enum.js';
 import { AppointmentNotificationStatus } from '../enums/appointment-notification-status.enum.js';
-import { AppointmentNotificationsService } from '../notifications/appointment-notifications.service.js';
+import { AppointmentParticipantRole } from '../enums/appointment-participant-role.enum.js';
+import { AppointmentNotificationsService } from '../notification/appointment-notifications.service.js';
 import {
   APPOINTMENT_ID,
   createAppointmentRecord,
@@ -243,12 +244,19 @@ describe('AppointmentNotificationsService', () => {
       groupKey: `appointment-notification:BOOKED:${APPOINTMENT_ID}`,
       payload: {
         counterpartName: 'Luis Flores',
-        date: '2026-10-23',
+        date: '23/10/2026',
         time: '10:00',
         topic: 'Orientación profesional',
+        recipientRole: AppointmentParticipantRole.MENTOR,
       },
     });
-    expect(studentRequest.payload.counterpartName).toBe('Ana Pérez');
+    expect(studentRequest).toMatchObject({
+      recipientIds: [STUDENT_ID],
+      payload: {
+        counterpartName: 'Ana Pérez',
+        recipientRole: AppointmentParticipantRole.STUDENT,
+      },
+    });
   });
 
   it('muestra la fecha de Bolivia cuando el instante cruza la medianoche UTC', async () => {
@@ -261,7 +269,7 @@ describe('AppointmentNotificationsService', () => {
 
     const [[request]] = notify.mock.calls;
     expect(request.payload).toMatchObject({
-      date: '2026-10-23',
+      date: '23/10/2026',
       time: '21:30',
     });
   });
@@ -414,7 +422,7 @@ describe('AppointmentNotificationsService', () => {
       payload: {
         cancelledByName: 'Luis Flores',
         counterpartName: 'Ana Pérez',
-        date: '2026-10-23',
+        date: '23/10/2026',
         time: '10:00',
         reason: 'Imprevisto',
       },
@@ -439,7 +447,7 @@ describe('AppointmentNotificationsService', () => {
 
     expect(title).toBe('Cita cancelada');
     expect(body).toBe(
-      'Luis Flores canceló la cita con Ana Pérez el 2026-10-23.',
+      'Luis Flores canceló la cita con Ana Pérez el 23/10/2026.',
     );
     expect(body).not.toContain('Luis Flores canceló la cita con Luis Flores');
   });
@@ -478,14 +486,17 @@ describe('AppointmentNotificationsService', () => {
       }),
     );
 
-    const [[request]] = notify.mock.calls;
-    const body = NOTIFICATION_TEMPLATES[
-      NotificationType.APPOINTMENT_BOOKED
-    ].renderBody(request.payload as never);
-    expect(body.length).toBeLessThanOrEqual(100);
-    expect(body).not.toContain('tesis');
-    expect(request.payload).not.toHaveProperty('message');
-    expect(request.payload).not.toHaveProperty('document');
+    const template = NOTIFICATION_TEMPLATES[NotificationType.APPOINTMENT_BOOKED];
+    for (const [request] of notify.mock.calls) {
+      const body = template.renderBody(request.payload as never);
+      expect(template.renderTitle(request.payload as never)).toBe(
+        'Nueva cita reservada',
+      );
+      expect(body.length).toBeLessThanOrEqual(100);
+      expect(body).not.toContain('tesis');
+      expect(request.payload).not.toHaveProperty('message');
+      expect(request.payload).not.toHaveProperty('document');
+    }
   });
 
   it('no incluye el motivo en el texto del push de cancelación', async () => {
