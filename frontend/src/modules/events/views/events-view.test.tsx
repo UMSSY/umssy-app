@@ -126,6 +126,7 @@ beforeEach(() => {
     error: null,
   });
   mockUseEvents.mockReturnValue({
+    isProfileComplete: true,
     events: MOCK_EVENTS,
     error: null,
     hasMore: false,
@@ -233,6 +234,7 @@ describe("EventsView", () => {
 
   it("muestra estado de carga y lista vacia", () => {
     mockUseEvents.mockReturnValue({
+      isProfileComplete: true,
       events: [],
       error: null,
       hasMore: false,
@@ -246,6 +248,7 @@ describe("EventsView", () => {
     expect(screen.getByRole("status")).toHaveTextContent("Cargando talleres");
 
     mockUseEvents.mockReturnValue({
+      isProfileComplete: true,
       events: [],
       error: null,
       hasMore: false,
@@ -264,6 +267,7 @@ describe("EventsView", () => {
   it("muestra el error del backend y permite reintentar", () => {
     const retry = vi.fn();
     mockUseEvents.mockReturnValue({
+      isProfileComplete: true,
       events: [],
       error: "No se pudieron cargar los talleres.",
       hasMore: false,
@@ -300,6 +304,7 @@ describe("EventsView", () => {
   it("solicita mas eventos cuando el endpoint indica otra pagina", () => {
     const loadMore = vi.fn();
     mockUseEvents.mockReturnValue({
+      isProfileComplete: true,
       events: MOCK_EVENTS,
       error: null,
       hasMore: true,
@@ -330,6 +335,43 @@ describe("EventsView", () => {
     expect(filterState.setCategoryId).toHaveBeenCalledWith("cat-1");
     expect(mockUseEvents).toHaveBeenCalledWith(filterState.filters);
   });
+  it("invites users with an incomplete profile to complete it without hiding the catalog", () => {
+    mockUseEvents.mockReturnValue({
+      isProfileComplete: false,
+      events: MOCK_EVENTS,
+      error: null,
+      hasMore: false,
+      isLoading: false,
+      isLoadingMore: false,
+      loadMore: vi.fn(),
+      retry: vi.fn(),
+    });
+    render(<EventsView />);
+
+    expect(
+      screen.getByRole("heading", {
+        name: "Completa tu perfil para ver talleres recomendados para ti",
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Completar mi perfil" }),
+    ).toHaveAttribute("href", "/profile/trajectory/skills");
+    expect(
+      screen.getByRole("searchbox", { name: "Buscar taller" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Desarrollo Web con React" }),
+    ).toBeInTheDocument();
+  });
+
+  it("does not show the profile notice when recommendations are available", () => {
+    render(<EventsView />);
+
+    expect(
+      screen.queryByRole("link", { name: "Completar mi perfil" }),
+    ).not.toBeInTheDocument();
+  });
+
   it("toggles the popular order next to the category chips", () => {
     render(<EventsView />);
 
@@ -421,6 +463,7 @@ describe("EventsView", () => {
       filters: { search: "Marketing", categoryId: null },
     });
     mockUseEvents.mockReturnValue({
+      isProfileComplete: true,
       events: [],
       error: null,
       hasMore: false,
@@ -485,6 +528,7 @@ describe("EventsView", () => {
 describe("EventsView proposal support", () => {
   beforeEach(() => {
     mockUseEvents.mockReturnValue({
+      isProfileComplete: true,
       events: [PROPOSAL], error: null, hasMore: false, isLoading: false,
       isLoadingMore: false, loadMore: vi.fn(), retry: vi.fn(),
     });
@@ -588,7 +632,7 @@ describe("EventsView proposal support", () => {
 
     const expired = { ...PROPOSAL, status: "Vencido" };
     showProposal(expired);
-    mockUseEvents.mockReturnValue({ events: [expired], error: null, hasMore: false, isLoading: false, isLoadingMore: false, loadMore: vi.fn(), retry: vi.fn() });
+    mockUseEvents.mockReturnValue({ isProfileComplete: true, events: [expired], error: null, hasMore: false, isLoading: false, isLoadingMore: false, loadMore: vi.fn(), retry: vi.fn() });
     rerender(<EventsView initialProposalId={PROPOSAL.id} />);
 
     expect(
@@ -615,7 +659,7 @@ describe("EventsView proposal support", () => {
 
     const published = { ...PROPOSAL, status: "Publicado", hasSupported: false, registrationCount: 20, availableSpots: 10 };
     showProposal(published);
-    mockUseEvents.mockReturnValue({ events: [published], error: null, hasMore: false, isLoading: false, isLoadingMore: false, loadMore: vi.fn(), retry: vi.fn() });
+    mockUseEvents.mockReturnValue({ isProfileComplete: true, events: [published], error: null, hasMore: false, isLoading: false, isLoadingMore: false, loadMore: vi.fn(), retry: vi.fn() });
     rerender(<EventsView initialProposalId={PROPOSAL.id} />);
 
     expect(screen.getByRole("button", { name: "Inscribirme" })).toHaveClass("bg-brand-red");

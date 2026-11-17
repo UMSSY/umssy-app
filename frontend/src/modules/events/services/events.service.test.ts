@@ -69,6 +69,23 @@ describe('eventsService', () => {
     );
   });
 
+  it('reads the profile state only when the backend sends it', async () => {
+    vi.spyOn(apiClient, 'get')
+      .mockResolvedValueOnce({
+        data: { data: { items: [], isProfileComplete: false }, page: 1, offset: 0 },
+      } as unknown as AxiosResponse<EventsListResponse>)
+      .mockResolvedValueOnce({
+        data: { data: { items: [], isProfileComplete: 'no' }, page: 1, offset: 0 },
+      } as unknown as AxiosResponse<EventsListResponse>);
+
+    await expect(
+      eventsService.getEvents({ page: 1, limit: 50, sort: 'recommended' }),
+    ).resolves.toEqual({ data: [], page: 1, offset: 0, isProfileComplete: false });
+    await expect(
+      eventsService.getEvents({ page: 1, limit: 50, sort: 'recommended' }),
+    ).resolves.toEqual({ data: [], page: 1, offset: 0 });
+  });
+
   it('falla claramente si falta configurar la URL del backend', async () => {
     apiClient.defaults.baseURL = undefined;
 

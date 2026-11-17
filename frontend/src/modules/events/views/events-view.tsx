@@ -26,6 +26,7 @@ import { useProposalSupport } from '../hooks/use-proposal-support';
 import { useEventCategories } from '@/modules/event-categories';
 import { EventsSearchInput } from '../components/events-search-input';
 import { PopularFilterChip } from '../components/popular-filter-chip';
+import { IncompleteProfileNotice } from '../components/incomplete-profile-notice';
 import { CategoryFilterChips } from '@/modules/event-categories';
 import type { EventItem } from '../types/event.types';
 import type { EventDetail } from '../types/event-detail.types';
@@ -50,8 +51,16 @@ export function EventsView({ initialProposalId = null }: EventsViewProps) {
     error: categoriesError,
     retry: retryCategories,
   } = useEventCategories();
-  const { events, error, hasMore, isLoading, isLoadingMore, loadMore, retry } =
-    useEvents(filters);
+  const {
+    events,
+    error,
+    hasMore,
+    isLoading,
+    isLoadingMore,
+    isProfileComplete,
+    loadMore,
+    retry,
+  } = useEvents(filters);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(initialProposalId);
   const viewRef = useRef<HTMLElement>(null);
 
@@ -221,6 +230,8 @@ export function EventsView({ initialProposalId = null }: EventsViewProps) {
               retryLabel="Reintentar categorías"
             />
           )}
+
+          {!isProfileComplete && <IncompleteProfileNotice />}
 
           <section aria-label="Listado de talleres">
             <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">

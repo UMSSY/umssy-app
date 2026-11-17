@@ -26,6 +26,7 @@ export function useEvents(filters: EventFiltersPayload = NO_EVENT_FILTERS) {
   return {
     events: [...new Map((query.data?.pages.flatMap((page) => page.data) ?? []).map(event => [event.id, event])).values()],
     error: query.isError && !query.isFetching ? "No se pudieron cargar los talleres. Revisa la conexión e inténtalo de nuevo." : null,
+    isProfileComplete: query.data?.pages[0]?.isProfileComplete ?? true,
     hasMore: Boolean(query.hasNextPage),
     isLoading: query.isPending,
     isLoadingMore: query.isFetchingNextPage,

@@ -85,6 +85,9 @@ export const eventsService = {
           data: readArray(data.items).map(parseEventItem),
           page: readCount(body.page),
           offset: readCount(body.offset),
+          ...(typeof data.isProfileComplete === 'boolean' && {
+            isProfileComplete: data.isProfileComplete,
+          }),
         };
       },
       { signal, requireStorage },
