@@ -34,7 +34,16 @@ const renderBody = (payload: AppointmentBookedPayload): string => {
     PUSH_TEXT_MAX_LENGTH - fixedLength - ELLIPSIS.length,
     0,
   );
-  const name = `${payload.counterpartName.slice(0, nameLength).trimEnd()}${ELLIPSIS}`;
+  // Se corta por caracteres completos para no partir un emoji en dos.
+  const characters = Array.from(payload.counterpartName);
+  let kept = '';
+  for (const character of characters) {
+    if (kept.length + character.length > nameLength) {
+      break;
+    }
+    kept += character;
+  }
+  const name = `${kept.trimEnd()}${ELLIPSIS}`;
   return bodyFor(payload, name);
 };
 

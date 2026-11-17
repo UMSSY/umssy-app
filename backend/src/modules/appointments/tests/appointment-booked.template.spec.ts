@@ -61,6 +61,21 @@ describe('Plantilla del aviso «Nueva cita reservada»', () => {
     },
   );
 
+  it.each(Object.values(AppointmentParticipantRole))(
+    'no parte un emoji al acortar el nombre (%s)',
+    (role) => {
+      for (const prefix of ['José ', 'Anas ']) {
+        const body = APPOINTMENT_BOOKED_TEMPLATE.renderBody(
+          payloadFor(role, `${prefix}${'🎓'.repeat(40)}`),
+        );
+
+        expect(body.length).toBeLessThanOrEqual(100);
+        expect(body).not.toMatch(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])/);
+        expect(body).toContain('23/10/2026 a las 10:00.');
+      }
+    },
+  );
+
   it('no incluye el tema en el texto corto del aviso', () => {
     const body = APPOINTMENT_BOOKED_TEMPLATE.renderBody(
       payloadFor(AppointmentParticipantRole.MENTOR, 'Luis Flores'),
