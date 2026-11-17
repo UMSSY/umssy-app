@@ -27,8 +27,7 @@ describe('panel de resultado de asistencia', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Cerrar resultado y volver a escanear' }));
     fireEvent.keyDown(document, { key: 'Escape' });
     expect(onDismiss).not.toHaveBeenCalled();
-    rerender(<AttendanceResultPanel state={{ kind: 'registered' }} onDismiss={onDismiss} demo />);
-    expect(screen.getByText('SIMULACIÓN LOCAL')).toBeInTheDocument();
+    rerender(<AttendanceResultPanel state={{ kind: 'registered' }} onDismiss={onDismiss} />);
     expect(screen.getByRole('button', { name: 'Ver registro del taller' })).toBeDisabled();
     fireEvent.keyDown(document, { key: 'Escape' });
     expect(onDismiss).toHaveBeenCalledOnce();

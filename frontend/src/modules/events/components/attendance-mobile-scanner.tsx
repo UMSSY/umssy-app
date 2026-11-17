@@ -10,25 +10,17 @@ import type { AttendancePanelState } from '../types/attendance-panel-state.types
 import { attendanceCheckInService } from '../services/attendance-check-in.service';
 import { getAttendanceCheckInError } from '../utils/attendance-check-in-error';
 
-type DemoOutcome = 'registered' | 'duplicate' | 'invalid' | 'error';
-
 export function AttendanceMobileScanner({
   workshopId,
 }: {
   workshopId: string;
 }) {
-  const demo =
-    process.env.NODE_ENV === 'development' &&
-    process.env.NEXT_PUBLIC_MOCK_MANAGED_WORKSHOPS === 'true';
   const [reference, setReference] = useState('');
   const [panel, setPanel] = useState<AttendancePanelState | null>(null);
-  const [demoOutcome, setDemoOutcome] = useState<DemoOutcome>('registered');
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const requestRef = useRef<AbortController | null>(null);
   const pendingRef = useRef(false);
   useEffect(
     () => () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
       requestRef.current?.abort();
     },
     [],
@@ -53,13 +45,6 @@ export function AttendanceMobileScanner({
     }
     pendingRef.current = true;
     setPanel({ kind: 'verifying' });
-    if (demo) {
-      timerRef.current = setTimeout(() => {
-        pendingRef.current = false;
-        setPanel({ kind: demoOutcome });
-      }, 650);
-      return true;
-    }
     const controller = new AbortController();
     requestRef.current = controller;
     void attendanceCheckInService
@@ -81,41 +66,6 @@ export function AttendanceMobileScanner({
   return (
     <div className="space-y-5">
       <AttendanceQrCamera paused={Boolean(panel)} onDetected={capture} />
-      {demo && (
-        <div className="space-y-2 rounded-lg border border-dashed border-border-strong bg-surface-soft p-4">
-          <p className="text-sm font-semibold text-ink">
-            Simular resultado de validación
-          </p>
-          <div
-            role="group"
-            aria-label="Resultado simulado"
-            className="grid grid-cols-2 gap-2"
-          >
-            {(
-              [
-                ['registered', 'Registrada'],
-                ['duplicate', 'Duplicada'],
-                ['invalid', 'Inválida'],
-                ['error', 'Error'],
-              ] as const
-            ).map(([outcome, label]) => (
-              <Button
-                key={outcome}
-                type="button"
-                size="sm"
-                variant={demoOutcome === outcome ? 'default' : 'outline'}
-                aria-pressed={demoOutcome === outcome}
-                onClick={() => setDemoOutcome(outcome)}
-              >
-                {label}
-              </Button>
-            ))}
-          </div>
-          <p className="text-xs text-text-secondary">
-            Simulación local para revisar el diseño. No registra asistencia.
-          </p>
-        </div>
-      )}
       <form
         className="space-y-3 rounded-lg border border-border bg-surface p-4"
         onSubmit={(event) => {
@@ -150,7 +100,7 @@ export function AttendanceMobileScanner({
         </div>
       </form>
       {panel && (
-        <AttendanceResultPanel state={panel} onDismiss={dismiss} demo={demo} />
+        <AttendanceResultPanel state={panel} onDismiss={dismiss} />
       )}
     </div>
   );
