@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { SimplePdfDocument } from '../../../common/utils/simple-pdf-document.js';
-import { toBoliviaTime } from '../../../common/utils/date-time.js';
+import { formatBoliviaDateTime } from '../../../common/utils/date-time.js';
 import {
   REPORT_PDF_BASE_COLUMNS,
   REPORT_PDF_COLORS,
@@ -38,12 +38,6 @@ function truncate(text: string, maxWidth: number, fontSize: number, bold = false
     value = value.slice(0, -1);
   }
   return `${value}...`;
-}
-
-export function formatReportDateTime(date: Date): string {
-  const { date: isoDate, time } = toBoliviaTime(date);
-  const [year, month, day] = isoDate.split('-');
-  return `${day}/${month}/${year} ${time}`;
 }
 
 @Injectable()
@@ -95,7 +89,7 @@ export class ReportPdfService {
       y += rowHeight;
     });
 
-    this.drawFooters(doc, formatReportDateTime(content.generatedAt));
+    this.drawFooters(doc, formatBoliviaDateTime(content.generatedAt));
     return doc.build();
   }
 
@@ -133,7 +127,7 @@ export class ReportPdfService {
     });
 
     const cardsBottom = this.drawCards(doc, top + 44, [
-      { label: REPORT_PDF_TEXT.generatedAtCard, value: formatReportDateTime(content.generatedAt) },
+      { label: REPORT_PDF_TEXT.generatedAtCard, value: formatBoliviaDateTime(content.generatedAt) },
       { label: REPORT_PDF_TEXT.generatedByCard, value: content.generatedBy },
       { label: REPORT_PDF_TEXT.totalCard, value: REPORT_PDF_TEXT.totalRecords(content.rows.length) },
     ]);
