@@ -1,12 +1,18 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { EventsCatalogService } from '../services/events-catalog.service.js';
 import type { EventsService } from '../services/events.service.js';
+import type { EventAffinitySignalsRepository } from '../repositories/event-affinity-signals.repository.js';
+import type { AffinitySignals } from '../types/affinity-signals.types.js';
 import type { EventWithRelations } from '../types/events.types.js';
 
-function buildRecord(id: string, registrations: number): EventWithRelations {
+function buildRecord(
+  id: string,
+  registrations: number,
+  title = `Taller ${id}`,
+): EventWithRelations {
   return {
     id,
-    title: `Taller ${id}`,
+    title,
     description: null,
     eventDate: new Date('2026-12-15T00:00:00.000Z'),
     startTime: new Date('1970-01-01T10:00:00.000Z'),
@@ -31,6 +37,7 @@ describe('EventsCatalogService', () => {
     findAndCount: ReturnType<typeof vi.fn>;
     expireOverdueProposals: ReturnType<typeof vi.fn>;
   };
+  let signals: { findByUserId: ReturnType<typeof vi.fn> };
   let service: EventsCatalogService;
 
   beforeEach(() => {
@@ -39,7 +46,11 @@ describe('EventsCatalogService', () => {
       findAndCount: vi.fn(),
       expireOverdueProposals: vi.fn().mockResolvedValue(0),
     };
-    service = new EventsCatalogService(eventsService as unknown as EventsService);
+    signals = { findByUserId: vi.fn() };
+    service = new EventsCatalogService(
+      eventsService as unknown as EventsService,
+      signals as unknown as EventAffinitySignalsRepository,
+    );
   });
 
   it('keeps the date order when no sort is requested', async () => {
@@ -107,5 +118,75 @@ describe('EventsCatalogService', () => {
     );
     expect(result.data.items.map(({ id }) => id)).toEqual(['a']);
     expect(result.offset).toBe(2);
+  });
+
+  describe('recommended sort', () => {
+    const emptySignals: AffinitySignals = {
+      skills: [],
+      radarScores: {},
+      careers: [],
+      interests: '',
+    };
+
+    it('keeps the date order when there is no authenticated user', async () => {
+      await service.findAll({ page: 1, limit: 10, sort: 'recommended' });
+
+      expect(eventsService.findAll).toHaveBeenCalled();
+      expect(signals.findByUserId).not.toHaveBeenCalled();
+    });
+
+    it('falls back to popularity and flags an incomplete profile without signals', async () => {
+      signals.findByUserId.mockResolvedValue(emptySignals);
+      eventsService.findAndCount.mockResolvedValue({
+        items: [buildRecord('a', 1), buildRecord('b', 4)],
+        total: 2,
+      });
+
+      const result = await service.findAll(
+        { page: 1, limit: 10, sort: 'recommended' },
+        'user-1',
+      );
+
+      expect(signals.findByUserId).toHaveBeenCalledWith('user-1');
+      expect(result.data.isProfileComplete).toBe(false);
+      expect(result.data.items.map(({ id }) => id)).toEqual(['b', 'a']);
+      expect(result.data.items[0].recommendation).toBeUndefined();
+    });
+
+    it('places affine workshops first and attaches the recommendation of each page item', async () => {
+      signals.findByUserId.mockResolvedValue({
+        ...emptySignals,
+        skills: ['React'],
+      });
+      eventsService.findAndCount.mockResolvedValue({
+        items: [
+          buildRecord('popular', 20, 'Oratoria para entrevistas'),
+          buildRecord('react', 1, 'Componentes con React'),
+          buildRecord('other', 3, 'Finanzas personales'),
+        ],
+        total: 3,
+      });
+
+      const firstPage = await service.findAll(
+        { page: 1, limit: 2, sort: 'recommended' },
+        'user-1',
+      );
+      const secondPage = await service.findAll(
+        { page: 2, limit: 2, sort: 'recommended' },
+        'user-1',
+      );
+
+      expect(firstPage.data.isProfileComplete).toBe(true);
+      expect(firstPage.data.items.map(({ id }) => id)).toEqual([
+        'react',
+        'popular',
+      ]);
+      expect(firstPage.data.items[0].recommendation?.reasons).toEqual([
+        'React',
+      ]);
+      expect(firstPage.data.items[1].recommendation?.reasons).toEqual([]);
+      expect(secondPage.data.items.map(({ id }) => id)).toEqual(['other']);
+      expect(secondPage.data.total).toBe(3);
+    });
   });
 });

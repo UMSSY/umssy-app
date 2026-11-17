@@ -1,3 +1,4 @@
+import type { EventRecommendation } from './event-recommendation.types.js';
 import type { EventCategoryResponse } from '../../event-categories/types/event-category-response.types.js';
 
 export interface EventItemResponse {
@@ -24,4 +25,5 @@ export interface EventItemResponse {
   progressPercent: number | null;
   votingDeadline: string | null;
   hasSupported: boolean;
+  recommendation?: EventRecommendation;
 }
