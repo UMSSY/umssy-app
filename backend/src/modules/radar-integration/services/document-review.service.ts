@@ -5,7 +5,6 @@ import { DocumentVerificationConflictException } from '../exceptions/document-ve
 import { DocumentVerificationFileNotFoundException } from '../exceptions/document-verification-file-not-found.exception.js';
 
 import type { DocumentReviewFilter } from '../requests/document-verification.request.js';
-
 @Injectable()
 export class DocumentReviewService {
   constructor(
