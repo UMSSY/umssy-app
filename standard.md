@@ -241,6 +241,7 @@ When a new GitHub task is created (Frontend, Backend, or General), the form requ
 - Architecture, database relationships, and key flows must be represented with Mermaid diagrams inside the relevant READMEs. Sequence diagrams must use Mermaid `sequenceDiagram`; standalone diagrams or images do not replace the required embedded diagrams.
 - Every documentation README must include a **Sprint History** section. Documenting Sprint 3 functionality is mandatory; documenting Sprints 1 and 2 is optional.
 - Database documentation must live in `backend/prisma/README.md`, alongside `schema.prisma`, and follow the backend database documentation standard.
+- Never add HU or epic references in the documentation
 
 ## 5. APPENDICES
 
