@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import { loadMailTemplate } from '../../mail/helpers/load-mail-template.js';
+import { MailTemplateService } from '../../mail/services/mail-template.service.js';
 import { NOTIFICATION_TEMPLATES } from '../../notifications/constants/notification-templates.constants.js';
 import { NotificationType } from '../../notifications/types/notification-type.enum.js';
 import { AppointmentParticipantRole } from '../enums/appointment-participant-role.enum.js';
@@ -65,5 +67,84 @@ describe('Plantilla del aviso «Nueva cita reservada»', () => {
     );
 
     expect(body).not.toContain('Orientación profesional');
+  });
+
+  describe('correo «Cita confirmada»', () => {
+    const actionUrl = 'https://umssy.test/appointments';
+    const emailFor = (role: AppointmentParticipantRole, name: string) => {
+      const email = APPOINTMENT_BOOKED_TEMPLATE.renderEmail?.(
+        payloadFor(role, name),
+        actionUrl,
+      );
+      if (!email) {
+        throw new Error('La plantilla debe definir el correo');
+      }
+      return email;
+    };
+
+    it('usa la plantilla propia y el asunto «Cita confirmada»', () => {
+      const email = emailFor(AppointmentParticipantRole.MENTOR, 'Luis Flores');
+
+      expect(email.template).toBe('appointment-booked');
+      expect(email.subject).toBe('Cita confirmada');
+    });
+
+    it('le presenta al mentor el titulado con la fecha, la hora GMT-4 y el tema', () => {
+      const email = emailFor(AppointmentParticipantRole.MENTOR, 'Luis Flores');
+
+      expect(email.values).toEqual({
+        intro: 'Luis Flores reservó una cita de orientación contigo.',
+        counterpartLabel: 'Titulado',
+        counterpartName: 'Luis Flores',
+        date: '23/10/2026',
+        time: '10:00 (hora de Bolivia, GMT-4)',
+        topic: 'Orientación profesional',
+        actionUrl,
+      });
+    });
+
+    it('le presenta al titulado su mentor', () => {
+      const email = emailFor(AppointmentParticipantRole.STUDENT, 'Ana Pérez');
+
+      expect(email.values).toMatchObject({
+        intro: 'Tu cita de orientación con Ana Pérez quedó confirmada.',
+        counterpartLabel: 'Mentor',
+        counterpartName: 'Ana Pérez',
+      });
+    });
+
+    it('incluye los mismos datos en la versión de texto plano', () => {
+      const email = emailFor(AppointmentParticipantRole.STUDENT, 'Ana Pérez');
+
+      expect(email.text.split('\n')).toEqual([
+        'Tu cita de orientación con Ana Pérez quedó confirmada.',
+        'Mentor: Ana Pérez',
+        'Fecha: 23/10/2026',
+        'Hora: 10:00 (hora de Bolivia, GMT-4)',
+        'Tema: Orientación profesional',
+        `Ver mis citas: ${actionUrl}`,
+      ]);
+    });
+
+    it('se arma sobre el layout institucional con todos los datos y escapa el nombre', async () => {
+      const email = emailFor(
+        AppointmentParticipantRole.MENTOR,
+        'Luis <b>Flores</b>',
+      );
+      const html = await new MailTemplateService().render(
+        await loadMailTemplate(email.template),
+        { ...email.values, brandName: 'UMSSY', logoUrl: '' },
+      );
+
+      expect(html).toContain('Cita confirmada');
+      expect(html).toContain('23/10/2026');
+      expect(html).toContain('10:00 (hora de Bolivia, GMT-4)');
+      expect(html).toContain('Orientación profesional');
+      expect(html).toContain(`href="${actionUrl}"`);
+      expect(html).toContain('Ver mis citas');
+      expect(html).toContain('Este es un mensaje automático.');
+      expect(html).toContain('Luis &lt;b&gt;Flores&lt;/b&gt;');
+      expect(html).not.toContain('<b>Flores</b>');
+    });
   });
 });
