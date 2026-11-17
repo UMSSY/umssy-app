@@ -79,7 +79,6 @@ export class CvService {
       this.cvMapper.toStoredFileName(file?.originalname),
     );
 
-    // The file insert also queues durable OCR work in the same transaction.
     const record = await this.cvMetadataRepository.findByIdForUser(
       userId,
       cvId,

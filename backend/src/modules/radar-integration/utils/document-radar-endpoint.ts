@@ -7,7 +7,6 @@ import type { RadarEndpointOptions } from '../types/radar-endpoint-options.types
 import { getRadarSchemaExample } from './get-radar-schema-example.js';
 import { HTTP_ERRORS } from '../../../common/constants/http-errors.constants.js';
 
-// Documenta el contrato del interceptor sin alterar las respuestas del servicio.
 export function documentRadarEndpoint(options: RadarEndpointOptions) {
   const status = options.status ?? 200;
   const decorators = [
@@ -67,22 +66,13 @@ export function documentRadarEndpoint(options: RadarEndpointOptions) {
     500: 'Error interno del servicio.',
   };
   for (const code of new Set([401, 500, ...(options.errors ?? [])])) {
-    const error = z.object({
-      statusCode: z.literal(code),
-      ok: z.literal(false),
-      code: z.string(),
-      detail: z.string(),
-      data: z.unknown().nullable(),
-    });
     decorators.push(
       ApiResponse({
         status: code,
         description: descriptions[code],
         content: {
           'application/json': {
-            schema: z.toJSONSchema(error, {
-              target: 'openapi-3.0',
-            }) as RadarOpenApiSchema,
+            schema: { $ref: '#/components/schemas/ApiErrorResponse' },
             example: {
               statusCode: code,
               ok: false,

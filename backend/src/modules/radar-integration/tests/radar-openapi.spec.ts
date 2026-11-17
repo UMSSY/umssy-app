@@ -1,6 +1,7 @@
 import { Controller, Module } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { documentCommonResponses } from '../../../common/utils/document-common-responses.js';
 import { describe, expect, it } from 'vitest';
 import { DocumentVerificationController } from '../controllers/document-verification.controller.js';
 import { RadarIntegrationController } from '../controllers/radar-integration.controller.js';
@@ -47,9 +48,11 @@ describe('Radar OpenAPI contracts', () => {
     class ContractModule {}
     const app = await NestFactory.create(ContractModule, { logger: false });
     try {
-      const document = SwaggerModule.createDocument(
-        app,
-        new DocumentBuilder().addBearerAuth().build(),
+      const document = documentCommonResponses(
+        SwaggerModule.createDocument(
+          app,
+          new DocumentBuilder().addBearerAuth().build(),
+        ),
       );
       const operations = Object.values(document.paths).flatMap((entry) =>
         Object.entries(entry ?? {})
@@ -66,6 +69,14 @@ describe('Radar OpenAPI contracts', () => {
         expect(operation.security).toEqual([{ bearer: [] }]);
         expect(operation.responses[401]).toBeDefined();
         expect(operation.responses[500]).toBeDefined();
+        for (const code of [400, 401, 403, 404, 409, 500]) {
+          const response = operation.responses[code];
+          if (response && 'content' in response) {
+            expect(response.content?.['application/json']?.schema).toEqual({
+              $ref: '#/components/schemas/ApiErrorResponse',
+            });
+          }
+        }
         expect(
           operation.responses[200] ?? operation.responses[201],
         ).toBeDefined();
@@ -79,6 +90,9 @@ describe('Radar OpenAPI contracts', () => {
         }),
       );
       const decision = document.paths['/radar-document-reviews/{id}']!.patch!;
+      expect(document.components?.schemas?.ApiErrorResponse).toMatchObject({
+        required: ['statusCode', 'ok', 'code', 'detail', 'data'],
+      });
       expect(decision.parameters).toContainEqual(
         expect.objectContaining({ name: 'id', in: 'path', required: true }),
       );
