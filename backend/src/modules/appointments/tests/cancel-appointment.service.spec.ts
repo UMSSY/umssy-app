@@ -327,9 +327,11 @@ describe('AppointmentsService.cancel', () => {
 
     await service.cancel(student, APPOINTMENT_ID, { reason: 'Imprevisto' });
 
-    expect(
-      appointmentNotifications.notifyCancelled,
-    ).toHaveBeenCalledExactlyOnceWith(cancelled, STUDENT_ID);
+    await vi.waitFor(() => {
+      expect(
+        appointmentNotifications.notifyCancelled,
+      ).toHaveBeenCalledExactlyOnceWith(cancelled, STUDENT_ID);
+    });
     expect(
       appointmentsRepository.cancelAppointment.mock.invocationCallOrder[0],
     ).toBeLessThan(
