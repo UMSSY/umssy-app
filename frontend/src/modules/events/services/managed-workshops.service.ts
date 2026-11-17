@@ -1,13 +1,32 @@
+import { apiClient } from '@/shared/services/api-client';
+import { getAccessToken } from '@/shared/services/storage/access-token-storage';
+import { BEARER_PREFIX } from '@/shared/constants/auth.constants';
+import { readArray, readNullableString, readRecord, readString } from '../utils/response-validation';
+import { REQUEST_TIMEOUT_MS } from '../constants/events.constants';
 import type { ManagedWorkshop } from '../types/managed-workshop.types';
-import { MOCK_MANAGED_WORKSHOPS } from '../testing/managed-workshops.mock';
+
+function parseManagedWorkshop(value: unknown): ManagedWorkshop {
+  const row = readRecord(value);
+  return {
+    id: readString(row.id),
+    title: readString(row.title),
+    eventDate: readString(row.eventDate),
+    startTime: readString(row.startTime),
+    endTime: readString(row.endTime),
+    location: readNullableString(row.location),
+    coverUrl: readNullableString(row.coverUrl),
+  };
+}
 
 export const managedWorkshopsService = {
-  async getMine(): Promise<ManagedWorkshop[]> {
-    if (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_MOCK_MANAGED_WORKSHOPS === 'true') {
-      return MOCK_MANAGED_WORKSHOPS;
-    }
-    // Aquí se conectará la consulta real de talleres autorizados, aún pendiente en backend.
-    // El listado público no identifica al creador y no puede usarse como sustituto.
-    throw new Error('La consulta de Mis talleres aún no está disponible.');
+  async getMine(signal?: AbortSignal, accessToken: string | null = getAccessToken()): Promise<ManagedWorkshop[]> {
+    if (!accessToken) throw new Error('Debes iniciar sesión para consultar tus talleres.');
+    if (!apiClient.defaults.baseURL) throw new Error('La URL del backend no está configurada.');
+    const response = await apiClient.get<unknown>('/events/managed', {
+      headers: { Authorization: `${BEARER_PREFIX}${accessToken}` },
+      signal,
+      timeout: REQUEST_TIMEOUT_MS,
+    });
+    return readArray(readRecord(response.data).data).map(parseManagedWorkshop);
   },
 };

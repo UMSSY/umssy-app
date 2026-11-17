@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { buttonVariants } from "@/components/ui/button-variants";
 import { OFFLINE_PASSES_TEXTS } from "../constants/offline-passes.constants";
 import { usePassesViewState } from "../hooks/use-passes-view-state";
+import { useCancelRegistration } from "../hooks/use-cancel-registration";
 import { OfflineStatusBanner } from "../components/offline-status-banner";
 import { NoOfflineCopyState } from "../components/no-offline-copy-state";
 import { RequestFeedback } from "../components/request-feedback";
@@ -17,6 +18,7 @@ import { PassDetail } from "../components/pass-detail";
 import { MyPassesEmptyState } from "../components/my-passes-empty-state";
 import { FinishedRegistrationCard } from "../components/finished-registration-card";
 import { CancelRegistrationDialog } from "../components/cancel-registration-dialog";
+import { RegistrationCancelledBanner } from "../components/registration-cancelled-banner";
 import { useMyPassesHistory } from "../hooks/use-my-passes";
 import { getHistoryErrorMessage } from "../utils/get-history-error-message";
 import {
@@ -32,12 +34,15 @@ export function MyPassesView({
 }: MyPassesViewProps = {}) {
   const [activeTab, setActiveTab] = useState("current");
   const { status, isOnline, passes: registrations, offlineQrTokens, lastUpdated, error, isConnectionError, removedSavedPasses, retry } = usePassesViewState(activeTab === "current");
+  const { cancelRegistration, getErrorMessage } = useCancelRegistration();
   const isLoading = status === "loading";
   const offlineReason = isOnline ? undefined : OFFLINE_PASSES_TEXTS.requiresConnection;
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [cancelTargetId, setCancelTargetId] = useState<string | null>(null);
   const [isCancelling, setIsCancelling] = useState(false);
+  const [showCancelledBanner, setShowCancelledBanner] = useState(false);
+  const [cancelError, setCancelError] = useState<string | null>(null);
   const history = useMyPassesHistory(activeTab === "history" && isOnline);
   const historyUnavailable = activeTab === "history" && !isOnline;
   const [now, setNow] = useState(Date.now);
@@ -78,9 +83,19 @@ export function MyPassesView({
   const handleConfirmCancel = async () => {
     if (!cancelTarget || !canCancelTarget || !isOnline || isCancelling) return;
     setIsCancelling(true);
+    setCancelError(null);
     try {
-      await onConfirmCancelRegistration?.(cancelTarget.id);
+      if (onConfirmCancelRegistration) {
+        await onConfirmCancelRegistration(cancelTarget.id);
+      } else {
+        await cancelRegistration(cancelTarget.id);
+      }
       setCancelTargetId(null);
+      setShowCancelledBanner(true);
+    } catch (cause) {
+      setCancelTargetId(null);
+      setShowCancelledBanner(false);
+      setCancelError(getErrorMessage(cause));
     } finally {
       setIsCancelling(false);
     }
@@ -101,6 +116,12 @@ export function MyPassesView({
         description={description}
         actions={<Link href="/events" className={buttonVariants({ variant: "outline" })}><CalendarDays aria-hidden="true" />Explorar talleres</Link>}
       /></div>
+      {showCancelledBanner ? (
+        <RegistrationCancelledBanner
+          onDismiss={() => setShowCancelledBanner(false)}
+        />
+      ) : null}
+      {cancelError ? <RequestFeedback message={cancelError} isError /> : null}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList aria-label="Secciones de mis inscripciones">
           <TabsTrigger value="current">Vigentes</TabsTrigger>
@@ -137,7 +158,14 @@ export function MyPassesView({
                     registrationId={item.id}
                     onOpenChat={onOpenWorkshopChat}
                     chatDisabledReason={offlineReason}
-                    onCancelRegistration={isOnline ? (id) => setCancelTargetId(id) : undefined}
+                    onCancelRegistration={
+                      isOnline
+                        ? (id) => {
+                            setCancelError(null);
+                            setCancelTargetId(id);
+                          }
+                        : undefined
+                    }
                     cancelDisabledReason={offlineReason}
                     isAvailableOffline={
                       status === 'live' && item.id in offlineQrTokens

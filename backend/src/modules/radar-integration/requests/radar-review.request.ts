@@ -8,5 +8,6 @@ export const reviewDecisionSchema = z
   .object({
     decision: z.enum(['approved', 'rejected', 'revoked']),
   })
-  .strict();
+  .strict()
+  .meta({ example: { decision: 'approved' } });
 export type ReviewDecisionRequest = z.infer<typeof reviewDecisionSchema>;

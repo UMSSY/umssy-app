@@ -9,10 +9,15 @@ import { EventProposalsRepository } from './repositories/event-proposals.reposit
 import { EventsRepository } from './repositories/events.repository.js';
 import { EventsService } from './services/events.service.js';
 import { EventsCronService } from './services/events-cron.service.js';
+import { ManagedWorkshopsController } from './controllers/managed-workshops.controller.js';
 
 @Module({
   imports: [JwtAuthModule],
-  controllers: [EventsController, EventProposalsController],
+  controllers: [
+    ManagedWorkshopsController,
+    EventsController,
+    EventProposalsController,
+  ],
   providers: [
     EventProposalsRepository,
     EventsRepository,

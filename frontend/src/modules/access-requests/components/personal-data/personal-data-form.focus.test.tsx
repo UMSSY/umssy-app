@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AccessRequestProvider } from "../../contexts/access-request-context";
@@ -59,7 +59,7 @@ describe("PersonalDataForm: foco en el primer campo con error", () => {
 
     await submitForm();
 
-    expect(screen.getByLabelText(/^Nombres/)).toHaveFocus();
+    await waitFor(() => expect(screen.getByLabelText(/^Nombres/)).toHaveFocus());
     expect(screen.getByLabelText(/^Nombres/)).toHaveAttribute("aria-invalid", "true");
   });
 
@@ -70,7 +70,7 @@ describe("PersonalDataForm: foco en el primer campo con error", () => {
 
     await submitForm();
 
-    expect(screen.getByLabelText(/^Correo electrónico/)).toHaveFocus();
+    await waitFor(() => expect(screen.getByLabelText(/^Correo electrónico/)).toHaveFocus());
     expect(create).not.toHaveBeenCalled();
   });
 
@@ -83,7 +83,7 @@ describe("PersonalDataForm: foco en el primer campo con error", () => {
 
     await submitForm();
 
-    expect(screen.getByLabelText(/^Código SIS/)).toHaveFocus();
+    await waitFor(() => expect(screen.getByLabelText(/^Código SIS/)).toHaveFocus());
     expect(screen.getByLabelText(/^Fecha de nacimiento/)).toHaveAttribute("aria-invalid", "true");
     expect(screen.getByLabelText(/^Año de titulación/)).toHaveAttribute("aria-invalid", "true");
   });
@@ -96,7 +96,7 @@ describe("PersonalDataForm: foco en el primer campo con error", () => {
 
     await submitForm();
 
-    expect(screen.getByLabelText(/Teléfono/)).toHaveFocus();
+    await waitFor(() => expect(screen.getByLabelText(/Teléfono/)).toHaveFocus());
   });
 
   it("enfoca el disparador del select Expedido cuando es el primer error", async () => {
@@ -106,7 +106,7 @@ describe("PersonalDataForm: foco en el primer campo con error", () => {
     await submitForm();
 
     const trigger = screen.getByRole("combobox", { name: "Expedido" });
-    expect(trigger).toHaveFocus();
+    await waitFor(() => expect(trigger).toHaveFocus());
     expect(trigger).toHaveAttribute("aria-invalid", "true");
   });
 
@@ -117,7 +117,7 @@ describe("PersonalDataForm: foco en el primer campo con error", () => {
     await submitForm();
 
     const trigger = screen.getByRole("combobox", { name: "Carrera" });
-    expect(trigger).toHaveFocus();
+    await waitFor(() => expect(trigger).toHaveFocus());
     expect(trigger).toHaveAttribute("aria-invalid", "true");
   });
 
@@ -128,7 +128,7 @@ describe("PersonalDataForm: foco en el primer campo con error", () => {
 
     await submitForm();
 
-    expect(screen.getByRole("combobox", { name: "Expedido" })).toHaveFocus();
+    await waitFor(() => expect(screen.getByRole("combobox", { name: "Expedido" })).toHaveFocus());
   });
 
   it("con un error solo del servidor (409 en el correo) enfoca el correo", async () => {
@@ -139,7 +139,7 @@ describe("PersonalDataForm: foco en el primer campo con error", () => {
     await submitForm();
 
     expect(await screen.findByText("El correo ya está registrado", { selector: "p[id='email-error']" })).toBeInTheDocument();
-    expect(screen.getByLabelText(/^Correo electrónico/)).toHaveFocus();
+    await waitFor(() => expect(screen.getByLabelText(/^Correo electrónico/)).toHaveFocus());
   });
 
   it("con errores del servidor en varios campos (400) enfoca el primero en el orden visual", async () => {
@@ -152,7 +152,7 @@ describe("PersonalDataForm: foco en el primer campo con error", () => {
     await submitForm();
 
     await screen.findByText("La carrera no es válida");
-    expect(screen.getByLabelText(/^Código SIS/)).toHaveFocus();
+    await waitFor(() => expect(screen.getByLabelText(/^Código SIS/)).toHaveFocus());
   });
 
   it("un error del servidor en el select Carrera enfoca su disparador", async () => {
@@ -163,7 +163,7 @@ describe("PersonalDataForm: foco en el primer campo con error", () => {
     await submitForm();
 
     await screen.findByText("La carrera no es válida");
-    expect(screen.getByRole("combobox", { name: "Carrera" })).toHaveFocus();
+    await waitFor(() => expect(screen.getByRole("combobox", { name: "Carrera" })).toHaveFocus());
   });
 
   it("un error del servidor sin campo (aviso general) no mueve el foco a ningún campo", async () => {
@@ -174,7 +174,7 @@ describe("PersonalDataForm: foco en el primer campo con error", () => {
     await submitForm();
 
     await screen.findByText("No se pudo completar la solicitud. Inténtalo de nuevo.");
-    expect(screen.getByRole("button", { name: SUBMIT_NAME })).toHaveFocus();
+    await waitFor(() => expect(screen.getByRole("button", { name: SUBMIT_NAME })).toHaveFocus());
   });
 
   it("sin errores el foco no se mueve a ningún campo", async () => {
@@ -186,18 +186,18 @@ describe("PersonalDataForm: foco en el primer campo con error", () => {
 
     expect(create).toHaveBeenCalledTimes(1);
     const button = screen.getByRole("button", { name: SUBMIT_NAME });
-    expect(button).toHaveFocus();
+    await waitFor(() => expect(button).toHaveFocus());
   });
 
   it("al corregir un campo no se vuelve a mover el foco hasta el siguiente envío", async () => {
     renderForm();
     await submitForm();
-    expect(screen.getByLabelText(/^Nombres/)).toHaveFocus();
+    await waitFor(() => expect(screen.getByLabelText(/^Nombres/)).toHaveFocus());
 
     screen.getByLabelText(/^Correo electrónico/).focus();
     type(/^Nombres/, "Ana");
 
-    expect(screen.getByLabelText(/^Correo electrónico/)).toHaveFocus();
+    await waitFor(() => expect(screen.getByLabelText(/^Correo electrónico/)).toHaveFocus());
   });
 
   it("un segundo envío inválido vuelve a enfocar el primer error", async () => {
@@ -207,7 +207,7 @@ describe("PersonalDataForm: foco en el primer campo con error", () => {
 
     await submitForm();
 
-    expect(screen.getByLabelText(/^Nombres/)).toHaveFocus();
+    await waitFor(() => expect(screen.getByLabelText(/^Nombres/)).toHaveFocus());
   });
 });
 
@@ -279,7 +279,7 @@ describe("PersonalDataForm: criterios de #500 en el formulario", () => {
 
     expect(screen.getByText("Debes ser mayor de 18 años")).toBeInTheDocument();
     expect(screen.getByLabelText(/^Fecha de nacimiento/)).toHaveAttribute("aria-invalid", "true");
-    expect(screen.getByLabelText(/^Fecha de nacimiento/)).toHaveFocus();
+    await waitFor(() => expect(screen.getByLabelText(/^Fecha de nacimiento/)).toHaveFocus());
     expect(create).not.toHaveBeenCalled();
   });
 

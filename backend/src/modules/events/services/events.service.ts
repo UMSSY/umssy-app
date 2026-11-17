@@ -14,10 +14,25 @@ import type {
   EventsListResponse,
   FindEventsPayload,
 } from '../types/events.types.js';
+import { formatUtcDate } from '../utils/event-date-time.js';
 
 @Injectable()
 export class EventsService {
   constructor(private readonly repository: EventsRepository) {}
+
+  async findManaged(userId: string) {
+    const events = await this.repository.findManaged(userId);
+    return events.map((event) => ({
+      id: event.id,
+      title: event.title,
+      eventDate: formatUtcDate(event.eventDate),
+      startTime: event.startTime.toISOString().slice(11, 23),
+      // Keep the exact check-in boundary used by the backend, including QA fixtures.
+      endTime: event.endTime.toISOString().slice(11, 23),
+      location: event.location,
+      ...(event.coverMimeType && { coverUrl: `/events/${event.id}/cover` }),
+    }));
+  }
 
   getFinishedEventThreshold(now: Date = new Date()): FinishedEventThreshold {
     const localNow = new Date(now.getTime() + BOLIVIA_OFFSET_MS);

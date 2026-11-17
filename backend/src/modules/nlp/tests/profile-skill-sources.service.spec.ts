@@ -13,7 +13,7 @@ const userId = '11111111-1111-4111-8111-111111111111';
 describe('ProfileSkillSourcesService', () => {
   const educations = { findAnalysisSources: vi.fn() };
   const workExperience = { findAnalysisSources: vi.fn() };
-  const profile = { ensureProfileExists: vi.fn() };
+  const profile = { getProfile:vi.fn(), ensureProfileExists: vi.fn() };
   const skills = { findCatalog: vi.fn() };
 
   const certifications = {
@@ -21,6 +21,7 @@ describe('ProfileSkillSourcesService', () => {
   };
 
   const radarEvidence = {
+    findCertificateSkills: vi.fn().mockResolvedValue([]),
     findCurrentCvText: vi.fn(),
   };
 
@@ -35,9 +36,11 @@ describe('ProfileSkillSourcesService', () => {
 
   beforeEach(() => {
     vi.resetAllMocks();
+    profile.getProfile.mockResolvedValue({headline:null,aboutMe:null});
 
     certifications.findManyByUserId.mockResolvedValue([]);
     radarEvidence.findCurrentCvText.mockResolvedValue([]);
+    radarEvidence.findCertificateSkills.mockResolvedValue([]);
   });
 
   it('delegates profile validation and propagates the owner exception', async () => {
