@@ -17,12 +17,15 @@ import {
 import { SocketProvider } from '@/modules/chat/contexts/socket-context';
 import { OfflineNavigation } from '@/shared/components/offline-navigation';
 
+import { AppVisibilityReporter } from '@/modules/notifications';
+
 function SessionProviders({ children }: { children: ReactNode }) {
   const [queryClient] = useState(createQueryClient);
   useEffect(() => () => queryClient.clear(), [queryClient]);
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
+        <AppVisibilityReporter />
         <SocketProvider>
           <OfflineNavigation />
           {children}

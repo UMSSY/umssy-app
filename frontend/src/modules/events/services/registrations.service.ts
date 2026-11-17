@@ -1,7 +1,7 @@
 import { BEARER_PREFIX } from "@/shared/constants/auth.constants";
 import type { PassData } from '../types/pass-data.types';
 export type { PassData } from '../types/pass-data.types';
-import { registrationsService as registrationApi } from '@/modules/registrations';
+import { registrationsService as registrationApi } from '@/modules/event-registrations';
 import { getAccessToken } from "@/shared/services/storage/access-token-storage";
 import { readRecord, readString, readNullableString } from '../utils/response-validation';
 import { REQUEST_TIMEOUT_MS } from '../constants/events.constants';

@@ -32,7 +32,12 @@ describe('EventRegistrationsService finished history', () => {
     getFinishedEventThreshold.mockReset().mockReturnValue(threshold);
     service = new EventRegistrationsService(
       { findByUserId, findFinishedByUserId } as never,
-      { getFinishedEventThreshold } as never,
+      {
+        getFinishedEventThreshold,
+        getActiveRegistrationEventFilter: () => ({
+          status: { title: 'Publicado' },
+        }),
+      } as never,
     );
   });
 
@@ -40,7 +45,9 @@ describe('EventRegistrationsService finished history', () => {
     await expect(
       service.findMine('user-a', { page: 2, limit: 2 }),
     ).resolves.toEqual([]);
-    expect(findByUserId).toHaveBeenCalledWith('user-a');
+    expect(findByUserId).toHaveBeenCalledWith('user-a', {
+      status: { title: 'Publicado' },
+    });
     expect(findFinishedByUserId).not.toHaveBeenCalled();
     expect(getFinishedEventThreshold).not.toHaveBeenCalled();
   });

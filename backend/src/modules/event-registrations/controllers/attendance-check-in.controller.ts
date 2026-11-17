@@ -53,7 +53,8 @@ export class AttendanceCheckInController {
   @ApiResponse({ status: 200, description: 'Asistencia ya registrada' })
   @ApiResponse({ status: 400, description: 'Referencia o identificador inválido' })
   @ApiResponse({ status: 401, description: 'Sesión requerida' })
-  @ApiResponse({ status: 403, description: 'Taller no gestionado por el usuario' })
+  @ApiResponse({ status: 403, description: 'Rol o taller no autorizado' })
+  @ApiResponse({ status: 409, description: 'Fuera de la ventana horaria del taller' })
   @ApiResponse({ status: 422, description: 'Pase inválido o inscripción cancelada' })
   async checkIn(
     @Param(new ZodValidationPipe(AttendanceCheckInParamsSchema, () => new ValidationException()))

@@ -14,11 +14,20 @@ import {
   PROFILE_COMPLETENESS_MESSAGES,
 } from '../constants/profile-completeness.constants';
 import { useProfileCompleteness } from '../hooks/use-profile-completeness';
+import { useProfileGuide } from '../contexts/profile-guide-context';
 import { useProfileCompletenessDisclosure } from '../hooks/use-profile-completeness-disclosure';
 import { ProfileCompletenessChecklist } from './profile-completeness-checklist';
+import type { ProfileCompletenessProgressProps } from '../types/profile-completeness-progress-props.types';
 
-export function ProfileCompletenessProgress() {
-  const { completeness, isLoading, error, reload } = useProfileCompleteness();
+export function ProfileCompletenessProgress({
+  showChecklist = true,
+  refetchOnMount = showChecklist,
+  hideWhenComplete = false,
+  showGuideAction = true,
+}: ProfileCompletenessProgressProps) {
+  const guide = useProfileGuide();
+  const { completeness, isLoading, error, reload } =
+    useProfileCompleteness(refetchOnMount);
   const isComplete =
     completeness?.percentage === PROFILE_COMPLETENESS_LIMITS.max;
   const { isOpen, panelId, containerRef, triggerRef, toggle } =
@@ -56,7 +65,14 @@ export function ProfileCompletenessProgress() {
     );
   }
 
-  if (!completeness) return null;
+  if (
+    !completeness ||
+    (hideWhenComplete &&
+      guide?.isEnabled &&
+      isComplete &&
+      guide.hasFinished !== false)
+  )
+    return null;
   const { percentage } = completeness;
   const title = isComplete
     ? PROFILE_COMPLETENESS_MESSAGES.completedTitle
@@ -95,7 +111,7 @@ export function ProfileCompletenessProgress() {
             </ProgressValue>
           </div>
         </Progress>
-        {isComplete ? (
+        {showChecklist && isComplete ? (
           <Button
             ref={triggerRef}
             type="button"
@@ -108,11 +124,23 @@ export function ProfileCompletenessProgress() {
           />
         ) : null}
       </div>
-      <div id={panelId} hidden={!isOpen}>
-        {isOpen ? (
-          <ProfileCompletenessChecklist sections={completeness.sections} />
-        ) : null}
-      </div>
+      {showChecklist &&
+      showGuideAction &&
+      guide?.isEnabled &&
+      (!isComplete || guide.hasFinished === false) ? (
+        <div className="px-4 pb-4 sm:px-5">
+          <Button data-profile-guide-trigger onClick={() => guide.start()}>
+            {isComplete ? 'Finalizar mi perfil' : 'Continuar mi perfil'}
+          </Button>
+        </div>
+      ) : null}
+      {showChecklist ? (
+        <div id={panelId} hidden={!isOpen}>
+          {isOpen ? (
+            <ProfileCompletenessChecklist sections={completeness.sections} />
+          ) : null}
+        </div>
+      ) : null}
     </Card>
   );
 }

@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { Test } from '@nestjs/testing';
+import { JwtService } from '@nestjs/jwt';
 import request from 'supertest';
 import { AttendanceCheckInController } from '../controllers/attendance-check-in.controller.js';
 import { AttendanceCheckInService } from '../services/attendance-check-in.service.js';
@@ -8,6 +9,9 @@ import { RolesGuard } from '../../../common/guards/roles.guard.js';
 import { ResponseInterceptor } from '../../../common/interceptors/response.interceptor.js';
 import { DomainExceptionFilter } from '../../../common/filters/domain-exception.filter.js';
 import type { AuthenticatedUser } from '../../../common/types/authenticated-user.types.js';
+import { SessionService } from '../../../common/services/session.service.js';
+import { AttendanceOutsideWindowException } from '../exceptions/attendance-outside-window.exception.js';
+import { UnauthorizedSessionException } from '../../../common/exceptions/unauthorized-session.exception.js';
 
 const EVENT_ID = '33333333-3333-4333-8333-333333333333';
 const ACTOR: AuthenticatedUser = {
@@ -40,6 +44,29 @@ async function setup(result: { result: 'registered' | 'duplicate'; checkedInAt: 
   return { app, checkIn };
 }
 
+async function setupWithRealGuards(actor: AuthenticatedUser | null) {
+  const checkIn = vi.fn().mockResolvedValue({ result: 'registered', checkedInAt: TIME });
+  const getAuthenticatedUser = vi.fn().mockImplementation(async () => {
+    if (!actor) throw new UnauthorizedSessionException();
+    return actor;
+  });
+  const moduleRef = await Test.createTestingModule({
+    controllers: [AttendanceCheckInController],
+    providers: [
+      { provide: AttendanceCheckInService, useValue: { checkIn } },
+      JwtAuthGuard,
+      RolesGuard,
+      { provide: JwtService, useValue: { verifyAsync: vi.fn().mockResolvedValue({ sub: ACTOR.id, roleTag: 'titulado' }) } },
+      { provide: SessionService, useValue: { getAuthenticatedUser } },
+    ],
+  }).compile();
+  const app = moduleRef.createNestApplication();
+  app.setGlobalPrefix('api');
+  app.useGlobalFilters(new DomainExceptionFilter());
+  await app.init();
+  return { app, checkIn, getAuthenticatedUser };
+}
+
 describe('AttendanceCheckInController', () => {
   it.each([
     { result: 'registered' as const, status: 201 },
@@ -57,6 +84,68 @@ describe('AttendanceCheckInController', () => {
         data: { result, checkedInAt: TIME },
       });
       expect(checkIn).toHaveBeenCalledWith(EVENT_ID, ACTOR, TOKEN);
+    } finally {
+      await app.close();
+    }
+  });
+
+  it('returns the attendance window error without exposing a pass or writing attendance', async () => {
+    const { app, checkIn } = await setup({ result: 'registered', checkedInAt: TIME });
+    checkIn.mockRejectedValueOnce(new AttendanceOutsideWindowException());
+    try {
+      const response = await request(app.getHttpServer())
+        .post(`/api/events/${EVENT_ID}/attendances/check-ins`)
+        .send({ reference: TOKEN })
+        .expect(409);
+      expect(response.body).toMatchObject({
+        statusCode: 409, ok: false, code: 'ATTENDANCE_OUTSIDE_WINDOW', data: null,
+      });
+      expect(JSON.stringify(response.body)).not.toContain(TOKEN);
+    } finally {
+      await app.close();
+    }
+  });
+
+  it('requires a Bearer session before attempting a check-in', async () => {
+    const { app, checkIn, getAuthenticatedUser } = await setupWithRealGuards(ACTOR);
+    try {
+      const response = await request(app.getHttpServer())
+        .post(`/api/events/${EVENT_ID}/attendances/check-ins`)
+        .send({ reference: TOKEN })
+        .expect(401);
+      expect(response.body.code).toBe('UNAUTHENTICATED');
+      expect(getAuthenticatedUser).not.toHaveBeenCalled();
+      expect(checkIn).not.toHaveBeenCalled();
+    } finally {
+      await app.close();
+    }
+  });
+
+  it('rejects an expired or inactive session', async () => {
+    const { app, checkIn } = await setupWithRealGuards(null);
+    try {
+      const response = await request(app.getHttpServer())
+        .post(`/api/events/${EVENT_ID}/attendances/check-ins`)
+        .set('Authorization', 'Bearer test-token')
+        .send({ reference: TOKEN })
+        .expect(401);
+      expect(response.body.code).toBe('UNAUTHENTICATED');
+      expect(checkIn).not.toHaveBeenCalled();
+    } finally {
+      await app.close();
+    }
+  });
+
+  it('rejects a mentor-only account before attempting a check-in', async () => {
+    const { app, checkIn } = await setupWithRealGuards({ ...ACTOR, roles: ['mentor'] });
+    try {
+      const response = await request(app.getHttpServer())
+        .post(`/api/events/${EVENT_ID}/attendances/check-ins`)
+        .set('Authorization', 'Bearer test-token')
+        .send({ reference: TOKEN })
+        .expect(403);
+      expect(response.body.code).toBe('FORBIDDEN_ROLE');
+      expect(checkIn).not.toHaveBeenCalled();
     } finally {
       await app.close();
     }

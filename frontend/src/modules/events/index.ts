@@ -31,8 +31,8 @@ export {
   useRegistrationActions,
   REGISTRATION_ERROR_MESSAGES,
   getRegistrationErrorMessage,
-} from '@/modules/registrations';
+} from '@/modules/event-registrations';
 export type {
   RegistrationResponse,
   RegistrationErrorCode,
-} from '@/modules/registrations';
+} from '@/modules/event-registrations';

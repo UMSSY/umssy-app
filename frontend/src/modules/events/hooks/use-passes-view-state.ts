@@ -1,6 +1,6 @@
 "use client";
 
-import { useRegistrationSession } from "@/modules/registrations";
+import { useRegistrationSession } from "@/modules/event-registrations";
 import { formatLastUpdated } from "../utils/format-last-updated";
 import { useMyPasses } from "./use-my-passes";
 import { useOfflinePassesSnapshot } from "./use-offline-passes-snapshot";

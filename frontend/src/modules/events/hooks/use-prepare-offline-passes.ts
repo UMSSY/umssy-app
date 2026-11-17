@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useRegistrationSession } from '@/modules/registrations';
+import { useRegistrationSession } from '@/modules/event-registrations';
 import { OFFLINE_PASSES_SNAPSHOT_QUERY_KEY } from '../constants/offline-passes.constants';
 import { prepareOfflineAccess } from '../services/prepare-offline-access';
 import { useOnlineStatus } from './use-online-status';

@@ -6,6 +6,7 @@ import {
   FeedbackMessage,
   useProfileSkillsRadar,
   useProfileCompletionRequest,
+  ProfileCompletenessProgress,
 } from "@/modules/profile";
 import type { DetectedSkill } from "@/modules/matching";
 import { RecordEditorDialog } from "@/shared/components/layout/record-editor-dialog";
@@ -188,29 +189,32 @@ export function WorkExperienceProfileSection() {
           onClose={resetForm}
         >
           {(requestClose) => (
-            <WorkExperienceForm
-              key={
-                editingExperience
-                  ? editingExperience.id
-                  : `new-${formVersion}`
-              }
-              initialValues={
-                editingExperience
-                  ? toWorkExperienceFormValues(editingExperience)
-                  : undefined
-              }
-              experienceId={editingExperience?.id}
-              initialDetectedSkills={
-                editingExperience
-                  ? detectedSkillsByExperience[editingExperience.id] ?? []
-                  : []
-              }
-              isPending={saveMutation.isSaving}
-              feedback={saveMutation.feedback}
-              onValuesChange={() => setHasChanges(true)}
-              onSubmit={handleSubmit}
-              onCancel={requestClose}
-            />
+            <>
+              <ProfileCompletenessProgress showChecklist={false} />
+              <WorkExperienceForm
+                key={
+                  editingExperience
+                    ? editingExperience.id
+                    : `new-${formVersion}`
+                }
+                initialValues={
+                  editingExperience
+                    ? toWorkExperienceFormValues(editingExperience)
+                    : undefined
+                }
+                experienceId={editingExperience?.id}
+                initialDetectedSkills={
+                  editingExperience
+                    ? detectedSkillsByExperience[editingExperience.id] ?? []
+                    : []
+                }
+                isPending={saveMutation.isSaving}
+                feedback={saveMutation.feedback}
+                onValuesChange={() => setHasChanges(true)}
+                onSubmit={handleSubmit}
+                onCancel={requestClose}
+              />
+            </>
           )}
         </RecordEditorDialog>
       ) : null}

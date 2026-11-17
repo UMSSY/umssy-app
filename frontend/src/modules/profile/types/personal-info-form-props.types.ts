@@ -4,6 +4,8 @@ import type { PersonalInfoValues } from "./personal-info-values.types";
 import type { ProfilePhotoFieldProps } from "./profile-photo-field-props.types";
 
 export interface PersonalInfoFormProps {
+  idPrefix?: string;
+  saveLabel?: string;
   initialValues: PersonalInfoValues;
   cities?: CityOption[];
   isSaving?: boolean;

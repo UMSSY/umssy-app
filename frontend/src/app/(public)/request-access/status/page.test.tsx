@@ -1,9 +1,9 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { accessRequestService } from "@/modules/access-request/services/access-request.service";
+import { accessRequestService } from "@/modules/access-requests/services/access-request.service";
 import MyRequestPage from "./page";
 
-vi.mock("@/modules/access-request/services/access-request.service", () => ({
+vi.mock("@/modules/access-requests/services/access-request.service", () => ({
   accessRequestService: {
     getRequestStatus: vi.fn(),
   },
