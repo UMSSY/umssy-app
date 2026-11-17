@@ -59,6 +59,19 @@ async function createApp(actor: AuthenticatedUser | null) {
 }
 
 describe('managed workshops', () => {
+  it('uses the supplied transaction for attendance ownership lookup', async () => {
+    const findFirst = vi.fn().mockResolvedValue(null);
+    const repository = new EventsRepository({ event: { findFirst: vi.fn() } } as never);
+    const service = new EventsService(repository);
+    const tx = { event: { findFirst } };
+
+    await expect(service.findManagedWorkshop(workshop.id, OWNER.id, tx as never)).resolves.toBeNull();
+    expect(findFirst).toHaveBeenCalledWith({
+      where: { id: workshop.id, createdById: OWNER.id, status: { title: 'Publicado' } },
+      select: { id: true, eventDate: true, startTime: true, endTime: true },
+    });
+  });
+
   it('queries only published workshops created by the authenticated owner', async () => {
     const findMany = vi.fn().mockResolvedValue([]);
     const repository = new EventsRepository({ event: { findMany } } as never);

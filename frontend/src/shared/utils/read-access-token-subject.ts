@@ -16,9 +16,7 @@ export function readAccessTokenSubject(token: unknown): string | null {
     ) {
       return claims.sub;
     }
-  } catch {
-    // Without a subject there is no offline account to read or write.
-  }
+  } catch {}
 
   return null;
 }

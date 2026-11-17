@@ -7,11 +7,17 @@ import {
   waitFor,
 } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AttendanceMobileScanner } from './attendance-mobile-scanner';
 import { attendanceCheckInService } from '../services/attendance-check-in.service';
 
 const WORKSHOP_ID = '914f52b0-47f0-49b0-925a-d6783861693a';
 const QR = `v1:${'a'.repeat(64)}`;
+
+function renderScanner() {
+  const queryClient = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
+  return render(<QueryClientProvider client={queryClient}><AttendanceMobileScanner workshopId={WORKSHOP_ID} /></QueryClientProvider>);
+}
 
 vi.mock('./attendance-qr-camera', () => ({
   AttendanceQrCamera: ({
@@ -47,7 +53,7 @@ describe('entrada de asistencia', () => {
         finish = resolve;
       }),
     );
-    render(<AttendanceMobileScanner workshopId={WORKSHOP_ID} />);
+    renderScanner();
     fireEvent.click(screen.getByRole('button', { name: 'Simular lectura QR' }));
     expect(screen.getByRole('dialog')).toHaveTextContent(
       'Verificando entrada...',
@@ -55,11 +61,11 @@ describe('entrada de asistencia', () => {
     expect(
       screen.getByRole('button', { name: 'Simular lectura QR' }),
     ).toBeDisabled();
-    expect(attendanceCheckInService.checkIn).toHaveBeenCalledExactlyOnceWith(
+    await waitFor(() => expect(attendanceCheckInService.checkIn).toHaveBeenCalledExactlyOnceWith(
       WORKSHOP_ID,
       'a'.repeat(64),
       expect.any(AbortSignal),
-    );
+    ));
     await act(async () => finish('registered'));
     expect(screen.getByRole('dialog')).toHaveTextContent(
       'Asistencia registrada',
@@ -72,7 +78,7 @@ describe('entrada de asistencia', () => {
 
   it('accepts a registration UUID and rejects scripts or unsupported short codes before sending', async () => {
     vi.mocked(attendanceCheckInService.checkIn).mockResolvedValue('duplicate');
-    render(<AttendanceMobileScanner workshopId={WORKSHOP_ID} />);
+    renderScanner();
     const input = screen.getByRole('textbox', {
       name: 'Ingresar referencia manualmente',
     });
@@ -111,7 +117,7 @@ describe('entrada de asistencia', () => {
         data: { code: 'ATTENDANCE_PASS_CANCELLED', detail: QR },
       },
     });
-    render(<AttendanceMobileScanner workshopId={WORKSHOP_ID} />);
+    renderScanner();
     fireEvent.click(screen.getByRole('button', { name: 'Simular lectura QR' }));
     await waitFor(() =>
       expect(screen.getByRole('dialog')).toHaveTextContent(

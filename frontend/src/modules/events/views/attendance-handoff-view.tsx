@@ -15,10 +15,7 @@ import {
   formatRegistrationTime,
 } from '../utils/registration-format';
 import { AttendanceMobileScanner } from '../components/attendance-mobile-scanner';
-
-interface AttendanceHandoffViewProps {
-  workshopId: string;
-}
+import type { AttendanceHandoffViewProps } from '../types/attendance-handoff-view-props.types';
 
 const subscribeViewport = (callback: () => void) => {
   if (typeof window.matchMedia !== 'function') return () => {};
