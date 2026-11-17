@@ -5,6 +5,6 @@ export interface FindEventsPayload {
   isPublishedOnly?: boolean;
   search?: string;
   userId?: string;
-  skip: number;
-  take: number;
+  skip?: number;
+  take?: number;
 }
