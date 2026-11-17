@@ -1,51 +1,140 @@
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AttendanceMobileScanner } from './attendance-mobile-scanner';
+import { attendanceCheckInService } from '../services/attendance-check-in.service';
+
+const WORKSHOP_ID = '914f52b0-47f0-49b0-925a-d6783861693a';
+const QR = `v1:${'a'.repeat(64)}`;
 
 vi.mock('./attendance-qr-camera', () => ({
-  AttendanceQrCamera: ({ paused, onDetected }: { paused: boolean; onDetected: (value: string) => boolean }) => (
-    <button type="button" disabled={paused} onClick={() => onDetected(`v1:${'a'.repeat(64)}`)}>Simular lectura QR</button>
+  AttendanceQrCamera: ({
+    paused,
+    onDetected,
+  }: {
+    paused: boolean;
+    onDetected: (value: string) => boolean;
+  }) => (
+    <button type="button" disabled={paused} onClick={() => onDetected(QR)}>
+      Simular lectura QR
+    </button>
   ),
 }));
-afterEach(() => { cleanup(); vi.unstubAllEnvs(); vi.useRealTimers(); });
+vi.mock('../services/attendance-check-in.service', () => ({
+  attendanceCheckInService: { checkIn: vi.fn() },
+}));
+
+beforeEach(() => {
+  vi.clearAllMocks();
+});
+afterEach(() => {
+  cleanup();
+  vi.unstubAllEnvs();
+  vi.useRealTimers();
+});
 
 describe('entrada de asistencia', () => {
-  it('pauses after QR capture and resumes on request', () => {
-    render(<AttendanceMobileScanner />);
+  it('sends one QR to the selected workshop, pauses while verifying and resumes after success', async () => {
+    let finish!: (value: 'registered') => void;
+    vi.mocked(attendanceCheckInService.checkIn).mockReturnValue(
+      new Promise((resolve) => {
+        finish = resolve;
+      }),
+    );
+    render(<AttendanceMobileScanner workshopId={WORKSHOP_ID} />);
     fireEvent.click(screen.getByRole('button', { name: 'Simular lectura QR' }));
-    expect(screen.getByRole('dialog')).toHaveTextContent('No se pudo verificar la entrada');
-    expect(screen.getByRole('button', { name: 'Simular lectura QR' })).toBeDisabled();
-    fireEvent.click(screen.getByRole('button', { name: 'Escanear nuevamente' }));
-    expect(screen.getByRole('button', { name: 'Simular lectura QR' })).toBeEnabled();
+    expect(screen.getByRole('dialog')).toHaveTextContent(
+      'Verificando entrada...',
+    );
+    expect(
+      screen.getByRole('button', { name: 'Simular lectura QR' }),
+    ).toBeDisabled();
+    expect(attendanceCheckInService.checkIn).toHaveBeenCalledExactlyOnceWith(
+      WORKSHOP_ID,
+      'a'.repeat(64),
+      expect.any(AbortSignal),
+    );
+    await act(async () => finish('registered'));
+    expect(screen.getByRole('dialog')).toHaveTextContent(
+      'Asistencia registrada',
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Escanear siguiente' }));
+    expect(
+      screen.getByRole('button', { name: 'Simular lectura QR' }),
+    ).toBeEnabled();
   });
 
-  it('accepts an inscription ID and a grouped short reference, and rejects scripts', () => {
-    render(<AttendanceMobileScanner />);
-    const input = screen.getByRole('textbox', { name: 'Ingresar referencia manualmente' });
-    fireEvent.change(input, { target: { value: '<script>alert(1)</script>' } });
+  it('accepts a registration UUID and rejects scripts or unsupported short codes before sending', async () => {
+    vi.mocked(attendanceCheckInService.checkIn).mockResolvedValue('duplicate');
+    render(<AttendanceMobileScanner workshopId={WORKSHOP_ID} />);
+    const input = screen.getByRole('textbox', {
+      name: 'Ingresar referencia manualmente',
+    });
+    for (const value of ['<script>alert(1)</script>', 'K7M4-R9TX-2Q8P']) {
+      fireEvent.change(input, { target: { value } });
+      fireEvent.click(screen.getByRole('button', { name: 'Validar' }));
+      expect(screen.getByRole('dialog')).toHaveTextContent(
+        'Formato de pase no reconocido',
+      );
+      fireEvent.click(
+        screen.getByRole('button', { name: 'Escanear nuevamente' }),
+      );
+    }
+    expect(attendanceCheckInService.checkIn).not.toHaveBeenCalled();
+    const registrationId = '7b8988fd-6818-4929-858b-4d83b72873cf';
+    fireEvent.change(input, { target: { value: registrationId } });
     fireEvent.click(screen.getByRole('button', { name: 'Validar' }));
-    expect(screen.getByRole('dialog')).toHaveTextContent('Formato de pase no reconocido');
-    fireEvent.click(screen.getByRole('button', { name: 'Escanear nuevamente' }));
-
-    fireEvent.change(input, { target: { value: '7b8988fd-6818-4929-858b-4d83b72873cf' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Validar' }));
-    expect(screen.getByRole('dialog')).toHaveTextContent('servicio de validación');
-    fireEvent.click(screen.getByRole('button', { name: 'Escanear nuevamente' }));
-    fireEvent.change(input, { target: { value: 'K7M4-R9TX-2Q8P' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Validar' }));
-    expect(screen.getByRole('dialog')).toHaveTextContent('servicio de validación');
+    await waitFor(() =>
+      expect(screen.getByRole('dialog')).toHaveTextContent(
+        'Asistencia ya registrada',
+      ),
+    );
+    expect(attendanceCheckInService.checkIn).toHaveBeenCalledWith(
+      WORKSHOP_ID,
+      registrationId,
+      expect.any(AbortSignal),
+    );
+    expect(input).toHaveValue('');
   });
 
-  it('shows verifying then the selected simulated result without sending a request', () => {
+  it('maps a cancelled pass to an invalid result without displaying the server detail', async () => {
+    vi.mocked(attendanceCheckInService.checkIn).mockRejectedValue({
+      isAxiosError: true,
+      response: {
+        status: 422,
+        data: { code: 'ATTENDANCE_PASS_CANCELLED', detail: QR },
+      },
+    });
+    render(<AttendanceMobileScanner workshopId={WORKSHOP_ID} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Simular lectura QR' }));
+    await waitFor(() =>
+      expect(screen.getByRole('dialog')).toHaveTextContent(
+        'La inscripción fue cancelada',
+      ),
+    );
+    expect(screen.getByRole('dialog')).not.toHaveTextContent(QR);
+  });
+
+  it('keeps the local demo separate from the backend request', () => {
     vi.stubEnv('NODE_ENV', 'development');
     vi.stubEnv('NEXT_PUBLIC_MOCK_MANAGED_WORKSHOPS', 'true');
     vi.useFakeTimers();
-    render(<AttendanceMobileScanner />);
+    render(<AttendanceMobileScanner workshopId={WORKSHOP_ID} />);
     fireEvent.click(screen.getByRole('button', { name: 'Duplicada' }));
     fireEvent.click(screen.getByRole('button', { name: 'Simular lectura QR' }));
-    expect(screen.getByRole('dialog')).toHaveTextContent('Verificando entrada...');
-    expect(screen.getByRole('button', { name: 'Simular lectura QR' })).toBeDisabled();
+    expect(screen.getByRole('dialog')).toHaveTextContent(
+      'Verificando entrada...',
+    );
     act(() => vi.advanceTimersByTime(650));
-    expect(screen.getByRole('dialog')).toHaveTextContent('Asistencia ya registrada');
+    expect(screen.getByRole('dialog')).toHaveTextContent(
+      'Asistencia ya registrada',
+    );
+    expect(attendanceCheckInService.checkIn).not.toHaveBeenCalled();
   });
 });
