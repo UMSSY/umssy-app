@@ -11,6 +11,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useLogin } from "../hooks/use-login";
+import { useCredentialRestrictions } from "../hooks/use-credential-restrictions";
+import { CredentialRestrictionNotice } from "../components/credential-restriction-notice";
+import { getCredentialLimit, toAuthRequestError } from "../utils/auth-request-error";
 import { useRedirectAuthenticated } from "../hooks/use-redirect-authenticated";
 import { NEXT_PARAM } from "../constants/session.constants";
 import { resolvePostLoginPath } from "../utils/resolve-post-login-path";
@@ -19,16 +22,21 @@ import { validateLoginFields, type LoginFieldErrors } from "../utils/validate-lo
 
 export function LoginView() {
   const router = useRouter();
-  const { login, isLoading, error } = useLogin();
+  const restrictions = useCredentialRestrictions();
+  const { login, isLoading, error } = useLogin((cause, payload) => restrictions.restrict(
+    payload.email, getCredentialLimit(cause), toAuthRequestError(cause, "No se pudo iniciar sesión.").message,
+  ));
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fieldErrors, setFieldErrors] = useState<LoginFieldErrors>({});
   const [isSigningIn, setIsSigningIn] = useState(false);
   useRedirectAuthenticated(!isSigningIn);
+  const loginRestriction = restrictions.getRestriction("login", email);
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
+    if (isLoading || isSigningIn || restrictions.isBlocked("login", email)) return;
     const errors = validateLoginFields(email, password);
     setFieldErrors(errors);
     if (errors.email || errors.password) return;
@@ -98,6 +106,7 @@ export function LoginView() {
                   type="email"
                   required
                   autoComplete="username"
+                  disabled={isLoading}
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   aria-invalid={fieldErrors.email ? true : undefined}
@@ -152,6 +161,7 @@ export function LoginView() {
                   type={isPasswordVisible ? "text" : "password"}
                   required
                   autoComplete="current-password"
+                  disabled={isLoading}
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                   aria-invalid={fieldErrors.password ? true : undefined}
@@ -192,6 +202,8 @@ export function LoginView() {
               ) : null}
             </div>
 
+            <CredentialRestrictionNotice restriction={loginRestriction} />
+
             {error ? (
               <Alert className="mb-4 border-danger/25 bg-surface text-danger">
                 <CircleAlert aria-hidden="true" />
@@ -204,7 +216,7 @@ export function LoginView() {
             <Button
               type="submit"
               variant="institutional"
-              disabled={isLoading}
+              disabled={isLoading || isSigningIn || Boolean(loginRestriction)}
               className="h-12 w-full text-base font-extrabold"
             >
               {isLoading ? (

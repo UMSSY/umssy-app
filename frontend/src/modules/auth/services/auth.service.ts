@@ -1,3 +1,4 @@
+import { toAuthRequestError } from "../utils/auth-request-error";
 import { BEARER_PREFIX } from "@/shared/constants/auth.constants";
 import { ROLE_TAGS } from "@/shared/constants/roles.constants";
 import { apiClient } from "@/shared/services/api-client";
@@ -28,14 +29,7 @@ function extractLoginResponse(body: unknown): LoginResponse {
 }
 
 function extractApiError(err: unknown, fallback: string): never {
-  const detail = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
-  if (detail) {
-    throw new Error(detail);
-  }
-  if (err instanceof Error) {
-    throw err;
-  }
-  throw new Error(fallback);
+  throw toAuthRequestError(err, fallback);
 }
 
 export const authService = {
