@@ -327,6 +327,9 @@ export type UserWhereInput = {
   receivedNotifications?: Prisma.NotificationListRelationFilter
   triggeredNotifications?: Prisma.NotificationListRelationFilter
   pushSubscriptions?: Prisma.PushSubscriptionListRelationFilter
+  openedCompanyRequests?: Prisma.CompanyAccessRequestListRelationFilter
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestListRelationFilter
+  approvedCompanyAccount?: Prisma.XOR<Prisma.CompanyAccessRequestNullableScalarRelationFilter, Prisma.CompanyAccessRequestWhereInput> | null
 }
 
 export type UserOrderByWithRelationInput = {
@@ -403,6 +406,9 @@ export type UserOrderByWithRelationInput = {
   receivedNotifications?: Prisma.NotificationOrderByRelationAggregateInput
   triggeredNotifications?: Prisma.NotificationOrderByRelationAggregateInput
   pushSubscriptions?: Prisma.PushSubscriptionOrderByRelationAggregateInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestOrderByRelationAggregateInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestOrderByRelationAggregateInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestOrderByWithRelationInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -482,6 +488,9 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   receivedNotifications?: Prisma.NotificationListRelationFilter
   triggeredNotifications?: Prisma.NotificationListRelationFilter
   pushSubscriptions?: Prisma.PushSubscriptionListRelationFilter
+  openedCompanyRequests?: Prisma.CompanyAccessRequestListRelationFilter
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestListRelationFilter
+  approvedCompanyAccount?: Prisma.XOR<Prisma.CompanyAccessRequestNullableScalarRelationFilter, Prisma.CompanyAccessRequestWhereInput> | null
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -600,6 +609,9 @@ export type UserCreateInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -674,6 +686,9 @@ export type UserUncheckedCreateInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUpdateInput = {
@@ -748,6 +763,9 @@ export type UserUpdateInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -822,6 +840,9 @@ export type UserUncheckedUpdateInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -1846,6 +1867,54 @@ export type UserUpdateOneRequiredWithoutNotificationPreferencesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutNotificationPreferencesInput, Prisma.UserUpdateWithoutNotificationPreferencesInput>, Prisma.UserUncheckedUpdateWithoutNotificationPreferencesInput>
 }
 
+export type UserCreateNestedOneWithoutOpenedCompanyRequestsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutOpenedCompanyRequestsInput, Prisma.UserUncheckedCreateWithoutOpenedCompanyRequestsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutOpenedCompanyRequestsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutReviewedCompanyRequestsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutReviewedCompanyRequestsInput, Prisma.UserUncheckedCreateWithoutReviewedCompanyRequestsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutReviewedCompanyRequestsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutApprovedCompanyAccountInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutApprovedCompanyAccountInput, Prisma.UserUncheckedCreateWithoutApprovedCompanyAccountInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutApprovedCompanyAccountInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutOpenedCompanyRequestsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutOpenedCompanyRequestsInput, Prisma.UserUncheckedCreateWithoutOpenedCompanyRequestsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutOpenedCompanyRequestsInput
+  upsert?: Prisma.UserUpsertWithoutOpenedCompanyRequestsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutOpenedCompanyRequestsInput, Prisma.UserUpdateWithoutOpenedCompanyRequestsInput>, Prisma.UserUncheckedUpdateWithoutOpenedCompanyRequestsInput>
+}
+
+export type UserUpdateOneWithoutReviewedCompanyRequestsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutReviewedCompanyRequestsInput, Prisma.UserUncheckedCreateWithoutReviewedCompanyRequestsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutReviewedCompanyRequestsInput
+  upsert?: Prisma.UserUpsertWithoutReviewedCompanyRequestsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutReviewedCompanyRequestsInput, Prisma.UserUpdateWithoutReviewedCompanyRequestsInput>, Prisma.UserUncheckedUpdateWithoutReviewedCompanyRequestsInput>
+}
+
+export type UserUpdateOneWithoutApprovedCompanyAccountNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutApprovedCompanyAccountInput, Prisma.UserUncheckedCreateWithoutApprovedCompanyAccountInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutApprovedCompanyAccountInput
+  upsert?: Prisma.UserUpsertWithoutApprovedCompanyAccountInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutApprovedCompanyAccountInput, Prisma.UserUpdateWithoutApprovedCompanyAccountInput>, Prisma.UserUncheckedUpdateWithoutApprovedCompanyAccountInput>
+}
+
 export type UserCreateWithoutCityInput = {
   id?: string
   firstName: string
@@ -1917,6 +1986,9 @@ export type UserCreateWithoutCityInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutCityInput = {
@@ -1990,6 +2062,9 @@ export type UserUncheckedCreateWithoutCityInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutCityInput = {
@@ -2111,6 +2186,9 @@ export type UserCreateWithoutCompanyInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutCompanyInput = {
@@ -2184,6 +2262,9 @@ export type UserUncheckedCreateWithoutCompanyInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutCompanyInput = {
@@ -2283,6 +2364,9 @@ export type UserCreateWithoutRolesInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutRolesInput = {
@@ -2356,6 +2440,9 @@ export type UserUncheckedCreateWithoutRolesInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutRolesInput = {
@@ -2445,6 +2532,9 @@ export type UserUpdateWithoutRolesInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRolesInput = {
@@ -2518,6 +2608,9 @@ export type UserUncheckedUpdateWithoutRolesInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutEducationsInput = {
@@ -2591,6 +2684,9 @@ export type UserCreateWithoutEducationsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutEducationsInput = {
@@ -2664,6 +2760,9 @@ export type UserUncheckedCreateWithoutEducationsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutEducationsInput = {
@@ -2753,6 +2852,9 @@ export type UserUpdateWithoutEducationsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEducationsInput = {
@@ -2826,6 +2928,9 @@ export type UserUncheckedUpdateWithoutEducationsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutWorkExperiencesInput = {
@@ -2899,6 +3004,9 @@ export type UserCreateWithoutWorkExperiencesInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutWorkExperiencesInput = {
@@ -2972,6 +3080,9 @@ export type UserUncheckedCreateWithoutWorkExperiencesInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutWorkExperiencesInput = {
@@ -3061,6 +3172,9 @@ export type UserUpdateWithoutWorkExperiencesInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutWorkExperiencesInput = {
@@ -3134,6 +3248,9 @@ export type UserUncheckedUpdateWithoutWorkExperiencesInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutUserSkillsInput = {
@@ -3207,6 +3324,9 @@ export type UserCreateWithoutUserSkillsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutUserSkillsInput = {
@@ -3280,6 +3400,9 @@ export type UserUncheckedCreateWithoutUserSkillsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutUserSkillsInput = {
@@ -3369,6 +3492,9 @@ export type UserUpdateWithoutUserSkillsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutUserSkillsInput = {
@@ -3442,6 +3568,9 @@ export type UserUncheckedUpdateWithoutUserSkillsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutCertificationsInput = {
@@ -3515,6 +3644,9 @@ export type UserCreateWithoutCertificationsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutCertificationsInput = {
@@ -3588,6 +3720,9 @@ export type UserUncheckedCreateWithoutCertificationsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutCertificationsInput = {
@@ -3677,6 +3812,9 @@ export type UserUpdateWithoutCertificationsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCertificationsInput = {
@@ -3750,6 +3888,9 @@ export type UserUncheckedUpdateWithoutCertificationsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutCvFilesInput = {
@@ -3823,6 +3964,9 @@ export type UserCreateWithoutCvFilesInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutCvFilesInput = {
@@ -3896,6 +4040,9 @@ export type UserUncheckedCreateWithoutCvFilesInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutCvFilesInput = {
@@ -3985,6 +4132,9 @@ export type UserUpdateWithoutCvFilesInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCvFilesInput = {
@@ -4058,6 +4208,9 @@ export type UserUncheckedUpdateWithoutCvFilesInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutSkillProcessingStateInput = {
@@ -4131,6 +4284,9 @@ export type UserCreateWithoutSkillProcessingStateInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutSkillProcessingStateInput = {
@@ -4204,6 +4360,9 @@ export type UserUncheckedCreateWithoutSkillProcessingStateInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutSkillProcessingStateInput = {
@@ -4293,6 +4452,9 @@ export type UserUpdateWithoutSkillProcessingStateInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSkillProcessingStateInput = {
@@ -4366,6 +4528,9 @@ export type UserUncheckedUpdateWithoutSkillProcessingStateInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutMentorTechnicalAreasInput = {
@@ -4439,6 +4604,9 @@ export type UserCreateWithoutMentorTechnicalAreasInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutMentorTechnicalAreasInput = {
@@ -4512,6 +4680,9 @@ export type UserUncheckedCreateWithoutMentorTechnicalAreasInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutMentorTechnicalAreasInput = {
@@ -4601,6 +4772,9 @@ export type UserUpdateWithoutMentorTechnicalAreasInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMentorTechnicalAreasInput = {
@@ -4674,6 +4848,9 @@ export type UserUncheckedUpdateWithoutMentorTechnicalAreasInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutMentorOrientationTypesInput = {
@@ -4747,6 +4924,9 @@ export type UserCreateWithoutMentorOrientationTypesInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutMentorOrientationTypesInput = {
@@ -4820,6 +5000,9 @@ export type UserUncheckedCreateWithoutMentorOrientationTypesInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutMentorOrientationTypesInput = {
@@ -4909,6 +5092,9 @@ export type UserUpdateWithoutMentorOrientationTypesInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMentorOrientationTypesInput = {
@@ -4982,6 +5168,9 @@ export type UserUncheckedUpdateWithoutMentorOrientationTypesInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutAvailabilityBlocksInput = {
@@ -5055,6 +5244,9 @@ export type UserCreateWithoutAvailabilityBlocksInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutAvailabilityBlocksInput = {
@@ -5128,6 +5320,9 @@ export type UserUncheckedCreateWithoutAvailabilityBlocksInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutAvailabilityBlocksInput = {
@@ -5217,6 +5412,9 @@ export type UserUpdateWithoutAvailabilityBlocksInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAvailabilityBlocksInput = {
@@ -5290,6 +5488,9 @@ export type UserUncheckedUpdateWithoutAvailabilityBlocksInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutBlockedDatesInput = {
@@ -5363,6 +5564,9 @@ export type UserCreateWithoutBlockedDatesInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutBlockedDatesInput = {
@@ -5436,6 +5640,9 @@ export type UserUncheckedCreateWithoutBlockedDatesInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutBlockedDatesInput = {
@@ -5525,6 +5732,9 @@ export type UserUpdateWithoutBlockedDatesInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutBlockedDatesInput = {
@@ -5598,6 +5808,9 @@ export type UserUncheckedUpdateWithoutBlockedDatesInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutMentorAppointmentsInput = {
@@ -5671,6 +5884,9 @@ export type UserCreateWithoutMentorAppointmentsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutMentorAppointmentsInput = {
@@ -5744,6 +5960,9 @@ export type UserUncheckedCreateWithoutMentorAppointmentsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutMentorAppointmentsInput = {
@@ -5822,6 +6041,9 @@ export type UserCreateWithoutStudentAppointmentsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutStudentAppointmentsInput = {
@@ -5895,6 +6117,9 @@ export type UserUncheckedCreateWithoutStudentAppointmentsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutStudentAppointmentsInput = {
@@ -5973,6 +6198,9 @@ export type UserCreateWithoutCancelledAppointmentsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutCancelledAppointmentsInput = {
@@ -6046,6 +6274,9 @@ export type UserUncheckedCreateWithoutCancelledAppointmentsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutCancelledAppointmentsInput = {
@@ -6135,6 +6366,9 @@ export type UserUpdateWithoutMentorAppointmentsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMentorAppointmentsInput = {
@@ -6208,6 +6442,9 @@ export type UserUncheckedUpdateWithoutMentorAppointmentsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUpsertWithoutStudentAppointmentsInput = {
@@ -6292,6 +6529,9 @@ export type UserUpdateWithoutStudentAppointmentsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutStudentAppointmentsInput = {
@@ -6365,6 +6605,9 @@ export type UserUncheckedUpdateWithoutStudentAppointmentsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUpsertWithoutCancelledAppointmentsInput = {
@@ -6449,6 +6692,9 @@ export type UserUpdateWithoutCancelledAppointmentsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCancelledAppointmentsInput = {
@@ -6522,6 +6768,9 @@ export type UserUncheckedUpdateWithoutCancelledAppointmentsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutAppointmentChangesInput = {
@@ -6595,6 +6844,9 @@ export type UserCreateWithoutAppointmentChangesInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutAppointmentChangesInput = {
@@ -6668,6 +6920,9 @@ export type UserUncheckedCreateWithoutAppointmentChangesInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutAppointmentChangesInput = {
@@ -6757,6 +7012,9 @@ export type UserUpdateWithoutAppointmentChangesInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAppointmentChangesInput = {
@@ -6830,6 +7088,9 @@ export type UserUncheckedUpdateWithoutAppointmentChangesInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutCreatedEventsInput = {
@@ -6903,6 +7164,9 @@ export type UserCreateWithoutCreatedEventsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutCreatedEventsInput = {
@@ -6976,6 +7240,9 @@ export type UserUncheckedCreateWithoutCreatedEventsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutCreatedEventsInput = {
@@ -7054,6 +7321,9 @@ export type UserCreateWithoutModeratedEventsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutModeratedEventsInput = {
@@ -7127,6 +7397,9 @@ export type UserUncheckedCreateWithoutModeratedEventsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutModeratedEventsInput = {
@@ -7216,6 +7489,9 @@ export type UserUpdateWithoutCreatedEventsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCreatedEventsInput = {
@@ -7289,6 +7565,9 @@ export type UserUncheckedUpdateWithoutCreatedEventsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUpsertWithoutModeratedEventsInput = {
@@ -7373,6 +7652,9 @@ export type UserUpdateWithoutModeratedEventsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutModeratedEventsInput = {
@@ -7446,6 +7728,9 @@ export type UserUncheckedUpdateWithoutModeratedEventsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutEventRegistrationsInput = {
@@ -7519,6 +7804,9 @@ export type UserCreateWithoutEventRegistrationsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutEventRegistrationsInput = {
@@ -7592,6 +7880,9 @@ export type UserUncheckedCreateWithoutEventRegistrationsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutEventRegistrationsInput = {
@@ -7681,6 +7972,9 @@ export type UserUpdateWithoutEventRegistrationsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEventRegistrationsInput = {
@@ -7754,6 +8048,9 @@ export type UserUncheckedUpdateWithoutEventRegistrationsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutCheckedInAttendancesInput = {
@@ -7827,6 +8124,9 @@ export type UserCreateWithoutCheckedInAttendancesInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutCheckedInAttendancesInput = {
@@ -7900,6 +8200,9 @@ export type UserUncheckedCreateWithoutCheckedInAttendancesInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutCheckedInAttendancesInput = {
@@ -7989,6 +8292,9 @@ export type UserUpdateWithoutCheckedInAttendancesInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCheckedInAttendancesInput = {
@@ -8062,6 +8368,9 @@ export type UserUncheckedUpdateWithoutCheckedInAttendancesInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutExportHistoriesInput = {
@@ -8135,6 +8444,9 @@ export type UserCreateWithoutExportHistoriesInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutExportHistoriesInput = {
@@ -8208,6 +8520,9 @@ export type UserUncheckedCreateWithoutExportHistoriesInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutExportHistoriesInput = {
@@ -8297,6 +8612,9 @@ export type UserUpdateWithoutExportHistoriesInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutExportHistoriesInput = {
@@ -8370,6 +8688,9 @@ export type UserUncheckedUpdateWithoutExportHistoriesInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutOpenedAccessRequestsInput = {
@@ -8443,6 +8764,9 @@ export type UserCreateWithoutOpenedAccessRequestsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutOpenedAccessRequestsInput = {
@@ -8516,6 +8840,9 @@ export type UserUncheckedCreateWithoutOpenedAccessRequestsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutOpenedAccessRequestsInput = {
@@ -8594,6 +8921,9 @@ export type UserCreateWithoutReviewedAccessRequestsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutReviewedAccessRequestsInput = {
@@ -8667,6 +8997,9 @@ export type UserUncheckedCreateWithoutReviewedAccessRequestsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutReviewedAccessRequestsInput = {
@@ -8745,6 +9078,9 @@ export type UserCreateWithoutApprovedAccessRequestInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutApprovedAccessRequestInput = {
@@ -8818,6 +9154,9 @@ export type UserUncheckedCreateWithoutApprovedAccessRequestInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutApprovedAccessRequestInput = {
@@ -8907,6 +9246,9 @@ export type UserUpdateWithoutOpenedAccessRequestsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOpenedAccessRequestsInput = {
@@ -8980,6 +9322,9 @@ export type UserUncheckedUpdateWithoutOpenedAccessRequestsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUpsertWithoutReviewedAccessRequestsInput = {
@@ -9064,6 +9409,9 @@ export type UserUpdateWithoutReviewedAccessRequestsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReviewedAccessRequestsInput = {
@@ -9137,6 +9485,9 @@ export type UserUncheckedUpdateWithoutReviewedAccessRequestsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUpsertWithoutApprovedAccessRequestInput = {
@@ -9221,6 +9572,9 @@ export type UserUpdateWithoutApprovedAccessRequestInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutApprovedAccessRequestInput = {
@@ -9294,6 +9648,9 @@ export type UserUncheckedUpdateWithoutApprovedAccessRequestInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutMentorParticipationRequestsInput = {
@@ -9367,6 +9724,9 @@ export type UserCreateWithoutMentorParticipationRequestsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutMentorParticipationRequestsInput = {
@@ -9440,6 +9800,9 @@ export type UserUncheckedCreateWithoutMentorParticipationRequestsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutMentorParticipationRequestsInput = {
@@ -9529,6 +9892,9 @@ export type UserUpdateWithoutMentorParticipationRequestsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMentorParticipationRequestsInput = {
@@ -9602,6 +9968,9 @@ export type UserUncheckedUpdateWithoutMentorParticipationRequestsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutMentorSlotOffersInput = {
@@ -9675,6 +10044,9 @@ export type UserCreateWithoutMentorSlotOffersInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutMentorSlotOffersInput = {
@@ -9748,6 +10120,9 @@ export type UserUncheckedCreateWithoutMentorSlotOffersInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutMentorSlotOffersInput = {
@@ -9837,6 +10212,9 @@ export type UserUpdateWithoutMentorSlotOffersInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMentorSlotOffersInput = {
@@ -9910,6 +10288,9 @@ export type UserUncheckedUpdateWithoutMentorSlotOffersInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutConversationsAsUserAInput = {
@@ -9983,6 +10364,9 @@ export type UserCreateWithoutConversationsAsUserAInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutConversationsAsUserAInput = {
@@ -10056,6 +10440,9 @@ export type UserUncheckedCreateWithoutConversationsAsUserAInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutConversationsAsUserAInput = {
@@ -10134,6 +10521,9 @@ export type UserCreateWithoutConversationsAsUserBInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutConversationsAsUserBInput = {
@@ -10207,6 +10597,9 @@ export type UserUncheckedCreateWithoutConversationsAsUserBInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutConversationsAsUserBInput = {
@@ -10296,6 +10689,9 @@ export type UserUpdateWithoutConversationsAsUserAInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutConversationsAsUserAInput = {
@@ -10369,6 +10765,9 @@ export type UserUncheckedUpdateWithoutConversationsAsUserAInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUpsertWithoutConversationsAsUserBInput = {
@@ -10453,6 +10852,9 @@ export type UserUpdateWithoutConversationsAsUserBInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutConversationsAsUserBInput = {
@@ -10526,6 +10928,9 @@ export type UserUncheckedUpdateWithoutConversationsAsUserBInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutChatParticipantsInput = {
@@ -10599,6 +11004,9 @@ export type UserCreateWithoutChatParticipantsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutChatParticipantsInput = {
@@ -10672,6 +11080,9 @@ export type UserUncheckedCreateWithoutChatParticipantsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutChatParticipantsInput = {
@@ -10761,6 +11172,9 @@ export type UserUpdateWithoutChatParticipantsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutChatParticipantsInput = {
@@ -10834,6 +11248,9 @@ export type UserUncheckedUpdateWithoutChatParticipantsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutChatMessagesInput = {
@@ -10907,6 +11324,9 @@ export type UserCreateWithoutChatMessagesInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutChatMessagesInput = {
@@ -10980,6 +11400,9 @@ export type UserUncheckedCreateWithoutChatMessagesInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutChatMessagesInput = {
@@ -11069,6 +11492,9 @@ export type UserUpdateWithoutChatMessagesInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutChatMessagesInput = {
@@ -11142,6 +11568,9 @@ export type UserUncheckedUpdateWithoutChatMessagesInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutChatBlocksMadeInput = {
@@ -11215,6 +11644,9 @@ export type UserCreateWithoutChatBlocksMadeInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutChatBlocksMadeInput = {
@@ -11288,6 +11720,9 @@ export type UserUncheckedCreateWithoutChatBlocksMadeInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutChatBlocksMadeInput = {
@@ -11366,6 +11801,9 @@ export type UserCreateWithoutChatBlocksReceivedInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutChatBlocksReceivedInput = {
@@ -11439,6 +11877,9 @@ export type UserUncheckedCreateWithoutChatBlocksReceivedInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutChatBlocksReceivedInput = {
@@ -11528,6 +11969,9 @@ export type UserUpdateWithoutChatBlocksMadeInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutChatBlocksMadeInput = {
@@ -11601,6 +12045,9 @@ export type UserUncheckedUpdateWithoutChatBlocksMadeInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUpsertWithoutChatBlocksReceivedInput = {
@@ -11685,6 +12132,9 @@ export type UserUpdateWithoutChatBlocksReceivedInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutChatBlocksReceivedInput = {
@@ -11758,6 +12208,9 @@ export type UserUncheckedUpdateWithoutChatBlocksReceivedInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutSentRequestsInput = {
@@ -11831,6 +12284,9 @@ export type UserCreateWithoutSentRequestsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutSentRequestsInput = {
@@ -11904,6 +12360,9 @@ export type UserUncheckedCreateWithoutSentRequestsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutSentRequestsInput = {
@@ -11982,6 +12441,9 @@ export type UserCreateWithoutReceivedRequestsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutReceivedRequestsInput = {
@@ -12055,6 +12517,9 @@ export type UserUncheckedCreateWithoutReceivedRequestsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutReceivedRequestsInput = {
@@ -12144,6 +12609,9 @@ export type UserUpdateWithoutSentRequestsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSentRequestsInput = {
@@ -12217,6 +12685,9 @@ export type UserUncheckedUpdateWithoutSentRequestsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUpsertWithoutReceivedRequestsInput = {
@@ -12301,6 +12772,9 @@ export type UserUpdateWithoutReceivedRequestsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReceivedRequestsInput = {
@@ -12374,6 +12848,9 @@ export type UserUncheckedUpdateWithoutReceivedRequestsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutPresenceInput = {
@@ -12447,6 +12924,9 @@ export type UserCreateWithoutPresenceInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutPresenceInput = {
@@ -12520,6 +13000,9 @@ export type UserUncheckedCreateWithoutPresenceInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutPresenceInput = {
@@ -12609,6 +13092,9 @@ export type UserUpdateWithoutPresenceInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPresenceInput = {
@@ -12682,6 +13168,9 @@ export type UserUncheckedUpdateWithoutPresenceInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutPasswordResetOtpsInput = {
@@ -12755,6 +13244,9 @@ export type UserCreateWithoutPasswordResetOtpsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutPasswordResetOtpsInput = {
@@ -12828,6 +13320,9 @@ export type UserUncheckedCreateWithoutPasswordResetOtpsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutPasswordResetOtpsInput = {
@@ -12917,6 +13412,9 @@ export type UserUpdateWithoutPasswordResetOtpsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPasswordResetOtpsInput = {
@@ -12990,6 +13488,9 @@ export type UserUncheckedUpdateWithoutPasswordResetOtpsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutMentorParticipationAttemptLimitInput = {
@@ -13063,6 +13564,9 @@ export type UserCreateWithoutMentorParticipationAttemptLimitInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutMentorParticipationAttemptLimitInput = {
@@ -13136,6 +13640,9 @@ export type UserUncheckedCreateWithoutMentorParticipationAttemptLimitInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutMentorParticipationAttemptLimitInput = {
@@ -13225,6 +13732,9 @@ export type UserUpdateWithoutMentorParticipationAttemptLimitInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMentorParticipationAttemptLimitInput = {
@@ -13298,6 +13808,9 @@ export type UserUncheckedUpdateWithoutMentorParticipationAttemptLimitInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutJobApplicationsInput = {
@@ -13371,6 +13884,9 @@ export type UserCreateWithoutJobApplicationsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutJobApplicationsInput = {
@@ -13444,6 +13960,9 @@ export type UserUncheckedCreateWithoutJobApplicationsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutJobApplicationsInput = {
@@ -13533,6 +14052,9 @@ export type UserUpdateWithoutJobApplicationsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutJobApplicationsInput = {
@@ -13606,6 +14128,9 @@ export type UserUncheckedUpdateWithoutJobApplicationsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutCreatedSurveysInput = {
@@ -13679,6 +14204,9 @@ export type UserCreateWithoutCreatedSurveysInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutCreatedSurveysInput = {
@@ -13752,6 +14280,9 @@ export type UserUncheckedCreateWithoutCreatedSurveysInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutCreatedSurveysInput = {
@@ -13841,6 +14372,9 @@ export type UserUpdateWithoutCreatedSurveysInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCreatedSurveysInput = {
@@ -13914,6 +14448,9 @@ export type UserUncheckedUpdateWithoutCreatedSurveysInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutSurveyResponsesInput = {
@@ -13987,6 +14524,9 @@ export type UserCreateWithoutSurveyResponsesInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutSurveyResponsesInput = {
@@ -14060,6 +14600,9 @@ export type UserUncheckedCreateWithoutSurveyResponsesInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutSurveyResponsesInput = {
@@ -14149,6 +14692,9 @@ export type UserUpdateWithoutSurveyResponsesInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSurveyResponsesInput = {
@@ -14222,6 +14768,9 @@ export type UserUncheckedUpdateWithoutSurveyResponsesInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutAuditEventsInput = {
@@ -14295,6 +14844,9 @@ export type UserCreateWithoutAuditEventsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutAuditEventsInput = {
@@ -14368,6 +14920,9 @@ export type UserUncheckedCreateWithoutAuditEventsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutAuditEventsInput = {
@@ -14457,6 +15012,9 @@ export type UserUpdateWithoutAuditEventsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAuditEventsInput = {
@@ -14530,6 +15088,9 @@ export type UserUncheckedUpdateWithoutAuditEventsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutRevertedValidationsInput = {
@@ -14603,6 +15164,9 @@ export type UserCreateWithoutRevertedValidationsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutRevertedValidationsInput = {
@@ -14676,6 +15240,9 @@ export type UserUncheckedCreateWithoutRevertedValidationsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutRevertedValidationsInput = {
@@ -14765,6 +15332,9 @@ export type UserUpdateWithoutRevertedValidationsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRevertedValidationsInput = {
@@ -14838,6 +15408,9 @@ export type UserUncheckedUpdateWithoutRevertedValidationsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutMentorIntakeAttemptsInput = {
@@ -14911,6 +15484,9 @@ export type UserCreateWithoutMentorIntakeAttemptsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutMentorIntakeAttemptsInput = {
@@ -14984,6 +15560,9 @@ export type UserUncheckedCreateWithoutMentorIntakeAttemptsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutMentorIntakeAttemptsInput = {
@@ -15073,6 +15652,9 @@ export type UserUpdateWithoutMentorIntakeAttemptsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMentorIntakeAttemptsInput = {
@@ -15146,6 +15728,9 @@ export type UserUncheckedUpdateWithoutMentorIntakeAttemptsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutMentorParticipationSanctionsInput = {
@@ -15219,6 +15804,9 @@ export type UserCreateWithoutMentorParticipationSanctionsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutMentorParticipationSanctionsInput = {
@@ -15292,6 +15880,9 @@ export type UserUncheckedCreateWithoutMentorParticipationSanctionsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutMentorParticipationSanctionsInput = {
@@ -15381,6 +15972,9 @@ export type UserUpdateWithoutMentorParticipationSanctionsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMentorParticipationSanctionsInput = {
@@ -15454,6 +16048,9 @@ export type UserUncheckedUpdateWithoutMentorParticipationSanctionsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutRadarCvOwnedInput = {
@@ -15527,6 +16124,9 @@ export type UserCreateWithoutRadarCvOwnedInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutRadarCvOwnedInput = {
@@ -15600,6 +16200,9 @@ export type UserUncheckedCreateWithoutRadarCvOwnedInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutRadarCvOwnedInput = {
@@ -15678,6 +16281,9 @@ export type UserCreateWithoutRadarCvReviewedInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutRadarCvReviewedInput = {
@@ -15751,6 +16357,9 @@ export type UserUncheckedCreateWithoutRadarCvReviewedInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutRadarCvReviewedInput = {
@@ -15840,6 +16449,9 @@ export type UserUpdateWithoutRadarCvOwnedInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRadarCvOwnedInput = {
@@ -15913,6 +16525,9 @@ export type UserUncheckedUpdateWithoutRadarCvOwnedInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUpsertWithoutRadarCvReviewedInput = {
@@ -15997,6 +16612,9 @@ export type UserUpdateWithoutRadarCvReviewedInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRadarCvReviewedInput = {
@@ -16070,6 +16688,9 @@ export type UserUncheckedUpdateWithoutRadarCvReviewedInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutRadarSnapshotsInput = {
@@ -16143,6 +16764,9 @@ export type UserCreateWithoutRadarSnapshotsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutRadarSnapshotsInput = {
@@ -16216,6 +16840,9 @@ export type UserUncheckedCreateWithoutRadarSnapshotsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutRadarSnapshotsInput = {
@@ -16305,6 +16932,9 @@ export type UserUpdateWithoutRadarSnapshotsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRadarSnapshotsInput = {
@@ -16378,6 +17008,9 @@ export type UserUncheckedUpdateWithoutRadarSnapshotsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutRadarAuditSubjectsInput = {
@@ -16451,6 +17084,9 @@ export type UserCreateWithoutRadarAuditSubjectsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutRadarAuditSubjectsInput = {
@@ -16524,6 +17160,9 @@ export type UserUncheckedCreateWithoutRadarAuditSubjectsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutRadarAuditSubjectsInput = {
@@ -16602,6 +17241,9 @@ export type UserCreateWithoutRadarAuditActorsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutRadarAuditActorsInput = {
@@ -16675,6 +17317,9 @@ export type UserUncheckedCreateWithoutRadarAuditActorsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutRadarAuditActorsInput = {
@@ -16764,6 +17409,9 @@ export type UserUpdateWithoutRadarAuditSubjectsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRadarAuditSubjectsInput = {
@@ -16837,6 +17485,9 @@ export type UserUncheckedUpdateWithoutRadarAuditSubjectsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUpsertWithoutRadarAuditActorsInput = {
@@ -16921,6 +17572,9 @@ export type UserUpdateWithoutRadarAuditActorsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRadarAuditActorsInput = {
@@ -16994,6 +17648,9 @@ export type UserUncheckedUpdateWithoutRadarAuditActorsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutSocialAccountsInput = {
@@ -17067,6 +17724,9 @@ export type UserCreateWithoutSocialAccountsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutSocialAccountsInput = {
@@ -17140,6 +17800,9 @@ export type UserUncheckedCreateWithoutSocialAccountsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutSocialAccountsInput = {
@@ -17229,6 +17892,9 @@ export type UserUpdateWithoutSocialAccountsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSocialAccountsInput = {
@@ -17302,6 +17968,9 @@ export type UserUncheckedUpdateWithoutSocialAccountsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutPortfolioProjectsInput = {
@@ -17375,6 +18044,9 @@ export type UserCreateWithoutPortfolioProjectsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutPortfolioProjectsInput = {
@@ -17448,6 +18120,9 @@ export type UserUncheckedCreateWithoutPortfolioProjectsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutPortfolioProjectsInput = {
@@ -17537,6 +18212,9 @@ export type UserUpdateWithoutPortfolioProjectsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPortfolioProjectsInput = {
@@ -17610,6 +18288,9 @@ export type UserUncheckedUpdateWithoutPortfolioProjectsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutReceivedNotificationsInput = {
@@ -17683,6 +18364,9 @@ export type UserCreateWithoutReceivedNotificationsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutReceivedNotificationsInput = {
@@ -17756,6 +18440,9 @@ export type UserUncheckedCreateWithoutReceivedNotificationsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutReceivedNotificationsInput = {
@@ -17834,6 +18521,9 @@ export type UserCreateWithoutTriggeredNotificationsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutTriggeredNotificationsInput = {
@@ -17907,6 +18597,9 @@ export type UserUncheckedCreateWithoutTriggeredNotificationsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutTriggeredNotificationsInput = {
@@ -17996,6 +18689,9 @@ export type UserUpdateWithoutReceivedNotificationsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReceivedNotificationsInput = {
@@ -18069,6 +18765,9 @@ export type UserUncheckedUpdateWithoutReceivedNotificationsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUpsertWithoutTriggeredNotificationsInput = {
@@ -18153,6 +18852,9 @@ export type UserUpdateWithoutTriggeredNotificationsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTriggeredNotificationsInput = {
@@ -18226,6 +18928,9 @@ export type UserUncheckedUpdateWithoutTriggeredNotificationsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutPushSubscriptionsInput = {
@@ -18299,6 +19004,9 @@ export type UserCreateWithoutPushSubscriptionsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutPushSubscriptionsInput = {
@@ -18372,6 +19080,9 @@ export type UserUncheckedCreateWithoutPushSubscriptionsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutPushSubscriptionsInput = {
@@ -18461,6 +19172,9 @@ export type UserUpdateWithoutPushSubscriptionsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPushSubscriptionsInput = {
@@ -18534,6 +19248,9 @@ export type UserUncheckedUpdateWithoutPushSubscriptionsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutRefreshTokensInput = {
@@ -18607,6 +19324,9 @@ export type UserCreateWithoutRefreshTokensInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutRefreshTokensInput = {
@@ -18680,6 +19400,9 @@ export type UserUncheckedCreateWithoutRefreshTokensInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutRefreshTokensInput = {
@@ -18769,6 +19492,9 @@ export type UserUpdateWithoutRefreshTokensInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRefreshTokensInput = {
@@ -18842,6 +19568,9 @@ export type UserUncheckedUpdateWithoutRefreshTokensInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutNotificationPreferencesInput = {
@@ -18915,6 +19644,9 @@ export type UserCreateWithoutNotificationPreferencesInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutNotificationPreferencesInput = {
@@ -18988,6 +19720,9 @@ export type UserUncheckedCreateWithoutNotificationPreferencesInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutNotificationPreferencesInput = {
@@ -19077,6 +19812,9 @@ export type UserUpdateWithoutNotificationPreferencesInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutNotificationPreferencesInput = {
@@ -19150,6 +19888,969 @@ export type UserUncheckedUpdateWithoutNotificationPreferencesInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
+}
+
+export type UserCreateWithoutOpenedCompanyRequestsInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
+  city?: Prisma.CityCreateNestedOneWithoutUsersInput
+  roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  notificationPreferences?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
+  receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
+  triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
+}
+
+export type UserUncheckedCreateWithoutOpenedCompanyRequestsInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  cityId?: string | null
+  companyId?: string | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  notificationPreferences?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
+  receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
+  triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
+}
+
+export type UserCreateOrConnectWithoutOpenedCompanyRequestsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutOpenedCompanyRequestsInput, Prisma.UserUncheckedCreateWithoutOpenedCompanyRequestsInput>
+}
+
+export type UserCreateWithoutReviewedCompanyRequestsInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
+  city?: Prisma.CityCreateNestedOneWithoutUsersInput
+  roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  notificationPreferences?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
+  receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
+  triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
+}
+
+export type UserUncheckedCreateWithoutReviewedCompanyRequestsInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  cityId?: string | null
+  companyId?: string | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  notificationPreferences?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
+  receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
+  triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
+}
+
+export type UserCreateOrConnectWithoutReviewedCompanyRequestsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutReviewedCompanyRequestsInput, Prisma.UserUncheckedCreateWithoutReviewedCompanyRequestsInput>
+}
+
+export type UserCreateWithoutApprovedCompanyAccountInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
+  city?: Prisma.CityCreateNestedOneWithoutUsersInput
+  roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  notificationPreferences?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
+  receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
+  triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+}
+
+export type UserUncheckedCreateWithoutApprovedCompanyAccountInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  cityId?: string | null
+  companyId?: string | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  notificationPreferences?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
+  receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
+  triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+}
+
+export type UserCreateOrConnectWithoutApprovedCompanyAccountInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutApprovedCompanyAccountInput, Prisma.UserUncheckedCreateWithoutApprovedCompanyAccountInput>
+}
+
+export type UserUpsertWithoutOpenedCompanyRequestsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutOpenedCompanyRequestsInput, Prisma.UserUncheckedUpdateWithoutOpenedCompanyRequestsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutOpenedCompanyRequestsInput, Prisma.UserUncheckedCreateWithoutOpenedCompanyRequestsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutOpenedCompanyRequestsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutOpenedCompanyRequestsInput, Prisma.UserUncheckedUpdateWithoutOpenedCompanyRequestsInput>
+}
+
+export type UserUpdateWithoutOpenedCompanyRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
+  city?: Prisma.CityUpdateOneWithoutUsersNestedInput
+  roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  notificationPreferences?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
+  receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
+  triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutOpenedCompanyRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  notificationPreferences?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
+  receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
+  triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
+}
+
+export type UserUpsertWithoutReviewedCompanyRequestsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutReviewedCompanyRequestsInput, Prisma.UserUncheckedUpdateWithoutReviewedCompanyRequestsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutReviewedCompanyRequestsInput, Prisma.UserUncheckedCreateWithoutReviewedCompanyRequestsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutReviewedCompanyRequestsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutReviewedCompanyRequestsInput, Prisma.UserUncheckedUpdateWithoutReviewedCompanyRequestsInput>
+}
+
+export type UserUpdateWithoutReviewedCompanyRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
+  city?: Prisma.CityUpdateOneWithoutUsersNestedInput
+  roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  notificationPreferences?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
+  receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
+  triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutReviewedCompanyRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  notificationPreferences?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
+  receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
+  triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
+}
+
+export type UserUpsertWithoutApprovedCompanyAccountInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutApprovedCompanyAccountInput, Prisma.UserUncheckedUpdateWithoutApprovedCompanyAccountInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutApprovedCompanyAccountInput, Prisma.UserUncheckedCreateWithoutApprovedCompanyAccountInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutApprovedCompanyAccountInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutApprovedCompanyAccountInput, Prisma.UserUncheckedUpdateWithoutApprovedCompanyAccountInput>
+}
+
+export type UserUpdateWithoutApprovedCompanyAccountInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
+  city?: Prisma.CityUpdateOneWithoutUsersNestedInput
+  roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  notificationPreferences?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
+  receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
+  triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutApprovedCompanyAccountInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  notificationPreferences?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
+  receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
+  triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserCreateManyCityInput = {
@@ -19241,6 +20942,9 @@ export type UserUpdateWithoutCityInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCityInput = {
@@ -19314,6 +21018,9 @@ export type UserUncheckedUpdateWithoutCityInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateManyWithoutCityInput = {
@@ -19423,6 +21130,9 @@ export type UserUpdateWithoutCompanyInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCompanyInput = {
@@ -19496,6 +21206,9 @@ export type UserUncheckedUpdateWithoutCompanyInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateManyWithoutCompanyInput = {
@@ -19572,6 +21285,8 @@ export type UserCountOutputType = {
   receivedNotifications: number
   triggeredNotifications: number
   pushSubscriptions: number
+  openedCompanyRequests: number
+  reviewedCompanyRequests: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -19625,6 +21340,8 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   receivedNotifications?: boolean | UserCountOutputTypeCountReceivedNotificationsArgs
   triggeredNotifications?: boolean | UserCountOutputTypeCountTriggeredNotificationsArgs
   pushSubscriptions?: boolean | UserCountOutputTypeCountPushSubscriptionsArgs
+  openedCompanyRequests?: boolean | UserCountOutputTypeCountOpenedCompanyRequestsArgs
+  reviewedCompanyRequests?: boolean | UserCountOutputTypeCountReviewedCompanyRequestsArgs
 }
 
 /**
@@ -19987,6 +21704,20 @@ export type UserCountOutputTypeCountPushSubscriptionsArgs<ExtArgs extends runtim
   where?: Prisma.PushSubscriptionWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountOpenedCompanyRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CompanyAccessRequestWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountReviewedCompanyRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CompanyAccessRequestWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -20062,6 +21793,9 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   receivedNotifications?: boolean | Prisma.User$receivedNotificationsArgs<ExtArgs>
   triggeredNotifications?: boolean | Prisma.User$triggeredNotificationsArgs<ExtArgs>
   pushSubscriptions?: boolean | Prisma.User$pushSubscriptionsArgs<ExtArgs>
+  openedCompanyRequests?: boolean | Prisma.User$openedCompanyRequestsArgs<ExtArgs>
+  reviewedCompanyRequests?: boolean | Prisma.User$reviewedCompanyRequestsArgs<ExtArgs>
+  approvedCompanyAccount?: boolean | Prisma.User$approvedCompanyAccountArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -20185,6 +21919,9 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   receivedNotifications?: boolean | Prisma.User$receivedNotificationsArgs<ExtArgs>
   triggeredNotifications?: boolean | Prisma.User$triggeredNotificationsArgs<ExtArgs>
   pushSubscriptions?: boolean | Prisma.User$pushSubscriptionsArgs<ExtArgs>
+  openedCompanyRequests?: boolean | Prisma.User$openedCompanyRequestsArgs<ExtArgs>
+  reviewedCompanyRequests?: boolean | Prisma.User$reviewedCompanyRequestsArgs<ExtArgs>
+  approvedCompanyAccount?: boolean | Prisma.User$approvedCompanyAccountArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -20256,6 +21993,9 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     receivedNotifications: Prisma.$NotificationPayload<ExtArgs>[]
     triggeredNotifications: Prisma.$NotificationPayload<ExtArgs>[]
     pushSubscriptions: Prisma.$PushSubscriptionPayload<ExtArgs>[]
+    openedCompanyRequests: Prisma.$CompanyAccessRequestPayload<ExtArgs>[]
+    reviewedCompanyRequests: Prisma.$CompanyAccessRequestPayload<ExtArgs>[]
+    approvedCompanyAccount: Prisma.$CompanyAccessRequestPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -20725,6 +22465,9 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   receivedNotifications<T extends Prisma.User$receivedNotificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$receivedNotificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   triggeredNotifications<T extends Prisma.User$triggeredNotificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$triggeredNotificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   pushSubscriptions<T extends Prisma.User$pushSubscriptionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$pushSubscriptionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PushSubscriptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  openedCompanyRequests<T extends Prisma.User$openedCompanyRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$openedCompanyRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CompanyAccessRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  reviewedCompanyRequests<T extends Prisma.User$reviewedCompanyRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$reviewedCompanyRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CompanyAccessRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  approvedCompanyAccount<T extends Prisma.User$approvedCompanyAccountArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$approvedCompanyAccountArgs<ExtArgs>>): Prisma.Prisma__CompanyAccessRequestClient<runtime.Types.Result.GetResult<Prisma.$CompanyAccessRequestPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -22501,6 +24244,73 @@ export type User$pushSubscriptionsArgs<ExtArgs extends runtime.Types.Extensions.
   take?: number
   skip?: number
   distinct?: Prisma.PushSubscriptionScalarFieldEnum | Prisma.PushSubscriptionScalarFieldEnum[]
+}
+
+/**
+ * User.openedCompanyRequests
+ */
+export type User$openedCompanyRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CompanyAccessRequest
+   */
+  select?: Prisma.CompanyAccessRequestSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CompanyAccessRequest
+   */
+  omit?: Prisma.CompanyAccessRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompanyAccessRequestInclude<ExtArgs> | null
+  where?: Prisma.CompanyAccessRequestWhereInput
+  orderBy?: Prisma.CompanyAccessRequestOrderByWithRelationInput | Prisma.CompanyAccessRequestOrderByWithRelationInput[]
+  cursor?: Prisma.CompanyAccessRequestWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CompanyAccessRequestScalarFieldEnum | Prisma.CompanyAccessRequestScalarFieldEnum[]
+}
+
+/**
+ * User.reviewedCompanyRequests
+ */
+export type User$reviewedCompanyRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CompanyAccessRequest
+   */
+  select?: Prisma.CompanyAccessRequestSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CompanyAccessRequest
+   */
+  omit?: Prisma.CompanyAccessRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompanyAccessRequestInclude<ExtArgs> | null
+  where?: Prisma.CompanyAccessRequestWhereInput
+  orderBy?: Prisma.CompanyAccessRequestOrderByWithRelationInput | Prisma.CompanyAccessRequestOrderByWithRelationInput[]
+  cursor?: Prisma.CompanyAccessRequestWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CompanyAccessRequestScalarFieldEnum | Prisma.CompanyAccessRequestScalarFieldEnum[]
+}
+
+/**
+ * User.approvedCompanyAccount
+ */
+export type User$approvedCompanyAccountArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CompanyAccessRequest
+   */
+  select?: Prisma.CompanyAccessRequestSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CompanyAccessRequest
+   */
+  omit?: Prisma.CompanyAccessRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompanyAccessRequestInclude<ExtArgs> | null
+  where?: Prisma.CompanyAccessRequestWhereInput
 }
 
 /**

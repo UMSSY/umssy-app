@@ -9,7 +9,7 @@ export function PersonalDataIntro() {
       />
 
       <p className="text-xs text-text-secondary">
-        <span aria-hidden="true" className="text-accent">
+        <span aria-hidden="true" className="font-semibold text-red-600">
           *
         </span>{" "}
         Campo obligatorio

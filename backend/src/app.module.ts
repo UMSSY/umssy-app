@@ -36,6 +36,7 @@ import { RadarIntegrationModule } from './modules/radar-integration/radar-integr
 import { SurveysModule } from './modules/surveys/surveys.module.js';
 import { AppointmentsModule } from './modules/appointments/appointments.module.js';
 import { NotificationsModule } from './modules/notifications/notifications.module.js';
+import { CompanyAccessRequestsModule } from './modules/company-access-requests/company-access-requests.module.js';
 
 @Module({
   imports: [
@@ -70,6 +71,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
     RadarIntegrationModule,
     SurveysModule,
     NotificationsModule,
+    CompanyAccessRequestsModule,
   ],
   controllers: [AppController],
   providers: [
