@@ -1,8 +1,10 @@
-import type { AreaExperienceTimelineProps } from "../types/area-detail-components.types";
-import { formatDurationYears } from "../utils/format-duration-years";
-import { AreaEmptyState } from "./area-empty-state";
+import type { AreaExperienceTimelineProps } from '../types/area-experience-timeline-props.types';
+import { formatDurationYears } from '../utils/format-duration-years';
+import { AreaEmptyState } from './area-empty-state';
 
-export function AreaExperienceTimeline({ experience }: AreaExperienceTimelineProps) {
+export function AreaExperienceTimeline({
+  experience,
+}: AreaExperienceTimelineProps) {
   if (experience.length === 0) {
     return <AreaEmptyState />;
   }
@@ -22,9 +24,13 @@ export function AreaExperienceTimeline({ experience }: AreaExperienceTimelinePro
             className="absolute top-1.5 left-0 size-2 rounded-full bg-accent ring-2 ring-surface"
             aria-hidden="true"
           />
-          <p className="text-sm font-semibold break-words text-ink">{item.role}</p>
+          <p className="text-sm font-semibold break-words text-ink">
+            {item.role}
+          </p>
           <div className="mt-1 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
-            <span className="min-w-0 text-xs break-words text-ink-soft">{item.company}</span>
+            <span className="min-w-0 text-xs break-words text-ink-soft">
+              {item.company}
+            </span>
             <span className="rounded-full bg-surface-soft px-2 py-0.5 text-xs font-medium whitespace-nowrap text-ink-soft tabular-nums">
               {formatDurationYears(item.durationYears)}
             </span>
