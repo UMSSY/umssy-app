@@ -1,5 +1,5 @@
 import { renderWithQuery } from "@/shared/testing/render-with-query";
-import { screen, fireEvent, waitFor, cleanup } from "@testing-library/react";
+import { screen, fireEvent, waitFor, cleanup, act } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { ForgotPasswordView } from "./forgot-password-view";
 import { authService } from "../services/auth.service";
@@ -28,6 +28,7 @@ describe("ForgotPasswordView", () => {
   afterEach(() => {
     cleanup();
     vi.useRealTimers();
+    vi.restoreAllMocks();
   });
 
   it("renderiza el paso 1 con los textos y enlaces iniciales", () => {
@@ -103,6 +104,9 @@ describe("ForgotPasswordView", () => {
       expect(screen.getByRole("heading", { name: "Revisa tu correo" })).toBeInTheDocument();
     });
 
+    expect(screen.getByRole("button", { name: /Reenviar código en/ })).toBeDisabled();
+    vi.spyOn(Date, "now").mockReturnValue(Date.now() + 120000);
+    act(() => { window.dispatchEvent(new Event("focus")); });
     fireEvent.click(screen.getByRole("button", { name: "¿No te llegó? Reenviar código" }));
 
     await waitFor(() => {
@@ -247,7 +251,10 @@ describe("ForgotPasswordView", () => {
       await goToVerifyStep();
 
       vi.mocked(authService.requestPasswordResetCode).mockRejectedValue(new Error("No se pudo reenviar el código"));
-      fireEvent.click(screen.getByRole("button", { name: "¿No te llegó? Reenviar código" }));
+      expect(screen.getByRole("button", { name: /Reenviar código en/ })).toBeDisabled();
+    vi.spyOn(Date, "now").mockReturnValue(Date.now() + 120000);
+    act(() => { window.dispatchEvent(new Event("focus")); });
+    fireEvent.click(screen.getByRole("button", { name: "¿No te llegó? Reenviar código" }));
 
       expect(await screen.findByText("No se pudo reenviar el código")).toBeInTheDocument();
     });
