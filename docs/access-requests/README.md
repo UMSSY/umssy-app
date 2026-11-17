@@ -1,19 +1,19 @@
-# Access Requests (solicitudes de acceso)
+# Access Requests
 
-## Propósito
+## Purpose
 
-El módulo `access-requests` gestiona las solicitudes de acceso de los titulados: registro y envío con documento, revisión y aprobación o rechazo en el backoffice, corrección de documentos y activación de la cuenta. Una solicitud aprobada vincula al usuario creado (`approved_user_id`) con su carrera (`career_id`) y su año de egreso (`graduation_year`), y por eso es la fuente oficial de la cohorte de cada titulado.
+The `access-requests` module manages graduates' access requests: registration and submission with a document, review and approval or rejection in the backoffice, document correction and account activation. An approved request links the created user (`approved_user_id`) to their career (`career_id`) and graduation year (`graduation_year`), which is why it is the official source of each graduate's cohort.
 
-Este documento describe los servicios de lectura que el módulo expone a otros dominios en el Sprint 3.
+This document describes the read services the module exposes to other domains in Sprint 3.
 
-## Servicios de lectura para otros dominios
+## Read services for other domains
 
-`ApprovedGraduateCareersService` (exportado por `AccessRequestsModule`) entrega datos de cohorte sin exponer la tabla `access_requests`:
+`ApprovedGraduateCareersService` (exported by `AccessRequestsModule`) provides cohort data without exposing the `access_requests` table:
 
-| Método | Devuelve | Consumidor |
+| Method | Returns | Consumer |
 | --- | --- | --- |
-| `findByUserIds(userIds)` | `{ userId, careerId }[]` de las solicitudes aprobadas de esos usuarios. Con lista vacía no consulta la base | [analytics](../analytics/README.md) (carrera de cada titulado en los mapas de calor) |
-| `findApprovedUserIds({ careerId, graduationYear })` | Ids de usuarios con solicitud aprobada, filtrando por carrera y/o año de egreso si se indican | [surveys](../surveys/README.md) (audiencia elegible de una encuesta) |
+| `findByUserIds(userIds)` | `{ userId, careerId }[]` from the approved requests of those users. With an empty list it does not query the database | [analytics](../analytics/README.md) (career of each graduate in the heatmaps) |
+| `findApprovedUserIds({ careerId, graduationYear })` | Ids of users with an approved request, filtered by career and/or graduation year if provided | [surveys](../surveys/README.md) (eligible audience of a survey) |
 
 ```mermaid
 flowchart LR
@@ -29,35 +29,35 @@ sequenceDiagram
   participant S as ApprovedGraduateCareersService
   participant R as ApprovedGraduateCareersRepository
   SA->>S: findApprovedUserIds({ careerId, graduationYear })
-  S->>R: findMany(approved_user_id no nulo [+ career_id] [+ graduation_year])
-  R-->>S: registros
+  S->>R: findMany(approved_user_id not null [+ career_id] [+ graduation_year])
+  R-->>S: records
   S-->>SA: userIds
 ```
 
-## Reglas de negocio
+## Business rules
 
-- Solo cuentan solicitudes con `approved_user_id` no nulo (aprobadas y vinculadas a una cuenta).
-- Los filtros `careerId` y `graduationYear` son opcionales; con ambos nulos devuelve todos los titulados aprobados.
-- Los servicios son de solo lectura y no tienen endpoint HTTP propio.
+- Only requests with a non-null `approved_user_id` count (approved and linked to an account).
+- The `careerId` and `graduationYear` filters are optional; with both null it returns all approved graduates.
+- The services are read-only and have no HTTP endpoint of their own.
 
-## Integración con el frontend
+## Frontend integration
 
-Estos servicios no tienen consumo directo desde el frontend. El registro de la solicitud vive en `frontend/src/modules/access-request` y la revisión en `frontend/src/modules/request-review`. La cohorte que exponen se refleja en la tasa de respuesta de las encuestas (`SurveyResponseRateCard`) y en los mapas de calor (`frontend/src/modules/heatmaps`).
+These services are not consumed directly by the frontend. Request registration lives in `frontend/src/modules/access-request` and review in `frontend/src/modules/request-review`. The cohort they expose is reflected in the survey response rate (`SurveyResponseRateCard`) and in the heatmaps (`frontend/src/modules/heatmaps`).
 
-## Dependencias
+## Dependencies
 
-| Dirección | Módulo | Uso |
+| Direction | Module | Usage |
 | --- | --- | --- |
-| Usa | [mail](../mail/README.md) | Correos de código de activación, cuenta activada y rechazo |
-| Usado por | [surveys](../surveys/README.md) | Cohorte por carrera y año de egreso |
-| Usado por | [analytics](../analytics/README.md) | Carrera aprobada por titulado |
+| Uses | [mail](../mail/README.md) | Activation code, account activated and rejection emails |
+| Used by | [surveys](../surveys/README.md) | Cohort by career and graduation year |
+| Used by | [analytics](../analytics/README.md) | Approved career per graduate |
 
-## Datos
+## Data
 
-Tabla `access_requests` (ver [backend/prisma/README.md](../../backend/prisma/README.md)).
+Table `access_requests` (see [backend/prisma/README.md](../../backend/prisma/README.md)).
 
 ## Sprint History
 
 ### Sprint 3
 
-- `ApprovedGraduateCareersService` con `findByUserIds` y `findApprovedUserIds` para que surveys y analytics lean la cohorte de los titulados aprobados.
+- `ApprovedGraduateCareersService` with `findByUserIds` and `findApprovedUserIds` so surveys and analytics can read the cohort of approved graduates.

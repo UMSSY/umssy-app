@@ -1,21 +1,21 @@
-# Notifications (infraestructura central de notificaciones)
+# Notifications (central notification infrastructure)
 
-## Propósito
+## Purpose
 
-El módulo `notifications` es la infraestructura central para avisar a los usuarios. Los dominios llaman a `NotificationsService.notify()` con un tipo, destinatarios y un payload; el módulo guarda la notificación in-app, la emite en tiempo real por WebSocket y la despacha por push (Web Push/VAPID) y por correo según el catálogo de tipos y las preferencias de cada destinatario. Devuelve el estado de cada canal y el resultado por destinatario para que el dominio llamador decida qué mostrar.
+The `notifications` module is the central infrastructure for alerting users. Domains call `NotificationsService.notify()` with a type, recipients and a payload; the module stores the in-app notification, emits it in real time over WebSocket, and dispatches it by push (Web Push/VAPID) and by email according to the type catalog and each recipient's preferences. It returns the status of each channel and the per-recipient result so the calling domain can decide what to show.
 
-También expone la bandeja de notificaciones, las preferencias de canal y el registro de suscripciones push.
+It also exposes the notification inbox, the channel preferences and the push subscription registry.
 
-## Arquitectura
+## Architecture
 
 ```mermaid
 flowchart LR
-  subgraph Dominios
+  subgraph Domains
     CH[chat]
     SV[surveys: survey-notifications.ts]
   end
   CH --> NS
-  SV -->|notify con payload validado y renderMail| NS
+  SV -->|notify with validated payload and renderMail| NS
   subgraph Backend["backend/src/modules/notifications"]
     NS[NotificationsService.notify] --> NR[(NotificationsRepository)]
     NS --> PR[(PreferencesRepository)]
@@ -35,34 +35,34 @@ flowchart LR
   PR --> DB2[(notification_preferences)]
 ```
 
-## Flujos clave
+## Key flows
 
-### Envío de una notificación
+### Sending a notification
 
 ```mermaid
 sequenceDiagram
-  participant D as Dominio (p. ej. surveys)
+  participant D as Domain (e.g. surveys)
   participant N as NotificationsService
   participant G as NotificationGateway
   participant P as PushDispatcherService
   participant M as MailDispatcherService
   participant ML as MailService
   D->>N: notify({ recipientIds, actorId?, type, payload, actionUrl, groupKey?, renderMail? })
-  N->>N: Quita al actor y a usuarios con bloqueo con el actor
-  N->>N: Busca el tipo en notification_types (404 si no existe)
-  N->>N: Título y cuerpo con NOTIFICATION_TEMPLATES[type]
-  N->>N: Canales por destinatario: catálogo (sendsPush/sendsEmail) + preferencias + visibilidad
-  N->>N: Crea una notificación in-app por destinatario
+  N->>N: Removes the actor and users with a block involving the actor
+  N->>N: Looks up the type in notification_types (404 if missing)
+  N->>N: Title and body from NOTIFICATION_TEMPLATES[type]
+  N->>N: Channels per recipient: catalog (sendsPush/sendsEmail) + preferences + visibility
+  N->>N: Creates one in-app notification per recipient
   N->>G: emitToUser(id, "notification:new")
-  opt hay destinatarios push
+  opt there are push recipients
     N->>P: dispatchToUsers(...)
     P-->>N: { status, deliveries[push] }
   end
-  opt hay destinatarios de correo
+  opt there are email recipients
     N->>M: dispatchToUsers(ids, title, body, actionUrl, renderMail)
-    loop por destinatario
-      M->>M: Contacto (sin correo = skipped)
-      M->>M: await renderMail(context) o plantilla genérica notification.mjml
+    loop per recipient
+      M->>M: Contact (no email = skipped)
+      M->>M: await renderMail(context) or generic notification.mjml template
       M->>ML: send({ to, subject, text, mjml, values })
     end
     M-->>N: { status, deliveries[email] }
@@ -70,61 +70,61 @@ sequenceDiagram
   N-->>D: { inAppCount, pushStatus, emailStatus, deliveries }
 ```
 
-## Reglas de negocio
+## Business rules
 
-- **Destinatarios.** El actor nunca se notifica a sí mismo. Si hay actor, se excluyen los destinatarios con bloqueo entre ambos. Sin destinatarios válidos devuelve todo `skipped` sin escribir nada.
-- **Catálogo.** Cada `NotificationType` debe existir en `notification_types`; sus columnas `sends_push` y `sends_email` habilitan cada canal. La semilla del catálogo hace upsert por `code`, así que actualiza los canales de tipos existentes.
-- **Preferencias.** Sin preferencia guardada: push desactivado y correo activado. Push y correo no pueden activarse a la vez (`PUT /notifications/preferences`).
-- **Push.** Solo si el tipo lo permite, el usuario lo activó y la app no está visible para ese usuario (`visibility:changed` por WebSocket). Se omiten las suscripciones con user agent de escritorio (solo móviles o sin user agent). Título y cuerpo se truncan. Las suscripciones que responden 404/410 se eliminan.
-- **Correo.** El dominio puede pasar `renderMail(context)` en la propia petición (`NotifyRequest.renderMail`, tipo `NotificationMailRenderer`); el catálogo `NOTIFICATION_TEMPLATES` solo define título y cuerpo in-app. `renderMail` recibe `recipientName` y `actionUrl` y devuelve una promesa con `mjml`, `subject`, `text` y `values`, de modo que el dominio puede leer su plantilla `.mjml` con `loadMailTemplate`. Sin `renderMail` se usa la plantilla genérica `mail/mjml/notification.mjml`, que se carga una sola vez por envío.
-- **Resultado.** Cada canal se resume como `sent` (todo enviado), `partial`, `failed` o `skipped`. `deliveries` trae `{ recipientId, channel: 'push' | 'email', status: 'sent' | 'failed' | 'skipped' }`. Un fallo crítico de un despachador marca su canal como `failed` sin cancelar los demás.
-- **Notificaciones de encuestas.** `SURVEY_REMINDER` (push y correo), `SURVEY_CLOSING_SOON`, `SURVEY_CLOSED` y `SURVEY_VARIATION_ALERT` (solo correo). Sus payloads se validan con Zod y sus correos se renderizan en `backend/src/modules/surveys/notification/`; `notifications` solo define título y cuerpo in-app.
+- **Recipients.** The actor is never notified about their own action. If there is an actor, recipients with a block between them and the actor are excluded. With no valid recipients it returns everything as `skipped` without writing anything.
+- **Catalog.** Every `NotificationType` must exist in `notification_types`; its `sends_push` and `sends_email` columns enable each channel. The catalog seed upserts by `code`, so it updates the channels of existing types.
+- **Preferences.** With no saved preference: push disabled and email enabled. Push and email cannot be enabled at the same time (`PUT /notifications/preferences`).
+- **Push.** Only if the type allows it, the user enabled it, and the app is not visible for that user (`visibility:changed` over WebSocket). Subscriptions with a desktop user agent are skipped (mobile or no user agent only). Title and body are truncated. Subscriptions that respond 404/410 are deleted.
+- **Email.** The domain can pass `renderMail(context)` in the request itself (`NotifyRequest.renderMail`, type `NotificationMailRenderer`); the `NOTIFICATION_TEMPLATES` catalog only defines the in-app title and body. `renderMail` receives `recipientName` and `actionUrl` and returns a promise with `mjml`, `subject`, `text` and `values`, so the domain can read its own `.mjml` template with `loadMailTemplate`. Without `renderMail`, the generic `mail/mjml/notification.mjml` template is used, loaded only once per send.
+- **Result.** Each channel is summarized as `sent` (everything sent), `partial`, `failed` or `skipped`. `deliveries` contains `{ recipientId, channel: 'push' | 'email', status: 'sent' | 'failed' | 'skipped' }`. A critical failure in one dispatcher marks its channel as `failed` without cancelling the others.
+- **Survey notifications.** `SURVEY_REMINDER` (push and email), `SURVEY_CLOSING_SOON`, `SURVEY_CLOSED` and `SURVEY_VARIATION_ALERT` (email only). Their payloads are validated with Zod and their emails are rendered in `backend/src/modules/surveys/notification/`; `notifications` only defines the in-app title and body.
 
 ## Endpoints
 
-### Expuestos
+### Exposed
 
-| Método | Ruta | Descripción |
+| Method | Route | Description |
 | --- | --- | --- |
-| GET | `/notifications?page&limit` | Bandeja paginada (limit 1–100, por defecto 10) |
-| GET | `/notifications/unread-count` | Cantidad de no leídas |
-| PATCH | `/notifications/:id/read` | Marca una como leída |
-| PATCH | `/notifications/read-all` | Marca todas como leídas |
-| GET | `/notifications/preferences` | Preferencias de canal |
-| PUT | `/notifications/preferences` | Actualiza `{ pushEnabled, emailEnabled, inAppEnabled }` |
-| GET | `/push/public-key` | Clave pública VAPID |
-| POST | `/push/subscriptions` | Registra una suscripción push |
-| DELETE | `/push/subscriptions` | Elimina una suscripción push |
-| WS | namespace `/notifications` (path `/api/socket.io`) | Evento `notification:new`; mensaje `visibility:changed` |
+| GET | `/notifications?page&limit` | Paginated inbox (limit 1–100, default 10) |
+| GET | `/notifications/unread-count` | Number of unread notifications |
+| PATCH | `/notifications/:id/read` | Marks one as read |
+| PATCH | `/notifications/read-all` | Marks all as read |
+| GET | `/notifications/preferences` | Channel preferences |
+| PUT | `/notifications/preferences` | Updates `{ pushEnabled, emailEnabled, inAppEnabled }` |
+| GET | `/push/public-key` | VAPID public key |
+| POST | `/push/subscriptions` | Registers a push subscription |
+| DELETE | `/push/subscriptions` | Deletes a push subscription |
+| WS | namespace `/notifications` (path `/api/socket.io`) | `notification:new` event; `visibility:changed` message |
 
-Todos requieren JWT (cualquier rol). El WebSocket autentica con `handshake.auth.token`.
+All require JWT (any role). The WebSocket authenticates with `handshake.auth.token`.
 
-### Servicio exportado
+### Exported service
 
-`NotificationsService.notify(request: NotifyRequest): Promise<NotifyResult>` y `SubscriptionsService`. Consumidores actuales: chat y [surveys](../surveys/README.md).
+`NotificationsService.notify(request: NotifyRequest): Promise<NotifyResult>` and `SubscriptionsService`. Current consumers: chat and [surveys](../surveys/README.md).
 
-## Dependencias
+## Dependencies
 
-| Dirección | Módulo | Uso |
+| Direction | Module | Usage |
 | --- | --- | --- |
-| Usa | [mail](../mail/README.md) | `MailService.send` y `loadMailTemplate('notification')` para la plantilla genérica |
-| Usa | [users](../users/README.md) | `findEmailById`, `findContactById` (nombre y correo del destinatario) |
-| Usa | auth | Sesión para autenticar el WebSocket |
-| Usado por | chat, [surveys](../surveys/README.md) | Envío de notificaciones |
+| Uses | [mail](../mail/README.md) | `MailService.send` and `loadMailTemplate('notification')` for the generic template |
+| Uses | [users](../users/README.md) | `findEmailById`, `findContactById` (recipient name and email) |
+| Uses | auth | Session to authenticate the WebSocket |
+| Used by | chat, [surveys](../surveys/README.md) | Sending notifications |
 
-## Datos
+## Data
 
-Tablas `notifications`, `notification_types`, `notification_preferences` y `push_subscriptions` (ver [backend/prisma/README.md](../../backend/prisma/README.md)). En el Sprint 3 el catálogo incorpora `SURVEY_REMINDER`, `SURVEY_CLOSING_SOON`, `SURVEY_CLOSED` y `SURVEY_VARIATION_ALERT`.
+Tables `notifications`, `notification_types`, `notification_preferences` and `push_subscriptions` (see [backend/prisma/README.md](../../backend/prisma/README.md)). In Sprint 3 the catalog adds `SURVEY_REMINDER`, `SURVEY_CLOSING_SOON`, `SURVEY_CLOSED` and `SURVEY_VARIATION_ALERT`.
 
-## Integración con el frontend
+## Frontend integration
 
-El frontend no llama a `notify()`: lo hace el dominio dueño del evento. Para encuestas, el backoffice recibe el resultado por canal a través de `POST /surveys/:id/reminders` (`SendSurveyReminderDialog` muestra entregados y fallidos a partir de `deliveries`), y el `actionUrl` de cada aviso apunta a rutas del frontend: `/surveys/:id` para quien debe responder y `/backoffice/surveys/statistics/:id` para el creador.
+The frontend does not call `notify()`: the domain that owns the event does. For surveys, the backoffice receives the per-channel result through `POST /surveys/:id/reminders` (`SendSurveyReminderDialog` shows delivered and failed counts based on `deliveries`), and the `actionUrl` of each notification points to frontend routes: `/surveys/:id` for those who must respond and `/backoffice/surveys/statistics/:id` for the creator.
 
 ## Sprint History
 
 ### Sprint 3
 
-- `notify()` devuelve el detalle por destinatario y canal (`deliveries`) además del estado agregado; push y correo informan `sent`, `partial`, `failed` o `skipped`.
-- El correo admite contenido propio del dominio mediante `renderMail` asíncrono (contenido MJML, asunto, texto y valores) con nombre del destinatario.
-- Nuevos tipos de notificación de encuestas en el catálogo; la semilla del catálogo pasa a upsert.
-- Los contratos de las notificaciones de encuestas (payloads Zod, correos y MJML) se ubican en el dominio surveys.
+- `notify()` returns the per-recipient, per-channel detail (`deliveries`) in addition to the aggregated status; push and email report `sent`, `partial`, `failed` or `skipped`.
+- Email supports domain-specific content through an async `renderMail` (MJML content, subject, text and values) with the recipient's name.
+- New survey notification types in the catalog; the catalog seed switches to upsert.
+- The survey notification contracts (Zod payloads, emails and MJML) live in the surveys domain.

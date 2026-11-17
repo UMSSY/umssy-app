@@ -1,28 +1,28 @@
-# Surveys (encuestas de empleabilidad)
+# Surveys (employability surveys)
 
-## Propósito
+## Purpose
 
-El módulo `surveys` permite al personal administrativo crear, publicar y analizar encuestas de empleabilidad dirigidas a titulados, estudiantes o mentores de una carrera y gestión, y permite a esas audiencias responderlas. Desde el Sprint 3 también controla la participación de la audiencia, los recordatorios manuales, las alertas de variación entre semestres y los avisos automáticos de cierre al creador de la encuesta.
+The `surveys` module lets administrative staff create, publish and analyze employability surveys aimed at graduates, students or mentors of a career and academic year, and lets those audiences answer them. Since Sprint 3 it also tracks audience participation, manual reminders, variation alerts between semesters and automatic closing notices to the survey creator.
 
-- Backend: `backend/src/modules/surveys` (controladores `SurveysController`, `SurveyNotificationsController`, `CareersController`; servicios de encuestas, participación, audiencia, variación, ciclo de vida, PDF y respuestas de empleabilidad; carpeta `notification/` con los contratos de las notificaciones de encuestas).
-- Frontend: `frontend/src/modules/surveys` (constructor de encuestas, vista de respuesta, listado del backoffice, vista de analíticas con tarjeta de tasa de respuesta, diálogo de recordatorio y diálogo de alertas).
+- Backend: `backend/src/modules/surveys` (controllers `SurveysController`, `SurveyNotificationsController`, `CareersController`; services for surveys, participation, audience, variation, lifecycle, PDF and employability responses; `notification/` folder with the survey notification contracts).
+- Frontend: `frontend/src/modules/surveys` (survey builder, answer view, backoffice list, analytics view with the response rate card, reminder dialog and alerts dialog).
 
-## Funcionalidad
+## Functionality
 
-| Funcionalidad | Dónde |
+| Feature | Where |
 | --- | --- |
-| Crear, editar borrador, publicar e inhabilitar encuestas | `POST /surveys`, `PATCH /surveys/:id`, `PATCH /surveys/:id/unpublish`; `/backoffice/surveys`, `/backoffice/surveys/create`, `/backoffice/surveys/:id` |
-| Responder una encuesta | `GET /surveys/:id`, `POST /surveys/:id/responses`; `/surveys`, `/surveys/:id` |
-| Avisos de encuestas asignadas al usuario | `GET /surveys/notifications` |
-| Estadísticas por semestre e informe PDF | `GET /surveys/:id/statistics`, `GET /surveys/:id/report`; `/backoffice/surveys/statistics/:id` |
-| Tasa de respuesta de la audiencia objetivo | `GET /surveys/:id/participation`; `SurveyResponseRateCard` |
-| Recordatorio manual a quienes no respondieron | `POST /surveys/:id/reminders`; `SendSurveyReminderDialog` |
-| Configuración de alertas de variación | `GET` / `PUT /surveys/:id/alert-config`; `SurveyAlertsDialog` |
-| Avisos automáticos de cierre próximo, cierre y variación | `SurveyLifecycleWorkerService` |
-| Respuestas de empleabilidad para otros dominios | `SurveyEmploymentResponsesService` (exportado) |
-| Carreras disponibles | `GET /careers`; `CareersService` (exportado) |
+| Create, edit draft, publish and disable surveys | `POST /surveys`, `PATCH /surveys/:id`, `PATCH /surveys/:id/unpublish`; `/backoffice/surveys`, `/backoffice/surveys/create`, `/backoffice/surveys/:id` |
+| Answer a survey | `GET /surveys/:id`, `POST /surveys/:id/responses`; `/surveys`, `/surveys/:id` |
+| Notices of surveys assigned to the user | `GET /surveys/notifications` |
+| Statistics per semester and PDF report | `GET /surveys/:id/statistics`, `GET /surveys/:id/report`; `/backoffice/surveys/statistics/:id` |
+| Response rate of the target audience | `GET /surveys/:id/participation`; `SurveyResponseRateCard` |
+| Manual reminder to those who have not answered | `POST /surveys/:id/reminders`; `SendSurveyReminderDialog` |
+| Variation alert configuration | `GET` / `PUT /surveys/:id/alert-config`; `SurveyAlertsDialog` |
+| Automatic closing-soon, closing and variation notices | `SurveyLifecycleWorkerService` |
+| Employability responses for other domains | `SurveyEmploymentResponsesService` (exported) |
+| Available careers | `GET /careers`; `CareersService` (exported) |
 
-## Arquitectura
+## Architecture
 
 ```mermaid
 flowchart LR
@@ -59,57 +59,57 @@ flowchart LR
   R --> DB[(surveys, survey_alert_configs, survey_responses ...)]
 ```
 
-### Notificaciones de encuestas
+### Survey notifications
 
-Las notificaciones de encuestas pertenecen al dominio `surveys` y viven en `backend/src/modules/surveys/notification/`:
+Survey notifications belong to the `surveys` domain and live in `backend/src/modules/surveys/notification/`:
 
-| Archivo | Responsabilidad |
+| File | Responsibility |
 | --- | --- |
-| `survey-notifications.ts` | Construye la petición para `NotificationsService.notify()` (`type`, `payload` validado y `renderMail`) de `SURVEY_REMINDER`, `SURVEY_CLOSING_SOON`, `SURVEY_CLOSED` y `SURVEY_VARIATION_ALERT` |
-| `survey-notification-payloads.schema.ts` | Esquemas Zod de cada payload (título 1–150 caracteres, fecha formateada no vacía, respuestas enteras ≥ 0, umbral 1–50, resumen no vacío). Un payload inválido lanza antes de llamar a `notify()` |
-| `survey-notification-mails.ts` | Asunto, texto plano y valores de cada correo; lee su plantilla con `loadMailTemplate` de `mail` |
-| `mjml/survey-reminder.mjml`, `mjml/survey-closing-soon.mjml`, `mjml/survey-closed.mjml`, `mjml/survey-variation-alert.mjml` | Contenido MJML de cada correo; `mail` lo envuelve con `layout.mjml` y `header.mjml`. El build los copia a `dist/modules/surveys/notification/mjml/` (`scripts/copy-mail-templates.ts` y `assets` de `nest-cli.json`) |
+| `survey-notifications.ts` | Builds the request for `NotificationsService.notify()` (`type`, validated `payload` and `renderMail`) for `SURVEY_REMINDER`, `SURVEY_CLOSING_SOON`, `SURVEY_CLOSED` and `SURVEY_VARIATION_ALERT` |
+| `survey-notification-payloads.schema.ts` | Zod schemas for each payload (title 1–150 characters, non-empty formatted date, integer responses ≥ 0, threshold 1–50, non-empty summary). An invalid payload throws before `notify()` is called |
+| `survey-notification-mails.ts` | Subject, plain text and values of each email; reads its template with `loadMailTemplate` from `mail` |
+| `mjml/survey-reminder.mjml`, `mjml/survey-closing-soon.mjml`, `mjml/survey-closed.mjml`, `mjml/survey-variation-alert.mjml` | MJML content of each email; `mail` wraps it with `layout.mjml` and `header.mjml`. The build copies them to `dist/modules/surveys/notification/mjml/` (`scripts/copy-mail-templates.ts` and `assets` in `nest-cli.json`) |
 
-El módulo `notifications` es infraestructura central: guarda la notificación in-app, emite por WebSocket y despacha push y correo según el catálogo `notification_types` y las preferencias del destinatario. Devuelve el estado por canal y el detalle por destinatario (`deliveries`), que `surveys` usa para contar correos entregados y fallidos.
+The `notifications` module is core infrastructure: it stores the in-app notification, emits it over WebSocket and dispatches push and email according to the `notification_types` catalog and the recipient's preferences. It returns the status per channel and the detail per recipient (`deliveries`), which `surveys` uses to count delivered and failed emails.
 
-## Flujos clave
+## Key flows
 
-### Recordatorio manual
+### Manual reminder
 
 ```mermaid
 sequenceDiagram
-  actor A as Administrativo
+  actor A as Administrative staff
   participant V as SurveyAnalyticsView
   participant C as SurveysController
   participant P as SurveyParticipationService
   participant AU as SurveyAudienceService
   participant N as NotificationsService
-  A->>V: Abre la encuesta en /backoffice/surveys/statistics/:id
+  A->>V: Opens the survey at /backoffice/surveys/statistics/:id
   V->>C: GET /surveys/:id/participation
   C->>P: getParticipation(id)
-  P->>AU: resolve(rol de la audiencia, carrera, año de egreso)
+  P->>AU: resolve(audience role, career, graduation year)
   AU-->>P: eligible / pending
-  P-->>V: tasa de respuesta, pendientes, último recordatorio, canSendReminder
-  A->>V: Enviar recordatorio (N pendientes) y confirma
+  P-->>V: response rate, pending, last reminder, canSendReminder
+  A->>V: Clicks "Enviar recordatorio (N pendientes)" and confirms
   V->>C: POST /surveys/:id/reminders {}
   C->>P: sendReminders(id, actorId)
-  alt no publicada o ya cerró
+  alt not published or already closed
     P-->>V: 409 SURVEY_REMINDER_NOT_ALLOWED
-  else sin pendientes
+  else no pending respondents
     P-->>V: 409 SURVEY_WITHOUT_PENDING_RESPONDENTS
   end
-  P->>N: notify(SURVEY_REMINDER, pendientes, payload validado, renderMail)
+  P->>N: notify(SURVEY_REMINDER, pending, validated payload, renderMail)
   N-->>P: { pushStatus, emailStatus, deliveries }
-  alt ningún correo enviado y push no enviado
+  alt no email sent and push not sent
     P-->>V: 502 SURVEY_REMINDER_DELIVERY_FAILED
   else
     P->>P: updateLastReminderSent(id, now)
     P-->>V: 200 { pendingCount, emailsDelivered, emailsFailed, pushStatus, sentAt }
   end
-  V->>V: Toast con entregados/fallidos e invalida participación
+  V->>V: Toast with delivered/failed and invalidates participation
 ```
 
-### Ciclo de vida automático (cierre próximo, cierre y variación)
+### Automatic lifecycle (closing soon, closing and variation)
 
 ```mermaid
 sequenceDiagram
@@ -117,158 +117,158 @@ sequenceDiagram
   participant R as SurveysRepository
   participant E as SurveyVariationEvaluatorService
   participant N as NotificationsService
-  loop cada 30 s (no corre con NODE_ENV=test)
-    W->>R: findSurveysClosingSoon(now + 3 días, now)
-    loop por encuesta publicada sin closing_soon_notified_at
-      W->>N: notify(SURVEY_CLOSING_SOON, [creador])
+  loop every 30 s (does not run with NODE_ENV=test)
+    W->>R: findSurveysClosingSoon(now + 3 days, now)
+    loop per published survey without closing_soon_notified_at
+      W->>N: notify(SURVEY_CLOSING_SOON, [creator])
       W->>R: markClosingSoonNotified(id, now)
     end
     W->>R: findSurveysExpiredForClosure(now)
-    loop por encuesta publicada vencida sin closed_notified_at
-      W->>N: notify(SURVEY_CLOSED, [creador])
+    loop per expired published survey without closed_notified_at
+      W->>N: notify(SURVEY_CLOSED, [creator])
       W->>R: markClosedNotified(id, now)
-      alt alertConfig.isEnabled (por defecto true)
+      alt alertConfig.isEnabled (default true)
         W->>E: evaluateSurvey(id, { closesAt, threshold, questionIds })
-        E->>R: findStatistics(semestre actual) y findStatistics(semestre anterior)
+        E->>R: findStatistics(current semester) and findStatistics(previous semester)
         E-->>W: hasShifts, summaryText
-        opt hay variaciones >= umbral
-          W->>N: notify(SURVEY_VARIATION_ALERT, [creador])
+        opt there are variations >= threshold
+          W->>N: notify(SURVEY_VARIATION_ALERT, [creator])
         end
       end
     end
   end
 ```
 
-### Configurar alertas de variación
+### Configure variation alerts
 
 ```mermaid
 sequenceDiagram
-  actor A as Administrativo
+  actor A as Administrative staff
   participant D as SurveyAlertsDialog
   participant C as SurveysController
   participant S as SurveysService
   participant R as SurveysRepository
-  A->>D: Abre "Alertas"
+  A->>D: Opens "Alertas"
   D->>C: GET /surveys/:id/alert-config
   C->>S: getAlertConfig(id)
   S->>R: findAlertConfig(id)
-  S-->>D: { enabled, threshold, questionIds } (valores por defecto si no existe)
-  A->>D: Activa, fija umbral y preguntas a vigilar
-  D->>D: Valida umbral 1–50 y al menos una pregunta
+  S-->>D: { enabled, threshold, questionIds } (default values if none exists)
+  A->>D: Enables, sets threshold and questions to watch
+  D->>D: Validates threshold 1–50 and at least one question
   D->>C: PUT /surveys/:id/alert-config
   C->>S: saveAlertConfig(id, dto)
-  S->>R: findStatus(id) (404 si no existe)
+  S->>R: findStatus(id) (404 if it does not exist)
   S->>R: upsertAlertConfig(id, { isEnabled, threshold, questionIds })
   S-->>D: { saved: true, enabled, threshold, questionIds }
 ```
 
-## Reglas de negocio
+## Business rules
 
-### Generales
+### General
 
-- La gestión de encuestas (crear, editar, inhabilitar, listar, estadísticas, PDF, participación, recordatorios y alertas) es exclusiva del rol `administrativo`. Ver y responder una encuesta (`GET /surveys/:id`, `POST /surveys/:id/responses`) y ver avisos (`GET /surveys/notifications`) también se permite a `titulado`, `estudiante` y `mentor`.
-- Una persona responde una encuesta una sola vez (`survey_responses` único por `survey_id` + `respondent_id`).
-- Exportar el informe PDF registra el archivo en el historial de reportes (`reportType = SURVEY_STATISTICS`).
+- Survey management (create, edit, disable, list, statistics, PDF, participation, reminders and alerts) is exclusive to the `administrativo` role. Viewing and answering a survey (`GET /surveys/:id`, `POST /surveys/:id/responses`) and viewing notices (`GET /surveys/notifications`) is also allowed for `titulado`, `estudiante` and `mentor`.
+- A person answers a survey only once (`survey_responses` unique by `survey_id` + `respondent_id`).
+- Exporting the PDF report registers the file in the report history (`reportType = SURVEY_STATISTICS`).
 
-### Participación y recordatorios
+### Participation and reminders
 
-- **Audiencia elegible.** Usuarios activos con el rol de la audiencia objetivo (`all` = titulado, estudiante y mentor; `graduates` = titulado; `students` = estudiante; `mentors` = mentor). Si la encuesta tiene carrera o una gestión de año (`academicPeriod` = `AAAA`), solo entran usuarios con solicitud de acceso aprobada en esa carrera y con ese año de egreso. `Todas` no filtra por año.
-- **Pendientes** = elegibles que todavía no tienen respuesta. `responseRate` = respondidos / elegibles, redondeado y limitado a 100; 0 si no hay elegibles.
-- **Recordatorios** solo para encuestas publicadas cuya fecha de cierre no pasó (o sin fecha de cierre), y solo a los pendientes. Quienes ya respondieron no reciben nada.
-- Se envía como `SURVEY_REMINDER` (push y correo según el catálogo y las preferencias). Si no se entregó ningún correo y el push no fue `sent` ni `partial`, responde 502 y no actualiza `last_reminder_sent_at`.
-- Los recordatorios **solo se envían manualmente** desde el backoffice; el worker no envía recordatorios.
-- Frontend: medidor de progreso con el color institucional uniforme y una etiqueta de nivel de participación baja (≤ 35 %), media (≤ 65 %) o esperada (> 65 %). El botón se deshabilita si no hay pendientes o `canSendReminder` es falso.
+- **Eligible audience.** Active users with the role of the target audience (`all` = titulado, estudiante and mentor; `graduates` = titulado; `students` = estudiante; `mentors` = mentor). If the survey has a career or an academic year (`academicPeriod` = `AAAA`), only users with an approved access request for that career and with that graduation year are included. `Todas` does not filter by year.
+- **Pending** = eligible users who have not answered yet. `responseRate` = answered / eligible, rounded and capped at 100; 0 if there are no eligible users.
+- **Reminders** only for published surveys whose closing date has not passed (or that have no closing date), and only to pending users. Those who already answered receive nothing.
+- It is sent as `SURVEY_REMINDER` (push and email according to the catalog and the preferences). If no email was delivered and push was neither `sent` nor `partial`, it responds 502 and does not update `last_reminder_sent_at`.
+- Reminders are **only sent manually** from the backoffice; the worker does not send reminders.
+- Frontend: progress meter with the uniform institutional color and a participation level label of low (≤ 35 %), medium (≤ 65 %) or expected (> 65 %). The button is disabled if there are no pending users or `canSendReminder` is false.
 
-### Alertas de variación (`SurveyAlertConfig`)
+### Variation alerts (`SurveyAlertConfig`)
 
-- Configuración opcional 1:1 con la encuesta. Sin registro se usan los valores por defecto `enabled = true`, `threshold = 10`, `questionIds = null` (todas las preguntas).
-- `threshold`: entero de 1 a 50 puntos porcentuales. `questionIds`: lista de ids de preguntas a vigilar; `null` o vacío vigila todas. El body acepta `enabled` o `isEnabled` (prevalece `enabled`).
-- Al cerrar la encuesta se compara, por pregunta y opción, el porcentaje de respuestas del semestre actual con el del semestre anterior. El semestre actual se deriva solo de `closesAt` (o de la fecha actual si la encuesta no tiene cierre); `academicPeriod` es la gestión de la cohorte (`AAAA` o `Todas`), no un semestre, y no interviene en la comparación. Por ejemplo, una encuesta que cierra el 15/11/2024 compara II-2024 con I-2024. Se reporta cada opción con `|diferencia| >= threshold`. Si alguno de los dos semestres no tiene respuestas, no hay alerta.
-- Frontend: con alertas activas exige al menos una pregunta seleccionada; al guardar envía los ids de las preguntas marcadas.
+- Optional 1:1 configuration with the survey. Without a record, the default values `enabled = true`, `threshold = 10`, `questionIds = null` (all questions) are used.
+- `threshold`: integer from 1 to 50 percentage points. `questionIds`: list of ids of the questions to watch; `null` or empty watches all of them. The body accepts `enabled` or `isEnabled` (`enabled` takes precedence).
+- When the survey closes, the percentage of responses of the current semester is compared with that of the previous semester, per question and option. The current semester is derived only from `closesAt` (or from the current date if the survey has no closing date); `academicPeriod` is the cohort year (`AAAA` or `Todas`), not a semester, and plays no part in the comparison. For example, a survey that closes on 15/11/2024 compares II-2024 with I-2024. Every option with `|diferencia| >= threshold` is reported. If either of the two semesters has no responses, there is no alert.
+- Frontend: with alerts enabled it requires at least one selected question; on save it sends the ids of the checked questions.
 
-### Ciclo de vida automático
+### Automatic lifecycle
 
-- El worker revisa cada 30 s. Una ejecución no se superpone a otra.
-- **Cierre próximo**: encuestas publicadas que cierran en las próximas 72 h y sin `closing_soon_notified_at`. Se notifica al creador (`SURVEY_CLOSING_SOON`, solo correo) y se marca la fecha.
-- **Cierre**: encuestas publicadas con `closes_at <= now` y sin `closed_notified_at`. Se notifica al creador (`SURVEY_CLOSED`, solo correo), se marca la fecha y, si las alertas están activas, se evalúa la variación (`SURVEY_VARIATION_ALERT`, solo correo).
-- Si la encuesta no tiene fecha de cierre, los avisos usan el texto `SURVEY_WITHOUT_CLOSING_DATE_TEXT` ("Sin fecha de cierre definida.") en lugar de una fecha vacía.
-- Las marcas `closing_soon_notified_at` y `closed_notified_at` garantizan un único aviso por encuesta. Un error en una encuesta se registra y no detiene las demás.
-- Los enlaces de los avisos apuntan a `FRONTEND_URL` (o el primer `CORS_ORIGIN`): `/backoffice/surveys/statistics/:id` para el creador y `/surveys/:id` para los recordatorios.
+- The worker checks every 30 s. One run never overlaps another.
+- **Closing soon**: published surveys that close within the next 72 h and have no `closing_soon_notified_at`. The creator is notified (`SURVEY_CLOSING_SOON`, email only) and the date is marked.
+- **Closing**: published surveys with `closes_at <= now` and no `closed_notified_at`. The creator is notified (`SURVEY_CLOSED`, email only), the date is marked and, if alerts are enabled, the variation is evaluated (`SURVEY_VARIATION_ALERT`, email only).
+- If the survey has no closing date, the notices use the text `SURVEY_WITHOUT_CLOSING_DATE_TEXT` ("Sin fecha de cierre definida.") instead of an empty date.
+- The `closing_soon_notified_at` and `closed_notified_at` marks guarantee a single notice per survey. An error in one survey is logged and does not stop the others.
+- Notice links point to `FRONTEND_URL` (or the first `CORS_ORIGIN`): `/backoffice/surveys/statistics/:id` for the creator and `/surveys/:id` for reminders.
 
 ## Endpoints
 
-### Expuestos
+### Exposed
 
-| Método | Ruta | Roles | Descripción | Respuesta | Errores |
+| Method | Route | Roles | Description | Response | Errors |
 | --- | --- | --- | --- | --- | --- |
-| POST | `/surveys` | administrativo | Crea encuesta en borrador o publicada | 201 | 400, 404 carrera, 409 título duplicado |
-| GET | `/surveys` | administrativo | Lista encuestas | 200 | |
-| GET | `/surveys/:id` | administrativo, titulado, estudiante, mentor | Detalle para responder o editar | 200 | 403 no dirigida al perfil, 404 |
-| PATCH | `/surveys/:id` | administrativo | Actualiza borrador / publica | 200 | 400, 404, 409 |
-| PATCH | `/surveys/:id/unpublish` | administrativo | Devuelve a borrador si no tiene respuestas | 204 | 404, 409 |
-| POST | `/surveys/:id/responses` | administrativo, titulado, estudiante, mentor | Registra respuestas | 201 | 400 no abierta o vencida, 403, 404, 409 ya respondida |
-| GET | `/surveys/:id/statistics?period=` | administrativo | Estadísticas por semestre | 200 | 400, 404 |
-| GET | `/surveys/:id/report?period=` | administrativo | Informe PDF | 200 `application/pdf` | 404 |
-| GET | `/surveys/:id/alert-config` | administrativo | Configuración de alertas (o valores por defecto) | 200 `{ enabled, threshold, questionIds }` | 400 |
-| PUT | `/surveys/:id/alert-config` | administrativo | Crea o actualiza la configuración | 200 `{ saved, enabled, threshold, questionIds }` | 400, 404 |
-| GET | `/surveys/:id/participation` | administrativo | Cobertura de la audiencia | 200 `SurveyParticipationResponse` | 404 |
-| POST | `/surveys/:id/reminders` | administrativo | Recordatorio a pendientes. Body `{}` | 200 `SurveyReminderResponse` | 404, 409, 502 |
-| GET | `/surveys/notifications` | administrativo, titulado, estudiante, mentor | Avisos de encuestas del usuario | 200 | |
-| GET | `/careers` | administrativo | Carreras ordenadas por título | 200 | |
+| POST | `/surveys` | administrativo | Creates a draft or published survey | 201 | 400, 404 career, 409 duplicate title |
+| GET | `/surveys` | administrativo | Lists surveys | 200 | |
+| GET | `/surveys/:id` | administrativo, titulado, estudiante, mentor | Detail for answering or editing | 200 | 403 not aimed at the profile, 404 |
+| PATCH | `/surveys/:id` | administrativo | Updates draft / publishes | 200 | 400, 404, 409 |
+| PATCH | `/surveys/:id/unpublish` | administrativo | Returns to draft if it has no responses | 204 | 404, 409 |
+| POST | `/surveys/:id/responses` | administrativo, titulado, estudiante, mentor | Records responses | 201 | 400 not open or expired, 403, 404, 409 already answered |
+| GET | `/surveys/:id/statistics?period=` | administrativo | Statistics per semester | 200 | 400, 404 |
+| GET | `/surveys/:id/report?period=` | administrativo | PDF report | 200 `application/pdf` | 404 |
+| GET | `/surveys/:id/alert-config` | administrativo | Alert configuration (or default values) | 200 `{ enabled, threshold, questionIds }` | 400 |
+| PUT | `/surveys/:id/alert-config` | administrativo | Creates or updates the configuration | 200 `{ saved, enabled, threshold, questionIds }` | 400, 404 |
+| GET | `/surveys/:id/participation` | administrativo | Audience coverage | 200 `SurveyParticipationResponse` | 404 |
+| POST | `/surveys/:id/reminders` | administrativo | Reminder to pending users. Body `{}` | 200 `SurveyReminderResponse` | 404, 409, 502 |
+| GET | `/surveys/notifications` | administrativo, titulado, estudiante, mentor | Survey notices for the user | 200 | |
+| GET | `/careers` | administrativo | Careers sorted by title | 200 | |
 
-Todas requieren JWT. Las respuestas JSON usan el contrato `{ statusCode, data, detail, ok }`.
+All of them require JWT. JSON responses use the `{ statusCode, data, detail, ok }` contract.
 
-Swagger (`/docs`) documenta cada endpoint con `operationId`, Bearer JWT, roles, parámetros y restricciones tomados de los esquemas Zod, ejemplos de éxito con el envoltorio `{ statusCode, ok, detail, data }`, los errores que lanza el código y 401, 403 y 500 declarados de forma explícita. Los ejemplos viven en `constants/*-swagger.constants.ts` del módulo y el esquema de error compartido en `backend/src/common/constants/api-error-swagger.constants.ts`.
+Swagger (`/docs`) documents each endpoint with `operationId`, Bearer JWT, roles, parameters and constraints taken from the Zod schemas, success examples with the `{ statusCode, ok, detail, data }` envelope, the errors the code throws, and 401, 403 and 500 declared explicitly. The examples live in the module's `constants/*-swagger.constants.ts` and the shared error schema in `backend/src/common/constants/api-error-swagger.constants.ts`.
 
-### Servicios exportados
+### Exported services
 
-| Servicio | Consumidor | Uso |
+| Service | Consumer | Use |
 | --- | --- | --- |
-| `CareersService.listCareers(sortOrder)` | analytics | Columnas del mapa por carrera (`desc`) |
-| `SurveyEmploymentResponsesService.findEmploymentResponses({ careerId, from, to })` | analytics | Respuestas con situación laboral y rango salarial de titulados activos y aprobados |
+| `CareersService.listCareers(sortOrder)` | analytics | Columns of the map per career (`desc`) |
+| `SurveyEmploymentResponsesService.findEmploymentResponses({ careerId, from, to })` | analytics | Responses with employment status and salary range of active, approved graduates |
 
-### Consumidos
+### Consumed
 
-| Módulo | Servicio | Uso |
+| Module | Service | Use |
 | --- | --- | --- |
-| notifications | `NotificationsService.notify()` | Recordatorios y avisos de ciclo de vida |
-| users | `UsersService.findActiveContactsByRoles` | Usuarios activos por rol de la audiencia |
-| access-requests | `ApprovedGraduateCareersService.findApprovedUserIds` | Cohorte por carrera y año de egreso |
-| reports | `ReportHistoryService.registerGeneratedReport`, `getAcademicPeriod` | Historial del PDF y cálculo de semestre |
-| mail | `loadMailTemplate` | Lectura de las plantillas de `surveys/notification/mjml/` |
-| mail (vía notifications) | `MailService` | Envío del MJML de `surveys/notification/mjml/` |
+| notifications | `NotificationsService.notify()` | Reminders and lifecycle notices |
+| users | `UsersService.findActiveContactsByRoles` | Active users by audience role |
+| access-requests | `ApprovedGraduateCareersService.findApprovedUserIds` | Cohort by career and graduation year |
+| reports | `ReportHistoryService.registerGeneratedReport`, `getAcademicPeriod` | PDF history and semester calculation |
+| mail | `loadMailTemplate` | Reading the templates in `surveys/notification/mjml/` |
+| mail (via notifications) | `MailService` | Sending the MJML from `surveys/notification/mjml/` |
 
-## Dependencias
+## Dependencies
 
-| Dirección | Módulo | Uso |
+| Direction | Module | Use |
 | --- | --- | --- |
-| Usa | [notifications](../notifications/README.md) | Envío in-app, push y correo |
-| Usa | [mail](../mail/README.md) | `loadMailTemplate` para leer las plantillas `.mjml` del dominio |
-| Usa | [users](../users/README.md) | Contactos activos por rol |
-| Usa | [access-requests](../access-requests/README.md) | Titulados aprobados por carrera y gestión |
-| Usa | [reports](../reports/README.md) | Historial de reportes y semestres académicos |
-| Usado por | [analytics](../analytics/README.md) | Respuestas de empleabilidad y carreras |
-| Usado por (frontend) | heatmaps | `useCareers` para el filtro de carrera |
+| Uses | [notifications](../notifications/README.md) | In-app, push and email delivery |
+| Uses | [mail](../mail/README.md) | `loadMailTemplate` to read the domain's `.mjml` templates |
+| Uses | [users](../users/README.md) | Active contacts by role |
+| Uses | [access-requests](../access-requests/README.md) | Approved graduates by career and academic year |
+| Uses | [reports](../reports/README.md) | Report history and academic semesters |
+| Used by | [analytics](../analytics/README.md) | Employability responses and careers |
+| Used by (frontend) | heatmaps | `useCareers` for the career filter |
 
-## Datos
+## Data
 
-Tablas `surveys`, `survey_alert_configs`, `survey_questions`, `survey_question_options`, `survey_responses`, `survey_answers` y los catálogos `survey_statuses`, `survey_question_types`, `survey_target_audiences` (ver [backend/prisma/README.md](../../backend/prisma/README.md)). En el Sprint 3 `surveys` incorpora `closing_soon_notified_at`, `closed_notified_at` y `last_reminder_sent_at`, y se crea `survey_alert_configs` (1:0..1 con `surveys`, borrado en cascada).
+Tables `surveys`, `survey_alert_configs`, `survey_questions`, `survey_question_options`, `survey_responses`, `survey_answers` and the catalogs `survey_statuses`, `survey_question_types`, `survey_target_audiences` (see [backend/prisma/README.md](../../backend/prisma/README.md)). In Sprint 3 `surveys` adds `closing_soon_notified_at`, `closed_notified_at` and `last_reminder_sent_at`, and `survey_alert_configs` is created (1:0..1 with `surveys`, cascade delete).
 
 ## Frontend
 
-- `SurveyAnalyticsView` (`/backoffice/surveys/statistics/:id`) muestra `SurveyResponseRateCard`, el botón de recordatorio con su diálogo de confirmación y el botón "Alertas".
-- Query keys `SURVEYS_QUERY_KEYS.participation(id)` y `SURVEYS_QUERY_KEYS.alertConfig(id)`; enviar un recordatorio o guardar alertas invalida su clave.
-- `toSurveyAlertQuestions` nombra las preguntas `P1`, `P2`... según su posición; `formatReminderResult` arma el mensaje de entregados y fallidos.
+- `SurveyAnalyticsView` (`/backoffice/surveys/statistics/:id`) shows `SurveyResponseRateCard`, the reminder button with its confirmation dialog and the "Alertas" button.
+- Query keys `SURVEYS_QUERY_KEYS.participation(id)` and `SURVEYS_QUERY_KEYS.alertConfig(id)`; sending a reminder or saving alerts invalidates its key.
+- `toSurveyAlertQuestions` names the questions `P1`, `P2`... by position; `formatReminderResult` builds the delivered and failed message.
 
 ## Sprint History
 
 ### Sprint 3
 
-- Tasa de respuesta de la audiencia objetivo (`GET /surveys/:id/participation`) y tarjeta de participación con medidor uniforme y etiqueta de nivel bajo, medio o esperado.
-- Recordatorio manual por correo y push solo a quienes no respondieron (`POST /surveys/:id/reminders`), con registro de `last_reminder_sent_at` y resultado por canal.
-- Configuración de alertas de variación por encuesta (`SurveyAlertConfig`, `GET`/`PUT /surveys/:id/alert-config`) y evaluador de variación entre semestres.
-- Worker de ciclo de vida que avisa al creador del cierre próximo (72 h), del cierre y de las variaciones significativas.
-- Notificaciones de encuestas propias del dominio en `surveys/notification/`: payloads validados con Zod, renderizado de correos y plantillas como archivos `.mjml` en `surveys/notification/mjml/`, leídos con `loadMailTemplate` y copiados a `dist` durante el build.
-- El semestre de la alerta de variación se deriva de la fecha de cierre y no de la gestión de la cohorte.
-- Contratos Swagger completos de todos los endpoints de `SurveysController`.
-- `SurveyEmploymentResponsesService` y orden configurable en `CareersService` para alimentar los mapas de calor.
+- Response rate of the target audience (`GET /surveys/:id/participation`) and participation card with a uniform meter and a low, medium or expected level label.
+- Manual email and push reminder only to those who have not answered (`POST /surveys/:id/reminders`), recording `last_reminder_sent_at` and the result per channel.
+- Per-survey variation alert configuration (`SurveyAlertConfig`, `GET`/`PUT /surveys/:id/alert-config`) and evaluator of variation between semesters.
+- Lifecycle worker that notifies the creator of the upcoming closing (72 h), the closing and significant variations.
+- Domain-owned survey notifications in `surveys/notification/`: payloads validated with Zod, email rendering and templates as `.mjml` files in `surveys/notification/mjml/`, read with `loadMailTemplate` and copied to `dist` during the build.
+- The semester of the variation alert is derived from the closing date, not from the cohort year.
+- Complete Swagger contracts for all `SurveysController` endpoints.
+- `SurveyEmploymentResponsesService` and configurable sort order in `CareersService` to feed the heatmaps.

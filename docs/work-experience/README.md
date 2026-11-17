@@ -158,15 +158,15 @@ Table `work_experiences`, related to `users` and `companies` (see [backend/prism
 - **Collapsible only when it helps.** A company with a single position is not collapsible; groups start collapsed to keep long histories short.
 - **The save does not wait for the skills refresh**, so the guide can continue immediately.
 
-## Servicios de lectura para otros dominios
+## Read services for other domains
 
-El módulo `work-experience` gestiona las experiencias laborales del perfil de cada persona. `WorkExperienceSourcesModule` expone a otros dominios las lecturas de esas experiencias sin dar acceso directo a la tabla.
+The `work-experience` module manages the work experiences of each person's profile. `WorkExperienceSourcesModule` exposes reads of those experiences to other domains without giving direct access to the table.
 
-`WorkExperienceSourcesService` (exportado por `WorkExperienceSourcesModule`):
+`WorkExperienceSourcesService` (exported by `WorkExperienceSourcesModule`):
 
-| Método | Devuelve | Consumidor |
+| Method | Returns | Consumer |
 | --- | --- | --- |
-| `findPeriodsByUserIds(userIds)` | `WorkPeriodResponse[]` (`userId`, `startDate`, `endDate` nulo si sigue vigente). Con lista vacía no consulta la base | [analytics](../analytics/README.md) (años de experiencia en el mapa de habilidades vs. experiencia) |
+| `findPeriodsByUserIds(userIds)` | `WorkPeriodResponse[]` (`userId`, `startDate`, `endDate` null if still ongoing). With an empty list it does not query the database | [analytics](../analytics/README.md) (years of experience in the skills vs. experience map) |
 
 ```mermaid
 flowchart LR
@@ -181,31 +181,31 @@ sequenceDiagram
   participant S as WorkExperienceSourcesService
   participant R as WorkExperienceRepository
   AN->>S: findPeriodsByUserIds(userIds)
-  alt userIds vacío
+  alt userIds empty
     S-->>AN: []
   else
-    S->>R: workExperience.findMany(userId en userIds, WORK_PERIOD_SELECT)
+    S->>R: workExperience.findMany(userId in userIds, WORK_PERIOD_SELECT)
     R-->>S: { userId, startDate, endDate }[]
     S-->>AN: WorkPeriodResponse[]
   end
-  AN->>AN: computeExperienceYears (recorta a hoy, fusiona solapes, suma)
+  AN->>AN: computeExperienceYears (clips to today, merges overlaps, sums)
 ```
 
-### Reglas de la lectura
+### Read rules
 
-- Solo se exponen las fechas de inicio y fin de cada experiencia (`WORK_PERIOD_SELECT`); no se exponen empresa, cargo ni descripción.
-- El cálculo de años de experiencia es responsabilidad del consumidor.
-- Solo lectura; no tiene endpoint HTTP propio.
+- Only the start and end dates of each experience are exposed (`WORK_PERIOD_SELECT`); company, position and description are not exposed.
+- Computing the years of experience is the consumer's responsibility.
+- Read only; it has no HTTP endpoint of its own.
 
-### Dependencias de la lectura
+### Read dependencies
 
-| Dirección | Módulo | Uso |
+| Direction | Module | Use |
 | --- | --- | --- |
-| Usado por | [analytics](../analytics/README.md) | Periodos laborales por titulado |
+| Used by | [analytics](../analytics/README.md) | Work periods per graduate |
 
-### Integración con el frontend de la lectura
+### Read frontend integration
 
-El frontend no llama a este servicio; sus datos se ven en los mapas de calor del backoffice (`frontend/src/modules/heatmaps`, `/backoffice/reports/heatmaps/*`).
+The frontend does not call this service; its data is shown in the backoffice heatmaps (`frontend/src/modules/heatmaps`, `/backoffice/reports/heatmaps/*`).
 
 ## Sprint History
 
@@ -216,4 +216,4 @@ El frontend no llama a este servicio; sus datos se ven en los mapas de calor del
 - Live skill suggestions while typing the description, with debounce and stale-answer protection.
 - Skills of the profile refreshed after each change, including cleanup when an experience is deleted.
 - Skill chips of each experience in light blue.
-- `WorkExperienceSourcesService.findPeriodsByUserIds` y el contrato `WorkPeriodResponse` para los mapas de calor.
+- `WorkExperienceSourcesService.findPeriodsByUserIds` and the `WorkPeriodResponse` contract for the heatmaps.

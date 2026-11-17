@@ -1,15 +1,15 @@
-# Users (usuarios)
+# Users
 
-## Propósito
+## Purpose
 
-El módulo `users` es dueño de las cuentas de usuario y expone, mediante `UsersService`, las consultas que otros dominios necesitan sobre ellas. No tiene controlador HTTP propio.
+The `users` module owns the user accounts and exposes, through `UsersService`, the queries that other domains need about them. It has no HTTP controller of its own.
 
-## Servicios de lectura para otros dominios
+## Read services for other domains
 
-| Método | Devuelve | Consumidor |
+| Method | Returns | Consumer |
 | --- | --- | --- |
-| `findContactById(userId)` | `UserContact` (`id`, `email`, `firstName`, `lastName`) o `null` | [notifications](../notifications/README.md) (`NotificationUserLookupRepository.findContactByUserId`, nombre y correo del destinatario de un correo) |
-| `findActiveContactsByRoles({ roles, userIds? })` | `UserContact[]` de usuarios activos con alguno de esos roles vigentes, opcionalmente limitado a `userIds`, ordenados por id | [surveys](../surveys/README.md) (`SurveyAudienceService`, audiencia elegible) |
+| `findContactById(userId)` | `UserContact` (`id`, `email`, `firstName`, `lastName`) or `null` | [notifications](../notifications/README.md) (`NotificationUserLookupRepository.findContactByUserId`, name and email of an email recipient) |
+| `findActiveContactsByRoles({ roles, userIds? })` | `UserContact[]` of active users with any of those roles currently in effect, optionally limited to `userIds`, ordered by id | [surveys](../surveys/README.md) (`SurveyAudienceService`, eligible audience) |
 
 ```mermaid
 flowchart LR
@@ -25,64 +25,64 @@ sequenceDiagram
   participant US as UsersService
   participant UR as UsersRepository
   SA->>US: findActiveContactsByRoles({ roles, userIds })
-  alt roles vacío o userIds vacío
+  alt roles empty or userIds empty
     US-->>SA: []
   else
-    US->>UR: findMany(is_active, rol vigente en roles [, id en userIds])
-    UR-->>US: contactos
+    US->>UR: findMany(is_active, active role in roles [, id in userIds])
+    UR-->>US: contacts
     US-->>SA: UserContact[]
   end
 ```
 
-## Reglas de negocio
+## Business rules
 
-- Solo usuarios con `is_active = true` y una asignación de rol sin `deleted_at`.
-- `roles` vacío o `userIds` explícitamente vacío devuelve lista vacía sin consultar la base; `userIds` ausente no limita por id.
-- `USER_CONTACT_SELECT` limita los datos devueltos a id, correo y nombre.
+- Only users with `is_active = true` and a role assignment without `deleted_at`.
+- Empty `roles` or an explicitly empty `userIds` returns an empty list without querying the database; a missing `userIds` does not limit by id.
+- `USER_CONTACT_SELECT` limits the returned data to id, email and name.
 
-## Integración con el frontend
+## Frontend integration
 
-Sin consumo directo desde el frontend. Los contactos alimentan la cantidad de pendientes que muestra `SendSurveyReminderDialog` y el saludo con nombre de los correos de notificación.
+No direct consumption from the frontend. The contacts feed the pending count shown by `SendSurveyReminderDialog` and the greeting by name in notification emails.
 
-## Dependencias
+## Dependencies
 
-| Dirección | Módulo | Uso |
+| Direction | Module | Use |
 | --- | --- | --- |
-| Usado por | [surveys](../surveys/README.md) | Contactos activos por rol |
-| Usado por | [notifications](../notifications/README.md) | Correo y nombre del destinatario |
+| Used by | [surveys](../surveys/README.md) | Active contacts by role |
+| Used by | [notifications](../notifications/README.md) | Email and name of the recipient |
 
-## Datos
+## Data
 
-Tablas `users`, `user_roles` y `roles` (ver [backend/prisma/README.md](../../backend/prisma/README.md)).
+Tables `users`, `user_roles` and `roles` (see [backend/prisma/README.md](../../backend/prisma/README.md)).
 
 ## Sprint History
 
 ### Sprint 3
 
-#### Consulta de reclutadores activos por empresa
+#### Query of active recruiters by company
 
-Se incorporó `UsersService.findActiveRecruitersByCompany(companyId)` para
-consultar los reclutadores activos asociados a una empresa. El servicio delega
-la consulta a `UsersRepository.findActiveRecruitersByCompany(companyId)`.
+`UsersService.findActiveRecruitersByCompany(companyId)` was added to
+query the active recruiters associated with a company. The service delegates
+the query to `UsersRepository.findActiveRecruitersByCompany(companyId)`.
 
-La consulta aplica los siguientes criterios:
+The query applies the following criteria:
 
-- El usuario pertenece a la empresa indicada por `companyId`.
-- El usuario está activo (`isActive: true`).
-- El usuario tiene un rol de reclutador no eliminado (`deletedAt: null`).
-- La fecha de inicio del rol es anterior o igual a la fecha actual
+- The user belongs to the company given by `companyId`.
+- The user is active (`isActive: true`).
+- The user has a non-deleted recruiter role (`deletedAt: null`).
+- The role start date is earlier than or equal to the current date
   (`startAt <= new Date()`).
 
-Se devuelven únicamente `id`, `firstName` y `lastName`, ordenados de forma
-ascendente por nombre, apellido e identificador.
+Only `id`, `firstName` and `lastName` are returned, sorted in
+ascending order by first name, last name and identifier.
 
-**Integración con Postulaciones:** `ApplicationsService.getApplicationContact()`
-utiliza esta consulta para obtener los reclutadores de la empresa asociada
-a una postulación y construir la respuesta de contacto.
+**Integration with Applications:** `ApplicationsService.getApplicationContact()`
+uses this query to get the recruiters of the company associated
+with an application and build the contact response.
 
-Esta funcionalidad es una consulta interna entre servicios; no incorpora
-un endpoint HTTP nuevo en el módulo Users.
+This feature is an internal query between services; it does not add
+a new HTTP endpoint to the Users module.
 
-#### Consultas de contacto para notificaciones y encuestas
+#### Contact queries for notifications and surveys
 
-- `findContactById` y `findActiveContactsByRoles` con el tipo `UserContact` para los correos personalizados de notificaciones y la audiencia de encuestas.
+- `findContactById` and `findActiveContactsByRoles` with the `UserContact` type for the personalized notification emails and the survey audience.

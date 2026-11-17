@@ -1,26 +1,26 @@
-# Analytics (mapas de calor)
+# Analytics (heatmaps)
 
-## Propósito
+## Purpose
 
-El módulo `analytics` genera los mapas de calor de habilidades de los titulados para el personal administrativo. Cruza la última respuesta de cada titulado a la encuesta de empleabilidad con su carrera aprobada, sus habilidades y su experiencia laboral, y devuelve una matriz lista para pintar (filas = habilidades, columnas = carreras, rangos salariales, situaciones laborales o niveles de experiencia).
+The `analytics` module builds the graduate skill heatmaps for administrative staff. It crosses each graduate's latest response to the employability survey with their approved career, their skills and their work experience, and returns a matrix ready to render (rows = skills, columns = careers, salary ranges, employment statuses or experience levels).
 
-- Backend: `backend/src/modules/analytics` (controlador, servicios, constructores puros de cada mapa y semilla de datos ficticios).
-- Frontend: `frontend/src/modules/heatmaps` (vista común `HeatmapView`, filtros, matriz, leyenda, lectura rápida y exportación).
+- Backend: `backend/src/modules/analytics` (controller, services, pure builders for each map and a fake-data seed).
+- Frontend: `frontend/src/modules/heatmaps` (shared `HeatmapView`, filters, matrix, legend, quick read and export).
 
-El módulo no tiene tablas propias: solo lee datos de otros dominios a través de sus servicios públicos.
+The module has no tables of its own: it only reads data from other domains through their public services.
 
-## Funcionalidad
+## Functionality
 
-| Mapa | Tipo (`:type`) | Columnas | Ruta frontend |
+| Map | Type (`:type`) | Columns | Frontend route |
 | --- | --- | --- | --- |
-| Habilidades por carrera | `skills-by-career` | Carreras (Sistemas, Informática) | `/backoffice/reports/heatmaps/skills-by-career` |
-| Habilidades NLP vs. rango salarial | `skills-by-salary` | 5 rangos salariales mensuales | `/backoffice/reports/heatmaps/skills-by-salary` |
-| Empleabilidad y habilidades | `employability` | 4 situaciones laborales + total y retención laboral | `/backoffice/reports/heatmaps/employability` |
-| Habilidades vs. años de experiencia | `skills-by-experience` | Junior, Semi-Senior, Senior + total y mayor adopción | `/backoffice/reports/heatmaps/skills-by-experience` |
+| Skills by career | `skills-by-career` | Careers (Sistemas, Informática) | `/backoffice/reports/heatmaps/skills-by-career` |
+| NLP skills vs. salary range | `skills-by-salary` | 5 monthly salary ranges | `/backoffice/reports/heatmaps/skills-by-salary` |
+| Employability and skills | `employability` | 4 employment statuses + total and job retention | `/backoffice/reports/heatmaps/employability` |
+| Skills vs. years of experience | `skills-by-experience` | Junior, Semi-Senior, Senior + total and highest adoption | `/backoffice/reports/heatmaps/skills-by-experience` |
 
-`/backoffice/reports/heatmaps` redirige al mapa de habilidades por carrera. El menú lateral tiene la sección propia "Mapas de calor".
+`/backoffice/reports/heatmaps` redirects to the skills by career map. The sidebar has its own "Mapas de calor" section.
 
-## Arquitectura
+## Architecture
 
 ```mermaid
 flowchart LR
@@ -29,7 +29,7 @@ flowchart LR
     View --> Toolbar[HeatmapToolbar + HeatmapDateRangeDialog]
     View --> Matrix[HeatmapMatrix / HeatmapLegend / HeatmapQuickRead]
     View --> Hook[useHeatmap + useHeatmapFilters]
-    View --> Careers[useCareers de surveys]
+    View --> Careers[useCareers from surveys]
     Hook --> Svc[heatmapsService]
   end
   Svc -->|GET /analytics/heatmap/:type| Ctrl[HeatmapsController]
@@ -47,108 +47,108 @@ flowchart LR
   HG --> WE[work-experience: WorkExperienceSourcesService]
 ```
 
-## Flujos clave
+## Key flows
 
-### Consultar un mapa de calor
+### Query a heatmap
 
 ```mermaid
 sequenceDiagram
-  actor A as Administrativo
+  actor A as Administrative staff
   participant V as HeatmapView
   participant C as HeatmapsController
   participant S as HeatmapsService
   participant G as HeatmapGraduatesService
   participant D as surveys / access-requests / skills / work-experience
-  A->>V: Elige mapa y filtros (carrera, gestión, mes, rango semestral)
+  A->>V: Picks a map and filters (career, academic year, month, semester range)
   V->>C: GET /analytics/heatmap/:type?careerId&year&month&startTimestamp&endTimestamp
-  C->>C: Valida params y query con Zod (400 si no son válidos)
+  C->>C: Validates params and query with Zod (400 if invalid)
   C->>S: getHeatmap(type, query)
-  S->>S: Rango semestral o año -> { from, to } (400 INVALID_HEATMAP_RANGE si inicio > fin)
-  par Titulados y carreras
+  S->>S: Semester range or year -> { from, to } (400 INVALID_HEATMAP_RANGE if start > end)
+  par Graduates and careers
     S->>G: findGraduates(filter, now)
-    G->>D: Respuestas de empleabilidad del periodo
-    G->>G: Última respuesta por titulado
-    G->>D: Carrera aprobada, habilidades y periodos laborales por userId
+    G->>D: Employability responses in the period
+    G->>G: Latest response per graduate
+    G->>D: Approved career, skills and work periods by userId
     G-->>S: HeatmapGraduate[]
   and
-    S->>D: listCareers('desc') (solo skills-by-career)
+    S->>D: listCareers('desc') (skills-by-career only)
   end
-  S->>S: Filtra por mes (hora de Bolivia) y construye la matriz del tipo pedido
+  S->>S: Filters by month (Bolivia time) and builds the matrix for the requested type
   S-->>V: 200 { statusCode, data: HeatmapResponse, ok }
-  V->>V: Pinta la matriz, la base (n) y la lectura rápida
+  V->>V: Renders the matrix, the base (n) and the quick read
 ```
 
-### Exportar
+### Export
 
 ```mermaid
 sequenceDiagram
-  actor A as Administrativo
+  actor A as Administrative staff
   participant V as HeatmapView
-  A->>V: Exportar -> CSV
-  V->>V: heatmapToCsv(data) con BOM UTF-8
-  V-->>A: Descarga mapa-calor-TIPO.csv
-  A->>V: Exportar -> PDF
-  V-->>A: Aviso: exportación PDF aún no disponible
+  A->>V: Export -> CSV
+  V->>V: heatmapToCsv(data) with UTF-8 BOM
+  V-->>A: Downloads mapa-calor-TIPO.csv
+  A->>V: Export -> PDF
+  V-->>A: Notice: PDF export not yet available
 ```
 
-## Reglas de negocio
+## Business rules
 
-- **Acceso.** Solo el rol `administrativo` (`JwtAuthGuard` + `RolesGuard`).
-- **Población.** Se consideran respuestas a encuestas que contienen la pregunta de situación laboral (`EMPLOYMENT_STATUS_QUESTION`), de usuarios activos con solicitud de acceso aprobada. Con `careerId` solo entran titulados aprobados en esa carrera. De cada titulado se usa **solo su respuesta más reciente**.
-- **Periodo.** `startTimestamp` y `endTimestamp` (ISO 8601 con zona) deben enviarse juntos y tienen prioridad sobre `year`. `year` (2000–2100) se convierte al año calendario en hora de Bolivia. `month` (1–12) filtra después por el mes de respuesta en hora de Bolivia. Sin filtros se usan todas las respuestas.
-- **Filas.** Como máximo 10 habilidades (`MAX_HEATMAP_SKILL_ROWS`), las más frecuentes en la base; empate por nombre.
-- **Celdas.** `percentage = count / total` de la columna; una columna sin titulados produce celdas `isEmpty: true`.
-- **Por carrera.** Base: titulados con al menos una habilidad. Columnas = carreras ordenadas de forma descendente por título (o solo la carrera filtrada); porcentaje con un decimal. La lectura rápida menciona las 2 habilidades con mayor presencia por carrera.
-- **Por rango salarial.** Base: titulados con rango salarial respondido y al menos una habilidad de origen `nlp`. Solo se cuentan habilidades NLP. La lectura rápida usa el rango más alto con titulados.
-- **Empleabilidad.** Base: titulados con situación laboral reconocida. Cada fila reparte a quienes tienen la habilidad entre las 4 situaciones. "Retención laboral" = empleados en su área, en otra área o independientes. Filas ordenadas por retención y luego por cantidad de titulados.
-- **Experiencia.** Los periodos laborales se recortan a la fecha actual, se fusionan si se solapan y se suman (años con un decimal). Niveles: Junior ≤ 2 años, Semi-Senior > 2 y ≤ 5, Senior > 5. Base: titulados con al menos un periodo laboral. Columnas extra: total que la domina y nivel con mayor adopción.
-- **Textos.** Las etiquetas de opciones de la encuesta se mapean a ids estables (`EMPLOYMENT_STATUSES`, `SALARY_RANGES`); una etiqueta desconocida deja el dato en `null` y el titulado queda fuera de ese mapa.
-- **Frontend.** El filtro de mes solo aparece en el mapa de experiencia. El rango semestral se convierte a timestamps con desfase `-04:00`. La consulta mantiene los datos previos mientras recarga (`keepPreviousData`). Exportar se habilita solo cuando `baseCount > 0`.
+- **Access.** Only the `administrativo` role (`JwtAuthGuard` + `RolesGuard`).
+- **Population.** Includes responses to surveys that contain the employment status question (`EMPLOYMENT_STATUS_QUESTION`), from active users with an approved access request. With `careerId`, only graduates approved in that career are included. For each graduate, **only their most recent response** is used.
+- **Period.** `startTimestamp` and `endTimestamp` (ISO 8601 with time zone) must be sent together and take precedence over `year`. `year` (2000–2100) is converted to the calendar year in Bolivia time. `month` (1–12) then filters by the response month in Bolivia time. Without filters, all responses are used.
+- **Rows.** At most 10 skills (`MAX_HEATMAP_SKILL_ROWS`), the most frequent in the base; ties are broken by name.
+- **Cells.** `percentage = count / total` of the column; a column with no graduates produces `isEmpty: true` cells.
+- **By career.** Base: graduates with at least one skill. Columns = careers sorted in descending order by title (or only the filtered career); percentage with one decimal. The quick read mentions the 2 most present skills per career.
+- **By salary range.** Base: graduates who answered the salary range and have at least one skill with `nlp` origin. Only NLP skills are counted. The quick read uses the highest range with graduates.
+- **Employability.** Base: graduates with a recognized employment status. Each row splits those who have the skill across the 4 statuses. "Retención laboral" = employed in their field, in another field or self-employed. Rows are sorted by retention and then by number of graduates.
+- **Experience.** Work periods are clipped to the current date, merged when they overlap and summed (years with one decimal). Levels: Junior ≤ 2 years, Semi-Senior > 2 and ≤ 5, Senior > 5. Base: graduates with at least one work period. Extra columns: total that masters it and level with the highest adoption.
+- **Texts.** Survey option labels are mapped to stable ids (`EMPLOYMENT_STATUSES`, `SALARY_RANGES`); an unknown label sets the value to `null` and the graduate is left out of that map.
+- **Frontend.** The month filter only appears on the experience map. The semester range is converted to timestamps with a `-04:00` offset. The query keeps the previous data while reloading (`keepPreviousData`). Export is enabled only when `baseCount > 0`.
 
 ## Endpoints
 
-### Expuestos
+### Exposed
 
-| Método | Ruta | Roles | Query | Respuesta | Errores |
+| Method | Path | Roles | Query | Response | Errors |
 | --- | --- | --- | --- | --- | --- |
-| GET | `/analytics/heatmap/:type` | `administrativo` | `careerId` (uuid), `year`, `month`, `startTimestamp`, `endTimestamp` | 200 `HeatmapResponse` (`heatmapType`, `baseCount`, `baseLabel`, `columns`, `extraColumnsConfig?`, `rows`, `quickReadSummary?`) | 400 validación o `INVALID_HEATMAP_RANGE`, 401, 403, 500 |
+| GET | `/analytics/heatmap/:type` | `administrativo` | `careerId` (uuid), `year`, `month`, `startTimestamp`, `endTimestamp` | 200 `HeatmapResponse` (`heatmapType`, `baseCount`, `baseLabel`, `columns`, `extraColumnsConfig?`, `rows`, `quickReadSummary?`) | 400 validation or `INVALID_HEATMAP_RANGE`, 401, 403, 500 |
 
-Swagger (`/docs`) documenta cada endpoint con `operationId`, Bearer JWT, roles, parámetros y restricciones tomados de los esquemas Zod, ejemplos de éxito con el envoltorio `{ statusCode, ok, detail, data }`, los errores que lanza el código y 401, 403 y 500 declarados de forma explícita. Los ejemplos viven en `constants/*-swagger.constants.ts` del módulo y el esquema de error compartido en `backend/src/common/constants/api-error-swagger.constants.ts`.
+Swagger (`/docs`) documents each endpoint with `operationId`, Bearer JWT, roles, parameters and constraints taken from the Zod schemas, success examples with the `{ statusCode, ok, detail, data }` envelope, the errors thrown by the code, and 401, 403 and 500 declared explicitly. The examples live in the module's `constants/*-swagger.constants.ts` and the shared error schema in `backend/src/common/constants/api-error-swagger.constants.ts`.
 
-### Consumidos
+### Consumed
 
-| Módulo | Servicio / endpoint | Uso |
+| Module | Service / endpoint | Use |
 | --- | --- | --- |
-| surveys | `SurveyEmploymentResponsesService.findEmploymentResponses` | Situación laboral y rango salarial respondidos |
-| surveys | `CareersService.listCareers('desc')`, `GET /careers` (frontend) | Columnas y filtro de carrera |
-| access-requests | `ApprovedGraduateCareersService.findByUserIds` | Carrera aprobada de cada titulado |
-| skills | `SkillAnalysisService.findSkillSummariesByUserIds` | Habilidades y su origen (`nlp`, manual) |
-| work-experience | `WorkExperienceSourcesService.findPeriodsByUserIds` | Periodos laborales para calcular años de experiencia |
+| surveys | `SurveyEmploymentResponsesService.findEmploymentResponses` | Answered employment status and salary range |
+| surveys | `CareersService.listCareers('desc')`, `GET /careers` (frontend) | Columns and career filter |
+| access-requests | `ApprovedGraduateCareersService.findByUserIds` | Approved career of each graduate |
+| skills | `SkillAnalysisService.findSkillSummariesByUserIds` | Skills and their origin (`nlp`, manual) |
+| work-experience | `WorkExperienceSourcesService.findPeriodsByUserIds` | Work periods to calculate years of experience |
 
-## Dependencias
+## Dependencies
 
-| Dirección | Módulo | Uso |
+| Direction | Module | Use |
 | --- | --- | --- |
-| Usa | [surveys](../surveys/README.md) | Respuestas de empleabilidad y catálogo de carreras |
-| Usa | [access-requests](../access-requests/README.md) | Carrera aprobada por titulado |
-| Usa | [skills](../skills/README.md) | Resumen de habilidades por usuario (`SkillAnalysisModule`) |
-| Usa | [work-experience](../work-experience/README.md) | Periodos laborales (`WorkExperienceSourcesModule`) |
-| Usa (frontend) | surveys (`useCareers`), shared (`ExportFormatMenu`, `WorkspacePage`, `downloadFile`) | Filtros, menú de exportación y layout |
+| Uses | [surveys](../surveys/README.md) | Employability responses and career catalog |
+| Uses | [access-requests](../access-requests/README.md) | Approved career per graduate |
+| Uses | [skills](../skills/README.md) | Skill summary per user (`SkillAnalysisModule`) |
+| Uses | [work-experience](../work-experience/README.md) | Work periods (`WorkExperienceSourcesModule`) |
+| Uses (frontend) | surveys (`useCareers`), shared (`ExportFormatMenu`, `WorkspacePage`, `downloadFile`) | Filters, export menu and layout |
 
-## Datos
+## Data
 
-Sin tablas propias. Lee `survey_responses`, `survey_answers`, `access_requests`, `user_skills`, `skills` y `work_experiences` mediante los servicios anteriores (ver [backend/prisma/README.md](../../backend/prisma/README.md)).
+No tables of its own. Reads `survey_responses`, `survey_answers`, `access_requests`, `user_skills`, `skills` and `work_experiences` through the services above (see [backend/prisma/README.md](../../backend/prisma/README.md)).
 
-La etapa de fixtures `heatmap_graduates` (`seeds/heatmap-graduates-fixtures.seed.ts`) crea titulados ficticios, sus solicitudes aprobadas, habilidades, experiencias y una encuesta con las preguntas de situación laboral y rango salarial para poder ver los cuatro mapas en desarrollo.
+The `heatmap_graduates` fixtures stage (`seeds/heatmap-graduates-fixtures.seed.ts`) creates fake graduates, their approved requests, skills, experiences and a survey with the employment status and salary range questions so the four maps can be viewed in development.
 
 ## Sprint History
 
 ### Sprint 3
 
-- Endpoint `GET /analytics/heatmap/:type` con los cuatro mapas: habilidades por carrera, habilidades NLP vs. rango salarial, empleabilidad y habilidades, y habilidades vs. años de experiencia.
-- Filtros por carrera, gestión, mes y rango semestral, con validación del rango.
-- Lectura rápida generada en el backend y columnas extra (total, retención laboral, total que domina, mayor adopción).
-- Servicios de lectura expuestos por surveys, access-requests, skills y work-experience para alimentar los mapas sin acceder a sus tablas.
-- Frontend `heatmaps`: sección "Mapas de calor" en el backoffice, matriz con escala de color y leyenda, indicador de base, diálogo de rango semestral y exportación CSV.
-- Semilla de titulados ficticios para los mapas.
-- Contrato Swagger completo de `GET /analytics/heatmap/:type`.
+- `GET /analytics/heatmap/:type` endpoint with the four maps: skills by career, NLP skills vs. salary range, employability and skills, and skills vs. years of experience.
+- Filters by career, academic year, month and semester range, with range validation.
+- Quick read generated in the backend and extra columns (total, job retention, total that masters it, highest adoption).
+- Read services exposed by surveys, access-requests, skills and work-experience to feed the maps without accessing their tables.
+- `heatmaps` frontend: "Mapas de calor" section in the backoffice, matrix with color scale and legend, base indicator, semester range dialog and CSV export.
+- Fake graduate seed for the maps.
+- Full Swagger contract for `GET /analytics/heatmap/:type`.
