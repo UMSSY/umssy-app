@@ -542,4 +542,68 @@ describe("AppointmentsView", () => {
       ).toHaveLength(1);
     });
   });
+
+  describe("citas canceladas", () => {
+    it("muestra quién canceló y el motivo en la tarjeta y el detalle, y ofrece reservar otro horario", async () => {
+      const user = userEvent.setup();
+      const cancelled = makeAppointment({
+        status: "CANCELLED",
+        cancellation: {
+          cancelledBy: "MENTOR",
+          cancelledByMe: false,
+          reason: "Tuve una emergencia familiar",
+          cancelledAt: "2026-10-25T00:00:00.000Z",
+        },
+      });
+      vi.mocked(appointmentsApi.getMyAppointments).mockResolvedValue(makePage([cancelled]));
+      vi.spyOn(appointmentsApi, "getById").mockResolvedValue({ ...cancelled, meetingUrl: null });
+      vi.spyOn(appointmentsApi, "getCounterpartPhoto").mockResolvedValue(null);
+
+      renderWithQuery(<AppointmentsView />);
+
+      const card = await screen.findByRole("button", { name: /Ana Pérez/ });
+      expect(within(card).getByText("Cancelada por el mentor")).toBeInTheDocument();
+      expect(within(card).getByText("Tuve una emergencia familiar")).toBeInTheDocument();
+
+      await user.click(card);
+      const dialog = await screen.findByRole("dialog");
+
+      expect(await within(dialog).findByText("Cancelada por el mentor")).toBeInTheDocument();
+      expect(within(dialog).getByText("Motivo de la cancelación")).toBeInTheDocument();
+      expect(within(dialog).getByText("Tuve una emergencia familiar")).toBeInTheDocument();
+      expect(within(dialog).getByRole("link", { name: "Reservar otro horario" })).toHaveAttribute(
+        "href",
+        "/mentors/mentor-1",
+      );
+    });
+
+    it("cuando el titulado canceló sin motivo, indica que la canceló él y no ofrece reservar otro horario", async () => {
+      const user = userEvent.setup();
+      const cancelled = makeAppointment({
+        status: "CANCELLED",
+        cancellation: {
+          cancelledBy: "STUDENT",
+          cancelledByMe: true,
+          reason: null,
+          cancelledAt: "2026-10-25T00:00:00.000Z",
+        },
+      });
+      vi.mocked(appointmentsApi.getMyAppointments).mockResolvedValue(makePage([cancelled]));
+      vi.spyOn(appointmentsApi, "getById").mockResolvedValue({ ...cancelled, meetingUrl: null });
+      vi.spyOn(appointmentsApi, "getCounterpartPhoto").mockResolvedValue(null);
+
+      renderWithQuery(<AppointmentsView />);
+
+      const card = await screen.findByRole("button", { name: /Ana Pérez/ });
+      expect(within(card).getByText("Cancelada por ti")).toBeInTheDocument();
+      expect(card).toHaveTextContent(/Hora de Bolivia \(GMT-4\)$/);
+
+      await user.click(card);
+      const dialog = await screen.findByRole("dialog");
+
+      expect(await within(dialog).findByText("Cancelada por ti")).toBeInTheDocument();
+      expect(within(dialog).queryByText("Motivo de la cancelación")).not.toBeInTheDocument();
+      expect(within(dialog).queryByRole("link", { name: "Reservar otro horario" })).not.toBeInTheDocument();
+    });
+  });
 });
