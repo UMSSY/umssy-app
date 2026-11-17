@@ -14,13 +14,13 @@ import { ApplicationContactRestrictedException } from '../exceptions/application
 import type { ApplicationContactResponse } from '../types/application-contact-response.types.js';
 import { ApplicationMapper } from '../mappers/application.mapper.js';
 import { JobRecommendationsService } from '../../matching/services/job-recommendations.service.js';
-import { StateChangedDto } from '../notifications/state-changed.dto.js';
-import { toApplicationStatusCode } from '../notifications/state-changed.mapper.js';
+import { StateChangedDto } from '../notification/state-changed.dto.js';
+import { toApplicationStatusCode } from '../notification/state-changed.mapper.js';
 import {
   NOTIFY_TIMEOUT_MS,
   STATE_CHANGED_ACTION_PATH,
-} from '../notifications/state-changed.constants.js';
-import type { NotifyStateChangedParams } from '../notifications/notify-state-changed-params.types.js';
+} from '../notification/state-changed.constants.js';
+import type { NotifyStateChangedParams } from '../notification/notify-state-changed-params.types.js';
 import type { ApplicationDecisionContext } from '../types/application-decision-context.types.js';
 import { JobOffersService } from '../../job-offers/services/job-offers.service.js';
 import { NotificationsService } from '../../notifications/services/notifications.service.js';
