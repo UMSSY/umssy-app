@@ -8,3 +8,5 @@ export * from './session-expired.exception.js';
 export * from './session-revoked.exception.js';
 export * from './refresh-invalid.exception.js';
 export * from './password-changed.exception.js';
+export { PasswordReusedException } from './password-reused.exception.js';
+export { PasswordResetConflictException } from './password-reset-conflict.exception.js';

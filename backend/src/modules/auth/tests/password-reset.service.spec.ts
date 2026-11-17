@@ -1,3 +1,4 @@
+import type { PasswordHistoryService } from '../services/password-history.service.js';
 import { describe, expect, it, vi } from 'vitest';
 import * as bcrypt from 'bcrypt';
 import type { JwtService } from '@nestjs/jwt';
@@ -19,25 +20,31 @@ async function buildService() {
     updateUserPasswordAndInvalidateOtp: vi.fn(),
   };
   const refreshTokens = { revokeAllForUser: vi.fn() };
+  const history = {
+    validateNewPassword: vi.fn().mockResolvedValue('observed-hash'),
+  };
   return {
     repository,
     refreshTokens,
+    history,
     service: new AuthService(
       repository as unknown as AuthRepository,
       {} as JwtService,
       {} as MailService,
       refreshTokens as unknown as RefreshTokenService,
+      history as unknown as PasswordHistoryService,
     ),
   };
 }
 
 describe('Confirmación de recuperación y sesiones', () => {
   it('verificar el código no lo consume ni revoca las sesiones', async () => {
-    const { repository, refreshTokens, service } = await buildService();
+    const { repository, refreshTokens, history, service } = await buildService();
     await expect(
       service.verifyPasswordReset({ email: 'user@example.test', code: '123456' }),
     ).resolves.toMatchObject({ ok: true });
     expect(repository.updateUserPasswordAndInvalidateOtp).not.toHaveBeenCalled();
+    expect(history.validateNewPassword).not.toHaveBeenCalled();
     expect(refreshTokens.revokeAllForUser).not.toHaveBeenCalled();
   });
 

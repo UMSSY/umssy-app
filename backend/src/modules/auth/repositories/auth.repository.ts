@@ -1,11 +1,16 @@
 import { Injectable } from '@nestjs/common';
+import { PasswordHistoryRepository } from './password-history.repository.js';
+import { PasswordResetConflictException } from '../exceptions/password-reset-conflict.exception.js';
 import { MAX_OTP_ATTEMPTS } from '../constants/password-reset.constants.js';
 import { InvalidResetCodeException } from '../exceptions/invalid-reset-code.exception.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 
 @Injectable()
 export class AuthRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly passwordHistory: PasswordHistoryRepository,
+  ) {}
 
   async existsByEmail(email: string) {
     const user = await this.prisma.user.findFirst({
@@ -95,6 +100,7 @@ export class AuthRepository {
     userId: string,
     newPasswordHash: string,
     otpId: string,
+    expectedPasswordHash: string | null,
   ) {
     return this.prisma.$transaction(async (transaction) => {
       const now = new Date();
@@ -113,10 +119,24 @@ export class AuthRepository {
         throw new InvalidResetCodeException();
       }
 
-      return transaction.user.update({
-        where: { id: userId },
+      // El hash observado actúa como versión frente a cambios concurrentes.
+      const updated = await transaction.user.updateMany({
+        where: { id: userId, password: expectedPasswordHash },
         data: { password: newPasswordHash },
       });
-    });
+      if (updated.count !== 1) {
+        throw new PasswordResetConflictException();
+      }
+
+      if (expectedPasswordHash !== null) {
+        await this.passwordHistory.recordPreviousAndTrim(
+          transaction,
+          userId,
+          expectedPasswordHash,
+        );
+      }
+
+      return transaction.user.findUniqueOrThrow({ where: { id: userId } });
+    }, { isolationLevel: 'ReadCommitted' });
   }
 }
