@@ -4,11 +4,10 @@ target_branch="$2"
 
 GROUP='^(feature|fix|hotfix|refactor|docs|test)/grupo-[0-9]+-[a-z0-9]+(-[a-z0-9]+)*$'
 DEVOPS='^(chore|ci|feature|fix|hotfix|refactor|docs|test)/devops-[a-z0-9]+(-[a-z0-9]+)*$'
-EPIC='^epic/.+$' 
+EPIC='^epic/.+$'
 
 if [[ "$branch" == "develop" || "$branch" == "main" \
    || "$branch" =~ $GROUP || "$branch" =~ $DEVOPS || "$branch" =~ $EPIC ]]; then
-  
   if [[ "$target_branch" == "develop" ]]; then
     if [[ "$branch" =~ $GROUP ]]; then
       echo "ERROR: ACCESS DENIED (Architectural Standard)" >&2
@@ -17,7 +16,6 @@ if [[ "$branch" == "develop" || "$branch" == "main" \
       exit 1
     fi
   fi
-
   exit 0
 fi
 

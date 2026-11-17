@@ -8,4 +8,4 @@ backend/scripts/ @umssy/DevOps
 vitest.config.* @umssy/DevOps
 vitest.setup.* @umssy/DevOps
 eslint.config.* @umssy/DevOps
-/backend/prisma/ @umssy/Database
+/backend/prisma/ @umssy/DevOps

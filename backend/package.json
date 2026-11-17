@@ -10,6 +10,7 @@
   "scripts": {
     "prepare": "cd .. && husky",
     "build": "tsc -p tsconfig.build.json && node scripts/copy-mail-templates.ts",
+    "deploy": "nest deploy",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
