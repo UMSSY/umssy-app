@@ -6,10 +6,13 @@ import { LoaderCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { resolvePostLoginPath } from "@/modules/auth";
 import { ActivationCodeStep } from "../components/activation/activation-code-step";
 import { ActivationNotice } from "../components/activation/activation-notice";
 import { ActivationPasswordStep } from "../components/activation/activation-password-step";
+import { ActivationSuccessStep } from "../components/activation/activation-success-step";
+import { GoogleLinkedSuccessStep } from "../components/activation/google-linked-success-step";
+import { GoogleAccessDeniedStep } from "../components/activation/google-access-denied-step";
+import { googleAuthService } from "@/modules/auth/services/google-auth.service";
 import { PublicHeader } from "../components/request-steps/public-header";
 import { RequestStepsSidebar } from "../components/request-steps/request-steps-sidebar";
 import { AccessRequestProvider } from "../contexts/access-request-context";
@@ -53,19 +56,72 @@ function ActivationFlow({ email }: { email: string }) {
   const expiresIn = useCountdown(status?.expiresAt ?? null, offsetMs);
   const resendIn = useCountdown(status?.resendAvailableAt ?? null, offsetMs);
 
+  const [postActivationStep, setPostActivationStep] = useState<
+    "none" | "account_activated" | "google_linked" | "access_denied"
+  >("none");
+  const [linkedGoogleEmail, setLinkedGoogleEmail] = useState("");
+  const [isLinking, setIsLinking] = useState(false);
+
   async function handleActivate(password: string) {
     const session = await flow.activate(password);
-    if (session) router.push(resolvePostLoginPath(session.roles ?? session.roleTag, null));
+    if (session) {
+      setPostActivationStep("account_activated");
+    }
   }
 
-  if (flow.session) {
+  async function handleTriggerGoogleLink() {
+    setIsLinking(true);
+    try {
+      const googleProfile = await googleAuthService.promptSelectAccount();
+      if (!googleProfile?.email) return;
+
+      const result = await googleAuthService.linkGoogleAccount(email, googleProfile.email);
+      if (result.success) {
+        setLinkedGoogleEmail(googleProfile.email);
+        setPostActivationStep("google_linked");
+      } else {
+        setPostActivationStep("access_denied");
+      }
+    } catch {
+      // User closed Google prompt or cancelled
+    } finally {
+      setIsLinking(false);
+    }
+  }
+
+  function handleGoToLogin() {
+    router.push("/login");
+  }
+
+  // Post-activation / Active account screens
+  if (postActivationStep === "google_linked") {
     return (
-      <p role="status" className="flex items-center gap-2 text-base text-ink">
-        <LoaderCircle aria-hidden="true" className="size-4 animate-spin" />
-        Cuenta activada. Entrando a la comunidad...
-      </p>
+      <GoogleLinkedSuccessStep
+        googleEmail={linkedGoogleEmail}
+        onGoToLogin={handleGoToLogin}
+      />
     );
   }
+
+  if (postActivationStep === "access_denied") {
+    return (
+      <GoogleAccessDeniedStep
+        onRetryAnotherAccount={handleTriggerGoogleLink}
+        onGoToLogin={handleGoToLogin}
+      />
+    );
+  }
+
+  if (postActivationStep === "account_activated" || status?.state === "activated") {
+    return (
+      <ActivationSuccessStep
+        onLinkGoogle={handleTriggerGoogleLink}
+        onGoToLogin={handleGoToLogin}
+        isLinking={isLinking}
+      />
+    );
+  }
+
   if (busy === "loading") {
     return (
       <p role="status" className="flex items-center gap-2 text-base text-text-secondary">
@@ -83,9 +139,6 @@ function ActivationFlow({ email }: { email: string }) {
         onAction={() => void flow.refresh()}
       />
     );
-  }
-  if (status.state === "activated") {
-    return <ActivationNotice title="Tu cuenta ya está activa" message="Inicia sesión con tu correo y la contraseña que creaste." />;
   }
   if (status.state === "locked") {
     return (

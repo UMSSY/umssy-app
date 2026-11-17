@@ -45,11 +45,7 @@ function isTestEnvironment(): boolean {
     if (process.env.NODE_ENV === "test") return true;
   } catch {}
   try {
-    const meta = import.meta as unknown as { env?: { TEST?: boolean } };
-    if (meta.env?.TEST) return true;
-  } catch {}
-  try {
-    if (typeof globalThis !== "undefined" && "__vitest_worker__" in globalThis) return true;
+    if (typeof globalThis !== "undefined" && ("__vitest_worker__" in globalThis || "vitest" in globalThis)) return true;
   } catch {}
   return false;
 }
