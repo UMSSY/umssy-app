@@ -51,6 +51,22 @@ export class RadarIntegrationController {
     return this.svc.myRadar(user);
   }
   @documentRadarEndpoint({
+    operationId: 'getMyHistoricalRadar',
+    summary: 'Consultar publicacion historica',
+    description:
+      'Devuelve una instantanea del titular autenticado y su version anterior. Una instantanea ajena o inexistente devuelve 404.',
+    response: radarResponseSchema,
+    errors: [400, 404],
+    parameters: ['id'],
+  })
+  @Get('profile/me/radar/snapshots/:id')
+  historical(
+    @CurrentUserId() user: string,
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ) {
+    return this.svc.historicalRadar(user, id);
+  }
+  @documentRadarEndpoint({
     operationId: 'getMyRadarNotifications',
     summary: 'Consultar notificaciones del radar',
     description:

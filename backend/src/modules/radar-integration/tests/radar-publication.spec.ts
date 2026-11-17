@@ -1,3 +1,4 @@
+import type { NotificationsService } from '../../notifications/services/notifications.service.js';
 import { describe, expect, it, vi } from 'vitest';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { ProfileSkillsEvents } from '../../../common/profile-skills/profile-skills-events.service.js';
@@ -141,11 +142,15 @@ function setup() {
         db.certification.findMany(),
       ]),
   };
+  const notifications = {
+    notify: vi.fn().mockResolvedValue({ inAppCount: 1 }),
+  };
   const publication = new RadarPublicationService(
     new RadarPublicationRepository(db as unknown as PrismaService),
     new RadarPublicationMapper(),
     evidence as unknown as RadarPublicationEvidenceService,
     nlp as unknown as ProfileSkillsAnalysisService,
+    notifications as unknown as NotificationsService,
   );
   const service = new RadarIntegrationService(
     nlp as unknown as ProfileSkillsAnalysisService,
@@ -155,7 +160,7 @@ function setup() {
     {} as RadarReviewService,
     {} as RadarNotificationsService,
   );
-  return { service, db, state, rows, insertions, nlp, events };
+  return { service, db, state, rows, insertions, nlp, events, notifications };
 }
 
 describe('Radar publication consistency', () => {
@@ -168,19 +173,24 @@ describe('Radar publication consistency', () => {
     );
   });
 
-  it('creates a notification for a newly published snapshot', async () => {
-    const { service, db } = setup();
-
-    await service.recalculate(userId, null);
-
-    const notificationCalls = db.$executeRaw.mock.calls.filter(([strings]) =>
-      strings.join('').includes('INSERT INTO notifications'),
-    );
-
-    expect(notificationCalls).toHaveLength(1);
-    expect(notificationCalls[0][1]).toBe(userId);
-    expect(notificationCalls[0][2]).toBe(
-      'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+  it('notifies after commit and retains the snapshot when delivery fails', async () => {
+    const { service, db, notifications, insertions } = setup();
+    notifications.notify.mockImplementation(async () => {
+      expect(db.$transaction.mock.settledResults[0]?.type).toBe('fulfilled');
+      throw new Error('Delivery unavailable');
+    });
+    await expect(service.recalculate(userId, userId)).resolves.toMatchObject({
+      version: 4,
+    });
+    expect(insertions).toHaveLength(1);
+    expect(notifications.notify).toHaveBeenCalledWith(
+      expect.objectContaining({
+        recipientIds: [userId],
+        type: 'RADAR_PUBLISHED',
+        groupKey: 'radar:bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+        actionUrl:
+          '/profile/radar?snapshot=bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+      }),
     );
   });
 

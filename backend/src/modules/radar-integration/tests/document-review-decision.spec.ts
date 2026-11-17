@@ -1,3 +1,4 @@
+import type { DocumentReviewService } from '../services/document-review.service.js';
 import { createHash } from 'node:crypto';
 import type { TransactionService } from '../../../common/prisma/transaction.service.js';
 import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
@@ -42,6 +43,7 @@ function setup() {
     reviews as unknown as RadarReviewRepository,
     access as unknown as RadarAccessRepository,
     transactions as unknown as TransactionService,
+    { revise: vi.fn() } as unknown as DocumentReviewService,
   );
 
   return { service, documents, reviews, access };
@@ -268,7 +270,7 @@ describe('Decisiones administrativas de documentos CV', () => {
 
     await expect(
       service.decide(admin, documentId, operationId, 'approved'),
-    ).rejects.toThrow('La version ya tiene una decision o fue reemplazada.');
+    ).rejects.toMatchObject({ code: 'DOCUMENT_VERIFICATION_CONFLICT' });
 
     expect(access.recordAudit).not.toHaveBeenCalled();
     expect(reviews.saveReviewOperationResult).not.toHaveBeenCalled();

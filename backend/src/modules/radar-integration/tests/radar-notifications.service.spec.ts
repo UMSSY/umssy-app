@@ -1,3 +1,4 @@
+import type { NotificationsInboxService } from '../../notifications/services/notifications-inbox.service.js';
 import { describe, expect, it, vi } from 'vitest';
 import type { SnapshotRow } from '../types/snapshot-row.types.js';
 import type { RadarNotificationsRepository } from '../repositories/radar-notifications.repository.js';
@@ -49,21 +50,19 @@ function setup() {
   };
 
   const repository = {
-    list: vi.fn().mockResolvedValue([
-      {
-        id: notificationId,
-        snapshot_id: snapshot.id,
-        version: 2,
-        created_at: createdAt,
-        read_at: null,
-      },
-    ]),
     findSnapshot: vi.fn().mockResolvedValue([snapshot]),
     findPreviousSnapshot: vi.fn().mockResolvedValue([previousSnapshot]),
-    markAsRead: vi.fn().mockResolvedValue({
-      id: notificationId,
-      read_at: readAt,
-    }),
+  };
+  const inbox = {
+    findByType: vi.fn().mockResolvedValue([
+      {
+        id: notificationId,
+        groupKey: `radar:${snapshot.id}`,
+        createdAt,
+        readAt: null,
+      },
+    ]),
+    markAsRead: vi.fn().mockResolvedValue({ ok: true }),
   };
 
   const mapper = {
@@ -73,10 +72,12 @@ function setup() {
   const service = new RadarNotificationsService(
     repository as unknown as RadarNotificationsRepository,
     mapper as unknown as RadarPublicationMapper,
+    inbox as unknown as NotificationsInboxService,
   );
 
   return {
     repository,
+    inbox,
     mapper,
     service,
     snapshot,
@@ -90,7 +91,7 @@ function setup() {
 
 describe('RadarNotificationsService', () => {
   it('lists the owner notifications with the required message', async () => {
-    const { service, repository, createdAt } = setup();
+    const { service, inbox, createdAt } = setup();
 
     await expect(service.list(userId)).resolves.toEqual([
       {
@@ -102,26 +103,26 @@ describe('RadarNotificationsService', () => {
       },
     ]);
 
-    expect(repository.list).toHaveBeenCalledWith(userId);
+    expect(inbox.findByType).toHaveBeenCalledWith(userId, 'RADAR_PUBLISHED');
   });
 
   it('opens the exact historical snapshot and marks the notification as read', async () => {
     const {
       service,
       repository,
+      inbox,
       mapper,
       snapshot,
       previousSnapshot,
       historical,
       previousCreatedAt,
-      readAt,
     } = setup();
 
     await expect(service.open(userId, notificationId)).resolves.toEqual({
       notification: {
         id: notificationId,
         version: 2,
-        readAt,
+        readAt: expect.any(Date),
       },
       radar: {
         ...historical,
@@ -139,10 +140,7 @@ describe('RadarNotificationsService', () => {
       compare: true,
     });
 
-    expect(repository.findSnapshot).toHaveBeenCalledWith(
-      userId,
-      notificationId,
-    );
+    expect(repository.findSnapshot).toHaveBeenCalledWith(userId, snapshot.id);
     expect(repository.findPreviousSnapshot).toHaveBeenCalledWith(
       userId,
       snapshot.version,
@@ -151,14 +149,14 @@ describe('RadarNotificationsService', () => {
       snapshot,
       previousSnapshot,
     );
-    expect(repository.markAsRead).toHaveBeenCalledWith(userId, notificationId);
+    expect(inbox.markAsRead).toHaveBeenCalledWith(userId, notificationId);
     expect(mapper.snapshotResponse.mock.invocationCallOrder[0]).toBeLessThan(
-      repository.markAsRead.mock.invocationCallOrder[0],
+      inbox.markAsRead.mock.invocationCallOrder[0],
     );
   });
 
   it('does not mark a notification as read when it does not belong to the owner', async () => {
-    const { service, repository, mapper } = setup();
+    const { service, repository, inbox, mapper } = setup();
     repository.findSnapshot.mockResolvedValue([]);
 
     await expect(service.open(userId, notificationId)).rejects.toThrow(
@@ -167,11 +165,11 @@ describe('RadarNotificationsService', () => {
 
     expect(repository.findPreviousSnapshot).not.toHaveBeenCalled();
     expect(mapper.snapshotResponse).not.toHaveBeenCalled();
-    expect(repository.markAsRead).not.toHaveBeenCalled();
+    expect(inbox.markAsRead).not.toHaveBeenCalled();
   });
 
   it('does not mark the notification as read when loading the previous snapshot fails', async () => {
-    const { service, repository } = setup();
+    const { service, repository, inbox } = setup();
     repository.findPreviousSnapshot.mockRejectedValue(
       new Error('Previous snapshot unavailable'),
     );
@@ -180,7 +178,7 @@ describe('RadarNotificationsService', () => {
       'Previous snapshot unavailable',
     );
 
-    expect(repository.markAsRead).not.toHaveBeenCalled();
+    expect(inbox.markAsRead).not.toHaveBeenCalled();
   });
 
   it('does not enable comparison when there is no previous snapshot', async () => {
@@ -199,8 +197,10 @@ describe('RadarNotificationsService', () => {
   });
 
   it('does not return successfully when marking the notification as read fails', async () => {
-    const { service, repository } = setup();
-    repository.markAsRead.mockResolvedValue(null);
+    const { service, inbox } = setup();
+    inbox.markAsRead.mockRejectedValue(
+      new Error('Notificaci\u00f3n no encontrada.'),
+    );
 
     await expect(service.open(userId, notificationId)).rejects.toThrow(
       'Notificación no encontrada.',

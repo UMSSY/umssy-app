@@ -1,17 +1,14 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { isApiError } from '@/shared/services/api-client';
 import { radarIntegrationApi } from '../services/radar-integration.service';
+import { listRadarReviewOperations } from '../services/radar-review-idempotency';
 import {
-  clearRadarReviewOperationId,
-  getRadarReviewOperationId,
-  listRadarReviewOperations,
-} from '../services/radar-review-idempotency';
-import type {
-  RadarReviewDecision,
-  RadarReviewKind,
-} from '../services/radar-integration.service';
+  recoverRadarReviewOperation,
+  submitRadarReviewDecision,
+} from '../services/radar-review-operation.service';
+import type { RadarReviewKind } from '../types/radar-review-kind.types';
+import type { ReviewDecisionVariables } from '../types/review-decision-variables.types';
 
 export const radarQueryKeys = {
   all: ['radar-integration'] as const,
@@ -32,34 +29,12 @@ export function useRadarReviewOperationRecovery(kind: RadarReviewKind) {
 
       for (const operation of operations) {
         try {
-          const result =
-            operation.kind === 'cv'
-              ? await radarIntegrationApi.documentOperationStatus(
-                  operation.operationId,
-                )
-              : await radarIntegrationApi.operationStatus(
-                  operation.operationId,
-                );
-
-          if (
-            result.operationId !== operation.operationId ||
-            result.status !== 'completed' ||
-            result.kind !== operation.kind ||
-            result.targetId !== operation.targetId ||
-            result.decision !== operation.decision
-          )
-            continue;
-
-          await clearRadarReviewOperationId(
-            operation.kind,
-            operation.targetId,
-            operation.decision,
-            operation.operationId,
-          );
+          await recoverRadarReviewOperation({
+            ...operation,
+            id: operation.targetId,
+          });
           recovered++;
-        } catch {
-          // Se conserva la operación si aún no está confirmada o hay un error.
-        }
+        } catch {}
       }
 
       if (recovered > 0) {
@@ -113,75 +88,12 @@ export function useRadarNotificationMutations() {
   return { openNotification };
 }
 
-interface ReviewDecisionVariables {
-  kind: RadarReviewKind;
-  id: string;
-  decision: RadarReviewDecision;
-}
-
 export function useRadarReviewMutations() {
   const queryClient = useQueryClient();
 
   const decision = useMutation({
-    mutationFn: async ({
-      kind,
-      id,
-      decision: action,
-    }: ReviewDecisionVariables) => {
-      const operationId = await getRadarReviewOperationId(kind, id, action);
-
-      const validateResult = (
-        result: Awaited<ReturnType<typeof radarIntegrationApi.operationStatus>>,
-      ) => {
-        if (
-          result.operationId !== operationId ||
-          result.status !== 'completed' ||
-          result.kind !== kind ||
-          result.targetId !== id ||
-          result.decision !== action
-        ) {
-          throw new Error(
-            'El resultado recuperado no coincide con la operacion solicitada.',
-          );
-        }
-
-        return result;
-      };
-
-      try {
-        const saved =
-          kind === 'cv'
-            ? await radarIntegrationApi.documentOperationStatus(operationId)
-            : await radarIntegrationApi.operationStatus(operationId);
-        const validated = validateResult(saved);
-
-        await clearRadarReviewOperationId(kind, id, action, operationId);
-
-        return validated;
-      } catch (error: unknown) {
-        if (
-          error instanceof Error &&
-          error.message ===
-            'El resultado recuperado no coincide con la operacion solicitada.'
-        ) {
-          throw error;
-        }
-
-        if (!isApiError(error) || error.response?.status !== 404) {
-          throw error;
-        }
-      }
-
-      const result = validateResult(
-        kind === 'cv'
-          ? await radarIntegrationApi.documentDecision(id, operationId, action)
-          : await radarIntegrationApi.decision(kind, id, operationId, action),
-      );
-
-      await clearRadarReviewOperationId(kind, id, action, operationId);
-
-      return result;
-    },
+    mutationFn: (operation: ReviewDecisionVariables) =>
+      submitRadarReviewDecision(operation),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: radarQueryKeys.reviews(),

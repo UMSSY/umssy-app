@@ -4,17 +4,7 @@ import { PrismaService } from '../../../common/prisma/prisma.service.js';
 
 import type { CvReview } from '../types/cv-review.types.js';
 
-type ReviewOperationRecord = {
-  id: string;
-  admin_id: string;
-  flow: string;
-  kind: string;
-  target_id: string;
-  payload_hash: string;
-  response_data: unknown;
-  created_at: Date;
-};
-
+import type { ReviewOperationRecord } from '../types/review-operation-record.types.js';
 @Injectable()
 export class RadarReviewRepository {
   constructor(private readonly prisma: PrismaService) {}

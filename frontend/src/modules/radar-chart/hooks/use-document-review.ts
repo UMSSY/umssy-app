@@ -1,14 +1,8 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { isApiError } from '@/shared/services/api-client';
 import { useRadarReviewOperationRecovery } from '../hooks/use-radar-integration-queries';
-import { radarIntegrationApi } from '../services/radar-integration.service';
-import type { RadarReviewOperationResult } from '../services/radar-integration.service';
-import {
-  clearRadarReviewOperationId,
-  getRadarReviewOperationId,
-} from '../services/radar-review-idempotency';
+import { submitRadarReviewDecision } from '../services/radar-review-operation.service';
 
 import { verificationApi, type DocumentVerification } from '@/modules/cv';
 import type { DocumentReviewConfirmation } from '../types/document-review-confirmation.types';
@@ -39,39 +33,7 @@ export function useDocumentReview() {
         return verificationApi.decide(id, decision);
       }
 
-      const operationId = await getRadarReviewOperationId('cv', id, decision);
-
-      let result: RadarReviewOperationResult;
-
-      try {
-        result = await radarIntegrationApi.documentOperationStatus(operationId);
-      } catch (error: unknown) {
-        if (!isApiError(error) || error.response?.status !== 404) {
-          throw error;
-        }
-
-        result = await radarIntegrationApi.documentDecision(
-          id,
-          operationId,
-          decision,
-        );
-      }
-
-      if (
-        result.operationId !== operationId ||
-        result.status !== 'completed' ||
-        result.kind !== 'cv' ||
-        result.targetId !== id ||
-        result.decision !== decision
-      ) {
-        throw new Error(
-          'El resultado recuperado no coincide con la decisión solicitada.',
-        );
-      }
-
-      await clearRadarReviewOperationId('cv', id, decision, operationId);
-
-      return result;
+      return submitRadarReviewDecision({ kind: 'cv', id, decision });
     },
     onSuccess: () => {
       setConfirmation(null);

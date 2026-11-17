@@ -7,13 +7,9 @@ import {
   updateIndexedDb,
 } from '@/shared/services/storage/browser-indexed-db';
 
-type ReviewKind = 'cv' | 'skill';
-type ReviewDecision = 'approved' | 'rejected' | 'revoked';
-
-interface PendingReviewOperation {
-  fingerprint: string;
-  operationId: string;
-}
+import type { RadarReviewKind as ReviewKind } from '../types/radar-review-kind.types';
+import type { RadarReviewDecision as ReviewDecision } from '../types/radar-review-decision.types';
+import type { PendingReviewOperation } from '../types/pending-review-operation.types';
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;

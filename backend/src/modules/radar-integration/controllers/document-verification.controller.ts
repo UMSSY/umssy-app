@@ -8,7 +8,6 @@ import {
   radarReviewOperationResponseSchema,
 } from '../responses/radar-api.response.js';
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
@@ -26,7 +25,7 @@ import { RolesGuard } from '../../../common/guards/roles.guard.js';
 import { RequestValidationPipe } from '../../../common/pipes/request-validation.pipe.js';
 import { DocumentReviewDecisionService } from '../services/document-review-decision.service.js';
 import { DocumentReviewService } from '../services/document-review.service.js';
-import { documentReviewDecisionSchema } from '../requests/radar-review.request.js';
+import type { DocumentDecisionRequest } from '../types/document-decision-request.types.js';
 import {
   documentDecisionSchema,
   documentAcknowledgementSchema,
@@ -170,33 +169,10 @@ export class DocumentVerificationController {
   async decide(
     @CurrentUserId() admin: string,
     @Param('id', ParseUUIDPipe) id: string,
-    @Body() body: unknown,
+    @Body(new RequestValidationPipe(documentDecisionSchema))
+    body: DocumentDecisionRequest,
   ) {
-    const payload =
-      typeof body === 'object' && body !== null
-        ? (body as Record<string, unknown>)
-        : {};
-    const decision = payload.decision;
-
-    if (decision === 'reprocess' || decision === 'revoke') {
-      const parsed = documentDecisionSchema.safeParse(body);
-      if (!parsed.success) {
-        throw new BadRequestException('Decisión inválida.');
-      }
-      return this.service.revise(admin, id, decision);
-    }
-
-    const parsed = documentReviewDecisionSchema.safeParse(body);
-    if (!parsed.success) {
-      throw new BadRequestException('Decision u operationId invalido.');
-    }
-
-    return this.decisionService.decide(
-      admin,
-      id,
-      parsed.data.operationId,
-      parsed.data.decision,
-    );
+    return this.decisionService.resolve(admin, id, body);
   }
 
   private async file(id: string, owner?: string) {

@@ -1,4 +1,5 @@
 import '@/shared/testing/indexed-db.mock';
+import { radarIntegrationApi } from '../services/radar-integration.service';
 import { saveAccessToken } from '@/shared/services/storage/access-token-storage';
 import { cloneElement, type ReactElement } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -27,6 +28,7 @@ function renderWithQuery(ui: ReactElement) {
 
 vi.mock('next/navigation', () => ({
   usePathname: () => '/profile/radar',
+  useSearchParams: () => new URLSearchParams(window.location.search),
   useRouter: () => ({ replace: vi.fn() }),
 }));
 vi.mock('@/modules/auth', async (importOriginal) => {
@@ -45,16 +47,6 @@ vi.mock('@/modules/mentorship/services/mentor-directory.service', () => ({
   }),
 }));
 vi.mock('../hooks/use-live-radar', () => ({ useLiveRadar: vi.fn() }));
-const { useRadarNotificationsMock, useRadarNotificationMutationsMock } =
-  vi.hoisted(() => ({
-    useRadarNotificationsMock: vi.fn(),
-    useRadarNotificationMutationsMock: vi.fn(),
-  }));
-
-vi.mock('../hooks/use-radar-integration-queries', () => ({
-  useRadarNotifications: useRadarNotificationsMock,
-  useRadarNotificationMutations: useRadarNotificationMutationsMock,
-}));
 vi.mock('recharts', async (importOriginal) => {
   const originalModule = await importOriginal<typeof import('recharts')>();
   return {
@@ -119,18 +111,7 @@ describe('Radar personal integrado con Épica 2', () => {
   beforeEach(() => {
     stubMatchMedia();
     setRadar();
-    useRadarNotificationsMock.mockReturnValue({
-      data: [],
-      isLoading: false,
-      isError: false,
-    });
-    useRadarNotificationMutationsMock.mockReturnValue({
-      openNotification: {
-        mutateAsync: vi.fn(),
-        isPending: false,
-        isError: false,
-      },
-    });
+    window.history.replaceState(null, '', '/profile/radar');
   });
   afterEach(() => {
     cleanup();
@@ -368,42 +349,12 @@ describe('Radar personal integrado con Épica 2', () => {
       </AppLayout>,
     );
     expect(
-      screen.getAllByRole('navigation', { name: 'Menú principal' }),
+      await screen.findAllByRole('navigation', { name: 'Menú principal' }),
     ).toHaveLength(1);
   });
 
-  it('muestra las notificaciones de nuevas publicaciones del radar', () => {
-    useRadarNotificationsMock.mockReturnValue({
-      data: [
-        {
-          id: 'notification-1',
-          message: 'Tu radar se ha actualizado',
-          version: 2,
-          createdAt: '2026-11-14T18:00:00Z',
-          readAt: null,
-        },
-      ],
-      isLoading: false,
-      isError: false,
-    });
-
-    renderWithQuery(<RadarProfileView />);
-
-    expect(
-      screen.getByRole('region', { name: 'Notificaciones del radar' }),
-    ).toBeInTheDocument();
-
-    expect(screen.getByText('Tu radar se ha actualizado')).toBeInTheDocument();
-
-    expect(screen.getByText(/Versión\s*2/)).toBeInTheDocument();
-    expect(screen.getByText('Sin leer')).toBeInTheDocument();
-    expect(
-      screen.getByRole('button', { name: 'Abrir radar' }),
-    ).toBeInTheDocument();
-  });
-
-  it('abre el radar al seleccionar una notificación', async () => {
-    const openNotification = vi.fn().mockResolvedValue({
+  it('consulta la publicacion enlazada desde la bandeja central', async () => {
+    const historical = {
       compare: true,
       radar: {
         userId: 'person-1',
@@ -442,44 +393,19 @@ describe('Radar personal integrado con Épica 2', () => {
         },
         skills: [],
       },
-      notification: {
-        id: 'notification-1',
-        version: 2,
-        readAt: '2026-11-14T18:00:00Z',
-      },
-    });
-
-    useRadarNotificationsMock.mockReturnValue({
-      data: [
-        {
-          id: 'notification-1',
-          message: 'Tu radar se ha actualizado',
-          version: 2,
-          createdAt: '2026-11-14T18:00:00Z',
-          readAt: null,
-        },
-      ],
-      isLoading: false,
-      isError: false,
-    });
-
-    useRadarNotificationMutationsMock.mockReturnValue({
-      openNotification: {
-        mutateAsync: openNotification,
-        isPending: false,
-        isError: false,
-      },
-    });
+    };
+    vi.spyOn(radarIntegrationApi, 'historical').mockResolvedValue(
+      historical.radar,
+    );
+    window.history.replaceState(null, '', '/profile/radar?snapshot=snapshot-2');
 
     renderWithQuery(<RadarProfileView />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Abrir radar' }));
-
-    expect(openNotification).toHaveBeenCalledWith('notification-1');
     expect(
       await screen.findByText('Consultando la versión histórica 2'),
     ).toBeInTheDocument();
 
+    expect(radarIntegrationApi.historical).toHaveBeenCalledWith('snapshot-2');
     expect(screen.getByText('7 / 10')).toBeInTheDocument();
 
     fireEvent.click(
