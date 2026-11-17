@@ -12,11 +12,17 @@ import {
   SurveyNotPublishedException,
   SurveyTitleAlreadyExistsException,
 } from '../exceptions/index.js';
+import {
+  toSurveyAlertConfigResponse,
+  toSurveyAlertConfigSavedResponse,
+} from '../mappers/survey-alert-config.mapper.js';
 import { SurveyMapper } from '../mappers/survey.mapper.js';
 import { CareersRepository } from '../repositories/careers.repository.js';
 import { SurveysRepository } from '../repositories/surveys.repository.js';
 import type { CreateSurveyRequest } from '../requests/create-survey.schema.js';
 import type { SubmitSurveyResponseRequest } from '../requests/submit-survey-response.schema.js';
+import type { SurveyAlertConfigResponse } from '../responses/survey-alert-config.response.js';
+import type { SurveyAlertConfigSavedResponse } from '../responses/survey-alert-config-saved.response.js';
 import type { SurveyCreatedResponse } from '../responses/survey-created.response.js';
 import type { SurveyDetailResponse } from '../responses/survey-detail.response.js';
 import type { SurveyNotificationResponse } from '../responses/survey-notification.response.js';
@@ -26,7 +32,9 @@ import {
   getSemesterRange,
 } from '../utils/academic-semester.js';
 import type { SurveySummaryResponse } from '../responses/survey-summary.response.js';
+import { SURVEY_ALERT_CONFIG_DEFAULTS } from '../constants/survey-alert-config.constants.js';
 import { SURVEYS_ROLE } from '../constants/surveys-access.constants.js';
+import type { SurveyAlertConfigDto } from '../types/survey-alert-config-dto.type.js';
 import type { UpdateSurveyData } from '../types/create-survey-data.type.js';
 import type { PreviousStatistics } from '../types/survey-statistics.type.js';
 import { SurveyQuestionType, SurveyStatus } from '../types/survey.enum.js';
@@ -35,7 +43,6 @@ import {
   isSurveyForGraduate,
 } from '../utils/is-survey-for-graduate.js';
 import { getScheduleError } from '../utils/survey-schedule.js';
-import type { SurveyAlertConfigDto } from '../requests/survey-alert-config.schema.js';
 
 import { ReportHistoryService } from '../../reports/services/report-history.service.js';
 import { SurveyPdfService } from './survey-pdf.service.js';
@@ -254,50 +261,27 @@ export class SurveysService {
     return { success: true, message: 'Respuestas guardadas con éxito' };
   }
 
-  async getAlertConfig(surveyId: string): Promise<{
-    enabled: boolean;
-    threshold: number;
-    questionIds: string[] | null;
-  }> {
-    const config = await this.surveysRepository.findAlertConfig(surveyId);
-    if (!config) {
-      return {
-        enabled: true,
-        threshold: 10,
-        questionIds: null,
-      };
-    }
-    return {
-      enabled: config.isEnabled,
-      threshold: config.threshold,
-      questionIds: (config.questionIds as string[] | null) ?? null,
-    };
+  async getAlertConfig(surveyId: string): Promise<SurveyAlertConfigResponse> {
+    return toSurveyAlertConfigResponse(
+      await this.surveysRepository.findAlertConfig(surveyId),
+    );
   }
 
   async saveAlertConfig(
     surveyId: string,
     dto: SurveyAlertConfigDto,
-  ): Promise<{
-    saved: boolean;
-    enabled: boolean;
-    threshold: number;
-    questionIds: string[] | null;
-  }> {
+  ): Promise<SurveyAlertConfigSavedResponse> {
     const survey = await this.surveysRepository.findStatus(surveyId);
     if (!survey) throw new SurveyNotFoundException();
 
-    const isEnabled = dto.enabled ?? dto.isEnabled ?? true;
+    const isEnabled =
+      dto.enabled ?? dto.isEnabled ?? SURVEY_ALERT_CONFIG_DEFAULTS.enabled;
     const config = await this.surveysRepository.upsertAlertConfig(surveyId, {
       isEnabled,
       threshold: dto.threshold,
       questionIds: dto.questionIds ?? null,
     });
-    return {
-      saved: true,
-      enabled: config.isEnabled,
-      threshold: config.threshold,
-      questionIds: (config.questionIds as string[] | null) ?? null,
-    };
+    return toSurveyAlertConfigSavedResponse(config);
   }
 
   private async ensureSurveyIsValid(

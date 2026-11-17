@@ -41,20 +41,16 @@ import {
   submitSurveyResponseSchema,
   type SubmitSurveyResponseRequest,
 } from '../requests/submit-survey-response.schema.js';
-import {
-  surveyAlertConfigSchema,
-  type SurveyAlertConfigDto,
-} from '../requests/survey-alert-config.schema.js';
-import {
-  sendSurveyReminderSchema,
-  type SendSurveyReminderRequest,
-} from '../requests/send-survey-reminder.schema.js';
+import { surveyAlertConfigSchema } from '../requests/survey-alert-config.schema.js';
+import { sendSurveyReminderSchema } from '../requests/send-survey-reminder.schema.js';
 import { surveyIdSchema } from '../requests/survey-id.schema.js';
 import {
   surveyStatisticsQuerySchema,
   type SurveyStatisticsQuery,
 } from '../requests/survey-statistics-query.schema.js';
 
+import type { SurveyAlertConfigResponse } from '../responses/survey-alert-config.response.js';
+import type { SurveyAlertConfigSavedResponse } from '../responses/survey-alert-config-saved.response.js';
 import type { SurveyCreatedResponse } from '../responses/survey-created.response.js';
 import type { SurveyDetailResponse } from '../responses/survey-detail.response.js';
 import type { SurveyParticipationResponse } from '../responses/survey-participation.response.js';
@@ -63,6 +59,8 @@ import type { SurveyStatisticsResponse } from '../responses/survey-statistics.re
 import type { SurveySummaryResponse } from '../responses/survey-summary.response.js';
 import { SurveyParticipationService } from '../services/survey-participation.service.js';
 import { SurveysService } from '../services/surveys.service.js';
+import type { SendSurveyReminderRequest } from '../types/send-survey-reminder-request.type.js';
+import type { SurveyAlertConfigDto } from '../types/survey-alert-config-dto.type.js';
 
 @ApiTags('Encuestas')
 @Controller('surveys')
@@ -210,7 +208,7 @@ export class SurveysController {
   @ApiOkResponse({ description: 'Configuración de alertas' })
   getAlertConfig(
     @Param('id', new ZodValidationPipe(surveyIdSchema)) id: string,
-  ) {
+  ): Promise<SurveyAlertConfigResponse> {
     return this.surveysService.getAlertConfig(id);
   }
 
@@ -224,7 +222,7 @@ export class SurveysController {
     @Param('id', new ZodValidationPipe(surveyIdSchema)) id: string,
     @Body(new ZodValidationPipe(surveyAlertConfigSchema))
     request: SurveyAlertConfigDto,
-  ) {
+  ): Promise<SurveyAlertConfigSavedResponse> {
     return this.surveysService.saveAlertConfig(id, request);
   }
 
