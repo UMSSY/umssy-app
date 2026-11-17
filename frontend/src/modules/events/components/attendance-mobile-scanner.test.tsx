@@ -115,7 +115,7 @@ describe('entrada de asistencia', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Simular lectura QR' }));
     await waitFor(() =>
       expect(screen.getByRole('dialog')).toHaveTextContent(
-        'La inscripción fue cancelada',
+        'Pase inválido - Inscripción cancelada',
       ),
     );
     expect(screen.getByRole('dialog')).not.toHaveTextContent(QR);

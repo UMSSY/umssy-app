@@ -25,7 +25,7 @@ export function AttendanceResultPanel({ state, onDismiss }: AttendanceResultPane
 
   const content = {
     verifying: { title: 'Verificando entrada...', description: 'Validando el pase y registrando la asistencia.', icon: LoaderCircle, color: 'text-accent' },
-    registered: { title: 'Asistencia registrada', description: 'La entrada del participante fue registrada correctamente.', icon: Check, color: 'text-success' },
+    registered: { title: 'Asistencia registrada', description: 'Pase válido. La entrada del participante fue registrada correctamente.', icon: Check, color: 'text-success' },
     duplicate: { title: 'Asistencia ya registrada', description: 'Este pase ya tiene una asistencia registrada.', icon: AlertCircle, color: 'text-accent' },
     invalid: { title: 'Pase inválido', description: state.kind === 'invalid' ? state.message ?? 'No se pudo validar este pase. Verifica que corresponda al taller y que la inscripción esté vigente.' : '', icon: CircleX, color: 'text-danger' },
     error: { title: 'No se pudo verificar la entrada', description: state.kind === 'error' ? state.message ?? 'Revisa la conexión e inténtalo de nuevo.' : '', icon: AlertCircle, color: 'text-danger' },
