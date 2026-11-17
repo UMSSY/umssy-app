@@ -26,6 +26,7 @@ import { BlockedDatesService } from '../../availability/services/blocked-dates.s
 import type { AvailabilityBlockResponse } from '../../availability/types/availability-block-response.types.js';
 import { MentorsService } from '../../mentors/services/mentors.service.js';
 import { AppointmentsModule } from '../appointments.module.js';
+import { PushDispatcherService } from '../../notifications/services/push-dispatcher.service.js';
 import { APPOINTMENT_ERROR_CODES } from '../constants/appointment-error-codes.constants.js';
 import {
   CANCELLATION_REASON_MAX_LENGTH,
@@ -123,6 +124,8 @@ describe('PATCH /appointments/:id/cancel (integración HTTP)', () => {
       })
       .overrideProvider(PrismaService)
       .useValue({})
+      .overrideProvider(PushDispatcherService)
+      .useValue({ dispatchToUsers: vi.fn() })
       .compile();
 
     app = moduleRef.createNestApplication();
