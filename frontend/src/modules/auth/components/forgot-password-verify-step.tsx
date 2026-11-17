@@ -1,4 +1,5 @@
-import type { FormEvent } from "react";
+import type { ForgotPasswordVerifyStepProps } from "../types/forgot-password-step.types";
+import { CredentialRestrictionNotice } from "./credential-restriction-notice";
 import Link from "next/link";
 import { LoaderCircle } from "lucide-react";
 import { BrandLogo } from "@/shared/components/layout/brand-logo";
@@ -6,23 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { OtpInput } from "@/shared/components/otp-input";
 
-interface ForgotPasswordVerifyStepProps {
-  email: string;
-  maskedEmail: string;
-  otpCode: string;
-  setOtpCode: (code: string) => void;
-  otpError: string;
-  setOtpError: (error: string) => void;
-  countdown: number;
-  formattedCountdown: string;
-  resendCooldown: number;
-  formattedCooldown: string;
-  isResent: boolean;
-  isPending: boolean;
-  isResending: boolean;
-  onSubmit: (e: FormEvent) => void;
-  onResend: () => void;
-}
 
 export function ForgotPasswordVerifyStep({
   maskedEmail,
@@ -39,6 +23,9 @@ export function ForgotPasswordVerifyStep({
   isResending,
   onSubmit,
   onResend,
+  verificationRestriction,
+  requestRestriction,
+  resendError,
 }: ForgotPasswordVerifyStepProps) {
   return (
     <div>
@@ -65,8 +52,8 @@ export function ForgotPasswordVerifyStep({
               setOtpCode(val);
               if (otpError) setOtpError("");
             }}
-            disabled={isPending}
-            invalid={Boolean(otpError)}
+            disabled={isPending || isResending || Boolean(verificationRestriction)}
+            invalid={Boolean(otpError || verificationRestriction)}
           />
         </div>
 
@@ -80,6 +67,8 @@ export function ForgotPasswordVerifyStep({
           </p>
         )}
 
+        <CredentialRestrictionNotice restriction={verificationRestriction} />
+
         {otpError ? (
           <p role="alert" className="mt-2 text-[13px] font-medium text-danger">
             {otpError}
@@ -89,7 +78,7 @@ export function ForgotPasswordVerifyStep({
         <Button
           type="submit"
           variant="institutional"
-          disabled={isPending || isResending || otpCode.length !== 6 || countdown === 0}
+          disabled={isPending || isResending || Boolean(verificationRestriction) || otpCode.length !== 6 || countdown === 0}
           className="mt-6 h-12 w-full text-base font-extrabold tracking-wide uppercase institutional-button"
         >
           {isPending ? <LoaderCircle aria-hidden="true" className="size-4 animate-spin" /> : null}
@@ -97,6 +86,8 @@ export function ForgotPasswordVerifyStep({
         </Button>
 
         <div className="mt-6 text-center">
+          {requestRestriction?.code !== "PASSWORD_RESET_COOLDOWN" ? <CredentialRestrictionNotice restriction={requestRestriction} /> : null}
+          {resendError ? <p role="alert" className="mb-2 text-sm font-medium text-danger">{resendError}</p> : null}
           <Button
             type="button"
             variant="link"
@@ -125,4 +116,3 @@ export function ForgotPasswordVerifyStep({
     </div>
   );
 }
-
