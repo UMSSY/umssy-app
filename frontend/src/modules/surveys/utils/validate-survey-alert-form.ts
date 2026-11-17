@@ -1,5 +1,6 @@
 import { SURVEY_ALERT_THRESHOLD_MAX, SURVEY_ALERT_THRESHOLD_MIN, SURVEY_ALERTS_TEXT } from "../constants/survey-participation.constants";
-import type { SurveyAlertFormErrors, SurveyAlertFormValues } from "../types/survey-alert-form-errors.types";
+import type { SurveyAlertFormErrors } from "../types/survey-alert-form-errors.types";
+import type { SurveyAlertFormValues } from "../types/survey-alert-form-values.types";
 
 export function parseAlertThreshold(value: string): number | null {
   const trimmed = (value ?? "").trim();

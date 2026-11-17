@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
+import { USER_CONTACT_SELECT } from '../constants/user-contact-select.constants.js';
+import type { ActiveUsersByRolesFilter } from '../types/active-users-by-roles-filter.types.js';
+import type { UserContact } from '../types/user-contact.types.js';
 
 @Injectable()
 export class UsersRepository {
@@ -54,5 +57,27 @@ export class UsersRepository {
       select: { email: true },
     });
     return user?.email ?? null;
+  }
+
+  findContactById(userId: string): Promise<UserContact | null> {
+    return this.prisma.user.findUnique({
+      where: { id: userId },
+      select: USER_CONTACT_SELECT,
+    });
+  }
+
+  findActiveContactsByRoles({
+    roles,
+    userIds,
+  }: ActiveUsersByRolesFilter): Promise<UserContact[]> {
+    return this.prisma.user.findMany({
+      where: {
+        isActive: true,
+        roles: { some: { deletedAt: null, role: { name: { in: [...roles] } } } },
+        ...(userIds ? { id: { in: [...userIds] } } : {}),
+      },
+      select: USER_CONTACT_SELECT,
+      orderBy: { id: 'asc' },
+    });
   }
 }

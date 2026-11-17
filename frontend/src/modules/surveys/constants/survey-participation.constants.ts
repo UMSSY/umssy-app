@@ -1,31 +1,18 @@
-import type { SurveyResponseRateTone } from "../types/survey-response-rate-tone.types";
-import type { SurveyResponseRateToneStyle } from "../types/survey-response-rate-tone-style.types";
+import type { SurveyResponseRateLevel } from "../types/survey-response-rate-level.types";
 
 export const SURVEY_ALERT_THRESHOLD_MIN = 1;
 export const SURVEY_ALERT_THRESHOLD_MAX = 50;
 
-export const SURVEY_RESPONSE_RATE_THRESHOLDS = {
-  dangerMax: 35,
-  warningMax: 65,
+export const SURVEY_RESPONSE_RATE_LEVEL_THRESHOLDS = {
+  lowMax: 35,
+  mediumMax: 65,
 } as const;
 
-export const SURVEY_RESPONSE_RATE_TONES = {
-  danger: {
-    label: "Participación baja",
-    meterClassName: "**:data-[slot=progress-indicator]:bg-danger",
-    textClassName: "text-danger",
-  },
-  warning: {
-    label: "Participación media",
-    meterClassName: "**:data-[slot=progress-indicator]:bg-gold",
-    textClassName: "text-gold",
-  },
-  success: {
-    label: "Participación esperada",
-    meterClassName: "**:data-[slot=progress-indicator]:bg-success",
-    textClassName: "text-success",
-  },
-} as const satisfies Record<SurveyResponseRateTone, SurveyResponseRateToneStyle>;
+export const SURVEY_RESPONSE_RATE_LEVEL_LABELS = {
+  low: "Participación baja",
+  medium: "Participación media",
+  expected: "Participación esperada",
+} as const satisfies Record<SurveyResponseRateLevel, string>;
 
 const pluralize = (count: number, singular: string, plural: string) => (count === 1 ? singular : plural);
 

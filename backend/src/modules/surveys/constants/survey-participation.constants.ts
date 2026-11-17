@@ -13,13 +13,6 @@ export const SURVEY_PARTICIPATION_TARGET_SELECT = {
   career: { select: CAREER_SELECT },
 } satisfies Prisma.SurveySelect;
 
-export const SURVEY_REMINDER_RECIPIENT_SELECT = {
-  id: true,
-  email: true,
-  firstName: true,
-  lastName: true,
-} satisfies Prisma.UserSelect;
-
 export const SURVEY_AUDIENCE_LABELS = {
   [SurveyTargetAudience.ALL]: 'Titulados, estudiantes y mentores',
   [SurveyTargetAudience.GRADUATES]: 'Titulados',
@@ -44,10 +37,4 @@ export const SURVEY_REMINDER_ERROR_MESSAGES = {
 
 export const SURVEY_ANSWER_FRONTEND_PATH = '/surveys';
 export const SURVEY_REMINDER_GROUP_KEY_PREFIX = 'survey-reminder';
-export const SURVEY_REMINDER_MAIL_TEXTS = {
-  subject: (title: string) => `Recordatorio: responde la encuesta «${title}»`,
-  body: (name: string, title: string, closesAt: string, url: string) =>
-    `Hola ${name}, aún no respondiste la encuesta «${title}». Cierra el: ${closesAt} Responde en: ${url}`,
-  withoutClosingDate: 'Sin fecha de cierre definida.',
-  recipientFallback: 'titulado',
-} as const;
+export const SURVEY_WITHOUT_CLOSING_DATE_TEXT = 'Sin fecha de cierre definida.';

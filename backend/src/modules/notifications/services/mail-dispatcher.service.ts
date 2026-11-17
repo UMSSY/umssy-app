@@ -1,7 +1,16 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { loadMailTemplate } from '../../mail/helpers/load-mail-template.js';
 import { MailService } from '../../mail/services/mail.service.js';
+import type { MailTemplateName } from '../../mail/types/mail-template-name.types.js';
 import { NotificationUserLookupRepository } from '../repositories/notification-user-lookup.repository.js';
-import { readFile } from 'node:fs/promises';
+import type { ChannelDispatchResult } from '../types/channel-dispatch-result.type.js';
+import type { NotificationMailContent } from '../types/notification-mail-content.type.js';
+import type { NotificationMailContext } from '../types/notification-mail-context.type.js';
+import type { NotificationRecipientDelivery } from '../types/notification-recipient-delivery.type.js';
+import { buildRecipientName } from '../utils/build-recipient-name.js';
+import { summarizeChannelStatus } from '../utils/summarize-channel-status.js';
+
+const GENERIC_NOTIFICATION_TEMPLATE: MailTemplateName = 'notification';
 
 @Injectable()
 export class MailDispatcherService {
@@ -17,41 +26,55 @@ export class MailDispatcherService {
     title: string,
     body: string,
     actionUrl: string,
-  ): Promise<'sent' | 'partial' | 'failed' | 'skipped'> {
-    if (userIds.length === 0) return 'skipped';
-
-    let successCount = 0;
-    let failedCount = 0;
-
-    const templatePath = new URL('../../mail/mjml/notification.mjml', import.meta.url);
-const mjmlContent = await readFile(templatePath, 'utf8');
+    renderMail?: (context: NotificationMailContext) => NotificationMailContent,
+  ): Promise<ChannelDispatchResult> {
+    const deliveries: NotificationRecipientDelivery[] = [];
+    const templates = new Map<MailTemplateName, Promise<string>>();
+    const loadTemplate = (name: MailTemplateName) => {
+      if (!templates.has(name)) templates.set(name, loadMailTemplate(name));
+      return templates.get(name)!;
+    };
 
     for (const userId of userIds) {
       try {
-        const email = await this.userLookupRepository.findEmailByUserId(userId);
-        if (!email) continue;
+        const contact = await this.userLookupRepository.findContactByUserId(userId);
+        if (!contact?.email) {
+          deliveries.push({ recipientId: userId, channel: 'email', status: 'skipped' });
+          continue;
+        }
+
+        const content: NotificationMailContent = renderMail
+          ? renderMail({
+              recipientName: buildRecipientName(contact.firstName, contact.lastName),
+              actionUrl,
+            })
+          : {
+              template: GENERIC_NOTIFICATION_TEMPLATE,
+              subject: title,
+              text: body,
+              values: { title, body, actionUrl },
+            };
 
         await this.mailService.send({
-          to: email,
-          subject: title,
-          text: body,
-          mjml: mjmlContent,
-          values: {
-            title: title,
-            body: body,
-            actionUrl: actionUrl,
-          },
+          to: contact.email,
+          subject: content.subject,
+          text: content.text,
+          mjml: await loadTemplate(content.template),
+          values: content.values,
         });
-        successCount++;
+        deliveries.push({ recipientId: userId, channel: 'email', status: 'sent' });
       } catch (error) {
-        failedCount++;
+        deliveries.push({ recipientId: userId, channel: 'email', status: 'failed' });
         this.logger.error(`Error enviando correo al usuario ${userId}`, error);
       }
     }
 
-    if (successCount > 0 && failedCount === 0) return 'sent';
-    if (successCount > 0 && failedCount > 0) return 'partial';
-    if (successCount === 0 && failedCount > 0) return 'failed';
-    return 'skipped';
+    return {
+      status: summarizeChannelStatus(
+        deliveries.filter((delivery) => delivery.status === 'sent').length,
+        deliveries.filter((delivery) => delivery.status === 'failed').length,
+      ),
+      deliveries,
+    };
   }
 }

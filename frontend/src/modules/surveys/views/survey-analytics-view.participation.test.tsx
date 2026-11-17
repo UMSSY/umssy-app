@@ -68,18 +68,19 @@ describe("SurveyAnalyticsView - participación y alertas", () => {
   });
 
   it.each([
-    [35, 42, "danger"],
-    [36, 43, "warning"],
-    [65, 78, "warning"],
-    [66, 79, "success"],
-  ])("pinta el meter con %i%% según su rango", async (responseRate, respondedCount, tone) => {
+    [35, 42, "Participación baja"],
+    [36, 43, "Participación media"],
+    [65, 78, "Participación media"],
+    [66, 79, "Participación esperada"],
+  ])("informa el nivel de %i%% como texto sin codificar color", async (responseRate, respondedCount, label) => {
     mockParticipation({ responseRate, respondedCount, pendingCount: 120 - respondedCount });
     await renderLoaded(`${respondedCount} de 120 titulados han respondido`);
 
-    expect(screen.getByRole("progressbar", { name: "Tasa de respuesta" }).closest("[data-tone]")).toHaveAttribute(
-      "data-tone",
-      tone,
-    );
+    const card = screen.getByLabelText("Tasa de respuesta", { selector: "[data-slot=card]" });
+    const meter = within(card).getByRole("progressbar", { name: "Tasa de respuesta" });
+    expect(within(card).getByText(label)).toBeInTheDocument();
+    expect(meter).toHaveAttribute("aria-valuetext", `${responseRate}% · ${label}`);
+    expect(card.innerHTML).not.toMatch(/bg-(gold|danger|success)|text-(gold|danger|success)/);
   });
 
   it("muestra la cantidad exacta de pendientes en el botón", async () => {

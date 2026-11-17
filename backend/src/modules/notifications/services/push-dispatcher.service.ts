@@ -1,6 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as webpush from 'web-push';
 import { PushSubscriptionsRepository } from '../repositories/push-subscriptions.repository.js';
+import type { ChannelDispatchResult } from '../types/channel-dispatch-result.type.js';
+import { summarizeChannelStatus } from '../utils/summarize-channel-status.js';
 
 @Injectable()
 export class PushDispatcherService {
@@ -35,14 +37,15 @@ export class PushDispatcherService {
     body: string,
     actionUrl: string,
     groupKey?: string,
-  ): Promise<'sent' | 'partial' | 'failed' | 'skipped'> {
-    if (userIds.length === 0) return 'skipped';
+  ): Promise<ChannelDispatchResult> {
+    if (userIds.length === 0) return { status: 'skipped', deliveries: [] };
 
     const subscriptions = await this.pushSubscriptionsRepository.findManyByUserIds(userIds);
-    if (subscriptions.length === 0) return 'skipped';
 
     let successCount = 0;
     let failedCount = 0;
+    const sentUserIds = new Set<string>();
+    const failedUserIds = new Set<string>();
 
     const payload = JSON.stringify({
       title: title.substring(0, 100),
@@ -64,8 +67,10 @@ export class PushDispatcherService {
       try {
         await webpush.sendNotification(pushSubscription, payload);
         successCount++;
+        sentUserIds.add(sub.userId);
       } catch (error: any) {
         failedCount++;
+        failedUserIds.add(sub.userId);
         if (error.statusCode === 404 || error.statusCode === 410) {
           await this.pushSubscriptionsRepository.deleteByEndpointAndUserId(sub.endpoint, sub.userId);
         } else {
@@ -74,10 +79,18 @@ export class PushDispatcherService {
       }
     }
 
-    if (successCount > 0 && failedCount === 0) return 'sent';
-    if (successCount > 0 && failedCount > 0) return 'partial';
-    if (successCount === 0 && failedCount > 0) return 'failed';
-    return 'skipped';
+    return {
+      status: summarizeChannelStatus(successCount, failedCount),
+      deliveries: userIds.map((recipientId) => ({
+        recipientId,
+        channel: 'push',
+        status: sentUserIds.has(recipientId)
+          ? 'sent'
+          : failedUserIds.has(recipientId)
+            ? 'failed'
+            : 'skipped',
+      })),
+    };
   }
 
   private isDesktopUserAgent(userAgent: string | null): boolean {

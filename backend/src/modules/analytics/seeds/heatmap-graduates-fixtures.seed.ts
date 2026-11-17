@@ -11,7 +11,7 @@ import {
   HEATMAP_SEED_SURVEY,
   HEATMAP_SEED_SURVEY_OPENS_AT,
 } from '../constants/heatmap-seed.constants.js';
-import type { HeatmapSeedGraduate } from '../types/heatmap-seed.types.js';
+import type { HeatmapSeedGraduate } from '../types/heatmap-seed-graduate.types.js';
 import { buildHeatmapSeedPlan } from '../utils/heatmap-seed-plan.util.js';
 
 const SURVEY_QUESTIONS = [

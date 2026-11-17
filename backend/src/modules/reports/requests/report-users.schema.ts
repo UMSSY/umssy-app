@@ -93,5 +93,3 @@ export type RegisteredUsersFilters = z.infer<
 export type RegisteredUsersQuery = z.infer<typeof registeredUsersQuerySchema>;
 export type RejectedUsersFilters = z.infer<typeof rejectedUsersFiltersSchema>;
 export type RejectedUsersQuery = z.infer<typeof rejectedUsersQuerySchema>;
-export type RegisteredUsersExportQuery = z.infer<typeof registeredUsersExportQuerySchema>;
-export type RejectedUsersExportQuery = z.infer<typeof rejectedUsersExportQuerySchema>;
