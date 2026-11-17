@@ -9,6 +9,7 @@ import { ProfilePhotoService } from '../../profile/services/profile-photo.servic
 import { AppointmentNotFoundException } from '../exceptions/appointment-not-found.exception.js';
 import { AppointmentNotOwnedException } from '../exceptions/appointment-not-owned.exception.js';
 import { AppointmentMapper } from '../mappers/appointment.mapper.js';
+import { AppointmentNotificationsService } from '../notifications/appointment-notifications.service.js';
 import { AppointmentsRepository } from '../repositories/appointments.repository.js';
 import { AppointmentsService } from '../services/appointments.service.js';
 import {
@@ -53,6 +54,10 @@ describe('AppointmentsService', () => {
         { provide: MentorsService, useValue: {} },
         { provide: ProfilePhotoService, useValue: profilePhotoService },
         { provide: TransactionService, useValue: { run: vi.fn() } },
+        {
+          provide: AppointmentNotificationsService,
+          useValue: { notifyBooked: vi.fn(), notifyCancelled: vi.fn() },
+        },
       ],
     }).compile();
     service = moduleRef.get(AppointmentsService);

@@ -1,4 +1,5 @@
 import type { INestApplication } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
@@ -25,6 +26,8 @@ import { BlockedDatesRepository } from '../../availability/repositories/blocked-
 import { MentorsService } from '../../mentors/services/mentors.service.js';
 import { AppointmentsModule } from '../appointments.module.js';
 import { APPOINTMENT_ERROR_CODES } from '../constants/appointment-error-codes.constants.js';
+import { AppointmentNotificationsService } from '../notifications/appointment-notifications.service.js';
+import { PushDispatcherService } from '../../notifications/services/push-dispatcher.service.js';
 import { AppointmentsRepository } from '../repositories/appointments.repository.js';
 import {
   InMemoryOverlapSeed,
@@ -72,7 +75,11 @@ describe('POST /appointments (integración HTTP de disponibilidad del mentor)', 
     });
 
     const moduleRef = await Test.createTestingModule({
-      imports: [AppointmentsModule, AvailabilityModule],
+      imports: [
+        ConfigModule.forRoot({ isGlobal: true, ignoreEnvFile: true }),
+        AppointmentsModule,
+        AvailabilityModule,
+      ],
       providers: [
         { provide: APP_FILTER, useClass: DomainExceptionFilter },
         { provide: APP_INTERCEPTOR, useClass: ResponseInterceptor },
@@ -91,6 +98,10 @@ describe('POST /appointments (integración HTTP de disponibilidad del mentor)', 
       .useValue(seed.appointmentsRepository)
       .overrideProvider(MentorsService)
       .useValue(seed.mentorsService)
+      .overrideProvider(AppointmentNotificationsService)
+      .useValue({ notifyBooked: vi.fn(), notifyCancelled: vi.fn() })
+      .overrideProvider(PushDispatcherService)
+      .useValue({ dispatchToUsers: vi.fn() })
       .overrideProvider(PrismaService)
       .useValue({})
       .compile();

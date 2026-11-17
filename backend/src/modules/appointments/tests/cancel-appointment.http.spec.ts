@@ -1,6 +1,7 @@
 import type { INestApplication } from '@nestjs/common';
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigModule } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { randomUUID } from 'node:crypto';
@@ -26,6 +27,7 @@ import { BlockedDatesService } from '../../availability/services/blocked-dates.s
 import type { AvailabilityBlockResponse } from '../../availability/types/availability-block-response.types.js';
 import { MentorsService } from '../../mentors/services/mentors.service.js';
 import { AppointmentsModule } from '../appointments.module.js';
+import { PushDispatcherService } from '../../notifications/services/push-dispatcher.service.js';
 import { APPOINTMENT_ERROR_CODES } from '../constants/appointment-error-codes.constants.js';
 import {
   CANCELLATION_REASON_MAX_LENGTH,
@@ -87,7 +89,10 @@ describe('PATCH /appointments/:id/cancel (integración HTTP)', () => {
     });
 
     const moduleRef = await Test.createTestingModule({
-      imports: [AppointmentsModule],
+      imports: [
+        ConfigModule.forRoot({ isGlobal: true, ignoreEnvFile: true }),
+        AppointmentsModule,
+      ],
       providers: [
         { provide: APP_FILTER, useClass: DomainExceptionFilter },
         { provide: APP_INTERCEPTOR, useClass: ResponseInterceptor },
@@ -123,6 +128,8 @@ describe('PATCH /appointments/:id/cancel (integración HTTP)', () => {
       })
       .overrideProvider(PrismaService)
       .useValue({})
+      .overrideProvider(PushDispatcherService)
+      .useValue({ dispatchToUsers: vi.fn() })
       .compile();
 
     app = moduleRef.createNestApplication();
