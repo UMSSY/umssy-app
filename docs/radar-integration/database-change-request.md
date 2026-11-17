@@ -1,17 +1,17 @@
-# Solicitud de adecuación de modelos de radar
+# Radar model standards alignment request
 
-## Epic #3 - User Story 5: persistencia documental y radar
+## Epic #3 - User Story 5: document persistence and radar
 
-Tipo: refactor. Prioridad: alta. Estimación inicial: 6 horas, a confirmar por el equipo de Base de Datos. Dependencia: aprobación del modelo de datos antes de modificar esquema y migraciones. Publicar mediante la plantilla de tarea backend y asociar al tablero del equipo propietario; este archivo prepara la solicitud y no crea una issue fuera de su proyecto.
+Type: refactor. Priority: high. Initial estimate: 6 hours, to be confirmed by the Database team. Dependency: data model approval before changing the schema and migrations. Publish using the backend task template and associate the issue with the owning team's board; this file prepares the request and does not create an issue outside its project.
 
-Responsable: equipo de Base de Datos. Esta solicitud no altera esquema ni migraciones publicadas.
+Owner: Database team. This request does not alter the schema or published migrations.
 
-| Modelo | Diferencia actual | Cambio solicitado |
+| Model | Current difference | Requested change |
 | --- | --- | --- |
-| `RadarCompanyAccess` | Clave primaria compuesta, sin ID propio ni auditoría; modelo ignorado por Prisma | Añadir ID UUID, conservar el par con `@@unique`, auditoría e índice que comience por `userId`. Revisar `@@ignore`. |
-| `RadarJobApplication` | Sin `createdAt`/`updatedAt`; `state` textual; `userId` y `decidedBy` sin índices propios; `decider` con `NoAction` | Confirmar si es legado activo antes de migrar. Si permanece, añadir auditoría, catálogo de estado, índices y política de borrado acorde a trazabilidad. |
-| IDs `Radar*` con `dbgenerated(gen_random_uuid())` | Default distinto del literal `@default(uuid())` nuevo | Acordar mecanismo único. No retirar defaults de BD sin adaptar los INSERT SQL que omiten ID. |
-| `RadarDocumentVerification` | Auditoría con `clock_timestamp()` en lugar de `now()` | Evaluar semántica transaccional y orden de versiones antes de migrar. Conservar mapas, precisión y `@updatedAt`. |
+| `RadarCompanyAccess` | Composite primary key, no dedicated ID or audit fields; model ignored by Prisma | Add a UUID ID, preserve the pair with `@@unique`, add audit fields and an index starting with `userId`. Review `@@ignore`. |
+| `RadarJobApplication` | No `createdAt`/`updatedAt`; textual `state`; `userId` and `decidedBy` lack dedicated indexes; `decider` uses `NoAction` | Confirm whether this legacy model remains active before migrating. If retained, add audit fields, a status catalog, indexes, and a deletion policy consistent with traceability. |
+| `Radar*` IDs using `dbgenerated(gen_random_uuid())` | Default differs from the new `@default(uuid())` requirement | Agree on a single mechanism. Do not remove database defaults without adapting SQL INSERT statements that omit IDs. |
+| `RadarDocumentVerification` | Audit defaults use `clock_timestamp()` rather than `now()` | Evaluate transactional semantics and version ordering before migrating. Preserve mappings, precision, and `@updatedAt`. |
 
 ```mermaid
 erDiagram
@@ -23,12 +23,12 @@ erDiagram
   RadarDocumentSourceType ||--o{ RadarDocumentVerification : sourceTypeId
 ```
 
-## Criterios de aceptación
+## Acceptance criteria
 
-- [ ] Confirmar propiedad y uso de tablas `@@ignore`.
-- [ ] Preservar datos, unicidad y relaciones.
-- [ ] Usar UUID e índices adecuados en todas las FK.
-- [ ] Aplicar catálogos, mapas y acciones de borrado explícitas.
-- [ ] Regenerar Prisma y adaptar INSERT dependientes de defaults.
-- [ ] Validar migración en BD temporal, publicación, consentimiento y verificación.
-- [ ] Actualizar documentación y obtener revisión del equipo propietario.
+- [ ] Confirm ownership and usage of `@@ignore` tables.
+- [ ] Preserve data, uniqueness, and relationships.
+- [ ] Use UUIDs and appropriate indexes for every foreign key.
+- [ ] Apply catalogs, mappings, and explicit deletion behavior.
+- [ ] Regenerate Prisma and adapt INSERT statements that depend on defaults.
+- [ ] Validate the migration against a temporary database, including publication, consent, and verification flows.
+- [ ] Update documentation and obtain review from the owning team.

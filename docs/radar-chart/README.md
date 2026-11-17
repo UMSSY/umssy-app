@@ -1,74 +1,74 @@
-# Radar de afinidad
+# Affinity radar
 
-## Propósito y responsabilidades
+## Purpose and responsibilities
 
-`frontend/src/modules/radar-chart` presenta el radar publicado del titular, evidencias, comparación entre publicaciones y simulación con mentoría. Consume [radar-integration](../radar-integration/README.md), que calcula y persiste las puntuaciones. Las rutas solo renderizan vistas; vistas y hooks interactivos declaran `use client`.
+`frontend/src/modules/radar-chart` presents the owner's published radar, supporting evidence, comparisons between publications, and mentorship simulations. It consumes [radar-integration](../radar-integration/README.md), which calculates and persists scores. Routes only render views; interactive views and hooks declare `use client`.
 
-## Arquitectura y dependencias
+## Architecture and dependencies
 
 ```mermaid
 flowchart LR
-  Route[profile/radar: servidor] --> View[RadarProfileView: cliente]
+  Route[profile/radar: server] --> View[RadarProfileView: client]
   View --> Query[useLiveRadar: TanStack Query]
   Query --> Api[radarIntegrationApi]
   Api --> Backend[radar-integration]
-  View --> Mentors[mentorship: mentores disponibles]
-  View --> Evidence[CV y certificaciones: respaldos]
+  View --> Mentors[mentorship: available mentors]
+  View --> Evidence[CV and certification evidence]
 ```
 
-Los servicios HTTP usan `shared/services/api-client`; no guardan tokens ni abren IndexedDB. Las integraciones entre dominios importan el `index.ts` propietario. Cada contrato y props tiene su archivo en `types/`.
+HTTP services use `shared/services/api-client`; they neither store tokens nor open IndexedDB. Cross-domain integrations import the owning module's `index.ts`. Each contract and props type has its own file in `types/`.
 
-## Flujos y reglas de negocio
+## Flows and business rules
 
 ```mermaid
 sequenceDiagram
-  actor Owner as Titular
+  actor Owner as Profile owner
   participant View as RadarProfileView
   participant Query as useLiveRadar
-  participant API as API de radar
-  Owner->>View: Abre Mi radar
-  View->>Query: Consulta con sesión vigente
+  participant API as Radar API
+  Owner->>View: Open My radar
+  View->>Query: Query with the current session
   Query->>API: GET /profile/me/radar
-  API-->>Query: Publicación, anterior y procesamiento
-  Query-->>View: Seis ejes y evidencias aprobadas
-  opt Procesamiento pendiente
-    loop Mientras hasPending o processingStatus=pending
-      Query->>API: Consulta cada 1,5 s
+  API-->>Query: Current and previous publications and processing state
+  Query-->>View: Six axes and approved evidence
+  opt Processing is pending
+    loop While hasPending or processingStatus=pending
+      Query->>API: Poll every 1.5 seconds
     end
   end
 ```
 
-- Los identificadores persistidos son `desarrollo`, `cloud-devops`, `data-ai`, `qa`, `ciberseguridad` y `gobernanza-ti`; traducir nombres de código no modifica estos contratos.
-- La puntuación proviene del backend, no de datos de demostración. Una versión menor no reemplaza una más reciente en caché. Si cambia la sesión, se descarta la respuesta en curso.
-- Sin publicación se muestra estado vacío; una publicación sin habilidades aprobadas conserva los seis ejes en cero.
-- La comparación usa las dos últimas publicaciones, con sus fechas. Un recálculo pendiente o fallido conserva la última publicación válida y permite reintentar.
-- HU2: seleccionar un área consulta el directorio real de mentores disponibles. Con resultados, la simulación estima hasta **+1 punto**, limitado a 10, y calcula el promedio proyectado. Sin mentores o con error no se aplica proyección. Cerrar el diálogo la elimina. Es una estimación ilustrativa que nunca modifica el radar publicado.
-- La revisión administrativa consume las APIs autorizadas del backend; ocultar controles no sustituye la autorización del servidor.
+- Persisted identifiers are `desarrollo`, `cloud-devops`, `data-ai`, `qa`, `ciberseguridad`, and `gobernanza-ti`; translating code names does not change these contracts.
+- Scores come from the backend, rather than demonstration data. An older version cannot replace a newer cached version. If the session changes, the in-flight response is discarded.
+- An empty state appears when there is no publication; a publication without approved skills keeps all six axes at zero.
+- Comparisons use the two latest publications and their dates. Pending or failed recalculation preserves the latest valid publication and allows retrying.
+- HU2: selecting an area queries the actual directory of available mentors. When results exist, the simulation estimates up to **+1 point**, capped at 10, and calculates the projected average. No projection is applied when there are no mentors or a query fails. Closing the dialog clears the projection. This illustrative estimate never changes the published radar.
+- Administrative review consumes authorized backend APIs; hiding controls does not replace server authorization.
 
-## Endpoints consumidos
+## Consumed endpoints
 
-| Método y ruta | Uso |
+| Method and path | Purpose |
 | --- | --- |
-| `GET /profile/me/radar` | Radar actual, anterior y procesamiento |
-| `POST /profile/me/radar/recalculations` | Reintentar análisis y publicación |
-| `POST /profile/me/radar/cv-rescans` | Reanalizar CV vigente |
-| `GET /radar-document-reviews?filter=pending` | Cola documental administrativa |
-| `PATCH /radar-document-reviews/:id` | Resolver, reprocesar o revocar documento |
-| `GET /radar-document-reviews/:id/file` | Respaldo administrativo |
-| `GET /radar-reviews` | Cola de habilidades y CV |
-| `PATCH /radar-reviews/:kind/:id` | Decisión sobre evidencia |
+| `GET /profile/me/radar` | Current and previous radar publications and processing state |
+| `POST /profile/me/radar/recalculations` | Retry analysis and publication |
+| `POST /profile/me/radar/cv-rescans` | Reanalyze the current CV |
+| `GET /radar-document-reviews?filter=pending` | Administrative document review queue |
+| `PATCH /radar-document-reviews/:id` | Decide, reprocess, or revoke a document |
+| `GET /radar-document-reviews/:id/file` | Administrative document preview |
+| `GET /radar-reviews` | Skill and CV review queue |
+| `PATCH /radar-reviews/:kind/:id` | Evidence review decision |
 
-Los JSON siguen `{ statusCode, data, detail, ok }`; los respaldos son binarios. Los permisos y errores se documentan en [radar-integration](../radar-integration/README.md) y Swagger.
+JSON responses follow `{ statusCode, data, detail, ok }`; supporting files are binary responses. Permissions and errors are documented in [radar-integration](../radar-integration/README.md) and Swagger.
 
-## Validación
+## Validation
 
-Las pruebas cubren consulta, conservación de versiones, estados vacíos y de error, comparación, interacción con áreas, simulación y revisión. La cobertura mínima es 80 %; se comprueba con Vitest y no se deduce del número de pruebas aprobadas.
+Tests cover queries, version preservation, empty and error states, comparisons, area interactions, simulation, and review. The minimum coverage is 80%; Vitest measures it independently of the number of passing tests.
 
 ## Sprint History
 
 ### Sprint 3
 
-- HU2: mentores disponibles por área y simulación ilustrativa.
-- Comparación entre publicaciones y navegación a evidencias.
-- HU5: resultado documental y revisión administrativa integrada.
-- Adecuación: tipos individuales, identificadores ingleses, exportaciones públicas y estilos estáticos con Tailwind.
+- HU2: available mentors by area and illustrative simulation.
+- Comparisons between publications and navigation to evidence.
+- HU5: document verification results and integrated administrative review.
+- Standards alignment: individual types, English identifiers, public exports, and static styles using Tailwind.

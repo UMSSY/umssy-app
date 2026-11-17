@@ -1,121 +1,121 @@
-# Integración y publicación del radar
+# Radar integration and publication
 
-## Propósito y responsabilidades
+## Purpose and responsibilities
 
-`backend/src/modules/radar-integration` coordina evidencias verificadas, publicaciones versionadas y afinidad para reclutamiento. Soporta [radar-chart](../radar-chart/README.md) y la verificación que muestra [cv](../cv/README.md). Los controladores validan con Zod y delegan; los servicios concentran reglas; los repositorios acceden a tablas propias; los mappers construyen respuestas envueltas por el interceptor global.
+`backend/src/modules/radar-integration` coordinates verified evidence, versioned publications, and recruitment affinity. It supports [radar-chart](../radar-chart/README.md) and the verification shown by [cv](../cv/README.md). Controllers validate with Zod and delegate; services own business rules; repositories access their own tables; mappers build responses wrapped by the global interceptor.
 
-## Arquitectura y dependencias
+## Architecture and dependencies
 
 ```mermaid
 flowchart TD
-  Controllers[Controladores REST: Zod, JWT y roles] --> Services[Servicios de radar]
-  Services --> Repositories[Repositorios propios]
-  Repositories --> Tables[Tablas radar]
-  Services --> Users[UsersService: identidad y roles activos]
-  Services --> Sources[Servicios propietarios de CV, habilidades y perfil]
-  Services --> Recruitment[Vacantes y postulaciones]
-  Services --> Mappers[Mappers de respuesta]
+  Controllers[REST controllers: Zod, JWT, and roles] --> Services[Radar services]
+  Services --> Repositories[Domain repositories]
+  Repositories --> Tables[Radar tables]
+  Services --> Users[UsersService: identity and active roles]
+  Services --> Sources[CV, skill, and profile owner services]
+  Services --> Recruitment[Vacancies and applications]
+  Services --> Mappers[Response mappers]
   Mappers --> Interceptor[ResponseInterceptor]
 ```
 
-Las lecturas ajenas pasan por servicios propietarios. `RadarRecruitmentSourcesService` consulta roles a `UsersService`, sin leer `userRole` desde radar. Los servicios no inyectan Prisma. Esquema y migraciones corresponden al equipo de Base de Datos.
+Cross-domain reads use the owning services. `RadarRecruitmentSourcesService` queries roles through `UsersService`, without reading `userRole` directly from radar. Services do not inject Prisma. The Database team owns the schema and migrations.
 
-## Publicación y puntuación
+## Publication and scoring
 
 ```mermaid
 sequenceDiagram
-  participant Profile as Perfil y documentos
+  participant Profile as Profile and documents
   participant NLP as ProfileSkillsAnalysisService
   participant Radar as RadarPublicationService
   participant Store as RadarPublicationRepository
   participant UI as RadarProfileView
-  Profile->>NLP: Cambian las fuentes
-  NLP->>Radar: Publicación de habilidades
-  Radar->>Radar: Reúne respaldos y calcula huella
-  Radar->>Store: Publica revisión consistente
-  Store-->>Radar: Snapshot versionado
+  Profile->>NLP: Sources change
+  NLP->>Radar: Publish skills
+  Radar->>Radar: Gather evidence and calculate fingerprint
+  Radar->>Store: Publish a consistent revision
+  Store-->>Radar: Versioned snapshot
   UI->>Radar: GET /profile/me/radar
-  Radar-->>UI: Publicaciones actual y anterior
+  Radar-->>UI: Current and previous publications
 ```
 
-Se publican habilidades aprobadas con respaldo válido, contando cada habilidad una vez. La rúbrica suma 1 punto por habilidad y 0,5 por alta relevancia, con máximo 10 por eje; el promedio usa los seis ejes. La huella y revisión de fuentes evitan publicaciones inconsistentes. Un fallo conserva el snapshot válido. La respuesta distingue ausencia de publicaciones, publicación en cero, habilidades pendientes y estado NLP.
+Only approved skills with valid evidence are published, counting each skill once. The rubric adds 1 point per skill and 0.5 for high relevance, capped at 10 per axis; the average uses all six axes. The fingerprint and source revision prevent inconsistent publications. Failures preserve the valid snapshot. The response distinguishes no publication, a zero-score publication, pending skills, and NLP state.
 
-## HU5: verificación documental
+## HU5: document verification
 
 ```mermaid
 sequenceDiagram
-  actor Owner as Titular
-  participant Source as CV o certificaciones
+  actor Owner as Profile owner
+  participant Source as CV or certifications
   participant Worker as DocumentVerificationService
   participant Review as DocumentReviewService
   participant Radar as RadarPublicationService
-  actor Admin as Administrativo
-  Owner->>Source: Sube o reemplaza documento
-  Source->>Worker: Registra versión activa en cola
-  Worker->>Worker: Reclama tarea; ejecuta OCR y NLP
-  alt Reglas satisfechas
-    Worker->>Worker: Aprueba automáticamente
-  else Caso dudoso
-    Worker->>Review: Revisión con motivo y respaldo
-    Admin->>Review: Consulta y decide
+  actor Admin as Administrator
+  Owner->>Source: Upload or replace a document
+  Source->>Worker: Queue the active version
+  Worker->>Worker: Claim job; run OCR and NLP
+  alt Rules satisfied
+    Worker->>Worker: Approve automatically
+  else Uncertain case
+    Worker->>Review: Review with reason and supporting file
+    Admin->>Review: Inspect and decide
   end
-  Worker->>Radar: Actualiza análisis y publicación
-  Radar-->>Owner: Resultado y habilidades publicadas
+  Worker->>Radar: Update analysis and publication
+  Radar-->>Owner: Result and published skills
 ```
 
-El trabajador consulta cada 1,5 s. La reclamación usa `FOR UPDATE SKIP LOCKED`, lease y fecha de reintento; solo finaliza la versión activa con el lease vigente. Lectura sin confianza pasa a revisión; confianza menor a 60 % produce `low_confidence`. Se comprueban duplicados, titular, tipo documental, emisor y habilidades del catálogo con área. Las versiones reemplazadas se conservan y dejan de aportar como activas.
+The worker polls every 1.5 seconds. Claims use `FOR UPDATE SKIP LOCKED`, a lease, and a retry date; only the active version with a current lease is finalized. Readings without confidence go to review; confidence below 60% produces `low_confidence`. Checks cover duplicates, owner identity, document type, issuer, and catalog skills with an area. Replaced versions remain in history and stop contributing as active sources.
 
-Las decisiones respetan estado y versión; cambios concurrentes devuelven 409. Reconocer lectura requiere titular y estado vigente. `noticeRead` registra lectura del historial, no implementa un canal de envío. El módulo no envía SMTP, Web Push ni Socket.io. Cualquier notificación futura debe usar `NotificationsService.notify()`, plantilla del dominio y tipo acordado con sus mantenedores.
+Decisions respect state and version; concurrent changes return 409. Acknowledging a result requires its owner and current state. `noticeRead` records history acknowledgement, rather than implementing a delivery channel. This module does not send SMTP, Web Push, or Socket.io messages. Future notifications must use `NotificationsService.notify()`, a domain template, and a type agreed with the notification maintainers.
 
-## Reclutamiento y consentimiento
+## Recruitment and consent
 
-El solicitante necesita rol activo `titulado` o `estudiante` y los tres consentimientos explícitos. Revocar consentimiento general desactiva CV y contacto. El reclutador necesita rol `empresa` y vinculación con la empresa de la vacante. Solo se muestran perfiles con radar publicado y consentimiento vigente; contacto y CV se autorizan por separado. La afinidad ordena candidatos y no decide contrataciones. El retiro y las decisiones finales respetan los estados y se auditan.
+Applicants need an active `titulado` or `estudiante` role and all three explicit consents. Revoking general consent disables CV and contact sharing. Recruiters need the `empresa` role and a link to the vacancy's company. Only profiles with a published radar and current consent are shown; contact and CV access are authorized separately. Affinity ranks candidates without making hiring decisions. Withdrawal and final decisions respect application state and are audited.
 
 ## Endpoints
 
-Todos requieren JWT. Titular significa usuario autenticado; los UUID se validan antes del servicio. Las listas son completas, sin paginación. La cola documental admite `filter=pending|approved|rejected|all`, con `pending` predeterminado. Swagger documenta las 24 operaciones, sus parámetros, cuerpos, roles y respuestas.
+All endpoints require JWT. Owner means the authenticated user; UUIDs are validated before services run. Lists are complete and unpaginated. The document queue accepts `filter=pending|approved|rejected|all`, defaulting to `pending`. Swagger documents all 24 operations, their parameters, bodies, roles, and responses.
 
-| Método y ruta | Permiso y resultado |
+| Method and path | Permission and result |
 | --- | --- |
-| `GET /profile/me/radar` | Titular: radar actual/anterior |
-| `POST /profile/me/radar/recalculations` | Titular: reanálisis y publicación |
-| `POST /profile/me/radar/cv-rescans` | Titular: reanalizar CV vigente |
-| `GET /radar-reviews` | Administrativo: cola de CV/habilidades |
-| `PATCH /radar-reviews/:kind/:id` | Administrativo: approved/rejected/revoked; kind=cv o skill |
-| `POST /radar-reviews/cvs/:id/reprocessings` | Administrativo: reprocesar CV |
-| `GET /radar-reviews/cvs/:id/file` | Administrativo: PDF y registro de consulta |
-| `GET /profile/me/document-verifications` | Titular: historial de versiones |
-| `PATCH /profile/me/document-verifications/:id/notification` | Titular: reconocer lectura de estado vigente |
-| `GET /profile/me/document-verifications/:id/file` | Titular: respaldo propio |
-| `GET /radar-document-reviews` | Administrativo: versiones activas filtradas |
-| `PATCH /radar-document-reviews/:id` | Administrativo: approved/rejected/reprocess/revoke |
-| `GET /radar-document-reviews/:id/file` | Administrativo: respaldo documental |
-| `POST /radar-integration/admin/company-access` | Administrativo: vincular usuario empresa |
-| `GET /radar-integration/vacancies` | Sesión: vacantes activas |
-| `POST /radar-integration/applications` | Titulado/estudiante: postular con consentimiento |
-| `GET /radar-integration/me/applications` | Titulado/estudiante: postulaciones propias |
-| `PATCH /radar-integration/me/applications/:id/consents` | Titulado/estudiante: permisos propios |
-| `PATCH /radar-integration/me/applications/:id/withdraw` | Titulado/estudiante: retirar postulación |
-| `GET /radar-integration/recruiter/vacancies` | Empresa: sus vacantes |
-| `GET /radar-integration/recruiter/vacancies/:id/applicants` | Empresa vinculada: afinidad descendente |
-| `GET /radar-integration/recruiter/applications/:id/areas/:areaId/evidence` | Empresa vinculada: respaldos aprobados |
-| `GET /radar-integration/recruiter/applications/:id/cv` | Empresa vinculada y consentimiento: PDF |
-| `PATCH /radar-integration/recruiter/applications/:id` | Empresa vinculada: hired/rejected |
+| `GET /profile/me/radar` | Owner: current and previous radar publications |
+| `POST /profile/me/radar/recalculations` | Owner: reanalysis and publication |
+| `POST /profile/me/radar/cv-rescans` | Owner: reanalyze the current CV |
+| `GET /radar-reviews` | Administrator: CV and skill queue |
+| `PATCH /radar-reviews/:kind/:id` | Administrator: approved/rejected/revoked; kind=cv or skill |
+| `POST /radar-reviews/cvs/:id/reprocessings` | Administrator: reprocess CV |
+| `GET /radar-reviews/cvs/:id/file` | Administrator: PDF and access audit |
+| `GET /profile/me/document-verifications` | Owner: version history |
+| `PATCH /profile/me/document-verifications/:id/notification` | Owner: acknowledge the current result state |
+| `GET /profile/me/document-verifications/:id/file` | Owner: supporting file |
+| `GET /radar-document-reviews` | Administrator: filtered active versions |
+| `PATCH /radar-document-reviews/:id` | Administrator: approved/rejected/reprocess/revoke |
+| `GET /radar-document-reviews/:id/file` | Administrator: supporting document |
+| `POST /radar-integration/admin/company-access` | Administrator: link a company user |
+| `GET /radar-integration/vacancies` | Authenticated session: active vacancies |
+| `POST /radar-integration/applications` | Titulado/estudiante: apply with consent |
+| `GET /radar-integration/me/applications` | Titulado/estudiante: owned applications |
+| `PATCH /radar-integration/me/applications/:id/consents` | Titulado/estudiante: owned sharing permissions |
+| `PATCH /radar-integration/me/applications/:id/withdraw` | Titulado/estudiante: withdraw an owned application |
+| `GET /radar-integration/recruiter/vacancies` | Company user: company vacancies |
+| `GET /radar-integration/recruiter/vacancies/:id/applicants` | Linked company user: descending affinity ranking |
+| `GET /radar-integration/recruiter/applications/:id/areas/:areaId/evidence` | Linked company user: approved evidence |
+| `GET /radar-integration/recruiter/applications/:id/cv` | Linked company user with consent: PDF |
+| `PATCH /radar-integration/recruiter/applications/:id` | Linked company user: hired/rejected |
 
-JSON correcto: `{ statusCode, data, detail, ok: true }`; POST usa 201, GET/PATCH 200. Errores: `{ statusCode, code, detail, data, ok: false }`. Se documentan 400 para entradas, 401 para sesión, 403 para permisos/consentimiento, 404 para recursos no disponibles, 409 para conflicto y 500 para fallo interno donde aplican. Las descargas envían bytes sin envoltura JSON y `Content-Disposition: inline`; los respaldos conservan su MIME.
+Successful JSON: `{ statusCode, data, detail, ok: true }`; POST uses 201, while GET/PATCH use 200. Errors: `{ statusCode, code, detail, data, ok: false }`. Applicable documented statuses are 400 for input, 401 for session, 403 for permission/consent, 404 for unavailable resources, 409 for conflicts, and 500 for internal failure. Downloads send bytes without a JSON envelope and use `Content-Disposition: inline`; supporting files retain their MIME type.
 
-## Datos y validación
+## Data and validation
 
-Modelos y relaciones: [backend/prisma/README.md](../../backend/prisma/README.md). Diferencias pendientes del estándar de BD: [solicitud al equipo propietario](database-change-request.md). Esta adecuación no modifica esquema ni migraciones.
+Models and relationships: [backend/prisma/README.md](../../backend/prisma/README.md). Outstanding database standards differences: [request to the owning team](database-change-request.md). This standards update does not modify the schema or migrations.
 
-Las pruebas cubren publicación, procedencia, revisión concurrente, consentimiento, autorización y contratos OpenAPI. Validar con Vitest, ESLint, Oxlint y compilación de backend. La cobertura mínima de 80 % se confirma con el informe de la ejecución correspondiente.
+Tests cover publication, provenance, concurrent review, consent, authorization, and OpenAPI contracts. Validate with Vitest, ESLint, Oxlint, and the backend build. The minimum coverage of 80% is confirmed by the corresponding execution report.
 
 ## Sprint History
 
 ### Sprint 3
 
-- Publicación versionada, comparación y evidencias aprobadas.
-- HU2: áreas de radar y soporte de integración con mentores.
-- HU5: verificación OCR/NLP, historial y revisión administrativa.
-- Consentimiento y afinidad para reclutamiento.
-- Adecuación: contratos `.types.ts`, documentación REST/OpenAPI y roles a través del servicio propietario.
+- Versioned publication, comparisons, and approved evidence.
+- HU2: radar areas and mentor integration support.
+- HU5: OCR/NLP verification, history, and administrative review.
+- Consent and recruitment affinity.
+- Standards alignment: `.types.ts` contracts, REST/OpenAPI documentation, and roles accessed through the owning service.

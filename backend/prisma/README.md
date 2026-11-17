@@ -1,20 +1,20 @@
-# Base de datos: Prisma y PostgreSQL
+# Database: Prisma and PostgreSQL
 
-## Propósito y gobierno
+## Purpose and governance
 
-Este documento describe los modelos vigentes de `schema.prisma`, sus campos, tipos, claves, relaciones y restricciones. Solo el equipo de Base de Datos modifica el esquema y las migraciones. La documentación de reglas de negocio corresponde a los README de `docs/<module>/`. Los cambios de radar que requieren aprobación están en [la solicitud de adecuación](../../docs/radar-integration/database-change-request.md).
+This document describes the current models in `schema.prisma`, their fields, types, keys, relationships, and constraints. Only the Database team modifies the schema and migrations. Business rules belong in the module README files under `docs/<module>/`. Radar changes requiring approval are listed in the [standards alignment request](../../docs/radar-integration/database-change-request.md).
 
-## Convenciones de lectura
+## Reading conventions
 
-- Prisma usa nombres de modelo singulares y campos camelCase; `@@map` indica la tabla PostgreSQL y `@map` la columna. Si falta un mapa, el nombre físico coincide con el declarado; la documentación registra el estado actual, no presupone conformidad.
-- `?` indica nulabilidad; `[]` representa una colección del lado 1:N o N:M. Un campo de relación no se almacena como columna: sus `fields` son las FK y `references` identifica el modelo/campo destino.
-- `@id`/`@@id` definen la clave primaria; `@unique`/`@@unique` unicidad; `@@index` define un índice. Se listan también índices compuestos y su orden.
-- `String @db.Uuid` identifica UUID. `@db.VarChar(n)` limita longitud; `@db.Timestamptz(6)` almacena fecha y hora con zona; `@db.Date` fecha; `@db.Time(6)` hora. Sin anotación nativa se usa el mapeo predeterminado de Prisma para PostgreSQL.
-- `@default` describe generación inicial, `@updatedAt` actualización gestionada por Prisma. `deletedAt` registra borrado lógico donde existe.
-- `Cascade` borra dependientes; `Restrict`/`NoAction` impide borrar referencias activas; `SetNull` conserva trazabilidad sin la referencia. Una acción no declarada se marca implícita y requiere revisión si el estándar exige explicitarla.
-- `@@ignore` indica un modelo no expuesto en el cliente generado; no significa que su tabla se pueda borrar. Los repositorios pueden conservar SQL parametrizado para esas tablas.
+- Prisma uses singular model names and camelCase fields; `@@map` identifies the PostgreSQL table and `@map` identifies the column. When a mapping is absent, the physical name matches the declared name; this document records the current schema rather than assuming compliance.
+- `?` indicates nullability; `[]` represents a collection on the 1:N or N:M side. A relation field is not a stored column: its `fields` are foreign keys and `references` identifies the target model and field.
+- `@id`/`@@id` define primary keys; `@unique`/`@@unique` define uniqueness; `@@index` defines an index. Composite indexes and their ordering are listed as well.
+- `String @db.Uuid` identifies UUID values. `@db.VarChar(n)` limits length; `@db.Timestamptz(6)` stores date and time with a time zone; `@db.Date` stores dates; `@db.Time(6)` stores times. Without a native annotation, Prisma's default PostgreSQL mapping applies.
+- `@default` describes initial value generation, while `@updatedAt` describes Prisma-managed updates. `deletedAt` records soft deletion where present.
+- `Cascade` deletes dependent rows; `Restrict`/`NoAction` prevents deleting active references; `SetNull` preserves traceability without the reference. Undeclared actions are marked implicit and require review where the standard requires explicit behavior.
+- `@@ignore` identifies a model omitted from the generated client; it does not mean its table can be deleted. Repositories may retain parameterized SQL for these tables.
 
-## Relaciones de radar
+## Radar relationships
 
 ```mermaid
 erDiagram
@@ -38,20 +38,20 @@ erDiagram
   RadarDocumentSourceType ||--o{ RadarDocumentVerification : sourceTypeEntry
 ```
 
-## Relaciones y claves foráneas
+## Relationships and foreign keys
 
-La cardinalidad de cada FK es N:1; cuando es única restringe la relación a 1:1. La nulabilidad de la relación indica si el extremo padre es opcional.
+Each foreign key has N:1 cardinality; a unique foreign key restricts the relationship to 1:1. Relation nullability indicates whether the parent endpoint is optional.
 
-| Modelo y relación | FK local | Referencia | Opcional | onDelete |
+| Model and relation | Local FK | Reference | Optional | onDelete |
 | --- | --- | --- | --- | --- |
-| User.company | companyId | Company.id | Sí | SetNull |
-| User.city | cityId | City.id | Sí | SetNull |
+| User.company | companyId | Company.id | Yes | SetNull |
+| User.city | cityId | City.id | Yes | SetNull |
 | UserRole.user | userId | User.id | No | Cascade |
 | UserRole.role | roleId | Role.id | No | Restrict |
 | Education.user | userId | User.id | No | Cascade |
 | WorkExperience.user | userId | User.id | No | Cascade |
 | WorkExperience.company | companyId | Company.id | No | Restrict |
-| Skill.area | areaId | RadarArea.id | Sí | SetNull |
+| Skill.area | areaId | RadarArea.id | Yes | SetNull |
 | JobOfferSkill.jobOffer | jobOfferId | JobOffer.id | No | Cascade |
 | JobOfferSkill.skill | skillId | Skill.id | No | Restrict |
 | UserSkill.user | userId | User.id | No | Cascade |
@@ -65,52 +65,52 @@ La cardinalidad de cada FK es N:1; cuando es única restringe la relación a 1:1
 | MentorOrientationType.orientationType | orientationTypeId | OrientationType.id | No | Restrict |
 | AvailabilityBlock.mentor | mentorId | User.id | No | Cascade |
 | BlockedDate.mentor | mentorId | User.id | No | Cascade |
-| Appointment.block | blockId | AvailabilityBlock.id | Sí | SetNull |
+| Appointment.block | blockId | AvailabilityBlock.id | Yes | SetNull |
 | Appointment.mentor | mentorId | User.id | No | Restrict |
 | Appointment.student | studentId | User.id | No | Restrict |
 | Appointment.status | statusId | AppointmentStatus.id | No | Restrict |
-| Appointment.orientationType | orientationTypeId | OrientationType.id | Sí | SetNull |
-| Appointment.cancelledBy | cancelledById | User.id | Sí | SetNull |
+| Appointment.orientationType | orientationTypeId | OrientationType.id | Yes | SetNull |
+| Appointment.cancelledBy | cancelledById | User.id | Yes | SetNull |
 | AppointmentDocument.appointment | appointmentId | Appointment.id | No | Cascade |
 | TimeProposal.appointment | appointmentId | Appointment.id | No | Cascade |
 | TimeProposal.proposedBlock | proposedBlockId | AvailabilityBlock.id | No | Cascade |
 | TimeProposal.status | statusId | ProposalStatus.id | No | Restrict |
 | AppointmentHistory.appointment | appointmentId | Appointment.id | No | Cascade |
-| AppointmentHistory.previousStatus | previousStatusId | AppointmentStatus.id | Sí | SetNull |
+| AppointmentHistory.previousStatus | previousStatusId | AppointmentStatus.id | Yes | SetNull |
 | AppointmentHistory.newStatus | newStatusId | AppointmentStatus.id | No | Restrict |
-| AppointmentHistory.changedBy | changedById | User.id | Sí | SetNull |
+| AppointmentHistory.changedBy | changedById | User.id | Yes | SetNull |
 | Event.category | categoryId | EventCategory.id | No | Restrict |
 | Event.modality | modalityId | EventModality.id | No | Restrict |
 | Event.origin | originId | EventOrigin.id | No | Restrict |
 | Event.status | statusId | EventStatus.id | No | Restrict |
 | Event.createdBy | createdById | User.id | No | Restrict |
-| Event.moderatedBy | moderatedById | User.id | Sí | SetNull |
+| Event.moderatedBy | moderatedById | User.id | Yes | SetNull |
 | EventRegistration.event | eventId | Event.id | No | Cascade |
 | EventRegistration.user | userId | User.id | No | Cascade |
 | EventRegistration.status | statusId | RegistrationStatus.id | No | Restrict |
 | EventAttendance.registration | registrationId | EventRegistration.id | No | Cascade |
-| EventAttendance.checkedInBy | checkedInById | User.id | Sí | SetNull |
+| EventAttendance.checkedInBy | checkedInById | User.id | Yes | SetNull |
 | JobOffer.company | companyId | Company.id | No | Cascade |
 | JobOffer.modality | modalityId | JobOfferModality.id | No | Restrict |
 | JobOffer.contractType | contractTypeId | JobOfferContractType.id | No | Restrict |
 | JobOffer.status | statusId | JobOfferStatus.id | No | Restrict |
 | AdminExportHistory.user | userId | User.id | No | Cascade |
 | AccessRequest.status | statusId | AccessRequestStatus.id | No | Restrict |
-| AccessRequest.documentType | documentTypeId | AccessRequestDocumentType.id | Sí | Restrict |
-| AccessRequest.documentFile | documentFileId | File.id | Sí | SetNull |
-| AccessRequest.openedBy | openedById | User.id | Sí | SetNull |
-| AccessRequest.reviewedBy | reviewedById | User.id | Sí | SetNull |
-| AccessRequest.approvedUser | approvedUserId | User.id | Sí | SetNull |
+| AccessRequest.documentType | documentTypeId | AccessRequestDocumentType.id | Yes | Restrict |
+| AccessRequest.documentFile | documentFileId | File.id | Yes | SetNull |
+| AccessRequest.openedBy | openedById | User.id | Yes | SetNull |
+| AccessRequest.reviewedBy | reviewedById | User.id | Yes | SetNull |
+| AccessRequest.approvedUser | approvedUserId | User.id | Yes | SetNull |
 | AccessRequest.career | careerId | Career.id | No | Restrict |
 | MentorParticipationRequest.user | userId | User.id | No | Restrict |
 | MentorParticipationRequest.statusCatalog | statusId | MentorParticipationStatus.id | No | Restrict |
 | MentorSlotOffer.user | userId | User.id | No | Restrict |
-| MentorSlotOffer.request | requestId | MentorParticipationRequest.id | Sí | Restrict |
+| MentorSlotOffer.request | requestId | MentorParticipationRequest.id | Yes | Restrict |
 | MentorSlotOffer.statusCatalog | statusId | MentorOfferStatus.id | No | Restrict |
 | ActivationOtp.accessRequest | accessRequestId | AccessRequest.id | No | Cascade |
-| Conversation.userA | userAId | User.id | Sí | Cascade |
-| Conversation.userB | userBId | User.id | Sí | Cascade |
-| Conversation.event | eventId | Event.id | Sí | Cascade |
+| Conversation.userA | userAId | User.id | Yes | Cascade |
+| Conversation.userB | userBId | User.id | Yes | Cascade |
+| Conversation.event | eventId | Event.id | Yes | Cascade |
 | ConversationParticipant.conversation | conversationId | Conversation.id | No | Cascade |
 | ConversationParticipant.user | userId | User.id | No | Cascade |
 | Message.conversation | conversationId | Conversation.id | No | Cascade |
@@ -130,9 +130,9 @@ La cardinalidad de cada FK es N:1; cuando es única restringe la relación a 1:1
 | JobApplication.user | userId | User.id | No | Cascade |
 | JobApplication.status | statusId | JobApplicationStatus.id | No | Restrict |
 | RadarApplicationConsent.application | applicationId | JobApplication.id | No | Cascade |
-| Survey.career | careerId | Career.id | Sí | Restrict |
+| Survey.career | careerId | Career.id | Yes | Restrict |
 | Survey.status | statusId | SurveyStatus.id | No | Restrict |
-| Survey.targetAudience | targetAudienceId | SurveyTargetAudience.id | Sí | Restrict |
+| Survey.targetAudience | targetAudienceId | SurveyTargetAudience.id | Yes | Restrict |
 | Survey.createdBy | createdById | User.id | No | Restrict |
 | SurveyQuestion.survey | surveyId | Survey.id | No | Cascade |
 | SurveyQuestion.type | typeId | SurveyQuestionType.id | No | Restrict |
@@ -141,198 +141,198 @@ La cardinalidad de cada FK es N:1; cuando es única restringe la relación a 1:1
 | SurveyResponse.respondent | respondentId | User.id | No | Restrict |
 | SurveyAnswer.response | responseId | SurveyResponse.id | No | Cascade |
 | SurveyAnswer.question | questionId | SurveyQuestion.id | No | Cascade |
-| SurveyAnswer.option | optionId | SurveyQuestionOption.id | Sí | Cascade |
+| SurveyAnswer.option | optionId | SurveyQuestionOption.id | Yes | Cascade |
 | AuditEvent.accessRequest | accessRequestId | AccessRequest.id | No | Restrict |
 | AuditEvent.action | actionId | AuditAction.id | No | Restrict |
-| AuditEvent.actor | actorId | User.id | Sí | SetNull |
-| AuditEvent.evidenceFile | evidenceFileId | File.id | Sí | Restrict |
+| AuditEvent.actor | actorId | User.id | Yes | SetNull |
+| AuditEvent.evidenceFile | evidenceFileId | File.id | Yes | Restrict |
 | DocumentValidation.accessRequest | accessRequestId | AccessRequest.id | No | Cascade |
-| DocumentValidation.revertedBy | revertedById | User.id | Sí | SetNull |
+| DocumentValidation.revertedBy | revertedById | User.id | Yes | SetNull |
 | MentorIntakeAttempt.intakeOperation | operationId | MentorIntakeOperation.id | No | Restrict |
 | MentorIntakeAttempt.user | userId | User.id | No | Restrict |
 | MentorParticipationSanction.user | userId | User.id | No | Restrict |
-| MentorParticipationSanction.triggerAttempt | triggerAttemptId | MentorIntakeAttempt.id | Sí | Restrict |
+| MentorParticipationSanction.triggerAttempt | triggerAttemptId | MentorIntakeAttempt.id | Yes | Restrict |
 | RadarCvEvidence.cv | cvId | UserCvFile.id | No | Cascade |
 | RadarCvEvidence.owner | userId | User.id | No | Cascade |
-| RadarCvEvidence.reviewer | reviewerId | User.id | Sí | SetNull |
+| RadarCvEvidence.reviewer | reviewerId | User.id | Yes | SetNull |
 | RadarCvEvidence.extractionState | extractionStatusId | RadarCvExtractionStatus.id | No | Restrict |
 | RadarCvEvidence.reviewState | reviewStatusId | RadarCvReviewStatus.id | No | Restrict |
 | RadarScoreSnapshot.user | userId | User.id | No | Cascade |
 | RadarAuditEvent.subject | userId | User.id | No | Cascade |
-| RadarAuditEvent.actor | actorId | User.id | Sí | SetNull |
+| RadarAuditEvent.actor | actorId | User.id | Yes | SetNull |
 | RadarCompanyAccess.company | companyId | Company.id | No | Cascade |
 | RadarCompanyAccess.user | userId | User.id | No | Cascade |
 | RadarJobApplication.jobOffer | jobOfferId | JobOffer.id | No | Cascade |
 | RadarJobApplication.user | userId | User.id | No | Cascade |
-| RadarJobApplication.decider | decidedBy | User.id | Sí | NoAction |
+| RadarJobApplication.decider | decidedBy | User.id | Yes | NoAction |
 | RadarDocumentVerification.owner | userId | User.id | No | Cascade |
-| RadarDocumentVerification.reviewer | reviewerId | User.id | Sí | SetNull |
+| RadarDocumentVerification.reviewer | reviewerId | User.id | Yes | SetNull |
 | RadarDocumentVerification.statusEntry | statusId | RadarDocumentStatus.id | No | Restrict |
 | RadarDocumentVerification.sourceTypeEntry | sourceTypeId | RadarDocumentSourceType.id | No | Restrict |
 | UserSocialAccount.user | userId | User.id | No | Cascade |
 | UserSocialAccount.provider | providerId | PortfolioProvider.id | No | Restrict |
 | UserPortfolioProject.user | userId | User.id | No | Cascade |
-| UserPortfolioProject.socialAccount | socialAccountId | UserSocialAccount.id | Sí | SetNull |
+| UserPortfolioProject.socialAccount | socialAccountId | UserSocialAccount.id | Yes | SetNull |
 | UserPortfolioProject.provider | providerId | PortfolioProvider.id | No | Restrict |
 | Notification.recipient | recipientId | User.id | No | Cascade |
-| Notification.actor | actorId | User.id | Sí | SetNull |
+| Notification.actor | actorId | User.id | Yes | SetNull |
 | Notification.type | typeId | NotificationType.id | No | Restrict |
 | PushSubscription.user | userId | User.id | No | Cascade |
 | NotificationPreference.user | userId | User.id | No | Cascade |
 
-## Diccionario de modelos
+## Model dictionary
 
-La columna de definición conserva los atributos del esquema para que defaults, precisión, índices y mapas puedan revisarse sin inferirlos.
+The definition column preserves schema attributes so defaults, precision, indexes, and mappings can be reviewed without inference.
 
 ### AppointmentStatus
 
-Tabla: `appointment_statuses`.
+Table: `appointment_statuses`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | title | `String` | title | `@unique @db.VarChar(100)` |
-| description | `String?` | description | `Sin atributos explícitos` |
+| description | `String?` | description | `No explicit attributes` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| appointments | `Appointment[]` | Relación: Appointment[] | `Sin atributos explícitos` |
-| previousAppointmentHistories | `AppointmentHistory[]` | Relación: AppointmentHistory[] | `@relation("PreviousAppointmentStatus")` |
-| newAppointmentHistories | `AppointmentHistory[]` | Relación: AppointmentHistory[] | `@relation("NewAppointmentStatus")` |
+| appointments | `Appointment[]` | Relation: Appointment[] | `No explicit attributes` |
+| previousAppointmentHistories | `AppointmentHistory[]` | Relation: AppointmentHistory[] | `@relation("PreviousAppointmentStatus")` |
+| newAppointmentHistories | `AppointmentHistory[]` | Relation: AppointmentHistory[] | `@relation("NewAppointmentStatus")` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@map("appointment_statuses")`
 
 ### ProposalStatus
 
-Tabla: `proposal_statuses`.
+Table: `proposal_statuses`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | title | `String` | title | `@unique @db.VarChar(100)` |
-| description | `String?` | description | `Sin atributos explícitos` |
+| description | `String?` | description | `No explicit attributes` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| proposals | `TimeProposal[]` | Relación: TimeProposal[] | `Sin atributos explícitos` |
+| proposals | `TimeProposal[]` | Relation: TimeProposal[] | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@map("proposal_statuses")`
 
 ### EventModality
 
-Tabla: `event_modalities`.
+Table: `event_modalities`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | title | `String` | title | `@unique @db.VarChar(100)` |
-| description | `String?` | description | `Sin atributos explícitos` |
+| description | `String?` | description | `No explicit attributes` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| events | `Event[]` | Relación: Event[] | `Sin atributos explícitos` |
+| events | `Event[]` | Relation: Event[] | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@map("event_modalities")`
 
 ### EventOrigin
 
-Tabla: `event_origins`.
+Table: `event_origins`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | title | `String` | title | `@unique @db.VarChar(100)` |
-| description | `String?` | description | `Sin atributos explícitos` |
+| description | `String?` | description | `No explicit attributes` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| events | `Event[]` | Relación: Event[] | `Sin atributos explícitos` |
+| events | `Event[]` | Relation: Event[] | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@map("event_origins")`
 
 ### EventStatus
 
-Tabla: `event_statuses`.
+Table: `event_statuses`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | title | `String` | title | `@unique @db.VarChar(100)` |
-| description | `String?` | description | `Sin atributos explícitos` |
+| description | `String?` | description | `No explicit attributes` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| events | `Event[]` | Relación: Event[] | `Sin atributos explícitos` |
+| events | `Event[]` | Relation: Event[] | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@map("event_statuses")`
 
 ### RegistrationStatus
 
-Tabla: `registration_statuses`.
+Table: `registration_statuses`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | title | `String` | title | `@unique @db.VarChar(100)` |
-| description | `String?` | description | `Sin atributos explícitos` |
+| description | `String?` | description | `No explicit attributes` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| eventRegistrations | `EventRegistration[]` | Relación: EventRegistration[] | `Sin atributos explícitos` |
+| eventRegistrations | `EventRegistration[]` | Relation: EventRegistration[] | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@map("registration_statuses")`
 
 ### City
 
-Tabla: `cities`.
+Table: `cities`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | title | `String` | title | `@unique @db.VarChar(100)` |
-| description | `String?` | description | `Sin atributos explícitos` |
+| description | `String?` | description | `No explicit attributes` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| users | `User[]` | Relación: User[] | `Sin atributos explícitos` |
+| users | `User[]` | Relation: User[] | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@map("cities")`
 
 ### Company
 
-Tabla: `companies`.
+Table: `companies`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | title | `String` | title | `@unique @db.VarChar(100)` |
-| description | `String?` | description | `Sin atributos explícitos` |
+| description | `String?` | description | `No explicit attributes` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| recruiters | `User[]` | Relación: User[] | `Sin atributos explícitos` |
-| workExperiences | `WorkExperience[]` | Relación: WorkExperience[] | `Sin atributos explícitos` |
-| jobOffers | `JobOffer[]` | Relación: JobOffer[] | `Sin atributos explícitos` |
-| radarCompanyAccess | `RadarCompanyAccess[]` | Relación: RadarCompanyAccess[] | `@ignore` |
+| recruiters | `User[]` | Relation: User[] | `No explicit attributes` |
+| workExperiences | `WorkExperience[]` | Relation: WorkExperience[] | `No explicit attributes` |
+| jobOffers | `JobOffer[]` | Relation: JobOffer[] | `No explicit attributes` |
+| radarCompanyAccess | `RadarCompanyAccess[]` | Relation: RadarCompanyAccess[] | `@ignore` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@map("companies")`
 
 ### User
 
-Tabla: `users`.
+Table: `users`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
-| mentorIntakeAttempts | `MentorIntakeAttempt[]` | Relación: MentorIntakeAttempt[] | `Sin atributos explícitos` |
-| mentorParticipationSanctions | `MentorParticipationSanction[]` | Relación: MentorParticipationSanction[] | `Sin atributos explícitos` |
+| mentorIntakeAttempts | `MentorIntakeAttempt[]` | Relation: MentorIntakeAttempt[] | `No explicit attributes` |
+| mentorParticipationSanctions | `MentorParticipationSanction[]` | Relation: MentorParticipationSanction[] | `No explicit attributes` |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | firstName | `String` | first_name | `@map("first_name") @db.VarChar(100)` |
 | lastName | `String` | last_name | `@map("last_name") @db.VarChar(100)` |
@@ -343,73 +343,73 @@ Tabla: `users`.
 | photoUrl | `Bytes?` | photo_url | `@map("photo_url")` |
 | cityId | `String?` | city_id | `@map("city_id") @db.Uuid` |
 | companyId | `String?` | company_id | `@map("company_id") @db.Uuid` |
-| company | `Company?` | Relación: Company? | `@relation(fields: [companyId], references: [id], onDelete: SetNull)` |
-| phone | `String?` | phone | `Sin atributos explícitos` |
+| company | `Company?` | Relation: Company? | `@relation(fields: [companyId], references: [id], onDelete: SetNull)` |
+| phone | `String?` | phone | `No explicit attributes` |
 | personalEmail | `String?` | personal_email | `@map("personal_email")` |
-| headline | `String?` | headline | `Sin atributos explícitos` |
+| headline | `String?` | headline | `No explicit attributes` |
 | aboutMe | `String?` | about_me | `@map("about_me")` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| city | `City?` | Relación: City? | `@relation(fields: [cityId], references: [id], onDelete: SetNull)` |
-| roles | `UserRole[]` | Relación: UserRole[] | `Sin atributos explícitos` |
-| educations | `Education[]` | Relación: Education[] | `Sin atributos explícitos` |
-| workExperiences | `WorkExperience[]` | Relación: WorkExperience[] | `Sin atributos explícitos` |
-| userSkills | `UserSkill[]` | Relación: UserSkill[] | `Sin atributos explícitos` |
-| certifications | `Certification[]` | Relación: Certification[] | `Sin atributos explícitos` |
-| cvFiles | `UserCvFile[]` | Relación: UserCvFile[] | `Sin atributos explícitos` |
-| skillProcessingState | `ProfileSkillProcessingState?` | Relación: ProfileSkillProcessingState? | `Sin atributos explícitos` |
-| mentorTechnicalAreas | `MentorTechnicalArea[]` | Relación: MentorTechnicalArea[] | `Sin atributos explícitos` |
-| mentorOrientationTypes | `MentorOrientationType[]` | Relación: MentorOrientationType[] | `Sin atributos explícitos` |
-| availabilityBlocks | `AvailabilityBlock[]` | Relación: AvailabilityBlock[] | `Sin atributos explícitos` |
-| blockedDates | `BlockedDate[]` | Relación: BlockedDate[] | `Sin atributos explícitos` |
-| mentorAppointments | `Appointment[]` | Relación: Appointment[] | `@relation("AppointmentMentor")` |
-| studentAppointments | `Appointment[]` | Relación: Appointment[] | `@relation("AppointmentStudent")` |
-| cancelledAppointments | `Appointment[]` | Relación: Appointment[] | `@relation("AppointmentCancelledBy")` |
-| appointmentChanges | `AppointmentHistory[]` | Relación: AppointmentHistory[] | `Sin atributos explícitos` |
-| createdEvents | `Event[]` | Relación: Event[] | `@relation("EventCreatedBy")` |
-| moderatedEvents | `Event[]` | Relación: Event[] | `@relation("EventModeratedBy")` |
-| eventRegistrations | `EventRegistration[]` | Relación: EventRegistration[] | `Sin atributos explícitos` |
-| checkedInAttendances | `EventAttendance[]` | Relación: EventAttendance[] | `Sin atributos explícitos` |
-| exportHistories | `AdminExportHistory[]` | Relación: AdminExportHistory[] | `@relation("AdminExportHistories")` |
-| openedAccessRequests | `AccessRequest[]` | Relación: AccessRequest[] | `@relation("AccessRequestOpenedBy")` |
-| reviewedAccessRequests | `AccessRequest[]` | Relación: AccessRequest[] | `@relation("AccessRequestReviewedBy")` |
-| approvedAccessRequest | `AccessRequest?` | Relación: AccessRequest? | `@relation("ApprovedGraduateAccount")` |
-| mentorSlotOffers | `MentorSlotOffer[]` | Relación: MentorSlotOffer[] | `Sin atributos explícitos` |
-| mentorParticipationRequests | `MentorParticipationRequest[]` | Relación: MentorParticipationRequest[] | `Sin atributos explícitos` |
-| mentorParticipationAttemptLimit | `MentorParticipationAttemptLimit?` | Relación: MentorParticipationAttemptLimit? | `Sin atributos explícitos` |
-| createdSurveys | `Survey[]` | Relación: Survey[] | `@relation("SurveyCreatedBy")` |
-| surveyResponses | `SurveyResponse[]` | Relación: SurveyResponse[] | `@relation("SurveyRespondent")` |
-| conversationsAsUserA | `Conversation[]` | Relación: Conversation[] | `@relation("UserAConversations")` |
-| conversationsAsUserB | `Conversation[]` | Relación: Conversation[] | `@relation("UserBConversations")` |
-| chatMessages | `Message[]` | Relación: Message[] | `Sin atributos explícitos` |
-| chatParticipants | `ConversationParticipant[]` | Relación: ConversationParticipant[] | `Sin atributos explícitos` |
-| presence | `UserPresence?` | Relación: UserPresence? | `Sin atributos explícitos` |
-| chatBlocksMade | `ChatUserBlock[]` | Relación: ChatUserBlock[] | `@relation("ChatBlocker")` |
-| chatBlocksReceived | `ChatUserBlock[]` | Relación: ChatUserBlock[] | `@relation("ChatBlocked")` |
-| sentRequests | `ConnectionRequest[]` | Relación: ConnectionRequest[] | `@relation("SentConnectionRequests")` |
-| receivedRequests | `ConnectionRequest[]` | Relación: ConnectionRequest[] | `@relation("ReceivedConnectionRequests")` |
-| passwordResetOtps | `PasswordResetOtp[]` | Relación: PasswordResetOtp[] | `Sin atributos explícitos` |
-| auditEvents | `AuditEvent[]` | Relación: AuditEvent[] | `@relation("AuditEventActor")` |
-| revertedValidations | `DocumentValidation[]` | Relación: DocumentValidation[] | `@relation("DocumentValidationRevertedBy")` |
-| jobApplications | `JobApplication[]` | Relación: JobApplication[] | `Sin atributos explícitos` |
-| radarCvOwned | `RadarCvEvidence[]` | Relación: RadarCvEvidence[] | `@relation("RadarCvOwner")` |
-| radarCvReviewed | `RadarCvEvidence[]` | Relación: RadarCvEvidence[] | `@relation("RadarCvReviewer")` |
-| radarSnapshots | `RadarScoreSnapshot[]` | Relación: RadarScoreSnapshot[] | `Sin atributos explícitos` |
-| documentVerifications | `RadarDocumentVerification[]` | Relación: RadarDocumentVerification[] | `@relation("VerifiedDocumentOwner")` |
-| reviewedDocuments | `RadarDocumentVerification[]` | Relación: RadarDocumentVerification[] | `@relation("VerifiedDocumentReviewer")` |
-| radarAuditSubjects | `RadarAuditEvent[]` | Relación: RadarAuditEvent[] | `@relation("RadarAuditSubject")` |
-| radarAuditActors | `RadarAuditEvent[]` | Relación: RadarAuditEvent[] | `@relation("RadarAuditActor")` |
-| radarCompanyAccess | `RadarCompanyAccess[]` | Relación: RadarCompanyAccess[] | `@ignore` |
-| radarApplications | `RadarJobApplication[]` | Relación: RadarJobApplication[] | `@relation("RadarApplicant") @ignore` |
-| radarDecisions | `RadarJobApplication[]` | Relación: RadarJobApplication[] | `@relation("RadarDecision") @ignore` |
-| socialAccounts | `UserSocialAccount[]` | Relación: UserSocialAccount[] | `Sin atributos explícitos` |
-| portfolioProjects | `UserPortfolioProject[]` | Relación: UserPortfolioProject[] | `Sin atributos explícitos` |
-| notificationPreferences | `NotificationPreference?` | Relación: NotificationPreference? | `Sin atributos explícitos` |
-| receivedNotifications | `Notification[]` | Relación: Notification[] | `@relation("ReceivedNotifications")` |
-| triggeredNotifications | `Notification[]` | Relación: Notification[] | `@relation("TriggeredNotifications")` |
-| pushSubscriptions | `PushSubscription[]` | Relación: PushSubscription[] | `Sin atributos explícitos` |
+| city | `City?` | Relation: City? | `@relation(fields: [cityId], references: [id], onDelete: SetNull)` |
+| roles | `UserRole[]` | Relation: UserRole[] | `No explicit attributes` |
+| educations | `Education[]` | Relation: Education[] | `No explicit attributes` |
+| workExperiences | `WorkExperience[]` | Relation: WorkExperience[] | `No explicit attributes` |
+| userSkills | `UserSkill[]` | Relation: UserSkill[] | `No explicit attributes` |
+| certifications | `Certification[]` | Relation: Certification[] | `No explicit attributes` |
+| cvFiles | `UserCvFile[]` | Relation: UserCvFile[] | `No explicit attributes` |
+| skillProcessingState | `ProfileSkillProcessingState?` | Relation: ProfileSkillProcessingState? | `No explicit attributes` |
+| mentorTechnicalAreas | `MentorTechnicalArea[]` | Relation: MentorTechnicalArea[] | `No explicit attributes` |
+| mentorOrientationTypes | `MentorOrientationType[]` | Relation: MentorOrientationType[] | `No explicit attributes` |
+| availabilityBlocks | `AvailabilityBlock[]` | Relation: AvailabilityBlock[] | `No explicit attributes` |
+| blockedDates | `BlockedDate[]` | Relation: BlockedDate[] | `No explicit attributes` |
+| mentorAppointments | `Appointment[]` | Relation: Appointment[] | `@relation("AppointmentMentor")` |
+| studentAppointments | `Appointment[]` | Relation: Appointment[] | `@relation("AppointmentStudent")` |
+| cancelledAppointments | `Appointment[]` | Relation: Appointment[] | `@relation("AppointmentCancelledBy")` |
+| appointmentChanges | `AppointmentHistory[]` | Relation: AppointmentHistory[] | `No explicit attributes` |
+| createdEvents | `Event[]` | Relation: Event[] | `@relation("EventCreatedBy")` |
+| moderatedEvents | `Event[]` | Relation: Event[] | `@relation("EventModeratedBy")` |
+| eventRegistrations | `EventRegistration[]` | Relation: EventRegistration[] | `No explicit attributes` |
+| checkedInAttendances | `EventAttendance[]` | Relation: EventAttendance[] | `No explicit attributes` |
+| exportHistories | `AdminExportHistory[]` | Relation: AdminExportHistory[] | `@relation("AdminExportHistories")` |
+| openedAccessRequests | `AccessRequest[]` | Relation: AccessRequest[] | `@relation("AccessRequestOpenedBy")` |
+| reviewedAccessRequests | `AccessRequest[]` | Relation: AccessRequest[] | `@relation("AccessRequestReviewedBy")` |
+| approvedAccessRequest | `AccessRequest?` | Relation: AccessRequest? | `@relation("ApprovedGraduateAccount")` |
+| mentorSlotOffers | `MentorSlotOffer[]` | Relation: MentorSlotOffer[] | `No explicit attributes` |
+| mentorParticipationRequests | `MentorParticipationRequest[]` | Relation: MentorParticipationRequest[] | `No explicit attributes` |
+| mentorParticipationAttemptLimit | `MentorParticipationAttemptLimit?` | Relation: MentorParticipationAttemptLimit? | `No explicit attributes` |
+| createdSurveys | `Survey[]` | Relation: Survey[] | `@relation("SurveyCreatedBy")` |
+| surveyResponses | `SurveyResponse[]` | Relation: SurveyResponse[] | `@relation("SurveyRespondent")` |
+| conversationsAsUserA | `Conversation[]` | Relation: Conversation[] | `@relation("UserAConversations")` |
+| conversationsAsUserB | `Conversation[]` | Relation: Conversation[] | `@relation("UserBConversations")` |
+| chatMessages | `Message[]` | Relation: Message[] | `No explicit attributes` |
+| chatParticipants | `ConversationParticipant[]` | Relation: ConversationParticipant[] | `No explicit attributes` |
+| presence | `UserPresence?` | Relation: UserPresence? | `No explicit attributes` |
+| chatBlocksMade | `ChatUserBlock[]` | Relation: ChatUserBlock[] | `@relation("ChatBlocker")` |
+| chatBlocksReceived | `ChatUserBlock[]` | Relation: ChatUserBlock[] | `@relation("ChatBlocked")` |
+| sentRequests | `ConnectionRequest[]` | Relation: ConnectionRequest[] | `@relation("SentConnectionRequests")` |
+| receivedRequests | `ConnectionRequest[]` | Relation: ConnectionRequest[] | `@relation("ReceivedConnectionRequests")` |
+| passwordResetOtps | `PasswordResetOtp[]` | Relation: PasswordResetOtp[] | `No explicit attributes` |
+| auditEvents | `AuditEvent[]` | Relation: AuditEvent[] | `@relation("AuditEventActor")` |
+| revertedValidations | `DocumentValidation[]` | Relation: DocumentValidation[] | `@relation("DocumentValidationRevertedBy")` |
+| jobApplications | `JobApplication[]` | Relation: JobApplication[] | `No explicit attributes` |
+| radarCvOwned | `RadarCvEvidence[]` | Relation: RadarCvEvidence[] | `@relation("RadarCvOwner")` |
+| radarCvReviewed | `RadarCvEvidence[]` | Relation: RadarCvEvidence[] | `@relation("RadarCvReviewer")` |
+| radarSnapshots | `RadarScoreSnapshot[]` | Relation: RadarScoreSnapshot[] | `No explicit attributes` |
+| documentVerifications | `RadarDocumentVerification[]` | Relation: RadarDocumentVerification[] | `@relation("VerifiedDocumentOwner")` |
+| reviewedDocuments | `RadarDocumentVerification[]` | Relation: RadarDocumentVerification[] | `@relation("VerifiedDocumentReviewer")` |
+| radarAuditSubjects | `RadarAuditEvent[]` | Relation: RadarAuditEvent[] | `@relation("RadarAuditSubject")` |
+| radarAuditActors | `RadarAuditEvent[]` | Relation: RadarAuditEvent[] | `@relation("RadarAuditActor")` |
+| radarCompanyAccess | `RadarCompanyAccess[]` | Relation: RadarCompanyAccess[] | `@ignore` |
+| radarApplications | `RadarJobApplication[]` | Relation: RadarJobApplication[] | `@relation("RadarApplicant") @ignore` |
+| radarDecisions | `RadarJobApplication[]` | Relation: RadarJobApplication[] | `@relation("RadarDecision") @ignore` |
+| socialAccounts | `UserSocialAccount[]` | Relation: UserSocialAccount[] | `No explicit attributes` |
+| portfolioProjects | `UserPortfolioProject[]` | Relation: UserPortfolioProject[] | `No explicit attributes` |
+| notificationPreferences | `NotificationPreference?` | Relation: NotificationPreference? | `No explicit attributes` |
+| receivedNotifications | `Notification[]` | Relation: Notification[] | `@relation("ReceivedNotifications")` |
+| triggeredNotifications | `Notification[]` | Relation: Notification[] | `@relation("TriggeredNotifications")` |
+| pushSubscriptions | `PushSubscription[]` | Relation: PushSubscription[] | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@index([cityId])`
 - `@@index([companyId])`
@@ -417,25 +417,25 @@ Restricciones del modelo:
 
 ### Role
 
-Tabla: `roles`.
+Table: `roles`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | name | `String` | name | `@unique @db.VarChar(50)` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| userRoles | `UserRole[]` | Relación: UserRole[] | `Sin atributos explícitos` |
+| userRoles | `UserRole[]` | Relation: UserRole[] | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@map("roles")`
 
 ### UserRole
 
-Tabla: `user_roles`.
+Table: `user_roles`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | userId | `String` | user_id | `@map("user_id") @db.Uuid` |
@@ -444,10 +444,10 @@ Tabla: `user_roles`.
 | deletedAt | `DateTime?` | deleted_at | `@map("deleted_at") @db.Timestamptz(6)` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| user | `User` | Relación: User | `@relation(fields: [userId], references: [id], onDelete: Cascade)` |
-| role | `Role` | Relación: Role | `@relation(fields: [roleId], references: [id], onDelete: Restrict)` |
+| user | `User` | Relation: User | `@relation(fields: [userId], references: [id], onDelete: Cascade)` |
+| role | `Role` | Relation: Role | `@relation(fields: [roleId], references: [id], onDelete: Restrict)` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@unique([userId, roleId, startAt])`
 - `@@index([roleId])`
@@ -456,46 +456,46 @@ Restricciones del modelo:
 
 ### Education
 
-Tabla: `educations`.
+Table: `educations`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | userId | `String` | user_id | `@map("user_id") @db.Uuid` |
-| institution | `String` | institution | `Sin atributos explícitos` |
-| degree | `String` | degree | `Sin atributos explícitos` |
+| institution | `String` | institution | `No explicit attributes` |
+| degree | `String` | degree | `No explicit attributes` |
 | startDate | `DateTime` | start_date | `@map("start_date") @db.Date` |
 | endDate | `DateTime?` | end_date | `@map("end_date") @db.Date` |
-| description | `String?` | description | `Sin atributos explícitos` |
+| description | `String?` | description | `No explicit attributes` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| user | `User` | Relación: User | `@relation(fields: [userId], references: [id], onDelete: Cascade)` |
+| user | `User` | Relation: User | `@relation(fields: [userId], references: [id], onDelete: Cascade)` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@index([userId])`
 - `@@map("educations")`
 
 ### WorkExperience
 
-Tabla: `work_experiences`.
+Table: `work_experiences`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | userId | `String` | user_id | `@map("user_id") @db.Uuid` |
 | companyId | `String` | company_id | `@map("company_id") @db.Uuid` |
-| position | `String` | position | `Sin atributos explícitos` |
+| position | `String` | position | `No explicit attributes` |
 | startDate | `DateTime` | start_date | `@map("start_date") @db.Date` |
 | endDate | `DateTime?` | end_date | `@map("end_date") @db.Date` |
 | isCurrent | `Boolean` | is_current | `@default(false) @map("is_current")` |
-| description | `String?` | description | `Sin atributos explícitos` |
+| description | `String?` | description | `No explicit attributes` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| user | `User` | Relación: User | `@relation(fields: [userId], references: [id], onDelete: Cascade)` |
-| company | `Company` | Relación: Company | `@relation(fields: [companyId], references: [id], onDelete: Restrict)` |
+| user | `User` | Relation: User | `@relation(fields: [userId], references: [id], onDelete: Cascade)` |
+| company | `Company` | Relation: Company | `@relation(fields: [companyId], references: [id], onDelete: Restrict)` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@index([userId])`
 - `@@index([companyId])`
@@ -503,26 +503,26 @@ Restricciones del modelo:
 
 ### RadarArea
 
-Tabla: `radar_areas`.
+Table: `radar_areas`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @db.VarChar(50)` |
 | name | `String` | name | `@unique @db.VarChar(80)` |
-| description | `String?` | description | `Sin atributos explícitos` |
+| description | `String?` | description | `No explicit attributes` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| skills | `Skill[]` | Relación: Skill[] | `Sin atributos explícitos` |
+| skills | `Skill[]` | Relation: Skill[] | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@map("radar_areas")`
 
 ### Skill
 
-Tabla: `skills`.
+Table: `skills`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | name | `String` | name | `@unique` |
@@ -530,30 +530,30 @@ Tabla: `skills`.
 | areaId | `String?` | area_id | `@map("area_id") @db.VarChar(50)` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| area | `RadarArea?` | Relación: RadarArea? | `@relation(fields: [areaId], references: [id], onDelete: SetNull)` |
-| userSkills | `UserSkill[]` | Relación: UserSkill[] | `Sin atributos explícitos` |
-| jobOfferSkills | `JobOfferSkill[]` | Relación: JobOfferSkill[] | `Sin atributos explícitos` |
+| area | `RadarArea?` | Relation: RadarArea? | `@relation(fields: [areaId], references: [id], onDelete: SetNull)` |
+| userSkills | `UserSkill[]` | Relation: UserSkill[] | `No explicit attributes` |
+| jobOfferSkills | `JobOfferSkill[]` | Relation: JobOfferSkill[] | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@index([areaId])`
 - `@@map("skills")`
 
 ### JobOfferSkill
 
-Tabla: `job_offer_skills`.
+Table: `job_offer_skills`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | jobOfferId | `String` | job_offer_id | `@map("job_offer_id") @db.Uuid` |
 | skillId | `String` | skill_id | `@map("skill_id") @db.Uuid` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| jobOffer | `JobOffer` | Relación: JobOffer | `@relation(fields: [jobOfferId], references: [id], onDelete: Cascade)` |
-| skill | `Skill` | Relación: Skill | `@relation(fields: [skillId], references: [id], onDelete: Restrict)` |
+| jobOffer | `JobOffer` | Relation: JobOffer | `@relation(fields: [jobOfferId], references: [id], onDelete: Cascade)` |
+| skill | `Skill` | Relation: Skill | `@relation(fields: [skillId], references: [id], onDelete: Restrict)` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@unique([jobOfferId, skillId])`
 - `@@index([skillId])`
@@ -561,9 +561,9 @@ Restricciones del modelo:
 
 ### UserSkill
 
-Tabla: `user_skills`.
+Table: `user_skills`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | radarAutoVerified | `Boolean` | radar_auto_verified | `@default(false) @map("radar_auto_verified")` |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
@@ -575,10 +575,10 @@ Tabla: `user_skills`.
 | evidenceRefs | `Json?` | evidence_refs | `@default("[]") @map("evidence_refs")` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| user | `User` | Relación: User | `@relation(fields: [userId], references: [id], onDelete: Cascade)` |
-| skill | `Skill` | Relación: Skill | `@relation(fields: [skillId], references: [id], onDelete: Restrict)` |
+| user | `User` | Relation: User | `@relation(fields: [userId], references: [id], onDelete: Cascade)` |
+| skill | `Skill` | Relation: Skill | `@relation(fields: [skillId], references: [id], onDelete: Restrict)` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@unique([userId, skillId])`
 - `@@index([skillId])`
@@ -586,51 +586,51 @@ Restricciones del modelo:
 
 ### Certification
 
-Tabla: `certifications`.
+Table: `certifications`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | userId | `String` | user_id | `@map("user_id") @db.Uuid` |
-| name | `String` | name | `Sin atributos explícitos` |
+| name | `String` | name | `No explicit attributes` |
 | issuingOrganization | `String` | issuing_organization | `@map("issuing_organization")` |
 | issueDate | `DateTime` | issue_date | `@map("issue_date") @db.Date` |
 | documentUrl | `Bytes?` | document_url | `@map("document_url")` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| user | `User` | Relación: User | `@relation(fields: [userId], references: [id], onDelete: Cascade)` |
+| user | `User` | Relation: User | `@relation(fields: [userId], references: [id], onDelete: Cascade)` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@index([userId])`
 - `@@map("certifications")`
 
 ### UserCvFile
 
-Tabla: `user_cv_file`.
+Table: `user_cv_file`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(dbgenerated("gen_random_uuid()")) @db.Uuid` |
 | userId | `String` | user_id | `@map("user_id") @db.Uuid` |
 | cvFileName | `String?` | cv_file_name | `@map("cv_file_name") @db.VarChar` |
 | cvUploadedAt | `DateTime?` | cv_uploaded_at | `@map("cv_uploaded_at") @db.Timestamptz(6)` |
 | cvPdfData | `String?` | cv_pdf_data | `@map("cv_pdf_data")` |
-| user | `User` | Relación: User | `@relation(fields: [userId], references: [id], onDelete: Cascade)` |
-| radarEvidence | `RadarCvEvidence?` | Relación: RadarCvEvidence? | `Sin atributos explícitos` |
+| user | `User` | Relation: User | `@relation(fields: [userId], references: [id], onDelete: Cascade)` |
+| radarEvidence | `RadarCvEvidence?` | Relation: RadarCvEvidence? | `No explicit attributes` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@index([userId])`
 - `@@map("user_cv_file")`
 
 ### ProfileSkillProcessingState
 
-Tabla: `profile_skill_processing_states`.
+Table: `profile_skill_processing_states`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | userId | `String` | user_id | `@id @map("user_id") @db.Uuid` |
 | status | `String` | status | `@default("pending") @db.VarChar(20)` |
@@ -639,63 +639,63 @@ Tabla: `profile_skill_processing_states`.
 | resultVersion | `Int` | result_version | `@default(0) @map("result_version")` |
 | updatedAt | `DateTime` | updated_at | `@default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)` |
 | dictionaryVersion | `String?` | dictionary_version | `@map("dictionary_version") @db.VarChar(64)` |
-| user | `User` | Relación: User | `@relation(fields: [userId], references: [id], onDelete: Cascade)` |
+| user | `User` | Relation: User | `@relation(fields: [userId], references: [id], onDelete: Cascade)` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@map("profile_skill_processing_states")`
 
 ### TechnicalArea
 
-Tabla: `technical_areas`.
+Table: `technical_areas`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | name | `String` | name | `@unique @db.VarChar(80)` |
-| description | `String?` | description | `Sin atributos explícitos` |
+| description | `String?` | description | `No explicit attributes` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| mentors | `MentorTechnicalArea[]` | Relación: MentorTechnicalArea[] | `Sin atributos explícitos` |
+| mentors | `MentorTechnicalArea[]` | Relation: MentorTechnicalArea[] | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@map("technical_areas")`
 
 ### OrientationType
 
-Tabla: `orientation_types`.
+Table: `orientation_types`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | name | `String` | name | `@unique @db.VarChar(60)` |
-| description | `String?` | description | `Sin atributos explícitos` |
+| description | `String?` | description | `No explicit attributes` |
 | isActive | `Boolean` | is_active | `@default(true) @map("is_active")` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| mentors | `MentorOrientationType[]` | Relación: MentorOrientationType[] | `Sin atributos explícitos` |
-| appointments | `Appointment[]` | Relación: Appointment[] | `Sin atributos explícitos` |
+| mentors | `MentorOrientationType[]` | Relation: MentorOrientationType[] | `No explicit attributes` |
+| appointments | `Appointment[]` | Relation: Appointment[] | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@map("orientation_types")`
 
 ### MentorTechnicalArea
 
-Tabla: `mentor_technical_areas`.
+Table: `mentor_technical_areas`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | mentorId | `String` | mentor_id | `@map("mentor_id") @db.Uuid` |
 | technicalAreaId | `String` | technical_area_id | `@map("technical_area_id") @db.Uuid` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| mentor | `User` | Relación: User | `@relation(fields: [mentorId], references: [id], onDelete: Cascade)` |
-| technicalArea | `TechnicalArea` | Relación: TechnicalArea | `@relation(fields: [technicalAreaId], references: [id], onDelete: Restrict)` |
+| mentor | `User` | Relation: User | `@relation(fields: [mentorId], references: [id], onDelete: Cascade)` |
+| technicalArea | `TechnicalArea` | Relation: TechnicalArea | `@relation(fields: [technicalAreaId], references: [id], onDelete: Restrict)` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@unique([mentorId, technicalAreaId])`
 - `@@index([technicalAreaId])`
@@ -703,19 +703,19 @@ Restricciones del modelo:
 
 ### MentorOrientationType
 
-Tabla: `mentor_orientation_types`.
+Table: `mentor_orientation_types`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | mentorId | `String` | mentor_id | `@map("mentor_id") @db.Uuid` |
 | orientationTypeId | `String` | orientation_type_id | `@map("orientation_type_id") @db.Uuid` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| mentor | `User` | Relación: User | `@relation(fields: [mentorId], references: [id], onDelete: Cascade)` |
-| orientationType | `OrientationType` | Relación: OrientationType | `@relation(fields: [orientationTypeId], references: [id], onDelete: Restrict)` |
+| mentor | `User` | Relation: User | `@relation(fields: [mentorId], references: [id], onDelete: Cascade)` |
+| orientationType | `OrientationType` | Relation: OrientationType | `@relation(fields: [orientationTypeId], references: [id], onDelete: Restrict)` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@unique([mentorId, orientationTypeId])`
 - `@@index([orientationTypeId])`
@@ -723,9 +723,9 @@ Restricciones del modelo:
 
 ### AvailabilityBlock
 
-Tabla: `availability_blocks`.
+Table: `availability_blocks`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | mentorId | `String` | mentor_id | `@map("mentor_id") @db.Uuid` |
@@ -735,11 +735,11 @@ Tabla: `availability_blocks`.
 | repeatUntil | `DateTime?` | repeat_until | `@map("repeat_until") @db.Date` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| mentor | `User` | Relación: User | `@relation(fields: [mentorId], references: [id], onDelete: Cascade)` |
-| appointments | `Appointment[]` | Relación: Appointment[] | `Sin atributos explícitos` |
-| proposals | `TimeProposal[]` | Relación: TimeProposal[] | `Sin atributos explícitos` |
+| mentor | `User` | Relation: User | `@relation(fields: [mentorId], references: [id], onDelete: Cascade)` |
+| appointments | `Appointment[]` | Relation: Appointment[] | `No explicit attributes` |
+| proposals | `TimeProposal[]` | Relation: TimeProposal[] | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@index([mentorId, startAt])`
 - `@@index([seriesId])`
@@ -747,9 +747,9 @@ Restricciones del modelo:
 
 ### BlockedDate
 
-Tabla: `blocked_dates`.
+Table: `blocked_dates`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | mentorId | `String` | mentor_id | `@map("mentor_id") @db.Uuid` |
@@ -757,18 +757,18 @@ Tabla: `blocked_dates`.
 | reason | `String?` | reason | `@db.VarChar(100)` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| mentor | `User` | Relación: User | `@relation(fields: [mentorId], references: [id], onDelete: Cascade)` |
+| mentor | `User` | Relation: User | `@relation(fields: [mentorId], references: [id], onDelete: Cascade)` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@unique([mentorId, blockedOn])`
 - `@@map("blocked_dates")`
 
 ### Appointment
 
-Tabla: `appointments`.
+Table: `appointments`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | blockId | `String?` | block_id | `@map("block_id") @db.Uuid` |
@@ -786,17 +786,17 @@ Tabla: `appointments`.
 | respondedAt | `DateTime?` | responded_at | `@map("responded_at") @db.Timestamptz(6)` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| block | `AvailabilityBlock?` | Relación: AvailabilityBlock? | `@relation(fields: [blockId], references: [id], onDelete: SetNull)` |
-| mentor | `User` | Relación: User | `@relation("AppointmentMentor", fields: [mentorId], references: [id], onDelete: Restrict)` |
-| student | `User` | Relación: User | `@relation("AppointmentStudent", fields: [studentId], references: [id], onDelete: Restrict)` |
-| status | `AppointmentStatus` | Relación: AppointmentStatus | `@relation(fields: [statusId], references: [id], onDelete: Restrict)` |
-| orientationType | `OrientationType?` | Relación: OrientationType? | `@relation(fields: [orientationTypeId], references: [id], onDelete: SetNull)` |
-| cancelledBy | `User?` | Relación: User? | `@relation("AppointmentCancelledBy", fields: [cancelledById], references: [id], onDelete: SetNull)` |
-| proposals | `TimeProposal[]` | Relación: TimeProposal[] | `Sin atributos explícitos` |
-| history | `AppointmentHistory[]` | Relación: AppointmentHistory[] | `Sin atributos explícitos` |
-| document | `AppointmentDocument?` | Relación: AppointmentDocument? | `Sin atributos explícitos` |
+| block | `AvailabilityBlock?` | Relation: AvailabilityBlock? | `@relation(fields: [blockId], references: [id], onDelete: SetNull)` |
+| mentor | `User` | Relation: User | `@relation("AppointmentMentor", fields: [mentorId], references: [id], onDelete: Restrict)` |
+| student | `User` | Relation: User | `@relation("AppointmentStudent", fields: [studentId], references: [id], onDelete: Restrict)` |
+| status | `AppointmentStatus` | Relation: AppointmentStatus | `@relation(fields: [statusId], references: [id], onDelete: Restrict)` |
+| orientationType | `OrientationType?` | Relation: OrientationType? | `@relation(fields: [orientationTypeId], references: [id], onDelete: SetNull)` |
+| cancelledBy | `User?` | Relation: User? | `@relation("AppointmentCancelledBy", fields: [cancelledById], references: [id], onDelete: SetNull)` |
+| proposals | `TimeProposal[]` | Relation: TimeProposal[] | `No explicit attributes` |
+| history | `AppointmentHistory[]` | Relation: AppointmentHistory[] | `No explicit attributes` |
+| document | `AppointmentDocument?` | Relation: AppointmentDocument? | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@index([mentorId, startAt])`
 - `@@index([studentId, startAt])`
@@ -808,30 +808,30 @@ Restricciones del modelo:
 
 ### AppointmentDocument
 
-Tabla: `appointment_documents`.
+Table: `appointment_documents`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | appointmentId | `String` | appointment_id | `@unique @map("appointment_id") @db.Uuid` |
 | fileName | `String` | file_name | `@map("file_name") @db.VarChar(255)` |
 | mimeType | `String` | mime_type | `@map("mime_type") @db.VarChar(50)` |
 | sizeBytes | `Int` | size_bytes | `@map("size_bytes")` |
-| data | `Bytes` | data | `Sin atributos explícitos` |
+| data | `Bytes` | data | `No explicit attributes` |
 | uploadedAt | `DateTime` | uploaded_at | `@default(now()) @map("uploaded_at") @db.Timestamptz(6)` |
-| appointment | `Appointment` | Relación: Appointment | `@relation(fields: [appointmentId], references: [id], onDelete: Cascade)` |
+| appointment | `Appointment` | Relation: Appointment | `@relation(fields: [appointmentId], references: [id], onDelete: Cascade)` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@map("appointment_documents")`
 
 ### TimeProposal
 
-Tabla: `time_proposals`.
+Table: `time_proposals`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | appointmentId | `String` | appointment_id | `@map("appointment_id") @db.Uuid` |
@@ -841,11 +841,11 @@ Tabla: `time_proposals`.
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | respondedAt | `DateTime?` | responded_at | `@map("responded_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| appointment | `Appointment` | Relación: Appointment | `@relation(fields: [appointmentId], references: [id], onDelete: Cascade)` |
-| proposedBlock | `AvailabilityBlock` | Relación: AvailabilityBlock | `@relation(fields: [proposedBlockId], references: [id], onDelete: Cascade)` |
-| status | `ProposalStatus` | Relación: ProposalStatus | `@relation(fields: [statusId], references: [id], onDelete: Restrict)` |
+| appointment | `Appointment` | Relation: Appointment | `@relation(fields: [appointmentId], references: [id], onDelete: Cascade)` |
+| proposedBlock | `AvailabilityBlock` | Relation: AvailabilityBlock | `@relation(fields: [proposedBlockId], references: [id], onDelete: Cascade)` |
+| status | `ProposalStatus` | Relation: ProposalStatus | `@relation(fields: [statusId], references: [id], onDelete: Restrict)` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@index([appointmentId])`
 - `@@index([proposedBlockId])`
@@ -854,9 +854,9 @@ Restricciones del modelo:
 
 ### AppointmentHistory
 
-Tabla: `appointment_histories`.
+Table: `appointment_histories`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | appointmentId | `String` | appointment_id | `@map("appointment_id") @db.Uuid` |
@@ -867,12 +867,12 @@ Tabla: `appointment_histories`.
 | note | `String?` | note | `@db.VarChar(300)` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| appointment | `Appointment` | Relación: Appointment | `@relation(fields: [appointmentId], references: [id], onDelete: Cascade)` |
-| previousStatus | `AppointmentStatus?` | Relación: AppointmentStatus? | `@relation("PreviousAppointmentStatus", fields: [previousStatusId], references: [id], onDelete: SetNull)` |
-| newStatus | `AppointmentStatus` | Relación: AppointmentStatus | `@relation("NewAppointmentStatus", fields: [newStatusId], references: [id], onDelete: Restrict)` |
-| changedBy | `User?` | Relación: User? | `@relation(fields: [changedById], references: [id], onDelete: SetNull)` |
+| appointment | `Appointment` | Relation: Appointment | `@relation(fields: [appointmentId], references: [id], onDelete: Cascade)` |
+| previousStatus | `AppointmentStatus?` | Relation: AppointmentStatus? | `@relation("PreviousAppointmentStatus", fields: [previousStatusId], references: [id], onDelete: SetNull)` |
+| newStatus | `AppointmentStatus` | Relation: AppointmentStatus | `@relation("NewAppointmentStatus", fields: [newStatusId], references: [id], onDelete: Restrict)` |
+| changedBy | `User?` | Relation: User? | `@relation(fields: [changedById], references: [id], onDelete: SetNull)` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@index([appointmentId, changedAt])`
 - `@@index([previousStatusId])`
@@ -882,25 +882,25 @@ Restricciones del modelo:
 
 ### EventCategory
 
-Tabla: `event_categories`.
+Table: `event_categories`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | name | `String` | name | `@unique @db.VarChar(50)` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| events | `Event[]` | Relación: Event[] | `Sin atributos explícitos` |
+| events | `Event[]` | Relation: Event[] | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@map("event_categories")`
 
 ### Event
 
-Tabla: `events`.
+Table: `events`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | coverData | `Bytes?` | cover_data | `@map("cover_data")` |
 | coverMimeType | `String?` | cover_mime_type | `@map("cover_mime_type") @db.VarChar(30)` |
@@ -908,15 +908,15 @@ Tabla: `events`.
 | proposalHash | `String?` | proposal_hash | `@map("proposal_hash") @db.VarChar(64)` |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | title | `String` | title | `@db.VarChar(150)` |
-| description | `String?` | description | `Sin atributos explícitos` |
+| description | `String?` | description | `No explicit attributes` |
 | categoryId | `String` | category_id | `@map("category_id") @db.Uuid` |
 | instructorName | `String?` | instructor_name | `@map("instructor_name") @db.VarChar(120)` |
 | eventDate | `DateTime` | event_date | `@map("event_date") @db.Date` |
 | startTime | `DateTime` | start_time | `@map("start_time") @db.Time(6)` |
 | endTime | `DateTime` | end_time | `@map("end_time") @db.Time(6)` |
 | modalityId | `String` | modality_id | `@map("modality_id") @db.Uuid` |
-| location | `String?` | location | `Sin atributos explícitos` |
-| capacity | `Int?` | capacity | `Sin atributos explícitos` |
+| location | `String?` | location | `No explicit attributes` |
+| capacity | `Int?` | capacity | `No explicit attributes` |
 | originId | `String` | origin_id | `@map("origin_id") @db.Uuid` |
 | statusId | `String` | status_id | `@map("status_id") @db.Uuid` |
 | supportThreshold | `Int?` | support_threshold | `@map("support_threshold")` |
@@ -926,16 +926,16 @@ Tabla: `events`.
 | createdById | `String` | created_by_id | `@map("created_by_id") @db.Uuid` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| category | `EventCategory` | Relación: EventCategory | `@relation(fields: [categoryId], references: [id], onDelete: Restrict)` |
-| modality | `EventModality` | Relación: EventModality | `@relation(fields: [modalityId], references: [id], onDelete: Restrict)` |
-| origin | `EventOrigin` | Relación: EventOrigin | `@relation(fields: [originId], references: [id], onDelete: Restrict)` |
-| status | `EventStatus` | Relación: EventStatus | `@relation(fields: [statusId], references: [id], onDelete: Restrict)` |
-| createdBy | `User` | Relación: User | `@relation("EventCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)` |
-| moderatedBy | `User?` | Relación: User? | `@relation("EventModeratedBy", fields: [moderatedById], references: [id], onDelete: SetNull)` |
-| registrations | `EventRegistration[]` | Relación: EventRegistration[] | `Sin atributos explícitos` |
-| chatRoom | `Conversation?` | Relación: Conversation? | `Sin atributos explícitos` |
+| category | `EventCategory` | Relation: EventCategory | `@relation(fields: [categoryId], references: [id], onDelete: Restrict)` |
+| modality | `EventModality` | Relation: EventModality | `@relation(fields: [modalityId], references: [id], onDelete: Restrict)` |
+| origin | `EventOrigin` | Relation: EventOrigin | `@relation(fields: [originId], references: [id], onDelete: Restrict)` |
+| status | `EventStatus` | Relation: EventStatus | `@relation(fields: [statusId], references: [id], onDelete: Restrict)` |
+| createdBy | `User` | Relation: User | `@relation("EventCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)` |
+| moderatedBy | `User?` | Relation: User? | `@relation("EventModeratedBy", fields: [moderatedById], references: [id], onDelete: SetNull)` |
+| registrations | `EventRegistration[]` | Relation: EventRegistration[] | `No explicit attributes` |
+| chatRoom | `Conversation?` | Relation: Conversation? | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@unique([createdById, proposalKey])`
 - `@@index([categoryId])`
@@ -948,9 +948,9 @@ Restricciones del modelo:
 
 ### EventRegistration
 
-Tabla: `event_registrations`.
+Table: `event_registrations`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | eventId | `String` | event_id | `@map("event_id") @db.Uuid` |
@@ -961,12 +961,12 @@ Tabla: `event_registrations`.
 | cancelledAt | `DateTime?` | cancelled_at | `@map("cancelled_at") @db.Timestamptz(6)` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| event | `Event` | Relación: Event | `@relation(fields: [eventId], references: [id], onDelete: Cascade)` |
-| user | `User` | Relación: User | `@relation(fields: [userId], references: [id], onDelete: Cascade)` |
-| status | `RegistrationStatus` | Relación: RegistrationStatus | `@relation(fields: [statusId], references: [id], onDelete: Restrict)` |
-| attendance | `EventAttendance?` | Relación: EventAttendance? | `Sin atributos explícitos` |
+| event | `Event` | Relation: Event | `@relation(fields: [eventId], references: [id], onDelete: Cascade)` |
+| user | `User` | Relation: User | `@relation(fields: [userId], references: [id], onDelete: Cascade)` |
+| status | `RegistrationStatus` | Relation: RegistrationStatus | `@relation(fields: [statusId], references: [id], onDelete: Restrict)` |
+| attendance | `EventAttendance?` | Relation: EventAttendance? | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@unique([eventId, userId])`
 - `@@index([userId])`
@@ -975,9 +975,9 @@ Restricciones del modelo:
 
 ### EventAttendance
 
-Tabla: `event_attendances`.
+Table: `event_attendances`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | registrationId | `String` | registration_id | `@unique @map("registration_id") @db.Uuid` |
@@ -987,31 +987,31 @@ Tabla: `event_attendances`.
 | syncedAt | `DateTime?` | synced_at | `@map("synced_at") @db.Timestamptz(6)` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| registration | `EventRegistration` | Relación: EventRegistration | `@relation(fields: [registrationId], references: [id], onDelete: Cascade)` |
-| checkedInBy | `User?` | Relación: User? | `@relation(fields: [checkedInById], references: [id], onDelete: SetNull)` |
+| registration | `EventRegistration` | Relation: EventRegistration | `@relation(fields: [registrationId], references: [id], onDelete: Cascade)` |
+| checkedInBy | `User?` | Relation: User? | `@relation(fields: [checkedInById], references: [id], onDelete: SetNull)` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@index([checkedInById])`
 - `@@map("event_attendances")`
 
 ### JobOffer
 
-Tabla: `job_offers`.
+Table: `job_offers`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | title | `String` | title | `@db.VarChar(60)` |
-| description | `String` | description | `Sin atributos explícitos` |
+| description | `String` | description | `No explicit attributes` |
 | companyId | `String` | company_id | `@map("company_id") @db.Uuid` |
 | modalityId | `String` | modality_id | `@map("modality_id") @db.Uuid` |
 | contractTypeId | `String` | contract_type_id | `@map("contract_type_id") @db.Uuid` |
 | statusId | `String` | status_id | `@map("status_id") @db.Uuid` |
-| category | `String` | category | `Sin atributos explícitos` |
+| category | `String` | category | `No explicit attributes` |
 | positionsAvailable | `Int` | positions_available | `@default(1) @map("positions_available")` |
 | salaryRange | `String` | salary_range | `@map("salary_range")` |
-| languages | `String` | languages | `Sin atributos explícitos` |
+| languages | `String` | languages | `No explicit attributes` |
 | locationUrl | `String` | location_url | `@map("location_url")` |
 | requiredCareers | `String[]` | required_careers | `@default([]) @map("required_careers")` |
 | minExperienceYears | `Int?` | min_experience_years | `@map("min_experience_years")` |
@@ -1020,15 +1020,15 @@ Tabla: `job_offers`.
 | publishedAt | `DateTime` | published_at | `@default(now()) @map("published_at") @db.Timestamptz(6)` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| company | `Company` | Relación: Company | `@relation(fields: [companyId], references: [id], onDelete: Cascade)` |
-| modality | `JobOfferModality` | Relación: JobOfferModality | `@relation(fields: [modalityId], references: [id], onDelete: Restrict)` |
-| contractType | `JobOfferContractType` | Relación: JobOfferContractType | `@relation(fields: [contractTypeId], references: [id], onDelete: Restrict)` |
-| status | `JobOfferStatus` | Relación: JobOfferStatus | `@relation(fields: [statusId], references: [id], onDelete: Restrict)` |
-| skills | `JobOfferSkill[]` | Relación: JobOfferSkill[] | `Sin atributos explícitos` |
-| applications | `JobApplication[]` | Relación: JobApplication[] | `Sin atributos explícitos` |
-| radarApplications | `RadarJobApplication[]` | Relación: RadarJobApplication[] | `@ignore` |
+| company | `Company` | Relation: Company | `@relation(fields: [companyId], references: [id], onDelete: Cascade)` |
+| modality | `JobOfferModality` | Relation: JobOfferModality | `@relation(fields: [modalityId], references: [id], onDelete: Restrict)` |
+| contractType | `JobOfferContractType` | Relation: JobOfferContractType | `@relation(fields: [contractTypeId], references: [id], onDelete: Restrict)` |
+| status | `JobOfferStatus` | Relation: JobOfferStatus | `@relation(fields: [statusId], references: [id], onDelete: Restrict)` |
+| skills | `JobOfferSkill[]` | Relation: JobOfferSkill[] | `No explicit attributes` |
+| applications | `JobApplication[]` | Relation: JobApplication[] | `No explicit attributes` |
+| radarApplications | `RadarJobApplication[]` | Relation: RadarJobApplication[] | `@ignore` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@index([companyId])`
 - `@@index([modalityId])`
@@ -1038,148 +1038,148 @@ Restricciones del modelo:
 
 ### JobOfferModality
 
-Tabla: `job_offer_modalities`.
+Table: `job_offer_modalities`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | title | `String` | title | `@unique @db.VarChar(100)` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| jobOffers | `JobOffer[]` | Relación: JobOffer[] | `Sin atributos explícitos` |
+| jobOffers | `JobOffer[]` | Relation: JobOffer[] | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@map("job_offer_modalities")`
 
 ### JobOfferContractType
 
-Tabla: `job_offer_contract_types`.
+Table: `job_offer_contract_types`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | title | `String` | title | `@unique @db.VarChar(100)` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| jobOffers | `JobOffer[]` | Relación: JobOffer[] | `Sin atributos explícitos` |
+| jobOffers | `JobOffer[]` | Relation: JobOffer[] | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@map("job_offer_contract_types")`
 
 ### JobOfferStatus
 
-Tabla: `job_offer_statuses`.
+Table: `job_offer_statuses`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | title | `String` | title | `@unique @db.VarChar(100)` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| jobOffers | `JobOffer[]` | Relación: JobOffer[] | `Sin atributos explícitos` |
+| jobOffers | `JobOffer[]` | Relation: JobOffer[] | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@map("job_offer_statuses")`
 
 ### AdminExportHistory
 
-Tabla: `admin_export_histories`.
+Table: `admin_export_histories`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | userId | `String` | user_id | `@map("user_id") @db.Uuid` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | reportName | `String` | report_name | `@map("report_name") @db.VarChar(255)` |
 | reportType | `String` | report_type | `@map("report_type") @db.VarChar(100)` |
-| user | `User` | Relación: User | `@relation("AdminExportHistories", fields: [userId], references: [id], onDelete: Cascade)` |
+| user | `User` | Relation: User | `@relation("AdminExportHistories", fields: [userId], references: [id], onDelete: Cascade)` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@unique([userId, createdAt])`
 - `@@map("admin_export_histories")`
 
 ### AccessRequestStatus
 
-Tabla: `access_request_statuses`.
+Table: `access_request_statuses`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | title | `String` | title | `@unique @db.VarChar(100)` |
-| description | `String?` | description | `Sin atributos explícitos` |
+| description | `String?` | description | `No explicit attributes` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| accessRequests | `AccessRequest[]` | Relación: AccessRequest[] | `Sin atributos explícitos` |
+| accessRequests | `AccessRequest[]` | Relation: AccessRequest[] | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@map("access_request_statuses")`
 
 ### AccessRequestDocumentType
 
-Tabla: `access_request_document_types`.
+Table: `access_request_document_types`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | title | `String` | title | `@unique @db.VarChar(100)` |
-| description | `String?` | description | `Sin atributos explícitos` |
+| description | `String?` | description | `No explicit attributes` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| accessRequests | `AccessRequest[]` | Relación: AccessRequest[] | `Sin atributos explícitos` |
+| accessRequests | `AccessRequest[]` | Relation: AccessRequest[] | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@map("access_request_document_types")`
 
 ### File
 
-Tabla: `files`.
+Table: `files`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | name | `String` | name | `@db.VarChar(255)` |
 | extension | `String` | extension | `@db.VarChar(10)` |
 | mimeType | `String` | mime_type | `@map("mime_type") @db.VarChar(100)` |
-| size | `Int` | size | `Sin atributos explícitos` |
-| content | `Bytes` | content | `Sin atributos explícitos` |
+| size | `Int` | size | `No explicit attributes` |
+| content | `Bytes` | content | `No explicit attributes` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| accessRequest | `AccessRequest?` | Relación: AccessRequest? | `Sin atributos explícitos` |
-| auditEvents | `AuditEvent[]` | Relación: AuditEvent[] | `@relation("AuditEventEvidence")` |
+| accessRequest | `AccessRequest?` | Relation: AccessRequest? | `No explicit attributes` |
+| auditEvents | `AuditEvent[]` | Relation: AuditEvent[] | `@relation("AuditEventEvidence")` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@map("files")`
 
 ### Career
 
-Tabla: `careers`.
+Table: `careers`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | title | `String` | title | `@unique @db.VarChar(100)` |
-| description | `String?` | description | `Sin atributos explícitos` |
+| description | `String?` | description | `No explicit attributes` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| accessRequests | `AccessRequest[]` | Relación: AccessRequest[] | `Sin atributos explícitos` |
-| surveys | `Survey[]` | Relación: Survey[] | `Sin atributos explícitos` |
+| accessRequests | `AccessRequest[]` | Relation: AccessRequest[] | `No explicit attributes` |
+| surveys | `Survey[]` | Relation: Survey[] | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@map("careers")`
 
 ### AccessRequest
 
-Tabla: `access_requests`.
+Table: `access_requests`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | requestCode | `String?` | request_code | `@unique @map("request_code") @db.VarChar(20)` |
@@ -1205,18 +1205,18 @@ Tabla: `access_requests`.
 | rejectionReason | `String?` | rejection_reason | `@map("rejection_reason") @db.VarChar(500)` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| status | `AccessRequestStatus` | Relación: AccessRequestStatus | `@relation(fields: [statusId], references: [id], onDelete: Restrict)` |
-| documentType | `AccessRequestDocumentType?` | Relación: AccessRequestDocumentType? | `@relation(fields: [documentTypeId], references: [id], onDelete: Restrict)` |
-| documentFile | `File?` | Relación: File? | `@relation(fields: [documentFileId], references: [id], onDelete: SetNull)` |
-| openedBy | `User?` | Relación: User? | `@relation("AccessRequestOpenedBy", fields: [openedById], references: [id], onDelete: SetNull)` |
-| reviewedBy | `User?` | Relación: User? | `@relation("AccessRequestReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)` |
-| approvedUser | `User?` | Relación: User? | `@relation("ApprovedGraduateAccount", fields: [approvedUserId], references: [id], onDelete: SetNull)` |
-| career | `Career` | Relación: Career | `@relation(fields: [careerId], references: [id], onDelete: Restrict)` |
-| activationOtps | `ActivationOtp[]` | Relación: ActivationOtp[] | `Sin atributos explícitos` |
-| auditEvents | `AuditEvent[]` | Relación: AuditEvent[] | `Sin atributos explícitos` |
-| documentValidation | `DocumentValidation?` | Relación: DocumentValidation? | `Sin atributos explícitos` |
+| status | `AccessRequestStatus` | Relation: AccessRequestStatus | `@relation(fields: [statusId], references: [id], onDelete: Restrict)` |
+| documentType | `AccessRequestDocumentType?` | Relation: AccessRequestDocumentType? | `@relation(fields: [documentTypeId], references: [id], onDelete: Restrict)` |
+| documentFile | `File?` | Relation: File? | `@relation(fields: [documentFileId], references: [id], onDelete: SetNull)` |
+| openedBy | `User?` | Relation: User? | `@relation("AccessRequestOpenedBy", fields: [openedById], references: [id], onDelete: SetNull)` |
+| reviewedBy | `User?` | Relation: User? | `@relation("AccessRequestReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)` |
+| approvedUser | `User?` | Relation: User? | `@relation("ApprovedGraduateAccount", fields: [approvedUserId], references: [id], onDelete: SetNull)` |
+| career | `Career` | Relation: Career | `@relation(fields: [careerId], references: [id], onDelete: Restrict)` |
+| activationOtps | `ActivationOtp[]` | Relation: ActivationOtp[] | `No explicit attributes` |
+| auditEvents | `AuditEvent[]` | Relation: AuditEvent[] | `No explicit attributes` |
+| documentValidation | `DocumentValidation?` | Relation: DocumentValidation? | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@index([statusId])`
 - `@@index([careerId])`
@@ -1230,9 +1230,9 @@ Restricciones del modelo:
 
 ### MentorParticipationRequest
 
-Tabla: `mentor_participation_requests`.
+Table: `mentor_participation_requests`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | userId | `String` | user_id | `@map("user_id") @db.Uuid` |
@@ -1241,13 +1241,13 @@ Tabla: `mentor_participation_requests`.
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | technicalAreaIds | `String[]` | technical_area_ids | `@map("technical_area_ids") @db.Uuid` |
 | orientationTypeIds | `String[]` | orientation_type_ids | `@map("orientation_type_ids") @db.Uuid` |
-| user | `User` | Relación: User | `@relation(fields: [userId], references: [id], onDelete: Restrict)` |
-| offer | `MentorSlotOffer?` | Relación: MentorSlotOffer? | `Sin atributos explícitos` |
+| user | `User` | Relation: User | `@relation(fields: [userId], references: [id], onDelete: Restrict)` |
+| offer | `MentorSlotOffer?` | Relation: MentorSlotOffer? | `No explicit attributes` |
 | updatedAt | `DateTime` | updated_at | `@default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)` |
 | statusId | `String` | status_id | `@default(dbgenerated("mentor_participation_status('PENDING'::text)")) @map("status_id") @db.Uuid` |
-| statusCatalog | `MentorParticipationStatus` | Relación: MentorParticipationStatus | `@relation(fields: [statusId], references: [id], onDelete: Restrict, onUpdate: Restrict)` |
+| statusCatalog | `MentorParticipationStatus` | Relation: MentorParticipationStatus | `@relation(fields: [statusId], references: [id], onDelete: Restrict, onUpdate: Restrict)` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@index([status, queuedAt, id])`
 - `@@index([userId])`
@@ -1256,9 +1256,9 @@ Restricciones del modelo:
 
 ### MentorSlotOffer
 
-Tabla: `mentor_slot_offers`.
+Table: `mentor_slot_offers`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | userId | `String` | user_id | `@map("user_id") @db.Uuid` |
@@ -1267,14 +1267,14 @@ Tabla: `mentor_slot_offers`.
 | expiresAt | `DateTime` | expires_at | `@map("expires_at") @db.Timestamptz(6)` |
 | requestId | `String?` | request_id | `@unique @map("request_id") @db.Uuid` |
 | confirmedAt | `DateTime?` | confirmed_at | `@map("confirmed_at") @db.Timestamptz(6)` |
-| user | `User` | Relación: User | `@relation(fields: [userId], references: [id], onDelete: Restrict)` |
-| request | `MentorParticipationRequest?` | Relación: MentorParticipationRequest? | `@relation(fields: [requestId], references: [id], onDelete: Restrict)` |
+| user | `User` | Relation: User | `@relation(fields: [userId], references: [id], onDelete: Restrict)` |
+| request | `MentorParticipationRequest?` | Relation: MentorParticipationRequest? | `@relation(fields: [requestId], references: [id], onDelete: Restrict)` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)` |
 | statusId | `String` | status_id | `@default(dbgenerated("mentor_offer_status('OFFERED'::text)")) @map("status_id") @db.Uuid` |
-| statusCatalog | `MentorOfferStatus` | Relación: MentorOfferStatus | `@relation(fields: [statusId], references: [id], onDelete: Restrict, onUpdate: Restrict)` |
+| statusCatalog | `MentorOfferStatus` | Relation: MentorOfferStatus | `@relation(fields: [statusId], references: [id], onDelete: Restrict, onUpdate: Restrict)` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@index([status, expiresAt])`
 - `@@index([userId])`
@@ -1283,9 +1283,9 @@ Restricciones del modelo:
 
 ### ActivationOtp
 
-Tabla: `activation_otps`.
+Table: `activation_otps`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | accessRequestId | `String` | access_request_id | `@map("access_request_id") @db.Uuid` |
@@ -1295,69 +1295,69 @@ Tabla: `activation_otps`.
 | usedAt | `DateTime?` | used_at | `@map("used_at") @db.Timestamptz(6)` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| accessRequest | `AccessRequest` | Relación: AccessRequest | `@relation(fields: [accessRequestId], references: [id], onDelete: Cascade)` |
+| accessRequest | `AccessRequest` | Relation: AccessRequest | `@relation(fields: [accessRequestId], references: [id], onDelete: Cascade)` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@index([accessRequestId])`
 - `@@map("activation_otps")`
 
 ### MessageStatus
 
-Tabla: `message_statuses`.
+Table: `message_statuses`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | title | `String` | title | `@unique @db.VarChar(30)` |
-| description | `String?` | description | `Sin atributos explícitos` |
+| description | `String?` | description | `No explicit attributes` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| messages | `Message[]` | Relación: Message[] | `Sin atributos explícitos` |
+| messages | `Message[]` | Relation: Message[] | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@map("message_statuses")`
 
 ### ConnectionRequestStatus
 
-Tabla: `connection_request_statuses`.
+Table: `connection_request_statuses`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | title | `String` | title | `@unique @db.VarChar(30)` |
-| description | `String?` | description | `Sin atributos explícitos` |
+| description | `String?` | description | `No explicit attributes` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| connectionRequests | `ConnectionRequest[]` | Relación: ConnectionRequest[] | `Sin atributos explícitos` |
+| connectionRequests | `ConnectionRequest[]` | Relation: ConnectionRequest[] | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@map("connection_request_statuses")`
 
 ### AttachmentType
 
-Tabla: `attachment_types`.
+Table: `attachment_types`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | title | `String` | title | `@unique @db.VarChar(30)` |
-| description | `String?` | description | `Sin atributos explícitos` |
+| description | `String?` | description | `No explicit attributes` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| messageAttachments | `MessageAttachment[]` | Relación: MessageAttachment[] | `Sin atributos explícitos` |
+| messageAttachments | `MessageAttachment[]` | Relation: MessageAttachment[] | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@map("attachment_types")`
 
 ### Conversation
 
-Tabla: `conversations`.
+Table: `conversations`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | userAId | `String?` | user_a_id | `@map("user_a_id") @db.Uuid` |
@@ -1369,13 +1369,13 @@ Tabla: `conversations`.
 | contextId | `String?` | context_id | `@unique @map("context_id") @db.Uuid` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| userA | `User?` | Relación: User? | `@relation("UserAConversations", fields: [userAId], references: [id], onDelete: Cascade)` |
-| userB | `User?` | Relación: User? | `@relation("UserBConversations", fields: [userBId], references: [id], onDelete: Cascade)` |
-| event | `Event?` | Relación: Event? | `@relation(fields: [eventId], references: [id], onDelete: Cascade)` |
-| participants | `ConversationParticipant[]` | Relación: ConversationParticipant[] | `Sin atributos explícitos` |
-| messages | `Message[]` | Relación: Message[] | `@relation("ConversationMessages")` |
+| userA | `User?` | Relation: User? | `@relation("UserAConversations", fields: [userAId], references: [id], onDelete: Cascade)` |
+| userB | `User?` | Relation: User? | `@relation("UserBConversations", fields: [userBId], references: [id], onDelete: Cascade)` |
+| event | `Event?` | Relation: Event? | `@relation(fields: [eventId], references: [id], onDelete: Cascade)` |
+| participants | `ConversationParticipant[]` | Relation: ConversationParticipant[] | `No explicit attributes` |
+| messages | `Message[]` | Relation: Message[] | `@relation("ConversationMessages")` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@index([userAId, lastMessageAt(sort: Desc)])`
 - `@@index([userBId, lastMessageAt(sort: Desc)])`
@@ -1385,9 +1385,9 @@ Restricciones del modelo:
 
 ### ConversationParticipant
 
-Tabla: `conversation_participants`.
+Table: `conversation_participants`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | conversationId | `String` | conversation_id | `@map("conversation_id") @db.Uuid` |
@@ -1396,10 +1396,10 @@ Tabla: `conversation_participants`.
 | isMuted | `Boolean` | is_muted | `@default(false) @map("is_muted")` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| conversation | `Conversation` | Relación: Conversation | `@relation(fields: [conversationId], references: [id], onDelete: Cascade)` |
-| user | `User` | Relación: User | `@relation(fields: [userId], references: [id], onDelete: Cascade)` |
+| conversation | `Conversation` | Relation: Conversation | `@relation(fields: [conversationId], references: [id], onDelete: Cascade)` |
+| user | `User` | Relation: User | `@relation(fields: [userId], references: [id], onDelete: Cascade)` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@unique([conversationId, userId])`
 - `@@index([userId])`
@@ -1407,9 +1407,9 @@ Restricciones del modelo:
 
 ### Message
 
-Tabla: `messages`.
+Table: `messages`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | conversationId | `String` | conversation_id | `@map("conversation_id") @db.Uuid` |
@@ -1421,12 +1421,12 @@ Tabla: `messages`.
 | readAt | `DateTime?` | read_at | `@map("read_at") @db.Timestamptz(6)` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| conversation | `Conversation` | Relación: Conversation | `@relation("ConversationMessages", fields: [conversationId], references: [id], onDelete: Cascade)` |
-| sender | `User` | Relación: User | `@relation(fields: [senderId], references: [id], onDelete: Cascade)` |
-| status | `MessageStatus` | Relación: MessageStatus | `@relation(fields: [statusId], references: [id], onDelete: Restrict)` |
-| attachments | `MessageAttachment[]` | Relación: MessageAttachment[] | `Sin atributos explícitos` |
+| conversation | `Conversation` | Relation: Conversation | `@relation("ConversationMessages", fields: [conversationId], references: [id], onDelete: Cascade)` |
+| sender | `User` | Relation: User | `@relation(fields: [senderId], references: [id], onDelete: Cascade)` |
+| status | `MessageStatus` | Relation: MessageStatus | `@relation(fields: [statusId], references: [id], onDelete: Restrict)` |
+| attachments | `MessageAttachment[]` | Relation: MessageAttachment[] | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@index([conversationId, sentAt(sort: Desc)])`
 - `@@index([senderId])`
@@ -1435,9 +1435,9 @@ Restricciones del modelo:
 
 ### MessageAttachment
 
-Tabla: `message_attachments`.
+Table: `message_attachments`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | messageId | `String` | message_id | `@map("message_id") @db.Uuid` |
@@ -1450,10 +1450,10 @@ Tabla: `message_attachments`.
 | thumbnailUrl | `String?` | thumbnail_url | `@map("thumbnail_url") @db.VarChar(1000)` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| message | `Message` | Relación: Message | `@relation(fields: [messageId], references: [id], onDelete: Cascade)` |
-| type | `AttachmentType` | Relación: AttachmentType | `@relation(fields: [typeId], references: [id], onDelete: Restrict)` |
+| message | `Message` | Relation: Message | `@relation(fields: [messageId], references: [id], onDelete: Cascade)` |
+| type | `AttachmentType` | Relation: AttachmentType | `@relation(fields: [typeId], references: [id], onDelete: Restrict)` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@index([messageId])`
 - `@@index([typeId])`
@@ -1461,19 +1461,19 @@ Restricciones del modelo:
 
 ### ChatUserBlock
 
-Tabla: `chat_user_blocks`.
+Table: `chat_user_blocks`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | blockerId | `String` | blocker_id | `@map("blocker_id") @db.Uuid` |
 | blockedId | `String` | blocked_id | `@map("blocked_id") @db.Uuid` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| blocker | `User` | Relación: User | `@relation("ChatBlocker", fields: [blockerId], references: [id], onDelete: Cascade)` |
-| blocked | `User` | Relación: User | `@relation("ChatBlocked", fields: [blockedId], references: [id], onDelete: Cascade)` |
+| blocker | `User` | Relation: User | `@relation("ChatBlocker", fields: [blockerId], references: [id], onDelete: Cascade)` |
+| blocked | `User` | Relation: User | `@relation("ChatBlocked", fields: [blockedId], references: [id], onDelete: Cascade)` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@unique([blockerId, blockedId])`
 - `@@index([blockedId])`
@@ -1481,9 +1481,9 @@ Restricciones del modelo:
 
 ### ConnectionRequest
 
-Tabla: `connection_requests`.
+Table: `connection_requests`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | senderId | `String` | sender_id | `@map("sender_id") @db.Uuid` |
@@ -1491,11 +1491,11 @@ Tabla: `connection_requests`.
 | statusId | `String` | status_id | `@map("status_id") @db.Uuid` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| sender | `User` | Relación: User | `@relation("SentConnectionRequests", fields: [senderId], references: [id], onDelete: Cascade)` |
-| receiver | `User` | Relación: User | `@relation("ReceivedConnectionRequests", fields: [receiverId], references: [id], onDelete: Cascade)` |
-| status | `ConnectionRequestStatus` | Relación: ConnectionRequestStatus | `@relation(fields: [statusId], references: [id], onDelete: Restrict)` |
+| sender | `User` | Relation: User | `@relation("SentConnectionRequests", fields: [senderId], references: [id], onDelete: Cascade)` |
+| receiver | `User` | Relation: User | `@relation("ReceivedConnectionRequests", fields: [receiverId], references: [id], onDelete: Cascade)` |
+| status | `ConnectionRequestStatus` | Relation: ConnectionRequestStatus | `@relation(fields: [statusId], references: [id], onDelete: Restrict)` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@index([senderId])`
 - `@@index([receiverId])`
@@ -1505,25 +1505,25 @@ Restricciones del modelo:
 
 ### UserPresence
 
-Tabla: `user_presences`.
+Table: `user_presences`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | userId | `String` | user_id | `@id @map("user_id") @db.Uuid` |
 | isOnline | `Boolean` | is_online | `@default(false) @map("is_online")` |
 | lastSeenAt | `DateTime` | last_seen_at | `@default(now()) @map("last_seen_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| user | `User` | Relación: User | `@relation(fields: [userId], references: [id], onDelete: Cascade)` |
+| user | `User` | Relation: User | `@relation(fields: [userId], references: [id], onDelete: Cascade)` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@map("user_presences")`
 
 ### PasswordResetOtp
 
-Tabla: `password_reset_otps`.
+Table: `password_reset_otps`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | userId | `String` | user_id | `@map("user_id") @db.Uuid` |
@@ -1533,9 +1533,9 @@ Tabla: `password_reset_otps`.
 | usedAt | `DateTime?` | used_at | `@map("used_at") @db.Timestamptz(6)` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| user | `User` | Relación: User | `@relation(fields: [userId], references: [id], onDelete: Cascade)` |
+| user | `User` | Relation: User | `@relation(fields: [userId], references: [id], onDelete: Cascade)` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@index([userId])`
 - `@@index([expiresAt])`
@@ -1543,41 +1543,41 @@ Restricciones del modelo:
 
 ### MentorParticipationAttemptLimit
 
-Tabla: `mentor_participation_attempt_limits`.
+Table: `mentor_participation_attempt_limits`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | userId | `String` | user_id | `@id @map("user_id") @db.Uuid` |
 | attemptCount | `Int` | attempt_count | `@default(0) @map("attempt_count")` |
 | windowStartedAt | `DateTime?` | window_started_at | `@map("window_started_at") @db.Timestamptz(6)` |
 | blockedUntil | `DateTime?` | blocked_until | `@map("blocked_until") @db.Timestamptz(6)` |
-| user | `User` | Relación: User | `@relation(fields: [userId], references: [id], onDelete: Cascade)` |
+| user | `User` | Relation: User | `@relation(fields: [userId], references: [id], onDelete: Cascade)` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@map("mentor_participation_attempt_limits")`
 
 ### JobApplicationStatus
 
-Tabla: `job_application_statuses`.
+Table: `job_application_statuses`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | title | `String` | title | `@unique @db.VarChar(100)` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| applications | `JobApplication[]` | Relación: JobApplication[] | `Sin atributos explícitos` |
+| applications | `JobApplication[]` | Relation: JobApplication[] | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@map("job_application_statuses")`
 
 ### JobApplication
 
-Tabla: `job_applications`.
+Table: `job_applications`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | jobOfferId | `String` | job_offer_id | `@map("job_offer_id") @db.Uuid` |
@@ -1586,12 +1586,12 @@ Tabla: `job_applications`.
 | appliedAt | `DateTime` | applied_at | `@default(now()) @map("applied_at") @db.Timestamptz(6)` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| jobOffer | `JobOffer` | Relación: JobOffer | `@relation(fields: [jobOfferId], references: [id], onDelete: Cascade)` |
-| user | `User` | Relación: User | `@relation(fields: [userId], references: [id], onDelete: Cascade)` |
-| status | `JobApplicationStatus` | Relación: JobApplicationStatus | `@relation(fields: [statusId], references: [id], onDelete: Restrict)` |
-| radarConsent | `RadarApplicationConsent?` | Relación: RadarApplicationConsent? | `Sin atributos explícitos` |
+| jobOffer | `JobOffer` | Relation: JobOffer | `@relation(fields: [jobOfferId], references: [id], onDelete: Cascade)` |
+| user | `User` | Relation: User | `@relation(fields: [userId], references: [id], onDelete: Cascade)` |
+| status | `JobApplicationStatus` | Relation: JobApplicationStatus | `@relation(fields: [statusId], references: [id], onDelete: Restrict)` |
+| radarConsent | `RadarApplicationConsent?` | Relation: RadarApplicationConsent? | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@unique([jobOfferId, userId])`
 - `@@index([userId])`
@@ -1600,9 +1600,9 @@ Restricciones del modelo:
 
 ### RadarApplicationConsent
 
-Tabla: `radar_application_consents`.
+Table: `radar_application_consents`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(dbgenerated("gen_random_uuid()")) @db.Uuid` |
 | applicationId | `String` | application_id | `@unique @map("application_id") @db.Uuid` |
@@ -1611,68 +1611,68 @@ Tabla: `radar_application_consents`.
 | consentToContact | `Boolean` | consent_to_contact | `@default(false) @map("consent_to_contact")` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| application | `JobApplication` | Relación: JobApplication | `@relation(fields: [applicationId], references: [id], onDelete: Cascade)` |
+| application | `JobApplication` | Relation: JobApplication | `@relation(fields: [applicationId], references: [id], onDelete: Cascade)` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@map("radar_application_consents")`
 
 ### SurveyStatus
 
-Tabla: `survey_statuses`.
+Table: `survey_statuses`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | title | `String` | title | `@unique @db.VarChar(100)` |
-| description | `String?` | description | `Sin atributos explícitos` |
+| description | `String?` | description | `No explicit attributes` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| surveys | `Survey[]` | Relación: Survey[] | `Sin atributos explícitos` |
+| surveys | `Survey[]` | Relation: Survey[] | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@map("survey_statuses")`
 
 ### SurveyQuestionType
 
-Tabla: `survey_question_types`.
+Table: `survey_question_types`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | title | `String` | title | `@unique @db.VarChar(100)` |
-| description | `String?` | description | `Sin atributos explícitos` |
+| description | `String?` | description | `No explicit attributes` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| questions | `SurveyQuestion[]` | Relación: SurveyQuestion[] | `Sin atributos explícitos` |
+| questions | `SurveyQuestion[]` | Relation: SurveyQuestion[] | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@map("survey_question_types")`
 
 ### SurveyTargetAudience
 
-Tabla: `survey_target_audiences`.
+Table: `survey_target_audiences`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | title | `String` | title | `@unique @db.VarChar(100)` |
-| description | `String?` | description | `Sin atributos explícitos` |
+| description | `String?` | description | `No explicit attributes` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| surveys | `Survey[]` | Relación: Survey[] | `Sin atributos explícitos` |
+| surveys | `Survey[]` | Relation: Survey[] | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@map("survey_target_audiences")`
 
 ### Survey
 
-Tabla: `surveys`.
+Table: `surveys`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | title | `String` | title | `@db.VarChar(150)` |
@@ -1687,14 +1687,14 @@ Tabla: `surveys`.
 | createdById | `String` | created_by_id | `@map("created_by_id") @db.Uuid` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| career | `Career?` | Relación: Career? | `@relation(fields: [careerId], references: [id], onDelete: Restrict)` |
-| status | `SurveyStatus` | Relación: SurveyStatus | `@relation(fields: [statusId], references: [id], onDelete: Restrict)` |
-| targetAudience | `SurveyTargetAudience?` | Relación: SurveyTargetAudience? | `@relation(fields: [targetAudienceId], references: [id], onDelete: Restrict)` |
-| createdBy | `User` | Relación: User | `@relation("SurveyCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)` |
-| questions | `SurveyQuestion[]` | Relación: SurveyQuestion[] | `Sin atributos explícitos` |
-| responses | `SurveyResponse[]` | Relación: SurveyResponse[] | `Sin atributos explícitos` |
+| career | `Career?` | Relation: Career? | `@relation(fields: [careerId], references: [id], onDelete: Restrict)` |
+| status | `SurveyStatus` | Relation: SurveyStatus | `@relation(fields: [statusId], references: [id], onDelete: Restrict)` |
+| targetAudience | `SurveyTargetAudience?` | Relation: SurveyTargetAudience? | `@relation(fields: [targetAudienceId], references: [id], onDelete: Restrict)` |
+| createdBy | `User` | Relation: User | `@relation("SurveyCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)` |
+| questions | `SurveyQuestion[]` | Relation: SurveyQuestion[] | `No explicit attributes` |
+| responses | `SurveyResponse[]` | Relation: SurveyResponse[] | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@index([careerId, academicPeriod])`
 - `@@index([createdById])`
@@ -1704,24 +1704,24 @@ Restricciones del modelo:
 
 ### SurveyQuestion
 
-Tabla: `survey_questions`.
+Table: `survey_questions`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | surveyId | `String` | survey_id | `@map("survey_id") @db.Uuid` |
-| position | `Int` | position | `Sin atributos explícitos` |
+| position | `Int` | position | `No explicit attributes` |
 | statement | `String` | statement | `@db.VarChar(250)` |
 | typeId | `String` | type_id | `@map("type_id") @db.Uuid` |
 | isRequired | `Boolean` | is_required | `@default(true) @map("is_required")` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| survey | `Survey` | Relación: Survey | `@relation(fields: [surveyId], references: [id], onDelete: Cascade)` |
-| type | `SurveyQuestionType` | Relación: SurveyQuestionType | `@relation(fields: [typeId], references: [id], onDelete: Restrict)` |
-| options | `SurveyQuestionOption[]` | Relación: SurveyQuestionOption[] | `Sin atributos explícitos` |
-| answers | `SurveyAnswer[]` | Relación: SurveyAnswer[] | `Sin atributos explícitos` |
+| survey | `Survey` | Relation: Survey | `@relation(fields: [surveyId], references: [id], onDelete: Cascade)` |
+| type | `SurveyQuestionType` | Relation: SurveyQuestionType | `@relation(fields: [typeId], references: [id], onDelete: Restrict)` |
+| options | `SurveyQuestionOption[]` | Relation: SurveyQuestionOption[] | `No explicit attributes` |
+| answers | `SurveyAnswer[]` | Relation: SurveyAnswer[] | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@unique([surveyId, position])`
 - `@@index([typeId])`
@@ -1729,29 +1729,29 @@ Restricciones del modelo:
 
 ### SurveyQuestionOption
 
-Tabla: `survey_question_options`.
+Table: `survey_question_options`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | questionId | `String` | question_id | `@map("question_id") @db.Uuid` |
-| position | `Int` | position | `Sin atributos explícitos` |
+| position | `Int` | position | `No explicit attributes` |
 | label | `String` | label | `@db.VarChar(100)` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| question | `SurveyQuestion` | Relación: SurveyQuestion | `@relation(fields: [questionId], references: [id], onDelete: Cascade)` |
-| answers | `SurveyAnswer[]` | Relación: SurveyAnswer[] | `Sin atributos explícitos` |
+| question | `SurveyQuestion` | Relation: SurveyQuestion | `@relation(fields: [questionId], references: [id], onDelete: Cascade)` |
+| answers | `SurveyAnswer[]` | Relation: SurveyAnswer[] | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@unique([questionId, position])`
 - `@@map("survey_question_options")`
 
 ### SurveyResponse
 
-Tabla: `survey_responses`.
+Table: `survey_responses`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | surveyId | `String` | survey_id | `@map("survey_id") @db.Uuid` |
@@ -1759,11 +1759,11 @@ Tabla: `survey_responses`.
 | submittedAt | `DateTime` | submitted_at | `@default(now()) @map("submitted_at") @db.Timestamptz(6)` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| survey | `Survey` | Relación: Survey | `@relation(fields: [surveyId], references: [id], onDelete: Cascade)` |
-| respondent | `User` | Relación: User | `@relation("SurveyRespondent", fields: [respondentId], references: [id], onDelete: Restrict)` |
-| answers | `SurveyAnswer[]` | Relación: SurveyAnswer[] | `Sin atributos explícitos` |
+| survey | `Survey` | Relation: Survey | `@relation(fields: [surveyId], references: [id], onDelete: Cascade)` |
+| respondent | `User` | Relation: User | `@relation("SurveyRespondent", fields: [respondentId], references: [id], onDelete: Restrict)` |
+| answers | `SurveyAnswer[]` | Relation: SurveyAnswer[] | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@unique([surveyId, respondentId])`
 - `@@index([respondentId])`
@@ -1771,9 +1771,9 @@ Restricciones del modelo:
 
 ### SurveyAnswer
 
-Tabla: `survey_answers`.
+Table: `survey_answers`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | responseId | `String` | response_id | `@map("response_id") @db.Uuid` |
@@ -1782,11 +1782,11 @@ Tabla: `survey_answers`.
 | textValue | `String?` | text_value | `@map("text_value") @db.Text` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| response | `SurveyResponse` | Relación: SurveyResponse | `@relation(fields: [responseId], references: [id], onDelete: Cascade)` |
-| question | `SurveyQuestion` | Relación: SurveyQuestion | `@relation(fields: [questionId], references: [id], onDelete: Cascade)` |
-| option | `SurveyQuestionOption?` | Relación: SurveyQuestionOption? | `@relation(fields: [optionId], references: [id], onDelete: Cascade)` |
+| response | `SurveyResponse` | Relation: SurveyResponse | `@relation(fields: [responseId], references: [id], onDelete: Cascade)` |
+| question | `SurveyQuestion` | Relation: SurveyQuestion | `@relation(fields: [questionId], references: [id], onDelete: Cascade)` |
+| option | `SurveyQuestionOption?` | Relation: SurveyQuestionOption? | `@relation(fields: [optionId], references: [id], onDelete: Cascade)` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@index([responseId])`
 - `@@index([optionId])`
@@ -1795,26 +1795,26 @@ Restricciones del modelo:
 
 ### AuditAction
 
-Tabla: `audit_actions`.
+Table: `audit_actions`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | title | `String` | title | `@unique @db.VarChar(100)` |
-| description | `String?` | description | `Sin atributos explícitos` |
+| description | `String?` | description | `No explicit attributes` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| auditEvents | `AuditEvent[]` | Relación: AuditEvent[] | `Sin atributos explícitos` |
+| auditEvents | `AuditEvent[]` | Relation: AuditEvent[] | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@map("audit_actions")`
 
 ### AuditEvent
 
-Tabla: `audit_events`.
+Table: `audit_events`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | number | `Int` | number | `@unique @default(autoincrement())` |
@@ -1831,12 +1831,12 @@ Tabla: `audit_events`.
 | occurredAt | `DateTime` | occurred_at | `@default(now()) @map("occurred_at") @db.Timestamptz(6)` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| accessRequest | `AccessRequest` | Relación: AccessRequest | `@relation(fields: [accessRequestId], references: [id], onDelete: Restrict)` |
-| action | `AuditAction` | Relación: AuditAction | `@relation(fields: [actionId], references: [id], onDelete: Restrict)` |
-| actor | `User?` | Relación: User? | `@relation("AuditEventActor", fields: [actorId], references: [id], onDelete: SetNull)` |
-| evidenceFile | `File?` | Relación: File? | `@relation("AuditEventEvidence", fields: [evidenceFileId], references: [id], onDelete: Restrict)` |
+| accessRequest | `AccessRequest` | Relation: AccessRequest | `@relation(fields: [accessRequestId], references: [id], onDelete: Restrict)` |
+| action | `AuditAction` | Relation: AuditAction | `@relation(fields: [actionId], references: [id], onDelete: Restrict)` |
+| actor | `User?` | Relation: User? | `@relation("AuditEventActor", fields: [actorId], references: [id], onDelete: SetNull)` |
+| evidenceFile | `File?` | Relation: File? | `@relation("AuditEventEvidence", fields: [evidenceFileId], references: [id], onDelete: Restrict)` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@index([occurredAt(sort: Desc), number(sort: Desc)])`
 - `@@index([accessRequestId, occurredAt])`
@@ -1847,9 +1847,9 @@ Restricciones del modelo:
 
 ### DocumentValidation
 
-Tabla: `document_validations`.
+Table: `document_validations`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | accessRequestId | `String` | access_request_id | `@unique @map("access_request_id") @db.Uuid` |
@@ -1863,10 +1863,10 @@ Tabla: `document_validations`.
 | revertedById | `String?` | reverted_by_id | `@map("reverted_by_id") @db.Uuid` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| accessRequest | `AccessRequest` | Relación: AccessRequest | `@relation(fields: [accessRequestId], references: [id], onDelete: Cascade)` |
-| revertedBy | `User?` | Relación: User? | `@relation("DocumentValidationRevertedBy", fields: [revertedById], references: [id], onDelete: SetNull)` |
+| accessRequest | `AccessRequest` | Relation: AccessRequest | `@relation(fields: [accessRequestId], references: [id], onDelete: Cascade)` |
+| revertedBy | `User?` | Relation: User? | `@relation("DocumentValidationRevertedBy", fields: [revertedById], references: [id], onDelete: SetNull)` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@index([result])`
 - `@@index([revertedById])`
@@ -1874,12 +1874,12 @@ Restricciones del modelo:
 
 ### MentorIntakeAttempt
 
-Tabla: `mentor_intake_attempts`.
+Table: `mentor_intake_attempts`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | operationId | `String` | operation_id | `@default(dbgenerated("mentor_intake_operation('LEGACY'::text)")) @map("operation_id") @db.Uuid` |
-| intakeOperation | `MentorIntakeOperation` | Relación: MentorIntakeOperation | `@relation(fields: [operationId], references: [id], onDelete: Restrict, onUpdate: NoAction)` |
+| intakeOperation | `MentorIntakeOperation` | Relation: MentorIntakeOperation | `@relation(fields: [operationId], references: [id], onDelete: Restrict, onUpdate: NoAction)` |
 | id | `String` | id | `@id @default(dbgenerated("gen_random_uuid()")) @db.Uuid` |
 | userId | `String` | user_id | `@map("user_id") @db.Uuid` |
 | operation | `String` | operation | `@db.VarChar(20)` |
@@ -1889,10 +1889,10 @@ Tabla: `mentor_intake_attempts`.
 | counted | `Boolean` | counted | `@default(true)` |
 | responseStatus | `Int` | response_status | `@map("response_status")` |
 | responseData | `Json` | response_data | `@map("response_data")` |
-| user | `User` | Relación: User | `@relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: NoAction)` |
-| sanction | `MentorParticipationSanction?` | Relación: MentorParticipationSanction? | `Sin atributos explícitos` |
+| user | `User` | Relation: User | `@relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: NoAction)` |
+| sanction | `MentorParticipationSanction?` | Relation: MentorParticipationSanction? | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@unique([userId, operation, idempotencyKey], map: "mentor_intake_attempts_identity")`
 - `@@index([operationId])`
@@ -1900,45 +1900,45 @@ Restricciones del modelo:
 
 ### MentorParticipationSanction
 
-Tabla: `mentor_participation_sanctions`.
+Table: `mentor_participation_sanctions`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(dbgenerated("gen_random_uuid()")) @db.Uuid` |
 | userId | `String` | user_id | `@map("user_id") @db.Uuid` |
 | triggerAttemptId | `String?` | trigger_attempt_id | `@unique @map("trigger_attempt_id") @db.Uuid` |
 | startedAt | `DateTime` | started_at | `@map("started_at") @db.Timestamptz(6)` |
 | endsAt | `DateTime` | ends_at | `@map("ends_at") @db.Timestamptz(6)` |
-| user | `User` | Relación: User | `@relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: NoAction)` |
-| triggerAttempt | `MentorIntakeAttempt?` | Relación: MentorIntakeAttempt? | `@relation(fields: [triggerAttemptId], references: [id], onDelete: Restrict, onUpdate: NoAction)` |
+| user | `User` | Relation: User | `@relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: NoAction)` |
+| triggerAttempt | `MentorIntakeAttempt?` | Relation: MentorIntakeAttempt? | `@relation(fields: [triggerAttemptId], references: [id], onDelete: Restrict, onUpdate: NoAction)` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@index([userId, endsAt], map: "mentor_participation_sanctions_active")`
 - `@@map("mentor_participation_sanctions")`
 
 ### MentorIntakeOperation
 
-Tabla: `mentor_intake_operations`.
+Table: `mentor_intake_operations`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | title | `String` | title | `@unique @db.VarChar(30)` |
-| description | `String?` | description | `Sin atributos explícitos` |
+| description | `String?` | description | `No explicit attributes` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| attempts | `MentorIntakeAttempt[]` | Relación: MentorIntakeAttempt[] | `Sin atributos explícitos` |
+| attempts | `MentorIntakeAttempt[]` | Relation: MentorIntakeAttempt[] | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@map("mentor_intake_operations")`
 
 ### RadarCvEvidence
 
-Tabla: `radar_cv_evidence`.
+Table: `radar_cv_evidence`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(dbgenerated("gen_random_uuid()")) @db.Uuid` |
 | cvId | `String` | cv_id | `@unique @map("cv_id") @db.Uuid` |
@@ -1951,13 +1951,13 @@ Tabla: `radar_cv_evidence`.
 | reviewStatusId | `String` | review_status_id | `@map("review_status_id") @db.Uuid` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| cv | `UserCvFile` | Relación: UserCvFile | `@relation(fields: [cvId], references: [id], onDelete: Cascade, onUpdate: NoAction)` |
-| owner | `User` | Relación: User | `@relation("RadarCvOwner", fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)` |
-| reviewer | `User?` | Relación: User? | `@relation("RadarCvReviewer", fields: [reviewerId], references: [id], onDelete: SetNull)` |
-| extractionState | `RadarCvExtractionStatus` | Relación: RadarCvExtractionStatus | `@relation(fields: [extractionStatusId], references: [id], onDelete: Restrict, onUpdate: Restrict)` |
-| reviewState | `RadarCvReviewStatus` | Relación: RadarCvReviewStatus | `@relation(fields: [reviewStatusId], references: [id], onDelete: Restrict, onUpdate: Restrict)` |
+| cv | `UserCvFile` | Relation: UserCvFile | `@relation(fields: [cvId], references: [id], onDelete: Cascade, onUpdate: NoAction)` |
+| owner | `User` | Relation: User | `@relation("RadarCvOwner", fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)` |
+| reviewer | `User?` | Relation: User? | `@relation("RadarCvReviewer", fields: [reviewerId], references: [id], onDelete: SetNull)` |
+| extractionState | `RadarCvExtractionStatus` | Relation: RadarCvExtractionStatus | `@relation(fields: [extractionStatusId], references: [id], onDelete: Restrict, onUpdate: Restrict)` |
+| reviewState | `RadarCvReviewStatus` | Relation: RadarCvReviewStatus | `@relation(fields: [reviewStatusId], references: [id], onDelete: Restrict, onUpdate: Restrict)` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@index([reviewStatusId, submittedAt], map: "radar_cv_evidence_review_idx")`
 - `@@index([userId], map: "radar_cv_evidence_user_idx")`
@@ -1968,23 +1968,23 @@ Restricciones del modelo:
 
 ### RadarScoreSnapshot
 
-Tabla: `radar_score_snapshots`.
+Table: `radar_score_snapshots`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(dbgenerated("gen_random_uuid()")) @db.Uuid` |
 | userId | `String` | user_id | `@map("user_id") @db.Uuid` |
-| version | `Int` | version | `Sin atributos explícitos` |
+| version | `Int` | version | `No explicit attributes` |
 | rubricVersion | `String` | rubric_version | `@map("rubric_version") @db.VarChar(80)` |
 | fingerprint | `String` | fingerprint | `@db.VarChar(64)` |
-| scores | `Json` | scores | `Sin atributos explícitos` |
-| evidence | `Json` | evidence | `Sin atributos explícitos` |
+| scores | `Json` | scores | `No explicit attributes` |
+| evidence | `Json` | evidence | `No explicit attributes` |
 | averageScore | `Decimal` | average_score | `@map("average_score") @db.Decimal(5, 2)` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| user | `User` | Relación: User | `@relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)` |
+| user | `User` | Relation: User | `@relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@unique([userId, version], map: "radar_score_snapshots_user_version_key")`
 - `@@index([userId], map: "radar_score_snapshots_user_idx")`
@@ -1992,9 +1992,9 @@ Restricciones del modelo:
 
 ### RadarAuditEvent
 
-Tabla: `radar_audit_events`.
+Table: `radar_audit_events`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(dbgenerated("gen_random_uuid()")) @db.Uuid` |
 | userId | `String` | user_id | `@map("user_id") @db.Uuid` |
@@ -2005,10 +2005,10 @@ Tabla: `radar_audit_events`.
 | occurredAt | `DateTime` | occurred_at | `@default(now()) @map("occurred_at") @db.Timestamptz(6)` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| subject | `User` | Relación: User | `@relation("RadarAuditSubject", fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)` |
-| actor | `User?` | Relación: User? | `@relation("RadarAuditActor", fields: [actorId], references: [id], onDelete: SetNull)` |
+| subject | `User` | Relation: User | `@relation("RadarAuditSubject", fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)` |
+| actor | `User?` | Relation: User? | `@relation("RadarAuditActor", fields: [actorId], references: [id], onDelete: SetNull)` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@index([userId, occurredAt(sort: Desc)], map: "radar_audit_user_idx")`
 - `@@index([userId], map: "radar_audit_subject_idx")`
@@ -2017,50 +2017,50 @@ Restricciones del modelo:
 
 ### RadarCvExtractionStatus
 
-Tabla: `radar_cv_extraction_statuses`.
+Table: `radar_cv_extraction_statuses`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(dbgenerated("gen_random_uuid()")) @db.Uuid` |
 | title | `String` | title | `@unique @db.VarChar(24)` |
-| description | `String?` | description | `Sin atributos explícitos` |
+| description | `String?` | description | `No explicit attributes` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| evidences | `RadarCvEvidence[]` | Relación: RadarCvEvidence[] | `Sin atributos explícitos` |
+| evidences | `RadarCvEvidence[]` | Relation: RadarCvEvidence[] | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@map("radar_cv_extraction_statuses")`
 
 ### RadarCvReviewStatus
 
-Tabla: `radar_cv_review_statuses`.
+Table: `radar_cv_review_statuses`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(dbgenerated("gen_random_uuid()")) @db.Uuid` |
 | title | `String` | title | `@unique @db.VarChar(24)` |
-| description | `String?` | description | `Sin atributos explícitos` |
+| description | `String?` | description | `No explicit attributes` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| evidences | `RadarCvEvidence[]` | Relación: RadarCvEvidence[] | `Sin atributos explícitos` |
+| evidences | `RadarCvEvidence[]` | Relation: RadarCvEvidence[] | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@map("radar_cv_review_statuses")`
 
 ### RadarCompanyAccess
 
-Tabla: `radar_company_access`.
+Table: `radar_company_access`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | companyId | `String` | company_id | `@map("company_id") @db.Uuid` |
 | userId | `String` | user_id | `@map("user_id") @db.Uuid` |
-| company | `Company` | Relación: Company | `@relation(fields: [companyId], references: [id], onDelete: Cascade, onUpdate: NoAction)` |
-| user | `User` | Relación: User | `@relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)` |
+| company | `Company` | Relation: Company | `@relation(fields: [companyId], references: [id], onDelete: Cascade, onUpdate: NoAction)` |
+| user | `User` | Relation: User | `@relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@id([companyId, userId])`
 - `@@map("radar_company_access")`
@@ -2068,9 +2068,9 @@ Restricciones del modelo:
 
 ### RadarJobApplication
 
-Tabla: `radar_job_applications`.
+Table: `radar_job_applications`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(dbgenerated("gen_random_uuid()")) @db.Uuid` |
 | jobOfferId | `String` | job_offer_id | `@map("job_offer_id") @db.Uuid` |
@@ -2082,11 +2082,11 @@ Tabla: `radar_job_applications`.
 | appliedAt | `DateTime` | applied_at | `@default(now()) @map("applied_at") @db.Timestamptz(6)` |
 | decidedAt | `DateTime?` | decided_at | `@map("decided_at") @db.Timestamptz(6)` |
 | decidedBy | `String?` | decided_by | `@map("decided_by") @db.Uuid` |
-| jobOffer | `JobOffer` | Relación: JobOffer | `@relation(fields: [jobOfferId], references: [id], onDelete: Cascade, onUpdate: NoAction)` |
-| user | `User` | Relación: User | `@relation("RadarApplicant", fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)` |
-| decider | `User?` | Relación: User? | `@relation("RadarDecision", fields: [decidedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)` |
+| jobOffer | `JobOffer` | Relation: JobOffer | `@relation(fields: [jobOfferId], references: [id], onDelete: Cascade, onUpdate: NoAction)` |
+| user | `User` | Relation: User | `@relation("RadarApplicant", fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)` |
+| decider | `User?` | Relation: User? | `@relation("RadarDecision", fields: [decidedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@unique([jobOfferId, userId])`
 - `@@index([jobOfferId, appliedAt(sort: Desc)], map: "radar_job_applications_vacancy_idx")`
@@ -2095,56 +2095,56 @@ Restricciones del modelo:
 
 ### MentorParticipationStatus
 
-Tabla: `mentor_request_statuses`.
+Table: `mentor_request_statuses`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(dbgenerated("gen_random_uuid()")) @db.Uuid` |
 | title | `String` | title | `@unique @db.VarChar(20)` |
-| description | `String?` | description | `Sin atributos explícitos` |
+| description | `String?` | description | `No explicit attributes` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| records | `MentorParticipationRequest[]` | Relación: MentorParticipationRequest[] | `Sin atributos explícitos` |
+| records | `MentorParticipationRequest[]` | Relation: MentorParticipationRequest[] | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@map("mentor_request_statuses")`
 
 ### MentorOfferStatus
 
-Tabla: `mentor_offer_statuses`.
+Table: `mentor_offer_statuses`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(dbgenerated("gen_random_uuid()")) @db.Uuid` |
 | title | `String` | title | `@unique @db.VarChar(20)` |
-| description | `String?` | description | `Sin atributos explícitos` |
+| description | `String?` | description | `No explicit attributes` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| records | `MentorSlotOffer[]` | Relación: MentorSlotOffer[] | `Sin atributos explícitos` |
+| records | `MentorSlotOffer[]` | Relation: MentorSlotOffer[] | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@map("mentor_offer_statuses")`
 
 ### RadarDocumentVerification
 
-Tabla: `radar_document_verifications`.
+Table: `radar_document_verifications`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(dbgenerated("gen_random_uuid()")) @db.Uuid` |
 | userId | `String` | user_id | `@map("user_id") @db.Uuid` |
 | sourceTypeId | `String` | source_type_id | `@map("source_type_id") @db.Uuid` |
 | sourceId | `String` | source_id | `@map("source_id") @db.Uuid` |
-| filename | `String` | filename | `Sin atributos explícitos` |
-| mime | `String` | mime | `Sin atributos explícitos` |
-| content | `Bytes?` | content | `Sin atributos explícitos` |
+| filename | `String` | filename | `No explicit attributes` |
+| mime | `String` | mime | `No explicit attributes` |
+| content | `Bytes?` | content | `No explicit attributes` |
 | sizeBytes | `Int` | size_bytes | `@map("size_bytes")` |
 | active | `Boolean` | active | `@default(true)` |
-| digest | `String` | digest | `Sin atributos explícitos` |
+| digest | `String` | digest | `No explicit attributes` |
 | statusId | `String` | status_id | `@default(dbgenerated("'a0000000-0000-4000-8000-000000000001'::uuid")) @map("status_id") @db.Uuid` |
-| confidence | `Float?` | confidence | `Sin atributos explícitos` |
+| confidence | `Float?` | confidence | `No explicit attributes` |
 | reason | `String` | reason | `@default("")` |
 | skills | `Json` | skills | `@default("[]")` |
 | createdAt | `DateTime` | created_at | `@default(dbgenerated("clock_timestamp()")) @map("created_at") @db.Timestamptz(6)` |
@@ -2157,12 +2157,12 @@ Tabla: `radar_document_verifications`.
 | synced | `Boolean` | synced | `@default(false)` |
 | lease | `String?` | lease | `@db.Uuid` |
 | retryAt | `DateTime` | retry_at | `@default(now()) @map("retry_at") @db.Timestamptz(6)` |
-| owner | `User` | Relación: User | `@relation("VerifiedDocumentOwner", fields:[userId],references:[id],onDelete:Cascade,onUpdate:NoAction)` |
-| reviewer | `User?` | Relación: User? | `@relation("VerifiedDocumentReviewer",fields:[reviewerId],references:[id],onDelete:SetNull,onUpdate:NoAction)` |
-| statusEntry | `RadarDocumentStatus` | Relación: RadarDocumentStatus | `@relation(fields:[statusId], references:[id], onDelete:Restrict, onUpdate:Cascade, map:"radar_document_status_fk")` |
-| sourceTypeEntry | `RadarDocumentSourceType` | Relación: RadarDocumentSourceType | `@relation(fields:[sourceTypeId], references:[id], onDelete:Restrict, onUpdate:Cascade, map:"radar_document_source_type_fk")` |
+| owner | `User` | Relation: User | `@relation("VerifiedDocumentOwner", fields:[userId],references:[id],onDelete:Cascade,onUpdate:NoAction)` |
+| reviewer | `User?` | Relation: User? | `@relation("VerifiedDocumentReviewer",fields:[reviewerId],references:[id],onDelete:SetNull,onUpdate:NoAction)` |
+| statusEntry | `RadarDocumentStatus` | Relation: RadarDocumentStatus | `@relation(fields:[statusId], references:[id], onDelete:Restrict, onUpdate:Cascade, map:"radar_document_status_fk")` |
+| sourceTypeEntry | `RadarDocumentSourceType` | Relation: RadarDocumentSourceType | `@relation(fields:[sourceTypeId], references:[id], onDelete:Restrict, onUpdate:Cascade, map:"radar_document_source_type_fk")` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@index([userId,createdAt(sort:Desc)],map:"radar_doc_owner_date")`
 - `@@map("radar_document_verifications")`
@@ -2172,27 +2172,27 @@ Restricciones del modelo:
 
 ### PortfolioProvider
 
-Tabla: `portfolio_providers`.
+Table: `portfolio_providers`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | name | `String` | name | `@unique @db.VarChar(50)` |
 | description | `String?` | description | `@db.VarChar(150)` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| socialAccounts | `UserSocialAccount[]` | Relación: UserSocialAccount[] | `Sin atributos explícitos` |
-| portfolioProjects | `UserPortfolioProject[]` | Relación: UserPortfolioProject[] | `Sin atributos explícitos` |
+| socialAccounts | `UserSocialAccount[]` | Relation: UserSocialAccount[] | `No explicit attributes` |
+| portfolioProjects | `UserPortfolioProject[]` | Relation: UserPortfolioProject[] | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@map("portfolio_providers")`
 
 ### UserSocialAccount
 
-Tabla: `user_social_accounts`.
+Table: `user_social_accounts`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | userId | `String` | user_id | `@map("user_id") @db.Uuid` |
@@ -2202,11 +2202,11 @@ Tabla: `user_social_accounts`.
 | profileUrl | `String?` | profile_url | `@map("profile_url") @db.VarChar(500)` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| user | `User` | Relación: User | `@relation(fields: [userId], references: [id], onDelete: Cascade)` |
-| provider | `PortfolioProvider` | Relación: PortfolioProvider | `@relation(fields: [providerId], references: [id], onDelete: Restrict)` |
-| portfolioProjects | `UserPortfolioProject[]` | Relación: UserPortfolioProject[] | `Sin atributos explícitos` |
+| user | `User` | Relation: User | `@relation(fields: [userId], references: [id], onDelete: Cascade)` |
+| provider | `PortfolioProvider` | Relation: PortfolioProvider | `@relation(fields: [providerId], references: [id], onDelete: Restrict)` |
+| portfolioProjects | `UserPortfolioProject[]` | Relation: UserPortfolioProject[] | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@unique([userId, providerId])`
 - `@@unique([providerId, externalId])`
@@ -2215,9 +2215,9 @@ Restricciones del modelo:
 
 ### UserPortfolioProject
 
-Tabla: `user_portfolio_projects`.
+Table: `user_portfolio_projects`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | userId | `String` | user_id | `@map("user_id") @db.Uuid` |
@@ -2232,11 +2232,11 @@ Tabla: `user_portfolio_projects`.
 | displayOrder | `Int` | display_order | `@default(0) @map("display_order") @db.SmallInt` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| user | `User` | Relación: User | `@relation(fields: [userId], references: [id], onDelete: Cascade)` |
-| socialAccount | `UserSocialAccount?` | Relación: UserSocialAccount? | `@relation(fields: [socialAccountId], references: [id], onDelete: SetNull)` |
-| provider | `PortfolioProvider` | Relación: PortfolioProvider | `@relation(fields: [providerId], references: [id], onDelete: Restrict)` |
+| user | `User` | Relation: User | `@relation(fields: [userId], references: [id], onDelete: Cascade)` |
+| socialAccount | `UserSocialAccount?` | Relation: UserSocialAccount? | `@relation(fields: [socialAccountId], references: [id], onDelete: SetNull)` |
+| provider | `PortfolioProvider` | Relation: PortfolioProvider | `@relation(fields: [providerId], references: [id], onDelete: Restrict)` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@unique([userId, providerId, repoName])`
 - `@@index([userId, displayOrder])`
@@ -2246,9 +2246,9 @@ Restricciones del modelo:
 
 ### NotificationType
 
-Tabla: `notification_types`.
+Table: `notification_types`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | code | `String` | code | `@unique @db.VarChar(50)` |
@@ -2257,17 +2257,17 @@ Tabla: `notification_types`.
 | sendsEmail | `Boolean` | sends_email | `@default(false) @map("sends_email")` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| notifications | `Notification[]` | Relación: Notification[] | `Sin atributos explícitos` |
+| notifications | `Notification[]` | Relation: Notification[] | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@map("notification_types")`
 
 ### Notification
 
-Tabla: `notifications`.
+Table: `notifications`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | recipientId | `String` | recipient_id | `@map("recipient_id") @db.Uuid` |
@@ -2280,11 +2280,11 @@ Tabla: `notifications`.
 | readAt | `DateTime?` | read_at | `@map("read_at") @db.Timestamptz(6)` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| recipient | `User` | Relación: User | `@relation("ReceivedNotifications", fields: [recipientId], references: [id], onDelete: Cascade)` |
-| actor | `User?` | Relación: User? | `@relation("TriggeredNotifications", fields: [actorId], references: [id], onDelete: SetNull)` |
-| type | `NotificationType` | Relación: NotificationType | `@relation(fields: [typeId], references: [id], onDelete: Restrict)` |
+| recipient | `User` | Relation: User | `@relation("ReceivedNotifications", fields: [recipientId], references: [id], onDelete: Cascade)` |
+| actor | `User?` | Relation: User? | `@relation("TriggeredNotifications", fields: [actorId], references: [id], onDelete: SetNull)` |
+| type | `NotificationType` | Relation: NotificationType | `@relation(fields: [typeId], references: [id], onDelete: Restrict)` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@index([recipientId, readAt])`
 - `@@index([recipientId, createdAt(sort: Desc)])`
@@ -2294,9 +2294,9 @@ Restricciones del modelo:
 
 ### PushSubscription
 
-Tabla: `push_subscriptions`.
+Table: `push_subscriptions`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(uuid()) @db.Uuid` |
 | userId | `String` | user_id | `@map("user_id") @db.Uuid` |
@@ -2307,18 +2307,18 @@ Tabla: `push_subscriptions`.
 | lastUsedAt | `DateTime?` | last_used_at | `@map("last_used_at") @db.Timestamptz(6)` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| user | `User` | Relación: User | `@relation(fields: [userId], references: [id], onDelete: Cascade)` |
+| user | `User` | Relation: User | `@relation(fields: [userId], references: [id], onDelete: Cascade)` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@index([userId])`
 - `@@map("push_subscriptions")`
 
 ### NotificationPreference
 
-Tabla: `notification_preferences`.
+Table: `notification_preferences`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | userId | `String` | user_id | `@id @map("user_id") @db.Uuid` |
 | pushEnabled | `Boolean` | push_enabled | `@default(false) @map("push_enabled")` |
@@ -2326,43 +2326,43 @@ Tabla: `notification_preferences`.
 | inAppEnabled | `Boolean` | in_app_enabled | `@default(true) @map("in_app_enabled")` |
 | createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| user | `User` | Relación: User | `@relation(fields: [userId], references: [id], onDelete: Cascade)` |
+| user | `User` | Relation: User | `@relation(fields: [userId], references: [id], onDelete: Cascade)` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@map("notification_preferences")`
 
 ### RadarDocumentStatus
 
-Tabla: `radar_document_statuses`.
+Table: `radar_document_statuses`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(dbgenerated("gen_random_uuid()")) @db.Uuid` |
 | title | `String` | title | `@unique` |
-| description | `String` | description | `Sin atributos explícitos` |
+| description | `String` | description | `No explicit attributes` |
 | createdAt | `DateTime` | created_at | `@default(dbgenerated("clock_timestamp()")) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@default(dbgenerated("clock_timestamp()")) @updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| documents | `RadarDocumentVerification[]` | Relación: RadarDocumentVerification[] | `Sin atributos explícitos` |
+| documents | `RadarDocumentVerification[]` | Relation: RadarDocumentVerification[] | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@map("radar_document_statuses")`
 
 ### RadarDocumentSourceType
 
-Tabla: `radar_document_source_types`.
+Table: `radar_document_source_types`.
 
-| Campo | Tipo Prisma | Columna o relación | Definición y restricciones |
+| Field | Prisma type | Column or relation | Definition and constraints |
 | --- | --- | --- | --- |
 | id | `String` | id | `@id @default(dbgenerated("gen_random_uuid()")) @db.Uuid` |
 | title | `String` | title | `@unique` |
-| description | `String` | description | `Sin atributos explícitos` |
+| description | `String` | description | `No explicit attributes` |
 | createdAt | `DateTime` | created_at | `@default(dbgenerated("clock_timestamp()")) @map("created_at") @db.Timestamptz(6)` |
 | updatedAt | `DateTime` | updated_at | `@default(dbgenerated("clock_timestamp()")) @updatedAt @map("updated_at") @db.Timestamptz(6)` |
-| documents | `RadarDocumentVerification[]` | Relación: RadarDocumentVerification[] | `Sin atributos explícitos` |
+| documents | `RadarDocumentVerification[]` | Relation: RadarDocumentVerification[] | `No explicit attributes` |
 
-Restricciones del modelo:
+Model constraints:
 
 - `@@map("radar_document_source_types")`
 
@@ -2370,7 +2370,7 @@ Restricciones del modelo:
 
 ### Sprint 3
 
-- Publicaciones de radar, auditoría y respaldos de CV.
-- HU5: versiones documentales, catálogo de estados y tipos de fuente, sincronización con publicaciones.
-- Integración de consentimientos para consultas de reclutamiento.
-- Inventario de modelos, relaciones, claves e índices del esquema combinado. Los ajustes pendientes del estándar se solicitan al equipo propietario antes de modificar migraciones.
+- Radar publications, audit events, and CV evidence.
+- HU5: document versions, status and source type catalogs, and publication synchronization.
+- Consent integration for recruitment queries.
+- Inventory of models, relationships, keys, and indexes in the combined schema. Outstanding standards adjustments are requested from the owning team before migrations are changed.

@@ -1,10 +1,10 @@
-# CV y verificación documental
+# CV and document verification
 
-## Propósito y responsabilidades
+## Purpose and responsibilities
 
-El dominio `cv` permite subir, consultar, reemplazar, eliminar, extraer y generar el CV del titular. El backend conserva archivos y ofrece sus fuentes autorizadas. El frontend presenta el contenido y dashboard documental; análisis y decisiones pertenecen a [radar-integration](../radar-integration/README.md).
+The `cv` domain supports uploading, viewing, replacing, deleting, extracting, and generating the owner's CV. The backend stores files and exposes their authorized sources. The frontend presents CV content and the document dashboard; analysis and decisions belong to [radar-integration](../radar-integration/README.md).
 
-## Arquitectura y dependencias
+## Architecture and dependencies
 
 ```mermaid
 flowchart LR
@@ -12,70 +12,70 @@ flowchart LR
   View --> Content[DocumentsCvContent]
   Content --> Mutations[useCvMutations]
   Mutations --> API[documentsService: api-client]
-  API --> Backend[CV: servicios y repositorios]
-  Backend --> Radar[Verificación documental]
+  API --> Backend[CV: services and repositories]
+  Backend --> Radar[Document verification]
   View --> History[useDocumentVerifications]
   History --> Radar
 ```
 
-El módulo usa TanStack Query y el cliente HTTP centralizado. Integra perfil, certificaciones y radar mediante sus `index.ts`. Las mutaciones actualizan CV y completitud; el dashboard refresca también verificaciones y radar. No abre IndexedDB directamente.
+The module uses TanStack Query and the centralized HTTP client. It integrates profile, certifications, and radar through their `index.ts` files. Mutations update CV data and profile completeness; the dashboard also refreshes verification history and radar data. It does not open IndexedDB directly.
 
-## Flujos y reglas
+## Flows and rules
 
 ```mermaid
 sequenceDiagram
-  actor Owner as Titular
+  actor Owner as Profile owner
   participant UI as DocumentsCvView
-  participant CV as API de CV
-  participant Radar as Verificación documental
-  Owner->>UI: Selecciona archivo
-  UI->>UI: Valida tipo y tamaño
-  UI->>CV: Sube CV con progreso
-  CV->>Radar: Registra versión activa
-  CV-->>UI: CV guardado
-  UI->>UI: Invalida CV y completitud
-  loop Mientras exista una versión activa sin sincronizar
-    UI->>Radar: Consulta cada 1,5 s
+  participant CV as CV API
+  participant Radar as Document verification
+  Owner->>UI: Select a file
+  UI->>UI: Validate type and size
+  UI->>CV: Upload CV with progress
+  CV->>Radar: Register the active version
+  CV-->>UI: CV saved
+  UI->>UI: Invalidate CV and completeness queries
+  loop While an active version is not synchronized
+    UI->>Radar: Poll every 1.5 seconds
   end
-  Radar-->>UI: Resultado, confianza y habilidades
+  Radar-->>UI: Result, confidence, and skills
 ```
 
-- El CV vigente procede del servicio propietario, no de una versión antigua aprobada.
-- Subir/eliminar cancela consultas en curso para evitar reintroducir datos obsoletos.
-- Eliminar requiere confirmación, retira la caché del archivo y actualiza completitud.
-- La vista previa libera su URL temporal al cerrar o desmontar.
-- La extracción permite revisar datos antes de aplicarlos al perfil; la exportación usa los datos seleccionados.
-- El dashboard muestra versiones activas e historial, confianza, motivo y habilidades. No aprueba documentos desde el navegador.
-- La consulta está ligada al titular: se actualiza cada 1,5 s durante procesamiento, cada 15 s en reposo y al reconectar.
-- Reemplazar o eliminar puede cambiar NLP y radar; la simulación con mentoría no cambia datos persistidos.
+- The current CV comes from its owning service, rather than an older approved version.
+- Uploading or deleting cancels in-flight queries to prevent stale data from being reintroduced.
+- Deletion requires confirmation, removes the cached file, and updates completeness.
+- File previews release their temporary URLs when closed or unmounted.
+- Extraction lets the user review data before applying it to the profile; export uses the selected data.
+- The dashboard shows active versions and history, confidence, reasons, and skills. It does not approve documents in the browser.
+- Queries are scoped to the owner: polling runs every 1.5 seconds during processing, every 15 seconds while idle, and on reconnection.
+- Replacing or deleting a file may change NLP analysis and the radar; mentorship simulation does not change persisted data.
 
 ## Endpoints
 
-| Método y ruta | Uso |
+| Method and path | Purpose |
 | --- | --- |
-| `GET /profile/me/cvs` | Historial paginado de CV |
-| `POST /profile/me/cvs` | Subir CV del titular |
-| `DELETE /profile/me/cvs/:id` | Eliminar CV propio |
-| `GET /profile/me/cvs/:id/file` | Descargar archivo propio |
-| `POST /profile/me/cvs/:id/extraction` | Extraer datos para revisión |
-| `POST /profile/cv/generate` | Generar CV con datos seleccionados |
-| `GET /profile/me/document-verifications` | Historial de verificaciones |
-| `GET /profile/me/document-verifications/:id/file` | Respaldo de la versión propia |
-| `PATCH /profile/me/document-verifications/:id/notification` | Reconocer lectura de resultado |
+| `GET /profile/me/cvs` | Paginated CV history |
+| `POST /profile/me/cvs` | Upload the owner's CV |
+| `DELETE /profile/me/cvs/:id` | Delete an owned CV |
+| `GET /profile/me/cvs/:id/file` | Download an owned file |
+| `POST /profile/me/cvs/:id/extraction` | Extract data for review |
+| `POST /profile/cv/generate` | Generate a CV from selected data |
+| `GET /profile/me/document-verifications` | Verification history |
+| `GET /profile/me/document-verifications/:id/file` | Supporting file for an owned version |
+| `PATCH /profile/me/document-verifications/:id/notification` | Acknowledge a verification result |
 
-Las decisiones administrativas, permisos y errores figuran en [radar-integration](../radar-integration/README.md).
+Administrative decisions, permissions, and errors are described in [radar-integration](../radar-integration/README.md).
 
-Los JSON usan `{ statusCode, data, detail, ok }`; los archivos son binarios. Los errores se muestran en español y las consultas fallidas permiten reintento.
+JSON responses use `{ statusCode, data, detail, ok }`; files are binary responses. Errors appear in Spanish, and failed queries can be retried.
 
-## Validación
+## Validation
 
-Las pruebas verifican mutaciones, cancelación y recarga, vista previa, extracción, exportación, historial y sincronización. TypeScript comprueba contratos y ESLint las reglas de nombres/UI. CI valida compilación y cobertura.
+Tests verify mutations, cancellation and refresh, previews, extraction, export, history, and synchronization. TypeScript checks contracts, while ESLint checks naming and UI rules. CI validates builds and coverage.
 
 ## Sprint History
 
 ### Sprint 3
 
-- HU5: dashboard OCR/NLP, historial y conexión con radar.
-- Vista previa y reconocimiento de resultados por versión.
-- Mutaciones compartidas entre vista de CV y dashboard.
-- Integración de `documents` a `cv` e importaciones públicas.
+- HU5: OCR/NLP dashboard, verification history, and radar integration.
+- File preview and acknowledgement of version-specific results.
+- Shared mutations between the CV view and dashboard.
+- Integration of the `documents` to `cv` rename and public module imports.

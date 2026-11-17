@@ -1,65 +1,65 @@
-# Mentoría
+# Mentorship
 
-## Propósito y responsabilidades
+## Purpose and responsibilities
 
-`frontend/src/modules/mentorship` ofrece el directorio, perfil público de mentor, activación y configuración de orientaciones. Consume los dominios backend `mentors`, `technical-areas` y `orientation-types`. La integración de HU2 usa las áreas publicadas por el `index.ts` de `radar-chart`, sin importar sus carpetas privadas.
+`frontend/src/modules/mentorship` provides the directory, public mentor profile, activation flow, and orientation settings. It consumes the backend domains `mentors`, `technical-areas`, and `orientation-types`. HU2 integrates the areas exported by the `radar-chart` module's `index.ts`, without importing its private folders.
 
-## Arquitectura y dependencias
+## Architecture and dependencies
 
 ```mermaid
 flowchart LR
-  Radar[Área del radar] --> Directory[MentorDirectoryView]
+  Radar[Radar area] --> Directory[MentorDirectoryView]
   Directory --> Query[useMentorDirectory]
   Query --> API[mentor-directory.service: api-client]
-  API --> Mentors[Dominio mentors]
-  Directory --> Catalogs[Áreas técnicas y orientaciones]
+  API --> Mentors[mentors domain]
+  Directory --> Catalogs[Technical areas and orientation types]
   Directory --> Profile[MentorProfileView]
-  Wizard[Activación y borrador] --> Mentors
+  Wizard[Activation and draft] --> Mentors
 ```
 
-La navegación usa rutas del servidor que renderizan vistas interactivas. TanStack Query gestiona consultas y errores. El borrador del asistente usa los servicios compartidos de almacenamiento y no abre IndexedDB en componentes.
+Navigation uses server routes that render interactive views. TanStack Query handles queries and errors. The wizard draft uses shared storage services; components do not open IndexedDB.
 
-## Flujos y reglas
+## Flows and rules
 
 ```mermaid
 sequenceDiagram
-  actor Owner as Titular
+  actor Owner as Profile owner
   participant Radar as RadarProfileView
   participant Directory as MentorDirectoryView
-  participant API as API de mentores
-  Owner->>Radar: Selecciona área
-  Radar->>Directory: Navega con area y from=radar
-  Directory->>API: Consulta con available=true
-  API-->>Directory: Página, total y orden efectivo
-  Directory-->>Owner: Resultados disponibles y filtros
+  participant API as Mentors API
+  Owner->>Radar: Select an area
+  Radar->>Directory: Navigate with area and from=radar
+  Directory->>API: Query with available=true
+  API-->>Directory: Page, total, and effective ordering
+  Directory-->>Owner: Available results and filters
 ```
 
-La URL conserva búsqueda, área, orientación, disponibilidad, orden y página. Los parámetros se normalizan antes de consultar. Al llegar desde radar se fuerza disponibilidad y se usan sus seis áreas; los estados sin resultados, carga y error se muestran explícitamente. El cliente permite reintentar y no inventa mentores ante un fallo. La simulación de puntuación pertenece al módulo radar y no altera perfiles ni disponibilidad.
+The URL preserves search, area, orientation, availability, ordering, and page. Parameters are normalized before querying. Navigation from radar forces availability and uses its six areas; empty, loading, and error states are explicit. The client allows retrying and does not invent mentors when a query fails. Score simulation belongs to the radar module and does not change profiles or availability.
 
-La activación envía `Idempotency-Key` mediante el servicio compartido, para evitar duplicar operaciones al reintentar. La configuración de orientaciones se obtiene del catálogo y se actualiza para el mentor autenticado. La autorización definitiva reside en backend.
+Activation sends `Idempotency-Key` through the shared service to prevent duplicate operations on retry. Orientation settings come from the catalog and are updated for the authenticated mentor. Backend authorization remains authoritative.
 
-## Endpoints consumidos
+## Consumed endpoints
 
-| Método y ruta | Uso |
+| Method and path | Purpose |
 | --- | --- |
-| `GET /mentors/directory` | Directorio con filtros, paginación y orden |
-| `GET /mentors/:id` | Perfil de mentor |
-| `POST /mentors/activate` | Activación idempotente |
-| `GET /technical-areas` | Catálogo de áreas técnicas |
-| `GET /orientation-types` | Catálogo de orientaciones |
-| `GET /mentors/me/orientation-types` | Orientaciones propias |
-| `PATCH /mentors/me/orientation-types` | Actualizar orientaciones propias |
+| `GET /mentors/directory` | Directory with filters, pagination, and ordering |
+| `GET /mentors/:id` | Mentor profile |
+| `POST /mentors/activate` | Idempotent activation |
+| `GET /technical-areas` | Technical area catalog |
+| `GET /orientation-types` | Orientation type catalog |
+| `GET /mentors/me/orientation-types` | Current mentor's orientation types |
+| `PATCH /mentors/me/orientation-types` | Update the current mentor's orientation types |
 
-Los servicios extraen `data` del contrato común y usan el cliente HTTP centralizado. Los errores del perfil se traducen a estado no disponible cuando corresponde; los demás se presentan al usuario para reintento.
+Services extract `data` from the common response contract and use the centralized HTTP client. Profile errors become an unavailable state where appropriate; other errors are presented to the user for retry.
 
-## Validación
+## Validation
 
-Las pruebas cubren servicios HTTP, navegación y normalización, filtros desde radar, estados de consulta, catálogo, perfil y asistente. Los cambios de HU2 deben conservar el filtro obligatorio de disponibilidad y la correspondencia de áreas.
+Tests cover HTTP services, navigation and normalization, radar filters, query states, catalogs, profiles, and the wizard. HU2 changes must preserve the mandatory availability filter and area mapping.
 
 ## Sprint History
 
 ### Sprint 3
 
-- HU2 de Épica 3: acceso desde un área del radar al directorio disponible.
-- Simulación en radar basada en la consulta real de mentores.
-- Adecuación: consumo de áreas mediante la API pública del módulo radar.
+- Epic 3 HU2: navigate from a radar area to the available mentor directory.
+- Radar simulation based on actual mentor queries.
+- Standards alignment: consume areas through the radar module's public API.
