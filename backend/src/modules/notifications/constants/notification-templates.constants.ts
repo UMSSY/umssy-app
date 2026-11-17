@@ -48,7 +48,7 @@ export const NOTIFICATION_TEMPLATES: NotificationTemplateMap = {
     renderTitle: () => 'Cita cancelada',
     renderBody: (p) =>
       truncate(
-        `${p.cancelledByName} canceló la cita con ${p.counterpartName} el ${p.date}.`,
+        `${p.cancelledByName} canceló la cita con ${p.counterpartName} el ${p.date} a las ${p.time}.`,
       ),
   },
   [NotificationType.APPOINTMENT_BOOKED]: {
