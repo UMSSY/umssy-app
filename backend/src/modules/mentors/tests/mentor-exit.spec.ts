@@ -190,7 +190,7 @@ describe('desactivación de participación HU6', () => {
       statusCode: 409,
       data: {
         code: 'MENTOR_HAS_FUTURE_APPOINTMENTS',
-        agendaPath: '/mentor/availability',
+        agendaPath: '/appointments',
       },
     });
     expect(

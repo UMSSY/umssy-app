@@ -40,7 +40,7 @@ export function ActivateParticipationModal({
                   Estado de mentor
                 </p>
                 <DialogTitle className="mt-1 text-lg font-bold tracking-tight break-words text-ink sm:text-xl">
-                  Activar participación
+                  Solicitar reincorporación
                 </DialogTitle>
               </div>
             </div>

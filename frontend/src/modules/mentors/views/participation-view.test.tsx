@@ -86,7 +86,7 @@ describe("ParticipationView HU-MEN-06", () => {
     expect(screen.getByRole("link", { name: "Editar tipos de orientación" }))
       .toHaveAttribute("href", "/mentorship/orientation");
     expect(
-      screen.getByRole("button", { name: "Desactivar participación" }),
+      screen.getByRole("button", { name: "Pausar mentoría" }),
     ).toBeInTheDocument();
   });
 
@@ -95,13 +95,13 @@ describe("ParticipationView HU-MEN-06", () => {
       deactivated,
     );
     renderWithQuery(<ParticipationView />);
-    expect(await screen.findByText("Desactivado")).toBeInTheDocument();
+    expect(await screen.findByText("Fuera de la red")).toBeInTheDocument();
     expect(screen.getByText("Backend")).toBeInTheDocument();
     expect(
       screen.queryByRole("link", { name: "Editar áreas técnicas" }),
     ).not.toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Activar participación" }),
+      screen.getByRole("button", { name: "Solicitar reincorporación" }),
     ).toBeInTheDocument();
   });
 
@@ -116,7 +116,7 @@ describe("ParticipationView HU-MEN-06", () => {
     expect(await screen.findByText("PENDIENTE")).toBeInTheDocument();
     expect(screen.getAllByRole("heading", { name: "Estado de participación" })).toHaveLength(1);
     expect(screen.getByRole("heading", { name: "Mi participación como mentor" })).toBeInTheDocument();
-    expect(screen.queryByText("Desactivado")).not.toBeInTheDocument();
+    expect(screen.queryByText("Fuera de la red")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Ver detalle" })).toBeInTheDocument();
   });
 
@@ -129,20 +129,32 @@ describe("ParticipationView HU-MEN-06", () => {
       .mockResolvedValue(deactivated);
     renderWithQuery(<ParticipationView />);
     fireEvent.click(
-      await screen.findByRole("button", { name: "Desactivar participación" }),
+      await screen.findByRole("button", { name: "Pausar mentoría" }),
     );
     fireEvent.click(screen.getByRole("button", { name: "Cancelar" }));
     expect(leave).not.toHaveBeenCalled();
     fireEvent.click(
-      screen.getByRole("button", { name: "Desactivar participación" }),
+      screen.getByRole("button", { name: "Pausar mentoría" }),
     );
     fireEvent.click(
       within(screen.getByRole("dialog")).getByRole("button", {
-        name: "Desactivar participación",
+        name: "Pausar mentoría",
       }),
     );
     await waitFor(() => expect(leave).toHaveBeenCalledTimes(1));
-    expect(await screen.findByText("Desactivado")).toBeInTheDocument();
+    expect(await screen.findByText("Fuera de la red")).toBeInTheDocument();
+  });
+
+  it("muestra la salida confirmada aunque falle la consulta posterior", async () => {
+    vi.spyOn(mentorParticipationService, "leave").mockResolvedValue();
+    vi.mocked(mentorParticipationService.getMyParticipation)
+      .mockResolvedValueOnce(active)
+      .mockRejectedValue(new Error("Network"));
+    renderWithQuery(<ParticipationView />);
+    fireEvent.click(await screen.findByRole("button", { name: "Pausar mentoría" }));
+    fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Pausar mentoría" }));
+    expect(await screen.findByText("Fuera de la red")).toBeInTheDocument();
+    expect(screen.queryByText("Activo")).not.toBeInTheDocument();
   });
 
   it("mantiene abierto el modal y explica las citas futuras cuando falla la salida", async () => {
@@ -158,20 +170,21 @@ describe("ParticipationView HU-MEN-06", () => {
     });
     renderWithQuery(<ParticipationView />);
     fireEvent.click(
-      await screen.findByRole("button", { name: "Desactivar participación" }),
+      await screen.findByRole("button", { name: "Pausar mentoría" }),
     );
     fireEvent.click(
       within(screen.getByRole("dialog")).getByRole("button", {
-        name: "Desactivar participación",
+        name: "Pausar mentoría",
       }),
     );
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "Resuelve las citas futuras",
     );
     expect(
-      screen.getByRole("link", { name: "Resolver mis citas en la agenda" }),
+      screen.getByRole("link", { name: "Ver mis citas en la agenda" }),
     ).toBeInTheDocument();
     expect(screen.getByText("Activo")).toBeInTheDocument();
+    expect(toast.success).not.toHaveBeenCalled();
   });
 
   it("bloquea el doble envío de desactivación", async () => {
@@ -180,10 +193,10 @@ describe("ParticipationView HU-MEN-06", () => {
       .mockImplementation(() => new Promise<void>(() => {}));
     renderWithQuery(<ParticipationView />);
     fireEvent.click(
-      await screen.findByRole("button", { name: "Desactivar participación" }),
+      await screen.findByRole("button", { name: "Pausar mentoría" }),
     );
     const confirm = within(screen.getByRole("dialog")).getByRole("button", {
-      name: "Desactivar participación",
+      name: "Pausar mentoría",
     });
     fireEvent.click(confirm);
     fireEvent.click(confirm);
@@ -196,7 +209,7 @@ describe("ParticipationView HU-MEN-06", () => {
     );
     renderWithQuery(<ParticipationView />);
     fireEvent.click(
-      await screen.findByRole("button", { name: "Activar participación" }),
+      await screen.findByRole("button", { name: "Solicitar reincorporación" }),
     );
     fireEvent.click(
       screen.getByRole("button", { name: "Continuar a incorporación" }),
@@ -211,7 +224,7 @@ describe("ParticipationView HU-MEN-06", () => {
       selectedOrientationTypeIds: ["orientation-1"],
     });
     expect(navigation.push).toHaveBeenCalledWith("/mentorship");
-    expect(screen.getByText("Desactivado")).toBeInTheDocument();
+    expect(screen.getByText("Fuera de la red")).toBeInTheDocument();
   });
 
   it("permite continuar sin precarga cuando falla IndexedDB", async () => {
@@ -223,7 +236,7 @@ describe("ParticipationView HU-MEN-06", () => {
     );
     renderWithQuery(<ParticipationView />);
     fireEvent.click(
-      await screen.findByRole("button", { name: "Activar participación" }),
+      await screen.findByRole("button", { name: "Solicitar reincorporación" }),
     );
     fireEvent.click(
       screen.getByRole("button", { name: "Continuar a incorporación" }),
@@ -250,7 +263,7 @@ describe("ParticipationView HU-MEN-06", () => {
     });
     renderWithQuery(<ParticipationView />);
     fireEvent.click(
-      await screen.findByRole("button", { name: "Activar participación" }),
+      await screen.findByRole("button", { name: "Solicitar reincorporación" }),
     );
     fireEvent.click(
       screen.getByRole("button", { name: "Continuar a incorporación" }),
@@ -299,7 +312,7 @@ describe("ParticipationView HU-MEN-06", () => {
       await screen.findByText("No se pudo consultar tu solicitud de cupo."),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Desactivar participación" }),
+      screen.getByRole("button", { name: "Pausar mentoría" }),
     ).toBeEnabled();
     expect(
       screen.queryByText("No se pudo cargar tu participación como mentor."),
