@@ -127,7 +127,6 @@ export class SurveyLifecycleWorkerService
         const evalResult = await this.variationEvaluator.evaluateSurvey(
           survey.id,
           {
-            academicPeriod: survey.academicPeriod,
             closesAt: survey.closesAt,
             threshold: survey.alertConfig?.threshold,
             questionIds: toQuestionIds(survey.alertConfig?.questionIds),
