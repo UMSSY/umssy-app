@@ -1,1 +1,1 @@
-export type ApplicationSortKey = "vacancy" | "company" | "affinity" | "status";
+export type ApplicationSortKey = "vacancy" | "company" | "affinity" | "status" | "date";
