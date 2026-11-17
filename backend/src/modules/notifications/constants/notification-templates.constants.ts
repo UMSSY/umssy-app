@@ -1,3 +1,4 @@
+import { APPOINTMENT_BOOKED_TEMPLATE } from '../../appointments/notification/appointment-booked.template.js';
 import { NotificationType } from '../types/notification-type.enum.js';
 
 import type { NotificationTemplateMap } from '../types/notification-template-map.type.js';
@@ -51,11 +52,7 @@ export const NOTIFICATION_TEMPLATES: NotificationTemplateMap = {
         `${p.cancelledByName} canceló la cita con ${p.counterpartName} el ${p.date} a las ${p.time}.`,
       ),
   },
-  [NotificationType.APPOINTMENT_BOOKED]: {
-    renderTitle: () => 'Cita confirmada',
-    renderBody: (p) =>
-      truncate(`Cita con ${p.counterpartName} el ${p.date} a las ${p.time}.`),
-  },
+  [NotificationType.APPOINTMENT_BOOKED]: APPOINTMENT_BOOKED_TEMPLATE,
 
   [NotificationType.SURVEY_PUBLISHED]: {
     renderTitle: () => 'Nueva encuesta publicada',

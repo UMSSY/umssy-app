@@ -26,7 +26,7 @@ import {
 import { AppointmentNotFoundException } from '../exceptions/appointment-not-found.exception.js';
 import { AppointmentNotOwnedException } from '../exceptions/appointment-not-owned.exception.js';
 import { AppointmentMapper } from '../mappers/appointment.mapper.js';
-import { AppointmentNotificationsService } from '../notifications/appointment-notifications.service.js';
+import { AppointmentNotificationsService } from '../notification/appointment-notifications.service.js';
 import { AppointmentsRepository } from '../repositories/appointments.repository.js';
 import type { CancelAppointmentDto } from '../requests/cancel-appointment.request.js';
 import type { CreateAppointmentDto } from '../requests/create-appointment.request.js';

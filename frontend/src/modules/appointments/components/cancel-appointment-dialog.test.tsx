@@ -159,4 +159,36 @@ describe('CancelAppointmentDialog', () => {
     ).toBe('CONFIRMED');
     expect(toast.error).toHaveBeenCalledWith(TEXT.error);
   });
+
+  it('señala el motivo obligatorio vacío y actualiza el contador al escribir', async () => {
+    const { user } = await openDialog();
+    const reason = screen.getByLabelText(TEXT.reason);
+    expect(screen.getByText('0/300')).toBeInTheDocument();
+    expect(reason).toHaveAttribute('aria-invalid', 'false');
+
+    await user.click(screen.getByRole('button', { name: TEXT.confirm }));
+
+    expect(reason).toHaveAttribute('aria-invalid', 'true');
+    expect(screen.getByRole('alert')).toHaveTextContent(TEXT.reasonRequired);
+
+    await user.type(reason, 'No puedo');
+
+    expect(reason).toHaveAttribute('aria-invalid', 'false');
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(screen.getByText('8/300')).toBeInTheDocument();
+  });
+
+  it('cerrar con Escape no cancela la cita y limpia el motivo al reabrir', async () => {
+    const { user } = await openDialog();
+    await user.type(screen.getByLabelText(TEXT.reason), 'No puedo');
+
+    await user.keyboard('{Escape}');
+
+    await waitFor(() =>
+      expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument(),
+    );
+    expect(appointmentsApi.cancel).not.toHaveBeenCalled();
+    await user.click(screen.getByRole('button', { name: TEXT.title }));
+    expect(screen.getByLabelText(TEXT.reason)).toHaveValue('');
+  });
 });

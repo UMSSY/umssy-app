@@ -9,7 +9,7 @@ import { AppointmentDocumentsController } from './controllers/appointment-docume
 import { AppointmentsController } from './controllers/appointments.controller.js';
 import { AppointmentDocumentMapper } from './mappers/appointment-document.mapper.js';
 import { AppointmentMapper } from './mappers/appointment.mapper.js';
-import { AppointmentNotificationsService } from './notifications/appointment-notifications.service.js';
+import { AppointmentNotificationsService } from './notification/appointment-notifications.service.js';
 import { AppointmentDocumentsRepository } from './repositories/appointment-documents.repository.js';
 import { AppointmentNotificationsRepository } from './repositories/appointment-notifications.repository.js';
 import { AppointmentsRepository } from './repositories/appointments.repository.js';
