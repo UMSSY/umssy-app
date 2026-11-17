@@ -6,7 +6,11 @@ const userId = '11111111-1111-4111-8111-111111111111';
 const skillId = '33333333-3333-4333-8333-333333333333';
 const otherSkillId = '44444444-4444-4444-8444-444444444444';
 const detectedSkillId = '55555555-5555-4555-8555-555555555555';
-const select = { skill: { select: { id: true, name: true, isCustom: true } } };
+const select = {
+  skill: { select: { id: true, name: true, isCustom: true } },
+  source: true,
+  evidenceRefs: true,
+};
 
 describe('UserSkillRepository', () => {
   let repository: UserSkillRepository;
