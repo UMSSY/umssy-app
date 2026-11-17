@@ -99,6 +99,7 @@ describe('Cancellation contract and capacity regression (HU-08-09 / 09.7)', () =
     };
 
     const eventsService = {
+      lockEventRow: vi.fn().mockResolvedValue(undefined),
       findForRegistration: vi.fn().mockResolvedValue(workshop),
       isFinished: vi.fn().mockReturnValue(false),
     };
@@ -122,6 +123,7 @@ describe('Cancellation contract and capacity regression (HU-08-09 / 09.7)', () =
       cancelledAt: expect.any(String),
     });
     expect(Number.isFinite(Date.parse(response.cancelledAt!))).toBe(true);
+    expect(eventsService.lockEventRow).toHaveBeenCalledWith(tx, workshop.id);
     expect(countConfirmed()).toBe(0);
     expect(workshop.capacity - countConfirmed()).toBe(1);
     expect(workshop.capacity).toBe(1);
@@ -156,6 +158,7 @@ describe('Cancellation contract and capacity regression (HU-08-09 / 09.7)', () =
         cancel: vi.fn(),
       };
       const eventsService = {
+        lockEventRow: vi.fn().mockResolvedValue(undefined),
         findForRegistration: vi.fn().mockResolvedValue(workshop),
         isFinished: vi.fn().mockReturnValue(false),
       };
@@ -192,7 +195,11 @@ describe('Cancellation contract and capacity regression (HU-08-09 / 09.7)', () =
     };
     const service = new EventRegistrationsService(
       repository as unknown as EventRegistrationsRepository,
-      { findForRegistration: vi.fn(), isFinished: vi.fn() } as never,
+      {
+        lockEventRow: vi.fn(),
+        findForRegistration: vi.fn(),
+        isFinished: vi.fn(),
+      } as never,
     );
 
     await expect(
