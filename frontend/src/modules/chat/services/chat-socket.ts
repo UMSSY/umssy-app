@@ -1,25 +1,8 @@
-
 import { io, type Socket } from 'socket.io-client';
+import { resolveSocketEndpoint } from '@/shared/services/socket-endpoint';
 import { getAccessToken } from '@/shared/services/storage/access-token-storage';
-import { ENV_CONFIG } from '@/shared/config/env.config';
 
 let sharedSocket: Socket | null = null;
-
-export function resolveSocketEndpoint(
-  apiUrl: string = ENV_CONFIG.apiUrl || 'http://localhost:8080',
-): {
-  serverUrl: string;
-  path?: string;
-} {
-  try {
-    const parsed = new URL(apiUrl);
-    const serverUrl = parsed.origin;
-
-    return { serverUrl, path: '/api/socket.io' };
-  } catch {
-    return { serverUrl: apiUrl, path: '/api/socket.io' };
-  }
-}
 
 export function createChatSocket(token: string): Socket {
   const { serverUrl, path } = resolveSocketEndpoint();

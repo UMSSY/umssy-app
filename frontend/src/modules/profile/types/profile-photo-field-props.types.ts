@@ -1,4 +1,5 @@
 export interface ProfilePhotoFieldProps {
+  idPrefix?: string;
   photoUrl?: string | null;
   previewUrl?: string | null;
   isUploading?: boolean;

@@ -6,6 +6,9 @@ import type { WorkPeriodResponse } from '../responses/work-period.response.js';
 
 @Injectable()
 export class WorkExperienceSourcesService {
+  findVerificationSources(userId: string, context?: TransactionContext) {
+    return this.repository.findVerificationSources(userId, context);
+  }
   constructor(private readonly repository: WorkExperienceRepository) {}
 
   hasByUserId(userId: string): Promise<boolean> {

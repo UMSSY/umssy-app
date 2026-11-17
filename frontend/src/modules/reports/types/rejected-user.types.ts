@@ -1,5 +1,5 @@
-import type { DocumentType } from "@/modules/access-request";
 import type { RoleTag } from "@/modules/auth";
+import type { DocumentType } from "@/modules/access-requests";
 
 export interface RejectedUser {
   id: string;

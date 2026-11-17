@@ -17,6 +17,7 @@ export const profileSkillRowSelect = {
   skillId: true,
   source: true,
   verificationStatus: true,
+  radarAutoVerified: true,
   isHighRelevance: true,
   evidenceRefs: true,
   skill: { select: { name: true, areaId: true } },
@@ -46,7 +47,6 @@ export class SkillAnalysisRepository {
       },
       include: {
         skill: true,
-        user: { select: { firstName: true, lastName: true } },
       },
       take: 300,
       orderBy: { createdAt: 'desc' },
@@ -67,7 +67,7 @@ export class SkillAnalysisRepository {
   ) {
     return context.client.userSkill.updateMany({
       where: { id: skillId, verificationStatus: { not: action } },
-      data: { verificationStatus: action },
+      data: { verificationStatus: action, radarAutoVerified: false },
     });
   }
 
@@ -75,12 +75,6 @@ export class SkillAnalysisRepository {
     return this.prisma.skill.findMany({
       where: { isCustom: false },
       select: { id: true, name: true, areaId: true },
-    });
-  }
-
-  countPendingPublicationSkills(userId: string): Promise<number> {
-    return this.prisma.userSkill.count({
-      where: { userId, verificationStatus: 'pending' },
     });
   }
 
@@ -113,7 +107,7 @@ export class SkillAnalysisRepository {
     userId: string,
     plan: SkillReconciliationPayload,
     context: TransactionContext,
-  ): Promise<void> {
+  ): Promise<number> {
     const client = context.client;
     if (plan.deleteIds.length > 0) {
       await client.userSkill.deleteMany({
@@ -142,6 +136,24 @@ export class SkillAnalysisRepository {
         skipDuplicates: true,
       });
     }
+    return plan.creates.length + plan.updates.length + plan.deleteIds.length;
+  }
+
+  async applyAutomaticDecisions(
+    userId: string,
+    approvedIds: string[],
+    pendingIds: string[],
+    context: TransactionContext,
+  ) {
+    const approved = await context.client.userSkill.updateMany({
+      where: { userId, id: { in: approvedIds } },
+      data: { verificationStatus: 'approved', radarAutoVerified: true },
+    });
+    const pending = await context.client.userSkill.updateMany({
+      where: { userId, id: { in: pendingIds } },
+      data: { verificationStatus: 'pending', radarAutoVerified: false },
+    });
+    return approved.count + pending.count;
   }
 
   findSkillSummariesByUserIds(

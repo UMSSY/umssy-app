@@ -82,9 +82,12 @@ describe('MentorsRepository directory page', () => {
         ),
       ),
     ).toEqual(Array(32).fill(0));
-    for (const [query] of raw.mock.calls) {
-      expect(query.sql.length).toBeLessThan(1500);
-      expect(query.values.length).toBe(8);
+    for (const [index, [query]] of raw.mock.calls.entries()) {
+      const term = 'u'.repeat(index % 2 ? 20 : 100);
+      expect(query.sql).not.toContain(term);
+      expect(query.values).toContain(term);
+      expect(query.sql).toBe(raw.mock.calls[0][0].sql);
+      expect(query.sql.match(/\?/g)).toHaveLength(query.values.length);
     }
   });
 
@@ -205,4 +208,19 @@ describe('MentorsRepository directory page', () => {
     expect(where).not.toHaveProperty('mentorOrientationTypes');
     expect(where).not.toHaveProperty('isAvailableForMentoring');
   });
+});
+
+it('filtra el área del radar por cualquiera de sus especialidades existentes', async () => {
+  const findMany = vi.fn().mockResolvedValue([]);
+  const repository = new MentorsRepository({ user: { findMany } } as unknown as PrismaService);
+  await repository.findDirectoryPage({ search: '', area: 'Desarrollo', available: true }, new Date(), 1, 6);
+  expect(findMany.mock.calls[0][0].where).toMatchObject({
+    isActive: true, isAvailableForMentoring: true,
+    mentorTechnicalAreas: { some: { technicalArea: { name: { in: expect.arrayContaining(['Backend', 'Desarrollo Web']) } } } },
+  });
+  const predicate = directoryPredicate({ search: 'ingeniero', area: 'Desarrollo', available: true }, new Date());
+  expect(predicate.values).toContain('Backend');
+  expect(predicate.values).toContain('Desarrollo Web');
+  expect(predicate.sql).toContain('u.headline');
+  expect(predicate.sql).toContain('we.position');
 });

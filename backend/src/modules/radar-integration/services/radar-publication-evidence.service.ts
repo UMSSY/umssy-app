@@ -20,13 +20,23 @@ export class RadarPublicationEvidenceService {
     return this.skills.countPendingPublicationSkills(userId);
   }
 
-  read(userId: string, context: TransactionContext) {
-    return Promise.all([
-      this.skills.findApprovedPublicationSkills(userId, context),
-      this.cv.findPublicationCvStates(userId, context),
-      this.workExperience.findPublicationEvidenceIds(userId, context),
-      this.educations.findPublicationEvidenceIds(userId, context),
-      this.certifications.findPublicationEvidenceIds(userId, context),
-    ]);
+  async read(userId: string, context: TransactionContext) {
+    const [skills, cvs, experiences, educations, certificates, blocked] =
+      await Promise.all([
+        this.skills.findApprovedPublicationSkills(userId, context),
+        this.cv.findPublicationCvStates(userId, context),
+        this.workExperience.findPublicationEvidenceIds(userId, context),
+        this.educations.findPublicationEvidenceIds(userId, context),
+        this.certifications.findPublicationEvidenceIds(userId, context),
+        this.cv.findUnapprovedCertificateIds(userId, context),
+      ]);
+    const excluded = new Set(blocked.map((row) => row.sourceId));
+    return [
+      skills,
+      cvs,
+      experiences,
+      educations,
+      certificates.filter((row) => !excluded.has(row.id)),
+    ] as const;
   }
 }

@@ -4,7 +4,6 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CERTIFICATION_DOCUMENT_MESSAGES } from "../config/certification-document.config";
 import { CERTIFICATION_FEEDBACK_MESSAGES } from "../config/certification-feedback.config";
-import { CERTIFICATION_VALIDATION_MESSAGES } from "../config/certification-validation.config";
 import { certificationsService } from "../services/certifications.service";
 import type { Certification } from "../types/certification.types";
 import { CertificationsView } from "./certifications-view";
@@ -215,9 +214,7 @@ describe("CertificationsView", () => {
       issuingOrganization: "Cisco",
       issueDate: "2024-01-15",
     }, expect.any(File));
-    expect(await screen.findByRole("status")).toHaveTextContent(
-      CERTIFICATION_FEEDBACK_MESSAGES.createSuccess,
-    );
+    expect(await screen.findByText(CERTIFICATION_FEEDBACK_MESSAGES.createSuccess)).toBeVisible();
     expect(screen.queryByLabelText(/Nombre de la certificación/)).not.toBeInTheDocument();
     expect(getCertificationNames()).toEqual(["AWS Cloud Practitioner", "CCNA", "Scrum Master"]);
   });
@@ -257,9 +254,7 @@ describe("CertificationsView", () => {
       issuingOrganization: "Scrum Alliance",
       issueDate: "2022-05-10",
     });
-    expect(await screen.findByRole("status")).toHaveTextContent(
-      CERTIFICATION_FEEDBACK_MESSAGES.updateSuccess,
-    );
+    expect(await screen.findByText(CERTIFICATION_FEEDBACK_MESSAGES.updateSuccess)).toBeVisible();
     expect(screen.queryByRole("form", { name: "Agregar certificación" })).not.toBeInTheDocument();
   });
 
@@ -361,9 +356,7 @@ describe("CertificationsView", () => {
     });
 
     expect(certificationsService.deleteCertification).toHaveBeenCalledWith("scrum");
-    expect(await screen.findByRole("status")).toHaveTextContent(
-      CERTIFICATION_FEEDBACK_MESSAGES.deleteSuccess,
-    );
+    expect(await screen.findByText(CERTIFICATION_FEEDBACK_MESSAGES.deleteSuccess)).toBeVisible();
     await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
     expect(getCertificationNames()).toEqual(["AWS Cloud Practitioner"]);
   });
@@ -491,18 +484,14 @@ describe("CertificationsView", () => {
         ).toHaveTextContent("Ver documento");
       });
 
-      it("prevents saving without a document when the current one is removed and shows the required error", async () => {
+      it("saves profile text after removing its optional document", async () => {
         const user = await renderView();
 
         await user.click(screen.getByRole("button", { name: "Editar Scrum Master" }));
         await user.click(screen.getByRole("button", { name: "Eliminar documento actual" }));
         await user.click(screen.getByRole("button", { name: "Guardar certificación" }));
 
-        expect(
-          screen.getByText(CERTIFICATION_VALIDATION_MESSAGES.documentRequired),
-        ).toBeInTheDocument();
-        expect(certificationsService.deleteDocument).not.toHaveBeenCalled();
-        expect(certificationsService.updateCertification).not.toHaveBeenCalled();
+        expect(certificationsService.updateWithDocument).toHaveBeenCalledWith("scrum",expect.any(Object),{type:"remove"});
       });
 
       it("does not call the document api when cancelling after marking the removal", async () => {

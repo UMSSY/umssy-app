@@ -1,5 +1,6 @@
 import type { NavigationItem } from "@/shared/types/navigation-item.types";
 import { getRouteRoles } from "@/shared/utils/get-route-roles";
+import { NOTIFICATION_INBOX_FILTER_LABELS } from "@/modules/notifications";
 import { WORKSPACE_SECTIONS } from "./workspace-sections.config";
 import { Bell, CalendarDays, ChartNoAxesCombined, ClipboardList, History, House, LayoutGrid, MessageCircle, Users, BriefcaseBusiness, Building2, Inbox, Radar, UserRound } from "lucide-react";
 
@@ -11,6 +12,8 @@ function getSectionItems(sectionId: string) {
   })) ?? [];
 }
 
+const notificationRoles = getRouteRoles("/notifications");
+
 export const SIDEBAR_NAVIGATION: NavigationItem[] = [
   { label: "Inicio", icon: House, href: "/dashboard", roles: getRouteRoles("/dashboard") },
   { label: "Mi perfil", icon: UserRound, activePathPatterns: [/^\/profile(?:\/|$)/], children: getSectionItems("profile") },
@@ -18,6 +21,17 @@ export const SIDEBAR_NAVIGATION: NavigationItem[] = [
   { label: "Talleres y eventos", icon: CalendarDays, activePathPatterns: [/^\/events(?:\/|$)/], children: getSectionItems("events") },
   { label: "Vacantes", icon: BriefcaseBusiness, activePathPatterns: [/^\/vacancies(?:\/|$)/], children: getSectionItems("vacancies") },
   { label: "Mensajes", icon: MessageCircle, href: "/chat", roles: getRouteRoles("/chat") },
+  {
+    label: "Notificaciones",
+    icon: Bell,
+    activePathPatterns: [/^\/notifications(?:\/|$)/],
+    children: [
+      { label: NOTIFICATION_INBOX_FILTER_LABELS.ALL, href: "/notifications", roles: notificationRoles },
+      { label: NOTIFICATION_INBOX_FILTER_LABELS.SURVEYS, href: "/notifications?filter=SURVEYS", roles: notificationRoles },
+      { label: NOTIFICATION_INBOX_FILTER_LABELS.REMINDERS, href: "/notifications?filter=REMINDERS", roles: notificationRoles },
+      { label: NOTIFICATION_INBOX_FILTER_LABELS.SYSTEM, href: "/notifications?filter=SYSTEM", roles: notificationRoles },
+    ],
+  },
   { label: "Notificaciones de encuestas", icon: Bell, href: "/surveys", roles: getRouteRoles("/surveys") },
   { label: "Mi empresa", icon: Building2, activePathPatterns: [/^\/(?:recruiters|matching)(?:\/|$)/, /^\/area-detail(?:-interaction)?-preview\/?$/], children: getSectionItems("company") },
   { label: "Solicitudes", icon: Inbox, href: "/backoffice/solicitudes", roles: getRouteRoles("/backoffice") },

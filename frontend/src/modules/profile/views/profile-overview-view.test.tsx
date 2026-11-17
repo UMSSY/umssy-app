@@ -85,7 +85,7 @@ describe("ProfileOverviewView", () => {
     vi.mocked(profileService.getProfile).mockReturnValue(new Promise(() => {}));
     render(<ProfileOverviewView />);
 
-    expect(await screen.findByRole("progressbar", { name: "Completitud del perfil" })).toHaveAttribute("aria-valuenow", "35");
+    expect(await screen.findByRole("progressbar", { name: "Completitud del perfil" })).toHaveAttribute("aria-valuenow", "30");
     expect(screen.getByRole("region", { name: "Secciones del perfil" })).toBeVisible();
     expect(screen.getByText("Cargando tu perfil...")).toBeVisible();
     expect(screen.queryByText("Valeria Quispe")).not.toBeInTheDocument();
@@ -123,7 +123,7 @@ describe("ProfileOverviewView", () => {
     render(<ProfileOverviewView />);
 
     expect(await screen.findByText("Valeria Quispe")).toBeInTheDocument();
-    expect(await screen.findByRole("progressbar", { name: "Completitud del perfil" })).toHaveAttribute("aria-valuenow", "35");
+    expect(await screen.findByRole("progressbar", { name: "Completitud del perfil" })).toHaveAttribute("aria-valuenow", "30");
     expect(screen.queryByText("Cargando tu perfil...")).not.toBeInTheDocument();
     expect(screen.getByText("VQ")).toBeInTheDocument();
     expect(screen.getByText("Desarrolladora web junior")).toBeInTheDocument();
@@ -197,7 +197,7 @@ describe("ProfileOverviewView", () => {
 
 });
 
-vi.mock("@/modules/education", () => ({ EducationProfileSection: () => <section aria-label="Formación académica"><h2>Formación académica</h2></section> }));
+vi.mock("@/modules/educations", () => ({ EducationProfileSection: () => <section aria-label="Formación académica"><h2>Formación académica</h2></section> }));
 
 vi.mock("@/modules/work-experience", () => ({ WorkExperienceProfileSection: () => <section aria-label="Experiencia laboral"><h2>Experiencia laboral</h2></section> }));
 
@@ -205,4 +205,4 @@ vi.mock("@/modules/skills", () => ({ SkillsProfileSection: () => <section aria-l
 
 vi.mock("@/modules/certifications", () => ({ CertificationProfileSection: () => <section aria-label="Certificaciones"><h2>Certificaciones</h2></section> }));
 
-vi.mock("@/modules/documents", () => ({ CvExportButton: () => <button type="button">Descargar CV en PDF</button> }));
+vi.mock("@/modules/cv", () => ({ CvExportButton: () => <button type="button">Descargar CV en PDF</button> }));

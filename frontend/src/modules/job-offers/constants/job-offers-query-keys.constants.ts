@@ -1,5 +1,6 @@
 export const JOB_OFFERS_QUERY_KEYS = {
   skillCatalog: ["job-offers", "skill-catalog"] as const,
+  requirementSkills: (text: string) => ["job-offers", "requirement-skills", text] as const,
   company: (companyId: string | null) => ["job-offers", "company", companyId] as const,
   companyOffers: (companyId: string | null, params?: object) =>
     ["job-offers", "company", companyId, params] as const,
