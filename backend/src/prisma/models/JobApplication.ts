@@ -201,6 +201,7 @@ export type JobApplicationWhereInput = {
   jobOffer?: Prisma.XOR<Prisma.JobOfferScalarRelationFilter, Prisma.JobOfferWhereInput>
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   status?: Prisma.XOR<Prisma.JobApplicationStatusScalarRelationFilter, Prisma.JobApplicationStatusWhereInput>
+  radarConsent?: Prisma.XOR<Prisma.RadarApplicationConsentNullableScalarRelationFilter, Prisma.RadarApplicationConsentWhereInput> | null
 }
 
 export type JobApplicationOrderByWithRelationInput = {
@@ -214,6 +215,7 @@ export type JobApplicationOrderByWithRelationInput = {
   jobOffer?: Prisma.JobOfferOrderByWithRelationInput
   user?: Prisma.UserOrderByWithRelationInput
   status?: Prisma.JobApplicationStatusOrderByWithRelationInput
+  radarConsent?: Prisma.RadarApplicationConsentOrderByWithRelationInput
 }
 
 export type JobApplicationWhereUniqueInput = Prisma.AtLeast<{
@@ -231,6 +233,7 @@ export type JobApplicationWhereUniqueInput = Prisma.AtLeast<{
   jobOffer?: Prisma.XOR<Prisma.JobOfferScalarRelationFilter, Prisma.JobOfferWhereInput>
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   status?: Prisma.XOR<Prisma.JobApplicationStatusScalarRelationFilter, Prisma.JobApplicationStatusWhereInput>
+  radarConsent?: Prisma.XOR<Prisma.RadarApplicationConsentNullableScalarRelationFilter, Prisma.RadarApplicationConsentWhereInput> | null
 }, "id" | "jobOfferId_userId">
 
 export type JobApplicationOrderByWithAggregationInput = {
@@ -267,6 +270,7 @@ export type JobApplicationCreateInput = {
   jobOffer: Prisma.JobOfferCreateNestedOneWithoutApplicationsInput
   user: Prisma.UserCreateNestedOneWithoutJobApplicationsInput
   status: Prisma.JobApplicationStatusCreateNestedOneWithoutApplicationsInput
+  radarConsent?: Prisma.RadarApplicationConsentCreateNestedOneWithoutApplicationInput
 }
 
 export type JobApplicationUncheckedCreateInput = {
@@ -277,6 +281,7 @@ export type JobApplicationUncheckedCreateInput = {
   appliedAt?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
+  radarConsent?: Prisma.RadarApplicationConsentUncheckedCreateNestedOneWithoutApplicationInput
 }
 
 export type JobApplicationUpdateInput = {
@@ -287,6 +292,7 @@ export type JobApplicationUpdateInput = {
   jobOffer?: Prisma.JobOfferUpdateOneRequiredWithoutApplicationsNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutJobApplicationsNestedInput
   status?: Prisma.JobApplicationStatusUpdateOneRequiredWithoutApplicationsNestedInput
+  radarConsent?: Prisma.RadarApplicationConsentUpdateOneWithoutApplicationNestedInput
 }
 
 export type JobApplicationUncheckedUpdateInput = {
@@ -297,6 +303,7 @@ export type JobApplicationUncheckedUpdateInput = {
   appliedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  radarConsent?: Prisma.RadarApplicationConsentUncheckedUpdateOneWithoutApplicationNestedInput
 }
 
 export type JobApplicationCreateManyInput = {
@@ -372,9 +379,9 @@ export type JobApplicationMinOrderByAggregateInput = {
 }
 
 export type JobApplicationScalarRelationFilter = {
-  is?: Prisma.JobApplicationWhereInput;
-  isNot?: Prisma.JobApplicationWhereInput;
-};
+  is?: Prisma.JobApplicationWhereInput
+  isNot?: Prisma.JobApplicationWhereInput
+}
 
 export type JobApplicationCreateNestedManyWithoutUserInput = {
   create?: Prisma.XOR<Prisma.JobApplicationCreateWithoutUserInput, Prisma.JobApplicationUncheckedCreateWithoutUserInput> | Prisma.JobApplicationCreateWithoutUserInput[] | Prisma.JobApplicationUncheckedCreateWithoutUserInput[]
@@ -503,30 +510,18 @@ export type JobApplicationUncheckedUpdateManyWithoutStatusNestedInput = {
 }
 
 export type JobApplicationCreateNestedOneWithoutRadarConsentInput = {
-  create?: Prisma.XOR<
-    Prisma.JobApplicationCreateWithoutRadarConsentInput,
-    Prisma.JobApplicationUncheckedCreateWithoutRadarConsentInput
-  >;
-  connectOrCreate?: Prisma.JobApplicationCreateOrConnectWithoutRadarConsentInput;
-  connect?: Prisma.JobApplicationWhereUniqueInput;
-};
+  create?: Prisma.XOR<Prisma.JobApplicationCreateWithoutRadarConsentInput, Prisma.JobApplicationUncheckedCreateWithoutRadarConsentInput>
+  connectOrCreate?: Prisma.JobApplicationCreateOrConnectWithoutRadarConsentInput
+  connect?: Prisma.JobApplicationWhereUniqueInput
+}
 
 export type JobApplicationUpdateOneRequiredWithoutRadarConsentNestedInput = {
-  create?: Prisma.XOR<
-    Prisma.JobApplicationCreateWithoutRadarConsentInput,
-    Prisma.JobApplicationUncheckedCreateWithoutRadarConsentInput
-  >;
-  connectOrCreate?: Prisma.JobApplicationCreateOrConnectWithoutRadarConsentInput;
-  upsert?: Prisma.JobApplicationUpsertWithoutRadarConsentInput;
-  connect?: Prisma.JobApplicationWhereUniqueInput;
-  update?: Prisma.XOR<
-    Prisma.XOR<
-      Prisma.JobApplicationUpdateToOneWithWhereWithoutRadarConsentInput,
-      Prisma.JobApplicationUpdateWithoutRadarConsentInput
-    >,
-    Prisma.JobApplicationUncheckedUpdateWithoutRadarConsentInput
-  >;
-};
+  create?: Prisma.XOR<Prisma.JobApplicationCreateWithoutRadarConsentInput, Prisma.JobApplicationUncheckedCreateWithoutRadarConsentInput>
+  connectOrCreate?: Prisma.JobApplicationCreateOrConnectWithoutRadarConsentInput
+  upsert?: Prisma.JobApplicationUpsertWithoutRadarConsentInput
+  connect?: Prisma.JobApplicationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.JobApplicationUpdateToOneWithWhereWithoutRadarConsentInput, Prisma.JobApplicationUpdateWithoutRadarConsentInput>, Prisma.JobApplicationUncheckedUpdateWithoutRadarConsentInput>
+}
 
 export type JobApplicationCreateWithoutUserInput = {
   id?: string
@@ -535,6 +530,7 @@ export type JobApplicationCreateWithoutUserInput = {
   updatedAt?: Date | string
   jobOffer: Prisma.JobOfferCreateNestedOneWithoutApplicationsInput
   status: Prisma.JobApplicationStatusCreateNestedOneWithoutApplicationsInput
+  radarConsent?: Prisma.RadarApplicationConsentCreateNestedOneWithoutApplicationInput
 }
 
 export type JobApplicationUncheckedCreateWithoutUserInput = {
@@ -544,6 +540,7 @@ export type JobApplicationUncheckedCreateWithoutUserInput = {
   appliedAt?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
+  radarConsent?: Prisma.RadarApplicationConsentUncheckedCreateNestedOneWithoutApplicationInput
 }
 
 export type JobApplicationCreateOrConnectWithoutUserInput = {
@@ -592,6 +589,7 @@ export type JobApplicationCreateWithoutJobOfferInput = {
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutJobApplicationsInput
   status: Prisma.JobApplicationStatusCreateNestedOneWithoutApplicationsInput
+  radarConsent?: Prisma.RadarApplicationConsentCreateNestedOneWithoutApplicationInput
 }
 
 export type JobApplicationUncheckedCreateWithoutJobOfferInput = {
@@ -601,6 +599,7 @@ export type JobApplicationUncheckedCreateWithoutJobOfferInput = {
   appliedAt?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
+  radarConsent?: Prisma.RadarApplicationConsentUncheckedCreateNestedOneWithoutApplicationInput
 }
 
 export type JobApplicationCreateOrConnectWithoutJobOfferInput = {
@@ -636,6 +635,7 @@ export type JobApplicationCreateWithoutStatusInput = {
   updatedAt?: Date | string
   jobOffer: Prisma.JobOfferCreateNestedOneWithoutApplicationsInput
   user: Prisma.UserCreateNestedOneWithoutJobApplicationsInput
+  radarConsent?: Prisma.RadarApplicationConsentCreateNestedOneWithoutApplicationInput
 }
 
 export type JobApplicationUncheckedCreateWithoutStatusInput = {
@@ -645,6 +645,7 @@ export type JobApplicationUncheckedCreateWithoutStatusInput = {
   appliedAt?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
+  radarConsent?: Prisma.RadarApplicationConsentUncheckedCreateNestedOneWithoutApplicationInput
 }
 
 export type JobApplicationCreateOrConnectWithoutStatusInput = {
@@ -674,72 +675,60 @@ export type JobApplicationUpdateManyWithWhereWithoutStatusInput = {
 }
 
 export type JobApplicationCreateWithoutRadarConsentInput = {
-  id?: string;
-  appliedAt?: Date | string;
-  createdAt?: Date | string;
-  updatedAt?: Date | string;
-  jobOffer: Prisma.JobOfferCreateNestedOneWithoutApplicationsInput;
-  user: Prisma.UserCreateNestedOneWithoutJobApplicationsInput;
-  status: Prisma.JobApplicationStatusCreateNestedOneWithoutApplicationsInput;
-};
+  id?: string
+  appliedAt?: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  jobOffer: Prisma.JobOfferCreateNestedOneWithoutApplicationsInput
+  user: Prisma.UserCreateNestedOneWithoutJobApplicationsInput
+  status: Prisma.JobApplicationStatusCreateNestedOneWithoutApplicationsInput
+}
 
 export type JobApplicationUncheckedCreateWithoutRadarConsentInput = {
-  id?: string;
-  jobOfferId: string;
-  userId: string;
-  statusId: string;
-  appliedAt?: Date | string;
-  createdAt?: Date | string;
-  updatedAt?: Date | string;
-};
+  id?: string
+  jobOfferId: string
+  userId: string
+  statusId: string
+  appliedAt?: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
 
 export type JobApplicationCreateOrConnectWithoutRadarConsentInput = {
-  where: Prisma.JobApplicationWhereUniqueInput;
-  create: Prisma.XOR<
-    Prisma.JobApplicationCreateWithoutRadarConsentInput,
-    Prisma.JobApplicationUncheckedCreateWithoutRadarConsentInput
-  >;
-};
+  where: Prisma.JobApplicationWhereUniqueInput
+  create: Prisma.XOR<Prisma.JobApplicationCreateWithoutRadarConsentInput, Prisma.JobApplicationUncheckedCreateWithoutRadarConsentInput>
+}
 
 export type JobApplicationUpsertWithoutRadarConsentInput = {
-  update: Prisma.XOR<
-    Prisma.JobApplicationUpdateWithoutRadarConsentInput,
-    Prisma.JobApplicationUncheckedUpdateWithoutRadarConsentInput
-  >;
-  create: Prisma.XOR<
-    Prisma.JobApplicationCreateWithoutRadarConsentInput,
-    Prisma.JobApplicationUncheckedCreateWithoutRadarConsentInput
-  >;
-  where?: Prisma.JobApplicationWhereInput;
-};
+  update: Prisma.XOR<Prisma.JobApplicationUpdateWithoutRadarConsentInput, Prisma.JobApplicationUncheckedUpdateWithoutRadarConsentInput>
+  create: Prisma.XOR<Prisma.JobApplicationCreateWithoutRadarConsentInput, Prisma.JobApplicationUncheckedCreateWithoutRadarConsentInput>
+  where?: Prisma.JobApplicationWhereInput
+}
 
 export type JobApplicationUpdateToOneWithWhereWithoutRadarConsentInput = {
-  where?: Prisma.JobApplicationWhereInput;
-  data: Prisma.XOR<
-    Prisma.JobApplicationUpdateWithoutRadarConsentInput,
-    Prisma.JobApplicationUncheckedUpdateWithoutRadarConsentInput
-  >;
-};
+  where?: Prisma.JobApplicationWhereInput
+  data: Prisma.XOR<Prisma.JobApplicationUpdateWithoutRadarConsentInput, Prisma.JobApplicationUncheckedUpdateWithoutRadarConsentInput>
+}
 
 export type JobApplicationUpdateWithoutRadarConsentInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string;
-  appliedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-  jobOffer?: Prisma.JobOfferUpdateOneRequiredWithoutApplicationsNestedInput;
-  user?: Prisma.UserUpdateOneRequiredWithoutJobApplicationsNestedInput;
-  status?: Prisma.JobApplicationStatusUpdateOneRequiredWithoutApplicationsNestedInput;
-};
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  appliedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  jobOffer?: Prisma.JobOfferUpdateOneRequiredWithoutApplicationsNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutJobApplicationsNestedInput
+  status?: Prisma.JobApplicationStatusUpdateOneRequiredWithoutApplicationsNestedInput
+}
 
 export type JobApplicationUncheckedUpdateWithoutRadarConsentInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string;
-  jobOfferId?: Prisma.StringFieldUpdateOperationsInput | string;
-  userId?: Prisma.StringFieldUpdateOperationsInput | string;
-  statusId?: Prisma.StringFieldUpdateOperationsInput | string;
-  appliedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-};
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  jobOfferId?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  statusId?: Prisma.StringFieldUpdateOperationsInput | string
+  appliedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
 
 export type JobApplicationCreateManyUserInput = {
   id?: string
@@ -757,6 +746,7 @@ export type JobApplicationUpdateWithoutUserInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   jobOffer?: Prisma.JobOfferUpdateOneRequiredWithoutApplicationsNestedInput
   status?: Prisma.JobApplicationStatusUpdateOneRequiredWithoutApplicationsNestedInput
+  radarConsent?: Prisma.RadarApplicationConsentUpdateOneWithoutApplicationNestedInput
 }
 
 export type JobApplicationUncheckedUpdateWithoutUserInput = {
@@ -766,6 +756,7 @@ export type JobApplicationUncheckedUpdateWithoutUserInput = {
   appliedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  radarConsent?: Prisma.RadarApplicationConsentUncheckedUpdateOneWithoutApplicationNestedInput
 }
 
 export type JobApplicationUncheckedUpdateManyWithoutUserInput = {
@@ -793,6 +784,7 @@ export type JobApplicationUpdateWithoutJobOfferInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutJobApplicationsNestedInput
   status?: Prisma.JobApplicationStatusUpdateOneRequiredWithoutApplicationsNestedInput
+  radarConsent?: Prisma.RadarApplicationConsentUpdateOneWithoutApplicationNestedInput
 }
 
 export type JobApplicationUncheckedUpdateWithoutJobOfferInput = {
@@ -802,6 +794,7 @@ export type JobApplicationUncheckedUpdateWithoutJobOfferInput = {
   appliedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  radarConsent?: Prisma.RadarApplicationConsentUncheckedUpdateOneWithoutApplicationNestedInput
 }
 
 export type JobApplicationUncheckedUpdateManyWithoutJobOfferInput = {
@@ -829,6 +822,7 @@ export type JobApplicationUpdateWithoutStatusInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   jobOffer?: Prisma.JobOfferUpdateOneRequiredWithoutApplicationsNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutJobApplicationsNestedInput
+  radarConsent?: Prisma.RadarApplicationConsentUpdateOneWithoutApplicationNestedInput
 }
 
 export type JobApplicationUncheckedUpdateWithoutStatusInput = {
@@ -838,6 +832,7 @@ export type JobApplicationUncheckedUpdateWithoutStatusInput = {
   appliedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  radarConsent?: Prisma.RadarApplicationConsentUncheckedUpdateOneWithoutApplicationNestedInput
 }
 
 export type JobApplicationUncheckedUpdateManyWithoutStatusInput = {
@@ -862,6 +857,7 @@ export type JobApplicationSelect<ExtArgs extends runtime.Types.Extensions.Intern
   jobOffer?: boolean | Prisma.JobOfferDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   status?: boolean | Prisma.JobApplicationStatusDefaultArgs<ExtArgs>
+  radarConsent?: boolean | Prisma.JobApplication$radarConsentArgs<ExtArgs>
 }, ExtArgs["result"]["jobApplication"]>
 
 export type JobApplicationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -905,6 +901,7 @@ export type JobApplicationInclude<ExtArgs extends runtime.Types.Extensions.Inter
   jobOffer?: boolean | Prisma.JobOfferDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   status?: boolean | Prisma.JobApplicationStatusDefaultArgs<ExtArgs>
+  radarConsent?: boolean | Prisma.JobApplication$radarConsentArgs<ExtArgs>
 }
 export type JobApplicationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   jobOffer?: boolean | Prisma.JobOfferDefaultArgs<ExtArgs>
@@ -923,6 +920,7 @@ export type $JobApplicationPayload<ExtArgs extends runtime.Types.Extensions.Inte
     jobOffer: Prisma.$JobOfferPayload<ExtArgs>
     user: Prisma.$UserPayload<ExtArgs>
     status: Prisma.$JobApplicationStatusPayload<ExtArgs>
+    radarConsent: Prisma.$RadarApplicationConsentPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1329,6 +1327,7 @@ export interface Prisma__JobApplicationClient<T, Null = never, ExtArgs extends r
   jobOffer<T extends Prisma.JobOfferDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.JobOfferDefaultArgs<ExtArgs>>): Prisma.Prisma__JobOfferClient<runtime.Types.Result.GetResult<Prisma.$JobOfferPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   status<T extends Prisma.JobApplicationStatusDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.JobApplicationStatusDefaultArgs<ExtArgs>>): Prisma.Prisma__JobApplicationStatusClient<runtime.Types.Result.GetResult<Prisma.$JobApplicationStatusPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  radarConsent<T extends Prisma.JobApplication$radarConsentArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.JobApplication$radarConsentArgs<ExtArgs>>): Prisma.Prisma__RadarApplicationConsentClient<runtime.Types.Result.GetResult<Prisma.$RadarApplicationConsentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1768,24 +1767,21 @@ export type JobApplicationDeleteManyArgs<ExtArgs extends runtime.Types.Extension
 /**
  * JobApplication.radarConsent
  */
-export type JobApplication$radarConsentArgs<
-  ExtArgs extends runtime.Types.Extensions.InternalArgs =
-    runtime.Types.Extensions.DefaultArgs,
-> = {
+export type JobApplication$radarConsentArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
    * Select specific fields to fetch from the RadarApplicationConsent
    */
-  select?: Prisma.RadarApplicationConsentSelect<ExtArgs> | null;
+  select?: Prisma.RadarApplicationConsentSelect<ExtArgs> | null
   /**
    * Omit specific fields from the RadarApplicationConsent
    */
-  omit?: Prisma.RadarApplicationConsentOmit<ExtArgs> | null;
+  omit?: Prisma.RadarApplicationConsentOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.RadarApplicationConsentInclude<ExtArgs> | null;
-  where?: Prisma.RadarApplicationConsentWhereInput;
-};
+  include?: Prisma.RadarApplicationConsentInclude<ExtArgs> | null
+  where?: Prisma.RadarApplicationConsentWhereInput
+}
 
 /**
  * JobApplication without action

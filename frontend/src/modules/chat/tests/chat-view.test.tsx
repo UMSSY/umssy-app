@@ -59,6 +59,7 @@ afterEach(() => {
   vi.restoreAllMocks();
   sessionStorage.clear();
   vi.unstubAllGlobals();
+  window.history.pushState({}, "", "/chat");
 });
 
 const testConversations: Conversation[] = [
@@ -260,5 +261,51 @@ describe("ChatView & ChatPage", () => {
     expect(
         await screen.findByText("Usuario de Prueba 1"),
       ).toBeDefined();
+  });
+
+  it("abre automaticamente la conversacion contextual de postulacion segun parametros de URL", async () => {
+    window.history.pushState(
+      {},
+      "",
+      "/chat?contactId=contact-postulacion-1&contextType=POSTULACION&contextId=postulacion-uuid-99",
+    );
+
+    const postulationConv: Conversation = {
+      id: "conv-post-99",
+      contact: {
+        id: "contact-postulacion-1",
+        fullName: "Reclutador Tech",
+        avatarUrl: null,
+        isOnline: true,
+      },
+      contextType: "POSTULACION",
+      contextId: "postulacion-uuid-99",
+      lastMessage: null,
+      unreadCount: 0,
+      updatedAt: new Date().toISOString(),
+    };
+
+    vi.spyOn(chatApi, "getConversations").mockResolvedValue([postulationConv]);
+    const getOrCreateSpy = vi
+      .spyOn(chatApi, "getOrCreateConversation")
+      .mockResolvedValue(postulationConv);
+
+    renderWithQueryClient(<ChatView />);
+
+    await waitFor(() => {
+      expect(getOrCreateSpy).toHaveBeenCalledWith("contact-postulacion-1", {
+        contextType: "POSTULACION",
+        contextId: "postulacion-uuid-99",
+      });
+      expect(screen.getByTestId("chat-contact-name").textContent).toBe(
+        "Reclutador Tech",
+      );
+      expect(
+        screen.getByTestId("chat-room-postulation-badge"),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId("chat-room-postulation-banner"),
+      ).toBeInTheDocument();
+    });
   });
 });

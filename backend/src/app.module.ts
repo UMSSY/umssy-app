@@ -36,6 +36,7 @@ import { RadarIntegrationModule } from './modules/radar-integration/radar-integr
 import { SurveysModule } from './modules/surveys/surveys.module.js';
 import { AppointmentsModule } from './modules/appointments/appointments.module.js';
 import { ScheduleModule } from '@nestjs/schedule';
+import { NotificationsModule } from './modules/notifications/notifications.module.js';
 
 @Module({
   imports: [
@@ -70,6 +71,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     NlpModule,
     RadarIntegrationModule,
     SurveysModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [

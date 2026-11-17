@@ -31,6 +31,8 @@ export type ConversationMinAggregateOutputType = {
   lastMessageId: string | null
   lastMessageAt: Date | null
   eventId: string | null
+  contextType: string | null
+  contextId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -42,6 +44,8 @@ export type ConversationMaxAggregateOutputType = {
   lastMessageId: string | null
   lastMessageAt: Date | null
   eventId: string | null
+  contextType: string | null
+  contextId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -53,6 +57,8 @@ export type ConversationCountAggregateOutputType = {
   lastMessageId: number
   lastMessageAt: number
   eventId: number
+  contextType: number
+  contextId: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -66,6 +72,8 @@ export type ConversationMinAggregateInputType = {
   lastMessageId?: true
   lastMessageAt?: true
   eventId?: true
+  contextType?: true
+  contextId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -77,6 +85,8 @@ export type ConversationMaxAggregateInputType = {
   lastMessageId?: true
   lastMessageAt?: true
   eventId?: true
+  contextType?: true
+  contextId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -88,6 +98,8 @@ export type ConversationCountAggregateInputType = {
   lastMessageId?: true
   lastMessageAt?: true
   eventId?: true
+  contextType?: true
+  contextId?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -172,6 +184,8 @@ export type ConversationGroupByOutputType = {
   lastMessageId: string | null
   lastMessageAt: Date | null
   eventId: string | null
+  contextType: string | null
+  contextId: string | null
   createdAt: Date
   updatedAt: Date
   _count: ConversationCountAggregateOutputType | null
@@ -204,6 +218,8 @@ export type ConversationWhereInput = {
   lastMessageId?: Prisma.UuidNullableFilter<"Conversation"> | string | null
   lastMessageAt?: Prisma.DateTimeNullableFilter<"Conversation"> | Date | string | null
   eventId?: Prisma.UuidNullableFilter<"Conversation"> | string | null
+  contextType?: Prisma.StringNullableFilter<"Conversation"> | string | null
+  contextId?: Prisma.UuidNullableFilter<"Conversation"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Conversation"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Conversation"> | Date | string
   userA?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
@@ -220,6 +236,8 @@ export type ConversationOrderByWithRelationInput = {
   lastMessageId?: Prisma.SortOrderInput | Prisma.SortOrder
   lastMessageAt?: Prisma.SortOrderInput | Prisma.SortOrder
   eventId?: Prisma.SortOrderInput | Prisma.SortOrder
+  contextType?: Prisma.SortOrderInput | Prisma.SortOrder
+  contextId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   userA?: Prisma.UserOrderByWithRelationInput
@@ -233,6 +251,7 @@ export type ConversationWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   eventId?: string
   userAId_userBId?: Prisma.ConversationUserAIdUserBIdCompoundUniqueInput
+  contextId?: string
   AND?: Prisma.ConversationWhereInput | Prisma.ConversationWhereInput[]
   OR?: Prisma.ConversationWhereInput[]
   NOT?: Prisma.ConversationWhereInput | Prisma.ConversationWhereInput[]
@@ -240,6 +259,7 @@ export type ConversationWhereUniqueInput = Prisma.AtLeast<{
   userBId?: Prisma.UuidNullableFilter<"Conversation"> | string | null
   lastMessageId?: Prisma.UuidNullableFilter<"Conversation"> | string | null
   lastMessageAt?: Prisma.DateTimeNullableFilter<"Conversation"> | Date | string | null
+  contextType?: Prisma.StringNullableFilter<"Conversation"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Conversation"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Conversation"> | Date | string
   userA?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
@@ -247,7 +267,7 @@ export type ConversationWhereUniqueInput = Prisma.AtLeast<{
   event?: Prisma.XOR<Prisma.EventNullableScalarRelationFilter, Prisma.EventWhereInput> | null
   participants?: Prisma.ConversationParticipantListRelationFilter
   messages?: Prisma.MessageListRelationFilter
-}, "id" | "eventId" | "userAId_userBId">
+}, "id" | "eventId" | "contextId">
 
 export type ConversationOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -256,6 +276,8 @@ export type ConversationOrderByWithAggregationInput = {
   lastMessageId?: Prisma.SortOrderInput | Prisma.SortOrder
   lastMessageAt?: Prisma.SortOrderInput | Prisma.SortOrder
   eventId?: Prisma.SortOrderInput | Prisma.SortOrder
+  contextType?: Prisma.SortOrderInput | Prisma.SortOrder
+  contextId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.ConversationCountOrderByAggregateInput
@@ -273,6 +295,8 @@ export type ConversationScalarWhereWithAggregatesInput = {
   lastMessageId?: Prisma.UuidNullableWithAggregatesFilter<"Conversation"> | string | null
   lastMessageAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Conversation"> | Date | string | null
   eventId?: Prisma.UuidNullableWithAggregatesFilter<"Conversation"> | string | null
+  contextType?: Prisma.StringNullableWithAggregatesFilter<"Conversation"> | string | null
+  contextId?: Prisma.UuidNullableWithAggregatesFilter<"Conversation"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Conversation"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Conversation"> | Date | string
 }
@@ -281,6 +305,8 @@ export type ConversationCreateInput = {
   id?: string
   lastMessageId?: string | null
   lastMessageAt?: Date | string | null
+  contextType?: string | null
+  contextId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   userA?: Prisma.UserCreateNestedOneWithoutConversationsAsUserAInput
@@ -297,6 +323,8 @@ export type ConversationUncheckedCreateInput = {
   lastMessageId?: string | null
   lastMessageAt?: Date | string | null
   eventId?: string | null
+  contextType?: string | null
+  contextId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   participants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutConversationInput
@@ -307,6 +335,8 @@ export type ConversationUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   lastMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastMessageAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  contextType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contextId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   userA?: Prisma.UserUpdateOneWithoutConversationsAsUserANestedInput
@@ -323,6 +353,8 @@ export type ConversationUncheckedUpdateInput = {
   lastMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastMessageAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   eventId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contextType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contextId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   participants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutConversationNestedInput
@@ -336,6 +368,8 @@ export type ConversationCreateManyInput = {
   lastMessageId?: string | null
   lastMessageAt?: Date | string | null
   eventId?: string | null
+  contextType?: string | null
+  contextId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -344,6 +378,8 @@ export type ConversationUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   lastMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastMessageAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  contextType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contextId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -355,6 +391,8 @@ export type ConversationUncheckedUpdateManyInput = {
   lastMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastMessageAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   eventId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contextType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contextId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -374,11 +412,6 @@ export type ConversationNullableScalarRelationFilter = {
   isNot?: Prisma.ConversationWhereInput | null
 }
 
-export type ConversationUserAIdUserBIdCompoundUniqueInput = {
-  userAId: string
-  userBId: string
-}
-
 export type ConversationCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userAId?: Prisma.SortOrder
@@ -386,6 +419,8 @@ export type ConversationCountOrderByAggregateInput = {
   lastMessageId?: Prisma.SortOrder
   lastMessageAt?: Prisma.SortOrder
   eventId?: Prisma.SortOrder
+  contextType?: Prisma.SortOrder
+  contextId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -397,6 +432,8 @@ export type ConversationMaxOrderByAggregateInput = {
   lastMessageId?: Prisma.SortOrder
   lastMessageAt?: Prisma.SortOrder
   eventId?: Prisma.SortOrder
+  contextType?: Prisma.SortOrder
+  contextId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -408,6 +445,8 @@ export type ConversationMinOrderByAggregateInput = {
   lastMessageId?: Prisma.SortOrder
   lastMessageAt?: Prisma.SortOrder
   eventId?: Prisma.SortOrder
+  contextType?: Prisma.SortOrder
+  contextId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -565,6 +604,8 @@ export type ConversationCreateWithoutUserAInput = {
   id?: string
   lastMessageId?: string | null
   lastMessageAt?: Date | string | null
+  contextType?: string | null
+  contextId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   userB?: Prisma.UserCreateNestedOneWithoutConversationsAsUserBInput
@@ -579,6 +620,8 @@ export type ConversationUncheckedCreateWithoutUserAInput = {
   lastMessageId?: string | null
   lastMessageAt?: Date | string | null
   eventId?: string | null
+  contextType?: string | null
+  contextId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   participants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutConversationInput
@@ -599,6 +642,8 @@ export type ConversationCreateWithoutUserBInput = {
   id?: string
   lastMessageId?: string | null
   lastMessageAt?: Date | string | null
+  contextType?: string | null
+  contextId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   userA?: Prisma.UserCreateNestedOneWithoutConversationsAsUserAInput
@@ -613,6 +658,8 @@ export type ConversationUncheckedCreateWithoutUserBInput = {
   lastMessageId?: string | null
   lastMessageAt?: Date | string | null
   eventId?: string | null
+  contextType?: string | null
+  contextId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   participants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutConversationInput
@@ -655,6 +702,8 @@ export type ConversationScalarWhereInput = {
   lastMessageId?: Prisma.UuidNullableFilter<"Conversation"> | string | null
   lastMessageAt?: Prisma.DateTimeNullableFilter<"Conversation"> | Date | string | null
   eventId?: Prisma.UuidNullableFilter<"Conversation"> | string | null
+  contextType?: Prisma.StringNullableFilter<"Conversation"> | string | null
+  contextId?: Prisma.UuidNullableFilter<"Conversation"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Conversation"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Conversation"> | Date | string
 }
@@ -679,6 +728,8 @@ export type ConversationCreateWithoutEventInput = {
   id?: string
   lastMessageId?: string | null
   lastMessageAt?: Date | string | null
+  contextType?: string | null
+  contextId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   userA?: Prisma.UserCreateNestedOneWithoutConversationsAsUserAInput
@@ -693,6 +744,8 @@ export type ConversationUncheckedCreateWithoutEventInput = {
   userBId?: string | null
   lastMessageId?: string | null
   lastMessageAt?: Date | string | null
+  contextType?: string | null
+  contextId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   participants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutConversationInput
@@ -719,6 +772,8 @@ export type ConversationUpdateWithoutEventInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   lastMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastMessageAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  contextType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contextId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   userA?: Prisma.UserUpdateOneWithoutConversationsAsUserANestedInput
@@ -733,6 +788,8 @@ export type ConversationUncheckedUpdateWithoutEventInput = {
   userBId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastMessageAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  contextType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contextId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   participants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutConversationNestedInput
@@ -743,6 +800,8 @@ export type ConversationCreateWithoutParticipantsInput = {
   id?: string
   lastMessageId?: string | null
   lastMessageAt?: Date | string | null
+  contextType?: string | null
+  contextId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   userA?: Prisma.UserCreateNestedOneWithoutConversationsAsUserAInput
@@ -758,6 +817,8 @@ export type ConversationUncheckedCreateWithoutParticipantsInput = {
   lastMessageId?: string | null
   lastMessageAt?: Date | string | null
   eventId?: string | null
+  contextType?: string | null
+  contextId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutConversationInput
@@ -783,6 +844,8 @@ export type ConversationUpdateWithoutParticipantsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   lastMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastMessageAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  contextType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contextId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   userA?: Prisma.UserUpdateOneWithoutConversationsAsUserANestedInput
@@ -798,6 +861,8 @@ export type ConversationUncheckedUpdateWithoutParticipantsInput = {
   lastMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastMessageAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   eventId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contextType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contextId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   messages?: Prisma.MessageUncheckedUpdateManyWithoutConversationNestedInput
@@ -807,6 +872,8 @@ export type ConversationCreateWithoutMessagesInput = {
   id?: string
   lastMessageId?: string | null
   lastMessageAt?: Date | string | null
+  contextType?: string | null
+  contextId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   userA?: Prisma.UserCreateNestedOneWithoutConversationsAsUserAInput
@@ -822,6 +889,8 @@ export type ConversationUncheckedCreateWithoutMessagesInput = {
   lastMessageId?: string | null
   lastMessageAt?: Date | string | null
   eventId?: string | null
+  contextType?: string | null
+  contextId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   participants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutConversationInput
@@ -847,6 +916,8 @@ export type ConversationUpdateWithoutMessagesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   lastMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastMessageAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  contextType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contextId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   userA?: Prisma.UserUpdateOneWithoutConversationsAsUserANestedInput
@@ -862,6 +933,8 @@ export type ConversationUncheckedUpdateWithoutMessagesInput = {
   lastMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastMessageAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   eventId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contextType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contextId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   participants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutConversationNestedInput
@@ -873,6 +946,8 @@ export type ConversationCreateManyUserAInput = {
   lastMessageId?: string | null
   lastMessageAt?: Date | string | null
   eventId?: string | null
+  contextType?: string | null
+  contextId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -883,6 +958,8 @@ export type ConversationCreateManyUserBInput = {
   lastMessageId?: string | null
   lastMessageAt?: Date | string | null
   eventId?: string | null
+  contextType?: string | null
+  contextId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -891,6 +968,8 @@ export type ConversationUpdateWithoutUserAInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   lastMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastMessageAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  contextType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contextId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   userB?: Prisma.UserUpdateOneWithoutConversationsAsUserBNestedInput
@@ -905,6 +984,8 @@ export type ConversationUncheckedUpdateWithoutUserAInput = {
   lastMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastMessageAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   eventId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contextType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contextId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   participants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutConversationNestedInput
@@ -917,6 +998,8 @@ export type ConversationUncheckedUpdateManyWithoutUserAInput = {
   lastMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastMessageAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   eventId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contextType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contextId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -925,6 +1008,8 @@ export type ConversationUpdateWithoutUserBInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   lastMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastMessageAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  contextType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contextId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   userA?: Prisma.UserUpdateOneWithoutConversationsAsUserANestedInput
@@ -939,6 +1024,8 @@ export type ConversationUncheckedUpdateWithoutUserBInput = {
   lastMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastMessageAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   eventId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contextType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contextId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   participants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutConversationNestedInput
@@ -951,6 +1038,8 @@ export type ConversationUncheckedUpdateManyWithoutUserBInput = {
   lastMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastMessageAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   eventId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contextType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contextId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1002,6 +1091,8 @@ export type ConversationSelect<ExtArgs extends runtime.Types.Extensions.Internal
   lastMessageId?: boolean
   lastMessageAt?: boolean
   eventId?: boolean
+  contextType?: boolean
+  contextId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   userA?: boolean | Prisma.Conversation$userAArgs<ExtArgs>
@@ -1019,6 +1110,8 @@ export type ConversationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   lastMessageId?: boolean
   lastMessageAt?: boolean
   eventId?: boolean
+  contextType?: boolean
+  contextId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   userA?: boolean | Prisma.Conversation$userAArgs<ExtArgs>
@@ -1033,6 +1126,8 @@ export type ConversationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   lastMessageId?: boolean
   lastMessageAt?: boolean
   eventId?: boolean
+  contextType?: boolean
+  contextId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   userA?: boolean | Prisma.Conversation$userAArgs<ExtArgs>
@@ -1047,11 +1142,13 @@ export type ConversationSelectScalar = {
   lastMessageId?: boolean
   lastMessageAt?: boolean
   eventId?: boolean
+  contextType?: boolean
+  contextId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ConversationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userAId" | "userBId" | "lastMessageId" | "lastMessageAt" | "eventId" | "createdAt" | "updatedAt", ExtArgs["result"]["conversation"]>
+export type ConversationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userAId" | "userBId" | "lastMessageId" | "lastMessageAt" | "eventId" | "contextType" | "contextId" | "createdAt" | "updatedAt", ExtArgs["result"]["conversation"]>
 export type ConversationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   userA?: boolean | Prisma.Conversation$userAArgs<ExtArgs>
   userB?: boolean | Prisma.Conversation$userBArgs<ExtArgs>
@@ -1087,6 +1184,8 @@ export type $ConversationPayload<ExtArgs extends runtime.Types.Extensions.Intern
     lastMessageId: string | null
     lastMessageAt: Date | null
     eventId: string | null
+    contextType: string | null
+    contextId: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["conversation"]>
@@ -1523,6 +1622,8 @@ export interface ConversationFieldRefs {
   readonly lastMessageId: Prisma.FieldRef<"Conversation", 'String'>
   readonly lastMessageAt: Prisma.FieldRef<"Conversation", 'DateTime'>
   readonly eventId: Prisma.FieldRef<"Conversation", 'String'>
+  readonly contextType: Prisma.FieldRef<"Conversation", 'String'>
+  readonly contextId: Prisma.FieldRef<"Conversation", 'String'>
   readonly createdAt: Prisma.FieldRef<"Conversation", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Conversation", 'DateTime'>
 }
