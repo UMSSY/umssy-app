@@ -1,28 +1,31 @@
 import type { Prisma } from '../../../prisma/client.js';
 
-export interface EventPassLifecycleFixture {
+export const EVENT_PASS_LIFECYCLE_FIXTURES = [
+  {
+    eventId: 'fb69db6e-ded6-4eed-85ef-6135cf88fad4',
+    registrationId: 'cf8b95fd-f796-4c9b-8797-ec7f50774442',
+    title: '[QA 08.5] Pase vigente',
+    dayOffset: 0,
+  },
+  {
+    eventId: '66f39ba1-ebc1-42b9-9169-e773f2eb3d2b',
+    registrationId: '0e4d2465-7346-4712-a933-4cb930b46677',
+    title: '[QA 08.5] Pase finalizado por horario',
+    dayOffset: -1,
+  },
+] as const;
+
+export interface RegistrationCancellationFixture {
   readonly eventId: string;
   readonly registrationId: string;
   readonly title: string;
   readonly dayOffset: number;
-  readonly capacity?: number;
-  readonly initialStatus?: 'confirmed' | 'cancelled';
+  readonly capacity: number;
+  readonly initialStatus: 'confirmed' | 'cancelled';
 }
 
-export const EVENT_PASS_LIFECYCLE_FIXTURES: readonly EventPassLifecycleFixture[] =
+export const REGISTRATION_CANCELLATION_FIXTURES: readonly RegistrationCancellationFixture[] =
   [
-    {
-      eventId: 'fb69db6e-ded6-4eed-85ef-6135cf88fad4',
-      registrationId: 'cf8b95fd-f796-4c9b-8797-ec7f50774442',
-      title: '[QA 08.5] Pase vigente',
-      dayOffset: 0,
-    },
-    {
-      eventId: '66f39ba1-ebc1-42b9-9169-e773f2eb3d2b',
-      registrationId: '0e4d2465-7346-4712-a933-4cb930b46677',
-      title: '[QA 08.5] Pase finalizado por horario',
-      dayOffset: -1,
-    },
     {
       eventId: '7b1c2d3e-4f5a-4b6c-8d9e-0f1a2b3c4d01',
       registrationId: '8b1c2d3e-4f5a-4b6c-8d9e-0f1a2b3c4d01',
@@ -165,19 +168,18 @@ export async function seedEventPassLifecycleEvents(
             startTime: new Date('1970-01-01T09:00:00.000Z'),
             endTime: new Date('1970-01-01T10:00:00.000Z'),
           };
-    const capacity = fixture.capacity ?? 30;
     await tx.event.upsert({
       where: { id: fixture.eventId },
       update: {
         title: fixture.title,
         description:
-          'Taller ficticio para validar pases vigentes, cancelaciones y cupos en QA.',
+          'Taller ficticio para validar pases vigentes y finalizados en QA.',
         instructorName: 'Equipo QA',
         eventDate: schedule.eventDate,
         startTime: schedule.startTime,
         endTime: schedule.endTime,
         location: 'Aula 101, Facultad de Ciencias y Tecnología',
-        capacity,
+        capacity: 30,
         supportThreshold: 0,
         categoryId,
         modalityId,
@@ -189,13 +191,13 @@ export async function seedEventPassLifecycleEvents(
         id: fixture.eventId,
         title: fixture.title,
         description:
-          'Taller ficticio para validar pases vigentes, cancelaciones y cupos en QA.',
+          'Taller ficticio para validar pases vigentes y finalizados en QA.',
         instructorName: 'Equipo QA',
         eventDate: schedule.eventDate,
         startTime: schedule.startTime,
         endTime: schedule.endTime,
         location: 'Aula 101, Facultad de Ciencias y Tecnología',
-        capacity,
+        capacity: 30,
         supportThreshold: 0,
         categoryId,
         modalityId,
@@ -206,4 +208,68 @@ export async function seedEventPassLifecycleEvents(
     });
   }
   return EVENT_PASS_LIFECYCLE_FIXTURES.length;
+}
+
+export async function seedRegistrationCancellationEvents(
+  tx: Prisma.TransactionClient,
+  {
+    createdById,
+    categoryId,
+    modalityId,
+    originId,
+    statusId,
+    now = new Date(),
+  }: {
+    createdById: string;
+    categoryId: string;
+    modalityId: string;
+    originId: string;
+    statusId: string;
+    now?: Date;
+  },
+): Promise<number> {
+  for (const fixture of REGISTRATION_CANCELLATION_FIXTURES) {
+    const eventDate = getBoliviaCalendarDate(now, fixture.dayOffset);
+    const startTime = new Date('1970-01-01T09:00:00.000Z');
+    const endTime = new Date('1970-01-01T10:00:00.000Z');
+    await tx.event.upsert({
+      where: { id: fixture.eventId },
+      update: {
+        title: fixture.title,
+        description:
+          'Taller ficticio para validar escenarios de cancelacion y cupos en QA.',
+        instructorName: 'Equipo QA',
+        eventDate,
+        startTime,
+        endTime,
+        location: 'Aula 101, Facultad de Ciencias y Tecnología',
+        capacity: fixture.capacity,
+        supportThreshold: 0,
+        categoryId,
+        modalityId,
+        originId,
+        statusId,
+        createdById,
+      },
+      create: {
+        id: fixture.eventId,
+        title: fixture.title,
+        description:
+          'Taller ficticio para validar escenarios de cancelacion y cupos en QA.',
+        instructorName: 'Equipo QA',
+        eventDate,
+        startTime,
+        endTime,
+        location: 'Aula 101, Facultad de Ciencias y Tecnología',
+        capacity: fixture.capacity,
+        supportThreshold: 0,
+        categoryId,
+        modalityId,
+        originId,
+        statusId,
+        createdById,
+      },
+    });
+  }
+  return REGISTRATION_CANCELLATION_FIXTURES.length;
 }

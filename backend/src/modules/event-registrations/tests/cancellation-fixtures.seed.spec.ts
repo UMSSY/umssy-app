@@ -1,6 +1,9 @@
 import { type Mock, vi } from 'vitest';
 import { REGISTRATION_STATUS_TITLES } from '../../../common/constants/registration-status.constants.js';
-import { EVENT_PASS_LIFECYCLE_FIXTURES } from '../../events/seeds/event-pass-lifecycle-fixtures.seed.js';
+import {
+  REGISTRATION_CANCELLATION_FIXTURES,
+  seedRegistrationCancellationEvents,
+} from '../../events/seeds/event-pass-lifecycle-fixtures.seed.js';
 import { seedEventRegistrations } from '../seeds/event-registrations.seed.js';
 
 interface UpsertRegistrationCall {
@@ -43,21 +46,40 @@ describe('Cancellation seed fixtures', () => {
   });
 
   it('includes fixtures for cancellable, pre-cancelled, full-capacity and expired registration scenarios', () => {
-    const qa096Fixtures = EVENT_PASS_LIFECYCLE_FIXTURES.filter((item) =>
-      item.title.startsWith('[QA 09.6]'),
-    );
-
-    expect(qa096Fixtures).toHaveLength(4);
+    expect(REGISTRATION_CANCELLATION_FIXTURES).toHaveLength(4);
     expect(
-      qa096Fixtures.some(
+      REGISTRATION_CANCELLATION_FIXTURES.some(
         (item) => item.dayOffset > 0 && item.initialStatus === 'confirmed',
       ),
     ).toBe(true);
     expect(
-      qa096Fixtures.some((item) => item.initialStatus === 'cancelled'),
+      REGISTRATION_CANCELLATION_FIXTURES.some(
+        (item) => item.initialStatus === 'cancelled',
+      ),
     ).toBe(true);
-    expect(qa096Fixtures.some((item) => item.capacity === 1)).toBe(true);
-    expect(qa096Fixtures.some((item) => item.dayOffset < 0)).toBe(true);
+    expect(
+      REGISTRATION_CANCELLATION_FIXTURES.some((item) => item.capacity === 1),
+    ).toBe(true);
+    expect(
+      REGISTRATION_CANCELLATION_FIXTURES.some((item) => item.dayOffset < 0),
+    ).toBe(true);
+  });
+
+  it('upserts cancellation scenario events with configured capacities', async () => {
+    const eventUpsert = vi.fn().mockResolvedValue({});
+    const count = await seedRegistrationCancellationEvents(
+      { event: { upsert: eventUpsert } } as never,
+      {
+        createdById: 'creator',
+        categoryId: 'category',
+        modalityId: 'modality',
+        originId: 'origin',
+        statusId: 'status',
+      },
+    );
+
+    expect(count).toBe(4);
+    expect(eventUpsert).toHaveBeenCalledTimes(4);
   });
 
   it('upserts active and cancelled registration fixtures idempotently', async () => {
