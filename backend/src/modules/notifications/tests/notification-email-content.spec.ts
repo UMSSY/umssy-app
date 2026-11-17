@@ -51,7 +51,6 @@ describe('Correo propio de un tipo de notificación', () => {
         { emitToUser: vi.fn() } as never,
         { isVisible: vi.fn().mockReturnValue(false) } as never,
       );
-      vi.stubEnv('FRONTEND_URL', 'https://umssy.test');
     });
 
     afterEach(() => {
@@ -79,22 +78,30 @@ describe('Correo propio de un tipo de notificación', () => {
       );
     });
 
-    it('pasa al correo el contenido propio con el enlace absoluto del frontend', async () => {
+    it('pasa al correo un armador del contenido propio y deja el enlace relativo en la aplicación', async () => {
       const renderEmail = vi.fn().mockReturnValue(emailContent);
       chatTemplate.renderEmail = renderEmail;
 
       await notifyChat();
 
-      expect(renderEmail).toHaveBeenCalledExactlyOnceWith(
-        chatPayload,
-        'https://umssy.test/chat',
-      );
       expect(mailDispatch).toHaveBeenCalledExactlyOnceWith(
         ['user-2'],
         'Mensaje nuevo de: Ana',
         'Hola',
         '/chat',
-        emailContent,
+        expect.any(Function),
+      );
+      const [, , , , renderer] = mailDispatch.mock.calls[0] as [
+        unknown,
+        unknown,
+        unknown,
+        unknown,
+        (url: string) => unknown,
+      ];
+      expect(renderer('https://umssy.test/chat')).toBe(emailContent);
+      expect(renderEmail).toHaveBeenCalledExactlyOnceWith(
+        chatPayload,
+        'https://umssy.test/chat',
       );
       expect(createMany).toHaveBeenCalledWith([
         expect.objectContaining({ link: '/chat' }),
@@ -119,6 +126,12 @@ describe('Correo propio de un tipo de notificación', () => {
       chatTemplate.renderEmail = () => {
         throw new Error('Plantilla inválida');
       };
+      mailDispatch.mockImplementation(
+        (_ids: string[], _t: string, _b: string, _u: string, render?: (url: string) => unknown) => {
+          render?.('https://umssy.test/chat');
+          return Promise.resolve('sent');
+        },
+      );
 
       const result = await notifyChat();
 
@@ -127,17 +140,22 @@ describe('Correo propio de un tipo de notificación', () => {
         pushStatus: 'sent',
         emailStatus: 'failed',
       });
-      expect(mailDispatch).not.toHaveBeenCalled();
+      expect(mailDispatch).toHaveBeenCalledOnce();
     });
   });
 
   describe('MailDispatcherService', () => {
     const send = vi.fn();
+
+    afterEach(() => {
+      vi.unstubAllEnvs();
+    });
     let dispatcher: MailDispatcherService;
 
     beforeEach(() => {
       vi.resetAllMocks();
       send.mockResolvedValue(undefined);
+      vi.stubEnv('MAIL_APP_URL', 'https://umssy.test');
       dispatcher = new MailDispatcherService(
         { send } as never,
         {
@@ -153,20 +171,27 @@ describe('Correo propio de un tipo de notificación', () => {
       expect(message).toMatchObject({
         to: 'ana@umssy.test',
         subject: 'Título',
-        text: 'Cuerpo',
-        values: { title: 'Título', body: 'Cuerpo', actionUrl: '/ruta' },
+        text: 'Cuerpo\n\nVer en UMSSY: https://umssy.test/ruta',
+        values: {
+          title: 'Título',
+          body: 'Cuerpo',
+          actionUrl: 'https://umssy.test/ruta',
+        },
       });
       expect(message.mjml).toContain('{{ title }}');
     });
 
     it('usa la plantilla, el asunto, el texto y los valores del contenido propio', async () => {
+      const render = vi.fn().mockReturnValue(emailContent);
       const result = await dispatcher.dispatchToUsers(
         ['user-1'],
         'Título',
         'Cuerpo',
         '/ruta',
-        emailContent,
+        render,
       );
+
+      expect(render).toHaveBeenCalledExactlyOnceWith('https://umssy.test/ruta');
 
       const [[message]] = send.mock.calls as [[Record<string, unknown>]];
       expect(message).toMatchObject({

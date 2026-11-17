@@ -176,7 +176,7 @@ describe('NotificationsService', () => {
       expect.any(String),
       expect.any(String),
       expect.any(String),
-      expect.objectContaining({ template: 'appointment-booked' }),
+      expect.any(Function),
     );
   });
 
@@ -217,7 +217,7 @@ describe('NotificationsService', () => {
       expect.any(String),
       expect.any(String),
       expect.any(String),
-      expect.objectContaining({ template: 'appointment-booked' }),
+      expect.any(Function),
     );
     expect(result).toEqual({
       inAppCount: 0,

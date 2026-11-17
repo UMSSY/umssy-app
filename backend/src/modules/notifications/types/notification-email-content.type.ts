@@ -1,7 +1,7 @@
-import type { MailTemplateName } from '../../mail/types/mail-template-name.types.js';
+import type { loadMailTemplate } from '../../mail/helpers/load-mail-template.js';
 
 export type NotificationEmailContent = {
-  template: MailTemplateName;
+  template: Parameters<typeof loadMailTemplate>[0];
   subject: string;
   text: string;
   values: Record<string, string>;
