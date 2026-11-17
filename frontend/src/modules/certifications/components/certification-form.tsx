@@ -41,6 +41,7 @@ function getDocumentChange(
 }
 
 export function CertificationForm({
+  requireDocument=true,
   initialData,
   currentDocumentName,
   onSubmit,
@@ -137,7 +138,7 @@ export function CertificationForm({
 
     let currentFileError = fileError;
     const hasDocument = Boolean(selectedFile) || Boolean(currentDocumentName && !isRemovingDocument);
-    if (!hasDocument) {
+    if (requireDocument && !hasDocument) {
       currentFileError = CERTIFICATION_VALIDATION_MESSAGES.documentRequired;
       setFileError(currentFileError);
     }
@@ -233,7 +234,7 @@ export function CertificationForm({
         selectedFile={selectedFile}
         currentDocumentName={currentDocumentName}
         isRemovalPending={isRemovingDocument}
-        isRequired={true}
+        isRequired={requireDocument}
         error={fileError ?? submitFileError}
         disabled={isBusy}
         isReading={isReadingFile}

@@ -1,10 +1,15 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
-import type { AreaDetailHeaderProps } from "../types/area-detail-components.types";
+import { Button } from '@/components/ui/button';
+import { X } from 'lucide-react';
+import type { AreaDetailHeaderProps } from '../types/area-detail-header-props.types';
 
-export function AreaDetailHeader({ titleId, name, order, onClose }: AreaDetailHeaderProps) {
+export function AreaDetailHeader({
+  titleId,
+  name,
+  order,
+  onClose,
+}: AreaDetailHeaderProps) {
   return (
     <header className="sticky top-0 z-10 flex items-start justify-between gap-4 bg-surface px-6 py-5">
       <div className="min-w-0">
