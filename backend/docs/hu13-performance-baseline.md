@@ -15,7 +15,7 @@ La prueba `test/registrations-performance.e2e-spec.ts` crea un usuario y 60 tall
 
 Todos los IDs de inscripción comparten el prefijo `13000000-0000-4000-8000-`; el usuario termina en `000000000000`. Los IDs de los talleres usan los mismos sufijos más 100. Los tokens QR son aleatorios y no forman parte de la respuesta medida.
 
-El listado actual devuelve los 50 finalizados seguidos de los 5 vigentes, por fecha ascendente; esta tarea registra ese comportamiento sin corregirlo. El historial devuelve los finalizados en orden inverso, 10 por página, total 50. Las cancelaciones no aparecen en ninguno. La prueba valida los IDs exactos de cada respuesta medida y el total del historial. En HU13.2 se evaluará reducir la carga de la consulta manteniendo los contratos que correspondan.
+En la línea base inicial, el listado devolvía los 50 finalizados seguidos de los 5 vigentes, por fecha ascendente; esta tarea registra ese comportamiento sin corregirlo. El historial devuelve los finalizados en orden inverso, 10 por página, total 50. Las cancelaciones no aparecen en ninguno. La prueba valida los IDs exactos de cada respuesta medida y el total del historial. En HU13.2 se evaluará reducir la carga de la consulta manteniendo los contratos que correspondan.
 
 ## Procedimiento y resultados
 
@@ -48,3 +48,20 @@ PGPASSWORD="$DB_PASSWORD" dropdb -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" "$DB_
 Eliminar únicamente la base temporal creada para esta prueba, también si la ejecución falla. No se ejecutan seeds generales. La prueba rechaza bases sin el prefijo requerido o que ya tengan usuarios y no borra datos. Sin `HU13_BASELINE=1`, queda omitida.
 
 Para comparar antes/después, repetir en una base nueva con las mismas migraciones, datos, equipo, versiones y número de muestras. Conservar el JSON de cada ejecución. La prueba fija los IDs y el comportamiento actual: si HU13.2 cambia deliberadamente el conjunto devuelto, documentar la diferencia y ajustar únicamente esa expectativa. No usar umbrales de tiempo como condición de CI.
+
+## HU13.2 — Comparación de la consulta optimizada
+
+Se repitió la línea base y luego la versión optimizada de forma consecutiva, sin ejecutar otras pruebas en paralelo. Mismas versiones, migraciones, equipo, conjunto de 60 inscripciones y 3 calentamientos más 20 muestras; una base temporal nueva por versión. La prueba falló primero porque esperaba 5 IDs y recibió 55, y pasó tras aplicar el filtro.
+
+EventsService construye el criterio de evento publicado y vigente usando su umbral horario de Bolivia. El repositorio de inscripciones aplica ese filtro antes de recuperar detalles. Se conserva el array y sus campos, el orden por fecha y el filtro por usuario; únicamente se excluyen talleres finalizados del listado activo. No se añaden paginación ni consultas en dos fases.
+
+| Consulta | Versión | p50 (ms) | p95 (ms) | Bytes JSON | Filas recuperadas |
+| --- | --- | ---: | ---: | ---: | ---: |
+| Listado | Antes | 3.993 | 5.745 | 18758 | 55 |
+| Listado | Después | 3.082 | 4.808 | 1762 | 5 |
+| Historial | Antes | 4.698 | 5.583 | 3534 | 10 |
+| Historial | Después | 5.350 | 6.657 | 3534 | 10 |
+
+El listado reduce las filas recuperadas un 90,9 % (55 → 5) y el cuerpo JSON un 90,6 % (18.758 → 1.762 bytes), manteniendo una llamada findMany por petición. Se conserva la optimización por esa reducción y la mejora local de latencia observada. El historial no se modifica: mantiene 50 resultados, 10 por página y 3.534 bytes. Sus tiempos variaron entre ejecuciones; no se afirma una mejora de rendimiento del historial ni una garantía de latencia en producción.
+
+La prueba optativa ahora espera exactamente los 5 IDs vigentes. Además comprueba las cinco páginas completas del historial, la conservación de un taller en curso hasta un segundo antes de finalizar y su exclusión exactamente a la hora de fin (con incorporación al historial). Una prueba de dominio cubre el cambio de día entre UTC y Bolivia. El contador sigue midiendo filas materializadas, no filas examinadas por el motor SQL. Las bases temporales de ambas ejecuciones se eliminaron.
