@@ -2,7 +2,7 @@
 
 ## Purpose and responsibilities
 
-`frontend/src/modules/mentorship` provides the directory, public mentor profile, activation flow, and orientation settings. It consumes the backend domains `mentors`, `technical-areas`, and `orientation-types`. HU2 integrates the areas exported by the `radar-chart` module's `index.ts`, without importing its private folders.
+`frontend/src/modules/mentorship` provides the directory, public mentor profile, activation flow, and orientation settings. It consumes the backend domains `mentors`, `technical-areas`, and `orientation-types`. The radar directory integration uses the areas exported by the `radar-chart` module's `index.ts`, without importing its private folders.
 
 ## Architecture and dependencies
 
@@ -54,12 +54,12 @@ Services extract `data` from the common response contract and use the centralize
 
 ## Validation
 
-Tests cover HTTP services, navigation and normalization, radar filters, query states, catalogs, profiles, and the wizard. HU2 changes must preserve the mandatory availability filter and area mapping.
+Tests cover HTTP services, navigation and normalization, radar filters, query states, catalogs, profiles, and the wizard. Directory integration changes must preserve the mandatory availability filter and area mapping.
 
 ## Sprint History
 
 ### Sprint 3
 
-- Epic 3 HU2: navigate from a radar area to the available mentor directory.
+- Radar directory integration: navigate from a radar area to the available mentor directory.
 - Radar simulation based on actual mentor queries.
 - Standards alignment: consume areas through the radar module's public API.

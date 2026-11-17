@@ -40,7 +40,6 @@ export function DocumentsCvView() {
   );
 }
 
-/** Conserva compatibilidad con los consumidores de la vista anterior. */
 export function LegacyDocumentsCvView() {
   return (
     <ProfilePageLayout

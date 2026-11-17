@@ -42,7 +42,7 @@ sequenceDiagram
 - Scores come from the backend, rather than demonstration data. An older version cannot replace a newer cached version. If the session changes, the in-flight response is discarded.
 - An empty state appears when there is no publication; a publication without approved skills keeps all six axes at zero.
 - Comparisons use the two latest publications and their dates. Pending or failed recalculation preserves the latest valid publication and allows retrying.
-- HU2: selecting an area queries the actual directory of available mentors. When results exist, the simulation estimates up to **+1 point**, capped at 10, and calculates the projected average. No projection is applied when there are no mentors or a query fails. Closing the dialog clears the projection. This illustrative estimate never changes the published radar.
+- Mentorship integration: selecting an area queries the actual directory of available mentors. When results exist, the simulation estimates up to **+1 point**, capped at 10, and calculates the projected average. No projection is applied when there are no mentors or a query fails. Closing the dialog clears the projection. This illustrative estimate never changes the published radar.
 - Administrative review consumes authorized backend APIs; hiding controls does not replace server authorization.
 
 ## Consumed endpoints
@@ -68,7 +68,7 @@ Tests cover queries, version preservation, empty and error states, comparisons, 
 
 ### Sprint 3
 
-- HU2: available mentors by area and illustrative simulation.
+- Mentorship integration: available mentors by area and illustrative simulation.
 - Comparisons between publications and navigation to evidence.
-- HU5: document verification results and integrated administrative review.
+- Document verification: document verification results and integrated administrative review.
 - Standards alignment: individual types, English identifiers, public exports, and static styles using Tailwind.

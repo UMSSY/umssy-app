@@ -75,7 +75,7 @@ Tests verify mutations, cancellation and refresh, previews, extraction, export, 
 
 ### Sprint 3
 
-- HU5: OCR/NLP dashboard, verification history, and radar integration.
+- Document verification: OCR/NLP dashboard, verification history, and radar integration.
 - File preview and acknowledgement of version-specific results.
 - Shared mutations between the CV view and dashboard.
 - Integration of the `documents` to `cv` rename and public module imports.

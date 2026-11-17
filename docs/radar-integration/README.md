@@ -20,6 +20,8 @@ flowchart TD
 
 Cross-domain reads use the owning services. `RadarRecruitmentSourcesService` queries roles through `UsersService`, without reading `userRole` directly from radar. Services do not inject Prisma. The Database team owns the schema and migrations.
 
+Certification document mutations obtain active verification IDs through `RadarAuditService` with the caller's `TransactionContext`. The certification service holds its own row lock and validates the expected version before writing; Radar repositories keep verification-table access inside the owning domain.
+
 ## Publication and scoring
 
 ```mermaid
@@ -40,7 +42,7 @@ sequenceDiagram
 
 Only approved skills with valid evidence are published, counting each skill once. The rubric adds 1 point per skill and 0.5 for high relevance, capped at 10 per axis; the average uses all six axes. The fingerprint and source revision prevent inconsistent publications. Failures preserve the valid snapshot. The response distinguishes no publication, a zero-score publication, pending skills, and NLP state.
 
-## HU5: document verification
+## Document verification
 
 ```mermaid
 sequenceDiagram
@@ -74,6 +76,8 @@ Applicants need an active `titulado` or `estudiante` role and all three explicit
 ## Endpoints
 
 All endpoints require JWT. Owner means the authenticated user; UUIDs are validated before services run. Lists are complete and unpaginated. The document queue accepts `filter=pending|approved|rejected|all`, defaulting to `pending`. Swagger documents all 24 operations, their parameters, bodies, roles, and responses.
+
+Error responses reference the shared `#/components/schemas/ApiErrorResponse` schema registered by `documentCommonResponses`, retaining Radar-specific descriptions and examples.
 
 | Method and path | Permission and result |
 | --- | --- |
@@ -115,7 +119,7 @@ Tests cover publication, provenance, concurrent review, consent, authorization, 
 ### Sprint 3
 
 - Versioned publication, comparisons, and approved evidence.
-- HU2: radar areas and mentor integration support.
-- HU5: OCR/NLP verification, history, and administrative review.
+- Mentorship integration: radar areas and mentor integration support.
+- Document verification: OCR/NLP verification, history, and administrative review.
 - Consent and recruitment affinity.
 - Standards alignment: `.types.ts` contracts, REST/OpenAPI documentation, and roles accessed through the owning service.

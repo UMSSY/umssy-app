@@ -1,6 +1,6 @@
 # Radar model standards alignment request
 
-## Epic #3 - User Story 5: document persistence and radar
+## Document persistence and radar
 
 Type: refactor. Priority: high. Initial estimate: 6 hours, to be confirmed by the Database team. Dependency: data model approval before changing the schema and migrations. Publish using the backend task template and associate the issue with the owning team's board; this file prepares the request and does not create an issue outside its project.
 

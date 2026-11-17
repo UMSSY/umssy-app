@@ -1,4 +1,3 @@
-// Produce ejemplos de documentación a partir de las restricciones del esquema.
 export function getRadarSchemaExample(
   schema: Record<string, unknown>,
 ): unknown {

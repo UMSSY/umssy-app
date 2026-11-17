@@ -1,4 +1,4 @@
-# Epic 3 standards alignment
+# Radar standards alignment
 
 ## Scope
 
@@ -9,7 +9,7 @@ Review of radar-owned code, CV verification, and their integration points. The c
 | Requirement | Result |
 | --- | --- |
 | Domain documentation | README files for radar-chart, radar-integration, cv, and mentorship with flows, dependencies, APIs, Mermaid diagrams, and Sprint 3 history |
-| Database documentation | Dictionary of 95 models and 135 relationships, including types, keys, mappings, indexes, and deletion behavior |
+| Database documentation | Radar model dictionary and relationships alongside the shared domain documentation, including types, keys, mappings, indexes, and deletion behavior |
 | Documented API | 24 radar operations with unique identifiers, JWT, permissions, parameters, bodies, responses, errors, and examples |
 | Domain boundaries | Roles queried through UsersService; radar does not read userRole directly |
 | Public frontend API | Imports through index.ts and area label lookup without circular initialization |
@@ -20,7 +20,19 @@ Review of radar-owned code, CV verification, and their integration points. The c
 
 ## Reproducible validation
 
-Local results from November 16, 2026:
+### Review follow-up
+
+The review corrections route active certification-version reads through the owning Radar service, preserve the certification row lock and transaction context, reuse the shared OpenAPI error schema, and remove redundant comments and tracking identifiers from documentation. Database documentation retains the sections from develop and adds the radar model section.
+
+Validation after those corrections: 340 tests passed across 56 backend test files. Coverage for radar-integration and certification-documents is 88.71% statements, 84.64% branches, 83.96% functions, and 89.02% lines. Backend production type checking, ESLint, Oxlint, frontend lint for the comment-only change, documentation links, and conflict-marker checks passed. The verification migration changed only in comments; its executable SQL is unchanged.
+
+```text
+node node_modules/vitest/vitest.mjs run src/modules/radar-integration src/modules/certification-documents src/modules/cv --maxWorkers=2 --coverage --coverage.include=src/modules/radar-integration/** --coverage.include=src/modules/certification-documents/**
+```
+
+### Previous baseline
+
+Baseline results from November 16, 2026, before the subsequent review corrections:
 
 | Scope | Passing tests | Statements | Branches | Functions | Lines |
 | --- | --- | --- | --- | --- | --- |
@@ -52,6 +64,5 @@ Coverage filters define the scope of this update; they neither exclude executabl
 ## Outstanding owner reviews
 
 - Database team: [specific change request](database-change-request.md). Differences in keys, defaults, audit fields, and legacy table catalogs remain pending until that team approves and implements the migration.
-- Epic 3 lead: review the changes and documentation before integration.
-- Prerequisite integration: merge PR #2482 first. Until then, a PR targeting Epic 3 also includes the CODEOWNERS changes inherited from develop and may be blocked by CI Files. The new standards commits do not modify those files or use DevOps branch names to bypass review.
-- DevOps: approve the future integration of Epic 3 into develop. Historical Spanish commits are not rewritten; new commits use English and Conventional Commits.
+- Team lead: review the changes and documentation before integration.
+- DevOps: approve the future integration of the radar branch into develop. Historical Spanish commits are not rewritten; new commits use English and Conventional Commits.

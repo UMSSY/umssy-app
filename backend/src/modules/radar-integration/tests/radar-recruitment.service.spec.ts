@@ -649,9 +649,8 @@ describe('RadarRecruitmentService', () => {
   });
 
   it('HU-15: notifica al postulante el cambio de estado tras la decisión', async () => {
-    const { access, applications, applicationActions, service, sources } =
-      setup();
-    access.hasRole.mockResolvedValue(true);
+    const { applications, applicationActions, service, sources } = setup();
+    sources.hasRole.mockResolvedValue(true);
     sources.recruiterCompanyId.mockResolvedValue('company');
     applications.recordRecruiterDecision.mockResolvedValue([{ id: 'app' }]);
 
@@ -673,9 +672,8 @@ describe('RadarRecruitmentService', () => {
   });
 
   it('HU-15: no notifica si la decisión no se pudo registrar', async () => {
-    const { access, applications, applicationActions, service, sources } =
-      setup();
-    access.hasRole.mockResolvedValue(true);
+    const { applications, applicationActions, service, sources } = setup();
+    sources.hasRole.mockResolvedValue(true);
     sources.recruiterCompanyId.mockResolvedValue('company');
     applications.recordRecruiterDecision.mockResolvedValue([]);
 
