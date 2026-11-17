@@ -2,6 +2,7 @@ import type { CertificationDocumentChange } from "./certification-document-chang
 import type { CreateCertificationDto } from "./create-certification-dto.types";
 
 export interface CertificationFormProps {
+  requireDocument?:boolean;
   initialData?: CreateCertificationDto;
   currentDocumentName?: string;
   onSubmit: (

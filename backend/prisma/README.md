@@ -258,6 +258,294 @@ All of them have `id`, a unique `title` (varchar(100)), `created_at` and `update
 | `20261103120000_add_job_offer_published_at`            | `published_at` of vacancies                                                   |
 | `20261106000000_add_radar_application_consents`        | Consents of an application                                                    |
 
+## Radar and document verification
+
+Tables supporting versioned radar publications, document verification, review decisions, audit events, and recruitment consent. Business flows are documented in [radar-integration](../../docs/radar-integration/README.md).
+
+### Relationship diagram
+
+```mermaid
+erDiagram
+  JobApplication ||--o{ RadarApplicationConsent : application
+  UserCvFile ||--o{ RadarCvEvidence : cv
+  User ||--o{ RadarCvEvidence : owner
+  User o|--o{ RadarCvEvidence : reviewer
+  RadarCvExtractionStatus ||--o{ RadarCvEvidence : extractionState
+  RadarCvReviewStatus ||--o{ RadarCvEvidence : reviewState
+  User ||--o{ RadarScoreSnapshot : user
+  User ||--o{ RadarAuditEvent : subject
+  User o|--o{ RadarAuditEvent : actor
+  Company ||--o{ RadarCompanyAccess : company
+  User ||--o{ RadarCompanyAccess : user
+  JobOffer ||--o{ RadarJobApplication : jobOffer
+  User ||--o{ RadarJobApplication : user
+  User o|--o{ RadarJobApplication : decider
+  User ||--o{ RadarDocumentVerification : owner
+  User o|--o{ RadarDocumentVerification : reviewer
+  RadarDocumentStatus ||--o{ RadarDocumentVerification : statusEntry
+  RadarDocumentSourceType ||--o{ RadarDocumentVerification : sourceTypeEntry
+```
+
+### RadarArea
+Table: `radar_areas`.
+
+| Field | Prisma type | Column or relation | Definition and constraints |
+| --- | --- | --- | --- |
+| id | `String` | id | `@id @db.VarChar(50)` |
+| name | `String` | name | `@unique @db.VarChar(80)` |
+| description | `String?` | description | `No explicit attributes` |
+| createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
+| updatedAt | `DateTime` | updated_at | `@updatedAt @map("updated_at") @db.Timestamptz(6)` |
+| skills | `Skill[]` | Relation: Skill[] | `No explicit attributes` |
+
+Model constraints:
+
+- `@@map("radar_areas")`
+
+### RadarApplicationConsent
+Table: `radar_application_consents`.
+
+| Field | Prisma type | Column or relation | Definition and constraints |
+| --- | --- | --- | --- |
+| id | `String` | id | `@id @default(dbgenerated("gen_random_uuid()")) @db.Uuid` |
+| applicationId | `String` | application_id | `@unique @map("application_id") @db.Uuid` |
+| consentToRecruiter | `Boolean` | consent_to_recruiter | `@default(false) @map("consent_to_recruiter")` |
+| consentToCv | `Boolean` | consent_to_cv | `@default(false) @map("consent_to_cv")` |
+| consentToContact | `Boolean` | consent_to_contact | `@default(false) @map("consent_to_contact")` |
+| createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
+| updatedAt | `DateTime` | updated_at | `@default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)` |
+| application | `JobApplication` | Relation: JobApplication | `@relation(fields: [applicationId], references: [id], onDelete: Cascade)` |
+
+Model constraints:
+
+- `@@map("radar_application_consents")`
+
+### RadarCvEvidence
+Table: `radar_cv_evidence`.
+
+| Field | Prisma type | Column or relation | Definition and constraints |
+| --- | --- | --- | --- |
+| id | `String` | id | `@id @default(dbgenerated("gen_random_uuid()")) @db.Uuid` |
+| cvId | `String` | cv_id | `@unique @map("cv_id") @db.Uuid` |
+| userId | `String` | user_id | `@map("user_id") @db.Uuid` |
+| extractedText | `String` | extracted_text | `@default("") @map("extracted_text") @db.Text` |
+| submittedAt | `DateTime` | submitted_at | `@default(now()) @map("submitted_at") @db.Timestamptz(6)` |
+| decidedAt | `DateTime?` | decided_at | `@map("decided_at") @db.Timestamptz(6)` |
+| reviewerId | `String?` | reviewer_id | `@map("reviewer_id") @db.Uuid` |
+| extractionStatusId | `String` | extraction_status_id | `@map("extraction_status_id") @db.Uuid` |
+| reviewStatusId | `String` | review_status_id | `@map("review_status_id") @db.Uuid` |
+| createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
+| updatedAt | `DateTime` | updated_at | `@default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)` |
+| cv | `UserCvFile` | Relation: UserCvFile | `@relation(fields: [cvId], references: [id], onDelete: Cascade, onUpdate: NoAction)` |
+| owner | `User` | Relation: User | `@relation("RadarCvOwner", fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)` |
+| reviewer | `User?` | Relation: User? | `@relation("RadarCvReviewer", fields: [reviewerId], references: [id], onDelete: SetNull)` |
+| extractionState | `RadarCvExtractionStatus` | Relation: RadarCvExtractionStatus | `@relation(fields: [extractionStatusId], references: [id], onDelete: Restrict, onUpdate: Restrict)` |
+| reviewState | `RadarCvReviewStatus` | Relation: RadarCvReviewStatus | `@relation(fields: [reviewStatusId], references: [id], onDelete: Restrict, onUpdate: Restrict)` |
+
+Model constraints:
+
+- `@@index([reviewStatusId, submittedAt], map: "radar_cv_evidence_review_idx")`
+- `@@index([userId], map: "radar_cv_evidence_user_idx")`
+- `@@index([reviewerId], map: "radar_cv_evidence_reviewer_idx")`
+- `@@index([extractionStatusId], map: "radar_cv_evidence_extraction_status_idx")`
+- `@@index([reviewStatusId], map: "radar_cv_evidence_review_status_idx")`
+- `@@map("radar_cv_evidence")`
+
+### RadarScoreSnapshot
+Table: `radar_score_snapshots`.
+
+| Field | Prisma type | Column or relation | Definition and constraints |
+| --- | --- | --- | --- |
+| id | `String` | id | `@id @default(dbgenerated("gen_random_uuid()")) @db.Uuid` |
+| userId | `String` | user_id | `@map("user_id") @db.Uuid` |
+| version | `Int` | version | `No explicit attributes` |
+| rubricVersion | `String` | rubric_version | `@map("rubric_version") @db.VarChar(80)` |
+| fingerprint | `String` | fingerprint | `@db.VarChar(64)` |
+| scores | `Json` | scores | `No explicit attributes` |
+| evidence | `Json` | evidence | `No explicit attributes` |
+| averageScore | `Decimal` | average_score | `@map("average_score") @db.Decimal(5, 2)` |
+| createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
+| updatedAt | `DateTime` | updated_at | `@default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)` |
+| user | `User` | Relation: User | `@relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)` |
+
+Model constraints:
+
+- `@@unique([userId, version], map: "radar_score_snapshots_user_version_key")`
+- `@@index([userId], map: "radar_score_snapshots_user_idx")`
+- `@@map("radar_score_snapshots")`
+
+### RadarAuditEvent
+Table: `radar_audit_events`.
+
+| Field | Prisma type | Column or relation | Definition and constraints |
+| --- | --- | --- | --- |
+| id | `String` | id | `@id @default(dbgenerated("gen_random_uuid()")) @db.Uuid` |
+| userId | `String` | user_id | `@map("user_id") @db.Uuid` |
+| actorId | `String?` | actor_id | `@map("actor_id") @db.Uuid` |
+| eventType | `String` | event_type | `@map("event_type") @db.VarChar(80)` |
+| targetId | `String?` | target_id | `@map("target_id") @db.Uuid` |
+| details | `Json` | details | `@default("{}")` |
+| occurredAt | `DateTime` | occurred_at | `@default(now()) @map("occurred_at") @db.Timestamptz(6)` |
+| createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
+| updatedAt | `DateTime` | updated_at | `@default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)` |
+| subject | `User` | Relation: User | `@relation("RadarAuditSubject", fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)` |
+| actor | `User?` | Relation: User? | `@relation("RadarAuditActor", fields: [actorId], references: [id], onDelete: SetNull)` |
+
+Model constraints:
+
+- `@@index([userId, occurredAt(sort: Desc)], map: "radar_audit_user_idx")`
+- `@@index([userId], map: "radar_audit_subject_idx")`
+- `@@index([actorId], map: "radar_audit_actor_idx")`
+- `@@map("radar_audit_events")`
+
+### RadarCvExtractionStatus
+Table: `radar_cv_extraction_statuses`.
+
+| Field | Prisma type | Column or relation | Definition and constraints |
+| --- | --- | --- | --- |
+| id | `String` | id | `@id @default(dbgenerated("gen_random_uuid()")) @db.Uuid` |
+| title | `String` | title | `@unique @db.VarChar(24)` |
+| description | `String?` | description | `No explicit attributes` |
+| createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
+| updatedAt | `DateTime` | updated_at | `@default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)` |
+| evidences | `RadarCvEvidence[]` | Relation: RadarCvEvidence[] | `No explicit attributes` |
+
+Model constraints:
+
+- `@@map("radar_cv_extraction_statuses")`
+
+### RadarCvReviewStatus
+Table: `radar_cv_review_statuses`.
+
+| Field | Prisma type | Column or relation | Definition and constraints |
+| --- | --- | --- | --- |
+| id | `String` | id | `@id @default(dbgenerated("gen_random_uuid()")) @db.Uuid` |
+| title | `String` | title | `@unique @db.VarChar(24)` |
+| description | `String?` | description | `No explicit attributes` |
+| createdAt | `DateTime` | created_at | `@default(now()) @map("created_at") @db.Timestamptz(6)` |
+| updatedAt | `DateTime` | updated_at | `@default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)` |
+| evidences | `RadarCvEvidence[]` | Relation: RadarCvEvidence[] | `No explicit attributes` |
+
+Model constraints:
+
+- `@@map("radar_cv_review_statuses")`
+
+### RadarCompanyAccess
+Table: `radar_company_access`.
+
+| Field | Prisma type | Column or relation | Definition and constraints |
+| --- | --- | --- | --- |
+| companyId | `String` | company_id | `@map("company_id") @db.Uuid` |
+| userId | `String` | user_id | `@map("user_id") @db.Uuid` |
+| company | `Company` | Relation: Company | `@relation(fields: [companyId], references: [id], onDelete: Cascade, onUpdate: NoAction)` |
+| user | `User` | Relation: User | `@relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)` |
+
+Model constraints:
+
+- `@@id([companyId, userId])`
+- `@@map("radar_company_access")`
+- `@@ignore`
+
+### RadarJobApplication
+Table: `radar_job_applications`.
+
+| Field | Prisma type | Column or relation | Definition and constraints |
+| --- | --- | --- | --- |
+| id | `String` | id | `@id @default(dbgenerated("gen_random_uuid()")) @db.Uuid` |
+| jobOfferId | `String` | job_offer_id | `@map("job_offer_id") @db.Uuid` |
+| userId | `String` | user_id | `@map("user_id") @db.Uuid` |
+| consentToRecruiter | `Boolean` | consent_to_recruiter | `@default(false) @map("consent_to_recruiter")` |
+| consentToCv | `Boolean` | consent_to_cv | `@default(false) @map("consent_to_cv")` |
+| consentToContact | `Boolean` | consent_to_contact | `@default(false) @map("consent_to_contact")` |
+| state | `String` | state | `@default("applied") @db.VarChar(24)` |
+| appliedAt | `DateTime` | applied_at | `@default(now()) @map("applied_at") @db.Timestamptz(6)` |
+| decidedAt | `DateTime?` | decided_at | `@map("decided_at") @db.Timestamptz(6)` |
+| decidedBy | `String?` | decided_by | `@map("decided_by") @db.Uuid` |
+| jobOffer | `JobOffer` | Relation: JobOffer | `@relation(fields: [jobOfferId], references: [id], onDelete: Cascade, onUpdate: NoAction)` |
+| user | `User` | Relation: User | `@relation("RadarApplicant", fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)` |
+| decider | `User?` | Relation: User? | `@relation("RadarDecision", fields: [decidedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)` |
+
+Model constraints:
+
+- `@@unique([jobOfferId, userId])`
+- `@@index([jobOfferId, appliedAt(sort: Desc)], map: "radar_job_applications_vacancy_idx")`
+- `@@map("radar_job_applications")`
+- `@@ignore`
+
+### RadarDocumentVerification
+Table: `radar_document_verifications`.
+
+| Field | Prisma type | Column or relation | Definition and constraints |
+| --- | --- | --- | --- |
+| id | `String` | id | `@id @default(dbgenerated("gen_random_uuid()")) @db.Uuid` |
+| userId | `String` | user_id | `@map("user_id") @db.Uuid` |
+| sourceTypeId | `String` | source_type_id | `@map("source_type_id") @db.Uuid` |
+| sourceId | `String` | source_id | `@map("source_id") @db.Uuid` |
+| filename | `String` | filename | `No explicit attributes` |
+| mime | `String` | mime | `No explicit attributes` |
+| content | `Bytes?` | content | `No explicit attributes` |
+| sizeBytes | `Int` | size_bytes | `@map("size_bytes")` |
+| active | `Boolean` | active | `@default(true)` |
+| digest | `String` | digest | `No explicit attributes` |
+| statusId | `String` | status_id | `@default(dbgenerated("'a0000000-0000-4000-8000-000000000001'::uuid")) @map("status_id") @db.Uuid` |
+| confidence | `Float?` | confidence | `No explicit attributes` |
+| reason | `String` | reason | `@default("")` |
+| skills | `Json` | skills | `@default("[]")` |
+| createdAt | `DateTime` | created_at | `@default(dbgenerated("clock_timestamp()")) @map("created_at") @db.Timestamptz(6)` |
+| updatedAt | `DateTime` | updated_at | `@default(dbgenerated("clock_timestamp()")) @updatedAt @map("updated_at") @db.Timestamptz(6)` |
+| decidedAt | `DateTime?` | decided_at | `@map("decided_at") @db.Timestamptz(6)` |
+| reviewerId | `String?` | reviewer_id | `@map("reviewer_id") @db.Uuid` |
+| noticeRead | `Boolean` | notice_read | `@default(false) @map("notice_read")` |
+| publishedIds | `Json` | published_ids | `@default("[]") @map("published_ids")` |
+| radarVersion | `Int?` | radar_version | `@map("radar_version")` |
+| synced | `Boolean` | synced | `@default(false)` |
+| lease | `String?` | lease | `@db.Uuid` |
+| retryAt | `DateTime` | retry_at | `@default(now()) @map("retry_at") @db.Timestamptz(6)` |
+| owner | `User` | Relation: User | `@relation("VerifiedDocumentOwner", fields:[userId],references:[id],onDelete:Cascade,onUpdate:NoAction)` |
+| reviewer | `User?` | Relation: User? | `@relation("VerifiedDocumentReviewer",fields:[reviewerId],references:[id],onDelete:SetNull,onUpdate:NoAction)` |
+| statusEntry | `RadarDocumentStatus` | Relation: RadarDocumentStatus | `@relation(fields:[statusId], references:[id], onDelete:Restrict, onUpdate:Cascade, map:"radar_document_status_fk")` |
+| sourceTypeEntry | `RadarDocumentSourceType` | Relation: RadarDocumentSourceType | `@relation(fields:[sourceTypeId], references:[id], onDelete:Restrict, onUpdate:Cascade, map:"radar_document_source_type_fk")` |
+
+Model constraints:
+
+- `@@index([userId,createdAt(sort:Desc)],map:"radar_doc_owner_date")`
+- `@@map("radar_document_verifications")`
+- `@@index([reviewerId],map:"radar_doc_reviewer")`
+- `@@index([statusId],map:"radar_doc_status")`
+- `@@index([sourceTypeId],map:"radar_doc_source_type")`
+
+### RadarDocumentStatus
+Table: `radar_document_statuses`.
+
+| Field | Prisma type | Column or relation | Definition and constraints |
+| --- | --- | --- | --- |
+| id | `String` | id | `@id @default(dbgenerated("gen_random_uuid()")) @db.Uuid` |
+| title | `String` | title | `@unique` |
+| description | `String` | description | `No explicit attributes` |
+| createdAt | `DateTime` | created_at | `@default(dbgenerated("clock_timestamp()")) @map("created_at") @db.Timestamptz(6)` |
+| updatedAt | `DateTime` | updated_at | `@default(dbgenerated("clock_timestamp()")) @updatedAt @map("updated_at") @db.Timestamptz(6)` |
+| documents | `RadarDocumentVerification[]` | Relation: RadarDocumentVerification[] | `No explicit attributes` |
+
+Model constraints:
+
+- `@@map("radar_document_statuses")`
+
+### RadarDocumentSourceType
+Table: `radar_document_source_types`.
+
+| Field | Prisma type | Column or relation | Definition and constraints |
+| --- | --- | --- | --- |
+| id | `String` | id | `@id @default(dbgenerated("gen_random_uuid()")) @db.Uuid` |
+| title | `String` | title | `@unique` |
+| description | `String` | description | `No explicit attributes` |
+| createdAt | `DateTime` | created_at | `@default(dbgenerated("clock_timestamp()")) @map("created_at") @db.Timestamptz(6)` |
+| updatedAt | `DateTime` | updated_at | `@default(dbgenerated("clock_timestamp()")) @updatedAt @map("updated_at") @db.Timestamptz(6)` |
+| documents | `RadarDocumentVerification[]` | Relation: RadarDocumentVerification[] | `No explicit attributes` |
+
+Model constraints:
+
+- `@@map("radar_document_source_types")`
+
 ## Sprint History
 
 ### Sprint 3
@@ -265,3 +553,4 @@ All of them have `id`, a unique `title` (varchar(100)), `created_at` and `update
 - Documented the tables used by Matching and Applications: work experience, skills, vacancies, applications and consents, with relationships, constraints, indexes and deletion behavior.
 - Evidence-based `user_skills` (`source`, `verification_status`, `evidence_refs`) used by the profile, the affinity calculation and the cleanup of detected skills.
 - Unique `(job_offer_id, user_id)` on applications, which supports withdrawing and applying again on the same row.
+- Documented radar publications, document verification, review catalogs, and audit relationships.

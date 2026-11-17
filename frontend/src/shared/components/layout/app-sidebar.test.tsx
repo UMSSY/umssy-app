@@ -23,12 +23,19 @@ describe("AppSidebar", () => {
     expect(screen.getByRole("img", { name: "UMSSY, Acreditación y comunidad" })).toHaveAttribute("src", "/icons/umssy-logo-web.svg");
     expect(document.querySelector('[data-slot="sidebar-footer"]')).toBeNull();
   });
-  it("exposes subsections in each expandable task group", () => {
-    renderSidebar();
-    fireEvent.click(screen.getByRole("button", { name: "Mentorías" }));
-    expect(screen.getByRole("link", { name: "Mi disponibilidad" })).toHaveAttribute("href", "/mentor/availability");
-    fireEvent.click(screen.getByRole("button", { name: "Talleres y eventos" }));
-    expect(screen.getByRole("link", { name: "Mis inscripciones" })).toHaveAttribute("href", "/events/my-passes");
+  it.each([
+    ["Mentorías", "Mi disponibilidad", "/mentor/availability"],
+    ["Talleres y eventos", "Mis inscripciones", "/events/my-passes"],
+  ])("exposes subsections when expanding %s", (group, destination, href) => {
+    renderSidebar({ items: SIDEBAR_NAVIGATION.filter((item) => item.label === group) });
+    const trigger = screen.getByRole("button", { name: group });
+    expect(trigger).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByRole("link", { name: destination })).toBeNull();
+
+    fireEvent.click(trigger);
+
+    expect(trigger).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByRole("link", { name: destination })).toHaveAttribute("href", href);
   });
   it.each([
     ["/events/my-passes", "Talleres y eventos", "Mis inscripciones"],
