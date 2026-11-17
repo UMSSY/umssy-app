@@ -30,10 +30,12 @@ export function useDocumentReview() {
       setConfirmation(null);
       setError('');
     },
-    onError: () =>
+    onError: () => {
+      setConfirmation(null);
       setError(
         'No se pudo confirmar la decisión. Comprueba el estado actualizado.',
-      ),
+      );
+    },
     onSettled: () => queue.refetch(),
   });
   const rows = queue.data ?? [];

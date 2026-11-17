@@ -133,6 +133,9 @@ export function DocumentReviewPanel() {
               className="h-[60vh] w-full"
             />
           )}
+          <Button variant="outline" onClick={() => setPreview(null)}>
+            Cerrar vista previa
+          </Button>
         </DialogContent>
       </Dialog>
     </section>
