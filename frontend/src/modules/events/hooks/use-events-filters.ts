@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useDebouncedValue } from '@/shared/hooks/use-debounced-value';
+import { DEFAULT_EVENT_SORT } from '../constants/events.constants';
 import type { EventFiltersPayload } from '../types/event-filters.types';
 
 export function useEventsFilters() {
@@ -13,6 +14,7 @@ export function useEventsFilters() {
   const filters: EventFiltersPayload = {
     search,
     categoryId,
+    sort: DEFAULT_EVENT_SORT,
   };
 
   return {

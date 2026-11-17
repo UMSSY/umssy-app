@@ -5,4 +5,6 @@ export const NO_EVENT_FILTERS: EventFiltersPayload = {
   categoryId: null,
 };
 
+export const DEFAULT_EVENT_SORT = 'recommended' as const;
+
 export { REQUEST_TIMEOUT_MS } from '@/shared/constants/http.constants';

@@ -52,6 +52,23 @@ describe('eventsService', () => {
     });
   });
 
+  it('sends the requested order to GET /events', async () => {
+    const getSpy = vi.spyOn(apiClient, 'get').mockResolvedValueOnce({
+      data: { data: { items: [] }, page: 1, offset: 0 },
+    } as unknown as AxiosResponse<EventsListResponse>);
+
+    await eventsService.getEvents(
+      { page: 1, limit: 50, sort: 'popular' },
+      undefined,
+      'signed-token',
+    );
+
+    expect(getSpy).toHaveBeenCalledWith(
+      '/events',
+      expect.objectContaining({ params: { page: 1, limit: 50, sort: 'popular' } }),
+    );
+  });
+
   it('falla claramente si falta configurar la URL del backend', async () => {
     apiClient.defaults.baseURL = undefined;
 

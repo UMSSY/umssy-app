@@ -11,14 +11,15 @@ export function useEvents(filters: EventFiltersPayload = NO_EVENT_FILTERS) {
   const accessToken = useRegistrationSession();
   const search = filters.search.trim();
   const categoryId = filters.categoryId;
-  const queryKey = ["events", "list", accessToken, search, categoryId];
+  const sort = filters.sort;
+  const queryKey = ["events", "list", accessToken, search, categoryId, sort];
   const query = useInfiniteQuery({
     queryKey,
     initialPageParam: 1,
     queryFn: ({ pageParam, signal }) => eventsService.getEvents({
       page: pageParam, limit: 50,
       includeProposals: true,
-      ...(search && { search }), ...(categoryId && { categoryId }),
+      ...(search && { search }), ...(categoryId && { categoryId }), ...(sort && { sort }),
     }, signal, accessToken),
     getNextPageParam: (lastPage, pages) => lastPage.data.length === 50 ? pages.length + 1 : undefined,
   });

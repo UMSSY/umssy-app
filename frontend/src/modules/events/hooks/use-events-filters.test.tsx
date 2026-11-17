@@ -9,7 +9,7 @@ afterEach(() => {
 });
 
 describe('useEventsFilters', () => {
-  it('starts with empty search and no category selected', () => {
+  it('starts with empty search, no category and the recommended order', () => {
     const { result } = renderHook(() => useEventsFilters());
 
     expect(result.current.searchInput).toBe('');
@@ -18,6 +18,7 @@ describe('useEventsFilters', () => {
     expect(result.current.filters).toEqual({
       search: '',
       categoryId: null,
+      sort: 'recommended',
     });
   });
 
