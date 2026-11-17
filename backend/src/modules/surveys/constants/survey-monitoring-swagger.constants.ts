@@ -17,8 +17,6 @@ import {
   validationError,
 } from './survey-swagger.constants.js';
 
-// Alert config
-
 const ALERT_CONFIG_DATA_SCHEMA = {
   type: 'object',
   required: ['enabled', 'threshold', 'questionIds'],
@@ -138,8 +136,6 @@ export const SURVEY_SAVE_ALERT_CONFIG_BAD_REQUEST_RESPONSE: ApiResponseOptions =
   },
 };
 
-// Participation
-
 export const SURVEY_GET_PARTICIPATION_DESCRIPTION = [
   'Calcula la cobertura de respuesta de la audiencia objetivo de la encuesta (rol según público objetivo, carrera y gestión de titulación configuradas).',
   '',
@@ -193,8 +189,6 @@ export const SURVEY_GET_PARTICIPATION_OK_RESPONSE: ApiResponseOptions = {
     },
   },
 };
-
-// Reminders
 
 export const SURVEY_SEND_REMINDERS_DESCRIPTION = [
   'Envía un recordatorio (correo y push, mediante `NotificationsService.notify()`) solo a los miembros de la audiencia que aún no respondieron y registra la fecha del envío.',

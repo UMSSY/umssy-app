@@ -43,8 +43,6 @@ const CAREER_SCHEMA = {
 const EXAMPLE_CAREER = { id: EXAMPLE_CAREER_ID, title: 'Ingeniería de Sistemas' };
 const NULLABLE_DATE_TIME = { type: 'string', format: 'date-time', nullable: true };
 
-// Create / update
-
 const SURVEY_UPSERT_RULES = [
   '**Reglas del cuerpo:**',
   '- `status: draft` solo exige `title`; el resto puede completarse después.',
@@ -242,8 +240,6 @@ export const SURVEY_UPDATE_CONFLICT_RESPONSE: ApiResponseOptions = {
   },
 };
 
-// List
-
 export const SURVEY_LIST_DESCRIPTION = [
   'Lista todas las encuestas de empleabilidad, de la más reciente a la más antigua. Sin paginación ni filtros.',
   '',
@@ -317,8 +313,6 @@ export const SURVEY_LIST_OK_RESPONSE: ApiResponseOptions = {
     },
   ]),
 };
-
-// Detail
 
 export const SURVEY_DETAIL_DESCRIPTION = [
   'Devuelve una encuesta con sus preguntas y opciones ordenadas, para responderla o editarla.',
@@ -476,8 +470,6 @@ export const SURVEY_RESPONDENT_NOT_FOUND_RESPONSE: ApiResponseOptions = {
   example: SURVEY_NOT_FOUND_ERROR,
 };
 
-// Unpublish
-
 export const SURVEY_UNPUBLISH_DESCRIPTION = [
   'Devuelve a borrador una encuesta publicada que todavía no tiene respuestas, para poder corregirla.',
   '',
@@ -511,8 +503,6 @@ export const SURVEY_UNPUBLISH_CONFLICT_RESPONSE: ApiResponseOptions = {
     },
   },
 };
-
-// Submit responses
 
 export const SURVEY_SUBMIT_RESPONSE_DESCRIPTION = [
   'Registra las respuestas del usuario autenticado a una encuesta publicada. Cada usuario responde una sola vez.',
@@ -587,8 +577,6 @@ export const SURVEY_ALREADY_ANSWERED_RESPONSE: ApiResponseOptions = {
     field: 'surveyId',
   }),
 };
-
-// Statistics and PDF report
 
 export const SURVEY_STATISTICS_PERIOD_QUERY: ApiQueryOptions = {
   name: 'period',
@@ -749,7 +737,6 @@ export const SURVEY_STATISTICS_BAD_REQUEST_RESPONSE: ApiResponseOptions = {
   },
 };
 
-// Errors of the PDF endpoint are JSON even though the operation produces PDF.
 export const SURVEY_REPORT_NOT_FOUND_RESPONSE: ApiResponseOptions = {
   status: 404,
   description: 'La encuesta no existe.',

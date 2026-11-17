@@ -1,9 +1,4 @@
-import {
-  SURVEY_CLOSED_MAIL_TEMPLATE,
-  SURVEY_CLOSING_SOON_MAIL_TEMPLATE,
-  SURVEY_REMINDER_MAIL_TEMPLATE,
-  SURVEY_VARIATION_ALERT_MAIL_TEMPLATE,
-} from './survey-mail-templates.constants.js';
+import { readFileSync } from 'node:fs';
 import type { NotificationMailContent } from '../../notifications/types/notification-mail-content.type.js';
 import type { NotificationMailContext } from '../../notifications/types/notification-mail-context.type.js';
 import type { NotificationPayloadMap } from '../../notifications/types/notification-payload-map.type.js';
@@ -11,6 +6,14 @@ import type { NotificationType } from '../../notifications/types/notification-ty
 
 const GRADUATE_FALLBACK_NAME = 'titulado';
 const ADMIN_FALLBACK_NAME = 'Administrador';
+
+const loadSurveyMailTemplate = (name: string): string =>
+  readFileSync(new URL(`./mjml/${name}.mjml`, import.meta.url), 'utf8');
+
+const SURVEY_REMINDER_MAIL_TEMPLATE = loadSurveyMailTemplate('survey-reminder');
+const SURVEY_CLOSING_SOON_MAIL_TEMPLATE = loadSurveyMailTemplate('survey-closing-soon');
+const SURVEY_CLOSED_MAIL_TEMPLATE = loadSurveyMailTemplate('survey-closed');
+const SURVEY_VARIATION_ALERT_MAIL_TEMPLATE = loadSurveyMailTemplate('survey-variation-alert');
 
 export function renderSurveyReminderMail(
   { surveyTitle, closesAtFormatted }: NotificationPayloadMap[NotificationType.SURVEY_REMINDER],
