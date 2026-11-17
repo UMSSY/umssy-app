@@ -13,6 +13,15 @@ vi.mock('@/shared/services/storage/access-token-storage', () => ({
   getAccessToken: () => mockGetAccessToken(),
 }));
 
+vi.mock('@/shared/utils/parse-api-error', () => ({
+  parseApiError: (error: unknown) => {
+    if (error && typeof error === 'object' && 'code' in error) {
+      return { code: String((error as { code: unknown }).code) };
+    }
+    return null;
+  },
+}));
+
 vi.mock('@/modules/event-registrations', () => ({
   REGISTRATION_QUERY_KEYS: {
     passes: ['registrations', 'passes'],
@@ -151,12 +160,8 @@ describe('useCancelRegistration', () => {
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
 
     mockCancelRegistration.mockRejectedValueOnce({
-      response: {
-        data: {
-          code: 'REGISTRATION_CLOSED',
-          message: 'El taller ya inició',
-        },
-      },
+      code: 'REGISTRATION_CLOSED',
+      message: 'El taller ya inició',
     });
 
     const { result } = renderHook(() => useCancelRegistration(), {
@@ -175,12 +180,8 @@ describe('useCancelRegistration', () => {
     expect(invalidateSpy).not.toHaveBeenCalled();
 
     mockCancelRegistration.mockRejectedValueOnce({
-      response: {
-        data: {
-          code: 'EVENT_FINISHED',
-          message: 'El taller ya finalizó',
-        },
-      },
+      code: 'EVENT_FINISHED',
+      message: 'El taller ya finalizó',
     });
 
     await expect(
