@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
+import { RECRUITER_ROLE } from '../constants/recruiter-role.constants.js';
+import type { CompanyRecruiter } from '../types/company-recruiter.types.js';
 
 @Injectable()
 export class UsersRepository {
@@ -11,6 +13,7 @@ export class UsersRepository {
       select: {
         id: true,
         isActive: true,
+        companyId: true,
         roles: {
           where: { deletedAt: null },
           select: {
@@ -35,6 +38,26 @@ export class UsersRepository {
       },
     });
   }
+  findActiveRecruitersByCompany(
+    companyId: string,
+  ): Promise<CompanyRecruiter[]> {
+    return this.prisma.user.findMany({
+      where: {
+        companyId,
+        isActive: true,
+        roles: {
+          some: {
+            deletedAt: null,
+            startAt: { lte: new Date() },
+            role: { name: RECRUITER_ROLE },
+          },
+        },
+      },
+      select: { id: true, firstName: true, lastName: true },
+      orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }, { id: 'asc' }],
+    });
+  }
+
   findCompany(userId: string) {
     return this.prisma.user.findUnique({
       where: { id: userId },

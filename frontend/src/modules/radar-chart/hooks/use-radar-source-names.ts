@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { documentsService } from "@/modules/documents";
+import { documentsService } from "@/modules/cv";
 import { useCertifications } from "@/modules/certifications";
 import type { Epic2Skill } from "../types/epic2-skill.types";
 

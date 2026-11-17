@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { RequestAccessView } from "@/modules/access-request";
+import { RequestAccessView } from "@/modules/access-requests";
 
 export const metadata: Metadata = {
   title: "Solicitud de acceso",

@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { useRegistrationSession } from '@/modules/registrations';
+import { useRegistrationSession } from '@/modules/event-registrations';
 import { managedWorkshopsService } from '../services/managed-workshops.service';
 
 export function useManagedWorkshops() {

@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ApplicationsRepository } from '../repositories/applications.repository.js';
+import type { ApplicationRecord } from '../types/application-record.types.js';
 import type { FindApplicationsQueryDto } from '../requests/find-applications.request.js';
 import {
   ApplicationStatus,
@@ -8,15 +9,43 @@ import {
 import { ApplicationNotFoundException } from '../exceptions/application-not-found.exception.js';
 import { ApplicationForbiddenException } from '../exceptions/application-forbidden.exception.js';
 import { ApplicationNotWithdrawableException } from '../exceptions/application-not-withdrawable.exception.js';
+import { ApplicationNotReactivableException } from '../exceptions/application-not-reactivable.exception.js';
+import { ApplicationContactRestrictedException } from '../exceptions/application-contact-restricted.exception.js';
+import type { ApplicationContactResponse } from '../types/application-contact-response.types.js';
 import { ApplicationMapper } from '../mappers/application.mapper.js';
 import { JobRecommendationsService } from '../../matching/services/job-recommendations.service.js';
+import { StateChangedDto } from '../notification/state-changed.dto.js';
+import { toApplicationStatusCode } from '../notification/state-changed.mapper.js';
+import {
+  NOTIFY_TIMEOUT_MS,
+  STATE_CHANGED_ACTION_PATH,
+} from '../notification/state-changed.constants.js';
+import type { NotifyStateChangedParams } from '../notification/notify-state-changed-params.types.js';
+import type { ApplicationDecisionContext } from '../types/application-decision-context.types.js';
+import { JobOffersService } from '../../job-offers/services/job-offers.service.js';
+import { NotificationsService } from '../../notifications/services/notifications.service.js';
+import { UsersService } from '../../users/services/users.service.js';
+import { ConfigService } from '@nestjs/config';
+import { NotificationType } from '../../notifications/types/notification-type.enum.js';
+
+const CONTACTABLE_STATUSES: readonly string[] = [
+  ApplicationStatus.IN_REVIEW,
+  ApplicationStatus.INTERVIEW,
+  ApplicationStatus.ACCEPTED,
+];
 
 @Injectable()
 export class ApplicationsService {
+  private readonly logger = new Logger(ApplicationsService.name);
+
   constructor(
     private readonly repository: ApplicationsRepository,
     private readonly mapper: ApplicationMapper,
     private readonly matching: JobRecommendationsService,
+    private readonly notifications: NotificationsService,
+    private readonly config: ConfigService,
+    private readonly jobOffers: JobOffersService,
+    private readonly users: UsersService,
   ) {}
 
   async findMyApplications(
@@ -24,21 +53,108 @@ export class ApplicationsService {
     query: FindApplicationsQueryDto,
   ): Promise<ApplicationItemResponse[]> {
     const records = await this.repository.findByUserId(userId, query);
-    if (!records.length) return [];
-    const scores = await this.matching.scoresForOffers(
-      userId,
-      records.map((record) => record.jobOfferId),
-    );
-    const responses = records.map((record) =>
-      this.mapper.toResponse(record, scores.get(record.jobOfferId) ?? 0),
-    );
-    if (query.sortBy === 'affinity')
-      responses.sort(
-        (a, b) =>
-          (a.affinityPercentage - b.affinityPercentage) *
-          (query.sortOrder === 'asc' ? 1 : -1),
+    if (!records || !records.length) return [];
+
+    const offerIds = records.map((record: ApplicationRecord) => record.jobOfferId);
+    const scoresMap = await this.matching.scoresForOffers(userId, offerIds);
+
+    const responses: ApplicationItemResponse[] = records.map((record: ApplicationRecord) => {
+      const score = scoresMap.get(record.jobOfferId) ?? 0;
+      return this.mapper.toResponse(record, score);
+    });
+
+    const statuses = [
+      ApplicationStatus.IN_REVIEW,
+      ApplicationStatus.INTERVIEW,
+      ApplicationStatus.ACCEPTED,
+      ApplicationStatus.REJECTED,
+      ApplicationStatus.WITHDRAWN,
+    ];
+
+    const collator = new Intl.Collator('es', { sensitivity: 'base' });
+    const direction = query.sortOrder === 'asc' ? 1 : -1;
+
+    responses.sort((a, b) => {
+      let comparison = 0;
+
+      switch (query.sortBy) {
+        case 'vacancy':
+          comparison =
+            collator.compare(a.vacancyTitle, b.vacancyTitle) * direction;
+          break;
+        case 'company':
+          comparison =
+            collator.compare(a.companyName, b.companyName) * direction;
+          break;
+        case 'affinity':
+          comparison =
+            (a.affinityPercentage - b.affinityPercentage) * direction;
+          break;
+        case 'status': {
+          const aIndex = statuses.indexOf(a.status as ApplicationStatus);
+          const bIndex = statuses.indexOf(b.status as ApplicationStatus);
+          comparison =
+            ((aIndex === -1 ? statuses.length : aIndex) -
+              (bIndex === -1 ? statuses.length : bIndex)) *
+            direction;
+          break;
+        }
+        case 'date':
+          comparison =
+            (Date.parse(a.appliedDate) - Date.parse(b.appliedDate)) *
+            direction;
+          break;
+        default:
+          comparison =
+            Date.parse(b.appliedDate) - Date.parse(a.appliedDate);
+      }
+
+      if (comparison !== 0) return comparison;
+
+      const dateDifference =
+        Date.parse(b.appliedDate) - Date.parse(a.appliedDate);
+
+      if (dateDifference !== 0) return dateDifference;
+
+      const titleDifference = collator.compare(
+        a.vacancyTitle,
+        b.vacancyTitle,
       );
+
+      return titleDifference || a.id.localeCompare(b.id);
+    });
+
     return responses;
+  }
+
+  async reactivateApplication(id: string, userId: string): Promise<void> {
+    const application = await this.repository.findById(id);
+    if (!application) throw new ApplicationNotFoundException();
+    if (application.userId !== userId)
+      throw new ApplicationForbiddenException();
+
+    const result = await this.repository.reactivateApplication(
+      id,
+      userId,
+      new Date(),
+    );
+
+    if (result.count !== 1) throw new ApplicationNotReactivableException();
+  }
+
+  async getApplicationContact(
+    id: string,
+    userId: string,
+  ): Promise<ApplicationContactResponse> {
+    const application = await this.findApplicationDecisionContext(id);
+    if (!application || application.userId !== userId)
+      throw new ApplicationNotFoundException();
+    if (!CONTACTABLE_STATUSES.includes(application.statusTitle))
+      throw new ApplicationContactRestrictedException();
+    const recruiters = await this.users.findActiveRecruitersByCompany(
+      application.companyId,
+    );
+    return this.mapper.toContactResponse(application, recruiters);
   }
 
   async withdrawApplication(id: string, userId: string): Promise<void> {
@@ -46,6 +162,7 @@ export class ApplicationsService {
     if (!application) throw new ApplicationNotFoundException();
     if (application.userId !== userId)
       throw new ApplicationForbiddenException();
+
     const result = await this.repository.withdraw(
       id,
       userId,
@@ -54,15 +171,119 @@ export class ApplicationsService {
     );
     if (!result.count) throw new ApplicationNotWithdrawableException();
   }
+
+  public async notifyStateChanged(p: NotifyStateChangedParams): Promise<void> {
+    if (p.previousStatus === p.newStatus) return;
+    if (p.newStatus === ApplicationStatus.WITHDRAWN) return;
+
+    try {
+      const context = StateChangedDto.parse({
+        jobTitle: p.jobTitle,
+        companyName: p.companyName,
+        newStatus: toApplicationStatusCode(p.newStatus),
+        previousStatus: toApplicationStatusCode(p.previousStatus),
+        actionUrl: `${this.config.getOrThrow('APP_URL')}${STATE_CHANGED_ACTION_PATH}`,
+      });
+
+      await this.withTimeout(
+        this.notifications.notify({
+          recipientIds: [p.recipientId],
+          type: NotificationType.APPLICATION_STATUS_CHANGED,
+          payload: {
+            vacancyTitle: context.jobTitle,
+            companyName: context.companyName,
+            newStatus: context.newStatus,
+          },
+          actionUrl: context.actionUrl,
+        }),
+        NOTIFY_TIMEOUT_MS,
+      );
+    } catch (error) {
+      this.logger.error(
+        `No se pudo notificar el cambio de estado (application=${p.applicationId}, recipient=${p.recipientId})`,
+        error instanceof Error ? error.stack : String(error),
+      );
+    }
+  }
+
+  private withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+    let timer: NodeJS.Timeout;
+    const timeout = new Promise<never>((_, reject) => {
+      timer = setTimeout(() => reject(new Error(`notify() timeout (${ms}ms)`)), ms);
+    });
+    return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+  }
+
+  async validateApplicationForChat(
+    applicationId: string,
+    studentUserId: string,
+    companyId: string,
+  ): Promise<{
+    isValid: boolean;
+    vacancyTitle: string | null;
+    companyName: string | null;
+  }> {
+    const record = await this.repository.findApplicationForChat(applicationId);
+    if (!record) {
+      return { isValid: false, vacancyTitle: null, companyName: null };
+    }
+
+    if (
+      record.userId !== studentUserId ||
+      record.jobOffer.companyId !== companyId
+    ) {
+      return { isValid: false, vacancyTitle: null, companyName: null };
+    }
+
+    const normalizedStatus = record.status.title.trim().toLowerCase();
+    const isInactive =
+      normalizedStatus.includes('rechazad') ||
+      normalizedStatus.includes('retirad') ||
+      normalizedStatus.includes('cancelad');
+
+    if (isInactive) {
+      return { isValid: false, vacancyTitle: null, companyName: null };
+    }
+
+    return {
+      isValid: true,
+      vacancyTitle: record.jobOffer.title,
+      companyName: record.jobOffer.company.title,
+    };
+  }
+
   findRecruitmentApplicationsByUser(userId: string) {
     return this.repository.findRecruitmentApplicationsByUser(userId);
   }
+
   findRecruitmentApplicants(jobId: string) {
     return this.repository.findRecruitmentApplicants(jobId);
   }
+
   findRecruitmentApplication(id: string) {
     return this.repository.findRecruitmentApplication(id);
   }
+
+  async findApplicationDecisionContext(
+    id: string,
+  ): Promise<ApplicationDecisionContext | null> {
+    const application = await this.repository.findApplicationDecisionContext(id);
+    if (!application) return null;
+
+    const offer = await this.jobOffers.findOfferSummary(application.jobOfferId);
+    if (!offer) return null;
+
+    return {
+      id: application.id,
+      userId: application.userId,
+      statusTitle: application.status.title,
+      jobOfferId: application.jobOfferId,
+      companyId: offer.companyId,
+      jobTitle: offer.title,
+      companyName: offer.companyName,
+    };
+  }
+
   recordRecruiterDecision(applicationId: string, target: string) {
     return this.repository.recordRecruiterDecision(applicationId, target);
   }

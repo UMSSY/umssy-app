@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 
 import { useEventTiming } from '../hooks/use-event-finished';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useRegistrationSession } from '@/modules/registrations';
+import { useRegistrationSession } from '@/modules/event-registrations';
 import { Button } from '@/components/ui/button';
 import { PassQr } from './pass-qr';
 import { formatEventLocation } from '../utils/format-event-location';

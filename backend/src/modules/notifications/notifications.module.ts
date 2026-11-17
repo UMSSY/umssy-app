@@ -10,6 +10,7 @@ import { PushDispatcherService } from './services/push-dispatcher.service.js';
 import { MailDispatcherService } from './services/mail-dispatcher.service.js';
 import { NotificationGateway } from './gateways/notification.gateway.js';
 import { SubscriptionsService } from './services/subscriptions.service.js';
+import { AppVisibilityService } from './services/app-visibility.service.js';
 
 import { NotificationsRepository } from './repositories/notifications.repository.js';
 import { PushSubscriptionsRepository } from './repositories/push-subscriptions.repository.js';
@@ -49,6 +50,7 @@ import { ChatModule } from '../chat/chat.module.js';
     NotificationUserLookupRepository,
     SubscriptionsService,
     NotificationsInboxService,
+    AppVisibilityService,
   ],
   exports: [NotificationsService, SubscriptionsService],
 })

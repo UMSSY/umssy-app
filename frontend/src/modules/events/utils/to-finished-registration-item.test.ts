@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { Registration } from "@/modules/registrations";
+import type { Registration } from "@/modules/event-registrations";
 import { toFinishedRegistrationItem } from "./to-finished-registration-item";
 
 describe("toFinishedRegistrationItem", () => {
