@@ -22,6 +22,29 @@ describe('useEventsFilters', () => {
     });
   });
 
+  it('switches to the popular order and back while keeping the category', () => {
+    const { result } = renderHook(() => useEventsFilters());
+
+    act(() => {
+      result.current.setCategoryId('category-1');
+      result.current.setIsPopular(true);
+    });
+
+    expect(result.current.isPopular).toBe(true);
+    expect(result.current.filters).toEqual({
+      search: '',
+      categoryId: 'category-1',
+      sort: 'popular',
+    });
+
+    act(() => {
+      result.current.setIsPopular(false);
+    });
+
+    expect(result.current.filters.sort).toBe('recommended');
+    expect(result.current.filters.categoryId).toBe('category-1');
+  });
+
   it('updates the selected category immediately', () => {
     const { result } = renderHook(() => useEventsFilters());
 

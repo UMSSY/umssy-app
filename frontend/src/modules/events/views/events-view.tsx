@@ -25,6 +25,7 @@ import { useEventsFilters } from '../hooks/use-events-filters';
 import { useProposalSupport } from '../hooks/use-proposal-support';
 import { useEventCategories } from '@/modules/event-categories';
 import { EventsSearchInput } from '../components/events-search-input';
+import { PopularFilterChip } from '../components/popular-filter-chip';
 import { CategoryFilterChips } from '@/modules/event-categories';
 import type { EventItem } from '../types/event.types';
 import type { EventDetail } from '../types/event-detail.types';
@@ -34,8 +35,15 @@ export function EventsView({ initialProposalId = null }: EventsViewProps) {
   const router = useRouter();
   const session = useRegistrationSession();
   const { roles, isLoading: rolesLoading } = useAuth();
-  const { searchInput, setSearchInput, categoryId, setCategoryId, filters } =
-    useEventsFilters();
+  const {
+    searchInput,
+    setSearchInput,
+    categoryId,
+    setCategoryId,
+    isPopular,
+    setIsPopular,
+    filters,
+  } = useEventsFilters();
   const {
     categories,
     isLoading: categoriesLoading,
@@ -183,14 +191,23 @@ export function EventsView({ initialProposalId = null }: EventsViewProps) {
                 setSearchInput(value);
               }}
             />
-            <CategoryFilterChips
-              categories={categories}
-              selectedId={categoryId}
-              onSelect={(id) => {
-                setSelectedEventId(null);
-                setCategoryId(id);
-              }}
-            />
+            <div className="flex flex-wrap items-center gap-2">
+              <PopularFilterChip
+                isSelected={isPopular}
+                onToggle={() => {
+                  setSelectedEventId(null);
+                  setIsPopular(!isPopular);
+                }}
+              />
+              <CategoryFilterChips
+                categories={categories}
+                selectedId={categoryId}
+                onSelect={(id) => {
+                  setSelectedEventId(null);
+                  setCategoryId(id);
+                }}
+              />
+            </div>
           </div>
 
           {categoriesLoading && (

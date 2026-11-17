@@ -115,7 +115,9 @@ beforeEach(() => {
     setSearchInput: vi.fn(),
     categoryId: null,
     setCategoryId: vi.fn(),
-    filters: { search: "", categoryId: null },
+    isPopular: false,
+    setIsPopular: vi.fn(),
+    filters: { search: "", categoryId: null, sort: "recommended" },
   });
   mockUseEventCategories.mockReturnValue({
     retry: vi.fn(),
@@ -328,6 +330,51 @@ describe("EventsView", () => {
     expect(filterState.setCategoryId).toHaveBeenCalledWith("cat-1");
     expect(mockUseEvents).toHaveBeenCalledWith(filterState.filters);
   });
+  it("toggles the popular order next to the category chips", () => {
+    render(<EventsView />);
+
+    const popular = screen.getByRole("button", { name: "Populares" });
+    expect(popular).toHaveAttribute("aria-pressed", "false");
+    expect(screen.getByRole("button", { name: "Todos" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    fireEvent.click(popular);
+
+    const filterState = mockUseEventsFilters.mock.results[0].value;
+    expect(filterState.setIsPopular).toHaveBeenCalledWith(true);
+  });
+
+  it("keeps popular and the selected category active together", () => {
+    const setIsPopular = vi.fn();
+    mockUseEventsFilters.mockReturnValue({
+      searchInput: "",
+      setSearchInput: vi.fn(),
+      categoryId: "cat-1",
+      setCategoryId: vi.fn(),
+      isPopular: true,
+      setIsPopular,
+      filters: { search: "", categoryId: "cat-1", sort: "popular" },
+    });
+    render(<EventsView />);
+
+    expect(screen.getByRole("button", { name: "Populares" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(screen.getByRole("button", { name: "Tecnología" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(mockUseEvents).toHaveBeenCalledWith({
+      search: "",
+      categoryId: "cat-1",
+      sort: "popular",
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Populares" }));
+    expect(setIsPopular).toHaveBeenCalledWith(false);
+  });
+
   it("shows category loading without hiding the workshops", () => {
     mockUseEventCategories.mockReturnValue({
       categories: [],
@@ -369,6 +416,8 @@ describe("EventsView", () => {
       setSearchInput: vi.fn(),
       categoryId: null,
       setCategoryId: vi.fn(),
+      isPopular: false,
+      setIsPopular: vi.fn(),
       filters: { search: "Marketing", categoryId: null },
     });
     mockUseEvents.mockReturnValue({
