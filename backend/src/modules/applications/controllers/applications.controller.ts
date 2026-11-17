@@ -97,43 +97,97 @@ export class ApplicationsController {
   })
   @ApiParam({ name: 'id', description: 'UUID de la postulación', type: String })
   @ApiOkResponse({
-    description: 'Datos de la vacante, empresa y reclutadores activos',
+    description: 'Datos de vacante, empresa y reclutadores activos, en el envoltorio global',
     schema: {
       type: 'object',
-      required: [
-        'applicationId',
-        'jobOfferId',
-        'vacancyTitle',
-        'companyId',
-        'companyName',
-        'recruiters',
-      ],
+      required: ['statusCode', 'ok', 'detail', 'data'],
       properties: {
-        applicationId: { type: 'string' },
-        jobOfferId: { type: 'string' },
-        vacancyTitle: { type: 'string' },
-        companyId: { type: 'string' },
-        companyName: { type: 'string' },
-        recruiters: {
-          type: 'array',
-          description: 'Contactos de reclutadores activos de la empresa',
-          items: {
-            type: 'object',
-            required: ['id', 'fullName'],
-            properties: {
-              id: { type: 'string' },
-              fullName: { type: 'string' },
+        statusCode: { type: 'integer', example: 200 },
+        ok: { type: 'boolean', example: true },
+        detail: { type: 'string', example: 'Operación exitosa' },
+        data: {
+          type: 'object',
+          required: [
+            'applicationId', 'jobOfferId', 'vacancyTitle',
+            'companyId', 'companyName', 'recruiters',
+          ],
+          properties: {
+            applicationId: { type: 'string', format: 'uuid' },
+            jobOfferId: { type: 'string', format: 'uuid' },
+            vacancyTitle: { type: 'string' },
+            companyId: { type: 'string', format: 'uuid' },
+            companyName: { type: 'string' },
+            recruiters: {
+              type: 'array',
+              description: 'Reclutadores activos de la empresa',
+              items: {
+                type: 'object',
+                required: ['id', 'fullName'],
+                properties: {
+                  id: { type: 'string', format: 'uuid' },
+                  fullName: { type: 'string' },
+                },
+              },
             },
           },
+        },
+      },
+      example: {
+        statusCode: 200,
+        ok: true,
+        detail: 'Operación exitosa',
+        data: {
+          applicationId: 'c7517198-ec2b-4c4f-89d8-c3cfe269b3b1',
+          jobOfferId: '3a183b0f-6798-4505-9eaa-7c4ece3119e1',
+          vacancyTitle: 'Desarrollador Backend',
+          companyId: '24e84ac3-8b47-4d18-8793-a8be6b65a5c1',
+          companyName: 'Empresa de ejemplo',
+          recruiters: [{ id: '37bc41b2-9aad-485c-b88e-d5ed7d19f48e', fullName: 'Ana Pérez' }],
         },
       },
     },
   })
   @ApiForbiddenResponse({
     description: 'El estado de la postulación no permite consultar contactos',
+    schema: {
+      type: 'object',
+      required: ['statusCode', 'code', 'data', 'detail', 'ok'],
+      properties: {
+        statusCode: { type: 'integer', example: 403 },
+        code: { type: 'string', example: 'APPLICATION_CONTACT_RESTRICTED' },
+        data: { type: 'object', nullable: true, example: null },
+        detail: { type: 'string', example: 'Esta postulación ya no permite la comunicación directa con el reclutador' },
+        ok: { type: 'boolean', example: false },
+      },
+      example: {
+        statusCode: 403,
+        code: 'APPLICATION_CONTACT_RESTRICTED',
+        data: null,
+        detail: 'Esta postulación ya no permite la comunicación directa con el reclutador',
+        ok: false,
+      },
+    },
   })
   @ApiNotFoundResponse({
     description: 'La postulación no existe, no pertenece al usuario o el ID no es válido',
+    schema: {
+      type: 'object',
+      required: ['statusCode', 'code', 'data', 'detail', 'ok'],
+      properties: {
+        statusCode: { type: 'integer', example: 404 },
+        code: { type: 'string', example: 'APPLICATION_NOT_FOUND' },
+        data: { type: 'object', nullable: true, example: null },
+        detail: { type: 'string', example: 'La postulación no existe' },
+        ok: { type: 'boolean', example: false },
+      },
+      example: {
+        statusCode: 404,
+        code: 'APPLICATION_NOT_FOUND',
+        data: null,
+        detail: 'La postulación no existe',
+        ok: false,
+      },
+    },
   })
   getApplicationContact(
     @Param('id', applicationIdPipe) id: string,
