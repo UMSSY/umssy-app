@@ -13,7 +13,6 @@ import { RadarReviewRepository } from '../repositories/radar-review.repository.j
 import { RadarReviewMapper } from '../mappers/radar-review.mapper.js';
 import { RadarPublicationService } from './radar-publication.service.js';
 
-
 type RadarReviewDecisionResult = {
   operationId: string;
   status: 'completed';
@@ -80,7 +79,10 @@ export class RadarReviewService {
       result: RadarReviewDecisionResult;
     }>(async (context) => {
       await this.repository.lockReviewOperation(operationId, context);
-      const existing = await this.repository.findReviewOperation(operationId, context);
+      const existing = await this.repository.findReviewOperation(
+        operationId,
+        context,
+      );
 
       if (existing.length) {
         const saved = existing[0];
@@ -216,7 +218,10 @@ export class RadarReviewService {
   async operationStatus(adminId: string, operationId: string) {
     return this.transactions.run(async (context) => {
       await this.repository.lockReviewOperation(operationId, context);
-      const rows = await this.repository.findReviewOperation(operationId, context);
+      const rows = await this.repository.findReviewOperation(
+        operationId,
+        context,
+      );
 
       if (
         !rows.length ||

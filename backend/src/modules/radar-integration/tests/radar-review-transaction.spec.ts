@@ -35,8 +35,9 @@ function setup() {
   };
   const prisma = {
     $transaction: vi.fn(
-      <T>(operation: (client: TransactionContext['client']) => Promise<T>): Promise<T> =>
-        operation(client),
+      <T>(
+        operation: (client: TransactionContext['client']) => Promise<T>,
+      ): Promise<T> => operation(client),
     ),
   };
   const service = new RadarReviewService(
@@ -57,7 +58,13 @@ describe('Revisión administrativa transaccional', () => {
     'comparte la transacción de %s y su auditoría',
     async (kind) => {
       const { service, repository, skills, access, client } = setup();
-      await service.decision('admin', kind, 'evidence', 'approved', 'operation-1');
+      await service.decision(
+        'admin',
+        kind,
+        'evidence',
+        'approved',
+        'operation-1',
+      );
       const write =
         kind === 'cv'
           ? repository.changeCvDecision
@@ -89,16 +96,41 @@ describe('Revisión administrativa transaccional', () => {
 
   it('recupera una operacion repetida sin duplicar la auditoria', async () => {
     const { service, repository, skills, access } = setup();
-    const payloadHash = createHash('sha256').update(JSON.stringify({ kind: 'skill', targetId: 'evidence', decision: 'approved' })).digest('hex');
-    repository.findReviewOperation.mockResolvedValue([{
-      admin_id: 'admin',
-      flow: 'radar-review',
-      kind: 'skill',
-      target_id: 'evidence',
-      payload_hash: payloadHash,
-      response_data: { operationId: 'operation-1', status: 'completed', kind: 'skill', targetId: 'evidence', decision: 'approved', changed: true, userId: 'owner', completedAt: '2026-11-15T00:00:00.000Z' },
-    }]);
-    const result = await service.decision('admin', 'skill', 'evidence', 'approved', 'operation-1');
+    const payloadHash = createHash('sha256')
+      .update(
+        JSON.stringify({
+          kind: 'skill',
+          targetId: 'evidence',
+          decision: 'approved',
+        }),
+      )
+      .digest('hex');
+    repository.findReviewOperation.mockResolvedValue([
+      {
+        admin_id: 'admin',
+        flow: 'radar-review',
+        kind: 'skill',
+        target_id: 'evidence',
+        payload_hash: payloadHash,
+        response_data: {
+          operationId: 'operation-1',
+          status: 'completed',
+          kind: 'skill',
+          targetId: 'evidence',
+          decision: 'approved',
+          changed: true,
+          userId: 'owner',
+          completedAt: '2026-11-15T00:00:00.000Z',
+        },
+      },
+    ]);
+    const result = await service.decision(
+      'admin',
+      'skill',
+      'evidence',
+      'approved',
+      'operation-1',
+    );
     expect(result.status).toBe('completed');
     expect(skills.changeSkillDecision).not.toHaveBeenCalled();
     expect(access.recordAudit).not.toHaveBeenCalled();
@@ -128,10 +160,9 @@ describe('Revisión administrativa transaccional', () => {
       service.operationStatus('admin', 'operation-1'),
     ).resolves.toEqual(response);
 
-    expect(repository.findReviewOperation).toHaveBeenCalledWith(
-      'operation-1',
-      { client },
-    );
+    expect(repository.findReviewOperation).toHaveBeenCalledWith('operation-1', {
+      client,
+    });
   });
 
   it('rechaza reutilizar el operationId con datos diferentes', async () => {
@@ -151,13 +182,7 @@ describe('Revisión administrativa transaccional', () => {
     ]);
 
     await expect(
-      service.decision(
-        'admin',
-        'skill',
-        'evidence',
-        'approved',
-        'operation-1',
-      ),
+      service.decision('admin', 'skill', 'evidence', 'approved', 'operation-1'),
     ).rejects.toMatchObject({
       code: 'RADAR_REVIEW_OPERATION_CONFLICT',
     });

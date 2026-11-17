@@ -12,6 +12,6 @@ export interface OpenedRadarNotification {
     version: number;
     readAt: string;
   };
-  radar: import("./integration-radar.types").IntegrationRadar;
+  radar: import('./integration-radar.types').IntegrationRadar;
   compare: boolean;
 }

@@ -62,10 +62,7 @@ export class RadarPublicationTransaction {
         ${JSON.stringify({ version, rubric: RUBRIC_VERSION, sourceRevision: revision, skills })}::jsonb,clock_timestamp())`;
   }
 
-    async createNotification(
-    userId: string,
-    snapshotId: string,
-  ): Promise<void> {
+  async createNotification(userId: string, snapshotId: string): Promise<void> {
     await this.tx.$executeRaw`
       INSERT INTO notifications (
         recipient_id,

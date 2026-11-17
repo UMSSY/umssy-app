@@ -3,8 +3,7 @@ import { renderWithQuery as render } from '@/shared/testing/render-with-query';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { radarIntegrationApi } from '../services/radar-integration.service';
-import { verificationApi } from '@/modules/documents/services/document-verification.service';
-import type { DocumentVerification } from '@/modules/documents/types/document-verification.types';
+import { verificationApi, type DocumentVerification } from '@/modules/cv';
 import { DocumentReviewPanel } from './document-review-panel';
 
 const { operationId, notFound, unavailable } = vi.hoisted(() => ({
@@ -22,6 +21,7 @@ const { operationId, notFound, unavailable } = vi.hoisted(() => ({
 vi.mock('../services/radar-review-idempotency', () => ({
   getRadarReviewOperationId: vi.fn().mockResolvedValue(operationId),
   clearRadarReviewOperationId: vi.fn().mockResolvedValue(undefined),
+  listRadarReviewOperations: vi.fn().mockResolvedValue([]),
 }));
 
 const row: DocumentVerification = {
@@ -83,11 +83,7 @@ describe('DocumentReviewPanel: recuperación de decisiones', () => {
 
     await waitFor(() => {
       expect(status).toHaveBeenCalledWith(operationId);
-      expect(decide).toHaveBeenCalledWith(
-        'v1',
-        operationId,
-        'approved',
-      );
+      expect(decide).toHaveBeenCalledWith('v1', operationId, 'approved');
     });
 
     await waitFor(() => {
@@ -154,7 +150,9 @@ describe('DocumentReviewPanel: recuperación de decisiones', () => {
     await user.click(screen.getByRole('button', { name: 'Confirmar' }));
 
     const errorMessage = await screen.findByRole('alert');
-    expect(errorMessage).toHaveTextContent(/No se pudo confirmar la decisi[oó]n/);
+    expect(errorMessage).toHaveTextContent(
+      /No se pudo confirmar la decisi[oó]n/,
+    );
 
     expect(
       screen.getByRole('heading', { name: 'Confirmar decisión' }),
@@ -163,14 +161,9 @@ describe('DocumentReviewPanel: recuperación de decisiones', () => {
     await user.click(screen.getByRole('button', { name: 'Confirmar' }));
 
     await waitFor(() => {
-      expect(decide).toHaveBeenCalledWith(
-        'v1',
-        operationId,
-        'approved',
-      );
+      expect(decide).toHaveBeenCalledWith('v1', operationId, 'approved');
     });
 
     expect(status).toHaveBeenCalledTimes(2);
   });
-
 });

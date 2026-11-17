@@ -9,8 +9,13 @@ export const reviewDecisionSchema = z
     operationId: z.string().uuid(),
     decision: z.enum(['approved', 'rejected', 'revoked']),
   })
-  .strict();
-
+  .strict()
+  .meta({
+    example: {
+      decision: 'approved',
+      operationId: '22222222-2222-4222-8222-222222222222',
+    },
+  });
 export type ReviewDecisionRequest = z.infer<typeof reviewDecisionSchema>;
 export const documentReviewDecisionSchema = z
   .object({

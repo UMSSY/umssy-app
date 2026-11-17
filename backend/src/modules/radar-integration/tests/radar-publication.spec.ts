@@ -108,7 +108,6 @@ function setup() {
         insertions.push(values);
         return [
           {
-
             ...snapshot(),
             id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
           },
@@ -169,14 +168,13 @@ describe('Radar publication consistency', () => {
     );
   });
 
-    it('creates a notification for a newly published snapshot', async () => {
+  it('creates a notification for a newly published snapshot', async () => {
     const { service, db } = setup();
 
     await service.recalculate(userId, null);
 
-    const notificationCalls = db.$executeRaw.mock.calls.filter(
-      ([strings]) =>
-        strings.join('').includes('INSERT INTO notifications'),
+    const notificationCalls = db.$executeRaw.mock.calls.filter(([strings]) =>
+      strings.join('').includes('INSERT INTO notifications'),
     );
 
     expect(notificationCalls).toHaveLength(1);
@@ -272,9 +270,8 @@ describe('Radar publication consistency', () => {
     expect(result?.version).toBe(4);
     expect(result?.sourceRevision).toBe(2);
     expect(insertions).toEqual([]);
-    const notificationCalls = db.$executeRaw.mock.calls.filter(
-      ([strings]) =>
-        strings.join('').includes('INSERT INTO notifications'),
+    const notificationCalls = db.$executeRaw.mock.calls.filter(([strings]) =>
+      strings.join('').includes('INSERT INTO notifications'),
     );
 
     expect(notificationCalls).toHaveLength(0);
@@ -289,25 +286,23 @@ describe('Radar publication consistency', () => {
     );
     expect(rows).toEqual(previous);
     expect(insertions).toEqual([]);
-    const notificationCalls = db.$executeRaw.mock.calls.filter(
-      ([strings]) =>
-        strings.join('').includes('INSERT INTO notifications'),
+    const notificationCalls = db.$executeRaw.mock.calls.filter(([strings]) =>
+      strings.join('').includes('INSERT INTO notifications'),
     );
 
     expect(notificationCalls).toHaveLength(0);
     expect(db.$executeRaw).toHaveBeenCalled();
   });
 
-    it('does not create a notification when NLP analysis has failed', async () => {
+  it('does not create a notification when NLP analysis has failed', async () => {
     const { service, state, db } = setup();
 
     state.status = 'error';
 
     await expect(service.recalculate(userId, null)).rejects.toThrow();
 
-    const notificationCalls = db.$executeRaw.mock.calls.filter(
-      ([strings]) =>
-        strings.join('').includes('INSERT INTO notifications'),
+    const notificationCalls = db.$executeRaw.mock.calls.filter(([strings]) =>
+      strings.join('').includes('INSERT INTO notifications'),
     );
 
     expect(notificationCalls).toHaveLength(0);
@@ -424,25 +419,48 @@ describe('Published radar processing states', () => {
   });
 });
 
-
 describe('published radar comparison', () => {
   it('returns the two published snapshots while a newer revision is pending', () => {
     const current = snapshot();
-    const previous = { ...snapshot(), version: 3, created_at: new Date('2026-10-20T12:00:00Z'), scores: { ...emptyScores(), qa: 3 } };
+    const previous = {
+      ...snapshot(),
+      version: 3,
+      created_at: new Date('2026-10-20T12:00:00Z'),
+      scores: { ...emptyScores(), qa: 3 },
+    };
     const result = new RadarPublicationMapper().myRadar(userId, {
-      snapshots: [current, previous], pendingDocs: [], pendingSkills: 0,
-      attempts: [], state: { status: 'pending', inputRevision: 3, processedRevision: 2, dictionaryVersion: '1' },
+      snapshots: [current, previous],
+      pendingDocs: [],
+      pendingSkills: 0,
+      attempts: [],
+      state: {
+        status: 'pending',
+        inputRevision: 3,
+        processedRevision: 2,
+        dictionaryVersion: '1',
+      },
     });
     expect(result.version).toBe(4);
     expect(result.scores.qa).toBe(1.5);
-    expect(result.previous).toEqual({ version: 3, updatedAt: previous.created_at, scores: previous.scores });
+    expect(result.previous).toEqual({
+      version: 3,
+      updatedAt: previous.created_at,
+      scores: previous.scores,
+    });
     expect(result.processingStatus).toBe('pending');
   });
 
   it('does not invent a previous publication', () => {
     const mapper = new RadarPublicationMapper();
-    const state = { pendingDocs: [], pendingSkills: 0, attempts: [], state: null };
-    expect(mapper.myRadar(userId, { ...state, snapshots: [snapshot()] }).previous).toBeNull();
+    const state = {
+      pendingDocs: [],
+      pendingSkills: 0,
+      attempts: [],
+      state: null,
+    };
+    expect(
+      mapper.myRadar(userId, { ...state, snapshots: [snapshot()] }).previous,
+    ).toBeNull();
     const empty = mapper.myRadar(userId, { ...state, snapshots: [] });
     expect(empty.previous).toBeNull();
     expect(empty.version).toBe(0);

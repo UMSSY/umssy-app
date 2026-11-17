@@ -1,8 +1,8 @@
-﻿import { Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 
-import type { CvReview } from '../types/cv-review.type.js';
+import type { CvReview } from '../types/cv-review.types.js';
 
 type ReviewOperationRecord = {
   id: string;
@@ -42,10 +42,7 @@ export class RadarReviewRepository {
     `;
   }
 
-  findReviewOperation(
-    operationId: string,
-    context: TransactionContext,
-  ) {
+  findReviewOperation(operationId: string, context: TransactionContext) {
     return context.client.$queryRaw<ReviewOperationRecord[]>`
       SELECT
         id,

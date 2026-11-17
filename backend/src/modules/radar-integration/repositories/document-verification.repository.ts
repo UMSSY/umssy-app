@@ -2,10 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { Prisma } from '../../../prisma/client.js';
 import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
-import type {
-  VerificationJob,
-  VerificationResult,
-} from '../types/document-verification.type.js';
+import type { VerificationJob } from '../types/verification-job.types.js';
+import type { VerificationResult } from '../types/verification-result.types.js';
 
 const fields = Prisma.sql`d.id, (SELECT title FROM radar_document_source_types WHERE id=d.source_type_id) AS "sourceType", d.source_id AS "sourceId", d.filename,
   d.mime, d.size_bytes AS "sizeBytes", (SELECT title FROM radar_document_statuses WHERE id=d.status_id) AS status, d.reason, d.confidence, d.skills, d.active,
@@ -104,9 +102,9 @@ export class DocumentVerificationRepository {
           SELECT id FROM radar_document_statuses
           WHERE title = ${approve ? 'manual_approved' : 'manual_rejected'}
         ),
-        reason = ${approve
-          ? 'Aprobación administrativa.'
-          : 'Rechazo administrativo.'},
+        reason = ${
+          approve ? 'Aprobación administrativa.' : 'Rechazo administrativo.'
+        },
         synced = false,
         notice_read = false,
         lease = NULL,

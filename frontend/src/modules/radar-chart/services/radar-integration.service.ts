@@ -1,3 +1,4 @@
+import type { CvRescanResponse } from '../types/cv-rescan-response.types';
 import { apiClient } from '@/shared/services/api-client';
 import type { ApiResponse } from '@/shared/types/api-response.types';
 import type {
@@ -55,9 +56,7 @@ export const radarIntegrationApi = {
 
   rescanCurrentCv: async () =>
     extract(
-      await apiClient.post<ApiResponse<{ cvId: string; submitted: boolean }>>(
-        `${root}/cv-rescans`,
-      ),
+      await apiClient.post<ApiResponse<CvRescanResponse>>(`${root}/cv-rescans`),
     ),
 
   reviews: async () =>

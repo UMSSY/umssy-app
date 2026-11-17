@@ -3,7 +3,11 @@
 import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ConfirmActionDialog } from '@/shared/components/confirm-action-dialog';
-import { useRadarReviews, useRadarReviewMutations, useRadarReviewOperationRecovery } from '../hooks/use-radar-integration-queries';
+import {
+  useRadarReviews,
+  useRadarReviewMutations,
+  useRadarReviewOperationRecovery,
+} from '../hooks/use-radar-integration-queries';
 import type { ReviewRow } from '../types/review-row.types';
 
 type SkillDecision = 'approved' | 'rejected' | 'revoked';
@@ -101,17 +105,19 @@ export function SkillReviewPanel() {
     <section className="rounded-xl border p-4">
       <h2 className="text-lg font-bold">Revisión de habilidades</h2>
       <p className="mt-1 text-sm text-text-secondary">
-        Revisa las habilidades registradas y sus evidencias antes de resolver
-        la verificación.
+        Revisa las habilidades registradas y sus evidencias antes de resolver la
+        verificación.
       </p>
 
       <div className="my-3 flex flex-wrap gap-2">
-        {([
-          ['pending', 'Pendientes'],
-          ['approved', 'Aprobadas'],
-          ['rejected', 'Rechazadas'],
-          ['all', 'Todas'],
-        ] as const).map(([value, label]) => (
+        {(
+          [
+            ['pending', 'Pendientes'],
+            ['approved', 'Aprobadas'],
+            ['rejected', 'Rechazadas'],
+            ['all', 'Todas'],
+          ] as const
+        ).map(([value, label]) => (
           <Button
             key={value}
             type="button"
@@ -178,8 +184,7 @@ export function SkillReviewPanel() {
               Estado: {selected.status}
             </p>
             <p className="mt-1 text-sm text-text-secondary">
-              Fecha de registro:{' '}
-              {new Date(selected.date).toLocaleString()}
+              Fecha de registro: {new Date(selected.date).toLocaleString()}
             </p>
             {selected.areaId && (
               <p className="mt-1 text-sm text-text-secondary">

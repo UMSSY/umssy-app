@@ -18,19 +18,19 @@ const format = (value: number) =>
   value.toLocaleString('es-BO', { maximumFractionDigits: 2 });
 
 export function MentorshipProjection(props: ProjectionProps) {
-  const [expanded, setExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const changeOpen = (open: boolean) => {
-    setExpanded(open);
+    setIsExpanded(open);
     props.onOpenChange?.(open);
   };
   const notifyOpen = props.onOpenChange;
   useEffect(() => () => notifyOpen?.(false), [notifyOpen]);
   return (
-    <Dialog open={expanded} onOpenChange={changeOpen}>
+    <Dialog open={isExpanded} onOpenChange={changeOpen}>
       <DialogTrigger render={<Button className="w-full" />}>
         Simular habilidad
       </DialogTrigger>
-      {expanded ? (
+      {isExpanded ? (
         <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Simular habilidad: {props.area.name}</DialogTitle>

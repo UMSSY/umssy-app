@@ -1,5 +1,3 @@
-
-
 import { describe, expect, it, vi } from 'vitest';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { RadarNotificationsRepository } from '../repositories/radar-notifications.repository.js';
@@ -42,18 +40,19 @@ describe('RadarNotificationsRepository', () => {
   it('marks a notification as read only for its owner', async () => {
     const readAt = new Date('2026-11-14T12:30:00Z');
     const db = {
-      $queryRaw: vi.fn().mockResolvedValue([
-        { id: notificationId, read_at: readAt },
-      ]),
+      $queryRaw: vi
+        .fn()
+        .mockResolvedValue([{ id: notificationId, read_at: readAt }]),
     };
 
     const repository = new RadarNotificationsRepository(
       db as unknown as PrismaService,
     );
 
-    expect(
-      await repository.markAsRead(userId, notificationId),
-    ).toEqual({ id: notificationId, read_at: readAt });
+    expect(await repository.markAsRead(userId, notificationId)).toEqual({
+      id: notificationId,
+      read_at: readAt,
+    });
 
     expect(db.$queryRaw.mock.calls[0].slice(1)).toEqual([
       notificationId,
@@ -62,9 +61,7 @@ describe('RadarNotificationsRepository', () => {
 
     const sql = db.$queryRaw.mock.calls[0][0].join('');
 
-    expect(sql).toContain(
-      'COALESCE(n.read_at, clock_timestamp())',
-    );
+    expect(sql).toContain('COALESCE(n.read_at, clock_timestamp())');
     expect(sql).toContain('AND n.recipient_id = ');
     expect(sql).toContain("nt.code = 'RADAR_PUBLISHED'");
   });
@@ -78,9 +75,7 @@ describe('RadarNotificationsRepository', () => {
       db as unknown as PrismaService,
     );
 
-    expect(
-      await repository.markAsRead(userId, notificationId),
-    ).toBeNull();
+    expect(await repository.markAsRead(userId, notificationId)).toBeNull();
   });
 
   it('finds the snapshot linked to a notification owned by the user', async () => {

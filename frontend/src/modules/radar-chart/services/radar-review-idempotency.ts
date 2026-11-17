@@ -1,11 +1,14 @@
 import {
   getAccessToken,
   initializeAccessTokenStorage,
-} from "@/shared/services/storage/access-token-storage";
-import { readIndexedDbByPrefix, updateIndexedDb } from "@/shared/services/storage/browser-indexed-db";
+} from '@/shared/services/storage/access-token-storage';
+import {
+  readIndexedDbByPrefix,
+  updateIndexedDb,
+} from '@/shared/services/storage/browser-indexed-db';
 
-type ReviewKind = "cv" | "skill";
-type ReviewDecision = "approved" | "rejected" | "revoked";
+type ReviewKind = 'cv' | 'skill';
+type ReviewDecision = 'approved' | 'rejected' | 'revoked';
 
 interface PendingReviewOperation {
   fingerprint: string;
@@ -17,25 +20,25 @@ const UUID_PATTERN =
 
 function currentSubject(): string {
   try {
-    const payload = getAccessToken()?.split(".")[1];
-    if (!payload) throw new Error("Sesión no disponible");
+    const payload = getAccessToken()?.split('.')[1];
+    if (!payload) throw new Error('Sesión no disponible');
 
-    const normalized = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
     const decoded: unknown = JSON.parse(atob(normalized));
 
     if (
-      typeof decoded !== "object" ||
+      typeof decoded !== 'object' ||
       decoded === null ||
-      !("sub" in decoded) ||
-      typeof decoded.sub !== "string" ||
+      !('sub' in decoded) ||
+      typeof decoded.sub !== 'string' ||
       !decoded.sub
     ) {
-      throw new Error("Identidad de sesión no válida");
+      throw new Error('Identidad de sesión no válida');
     }
 
     return decoded.sub;
   } catch {
-    throw new Error("No se pudo identificar al administrador de la sesión");
+    throw new Error('No se pudo identificar al administrador de la sesión');
   }
 }
 
@@ -77,8 +80,8 @@ export async function getRadarReviewOperationId(
         return current;
       }
 
-      if (typeof crypto.randomUUID !== "function") {
-        throw new Error("El navegador no permite generar identificadores UUID");
+      if (typeof crypto.randomUUID !== 'function') {
+        throw new Error('El navegador no permite generar identificadores UUID');
       }
 
       return {
@@ -89,7 +92,7 @@ export async function getRadarReviewOperationId(
   );
 
   if (!saved || !UUID_PATTERN.test(saved.operationId)) {
-    throw new Error("No se pudo guardar la operación pendiente");
+    throw new Error('No se pudo guardar la operación pendiente');
   }
 
   return saved.operationId;
@@ -106,10 +109,8 @@ export async function clearRadarReviewOperationId(
   const subject = currentSubject();
   const key = operationKey(subject, kind, targetId, decision);
 
-  await updateIndexedDb<PendingReviewOperation>(
-    key,
-    (current) =>
-      current?.operationId === operationId ? null : current,
+  await updateIndexedDb<PendingReviewOperation>(key, (current) =>
+    current?.operationId === operationId ? null : current,
   );
 }
 
@@ -124,9 +125,8 @@ export async function listRadarReviewOperations(): Promise<
   await initializeAccessTokenStorage();
 
   const subject = currentSubject();
-  const prefix = "hu4:radar-review:" + subject + ":";
-  const entries =
-    await readIndexedDbByPrefix<PendingReviewOperation>(prefix);
+  const prefix = 'hu4:radar-review:' + subject + ':';
+  const entries = await readIndexedDbByPrefix<PendingReviewOperation>(prefix);
 
   const operations: Array<{
     kind: ReviewKind;
@@ -136,17 +136,17 @@ export async function listRadarReviewOperations(): Promise<
   }> = [];
 
   for (const entry of entries) {
-    const parts = entry.key.slice(prefix.length).split(":");
+    const parts = entry.key.slice(prefix.length).split(':');
     if (parts.length !== 3) continue;
 
     const [kindValue, targetId, decisionValue] = parts;
 
     if (
-      (kindValue !== "cv" && kindValue !== "skill") ||
+      (kindValue !== 'cv' && kindValue !== 'skill') ||
       !UUID_PATTERN.test(targetId) ||
-      (decisionValue !== "approved" &&
-        decisionValue !== "rejected" &&
-        decisionValue !== "revoked")
+      (decisionValue !== 'approved' &&
+        decisionValue !== 'rejected' &&
+        decisionValue !== 'revoked')
     ) {
       continue;
     }

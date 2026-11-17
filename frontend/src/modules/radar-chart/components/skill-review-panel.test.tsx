@@ -1,4 +1,3 @@
-
 import { cleanup, screen, waitFor } from '@testing-library/react';
 import { renderWithQuery as render } from '@/shared/testing/render-with-query';
 import userEvent from '@testing-library/user-event';
@@ -29,7 +28,6 @@ const operationResult = {
   userId: 'user-1',
   completedAt: '2026-11-15T00:00:00.000Z',
 };
-
 
 const pendingSkill = {
   id: 'skill:skill-1',
@@ -96,8 +94,9 @@ it('recupera una aprobación guardada después de perder la respuesta', async ()
   await user.click(screen.getByRole('button', { name: 'Confirmar' }));
 
   await waitFor(() => {
-    expect(screen.getByRole('heading', { name: 'Confirmar decisión' }))
-      .toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Confirmar decisión' }),
+    ).toBeInTheDocument();
   });
 
   await user.click(screen.getByRole('button', { name: 'Confirmar' }));

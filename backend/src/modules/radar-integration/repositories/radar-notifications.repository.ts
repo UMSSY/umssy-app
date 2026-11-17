@@ -1,20 +1,21 @@
-
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
-import type { SnapshotRow } from '../types/snapshot-row.type.js';
+import type { SnapshotRow } from '../types/snapshot-row.types.js';
 
 @Injectable()
 export class RadarNotificationsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-    list(userId: string) {
-    return this.prisma.$queryRaw<{
-      id: string;
-      snapshot_id: string;
-      version: number;
-      created_at: Date;
-      read_at: Date | null;
-    }[]>`
+  list(userId: string) {
+    return this.prisma.$queryRaw<
+      {
+        id: string;
+        snapshot_id: string;
+        version: number;
+        created_at: Date;
+        read_at: Date | null;
+      }[]
+    >`
       SELECT
         n.id,
         s.id AS snapshot_id,
@@ -35,10 +36,8 @@ export class RadarNotificationsRepository {
       ORDER BY n.created_at DESC, n.id DESC`;
   }
 
-    async markAsRead(userId: string, notificationId: string) {
-    const rows = await this.prisma.$queryRaw<
-      { id: string; read_at: Date }[]
-    >`
+  async markAsRead(userId: string, notificationId: string) {
+    const rows = await this.prisma.$queryRaw<{ id: string; read_at: Date }[]>`
       UPDATE notifications n
       SET
         read_at = COALESCE(n.read_at, clock_timestamp()),
@@ -54,9 +53,7 @@ export class RadarNotificationsRepository {
   }
 
   findPreviousSnapshot(userId: string, version: number) {
-    return this.prisma.$queryRaw<
-      SnapshotRow[]
-    >`
+    return this.prisma.$queryRaw<SnapshotRow[]>`
       SELECT
         s.*,
         (a.details->>'sourceRevision')::integer AS source_revision,
@@ -76,7 +73,7 @@ export class RadarNotificationsRepository {
       ORDER BY s.version DESC
       LIMIT 1`;
   }
-    findSnapshot(userId: string, notificationId: string) {
+  findSnapshot(userId: string, notificationId: string) {
     return this.prisma.$queryRaw<SnapshotRow[]>`
       SELECT
         s.*,

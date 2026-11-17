@@ -130,11 +130,7 @@ export class RadarPublicationService {
           accepted,
         );
 
-        await store.createNotification(
-          userId,
-          inserted[0].id,
-        );
-
+        await store.createNotification(userId, inserted[0].id);
 
         return this.mapper.snapshotResponse(
           { ...inserted[0], source_revision: revision, skills: accepted },

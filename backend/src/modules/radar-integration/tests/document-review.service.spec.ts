@@ -1,8 +1,9 @@
-﻿import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { DocumentReviewService } from '../services/document-review.service.js';
 import type { DocumentVerificationRepository } from '../repositories/document-verification.repository.js';
 import type { UsersService } from '../../users/services/users.service.js';
 import {
+  documentDecisionSchema,
   documentAcknowledgementSchema,
   documentReviewFilterSchema,
 } from '../requests/document-verification.request.js';
@@ -29,7 +30,37 @@ function setup() {
 }
 
 describe('Document review coordination', () => {
-  it('rechaza estados y filtros desconocidos', () => {
+  it('does not acknowledge a result that changed after the owner viewed it', async () => {
+    const { store, service } = setup();
+    store.acknowledge.mockResolvedValueOnce(0).mockResolvedValueOnce(1);
+    await expect(
+      service.acknowledge('owner', 'version', 'approved'),
+    ).rejects.toMatchObject({ code: 'DOCUMENT_VERIFICATION_CONFLICT' });
+    await expect(
+      service.acknowledge('owner', 'version', 'approved'),
+    ).resolves.toEqual({ id: 'version' });
+    expect(store.acknowledge).toHaveBeenCalledWith(
+      'owner',
+      'version',
+      'approved',
+    );
+    store.history.mockResolvedValue([{ id: 'own-version' }]);
+    await expect(service.history('owner')).resolves.toEqual([
+      { id: 'own-version' },
+    ]);
+    expect(store.history).toHaveBeenCalledWith('owner');
+  });
+
+  it('rechaza decisiones, estados y filtros desconocidos', () => {
+    expect(
+      documentDecisionSchema.safeParse({ decision: 'approve-all' }).success,
+    ).toBe(false);
+    expect(
+      documentDecisionSchema.safeParse({
+        decision: 'approved',
+        userId: 'other',
+      }).success,
+    ).toBe(false);
     expect(
       documentAcknowledgementSchema.safeParse({ status: 'unknown' }).success,
     ).toBe(false);

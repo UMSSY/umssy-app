@@ -4,7 +4,7 @@ import type { ProfileCompletenessSectionId } from '../types/profile-completeness
 
 const importers = {
   education: () =>
-    import('@/modules/education').then((module) => ({
+    import('@/modules/educations').then((module) => ({
       default: module.EducationGuideStep,
     })),
   'work-experience': () =>
@@ -20,7 +20,7 @@ const importers = {
       default: module.CertificationGuideStep,
     })),
   cv: () =>
-    import('@/modules/documents').then((module) => ({
+    import('@/modules/cv').then((module) => ({
       default: module.DocumentsCvGuideStep,
     })),
 };

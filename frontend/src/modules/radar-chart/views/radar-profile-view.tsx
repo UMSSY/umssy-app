@@ -1,61 +1,71 @@
-"use client";
+'use client';
 
-import { MentorshipProjection } from "../components/mentorship-projection";
-import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
-import { ChevronDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { PageHeading } from "@/shared/components/layout";
-import { AffinityRadarChart } from "../components/affinity-radar-chart";
-import { AreaBreakdownPanel } from "../components/area-breakdown-panel";
-import type { AreaId } from "../types/area-detail.types";
-import { RadarEvidencePanel } from "../components/radar-evidence-panel";
-import { RadarSkillSources } from "../components/radar-skill-sources";
-import { useLiveRadar } from "../hooks/use-live-radar";
-import { mapPublishedRadar } from "../mappers/radar-published.mapper";
-import type { IntegrationRadar } from "../types/integration-radar.types";
+import { MentorshipProjection } from '../components/mentorship-projection';
+import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
+import { ChevronDown } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { PageHeading } from '@/shared/components/layout';
+import { AffinityRadarChart } from '../components/affinity-radar-chart';
+import { AreaBreakdownPanel } from '../components/area-breakdown-panel';
+import type { AreaId } from '../types/area-id.types';
+import { RadarEvidencePanel } from '../components/radar-evidence-panel';
+import { RadarSkillSources } from '../components/radar-skill-sources';
+import { useLiveRadar } from '../hooks/use-live-radar';
+
+import { mapPublishedRadar } from '../mappers/radar-published.mapper';
+import type { IntegrationRadar } from '../types/integration-radar.types';
 import {
   useRadarNotifications,
   useRadarNotificationMutations,
-} from "../hooks/use-radar-integration-queries";
+} from '../hooks/use-radar-integration-queries';
 
-const DATE_FORMAT: Intl.DateTimeFormatOptions = { dateStyle: "medium", timeStyle: "short" };
+const DATE_FORMAT: Intl.DateTimeFormatOptions = {
+  dateStyle: 'medium',
+  timeStyle: 'short',
+};
 
 export function RadarProfileView() {
-  const { data, loading, error, variation, previous, retry, retrying } = useLiveRadar();
+  const {
+    data: liveData,
+    loading,
+    error,
+    variation: liveVariation,
+    previous: livePrevious,
+    retry,
+    retrying,
+  } = useLiveRadar();
   const { data: notifications = [], isLoading: notificationsLoading } =
     useRadarNotifications();
   const { openNotification } = useRadarNotificationMutations();
-
-  const [selectedArea, setSelectedArea] = useState<AreaId | null>(null);
-  const [projection, setProjection] = useState<{ areaId: AreaId; score: number } | null>(null);
-  const [simulationOpen, setSimulationOpen] = useState(false);
-  const [showEvidence, setShowEvidence] = useState(false);
-  const [comparing, setComparing] = useState(false);
   const [openedRadar, setOpenedRadar] = useState<IntegrationRadar | null>(null);
-  const selectedPanelRef = useRef<HTMLDivElement>(null);
-
+  const data = openedRadar ? mapPublishedRadar(openedRadar) : liveData;
+  const previous = openedRadar ? openedRadar.previous : livePrevious;
+  const variation = openedRadar ? openedRadar.variation : liveVariation;
   const handleOpenNotification = async (id: string) => {
     try {
       const result = await openNotification.mutateAsync(id);
       setOpenedRadar(result.radar);
-      setComparing(result.compare);
+      setIsComparing(result.compare);
       setSelectedArea(null);
+      setProjection(null);
+      setIsEvidenceVisible(false);
     } catch {
-      // React Query conserva el error de la mutación.
+      // La mutación conserva el error para mostrarlo en la vista.
     }
   };
-  const displayedData = openedRadar ? mapPublishedRadar(openedRadar) : data;
-  const displayPrevious = openedRadar ? openedRadar.previous : previous;
-  const displayVariation = openedRadar ? openedRadar.variation : variation;
-  const comparison = comparing ? displayPrevious : null;
-  const areas = displayedData?.areas ?? [];
-
+  const [selectedArea, setSelectedArea] = useState<AreaId | null>(null);
+  const [projection, setProjection] = useState<{
+    areaId: AreaId;
+    score: number;
+  } | null>(null);
+  const [isSimulationOpen, setIsSimulationOpen] = useState(false);
+  const [isEvidenceVisible, setIsEvidenceVisible] = useState(false);
+  const [isComparing, setIsComparing] = useState(false);
+  const selectedPanelRef = useRef<HTMLElement>(null);
   useEffect(() => {
-    if (!selectedArea) return;
-
+    if (!selectedArea || isEvidenceVisible || isSimulationOpen) return;
     const dismissOutside = (event: PointerEvent) => {
-      if (simulationOpen || showEvidence) return;
       if (
         event.target instanceof Node &&
         !selectedPanelRef.current?.contains(event.target)
@@ -63,28 +73,29 @@ export function RadarProfileView() {
         setSelectedArea(null);
       }
     };
-
     const dismissWithEscape = (event: KeyboardEvent) => {
-      if (simulationOpen || showEvidence) return;
-      if (event.key === "Escape") {
-        setSelectedArea(null);
-      }
+      if (event.key === 'Escape') setSelectedArea(null);
     };
-
-    document.addEventListener("pointerdown", dismissOutside);
-    document.addEventListener("keydown", dismissWithEscape);
-
+    document.addEventListener('pointerdown', dismissOutside);
+    document.addEventListener('keydown', dismissWithEscape);
     return () => {
-      document.removeEventListener("pointerdown", dismissOutside);
-      document.removeEventListener("keydown", dismissWithEscape);
+      document.removeEventListener('pointerdown', dismissOutside);
+      document.removeEventListener('keydown', dismissWithEscape);
     };
-  }, [selectedArea, simulationOpen, showEvidence]);
-
-  const selected = areas.find(area => area.id === selectedArea)
-    ?? areas.find(area => comparison && area.score !== comparison.scores[area.id])
-    ?? areas[0];
+  }, [selectedArea, isEvidenceVisible, isSimulationOpen]);
+  const comparison = isComparing ? previous : null;
+  const areas = data?.areas ?? [];
+  const selected =
+    areas.find((area) => area.id === selectedArea) ??
+    areas.find(
+      (area) => comparison && area.score !== comparison.scores[area.id],
+    ) ??
+    areas[0];
   const previousScore = selected ? comparison?.scores[selected.id] : undefined;
-  const delta = selected && previousScore !== undefined ? Number((selected.score - previousScore).toFixed(2)) : 0;
+  const delta =
+    selected && previousScore !== undefined
+      ? Number((selected.score - previousScore).toFixed(2))
+      : 0;
 
   return (
     <main className="mx-auto flex w-full max-w-7xl flex-col gap-6 font-sans">
@@ -96,9 +107,7 @@ export function RadarProfileView() {
         aria-label="Notificaciones del radar"
         className="rounded-lg border border-border bg-surface p-5"
       >
-        <h2 className="text-lg font-semibold text-ink">
-          Notificaciones
-        </h2>
+        <h2 className="text-lg font-semibold text-ink">Notificaciones</h2>
 
         {notificationsLoading ? (
           <p role="status" className="mt-3 text-sm text-text-secondary">
@@ -116,18 +125,16 @@ export function RadarProfileView() {
                 className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border p-3"
               >
                 <div>
-                  <p className="font-medium text-ink">
-                    {notification.message}
-                  </p>
+                  <p className="font-medium text-ink">{notification.message}</p>
                   <p className="text-xs text-text-secondary">
-                    Versión {notification.version} ·{" "}
+                    Versión {notification.version} ·{' '}
                     {new Date(notification.createdAt).toLocaleString(
-                      "es-BO",
+                      'es-BO',
                       DATE_FORMAT,
                     )}
                   </p>
                   <p className="text-xs text-text-secondary">
-                    {notification.readAt ? "Leída" : "Sin leer"}
+                    {notification.readAt ? 'Leída' : 'Sin leer'}
                   </p>
                 </div>
 
@@ -147,7 +154,8 @@ export function RadarProfileView() {
         )}
         {openNotification.isError && (
           <p role="alert" className="mt-3 text-sm text-red-600">
-            No se pudo abrir el radar. Comprueba tu conexión e inténtalo nuevamente.
+            No se pudo abrir el radar. Comprueba tu conexión e inténtalo
+            nuevamente.
           </p>
         )}
       </section>
@@ -156,91 +164,204 @@ export function RadarProfileView() {
           <p role="status" className="text-sm font-medium text-ink">
             Consultando la versión histórica {openedRadar.version}
           </p>
-          <Button type="button" variant="outline" onClick={() => {
-            setOpenedRadar(null);
-            setComparing(false);
-            setSelectedArea(null);
-          }}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              setOpenedRadar(null);
+              setIsComparing(false);
+              setSelectedArea(null);
+            }}
+          >
             Volver al radar actual
           </Button>
         </div>
-      ) : null}      {loading && !data ? <p role="status" className="rounded-lg border border-border bg-surface p-5">Cargando tu radar...</p> : null}
+      ) : null}{' '}
+      {loading && !data ? (
+        <p
+          role="status"
+          className="rounded-lg border border-border bg-surface p-5"
+        >
+          Cargando tu radar...
+        </p>
+      ) : null}
       {error ? (
-        <div role="alert" className="rounded-lg border border-border bg-surface p-5">
+        <div
+          role="alert"
+          className="rounded-lg border border-border bg-surface p-5"
+        >
           <p>{error}</p>
-          <Button type="button" variant="outline" className="mt-2" disabled={retrying} onClick={() => { void retry(); }}>{retrying ? 'Actualizando...' : 'Reintentar'}</Button>
-          {data ? <p className="mt-2 text-xs text-text-secondary">Se conserva la última instantánea disponible.</p> : null}
+          <Button
+            type="button"
+            variant="outline"
+            className="mt-2"
+            disabled={retrying}
+            onClick={() => {
+              void retry();
+            }}
+          >
+            {retrying ? 'Actualizando...' : 'Reintentar'}
+          </Button>
+          {data ? (
+            <p className="mt-2 text-xs text-text-secondary">
+              Se conserva la última instantánea disponible.
+            </p>
+          ) : null}
         </div>
       ) : null}
-      {displayedData ? (
+      {data ? (
         <>
           <details className="group rounded-lg border border-border bg-surface p-5">
             <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-4 rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent [&::-webkit-details-marker]:hidden">
               <div>
-                <h2 className="text-lg font-semibold text-ink">Mi perfil profesional</h2>
-                <p className="text-xs text-text-secondary">Competencias y evidencias de tu perfil</p>
+                <h2 className="text-lg font-semibold text-ink">
+                  Mi perfil profesional
+                </h2>
+                <p className="text-xs text-text-secondary">
+                  Competencias y evidencias de tu perfil
+                </p>
               </div>
               <div className="ml-auto text-right text-xs text-text-secondary">
-                <p role="status" className="font-semibold text-ink">{displayedData.status === "ready" ? (displayedData.approved.length ? "Publicado" : "Sin evidencias aprobadas") : displayedData.status === "pending" ? (displayedData.processingStatus === "pending" ? "Actualización en curso" : "Pendiente de revisión") : "Análisis con error"}</p>
-                <p>Última actualización: {displayedData.updatedAt ? new Date(displayedData.updatedAt).toLocaleString("es-BO", DATE_FORMAT) : "Sin actualización"}</p>
+                <p role="status" className="font-semibold text-ink">
+                  {data.status === 'ready'
+                    ? data.approved.length
+                      ? 'Publicado'
+                      : 'Sin evidencias aprobadas'
+                    : data.status === 'pending'
+                      ? data.processingStatus === 'pending'
+                        ? 'Actualización en curso'
+                        : 'Pendiente de revisión'
+                      : 'Análisis con error'}
+                </p>
+                <p>
+                  Última actualización:{' '}
+                  {data.updatedAt
+                    ? new Date(data.updatedAt).toLocaleString(
+                        'es-BO',
+                        DATE_FORMAT,
+                      )
+                    : 'Sin actualización'}
+                </p>
               </div>
-              <ChevronDown aria-hidden="true" className="size-5 shrink-0 text-text-secondary transition-transform group-open:rotate-180" />
+              <ChevronDown
+                aria-hidden="true"
+                className="size-5 shrink-0 text-text-secondary transition-transform group-open:rotate-180"
+              />
             </summary>
-            <RadarSkillSources userId={displayedData.userId} skills={displayedData.approved} />
+            <RadarSkillSources userId={data.userId} skills={data.approved} />
           </details>
-          <div aria-label="Resumen del perfil" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <div className="rounded-lg border border-border bg-surface p-5"><b className="text-2xl">{displayedData.average.toLocaleString("es-BO", { maximumFractionDigits: 2 })} / 10</b><p className="text-xs">Afinidad global</p><p className="text-xs text-text-secondary">{displayVariation === null ? "Variación anterior no disponible" : `${displayVariation >= 0 ? "+" : ""}${displayVariation.toFixed(2)} vs. anterior`}</p></div>
-            <div className="rounded-lg border border-border bg-surface p-5"><b className="text-2xl">{areas.filter((a) => a.score > 0).length} / 6</b><p className="text-xs">Áreas con puntuación</p></div>
-            <div className="rounded-lg border border-border bg-surface p-5"><b className="text-2xl">{displayedData.keywordCount}</b><p className="text-xs">Habilidades aprobadas</p><p className="text-xs text-text-secondary">{displayedData.highRelevanceCount} de alta relevancia</p></div>
-            <div className="rounded-lg border border-border bg-surface p-5"><b className="text-2xl">{displayedData.pendingCount}</b><p className="text-xs">Habilidades pendientes</p></div>
+          <div
+            aria-label="Resumen del perfil"
+            className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+          >
+            <div className="rounded-lg border border-border bg-surface p-5">
+              <b className="text-2xl">
+                {data.average.toLocaleString('es-BO', {
+                  maximumFractionDigits: 2,
+                })}{' '}
+                / 10
+              </b>
+              <p className="text-xs">Afinidad global</p>
+              <p className="text-xs text-text-secondary">
+                {variation === null
+                  ? 'Variación anterior no disponible'
+                  : `${variation >= 0 ? '+' : ''}${variation.toFixed(2)} vs. anterior`}
+              </p>
+            </div>
+            <div className="rounded-lg border border-border bg-surface p-5">
+              <b className="text-2xl">
+                {areas.filter((a) => a.score > 0).length} / 6
+              </b>
+              <p className="text-xs">Áreas con puntuación</p>
+            </div>
+            <div className="rounded-lg border border-border bg-surface p-5">
+              <b className="text-2xl">{data.keywordCount}</b>
+              <p className="text-xs">Habilidades aprobadas</p>
+              <p className="text-xs text-text-secondary">
+                {data.highRelevanceCount} de alta relevancia
+              </p>
+            </div>
+            <div className="rounded-lg border border-border bg-surface p-5">
+              <b className="text-2xl">{data.pendingCount}</b>
+              <p className="text-xs">Habilidades pendientes</p>
+            </div>
           </div>
-          {displayedData.version > 0 && displayedData.approved.length === 0 && areas.every(area => area.score === 0) ? (
-            <p className="rounded-lg border border-border bg-surface-soft p-4 text-sm text-text-secondary">Todavía no tienes habilidades aprobadas. El radar conserva sus seis ejes en 0/10. <Link href="/profile/documents" className="underline">Completar documentación y CV</Link>.</p>
+          {data.version > 0 &&
+          data.approved.length === 0 &&
+          areas.every((area) => area.score === 0) ? (
+            <p className="rounded-lg border border-border bg-surface-soft p-4 text-sm text-text-secondary">
+              Todavía no tienes habilidades aprobadas. El radar conserva sus
+              seis ejes en 0/10.{' '}
+              <Link href="/profile/documents" className="underline">
+                Completar documentación y CV
+              </Link>
+              .
+            </p>
           ) : null}
-          {displayedData.version === 0 ? <p role="status">Aún no tienes publicaciones. Tu radar está sin datos.</p> : !displayPrevious ? <p role="status">Tienes una publicación. Podrás compararla cuando se publique la próxima versión de tu radar.</p> : null}
+          {data.version === 0 ? (
+            <p role="status">
+              Aún no tienes publicaciones. Tu radar está sin datos.
+            </p>
+          ) : !previous ? (
+            <p role="status">
+              Tienes una publicación. Podrás compararla cuando se publique la
+              próxima versión de tu radar.
+            </p>
+          ) : null}
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
             <AffinityRadarChart
-              projectedScores={projection ? { [projection.areaId]: projection.score } : undefined}
-              previousScores={displayPrevious?.scores}
-              previousPublishedAt={displayPrevious?.updatedAt}
-              publishedAt={displayedData.updatedAt}
-              comparisonEnabled={Boolean(comparison)}
-              onComparisonChange={(enabled) => { setComparing(enabled); setSelectedArea(null); }}
-              areas={displayedData.version === 0 ? [] : areas}
-              average={displayedData.average}
-              onAreaClick={setSelectedArea}
+              projectedScores={
+                projection && projection.areaId === selectedArea
+                  ? { [projection.areaId]: projection.score }
+                  : undefined
+              }
+              previousScores={previous?.scores}
+              previousPublishedAt={previous?.updatedAt}
+              publishedAt={data.updatedAt}
+              isComparisonEnabled={Boolean(comparison)}
+              onComparisonChange={(enabled) => {
+                setIsComparing(enabled);
+                setSelectedArea(null);
+              }}
+              areas={data.version === 0 ? [] : areas}
+              average={data.average}
+              onAreaClick={(id) => {
+                setSelectedArea(id);
+                setIsEvidenceVisible(false);
+              }}
             />
-            <div ref={selectedPanelRef} className="flex flex-col gap-4">
-              {selectedArea && !comparison && areas.find(area => area.id === selectedArea) ? (
+            <div className="flex min-w-0 flex-col gap-4">
+              {selectedArea && selected ? (
                 <section
-                  aria-label={`Área seleccionada: ${areas.find(area => area.id === selectedArea)!.name}`}
-                  className="rounded-lg border border-border bg-surface p-4"
+                  ref={selectedPanelRef}
+                  aria-label="Área seleccionada"
+                  className="space-y-3 rounded-lg border border-border bg-surface p-5"
                 >
-                  <h2 className="text-base font-semibold text-ink">
-                    {areas.find(area => area.id === selectedArea)!.name}
-                  </h2>
-                  <p className="mt-1 text-sm text-text-secondary">
-                    Explora oportunidades de mentoría y la evidencia de esta área.
+                  <p className="text-sm text-text-secondary">
+                    Área seleccionada
                   </p>
+                  <h2 className="font-semibold">{selected.name}</h2>
+                  <p>{selected.score.toLocaleString('es-BO')} / 10</p>
+                  <MentorshipProjection
+                    key={selected.id}
+                    area={selected}
+                    areas={areas}
+                    onProjectionChange={setProjection}
+                    onOpenChange={setIsSimulationOpen}
+                  />
                   <Link
-                    href={`/mentorship/mentors?area=${selectedArea.toUpperCase()}&from=radar`}
-                    className="mt-3 block text-sm font-medium text-accent underline underline-offset-4"
+                    className="block rounded border p-3 text-center text-sm underline"
+                    href={`/mentorship/mentors?area=${encodeURIComponent(selected.name)}&from=radar`}
                   >
                     Ver mentores de esta área
                   </Link>
-                  <div className="mt-3">
-                    <MentorshipProjection
-                      area={areas.find(area => area.id === selectedArea)!}
-                      areas={areas}
-                      onProjectionChange={setProjection}
-                      onOpenChange={setSimulationOpen}
-                    />
-                  </div>
                   <Button
-                    type="button"
                     variant="outline"
-                    className="mt-2 w-full"
-                    onClick={() => setShowEvidence(true)}
+                    className="w-full"
+                    onClick={() => {
+                      setSelectedArea(selected.id);
+                      setIsEvidenceVisible(true);
+                    }}
                   >
                     Ver evidencias
                   </Button>
@@ -248,39 +369,85 @@ export function RadarProfileView() {
               ) : null}
               <AreaBreakdownPanel
                 areas={areas}
-                average={displayedData.average}
-                compact
+                average={data.average}
+                compact={Boolean(selectedArea)}
                 selectedArea={selectedArea}
-                onAreaClick={setSelectedArea}
+                onAreaClick={(id) => {
+                  setSelectedArea(id);
+                  setIsEvidenceVisible(false);
+                }}
               />
             </div>
           </div>
           {comparison ? (
-            <section aria-label="Comparación de publicaciones" className="rounded-lg border border-border bg-surface p-4">
-              <h2 className="text-sm font-semibold text-ink">Detalle de los cambios</h2>
-              {displayedData.processingStatus === "pending" ? <p role="status">Hay un recálculo pendiente. Se comparan las dos últimas publicaciones disponibles.</p> : null}
+            <section
+              aria-label="Comparación de publicaciones"
+              className="rounded-lg border border-border bg-surface p-4"
+            >
+              <h2 className="text-sm font-semibold text-ink">
+                Detalle de los cambios
+              </h2>
+              {data.processingStatus === 'pending' ? (
+                <p role="status">
+                  Hay un recálculo pendiente. Se comparan las dos últimas
+                  publicaciones disponibles.
+                </p>
+              ) : null}
               <div className="mt-2 flex flex-wrap gap-2">
-                {areas.map(area => <Button key={area.id} type="button" size="sm" variant="outline" aria-pressed={selected?.id === area.id} onClick={() => setSelectedArea(area.id)}>{area.name}</Button>)}
+                {areas.map((area) => (
+                  <Button
+                    key={area.id}
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    aria-pressed={selected?.id === area.id}
+                    onClick={() => setSelectedArea(area.id)}
+                  >
+                    {area.name}
+                  </Button>
+                ))}
               </div>
-              {selected ? <div aria-label={`Cambio en ${selected.name}`} className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 text-sm">
-                <b className="text-ink">{selected.name}</b>
-                <span>Puntaje anterior: {previousScore?.toLocaleString("es-BO")} / 10</span>
-                <span>Puntaje actual: {selected.score.toLocaleString("es-BO")} / 10</span>
-                <span className="font-semibold">{delta === 0 ? "Sin cambio" : `${delta > 0 ? "Subió" : "Bajó"} ${Math.abs(delta).toLocaleString("es-BO")} puntos`}</span>
-              </div> : null}
+              {selected ? (
+                <div
+                  aria-label={`Cambio en ${selected.name}`}
+                  className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 text-sm"
+                >
+                  <b className="text-ink">{selected.name}</b>
+                  <span>
+                    Puntaje anterior: {previousScore?.toLocaleString('es-BO')} /
+                    10
+                  </span>
+                  <span>
+                    Puntaje actual: {selected.score.toLocaleString('es-BO')} /
+                    10
+                  </span>
+                  <span className="font-semibold">
+                    {delta === 0
+                      ? 'Sin cambio'
+                      : `${delta > 0 ? 'Subió' : 'Bajó'} ${Math.abs(delta).toLocaleString('es-BO')} puntos`}
+                  </span>
+                </div>
+              ) : null}
             </section>
           ) : null}
-          {showEvidence && selectedArea && !comparison ? (
+          {selectedArea && isEvidenceVisible ? (
             <RadarEvidencePanel
-              key={`${displayedData.userId}:${selectedArea}`}
+              key={`${data.userId}:${selectedArea}`}
               selected={selectedArea}
-              radar={displayedData}
-              onClose={() => setShowEvidence(false)}
+              radar={data}
+              onClose={() => setIsEvidenceVisible(false)}
             />
           ) : null}
-          <p className="text-xs text-text-secondary">Las puntuaciones reflejan las habilidades aprobadas y sus evidencias.</p>
+          <p className="text-xs text-text-secondary">
+            Las puntuaciones reflejan las habilidades aprobadas y sus
+            evidencias.
+          </p>
         </>
-      ) : (!loading && !error ? <p className="text-text-secondary">Sin respuesta del servicio de afinidad.</p> : null)}
+      ) : !loading && !error ? (
+        <p className="text-text-secondary">
+          Sin respuesta del servicio de afinidad.
+        </p>
+      ) : null}
     </main>
   );
 }

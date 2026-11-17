@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { SnapshotRow } from '../types/snapshot-row.type.js';
+import type { SnapshotRow } from '../types/snapshot-row.types.js';
 import type { RadarNotificationsRepository } from '../repositories/radar-notifications.repository.js';
 import type { RadarPublicationMapper } from '../mappers/radar-publication.mapper.js';
 import { RadarNotificationsService } from '../services/radar-notifications.service.js';
@@ -117,9 +117,7 @@ describe('RadarNotificationsService', () => {
       readAt,
     } = setup();
 
-    await expect(
-      service.open(userId, notificationId),
-    ).resolves.toEqual({
+    await expect(service.open(userId, notificationId)).resolves.toEqual({
       notification: {
         id: notificationId,
         version: 2,
@@ -153,10 +151,7 @@ describe('RadarNotificationsService', () => {
       snapshot,
       previousSnapshot,
     );
-    expect(repository.markAsRead).toHaveBeenCalledWith(
-      userId,
-      notificationId,
-    );
+    expect(repository.markAsRead).toHaveBeenCalledWith(userId, notificationId);
     expect(mapper.snapshotResponse.mock.invocationCallOrder[0]).toBeLessThan(
       repository.markAsRead.mock.invocationCallOrder[0],
     );
@@ -166,9 +161,9 @@ describe('RadarNotificationsService', () => {
     const { service, repository, mapper } = setup();
     repository.findSnapshot.mockResolvedValue([]);
 
-    await expect(
-      service.open(userId, notificationId),
-    ).rejects.toThrow('Notificación no encontrada.');
+    await expect(service.open(userId, notificationId)).rejects.toThrow(
+      'Notificación no encontrada.',
+    );
 
     expect(repository.findPreviousSnapshot).not.toHaveBeenCalled();
     expect(mapper.snapshotResponse).not.toHaveBeenCalled();
@@ -181,9 +176,9 @@ describe('RadarNotificationsService', () => {
       new Error('Previous snapshot unavailable'),
     );
 
-    await expect(
-      service.open(userId, notificationId),
-    ).rejects.toThrow('Previous snapshot unavailable');
+    await expect(service.open(userId, notificationId)).rejects.toThrow(
+      'Previous snapshot unavailable',
+    );
 
     expect(repository.markAsRead).not.toHaveBeenCalled();
   });
@@ -192,9 +187,7 @@ describe('RadarNotificationsService', () => {
     const { service, repository, mapper, snapshot, historical } = setup();
     repository.findPreviousSnapshot.mockResolvedValue([]);
 
-    await expect(
-      service.open(userId, notificationId),
-    ).resolves.toMatchObject({
+    await expect(service.open(userId, notificationId)).resolves.toMatchObject({
       radar: {
         ...historical,
         previous: null,
@@ -202,18 +195,15 @@ describe('RadarNotificationsService', () => {
       compare: false,
     });
 
-    expect(mapper.snapshotResponse).toHaveBeenCalledWith(
-      snapshot,
-      undefined,
-    );
+    expect(mapper.snapshotResponse).toHaveBeenCalledWith(snapshot, undefined);
   });
 
   it('does not return successfully when marking the notification as read fails', async () => {
     const { service, repository } = setup();
     repository.markAsRead.mockResolvedValue(null);
 
-    await expect(
-      service.open(userId, notificationId),
-    ).rejects.toThrow('Notificación no encontrada.');
+    await expect(service.open(userId, notificationId)).rejects.toThrow(
+      'Notificación no encontrada.',
+    );
   });
 });

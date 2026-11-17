@@ -63,7 +63,10 @@ export class DocumentReviewDecisionService {
 
     return this.transactions.run(async (context) => {
       await this.reviews.lockReviewOperation(operationId, context);
-      const existing = await this.reviews.findReviewOperation(operationId, context);
+      const existing = await this.reviews.findReviewOperation(
+        operationId,
+        context,
+      );
 
       if (existing.length) {
         const saved = existing[0];
