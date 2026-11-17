@@ -32,4 +32,9 @@ describe('panel de resultado de asistencia', () => {
     fireEvent.keyDown(document, { key: 'Escape' });
     expect(onDismiss).toHaveBeenCalledOnce();
   });
+
+  it('confirms a valid pass after registration', () => {
+    render(<AttendanceResultPanel state={{ kind: 'registered' }} onDismiss={vi.fn()} />);
+    expect(screen.getByRole('dialog')).toHaveTextContent('Pase válido');
+  });
 });
