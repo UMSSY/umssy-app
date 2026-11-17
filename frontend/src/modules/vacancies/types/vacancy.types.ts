@@ -11,6 +11,7 @@ export interface PublishedJobOffer {
   languages: string;
   locationUrl: string;
   expiresAt: string | null;
+  publishedAt: string;
   createdAt: string;
   company: { id: string; name: string };
   skills: Array<{ id: string; name: string }>;
@@ -28,4 +29,6 @@ export interface Vacancy {
   languages: string;
   positionsAvailable: number;
   locationUrl: string;
+  publishedAt: string;
+  expiresAt: string | null;
 }

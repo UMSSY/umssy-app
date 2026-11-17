@@ -25,6 +25,23 @@ describe("applicationService", () => {
     expect(request).toHaveBeenCalledWith("/applications/application-1/withdraw");
   });
 
+  it("gets the contact of an application through the shared client", async () => {
+    const contact = {
+      applicationId: "application-1",
+      jobOfferId: "offer-1",
+      vacancyTitle: "Desarrollador Backend",
+      companyId: "company-1",
+      companyName: "TechBolivia S.R.L.",
+      recruiters: [{ id: "recruiter-1", fullName: "Ana Rojas" }],
+    };
+    const request = vi.spyOn(apiClient, "get").mockResolvedValue({
+      data: { statusCode: 200, ok: true, detail: "Operación exitosa", data: contact },
+    });
+
+    await expect(applicationService.getContact("application-1")).resolves.toBe(contact);
+    expect(request).toHaveBeenCalledWith("/applications/application-1/contact");
+  });
+
   it("propagates the failure so the query can show the error state", async () => {
     vi.spyOn(apiClient, "get").mockRejectedValue(new Error("Network Error"));
 
