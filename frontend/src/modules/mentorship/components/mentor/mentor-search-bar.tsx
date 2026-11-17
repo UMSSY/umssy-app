@@ -52,7 +52,7 @@ export function MentorSearchBar({
       type="search"
       className="min-w-56 flex-1 self-end"
       aria-label="Buscar mentores por nombre"
-      placeholder="Buscar por nombre"
+      placeholder="Nombre, cargo o palabra clave"
       value={inputValue}
       onChange={(event) => {
         inputValueRef.current = event.target.value;
