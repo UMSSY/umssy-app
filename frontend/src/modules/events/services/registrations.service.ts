@@ -15,6 +15,7 @@ import { toFinishedRegistrationItem } from '../utils/to-finished-registration-it
 
 export const registrationsService = {
   getMine: registrationApi.getMine,
+  cancel: registrationApi.cancel,
   async getFinished(page: number, limit = 10, signal?: AbortSignal, accessToken = getAccessToken()): Promise<FinishedHistoryPage> {
     const response = await registrationApi.getFinished(page, limit, signal, accessToken);
     return { ...response, items: response.items.map(toFinishedRegistrationItem) };
