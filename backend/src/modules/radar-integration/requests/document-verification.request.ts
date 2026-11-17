@@ -20,3 +20,11 @@ export const documentAcknowledgementSchema = z
 export const documentReviewFilterSchema = z
   .enum(['pending', 'approved', 'rejected', 'all'])
   .default('pending');
+
+export type DocumentAcknowledgementRequest = z.infer<
+  typeof documentAcknowledgementSchema
+>;
+
+export type DocumentReviewFilter = z.infer<
+  typeof documentReviewFilterSchema
+>;
