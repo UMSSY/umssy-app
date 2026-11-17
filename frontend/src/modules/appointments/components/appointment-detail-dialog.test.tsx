@@ -63,6 +63,21 @@ describe("AppointmentDetailDialog", () => {
     expect(screen.getByRole("dialog")).toBeInTheDocument()
   })
 
+  it("al volver sin confirmar la cancelación, el detalle conserva «Confirmada» y permite cancelar", async () => {
+    vi.spyOn(Date, "now").mockReturnValue(new Date("2026-10-13T01:00:00Z").getTime())
+    const cancel = vi.spyOn(appointmentsApi, "cancel")
+    const { user } = renderDialog()
+    await user.click(await screen.findByRole("button", { name: "Cancelar cita" }, { timeout: 3000 }))
+    await user.type(screen.getByLabelText("Motivo"), "No puedo asistir")
+
+    await user.click(screen.getByRole("button", { name: "Volver" }))
+
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument())
+    expect(screen.getByText("Confirmada")).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Cancelar cita" })).toBeInTheDocument()
+    expect(cancel).not.toHaveBeenCalled()
+  })
+
   it("no se abre sin una cita elegida", () => {
     renderDialog(null)
 
