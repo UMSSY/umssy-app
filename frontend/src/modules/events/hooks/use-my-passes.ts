@@ -8,7 +8,7 @@ import {
   getRegistrationErrorMessage,
   REGISTRATION_QUERY_KEYS,
   useRegistrationSession,
-} from '@/modules/registrations';
+} from '@/modules/event-registrations';
 import { registrationsService } from '../services/registrations.service';
 import { reconcileOfflinePasses } from '../services/offline-passes.service';
 import { OFFLINE_PASSES_SNAPSHOT_QUERY_KEY } from '../constants/offline-passes.constants';

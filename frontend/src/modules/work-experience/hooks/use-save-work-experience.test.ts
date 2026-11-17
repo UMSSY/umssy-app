@@ -1,28 +1,28 @@
-import { renderHookWithQuery as renderHook } from "@/shared/testing/render-hook-with-query";
-import { act, cleanup, waitFor } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { skillsAnalysisService } from "@/modules/matching/services/skills-analysis.service";
-import { profileSkillsRadarService } from "@/modules/profile/services/profile-skills-radar.service";
-import { WORK_EXPERIENCE_FEEDBACK_MESSAGES } from "../config/work-experience-feedback.config";
-import { workExperienceService } from "../services/work-experience.service";
-import type { WorkExperienceItem } from "../types/work-experience-item.types";
-import type { WorkExperiencePayload } from "../types/work-experience-payload.types";
-import { useSaveWorkExperience } from "./use-save-work-experience";
+import { renderHookWithQuery as renderHook } from '@/shared/testing/render-hook-with-query';
+import { act, cleanup, waitFor } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { skillsAnalysisService } from '@/modules/matching/services/skills-analysis.service';
+import { profileSkillsRadarService } from '@/modules/profile/services/profile-skills-radar.service';
+import { WORK_EXPERIENCE_FEEDBACK_MESSAGES } from '../config/work-experience-feedback.config';
+import { workExperienceService } from '../services/work-experience.service';
+import type { WorkExperienceItem } from '../types/work-experience-item.types';
+import type { WorkExperiencePayload } from '../types/work-experience-payload.types';
+import { useSaveWorkExperience } from './use-save-work-experience';
 
-vi.mock("../services/work-experience.service", () => ({
+vi.mock('../services/work-experience.service', () => ({
   workExperienceService: {
     createWorkExperience: vi.fn(),
     updateWorkExperience: vi.fn(),
   },
 }));
 
-vi.mock("@/modules/matching/services/skills-analysis.service", () => ({
+vi.mock('@/modules/matching/services/skills-analysis.service', () => ({
   skillsAnalysisService: {
     analyzeExperience: vi.fn(),
   },
 }));
 
-vi.mock("@/modules/profile/services/profile-skills-radar.service", () => ({
+vi.mock('@/modules/profile/services/profile-skills-radar.service', () => ({
   profileSkillsRadarService: {
     analyzeSkills: vi.fn(),
     getSkills: vi.fn(),
@@ -30,29 +30,29 @@ vi.mock("@/modules/profile/services/profile-skills-radar.service", () => ({
 }));
 
 const PAYLOAD: WorkExperiencePayload = {
-  companyName: "Synapse Labs",
-  position: "Desarrolladora web junior",
-  startDate: "2025-03-01",
+  companyName: 'Synapse Labs',
+  position: 'Desarrolladora web junior',
+  startDate: '2025-03-01',
   endDate: null,
   isCurrent: true,
-  description: "Desarrollo con Python y Scrum",
+  description: 'Desarrollo con Python y Scrum',
 };
 
 const SAVED: WorkExperienceItem = {
-  id: "experience-1",
+  id: 'experience-1',
   ...PAYLOAD,
 };
 
 const ANALYSIS = {
-  experienceId: "experience-1",
+  experienceId: 'experience-1',
   skills: [
-    { id: "skill-1", name: "Python" },
-    { id: "skill-2", name: "Scrum" },
+    { id: 'skill-1', name: 'Python' },
+    { id: 'skill-2', name: 'Scrum' },
   ],
   processingTimeMs: 320,
 };
 
-describe("useSaveWorkExperience", () => {
+describe('useSaveWorkExperience', () => {
   beforeEach(() => {
     vi.mocked(workExperienceService.createWorkExperience).mockResolvedValue(
       SAVED,
@@ -76,7 +76,71 @@ describe("useSaveWorkExperience", () => {
     vi.resetAllMocks();
   });
 
-  it("creates the experience keeping the description as typed and analyzes it after saving (AC-01.1)", async () => {
+  it('acknowledges a guide write before completeness refresh and finishes analysis after unmount', async () => {
+    let finishAnalysis!: (value: typeof ANALYSIS) => void;
+    vi.mocked(skillsAnalysisService.analyzeExperience).mockReturnValueOnce(
+      new Promise((resolve) => {
+        finishAnalysis = resolve;
+      }),
+    );
+    const onSaved = vi.fn();
+    const { result, client, unmount } = renderHook(() =>
+      useSaveWorkExperience(onSaved, { forGuide: true }),
+    );
+    let finishRefresh!: () => void;
+    const refreshing = new Promise<void>((resolve) => {
+      finishRefresh = resolve;
+    });
+    const invalidations = vi
+      .spyOn(client, 'invalidateQueries')
+      .mockReturnValueOnce(refreshing);
+
+    await act(async () => {
+      await result.current.save(PAYLOAD);
+    });
+
+    expect(onSaved).toHaveBeenCalledOnce();
+    expect(result.current.feedback?.type).toBe('success');
+    expect(result.current.isSaving).toBe(false);
+    expect(result.current.isAnalyzing).toBe(true);
+    expect(invalidations).toHaveBeenCalledWith({
+      queryKey: ['profile', 'completeness'],
+    });
+    unmount();
+    await act(async () => {
+      finishRefresh();
+      finishAnalysis(ANALYSIS);
+    });
+    await waitFor(() =>
+      expect(profileSkillsRadarService.analyzeSkills).toHaveBeenCalledOnce(),
+    );
+    await waitFor(() =>
+      expect(invalidations).toHaveBeenCalledWith({
+        queryKey: ['skills', 'profile'],
+      }),
+    );
+  });
+
+  it('keeps guide writes successful if a background invalidation fails', async () => {
+    const onSaved = vi.fn();
+    const { result, client } = renderHook(() =>
+      useSaveWorkExperience(onSaved, { forGuide: true }),
+    );
+    vi.spyOn(client, 'invalidateQueries').mockRejectedValue(
+      new Error('refresh unavailable'),
+    );
+
+    await act(async () => {
+      await result.current.save(PAYLOAD);
+    });
+    await waitFor(() => expect(result.current.isAnalyzing).toBe(false));
+
+    expect(onSaved).toHaveBeenCalledOnce();
+    expect(result.current.feedback?.type).toBe('success');
+    expect(result.current.isSaving).toBe(false);
+  });
+
+  it('creates the experience keeping the description as typed and analyzes it after saving (AC-01.1)', async () => {
     const onSaved = vi.fn();
     const { result } = renderHook(() => useSaveWorkExperience(onSaved));
 
@@ -89,7 +153,7 @@ describe("useSaveWorkExperience", () => {
     expect(onSaved).toHaveBeenCalledTimes(1);
 
     expect(result.current.feedback).toEqual({
-      type: "success",
+      type: 'success',
       message: WORK_EXPERIENCE_FEEDBACK_MESSAGES.createSuccess,
     });
 
@@ -98,7 +162,7 @@ describe("useSaveWorkExperience", () => {
     });
 
     expect(skillsAnalysisService.analyzeExperience).toHaveBeenCalledWith(
-      "experience-1",
+      'experience-1',
       PAYLOAD.description,
     );
 
@@ -111,8 +175,9 @@ describe("useSaveWorkExperience", () => {
     });
   });
 
-  it("does not alter the capitalization, accents or punctuation of the saved description", async () => {
-    const description = "Lideré APIs en Node.js, C++ y C#. ¡Gestión de proyectos!";
+  it('does not alter the capitalization, accents or punctuation of the saved description', async () => {
+    const description =
+      'Lideré APIs en Node.js, C++ y C#. ¡Gestión de proyectos!';
     const { result } = renderHook(() => useSaveWorkExperience(vi.fn()));
 
     await act(() => result.current.save({ ...PAYLOAD, description }));
@@ -124,21 +189,21 @@ describe("useSaveWorkExperience", () => {
 
     await waitFor(() => {
       expect(skillsAnalysisService.analyzeExperience).toHaveBeenCalledWith(
-        "experience-1",
+        'experience-1',
         description,
       );
     });
   });
 
-  it("updates the experience and preserves a null description", async () => {
+  it('updates the experience and preserves a null description', async () => {
     const { result } = renderHook(() => useSaveWorkExperience(vi.fn()));
 
     await act(() =>
-      result.current.save({ ...PAYLOAD, description: null }, "experience-1"),
+      result.current.save({ ...PAYLOAD, description: null }, 'experience-1'),
     );
 
     expect(workExperienceService.updateWorkExperience).toHaveBeenCalledWith(
-      "experience-1",
+      'experience-1',
       {
         ...PAYLOAD,
         description: null,
@@ -147,7 +212,7 @@ describe("useSaveWorkExperience", () => {
 
     await waitFor(() => {
       expect(skillsAnalysisService.analyzeExperience).toHaveBeenCalledWith(
-        "experience-1",
+        'experience-1',
         null,
       );
     });
@@ -157,31 +222,29 @@ describe("useSaveWorkExperience", () => {
     });
   });
 
-  it("refreshes the skills queries after the analysis", async () => {
-    const { result, client } = renderHook(() =>
-      useSaveWorkExperience(vi.fn()),
-    );
+  it('refreshes the skills queries after the analysis', async () => {
+    const { result, client } = renderHook(() => useSaveWorkExperience(vi.fn()));
 
-    const invalidate = vi.spyOn(client, "invalidateQueries");
+    const invalidate = vi.spyOn(client, 'invalidateQueries');
 
     await act(() => result.current.save(PAYLOAD));
 
     await waitFor(() => {
       expect(invalidate).toHaveBeenCalledWith({
-        queryKey: ["skills", "profile"],
+        queryKey: ['skills', 'profile'],
       });
     });
 
     await waitFor(() => {
       expect(invalidate).toHaveBeenCalledWith({
-        queryKey: ["profile", "skills-radar"],
+        queryKey: ['profile', 'skills-radar'],
       });
     });
   });
 
-  it("keeps the saved experience when the individual analysis fails (AC-01.9)", async () => {
+  it('keeps the saved experience when the individual analysis fails (AC-01.9)', async () => {
     vi.mocked(skillsAnalysisService.analyzeExperience).mockRejectedValue(
-      new Error("fail"),
+      new Error('fail'),
     );
 
     const onSaved = vi.fn();
@@ -203,10 +266,10 @@ describe("useSaveWorkExperience", () => {
 
     expect(onSaved).toHaveBeenCalledTimes(1);
     expect(result.current.analysis).toBeNull();
-    expect(result.current.feedback?.type).toBe("success");
+    expect(result.current.feedback?.type).toBe('success');
   });
 
-  it("keeps the saved experience when no skills are detected (AC-01.9)", async () => {
+  it('keeps the saved experience when no skills are detected (AC-01.9)', async () => {
     const analysisWithoutSkills = {
       ...ANALYSIS,
       skills: [],
@@ -230,15 +293,15 @@ describe("useSaveWorkExperience", () => {
     });
 
     expect(onSaved).toHaveBeenCalledTimes(1);
-    expect(result.current.feedback?.type).toBe("success");
+    expect(result.current.feedback?.type).toBe('success');
     expect(workExperienceService.createWorkExperience).toHaveBeenCalledWith(
       PAYLOAD,
     );
   });
 
-  it("does not analyze when the experience could not be saved", async () => {
+  it('does not analyze when the experience could not be saved', async () => {
     vi.mocked(workExperienceService.createWorkExperience).mockRejectedValue(
-      new Error("fail"),
+      new Error('fail'),
     );
 
     const onSaved = vi.fn();
@@ -251,12 +314,12 @@ describe("useSaveWorkExperience", () => {
     expect(profileSkillsRadarService.analyzeSkills).not.toHaveBeenCalled();
 
     expect(result.current.feedback).toEqual({
-      type: "error",
+      type: 'error',
       message: WORK_EXPERIENCE_FEEDBACK_MESSAGES.createError,
     });
   });
 
-  it("clears the feedback and the detected skills", async () => {
+  it('clears the feedback and the detected skills', async () => {
     const { result } = renderHook(() => useSaveWorkExperience(vi.fn()));
 
     await act(() => result.current.save(PAYLOAD));

@@ -1,20 +1,21 @@
-import { act, cleanup, screen, waitFor, within } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { afterEach, describe, expect, it, vi } from "vitest";
-import { renderWithQuery } from "@/shared/testing/render-with-query";
-import { DETECTED_SKILLS_TEXTS } from "../constants/skills.constants";
-import { skillsService } from "../services/skills.service";
-import { DetectedSkillsPanel } from "./detected-skills-panel";
+import { act, cleanup, screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { renderWithQuery } from '@/shared/testing/render-with-query';
+import { DETECTED_SKILLS_TEXTS } from '../constants/skills.constants';
+import { skillsService } from '../services/skills.service';
+import { DetectedSkillsPanel } from './detected-skills-panel';
+import { createQueryWrapper } from '@/shared/testing/create-query-wrapper';
 
-vi.mock("../services/skills.service", () => ({
+vi.mock('../services/skills.service', () => ({
   skillsService: { getDetectedSkills: vi.fn(), analyzeSkills: vi.fn() },
 }));
 
 const READY = {
-  status: "ready" as const,
+  status: 'ready' as const,
   skills: [
-    { id: "docker", name: "Docker", evidenceCount: 2 },
-    { id: "python", name: "Python", evidenceCount: 1 },
+    { id: 'docker', name: 'Docker', evidenceCount: 2 },
+    { id: 'python', name: 'Python', evidenceCount: 1 },
   ],
 };
 
@@ -23,23 +24,47 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-describe("DetectedSkillsPanel", () => {
-  it("lists the skills found in the experience with their number of records", async () => {
+describe('DetectedSkillsPanel', () => {
+  it('reuses recently loaded guide suggestions when returning to the step', async () => {
+    const { wrapper, client } = createQueryWrapper();
+    const invalidations = vi.spyOn(client, 'invalidateQueries');
+    vi.mocked(skillsService.getDetectedSkills).mockResolvedValue(READY);
+    const first = renderWithQuery(<DetectedSkillsPanel forGuide />, {
+      wrapper,
+    });
+    await screen.findByRole('list', { name: DETECTED_SKILLS_TEXTS.title });
+    await waitFor(() =>
+      expect(invalidations).toHaveBeenCalledWith({
+        queryKey: ['profile', 'completeness'],
+      }),
+    );
+    invalidations.mockClear();
+    first.unmount();
+    renderWithQuery(<DetectedSkillsPanel forGuide />, { wrapper });
+    expect(
+      screen.getByRole('list', { name: DETECTED_SKILLS_TEXTS.title }),
+    ).toBeInTheDocument();
+    expect(skillsService.getDetectedSkills).toHaveBeenCalledOnce();
+    expect(invalidations).not.toHaveBeenCalled();
+  });
+  it('lists the skills found in the experience with their number of records', async () => {
     vi.mocked(skillsService.getDetectedSkills).mockResolvedValue(READY);
 
     renderWithQuery(<DetectedSkillsPanel />);
 
-    const list = await screen.findByRole("list", { name: DETECTED_SKILLS_TEXTS.title });
-    expect(within(list).getByText("Docker")).toBeInTheDocument();
-    expect(within(list).getByText("En 2 registros")).toBeInTheDocument();
-    expect(within(list).getByText("En 1 registro")).toBeInTheDocument();
+    const list = await screen.findByRole('list', {
+      name: DETECTED_SKILLS_TEXTS.title,
+    });
+    expect(within(list).getByText('Docker')).toBeInTheDocument();
+    expect(within(list).getByText('En 2 registros')).toBeInTheDocument();
+    expect(within(list).getByText('En 1 registro')).toBeInTheDocument();
   });
 
   it.each([
-    [{ status: "pending" as const, skills: [] }, DETECTED_SKILLS_TEXTS.pending],
-    [{ status: "error" as const, skills: [] }, DETECTED_SKILLS_TEXTS.error],
-    [{ status: "ready" as const, skills: [] }, DETECTED_SKILLS_TEXTS.empty],
-  ])("explains the state of the analysis", async (summary, message) => {
+    [{ status: 'pending' as const, skills: [] }, DETECTED_SKILLS_TEXTS.pending],
+    [{ status: 'error' as const, skills: [] }, DETECTED_SKILLS_TEXTS.error],
+    [{ status: 'ready' as const, skills: [] }, DETECTED_SKILLS_TEXTS.empty],
+  ])('explains the state of the analysis', async (summary, message) => {
     vi.mocked(skillsService.getDetectedSkills).mockResolvedValue(summary);
 
     renderWithQuery(<DetectedSkillsPanel />);
@@ -47,54 +72,82 @@ describe("DetectedSkillsPanel", () => {
     expect(await screen.findByText(message)).toBeInTheDocument();
   });
 
-  it("tells when the list cannot be loaded", async () => {
-    vi.mocked(skillsService.getDetectedSkills).mockRejectedValue(new Error("Network error"));
+  it('tells when the list cannot be loaded', async () => {
+    vi.mocked(skillsService.getDetectedSkills).mockRejectedValue(
+      new Error('Network error'),
+    );
 
     renderWithQuery(<DetectedSkillsPanel />);
 
-    expect(await screen.findByText(DETECTED_SKILLS_TEXTS.loadError)).toBeInTheDocument();
+    expect(
+      await screen.findByText(DETECTED_SKILLS_TEXTS.loadError),
+    ).toBeInTheDocument();
   });
 
-  it("runs the analysis again and shows the new result", async () => {
+  it('runs the analysis again and shows the new result', async () => {
     const user = userEvent.setup();
-    vi.mocked(skillsService.getDetectedSkills).mockResolvedValue({ status: "error", skills: [] });
+    vi.mocked(skillsService.getDetectedSkills).mockResolvedValue({
+      status: 'error',
+      skills: [],
+    });
     vi.mocked(skillsService.analyzeSkills).mockResolvedValue(READY);
     renderWithQuery(<DetectedSkillsPanel />);
     await screen.findByText(DETECTED_SKILLS_TEXTS.error);
 
-    await user.click(screen.getByRole("button", { name: DETECTED_SKILLS_TEXTS.analyze }));
+    await user.click(
+      screen.getByRole('button', { name: DETECTED_SKILLS_TEXTS.analyze }),
+    );
 
-    expect(await screen.findByText("Docker")).toBeInTheDocument();
+    expect(await screen.findByText('Docker')).toBeInTheDocument();
     expect(skillsService.analyzeSkills).toHaveBeenCalledOnce();
   });
 
-  it("reads the list again after another change of the profile is saved", async () => {
-    vi.mocked(skillsService.getDetectedSkills).mockResolvedValueOnce({ status: "ready", skills: [] }).mockResolvedValue(READY);
+  it('reads the list again after another change of the profile is saved', async () => {
+    vi.mocked(skillsService.getDetectedSkills)
+      .mockResolvedValueOnce({ status: 'ready', skills: [] })
+      .mockResolvedValue(READY);
     const { client } = renderWithQuery(<DetectedSkillsPanel />);
     await screen.findByText(DETECTED_SKILLS_TEXTS.empty);
 
     await act(async () => {
-      await client.getMutationCache().build(client, { mutationFn: () => Promise.resolve("saved") }).execute(undefined);
+      await client
+        .getMutationCache()
+        .build(client, { mutationFn: () => Promise.resolve('saved') })
+        .execute(undefined);
     });
 
-    await waitFor(() => expect(screen.getByText("Docker")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Docker')).toBeInTheDocument());
     expect(skillsService.getDetectedSkills).toHaveBeenCalledTimes(2);
   });
 
-  it("does not read the list again after a failed save or its own analysis", async () => {
-    vi.mocked(skillsService.getDetectedSkills).mockResolvedValue({ status: "ready", skills: [] });
-    vi.mocked(skillsService.analyzeSkills).mockResolvedValue({ status: "ready", skills: [] });
+  it('does not read the list again after a failed save or its own analysis', async () => {
+    vi.mocked(skillsService.getDetectedSkills).mockResolvedValue({
+      status: 'ready',
+      skills: [],
+    });
+    vi.mocked(skillsService.analyzeSkills).mockResolvedValue({
+      status: 'ready',
+      skills: [],
+    });
     const user = userEvent.setup();
     const { client } = renderWithQuery(<DetectedSkillsPanel />);
     await screen.findByText(DETECTED_SKILLS_TEXTS.empty);
 
     await act(async () => {
-      await client.getMutationCache().build(client, { mutationFn: () => Promise.reject(new Error("Network")) })
+      await client
+        .getMutationCache()
+        .build(client, {
+          mutationFn: () => Promise.reject(new Error('Network')),
+        })
         .execute(undefined)
         .catch(() => undefined);
     });
-    await user.click(screen.getByRole("button", { name: DETECTED_SKILLS_TEXTS.analyze }));
-    await waitFor(() => expect(skillsService.analyzeSkills).toHaveBeenCalledOnce());
+    await user.click(
+      screen.getByRole('button', { name: DETECTED_SKILLS_TEXTS.analyze }),
+    );
+    await waitFor(() =>
+      expect(skillsService.analyzeSkills).toHaveBeenCalledOnce(),
+    );
 
     expect(skillsService.getDetectedSkills).toHaveBeenCalledOnce();
   });

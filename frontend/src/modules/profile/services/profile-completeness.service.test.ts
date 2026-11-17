@@ -10,14 +10,15 @@ vi.mock('../utils/get-auth-headers', () => ({
 }));
 
 const response = {
-  percentage: 35,
+  percentage: 30,
   sections: [
-    { id: 'contact', weight: 20, isCompleted: true },
+    { id: 'contact', weight: 15, isCompleted: true },
     { id: 'presentation', weight: 15, isCompleted: true },
-    { id: 'education', weight: 20, isCompleted: false },
-    { id: 'work-experience', weight: 20, isCompleted: false },
+    { id: 'education', weight: 15, isCompleted: false },
+    { id: 'work-experience', weight: 15, isCompleted: false },
     { id: 'skills', weight: 15, isCompleted: false },
     { id: 'certifications', weight: 10, isCompleted: false },
+    { id: 'cv', weight: 15, isCompleted: false },
   ],
 };
 
@@ -80,12 +81,12 @@ describe('profileCompletenessService', () => {
 
   it.each([
     null,
-    { id: 'unknown', weight: 20, isCompleted: true },
+    { id: 'unknown', weight: 15, isCompleted: true },
     { id: 'contact', weight: '20', isCompleted: true },
     { id: 'contact', weight: -1, isCompleted: true },
     { id: 'contact', weight: 101, isCompleted: true },
-    { id: 'contact', weight: 20, isCompleted: 'true' },
-    { id: 'presentation', weight: 20, isCompleted: true },
+    { id: 'contact', weight: 15, isCompleted: 'true' },
+    { id: 'presentation', weight: 15, isCompleted: true },
   ])('rejects malformed or duplicate sections: %j', async (section) => {
     respond({
       ...response,

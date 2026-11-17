@@ -18,6 +18,12 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace }),
 }));
 
+vi.mock("@/modules/notifications/hooks/use-notifications", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/modules/notifications/hooks/use-notifications")>()),
+  useNotificationsRealtimeSync: vi.fn(),
+  useUnreadNotificationsCount: () => ({ data: { count: 0 } }),
+}));
+
 vi.mock("@/modules/radar-chart/services/radar-integration.service", () => ({
   radarIntegrationApi: {
     reviews: vi.fn().mockResolvedValue([]),
