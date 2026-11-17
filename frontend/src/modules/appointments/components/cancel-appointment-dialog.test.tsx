@@ -26,6 +26,7 @@ function appointment(
     message: null,
     requestedAt: now.toISOString(),
     document: null,
+    cancellation: null,
   };
 }
 async function openDialog(value = appointment()) {

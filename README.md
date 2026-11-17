@@ -4,6 +4,9 @@ This repository is organized as a monorepo. For specific setup instructions, scr
 
 **[Backend Documentation](./backend/README.md)** – NestJS API, Prisma ORM, database migrations, and testing setup.
 
+the project have standard too, you can read in: **[Project Standards](./standard.md)**
+
+
 # Setup
 
 ## Prerequisites
@@ -71,3 +74,4 @@ You can also disable it with the environment variable `HUSKY=0`.
 
 - Access denied (os error 5) during install: enable Windows Developer Mode and close any dev server, terminal or editor that has the `node_modules` folder open.
 - The hook does not run when editing files from the GitHub web UI, only on local commits.
+

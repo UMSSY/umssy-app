@@ -6,6 +6,7 @@ import { AppointmentStatusTitle } from '../../../availability/enums/appointment-
 import { buildAppointmentFixtures } from '../../../availability/seeds/appointments-fixtures.seed.js';
 import { buildAvailabilityBlockFixtures } from '../../../availability/seeds/availability-blocks-fixtures.seed.js';
 import type { AvailabilityBlockWithAppointments } from '../../../availability/types/availability-block-with-appointments.types.js';
+import { toDayString } from '../../../availability/utils/bolivia-day.js';
 import { SEED_ORIENTATION_TYPES } from '../../../orientation-types/constants/seed-orientation-types.constants.js';
 import {
   FIXTURE_MENTORS,
@@ -17,6 +18,7 @@ import { PAST_APPOINTMENT_STATUS_TITLES } from '../../constants/past-appointment
 import { UPCOMING_APPOINTMENT_STATUS_TITLES } from '../../constants/upcoming-appointment-statuses.constants.js';
 import type { BoliviaDayRange } from '../../types/bolivia-day-range.types.js';
 import type { AppointmentRecord } from '../../types/appointment-record.types.js';
+import type { CancelAppointmentData } from '../../types/cancel-appointment-data.types.js';
 import type { CreateAppointmentData } from '../../types/create-appointment-data.types.js';
 import type { CreateAppointmentHistoryData } from '../../types/create-appointment-history-data.types.js';
 import type { MyAppointmentsQuery } from '../../types/my-appointments-query.types.js';
@@ -277,15 +279,20 @@ export class InMemoryOverlapSeed {
     );
   }
 
+  statusIdOf(title: AppointmentStatusTitle): string {
+    const id = this.statusIdByTitle.get(title);
+    if (!id) {
+      throw new Error(`No existe el estado ${title}`);
+    }
+    return id;
+  }
+
   get appointmentsRepository() {
     return {
-      findStatusIdByTitle: (title: AppointmentStatusTitle) => {
-        const id = this.statusIdByTitle.get(title);
-        if (!id) {
-          throw new Error(`No existe el estado ${title}`);
-        }
-        return Promise.resolve(id);
-      },
+      findStatusIdByTitle: (title: AppointmentStatusTitle) =>
+        Promise.resolve(this.statusIdOf(title)),
+      cancelAppointment: (id: string, data: CancelAppointmentData) =>
+        Promise.resolve(this.cancelAppointment(id, data)),
       createAppointment: (data: CreateAppointmentData) =>
         Promise.resolve(this.createAppointment(data)),
       assignMeetingUrl: (id: string, meetingUrl: string) => {
@@ -493,6 +500,21 @@ export class InMemoryOverlapSeed {
 
   get blockedDatesService() {
     return {
+      findBlockedDays: (
+        mentorId: string,
+        from: Date,
+        to: Date,
+      ): Promise<Set<string>> => {
+        const blocked = this.blockedDates.filter(
+          (item) =>
+            item.mentorId === mentorId &&
+            item.blockedOn.getTime() >= from.getTime() &&
+            item.blockedOn.getTime() < to.getTime(),
+        );
+        return Promise.resolve(
+          new Set(blocked.map((item) => toDayString(item.blockedOn))),
+        );
+      },
       runOnUnblockedDay: async <T>(
         _mentorId: string,
         _startAt: Date,
@@ -508,6 +530,26 @@ export class InMemoryOverlapSeed {
         }
       },
     };
+  }
+
+  private cancelAppointment(
+    id: string,
+    data: CancelAppointmentData,
+  ): AppointmentRecord {
+    const appointment = this.appointments.find((item) => item.id === id);
+    if (!appointment) {
+      throw new Error(`No existe la cita ${id}`);
+    }
+
+    const title = this.statusTitleById.get(data.statusId) as
+      | AppointmentStatusTitle
+      | undefined;
+    appointment.status.title = title ?? AppointmentStatusTitle.CANCELLED;
+    appointment.cancelledById = data.cancelledById;
+    appointment.cancelledAt = data.cancelledAt;
+    appointment.cancellationReason = data.cancellationReason;
+
+    return appointment;
   }
 
   private createAppointment(data: CreateAppointmentData): AppointmentRecord {
@@ -669,7 +711,8 @@ export class InMemoryOverlapSeed {
           block.mentorId === mentorId &&
           block.startAt.getTime() >= from.getTime() &&
           block.startAt.getTime() < to.getTime() &&
-          this.activeAppointmentsOf(block.id).length === 0,
+          this.activeAppointmentsOf(block.id).length === 0 &&
+          !this.hasMentorCancellation(block.id, mentorId),
       )
       .sort((left, right) => left.startAt.getTime() - right.startAt.getTime())
       .map(
