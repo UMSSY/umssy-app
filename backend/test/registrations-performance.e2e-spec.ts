@@ -4,7 +4,7 @@ import { randomBytes } from 'node:crypto';
 import { writeFileSync } from 'node:fs';
 import { performance } from 'node:perf_hooks';
 import request from 'supertest';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { JwtAuthGuard } from '../src/common/guards/jwt-auth.guard.js';
 import { ResponseInterceptor } from '../src/common/interceptors/response.interceptor.js';
 import { PrismaService } from '../src/common/prisma/prisma.service.js';
@@ -155,7 +155,7 @@ describe.skipIf(process.env.HU13_BASELINE !== '1')(
       ).toBe(5);
       const samples = [];
       for (const [scope, suffix, expected] of [
-        ['list', '', [...finishedIds, ...activeIds]],
+        ['list', '', activeIds],
         [
           'history',
           '?scope=finished&page=1&limit=10',
@@ -214,5 +214,53 @@ describe.skipIf(process.env.HU13_BASELINE !== '1')(
           JSON.stringify(report, null, 2) + '\n',
         );
     }, 30_000);
+    it('preserves every history page and excludes passes exactly at their Bolivia end time', async () => {
+      const historyIds: string[] = [];
+      for (let page = 1; page <= 5; page++) {
+        const response = await request(app.getHttpServer())
+          .get(
+            `/api/event-registrations/me?scope=finished&page=${page}&limit=10`,
+          )
+          .expect(200);
+        historyIds.push(
+          ...response.body.data.items.map((item: { id: string }) => item.id),
+        );
+      }
+      expect(historyIds).toEqual([...finishedIds].reverse());
+      const eventId = id(105);
+      const previous = await prisma.event.findUniqueOrThrow({
+        where: { id: eventId },
+      });
+      vi.useFakeTimers({ toFake: ['Date'] });
+      try {
+        await prisma.event.update({
+          where: { id: eventId },
+          data: { eventDate: new Date('2026-10-23T00:00:00Z') },
+        });
+        for (const [now, expected] of [
+          ['2026-10-23T15:59:59Z', [id(5), ...activeIds.slice(0, 4)]],
+          ['2026-10-23T16:00:00Z', activeIds.slice(0, 4)],
+        ] as const) {
+          vi.setSystemTime(new Date(now));
+          const response = await request(app.getHttpServer())
+            .get('/api/event-registrations/me')
+            .expect(200);
+          expect(
+            response.body.data.map((item: { id: string }) => item.id),
+          ).toEqual(expected);
+        }
+        const history = await request(app.getHttpServer())
+          .get('/api/event-registrations/me?scope=finished')
+          .expect(200);
+        expect(history.body.data.total).toBe(51);
+        expect(history.body.data.items[0].id).toBe(id(5));
+      } finally {
+        vi.useRealTimers();
+        await prisma.event.update({
+          where: { id: eventId },
+          data: { eventDate: previous.eventDate },
+        });
+      }
+    });
   },
 );

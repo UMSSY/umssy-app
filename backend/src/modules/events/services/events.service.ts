@@ -1,6 +1,7 @@
 import type { RegistrationScheduleEvent } from '../types/registration-schedule-event.types.js';
 import { BOLIVIA_OFFSET_MS } from '../../../common/constants/date-time.constants.js';
 import type { FinishedEventThreshold } from '../types/finished-event-threshold.types.js';
+import { PUBLISHED_STATUS_TITLE } from '../constants/events.constants.js';
 import { Injectable } from '@nestjs/common';
 import type { Prisma } from '../../../prisma/client.js';
 import { EventNotFoundException } from '../exceptions/event-not-found.exception.js';
@@ -39,6 +40,19 @@ export class EventsService {
           localNow.getUTCMilliseconds(),
         ),
       ),
+    };
+  }
+
+  getActiveRegistrationEventFilter(
+    now: Date = new Date(),
+  ): Prisma.EventWhereInput {
+    const threshold = this.getFinishedEventThreshold(now);
+    return {
+      status: { title: PUBLISHED_STATUS_TITLE },
+      OR: [
+        { eventDate: { gt: threshold.eventDate } },
+        { eventDate: threshold.eventDate, endTime: { gt: threshold.endTime } },
+      ],
     };
   }
 
