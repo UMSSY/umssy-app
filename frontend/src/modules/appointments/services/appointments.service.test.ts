@@ -20,6 +20,17 @@ describe("getMyAppointments", () => {
     expect(get).toHaveBeenCalledWith("/appointments/me", { params: { scope: "past", page: 2 } })
     expect(result).toEqual(page)
   })
+
+  it("manda q cuando se busca por nombre", async () => {
+    const page = { items: [], total: 0, page: 1, pageSize: 10 }
+    const get = vi.spyOn(apiClient, "get").mockResolvedValue(envelope(page))
+
+    await appointmentsApi.getMyAppointments({ scope: "upcoming", page: 1, q: "Ana" })
+
+    expect(get).toHaveBeenCalledWith("/appointments/me", {
+      params: { scope: "upcoming", page: 1, q: "Ana" },
+    })
+  })
 })
 
 describe("createAppointment", () => {

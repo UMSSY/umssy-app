@@ -1,4 +1,5 @@
 import {
+  act,
   cleanup,
   screen,
   waitFor,
@@ -335,10 +336,10 @@ describe("AppointmentsView", () => {
     ).not.toBeInTheDocument();
 
     expect(
-      (client.getQueryData(["appointments", "mine", "upcoming", 1]) as MyAppointmentsPage).items,
+      (client.getQueryData(["appointments", "mine", "upcoming", 1, ""]) as MyAppointmentsPage).items,
     ).toHaveLength(2);
     expect(
-      (client.getQueryData(["appointments", "mine", "past", 1]) as MyAppointmentsPage).items,
+      (client.getQueryData(["appointments", "mine", "past", 1, ""]) as MyAppointmentsPage).items,
     ).toHaveLength(2);
 
     await user.click(screen.getByRole("tab", { name: "Próximas" }));
@@ -604,6 +605,149 @@ describe("AppointmentsView", () => {
       expect(await within(dialog).findByText("Cancelada por ti")).toBeInTheDocument();
       expect(within(dialog).queryByText("Motivo de la cancelación")).not.toBeInTheDocument();
       expect(within(dialog).queryByRole("link", { name: "Reservar otro horario" })).not.toBeInTheDocument();
+    });
+  });
+
+  describe("búsqueda por nombre", () => {
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it("muestra el campo de búsqueda sobre la lista", async () => {
+      renderWithQuery(<AppointmentsView />);
+
+      await screen.findByText("No tienes citas próximas");
+
+      expect(
+        screen.getByRole("searchbox", { name: "Buscar citas por nombre" }),
+      ).toBeInTheDocument();
+    });
+
+    it("busca con debounce, manda q y vuelve a la página 1", async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      const user = userEvent.setup({ delay: null });
+
+      vi.mocked(appointmentsApi.getMyAppointments).mockImplementation(
+        async ({ page }) =>
+          makePage(
+            [makeAppointment({ counterpart: { id: "m1", fullName: "Ana Pérez", role: "mentor" } })],
+            { total: 48, page },
+          ),
+      );
+
+      renderWithQuery(<AppointmentsView />);
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(0);
+      });
+      await user.click(screen.getByRole("button", { name: "Siguiente" }));
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(0);
+      });
+
+      await user.type(
+        screen.getByRole("searchbox", { name: "Buscar citas por nombre" }),
+        "Ana",
+      );
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(300);
+      });
+
+      expect(appointmentsApi.getMyAppointments).toHaveBeenLastCalledWith({
+        scope: "upcoming",
+        page: 1,
+        q: "Ana",
+      });
+    });
+
+    it("muestra «No se encontraron citas con ese nombre» en vez del vacío genérico", async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      const user = userEvent.setup({ delay: null });
+
+      vi.mocked(appointmentsApi.getMyAppointments).mockImplementation(
+        async ({ q }) => (q ? makePage([]) : makePage([makeAppointment()])),
+      );
+
+      renderWithQuery(<AppointmentsView />);
+      await screen.findByText("Ana Pérez");
+
+      await user.type(
+        screen.getByRole("searchbox", { name: "Buscar citas por nombre" }),
+        "Zzz",
+      );
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(300);
+      });
+
+      expect(
+        await screen.findByText("No se encontraron citas con ese nombre"),
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByText("No tienes citas próximas"),
+      ).not.toBeInTheDocument();
+    });
+
+    it("distingue el mensaje de error del de sin resultados", async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      const user = userEvent.setup({ delay: null });
+
+      vi.mocked(appointmentsApi.getMyAppointments).mockImplementation(
+        async ({ q }) => {
+          if (q) throw new Error("Network");
+          return makePage([makeAppointment()]);
+        },
+      );
+
+      renderWithQuery(<AppointmentsView />);
+      await screen.findByText("Ana Pérez");
+
+      await user.type(
+        screen.getByRole("searchbox", { name: "Buscar citas por nombre" }),
+        "Zzz",
+      );
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(300);
+      });
+
+      expect(await screen.findByRole("alert")).toHaveTextContent(
+        "No se pudieron cargar tus citas.",
+      );
+      expect(
+        screen.queryByText("No se encontraron citas con ese nombre"),
+      ).not.toBeInTheDocument();
+    });
+
+    it("borrar el texto vuelve a la lista completa de la pestaña", async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      const user = userEvent.setup({ delay: null });
+
+      vi.mocked(appointmentsApi.getMyAppointments).mockImplementation(
+        async ({ q }) =>
+          q
+            ? makePage([])
+            : makePage([makeAppointment({ counterpart: { id: "m1", fullName: "Ana Pérez", role: "mentor" } })]),
+      );
+
+      renderWithQuery(<AppointmentsView />);
+      await screen.findByText("Ana Pérez");
+
+      const searchBox = screen.getByRole("searchbox", { name: "Buscar citas por nombre" });
+      await user.type(searchBox, "Zzz");
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(300);
+      });
+      await screen.findByText("No se encontraron citas con ese nombre");
+
+      await user.clear(searchBox);
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(300);
+      });
+
+      expect(await screen.findByText("Ana Pérez")).toBeInTheDocument();
     });
   });
 });

@@ -8,9 +8,12 @@ export const APPOINTMENTS_TEXT = {
   past: "Pasadas",
   emptyState: "No tienes citas próximas",
   emptyPast: "No tienes citas pasadas",
+  noSearchResults: "No se encontraron citas con ese nombre",
   loadError: "No se pudieron cargar tus citas.",
   loading: "Cargando citas",
   searchMentors: "Buscar mentores",
+  searchLabel: "Buscar citas por nombre",
+  searchPlaceholder: "Buscar por nombre",
   noTopic: "Tema no especificado",
 } as const;
 

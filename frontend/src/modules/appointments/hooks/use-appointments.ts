@@ -10,10 +10,11 @@ import type { AppointmentScope } from "../types/appointment-scope.types";
 export function useAppointments(
   scope: AppointmentScope = "upcoming",
   page: number = DEFAULT_APPOINTMENTS_PAGE,
+  q: string = "",
 ) {
   const query = useQuery({
-    queryKey: APPOINTMENTS_QUERY_KEYS.mine(scope, page),
-    queryFn: () => appointmentsApi.getMyAppointments({ scope, page }),
+    queryKey: APPOINTMENTS_QUERY_KEYS.mine(scope, page, q),
+    queryFn: () => appointmentsApi.getMyAppointments({ scope, page, q: q || undefined }),
   });
 
   return {
