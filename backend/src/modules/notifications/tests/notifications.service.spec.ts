@@ -68,8 +68,8 @@ describe('NotificationsService', () => {
     };
     mockPreferencesRepo = { findManyByUserIds: vi.fn().mockResolvedValue([]) };
     mockUserLookupRepo = { hasBlockBetween: vi.fn().mockResolvedValue(false) };
-    mockPushDispatcher = { dispatchToUsers: vi.fn().mockResolvedValue('sent') };
-    mockMailDispatcher = { dispatchToUsers: vi.fn().mockResolvedValue('sent') };
+    mockPushDispatcher = { dispatchToUsers: vi.fn().mockResolvedValue({ status: 'sent', deliveries: [] }) };
+    mockMailDispatcher = { dispatchToUsers: vi.fn().mockResolvedValue({ status: 'sent', deliveries: [] }) };
     mockGateway = { emitToUser: vi.fn() };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -162,6 +162,7 @@ describe('NotificationsService', () => {
       expect.any(String),
       expect.any(String),
       expect.any(String),
+      undefined,
     );
   });
 
@@ -182,5 +183,52 @@ describe('NotificationsService', () => {
     expect(result.inAppCount).toBe(1);
     expect(result.pushStatus).toBe('failed');
     expect(result.emailStatus).toBe('sent');
+  });
+
+  it('usa la plantilla de correo del tipo y devuelve la entrega por destinatario y canal', async () => {
+    mockNotificationsRepo.findTypeByCode.mockResolvedValue({
+      id: 'type-reminder',
+      code: 'SURVEY_REMINDER',
+      sendsPush: true,
+      sendsEmail: true,
+    });
+    mockPreferencesRepo.findManyByUserIds.mockResolvedValue([
+      { userId: 'user-2', pushEnabled: true, emailEnabled: true },
+    ]);
+    mockPushDispatcher.dispatchToUsers.mockResolvedValue({
+      status: 'skipped',
+      deliveries: [{ recipientId: 'user-2', channel: 'push', status: 'skipped' }],
+    });
+    mockMailDispatcher.dispatchToUsers.mockResolvedValue({
+      status: 'sent',
+      deliveries: [{ recipientId: 'user-2', channel: 'email', status: 'sent' }],
+    });
+
+    const result = await service.notify({
+      recipientIds: ['user-2'],
+      actorId: 'admin-1',
+      type: NotificationType.SURVEY_REMINDER,
+      payload: { surveyTitle: 'Empleabilidad', closesAtFormatted: '30/11/2026 20:00.' },
+      actionUrl: 'http://localhost:3000/surveys/survey-1',
+    });
+
+    const renderMail = mockMailDispatcher.dispatchToUsers.mock.calls[0]?.[4];
+    expect(
+      renderMail({ recipientName: 'Ana Rojas', actionUrl: 'http://localhost:3000/surveys/survey-1' }),
+    ).toEqual({
+      template: 'survey-reminder',
+      subject: 'Recordatorio: responde la encuesta «Empleabilidad»',
+      text: 'Hola Ana Rojas, aún no respondiste la encuesta «Empleabilidad». Cierra el: 30/11/2026 20:00. Responde en: http://localhost:3000/surveys/survey-1',
+      values: {
+        recipientName: 'Ana Rojas',
+        surveyTitle: 'Empleabilidad',
+        closesAtFormatted: '30/11/2026 20:00.',
+        actionUrl: 'http://localhost:3000/surveys/survey-1',
+      },
+    });
+    expect(result.deliveries).toEqual([
+      { recipientId: 'user-2', channel: 'push', status: 'skipped' },
+      { recipientId: 'user-2', channel: 'email', status: 'sent' },
+    ]);
   });
 });

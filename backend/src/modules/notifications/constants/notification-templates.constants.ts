@@ -1,6 +1,12 @@
 import { NotificationType } from '../types/notification-type.enum.js';
 
 import type { NotificationTemplateMap } from '../types/notification-template-map.type.js';
+import {
+  renderSurveyClosedMail,
+  renderSurveyClosingSoonMail,
+  renderSurveyReminderMail,
+  renderSurveyVariationAlertMail,
+} from '../utils/render-survey-notification-mails.js';
 
 const truncate = (text: string, max: number = 100) => 
   text.length > max ? `${text.substring(0, max - 3)}...` : text;
@@ -49,6 +55,22 @@ export const NOTIFICATION_TEMPLATES: NotificationTemplateMap = {
   [NotificationType.SURVEY_REMINDER]: {
     renderTitle: () => 'Recordatorio de encuesta',
     renderBody: (p) => truncate(`Aún no respondiste la encuesta "${p.surveyTitle}".`),
+    renderMail: renderSurveyReminderMail,
+  },
+  [NotificationType.SURVEY_CLOSING_SOON]: {
+    renderTitle: () => 'Encuesta próxima a cerrar',
+    renderBody: (p) => truncate(`La encuesta "${p.surveyTitle}" cierra el ${p.closesAtFormatted}`),
+    renderMail: renderSurveyClosingSoonMail,
+  },
+  [NotificationType.SURVEY_CLOSED]: {
+    renderTitle: () => 'Encuesta cerrada',
+    renderBody: (p) => truncate(`La encuesta "${p.surveyTitle}" cerró con ${p.responsesCount} respuestas.`),
+    renderMail: renderSurveyClosedMail,
+  },
+  [NotificationType.SURVEY_VARIATION_ALERT]: {
+    renderTitle: () => 'Alerta de variación en encuesta',
+    renderBody: (p) => truncate(`Se detectaron cambios significativos en la encuesta "${p.surveyTitle}".`),
+    renderMail: renderSurveyVariationAlertMail,
   },
 
   [NotificationType.APPLICATION_STATUS_CHANGED]: {

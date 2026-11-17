@@ -35,7 +35,10 @@ describe('PushDispatcherService', () => {
   it('debe retornar skipped si no hay suscripciones', async () => {
     mockPushRepo.findManyByUserIds.mockResolvedValue([]);
     const result = await service.dispatchToUsers(['user-1'], 'Title', 'Body', '/url');
-    expect(result).toBe('skipped');
+    expect(result).toEqual({
+      status: 'skipped',
+      deliveries: [{ recipientId: 'user-1', channel: 'push', status: 'skipped' }],
+    });
   });
 
   it('debe ignorar (skipped) los userAgents de escritorio', async () => {
@@ -52,7 +55,7 @@ describe('PushDispatcherService', () => {
     const result = await service.dispatchToUsers(['user-1'], 'Title', 'Body', '/url');
 
     expect(webpush.sendNotification).not.toHaveBeenCalled();
-    expect(result).toBe('skipped');
+    expect(result.status).toBe('skipped');
   });
 
   it('debe eliminar la suscripción si el push service responde 410 (Gone)', async () => {
@@ -73,6 +76,9 @@ describe('PushDispatcherService', () => {
     const result = await service.dispatchToUsers(['user-1'], 'Title', 'Body', '/url');
 
     expect(mockPushRepo.deleteByEndpointAndUserId).toHaveBeenCalledWith('https://fcm...', 'user-1');
-    expect(result).toBe('failed');
+    expect(result).toEqual({
+      status: 'failed',
+      deliveries: [{ recipientId: 'user-1', channel: 'push', status: 'failed' }],
+    });
   });
 });
