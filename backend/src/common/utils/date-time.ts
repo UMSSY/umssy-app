@@ -83,6 +83,11 @@ export const getWeekRange = (reference: DateInput): WeekRange => {
 export const addWeeks = (value: DateInput, amount: number): string =>
   new Date(toTimestamp(value) + amount * WEEK_MS).toISOString();
 
+export const formatBoliviaDateTime = (value: DateInput): string => {
+  const { year, month, day, time } = toBoliviaTime(value);
+  return `${pad(day)}/${pad(month)}/${year} ${time}`;
+};
+
 export const formatBlockRange = (
   startAt: DateInput,
   endAt: DateInput,
