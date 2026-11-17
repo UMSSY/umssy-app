@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="7f59f3b0-e02c-4d59-aeb2-50f469c8d43c" name="Changes" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="EmbeddingIndexingInfo">
+    <option name="cachedIndexableFilesCount" value="5976" />
+    <option name="fileBasedEmbeddingIndicesEnabled" value="true" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Tabz318&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/UMSSY/umssy-app.git&quot;,
+    &quot;accountId&quot;: &quot;0e35c4d6-0628-494b-a219-12f758eaae9b&quot;
+  }
+}</component>
+  <component name="McpProjectServerCommands">
+    <commands />
+    <urls />
+  </component>
+  <component name="NextEditCompletionFeaturesState">
+    <decayedCancelled>
+      <entry key="MS100" value="2.1314405970461707" />
+      <entry key="MS500" value="5.754843512193307" />
+      <entry key="S2" value="15.904568047978557" />
+      <entry key="S5" value="22.768539858621647" />
+      <entry key="S10" value="26.038976569993757" />
+      <entry key="S30" value="28.727280916313987" />
+      <entry key="S60" value="31.362499028948882" />
+      <entry key="M2" value="42.67057372356229" />
+      <entry key="M5" value="100.12014431267865" />
+      <entry key="M10" value="204.67078171999643" />
+      <entry key="M15" value="303.91341695879544" />
+      <entry key="M30" value="523.5307243181401" />
+      <entry key="H1" value="736.3441536941365" />
+      <entry key="H2" value="889.5760249990889" />
+      <entry key="H4" value="982.2975860148993" />
+      <entry key="D1" value="1069.3990974137573" />
+      <entry key="W1" value="1085.3174765669032" />
+    </decayedCancelled>
+    <decayedSelected>
+      <entry key="MS100" value="0.0" />
+      <entry key="MS500" value="0.0" />
+      <entry key="S2" value="0.0" />
+      <entry key="S5" value="0.0" />
+      <entry key="S10" value="0.0" />
+      <entry key="S30" value="0.0" />
+      <entry key="S60" value="0.0" />
+      <entry key="M2" value="0.0" />
+      <entry key="M5" value="0.0" />
+      <entry key="M10" value="0.0" />
+      <entry key="M15" value="0.0" />
+      <entry key="M30" value="0.0" />
+      <entry key="H1" value="0.0" />
+      <entry key="H2" value="0.0" />
+      <entry key="H4" value="0.0" />
+      <entry key="D1" value="0.0" />
+      <entry key="W1" value="0.0" />
+    </decayedSelected>
+    <decayedShown>
+      <entry key="MS100" value="1.9595745283960577" />
+      <entry key="MS500" value="5.667615765400349" />
+      <entry key="S2" value="15.838630743048153" />
+      <entry key="S5" value="22.729917352522698" />
+      <entry key="S10" value="26.0167160164406" />
+      <entry key="S30" value="28.71899530279685" />
+      <entry key="S60" value="31.357626503497322" />
+      <entry key="M2" value="42.666769288873866" />
+      <entry key="M5" value="100.1163388506963" />
+      <entry key="M10" value="204.66688271575165" />
+      <entry key="M15" value="303.9095381338818" />
+      <entry key="M30" value="523.527332162071" />
+      <entry key="H1" value="736.3417322514556" />
+      <entry key="H2" value="889.5745473794764" />
+      <entry key="H4" value="982.2967653775016" />
+      <entry key="D1" value="1069.3989477125797" />
+      <entry key="W1" value="1085.3174548417865" />
+    </decayedShown>
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 2,
+  &quot;fromUser&quot;: false
+}</component>
+  <component name="ProjectId" id="3LR0mKerosWWJjiPMTrL7vZrqPY" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "KEY_CHAT_IN_TOOLWINDOW": "false",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.MCP Project settings loaded": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "git-widget-placeholder": "7ba3b177",
+    "javascript.preferred.runtime.type.id": "node",
+    "junie.onboarding.icon.badge.shown": "true",
+    "last_opened_file_path": "/home/alejandro/Documentos/umss/IngSoftware/ProyectoIngSoftware/proyecto/umssy-app",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "pnpm",
+    "settings.editor.selected.configurable": "ml.llm.LLMConfigurable",
+    "to.speed.mode.migration.done": "true"
+  }
+}]]></component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-4abd2a77f808-JavaScript-WS-262.10968.77" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="7f59f3b0-e02c-4d59-aeb2-50f469c8d43c" name="Changes" comment="" />
+      <created>1793401731465</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1793401731465</updated>
+      <workItem from="1793401734819" duration="771000" />
+      <workItem from="1793402559889" duration="5629000" />
+      <workItem from="1793409145749" duration="3872000" />
+      <workItem from="1793413149740" duration="145000" />
+      <workItem from="1793414146724" duration="356000" />
+      <workItem from="1793415640402" duration="59000" />
+      <workItem from="1793415738210" duration="1090000" />
+      <workItem from="1793710771529" duration="5063000" />
+      <workItem from="1793750020340" duration="6939000" />
+      <workItem from="1793809242275" duration="2037000" />
+      <workItem from="1793833653089" duration="780000" />
+      <workItem from="1793839009466" duration="1037000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>

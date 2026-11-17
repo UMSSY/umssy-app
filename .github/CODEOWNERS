@@ -1,9 +1,4 @@
-/README.md @umssy/DevOps
-/backend/README.md @umssy/DevOps
-/frontend/README.md @umssy/DevOps
-/standard.md @umssy/DevOps
-/backend/standard.md @umssy/DevOps
-/frontend/standard.md @umssy/DevOps
+README.md @umssy/DevOps
 .github/ @umssy/DevOps
 .husky/ @umssy/DevOps
 scripts/ @umssy/DevOps
@@ -13,3 +8,4 @@ backend/scripts/ @umssy/DevOps
 vitest.config.* @umssy/DevOps
 vitest.setup.* @umssy/DevOps
 eslint.config.* @umssy/DevOps
+/backend/prisma/ @umssy/Database
