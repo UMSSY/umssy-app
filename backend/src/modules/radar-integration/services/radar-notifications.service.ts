@@ -1,5 +1,7 @@
+import { RadarPublicationNotFoundException } from '../exceptions/radar-publication-not-found.exception.js';
+import { RadarNotificationNotFoundException } from '../exceptions/radar-notification-not-found.exception.js';
 import { NotificationsInboxService } from '../../notifications/services/notifications-inbox.service.js';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { RadarNotificationsRepository } from '../repositories/radar-notifications.repository.js';
 import { RadarPublicationMapper } from '../mappers/radar-publication.mapper.js';
 
@@ -42,27 +44,12 @@ export class RadarNotificationsService {
 
   async historical(userId: string, snapshotId: string) {
     const [snapshot] = await this.repository.findSnapshot(userId, snapshotId);
-    if (!snapshot)
-      throw new NotFoundException('Publicaci\u00f3n no encontrada.');
+    if (!snapshot) throw new RadarPublicationNotFoundException();
     const [previous] = await this.repository.findPreviousSnapshot(
       userId,
       snapshot.version,
     );
-    return {
-      ...this.mapper.snapshotResponse(snapshot, previous),
-      previous: previous
-        ? {
-            version: previous.version,
-            updatedAt: previous.created_at,
-            scores: previous.scores,
-          }
-        : null,
-      pending: 0,
-      hasPending: false,
-      processingStatus: 'ready' as const,
-      inputRevision: snapshot.source_revision ?? 0,
-      dictionaryVersion: null,
-    };
+    return this.mapper.historicalResponse(snapshot, previous);
   }
 
   async open(userId: string, notificationId: string) {
@@ -76,13 +63,12 @@ export class RadarNotificationsService {
     const snapshotId = notification?.groupKey?.match(
       /^radar:([0-9a-f-]{36})$/i,
     )?.[1];
-    if (!snapshotId)
-      throw new NotFoundException('Notificaci\u00f3n no encontrada.');
+    if (!snapshotId) throw new RadarNotificationNotFoundException();
     const snapshots = await this.repository.findSnapshot(userId, snapshotId);
     const snapshot = snapshots[0];
 
     if (!snapshot) {
-      throw new NotFoundException('Notificaci\u00f3n no encontrada.');
+      throw new RadarNotificationNotFoundException();
     }
 
     const previousSnapshots = await this.repository.findPreviousSnapshot(
@@ -92,23 +78,7 @@ export class RadarNotificationsService {
 
     const previous = previousSnapshots[0];
 
-    const historical = this.mapper.snapshotResponse(snapshot, previous);
-
-    const radar = {
-      ...historical,
-      previous: previous
-        ? {
-            version: previous.version,
-            updatedAt: previous.created_at,
-            scores: previous.scores,
-          }
-        : null,
-      pending: 0,
-      hasPending: false,
-      processingStatus: 'ready' as const,
-      inputRevision: snapshot.source_revision ?? 0,
-      dictionaryVersion: null,
-    };
+    const radar = this.mapper.historicalResponse(snapshot, previous);
 
     await this.inbox.markAsRead(userId, notificationId);
 

@@ -94,3 +94,5 @@ sequenceDiagram
 
 - Shared recoverable review protocol and central notification navigation.
 - Semantic error styles and shared conditional class utility.
+
+`useHistoricalRadar` owns the historical query key, session scope, request and loading/error states. The view selects the snapshot from navigation parameters and renders the result; it no longer defines its own HTTP query.

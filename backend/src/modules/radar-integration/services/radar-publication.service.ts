@@ -1,3 +1,4 @@
+import { radarPublishedPayloadSchema } from '../../notifications/requests/radar-published-payload.schema.js';
 import { NotificationsService } from '../../notifications/services/notifications.service.js';
 import { NotificationType } from '../../notifications/types/notification-type.enum.js';
 import { ProfileSkillsAnalysisService } from '../../nlp/services/profile-skills-analysis.service.js';
@@ -163,10 +164,10 @@ export class RadarPublicationService {
         await this.notifications.notify({
           recipientIds: [userId],
           type: NotificationType.RADAR_PUBLISHED,
-          payload: {
+          payload: radarPublishedPayloadSchema.parse({
             radarVersion: String(publishedVersion),
             publishedAt: new Date().toISOString(),
-          },
+          }),
           actionUrl: `/profile/radar?snapshot=${snapshotId}`,
           groupKey: `radar:${snapshotId}`,
         });

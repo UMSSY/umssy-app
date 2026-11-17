@@ -1,7 +1,6 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { getAccessToken } from '@/shared/services/storage/access-token-storage';
 
 import { MentorshipProjection } from '../components/mentorship-projection';
 import { useEffect, useRef, useState } from 'react';
@@ -18,8 +17,7 @@ import { useLiveRadar } from '../hooks/use-live-radar';
 
 import { mapPublishedRadar } from '../mappers/radar-published.mapper';
 import type { IntegrationRadar } from '../types/integration-radar.types';
-import { useQuery } from '@tanstack/react-query';
-import { radarIntegrationApi } from '../services/radar-integration.service';
+import { useHistoricalRadar } from '../hooks/use-historical-radar';
 
 const DATE_FORMAT: Intl.DateTimeFormatOptions = {
   dateStyle: 'medium',
@@ -43,13 +41,7 @@ export function RadarProfileView() {
   const requestedSnapshot = searchParams.get('snapshot');
   const snapshotId =
     requestedSnapshot === dismissedSnapshot ? null : requestedSnapshot;
-  const session = getAccessToken();
-  const historical = useQuery({
-    queryKey: ['radar-integration', 'snapshot', snapshotId, session],
-    enabled: Boolean(snapshotId),
-    queryFn: () => radarIntegrationApi.historical(snapshotId!),
-    retry: false,
-  });
+  const historical = useHistoricalRadar(snapshotId);
   const openedRadar: IntegrationRadar | null = snapshotId
     ? (historical.data ?? null)
     : null;
