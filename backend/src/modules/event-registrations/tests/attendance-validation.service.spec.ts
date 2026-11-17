@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AttendanceValidationRepository } from '../repositories/attendance-validation.repository.js';
 import { AttendanceValidationService } from '../services/attendance-validation.service.js';
 import type { AuthenticatedUser } from '../../../common/types/authenticated-user.types.js';
@@ -8,9 +8,14 @@ const OWNER_ID = '11111111-1111-4111-8111-111111111111';
 const REGISTRATION_ID = '22222222-2222-4222-8222-222222222222';
 const TOKEN = 'a'.repeat(64);
 const ACTOR: AuthenticatedUser = { id: OWNER_ID, email: 'owner@example.test', roles: ['titulado'] };
+const SCHEDULE = {
+  eventDate: new Date('2026-11-16T00:00:00.000Z'),
+  startTime: new Date('1970-01-01T10:00:00.000Z'),
+  endTime: new Date('1970-01-01T11:00:00.000Z'),
+};
 
 function setup() {
-  const findWorkshop = vi.fn().mockResolvedValue({ id: EVENT_ID });
+  const findWorkshop = vi.fn().mockResolvedValue({ id: EVENT_ID, ...SCHEDULE });
   const findPass = vi.fn().mockResolvedValue({
     id: REGISTRATION_ID, cancelledAt: null, status: { title: 'Confirmada' },
   });
@@ -20,13 +25,15 @@ function setup() {
 }
 
 describe('AttendanceValidationService', () => {
+  beforeEach(() => { vi.useFakeTimers(); vi.setSystemTime(new Date('2026-11-16T14:30:00.000Z')); });
+  afterEach(() => vi.useRealTimers());
   it('resolves an active pass only for its published workshop creator', async () => {
     const { service, findWorkshop, findPass } = setup();
     await expect(service.resolveForCheckIn(EVENT_ID, ACTOR, `V1:${TOKEN.toUpperCase()}`))
       .resolves.toEqual({ registrationId: REGISTRATION_ID });
     expect(findWorkshop).toHaveBeenCalledWith({
       where: { id: EVENT_ID, createdById: OWNER_ID, status: { title: 'Publicado' } },
-      select: { id: true },
+      select: { id: true, eventDate: true, startTime: true, endTime: true },
     });
     expect(findPass).toHaveBeenCalledWith({
       where: { eventId: EVENT_ID, qrToken: TOKEN },
@@ -99,9 +106,28 @@ describe('AttendanceValidationService', () => {
       .rejects.toMatchObject({ statusCode: 422, code: 'ATTENDANCE_PASS_INVALID' });
   });
 
+  it.each([
+    '2026-11-16T13:59:59.999Z',
+    '2026-11-16T15:00:00.000Z',
+    '2026-11-17T14:30:00.000Z',
+  ])('rejects a confirmed pass outside the local workshop window at %s', async (instant) => {
+    const { service, findPass } = setup();
+    await expect(service.resolveForCheckIn(EVENT_ID, ACTOR, TOKEN, undefined, new Date(instant)))
+      .rejects.toMatchObject({ statusCode: 409, code: 'ATTENDANCE_OUTSIDE_WINDOW' });
+    expect(findPass).toHaveBeenCalledOnce();
+  });
+
+  it.each(['2026-11-16T14:00:00.000Z', '2026-11-16T14:59:59.999Z'])(
+    'accepts a confirmed pass inside the local workshop window at %s', async (instant) => {
+      const { service } = setup();
+      await expect(service.resolveForCheckIn(EVENT_ID, ACTOR, TOKEN, undefined, new Date(instant)))
+        .resolves.toEqual({ registrationId: REGISTRATION_ID });
+    },
+  );
+
   it('can execute both reads on the same transaction supplied by the check-in service', async () => {
     const { service, db } = setup();
-    const eventFindFirst = vi.fn().mockResolvedValue({ id: EVENT_ID });
+    const eventFindFirst = vi.fn().mockResolvedValue({ id: EVENT_ID, ...SCHEDULE });
     const registrationFindFirst = vi.fn().mockResolvedValue({ id: REGISTRATION_ID, cancelledAt: null, status: { title: 'Confirmada' } });
     const tx = { event: { findFirst: eventFindFirst }, eventRegistration: { findFirst: registrationFindFirst } };
     await expect(service.resolveForCheckIn(EVENT_ID, ACTOR, TOKEN, tx as never))

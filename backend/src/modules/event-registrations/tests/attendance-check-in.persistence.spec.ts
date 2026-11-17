@@ -3,6 +3,7 @@ import { Prisma } from '../../../prisma/client.js';
 import { AttendanceCheckInRepository } from '../repositories/attendance-check-in.repository.js';
 import { AttendanceCheckInService } from '../services/attendance-check-in.service.js';
 import type { AuthenticatedUser } from '../../../common/types/authenticated-user.types.js';
+import { AttendanceOutsideWindowException } from '../exceptions/attendance-outside-window.exception.js';
 
 const EVENT_ID = '33333333-3333-4333-8333-333333333333';
 const REGISTRATION_ID = '22222222-2222-4222-8222-222222222222';
@@ -37,9 +38,11 @@ describe('AttendanceCheckInService', () => {
     });
     expect(validation.resolveForCheckIn).toHaveBeenCalledTimes(2);
     expect(validation.resolveForCheckIn).toHaveBeenNthCalledWith(1, EVENT_ID, ACTOR, REFERENCE, tx);
-    expect(validation.resolveForCheckIn).toHaveBeenNthCalledWith(2, EVENT_ID, ACTOR, REFERENCE, tx);
+    const checkedInAt = validation.resolveForCheckIn.mock.calls[1][4];
+    expect(checkedInAt).toBeInstanceOf(Date);
+    expect(validation.resolveForCheckIn).toHaveBeenNthCalledWith(2, EVENT_ID, ACTOR, REFERENCE, tx, checkedInAt);
     expect(repository.lockRegistration).toHaveBeenCalledWith(tx, EVENT_ID, REGISTRATION_ID);
-    expect(repository.insertIfAbsent).toHaveBeenCalledWith(tx, REGISTRATION_ID, ACTOR.id, expect.any(Date));
+    expect(repository.insertIfAbsent).toHaveBeenCalledWith(tx, REGISTRATION_ID, ACTOR.id, checkedInAt);
     expect(repository.findAttendance).toHaveBeenCalledWith(tx, REGISTRATION_ID);
     expect(repository.lockRegistration.mock.invocationCallOrder[0])
       .toBeLessThan(repository.insertIfAbsent.mock.invocationCallOrder[0]);
@@ -60,6 +63,15 @@ describe('AttendanceCheckInService', () => {
       .mockRejectedValueOnce({ code: 'ATTENDANCE_PASS_CANCELLED' });
     await expect(service.checkIn(EVENT_ID, ACTOR, REFERENCE))
       .rejects.toMatchObject({ code: 'ATTENDANCE_PASS_CANCELLED' });
+    expect(repository.insertIfAbsent).not.toHaveBeenCalled();
+  });
+
+  it('does not write if the window closes while waiting for the lock', async () => {
+    const { service, repository, validation } = setup();
+    validation.resolveForCheckIn.mockResolvedValueOnce({ registrationId: REGISTRATION_ID })
+      .mockRejectedValueOnce(new AttendanceOutsideWindowException());
+    await expect(service.checkIn(EVENT_ID, ACTOR, REFERENCE))
+      .rejects.toMatchObject({ statusCode: 409, code: 'ATTENDANCE_OUTSIDE_WINDOW' });
     expect(repository.insertIfAbsent).not.toHaveBeenCalled();
   });
 
