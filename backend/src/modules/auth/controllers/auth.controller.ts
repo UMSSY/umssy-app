@@ -165,6 +165,14 @@ export class AuthController {
 
   @Post('forgot-password/reset')
   @ApiResponse(CREDENTIAL_LIMIT_RESPONSE)
+  @ApiResponse({
+    status: 400,
+    description: 'Código no válido o contraseña reutilizada (PASSWORD_REUSED).',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Otro cambio de contraseña invalidó la comprobación (PASSWORD_RESET_CONFLICT).',
+  })
   resetPassword(@Body() body: ResetPasswordDto) {
     return this.credentialLimits.run('reset', body.email, () =>
       this.authService.resetPassword(body),

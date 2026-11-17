@@ -1,3 +1,4 @@
+import type { PasswordHistoryService } from '../services/password-history.service.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as bcrypt from 'bcrypt';
 import { AuthService } from '../services/auth.service.js';
@@ -27,6 +28,9 @@ describe('AuthService', () => {
   const refreshTokenService = {
     revokeAllForUser: vi.fn(),
   };
+  const passwordHistory = {
+    validateNewPassword: vi.fn().mockResolvedValue('observed-hash'),
+  };
   let service: AuthService;
 
   beforeEach(() => {
@@ -36,6 +40,7 @@ describe('AuthService', () => {
       jwtService as any,
       mailService as any,
       refreshTokenService as any,
+      passwordHistory as unknown as PasswordHistoryService,
     );
   });
 
@@ -403,7 +408,7 @@ describe('AuthService', () => {
       expect(res.ok).toBe(true);
       expect(
         authRepository.updateUserPasswordAndInvalidateOtp,
-      ).toHaveBeenCalledWith('u-123', expect.any(String), 'otp-1');
+      ).toHaveBeenCalledWith('u-123', expect.any(String), 'otp-1', 'observed-hash');
     });
 
     it('lanza InvalidResetCodeException si el usuario no existe', async () => {

@@ -19,6 +19,7 @@ import {
 import { MailService } from '../../mail/services/mail.service.js';
 import { loadMailTemplate } from '../../mail/helpers/load-mail-template.js';
 import { RefreshTokenService } from './refresh-token.service.js';
+import { PasswordHistoryService } from './password-history.service.js';
 import type { SessionResponse } from '../types/session-response.types.js';
 import type { LoginResponse } from '../types/login-response.types.js';
 import type { AuthenticatedUser } from '../../../common/types/authenticated-user.types.js';
@@ -42,6 +43,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly mailService: MailService,
     private readonly refreshTokenService: RefreshTokenService,
+    private readonly passwordHistory: PasswordHistoryService,
   ) {}
 
   existsByEmail(email: string) {
@@ -198,11 +200,16 @@ export class AuthService {
     dto: ResetPasswordDto,
   ): Promise<{ ok: boolean; message: string }> {
     const { user, otp } = await this.validateResetCode(dto.email, dto.code);
+    const expectedPasswordHash = await this.passwordHistory.validateNewPassword(
+      user.id,
+      dto.password,
+    );
     const newPasswordHash = await bcrypt.hash(dto.password, 10);
     await this.authRepository.updateUserPasswordAndInvalidateOtp(
       user.id,
       newPasswordHash,
       otp.id,
+      expectedPasswordHash,
     );
     await this.refreshTokenService.revokeAllForUser(user.id);
 
