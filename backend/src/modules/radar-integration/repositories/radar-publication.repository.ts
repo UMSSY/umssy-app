@@ -61,41 +61,6 @@ export class RadarPublicationTransaction {
       VALUES (${userId}::uuid,${actorId}::uuid,'radar.published',
         ${JSON.stringify({ version, rubric: RUBRIC_VERSION, sourceRevision: revision, skills })}::jsonb,clock_timestamp())`;
   }
-
-  async createNotification(userId: string, snapshotId: string): Promise<void> {
-    await this.tx.$executeRaw`
-      INSERT INTO notifications (
-        recipient_id,
-        type_id,
-        title,
-        body,
-        link,
-        group_key,
-        created_at,
-        updated_at
-      )
-      SELECT
-        ${userId}::uuid,
-        nt.id,
-        'Nueva versión del Radar publicada',
-        'Tu radar ha sido actualizado (Versión: ' || s.version::text || ').',
-        '/profile/radar',
-        'radar:' || s.id::text,
-        clock_timestamp(),
-        clock_timestamp()
-      FROM notification_types nt
-      INNER JOIN radar_score_snapshots s
-        ON s.id = ${snapshotId}::uuid
-       AND s.user_id = ${userId}::uuid
-      WHERE nt.code = 'RADAR_PUBLISHED'
-        AND NOT EXISTS (
-          SELECT 1
-          FROM notifications existing
-          WHERE existing.recipient_id = ${userId}::uuid
-            AND existing.type_id = nt.id
-            AND existing.group_key = 'radar:' || s.id::text
-        )`;
-  }
 }
 
 function querySnapshots(

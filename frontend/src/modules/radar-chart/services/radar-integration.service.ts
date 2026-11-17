@@ -15,23 +15,23 @@ const root = '/profile/me/radar';
 const extract = <T>(response: { data: ApiResponse<T> }): T =>
   response.data.data;
 
-export type RadarReviewKind = 'cv' | 'skill';
-export type RadarReviewDecision = 'approved' | 'rejected' | 'revoked';
-
-export interface RadarReviewOperationResult {
-  operationId: string;
-  status: 'completed';
-  kind: RadarReviewKind;
-  targetId: string;
-  decision: RadarReviewDecision;
-  changed: boolean;
-  userId: string | null;
-  completedAt: string;
-}
+import type { RadarReviewKind } from '../types/radar-review-kind.types';
+export type { RadarReviewKind } from '../types/radar-review-kind.types';
+import type { RadarReviewDecision } from '../types/radar-review-decision.types';
+export type { RadarReviewDecision } from '../types/radar-review-decision.types';
+import type { RadarReviewOperationResult } from '../types/radar-review-operation-result.types';
+export type { RadarReviewOperationResult } from '../types/radar-review-operation-result.types';
 
 export const radarIntegrationApi = {
   me: async () =>
     extract(await apiClient.get<ApiResponse<IntegrationRadar>>(root)),
+
+  historical: async (id: string) =>
+    extract(
+      await apiClient.get<ApiResponse<IntegrationRadar>>(
+        `${root}/snapshots/${id}`,
+      ),
+    ),
 
   notifications: async () =>
     extract(

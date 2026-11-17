@@ -1,3 +1,4 @@
+import { findReviewOperation } from '../utils/find-review-operation.js';
 import { createHash } from 'node:crypto';
 import { Injectable } from '@nestjs/common';
 import { CvSourcesService } from '../../cv/services/cv-sources.service.js';
@@ -7,22 +8,12 @@ import { TransactionService } from '../../../common/prisma/transaction.service.j
 import { RadarReviewInvalidDecisionException } from '../exceptions/radar-review-invalid-decision.exception.js';
 import { RadarReviewInvalidEvidenceException } from '../exceptions/radar-review-invalid-evidence.exception.js';
 import { RadarReviewNotFoundException } from '../exceptions/radar-review-not-found.exception.js';
-import { RadarReviewOperationConflictException } from '../exceptions/radar-review-operation-conflict.exception.js';
 import { RadarAccessRepository } from '../repositories/radar-access.repository.js';
 import { RadarReviewRepository } from '../repositories/radar-review.repository.js';
 import { RadarReviewMapper } from '../mappers/radar-review.mapper.js';
 import { RadarPublicationService } from './radar-publication.service.js';
 
-type RadarReviewDecisionResult = {
-  operationId: string;
-  status: 'completed';
-  kind: 'cv' | 'skill';
-  targetId: string;
-  decision: string;
-  changed: boolean;
-  userId: string;
-  completedAt: string;
-};
+import type { RadarReviewDecisionResult } from '../types/radar-review-decision-result.types.js';
 @Injectable()
 export class RadarReviewService {
   constructor(
@@ -78,26 +69,15 @@ export class RadarReviewService {
       changed: boolean;
       result: RadarReviewDecisionResult;
     }>(async (context) => {
-      await this.repository.lockReviewOperation(operationId, context);
-      const existing = await this.repository.findReviewOperation(
+      const saved = await findReviewOperation(this.repository, context, {
+        adminId,
         operationId,
-        context,
-      );
-
-      if (existing.length) {
-        const saved = existing[0];
-
-        if (saved.admin_id !== adminId)
-          throw new RadarReviewNotFoundException('Operacion no encontrada');
-
-        if (
-          saved.flow !== 'radar-review' ||
-          saved.kind !== kind ||
-          saved.target_id !== id ||
-          saved.payload_hash !== payloadHash
-        )
-          throw new RadarReviewOperationConflictException();
-
+        flow: 'radar-review',
+        kind,
+        targetId: id,
+        payloadHash,
+      });
+      if (saved) {
         return {
           created: false,
           userId: null as string | null,
@@ -217,20 +197,15 @@ export class RadarReviewService {
 
   async operationStatus(adminId: string, operationId: string) {
     return this.transactions.run(async (context) => {
-      await this.repository.lockReviewOperation(operationId, context);
-      const rows = await this.repository.findReviewOperation(
+      const saved = await findReviewOperation(this.repository, context, {
+        adminId,
         operationId,
-        context,
-      );
-
-      if (
-        !rows.length ||
-        rows[0].admin_id !== adminId ||
-        rows[0].flow !== 'radar-review'
-      )
+        flow: 'radar-review',
+      });
+      if (!saved)
         throw new RadarReviewNotFoundException('Operacion no encontrada');
 
-      return rows[0].response_data;
+      return saved.response_data;
     });
   }
 

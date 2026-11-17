@@ -1,3 +1,5 @@
+import { RequestValidationPipe } from '../../../common/pipes/request-validation.pipe.js';
+import { documentDecisionSchema } from '../requests/document-verification.request.js';
 import { StreamableFile } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
 import { DocumentVerificationController } from '../controllers/document-verification.controller.js';
@@ -17,7 +19,7 @@ describe('Document verification HTTP boundaries', () => {
         mime: 'application/pdf',
       }),
     };
-    const decisions = { decide: vi.fn(), operationStatus: vi.fn() };
+    const decisions = { resolve: vi.fn(), operationStatus: vi.fn() };
     const operationId = '22222222-2222-4222-8222-222222222222';
     const controller = new DocumentVerificationController(
       service as unknown as DocumentReviewService,
@@ -34,15 +36,11 @@ describe('Document verification HTTP boundaries', () => {
     });
     await controller.operationStatus('admin', operationId);
     await controller.decide('admin', 'version', { decision: 'reprocess' });
-    await expect(
-      controller.decide('admin', 'version', { decision: 'approved' }),
-    ).rejects.toMatchObject({ status: 400 });
-    await expect(
-      controller.decide('admin', 'version', {
-        decision: 'revoke',
-        userId: 'other',
-      }),
-    ).rejects.toMatchObject({ status: 400 });
+    const pipe = new RequestValidationPipe(documentDecisionSchema);
+    expect(() => pipe.transform({ decision: 'approved' })).toThrow();
+    expect(() =>
+      pipe.transform({ decision: 'revoke', userId: 'other' }),
+    ).toThrow();
     const ownFile = await controller.preview('owner', 'version');
     expect(service.file).toHaveBeenLastCalledWith('version', 'owner');
     expect(ownFile).toBeInstanceOf(StreamableFile);
@@ -60,20 +58,16 @@ describe('Document verification HTTP boundaries', () => {
       'approved',
     );
     expect(service.reviews).toHaveBeenCalledWith('pending');
-    expect(decisions.decide).toHaveBeenCalledExactlyOnceWith(
-      'admin',
-      'version',
+    expect(decisions.resolve).toHaveBeenCalledWith('admin', 'version', {
+      decision: 'approved',
       operationId,
-      'approved',
-    );
+    });
+    expect(decisions.resolve).toHaveBeenCalledWith('admin', 'version', {
+      decision: 'reprocess',
+    });
     expect(decisions.operationStatus).toHaveBeenCalledWith(
       'admin',
       operationId,
-    );
-    expect(service.revise).toHaveBeenCalledWith(
-      'admin',
-      'version',
-      'reprocess',
     );
   });
 });

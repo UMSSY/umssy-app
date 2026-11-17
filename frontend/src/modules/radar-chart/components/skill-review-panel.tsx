@@ -10,14 +10,10 @@ import {
 } from '../hooks/use-radar-integration-queries';
 import type { ReviewRow } from '../types/review-row.types';
 
-type SkillDecision = 'approved' | 'rejected' | 'revoked';
-type SkillFilter = 'pending' | 'approved' | 'rejected' | 'all';
-
-interface Confirmation {
-  id: string;
-  decision: SkillDecision;
-  title: string;
-}
+import type { RadarReviewDecision as SkillDecision } from '../types/radar-review-decision.types';
+import type { SkillReviewFilter as SkillFilter } from '../types/skill-review-filter.types';
+import type { SkillReviewConfirmation as Confirmation } from '../types/skill-review-confirmation.types';
+import { cn } from '@/lib/utils';
 
 function formatEvidence(value: unknown): string {
   if (value === null || value === undefined || value === '') {
@@ -156,9 +152,10 @@ export function SkillReviewPanel() {
                   type="button"
                   variant="ghost"
                   aria-pressed={selected.id === row.id}
-                  className={`h-auto w-full justify-start p-3 text-left whitespace-normal ${
-                    selected.id === row.id ? 'bg-interaction' : ''
-                  }`}
+                  className={cn(
+                    'h-auto w-full justify-start p-3 text-left whitespace-normal',
+                    selected.id === row.id && 'bg-interaction',
+                  )}
                   onClick={() => {
                     setSelectedId(row.id);
                     setError('');

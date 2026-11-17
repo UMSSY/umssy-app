@@ -1,13 +1,16 @@
+import { findReviewOperation } from '../utils/find-review-operation.js';
 import { createHash } from 'node:crypto';
-import { ConflictException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { TransactionService } from '../../../common/prisma/transaction.service.js';
-import { RadarReviewOperationConflictException } from '../exceptions/radar-review-operation-conflict.exception.js';
 import { RadarReviewNotFoundException } from '../exceptions/radar-review-not-found.exception.js';
 import { DocumentVerificationRepository } from '../repositories/document-verification.repository.js';
 import { RadarReviewRepository } from '../repositories/radar-review.repository.js';
 import { RadarAccessRepository } from '../repositories/radar-access.repository.js';
 
-type DocumentDecision = 'approved' | 'rejected';
+import type { DocumentReviewDecision } from '../types/document-review-decision.types.js';
+import type { DocumentDecisionRequest } from '../types/document-decision-request.types.js';
+import { DocumentReviewService } from './document-review.service.js';
+import { DocumentVerificationConflictException } from '../exceptions/document-verification-conflict.exception.js';
 
 @Injectable()
 export class DocumentReviewDecisionService {
@@ -16,30 +19,25 @@ export class DocumentReviewDecisionService {
     private readonly reviews: RadarReviewRepository,
     private readonly access: RadarAccessRepository,
     private readonly transactions: TransactionService,
+    private readonly documentReview: DocumentReviewService,
   ) {}
+
+  resolve(admin: string, id: string, body: DocumentDecisionRequest) {
+    if (!('operationId' in body))
+      return this.documentReview.revise(admin, id, body.decision);
+    return this.decide(admin, id, body.operationId, body.decision);
+  }
 
   async operationStatus(adminId: string, operationId: string) {
     return this.transactions.run(async (context) => {
-      await this.reviews.lockReviewOperation(operationId, context);
-
-      const existing = await this.reviews.findReviewOperation(
+      const saved = await findReviewOperation(this.reviews, context, {
+        adminId,
         operationId,
-        context,
-      );
-
-      if (!existing.length) {
+        flow: 'document-review',
+        kind: 'cv',
+      });
+      if (!saved)
         throw new RadarReviewNotFoundException('Operacion no encontrada');
-      }
-
-      const saved = existing[0];
-
-      if (
-        saved.admin_id !== adminId ||
-        saved.flow !== 'document-review' ||
-        saved.kind !== 'cv'
-      ) {
-        throw new RadarReviewNotFoundException('Operacion no encontrada');
-      }
 
       return saved.response_data;
     });
@@ -49,7 +47,7 @@ export class DocumentReviewDecisionService {
     adminId: string,
     documentId: string,
     operationId: string,
-    decision: DocumentDecision,
+    decision: DocumentReviewDecision,
   ) {
     const payloadHash = createHash('sha256')
       .update(
@@ -62,28 +60,15 @@ export class DocumentReviewDecisionService {
       .digest('hex');
 
     return this.transactions.run(async (context) => {
-      await this.reviews.lockReviewOperation(operationId, context);
-      const existing = await this.reviews.findReviewOperation(
+      const saved = await findReviewOperation(this.reviews, context, {
+        adminId,
         operationId,
-        context,
-      );
-
-      if (existing.length) {
-        const saved = existing[0];
-
-        if (saved.admin_id !== adminId)
-          throw new RadarReviewNotFoundException('Operacion no encontrada');
-
-        if (
-          saved.flow !== 'document-review' ||
-          saved.kind !== 'cv' ||
-          saved.target_id !== documentId ||
-          saved.payload_hash !== payloadHash
-        )
-          throw new RadarReviewOperationConflictException();
-
-        return saved.response_data;
-      }
+        flow: 'document-review',
+        kind: 'cv',
+        targetId: documentId,
+        payloadHash,
+      });
+      if (saved) return saved.response_data;
 
       const changed = await this.documents.decide(
         adminId,
@@ -93,9 +78,7 @@ export class DocumentReviewDecisionService {
       );
 
       if (!changed.length) {
-        throw new ConflictException(
-          'La version ya tiene una decision o fue reemplazada.',
-        );
+        throw new DocumentVerificationConflictException();
       }
 
       const userId = changed[0].userId;

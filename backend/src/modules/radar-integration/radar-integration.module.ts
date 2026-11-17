@@ -1,3 +1,4 @@
+import { NotificationsModule } from '../notifications/notifications.module.js';
 import { DocumentReviewService } from './services/document-review.service.js';
 import { RadarConsentsModule } from './radar-consents.module.js';
 import { RadarApplicationsService } from './services/radar-applications.service.js';
@@ -46,6 +47,7 @@ import { RadarNotificationsService } from './services/radar-notifications.servic
 
 @Module({
   imports: [
+    NotificationsModule,
     DocumentOcrModule,
     RadarConsentsModule,
     JobOffersModule,

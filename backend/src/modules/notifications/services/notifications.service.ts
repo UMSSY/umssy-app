@@ -28,7 +28,8 @@ export class NotificationsService {
   ) {}
 
   async notify(request: NotifyRequest): Promise<NotifyResult> {
-    const { recipientIds, actorId, type, payload, actionUrl, groupKey } = request;
+    const { recipientIds, actorId, type, payload, actionUrl, groupKey } =
+      request;
 
     const finalRecipients = recipientIds.filter((id) => id !== actorId);
     if (finalRecipients.length === 0) {
@@ -37,8 +38,11 @@ export class NotificationsService {
 
     const validRecipients: string[] = [];
     for (const recipientId of finalRecipients) {
-      if (actorId && (await this.userLookupRepository.hasBlockBetween(actorId, recipientId))) {
-        continue; 
+      if (
+        actorId &&
+        (await this.userLookupRepository.hasBlockBetween(actorId, recipientId))
+      ) {
+        continue;
       }
       validRecipients.push(recipientId);
     }
@@ -49,20 +53,27 @@ export class NotificationsService {
 
     const typeRecord = await this.notificationsRepository.findTypeByCode(type);
     if (!typeRecord) {
-      throw new NotFoundException(`NotificationType ${type} no encontrado en el catálogo`);
+      throw new NotFoundException(
+        `NotificationType ${type} no encontrado en el catálogo`,
+      );
     }
 
-    const template = NOTIFICATION_TEMPLATES[type] as NotificationTemplateDefinition<NotificationType>;
+    const template = NOTIFICATION_TEMPLATES[
+      type
+    ] as NotificationTemplateDefinition<NotificationType>;
     if (!template) {
-      throw new NotFoundException(`Plantilla no encontrada para el tipo ${type}`);
+      throw new NotFoundException(
+        `Plantilla no encontrada para el tipo ${type}`,
+      );
     }
 
     const normalizedPayload = normalizeNotificationPayload(payload);
     const title = template.renderTitle(normalizedPayload);
     const body = template.renderBody(normalizedPayload);
 
-    const preferences = await this.preferencesRepository.findManyByUserIds(validRecipients);
-    
+    const preferences =
+      await this.preferencesRepository.findManyByUserIds(validRecipients);
+
     const pushTargets: string[] = [];
     const emailTargets: string[] = [];
 
@@ -72,7 +83,8 @@ export class NotificationsService {
       const emailEnabled = userPref ? userPref.emailEnabled : true;
 
       const appVisible = this.appVisibilityService.isVisible(recipientId);
-      if (typeRecord.sendsPush && pushEnabled && !appVisible) pushTargets.push(recipientId);
+      if (typeRecord.sendsPush && pushEnabled && !appVisible)
+        pushTargets.push(recipientId);
       if (typeRecord.sendsEmail && emailEnabled) emailTargets.push(recipientId);
     }
 
@@ -80,7 +92,7 @@ export class NotificationsService {
       validRecipients.map((id) => ({
         recipientId: id,
         actorId: actorId,
-        typeId: typeRecord.id, 
+        typeId: typeRecord.id,
         title,
         body,
         link: actionUrl,
@@ -89,11 +101,21 @@ export class NotificationsService {
     );
     const inAppCount = createdNotifications.length;
     const notificationIdsByRecipient = new Map(
-      createdNotifications.map((notification) => [notification.recipientId, notification.id]),
+      createdNotifications.map((notification) => [
+        notification.recipientId,
+        notification.id,
+      ]),
     );
 
-    for (const recipientId of validRecipients) {
-        this.notificationGateway.emitToUser(recipientId, 'notification:new', {
+    const createdPushTargets = pushTargets.filter((id) =>
+      notificationIdsByRecipient.has(id),
+    );
+    const createdEmailTargets = emailTargets.filter((id) =>
+      notificationIdsByRecipient.has(id),
+    );
+
+    for (const recipientId of notificationIdsByRecipient.keys()) {
+      this.notificationGateway.emitToUser(recipientId, 'notification:new', {
         typeCode: type,
         title,
         body,
@@ -104,10 +126,10 @@ export class NotificationsService {
     let pushStatus: NotifyResult['pushStatus'] = 'skipped';
     let emailStatus: NotifyResult['emailStatus'] = 'skipped';
 
-    if (pushTargets.length > 0) {
+    if (createdPushTargets.length > 0) {
       try {
         pushStatus = await this.pushDispatcher.dispatchToUsers(
-          pushTargets,
+          createdPushTargets,
           title,
           body,
           actionUrl,
@@ -120,9 +142,14 @@ export class NotificationsService {
       }
     }
 
-    if (emailTargets.length > 0) {
+    if (createdEmailTargets.length > 0) {
       try {
-        emailStatus = await this.mailDispatcher.dispatchToUsers(emailTargets, title, body, actionUrl);
+        emailStatus = await this.mailDispatcher.dispatchToUsers(
+          createdEmailTargets,
+          title,
+          body,
+          actionUrl,
+        );
       } catch (e) {
         this.logger.error('Fallo crítico en MailDispatcher', e);
         emailStatus = 'failed';
