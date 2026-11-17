@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { NotificationsService } from '../../notifications/services/notifications.service.js';
-import { NotificationType } from '../../notifications/types/notification-type.enum.js';
 import type { NotifyResult } from '../../notifications/types/notify-result.type.js';
 import {
   SURVEY_ANSWER_FRONTEND_PATH,
@@ -13,6 +12,7 @@ import {
   SurveyReminderNotAllowedException,
   SurveyWithoutPendingRespondentsException,
 } from '../exceptions/index.js';
+import { surveyReminderNotification } from '../notification/survey-notifications.js';
 import { SurveysRepository } from '../repositories/surveys.repository.js';
 import type { SurveyParticipationResponse } from '../responses/survey-participation.response.js';
 import type { SurveyReminderResponse } from '../responses/survey-reminder.response.js';
@@ -80,13 +80,12 @@ export class SurveyParticipationService {
     const result = await this.notificationsService.notify({
       recipientIds: pending.map((recipient) => recipient.id),
       actorId,
-      type: NotificationType.SURVEY_REMINDER,
-      payload: {
+      ...surveyReminderNotification({
         surveyTitle: target.title,
         closesAtFormatted: target.closesAt
           ? formatSurveyClosureDate(target.closesAt)
           : SURVEY_WITHOUT_CLOSING_DATE_TEXT,
-      },
+      }),
       actionUrl: buildSurveyFrontendUrl(
         `${SURVEY_ANSWER_FRONTEND_PATH}/${target.id}`,
       ),

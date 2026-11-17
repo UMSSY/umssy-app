@@ -185,7 +185,7 @@ describe('NotificationsService', () => {
     expect(result.emailStatus).toBe('sent');
   });
 
-  it('usa la plantilla de correo del tipo y devuelve la entrega por destinatario y canal', async () => {
+  it('entrega al despachador de correo el renderizador del dominio y devuelve la entrega por destinatario y canal', async () => {
     mockNotificationsRepo.findTypeByCode.mockResolvedValue({
       id: 'type-reminder',
       code: 'SURVEY_REMINDER',
@@ -203,6 +203,7 @@ describe('NotificationsService', () => {
       status: 'sent',
       deliveries: [{ recipientId: 'user-2', channel: 'email', status: 'sent' }],
     });
+    const renderMail = vi.fn();
 
     const result = await service.notify({
       recipientIds: ['user-2'],
@@ -210,22 +211,16 @@ describe('NotificationsService', () => {
       type: NotificationType.SURVEY_REMINDER,
       payload: { surveyTitle: 'Empleabilidad', closesAtFormatted: '30/11/2026 20:00.' },
       actionUrl: 'http://localhost:3000/surveys/survey-1',
+      renderMail,
     });
 
-    const renderMail = mockMailDispatcher.dispatchToUsers.mock.calls[0]?.[4];
-    expect(
-      renderMail({ recipientName: 'Ana Rojas', actionUrl: 'http://localhost:3000/surveys/survey-1' }),
-    ).toEqual({
-      template: 'survey-reminder',
-      subject: 'Recordatorio: responde la encuesta «Empleabilidad»',
-      text: 'Hola Ana Rojas, aún no respondiste la encuesta «Empleabilidad». Cierra el: 30/11/2026 20:00. Responde en: http://localhost:3000/surveys/survey-1',
-      values: {
-        recipientName: 'Ana Rojas',
-        surveyTitle: 'Empleabilidad',
-        closesAtFormatted: '30/11/2026 20:00.',
-        actionUrl: 'http://localhost:3000/surveys/survey-1',
-      },
-    });
+    expect(mockMailDispatcher.dispatchToUsers).toHaveBeenCalledWith(
+      ['user-2'],
+      expect.any(String),
+      expect.any(String),
+      'http://localhost:3000/surveys/survey-1',
+      renderMail,
+    );
     expect(result.deliveries).toEqual([
       { recipientId: 'user-2', channel: 'push', status: 'skipped' },
       { recipientId: 'user-2', channel: 'email', status: 'sent' },

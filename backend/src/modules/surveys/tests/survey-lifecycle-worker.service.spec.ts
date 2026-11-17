@@ -240,6 +240,7 @@ describe('SurveyLifecycleWorkerService', () => {
         /\/backoffice\/surveys\/statistics\/survey-closing-1$/,
       ),
       groupKey: 'survey-lifecycle:closing-soon:survey-closing-1',
+      renderMail: expect.any(Function),
     });
     expect(repository.markClosingSoonNotified).toHaveBeenCalledWith(
       'survey-closing-1',

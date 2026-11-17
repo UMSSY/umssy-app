@@ -5,7 +5,6 @@ import {
   OnModuleInit,
 } from '@nestjs/common';
 import { NotificationsService } from '../../notifications/services/notifications.service.js';
-import { NotificationType } from '../../notifications/types/notification-type.enum.js';
 import { SURVEY_ALERT_CONFIG_DEFAULTS } from '../constants/survey-alert-config.constants.js';
 import {
   SURVEY_CLOSING_SOON_WINDOW_MS,
@@ -13,6 +12,12 @@ import {
   SURVEY_LIFECYCLE_GROUP_KEY_PREFIX,
   SURVEY_STATISTICS_FRONTEND_PATH,
 } from '../constants/survey-lifecycle.constants.js';
+import { SURVEY_WITHOUT_CLOSING_DATE_TEXT } from '../constants/survey-participation.constants.js';
+import {
+  surveyClosedNotification,
+  surveyClosingSoonNotification,
+  surveyVariationAlertNotification,
+} from '../notification/survey-notifications.js';
 import { SurveysRepository } from '../repositories/surveys.repository.js';
 import {
   buildSurveyFrontendUrl,
@@ -75,12 +80,11 @@ export class SurveyLifecycleWorkerService
         if (survey.createdBy) {
           await this.notificationsService.notify({
             recipientIds: [survey.createdBy.id],
-            type: NotificationType.SURVEY_CLOSING_SOON,
-            payload: {
+            ...surveyClosingSoonNotification({
               surveyTitle: survey.title,
               closesAtFormatted: this.formatClosesAt(survey.closesAt),
               responsesCount: survey._count.responses,
-            },
+            }),
             actionUrl: this.statisticsUrl(survey.id),
             groupKey: this.groupKey('closing-soon', survey.id),
           });
@@ -104,12 +108,11 @@ export class SurveyLifecycleWorkerService
         if (survey.createdBy) {
           await this.notificationsService.notify({
             recipientIds: [survey.createdBy.id],
-            type: NotificationType.SURVEY_CLOSED,
-            payload: {
+            ...surveyClosedNotification({
               surveyTitle: survey.title,
               closesAtFormatted: this.formatClosesAt(survey.closesAt),
               responsesCount: survey._count.responses,
-            },
+            }),
             actionUrl: this.statisticsUrl(survey.id),
             groupKey: this.groupKey('closed', survey.id),
           });
@@ -134,14 +137,13 @@ export class SurveyLifecycleWorkerService
         if (evalResult.hasShifts && survey.createdBy) {
           await this.notificationsService.notify({
             recipientIds: [survey.createdBy.id],
-            type: NotificationType.SURVEY_VARIATION_ALERT,
-            payload: {
+            ...surveyVariationAlertNotification({
               surveyTitle: survey.title,
               threshold:
                 survey.alertConfig?.threshold ??
                 SURVEY_ALERT_CONFIG_DEFAULTS.threshold,
               summaryText: evalResult.summaryText,
-            },
+            }),
             actionUrl: this.statisticsUrl(survey.id),
             groupKey: this.groupKey('variation', survey.id),
           });
@@ -156,7 +158,9 @@ export class SurveyLifecycleWorkerService
   }
 
   private formatClosesAt(closesAt: Date | null): string {
-    return closesAt ? formatSurveyClosureDate(closesAt) : '';
+    return closesAt
+      ? formatSurveyClosureDate(closesAt)
+      : SURVEY_WITHOUT_CLOSING_DATE_TEXT;
   }
 
   private statisticsUrl(surveyId: string): string {

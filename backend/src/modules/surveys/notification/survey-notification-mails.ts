@@ -1,7 +1,13 @@
-import type { NotificationPayloadMap } from '../types/notification-payload-map.type.js';
-import type { NotificationMailContent } from '../types/notification-mail-content.type.js';
-import type { NotificationMailContext } from '../types/notification-mail-context.type.js';
-import type { NotificationType } from '../types/notification-type.enum.js';
+import {
+  SURVEY_CLOSED_MAIL_TEMPLATE,
+  SURVEY_CLOSING_SOON_MAIL_TEMPLATE,
+  SURVEY_REMINDER_MAIL_TEMPLATE,
+  SURVEY_VARIATION_ALERT_MAIL_TEMPLATE,
+} from './survey-mail-templates.constants.js';
+import type { NotificationMailContent } from '../../notifications/types/notification-mail-content.type.js';
+import type { NotificationMailContext } from '../../notifications/types/notification-mail-context.type.js';
+import type { NotificationPayloadMap } from '../../notifications/types/notification-payload-map.type.js';
+import type { NotificationType } from '../../notifications/types/notification-type.enum.js';
 
 const GRADUATE_FALLBACK_NAME = 'titulado';
 const ADMIN_FALLBACK_NAME = 'Administrador';
@@ -12,7 +18,7 @@ export function renderSurveyReminderMail(
 ): NotificationMailContent {
   const name = recipientName || GRADUATE_FALLBACK_NAME;
   return {
-    template: 'survey-reminder',
+    mjml: SURVEY_REMINDER_MAIL_TEMPLATE,
     subject: `Recordatorio: responde la encuesta «${surveyTitle}»`,
     text: `Hola ${name}, aún no respondiste la encuesta «${surveyTitle}». Cierra el: ${closesAtFormatted} Responde en: ${actionUrl}`,
     values: { recipientName: name, surveyTitle, closesAtFormatted, actionUrl },
@@ -25,7 +31,7 @@ export function renderSurveyClosingSoonMail(
 ): NotificationMailContent {
   const name = recipientName || ADMIN_FALLBACK_NAME;
   return {
-    template: 'survey-closing-soon',
+    mjml: SURVEY_CLOSING_SOON_MAIL_TEMPLATE,
     subject: `La encuesta «${surveyTitle}» cierra en 3 días`,
     text: `Hola ${name}, este es un aviso sobre una encuesta que creaste. La encuesta «${surveyTitle}» cierra el ${closesAtFormatted}. Respuestas hasta ahora: ${responsesCount}. Ver analíticas en: ${actionUrl}`,
     values: {
@@ -44,7 +50,7 @@ export function renderSurveyClosedMail(
 ): NotificationMailContent {
   const name = recipientName || ADMIN_FALLBACK_NAME;
   return {
-    template: 'survey-closed',
+    mjml: SURVEY_CLOSED_MAIL_TEMPLATE,
     subject: `La encuesta «${surveyTitle}» ya cerró`,
     text: `Hola ${name}, este es un aviso sobre una encuesta que creaste. El periodo de recepción de respuestas para la encuesta «${surveyTitle}» ha concluido. Cerró el: ${closesAtFormatted}. Respuestas recibidas: ${responsesCount} en total. Ver resultados en: ${actionUrl}`,
     values: {
@@ -63,7 +69,7 @@ export function renderSurveyVariationAlertMail(
 ): NotificationMailContent {
   const name = recipientName || ADMIN_FALLBACK_NAME;
   return {
-    template: 'survey-variation-alert',
+    mjml: SURVEY_VARIATION_ALERT_MAIL_TEMPLATE,
     subject: `Alerta de variación significativa en «${surveyTitle}»`,
     text: `Hola ${name}, detectamos cambios significativos en los resultados de la encuesta «${surveyTitle}» frente al semestre anterior.\n${summaryText}\nVer analíticas en: ${actionUrl}`,
     values: {
