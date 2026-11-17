@@ -28,12 +28,12 @@ import {
 import { ReportUsersRepository } from '../repositories/report-users.repository.js';
 import type {
   RegisteredUsersFilters,
-  RegisteredUsersExportQuery,
   RegisteredUsersQuery,
   RejectedUsersFilters,
-  RejectedUsersExportQuery,
   RejectedUsersQuery,
 } from '../requests/report-users.schema.js';
+import type { RegisteredUsersExportQuery } from '../types/registered-users-export-query.types.js';
+import type { RejectedUsersExportQuery } from '../types/rejected-users-export-query.types.js';
 import type {
   RegisteredUserResponse,
   RejectedUserResponse,

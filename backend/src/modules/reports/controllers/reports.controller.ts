@@ -19,9 +19,7 @@ import {
   registeredUsersQuerySchema,
   rejectedUsersExportQuerySchema,
   rejectedUsersQuerySchema,
-  type RegisteredUsersExportQuery,
   type RegisteredUsersQuery,
-  type RejectedUsersExportQuery,
   type RejectedUsersQuery,
 } from '../requests/report-users.schema.js';
 import {
@@ -31,6 +29,8 @@ import {
 
 import { ReportHistoryService } from '../services/report-history.service.js';
 import { ReportsService } from '../services/reports.service.js';
+import type { RegisteredUsersExportQuery } from '../types/registered-users-export-query.types.js';
+import type { RejectedUsersExportQuery } from '../types/rejected-users-export-query.types.js';
 import type { ReportPdfFile } from '../types/report-pdf-file.types.js';
 import type { ReportCsvFile } from '../types/report-user.types.js';
 
