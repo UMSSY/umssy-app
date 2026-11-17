@@ -422,7 +422,7 @@ describe('AppointmentNotificationsService', () => {
       payload: {
         cancelledByName: 'Luis Flores',
         counterpartName: 'Ana Pérez',
-        date: '2026-10-23',
+        date: '23/10/2026',
         time: '10:00',
         reason: 'Imprevisto',
       },
@@ -447,7 +447,7 @@ describe('AppointmentNotificationsService', () => {
 
     expect(title).toBe('Cita cancelada');
     expect(body).toBe(
-      'Luis Flores canceló la cita con Ana Pérez el 2026-10-23.',
+      'Luis Flores canceló la cita con Ana Pérez el 23/10/2026.',
     );
     expect(body).not.toContain('Luis Flores canceló la cita con Luis Flores');
   });
