@@ -1,18 +1,16 @@
-import { cn } from "cn";
 import { Loader2, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { SURVEY_PARTICIPATION_TEXT, SURVEY_RESPONSE_RATE_TONES } from "../constants/survey-participation.constants";
+import { SURVEY_PARTICIPATION_TEXT, SURVEY_RESPONSE_RATE_LEVEL_LABELS } from "../constants/survey-participation.constants";
 import type { SurveyResponseRateCardProps } from "../types/survey-response-rate-card-props.types";
-import { getResponseRateTone } from "../utils/get-response-rate-tone";
+import { getResponseRateLevel } from "../utils/get-response-rate-level";
 import { formatIsoDisplayDate } from "../utils/survey-dates";
 
 export function SurveyResponseRateCard({ participation, isSendingReminder, onSendReminder }: SurveyResponseRateCardProps) {
   const { responseRate, respondedCount, eligibleCount, pendingCount, audienceLabel, lastReminderSentAt, canSendReminder } =
     participation;
-  const tone = getResponseRateTone(responseRate);
-  const toneStyle = SURVEY_RESPONSE_RATE_TONES[tone];
+  const levelLabel = SURVEY_RESPONSE_RATE_LEVEL_LABELS[getResponseRateLevel(responseRate)];
   const hasPending = pendingCount > 0;
 
   return (
@@ -22,17 +20,17 @@ export function SurveyResponseRateCard({ participation, isSendingReminder, onSen
           <div className="flex flex-col gap-1">
             <p className="text-xs font-medium text-text-secondary">{SURVEY_PARTICIPATION_TEXT.responseRateLabel}</p>
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-              <p className={cn("font-tight text-4xl font-bold tabular-nums", toneStyle.textClassName)}>{responseRate}%</p>
+              <p className="font-tight text-4xl font-bold text-ink tabular-nums">{responseRate}%</p>
               <p className="text-sm text-ink-soft">{SURVEY_PARTICIPATION_TEXT.respondedSummary(respondedCount, eligibleCount)}</p>
+              <p className="text-xs font-medium text-text-secondary">{levelLabel}</p>
             </div>
           </div>
 
           <Progress
             value={responseRate}
-            data-tone={tone}
             aria-label={SURVEY_PARTICIPATION_TEXT.responseRateLabel}
-            aria-valuetext={`${responseRate}% · ${toneStyle.label}`}
-            className={cn("**:data-[slot=progress-track]:h-2.5", toneStyle.meterClassName)}
+            aria-valuetext={`${responseRate}% · ${levelLabel}`}
+            className="**:data-[slot=progress-track]:h-2.5"
           />
 
           <p className="text-xs text-text-secondary">{SURVEY_PARTICIPATION_TEXT.audience(audienceLabel)}</p>
