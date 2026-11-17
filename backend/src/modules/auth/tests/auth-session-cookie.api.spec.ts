@@ -16,6 +16,7 @@ import {
 import { DomainExceptionFilter } from '../../../common/filters/domain-exception.filter.js';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import type { SessionService } from '../../../common/services/session.service.js';
+import { CredentialSecurityModule } from '../credential-security.module.js';
 import { AuthController } from '../controllers/auth.controller.js';
 import { AuthService } from '../services/auth.service.js';
 import { RefreshTokenService } from '../services/refresh-token.service.js';
@@ -50,6 +51,7 @@ describe('session cookie over HTTP', () => {
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
+      imports: [CredentialSecurityModule],
       controllers: [AuthController],
       providers: [
         { provide: AuthService, useValue: authService },
@@ -110,7 +112,7 @@ describe('session cookie over HTTP', () => {
   it('login still returns the token and also sets an HttpOnly cookie', async () => {
     const response = await request(app.getHttpServer())
       .post('/api/auth/login')
-      .send({});
+      .send({ email: 'user@example.test', password: 'PasswordSafe1' });
 
     expect(response.body.accessToken).toBe(token);
     const cookie = String(response.headers['set-cookie']?.[0]);
@@ -124,7 +126,7 @@ describe('session cookie over HTTP', () => {
   it('login also sets the refresh cookie scoped to the auth endpoints', async () => {
     const response = await request(app.getHttpServer())
       .post('/api/auth/login')
-      .send({});
+      .send({ email: 'user@example.test', password: 'PasswordSafe1' });
 
     const cookies =
       (response.headers['set-cookie'] as unknown as string[]) ?? [];

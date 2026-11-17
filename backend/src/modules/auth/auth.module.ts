@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { JwtModule, type JwtSignOptions } from '@nestjs/jwt';
+import { CredentialSecurityModule } from './credential-security.module.js';
 import { AuthController } from './controllers/auth.controller.js';
 import { AuthService } from './services/auth.service.js';
 import { AuthRepository } from './repositories/auth.repository.js';
@@ -12,6 +13,7 @@ import { MailModule } from '../mail/mail.module.js';
 
 @Module({
   imports: [
+    CredentialSecurityModule,
     PrismaModule,
     SessionModule,
     MailModule,
