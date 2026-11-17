@@ -19,7 +19,6 @@
     "migrate:apply": "prisma migrate deploy && prisma generate",
     "seed": "prisma db seed",
     "seed:run": "tsc -p tsconfig.seed.json && node dist-seed/src/common/database/development-seeds.js",
-    "seed:attendance-qa": "tsx src/modules/event-registrations/seeds/attendance-qa-fixtures.seed.ts",
     "seed:production": "tsc -p tsconfig.seed.json && node dist-seed/src/common/database/catalog-seeds.js",
     "vercel-build": "prisma generate && pnpm vercel:migrate && pnpm build",
     "vercel:migrate": "sh -c 'if [ \"$VERCEL_ENV\" = \"production\" ]; then prisma migrate deploy; else echo \"vercel:migrate skipped (VERCEL_ENV=$VERCEL_ENV)\"; fi'",
