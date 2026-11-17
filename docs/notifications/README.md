@@ -62,7 +62,7 @@ sequenceDiagram
     N->>M: dispatchToUsers(ids, title, body, actionUrl, renderMail)
     loop por destinatario
       M->>M: Contacto (sin correo = skipped)
-      M->>M: renderMail(context) o plantilla genérica notification.mjml
+      M->>M: await renderMail(context) o plantilla genérica notification.mjml
       M->>ML: send({ to, subject, text, mjml, values })
     end
     M-->>N: { status, deliveries[email] }
@@ -76,7 +76,7 @@ sequenceDiagram
 - **Catálogo.** Cada `NotificationType` debe existir en `notification_types`; sus columnas `sends_push` y `sends_email` habilitan cada canal. La semilla del catálogo hace upsert por `code`, así que actualiza los canales de tipos existentes.
 - **Preferencias.** Sin preferencia guardada: push desactivado y correo activado. Push y correo no pueden activarse a la vez (`PUT /notifications/preferences`).
 - **Push.** Solo si el tipo lo permite, el usuario lo activó y la app no está visible para ese usuario (`visibility:changed` por WebSocket). Se omiten las suscripciones con user agent de escritorio (solo móviles o sin user agent). Título y cuerpo se truncan. Las suscripciones que responden 404/410 se eliminan.
-- **Correo.** El dominio puede pasar `renderMail(context)` en la propia petición (`NotifyRequest.renderMail`, tipo `NotificationMailRenderer`); el catálogo `NOTIFICATION_TEMPLATES` solo define título y cuerpo in-app. `renderMail` recibe `recipientName` y `actionUrl` y devuelve `mjml`, `subject`, `text` y `values`. Sin `renderMail` se usa la plantilla genérica `mail/mjml/notification.mjml`, que se carga una sola vez por envío.
+- **Correo.** El dominio puede pasar `renderMail(context)` en la propia petición (`NotifyRequest.renderMail`, tipo `NotificationMailRenderer`); el catálogo `NOTIFICATION_TEMPLATES` solo define título y cuerpo in-app. `renderMail` recibe `recipientName` y `actionUrl` y devuelve una promesa con `mjml`, `subject`, `text` y `values`, de modo que el dominio puede leer su plantilla `.mjml` con `loadMailTemplate`. Sin `renderMail` se usa la plantilla genérica `mail/mjml/notification.mjml`, que se carga una sola vez por envío.
 - **Resultado.** Cada canal se resume como `sent` (todo enviado), `partial`, `failed` o `skipped`. `deliveries` trae `{ recipientId, channel: 'push' | 'email', status: 'sent' | 'failed' | 'skipped' }`. Un fallo crítico de un despachador marca su canal como `failed` sin cancelar los demás.
 - **Notificaciones de encuestas.** `SURVEY_REMINDER` (push y correo), `SURVEY_CLOSING_SOON`, `SURVEY_CLOSED` y `SURVEY_VARIATION_ALERT` (solo correo). Sus payloads se validan con Zod y sus correos se renderizan en `backend/src/modules/surveys/notification/`; `notifications` solo define título y cuerpo in-app.
 
@@ -125,6 +125,6 @@ El frontend no llama a `notify()`: lo hace el dominio dueño del evento. Para en
 ### Sprint 3
 
 - `notify()` devuelve el detalle por destinatario y canal (`deliveries`) además del estado agregado; push y correo informan `sent`, `partial`, `failed` o `skipped`.
-- El correo admite contenido propio del dominio mediante `renderMail` (contenido MJML, asunto, texto y valores) con nombre del destinatario.
+- El correo admite contenido propio del dominio mediante `renderMail` asíncrono (contenido MJML, asunto, texto y valores) con nombre del destinatario.
 - Nuevos tipos de notificación de encuestas en el catálogo; la semilla del catálogo pasa a upsert.
 - Los contratos de las notificaciones de encuestas (payloads Zod, correos y MJML) se ubican en el dominio surveys.

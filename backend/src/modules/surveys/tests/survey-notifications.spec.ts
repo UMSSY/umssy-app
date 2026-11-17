@@ -13,7 +13,7 @@ const CONTEXT = {
 };
 
 describe('survey notifications', () => {
-  it('valida el recordatorio y renderiza su correo con la plantilla del dominio', () => {
+  it('valida el recordatorio y renderiza su correo con la plantilla del dominio', async () => {
     const notification = surveyReminderNotification({
       surveyTitle: ' Empleabilidad ',
       closesAtFormatted: '30/11/2026 20:00.',
@@ -24,7 +24,7 @@ describe('survey notifications', () => {
       surveyTitle: 'Empleabilidad',
       closesAtFormatted: '30/11/2026 20:00.',
     });
-    const mail = notification.renderMail!(CONTEXT);
+    const mail = await notification.renderMail!(CONTEXT);
     expect(mail.mjml).toContain('Recordatorio de encuesta');
     expect(mail).toMatchObject({
       subject: 'Recordatorio: responde la encuesta «Empleabilidad»',
@@ -38,8 +38,8 @@ describe('survey notifications', () => {
     });
   });
 
-  it('usa el nombre genérico cuando el destinatario no tiene nombre', () => {
-    const mail = surveyClosedNotification({
+  it('usa el nombre genérico cuando el destinatario no tiene nombre', async () => {
+    const mail = await surveyClosedNotification({
       surveyTitle: 'Empleabilidad',
       closesAtFormatted: '30/11/2026 20:00.',
       responsesCount: 3,
@@ -49,12 +49,12 @@ describe('survey notifications', () => {
   });
 
   it('renderiza las plantillas MJML del dominio con sus valores', async () => {
-    const mails = [
+    const mails = await Promise.all([
       surveyReminderNotification({ surveyTitle: 'Encuesta', closesAtFormatted: 'Hoy.' }),
       surveyClosingSoonNotification({ surveyTitle: 'Encuesta', closesAtFormatted: 'Hoy.', responsesCount: 0 }),
       surveyClosedNotification({ surveyTitle: 'Encuesta', closesAtFormatted: 'Hoy.', responsesCount: 0 }),
       surveyVariationAlertNotification({ surveyTitle: 'Encuesta', threshold: 10, summaryText: 'Cambio' }),
-    ].map((notification) => notification.renderMail!(CONTEXT));
+    ].map((notification) => notification.renderMail!(CONTEXT)));
 
     const templates = new MailTemplateService();
     const html = await Promise.all(

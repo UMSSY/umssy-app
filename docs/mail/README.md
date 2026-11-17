@@ -13,12 +13,15 @@ flowchart LR
   AU[auth] --> MS
   AR[access-requests: mail-service-sender] --> MS
   ND[notifications: MailDispatcherService] --> MS
-  SV[surveys/notification/survey-mail-templates.constants] -.contenido MJML.-> ND
+  SV[surveys/notification/survey-notification-mails] --> H
+  SV -.contenido MJML.-> ND
+  SVM[surveys/notification/mjml/*.mjml]
   subgraph Backend["backend/src/modules/mail"]
     MS[MailService.send] --> MT[MailTemplateService.render]
     MT --> L[mjml/layout.mjml + header.mjml]
     H[helpers/load-mail-template] --> T[mjml/*.mjml propias]
   end
+  H --> SVM
   ND --> H
   MS -->|MAIL_TRANSPORT=smtp| SMTP[(Servidor SMTP)]
   MS -->|MAIL_TRANSPORT=console| LOG[Logger]
@@ -33,7 +36,7 @@ sequenceDiagram
   participant M as MailService
   participant T as MailTemplateService
   participant S as SMTP
-  D->>H: loadMailTemplate(name) si no hay MJML de dominio
+  D->>H: loadMailTemplate(name) o loadMailTemplate(URL del dominio)
   H-->>D: contenido MJML
   D->>M: send({ to, subject, text, mjml, values })
   M->>T: render(mjml, values + brandName + logoUrl)
@@ -56,7 +59,8 @@ sequenceDiagram
 - **Remitente.** `MAIL_FROM_NAME`, `MAIL_FROM_ADDRESS` y `MAIL_REPLY_TO` opcional. `MAIL_LOGO_URL` muestra el logo en la cabecera; sin él se quita la imagen.
 - **Plantillas.** Todos los correos comparten `layout.mjml` y `header.mjml`. Los valores se escapan como HTML y una variable faltante lanza error, de modo que no se envían correos incompletos.
 - **Plantillas propias de `mail`.** `activation-code`, `account-activated`, `access-request-rejection`, `password-reset-email` y `notification` (genérica para notificaciones sin contenido propio), tipadas en `MailTemplateName`.
-- **Plantillas de dominio.** Un dominio puede declarar su contenido MJML junto a su código. Las plantillas de encuestas (recordatorio, cierre próximo, cierre y alerta de variación) viven como constantes en `backend/src/modules/surveys/notification/survey-mail-templates.constants.ts` y llegan a `mail` a través de `notifications` (`renderMail` devuelve `mjml`). Al ser código TypeScript se compilan a `dist` sin pasos de copia adicionales.
+- **Plantillas de dominio.** Un dominio guarda sus plantillas como archivos `.mjml` en `backend/src/modules/<dominio>/notification/mjml/` y las lee con `loadMailTemplate`, pasando la `URL` del archivo en lugar de un `MailTemplateName`. Las plantillas de encuestas (`survey-reminder`, `survey-closing-soon`, `survey-closed` y `survey-variation-alert`) viven en `backend/src/modules/surveys/notification/mjml/` y llegan a `mail` a través de `notifications` (`renderMail` devuelve una promesa con `mjml`).
+- **Copia de plantillas al build.** Los `.mjml` no se compilan con TypeScript, por eso se copian a `dist`: `pnpm run build` ejecuta `scripts/copy-mail-templates.ts`, que copia `mail/mjml/` y cada `modules/*/notification/mjml/`, y `nest start` los copia con los `assets` de `nest-cli.json`.
 
 ## API pública (módulo Nest)
 
@@ -65,7 +69,7 @@ sequenceDiagram
 | `MailModule` | Importar en el módulo consumidor |
 | `MailService.send(payload: SendMailPayload)` | Enviar un correo (`to`, `subject`, `text`, `mjml`, `values`) |
 | `MailTemplateName` | Nombres de las plantillas propias de `mail` |
-| `loadMailTemplate(name)` | Leer una plantilla MJML propia de `mail` (`helpers/load-mail-template.ts`) |
+| `loadMailTemplate(template)` | Leer una plantilla MJML propia de `mail` por `MailTemplateName` o una de dominio por `URL` (`helpers/load-mail-template.ts`) |
 
 ## Dependencias
 
@@ -84,5 +88,6 @@ Sin interfaz propia. Los enlaces de los correos (`actionUrl`) apuntan a rutas de
 
 ### Sprint 3
 
-- Soporte de contenido MJML de dominio: `notifications` entrega a `MailService` el MJML que devuelve el dominio (`NotificationMailContent.mjml`) y `loadMailTemplate` queda solo para las plantillas propias de `mail`. Las plantillas `survey-*` salen de `mail/mjml/` y de `MailTemplateName`.
-- Correos de encuestas (recordatorio, cierre próximo, cierre y alerta de variación) con su contenido MJML ubicado en `surveys/notification/`; `mail` aporta el layout y la cabecera.
+- Soporte de contenido MJML de dominio: `notifications` entrega a `MailService` el MJML que devuelve el dominio (`NotificationMailContent.mjml`) Las plantillas `survey-*` salen de `mail/mjml/` y de `MailTemplateName`.
+- Correos de encuestas (recordatorio, cierre próximo, cierre y alerta de variación) con sus plantillas `.mjml` en `surveys/notification/mjml/`; `mail` aporta el layout y la cabecera.
+- `loadMailTemplate` acepta la `URL` de una plantilla de dominio, y el build copia a `dist` las plantillas de `modules/*/notification/mjml/`.
