@@ -5,4 +5,5 @@ export interface AuditEventListProps {
   isLoading?: boolean;
   loadingEvidenceId: string | null;
   onOpenEvidence: (event: AuditEvent, trigger: HTMLElement) => void;
+  onSelectEvent: (event: AuditEvent) => void;
 }

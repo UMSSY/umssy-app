@@ -42,7 +42,7 @@ describe("AuditEventTable y AuditEventCards", () => {
     ["tabla", AuditEventTable],
     ["tarjetas", AuditEventCards],
   ])("en %s muestra los campos de la HU, hora de Bolivia y valores ausentes", (_name, List) => {
-    render(<List items={EVENTS} loadingEvidenceId={null} onOpenEvidence={vi.fn()} />);
+    render(<List items={EVENTS} loadingEvidenceId={null} onOpenEvidence={vi.fn()} onSelectEvent={vi.fn()} />);
 
     expect(screen.getByText("Código de activación enviado")).toBeInTheDocument();
     expect(screen.getByText("Rechazada")).toBeInTheDocument();
@@ -53,27 +53,27 @@ describe("AuditEventTable y AuditEventCards", () => {
   });
 
   it("los datos son de solo lectura: no hay campos editables ni botones de editar o borrar", () => {
-    const { container } = render(<AuditEventTable items={EVENTS} loadingEvidenceId={null} onOpenEvidence={vi.fn()} />);
+    const { container } = render(<AuditEventTable items={EVENTS} loadingEvidenceId={null} onOpenEvidence={vi.fn()} onSelectEvent={vi.fn()} />);
     expect(container.querySelector("input, textarea, select, form")).toBeNull();
     expect(screen.queryByRole("button", { name: /editar|eliminar|borrar|aprobar|rechazar/i })).toBeNull();
   });
 
   it("Ver documento abre la evidencia del evento seleccionado y muestra la carga", () => {
     const onOpenEvidence = vi.fn();
-    const { rerender } = render(<AuditEventTable items={EVENTS} loadingEvidenceId={null} onOpenEvidence={onOpenEvidence} />);
+    const { rerender } = render(<AuditEventTable items={EVENTS} loadingEvidenceId={null} onOpenEvidence={onOpenEvidence} onSelectEvent={vi.fn()} />);
 
     fireEvent.click(screen.getByRole("button", { name: "Ver documento del evento EVT-2026-000002" }));
     expect(onOpenEvidence).toHaveBeenCalledWith(EVENTS[1], expect.any(HTMLElement));
 
-    rerender(<AuditEventTable items={EVENTS} loadingEvidenceId="evt-2" onOpenEvidence={onOpenEvidence} />);
+    rerender(<AuditEventTable items={EVENTS} loadingEvidenceId="evt-2" onOpenEvidence={onOpenEvidence} onSelectEvent={vi.fn()} />);
     expect(screen.getByRole("button", { name: "Ver documento del evento EVT-2026-000002" })).toBeDisabled();
   });
 
   it("muestra esqueletos mientras carga", () => {
-    render(<AuditEventTable items={[]} isLoading loadingEvidenceId={null} onOpenEvidence={vi.fn()} />);
+    render(<AuditEventTable items={[]} isLoading loadingEvidenceId={null} onOpenEvidence={vi.fn()} onSelectEvent={vi.fn()} />);
     expect(screen.getAllByTestId("audit-skeleton-row")).toHaveLength(5);
     cleanup();
-    render(<AuditEventCards items={[]} isLoading loadingEvidenceId={null} onOpenEvidence={vi.fn()} />);
+    render(<AuditEventCards items={[]} isLoading loadingEvidenceId={null} onOpenEvidence={vi.fn()} onSelectEvent={vi.fn()} />);
     expect(screen.getAllByTestId("audit-skeleton-card")).toHaveLength(3);
   });
 });
