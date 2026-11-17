@@ -3,8 +3,8 @@ import { act, cleanup, fireEvent, screen, waitFor } from "@testing-library/react
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithQuery } from "@/shared/testing/render-with-query";
 import { clearAccessToken, saveAccessToken } from "@/shared/services/storage/access-token-storage";
-import { registrationsService } from "@/modules/registrations";
-import type { RegistrationResponse } from "@/modules/registrations";
+import { registrationsService } from "@/modules/event-registrations";
+import type { RegistrationResponse } from "@/modules/event-registrations";
 import type { EventDetail } from "../types/event-detail.types";
 import { EventRegistrationAction } from "./event-registration-action";
 import { toast } from "sonner";

@@ -1,4 +1,4 @@
-import type { DocumentType } from "@/modules/access-request";
+import type { DocumentType } from "@/modules/access-requests";
 import type { RoleTag } from "@/modules/auth";
 import type { PaginatedData } from "@/shared/types/api-response.types";
 

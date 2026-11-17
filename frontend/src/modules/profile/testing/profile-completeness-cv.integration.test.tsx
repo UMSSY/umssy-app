@@ -2,8 +2,8 @@ import { cleanup, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { renderWithQuery as render } from '@/shared/testing/render-with-query';
-import { DocumentsCvView } from '@/modules/documents/views/documents-cv-view';
-import type { SavedCv } from '@/modules/documents/types/saved-cv.types';
+import { DocumentsCvView } from '@/modules/cv/views/documents-cv-view';
+import type { SavedCv } from '@/modules/cv/types/saved-cv.types';
 import { PROFILE_COMPLETENESS_SECTION_IDS } from '../constants/profile-completeness.constants';
 import { createProfileCompleteness } from './profile-completeness.fixture';
 
@@ -23,7 +23,7 @@ vi.mock('../services/profile-completeness.service', () => ({
 vi.mock('../services/profile.service', () => ({
   profileService: { getProfile: vi.fn().mockResolvedValue(null) },
 }));
-vi.mock('@/modules/documents/services/documents.service', () => ({
+vi.mock('@/modules/cv/services/documents.service', () => ({
   documentsService: {
     getCvs: api.list,
     uploadCv: api.upload,
