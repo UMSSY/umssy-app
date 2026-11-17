@@ -39,4 +39,17 @@ describe('getAttendanceCheckInError', () => {
       }).message,
     ).not.toContain('private token');
   });
+
+  it('uses the agreed messages for cancelled passes and closed attendance windows', () => {
+    const cancelled = getAttendanceCheckInError({
+      isAxiosError: true,
+      response: { status: 422, data: { code: 'ATTENDANCE_PASS_CANCELLED' } },
+    });
+    const closed = getAttendanceCheckInError({
+      isAxiosError: true,
+      response: { status: 409, data: { code: 'ATTENDANCE_OUTSIDE_WINDOW' } },
+    });
+    expect(cancelled.message).toContain('Pase inválido - Inscripción cancelada');
+    expect(closed.message).toContain('Fuera de la ventana horaria de validación');
+  });
 });

@@ -17,7 +17,7 @@ import type { AvailabilityBlock } from "../../types/availability-block.types"
 
 const push = vi.fn()
 
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }))
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push }), useSearchParams: () => new URLSearchParams() }))
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn(), warning: vi.fn() } }))
 vi.mock("@/modules/mentorship", () => ({
   useMentorProfile: () => ({

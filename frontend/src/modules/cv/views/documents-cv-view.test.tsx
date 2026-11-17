@@ -18,6 +18,14 @@ import type { SavedCv } from "../types/saved-cv.types";
 import { DocumentsCvView } from "./documents-cv-view";
 import { DocumentsCvGuideStep } from "../components/documents-cv-guide-step";
 
+vi.mock('../hooks/use-document-verifications', () => ({
+  useDocumentVerifications: () => ({
+    data: undefined,
+    isError: false,
+    refetch: vi.fn(),
+  }),
+}));
+
 vi.mock("@/shared/utils/download-file", () => ({
   downloadFile: vi.fn(),
 }));
@@ -264,7 +272,9 @@ describe("DocumentsCvView", () => {
     expect(screen.getByRole("heading", { level: 1, name: "Documentos y CV" })).toBeInTheDocument();
     expect(screen.getAllByText("Documentos y CV")).toHaveLength(1);
     expect(
-      screen.getByText("Sube tu CV para tenerlo disponible en el perfil y mantenerlo actualizado"),
+      screen.getByText(
+        "Gestiona tus CV y consulta su verificación automática para el radar de afinidad.",
+      ),
     ).toBeInTheDocument();
   });
 

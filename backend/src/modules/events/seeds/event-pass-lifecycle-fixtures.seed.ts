@@ -15,6 +15,51 @@ export const EVENT_PASS_LIFECYCLE_FIXTURES = [
   },
 ] as const;
 
+export interface RegistrationCancellationFixture {
+  readonly eventId: string;
+  readonly registrationId: string;
+  readonly title: string;
+  readonly dayOffset: number;
+  readonly capacity: number;
+  readonly initialStatus: 'confirmed' | 'cancelled';
+}
+
+export const REGISTRATION_CANCELLATION_FIXTURES: readonly RegistrationCancellationFixture[] =
+  [
+    {
+      eventId: '7b1c2d3e-4f5a-4b6c-8d9e-0f1a2b3c4d01',
+      registrationId: '8b1c2d3e-4f5a-4b6c-8d9e-0f1a2b3c4d01',
+      title: '[QA 09.6] Taller vigente cancelable',
+      dayOffset: 1,
+      capacity: 20,
+      initialStatus: 'confirmed',
+    },
+    {
+      eventId: '7b1c2d3e-4f5a-4b6c-8d9e-0f1a2b3c4d02',
+      registrationId: '8b1c2d3e-4f5a-4b6c-8d9e-0f1a2b3c4d02',
+      title: '[QA 09.6] Taller con inscripcion cancelada',
+      dayOffset: 1,
+      capacity: 20,
+      initialStatus: 'cancelled',
+    },
+    {
+      eventId: '7b1c2d3e-4f5a-4b6c-8d9e-0f1a2b3c4d03',
+      registrationId: '8b1c2d3e-4f5a-4b6c-8d9e-0f1a2b3c4d03',
+      title: '[QA 09.6] Taller cupo lleno para liberacion',
+      dayOffset: 1,
+      capacity: 1,
+      initialStatus: 'confirmed',
+    },
+    {
+      eventId: '7b1c2d3e-4f5a-4b6c-8d9e-0f1a2b3c4d04',
+      registrationId: '8b1c2d3e-4f5a-4b6c-8d9e-0f1a2b3c4d04',
+      title: '[QA 09.6] Taller fuera de plazo de cancelacion',
+      dayOffset: -1,
+      capacity: 20,
+      initialStatus: 'confirmed',
+    },
+  ];
+
 function getBoliviaCalendarDate(now: Date, dayOffset: number): Date {
   const parts = new Intl.DateTimeFormat('en-CA', {
     timeZone: 'America/La_Paz',
@@ -163,4 +208,68 @@ export async function seedEventPassLifecycleEvents(
     });
   }
   return EVENT_PASS_LIFECYCLE_FIXTURES.length;
+}
+
+export async function seedRegistrationCancellationEvents(
+  tx: Prisma.TransactionClient,
+  {
+    createdById,
+    categoryId,
+    modalityId,
+    originId,
+    statusId,
+    now = new Date(),
+  }: {
+    createdById: string;
+    categoryId: string;
+    modalityId: string;
+    originId: string;
+    statusId: string;
+    now?: Date;
+  },
+): Promise<number> {
+  for (const fixture of REGISTRATION_CANCELLATION_FIXTURES) {
+    const eventDate = getBoliviaCalendarDate(now, fixture.dayOffset);
+    const startTime = new Date('1970-01-01T09:00:00.000Z');
+    const endTime = new Date('1970-01-01T10:00:00.000Z');
+    await tx.event.upsert({
+      where: { id: fixture.eventId },
+      update: {
+        title: fixture.title,
+        description:
+          'Taller ficticio para validar escenarios de cancelacion y cupos en QA.',
+        instructorName: 'Equipo QA',
+        eventDate,
+        startTime,
+        endTime,
+        location: 'Aula 101, Facultad de Ciencias y Tecnología',
+        capacity: fixture.capacity,
+        supportThreshold: 0,
+        categoryId,
+        modalityId,
+        originId,
+        statusId,
+        createdById,
+      },
+      create: {
+        id: fixture.eventId,
+        title: fixture.title,
+        description:
+          'Taller ficticio para validar escenarios de cancelacion y cupos en QA.',
+        instructorName: 'Equipo QA',
+        eventDate,
+        startTime,
+        endTime,
+        location: 'Aula 101, Facultad de Ciencias y Tecnología',
+        capacity: fixture.capacity,
+        supportThreshold: 0,
+        categoryId,
+        modalityId,
+        originId,
+        statusId,
+        createdById,
+      },
+    });
+  }
+  return REGISTRATION_CANCELLATION_FIXTURES.length;
 }

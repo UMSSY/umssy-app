@@ -28,7 +28,7 @@ export function getAttendanceCheckInError(
   if (status === 422 && code === 'ATTENDANCE_PASS_CANCELLED') {
     return {
       kind: 'invalid',
-      message: 'La inscripción fue cancelada. Solicita un pase vigente.',
+      message: 'Pase inválido - Inscripción cancelada. Solicita un pase vigente.',
     };
   }
   if (status === 422 && code === 'ATTENDANCE_PASS_INVALID') {
@@ -59,7 +59,7 @@ export function getAttendanceCheckInError(
   if (status === 409 && code === 'ATTENDANCE_OUTSIDE_WINDOW') {
     return {
       kind: 'error',
-      message: 'El escaneo solo está disponible durante el horario del taller.',
+      message: 'Fuera de la ventana horaria de validación. El escaneo solo está disponible durante el horario del taller.',
     };
   }
   if (!status) {
