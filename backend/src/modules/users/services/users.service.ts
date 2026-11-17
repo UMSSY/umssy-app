@@ -6,6 +6,9 @@ import type { CompanyRecruiter } from '../types/company-recruiter.types.js';
 export class UsersService {
   constructor(private readonly usersRepository: UsersRepository) {}
 
+  findNamesByIds(ids: string[]) {
+    return this.usersRepository.findNamesByIds(ids);
+  }
   findManyWithActiveRoles(ids: string[]) {
     return this.usersRepository.findManyWithActiveRoles(ids);
   }

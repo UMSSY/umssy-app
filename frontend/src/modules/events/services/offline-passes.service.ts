@@ -72,3 +72,18 @@ export async function reconcileOfflinePasses(
   );
   return Boolean(updated && removed);
 }
+
+export async function removeOfflinePass(
+  registrationId: string,
+  accessToken: string,
+  signal?: AbortSignal,
+): Promise<void> {
+  await updateSessionOfflinePasses(accessToken, signal, (snapshot) => {
+    if (!snapshot?.passes.some(({ id }) => id === registrationId)) return;
+    return {
+      ...snapshot,
+      savedAt: new Date().toISOString(),
+      passes: snapshot.passes.filter(({ id }) => id !== registrationId),
+    };
+  });
+}

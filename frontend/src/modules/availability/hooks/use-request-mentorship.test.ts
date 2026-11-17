@@ -157,3 +157,11 @@ describe("useRequestMentorship", () => {
     expect(result.current.isChecking).toBe(false)
   })
 })
+
+ it("conserva el área del radar al iniciar la solicitud", async () => {
+    push.mockClear();
+    vi.spyOn(availabilityApi, "getMentorFreeBlocks").mockResolvedValue([freeBlock]);
+    const { result } = renderHook(() => useRequestMentorship("m1", "Cloud/DevOps"), createQueryWrapper());
+    await act(() => result.current.requestMentorship());
+    expect(push).toHaveBeenCalledWith("/mentors/m1/availability?area=Cloud%2FDevOps");
+ });

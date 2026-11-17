@@ -19,14 +19,16 @@ import { saveOfflinePass } from '../services/offline-passes.service';
 import { offlinePassesStore } from '../utils/offline-passes-store';
 import { MyPassesView } from './my-passes-view';
 
-vi.mock('../services/registrations.service', () => ({ registrationsService: { getMine: vi.fn(), getPass: vi.fn(), getFinished: vi.fn() } }));
+vi.mock('../services/registrations.service', () => ({ registrationsService: { getMine: vi.fn(), getPass: vi.fn(), getFinished: vi.fn(), cancel: vi.fn(),},}));
 const getMine = vi.mocked(registrationsService.getMine);
 const getFinished = vi.mocked(registrationsService.getFinished);
+const cancelRegistration = vi.mocked(registrationsService.cancel);
 const pass = { id: 'reg-1', eventName: 'React', date: '2026-10-20T00:00:00Z', startTime: '1970-01-01T09:00:00Z', endTime: '1970-01-01T12:00:00Z', location: 'Aula 101', status: 'Confirmada' };
 beforeEach(async () => {
   vi.useFakeTimers({ now: new Date('2026-10-19T12:00:00Z'), toFake: ['Date'] });
   getMine.mockReset();
   getFinished.mockReset();
+  cancelRegistration.mockReset();
   await saveAccessToken("session");
   vi.mocked(registrationsService.getPass).mockImplementation(async (id) => {
     const rows = await getMine.mock.results.at(-1)?.value;
@@ -634,7 +636,108 @@ describe("Mis pases", () => {
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument(),
     );
   });
+it('cancels registration via backend, updates the pass list and count, removes offline copy, and shows dismissible green banner', async () => {
+    vi.setSystemTime(new Date('2026-10-20T12:00:00Z'));
+    const secondPass = {
+      ...pass,
+      id: 'reg-2',
+      eventName: 'TypeScript Avanzado',
+    };
+    let currentList = [pass, secondPass];
+    getMine.mockImplementation(async () => currentList);
+    await saveOfflinePass(
+      { ...pass, qrToken: 'a'.repeat(64) },
+      'session',
+    );
+    cancelRegistration.mockImplementation(async (id) => {
+      currentList = currentList.filter((item) => item.id !== id);
+      return {
+        id,
+        eventId: 'evt-1',
+        status: 'cancelled',
+        qrToken: 'a'.repeat(64),
+        registeredAt: '2026-10-01T10:00:00Z',
+        cancelledAt: '2026-10-20T12:00:00Z',
+      };
+    });
 
+    render(<MyPassesView />);
+    expect(await screen.findByText('2 pases')).toBeInTheDocument();
+
+    const cancelButtons = screen.getAllByRole('button', {
+      name: 'Cancelar inscripción',
+    });
+    fireEvent.click(cancelButtons[0]);
+
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Sí, cancelar' }),
+    );
+
+    await waitFor(() =>
+      expect(cancelRegistration).toHaveBeenCalledWith('reg-1', 'session'),
+    );
+    expect(
+      await screen.findByText(
+        'Tu inscripción ha sido cancelada correctamente.',
+      ),
+    ).toBeInTheDocument();
+    expect(await screen.findByText('1 pase')).toBeInTheDocument();
+    expect(screen.queryByText('React')).not.toBeInTheDocument();
+    expect(
+      within(
+        screen.getByRole('region', { name: 'Tus inscripciones' }),
+      ).getByText('TypeScript Avanzado'),
+    ).toBeInTheDocument();
+
+    const offlineSnapshot = await offlinePassesStore.load('session');
+    expect(offlineSnapshot?.passes ?? []).toHaveLength(0);
+
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Cerrar notificación' }),
+    );
+    expect(
+      screen.queryByText('Tu inscripción ha sido cancelada correctamente.'),
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows an error alert and keeps the registration card when cancellation fails on the backend', async () => {
+    vi.setSystemTime(new Date('2026-10-20T12:00:00Z'));
+    getMine.mockResolvedValue([pass]);
+    cancelRegistration.mockRejectedValue({
+      isAxiosError: true,
+      response: {
+        status: 422,
+        data: {
+          statusCode: 422,
+          ok: false,
+          code: 'CANCELLATION_NOT_ALLOWED',
+          detail: 'Event already started',
+          data: null,
+        },
+      },
+    });
+
+    render(<MyPassesView />);
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Cancelar inscripción' }),
+    );
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Sí, cancelar' }),
+    );
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'No es posible cancelar la inscripción una vez iniciado el evento.',
+    );
+    expect(
+      screen.queryByText('Tu inscripción ha sido cancelada correctamente.'),
+    ).not.toBeInTheDocument();
+    expect(
+      within(
+        screen.getByRole('region', { name: 'Tus inscripciones' }),
+      ).getByText('React'),
+    ).toBeInTheDocument();
+    expect(screen.getByText('1 pase')).toBeInTheDocument();
+  });
 });
 
 describe('Mis pases sin conexión', () => {

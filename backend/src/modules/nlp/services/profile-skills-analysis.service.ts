@@ -29,6 +29,16 @@ export class ProfileSkillsAnalysisService {
     private readonly events: ProfileSkillsEvents,
   ) {}
 
+  private unsubscribe?: () => void;
+  onModuleInit() {
+    this.unsubscribe = this.events.onSourceChange((userId) =>
+      this.refreshAfterChange(userId),
+    );
+  }
+  onModuleDestroy() {
+    this.unsubscribe?.();
+  }
+
   getProcessingState(userId: string) {
     return this.results.findState(userId);
   }
