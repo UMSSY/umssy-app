@@ -25,7 +25,7 @@ export class NotificationsService {
   ) {}
 
   async notify(request: NotifyRequest): Promise<NotifyResult> {
-    const { recipientIds, actorId, type, payload, actionUrl, groupKey } = request;
+    const { recipientIds, actorId, type, payload, actionUrl, groupKey, renderMail } = request;
 
     const finalRecipients = recipientIds.filter((id) => id !== actorId);
     if (finalRecipients.length === 0) {
@@ -103,14 +103,13 @@ export class NotificationsService {
     }
 
     if (emailTargets.length > 0) {
-      const renderMail = template.renderMail;
       try {
         const email = await this.mailDispatcher.dispatchToUsers(
           emailTargets,
           title,
           body,
           actionUrl,
-          renderMail ? (context) => renderMail(payload, context) : undefined,
+          renderMail,
         );
         emailStatus = email.status;
         deliveries.push(...email.deliveries);

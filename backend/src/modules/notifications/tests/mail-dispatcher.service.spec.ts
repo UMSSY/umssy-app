@@ -66,7 +66,7 @@ describe('MailDispatcherService', () => {
 
   it('usa la plantilla propia del tipo con el nombre del destinatario', async () => {
     const renderMail = vi.fn(({ recipientName, actionUrl }) => ({
-      template: 'survey-reminder' as const,
+      mjml: '<mjml>survey-reminder</mjml>',
       subject: 'Recordatorio',
       text: `Hola ${recipientName}`,
       values: { recipientName, actionUrl },

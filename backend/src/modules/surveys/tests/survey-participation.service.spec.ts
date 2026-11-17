@@ -150,6 +150,7 @@ describe('SurveyParticipationService', () => {
         },
         actionUrl: expect.stringMatching(/\/surveys\/survey-1$/),
         groupKey: 'survey-reminder:survey-1',
+        renderMail: expect.any(Function),
       });
       expect(repository.updateLastReminderSent).toHaveBeenCalledWith(
         'survey-1',

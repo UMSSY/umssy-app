@@ -10,7 +10,6 @@ import type { SurveyVariationEvaluationResult } from '../types/survey-variation-
 import type { VariationShift } from '../types/variation-shift.type.js';
 import { distributePercentages } from '../utils/distribute-percentages.js';
 
-
 @Injectable()
 export class SurveyVariationEvaluatorService {
   constructor(private readonly surveysRepository: SurveysRepository) {}
@@ -30,7 +29,6 @@ export class SurveyVariationEvaluatorService {
       options?.questionIds ?? (config?.questionIds as string[] | null) ?? null;
 
     const currentPeriod =
-      options?.academicPeriod ??
       (options?.closesAt
         ? getAcademicPeriod(options.closesAt.toISOString())
         : undefined) ??

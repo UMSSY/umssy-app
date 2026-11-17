@@ -1,16 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { loadMailTemplate } from '../../mail/helpers/load-mail-template.js';
 import { MailService } from '../../mail/services/mail.service.js';
-import type { MailTemplateName } from '../../mail/types/mail-template-name.types.js';
 import { NotificationUserLookupRepository } from '../repositories/notification-user-lookup.repository.js';
 import type { ChannelDispatchResult } from '../types/channel-dispatch-result.type.js';
 import type { NotificationMailContent } from '../types/notification-mail-content.type.js';
-import type { NotificationMailContext } from '../types/notification-mail-context.type.js';
+import type { NotificationMailRenderer } from '../types/notification-mail-renderer.type.js';
 import type { NotificationRecipientDelivery } from '../types/notification-recipient-delivery.type.js';
 import { buildRecipientName } from '../utils/build-recipient-name.js';
 import { summarizeChannelStatus } from '../utils/summarize-channel-status.js';
-
-const GENERIC_NOTIFICATION_TEMPLATE: MailTemplateName = 'notification';
 
 @Injectable()
 export class MailDispatcherService {
@@ -26,14 +23,12 @@ export class MailDispatcherService {
     title: string,
     body: string,
     actionUrl: string,
-    renderMail?: (context: NotificationMailContext) => NotificationMailContent,
+    renderMail?: NotificationMailRenderer,
   ): Promise<ChannelDispatchResult> {
     const deliveries: NotificationRecipientDelivery[] = [];
-    const templates = new Map<MailTemplateName, Promise<string>>();
-    const loadTemplate = (name: MailTemplateName) => {
-      if (!templates.has(name)) templates.set(name, loadMailTemplate(name));
-      return templates.get(name)!;
-    };
+    let genericTemplate: Promise<string> | undefined;
+    const loadGenericTemplate = () =>
+      (genericTemplate ??= loadMailTemplate('notification'));
 
     for (const userId of userIds) {
       try {
@@ -49,7 +44,7 @@ export class MailDispatcherService {
               actionUrl,
             })
           : {
-              template: GENERIC_NOTIFICATION_TEMPLATE,
+              mjml: await loadGenericTemplate(),
               subject: title,
               text: body,
               values: { title, body, actionUrl },
@@ -59,7 +54,7 @@ export class MailDispatcherService {
           to: contact.email,
           subject: content.subject,
           text: content.text,
-          mjml: await loadTemplate(content.template),
+          mjml: content.mjml,
           values: content.values,
         });
         deliveries.push({ recipientId: userId, channel: 'email', status: 'sent' });

@@ -1,5 +1,5 @@
 import { REGISTERED_USERS_PDF } from '../constants/report-pdf.constants.js';
-import { ReportPdfService, formatReportDateTime } from '../services/report-pdf.service.js';
+import { ReportPdfService } from '../services/report-pdf.service.js';
 import type { ReportPdfContent } from '../types/report-pdf-content.types.js';
 
 const GENERATED_AT = new Date('2026-11-13T18:30:00.000Z');
@@ -50,7 +50,8 @@ describe('ReportPdfService', () => {
     expect(text).toContain('(No hay resultados disponibles para exportar.)');
   });
 
-  it('formatea la fecha de generación en hora de Bolivia', () => {
-    expect(formatReportDateTime(GENERATED_AT)).toBe('13/11/2026 14:30');
+  it('muestra la fecha de generación en hora de Bolivia', () => {
+    const text = service.render(content([row(1)])).toString('latin1');
+    expect(text).toContain('(13/11/2026 14:30)');
   });
 });

@@ -193,7 +193,11 @@ describe('SurveyLifecycleWorkerService', () => {
     expect(variationEvaluator.evaluateSurvey).toHaveBeenNthCalledWith(
       1,
       'survey-closed-2',
-      expect.objectContaining({ questionIds: ['q-1', 'q-2'] }),
+      {
+        closesAt: new Date('2026-11-14T23:59:59Z'),
+        threshold: 15,
+        questionIds: ['q-1', 'q-2'],
+      },
     );
     expect(variationEvaluator.evaluateSurvey).toHaveBeenNthCalledWith(
       2,
@@ -240,6 +244,7 @@ describe('SurveyLifecycleWorkerService', () => {
         /\/backoffice\/surveys\/statistics\/survey-closing-1$/,
       ),
       groupKey: 'survey-lifecycle:closing-soon:survey-closing-1',
+      renderMail: expect.any(Function),
     });
     expect(repository.markClosingSoonNotified).toHaveBeenCalledWith(
       'survey-closing-1',
