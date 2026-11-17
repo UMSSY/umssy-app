@@ -181,6 +181,7 @@ model User {
   sentRequests         ConnectionRequest[]       @relation("SentConnectionRequests")
   receivedRequests     ConnectionRequest[]       @relation("ReceivedConnectionRequests")
   passwordResetOtps    PasswordResetOtp[]
+  passwordHistories    PasswordHistory[]
   auditEvents          AuditEvent[]              @relation("AuditEventActor")
   revertedValidations  DocumentValidation[]      @relation("DocumentValidationRevertedBy")
   jobApplications      JobApplication[]
@@ -1080,6 +1081,18 @@ model UserPresence {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_presences")
+}
+
+model PasswordHistory {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @map("user_id") @db.Uuid
+  passwordHash String   @map("password_hash") @db.VarChar(255)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt(sort: Desc), id(sort: Desc)])
+  @@map("password_histories")
 }
 
 model PasswordResetOtp {

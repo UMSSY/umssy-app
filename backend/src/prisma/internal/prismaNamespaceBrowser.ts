@@ -108,6 +108,7 @@ export const ModelName = {
   ChatUserBlock: 'ChatUserBlock',
   ConnectionRequest: 'ConnectionRequest',
   UserPresence: 'UserPresence',
+  PasswordHistory: 'PasswordHistory',
   PasswordResetOtp: 'PasswordResetOtp',
   MentorParticipationAttemptLimit: 'MentorParticipationAttemptLimit',
   JobApplicationStatus: 'JobApplicationStatus',
@@ -935,6 +936,16 @@ export const UserPresenceScalarFieldEnum = {
 } as const
 
 export type UserPresenceScalarFieldEnum = (typeof UserPresenceScalarFieldEnum)[keyof typeof UserPresenceScalarFieldEnum]
+
+
+export const PasswordHistoryScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  passwordHash: 'passwordHash',
+  createdAt: 'createdAt'
+} as const
+
+export type PasswordHistoryScalarFieldEnum = (typeof PasswordHistoryScalarFieldEnum)[keyof typeof PasswordHistoryScalarFieldEnum]
 
 
 export const PasswordResetOtpScalarFieldEnum = {
