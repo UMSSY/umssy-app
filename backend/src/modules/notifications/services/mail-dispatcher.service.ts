@@ -39,7 +39,7 @@ export class MailDispatcherService {
         }
 
         const content: NotificationMailContent = renderMail
-          ? renderMail({
+          ? await renderMail({
               recipientName: buildRecipientName(contact.firstName, contact.lastName),
               actionUrl,
             })

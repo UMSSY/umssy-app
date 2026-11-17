@@ -3,4 +3,4 @@ import type { NotificationMailContext } from './notification-mail-context.type.j
 
 export type NotificationMailRenderer = (
   context: NotificationMailContext,
-) => NotificationMailContent;
+) => Promise<NotificationMailContent>;

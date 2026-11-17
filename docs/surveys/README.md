@@ -44,7 +44,8 @@ flowchart LR
     PSV --> NT[notification/survey-notifications]
     W --> NT
     NT --> ZOD[notification/survey-notification-payloads.schema]
-    NT --> ML[notification/survey-notification-mails + survey-mail-templates.constants]
+    NT --> ML[notification/survey-notification-mails]
+    ML --> TPL[notification/mjml/*.mjml]
     SS --> R[(SurveysRepository)]
     PSV --> R
     W --> R
@@ -53,6 +54,7 @@ flowchart LR
   AUD --> US[users: UsersService]
   AUD --> AG[access-requests: ApprovedGraduateCareersService]
   NT --> N[notifications: NotificationsService.notify]
+  ML --> LMT[mail: loadMailTemplate]
   SS --> RH[reports: ReportHistoryService]
   R --> DB[(surveys, survey_alert_configs, survey_responses ...)]
 ```
@@ -65,8 +67,8 @@ Las notificaciones de encuestas pertenecen al dominio `surveys` y viven en `back
 | --- | --- |
 | `survey-notifications.ts` | Construye la petición para `NotificationsService.notify()` (`type`, `payload` validado y `renderMail`) de `SURVEY_REMINDER`, `SURVEY_CLOSING_SOON`, `SURVEY_CLOSED` y `SURVEY_VARIATION_ALERT` |
 | `survey-notification-payloads.schema.ts` | Esquemas Zod de cada payload (título 1–150 caracteres, fecha formateada no vacía, respuestas enteras ≥ 0, umbral 1–50, resumen no vacío). Un payload inválido lanza antes de llamar a `notify()` |
-| `survey-notification-mails.ts` | Asunto, texto plano y valores de cada correo; toma el MJML de `survey-mail-templates.constants.ts` |
-| `survey-mail-templates.constants.ts` (MJML de recordatorio, cierre próximo, cierre y alerta de variación) | Contenido de cada correo como constantes TypeScript, compiladas a `dist` junto al resto del código; `mail` lo envuelve con `layout.mjml` y `header.mjml` |
+| `survey-notification-mails.ts` | Asunto, texto plano y valores de cada correo; lee su plantilla con `loadMailTemplate` de `mail` |
+| `mjml/survey-reminder.mjml`, `mjml/survey-closing-soon.mjml`, `mjml/survey-closed.mjml`, `mjml/survey-variation-alert.mjml` | Contenido MJML de cada correo; `mail` lo envuelve con `layout.mjml` y `header.mjml`. El build los copia a `dist/modules/surveys/notification/mjml/` (`scripts/copy-mail-templates.ts` y `assets` de `nest-cli.json`) |
 
 El módulo `notifications` es infraestructura central: guarda la notificación in-app, emite por WebSocket y despacha push y correo según el catálogo `notification_types` y las preferencias del destinatario. Devuelve el estado por canal y el detalle por destinatario (`deliveries`), que `surveys` usa para contar correos entregados y fallidos.
 
@@ -233,13 +235,15 @@ Swagger (`/docs`) documenta cada endpoint con `operationId`, Bearer JWT, roles, 
 | users | `UsersService.findActiveContactsByRoles` | Usuarios activos por rol de la audiencia |
 | access-requests | `ApprovedGraduateCareersService.findApprovedUserIds` | Cohorte por carrera y año de egreso |
 | reports | `ReportHistoryService.registerGeneratedReport`, `getAcademicPeriod` | Historial del PDF y cálculo de semestre |
-| mail (vía notifications) | `MailService` | Envío del MJML de `surveys/notification/` |
+| mail | `loadMailTemplate` | Lectura de las plantillas de `surveys/notification/mjml/` |
+| mail (vía notifications) | `MailService` | Envío del MJML de `surveys/notification/mjml/` |
 
 ## Dependencias
 
 | Dirección | Módulo | Uso |
 | --- | --- | --- |
 | Usa | [notifications](../notifications/README.md) | Envío in-app, push y correo |
+| Usa | [mail](../mail/README.md) | `loadMailTemplate` para leer las plantillas `.mjml` del dominio |
 | Usa | [users](../users/README.md) | Contactos activos por rol |
 | Usa | [access-requests](../access-requests/README.md) | Titulados aprobados por carrera y gestión |
 | Usa | [reports](../reports/README.md) | Historial de reportes y semestres académicos |
@@ -264,7 +268,7 @@ Tablas `surveys`, `survey_alert_configs`, `survey_questions`, `survey_question_o
 - Recordatorio manual por correo y push solo a quienes no respondieron (`POST /surveys/:id/reminders`), con registro de `last_reminder_sent_at` y resultado por canal.
 - Configuración de alertas de variación por encuesta (`SurveyAlertConfig`, `GET`/`PUT /surveys/:id/alert-config`) y evaluador de variación entre semestres.
 - Worker de ciclo de vida que avisa al creador del cierre próximo (72 h), del cierre y de las variaciones significativas.
-- Notificaciones de encuestas propias del dominio en `surveys/notification/`: payloads validados con Zod, renderizado de correos y plantillas MJML como constantes TypeScript.
+- Notificaciones de encuestas propias del dominio en `surveys/notification/`: payloads validados con Zod, renderizado de correos y plantillas como archivos `.mjml` en `surveys/notification/mjml/`, leídos con `loadMailTemplate` y copiados a `dist` durante el build.
 - El semestre de la alerta de variación se deriva de la fecha de cierre y no de la gestión de la cohorte.
 - Contratos Swagger completos de todos los endpoints de `SurveysController`.
 - `SurveyEmploymentResponsesService` y orden configurable en `CareersService` para alimentar los mapas de calor.

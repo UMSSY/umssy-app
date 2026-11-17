@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { loadMailTemplate } from '../../mail/helpers/load-mail-template.js';
 import type { NotificationMailContent } from '../../notifications/types/notification-mail-content.type.js';
 import type { NotificationMailContext } from '../../notifications/types/notification-mail-context.type.js';
 import type { NotificationPayloadMap } from '../../notifications/types/notification-payload-map.type.js';
@@ -7,34 +7,29 @@ import type { NotificationType } from '../../notifications/types/notification-ty
 const GRADUATE_FALLBACK_NAME = 'titulado';
 const ADMIN_FALLBACK_NAME = 'Administrador';
 
-const loadSurveyMailTemplate = (name: string): string =>
-  readFileSync(new URL(`./mjml/${name}.mjml`, import.meta.url), 'utf8');
+const loadSurveyMailTemplate = (name: string): Promise<string> =>
+  loadMailTemplate(new URL(`./mjml/${name}.mjml`, import.meta.url));
 
-const SURVEY_REMINDER_MAIL_TEMPLATE = loadSurveyMailTemplate('survey-reminder');
-const SURVEY_CLOSING_SOON_MAIL_TEMPLATE = loadSurveyMailTemplate('survey-closing-soon');
-const SURVEY_CLOSED_MAIL_TEMPLATE = loadSurveyMailTemplate('survey-closed');
-const SURVEY_VARIATION_ALERT_MAIL_TEMPLATE = loadSurveyMailTemplate('survey-variation-alert');
-
-export function renderSurveyReminderMail(
+export async function renderSurveyReminderMail(
   { surveyTitle, closesAtFormatted }: NotificationPayloadMap[NotificationType.SURVEY_REMINDER],
   { recipientName, actionUrl }: NotificationMailContext,
-): NotificationMailContent {
+): Promise<NotificationMailContent> {
   const name = recipientName || GRADUATE_FALLBACK_NAME;
   return {
-    mjml: SURVEY_REMINDER_MAIL_TEMPLATE,
+    mjml: await loadSurveyMailTemplate('survey-reminder'),
     subject: `Recordatorio: responde la encuesta «${surveyTitle}»`,
     text: `Hola ${name}, aún no respondiste la encuesta «${surveyTitle}». Cierra el: ${closesAtFormatted} Responde en: ${actionUrl}`,
     values: { recipientName: name, surveyTitle, closesAtFormatted, actionUrl },
   };
 }
 
-export function renderSurveyClosingSoonMail(
+export async function renderSurveyClosingSoonMail(
   { surveyTitle, closesAtFormatted, responsesCount }: NotificationPayloadMap[NotificationType.SURVEY_CLOSING_SOON],
   { recipientName, actionUrl }: NotificationMailContext,
-): NotificationMailContent {
+): Promise<NotificationMailContent> {
   const name = recipientName || ADMIN_FALLBACK_NAME;
   return {
-    mjml: SURVEY_CLOSING_SOON_MAIL_TEMPLATE,
+    mjml: await loadSurveyMailTemplate('survey-closing-soon'),
     subject: `La encuesta «${surveyTitle}» cierra en 3 días`,
     text: `Hola ${name}, este es un aviso sobre una encuesta que creaste. La encuesta «${surveyTitle}» cierra el ${closesAtFormatted}. Respuestas hasta ahora: ${responsesCount}. Ver analíticas en: ${actionUrl}`,
     values: {
@@ -47,13 +42,13 @@ export function renderSurveyClosingSoonMail(
   };
 }
 
-export function renderSurveyClosedMail(
+export async function renderSurveyClosedMail(
   { surveyTitle, closesAtFormatted, responsesCount }: NotificationPayloadMap[NotificationType.SURVEY_CLOSED],
   { recipientName, actionUrl }: NotificationMailContext,
-): NotificationMailContent {
+): Promise<NotificationMailContent> {
   const name = recipientName || ADMIN_FALLBACK_NAME;
   return {
-    mjml: SURVEY_CLOSED_MAIL_TEMPLATE,
+    mjml: await loadSurveyMailTemplate('survey-closed'),
     subject: `La encuesta «${surveyTitle}» ya cerró`,
     text: `Hola ${name}, este es un aviso sobre una encuesta que creaste. El periodo de recepción de respuestas para la encuesta «${surveyTitle}» ha concluido. Cerró el: ${closesAtFormatted}. Respuestas recibidas: ${responsesCount} en total. Ver resultados en: ${actionUrl}`,
     values: {
@@ -66,13 +61,13 @@ export function renderSurveyClosedMail(
   };
 }
 
-export function renderSurveyVariationAlertMail(
+export async function renderSurveyVariationAlertMail(
   { surveyTitle, threshold, summaryText }: NotificationPayloadMap[NotificationType.SURVEY_VARIATION_ALERT],
   { recipientName, actionUrl }: NotificationMailContext,
-): NotificationMailContent {
+): Promise<NotificationMailContent> {
   const name = recipientName || ADMIN_FALLBACK_NAME;
   return {
-    mjml: SURVEY_VARIATION_ALERT_MAIL_TEMPLATE,
+    mjml: await loadSurveyMailTemplate('survey-variation-alert'),
     subject: `Alerta de variación significativa en «${surveyTitle}»`,
     text: `Hola ${name}, detectamos cambios significativos en los resultados de la encuesta «${surveyTitle}» frente al semestre anterior.\n${summaryText}\nVer analíticas en: ${actionUrl}`,
     values: {
