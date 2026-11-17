@@ -1,4 +1,4 @@
-import { radarPublishedPayloadSchema } from '../../notifications/requests/radar-published-payload.schema.js';
+import { radarPublishedPayloadSchema } from '../notification/radar-published-payload.schema.js';
 import { NotificationsService } from '../../notifications/services/notifications.service.js';
 import { NotificationType } from '../../notifications/types/notification-type.enum.js';
 import { ProfileSkillsAnalysisService } from '../../nlp/services/profile-skills-analysis.service.js';

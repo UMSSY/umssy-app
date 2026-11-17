@@ -27,4 +27,4 @@ sequenceDiagram
 - Central creation and inbox ownership for radar publication notices.
 - Concurrent duplicate prevention per recipient and snapshot, preserving historical navigation.
 
-The radar publication payload is validated before dispatch with `radarPublishedPayloadSchema` from the Notifications domain. `radarVersion` must be a positive integer string and `publishedAt` an ISO datetime; unknown fields are rejected. Validation errors are handled with other post-commit delivery failures and never revert the snapshot.
+The radar publication payload is validated before dispatch with `radarPublishedPayloadSchema` owned by the producing Radar domain at `radar-integration/notification/radar-published-payload.schema.ts`. `radarVersion` must be a positive integer string and `publishedAt` an ISO datetime; unknown fields are rejected. Validation errors are handled with other post-commit delivery failures and never revert the snapshot.
