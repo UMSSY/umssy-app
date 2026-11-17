@@ -57,7 +57,7 @@ describe('SurveyVariationEvaluatorService', () => {
     } as any);
 
     const result = await service.evaluateSurvey(mockSurveyId, {
-      academicPeriod: 'II-2024',
+      closesAt: new Date('2024-11-15T12:00:00Z'),
     });
 
     expect(result.hasShifts).toBe(false);
@@ -108,7 +108,7 @@ describe('SurveyVariationEvaluatorService', () => {
     } as any);
 
     const result = await service.evaluateSurvey(mockSurveyId, {
-      academicPeriod: 'II-2024',
+      closesAt: new Date('2024-11-15T12:00:00Z'),
       threshold: 10,
     });
 
@@ -190,12 +190,27 @@ describe('SurveyVariationEvaluatorService', () => {
     } as any);
 
     const result = await service.evaluateSurvey(mockSurveyId, {
-      academicPeriod: 'II-2024',
+      closesAt: new Date('2024-11-15T12:00:00Z'),
       questionIds: ['q-1'],
     });
 
     expect(result.hasShifts).toBe(true);
     // Only q-1 was monitored, so shifts only contains q-1
     expect(result.shifts.every((s) => s.questionId === 'q-1')).toBe(true);
+  });
+  it('compara el semestre de cierre con el semestre anterior', async () => {
+    vi.mocked(repository.findAlertConfig!).mockResolvedValue(null);
+    vi.mocked(repository.findStatistics!).mockResolvedValue({
+      _count: { responses: 0 },
+      questions: [],
+    } as any);
+
+    const result = await service.evaluateSurvey(mockSurveyId, {
+      closesAt: new Date('2024-11-15T12:00:00Z'),
+    });
+
+    expect(result.currentPeriod).toBe('II-2024');
+    expect(result.previousPeriod).toBe('I-2024');
+    expect(repository.findStatistics).toHaveBeenCalledTimes(2);
   });
 });

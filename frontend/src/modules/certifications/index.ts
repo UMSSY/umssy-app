@@ -4,3 +4,4 @@ export { CertificationProfileSection } from "./components/certification-profile-
 export { useCertifications } from "./hooks/use-certifications";
 
 export { certificationsService } from "./services/certifications.service";
+export { CertificationGuideStep } from "./components/certification-guide-step";

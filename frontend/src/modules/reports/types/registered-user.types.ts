@@ -1,4 +1,4 @@
-import type { DocumentType } from "@/modules/access-request";
+import type { DocumentType } from "@/modules/access-requests";
 import type { RoleTag } from "@/modules/auth";
 
 export interface RegisteredUser {

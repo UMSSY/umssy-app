@@ -8,6 +8,7 @@ import { NotificationUserLookupRepository } from '../repositories/notification-u
 import { PushDispatcherService } from '../services/push-dispatcher.service.js';
 import { MailDispatcherService } from '../services/mail-dispatcher.service.js';
 import { NotificationGateway } from '../gateways/notification.gateway.js';
+import { AppVisibilityService } from '../services/app-visibility.service.js';
 import { NotificationType } from '../types/notification-type.enum.js';
 
 interface MockNotificationsRepo {
@@ -35,6 +36,10 @@ interface MockGateway {
   emitToUser: ReturnType<typeof vi.fn>;
 }
 
+interface MockAppVisibilityService {
+  isVisible: ReturnType<typeof vi.fn>;
+}
+
 describe('NotificationsService', () => {
   let service: NotificationsService;
 
@@ -44,6 +49,7 @@ describe('NotificationsService', () => {
   let mockPushDispatcher: MockPushDispatcher;
   let mockMailDispatcher: MockMailDispatcher;
   let mockGateway: MockGateway;
+  let mockAppVisibilityService: MockAppVisibilityService;
 
   const validPayload = {
     counterpartName: 'Test',
@@ -64,13 +70,14 @@ describe('NotificationsService', () => {
         sendsPush: true,
         sendsEmail: true,
       }),
-      createMany: vi.fn().mockResolvedValue(1),
+      createMany: vi.fn().mockResolvedValue([{ id: 'notification-1', recipientId: 'user-2' }]),
     };
     mockPreferencesRepo = { findManyByUserIds: vi.fn().mockResolvedValue([]) };
     mockUserLookupRepo = { hasBlockBetween: vi.fn().mockResolvedValue(false) };
     mockPushDispatcher = { dispatchToUsers: vi.fn().mockResolvedValue({ status: 'sent', deliveries: [] }) };
     mockMailDispatcher = { dispatchToUsers: vi.fn().mockResolvedValue({ status: 'sent', deliveries: [] }) };
     mockGateway = { emitToUser: vi.fn() };
+    mockAppVisibilityService = { isVisible: vi.fn().mockReturnValue(false) };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -81,6 +88,7 @@ describe('NotificationsService', () => {
         { provide: PushDispatcherService, useValue: mockPushDispatcher },
         { provide: MailDispatcherService, useValue: mockMailDispatcher },
         { provide: NotificationGateway, useValue: mockGateway },
+        { provide: AppVisibilityService, useValue: mockAppVisibilityService },
       ],
     }).compile();
 
@@ -135,8 +143,11 @@ describe('NotificationsService', () => {
       { userId: 'user-3', pushEnabled: false, emailEnabled: true },
     ]);
 
-    mockNotificationsRepo.createMany.mockImplementation((data: unknown[]) =>
-      Promise.resolve(data.length),
+    mockNotificationsRepo.createMany.mockImplementation(
+      (data: { recipientId: string }[]) =>
+        Promise.resolve(
+          data.map((item) => ({ id: `notification-${item.recipientId}`, recipientId: item.recipientId })),
+        ),
     );
 
     const result = await service.notify({
@@ -155,6 +166,7 @@ describe('NotificationsService', () => {
       expect.any(String),
       expect.any(String),
       undefined,
+      expect.any(Map),
     );
 
     expect(mockMailDispatcher.dispatchToUsers).toHaveBeenCalledWith(
@@ -185,7 +197,7 @@ describe('NotificationsService', () => {
     expect(result.emailStatus).toBe('sent');
   });
 
-  it('usa la plantilla de correo del tipo y devuelve la entrega por destinatario y canal', async () => {
+  it('entrega al despachador de correo el renderizador del dominio y devuelve la entrega por destinatario y canal', async () => {
     mockNotificationsRepo.findTypeByCode.mockResolvedValue({
       id: 'type-reminder',
       code: 'SURVEY_REMINDER',
@@ -203,6 +215,7 @@ describe('NotificationsService', () => {
       status: 'sent',
       deliveries: [{ recipientId: 'user-2', channel: 'email', status: 'sent' }],
     });
+    const renderMail = vi.fn();
 
     const result = await service.notify({
       recipientIds: ['user-2'],
@@ -210,25 +223,75 @@ describe('NotificationsService', () => {
       type: NotificationType.SURVEY_REMINDER,
       payload: { surveyTitle: 'Empleabilidad', closesAtFormatted: '30/11/2026 20:00.' },
       actionUrl: 'http://localhost:3000/surveys/survey-1',
+      renderMail,
     });
 
-    const renderMail = mockMailDispatcher.dispatchToUsers.mock.calls[0]?.[4];
-    expect(
-      renderMail({ recipientName: 'Ana Rojas', actionUrl: 'http://localhost:3000/surveys/survey-1' }),
-    ).toEqual({
-      template: 'survey-reminder',
-      subject: 'Recordatorio: responde la encuesta «Empleabilidad»',
-      text: 'Hola Ana Rojas, aún no respondiste la encuesta «Empleabilidad». Cierra el: 30/11/2026 20:00. Responde en: http://localhost:3000/surveys/survey-1',
-      values: {
-        recipientName: 'Ana Rojas',
-        surveyTitle: 'Empleabilidad',
-        closesAtFormatted: '30/11/2026 20:00.',
-        actionUrl: 'http://localhost:3000/surveys/survey-1',
-      },
-    });
+    expect(mockMailDispatcher.dispatchToUsers).toHaveBeenCalledWith(
+      ['user-2'],
+      expect.any(String),
+      expect.any(String),
+      'http://localhost:3000/surveys/survey-1',
+      renderMail,
+    );
     expect(result.deliveries).toEqual([
       { recipientId: 'user-2', channel: 'push', status: 'skipped' },
       { recipientId: 'user-2', channel: 'email', status: 'sent' },
     ]);
+  });
+
+  it('no debe enviar push a un destinatario con la app visible', async () => {
+    mockPreferencesRepo.findManyByUserIds.mockResolvedValue([
+      { userId: 'user-2', pushEnabled: true, emailEnabled: false },
+      { userId: 'user-3', pushEnabled: true, emailEnabled: false },
+    ]);
+    mockAppVisibilityService.isVisible.mockImplementation(
+      (userId: string) => userId === 'user-2',
+    );
+
+    await service.notify({
+      recipientIds: ['user-2', 'user-3'],
+      actorId: 'user-1',
+      type: NotificationType.APPOINTMENT_BOOKED,
+      payload: validPayload,
+      actionUrl: '/test',
+    });
+
+    expect(mockPushDispatcher.dispatchToUsers).toHaveBeenCalledWith(
+      ['user-3'],
+      expect.any(String),
+      expect.any(String),
+      expect.any(String),
+      undefined,
+      expect.any(Map),
+    );
+    expect(mockGateway.emitToUser).toHaveBeenCalledTimes(2);
+    expect(mockGateway.emitToUser).toHaveBeenCalledWith(
+      'user-2',
+      'notification:new',
+      expect.objectContaining({
+        typeCode: NotificationType.APPOINTMENT_BOOKED,
+        actionUrl: '/test',
+      }),
+    );
+  });
+
+  it('debe pasar al push el id del aviso creado para cada destinatario', async () => {
+    mockPreferencesRepo.findManyByUserIds.mockResolvedValue([
+      { userId: 'user-2', pushEnabled: true, emailEnabled: false },
+    ]);
+    mockNotificationsRepo.createMany.mockResolvedValue([
+      { id: 'notification-9', recipientId: 'user-2' },
+    ]);
+
+    await service.notify({
+      recipientIds: ['user-2'],
+      actorId: 'user-1',
+      type: NotificationType.APPOINTMENT_BOOKED,
+      payload: validPayload,
+      actionUrl: '/appointments',
+    });
+
+    const notificationIds = mockPushDispatcher.dispatchToUsers.mock.calls[0][5] as Map<string, string>;
+    expect(notificationIds.get('user-2')).toBe('notification-9');
   });
 });
