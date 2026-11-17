@@ -1,11 +1,6 @@
 import { Button } from "@/components/ui/button";
 
-interface ReactivateApplicationButtonProps {
-  applicationId: string;
-  reactivatingId?: string | null;
-  onReactivate: (applicationId: string) => void;
-  className?: string;
-}
+import type { ReactivateApplicationButtonProps } from "../types/reactivate-application-button-props.types";
 
 export function ReactivateApplicationButton({
   applicationId,

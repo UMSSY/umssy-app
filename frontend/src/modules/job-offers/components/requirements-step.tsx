@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { DetectedSkillsChips } from "@/modules/profile/components/detected-skills-chips";
+import { DetectedSkillsChips } from "@/modules/profile";
 import {
   FIELD_FOCUS_CLASS,
   MAX_DESCRIPTION_CHARS,
