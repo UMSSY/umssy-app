@@ -1,5 +1,5 @@
 import type { RoleTag } from "@/modules/auth";
-import type { DocumentType } from "@/modules/access-request";
+import type { DocumentType } from "@/modules/access-requests";
 import type { AcademicPeriod } from "./registered-user.types";
 
 export interface RejectedUser {

@@ -1,7 +1,8 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -38,6 +39,7 @@ import {
 } from '../services/chat-api';
 import { getChatSocket } from '../services/chat-socket';
 import { useChatConnection } from '../hooks/use-chat-connection';
+import { useConversationVisibility } from '../hooks/use-conversation-visibility';
 
 interface SocketMessage {
   id?: string;
@@ -135,9 +137,97 @@ export function ChatWorkspace({
     clearSelectedConversation,
     findExistingConversationByContact,
     startConversationWithContact,
+    openContextualConversation,
     updateConversationLastMessage,
     setConversationBlocked,
   } = useConversations();
+
+  useConversationVisibility(selectedRequestId ? null : selectedId);
+
+  const handledQueryParamRef = useRef<string | null>(null);
+  const handledConversationParamRef = useRef<string | null>(null);
+  const handledTabParamRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const searchParams = new URLSearchParams(window.location.search);
+    const tabParam = searchParams.get("tab");
+
+    if (tabParam === "requests" && handledTabParamRef.current !== "requests") {
+      handledTabParamRef.current = "requests";
+      clearSelectedConversation();
+      if (receivedRequests.length > 0) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setSelectedRequestId(receivedRequests[0].id);
+      }
+    }
+  }, [receivedRequests, clearSelectedConversation]);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || isLoading) {
+      return;
+    }
+
+    const searchParams = new URLSearchParams(window.location.search);
+    const conversationIdParam = searchParams.get("conversationId");
+
+    if (!conversationIdParam) {
+      return;
+    }
+
+    if (handledConversationParamRef.current === conversationIdParam) {
+      return;
+    }
+
+    const targetConv = conversations.find((c) => c.id === conversationIdParam);
+    if (targetConv) {
+      handledConversationParamRef.current = conversationIdParam;
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSelectedRequestId(null);
+      handleSelectConversation(targetConv);
+    } else if (conversations.length > 0) {
+      handledConversationParamRef.current = conversationIdParam;
+      toast.error("Conversación no encontrada o sin acceso.");
+    }
+  }, [conversations, isLoading, handleSelectConversation]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const searchParams = new URLSearchParams(window.location.search);
+    const contactIdParam = searchParams.get("contactId");
+    const contextTypeParam = searchParams.get("contextType");
+    const contextIdParam = searchParams.get("contextId");
+
+    if (!contactIdParam || !contextTypeParam || !contextIdParam) {
+      return;
+    }
+
+    const queryKey = `${contactIdParam}-${contextTypeParam}-${contextIdParam}`;
+    if (handledQueryParamRef.current === queryKey) {
+      return;
+    }
+
+    handledQueryParamRef.current = queryKey;
+
+    const initContextualChat = async () => {
+      try {
+        await openContextualConversation(contactIdParam, {
+          contextType: contextTypeParam,
+          contextId: contextIdParam,
+        });
+      } catch {
+        setContactSelectionError("No se pudo iniciar la conversación de la postulación.");
+      }
+    };
+
+    void initContextualChat();
+  }, [openContextualConversation]);
 
   const {
     data: messages = [],

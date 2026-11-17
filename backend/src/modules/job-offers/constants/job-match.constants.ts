@@ -3,6 +3,8 @@ export const JOB_MATCH_SELECT = {
   title: true,
   description: true,
   createdAt: true,
+  publishedAt: true,
+  expiresAt: true,
   locationUrl: true,
   requiredCareers: true,
   minExperienceYears: true,

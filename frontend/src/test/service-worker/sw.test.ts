@@ -85,6 +85,7 @@ function loadWorker(routes: Record<string, Route> = {}) {
     addEventListener: (type: string, listener: Listener) => listeners.set(type, listener),
     skipWaiting: vi.fn(),
     clients: { claim: vi.fn().mockResolvedValue(undefined) },
+    registration: { showNotification: vi.fn().mockResolvedValue(undefined) },
   };
   vm.runInContext(
     source,
@@ -131,6 +132,7 @@ function loadWorker(routes: Record<string, Route> = {}) {
     caches,
     fetch,
     self,
+    push: (payload: unknown) => dispatch("push", { data: { json: () => payload } }),
     install: () => dispatch("install"),
     activate: () => dispatch("activate"),
     message: (data: unknown, ports: unknown[] = []) => dispatch("message", { data, ports }),
@@ -383,4 +385,29 @@ describe("service worker lifecycle", () => {
     await worker.message({ type: "PREPARE_OFFLINE_PASSES" }, [{ postMessage }]);
     expect(postMessage).toHaveBeenCalledWith(ready);
   });
+});
+
+it('keeps push delivery and offline asset caching in the same worker', async () => {
+  const worker = loadWorker({
+    '/_next/static/chunks/app.js': asset('offline chunk'),
+  });
+  await worker.activate();
+  await worker.get('/_next/static/chunks/app.js');
+  await worker.push({
+    title: 'Taller actualizado',
+    body: 'Consulta tu inscripción',
+    actionUrl: '/events/my-passes',
+  });
+
+  expect(worker.self.clients.claim).toHaveBeenCalledOnce();
+  expect(worker.caches.cachedUrls(ASSETS)).toContain(
+    '/_next/static/chunks/app.js',
+  );
+  expect(worker.self.registration.showNotification).toHaveBeenCalledWith(
+    'Taller actualizado',
+    expect.objectContaining({
+      body: 'Consulta tu inscripción',
+      data: expect.objectContaining({ actionUrl: '/events/my-passes' }),
+    }),
+  );
 });

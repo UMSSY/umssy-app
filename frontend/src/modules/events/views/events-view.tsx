@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { buttonVariants } from "@/components/ui/button-variants";
 import { Button } from '@/components/ui/button';
 import { buildLoginUrl } from "@/modules/auth";
-import { useRegistrationSession } from '@/modules/registrations';
+import { useRegistrationSession } from '@/modules/event-registrations';
 import { useAuth } from '@/shared/contexts/auth-context';
 import { parseApiError } from '@/shared/utils/parse-api-error';
 import { useEffect, useRef, useState } from 'react';

@@ -4,6 +4,8 @@ import { contactIdField } from './chat-fields.schema.js';
 export const createConversationSchema = z
   .object({
     contactId: contactIdField,
+    contextType: z.literal('POSTULACION').optional(),
+    contextId: z.string().uuid().optional(),
   })
   .strict();
 
