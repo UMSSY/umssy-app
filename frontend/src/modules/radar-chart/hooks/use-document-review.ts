@@ -1,10 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import {
-  verificationApi,
-  type DocumentVerification,
-} from '@/modules/cv/public';
+import { verificationApi, type DocumentVerification } from '@/modules/cv';
 import type { DocumentReviewConfirmation } from '../types/document-review-confirmation.types';
 import type { DocumentReviewPreview } from '../types/document-review-preview.types';
 import type { DocumentReviewDecision } from '../types/document-review-decision.types';

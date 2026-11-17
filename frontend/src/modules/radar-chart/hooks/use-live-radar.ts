@@ -45,10 +45,12 @@ export function useLiveRadar() {
         ? 1500
         : false,
     structuralSharing: (previous, next) => {
-      const anterior = previous as IntegrationRadar | undefined;
-      const actual = next as IntegrationRadar;
+      const previousRadar = previous as IntegrationRadar | undefined;
+      const nextRadar = next as IntegrationRadar;
 
-      return anterior && actual.version < anterior.version ? anterior : actual;
+      return previousRadar && nextRadar.version < previousRadar.version
+        ? previousRadar
+        : nextRadar;
     },
   });
 

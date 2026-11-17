@@ -1,22 +1,27 @@
+import { RadarDocumentStatus } from '../constants/radar-document-status.enum.js';
 import { z } from 'zod';
 export const documentDecisionSchema = z
-  .object({ decision: z.enum(['approved', 'rejected', 'reprocess', 'revoke']) })
-  .strict();
+  .object({
+    decision: z.enum(['approved', 'rejected', 'reprocess', 'revoke']),
+  })
+  .strict()
+  .meta({ example: { decision: 'approved' } });
 export const documentAcknowledgementSchema = z
   .object({
     status: z.enum([
-      'queued',
-      'reading',
-      'approved',
-      'review',
-      'low_confidence',
-      'manual_approved',
-      'manual_rejected',
-      'legacy',
-      'cancelled',
+      RadarDocumentStatus.QUEUED,
+      RadarDocumentStatus.READING,
+      RadarDocumentStatus.APPROVED,
+      RadarDocumentStatus.REVIEW,
+      RadarDocumentStatus.LOW_CONFIDENCE,
+      RadarDocumentStatus.MANUAL_APPROVED,
+      RadarDocumentStatus.MANUAL_REJECTED,
+      RadarDocumentStatus.LEGACY,
+      RadarDocumentStatus.CANCELLED,
     ]),
   })
-  .strict();
+  .strict()
+  .meta({ example: { status: 'approved' } });
 export const documentReviewFilterSchema = z
   .enum(['pending', 'approved', 'rejected', 'all'])
   .default('pending');

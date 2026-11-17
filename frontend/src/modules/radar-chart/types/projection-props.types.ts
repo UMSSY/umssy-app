@@ -1,4 +1,4 @@
-import type { RadarAreaScore } from './radar-profile.types';
+import type { RadarAreaScore } from './radar-area-score.types';
 import type { Projection } from './projection.types';
 export type ProjectionProps = {
   area: RadarAreaScore;

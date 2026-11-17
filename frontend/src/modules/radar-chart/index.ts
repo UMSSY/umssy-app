@@ -1,11 +1,9 @@
-export type {
-  AreaDetail,
-  AreaId,
-  AreaLevel,
-  Certification,
-  Course,
-  ExperienceItem,
-} from './types/area-detail.types';
+export type { AreaDetail } from './types/area-detail.types';
+export type { AreaId } from './types/area-id.types';
+export type { AreaLevel } from './types/area-level.types';
+export type { Certification } from './types/certification.types';
+export type { Course } from './types/course.types';
+export type { ExperienceItem } from './types/experience-item.types';
 export {
   AREA_DETAILS,
   AREA_ORDER,
@@ -16,19 +14,15 @@ export { calculateGap } from './utils/calculate-gap';
 export { formatDecimal } from './utils/format-decimal';
 export { getAreaDetail } from './utils/get-area-detail';
 export { getAreaLevel } from './utils/get-area-level';
-export type { AreaDetailPanelProps } from './types/area-detail-components.types';
+export type { AreaDetailPanelProps } from './types/area-detail-panel-props.types';
 export { AreaDetailPanel } from './components/area-detail-panel';
-export type {
-  RadarAreaScore,
-  RadarKpis,
-  RadarProfile,
-} from './types/radar-profile.types';
-export type {
-  AffinityRadarChartProps,
-  AreaBreakdownPanelProps,
-  KpiCardsProps,
-  ProfileHeaderProps,
-} from './types/radar-profile-components.types';
+export type { RadarAreaScore } from './types/radar-area-score.types';
+export type { RadarKpis } from './types/radar-kpis.types';
+export type { RadarProfile } from './types/radar-profile.types';
+export type { AffinityRadarChartProps } from './types/affinity-radar-chart-props.types';
+export type { AreaBreakdownPanelProps } from './types/area-breakdown-panel-props.types';
+export type { KpiCardsProps } from './types/kpi-cards-props.types';
+export type { ProfileHeaderProps } from './types/profile-header-props.types';
 export {
   RADAR_AREA_SCORES,
   RADAR_KPIS,
@@ -48,4 +42,5 @@ export { AffinityRadarAxisTick } from './components/affinity-radar-axis-tick';
 export { AffinityRadarDot } from './components/affinity-radar-dot';
 
 export { RADAR_AXIS_NAMES } from './constants/radar-axis-names.constants';
-export { RADAR_PERSONAL_QUERY_KEY } from './hooks/use-live-radar';
+export { RADAR_PERSONAL_QUERY_KEY } from './constants/radar-query-keys.constants';
+export { getRadarAreaName } from './utils/get-radar-area-name';

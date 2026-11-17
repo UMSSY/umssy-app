@@ -18,7 +18,7 @@ import { verificationLabels } from '../constants/verification-labels.constants';
 import { formatVerificationConfidence } from '../utils/format-verification-confidence';
 import { hasPublishedVerification } from '../utils/has-published-verification';
 import { VERIFICATION_FLOW_STEPS } from '../constants/verification-flow-steps.constants';
-import { VERIFICATION_AREA_NAMES } from '../constants/verification-area-names.constants';
+import { getRadarAreaName } from '@/modules/radar-chart';
 import { cn } from '@/lib/utils';
 import type { VerificationBadgeProps } from '../types/verification-badge-props.types';
 import type { VerificationResultProps } from '../types/verification-result-props.types';
@@ -183,7 +183,7 @@ export function VerificationDetail({
               <span>
                 Área:{' '}
                 <span className="rounded bg-surface-soft px-2 py-1">
-                  {VERIFICATION_AREA_NAMES[skill.areaId] ?? skill.areaId}
+                  {getRadarAreaName(skill.areaId)}
                 </span>
               </span>
               <span>

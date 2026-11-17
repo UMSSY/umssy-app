@@ -1,3 +1,10 @@
+import { ApiBearerAuth, ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { toApiBody } from '../../../common/utils/to-api-body.js';
+import { documentRadarEndpoint } from '../utils/document-radar-endpoint.js';
+import {
+  documentHistoryResponseSchema,
+  documentMutationResponseSchema,
+} from '../responses/radar-api.response.js';
 import {
   Body,
   Controller,
@@ -20,18 +27,37 @@ import {
   documentAcknowledgementSchema,
   documentReviewFilterSchema,
 } from '../requests/document-verification.request.js';
-import type { DocumentDecisionRequest } from '../types/document-decision-request.type.js';
-import type { DocumentAcknowledgementRequest } from '../types/document-acknowledgement-request.type.js';
-import type { DocumentReviewFilter } from '../types/document-review-filter.type.js';
+import type { DocumentDecisionRequest } from '../types/document-decision-request.types.js';
+import type { DocumentAcknowledgementRequest } from '../types/document-acknowledgement-request.types.js';
+import type { DocumentReviewFilter } from '../types/document-review-filter.types.js';
 
+@ApiTags('radar-documents')
+@ApiBearerAuth()
 @Controller()
 @UseGuards(JwtAuthGuard)
 export class DocumentVerificationController {
   constructor(private readonly service: DocumentReviewService) {}
+  @documentRadarEndpoint({
+    operationId: 'getMyDocumentVerifications',
+    summary: 'Consultar verificaciones',
+    description:
+      'Historial completo del titular, ordenado por fecha e identificador descendentes. Incluye versiones reemplazadas.',
+    response: documentHistoryResponseSchema,
+  })
   @Get('profile/me/document-verifications')
   history(@CurrentUserId() owner: string) {
     return this.service.history(owner);
   }
+  @documentRadarEndpoint({
+    operationId: 'acknowledgeDocumentVerification',
+    summary: 'Marcar resultado como leído',
+    description:
+      'Solo el titular puede reconocer el resultado de la versión y estado enviados. Una versión obsoleta devuelve conflicto.',
+    response: documentMutationResponseSchema,
+    errors: [400, 409],
+    parameters: ['id'],
+  })
+  @ApiBody(toApiBody(documentAcknowledgementSchema))
   @Patch('profile/me/document-verifications/:id/notification')
   async acknowledge(
     @CurrentUserId() owner: string,
@@ -41,6 +67,16 @@ export class DocumentVerificationController {
   ) {
     return this.service.acknowledge(owner, id, body.status);
   }
+  @documentRadarEndpoint({
+    operationId: 'previewMyVerificationFile',
+    summary: 'Consultar mi respaldo',
+    description:
+      'Solo permite abrir el respaldo perteneciente al titular autenticado. Conserva el tipo MIME del archivo.',
+    binary: true,
+    mime: 'application/octet-stream',
+    errors: [400, 404],
+    parameters: ['id'],
+  })
   @Get('profile/me/document-verifications/:id/file')
   preview(
     @CurrentUserId() owner: string,
@@ -50,6 +86,21 @@ export class DocumentVerificationController {
   }
   @UseGuards(RolesGuard)
   @Roles('administrativo')
+  @documentRadarEndpoint({
+    operationId: 'getDocumentReviewQueue',
+    summary: 'Consultar revisión documental',
+    description:
+      'Requiere rol administrativo. Devuelve versiones activas, filtradas por estado y ordenadas por fecha descendente, sin paginación.',
+    response: documentHistoryResponseSchema,
+    errors: [400, 403],
+  })
+  @ApiQuery({
+    name: 'filter',
+    required: false,
+    enum: ['pending', 'approved', 'rejected', 'all'],
+    example: 'pending',
+    description: 'Filtro por estado; predeterminado: pending.',
+  })
   @Get('radar-document-reviews')
   queue(
     @Query('filter', new RequestValidationPipe(documentReviewFilterSchema))
@@ -59,12 +110,32 @@ export class DocumentVerificationController {
   }
   @UseGuards(RolesGuard)
   @Roles('administrativo')
+  @documentRadarEndpoint({
+    operationId: 'previewDocumentReviewFile',
+    summary: 'Consultar respaldo administrativo',
+    description:
+      'Requiere rol administrativo. Devuelve el archivo conservando su tipo MIME.',
+    binary: true,
+    mime: 'application/octet-stream',
+    errors: [400, 403, 404],
+    parameters: ['id'],
+  })
   @Get('radar-document-reviews/:id/file')
   adminPreview(@Param('id', ParseUUIDPipe) id: string) {
     return this.file(id);
   }
   @UseGuards(RolesGuard)
   @Roles('administrativo')
+  @documentRadarEndpoint({
+    operationId: 'decideDocumentVerification',
+    summary: 'Resolver verificación documental',
+    description:
+      'Requiere rol administrativo. Aprueba, rechaza, reprocesa o revoca según el estado y versión actuales.',
+    response: documentMutationResponseSchema,
+    errors: [400, 403, 409],
+    parameters: ['id'],
+  })
+  @ApiBody(toApiBody(documentDecisionSchema))
   @Patch('radar-document-reviews/:id')
   async decide(
     @CurrentUserId() admin: string,

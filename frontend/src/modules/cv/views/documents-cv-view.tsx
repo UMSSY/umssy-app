@@ -16,7 +16,10 @@ export function DocumentsCvView() {
     >
       <DocumentsCvContent />
 
-      <section aria-label="Verificación automática de documentos" className="mt-8 space-y-4">
+      <section
+        aria-label="Verificación automática de documentos"
+        className="mt-8 space-y-4"
+      >
         {history.isError && !history.data ? (
           <p role="alert">
             El historial de verificaciones no está disponible.{' '}
@@ -25,7 +28,10 @@ export function DocumentsCvView() {
             </Button>
           </p>
         ) : history.data ? (
-          <VerificationDashboard rows={history.data} refresh={history.refetch} />
+          <VerificationDashboard
+            rows={history.data}
+            refresh={history.refetch}
+          />
         ) : (
           <p aria-busy="true">Cargando verificaciones…</p>
         )}
@@ -34,7 +40,7 @@ export function DocumentsCvView() {
   );
 }
 
-/** Kept for compatibility with other callers of the legacy view. */
+/** Conserva compatibilidad con los consumidores de la vista anterior. */
 export function LegacyDocumentsCvView() {
   return (
     <ProfilePageLayout

@@ -1,7 +1,7 @@
 'use client';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
-import { verificationLabels } from '@/modules/cv/public';
+import { verificationLabels } from '@/modules/cv';
 import { useDocumentReview } from '../hooks/use-document-review';
 import { DOCUMENT_REVIEW_LABELS as labels } from '../constants/document-review-labels.constants';
 import { ConfirmActionDialog } from '@/shared/components/confirm-action-dialog';

@@ -1,6 +1,8 @@
-import type { VerificationDocumentContext } from '../types/verification-document-context.type.js';
-import type { VerificationResult } from '../types/verification-result.type.js';
-import type { DocumentSkill } from '../types/document-skill.type.js';
+import { RadarDocumentSourceType } from '../constants/radar-document-source-type.enum.js';
+import { RadarDocumentStatus } from '../constants/radar-document-status.enum.js';
+import type { VerificationDocumentContext } from '../types/verification-document-context.types.js';
+import type { VerificationResult } from '../types/verification-result.types.js';
+import type { DocumentSkill } from '../types/document-skill.types.js';
 import { normalizeTerm } from '../../nlp/utils/normalize-term.js';
 
 const words = (value: string) =>
@@ -25,17 +27,17 @@ export function evaluateRadarDocument(
   });
   if (confidence === null || !Number.isFinite(confidence))
     return result(
-      'review',
+      RadarDocumentStatus.REVIEW,
       'No se pudo obtener una lectura fiable del documento.',
     );
   if (confidence < 0.6)
     return result(
-      'low_confidence',
+      RadarDocumentStatus.LOW_CONFIDENCE,
       'La confianza de lectura está por debajo del mínimo del 60 %.',
     );
   if (job.duplicate)
     return result(
-      'review',
+      RadarDocumentStatus.REVIEW,
       'Este archivo coincide con otra versión ya registrada.',
     );
   const content = ' ' + words(text) + ' ';
@@ -46,10 +48,10 @@ export function evaluateRadarDocument(
     has(job.lastName + ' ' + job.firstName)
   ))
     return result(
-      'review',
+      RadarDocumentStatus.REVIEW,
       'El nombre del titular no coincide con el documento.',
     );
-  if (job.sourceType === 'certification') {
+  if (job.sourceType === RadarDocumentSourceType.CERTIFICATION) {
     if (
       !/\b(certificad[oa]|certificamos|certificate|constancia|diploma)\b/.test(
         content,
@@ -58,7 +60,7 @@ export function evaluateRadarDocument(
       !has(job.issuer)
     )
       return result(
-        'review',
+        RadarDocumentStatus.REVIEW,
         'Se necesita confirmar el tipo de certificado o la institución emisora.',
       );
   } else if (
@@ -67,16 +69,16 @@ export function evaluateRadarDocument(
     )
   )
     return result(
-      'review',
+      RadarDocumentStatus.REVIEW,
       'El contenido no permite identificar el archivo como currículum.',
     );
   if (!skills.length)
     return result(
-      'review',
+      RadarDocumentStatus.REVIEW,
       'No se identificaron habilidades del catálogo con un área de radar.',
     );
   return result(
-    'approved',
+    RadarDocumentStatus.APPROVED,
     'La lectura, los datos del titular y las habilidades del catálogo cumplen las reglas de verificación.',
   );
 }
