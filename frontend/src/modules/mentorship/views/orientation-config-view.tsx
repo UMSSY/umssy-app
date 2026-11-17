@@ -36,7 +36,7 @@ import { useOrientationConfig } from "../hooks/use-orientation-config";
 import { useMentorProfileDraft } from "../hooks/use-mentor-profile-draft";
 import { useCurrentUserId } from "../hooks/use-current-user-id";
 import { MentorProfilePreview } from "../components/preview/mentor-profile-preview";
-import { useTechnicalAreas } from "@/modules/mentors/hooks/use-technical-areas";
+import { useTechnicalAreas } from "@/modules/mentors";
 import {
   PROFILE_CHANGES_SAVED_MESSAGE,
   PROFILE_CHANGES_SAVE_ERROR_MESSAGE,

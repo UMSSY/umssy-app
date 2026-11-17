@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Eye, Save, X } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
-import { DiscardChangesDialog, PROFILE_CHANGES_SAVED_MESSAGE, PROFILE_CHANGES_SAVE_ERROR_MESSAGE, PROFILE_SELECTION_REQUIRED_MESSAGE, useMentorProfileDraft, } from "@/modules/mentorship";
+import { DiscardChangesDialog, PROFILE_CHANGES_SAVED_MESSAGE, PROFILE_CHANGES_SAVE_ERROR_MESSAGE, PROFILE_SELECTION_REQUIRED_MESSAGE, useMentorProfileDraft, useOrientationConfig, useCurrentUserId, MentorProfilePreview, } from "@/modules/mentorship";
 
 import { WorkspacePage } from "@/shared/components/layout/workspace-page";
 import { Button } from "@/components/ui/button";
@@ -15,9 +15,6 @@ import { buttonVariants } from "@/components/ui/button-variants";
 
 import { TechnicalAreaCard } from "../components/technical-area-card";
 import { useTechnicalAreas } from "../hooks/use-technical-areas";
-import { useOrientationConfig } from "@/modules/mentorship/hooks/use-orientation-config";
-import { useCurrentUserId } from "@/modules/mentorship/hooks/use-current-user-id";
-import { MentorProfilePreview } from "@/modules/mentorship/components/preview/mentor-profile-preview";
 
 export function TechnicalAreasView() {
   const router = useRouter();
