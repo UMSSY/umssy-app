@@ -1,3 +1,5 @@
+import { RadarDocumentSourceType } from '../constants/radar-document-source-type.enum.js';
+import { RadarDocumentStatus } from '../constants/radar-document-status.enum.js';
 import { UsersService } from '../../users/services/users.service.js';
 import { CertificationRecordsService } from '../../certifications/services/certification-records.service.js';
 import {
@@ -15,7 +17,7 @@ import { DocumentVerificationRepository } from '../repositories/document-verific
 import { evaluateRadarDocument } from '../utils/evaluate-radar-document.js';
 import { MAX_NLP_SOURCE_LENGTH } from '../../nlp/constants/nlp-validation.constants.js';
 import { AREA_IDS } from '../utils/radar-scoring.js';
-import type { VerificationJob } from '../types/verification-job.type.js';
+import type { VerificationJob } from '../types/verification-job.types.js';
 import { RadarPublicationService } from './radar-publication.service.js';
 
 @Injectable()
@@ -55,7 +57,7 @@ export class DocumentVerificationService
   async processNext() {
     const job = await this.store.claim();
     if (!job) return;
-    if (job.status === 'reading') {
+    if (job.status === RadarDocumentStatus.READING) {
       const result = await this.read(job);
       if (!(await this.store.finish(job, result))) return;
     }
@@ -78,7 +80,7 @@ export class DocumentVerificationService
   private async read(claimed: VerificationJob) {
     const [owner, certificate] = await Promise.all([
       this.users.findRecruitmentProfile(claimed.userId),
-      claimed.sourceType === 'certification'
+      claimed.sourceType === RadarDocumentSourceType.CERTIFICATION
         ? this.certificates.findById(claimed.sourceId)
         : null,
     ]);
@@ -112,7 +114,7 @@ export class DocumentVerificationService
     const checked = this.validation.validateSources(sources);
     if (checked.rejected.length)
       return {
-        status: 'review' as const,
+        status: RadarDocumentStatus.REVIEW as const,
         confidence: reading.confidence,
         reason: `El OCR extrajo ${reading.text.length.toLocaleString('es-BO')} caracteres. El análisis de habilidades admite hasta ${MAX_NLP_SOURCE_LENGTH.toLocaleString('es-BO')} por documento. Se omitió la detección y se solicitó revisión administrativa.`,
         skills: [],

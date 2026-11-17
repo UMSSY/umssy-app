@@ -7,7 +7,7 @@ import {
   validateCertificateFile,
   type CertificationFormProps,
 } from '@/modules/certifications';
-import { RADAR_PERSONAL_QUERY_KEY } from '@/modules/radar-chart/public';
+import { RADAR_PERSONAL_QUERY_KEY } from '@/modules/radar-chart';
 import { verificationApi } from '../services/document-verification.service';
 import { useCvMutations } from './use-cv-mutations';
 import { validateCvFile } from '../utils/validate-cv-file';

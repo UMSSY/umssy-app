@@ -1,5 +1,6 @@
 'use client';
-import { useRef } from 'react';
+import { useId, useRef } from 'react';
+import { Label } from '@/components/ui/label';
 import { Bell, Check, Eye, FileText, Trash2, Upload } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -28,6 +29,8 @@ export function VerificationDashboard({
   refresh,
 }: VerificationDashboardProps) {
   const fileInput = useRef<HTMLInputElement>(null);
+  const documentTypeId = useId();
+  const certificationId = useId();
   const {
     setSelected,
     historyOpen,
@@ -220,9 +223,10 @@ export function VerificationDashboard({
       >
         <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
           <DialogTitle>Subir nueva versión</DialogTitle>
-          <label>
-            Tipo de documento{' '}
+          <div className="space-y-2">
+            <Label htmlFor={documentTypeId}>Tipo de documento</Label>
             <NativeSelect
+              id={documentTypeId}
               className="rounded border p-2"
               aria-label="Tipo de documento"
               value={mode}
@@ -233,11 +237,12 @@ export function VerificationDashboard({
                 Certificación
               </NativeSelectOption>
             </NativeSelect>
-          </label>
+          </div>
           {mode === 'certification' && (
-            <label>
-              Certificación{' '}
+            <div className="space-y-2">
+              <Label htmlFor={certificationId}>Certificación</Label>
               <NativeSelect
+                id={certificationId}
                 className="rounded border p-2"
                 aria-label="Certificación"
                 value={target}
@@ -252,7 +257,7 @@ export function VerificationDashboard({
                   </NativeSelectOption>
                 ))}
               </NativeSelect>
-            </label>
+            </div>
           )}
           {mode === 'certification' && !target ? (
             <CertificationForm

@@ -15,7 +15,7 @@ import {
 } from 'recharts';
 import { cn } from '@/lib/utils';
 import { Switch } from '@/components/ui/switch';
-import type { AffinityRadarChartProps } from '../types/radar-profile-components.types';
+import type { AffinityRadarChartProps } from '../types/affinity-radar-chart-props.types';
 import { formatDecimal } from '../utils/format-decimal';
 import { AffinityRadarAxisTick } from './affinity-radar-axis-tick';
 import { AffinityRadarDot } from './affinity-radar-dot';
@@ -28,7 +28,7 @@ export function AffinityRadarChart({
   areas,
   projectedScores,
   previousScores,
-  comparisonEnabled = false,
+  isComparisonEnabled = false,
   onComparisonChange,
   previousPublishedAt,
   publishedAt,
@@ -39,7 +39,7 @@ export function AffinityRadarChart({
   const titleId = useId();
   const comparisonId = useId();
   const comparisonDescriptionId = useId();
-  const showPrevious = comparisonEnabled && Boolean(previousScores);
+  const hasPreviousComparison = isComparisonEnabled && Boolean(previousScores);
   const formatDate = (date: string) =>
     new Date(date).toLocaleString('es-BO', {
       dateStyle: 'medium',
@@ -98,7 +98,7 @@ export function AffinityRadarChart({
           <Switch
             id={comparisonId}
             aria-describedby={comparisonDescriptionId}
-            checked={comparisonEnabled}
+            checked={isComparisonEnabled}
             onCheckedChange={onComparisonChange}
             className="data-checked:bg-accent"
           />
@@ -147,7 +147,7 @@ export function AffinityRadarChart({
                   axisLine={false}
                   tick={{ fill: 'var(--color-text-secondary)', fontSize: 10 }}
                 />
-                {showPrevious ? (
+                {hasPreviousComparison ? (
                   <Radar
                     name="Publicación anterior"
                     dataKey="previousScore"
@@ -183,33 +183,43 @@ export function AffinityRadarChart({
                     />
                   )}
                 />
-                {projectedScores ? <Radar
-                  name="Proyección con mentoría"
-                  dataKey="projectedScore"
-                  stroke="var(--color-success)"
-                  strokeWidth={2}
-                  strokeDasharray="4 3"
-                  fill="var(--color-success)"
-                  fillOpacity={0.1}
-                  isAnimationActive={false}
-                  dot={false}
-                  style={{ pointerEvents: 'none' }}
-                /> : null}
+                {projectedScores ? (
+                  <Radar
+                    name="Proyección con mentoría"
+                    dataKey="projectedScore"
+                    stroke="var(--color-success)"
+                    strokeWidth={2}
+                    strokeDasharray="4 3"
+                    fill="var(--color-success)"
+                    fillOpacity={0.1}
+                    isAnimationActive={false}
+                    dot={false}
+                    className="pointer-events-none"
+                  />
+                ) : null}
               </RadarChart>
             </ResponsiveContainer>
           </div>
           <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs text-text-secondary">
-            {projectedScores ? <p className="flex items-center gap-2"><span aria-hidden="true" className="w-5 border-t-2 border-dashed border-success" />Proyección con mentoría (línea verde discontinua)</p> : null}
+            {projectedScores ? (
+              <p className="flex items-center gap-2">
+                <span
+                  aria-hidden="true"
+                  className="w-5 border-t-2 border-dashed border-success"
+                />
+                Proyección con mentoría (línea verde discontinua)
+              </p>
+            ) : null}
             <p className="flex items-center gap-2">
               <span
                 className="h-2.5 w-5 rounded-sm border border-accent bg-accent/15"
                 aria-hidden="true"
               />
-              {showPrevious
+              {hasPreviousComparison
                 ? `Actual (línea continua): ${publishedAt ? formatDate(publishedAt) : 'Sin fecha'}`
                 : SERIES_LABEL}
             </p>
-            {showPrevious ? (
+            {hasPreviousComparison ? (
               <p className="flex items-center gap-2">
                 <span
                   aria-hidden="true"

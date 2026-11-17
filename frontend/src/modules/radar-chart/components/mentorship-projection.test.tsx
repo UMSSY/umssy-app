@@ -1,7 +1,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MentorshipProjection } from './mentorship-projection';
-import type { RadarAreaScore } from '../types/radar-profile.types';
+import type { RadarAreaScore } from '../types/radar-area-score.types';
 
 const query = vi.hoisted(() => ({
   data: { totalItems: 2 },

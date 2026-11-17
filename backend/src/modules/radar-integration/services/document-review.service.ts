@@ -3,8 +3,8 @@ import { UsersService } from '../../users/services/users.service.js';
 import { DocumentVerificationRepository } from '../repositories/document-verification.repository.js';
 import { DocumentVerificationConflictException } from '../exceptions/document-verification-conflict.exception.js';
 import { DocumentVerificationFileNotFoundException } from '../exceptions/document-verification-file-not-found.exception.js';
-import type { DocumentDecisionRequest } from '../types/document-decision-request.type.js';
-import type { DocumentReviewFilter } from '../types/document-review-filter.type.js';
+import type { DocumentDecisionRequest } from '../types/document-decision-request.types.js';
+import type { DocumentReviewFilter } from '../types/document-review-filter.types.js';
 @Injectable()
 export class DocumentReviewService {
   constructor(
