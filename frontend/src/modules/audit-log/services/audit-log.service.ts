@@ -4,9 +4,9 @@ import { AUDIT_PAGE_SIZE } from "../constants/audit-log.constants";
 import type { AuditApiResult } from "../types/audit-api-result.types";
 import type { AuditEventDetail } from "../types/audit-event-detail.types";
 import type { AuditEventPage } from "../types/audit-event-page.types";
+import type { AuditEventTimeline } from "../types/audit-event-timeline.types";
 import type { AuditLogFilters } from "../types/audit-log-filters.types";
 import { isRecord, toAuditFailure } from "../utils/to-audit-failure";
-import type { AuditEventTimeline } from "../types/audit-event-timeline.types";
 
 const NO_EVIDENCE_MESSAGE = "Este evento no tiene un documento asociado.";
 const EVIDENCE_GONE_MESSAGE = "El documento de este evento ya no está disponible.";

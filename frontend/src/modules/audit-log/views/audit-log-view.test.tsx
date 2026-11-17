@@ -9,7 +9,6 @@ import type { AuditEvent } from "../types/audit-event.types";
 import { getCurrentMonthPeriod } from "../utils/get-current-month-period";
 import { AuditLogView } from "./audit-log-view";
 
-
 const INITIAL_FILTERS = { ...DEFAULT_AUDIT_FILTERS, ...getCurrentMonthPeriod() };
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ replace: vi.fn() }), usePathname: () => "/backoffice/audit" }));

@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
 import { AUDIT_ACTION_LABELS } from '../constants/audit-action-labels.constants.js';
+import { AuditEventNotFoundException } from '../exceptions/index.js';
 import { AuditEventsRepository } from '../repositories/audit-events.repository.js';
 import { AuditEventTimelineService } from '../services/audit-event-timeline.service.js';
-import { AuditEventNotFoundException } from '../exceptions/index.js';
 
 describe('AuditEventTimelineService', () => {
   it('devuelve el historial de la solicitud con acción, fecha y quién la realizó', async () => {
@@ -79,41 +79,41 @@ describe('nuevas acciones de auditoría', () => {
 });
 
 describe('listForEvent', () => {
-    it('devuelve el historial de la solicitud con el evento consultado marcado', async () => {
-      const repository = {
-        findTimelineOwner: vi.fn().mockResolvedValue({
+  it('devuelve el historial de la solicitud con el evento consultado marcado', async () => {
+    const repository = {
+      findTimelineOwner: vi.fn().mockResolvedValue({
+        id: 'evt-2',
+        accessRequestId: 'req-1',
+        requestCode: 'SOL-2026-0018',
+      }),
+      findTimeline: vi.fn().mockResolvedValue([
+        {
+          id: 'evt-1',
+          occurredAt: new Date('2026-11-07T09:53:00.000Z'),
+          actorName: 'Xavier Daniel Soria Flores',
+          actorRole: 'titulado',
+          detail: null,
+          action: { title: 'submitted' },
+        },
+        {
           id: 'evt-2',
-          accessRequestId: 'req-1',
-          requestCode: 'SOL-2026-0018',
-        }),
-        findTimeline: vi.fn().mockResolvedValue([
-          {
-            id: 'evt-1',
-            occurredAt: new Date('2026-11-07T09:53:00.000Z'),
-            actorName: 'Xavier Daniel Soria Flores',
-            actorRole: 'titulado',
-            detail: null,
-            action: { title: 'submitted' },
-          },
-          {
-            id: 'evt-2',
-            occurredAt: new Date('2026-11-07T09:54:00.000Z'),
-            actorName: 'Admin Uno',
-            actorRole: 'administrativo',
-            detail: 'Motivo: Documento ilegible',
-            action: { title: 'rejected' },
-          },
-        ]),
-      };
-      const service = new AuditEventTimelineService(repository as never);
+          occurredAt: new Date('2026-11-07T09:54:00.000Z'),
+          actorName: 'Admin Uno',
+          actorRole: 'administrativo',
+          detail: 'Motivo: Documento ilegible',
+          action: { title: 'rejected' },
+        },
+      ]),
+    };
+    const service = new AuditEventTimelineService(repository as never);
 
-      const result = await service.listForEvent('evt-2');
+    const result = await service.listForEvent('evt-2');
 
-      expect(result.requestCode).toBe('SOL-2026-0018');
-      expect(result.focusedEventId).toBe('evt-2');
-      expect(result.items.map((item) => item.id)).toEqual(['evt-1', 'evt-2']);
-      expect(repository.findTimeline).toHaveBeenCalledWith('req-1');
-    });
+    expect(result.requestCode).toBe('SOL-2026-0018');
+    expect(result.focusedEventId).toBe('evt-2');
+    expect(result.items.map((item) => item.id)).toEqual(['evt-1', 'evt-2']);
+    expect(repository.findTimeline).toHaveBeenCalledWith('req-1');
+  });
 
     it('rechaza un evento inexistente', async () => {
       const repository = {
@@ -127,4 +127,4 @@ describe('listForEvent', () => {
       );
       expect(repository.findTimeline).not.toHaveBeenCalled();
     });
-  });
+});

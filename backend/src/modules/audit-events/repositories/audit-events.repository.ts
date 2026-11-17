@@ -114,7 +114,7 @@ export class AuditEventsRepository {
     });
   }
 
-   findTimelineOwner(id: string) {
+  findTimelineOwner(id: string) {
     return this.prisma.auditEvent.findUnique({
       where: { id },
       select: { id: true, accessRequestId: true, requestCode: true },

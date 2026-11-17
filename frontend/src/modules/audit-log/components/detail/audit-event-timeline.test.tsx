@@ -2,8 +2,8 @@ import { cleanup, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { renderWithQuery } from "@/shared/testing/render-with-query";
 import { auditLogService } from "../../services/audit-log.service";
+import type { AuditEventTimeline as AuditEventTimelineData } from "../../types/audit-event-timeline.types";
 import { AuditEventTimeline } from "./audit-event-timeline";
-import type { AuditEventTimeline as AuditEventTimelineData } from "../../types/audit-event-timeline.types";;
 
 const TIMELINE: AuditEventTimelineData = {
   requestCode: "SOL-2026-0018",
@@ -13,6 +13,7 @@ const TIMELINE: AuditEventTimelineData = {
     { id: "evt-2", action: "rejected", occurredAt: "2026-11-07T09:54:00.000Z", actorName: "Admin Uno", actorRole: "administrativo", detail: "Motivo: Documento ilegible" },
   ],
 };
+
 afterEach(() => cleanup());
 
 describe("AuditEventTimeline", () => {

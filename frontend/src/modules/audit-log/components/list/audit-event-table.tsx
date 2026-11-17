@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AUDIT_PAGE_SIZE, EMPTY_VALUE } from "../../constants/audit-log.constants";
@@ -8,12 +9,18 @@ import { EvidenceButton } from "../evidence/evidence-button";
 import { AuditActionBadge } from "./audit-action-badge";
 import { AuditEventDate } from "./audit-event-date";
 import { AuditResponsibleCell } from "./audit-responsible-cell";
-import { Button } from "@/components/ui/button";
 
 const CELL_CLASS = "text-sm text-ink";
 const COLUMNS = ["Fecha y hora", "Solicitud", "Acción", "Responsable", "Detalle", "Evidencia"];
 
-export function AuditEventTable({ items, isLoading = false, loadingEvidenceId, onOpenEvidence, onSelectEvent }: AuditEventListProps) {
+// Tabla de solo lectura: no hay controles para editar ni borrar eventos
+export function AuditEventTable({
+  items,
+  isLoading = false,
+  loadingEvidenceId,
+  onOpenEvidence,
+  onSelectEvent,
+}: AuditEventListProps) {
   return (
     <Table>
       <TableHeader>
@@ -64,12 +71,25 @@ export function AuditEventTable({ items, isLoading = false, loadingEvidenceId, o
                 <TableCell className={CELL_CLASS}>
                   <AuditActionBadge action={event.action} />
                 </TableCell>
-                <TableCell className={`${CELL_CLASS} min-w-48 whitespace-normal`}>
+                <TableCell
+                  className={`${CELL_CLASS} min-w-48 whitespace-normal`}
+                >
                   <AuditResponsibleCell responsible={event.responsible} />
                 </TableCell>
-                <TableCell className={`${CELL_CLASS} min-w-56 whitespace-normal`}>{event.detail || EMPTY_VALUE}</TableCell>
-                <TableCell className={CELL_CLASS} onClick={(clickEvent) => clickEvent.stopPropagation()}>
-                  <EvidenceButton event={event} isLoading={loadingEvidenceId === event.id} onOpen={onOpenEvidence} />
+                <TableCell
+                  className={`${CELL_CLASS} min-w-56 whitespace-normal`}
+                >
+                  {event.detail || EMPTY_VALUE}
+                </TableCell>
+                <TableCell
+                  className={CELL_CLASS}
+                  onClick={(clickEvent) => clickEvent.stopPropagation()}
+                >
+                  <EvidenceButton
+                    event={event}
+                    isLoading={loadingEvidenceId === event.id}
+                    onOpen={onOpenEvidence}
+                  />
                 </TableCell>
               </TableRow>
             ))}

@@ -42,7 +42,7 @@ describe("AuditEventTable y AuditEventCards", () => {
     ["tabla", AuditEventTable],
     ["tarjetas", AuditEventCards],
   ])("en %s muestra los campos de la HU, hora de Bolivia y valores ausentes", (_name, List) => {
-    render(<List items={EVENTS} loadingEvidenceId={null} onOpenEvidence={vi.fn()} onSelectEvent={vi.fn()}/>);
+    render(<List items={EVENTS} loadingEvidenceId={null} onOpenEvidence={vi.fn()} onSelectEvent={vi.fn()} />);
 
     expect(screen.getByText("Código de activación enviado")).toBeInTheDocument();
     expect(screen.getByText("Rechazada")).toBeInTheDocument();
@@ -70,7 +70,7 @@ describe("AuditEventTable y AuditEventCards", () => {
   });
 
   it("muestra esqueletos mientras carga", () => {
-    render(<AuditEventTable items={[]} isLoading loadingEvidenceId={null} onOpenEvidence={vi.fn()}  onSelectEvent={vi.fn()}/>);
+    render(<AuditEventTable items={[]} isLoading loadingEvidenceId={null} onOpenEvidence={vi.fn()} onSelectEvent={vi.fn()} />);
     expect(screen.getAllByTestId("audit-skeleton-row")).toHaveLength(5);
     cleanup();
     render(<AuditEventCards items={[]} isLoading loadingEvidenceId={null} onOpenEvidence={vi.fn()} onSelectEvent={vi.fn()} />);

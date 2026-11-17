@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AUDIT_ROLE_LABELS } from "../../constants/audit-actions.constants";
 import { EMPTY_VALUE } from "../../constants/audit-log.constants";
@@ -7,7 +8,6 @@ import type { AuditEventListProps } from "../../types/audit-event-list-props.typ
 import { EvidenceButton } from "../evidence/evidence-button";
 import { AuditActionBadge } from "./audit-action-badge";
 import { AuditEventDate } from "./audit-event-date";
-import { Button } from "@/components/ui/button";
 
 const SKELETON_CARDS = 3;
 

@@ -14,7 +14,6 @@ import { RequestValidationException } from '../../../common/exceptions/request-v
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../../../common/guards/roles.guard.js';
 import { ZodValidationPipe } from '../../../common/pipes/zod-validation.pipe.js';
-import { AuditEventTimelineService } from '../services/audit-event-timeline.service.js';
 
 import {
   auditEventsFiltersSchema,
@@ -24,6 +23,7 @@ import {
   listAuditEventsQuerySchema,
   type ListAuditEventsQuery,
 } from '../requests/list-audit-events.schema.js';
+import { AuditEventTimelineService } from '../services/audit-event-timeline.service.js';
 import { AuditEventsExportService } from '../services/audit-events-export.service.js';
 import { AuditEventsService } from '../services/audit-events.service.js';
 
