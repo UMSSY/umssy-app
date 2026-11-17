@@ -15,7 +15,7 @@ export class AttendanceValidationRepository {
         createdById: userId,
         status: { title: PUBLISHED_STATUS_TITLE },
       },
-      select: { id: true },
+      select: { id: true, eventDate: true, startTime: true, endTime: true },
     });
   }
 

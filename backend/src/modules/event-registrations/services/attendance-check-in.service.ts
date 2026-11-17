@@ -21,10 +21,11 @@ export class AttendanceCheckInService {
       }
 
       // Cancellation or QR rotation may have happened while waiting for the row lock.
-      const current = await this.validation.resolveForCheckIn(eventId, actor, reference, tx);
+      const checkedInAt = new Date();
+      const current = await this.validation.resolveForCheckIn(eventId, actor, reference, tx, checkedInAt);
       if (current.registrationId !== initial.registrationId) throw new AttendancePassInvalidException();
 
-      const { count } = await this.repository.insertIfAbsent(tx, current.registrationId, actor.id, new Date());
+      const { count } = await this.repository.insertIfAbsent(tx, current.registrationId, actor.id, checkedInAt);
       const attendance = await this.repository.findAttendance(tx, current.registrationId);
       if (!attendance) throw new InternalException();
 
