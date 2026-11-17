@@ -111,15 +111,23 @@ export function formatRegistrationTimeRange(startTime: string, endTime: string) 
   return `${start} - ${end}`;
 }
 
+export function isConfirmedRegistrationStatus(status: string): boolean {
+  return (
+    status === 'CONFIRMED' ||
+    status === 'APPROVED' ||
+    status === 'Confirmada'
+  );
+}
+
 export function getEffectiveRegistrationStatus(
   status: string,
   isPast: boolean,
   isInProgress = false,
 ) {
-  if (isPast && (status === "CONFIRMED" || status === "APPROVED" || status === "Confirmada")) {
+  if (isPast && isConfirmedRegistrationStatus(status)) {
     return { label: "Finalizado", isPast: true, code: "FINALIZED" };
   }
-  if (isInProgress && (status === "CONFIRMED" || status === "APPROVED" || status === "Confirmada")) {
+  if (isInProgress && isConfirmedRegistrationStatus(status)) {
     return { label: "En curso", isPast: false, code: "IN_PROGRESS" };
   }
 

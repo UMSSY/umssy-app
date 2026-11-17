@@ -12,9 +12,11 @@ export function useEventTiming(event: {
   const [now, setNow] = useState(Date.now);
   const startsAt = getRegistrationEventTimestamp(event.date, event.startTime ?? '');
   const endsAt = getRegistrationEventTimestamp(event.date, event.endTime);
+  const hasValidStart = Number.isFinite(startsAt);
+  const hasStarted = hasValidStart && now >= startsAt;
   const isPast = Number.isFinite(endsAt) && now >= endsAt;
   const isInProgress =
-    Number.isFinite(startsAt) &&
+    hasValidStart &&
     Number.isFinite(endsAt) &&
     now >= startsAt &&
     now < endsAt;
@@ -32,7 +34,7 @@ export function useEventTiming(event: {
     return () => window.clearTimeout(timer);
   }, [endsAt, now, startsAt]);
 
-  return { isPast, isInProgress };
+  return { isPast, isInProgress, hasValidStart, hasStarted };
 }
 
 export function useEventFinished(

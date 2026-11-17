@@ -479,6 +479,162 @@ describe("Mis pases", () => {
       await screen.findByRole('img', { name: 'Código QR del pase' }),
     ).toBeInTheDocument();
   });
+
+  it('shows the cancel button next to chat only for confirmed registrations before Bolivia start time', async () => {
+    vi.setSystemTime(new Date('2026-10-20T12:59:59Z'));
+    getMine.mockResolvedValue([
+      pass,
+      { ...pass, id: 'reg-pending', eventName: 'Pendiente', status: 'PENDING' },
+    ]);
+    render(<MyPassesView />);
+    const cancelButtons = await screen.findAllByRole('button', {
+      name: 'Cancelar inscripción',
+    });
+    expect(cancelButtons).toHaveLength(1);
+    expect(cancelButtons[0]).toHaveTextContent('Cancelar');
+    expect(cancelButtons[0]).toBeEnabled();
+  });
+
+  it('hides the cancel button at the exact Bolivia workshop start time without reloading', async () => {
+    vi.setSystemTime(new Date('2026-10-20T12:59:59.400Z'));
+    getMine.mockResolvedValue([pass]);
+    render(<MyPassesView />);
+    expect(
+      await screen.findByRole('button', { name: 'Cancelar inscripción' }),
+    ).toBeInTheDocument();
+
+    vi.setSystemTime(new Date('2026-10-20T13:00:00Z'));
+    await waitFor(
+      () =>
+        expect(
+          screen.queryByRole('button', { name: 'Cancelar inscripción' }),
+        ).not.toBeInTheDocument(),
+      { timeout: 2500 },
+    );
+  });
+
+  it('disables the cancel button when offline', async () => {
+    const userToken = `h.${btoa(JSON.stringify({ sub: 'user-offline' }))}.s`;
+    await saveAccessToken(userToken);
+    await offlinePassesStore.save('user-offline', [
+      { ...pass, qrToken: 'c'.repeat(64) },
+    ]);
+    vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
+    onlineManager.setOnline(false);
+
+    render(<MyPassesView />);
+    const cancelButton = await screen.findByRole('button', {
+      name: 'Cancelar inscripción',
+    });
+    expect(cancelButton).toBeDisabled();
+    expect(cancelButton).toHaveAttribute('title', 'Requiere conexión a Internet');
+
+    vi.restoreAllMocks();
+    onlineManager.setOnline(true);
+  });
+
+  it('opens the cancel confirmation dialog when clicking Cancelar on an upcoming confirmed pass', async () => {
+    vi.setSystemTime(new Date('2026-10-20T12:00:00Z'));
+    getMine.mockResolvedValue([pass]);
+    render(<MyPassesView />);
+
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Cancelar inscripción' }),
+    );
+
+    expect(
+      await screen.findByRole('dialog', {
+        name: '¿Estás seguro de que deseas cancelar tu inscripción a este taller?',
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Esta acción liberará tu cupo y ya no podrás acceder a los detalles de este taller.',
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Volver' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Sí, cancelar' }),
+    ).toBeInTheDocument();
+  });
+
+  it('closes the confirmation dialog without cancelling when clicking Volver', async () => {
+    vi.setSystemTime(new Date('2026-10-20T12:00:00Z'));
+    const onConfirmCancelRegistration = vi.fn();
+    getMine.mockResolvedValue([pass]);
+    render(
+      <MyPassesView
+        onConfirmCancelRegistration={onConfirmCancelRegistration}
+      />,
+    );
+
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Cancelar inscripción' }),
+    );
+    fireEvent.click(await screen.findByRole('button', { name: 'Volver' }));
+
+    await waitFor(() =>
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument(),
+    );
+    expect(onConfirmCancelRegistration).not.toHaveBeenCalled();
+  });
+
+  it('closes the confirmation dialog without cancelling when pressing Escape or clicking Close', async () => {
+    vi.setSystemTime(new Date('2026-10-20T12:00:00Z'));
+    const onConfirmCancelRegistration = vi.fn();
+    getMine.mockResolvedValue([pass]);
+    render(
+      <MyPassesView
+        onConfirmCancelRegistration={onConfirmCancelRegistration}
+      />,
+    );
+
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Cancelar inscripción' }),
+    );
+    fireEvent.click(await screen.findByRole('button', { name: 'Close' }));
+
+    await waitFor(() =>
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument(),
+    );
+    expect(onConfirmCancelRegistration).not.toHaveBeenCalled();
+  });
+
+  it('confirms cancellation and disables buttons while processing', async () => {
+    vi.setSystemTime(new Date('2026-10-20T12:00:00Z'));
+    let resolveConfirm: (() => void) | undefined;
+    const onConfirmCancelRegistration = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveConfirm = resolve;
+        }),
+    );
+    getMine.mockResolvedValue([pass]);
+    render(
+      <MyPassesView
+        onConfirmCancelRegistration={onConfirmCancelRegistration}
+      />,
+    );
+
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Cancelar inscripción' }),
+    );
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Sí, cancelar' }),
+    );
+
+    expect(onConfirmCancelRegistration).toHaveBeenCalledWith('reg-1');
+    expect(
+      await screen.findByRole('button', { name: 'Cancelando...' }),
+    ).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Volver' })).toBeDisabled();
+
+    resolveConfirm?.();
+    await waitFor(() =>
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument(),
+    );
+  });
+
 });
 
 describe('Mis pases sin conexión', () => {
