@@ -1,22 +1,22 @@
-# Reports (reportes administrativos)
+# Reports (administrative reports)
 
-## Propósito
+## Purpose
 
-El módulo `reports` ofrece al personal administrativo los reportes de usuarios aceptados y rechazados, su exportación en CSV y PDF, y el historial de reportes generados. También expone utilidades de semestre académico y el historial a otros dominios (por ejemplo, el informe PDF de encuestas).
+The `reports` module gives administrative staff the accepted and rejected users reports, their CSV and PDF export, and the history of generated reports. It also exposes academic semester utilities and the history to other domains (for example, the survey PDF report).
 
-- Backend: `backend/src/modules/reports` (`ReportsController`, `ReportsService`, `ReportPdfService`, `ReportHistoryService`, repositorios de usuarios y de reportes generados).
-- Frontend: `frontend/src/modules/reports` (vistas de usuarios aceptados, rechazados e historial, menú de descarga con formato y alcance, menú de gestión).
+- Backend: `backend/src/modules/reports` (`ReportsController`, `ReportsService`, `ReportPdfService`, `ReportHistoryService`, user and generated report repositories).
+- Frontend: `frontend/src/modules/reports` (accepted users, rejected users and history views, download menu with format and scope, academic year menu).
 
-## Funcionalidad
+## Functionality
 
-| Funcionalidad | Backend | Ruta frontend |
+| Feature | Backend | Frontend route |
 | --- | --- | --- |
-| Usuarios aceptados paginados y filtrados | `GET /reports/registered-users` | `/backoffice/reports/registered-users` |
-| Usuarios rechazados paginados y filtrados | `GET /reports/rejected-users` | `/backoffice/reports/rejected-users` |
-| Exportar en CSV o PDF, todo el filtro o solo la página actual | `GET /reports/registered-users/export`, `GET /reports/rejected-users/export` | `ReportActions` |
-| Historial de reportes generados | `GET /reports/history` | `/backoffice/reports/history` |
+| Paginated and filtered accepted users | `GET /reports/registered-users` | `/backoffice/reports/registered-users` |
+| Paginated and filtered rejected users | `GET /reports/rejected-users` | `/backoffice/reports/rejected-users` |
+| Export as CSV or PDF, the whole filter or only the current page | `GET /reports/registered-users/export`, `GET /reports/rejected-users/export` | `ReportActions` |
+| History of generated reports | `GET /reports/history` | `/backoffice/reports/history` |
 
-## Arquitectura
+## Architecture
 
 ```mermaid
 flowchart LR
@@ -43,91 +43,91 @@ flowchart LR
   SURV[surveys: exportSurveyPdf] --> HS
 ```
 
-## Flujos clave
+## Key flows
 
-### Exportar un reporte
+### Export a report
 
 ```mermaid
 sequenceDiagram
-  actor A as Administrativo
+  actor A as Administrative staff
   participant UI as ReportActions
   participant H as useExportReportCsv
   participant C as ReportsController
   participant S as ReportsService
   participant P as ReportPdfService
   participant RH as ReportHistoryService
-  A->>UI: Descargar -> formato (PDF/CSV) y alcance (filtrado / página actual)
-  H->>H: CSV: pide destino al navegador si está disponible
+  A->>UI: Download -> format (PDF/CSV) and scope (filtered / current page)
+  H->>H: CSV: asks the browser for a destination if available
   H->>C: GET /reports/registered-users/export?format&userType&period&search&snapshotAt[&page&limit]
-  C->>C: Valida query (page y limit juntos)
+  C->>C: Validates query (page and limit together)
   alt format = pdf
     C->>S: exportRegisteredUsersPdf(filters, userId)
-    S->>S: Filtra y pagina en memoria si llegan page y limit
-    S->>S: findAuthor(userId) (404 REPORT_AUTHOR_NOT_FOUND si no tiene nombre)
-    S->>P: render(título, autor, fecha, filtros, filas)
-    P-->>S: Buffer PDF
-  else format = csv (por defecto)
+    S->>S: Filters and paginates in memory if page and limit are sent
+    S->>S: findAuthor(userId) (404 REPORT_AUTHOR_NOT_FOUND if they have no name)
+    S->>P: render(title, author, date, filters, rows)
+    P-->>S: PDF Buffer
+  else format = csv (default)
     C->>S: exportRegisteredUsersCsv(filters)
   end
   C->>RH: registerGeneratedReport(userId, { fileName, reportType })
-  C-->>H: 200 archivo como adjunto con nombre
-  H-->>A: Guarda o descarga y muestra mensaje de éxito
+  C-->>H: 200 file as a named attachment
+  H-->>A: Saves or downloads and shows a success message
 ```
 
-## Reglas de negocio
+## Business rules
 
-- **Acceso.** Todo el controlador exige JWT y rol `administrativo`.
-- **Filtros.** `userType` (rol o `ALL`), `period` (`I-AAAA` / `II-AAAA` o `ALL`), `search` y `snapshotAt` (fecha de corte ISO 8601 con zona). `ALL` equivale a no filtrar.
-- **Alcance de exportación.** Sin `page` ni `limit` se exporta todo el resultado filtrado; con ambos se exporta solo esa página. Enviar solo uno de los dos responde 400.
-- **Formato.** `format` = `csv` (por defecto) o `pdf`. Ambos usan el mismo nombre base (`buildExportFileName`) con extensión `.csv` o `.pdf`.
-- **PDF.** Hoja A4 horizontal con cabecera institucional (UMSS, UMSSY), tarjetas de fecha de generación, autor (`Nombre Apellido (Administrativo)`) y total de registros, píldoras con los filtros aplicados, fecha de generación con `formatBoliviaDateTime` (`DD/MM/AAAA HH:mm`, hora de Bolivia, compartido con el resto del backend), tabla con nombre, correo, tipo de usuario, documento y fecha de aprobación o rechazo, filas alternadas, salto de página con cabecera repetida y pie "Página X de Y". Sin filas muestra "No hay resultados disponibles para exportar.".
-- **Filtro de fecha en el PDF.** La gestión se muestra como la fecha de inicio del semestre (`01/01/AAAA` o `01/07/AAAA`); sin gestión, "Todas las fechas".
-- **Historial.** Cada exportación (CSV o PDF) registra el archivo y su tipo (`REGISTERED_USERS` o su variante por tipo de usuario, y `REJECTED_USERS`); el informe de encuestas registra `SURVEY_STATISTICS`.
-- **Frontend.** Evita exportaciones simultáneas, muestra el mensaje de éxito 4 s y un toast de error si falla. El menú de gestión lista los semestres académicos con la opción "Todas".
+- **Access.** The whole controller requires JWT and the `administrativo` role.
+- **Filters.** `userType` (role or `ALL`), `period` (`I-AAAA` / `II-AAAA` or `ALL`), `search` and `snapshotAt` (ISO 8601 cutoff date with time zone). `ALL` means no filter.
+- **Export scope.** Without `page` or `limit`, the whole filtered result is exported; with both, only that page is exported. Sending only one of the two returns 400.
+- **Format.** `format` = `csv` (default) or `pdf`. Both use the same base name (`buildExportFileName`) with a `.csv` or `.pdf` extension.
+- **PDF.** Landscape A4 sheet with an institutional header (UMSS, UMSSY), cards for generation date, author (`Nombre Apellido (Administrativo)`) and total records, pills with the applied filters, generation date with `formatBoliviaDateTime` (`DD/MM/AAAA HH:mm`, Bolivia time, shared with the rest of the backend), a table with name, email, user type, document and approval or rejection date, alternating rows, page breaks with a repeated header and a "Página X de Y" footer. With no rows it shows "No hay resultados disponibles para exportar.".
+- **Date filter in the PDF.** The academic year is shown as the semester start date (`01/01/AAAA` or `01/07/AAAA`); without an academic year, "Todas las fechas".
+- **History.** Each export (CSV or PDF) records the file and its type (`REGISTERED_USERS` or its per-user-type variant, and `REJECTED_USERS`); the survey report records `SURVEY_STATISTICS`.
+- **Frontend.** Prevents simultaneous exports, shows the success message for 4 s and an error toast if it fails. The academic year menu lists the academic semesters with the "Todas" option.
 
 ## Endpoints
 
-### Expuestos
+### Exposed
 
-| Método | Ruta | Query | Respuesta | Errores |
+| Method | Path | Query | Response | Errors |
 | --- | --- | --- | --- | --- |
-| GET | `/reports/registered-users` | `page`, `limit`, `userType`, `period`, `search`, `snapshotAt` | 200 página de usuarios aceptados | 400 |
-| GET | `/reports/registered-users/export` | Filtros + `format` (`csv`/`pdf`), `page` y `limit` opcionales y juntos | 200 `text/csv` o `application/pdf` | 400, 404 `REPORT_AUTHOR_NOT_FOUND` (PDF) |
-| GET | `/reports/rejected-users` | Igual que aceptados | 200 página de usuarios rechazados | 400 |
-| GET | `/reports/rejected-users/export` | Igual que aceptados | 200 `text/csv` o `application/pdf` | 400, 404 (PDF) |
-| GET | `/reports/history` | `page`, `limit`, `reportType`, `search`, `snapshotAt` | 200 página de reportes generados | 400 |
+| GET | `/reports/registered-users` | `page`, `limit`, `userType`, `period`, `search`, `snapshotAt` | 200 page of accepted users | 400 |
+| GET | `/reports/registered-users/export` | Filters + `format` (`csv`/`pdf`), `page` and `limit` optional and together | 200 `text/csv` or `application/pdf` | 400, 404 `REPORT_AUTHOR_NOT_FOUND` (PDF) |
+| GET | `/reports/rejected-users` | Same as accepted | 200 page of rejected users | 400 |
+| GET | `/reports/rejected-users/export` | Same as accepted | 200 `text/csv` or `application/pdf` | 400, 404 (PDF) |
+| GET | `/reports/history` | `page`, `limit`, `reportType`, `search`, `snapshotAt` | 200 page of generated reports | 400 |
 
-Todas requieren JWT y rol `administrativo`. Las respuestas JSON usan `{ statusCode, data, detail, ok }`; las exportaciones son binarias con `Content-Disposition: attachment`.
+All of them require JWT and the `administrativo` role. JSON responses use `{ statusCode, data, detail, ok }`; exports are binary with `Content-Disposition: attachment`.
 
-Swagger (`/docs`) documenta cada endpoint con `operationId`, Bearer JWT, roles, parámetros y restricciones tomados de los esquemas Zod, ejemplos de éxito con el envoltorio `{ statusCode, ok, detail, data }`, los errores que lanza el código y 401, 403 y 500 declarados de forma explícita. Los ejemplos viven en `constants/*-swagger.constants.ts` del módulo y el esquema de error compartido en `backend/src/common/constants/api-error-swagger.constants.ts`. Las exportaciones declaran `text/csv` y `application/pdf` con esquema binario y las cabeceras `Content-Type` y `Content-Disposition`.
+Swagger (`/docs`) documents each endpoint with `operationId`, Bearer JWT, roles, parameters and constraints taken from the Zod schemas, success examples with the `{ statusCode, ok, detail, data }` envelope, the errors thrown by the code, and 401, 403 and 500 declared explicitly. The examples live in the module's `constants/*-swagger.constants.ts` and the shared error schema in `backend/src/common/constants/api-error-swagger.constants.ts`. Exports declare `text/csv` and `application/pdf` with a binary schema and the `Content-Type` and `Content-Disposition` headers.
 
-### Servicios exportados
+### Exported services
 
-| Servicio | Consumidor | Uso |
+| Service | Consumer | Use |
 | --- | --- | --- |
-| `ReportHistoryService.registerGeneratedReport` | surveys | Registrar el informe PDF de una encuesta |
-| `GeneratedReportsRepository` | surveys | Acceso al historial |
-| `getAcademicPeriod` (`utils/academic-period.ts`) | surveys | Semestre académico de una fecha |
+| `ReportHistoryService.registerGeneratedReport` | surveys | Record a survey's PDF report |
+| `GeneratedReportsRepository` | surveys | Access to the history |
+| `getAcademicPeriod` (`utils/academic-period.ts`) | surveys | Academic semester of a date |
 
-## Dependencias
+## Dependencies
 
-| Dirección | Módulo | Uso |
+| Direction | Module | Use |
 | --- | --- | --- |
-| Usa | common | `SimplePdfDocument`, `formatBoliviaDateTime`, paginación, `ResponseInterceptor` |
-| Usado por | [surveys](../surveys/README.md) | Historial de reportes y semestres académicos |
-| Usa (frontend) | shared | `ExportFormatMenu` (menú de formato compartido con los mapas de calor), `downloadFile` |
+| Uses | common | `SimplePdfDocument`, `formatBoliviaDateTime`, pagination, `ResponseInterceptor` |
+| Used by | [surveys](../surveys/README.md) | Report history and academic semesters |
+| Uses (frontend) | shared | `ExportFormatMenu` (format menu shared with the heatmaps), `downloadFile` |
 
-## Datos
+## Data
 
-Lee `users` y `access_requests` para los reportes de usuarios y escribe en `admin_export_histories` (historial). Ver [backend/prisma/README.md](../../backend/prisma/README.md).
+Reads `users` and `access_requests` for the user reports and writes to `admin_export_histories` (history). See [backend/prisma/README.md](../../backend/prisma/README.md).
 
 ## Sprint History
 
 ### Sprint 3
 
-- Exportación en PDF de los reportes de usuarios aceptados y rechazados (`format=pdf`) con cabecera institucional, autor, filtros aplicados y paginación del documento.
-- Alcance de descarga: todo el reporte filtrado o solo la página actual (`page` + `limit`).
-- Menú de descarga con selección de formato (`ExportFormatMenu` compartido) y alcance en el frontend.
-- Registro en el historial de las exportaciones CSV y PDF.
-- Contratos Swagger completos de listados, exportaciones e historial.
-- Navegación separada entre "Reportes" y "Mapas de calor" en el backoffice.
+- PDF export of the accepted and rejected users reports (`format=pdf`) with institutional header, author, applied filters and document pagination.
+- Download scope: the whole filtered report or only the current page (`page` + `limit`).
+- Download menu with format selection (shared `ExportFormatMenu`) and scope in the frontend.
+- History records for CSV and PDF exports.
+- Full Swagger contracts for listings, exports and history.
+- Separate navigation between "Reportes" and "Mapas de calor" in the backoffice.
