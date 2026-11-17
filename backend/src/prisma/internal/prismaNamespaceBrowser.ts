@@ -140,7 +140,12 @@ export const ModelName = {
   NotificationType: 'NotificationType',
   Notification: 'Notification',
   PushSubscription: 'PushSubscription',
-  NotificationPreference: 'NotificationPreference'
+  RefreshToken: 'RefreshToken',
+  NotificationPreference: 'NotificationPreference',
+  CompanyProfile: 'CompanyProfile',
+  CompanyLogo: 'CompanyLogo',
+  CompanyAccessRequest: 'CompanyAccessRequest',
+  CompanyActivationOtp: 'CompanyActivationOtp'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1364,6 +1369,24 @@ export const PushSubscriptionScalarFieldEnum = {
 export type PushSubscriptionScalarFieldEnum = (typeof PushSubscriptionScalarFieldEnum)[keyof typeof PushSubscriptionScalarFieldEnum]
 
 
+export const RefreshTokenScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  familyId: 'familyId',
+  roleTag: 'roleTag',
+  tokenHash: 'tokenHash',
+  expiresAt: 'expiresAt',
+  absoluteExpiresAt: 'absoluteExpiresAt',
+  usedAt: 'usedAt',
+  revokedAt: 'revokedAt',
+  revokedReason: 'revokedReason',
+  userAgent: 'userAgent',
+  createdAt: 'createdAt'
+} as const
+
+export type RefreshTokenScalarFieldEnum = (typeof RefreshTokenScalarFieldEnum)[keyof typeof RefreshTokenScalarFieldEnum]
+
+
 export const NotificationPreferenceScalarFieldEnum = {
   userId: 'userId',
   pushEnabled: 'pushEnabled',
@@ -1374,6 +1397,82 @@ export const NotificationPreferenceScalarFieldEnum = {
 } as const
 
 export type NotificationPreferenceScalarFieldEnum = (typeof NotificationPreferenceScalarFieldEnum)[keyof typeof NotificationPreferenceScalarFieldEnum]
+
+
+export const CompanyProfileScalarFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  sector: 'sector',
+  email: 'email',
+  phone: 'phone',
+  websiteUrl: 'websiteUrl',
+  cityId: 'cityId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CompanyProfileScalarFieldEnum = (typeof CompanyProfileScalarFieldEnum)[keyof typeof CompanyProfileScalarFieldEnum]
+
+
+export const CompanyLogoScalarFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  fileName: 'fileName',
+  mimeType: 'mimeType',
+  sizeBytes: 'sizeBytes',
+  data: 'data',
+  uploadedAt: 'uploadedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CompanyLogoScalarFieldEnum = (typeof CompanyLogoScalarFieldEnum)[keyof typeof CompanyLogoScalarFieldEnum]
+
+
+export const CompanyAccessRequestScalarFieldEnum = {
+  id: 'id',
+  requestCode: 'requestCode',
+  companyName: 'companyName',
+  description: 'description',
+  sector: 'sector',
+  email: 'email',
+  phone: 'phone',
+  websiteUrl: 'websiteUrl',
+  cityId: 'cityId',
+  username: 'username',
+  statusId: 'statusId',
+  documentFileId: 'documentFileId',
+  logoFileId: 'logoFileId',
+  ocrMatchScore: 'ocrMatchScore',
+  ocrFieldResults: 'ocrFieldResults',
+  submittedAt: 'submittedAt',
+  openedById: 'openedById',
+  openedAt: 'openedAt',
+  reviewedById: 'reviewedById',
+  reviewedAt: 'reviewedAt',
+  rejectionReason: 'rejectionReason',
+  approvedCompanyId: 'approvedCompanyId',
+  approvedUserId: 'approvedUserId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  accessRequestDocumentTypeId: 'accessRequestDocumentTypeId'
+} as const
+
+export type CompanyAccessRequestScalarFieldEnum = (typeof CompanyAccessRequestScalarFieldEnum)[keyof typeof CompanyAccessRequestScalarFieldEnum]
+
+
+export const CompanyActivationOtpScalarFieldEnum = {
+  id: 'id',
+  companyAccessRequestId: 'companyAccessRequestId',
+  codeHash: 'codeHash',
+  expiresAt: 'expiresAt',
+  attempts: 'attempts',
+  usedAt: 'usedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CompanyActivationOtpScalarFieldEnum = (typeof CompanyActivationOtpScalarFieldEnum)[keyof typeof CompanyActivationOtpScalarFieldEnum]
 
 
 export const SortOrder = {

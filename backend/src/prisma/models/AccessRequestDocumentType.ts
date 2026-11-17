@@ -183,6 +183,7 @@ export type AccessRequestDocumentTypeWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"AccessRequestDocumentType"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AccessRequestDocumentType"> | Date | string
   accessRequests?: Prisma.AccessRequestListRelationFilter
+  companyAccessRequests?: Prisma.CompanyAccessRequestListRelationFilter
 }
 
 export type AccessRequestDocumentTypeOrderByWithRelationInput = {
@@ -192,6 +193,7 @@ export type AccessRequestDocumentTypeOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   accessRequests?: Prisma.AccessRequestOrderByRelationAggregateInput
+  companyAccessRequests?: Prisma.CompanyAccessRequestOrderByRelationAggregateInput
 }
 
 export type AccessRequestDocumentTypeWhereUniqueInput = Prisma.AtLeast<{
@@ -204,6 +206,7 @@ export type AccessRequestDocumentTypeWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"AccessRequestDocumentType"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AccessRequestDocumentType"> | Date | string
   accessRequests?: Prisma.AccessRequestListRelationFilter
+  companyAccessRequests?: Prisma.CompanyAccessRequestListRelationFilter
 }, "id" | "title">
 
 export type AccessRequestDocumentTypeOrderByWithAggregationInput = {
@@ -235,6 +238,7 @@ export type AccessRequestDocumentTypeCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   accessRequests?: Prisma.AccessRequestCreateNestedManyWithoutDocumentTypeInput
+  companyAccessRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutAccessRequestDocumentTypeInput
 }
 
 export type AccessRequestDocumentTypeUncheckedCreateInput = {
@@ -244,6 +248,7 @@ export type AccessRequestDocumentTypeUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   accessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutDocumentTypeInput
+  companyAccessRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutAccessRequestDocumentTypeInput
 }
 
 export type AccessRequestDocumentTypeUpdateInput = {
@@ -253,6 +258,7 @@ export type AccessRequestDocumentTypeUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accessRequests?: Prisma.AccessRequestUpdateManyWithoutDocumentTypeNestedInput
+  companyAccessRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutAccessRequestDocumentTypeNestedInput
 }
 
 export type AccessRequestDocumentTypeUncheckedUpdateInput = {
@@ -262,6 +268,7 @@ export type AccessRequestDocumentTypeUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutDocumentTypeNestedInput
+  companyAccessRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutAccessRequestDocumentTypeNestedInput
 }
 
 export type AccessRequestDocumentTypeCreateManyInput = {
@@ -333,12 +340,29 @@ export type AccessRequestDocumentTypeUpdateOneWithoutAccessRequestsNestedInput =
   update?: Prisma.XOR<Prisma.XOR<Prisma.AccessRequestDocumentTypeUpdateToOneWithWhereWithoutAccessRequestsInput, Prisma.AccessRequestDocumentTypeUpdateWithoutAccessRequestsInput>, Prisma.AccessRequestDocumentTypeUncheckedUpdateWithoutAccessRequestsInput>
 }
 
+export type AccessRequestDocumentTypeCreateNestedOneWithoutCompanyAccessRequestsInput = {
+  create?: Prisma.XOR<Prisma.AccessRequestDocumentTypeCreateWithoutCompanyAccessRequestsInput, Prisma.AccessRequestDocumentTypeUncheckedCreateWithoutCompanyAccessRequestsInput>
+  connectOrCreate?: Prisma.AccessRequestDocumentTypeCreateOrConnectWithoutCompanyAccessRequestsInput
+  connect?: Prisma.AccessRequestDocumentTypeWhereUniqueInput
+}
+
+export type AccessRequestDocumentTypeUpdateOneWithoutCompanyAccessRequestsNestedInput = {
+  create?: Prisma.XOR<Prisma.AccessRequestDocumentTypeCreateWithoutCompanyAccessRequestsInput, Prisma.AccessRequestDocumentTypeUncheckedCreateWithoutCompanyAccessRequestsInput>
+  connectOrCreate?: Prisma.AccessRequestDocumentTypeCreateOrConnectWithoutCompanyAccessRequestsInput
+  upsert?: Prisma.AccessRequestDocumentTypeUpsertWithoutCompanyAccessRequestsInput
+  disconnect?: Prisma.AccessRequestDocumentTypeWhereInput | boolean
+  delete?: Prisma.AccessRequestDocumentTypeWhereInput | boolean
+  connect?: Prisma.AccessRequestDocumentTypeWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AccessRequestDocumentTypeUpdateToOneWithWhereWithoutCompanyAccessRequestsInput, Prisma.AccessRequestDocumentTypeUpdateWithoutCompanyAccessRequestsInput>, Prisma.AccessRequestDocumentTypeUncheckedUpdateWithoutCompanyAccessRequestsInput>
+}
+
 export type AccessRequestDocumentTypeCreateWithoutAccessRequestsInput = {
   id?: string
   title: string
   description?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  companyAccessRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutAccessRequestDocumentTypeInput
 }
 
 export type AccessRequestDocumentTypeUncheckedCreateWithoutAccessRequestsInput = {
@@ -347,6 +371,7 @@ export type AccessRequestDocumentTypeUncheckedCreateWithoutAccessRequestsInput =
   description?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  companyAccessRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutAccessRequestDocumentTypeInput
 }
 
 export type AccessRequestDocumentTypeCreateOrConnectWithoutAccessRequestsInput = {
@@ -371,6 +396,7 @@ export type AccessRequestDocumentTypeUpdateWithoutAccessRequestsInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  companyAccessRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutAccessRequestDocumentTypeNestedInput
 }
 
 export type AccessRequestDocumentTypeUncheckedUpdateWithoutAccessRequestsInput = {
@@ -379,6 +405,59 @@ export type AccessRequestDocumentTypeUncheckedUpdateWithoutAccessRequestsInput =
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  companyAccessRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutAccessRequestDocumentTypeNestedInput
+}
+
+export type AccessRequestDocumentTypeCreateWithoutCompanyAccessRequestsInput = {
+  id?: string
+  title: string
+  description?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  accessRequests?: Prisma.AccessRequestCreateNestedManyWithoutDocumentTypeInput
+}
+
+export type AccessRequestDocumentTypeUncheckedCreateWithoutCompanyAccessRequestsInput = {
+  id?: string
+  title: string
+  description?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  accessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutDocumentTypeInput
+}
+
+export type AccessRequestDocumentTypeCreateOrConnectWithoutCompanyAccessRequestsInput = {
+  where: Prisma.AccessRequestDocumentTypeWhereUniqueInput
+  create: Prisma.XOR<Prisma.AccessRequestDocumentTypeCreateWithoutCompanyAccessRequestsInput, Prisma.AccessRequestDocumentTypeUncheckedCreateWithoutCompanyAccessRequestsInput>
+}
+
+export type AccessRequestDocumentTypeUpsertWithoutCompanyAccessRequestsInput = {
+  update: Prisma.XOR<Prisma.AccessRequestDocumentTypeUpdateWithoutCompanyAccessRequestsInput, Prisma.AccessRequestDocumentTypeUncheckedUpdateWithoutCompanyAccessRequestsInput>
+  create: Prisma.XOR<Prisma.AccessRequestDocumentTypeCreateWithoutCompanyAccessRequestsInput, Prisma.AccessRequestDocumentTypeUncheckedCreateWithoutCompanyAccessRequestsInput>
+  where?: Prisma.AccessRequestDocumentTypeWhereInput
+}
+
+export type AccessRequestDocumentTypeUpdateToOneWithWhereWithoutCompanyAccessRequestsInput = {
+  where?: Prisma.AccessRequestDocumentTypeWhereInput
+  data: Prisma.XOR<Prisma.AccessRequestDocumentTypeUpdateWithoutCompanyAccessRequestsInput, Prisma.AccessRequestDocumentTypeUncheckedUpdateWithoutCompanyAccessRequestsInput>
+}
+
+export type AccessRequestDocumentTypeUpdateWithoutCompanyAccessRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  accessRequests?: Prisma.AccessRequestUpdateManyWithoutDocumentTypeNestedInput
+}
+
+export type AccessRequestDocumentTypeUncheckedUpdateWithoutCompanyAccessRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  accessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutDocumentTypeNestedInput
 }
 
 
@@ -388,10 +467,12 @@ export type AccessRequestDocumentTypeUncheckedUpdateWithoutAccessRequestsInput =
 
 export type AccessRequestDocumentTypeCountOutputType = {
   accessRequests: number
+  companyAccessRequests: number
 }
 
 export type AccessRequestDocumentTypeCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   accessRequests?: boolean | AccessRequestDocumentTypeCountOutputTypeCountAccessRequestsArgs
+  companyAccessRequests?: boolean | AccessRequestDocumentTypeCountOutputTypeCountCompanyAccessRequestsArgs
 }
 
 /**
@@ -411,6 +492,13 @@ export type AccessRequestDocumentTypeCountOutputTypeCountAccessRequestsArgs<ExtA
   where?: Prisma.AccessRequestWhereInput
 }
 
+/**
+ * AccessRequestDocumentTypeCountOutputType without action
+ */
+export type AccessRequestDocumentTypeCountOutputTypeCountCompanyAccessRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CompanyAccessRequestWhereInput
+}
+
 
 export type AccessRequestDocumentTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -419,6 +507,7 @@ export type AccessRequestDocumentTypeSelect<ExtArgs extends runtime.Types.Extens
   createdAt?: boolean
   updatedAt?: boolean
   accessRequests?: boolean | Prisma.AccessRequestDocumentType$accessRequestsArgs<ExtArgs>
+  companyAccessRequests?: boolean | Prisma.AccessRequestDocumentType$companyAccessRequestsArgs<ExtArgs>
   _count?: boolean | Prisma.AccessRequestDocumentTypeCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["accessRequestDocumentType"]>
 
@@ -449,6 +538,7 @@ export type AccessRequestDocumentTypeSelectScalar = {
 export type AccessRequestDocumentTypeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "createdAt" | "updatedAt", ExtArgs["result"]["accessRequestDocumentType"]>
 export type AccessRequestDocumentTypeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   accessRequests?: boolean | Prisma.AccessRequestDocumentType$accessRequestsArgs<ExtArgs>
+  companyAccessRequests?: boolean | Prisma.AccessRequestDocumentType$companyAccessRequestsArgs<ExtArgs>
   _count?: boolean | Prisma.AccessRequestDocumentTypeCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type AccessRequestDocumentTypeIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -458,6 +548,7 @@ export type $AccessRequestDocumentTypePayload<ExtArgs extends runtime.Types.Exte
   name: "AccessRequestDocumentType"
   objects: {
     accessRequests: Prisma.$AccessRequestPayload<ExtArgs>[]
+    companyAccessRequests: Prisma.$CompanyAccessRequestPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -860,6 +951,7 @@ readonly fields: AccessRequestDocumentTypeFieldRefs;
 export interface Prisma__AccessRequestDocumentTypeClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   accessRequests<T extends Prisma.AccessRequestDocumentType$accessRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AccessRequestDocumentType$accessRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AccessRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  companyAccessRequests<T extends Prisma.AccessRequestDocumentType$companyAccessRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AccessRequestDocumentType$companyAccessRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CompanyAccessRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1308,6 +1400,30 @@ export type AccessRequestDocumentType$accessRequestsArgs<ExtArgs extends runtime
   take?: number
   skip?: number
   distinct?: Prisma.AccessRequestScalarFieldEnum | Prisma.AccessRequestScalarFieldEnum[]
+}
+
+/**
+ * AccessRequestDocumentType.companyAccessRequests
+ */
+export type AccessRequestDocumentType$companyAccessRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CompanyAccessRequest
+   */
+  select?: Prisma.CompanyAccessRequestSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CompanyAccessRequest
+   */
+  omit?: Prisma.CompanyAccessRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompanyAccessRequestInclude<ExtArgs> | null
+  where?: Prisma.CompanyAccessRequestWhereInput
+  orderBy?: Prisma.CompanyAccessRequestOrderByWithRelationInput | Prisma.CompanyAccessRequestOrderByWithRelationInput[]
+  cursor?: Prisma.CompanyAccessRequestWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CompanyAccessRequestScalarFieldEnum | Prisma.CompanyAccessRequestScalarFieldEnum[]
 }
 
 /**

@@ -1,6 +1,7 @@
 import { BEARER_PREFIX } from "@/shared/constants/auth.constants";
 import { ROLE_TAGS } from "@/shared/constants/roles.constants";
 import { apiClient } from "@/shared/services/api-client";
+import { broadcastAuthEvent } from "../utils/auth-broadcast";
 import type { ApiResponse } from "@/shared/types/api-response.types";
 import type { SessionResponse } from "../types/session-response.types";
 import type { LoginPayload, LoginResponse } from "../types/auth-types";
@@ -44,6 +45,31 @@ export const authService = {
       headers: accessToken ? { Authorization: `${BEARER_PREFIX}${accessToken}` } : undefined,
     });
     return response.data.data;
+  },
+  refreshSession: async (): Promise<{ ok: boolean }> => {
+    try {
+      const response = await apiClient.post<ApiResponse<{ ok: boolean }> | { ok: boolean }>("/auth/refresh");
+      const res = response.data;
+      if (res && typeof res === "object" && "data" in res && res.data) {
+        return res.data;
+      }
+      return (res as { ok: boolean }) ?? { ok: true };
+    } catch (err: unknown) {
+      extractApiError(err, "No se pudo renovar la sesión");
+    }
+  },
+  logout: async (): Promise<{ ok: boolean }> => {
+    broadcastAuthEvent({ type: "SESSION_CLOSED", reason: "SESSION_REVOKED" });
+    try {
+      const response = await apiClient.post<ApiResponse<{ ok: boolean }> | { ok: boolean }>("/auth/logout");
+      const res = response.data;
+      if (res && typeof res === "object" && "data" in res && res.data) {
+        return res.data;
+      }
+      return (res as { ok: boolean }) ?? { ok: true };
+    } catch {
+      return { ok: true };
+    }
   },
   login: async (payload: LoginPayload): Promise<LoginResponse> => {
     if (!apiClient.defaults.baseURL) {

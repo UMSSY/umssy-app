@@ -1,5 +1,6 @@
 import { isApiError } from "@/shared/services/api-client";
 import { getAccessToken, initializeAccessTokenStorage } from "@/shared/services/storage/access-token-storage";
+import { getCurrentSessionUserId } from "@/shared/services/storage/session-user-id-storage";
 import { updateIndexedDb } from "@/shared/services/storage/browser-indexed-db";
 import {
   readSessionStorage,
@@ -12,6 +13,9 @@ import type { LegacyMentorIntakeIntention } from "@/shared/types/legacy-mentor-i
 
 function currentSubject(): string {
   try {
+    const sessionUserId = getCurrentSessionUserId();
+    if (sessionUserId) return sessionUserId;
+
     const payload = getAccessToken()?.split(".")[1];
     if (!payload) return "anonymous";
     const subject: unknown = JSON.parse(
