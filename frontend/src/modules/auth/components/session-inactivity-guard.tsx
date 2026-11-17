@@ -6,6 +6,7 @@ import { authService } from "../services/auth.service";
 import { endSession } from "../utils/session";
 import { buildLoginUrl } from "../utils/safe-next-path";
 import { useSessionInactivity } from "../hooks/use-session-inactivity";
+import { broadcastAuthEvent, useAuthBroadcastSync } from "../utils/auth-broadcast";
 import { SessionTimeoutModal } from "./session-timeout-modal";
 
 function useOptionalRouter() {
@@ -27,6 +28,19 @@ export function SessionInactivityGuard() {
     }
   };
 
+  // Sincroniza el cierre de sesión entre pestañas del navegador (CA10)
+  useAuthBroadcastSync((message) => {
+    if (
+      message.type === "SESSION_CLOSED" ||
+      message.type === "LOGOUT" ||
+      message.type === "SESSION_EXPIRED"
+    ) {
+      endSession();
+      const reason = message.reason || "SESSION_REVOKED";
+      navigateTo(`/session-closed?reason=${reason}`);
+    }
+  });
+
   // Lee la sesión activa del servidor para obtener los tiempos dinámicos del backend
   const { data: session } = useQuery({
     queryKey: ["auth-session-timings"],
@@ -36,10 +50,16 @@ export function SessionInactivityGuard() {
   });
 
   const handleTimeout = () => {
+    broadcastAuthEvent({ type: "SESSION_CLOSED", reason: "SESSION_EXPIRED" });
     endSession();
     void authService.logout();
     if (typeof window !== "undefined") {
       const currentPath = `${window.location.pathname}${window.location.search}`;
+      try {
+        sessionStorage.setItem("umssy_post_login_redirect", currentPath);
+      } catch {
+        // ignore storage error
+      }
       const loginUrl = buildLoginUrl(currentPath);
       const separator = loginUrl.includes("?") ? "&" : "?";
       navigateTo(`${loginUrl}${separator}reason=SESSION_EXPIRED`);
@@ -49,9 +69,22 @@ export function SessionInactivityGuard() {
   };
 
   const handleCloseSession = () => {
+    broadcastAuthEvent({ type: "SESSION_CLOSED", reason: "SESSION_REVOKED" });
     endSession();
     void authService.logout();
-    navigateTo("/login");
+    if (typeof window !== "undefined") {
+      const currentPath = `${window.location.pathname}${window.location.search}`;
+      try {
+        sessionStorage.setItem("umssy_post_login_redirect", currentPath);
+      } catch {
+        // ignore storage error
+      }
+      const loginUrl = buildLoginUrl(currentPath);
+      const separator = loginUrl.includes("?") ? "&" : "?";
+      navigateTo(`${loginUrl}${separator}reason=SESSION_EXPIRED`);
+    } else {
+      navigateTo("/login?reason=SESSION_EXPIRED");
+    }
   };
 
   const { isWarningOpen, secondsLeft, isRefreshing, stayConnected } =

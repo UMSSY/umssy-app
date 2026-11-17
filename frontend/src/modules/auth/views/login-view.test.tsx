@@ -290,4 +290,42 @@ describe("LoginView", () => {
     expect(input).toHaveAttribute("type","password");
     expect(login).not.toHaveBeenCalled();
   });
+
+  it("muestra el aviso de sesión expirada cuando reason=SESSION_EXPIRED (CA6)", () => {
+    window.history.replaceState({}, "", "/login?reason=SESSION_EXPIRED&next=/profile");
+    vi.mocked(useLogin).mockReturnValue({ login: vi.fn(), isLoading: false, error: null });
+
+    render(<LoginView />);
+
+    expect(screen.getByRole("heading", { name: "Tu sesión expiró" })).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Por seguridad la cerramos tras 15 minutos sin actividad. Inicia sesión de nuevo y volverás a la página donde estabas.",
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("regresa a la página anterior guardada en sessionStorage tras iniciar sesión (CA9)", async () => {
+    sessionStorage.setItem("umssy_post_login_redirect", "/profile?tab=cv");
+    const login = vi.fn().mockResolvedValue({
+      accessToken: "token-123",
+      roleTag: "titulado",
+    });
+    vi.mocked(useLogin).mockReturnValue({ login, isLoading: false, error: null });
+
+    render(<LoginView />);
+
+    fireEvent.change(screen.getByPlaceholderText("nombre@ejemplo.com"), {
+      target: { value: "person@example.com" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Tu contraseña"), {
+      target: { value: "secret" },
+    });
+    fireEvent.submit(screen.getByRole("button", { name: "Iniciar sesión" }).closest("form")!);
+
+    await waitFor(() => {
+      expect(push).toHaveBeenCalledWith("/profile?tab=cv");
+    });
+    expect(sessionStorage.getItem("umssy_post_login_redirect")).toBeNull();
+  });
 });
