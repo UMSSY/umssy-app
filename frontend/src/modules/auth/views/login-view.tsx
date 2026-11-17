@@ -5,7 +5,17 @@ import Link from "next/link";
 import Image from "next/image";
 import { BrandLogo } from "@/shared/components/layout/brand-logo";
 import { useRouter } from "next/navigation";
-import { CircleAlert, LoaderCircle, Eye, EyeOff, ArrowLeft, ArrowRight, LockKeyhole, Mail } from "lucide-react";
+import {
+  CircleAlert,
+  LoaderCircle,
+  Eye,
+  EyeOff,
+  ArrowLeft,
+  ArrowRight,
+  LockKeyhole,
+  Mail,
+  Clock,
+} from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,6 +41,11 @@ export function LoginView() {
   const [password, setPassword] = useState("");
   const [fieldErrors, setFieldErrors] = useState<LoginFieldErrors>({});
   const [isSigningIn, setIsSigningIn] = useState(false);
+  const [isExpiredNoticeVisible] = useState(() => {
+    if (typeof window === "undefined") return false;
+    const reason = new URLSearchParams(window.location.search).get("reason");
+    return reason === "SESSION_EXPIRED" || reason === "session_expired";
+  });
   useRedirectAuthenticated(!isSigningIn);
   const loginRestriction = restrictions.getRestriction("login", email);
 
@@ -44,7 +59,15 @@ export function LoginView() {
     if (result) {
       setIsSigningIn(true);
       await startSession(result.accessToken);
-      const next = new URLSearchParams(window.location.search).get(NEXT_PARAM);
+      const urlNext = new URLSearchParams(window.location.search).get(NEXT_PARAM);
+      const storedNext =
+        typeof window !== "undefined"
+          ? sessionStorage.getItem("umssy_post_login_redirect")
+          : null;
+      if (typeof window !== "undefined" && storedNext) {
+        sessionStorage.removeItem("umssy_post_login_redirect");
+      }
+      const next = urlNext || storedNext;
       router.push(resolvePostLoginPath(result.roles ?? result.roleTag, next));
     }
   }
@@ -88,6 +111,26 @@ export function LoginView() {
             <p className="mt-3 mb-8 text-base text-text-secondary">
               Ingresa con tu cuenta de UMSSY.
             </p>
+
+            {isExpiredNoticeVisible ? (
+              <div
+                role="alert"
+                className="mb-6 flex items-start gap-3 rounded-lg border border-amber-300 bg-amber-50 p-4 text-amber-900 dark:border-amber-700/50 dark:bg-amber-950/30 dark:text-amber-200"
+              >
+                <Clock
+                  className="mt-0.5 size-5 shrink-0 text-amber-600 dark:text-amber-400"
+                  aria-hidden="true"
+                />
+                <div>
+                  <h2 className="text-sm font-bold text-amber-900 dark:text-amber-200">
+                    Tu sesión expiró
+                  </h2>
+                  <p className="mt-0.5 text-xs text-amber-800 dark:text-amber-300">
+                    Por seguridad la cerramos tras 15 minutos sin actividad. Inicia sesión de nuevo y volverás a la página donde estabas.
+                  </p>
+                </div>
+              </div>
+            ) : null}
 
             <div className="mb-4">
               <Label
