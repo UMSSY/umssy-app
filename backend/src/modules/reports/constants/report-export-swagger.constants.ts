@@ -163,7 +163,6 @@ const VALIDATION_ERROR_SCHEMA = {
   ],
 };
 
-// Errors are always JSON even though the operation produces CSV/PDF.
 export const REPORT_EXPORT_BAD_REQUEST_RESPONSE: ApiResponseOptions = {
   status: 400,
   description: 'Filtros inválidos.',

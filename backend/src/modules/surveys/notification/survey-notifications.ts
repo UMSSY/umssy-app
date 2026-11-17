@@ -1,6 +1,5 @@
 import type { NotificationPayloadMap } from '../../notifications/types/notification-payload-map.type.js';
 import { NotificationType } from '../../notifications/types/notification-type.enum.js';
-import type { NotifyRequest } from '../../notifications/types/notify-request.type.js';
 import {
   renderSurveyClosedMail,
   renderSurveyClosingSoonMail,
@@ -13,11 +12,7 @@ import {
   surveyReminderPayloadSchema,
   surveyVariationAlertPayloadSchema,
 } from './survey-notification-payloads.schema.js';
-
-type SurveyNotification<K extends NotificationType> = Pick<
-  Extract<NotifyRequest, { type: K }>,
-  'type' | 'payload' | 'renderMail'
->;
+import type { SurveyNotification } from '../types/survey-notification.type.js';
 
 export function surveyReminderNotification(
   input: NotificationPayloadMap[NotificationType.SURVEY_REMINDER],
