@@ -6,6 +6,7 @@ import { performance } from 'node:perf_hooks';
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { JwtAuthGuard } from '../src/common/guards/jwt-auth.guard.js';
+import { DomainExceptionFilter } from '../src/common/filters/domain-exception.filter.js';
 import { ResponseInterceptor } from '../src/common/interceptors/response.interceptor.js';
 import { PrismaService } from '../src/common/prisma/prisma.service.js';
 import { EventRegistrationsController } from '../src/modules/event-registrations/controllers/event-registrations.controller.js';
@@ -128,7 +129,11 @@ describe.skipIf(process.env.HU13_BASELINE !== '1')(
         .useValue({
           canActivate(context: ExecutionContext) {
             context.switchToHttp().getRequest().user = {
-              id: userId,
+              id:
+                context.switchToHttp().getRequest().headers.authorization ===
+                'Bearer hu13-other'
+                  ? id(999)
+                  : userId,
               roles: ['titulado'],
             };
             return true;
@@ -138,6 +143,7 @@ describe.skipIf(process.env.HU13_BASELINE !== '1')(
       app = module.createNestApplication();
       app.setGlobalPrefix('api');
       app.useGlobalInterceptors(new ResponseInterceptor());
+      app.useGlobalFilters(new DomainExceptionFilter());
       await app.init();
     }, 30_000);
 
@@ -261,6 +267,71 @@ describe.skipIf(process.env.HU13_BASELINE !== '1')(
           data: { eventDate: previous.eventDate },
         });
       }
+    });
+    it('keeps QR tokens stable, isolates users and removes a cancelled pass from both lists', async () => {
+      const otherUserId = id(999);
+      await prisma.user.create({
+        data: {
+          id: otherUserId,
+          firstName: 'Otro',
+          lastName: 'QA',
+          email: 'hu13-other@example.test',
+        },
+      });
+      await prisma.eventRegistration.create({
+        data: {
+          id: id(998),
+          user: { connect: { id: otherUserId } },
+          event: { connect: { id: id(101) } },
+          status: { connect: { title: 'Confirmada' } },
+          qrToken: randomBytes(32).toString('hex'),
+        },
+      });
+      const first = await request(app.getHttpServer())
+        .get(`/api/event-registrations/${id(1)}/pass`)
+        .expect(200);
+      const second = await request(app.getHttpServer())
+        .get(`/api/event-registrations/${id(1)}/pass`)
+        .expect(200);
+      expect(first.body.data.qrToken).toMatch(/^[a-f0-9]{64}$/);
+      expect(second.body.data.qrToken).toBe(first.body.data.qrToken);
+      const own = await request(app.getHttpServer())
+        .get(`/api/event-registrations/me?userId=${otherUserId}`)
+        .expect(200);
+      expect(own.body.data.map((item: { id: string }) => item.id)).toEqual(
+        activeIds,
+      );
+      expect(JSON.stringify(own.body)).not.toContain('qrToken');
+      const other = await request(app.getHttpServer())
+        .get('/api/event-registrations/me')
+        .set('Authorization', 'Bearer hu13-other')
+        .expect(200);
+      expect(other.body.data.map((item: { id: string }) => item.id)).toEqual([
+        id(998),
+      ]);
+      await request(app.getHttpServer())
+        .get(`/api/event-registrations/${id(1)}/pass`)
+        .set('Authorization', 'Bearer hu13-other')
+        .expect(404);
+      await request(app.getHttpServer())
+        .delete(`/api/event-registrations/${id(5)}`)
+        .expect(200);
+      await request(app.getHttpServer())
+        .get(`/api/event-registrations/${id(5)}/pass`)
+        .expect(404);
+      const current = await request(app.getHttpServer())
+        .get('/api/event-registrations/me')
+        .expect(200);
+      expect(current.body.data.map((item: { id: string }) => item.id)).toEqual(
+        activeIds.slice(0, 4),
+      );
+      const history = await request(app.getHttpServer())
+        .get('/api/event-registrations/me?scope=finished')
+        .expect(200);
+      expect(history.body.data.total).toBe(50);
+      expect(
+        history.body.data.items.map((item: { id: string }) => item.id),
+      ).not.toContain(id(5));
     });
   },
 );
