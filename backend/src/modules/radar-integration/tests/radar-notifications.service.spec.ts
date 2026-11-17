@@ -2,7 +2,7 @@ import type { NotificationsInboxService } from '../../notifications/services/not
 import { describe, expect, it, vi } from 'vitest';
 import type { SnapshotRow } from '../types/snapshot-row.types.js';
 import type { RadarNotificationsRepository } from '../repositories/radar-notifications.repository.js';
-import type { RadarPublicationMapper } from '../mappers/radar-publication.mapper.js';
+import { RadarPublicationMapper } from '../mappers/radar-publication.mapper.js';
 import { RadarNotificationsService } from '../services/radar-notifications.service.js';
 
 const userId = '11111111-1111-4111-8111-111111111111';
@@ -65,8 +65,13 @@ function setup() {
     markAsRead: vi.fn().mockResolvedValue({ ok: true }),
   };
 
+  const publicationMapper = new RadarPublicationMapper();
   const mapper = {
-    snapshotResponse: vi.fn().mockReturnValue(historical),
+    snapshotResponse: vi
+      .spyOn(publicationMapper, 'snapshotResponse')
+      .mockReturnValue(historical),
+    historicalResponse:
+      publicationMapper.historicalResponse.bind(publicationMapper),
   };
 
   const service = new RadarNotificationsService(
@@ -90,6 +95,35 @@ function setup() {
 }
 
 describe('RadarNotificationsService', () => {
+  it('uses the same historical response for direct access and notification opening', async () => {
+    const { service, snapshot } = setup();
+    const historical = await service.historical(userId, snapshot.id);
+    const opened = await service.open(userId, notificationId);
+    expect(opened.radar).toEqual(historical);
+  });
+
+  it('returns a domain 404 when a historical publication is missing', async () => {
+    const { service, repository, snapshot } = setup();
+    repository.findSnapshot.mockResolvedValue([]);
+    await expect(service.historical(userId, snapshot.id)).rejects.toMatchObject(
+      {
+        statusCode: 404,
+        code: 'RADAR_PUBLICATION_NOT_FOUND',
+      },
+    );
+  });
+
+  it('returns a domain 404 when the notification is missing', async () => {
+    const { service, inbox, repository } = setup();
+    inbox.findByType.mockResolvedValue([]);
+    await expect(service.open(userId, notificationId)).rejects.toMatchObject({
+      statusCode: 404,
+      code: 'RADAR_NOTIFICATION_NOT_FOUND',
+    });
+    expect(repository.findSnapshot).not.toHaveBeenCalled();
+    expect(inbox.markAsRead).not.toHaveBeenCalled();
+  });
+
   it('lists the owner notifications with the required message', async () => {
     const { service, inbox, createdAt } = setup();
 
