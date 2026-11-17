@@ -18,6 +18,19 @@ import {
   STUDENT_ID,
 } from './fixtures/appointment-record.fixture.js';
 
+vi.mock(
+  '../constants/appointment-notification.constants.js',
+  async (importOriginal) => {
+    const actual = await importOriginal<
+      typeof import('../constants/appointment-notification.constants.js')
+    >();
+    return {
+      ...actual,
+      APPOINTMENT_NOTIFICATION_RETRY_DELAY_MS: 0,
+    };
+  },
+);
+
 type PendingInput = {
   appointmentId: string;
   recipientId: string;
@@ -400,12 +413,35 @@ describe('AppointmentNotificationsService', () => {
       groupKey: `appointment-notification:CANCELLED:${APPOINTMENT_ID}`,
       payload: {
         cancelledByName: 'Luis Flores',
-        counterpartName: 'Luis Flores',
+        counterpartName: 'Ana Pérez',
         date: '2026-10-23',
         time: '10:00',
         reason: 'Imprevisto',
       },
     });
+  });
+
+  it('muestra en el texto de la cancelación quién canceló y a quién se avisa', async () => {
+    await service.notifyCancelled(
+      createAppointmentRecord({
+        status: { title: 'CANCELLED' },
+        cancelledById: STUDENT_ID,
+        cancellationReason: 'Imprevisto',
+      }),
+      STUDENT_ID,
+    );
+
+    const [[request]] = notify.mock.calls;
+    const template =
+      NOTIFICATION_TEMPLATES[NotificationType.APPOINTMENT_CANCELLED];
+    const title = template.renderTitle(request.payload as never);
+    const body = template.renderBody(request.payload as never);
+
+    expect(title).toBe('Cita cancelada');
+    expect(body).toBe(
+      'Luis Flores canceló la cita con Ana Pérez el 2026-10-23.',
+    );
+    expect(body).not.toContain('Luis Flores canceló la cita con Luis Flores');
   });
 
   it('avisa al titulado cuando la cancelación la hace el mentor', async () => {
