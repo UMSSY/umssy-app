@@ -101,7 +101,7 @@ export function DocumentReviewPanel() {
           </div>
         </div>
       )}
-      {error && <p role="alert">{error}</p>}
+      {error && !confirmation && <p role="alert">{error}</p>}
       <ConfirmActionDialog
         open={!!confirmation}
         title="Confirmar decisión"
@@ -110,6 +110,7 @@ export function DocumentReviewPanel() {
             ? labels[confirmation.decision] + ' · ' + confirmation.name + '?'
             : ''
         }
+        error={error}
         busy={mutation.isPending}
         onOpenChange={(v) => {
           if (!v) setConfirmation(null);

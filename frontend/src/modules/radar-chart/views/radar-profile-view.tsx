@@ -13,14 +13,47 @@ import { RadarEvidencePanel } from '../components/radar-evidence-panel';
 import { RadarSkillSources } from '../components/radar-skill-sources';
 import { useLiveRadar } from '../hooks/use-live-radar';
 
+import { mapPublishedRadar } from '../mappers/radar-published.mapper';
+import type { IntegrationRadar } from '../types/integration-radar.types';
+import {
+  useRadarNotifications,
+  useRadarNotificationMutations,
+} from '../hooks/use-radar-integration-queries';
+
 const DATE_FORMAT: Intl.DateTimeFormatOptions = {
   dateStyle: 'medium',
   timeStyle: 'short',
 };
 
 export function RadarProfileView() {
-  const { data, loading, error, variation, previous, retry, retrying } =
-    useLiveRadar();
+  const {
+    data: liveData,
+    loading,
+    error,
+    variation: liveVariation,
+    previous: livePrevious,
+    retry,
+    retrying,
+  } = useLiveRadar();
+  const { data: notifications = [], isLoading: notificationsLoading } =
+    useRadarNotifications();
+  const { openNotification } = useRadarNotificationMutations();
+  const [openedRadar, setOpenedRadar] = useState<IntegrationRadar | null>(null);
+  const data = openedRadar ? mapPublishedRadar(openedRadar) : liveData;
+  const previous = openedRadar ? openedRadar.previous : livePrevious;
+  const variation = openedRadar ? openedRadar.variation : liveVariation;
+  const handleOpenNotification = async (id: string) => {
+    try {
+      const result = await openNotification.mutateAsync(id);
+      setOpenedRadar(result.radar);
+      setIsComparing(result.compare);
+      setSelectedArea(null);
+      setProjection(null);
+      setIsEvidenceVisible(false);
+    } catch {
+      // La mutación conserva el error para mostrarlo en la vista.
+    }
+  };
   const [selectedArea, setSelectedArea] = useState<AreaId | null>(null);
   const [projection, setProjection] = useState<{
     areaId: AreaId;
@@ -70,6 +103,80 @@ export function RadarProfileView() {
         title="Radar de afinidad"
         description="Competencias verificadas de tu perfil. Las habilidades pendientes no alteran las puntuaciones publicadas."
       />
+      <section
+        aria-label="Notificaciones del radar"
+        className="rounded-lg border border-border bg-surface p-5"
+      >
+        <h2 className="text-lg font-semibold text-ink">Notificaciones</h2>
+
+        {notificationsLoading ? (
+          <p role="status" className="mt-3 text-sm text-text-secondary">
+            Cargando notificaciones...
+          </p>
+        ) : notifications.length === 0 ? (
+          <p className="mt-3 text-sm text-text-secondary">
+            No tienes notificaciones todavía.
+          </p>
+        ) : (
+          <ul className="mt-3 space-y-3">
+            {notifications.map((notification) => (
+              <li
+                key={notification.id}
+                className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border p-3"
+              >
+                <div>
+                  <p className="font-medium text-ink">{notification.message}</p>
+                  <p className="text-xs text-text-secondary">
+                    Versión {notification.version} ·{' '}
+                    {new Date(notification.createdAt).toLocaleString(
+                      'es-BO',
+                      DATE_FORMAT,
+                    )}
+                  </p>
+                  <p className="text-xs text-text-secondary">
+                    {notification.readAt ? 'Leída' : 'Sin leer'}
+                  </p>
+                </div>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={openNotification.isPending}
+                  onClick={() => {
+                    void handleOpenNotification(notification.id);
+                  }}
+                >
+                  Abrir radar
+                </Button>
+              </li>
+            ))}
+          </ul>
+        )}
+        {openNotification.isError && (
+          <p role="alert" className="mt-3 text-sm text-red-600">
+            No se pudo abrir el radar. Comprueba tu conexión e inténtalo
+            nuevamente.
+          </p>
+        )}
+      </section>
+      {openedRadar ? (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-surface p-4">
+          <p role="status" className="text-sm font-medium text-ink">
+            Consultando la versión histórica {openedRadar.version}
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              setOpenedRadar(null);
+              setIsComparing(false);
+              setSelectedArea(null);
+            }}
+          >
+            Volver al radar actual
+          </Button>
+        </div>
+      ) : null}{' '}
       {loading && !data ? (
         <p
           role="status"

@@ -3,9 +3,12 @@ import { toApiBody } from '../../../common/utils/to-api-body.js';
 import { documentRadarEndpoint } from '../utils/document-radar-endpoint.js';
 import {
   documentHistoryResponseSchema,
+  documentDecisionResponseSchema,
   documentMutationResponseSchema,
+  radarReviewOperationResponseSchema,
 } from '../responses/radar-api.response.js';
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -20,14 +23,15 @@ import { CurrentUserId } from '../../../common/decorators/current-user-id.decora
 import { Roles } from '../../../common/decorators/roles.decorator.js';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../../../common/guards/roles.guard.js';
-import { DocumentReviewService } from '../services/document-review.service.js';
 import { RequestValidationPipe } from '../../../common/pipes/request-validation.pipe.js';
+import { DocumentReviewDecisionService } from '../services/document-review-decision.service.js';
+import { DocumentReviewService } from '../services/document-review.service.js';
+import { documentReviewDecisionSchema } from '../requests/radar-review.request.js';
 import {
   documentDecisionSchema,
   documentAcknowledgementSchema,
   documentReviewFilterSchema,
 } from '../requests/document-verification.request.js';
-import type { DocumentDecisionRequest } from '../types/document-decision-request.types.js';
 import type { DocumentAcknowledgementRequest } from '../types/document-acknowledgement-request.types.js';
 import type { DocumentReviewFilter } from '../types/document-review-filter.types.js';
 
@@ -36,7 +40,11 @@ import type { DocumentReviewFilter } from '../types/document-review-filter.types
 @Controller()
 @UseGuards(JwtAuthGuard)
 export class DocumentVerificationController {
-  constructor(private readonly service: DocumentReviewService) {}
+  constructor(
+    private readonly service: DocumentReviewService,
+    private readonly decisionService: DocumentReviewDecisionService,
+  ) {}
+
   @documentRadarEndpoint({
     operationId: 'getMyDocumentVerifications',
     summary: 'Consultar verificaciones',
@@ -84,6 +92,7 @@ export class DocumentVerificationController {
   ) {
     return this.file(id, owner);
   }
+
   @UseGuards(RolesGuard)
   @Roles('administrativo')
   @documentRadarEndpoint({
@@ -108,6 +117,26 @@ export class DocumentVerificationController {
   ) {
     return this.service.reviews(filter);
   }
+
+  @UseGuards(RolesGuard)
+  @Roles('administrativo')
+  @documentRadarEndpoint({
+    operationId: 'getDocumentReviewOperation',
+    summary: 'Recuperar decisión documental',
+    description:
+      'Devuelve el resultado de una revisión completada por el administrador autenticado.',
+    response: radarReviewOperationResponseSchema,
+    errors: [400, 403, 404],
+    parameters: ['operationId'],
+  })
+  @Get('radar-document-reviews/operations/:operationId')
+  operationStatus(
+    @CurrentUserId() admin: string,
+    @Param('operationId', ParseUUIDPipe) operationId: string,
+  ) {
+    return this.decisionService.operationStatus(admin, operationId);
+  }
+
   @UseGuards(RolesGuard)
   @Roles('administrativo')
   @documentRadarEndpoint({
@@ -124,6 +153,7 @@ export class DocumentVerificationController {
   adminPreview(@Param('id', ParseUUIDPipe) id: string) {
     return this.file(id);
   }
+
   @UseGuards(RolesGuard)
   @Roles('administrativo')
   @documentRadarEndpoint({
@@ -131,7 +161,7 @@ export class DocumentVerificationController {
     summary: 'Resolver verificación documental',
     description:
       'Requiere rol administrativo. Aprueba, rechaza, reprocesa o revoca según el estado y versión actuales.',
-    response: documentMutationResponseSchema,
+    response: documentDecisionResponseSchema,
     errors: [400, 403, 409],
     parameters: ['id'],
   })
@@ -140,11 +170,35 @@ export class DocumentVerificationController {
   async decide(
     @CurrentUserId() admin: string,
     @Param('id', ParseUUIDPipe) id: string,
-    @Body(new RequestValidationPipe(documentDecisionSchema))
-    body: DocumentDecisionRequest,
+    @Body() body: unknown,
   ) {
-    return this.service.decide(admin, id, body.decision);
+    const payload =
+      typeof body === 'object' && body !== null
+        ? (body as Record<string, unknown>)
+        : {};
+    const decision = payload.decision;
+
+    if (decision === 'reprocess' || decision === 'revoke') {
+      const parsed = documentDecisionSchema.safeParse(body);
+      if (!parsed.success) {
+        throw new BadRequestException('Decisión inválida.');
+      }
+      return this.service.revise(admin, id, decision);
+    }
+
+    const parsed = documentReviewDecisionSchema.safeParse(body);
+    if (!parsed.success) {
+      throw new BadRequestException('Decision u operationId invalido.');
+    }
+
+    return this.decisionService.decide(
+      admin,
+      id,
+      parsed.data.operationId,
+      parsed.data.decision,
+    );
   }
+
   private async file(id: string, owner?: string) {
     const row = await this.service.file(id, owner);
     return new StreamableFile(Buffer.from(row.content), {

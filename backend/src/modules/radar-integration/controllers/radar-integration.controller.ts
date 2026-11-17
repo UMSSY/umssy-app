@@ -3,6 +3,9 @@ import {
   radarResponseSchema,
   cvRescanResponseSchema,
   reviewQueueResponseSchema,
+  radarReviewOperationResponseSchema,
+  radarNotificationsResponseSchema,
+  openedRadarNotificationResponseSchema,
 } from '../responses/radar-api.response.js';
 import {
   Body,
@@ -48,6 +51,34 @@ export class RadarIntegrationController {
     return this.svc.myRadar(user);
   }
   @documentRadarEndpoint({
+    operationId: 'getMyRadarNotifications',
+    summary: 'Consultar notificaciones del radar',
+    description:
+      'Devuelve las notificaciones del titular, ordenadas por fecha descendente.',
+    response: radarNotificationsResponseSchema,
+  })
+  @Get('profile/me/radar/notifications')
+  notifications(@CurrentUserId() user: string) {
+    return this.svc.notificationsList(user);
+  }
+  @documentRadarEndpoint({
+    operationId: 'openMyRadarNotification',
+    summary: 'Abrir publicación notificada',
+    description:
+      'Consulta la publicación histórica del titular y marca su notificación como leída.',
+    response: openedRadarNotificationResponseSchema,
+    status: 201,
+    errors: [400, 404],
+    parameters: ['id'],
+  })
+  @Post('profile/me/radar/notifications/:id/open')
+  openNotification(
+    @CurrentUserId() user: string,
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ) {
+    return this.svc.openNotification(user, id);
+  }
+  @documentRadarEndpoint({
     operationId: 'rescanMyRadarCv',
     summary: 'Reanalizar CV vigente',
     description:
@@ -89,14 +120,32 @@ export class RadarIntegrationController {
   }
   @UseGuards(RolesGuard)
   @Roles('administrativo')
+  @documentRadarEndpoint({
+    operationId: 'getRadarReviewOperation',
+    summary: 'Recuperar decisión administrativa',
+    description:
+      'Devuelve el resultado de una operación completada por el administrador autenticado.',
+    response: radarReviewOperationResponseSchema,
+    errors: [400, 403, 404],
+    parameters: ['operationId'],
+  })
+  @Get('radar-reviews/operations/:operationId')
+  operationStatus(
+    @CurrentUserId() admin: string,
+    @Param('operationId', new ParseUUIDPipe()) operationId: string,
+  ) {
+    return this.svc.operationStatus(admin, operationId);
+  }
+  @UseGuards(RolesGuard)
+  @Roles('administrativo')
   @ApiBody(toApiBody(reviewDecisionSchema))
   @documentRadarEndpoint({
     operationId: 'decideRadarEvidence',
     summary: 'Resolver evidencia',
     description:
-      'Requiere rol administrativo. Aprueba, rechaza o revoca una evidencia y devuelve el radar actualizado.',
-    response: radarResponseSchema,
-    errors: [400, 403, 404],
+      'Requiere rol administrativo. Resuelve una evidencia con un identificador de operación que permite recuperar el resultado sin repetir la decisión.',
+    response: radarReviewOperationResponseSchema,
+    errors: [400, 403, 404, 409],
     parameters: ['kind', 'id'],
   })
   @Patch('radar-reviews/:kind/:id')
@@ -108,8 +157,9 @@ export class RadarIntegrationController {
     @Body(new RequestValidationPipe(reviewDecisionSchema))
     body: ReviewDecisionRequest,
   ) {
-    return this.svc.decision(admin, kind, id, body.decision);
+    return this.svc.decision(admin, kind, id, body.decision, body.operationId);
   }
+
   @UseGuards(RolesGuard)
   @Roles('administrativo')
   @documentRadarEndpoint({

@@ -2,6 +2,7 @@ import { StreamableFile } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
 import { DocumentVerificationController } from '../controllers/document-verification.controller.js';
 import type { DocumentReviewService } from '../services/document-review.service.js';
+import type { DocumentReviewDecisionService } from '../services/document-review-decision.service.js';
 import { RadarDocumentStatus } from '../constants/radar-document-status.enum.js';
 
 describe('Document verification HTTP boundaries', () => {
@@ -10,23 +11,38 @@ describe('Document verification HTTP boundaries', () => {
       history: vi.fn(),
       acknowledge: vi.fn(),
       reviews: vi.fn(),
-      decide: vi.fn(),
-      file: vi
-        .fn()
-        .mockResolvedValue({
-          content: Buffer.from('pdf'),
-          mime: 'application/pdf',
-        }),
+      revise: vi.fn(),
+      file: vi.fn().mockResolvedValue({
+        content: Buffer.from('pdf'),
+        mime: 'application/pdf',
+      }),
     };
+    const decisions = { decide: vi.fn(), operationStatus: vi.fn() };
+    const operationId = '22222222-2222-4222-8222-222222222222';
     const controller = new DocumentVerificationController(
       service as unknown as DocumentReviewService,
+      decisions as unknown as DocumentReviewDecisionService,
     );
     await controller.history('owner');
     await controller.acknowledge('owner', 'version', {
       status: RadarDocumentStatus.APPROVED,
     });
     await controller.queue('pending');
-    await controller.decide('admin', 'version', { decision: 'approved' });
+    await controller.decide('admin', 'version', {
+      decision: 'approved',
+      operationId,
+    });
+    await controller.operationStatus('admin', operationId);
+    await controller.decide('admin', 'version', { decision: 'reprocess' });
+    await expect(
+      controller.decide('admin', 'version', { decision: 'approved' }),
+    ).rejects.toMatchObject({ status: 400 });
+    await expect(
+      controller.decide('admin', 'version', {
+        decision: 'revoke',
+        userId: 'other',
+      }),
+    ).rejects.toMatchObject({ status: 400 });
     const ownFile = await controller.preview('owner', 'version');
     expect(service.file).toHaveBeenLastCalledWith('version', 'owner');
     expect(ownFile).toBeInstanceOf(StreamableFile);
@@ -44,6 +60,20 @@ describe('Document verification HTTP boundaries', () => {
       'approved',
     );
     expect(service.reviews).toHaveBeenCalledWith('pending');
-    expect(service.decide).toHaveBeenCalledWith('admin', 'version', 'approved');
+    expect(decisions.decide).toHaveBeenCalledExactlyOnceWith(
+      'admin',
+      'version',
+      operationId,
+      'approved',
+    );
+    expect(decisions.operationStatus).toHaveBeenCalledWith(
+      'admin',
+      operationId,
+    );
+    expect(service.revise).toHaveBeenCalledWith(
+      'admin',
+      'version',
+      'reprocess',
+    );
   });
 });

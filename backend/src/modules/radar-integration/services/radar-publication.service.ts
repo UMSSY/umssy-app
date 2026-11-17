@@ -115,6 +115,13 @@ export class RadarPublicationService {
           version,
           calculated,
         );
+
+        if (!inserted[0]?.id) {
+          throw new Error(
+            'No se pudo obtener el identificador del radar publicado.',
+          );
+        }
+
         await store.recordPublished(
           userId,
           actorId,
@@ -122,6 +129,9 @@ export class RadarPublicationService {
           revision,
           accepted,
         );
+
+        await store.createNotification(userId, inserted[0].id);
+
         return this.mapper.snapshotResponse(
           { ...inserted[0], source_revision: revision, skills: accepted },
           last[0],

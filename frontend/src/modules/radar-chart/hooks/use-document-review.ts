@@ -1,11 +1,21 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { isApiError } from '@/shared/services/api-client';
+import { useRadarReviewOperationRecovery } from '../hooks/use-radar-integration-queries';
+import { radarIntegrationApi } from '../services/radar-integration.service';
+import type { RadarReviewOperationResult } from '../services/radar-integration.service';
+import {
+  clearRadarReviewOperationId,
+  getRadarReviewOperationId,
+} from '../services/radar-review-idempotency';
+
 import { verificationApi, type DocumentVerification } from '@/modules/cv';
 import type { DocumentReviewConfirmation } from '../types/document-review-confirmation.types';
 import type { DocumentReviewPreview } from '../types/document-review-preview.types';
 import type { DocumentReviewDecision } from '../types/document-review-decision.types';
 export function useDocumentReview() {
+  useRadarReviewOperationRecovery('cv');
   const [filter, setFilter] = useState('pending');
   const queue = useQuery({
     queryKey: ['radar-integration', 'document-reviews', filter],
@@ -24,20 +34,57 @@ export function useDocumentReview() {
     [preview],
   );
   const mutation = useMutation({
-    mutationFn: ({ id, decision }: DocumentReviewConfirmation) =>
-      verificationApi.decide(id, decision),
+    mutationFn: async ({ id, decision }: DocumentReviewConfirmation) => {
+      if (decision !== 'approved' && decision !== 'rejected') {
+        return verificationApi.decide(id, decision);
+      }
+
+      const operationId = await getRadarReviewOperationId('cv', id, decision);
+
+      let result: RadarReviewOperationResult;
+
+      try {
+        result = await radarIntegrationApi.documentOperationStatus(operationId);
+      } catch (error: unknown) {
+        if (!isApiError(error) || error.response?.status !== 404) {
+          throw error;
+        }
+
+        result = await radarIntegrationApi.documentDecision(
+          id,
+          operationId,
+          decision,
+        );
+      }
+
+      if (
+        result.operationId !== operationId ||
+        result.status !== 'completed' ||
+        result.kind !== 'cv' ||
+        result.targetId !== id ||
+        result.decision !== decision
+      ) {
+        throw new Error(
+          'El resultado recuperado no coincide con la decisión solicitada.',
+        );
+      }
+
+      await clearRadarReviewOperationId('cv', id, decision, operationId);
+
+      return result;
+    },
     onSuccess: () => {
       setConfirmation(null);
       setError('');
     },
     onError: () => {
-      setConfirmation(null);
       setError(
-        'No se pudo confirmar la decisión. Comprueba el estado actualizado.',
+        'No se pudo confirmar la decisión. Puedes reintentar; se conservará el identificador de la operación.',
       );
     },
     onSettled: () => queue.refetch(),
   });
+
   const rows = queue.data ?? [];
   const item = rows.find((d) => d.id === selected) ?? rows[0];
   const actions: DocumentReviewDecision[] = !item

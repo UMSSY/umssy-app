@@ -4,6 +4,17 @@ import { PrismaService } from '../../../common/prisma/prisma.service.js';
 
 import type { CvReview } from '../types/cv-review.types.js';
 
+type ReviewOperationRecord = {
+  id: string;
+  admin_id: string;
+  flow: string;
+  kind: string;
+  target_id: string;
+  payload_hash: string;
+  response_data: unknown;
+  created_at: Date;
+};
+
 @Injectable()
 export class RadarReviewRepository {
   constructor(private readonly prisma: PrismaService) {}
@@ -20,6 +31,71 @@ export class RadarReviewRepository {
         JOIN user_cv_file c ON c.id=e.cv_id
         WHERE NOT EXISTS (SELECT 1 FROM radar_document_verifications d WHERE d.source_type_id=(SELECT id FROM radar_document_source_types WHERE title='cv') AND d.source_id=e.cv_id AND d.status_id<>(SELECT id FROM radar_document_statuses WHERE title='legacy'))
         ORDER BY e.submitted_at DESC LIMIT 300`;
+  }
+
+  async lockReviewOperation(
+    operationId: string,
+    context: TransactionContext,
+  ): Promise<void> {
+    await context.client.$queryRaw`
+      SELECT pg_advisory_xact_lock(hashtextextended(${operationId}, 0))
+    `;
+  }
+
+  findReviewOperation(operationId: string, context: TransactionContext) {
+    return context.client.$queryRaw<ReviewOperationRecord[]>`
+      SELECT
+        id,
+        actor_id AS admin_id,
+        details->>'flow' AS flow,
+        details->>'kind' AS kind,
+        target_id,
+        details->>'payloadHash' AS payload_hash,
+        details->'responseData' AS response_data,
+        occurred_at AS created_at
+      FROM radar_audit_events
+      WHERE event_type = 'radar.review.operation'
+        AND details->>'operationId' = ${operationId}
+      ORDER BY occurred_at DESC
+      LIMIT 1
+    `;
+  }
+
+  saveReviewOperationResult(
+    userId: string,
+    adminId: string,
+    operationId: string,
+    flow: string,
+    kind: string,
+    targetId: string,
+    payloadHash: string,
+    responseData: object,
+    context: TransactionContext,
+  ) {
+    const details = {
+      operationId,
+      flow,
+      kind,
+      payloadHash,
+      responseData,
+    };
+
+    return context.client.$executeRaw`
+      INSERT INTO radar_audit_events (
+        user_id,
+        actor_id,
+        event_type,
+        target_id,
+        details
+      )
+      VALUES (
+        ${userId}::uuid,
+        ${adminId}::uuid,
+        'radar.review.operation',
+        ${targetId}::uuid,
+        ${JSON.stringify(details)}::jsonb
+      )
+    `;
   }
 
   changeCvDecision(
