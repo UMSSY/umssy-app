@@ -11,7 +11,7 @@ import { AppointmentNotificationChannel } from '../enums/appointment-notificatio
 import { AppointmentNotificationEvent } from '../enums/appointment-notification-event.enum.js';
 import { AppointmentNotificationStatus } from '../enums/appointment-notification-status.enum.js';
 import { AppointmentParticipantRole } from '../enums/appointment-participant-role.enum.js';
-import { AppointmentNotificationsService } from '../notifications/appointment-notifications.service.js';
+import { AppointmentNotificationsService } from '../notification/appointment-notifications.service.js';
 import {
   APPOINTMENT_ID,
   createAppointmentRecord,

@@ -4,7 +4,7 @@ import { MailTemplateService } from '../../mail/services/mail-template.service.j
 import { NOTIFICATION_TEMPLATES } from '../../notifications/constants/notification-templates.constants.js';
 import { NotificationType } from '../../notifications/types/notification-type.enum.js';
 import { AppointmentParticipantRole } from '../enums/appointment-participant-role.enum.js';
-import { APPOINTMENT_BOOKED_TEMPLATE } from '../notifications/appointment-booked.template.js';
+import { APPOINTMENT_BOOKED_TEMPLATE } from '../notification/appointment-booked.template.js';
 
 const payloadFor = (
   recipientRole: AppointmentParticipantRole,

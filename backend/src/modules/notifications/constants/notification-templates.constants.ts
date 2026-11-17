@@ -1,4 +1,4 @@
-import { APPOINTMENT_BOOKED_TEMPLATE } from '../../appointments/notifications/appointment-booked.template.js';
+import { APPOINTMENT_BOOKED_TEMPLATE } from '../../appointments/notification/appointment-booked.template.js';
 import { NotificationType } from '../types/notification-type.enum.js';
 
 import type { NotificationTemplateMap } from '../types/notification-template-map.type.js';

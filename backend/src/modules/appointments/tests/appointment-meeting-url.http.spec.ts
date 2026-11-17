@@ -30,7 +30,7 @@ import {
   MEETING_BASE_URL,
   MEETING_ROOM_PREFIX,
 } from '../constants/meeting-url.constants.js';
-import { AppointmentNotificationsService } from '../notifications/appointment-notifications.service.js';
+import { AppointmentNotificationsService } from '../notification/appointment-notifications.service.js';
 import { PushDispatcherService } from '../../notifications/services/push-dispatcher.service.js';
 import { AppointmentsRepository } from '../repositories/appointments.repository.js';
 import {
