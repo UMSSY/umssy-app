@@ -2,6 +2,8 @@ import { AppointmentNotificationChannel } from '../enums/appointment-notificatio
 
 export const APPOINTMENT_NOTIFICATION_MAX_ATTEMPTS = 3;
 
+export const APPOINTMENT_NOTIFICATION_RETRY_DELAY_MS = 5000;
+
 export const APPOINTMENT_NOTIFICATION_ACTION_URL = '/appointments';
 
 export const APPOINTMENT_NOTIFICATION_GROUP_PREFIX = 'appointment-notification';
