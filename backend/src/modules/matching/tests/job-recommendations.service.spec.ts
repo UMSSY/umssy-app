@@ -15,10 +15,12 @@ interface OfferOptions {
   careers?: string[];
   minExperienceYears?: number | null;
   createdAt?: Date;
+  expiresAt?: Date | null;
 }
 
 const PUBLISHED_AT = new Date('2026-10-10T12:00:00.000Z');
 const PUBLISHED_LATER = new Date('2026-10-20T12:00:00.000Z');
+const EXPIRES_AT = new Date('2026-11-25T03:59:59.000Z');
 
 function offer(
   id: string,
@@ -30,6 +32,8 @@ function offer(
     title: id,
     description: 'Descripción',
     createdAt: options.createdAt ?? PUBLISHED_AT,
+    publishedAt: options.createdAt ?? PUBLISHED_AT,
+    expiresAt: options.expiresAt === undefined ? null : options.expiresAt,
     locationUrl: 'https://maps.google.com/?q=x',
     requiredCareers: options.careers ?? [],
     minExperienceYears: options.minExperienceYears ?? null,
@@ -118,9 +122,27 @@ describe('HU-06 recommendations contract', () => {
       companyName: 'Empresa',
       modality: 'Remoto',
       locationUrl: 'https://maps.google.com/?q=x',
+      publishedAt: '2026-10-10T12:00:00.000Z',
+      expiresAt: null,
       score: 50,
       skills: ['Python', 'SQL'],
       matchedSkills: ['Python'],
+    });
+  });
+
+  it('returns the publication and the expiry dates of every offer', async () => {
+    findPublished.mockResolvedValue([
+      offer('expiring', ['Python'], {
+        createdAt: PUBLISHED_LATER,
+        expiresAt: EXPIRES_AT,
+      }),
+    ]);
+
+    const result = await service.recommendations('user');
+
+    expect(result.items[0]).toMatchObject({
+      publishedAt: '2026-10-20T12:00:00.000Z',
+      expiresAt: '2026-11-25T03:59:59.000Z',
     });
   });
 

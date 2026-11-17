@@ -68,7 +68,7 @@ export function AppointmentCard({ appointment, onSelect }: AppointmentCardProps)
             {appointment.orientationType?.name ?? APPOINTMENTS_TEXT.noTopic}
           </span>
 
-          <span className="col-start-1 row-start-4 text-sm whitespace-nowrap text-text-secondary sm:row-start-3">
+          <span className="col-start-1 row-start-4 min-w-0 text-sm wrap-anywhere whitespace-normal text-text-secondary sm:row-start-3">
             {formatBlockRange(appointment.startAt, appointment.endAt)}
             {` · ${BOLIVIA_TIME_LABEL}`}
           </span>

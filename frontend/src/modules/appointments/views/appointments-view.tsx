@@ -15,6 +15,7 @@ import { useAuth } from "@/shared/contexts/auth-context";
 import { AppointmentCard } from "../components/appointment-card";
 import { AppointmentDetailDialog } from "../components/appointment-detail-dialog";
 import { AppointmentsPagination } from "../components/appointments-pagination";
+import { AppointmentsSearchBar } from "../components/appointments-search-bar";
 import { DEFAULT_APPOINTMENTS_PAGE } from "../constants/appointments-pagination.constants";
 import { APPOINTMENTS_TEXT } from "../constants/appointments.constants";
 import { useAppointments } from "../hooks/use-appointments";
@@ -23,6 +24,7 @@ import type { AppointmentScope } from "../types/appointment-scope.types";
 export function AppointmentsView() {
   const [scope, setScope] = useState<AppointmentScope>("upcoming");
   const [page, setPage] = useState(DEFAULT_APPOINTMENTS_PAGE);
+  const [search, setSearch] = useState("");
   const [selectedAppointmentId, setSelectedAppointmentId] = useState<string | null>(null);
   const { roles } = useAuth();
   const {
@@ -33,21 +35,28 @@ export function AppointmentsView() {
     isLoading,
     isFetching,
     error,
-  } = useAppointments(scope, page);
+  } = useAppointments(scope, page, search);
 
   const emptyMessage =
-    scope === "upcoming"
-      ? APPOINTMENTS_TEXT.emptyState
-      : APPOINTMENTS_TEXT.emptyPast;
+    search
+      ? APPOINTMENTS_TEXT.noSearchResults
+      : scope === "upcoming"
+        ? APPOINTMENTS_TEXT.emptyState
+        : APPOINTMENTS_TEXT.emptyPast;
 
   const showSearchMentors =
-    scope === "upcoming" && roles.includes("titulado");
+    !search && scope === "upcoming" && roles.includes("titulado");
 
   function handleScopeChange(value: unknown) {
     if (value === "upcoming" || value === "past") {
       setScope(value);
       setPage(DEFAULT_APPOINTMENTS_PAGE);
     }
+  }
+
+  function handleSearchChange(value: string) {
+    setSearch(value);
+    setPage(DEFAULT_APPOINTMENTS_PAGE);
   }
 
   return (
@@ -73,9 +82,13 @@ export function AppointmentsView() {
           </TabsTrigger>
         </TabsList>
 
+        <div className="pt-4">
+          <AppointmentsSearchBar value={search} onSearchChange={handleSearchChange} />
+        </div>
+
         <TabsContent
           value={scope}
-          className="min-w-0 pt-4"
+          className="min-w-0 pt-3"
           aria-busy={isLoading}
         >
           {isLoading ? (

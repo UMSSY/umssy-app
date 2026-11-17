@@ -20,6 +20,17 @@ describe("getMyAppointments", () => {
     expect(get).toHaveBeenCalledWith("/appointments/me", { params: { scope: "past", page: 2 } })
     expect(result).toEqual(page)
   })
+
+  it("manda q cuando se busca por nombre", async () => {
+    const page = { items: [], total: 0, page: 1, pageSize: 10 }
+    const get = vi.spyOn(apiClient, "get").mockResolvedValue(envelope(page))
+
+    await appointmentsApi.getMyAppointments({ scope: "upcoming", page: 1, q: "Ana" })
+
+    expect(get).toHaveBeenCalledWith("/appointments/me", {
+      params: { scope: "upcoming", page: 1, q: "Ana" },
+    })
+  })
 })
 
 describe("createAppointment", () => {
@@ -119,3 +130,20 @@ describe("downloadDocument", () => {
     expect(get).toHaveBeenCalledWith("/appointments/a1/document", { responseType: "blob" })
   })
 })
+
+describe("cancel", () => {
+  beforeEach(() => vi.restoreAllMocks());
+
+  it("envía el motivo al endpoint y devuelve la cita cancelada", async () => {
+    const appointment = { id: "a1", status: "CANCELLED" };
+    const patch = vi.spyOn(apiClient, "patch").mockResolvedValue(envelope(appointment));
+    expect(await appointmentsApi.cancel("a1", "No puedo asistir")).toEqual(appointment);
+    expect(patch).toHaveBeenCalledWith("/appointments/a1/cancel", { reason: "No puedo asistir" });
+  });
+
+  it("permite omitir el motivo y propaga los errores", async () => {
+    const patch = vi.spyOn(apiClient, "patch").mockRejectedValue(new Error("network"));
+    await expect(appointmentsApi.cancel("a1")).rejects.toThrow("network");
+    expect(patch).toHaveBeenCalledWith("/appointments/a1/cancel", { reason: undefined });
+  });
+});
