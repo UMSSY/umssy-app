@@ -66,6 +66,25 @@ function buildSelect(userId?: string): Prisma.EventSelect {
 export class EventsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
+  findManaged(userId: string) {
+    return this.prisma.event.findMany({
+      where: {
+        createdById: userId,
+        status: { title: PUBLISHED_STATUS_TITLE },
+      },
+      select: {
+        id: true,
+        title: true,
+        eventDate: true,
+        startTime: true,
+        endTime: true,
+        location: true,
+        coverMimeType: true,
+      },
+      orderBy: [{ eventDate: 'asc' }, { startTime: 'asc' }, { id: 'asc' }],
+    });
+  }
+
   async expireOverdueProposals(now: Date): Promise<number> {
     const expiredStatus = await this.prisma.eventStatus.findUnique({
       where: { title: EXPIRED_STATUS_TITLE },
