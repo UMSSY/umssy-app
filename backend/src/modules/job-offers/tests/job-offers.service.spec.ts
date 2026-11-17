@@ -684,7 +684,6 @@ describe('JobOffersService', () => {
       },
     );
   });
-});
 
   describe('findOfferSummary', () => {
     it('expone título, empresa y nombre de la empresa de la vacante', async () => {
@@ -709,3 +708,4 @@ describe('JobOffersService', () => {
       await expect(service.findOfferSummary('missing')).resolves.toBeNull();
     });
   });
+});
