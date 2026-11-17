@@ -1,5 +1,6 @@
 import { type Mock, vi } from 'vitest';
 import { BOLIVIA_OFFSET_MS } from '../../../common/constants/date-time.constants.js';
+import { REGISTRATION_STATUS_TITLES } from '../../../common/constants/registration-status.constants.js';
 import { PUBLISHED_STATUS_TITLE } from '../../events/index.js';
 import { EventFinishedException } from '../exceptions/event-finished.exception.js';
 import { RegistrationAlreadyCancelledException } from '../exceptions/registration-already-cancelled.exception.js';
@@ -25,8 +26,8 @@ describe('EventRegistrationsService cancellation', () => {
     userId: 'user-owner',
     cancelledAt: null,
     qrToken: 'qr-token-1',
-    createdAt: new Date('2026-11-10T10:00:00.000Z'),
-    status: { title: 'confirmed' },
+    registeredAt: new Date('2026-11-10T10:00:00.000Z'),
+    status: { title: REGISTRATION_STATUS_TITLES.confirmed },
   };
 
   let repository: {
@@ -83,7 +84,7 @@ describe('EventRegistrationsService cancellation', () => {
         ...confirmedRecord,
         id,
         cancelledAt,
-        status: { title: 'cancelled' },
+        status: { title: REGISTRATION_STATUS_TITLES.cancelled },
       }),
     );
 
@@ -121,7 +122,7 @@ describe('EventRegistrationsService cancellation', () => {
     repository.findById.mockResolvedValue({
       ...confirmedRecord,
       cancelledAt: new Date('2026-11-11T10:00:00.000Z'),
-      status: { title: 'cancelled' },
+      status: { title: REGISTRATION_STATUS_TITLES.cancelled },
     });
 
     await expect(service.cancel('reg-1', 'user-owner')).rejects.toThrow(
@@ -161,7 +162,7 @@ describe('EventRegistrationsService cancellation', () => {
     repository.cancel.mockResolvedValue({
       ...confirmedRecord,
       cancelledAt: new Date(),
-      status: { title: 'cancelled' },
+      status: { title: REGISTRATION_STATUS_TITLES.cancelled },
     });
 
     await service.cancel('reg-1', 'user-owner');
