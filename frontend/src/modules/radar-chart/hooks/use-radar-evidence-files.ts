@@ -2,7 +2,7 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 import { certificationsService } from "@/modules/certifications";
-import { documentsService } from "@/modules/documents";
+import { documentsService } from "@/modules/cv";
 
 export function useRadarEvidenceFiles() {
   const queryClient = useQueryClient();

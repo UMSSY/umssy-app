@@ -31,6 +31,7 @@ function makeAppointment(
     message: "Quiero revisar mi CV",
     requestedAt: "2026-10-20T22:42:00.000Z",
     document: null,
+    cancellation: null,
     ...overrides,
   };
 }
@@ -494,6 +495,51 @@ describe("AppointmentsView", () => {
         scope: "upcoming",
         page: 1,
       });
+    });
+
+    it("con 11 citas muestra 10 en la primera página y una en la segunda", async () => {
+      const user = userEvent.setup();
+      const appointments = makeManyAppointments(11);
+      vi.mocked(appointmentsApi.getMyAppointments).mockImplementation(
+        async ({ page }) =>
+          makePage(appointments.slice((page - 1) * 10, page * 10), { total: 11, page }),
+      );
+
+      renderWithQuery(<AppointmentsView />);
+
+      await screen.findByText("Mostrando 1–10 de 11 citas");
+      expect(screen.getAllByText(/^Mentor \d+$/)).toHaveLength(10);
+      expect(screen.getByText("Página 1 de 2")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Siguiente" })).toBeEnabled();
+
+      await user.click(screen.getByRole("button", { name: "Siguiente" }));
+
+      await screen.findByText("Mostrando 11–11 de 11 citas");
+      expect(screen.getAllByText(/^Mentor \d+$/)).toHaveLength(1);
+      expect(screen.getByText("Mentor 10")).toBeInTheDocument();
+      expect(screen.getByText("Página 2 de 2")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Siguiente" })).toBeDisabled();
+    });
+
+    it("mientras carga la página siguiente no permite volver a cambiar de página", async () => {
+      const user = userEvent.setup();
+      vi.mocked(appointmentsApi.getMyAppointments).mockImplementation(({ page }) =>
+        page === 1
+          ? Promise.resolve(makePage(makeManyAppointments(10), { total: 48, page }))
+          : new Promise(() => {}),
+      );
+
+      renderWithQuery(<AppointmentsView />);
+      await screen.findByText("Página 1 de 5");
+
+      await user.click(screen.getByRole("button", { name: "Siguiente" }));
+
+      expect(await screen.findByRole("status", { name: "Cargando citas" })).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Siguiente" })).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Anterior" })).not.toBeInTheDocument();
+      expect(
+        vi.mocked(appointmentsApi.getMyAppointments).mock.calls.filter(([params]) => params.page === 2),
+      ).toHaveLength(1);
     });
   });
 });

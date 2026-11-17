@@ -6,6 +6,7 @@ import { useProfileCompleteness } from '../hooks/use-profile-completeness';
 import { createProfileCompleteness } from '../testing/profile-completeness.fixture';
 import type { ProfileCompletenessSectionId } from '../types/profile-completeness-section-id.types';
 import { ProfileCompletenessProgress } from './profile-completeness-progress';
+import { ProfileGuideContext } from '../contexts/profile-guide-context';
 
 vi.mock('../hooks/use-profile-completeness', () => ({
   useProfileCompleteness: vi.fn(),
@@ -34,11 +35,33 @@ afterEach(() => {
 });
 
 describe('incomplete profile checklist', () => {
+  it('resumes the shared guide from the progress card', async () => {
+    const start = vi.fn();
+    render(
+      <ProfileGuideContext.Provider value={{ isEnabled: true, isComplete: false, start }}>
+        <ProfileCompletenessProgress />
+      </ProfileGuideContext.Provider>,
+    );
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Continuar mi perfil' }));
+    expect(start).toHaveBeenCalledExactlyOnceWith();
+  });
+
+  it('removes the completed dashboard bar when the guide is available', () => {
+    setCompletedSections(PROFILE_COMPLETENESS_SECTION_IDS);
+    render(
+      <ProfileGuideContext.Provider value={{ isEnabled: true, isComplete: true, start: vi.fn() }}>
+        <ProfileCompletenessProgress hideWhenComplete />
+      </ProfileGuideContext.Provider>,
+    );
+    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Continuar mi perfil' })).not.toBeInTheDocument();
+  });
+
   it.each([
     { percentage: 0, completed: [] },
-    { percentage: 35, completed: ['contact', 'presentation'] },
+    { percentage: 30, completed: ['contact', 'presentation'] },
     {
-      percentage: 90,
+      percentage: 75,
       completed: [
         'contact',
         'presentation',
@@ -72,14 +95,14 @@ describe('incomplete profile checklist', () => {
       await user.click(screen.getByText('Outside the indicator'));
       await user.keyboard('{Escape}');
       expect(screen.getByRole('region', checklistName)).toBeVisible();
-      expect(screen.getAllByRole('listitem')).toHaveLength(6);
+      expect(screen.getAllByRole('listitem')).toHaveLength(7);
     },
   );
 
   it('updates the percentage, count and saved section status without remounting', () => {
     const { rerender } = render(<ProfileCompletenessProgress />);
     const bar = screen.getByRole('progressbar');
-    expect(screen.getByText('2 de 6 secciones completadas')).toBeVisible();
+    expect(screen.getByText('2 de 7 secciones completadas')).toBeVisible();
     expect(
       screen.getByRole('listitem', { name: 'Formación académica: Pendiente' }),
     ).toBeVisible();
@@ -87,16 +110,16 @@ describe('incomplete profile checklist', () => {
     setCompletedSections(['contact', 'presentation', 'education']);
     rerender(<ProfileCompletenessProgress />);
     expect(screen.getByRole('progressbar')).toBe(bar);
-    expect(bar).toHaveAttribute('aria-valuenow', '55');
-    expect(screen.getByText('3 de 6 secciones completadas')).toBeVisible();
+    expect(bar).toHaveAttribute('aria-valuenow', '45');
+    expect(screen.getByText('3 de 7 secciones completadas')).toBeVisible();
     expect(
       screen.getByRole('listitem', { name: 'Formación académica: Completada' }),
     ).toBeVisible();
 
     vi.mocked(useProfileCompleteness).mockReturnValue(ready);
     rerender(<ProfileCompletenessProgress />);
-    expect(bar).toHaveAttribute('aria-valuenow', '35');
-    expect(screen.getByText('2 de 6 secciones completadas')).toBeVisible();
+    expect(bar).toHaveAttribute('aria-valuenow', '30');
+    expect(screen.getByText('2 de 7 secciones completadas')).toBeVisible();
     expect(
       screen.getByRole('listitem', { name: 'Formación académica: Pendiente' }),
     ).toBeVisible();
@@ -121,7 +144,7 @@ describe('completed profile checklist', () => {
     expect(
       document.getElementById(trigger.getAttribute('aria-controls')!),
     ).toContainElement(panel);
-    expect(screen.getByText('6 de 6 secciones completadas')).toBeVisible();
+    expect(screen.getByText('7 de 7 secciones completadas')).toBeVisible();
     await user.click(
       screen.getByRole('listitem', { name: 'Presentación: Completada' }),
     );
@@ -185,11 +208,35 @@ describe('completed profile checklist', () => {
 });
 
 describe('progress content and request states', () => {
+  it('can refresh a standalone bar without enabling checklist navigation', () => {
+    render(<ProfileCompletenessProgress showChecklist={false} refetchOnMount />);
+    expect(useProfileCompleteness).toHaveBeenCalledWith(true);
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '30');
+    expect(screen.queryByRole('region', checklistName)).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', triggerName)).not.toBeInTheDocument();
+  });
+
+  it.each([{ ids: [] }, { ids: PROFILE_COMPLETENESS_SECTION_IDS }])(
+    'shows the editor percentage without checklist navigation: %j',
+    ({ ids }) => {
+      setCompletedSections(ids);
+      render(<ProfileCompletenessProgress showChecklist={false} />);
+      expect(
+        screen.getByRole('progressbar', { name: 'Completitud del perfil' }),
+      ).toHaveAttribute('aria-valuenow', ids.length ? '100' : '0');
+      expect(
+        screen.queryByRole('region', checklistName),
+      ).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', triggerName)).not.toBeInTheDocument();
+      expect(useProfileCompleteness).toHaveBeenCalledWith(false);
+    },
+  );
+
   it.each([
     { completed: [], percentage: 0, title: 'Completa tu perfil profesional' },
     {
       completed: ['contact', 'presentation'],
-      percentage: 35,
+      percentage: 30,
       title: 'Tu perfil está tomando forma',
     },
     {
