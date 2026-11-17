@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   AlertDialog,
   AlertDialogContent,
@@ -29,10 +29,6 @@ export function CancelAppointmentDialog({
   appointment,
 }: CancelAppointmentDialogProps) {
   const [now, setNow] = useState(() => Date.now());
-  useEffect(() => {
-    const timer = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => window.clearInterval(timer);
-  }, []);
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -44,6 +40,7 @@ export function CancelAppointmentDialog({
 
   const changeOpen = (nextOpen: boolean) => {
     if (sendingRef.current) return;
+    if (nextOpen) setNow(Date.now());
     setOpen(nextOpen);
     setReason('');
     setError(null);
@@ -90,7 +87,7 @@ export function CancelAppointmentDialog({
       <AlertDialogTrigger render={<Button variant="destructive" />}>
         {TEXT.title}
       </AlertDialogTrigger>
-      <AlertDialogContent overlayProps={{ forceRender: true, className: "z-[60] bg-black/50" }} className="z-[70] max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] min-w-0 overflow-y-auto">
+      <AlertDialogContent overlayProps={{ forceRender: true, className: "bg-black/50" }} className="max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] min-w-0 overflow-y-auto">
         <AlertDialogHeader>
           <AlertDialogTitle>{TEXT.title}</AlertDialogTitle>
           <AlertDialogDescription>{TEXT.description}</AlertDialogDescription>

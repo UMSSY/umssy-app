@@ -103,6 +103,39 @@ describe('CancelAppointmentDialog', () => {
       ),
     );
   });
+  it('actualiza la obligación del motivo al abrir después de cruzar las 24 horas', async () => {
+    renderWithQuery(<CancelAppointmentDialog appointment={appointment(25)} />);
+    vi.mocked(Date.now).mockReturnValue(+now + 2 * 3600000);
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('button', { name: TEXT.title }));
+    expect(screen.getByLabelText(TEXT.reason)).toBeRequired();
+  });
+
+  it('revalida las 24 horas al confirmar un diálogo que quedó abierto', async () => {
+    const { user } = await openDialog(appointment(24));
+    expect(screen.getByLabelText(TEXT.reason)).not.toBeRequired();
+    vi.mocked(Date.now).mockReturnValue(+now + 1);
+    await user.click(screen.getByRole('button', { name: TEXT.confirm }));
+    expect(screen.getByRole('alert')).toHaveTextContent(TEXT.reasonRequired);
+    expect(appointmentsApi.cancel).not.toHaveBeenCalled();
+  });
+
+  it('rechaza confirmar si la cita empezó mientras el diálogo estaba abierto', async () => {
+    const { user } = await openDialog(appointment(1));
+    await user.type(screen.getByLabelText(TEXT.reason), '  No puedo asistir  ');
+    vi.mocked(Date.now).mockReturnValue(+now + 3600000);
+    await user.click(screen.getByRole('button', { name: TEXT.confirm }));
+    expect(screen.getByRole('alert')).toHaveTextContent(TEXT.unavailable);
+    expect(appointmentsApi.cancel).not.toHaveBeenCalled();
+  });
+
+  it('envía el motivo recortado desde el diálogo', async () => {
+    const { user } = await openDialog();
+    await user.type(screen.getByLabelText(TEXT.reason), '  No puedo asistir  ');
+    await user.click(screen.getByRole('button', { name: TEXT.confirm }));
+    await waitFor(() => expect(appointmentsApi.cancel).toHaveBeenCalledWith('a1', 'No puedo asistir'));
+  });
+
   it('volver no cambia la cita y limpia el motivo al reabrir', async () => {
     const { user } = await openDialog();
     await user.type(screen.getByLabelText(TEXT.reason), 'No puedo');
