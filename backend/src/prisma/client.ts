@@ -327,6 +327,11 @@ export type ConnectionRequest = Prisma.ConnectionRequestModel
  */
 export type UserPresence = Prisma.UserPresenceModel
 /**
+ * Model PasswordHistory
+ *
+ */
+export type PasswordHistory = Prisma.PasswordHistoryModel
+/**
  * Model PasswordResetOtp
  * 
  */

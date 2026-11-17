@@ -313,6 +313,7 @@ export type UserWhereInput = {
   sentRequests?: Prisma.ConnectionRequestListRelationFilter
   receivedRequests?: Prisma.ConnectionRequestListRelationFilter
   passwordResetOtps?: Prisma.PasswordResetOtpListRelationFilter
+  passwordHistories?: Prisma.PasswordHistoryListRelationFilter
   auditEvents?: Prisma.AuditEventListRelationFilter
   revertedValidations?: Prisma.DocumentValidationListRelationFilter
   jobApplications?: Prisma.JobApplicationListRelationFilter
@@ -392,6 +393,7 @@ export type UserOrderByWithRelationInput = {
   sentRequests?: Prisma.ConnectionRequestOrderByRelationAggregateInput
   receivedRequests?: Prisma.ConnectionRequestOrderByRelationAggregateInput
   passwordResetOtps?: Prisma.PasswordResetOtpOrderByRelationAggregateInput
+  passwordHistories?: Prisma.PasswordHistoryOrderByRelationAggregateInput
   auditEvents?: Prisma.AuditEventOrderByRelationAggregateInput
   revertedValidations?: Prisma.DocumentValidationOrderByRelationAggregateInput
   jobApplications?: Prisma.JobApplicationOrderByRelationAggregateInput
@@ -474,6 +476,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   sentRequests?: Prisma.ConnectionRequestListRelationFilter
   receivedRequests?: Prisma.ConnectionRequestListRelationFilter
   passwordResetOtps?: Prisma.PasswordResetOtpListRelationFilter
+  passwordHistories?: Prisma.PasswordHistoryListRelationFilter
   auditEvents?: Prisma.AuditEventListRelationFilter
   revertedValidations?: Prisma.DocumentValidationListRelationFilter
   jobApplications?: Prisma.JobApplicationListRelationFilter
@@ -595,6 +598,7 @@ export type UserCreateInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -672,6 +676,7 @@ export type UserUncheckedCreateInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -749,6 +754,7 @@ export type UserUpdateInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -826,6 +832,7 @@ export type UserUncheckedUpdateInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -1563,6 +1570,20 @@ export type UserUpdateOneRequiredWithoutPresenceNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPresenceInput, Prisma.UserUpdateWithoutPresenceInput>, Prisma.UserUncheckedUpdateWithoutPresenceInput>
 }
 
+export type UserCreateNestedOneWithoutPasswordHistoriesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPasswordHistoriesInput, Prisma.UserUncheckedCreateWithoutPasswordHistoriesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPasswordHistoriesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutPasswordHistoriesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPasswordHistoriesInput, Prisma.UserUncheckedCreateWithoutPasswordHistoriesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPasswordHistoriesInput
+  upsert?: Prisma.UserUpsertWithoutPasswordHistoriesInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPasswordHistoriesInput, Prisma.UserUpdateWithoutPasswordHistoriesInput>, Prisma.UserUncheckedUpdateWithoutPasswordHistoriesInput>
+}
+
 export type UserCreateNestedOneWithoutPasswordResetOtpsInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutPasswordResetOtpsInput, Prisma.UserUncheckedCreateWithoutPasswordResetOtpsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutPasswordResetOtpsInput
@@ -1972,6 +1993,7 @@ export type UserCreateWithoutCityInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -2048,6 +2070,7 @@ export type UserUncheckedCreateWithoutCityInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -2172,6 +2195,7 @@ export type UserCreateWithoutCompanyInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -2248,6 +2272,7 @@ export type UserUncheckedCreateWithoutCompanyInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -2350,6 +2375,7 @@ export type UserCreateWithoutRolesInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -2426,6 +2452,7 @@ export type UserUncheckedCreateWithoutRolesInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -2518,6 +2545,7 @@ export type UserUpdateWithoutRolesInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -2594,6 +2622,7 @@ export type UserUncheckedUpdateWithoutRolesInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -2670,6 +2699,7 @@ export type UserCreateWithoutEducationsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -2746,6 +2776,7 @@ export type UserUncheckedCreateWithoutEducationsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -2838,6 +2869,7 @@ export type UserUpdateWithoutEducationsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -2914,6 +2946,7 @@ export type UserUncheckedUpdateWithoutEducationsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -2990,6 +3023,7 @@ export type UserCreateWithoutWorkExperiencesInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -3066,6 +3100,7 @@ export type UserUncheckedCreateWithoutWorkExperiencesInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -3158,6 +3193,7 @@ export type UserUpdateWithoutWorkExperiencesInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -3234,6 +3270,7 @@ export type UserUncheckedUpdateWithoutWorkExperiencesInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -3310,6 +3347,7 @@ export type UserCreateWithoutUserSkillsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -3386,6 +3424,7 @@ export type UserUncheckedCreateWithoutUserSkillsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -3478,6 +3517,7 @@ export type UserUpdateWithoutUserSkillsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -3554,6 +3594,7 @@ export type UserUncheckedUpdateWithoutUserSkillsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -3630,6 +3671,7 @@ export type UserCreateWithoutCertificationsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -3706,6 +3748,7 @@ export type UserUncheckedCreateWithoutCertificationsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -3798,6 +3841,7 @@ export type UserUpdateWithoutCertificationsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -3874,6 +3918,7 @@ export type UserUncheckedUpdateWithoutCertificationsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -3950,6 +3995,7 @@ export type UserCreateWithoutCvFilesInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -4026,6 +4072,7 @@ export type UserUncheckedCreateWithoutCvFilesInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -4118,6 +4165,7 @@ export type UserUpdateWithoutCvFilesInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -4194,6 +4242,7 @@ export type UserUncheckedUpdateWithoutCvFilesInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -4270,6 +4319,7 @@ export type UserCreateWithoutSkillProcessingStateInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -4346,6 +4396,7 @@ export type UserUncheckedCreateWithoutSkillProcessingStateInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -4438,6 +4489,7 @@ export type UserUpdateWithoutSkillProcessingStateInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -4514,6 +4566,7 @@ export type UserUncheckedUpdateWithoutSkillProcessingStateInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -4590,6 +4643,7 @@ export type UserCreateWithoutMentorTechnicalAreasInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -4666,6 +4720,7 @@ export type UserUncheckedCreateWithoutMentorTechnicalAreasInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -4758,6 +4813,7 @@ export type UserUpdateWithoutMentorTechnicalAreasInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -4834,6 +4890,7 @@ export type UserUncheckedUpdateWithoutMentorTechnicalAreasInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -4910,6 +4967,7 @@ export type UserCreateWithoutMentorOrientationTypesInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -4986,6 +5044,7 @@ export type UserUncheckedCreateWithoutMentorOrientationTypesInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -5078,6 +5137,7 @@ export type UserUpdateWithoutMentorOrientationTypesInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -5154,6 +5214,7 @@ export type UserUncheckedUpdateWithoutMentorOrientationTypesInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -5230,6 +5291,7 @@ export type UserCreateWithoutAvailabilityBlocksInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -5306,6 +5368,7 @@ export type UserUncheckedCreateWithoutAvailabilityBlocksInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -5398,6 +5461,7 @@ export type UserUpdateWithoutAvailabilityBlocksInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -5474,6 +5538,7 @@ export type UserUncheckedUpdateWithoutAvailabilityBlocksInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -5550,6 +5615,7 @@ export type UserCreateWithoutBlockedDatesInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -5626,6 +5692,7 @@ export type UserUncheckedCreateWithoutBlockedDatesInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -5718,6 +5785,7 @@ export type UserUpdateWithoutBlockedDatesInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -5794,6 +5862,7 @@ export type UserUncheckedUpdateWithoutBlockedDatesInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -5870,6 +5939,7 @@ export type UserCreateWithoutMentorAppointmentsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -5946,6 +6016,7 @@ export type UserUncheckedCreateWithoutMentorAppointmentsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -6027,6 +6098,7 @@ export type UserCreateWithoutStudentAppointmentsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -6103,6 +6175,7 @@ export type UserUncheckedCreateWithoutStudentAppointmentsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -6184,6 +6257,7 @@ export type UserCreateWithoutCancelledAppointmentsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -6260,6 +6334,7 @@ export type UserUncheckedCreateWithoutCancelledAppointmentsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -6352,6 +6427,7 @@ export type UserUpdateWithoutMentorAppointmentsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -6428,6 +6504,7 @@ export type UserUncheckedUpdateWithoutMentorAppointmentsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -6515,6 +6592,7 @@ export type UserUpdateWithoutStudentAppointmentsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -6591,6 +6669,7 @@ export type UserUncheckedUpdateWithoutStudentAppointmentsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -6678,6 +6757,7 @@ export type UserUpdateWithoutCancelledAppointmentsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -6754,6 +6834,7 @@ export type UserUncheckedUpdateWithoutCancelledAppointmentsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -6830,6 +6911,7 @@ export type UserCreateWithoutAppointmentChangesInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -6906,6 +6988,7 @@ export type UserUncheckedCreateWithoutAppointmentChangesInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -6998,6 +7081,7 @@ export type UserUpdateWithoutAppointmentChangesInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -7074,6 +7158,7 @@ export type UserUncheckedUpdateWithoutAppointmentChangesInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -7150,6 +7235,7 @@ export type UserCreateWithoutCreatedEventsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -7226,6 +7312,7 @@ export type UserUncheckedCreateWithoutCreatedEventsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -7307,6 +7394,7 @@ export type UserCreateWithoutModeratedEventsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -7383,6 +7471,7 @@ export type UserUncheckedCreateWithoutModeratedEventsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -7475,6 +7564,7 @@ export type UserUpdateWithoutCreatedEventsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -7551,6 +7641,7 @@ export type UserUncheckedUpdateWithoutCreatedEventsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -7638,6 +7729,7 @@ export type UserUpdateWithoutModeratedEventsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -7714,6 +7806,7 @@ export type UserUncheckedUpdateWithoutModeratedEventsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -7790,6 +7883,7 @@ export type UserCreateWithoutEventRegistrationsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -7866,6 +7960,7 @@ export type UserUncheckedCreateWithoutEventRegistrationsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -7958,6 +8053,7 @@ export type UserUpdateWithoutEventRegistrationsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -8034,6 +8130,7 @@ export type UserUncheckedUpdateWithoutEventRegistrationsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -8110,6 +8207,7 @@ export type UserCreateWithoutCheckedInAttendancesInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -8186,6 +8284,7 @@ export type UserUncheckedCreateWithoutCheckedInAttendancesInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -8278,6 +8377,7 @@ export type UserUpdateWithoutCheckedInAttendancesInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -8354,6 +8454,7 @@ export type UserUncheckedUpdateWithoutCheckedInAttendancesInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -8430,6 +8531,7 @@ export type UserCreateWithoutExportHistoriesInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -8506,6 +8608,7 @@ export type UserUncheckedCreateWithoutExportHistoriesInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -8598,6 +8701,7 @@ export type UserUpdateWithoutExportHistoriesInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -8674,6 +8778,7 @@ export type UserUncheckedUpdateWithoutExportHistoriesInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -8750,6 +8855,7 @@ export type UserCreateWithoutOpenedAccessRequestsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -8826,6 +8932,7 @@ export type UserUncheckedCreateWithoutOpenedAccessRequestsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -8907,6 +9014,7 @@ export type UserCreateWithoutReviewedAccessRequestsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -8983,6 +9091,7 @@ export type UserUncheckedCreateWithoutReviewedAccessRequestsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -9064,6 +9173,7 @@ export type UserCreateWithoutApprovedAccessRequestInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -9140,6 +9250,7 @@ export type UserUncheckedCreateWithoutApprovedAccessRequestInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -9232,6 +9343,7 @@ export type UserUpdateWithoutOpenedAccessRequestsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -9308,6 +9420,7 @@ export type UserUncheckedUpdateWithoutOpenedAccessRequestsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -9395,6 +9508,7 @@ export type UserUpdateWithoutReviewedAccessRequestsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -9471,6 +9585,7 @@ export type UserUncheckedUpdateWithoutReviewedAccessRequestsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -9558,6 +9673,7 @@ export type UserUpdateWithoutApprovedAccessRequestInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -9634,6 +9750,7 @@ export type UserUncheckedUpdateWithoutApprovedAccessRequestInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -9710,6 +9827,7 @@ export type UserCreateWithoutMentorParticipationRequestsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -9786,6 +9904,7 @@ export type UserUncheckedCreateWithoutMentorParticipationRequestsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -9878,6 +9997,7 @@ export type UserUpdateWithoutMentorParticipationRequestsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -9954,6 +10074,7 @@ export type UserUncheckedUpdateWithoutMentorParticipationRequestsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -10030,6 +10151,7 @@ export type UserCreateWithoutMentorSlotOffersInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -10106,6 +10228,7 @@ export type UserUncheckedCreateWithoutMentorSlotOffersInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -10198,6 +10321,7 @@ export type UserUpdateWithoutMentorSlotOffersInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -10274,6 +10398,7 @@ export type UserUncheckedUpdateWithoutMentorSlotOffersInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -10350,6 +10475,7 @@ export type UserCreateWithoutConversationsAsUserAInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -10426,6 +10552,7 @@ export type UserUncheckedCreateWithoutConversationsAsUserAInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -10507,6 +10634,7 @@ export type UserCreateWithoutConversationsAsUserBInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -10583,6 +10711,7 @@ export type UserUncheckedCreateWithoutConversationsAsUserBInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -10675,6 +10804,7 @@ export type UserUpdateWithoutConversationsAsUserAInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -10751,6 +10881,7 @@ export type UserUncheckedUpdateWithoutConversationsAsUserAInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -10838,6 +10969,7 @@ export type UserUpdateWithoutConversationsAsUserBInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -10914,6 +11046,7 @@ export type UserUncheckedUpdateWithoutConversationsAsUserBInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -10990,6 +11123,7 @@ export type UserCreateWithoutChatParticipantsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -11066,6 +11200,7 @@ export type UserUncheckedCreateWithoutChatParticipantsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -11158,6 +11293,7 @@ export type UserUpdateWithoutChatParticipantsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -11234,6 +11370,7 @@ export type UserUncheckedUpdateWithoutChatParticipantsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -11310,6 +11447,7 @@ export type UserCreateWithoutChatMessagesInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -11386,6 +11524,7 @@ export type UserUncheckedCreateWithoutChatMessagesInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -11478,6 +11617,7 @@ export type UserUpdateWithoutChatMessagesInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -11554,6 +11694,7 @@ export type UserUncheckedUpdateWithoutChatMessagesInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -11630,6 +11771,7 @@ export type UserCreateWithoutChatBlocksMadeInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -11706,6 +11848,7 @@ export type UserUncheckedCreateWithoutChatBlocksMadeInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -11787,6 +11930,7 @@ export type UserCreateWithoutChatBlocksReceivedInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -11863,6 +12007,7 @@ export type UserUncheckedCreateWithoutChatBlocksReceivedInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -11955,6 +12100,7 @@ export type UserUpdateWithoutChatBlocksMadeInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -12031,6 +12177,7 @@ export type UserUncheckedUpdateWithoutChatBlocksMadeInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -12118,6 +12265,7 @@ export type UserUpdateWithoutChatBlocksReceivedInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -12194,6 +12342,7 @@ export type UserUncheckedUpdateWithoutChatBlocksReceivedInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -12270,6 +12419,7 @@ export type UserCreateWithoutSentRequestsInput = {
   chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -12346,6 +12496,7 @@ export type UserUncheckedCreateWithoutSentRequestsInput = {
   chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -12427,6 +12578,7 @@ export type UserCreateWithoutReceivedRequestsInput = {
   chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -12503,6 +12655,7 @@ export type UserUncheckedCreateWithoutReceivedRequestsInput = {
   chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -12595,6 +12748,7 @@ export type UserUpdateWithoutSentRequestsInput = {
   chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -12671,6 +12825,7 @@ export type UserUncheckedUpdateWithoutSentRequestsInput = {
   chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -12758,6 +12913,7 @@ export type UserUpdateWithoutReceivedRequestsInput = {
   chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -12834,6 +12990,7 @@ export type UserUncheckedUpdateWithoutReceivedRequestsInput = {
   chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -12910,6 +13067,7 @@ export type UserCreateWithoutPresenceInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -12986,6 +13144,7 @@ export type UserUncheckedCreateWithoutPresenceInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -13078,6 +13237,7 @@ export type UserUpdateWithoutPresenceInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -13149,6 +13309,331 @@ export type UserUncheckedUpdateWithoutPresenceInput = {
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  notificationPreferences?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
+  receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
+  triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
+}
+
+export type UserCreateWithoutPasswordHistoriesInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
+  city?: Prisma.CityCreateNestedOneWithoutUsersInput
+  roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  notificationPreferences?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
+  receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
+  triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
+}
+
+export type UserUncheckedCreateWithoutPasswordHistoriesInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  cityId?: string | null
+  companyId?: string | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  notificationPreferences?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
+  receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
+  triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
+}
+
+export type UserCreateOrConnectWithoutPasswordHistoriesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutPasswordHistoriesInput, Prisma.UserUncheckedCreateWithoutPasswordHistoriesInput>
+}
+
+export type UserUpsertWithoutPasswordHistoriesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutPasswordHistoriesInput, Prisma.UserUncheckedUpdateWithoutPasswordHistoriesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutPasswordHistoriesInput, Prisma.UserUncheckedCreateWithoutPasswordHistoriesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutPasswordHistoriesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutPasswordHistoriesInput, Prisma.UserUncheckedUpdateWithoutPasswordHistoriesInput>
+}
+
+export type UserUpdateWithoutPasswordHistoriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
+  city?: Prisma.CityUpdateOneWithoutUsersNestedInput
+  roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  notificationPreferences?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
+  receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
+  triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutPasswordHistoriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
   chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
   chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
@@ -13230,6 +13715,7 @@ export type UserCreateWithoutPasswordResetOtpsInput = {
   chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -13306,6 +13792,7 @@ export type UserUncheckedCreateWithoutPasswordResetOtpsInput = {
   chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -13398,6 +13885,7 @@ export type UserUpdateWithoutPasswordResetOtpsInput = {
   chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -13474,6 +13962,7 @@ export type UserUncheckedUpdateWithoutPasswordResetOtpsInput = {
   chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -13550,6 +14039,7 @@ export type UserCreateWithoutMentorParticipationAttemptLimitInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -13626,6 +14116,7 @@ export type UserUncheckedCreateWithoutMentorParticipationAttemptLimitInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -13718,6 +14209,7 @@ export type UserUpdateWithoutMentorParticipationAttemptLimitInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -13794,6 +14286,7 @@ export type UserUncheckedUpdateWithoutMentorParticipationAttemptLimitInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -13871,6 +14364,7 @@ export type UserCreateWithoutJobApplicationsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
@@ -13947,6 +14441,7 @@ export type UserUncheckedCreateWithoutJobApplicationsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
@@ -14039,6 +14534,7 @@ export type UserUpdateWithoutJobApplicationsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
@@ -14115,6 +14611,7 @@ export type UserUncheckedUpdateWithoutJobApplicationsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
@@ -14190,6 +14687,7 @@ export type UserCreateWithoutCreatedSurveysInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -14266,6 +14764,7 @@ export type UserUncheckedCreateWithoutCreatedSurveysInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -14358,6 +14857,7 @@ export type UserUpdateWithoutCreatedSurveysInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -14434,6 +14934,7 @@ export type UserUncheckedUpdateWithoutCreatedSurveysInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -14510,6 +15011,7 @@ export type UserCreateWithoutSurveyResponsesInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -14586,6 +15088,7 @@ export type UserUncheckedCreateWithoutSurveyResponsesInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -14678,6 +15181,7 @@ export type UserUpdateWithoutSurveyResponsesInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -14754,6 +15258,7 @@ export type UserUncheckedUpdateWithoutSurveyResponsesInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -14831,6 +15336,7 @@ export type UserCreateWithoutAuditEventsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
@@ -14907,6 +15413,7 @@ export type UserUncheckedCreateWithoutAuditEventsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
@@ -14999,6 +15506,7 @@ export type UserUpdateWithoutAuditEventsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
@@ -15075,6 +15583,7 @@ export type UserUncheckedUpdateWithoutAuditEventsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
@@ -15151,6 +15660,7 @@ export type UserCreateWithoutRevertedValidationsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
@@ -15227,6 +15737,7 @@ export type UserUncheckedCreateWithoutRevertedValidationsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
@@ -15319,6 +15830,7 @@ export type UserUpdateWithoutRevertedValidationsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
@@ -15395,6 +15907,7 @@ export type UserUncheckedUpdateWithoutRevertedValidationsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
@@ -15470,6 +15983,7 @@ export type UserCreateWithoutMentorIntakeAttemptsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -15546,6 +16060,7 @@ export type UserUncheckedCreateWithoutMentorIntakeAttemptsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -15638,6 +16153,7 @@ export type UserUpdateWithoutMentorIntakeAttemptsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -15714,6 +16230,7 @@ export type UserUncheckedUpdateWithoutMentorIntakeAttemptsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -15790,6 +16307,7 @@ export type UserCreateWithoutMentorParticipationSanctionsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -15866,6 +16384,7 @@ export type UserUncheckedCreateWithoutMentorParticipationSanctionsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -15958,6 +16477,7 @@ export type UserUpdateWithoutMentorParticipationSanctionsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -16034,6 +16554,7 @@ export type UserUncheckedUpdateWithoutMentorParticipationSanctionsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -16111,6 +16632,7 @@ export type UserCreateWithoutRadarCvOwnedInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -16187,6 +16709,7 @@ export type UserUncheckedCreateWithoutRadarCvOwnedInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -16268,6 +16791,7 @@ export type UserCreateWithoutRadarCvReviewedInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -16344,6 +16868,7 @@ export type UserUncheckedCreateWithoutRadarCvReviewedInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -16436,6 +16961,7 @@ export type UserUpdateWithoutRadarCvOwnedInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -16512,6 +17038,7 @@ export type UserUncheckedUpdateWithoutRadarCvOwnedInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -16599,6 +17126,7 @@ export type UserUpdateWithoutRadarCvReviewedInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -16675,6 +17203,7 @@ export type UserUncheckedUpdateWithoutRadarCvReviewedInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -16751,6 +17280,7 @@ export type UserCreateWithoutRadarSnapshotsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -16827,6 +17357,7 @@ export type UserUncheckedCreateWithoutRadarSnapshotsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -16919,6 +17450,7 @@ export type UserUpdateWithoutRadarSnapshotsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -16995,6 +17527,7 @@ export type UserUncheckedUpdateWithoutRadarSnapshotsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -17071,6 +17604,7 @@ export type UserCreateWithoutRadarAuditSubjectsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -17147,6 +17681,7 @@ export type UserUncheckedCreateWithoutRadarAuditSubjectsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -17228,6 +17763,7 @@ export type UserCreateWithoutRadarAuditActorsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -17304,6 +17840,7 @@ export type UserUncheckedCreateWithoutRadarAuditActorsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -17396,6 +17933,7 @@ export type UserUpdateWithoutRadarAuditSubjectsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -17472,6 +18010,7 @@ export type UserUncheckedUpdateWithoutRadarAuditSubjectsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -17559,6 +18098,7 @@ export type UserUpdateWithoutRadarAuditActorsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -17635,6 +18175,7 @@ export type UserUncheckedUpdateWithoutRadarAuditActorsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -17711,6 +18252,7 @@ export type UserCreateWithoutSocialAccountsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -17787,6 +18329,7 @@ export type UserUncheckedCreateWithoutSocialAccountsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -17879,6 +18422,7 @@ export type UserUpdateWithoutSocialAccountsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -17955,6 +18499,7 @@ export type UserUncheckedUpdateWithoutSocialAccountsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -18031,6 +18576,7 @@ export type UserCreateWithoutPortfolioProjectsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -18107,6 +18653,7 @@ export type UserUncheckedCreateWithoutPortfolioProjectsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -18199,6 +18746,7 @@ export type UserUpdateWithoutPortfolioProjectsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -18275,6 +18823,7 @@ export type UserUncheckedUpdateWithoutPortfolioProjectsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -18351,6 +18900,7 @@ export type UserCreateWithoutReceivedNotificationsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -18427,6 +18977,7 @@ export type UserUncheckedCreateWithoutReceivedNotificationsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -18508,6 +19059,7 @@ export type UserCreateWithoutTriggeredNotificationsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -18584,6 +19136,7 @@ export type UserUncheckedCreateWithoutTriggeredNotificationsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -18676,6 +19229,7 @@ export type UserUpdateWithoutReceivedNotificationsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -18752,6 +19306,7 @@ export type UserUncheckedUpdateWithoutReceivedNotificationsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -18839,6 +19394,7 @@ export type UserUpdateWithoutTriggeredNotificationsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -18915,6 +19471,7 @@ export type UserUncheckedUpdateWithoutTriggeredNotificationsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -18991,6 +19548,7 @@ export type UserCreateWithoutPushSubscriptionsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -19067,6 +19625,7 @@ export type UserUncheckedCreateWithoutPushSubscriptionsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -19159,6 +19718,7 @@ export type UserUpdateWithoutPushSubscriptionsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -19235,6 +19795,7 @@ export type UserUncheckedUpdateWithoutPushSubscriptionsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -19310,6 +19871,7 @@ export type UserCreateWithoutRefreshTokensInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -19386,6 +19948,7 @@ export type UserUncheckedCreateWithoutRefreshTokensInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -19478,6 +20041,7 @@ export type UserUpdateWithoutRefreshTokensInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -19554,6 +20118,7 @@ export type UserUncheckedUpdateWithoutRefreshTokensInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -19631,6 +20196,7 @@ export type UserCreateWithoutNotificationPreferencesInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -19707,6 +20273,7 @@ export type UserUncheckedCreateWithoutNotificationPreferencesInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -19799,6 +20366,7 @@ export type UserUpdateWithoutNotificationPreferencesInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -19875,6 +20443,7 @@ export type UserUncheckedUpdateWithoutNotificationPreferencesInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -19951,6 +20520,7 @@ export type UserCreateWithoutOpenedCompanyRequestsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -20027,6 +20597,7 @@ export type UserUncheckedCreateWithoutOpenedCompanyRequestsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -20108,6 +20679,7 @@ export type UserCreateWithoutReviewedCompanyRequestsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -20184,6 +20756,7 @@ export type UserUncheckedCreateWithoutReviewedCompanyRequestsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -20265,6 +20838,7 @@ export type UserCreateWithoutApprovedCompanyAccountInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -20341,6 +20915,7 @@ export type UserUncheckedCreateWithoutApprovedCompanyAccountInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -20433,6 +21008,7 @@ export type UserUpdateWithoutOpenedCompanyRequestsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -20509,6 +21085,7 @@ export type UserUncheckedUpdateWithoutOpenedCompanyRequestsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -20596,6 +21173,7 @@ export type UserUpdateWithoutReviewedCompanyRequestsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -20672,6 +21250,7 @@ export type UserUncheckedUpdateWithoutReviewedCompanyRequestsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -20759,6 +21338,7 @@ export type UserUpdateWithoutApprovedCompanyAccountInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -20835,6 +21415,7 @@ export type UserUncheckedUpdateWithoutApprovedCompanyAccountInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -20928,6 +21509,7 @@ export type UserUpdateWithoutCityInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -21004,6 +21586,7 @@ export type UserUncheckedUpdateWithoutCityInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -21116,6 +21699,7 @@ export type UserUpdateWithoutCompanyInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -21192,6 +21776,7 @@ export type UserUncheckedUpdateWithoutCompanyInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -21272,6 +21857,7 @@ export type UserCountOutputType = {
   sentRequests: number
   receivedRequests: number
   passwordResetOtps: number
+  passwordHistories: number
   auditEvents: number
   revertedValidations: number
   jobApplications: number
@@ -21327,6 +21913,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   sentRequests?: boolean | UserCountOutputTypeCountSentRequestsArgs
   receivedRequests?: boolean | UserCountOutputTypeCountReceivedRequestsArgs
   passwordResetOtps?: boolean | UserCountOutputTypeCountPasswordResetOtpsArgs
+  passwordHistories?: boolean | UserCountOutputTypeCountPasswordHistoriesArgs
   auditEvents?: boolean | UserCountOutputTypeCountAuditEventsArgs
   revertedValidations?: boolean | UserCountOutputTypeCountRevertedValidationsArgs
   jobApplications?: boolean | UserCountOutputTypeCountJobApplicationsArgs
@@ -21616,6 +22203,13 @@ export type UserCountOutputTypeCountPasswordResetOtpsArgs<ExtArgs extends runtim
 /**
  * UserCountOutputType without action
  */
+export type UserCountOutputTypeCountPasswordHistoriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PasswordHistoryWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
 export type UserCountOutputTypeCountAuditEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.AuditEventWhereInput
 }
@@ -21779,6 +22373,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   sentRequests?: boolean | Prisma.User$sentRequestsArgs<ExtArgs>
   receivedRequests?: boolean | Prisma.User$receivedRequestsArgs<ExtArgs>
   passwordResetOtps?: boolean | Prisma.User$passwordResetOtpsArgs<ExtArgs>
+  passwordHistories?: boolean | Prisma.User$passwordHistoriesArgs<ExtArgs>
   auditEvents?: boolean | Prisma.User$auditEventsArgs<ExtArgs>
   revertedValidations?: boolean | Prisma.User$revertedValidationsArgs<ExtArgs>
   jobApplications?: boolean | Prisma.User$jobApplicationsArgs<ExtArgs>
@@ -21905,6 +22500,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   sentRequests?: boolean | Prisma.User$sentRequestsArgs<ExtArgs>
   receivedRequests?: boolean | Prisma.User$receivedRequestsArgs<ExtArgs>
   passwordResetOtps?: boolean | Prisma.User$passwordResetOtpsArgs<ExtArgs>
+  passwordHistories?: boolean | Prisma.User$passwordHistoriesArgs<ExtArgs>
   auditEvents?: boolean | Prisma.User$auditEventsArgs<ExtArgs>
   revertedValidations?: boolean | Prisma.User$revertedValidationsArgs<ExtArgs>
   jobApplications?: boolean | Prisma.User$jobApplicationsArgs<ExtArgs>
@@ -21979,6 +22575,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     sentRequests: Prisma.$ConnectionRequestPayload<ExtArgs>[]
     receivedRequests: Prisma.$ConnectionRequestPayload<ExtArgs>[]
     passwordResetOtps: Prisma.$PasswordResetOtpPayload<ExtArgs>[]
+    passwordHistories: Prisma.$PasswordHistoryPayload<ExtArgs>[]
     auditEvents: Prisma.$AuditEventPayload<ExtArgs>[]
     revertedValidations: Prisma.$DocumentValidationPayload<ExtArgs>[]
     jobApplications: Prisma.$JobApplicationPayload<ExtArgs>[]
@@ -22451,6 +23048,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   sentRequests<T extends Prisma.User$sentRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sentRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConnectionRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   receivedRequests<T extends Prisma.User$receivedRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$receivedRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConnectionRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   passwordResetOtps<T extends Prisma.User$passwordResetOtpsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$passwordResetOtpsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PasswordResetOtpPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  passwordHistories<T extends Prisma.User$passwordHistoriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$passwordHistoriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PasswordHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   auditEvents<T extends Prisma.User$auditEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$auditEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuditEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   revertedValidations<T extends Prisma.User$revertedValidationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$revertedValidationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentValidationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   jobApplications<T extends Prisma.User$jobApplicationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$jobApplicationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$JobApplicationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -23913,6 +24511,30 @@ export type User$passwordResetOtpsArgs<ExtArgs extends runtime.Types.Extensions.
   take?: number
   skip?: number
   distinct?: Prisma.PasswordResetOtpScalarFieldEnum | Prisma.PasswordResetOtpScalarFieldEnum[]
+}
+
+/**
+ * User.passwordHistories
+ */
+export type User$passwordHistoriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PasswordHistory
+   */
+  select?: Prisma.PasswordHistorySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PasswordHistory
+   */
+  omit?: Prisma.PasswordHistoryOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PasswordHistoryInclude<ExtArgs> | null
+  where?: Prisma.PasswordHistoryWhereInput
+  orderBy?: Prisma.PasswordHistoryOrderByWithRelationInput | Prisma.PasswordHistoryOrderByWithRelationInput[]
+  cursor?: Prisma.PasswordHistoryWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PasswordHistoryScalarFieldEnum | Prisma.PasswordHistoryScalarFieldEnum[]
 }
 
 /**
