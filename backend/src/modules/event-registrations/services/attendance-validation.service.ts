@@ -7,6 +7,7 @@ import { REGISTRATION_STATUS_TITLES } from '../../../common/constants/registrati
 import { AttendanceAccessDeniedException } from '../exceptions/attendance-access-denied.exception.js';
 import { AttendancePassCancelledException } from '../exceptions/attendance-pass-cancelled.exception.js';
 import { AttendancePassInvalidException } from '../exceptions/attendance-pass-invalid.exception.js';
+import { assertAttendanceWindow } from '../utils/assert-attendance-window.js';
 import { AttendanceValidationRepository } from '../repositories/attendance-validation.repository.js';
 import {
   AttendanceCheckInBodySchema,
@@ -22,6 +23,7 @@ export class AttendanceValidationService {
     actor: AuthenticatedUser,
     reference: string,
     tx?: Prisma.TransactionClient,
+    now: Date = new Date(),
   ): Promise<{ registrationId: string }> {
     if (!actor.roles.includes('titulado')) throw new ForbiddenRoleException();
     if (!AttendanceCheckInParamsSchema.safeParse({ eventId }).success) throw new ValidationException();
@@ -41,6 +43,7 @@ export class AttendanceValidationService {
       throw new AttendancePassInvalidException();
     }
 
+    assertAttendanceWindow(workshop, now);
     return { registrationId: pass.id };
   }
 }
