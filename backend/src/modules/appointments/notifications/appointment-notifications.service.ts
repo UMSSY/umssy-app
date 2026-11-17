@@ -9,6 +9,7 @@ import {
   APPOINTMENT_NOTIFICATION_CHANNELS,
   APPOINTMENT_NOTIFICATION_GROUP_PREFIX,
   APPOINTMENT_NOTIFICATION_MAX_ATTEMPTS,
+  APPOINTMENT_NOTIFICATION_RETRY_DELAY_MS,
 } from '../constants/appointment-notification.constants.js';
 import { AppointmentNotificationChannel } from '../enums/appointment-notification-channel.enum.js';
 import { AppointmentNotificationEvent } from '../enums/appointment-notification-event.enum.js';
@@ -131,6 +132,7 @@ export class AppointmentNotificationsService {
           }
         }
 
+        let hasFailures = false;
         for (const [recipientId, rows] of byRecipient) {
           const channels = rows.map(
             (row) => row.channel.title as NotifyChannel,
@@ -140,15 +142,28 @@ export class AppointmentNotificationsService {
               buildRequest(recipientId, channels, groupKey),
             );
             for (const row of rows) {
-              await this.settleRow(row, result, catalog);
+              const failed = await this.settleRow(row, result, catalog);
+              if (failed) {
+                hasFailures = true;
+              }
             }
           } catch (error) {
+            hasFailures = true;
             const message =
               error instanceof Error ? error.message : String(error);
             for (const row of rows) {
               await this.failRow(row, message, catalog);
             }
           }
+        }
+
+        if (
+          hasFailures &&
+          attempt < APPOINTMENT_NOTIFICATION_MAX_ATTEMPTS
+        ) {
+          await new Promise<void>((resolve) => {
+            setTimeout(resolve, APPOINTMENT_NOTIFICATION_RETRY_DELAY_MS);
+          });
         }
       }
     } catch (error) {
@@ -160,7 +175,7 @@ export class AppointmentNotificationsService {
     row: AppointmentNotificationRecord,
     result: NotifyResult,
     catalog: AppointmentNotificationCatalog,
-  ): Promise<void> {
+  ): Promise<boolean> {
     const outcome = this.classify(row, result);
     if (outcome === 'sent') {
       await this.repository.markSent(
@@ -168,17 +183,18 @@ export class AppointmentNotificationsService {
         catalog.statusIds.sent,
         new Date(),
       );
-      return;
+      return false;
     }
     if (outcome === 'omit') {
       await this.repository.discard(row.id);
-      return;
+      return false;
     }
     await this.failRow(
       row,
       `Falló el envío por ${row.channel.title}`,
       catalog,
     );
+    return true;
   }
 
   private classify(
