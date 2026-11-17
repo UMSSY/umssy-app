@@ -1,5 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { toBoliviaTime } from '../../../common/utils/date-time.js';
+import {
+  formatBoliviaDate,
+  formatBoliviaTime,
+  toBoliviaTime,
+} from '../../../common/utils/date-time.js';
 import { NotificationsService } from '../../notifications/services/notifications.service.js';
 import { NotificationType } from '../../notifications/types/notification-type.enum.js';
 import type { NotifyChannel } from '../../notifications/types/notify-channel.type.js';
@@ -63,7 +67,8 @@ export class AppointmentNotificationsService {
         : appointment.mentorId;
     const canceller = this.participantOf(appointment, actorId);
     const reason = appointment.cancellationReason;
-    const { date, time } = toBoliviaTime(appointment.startAt);
+    const date = formatBoliviaDate(appointment.startAt);
+    const time = formatBoliviaTime(appointment.startAt);
 
     await this.dispatch({
       appointment,
