@@ -98,8 +98,8 @@ describe('managed workshops', () => {
         id: workshop.id,
         title: workshop.title,
         eventDate: '2026-06-24',
-        startTime: '14:00',
-        endTime: '17:00',
+        startTime: '14:00:00.000',
+        endTime: '17:00:00.000',
         location: 'Aula D-101',
         coverUrl: `/events/${workshop.id}/cover`,
       },
@@ -107,11 +107,23 @@ describe('managed workshops', () => {
         id: '33333333-3333-4333-8333-333333333333',
         title: workshop.title,
         eventDate: '2026-06-24',
-        startTime: '14:00',
-        endTime: '17:00',
+        startTime: '14:00:00.000',
+        endTime: '17:00:00.000',
         location: 'Aula D-101',
       },
     ]);
+  });
+
+  it('preserves the exact end of the check-in window for the QA workshop', async () => {
+    const findManaged = vi.fn().mockResolvedValue([{
+      ...workshop,
+      endTime: new Date('1970-01-01T23:59:59.999Z'),
+    }]);
+    const service = new EventsService({ findManaged } as never);
+
+    const [result] = await service.findManaged(OWNER.id);
+
+    expect(result.endTime).toBe('23:59:59.999');
   });
 
   it('requires a Bearer session and does not query workshops anonymously', async () => {

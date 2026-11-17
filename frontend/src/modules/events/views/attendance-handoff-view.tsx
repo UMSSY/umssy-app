@@ -15,7 +15,6 @@ import {
   formatRegistrationTime,
 } from '../utils/registration-format';
 import { AttendanceMobileScanner } from '../components/attendance-mobile-scanner';
-import { AttendanceDemoPass } from '../testing/attendance-demo-pass';
 
 interface AttendanceHandoffViewProps {
   workshopId: string;
@@ -135,10 +134,6 @@ export function AttendanceHandoffView({
               <AttendanceMobileScanner workshopId={workshopId} />
             </div>
           )}
-          {process.env.NODE_ENV === 'development' &&
-            process.env.NEXT_PUBLIC_MOCK_MANAGED_WORKSHOPS === 'true' && (
-              <AttendanceDemoPass />
-            )}
         </>
       )}
     </main>

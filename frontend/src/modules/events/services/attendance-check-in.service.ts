@@ -27,10 +27,26 @@ export const attendanceCheckInService = {
       },
     );
     const body = response.data;
-    if (!body || typeof body !== 'object' || !('data' in body))
+    if (
+      !body ||
+      typeof body !== 'object' ||
+      !('data' in body) ||
+      !('statusCode' in body) ||
+      body.statusCode !== response.status ||
+      !('ok' in body) ||
+      body.ok !== true
+    )
       throw new Error('Invalid attendance response');
     const data = body.data;
-    if (!data || typeof data !== 'object' || !('result' in data))
+    if (
+      !data ||
+      typeof data !== 'object' ||
+      !('result' in data) ||
+      !('checkedInAt' in data) ||
+      typeof data.checkedInAt !== 'string' ||
+      !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(data.checkedInAt) ||
+      !Number.isFinite(Date.parse(data.checkedInAt))
+    )
       throw new Error('Invalid attendance response');
     if (response.status === 201 && data.result === 'registered')
       return 'registered';

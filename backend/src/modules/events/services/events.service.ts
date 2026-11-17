@@ -14,7 +14,7 @@ import type {
   EventsListResponse,
   FindEventsPayload,
 } from '../types/events.types.js';
-import { formatUtcDate, formatUtcTime } from '../utils/event-date-time.js';
+import { formatUtcDate } from '../utils/event-date-time.js';
 
 @Injectable()
 export class EventsService {
@@ -26,8 +26,9 @@ export class EventsService {
       id: event.id,
       title: event.title,
       eventDate: formatUtcDate(event.eventDate),
-      startTime: formatUtcTime(event.startTime),
-      endTime: formatUtcTime(event.endTime),
+      startTime: event.startTime.toISOString().slice(11, 23),
+      // Keep the exact check-in boundary used by the backend, including QA fixtures.
+      endTime: event.endTime.toISOString().slice(11, 23),
       location: event.location,
       ...(event.coverMimeType && { coverUrl: `/events/${event.id}/cover` }),
     }));
