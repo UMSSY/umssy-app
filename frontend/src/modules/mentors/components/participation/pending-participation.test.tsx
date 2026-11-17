@@ -180,9 +180,18 @@ describe("Participación pendiente HU7-2", () => {
     fireEvent.click(screen.getByRole("button", { name: "Ver detalle" }));
     expect(screen.getByRole("dialog", { name: "Solicitud pendiente" })).toBeInTheDocument();
     expect(screen.getByText(/Solicitud enviada hace/)).toBeInTheDocument();
+    expect(screen.getByText("En evaluación")).toBeInTheDocument();
     expect(screen.getByText("titulado@umssy.test")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Ver historial" })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Volver" }));
     expect(screen.queryByRole("dialog", { name: "Solicitud pendiente" })).not.toBeInTheDocument();
+  });
+
+  it("recorta el correo institucional largo sin ocultar su valor completo", () => {
+    const email = `${"nombre".repeat(20)}@umssy.test`;
+    renderWithQuery(<PendingParticipation request={{ ...pendingRequest, email }} />);
+    fireEvent.click(screen.getByRole("button", { name: "Ver detalle" }));
+    expect(screen.getByText(email)).toHaveClass("truncate");
+    expect(screen.getByText(email)).toHaveAttribute("title", email);
   });
 });

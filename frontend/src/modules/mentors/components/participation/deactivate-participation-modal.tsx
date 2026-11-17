@@ -70,7 +70,7 @@ export function DeactivateParticipationModal({
                   Estado de mentor
                 </p>
                 <DialogTitle className="mt-1 text-lg font-bold tracking-tight break-words text-ink sm:text-xl">
-                  Desactivar participación
+                  Pausar mentoría
                 </DialogTitle>
               </div>
             </div>
@@ -88,9 +88,8 @@ export function DeactivateParticipationModal({
           </DialogHeader>
 
           <DialogDescription className="mt-4 text-[13px] leading-relaxed text-text-secondary">
-            Tu perfil dejará de aparecer como mentor disponible en el directorio
-            y no recibirás nuevas solicitudes de asesoramiento mientras tu
-            participación esté desactivada.
+            Al pausar tu mentoría, dejarás de participar en la red de mentores
+            y perderás tu cupo actual.
           </DialogDescription>
 
           <div className="mt-4 flex items-start gap-3 rounded-xl border border-border bg-surface-soft p-3.5">
@@ -101,7 +100,7 @@ export function DeactivateParticipationModal({
             />
             <div className="min-w-0 text-xs leading-relaxed text-text-secondary">
               Tus áreas técnicas y tipos de orientación permanecerán guardados.
-              Se liberará tu cupo y podrás solicitar la reincorporación desde
+              Para volver, deberás solicitar tu incorporación nuevamente desde
               este panel.
               <p className="mt-2 flex items-start gap-1.5 border-t border-border pt-2 font-medium text-ink-soft">
                 <AlertTriangle
@@ -109,8 +108,9 @@ export function DeactivateParticipationModal({
                   className="mt-0.5 shrink-0 text-accent"
                   size={14}
                 />
-                La reincorporación depende de la validación y de los cupos
-                disponibles.
+                Si cumples los requisitos y hay cupos disponibles, podrás
+                incorporarte directamente. Si no hay cupos, ingresarás a la
+                lista de espera por orden de solicitud.
               </p>
             </div>
           </div>
@@ -123,8 +123,9 @@ export function DeactivateParticipationModal({
               {errorMessage}
               {hasFutureAppointments && (
                 <p className="mt-2">
-                  <Link href="/mentor/availability" className="underline">
-                    Resolver mis citas en la agenda
+                  Primero debes resolver tus citas futuras pendientes o confirmadas. {" "}
+                  <Link href="/appointments" className="underline">
+                    Ver mis citas en la agenda
                   </Link>
                 </p>
               )}
@@ -162,7 +163,7 @@ export function DeactivateParticipationModal({
               className="h-auto min-h-9 w-full gap-2 px-4 py-2 text-xs whitespace-normal sm:w-auto"
             >
               <UserRoundX aria-hidden="true" size={15} />
-              {isLoading ? "Procesando..." : "Desactivar participación"}
+              {isLoading ? "Procesando..." : "Pausar mentoría"}
             </Button>
           </div>
         </div>

@@ -70,18 +70,18 @@ export function ParticipationOverview({ isActive, areas, orientations, onAction,
                   <h2 className="font-bold text-ink">Estado de participación</h2>
                   <span className={cn("inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-semibold", isActive ? "bg-interaction text-availability-foreground" : "bg-surface-soft text-text-secondary")}>
                     <span aria-hidden="true" className={cn("size-2 rounded-full", isActive ? "bg-availability-foreground" : "bg-text-secondary")} />
-                    {isActive ? "Activo" : "Desactivado"}
+                    {isActive ? "Activo" : "Fuera de la red"}
                   </span>
                 </div>
                 <p className="text-sm text-text-secondary">
-                  {isActive ? "Tu perfil puede aparecer como mentor disponible en el directorio." : "Tu participación está desactivada y tu perfil no aparece en el directorio. Para regresar deberás completar la incorporación y validar los cupos disponibles."}
+                  {isActive ? "Tu perfil puede aparecer como mentor disponible en el directorio." : "Tu participación como mentor terminó y tu cupo fue liberado. Para volver, solicita tu incorporación nuevamente; si no hay cupos, ingresarás a la lista de espera."}
                 </p>
               </div>
             </div>
             {actionEnabled && (
               <Button type="button" variant={isActive ? "outline" : "default"} onClick={onAction} className="h-auto min-h-10 max-w-full gap-2 py-2 whitespace-normal">
                 {isActive && <CircleX aria-hidden="true" className="size-4" />}
-                {isActive ? "Desactivar participación" : "Activar participación"}
+                {isActive ? "Pausar mentoría" : "Solicitar reincorporación"}
               </Button>
             )}
           </div>

@@ -272,7 +272,7 @@ export function MentorshipView() {
         } else if (status === 429) {
           setActivationError(
             message ??
-              "Has superado el límite de cuatro intentos en 24 horas. Tu participación está bloqueada temporalmente durante 72 horas.",
+              "Tu solicitud está suspendida temporalmente. Podrás volver a intentarlo más adelante.",
           );
         } else {
           setActivationError(

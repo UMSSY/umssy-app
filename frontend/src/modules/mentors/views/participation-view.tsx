@@ -12,6 +12,7 @@ import {
   subscribeAccessToken,
 } from "@/shared/services/storage/access-token-storage";
 import { mentorParticipationService } from "../services/mentor-participation.service";
+import type { MyMentorParticipation } from "../types/my-mentor-participation.types";
 import { ParticipationEmptyState } from "../components/participation/participation-empty-state";
 import { ParticipationLoading } from "../components/participation/participation-loading";
 import { ParticipationOverview } from "../components/participation/participation-overview";
@@ -115,6 +116,11 @@ export function ParticipationView({
     setError(null);
     try {
       await mentorParticipationService.leave();
+      client.setQueryData<MyMentorParticipation>(
+        ["mentors", "participation", token],
+        (previous) =>
+          previous ? { ...previous, status: "DEACTIVATED" } : previous,
+      );
       await Promise.allSettled([
         refreshRoles(),
         client.invalidateQueries({ queryKey: ["mentors", "participation"] }),
@@ -125,7 +131,7 @@ export function ParticipationView({
         client.invalidateQueries({ queryKey: ["mentorship", "profile"] }),
       ]);
       setModal(null);
-      notifySuccess("Participación desactivada correctamente");
+      notifySuccess("Saliste de la red de mentores y tu cupo fue liberado");
     } catch (failure) {
       setError(failure);
     } finally {

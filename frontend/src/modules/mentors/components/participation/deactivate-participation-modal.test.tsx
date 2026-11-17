@@ -23,7 +23,7 @@ describe("DeactivateParticipationModal", () => {
     const props = createProps();
     render(<DeactivateParticipationModal {...props} />);
     expect(screen.getAllByText("Sin configuración")).toHaveLength(2);
-    fireEvent.click(screen.getByRole("button", { name: "Desactivar participación" }));
+    fireEvent.click(screen.getByRole("button", { name: "Pausar mentoría" }));
     expect(props.onConfirm).toHaveBeenCalledTimes(1);
   });
 
@@ -49,7 +49,16 @@ describe("DeactivateParticipationModal", () => {
   it("muestra otros errores sin ofrecer el enlace de citas", () => {
     render(<DeactivateParticipationModal {...createProps()} errorMessage="No se pudo guardar" />);
     expect(screen.getByRole("alert")).toHaveTextContent("No se pudo guardar");
-    expect(screen.queryByRole("link", { name: "Resolver mis citas en la agenda" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Ver mis citas en la agenda" })).not.toBeInTheDocument();
+  });
+
+  it("explica la salida definitiva y dirige las citas futuras a la agenda", () => {
+    render(<DeactivateParticipationModal {...createProps()} errorMessage="Salida bloqueada" hasFutureAppointments />);
+    expect(screen.getByText(/perderás tu cupo actual/)).toBeInTheDocument();
+    expect(screen.getByText(/permanecerán guardados/)).toBeInTheDocument();
+    expect(screen.getByText(/lista de espera por orden de solicitud/)).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent("Primero debes resolver tus citas futuras");
+    expect(screen.getByRole("link", { name: "Ver mis citas en la agenda" })).toHaveAttribute("href", "/appointments");
   });
 
   it("no muestra el diálogo cuando está cerrado", () => {

@@ -41,7 +41,7 @@ function getErrorMessage(error: unknown): string {
     }
 
     if (status === 429) {
-      return "Has superado el límite de intentos. Se ha aplicado una sanción temporal de 72 horas.";
+      return "Tu solicitud está suspendida temporalmente. Podrás volver a intentarlo más adelante.";
     }
 
     const body = error.response?.data;
@@ -325,7 +325,7 @@ export function PendingParticipation({
               </div>
               <span className="inline-flex items-center gap-1 rounded-md bg-availability px-2 py-1 text-sm font-semibold text-availability-foreground">
                 <Clock aria-hidden="true" className="size-4" />
-                Pendiente
+                En evaluación
               </span>
             </div>
             <div className="flex items-start gap-4 rounded-lg border border-availability bg-interaction p-4">
@@ -345,9 +345,12 @@ export function PendingParticipation({
             </div>
             <p className="flex min-w-0 items-start gap-3 text-sm text-text-secondary">
               <AtSign aria-hidden="true" className="mt-0.5 size-5 shrink-0" />
-              <span>
+              <span className="min-w-0 flex-1">
                 Correo institucional:{" "}
-                <span className="font-semibold break-all text-ink">
+                <span
+                  className="block max-w-full truncate font-semibold text-ink"
+                  title={request.email ?? undefined}
+                >
                   {request.email ?? "No disponible"}
                 </span>
               </span>
