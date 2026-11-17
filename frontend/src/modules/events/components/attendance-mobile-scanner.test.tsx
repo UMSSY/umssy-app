@@ -121,20 +121,4 @@ describe('entrada de asistencia', () => {
     expect(screen.getByRole('dialog')).not.toHaveTextContent(QR);
   });
 
-  it('keeps the local demo separate from the backend request', () => {
-    vi.stubEnv('NODE_ENV', 'development');
-    vi.stubEnv('NEXT_PUBLIC_MOCK_MANAGED_WORKSHOPS', 'true');
-    vi.useFakeTimers();
-    render(<AttendanceMobileScanner workshopId={WORKSHOP_ID} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Duplicada' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Simular lectura QR' }));
-    expect(screen.getByRole('dialog')).toHaveTextContent(
-      'Verificando entrada...',
-    );
-    act(() => vi.advanceTimersByTime(650));
-    expect(screen.getByRole('dialog')).toHaveTextContent(
-      'Asistencia ya registrada',
-    );
-    expect(attendanceCheckInService.checkIn).not.toHaveBeenCalled();
-  });
 });

@@ -8,14 +8,14 @@ export function useManagedWorkshops() {
   const session = useRegistrationSession();
   const query = useQuery({
     queryKey: ['events', 'managed', session],
-    queryFn: () => managedWorkshopsService.getMine(),
+    queryFn: ({ signal }) => managedWorkshopsService.getMine(signal, session),
     retry: false,
   });
 
   return {
     workshops: query.data ?? [],
     isLoading: query.isPending,
-    error: query.isError ? 'La consulta de Mis talleres aún no está disponible. Inténtalo más tarde.' : null,
+    error: query.isError ? 'No se pudieron cargar tus talleres. Revisa la conexión e inténtalo de nuevo.' : null,
     retry: () => { void query.refetch(); },
   };
 }
