@@ -16,19 +16,28 @@ import { PassCard } from "../components/pass-card";
 import { PassDetail } from "../components/pass-detail";
 import { MyPassesEmptyState } from "../components/my-passes-empty-state";
 import { FinishedRegistrationCard } from "../components/finished-registration-card";
+import { CancelRegistrationDialog } from "../components/cancel-registration-dialog";
 import { useMyPassesHistory } from "../hooks/use-my-passes";
 import { getHistoryErrorMessage } from "../utils/get-history-error-message";
-import { getRegistrationEventTimestamp } from "../utils/registration-format";
+import {
+  getRegistrationEventTimestamp,
+  isConfirmedRegistrationStatus,
+} from "../utils/registration-format";
 
 import type { MyPassesViewProps } from '../types/my-passes-view-props.types';
 
-export function MyPassesView({ onOpenWorkshopChat }: MyPassesViewProps = {}) {
+export function MyPassesView({
+  onOpenWorkshopChat,
+  onConfirmCancelRegistration,
+}: MyPassesViewProps = {}) {
   const [activeTab, setActiveTab] = useState("current");
   const { status, isOnline, passes: registrations, offlineQrTokens, lastUpdated, error, isConnectionError, removedSavedPasses, retry } = usePassesViewState(activeTab === "current");
   const isLoading = status === "loading";
   const offlineReason = isOnline ? undefined : OFFLINE_PASSES_TEXTS.requiresConnection;
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [cancelTargetId, setCancelTargetId] = useState<string | null>(null);
+  const [isCancelling, setIsCancelling] = useState(false);
   const history = useMyPassesHistory(activeTab === "history" && isOnline);
   const historyUnavailable = activeTab === "history" && !isOnline;
   const [now, setNow] = useState(Date.now);
@@ -36,19 +45,46 @@ export function MyPassesView({ onOpenWorkshopChat }: MyPassesViewProps = {}) {
     const closesAt = getRegistrationEventTimestamp(registration.date, registration.endTime);
     return !Number.isFinite(closesAt) || now < closesAt;
   });
+  const cancelTarget = cancelTargetId
+    ? currentRegistrations.find((item) => item.id === cancelTargetId) ?? null
+    : null;
+  const cancelTargetStart = cancelTarget
+    ? getRegistrationEventTimestamp(cancelTarget.date, cancelTarget.startTime)
+    : Number.NaN;
+  const canCancelTarget = Boolean(
+    cancelTarget &&
+      isConfirmedRegistrationStatus(cancelTarget.status) &&
+      Number.isFinite(cancelTargetStart) &&
+      now < cancelTargetStart,
+  );
+
   useEffect(() => {
-    const nextClose = registrations
+    const deadlines = registrations
       .map((registration) => getRegistrationEventTimestamp(registration.date, registration.endTime))
-      .filter((closesAt) => Number.isFinite(closesAt) && closesAt > now)
-      .sort((left, right) => left - right)[0];
-    if (nextClose === undefined) return;
+      .filter((closesAt) => Number.isFinite(closesAt) && closesAt > now);
+    if (canCancelTarget && Number.isFinite(cancelTargetStart) && cancelTargetStart > now) {
+      deadlines.push(cancelTargetStart);
+    }
+    const nextDeadline = deadlines.sort((left, right) => left - right)[0];
+    if (nextDeadline === undefined) return;
 
     const timer = window.setTimeout(
       () => setNow(Date.now()),
-      Math.min(2_147_483_647, Math.max(1, nextClose - Date.now())),
+      Math.min(2_147_483_647, Math.max(1, nextDeadline - now)),
     );
     return () => window.clearTimeout(timer);
-  }, [now, registrations]);
+  }, [canCancelTarget, cancelTargetStart, now, registrations]);
+
+  const handleConfirmCancel = async () => {
+    if (!cancelTarget || !canCancelTarget || !isOnline || isCancelling) return;
+    setIsCancelling(true);
+    try {
+      await onConfirmCancelRegistration?.(cancelTarget.id);
+      setCancelTargetId(null);
+    } finally {
+      setIsCancelling(false);
+    }
+  };
 
   const selected =
     currentRegistrations.find((item) => item.id === selectedId) ??
@@ -101,6 +137,8 @@ export function MyPassesView({ onOpenWorkshopChat }: MyPassesViewProps = {}) {
                     registrationId={item.id}
                     onOpenChat={onOpenWorkshopChat}
                     chatDisabledReason={offlineReason}
+                    onCancelRegistration={isOnline ? (id) => setCancelTargetId(id) : undefined}
+                    cancelDisabledReason={offlineReason}
                     isAvailableOffline={
                       status === 'live' && item.id in offlineQrTokens
                     }
@@ -155,6 +193,16 @@ export function MyPassesView({ onOpenWorkshopChat }: MyPassesViewProps = {}) {
           )}
         </TabsContent>
       </Tabs>
+
+      <CancelRegistrationDialog
+        open={canCancelTarget}
+        pending={isCancelling}
+        disabled={!isOnline}
+        onClose={() => {
+          if (!isCancelling) setCancelTargetId(null);
+        }}
+        onConfirm={handleConfirmCancel}
+      />
     </main>
   );
 }

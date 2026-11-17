@@ -2,12 +2,16 @@
 
 import { useEventTiming } from '../hooks/use-event-finished';
 import { formatEventLocation } from '../utils/format-event-location';
-import { formatRegistrationDate, getEffectiveRegistrationStatus } from '../utils/registration-format';
-import { formatRegistrationTimeRange } from '../utils/registration-format';
+import {
+  formatRegistrationDate,
+  formatRegistrationTimeRange,
+  getEffectiveRegistrationStatus,
+  isConfirmedRegistrationStatus,
+} from '../utils/registration-format';
 import { cn } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calendar, Clock, Check, MessageCircle } from 'lucide-react';
+import { Calendar, Clock, Check, MessageCircle, X } from 'lucide-react';
 import { OfflineAvailableBadge } from './offline-available-badge';
 
 import type { PassCardProps } from '../types/pass-card-props.types';
@@ -24,11 +28,17 @@ export function PassCard({
   onClick,
   onOpenChat,
   chatDisabledReason,
+  onCancelRegistration,
+  cancelDisabledReason,
   isAvailableOffline,
 }: PassCardProps) {
   const timing = useEventTiming({ date, startTime: startTime ?? '', endTime: endTime ?? '' });
   const effectiveStatus = getEffectiveRegistrationStatus(status, timing.isPast, timing.isInProgress);
   const timeRange = (startTime || endTime) ? formatRegistrationTimeRange(startTime ?? '', endTime ?? '') : null;
+  const canCancel =
+    isConfirmedRegistrationStatus(status) &&
+    timing.hasValidStart &&
+    !timing.hasStarted;
 
   return (
     <Card className="relative gap-0 border-0 bg-transparent p-0 shadow-none">
@@ -37,7 +47,8 @@ export function PassCard({
         type="button"
         aria-pressed={Boolean(isSelected)}
         onClick={onClick}
-        className={cn("flex h-auto w-full min-w-0 flex-col items-stretch gap-4 rounded-lg p-5 pb-20 text-left whitespace-normal transition-all",
+        className={cn(
+          "flex h-auto w-full min-w-0 flex-col items-stretch gap-4 rounded-lg p-5 pb-24 text-left whitespace-normal transition-all min-[360px]:pb-20",
           isSelected
             ? 'border border-accent bg-accent text-accent-foreground hover:bg-accent hover:text-accent-foreground'
             : 'border border-border bg-surface text-ink hover:border-border-strong'
@@ -91,19 +102,36 @@ export function PassCard({
           <span className="break-all">{registrationId}</span>
         </p>
       </Button>
-      <Button
-        variant={isSelected ? "secondary" : "default"}
-        size="default"
-        type="button"
-        className="absolute right-5 bottom-5"
-        aria-label="Abrir chat del taller"
-        title={chatDisabledReason ?? (onOpenChat ? 'Abrir chat del taller' : 'Chat del taller próximamente')}
-        disabled={!onOpenChat || Boolean(chatDisabledReason)}
-        onClick={() => onOpenChat?.(registrationId)}
-      >
-        <MessageCircle className="size-5" aria-hidden="true" />
-        <span>Chat</span>
-      </Button>
+
+      <div className="absolute right-5 bottom-5 flex flex-wrap items-center justify-end gap-2">
+        <Button
+          variant={isSelected ? "secondary" : "default"}
+          size="default"
+          type="button"
+          aria-label="Abrir chat del taller"
+          title={chatDisabledReason ?? (onOpenChat ? 'Abrir chat del taller' : 'Chat del taller próximamente')}
+          disabled={!onOpenChat || Boolean(chatDisabledReason)}
+          onClick={() => onOpenChat?.(registrationId)}
+        >
+          <MessageCircle className="size-5" aria-hidden="true" />
+          <span>Chat</span>
+        </Button>
+
+        {canCancel ? (
+          <Button
+            variant="destructive"
+            size="default"
+            type="button"
+            aria-label="Cancelar inscripción"
+            title={cancelDisabledReason ?? 'Cancelar inscripción'}
+            disabled={Boolean(cancelDisabledReason)}
+            onClick={() => onCancelRegistration?.(registrationId)}
+          >
+            <X className="size-4" aria-hidden="true" />
+            <span>Cancelar</span>
+          </Button>
+        ) : null}
+      </div>
     </Card>
   );
 }
