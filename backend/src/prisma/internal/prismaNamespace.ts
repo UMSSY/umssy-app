@@ -8794,10 +8794,7 @@ export type GlobalOmitConfig = {
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitOmit
   jobApplicationStatus?: Prisma.JobApplicationStatusOmit
   jobApplication?: Prisma.JobApplicationOmit
-<<<<<<< HEAD
-=======
   radarApplicationConsent?: Prisma.RadarApplicationConsentOmit
->>>>>>> epic/grupo-4-modulo-reclutadores
   surveyStatus?: Prisma.SurveyStatusOmit
   surveyQuestionType?: Prisma.SurveyQuestionTypeOmit
   surveyTargetAudience?: Prisma.SurveyTargetAudienceOmit
