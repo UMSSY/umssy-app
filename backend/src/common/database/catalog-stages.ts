@@ -1,3 +1,5 @@
+import { seedRadarDocumentSourceTypesCatalog } from '../../modules/radar-integration/seeds/radar-document-source-types-catalog.seed.js';
+import { seedRadarDocumentStatusesCatalog } from '../../modules/radar-integration/seeds/radar-document-statuses-catalog.seed.js';
 import { seedTechnicalAreasCatalog } from '../../modules/technical-areas/seeds/technical-areas-catalog.seed.js';
 import { seedOrientationTypesCatalog } from '../../modules/orientation-types/seeds/orientation-types-catalog.seed.js';
 import { seedMentorParticipationStatusesCatalog } from '../../modules/mentors/seeds/mentor-participation-statuses-catalog.seed.js';
@@ -27,6 +29,8 @@ import type { Prisma } from '../../prisma/client.js';
 export async function seedCatalogStages(
   tx: Prisma.TransactionClient,
 ): Promise<void> {
+  await seedRadarDocumentStatusesCatalog(tx);
+  await seedRadarDocumentSourceTypesCatalog(tx);
   await seedTechnicalAreasCatalog(tx);
   await seedOrientationTypesCatalog(tx);
   await seedMentorParticipationStatusesCatalog(tx);
