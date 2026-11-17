@@ -1,4 +1,4 @@
-import type { ReportType } from "./generated-report.types";
+import type { ReportType } from "./report-type.types";
 
 export interface ReportTypeFilterProps {
   value?: ReportType;

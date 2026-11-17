@@ -88,13 +88,9 @@ describe('UserSkillService', () => {
 
   describe('getUserSkills', () => {
     it('returns the skills of the token user', async () => {
-      userSkillRepository.findByUserId.mockResolvedValue([
-        { skill: python, source: 'manual', evidenceRefs: [] },
-      ]);
+      userSkillRepository.findByUserId.mockResolvedValue([{ skill: python }]);
 
-      await expect(service.getUserSkills(userId)).resolves.toEqual([
-        { ...python, origins: ['manual'] },
-      ]);
+      await expect(service.getUserSkills(userId)).resolves.toEqual([python]);
       expect(userSkillRepository.findByUserId).toHaveBeenCalledWith(userId);
     });
 
@@ -114,20 +110,13 @@ describe('UserSkillService', () => {
     it('replaces the skills of the token user', async () => {
       skillRepository.findByIds.mockResolvedValue([python, sql]);
       userSkillRepository.replaceForUser.mockResolvedValue([
-        { skill: python, source: 'manual', evidenceRefs: [] },
-        {
-          skill: sql,
-          source: 'manual',
-          evidenceRefs: ['work_experience:experience-1'],
-        },
+        { skill: python },
+        { skill: sql },
       ]);
 
       await expect(
         service.updateUserSkills(userId, { skillIds: [pythonId, sqlId] }),
-      ).resolves.toEqual([
-        { ...python, origins: ['manual'] },
-        { ...sql, origins: ['manual', 'experience'] },
-      ]);
+      ).resolves.toEqual([python, sql]);
       expect(userSkillRepository.replaceForUser).toHaveBeenCalledWith(userId, [
         pythonId,
         sqlId,
@@ -202,20 +191,13 @@ describe('UserSkillService', () => {
     it('appends skills without modifying existing sources and triggers analysis', async () => {
       skillRepository.findByIds.mockResolvedValue([sql]);
       userSkillRepository.addSkillsForUser.mockResolvedValue([
-        {
-          skill: python,
-          source: 'nlp',
-          evidenceRefs: [{ type: 'cv', id: 'cv-1' }],
-        },
-        { skill: sql, source: 'manual', evidenceRefs: [] },
+        { skill: python, source: 'nlp' },
+        { skill: sql, source: 'manual' },
       ]);
 
       const result = await service.addSkills(userId, { skillIds: [sqlId] });
 
-      expect(result).toEqual([
-        { ...python, origins: ['cv'] },
-        { ...sql, origins: ['manual'] },
-      ]);
+      expect(result).toEqual([python, sql]);
       expect(userSkillRepository.addSkillsForUser).toHaveBeenCalledWith(
         userId,
         [sqlId],

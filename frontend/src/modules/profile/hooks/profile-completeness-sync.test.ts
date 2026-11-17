@@ -87,7 +87,7 @@ vi.mock('../services/profile-skills-radar.service', () => ({
   profileSkillsRadarService: { analyzeSkills: vi.fn() },
 }));
 vi.mock('@/modules/matching/services/skills-analysis.service', () => ({
-  skillsAnalysisService: { previewExperience: vi.fn() },
+  skillsAnalysisService: { analyzeExperience: vi.fn() },
 }));
 
 const education = {

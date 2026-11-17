@@ -1,4 +1,3 @@
-import type { JobOfferSummary } from '../types/job-offer-summary.types.js';
 import { JobOfferMatchRepository } from '../repositories/job-offer-match.repository.js';
 import { Injectable } from '@nestjs/common';
 import {
@@ -191,18 +190,6 @@ export class JobOffersService {
 
   findScoringOffers(ids: string[]) {
     return this.jobOffersRepository.findScoringOffers(ids);
-  }
-
-  async findOfferSummary(id: string): Promise<JobOfferSummary | null> {
-    const offer = await this.jobOffersRepository.findOfferSummary(id);
-    return offer
-      ? {
-          id: offer.id,
-          title: offer.title,
-          companyId: offer.companyId,
-          companyName: offer.company.title,
-        }
-      : null;
   }
 
   findCompanyOffer(companyId: string, id: string) {

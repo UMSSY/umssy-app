@@ -21,13 +21,12 @@ describe('JobRecommendationsController', () => {
 
   it('uses the authenticated user for the feed', async () => {
     const service = {
-      recommendations: vi.fn().mockResolvedValue({ isProfileComplete: false, items: [] }),
+      recommendations: vi.fn().mockResolvedValue({ items: [] }),
     };
     const controller = new JobRecommendationsController(
       service as unknown as JobRecommendationsService,
     );
     await expect(controller.recommendations('user')).resolves.toEqual({
-      isProfileComplete: false,
       items: [],
     });
     expect(service.recommendations).toHaveBeenCalledWith('user');

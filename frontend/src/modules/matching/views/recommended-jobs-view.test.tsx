@@ -19,8 +19,6 @@ function setQueryState(state: {
       title: string;
       companyName: string;
       modality: string;
-      publishedAt: string;
-      expiresAt: string | null;
       score: number;
       matchedSkills: string[];
       skills: string[];
@@ -90,8 +88,6 @@ describe("HU-02A T2.4 - RecommendedJobsView", () => {
             title: "Vacante de prueba",
             companyName: "Empresa de prueba",
             modality: "Remoto",
-            publishedAt: "2026-11-10T15:00:00.000Z",
-            expiresAt: null,
             score: 90,
             matchedSkills: ["React"],
             skills: ["React", "SQL"],
@@ -133,8 +129,6 @@ describe("HU-02A T2.4 - RecommendedJobsView", () => {
             title: "Vacante de prueba",
             companyName: "Empresa de prueba",
             modality: "Remoto",
-            publishedAt: "2026-11-10T15:00:00.000Z",
-            expiresAt: null,
             score: 90,
             matchedSkills: ["React"],
             skills: ["React", "SQL"],

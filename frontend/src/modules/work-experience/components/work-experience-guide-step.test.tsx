@@ -8,11 +8,11 @@ import {
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MY_SKILLS_QUERY_KEY } from '@/modules/skills';
 import { renderWithQuery as render } from '@/shared/testing/render-with-query';
 import { workExperienceService } from '../services/work-experience.service';
 import type { WorkExperienceItem } from '../types/work-experience-item.types';
 import { WorkExperienceGuideStep } from './work-experience-guide-step';
+import { skillsAnalysisService } from '@/modules/matching/services/skills-analysis.service';
 
 vi.mock('../services/work-experience.service', () => ({
   workExperienceService: {
@@ -24,6 +24,7 @@ vi.mock('../services/work-experience.service', () => ({
 }));
 vi.mock('@/modules/matching/services/skills-analysis.service', () => ({
   skillsAnalysisService: {
+    analyzeExperience: vi.fn().mockResolvedValue({ skills: [] }),
     previewExperience: vi.fn().mockResolvedValue({ skills: [] }),
   },
 }));
@@ -49,8 +50,8 @@ function setupStep() {
     onDirtyChange: vi.fn(),
     onBusyChange: vi.fn(),
   };
-  const { client } = render(<WorkExperienceGuideStep {...callbacks} />);
-  return { user: userEvent.setup(), client, ...callbacks };
+  render(<WorkExperienceGuideStep {...callbacks} />);
+  return { user: userEvent.setup(), ...callbacks };
 }
 
 describe('WorkExperienceGuideStep', () => {
@@ -64,21 +65,21 @@ describe('WorkExperienceGuideStep', () => {
     vi.clearAllMocks();
   });
 
-  it('lets the guide continue after a saved write while the skills refresh is still pending', async () => {
-    let finishRefresh!: () => void;
-    const refreshing = new Promise<void>((resolve) => {
-      finishRefresh = resolve;
-    });
+  it('lets the guide continue after a saved write while NLP analysis is still pending', async () => {
+    let finishAnalysis!: (result: {
+      experienceId: string;
+      skills: [];
+      processingTimeMs: number;
+    }) => void;
+    vi.mocked(skillsAnalysisService.analyzeExperience).mockReturnValueOnce(
+      new Promise((resolve) => {
+        finishAnalysis = resolve;
+      }),
+    );
     vi.mocked(workExperienceService.updateWorkExperience).mockResolvedValueOnce(
       EXPERIENCE,
     );
-    const { user, client, onSaved, onBusyChange } = setupStep();
-    const invalidate = client.invalidateQueries.bind(client);
-    vi.spyOn(client, 'invalidateQueries').mockImplementation((filters) =>
-      filters?.queryKey === MY_SKILLS_QUERY_KEY
-        ? refreshing
-        : invalidate(filters),
-    );
+    const { user, onSaved, onBusyChange } = setupStep();
     await screen.findByRole('form', { name: 'Agregar experiencia' });
     await user.click(screen.getByRole('button', { name: 'Cancelar' }));
     await user.click(
@@ -96,15 +97,12 @@ describe('WorkExperienceGuideStep', () => {
       screen.getByRole('button', { name: 'Añadir experiencia' }),
     ).toBeEnabled();
     await act(async () => {
-      finishRefresh();
+      finishAnalysis({
+        experienceId: EXPERIENCE.id,
+        skills: [],
+        processingTimeMs: 100,
+      });
     });
-    await waitFor(() =>
-      expect(
-        screen.queryByText(
-          /Analizando las habilidades de tu experiencia en segundo plano/,
-        ),
-      ).not.toBeInTheDocument(),
-    );
   });
 
   it('saves an existing job inline before notifying the guide and keeps adding records available', async () => {

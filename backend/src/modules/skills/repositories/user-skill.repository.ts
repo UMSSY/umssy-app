@@ -5,11 +5,7 @@ import type { UserSkillRecord } from '../types/user-skill-record.type.js';
 import { planManualSkillChanges } from '../utils/plan-manual-skill-changes.js';
 import { skillSelect } from './skill.repository.js';
 
-const userSkillSelect = {
-  skill: { select: skillSelect },
-  source: true,
-  evidenceRefs: true,
-} as const;
+const userSkillSelect = { skill: { select: skillSelect } } as const;
 const sourceRowSelect = {
   id: true,
   skillId: true,

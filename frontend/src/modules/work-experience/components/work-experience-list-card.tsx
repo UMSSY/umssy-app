@@ -1,14 +1,11 @@
 'use client';
 
-import { useState } from 'react';
-import { Building2, ChevronDown, Pencil, Plus, Trash2 } from 'lucide-react';
+import { ArrowDown, Building2, Pencil, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SectionCard } from '@/modules/profile';
 import { cn } from '@/lib/utils';
-import type { WorkExperienceCompanyGroup } from '../types/work-experience-company-group.types';
 import type { WorkExperienceListCardProps } from '../types/work-experience-list-card-props.types';
 import { formatWorkPeriod } from '../utils/format-work-period';
-import { getCompanyGroupPeriod } from '../utils/get-company-group-period';
 import { groupWorkExperiences } from '../utils/group-work-experiences';
 
 export function WorkExperienceListCard({
@@ -21,17 +18,6 @@ export function WorkExperienceListCard({
   skillsByExperience = {},
 }: WorkExperienceListCardProps) {
   const groups = groupWorkExperiences(experiences);
-
-  const [expandedGroups, setExpandedGroups] = useState<
-    Record<string, boolean>
-  >({});
-
-  const toggleGroup = (groupId: string) => {
-    setExpandedGroups((previous) => ({
-      ...previous,
-      [groupId]: !previous[groupId],
-    }));
-  };
 
   return (
     <SectionCard
@@ -60,96 +46,76 @@ export function WorkExperienceListCard({
           Aún no registraste experiencia laboral.
         </p>
       ) : (
-        <ul className="divide-y divide-border">
-          {groups.map((group: WorkExperienceCompanyGroup) => {
-            const groupId = group.id;
-            const positionsId = `${groupId}-positions`;
-            const isCollapsible = group.positions.length > 1;
-            const isCollapsed = isCollapsible && !expandedGroups[groupId];
-            const headerClassName =
-              'flex h-auto w-full items-center gap-3 rounded-lg bg-interaction p-3 text-left whitespace-normal';
-            const headerContent = (
-              <>
-                <span
-                  aria-hidden="true"
-                  className="flex size-11 shrink-0 items-center justify-center rounded-md bg-background text-accent"
-                >
-                  <Building2 className="size-6" strokeWidth={1.5} />
-                </span>
+        <ul className="relative divide-y divide-border">
+          {groups.map((group) => (
+            <li
+              key={group.positions[0].id}
+              className="group/timeline relative flex items-start gap-4 py-6 first:pt-0 last:pb-0"
+            >
+              <span
+                aria-hidden="true"
+                className="absolute top-12 -bottom-6 left-6 border-l border-border-strong group-last/timeline:hidden"
+              />
 
-                <span className="min-w-0 flex-1">
-                  <span className="block wrap-anywhere text-ink">
+              <ArrowDown
+                aria-hidden="true"
+                className="absolute bottom-1 left-4 hidden size-4 text-accent group-last/timeline:block"
+              />
+
+              <div
+                aria-hidden="true"
+                className="relative flex size-12 shrink-0 items-center justify-center rounded-md bg-interaction text-accent"
+              >
+                <Building2 className="size-6" strokeWidth={1.5} />
+              </div>
+
+              <div className="min-w-0 flex-1">
+                {group.positions.length > 1 && (
+                  <h3 className="mb-5 text-lg font-bold wrap-anywhere text-ink">
                     {group.companyName}
-                  </span>
+                  </h3>
+                )}
 
-                  <span className="mt-1 block text-sm font-normal text-text-secondary">
-                    {group.positions.length}{' '}
-                    {group.positions.length === 1 ? 'cargo' : 'cargos'}
-                    {isCollapsible && (
-                      <>
-                        {' · '}
-                        {getCompanyGroupPeriod(group.positions)}
-                      </>
-                    )}
-                  </span>
-                </span>
-              </>
-            );
-
-            return (
-              <li key={groupId} className="py-5 first:pt-0 last:pb-0">
-                <h3 className="text-base font-bold">
-                  {isCollapsible ? (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      className={cn(
-                        headerClassName,
-                        'transition-colors hover:bg-interaction/80',
-                      )}
-                      aria-expanded={!isCollapsed}
-                      aria-controls={positionsId}
-                      onClick={() => toggleGroup(groupId)}
-                    >
-                      {headerContent}
-
-                      <ChevronDown
-                        aria-hidden="true"
-                        className={cn(
-                          'size-5 shrink-0 text-text-secondary transition-transform',
-                          !isCollapsed && 'rotate-180',
-                        )}
-                      />
-                    </Button>
-                  ) : (
-                    <span className={headerClassName}>{headerContent}</span>
-                  )}
-                </h3>
-
-                <ol
-                  id={positionsId}
-                  hidden={isCollapsed}
-                  className="mt-5 ml-5 space-y-6 border-l border-border-strong"
-                >
+                <ol className="space-y-5">
                   {group.positions.map((experience) => {
+                    const Heading =
+                      group.positions.length > 1 ? 'h4' : 'h3';
+
                     const skillsList =
                       skillsByExperience[experience.id] ?? [];
 
                     return (
                       <li
                         key={experience.id}
-                        className="relative min-w-0 pl-5"
+                        className={cn(
+                          'group/position relative min-w-0',
+                          group.positions.length > 1 && 'ml-2 pl-6',
+                        )}
                       >
-                        <span
-                          aria-hidden="true"
-                          className="absolute top-2 left-0 size-2.5 -translate-x-1/2 rounded-full border-2 border-background bg-accent"
-                        />
+                        {group.positions.length > 1 && (
+                          <>
+                            <span
+                              aria-hidden="true"
+                              className="absolute top-2 -bottom-7 left-0 border-l border-border-strong group-last/position:hidden"
+                            />
+                            <span
+                              aria-hidden="true"
+                              className="absolute top-2 -left-1 size-2 rounded-full bg-accent"
+                            />
+                          </>
+                        )}
 
-                        <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-start justify-between gap-4">
                           <div className="min-w-0 flex-1">
-                            <h4 className="text-base font-bold wrap-anywhere text-ink">
+                            <Heading className="text-base font-bold wrap-anywhere text-ink">
                               {experience.position}
-                            </h4>
+                            </Heading>
+
+                            {group.positions.length === 1 && (
+                              <p className="mt-1 text-sm wrap-anywhere text-ink-soft">
+                                {experience.companyName}
+                              </p>
+                            )}
 
                             <p className="mt-1 text-sm text-text-secondary">
                               {formatWorkPeriod(
@@ -169,7 +135,10 @@ export function WorkExperienceListCard({
                               disabled={isBusy || !onEdit}
                               onClick={() => onEdit?.(experience)}
                             >
-                              <Pencil className="size-4" aria-hidden="true" />
+                              <Pencil
+                                className="size-4"
+                                aria-hidden="true"
+                              />
                             </Button>
 
                             <Button
@@ -180,7 +149,10 @@ export function WorkExperienceListCard({
                               disabled={isBusy || !onDelete}
                               onClick={() => onDelete?.(experience)}
                             >
-                              <Trash2 className="size-4" aria-hidden="true" />
+                              <Trash2
+                                className="size-4"
+                                aria-hidden="true"
+                              />
                             </Button>
                           </div>
                         </div>
@@ -200,7 +172,7 @@ export function WorkExperienceListCard({
                             {skillsList.map((skill) => (
                               <span
                                 key={skill.toLowerCase()}
-                                className="inline-flex items-center rounded-full border border-transparent bg-availability px-2.5 py-0.5 text-xs font-medium text-availability-foreground"
+                                className="inline-flex items-center rounded-full border border-border bg-interaction px-2.5 py-0.5 text-xs font-medium text-ink"
                               >
                                 {skill}
                               </span>
@@ -211,9 +183,9 @@ export function WorkExperienceListCard({
                     );
                   })}
                 </ol>
-              </li>
-            );
-          })}
+              </div>
+            </li>
+          ))}
         </ul>
       )}
     </SectionCard>

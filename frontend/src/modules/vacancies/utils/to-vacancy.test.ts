@@ -16,7 +16,6 @@ const OFFER: PublishedJobOffer = {
   languages: "Español, Inglés",
   locationUrl: "https://maps.app.goo.gl/abc",
   expiresAt: null,
-  publishedAt: "2026-10-13T15:00:00.000Z",
   createdAt: "2026-10-12T15:00:00.000Z",
   company: { id: "company-1", name: "TechBolivia S.R.L." },
   skills: [{ id: "skill-1", name: "Docker" }, { id: "skill-2", name: "Kubernetes" }],
@@ -40,8 +39,6 @@ describe("toVacancy", () => {
       languages: "Español, Inglés",
       positionsAvailable: 2,
       locationUrl: "https://maps.app.goo.gl/abc",
-      publishedAt: "2026-10-13T15:00:00.000Z",
-      expiresAt: null,
     });
   });
 });

@@ -28,7 +28,6 @@ import { CandidateProfileService } from './services/candidate-profile.service.js
 import { JobApplicationMapper } from './mappers/job-application.mapper.js';
 import { JobRecommendationsController } from './controllers/job-recommendations.controller.js';
 import { JobRecommendationsService } from './services/job-recommendations.service.js';
-import { RequirementsController } from './controllers/requirements.controller.js'; 
 
 @Module({
   imports: [
@@ -46,7 +45,6 @@ import { RequirementsController } from './controllers/requirements.controller.js
     JobApplicationsController,
     JobRecommendationsController,
     CompanyJobApplicantsController,
-    RequirementsController,
   ],
   providers: [
     JobApplicationsService,

@@ -13,8 +13,6 @@ export interface JobMatchResponse {
   companyName: string;
   modality: string;
   description: string;
-  publishedAt: string;
-  expiresAt: string | null;
   score: number;
   hasPendingRequirements: boolean;
   requirements: CategorizedRequirement[];

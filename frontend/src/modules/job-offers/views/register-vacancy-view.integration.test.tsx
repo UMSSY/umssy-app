@@ -15,17 +15,6 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 vi.mock("@/shared/services/api-client", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/shared/services/api-client")>()), apiClient: { get: vi.fn(), post: vi.fn(), put: vi.fn() } }));
-vi.mock("../hooks/use-requirements-skills-preview", () => {
-  const none: never[] = [];
-  return {
-    useRequirementsSkillsPreview: () => ({
-      detectedSkills: none,
-      processingTimeMs: undefined,
-      isAnalyzing: false,
-      isError: false,
-    }),
-  };
-});
 vi.mock("@/components/ui/select", () => ({
   Select: ({
     children,
@@ -95,18 +84,15 @@ function fillInformation() {
   click("Continuar");
 }
 
-function addSkillFromDialog(search: string, name: string) {
-  click("+ Añadir habilidad");
-  fireEvent.change(screen.getByLabelText(/Buscar tecnología/), { target: { value: search } });
-  click(name);
-  click("Añadir habilidad");
-}
-
 async function fillRequirements() {
-  await screen.findByRole("button", { name: "+ Añadir habilidad" });
+  await screen.findByRole("button", { name: "Docker" });
   type("description", "Buscamos un DevOps con Docker y Kubernetes.");
-  addSkillFromDialog("docker", "Docker");
-  addSkillFromDialog("kuber", "Kubernetes");
+  click("Docker");
+  click("+ Añadir habilidad");
+  fireEvent.change(screen.getByLabelText(/Buscar tecnología/), { target: { value: "kuber" } });
+  click("Kubernetes");
+  click("Añadir habilidad");
+  await waitFor(() => expect(screen.queryByText("Buscar habilidad")).not.toBeInTheDocument());
   click("Continuar");
 }
 
@@ -162,11 +148,11 @@ describe("Registrar vacante: wizard completo conectado al backend", () => {
     await goToPreview();
 
     click("Anterior");
-    await screen.findByRole("button", { name: "Quitar Docker" });
+    await screen.findByRole("button", { name: "Docker" });
 
-    expect(screen.getByRole("button", { name: "Quitar Docker" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Quitar Kubernetes" })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Quitar Python" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Docker" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "Kubernetes" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "Python" })).toHaveAttribute("aria-pressed", "false");
     expect(byId("description").value).toBe("Buscamos un DevOps con Docker y Kubernetes.");
   });
 
@@ -237,7 +223,7 @@ describe("Registrar vacante: wizard completo conectado al backend", () => {
   it("paso 2: exige descripción y al menos una tecnología", async () => {
     renderWithQuery(<RegisterVacancyView />);
     fillInformation();
-    await screen.findByRole("button", { name: "+ Añadir habilidad" });
+    await screen.findByRole("button", { name: "Docker" });
 
     click("Continuar");
 
@@ -300,7 +286,7 @@ describe("Registrar vacante: wizard completo conectado al backend", () => {
     );
     expect(byId("title").value).toBe("DevOps Senior");
     click("Continuar");
-    await screen.findByRole("button", { name: "Quitar Docker" });
+    await screen.findByRole("button", { name: "Docker" });
     click("Continuar");
     await screen.findByText("Revisa tu publicación");
     click("Confirmar edición");

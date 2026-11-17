@@ -9,6 +9,8 @@ import type { ProfileSkillRowResponse } from '../responses/profile-skill-row.res
 import type { SkillAnalysisCatalogResponse } from '../responses/skill-analysis-catalog.response.js';
 import type { SkillEvidenceRefPayload } from '../types/skill-evidence-ref-payload.type.js';
 import type { SkillReconciliationPayload } from '../types/skill-reconciliation-payload.type.js';
+import { USER_SKILL_SUMMARY_SELECT } from '../constants/user-skill-summary-select.constants.js';
+import type { UserSkillSummaryRecord } from '../types/user-skill-summary-record.type.js';
 
 export const profileSkillRowSelect = {
   id: true,
@@ -140,6 +142,15 @@ export class SkillAnalysisRepository {
         skipDuplicates: true,
       });
     }
+  }
+
+  findSkillSummariesByUserIds(
+    userIds: string[],
+  ): Promise<UserSkillSummaryRecord[]> {
+    return this.prisma.userSkill.findMany({
+      where: { userId: { in: userIds } },
+      select: USER_SKILL_SUMMARY_SELECT,
+    });
   }
 
   findApprovedRecruitmentReferences(userId: string, ids: string[]) {

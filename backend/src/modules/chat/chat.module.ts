@@ -63,7 +63,7 @@ import { ChatGateway } from './gateways/chat.gateway.js';
     EducationsModule,
     SkillsModule,
     UsersModule,
-    forwardRef(() => ApplicationsModule),
+    ApplicationsModule,
     forwardRef(() => NotificationsModule),
   ],
   controllers: [
