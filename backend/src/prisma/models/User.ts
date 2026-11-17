@@ -281,6 +281,7 @@ export type UserWhereInput = {
   certifications?: Prisma.CertificationListRelationFilter
   cvFiles?: Prisma.UserCvFileListRelationFilter
   skillProcessingState?: Prisma.XOR<Prisma.ProfileSkillProcessingStateNullableScalarRelationFilter, Prisma.ProfileSkillProcessingStateWhereInput> | null
+  refreshTokens?: Prisma.RefreshTokenListRelationFilter
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaListRelationFilter
   mentorOrientationTypes?: Prisma.MentorOrientationTypeListRelationFilter
   availabilityBlocks?: Prisma.AvailabilityBlockListRelationFilter
@@ -312,6 +313,7 @@ export type UserWhereInput = {
   sentRequests?: Prisma.ConnectionRequestListRelationFilter
   receivedRequests?: Prisma.ConnectionRequestListRelationFilter
   passwordResetOtps?: Prisma.PasswordResetOtpListRelationFilter
+  passwordHistories?: Prisma.PasswordHistoryListRelationFilter
   auditEvents?: Prisma.AuditEventListRelationFilter
   revertedValidations?: Prisma.DocumentValidationListRelationFilter
   jobApplications?: Prisma.JobApplicationListRelationFilter
@@ -326,6 +328,9 @@ export type UserWhereInput = {
   receivedNotifications?: Prisma.NotificationListRelationFilter
   triggeredNotifications?: Prisma.NotificationListRelationFilter
   pushSubscriptions?: Prisma.PushSubscriptionListRelationFilter
+  openedCompanyRequests?: Prisma.CompanyAccessRequestListRelationFilter
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestListRelationFilter
+  approvedCompanyAccount?: Prisma.XOR<Prisma.CompanyAccessRequestNullableScalarRelationFilter, Prisma.CompanyAccessRequestWhereInput> | null
 }
 
 export type UserOrderByWithRelationInput = {
@@ -356,6 +361,7 @@ export type UserOrderByWithRelationInput = {
   certifications?: Prisma.CertificationOrderByRelationAggregateInput
   cvFiles?: Prisma.UserCvFileOrderByRelationAggregateInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateOrderByWithRelationInput
+  refreshTokens?: Prisma.RefreshTokenOrderByRelationAggregateInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaOrderByRelationAggregateInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeOrderByRelationAggregateInput
   availabilityBlocks?: Prisma.AvailabilityBlockOrderByRelationAggregateInput
@@ -387,6 +393,7 @@ export type UserOrderByWithRelationInput = {
   sentRequests?: Prisma.ConnectionRequestOrderByRelationAggregateInput
   receivedRequests?: Prisma.ConnectionRequestOrderByRelationAggregateInput
   passwordResetOtps?: Prisma.PasswordResetOtpOrderByRelationAggregateInput
+  passwordHistories?: Prisma.PasswordHistoryOrderByRelationAggregateInput
   auditEvents?: Prisma.AuditEventOrderByRelationAggregateInput
   revertedValidations?: Prisma.DocumentValidationOrderByRelationAggregateInput
   jobApplications?: Prisma.JobApplicationOrderByRelationAggregateInput
@@ -401,6 +408,9 @@ export type UserOrderByWithRelationInput = {
   receivedNotifications?: Prisma.NotificationOrderByRelationAggregateInput
   triggeredNotifications?: Prisma.NotificationOrderByRelationAggregateInput
   pushSubscriptions?: Prisma.PushSubscriptionOrderByRelationAggregateInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestOrderByRelationAggregateInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestOrderByRelationAggregateInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestOrderByWithRelationInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -434,6 +444,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   certifications?: Prisma.CertificationListRelationFilter
   cvFiles?: Prisma.UserCvFileListRelationFilter
   skillProcessingState?: Prisma.XOR<Prisma.ProfileSkillProcessingStateNullableScalarRelationFilter, Prisma.ProfileSkillProcessingStateWhereInput> | null
+  refreshTokens?: Prisma.RefreshTokenListRelationFilter
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaListRelationFilter
   mentorOrientationTypes?: Prisma.MentorOrientationTypeListRelationFilter
   availabilityBlocks?: Prisma.AvailabilityBlockListRelationFilter
@@ -465,6 +476,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   sentRequests?: Prisma.ConnectionRequestListRelationFilter
   receivedRequests?: Prisma.ConnectionRequestListRelationFilter
   passwordResetOtps?: Prisma.PasswordResetOtpListRelationFilter
+  passwordHistories?: Prisma.PasswordHistoryListRelationFilter
   auditEvents?: Prisma.AuditEventListRelationFilter
   revertedValidations?: Prisma.DocumentValidationListRelationFilter
   jobApplications?: Prisma.JobApplicationListRelationFilter
@@ -479,6 +491,9 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   receivedNotifications?: Prisma.NotificationListRelationFilter
   triggeredNotifications?: Prisma.NotificationListRelationFilter
   pushSubscriptions?: Prisma.PushSubscriptionListRelationFilter
+  openedCompanyRequests?: Prisma.CompanyAccessRequestListRelationFilter
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestListRelationFilter
+  approvedCompanyAccount?: Prisma.XOR<Prisma.CompanyAccessRequestNullableScalarRelationFilter, Prisma.CompanyAccessRequestWhereInput> | null
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -551,6 +566,7 @@ export type UserCreateInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -582,6 +598,7 @@ export type UserCreateInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -596,6 +613,9 @@ export type UserCreateInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -624,6 +644,7 @@ export type UserUncheckedCreateInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -655,6 +676,7 @@ export type UserUncheckedCreateInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -669,6 +691,9 @@ export type UserUncheckedCreateInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUpdateInput = {
@@ -697,6 +722,7 @@ export type UserUpdateInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -728,6 +754,7 @@ export type UserUpdateInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -742,6 +769,9 @@ export type UserUpdateInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -770,6 +800,7 @@ export type UserUncheckedUpdateInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -801,6 +832,7 @@ export type UserUncheckedUpdateInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -815,6 +847,9 @@ export type UserUncheckedUpdateInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -1535,6 +1570,20 @@ export type UserUpdateOneRequiredWithoutPresenceNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPresenceInput, Prisma.UserUpdateWithoutPresenceInput>, Prisma.UserUncheckedUpdateWithoutPresenceInput>
 }
 
+export type UserCreateNestedOneWithoutPasswordHistoriesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPasswordHistoriesInput, Prisma.UserUncheckedCreateWithoutPasswordHistoriesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPasswordHistoriesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutPasswordHistoriesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPasswordHistoriesInput, Prisma.UserUncheckedCreateWithoutPasswordHistoriesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPasswordHistoriesInput
+  upsert?: Prisma.UserUpsertWithoutPasswordHistoriesInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPasswordHistoriesInput, Prisma.UserUpdateWithoutPasswordHistoriesInput>, Prisma.UserUncheckedUpdateWithoutPasswordHistoriesInput>
+}
+
 export type UserCreateNestedOneWithoutPasswordResetOtpsInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutPasswordResetOtpsInput, Prisma.UserUncheckedCreateWithoutPasswordResetOtpsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutPasswordResetOtpsInput
@@ -1811,6 +1860,20 @@ export type UserUpdateOneRequiredWithoutPushSubscriptionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPushSubscriptionsInput, Prisma.UserUpdateWithoutPushSubscriptionsInput>, Prisma.UserUncheckedUpdateWithoutPushSubscriptionsInput>
 }
 
+export type UserCreateNestedOneWithoutRefreshTokensInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutRefreshTokensInput, Prisma.UserUncheckedCreateWithoutRefreshTokensInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutRefreshTokensInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutRefreshTokensNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutRefreshTokensInput, Prisma.UserUncheckedCreateWithoutRefreshTokensInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutRefreshTokensInput
+  upsert?: Prisma.UserUpsertWithoutRefreshTokensInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutRefreshTokensInput, Prisma.UserUpdateWithoutRefreshTokensInput>, Prisma.UserUncheckedUpdateWithoutRefreshTokensInput>
+}
+
 export type UserCreateNestedOneWithoutNotificationPreferencesInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutNotificationPreferencesInput, Prisma.UserUncheckedCreateWithoutNotificationPreferencesInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutNotificationPreferencesInput
@@ -1823,6 +1886,54 @@ export type UserUpdateOneRequiredWithoutNotificationPreferencesNestedInput = {
   upsert?: Prisma.UserUpsertWithoutNotificationPreferencesInput
   connect?: Prisma.UserWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutNotificationPreferencesInput, Prisma.UserUpdateWithoutNotificationPreferencesInput>, Prisma.UserUncheckedUpdateWithoutNotificationPreferencesInput>
+}
+
+export type UserCreateNestedOneWithoutOpenedCompanyRequestsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutOpenedCompanyRequestsInput, Prisma.UserUncheckedCreateWithoutOpenedCompanyRequestsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutOpenedCompanyRequestsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutReviewedCompanyRequestsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutReviewedCompanyRequestsInput, Prisma.UserUncheckedCreateWithoutReviewedCompanyRequestsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutReviewedCompanyRequestsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutApprovedCompanyAccountInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutApprovedCompanyAccountInput, Prisma.UserUncheckedCreateWithoutApprovedCompanyAccountInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutApprovedCompanyAccountInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutOpenedCompanyRequestsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutOpenedCompanyRequestsInput, Prisma.UserUncheckedCreateWithoutOpenedCompanyRequestsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutOpenedCompanyRequestsInput
+  upsert?: Prisma.UserUpsertWithoutOpenedCompanyRequestsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutOpenedCompanyRequestsInput, Prisma.UserUpdateWithoutOpenedCompanyRequestsInput>, Prisma.UserUncheckedUpdateWithoutOpenedCompanyRequestsInput>
+}
+
+export type UserUpdateOneWithoutReviewedCompanyRequestsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutReviewedCompanyRequestsInput, Prisma.UserUncheckedCreateWithoutReviewedCompanyRequestsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutReviewedCompanyRequestsInput
+  upsert?: Prisma.UserUpsertWithoutReviewedCompanyRequestsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutReviewedCompanyRequestsInput, Prisma.UserUpdateWithoutReviewedCompanyRequestsInput>, Prisma.UserUncheckedUpdateWithoutReviewedCompanyRequestsInput>
+}
+
+export type UserUpdateOneWithoutApprovedCompanyAccountNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutApprovedCompanyAccountInput, Prisma.UserUncheckedCreateWithoutApprovedCompanyAccountInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutApprovedCompanyAccountInput
+  upsert?: Prisma.UserUpsertWithoutApprovedCompanyAccountInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutApprovedCompanyAccountInput, Prisma.UserUpdateWithoutApprovedCompanyAccountInput>, Prisma.UserUncheckedUpdateWithoutApprovedCompanyAccountInput>
 }
 
 export type UserCreateWithoutCityInput = {
@@ -1850,6 +1961,7 @@ export type UserCreateWithoutCityInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -1881,6 +1993,7 @@ export type UserCreateWithoutCityInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -1895,6 +2008,9 @@ export type UserCreateWithoutCityInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutCityInput = {
@@ -1922,6 +2038,7 @@ export type UserUncheckedCreateWithoutCityInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -1953,6 +2070,7 @@ export type UserUncheckedCreateWithoutCityInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -1967,6 +2085,9 @@ export type UserUncheckedCreateWithoutCityInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutCityInput = {
@@ -2042,6 +2163,7 @@ export type UserCreateWithoutCompanyInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -2073,6 +2195,7 @@ export type UserCreateWithoutCompanyInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -2087,6 +2210,9 @@ export type UserCreateWithoutCompanyInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutCompanyInput = {
@@ -2114,6 +2240,7 @@ export type UserUncheckedCreateWithoutCompanyInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -2145,6 +2272,7 @@ export type UserUncheckedCreateWithoutCompanyInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -2159,6 +2287,9 @@ export type UserUncheckedCreateWithoutCompanyInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutCompanyInput = {
@@ -2212,6 +2343,7 @@ export type UserCreateWithoutRolesInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -2243,6 +2375,7 @@ export type UserCreateWithoutRolesInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -2257,6 +2390,9 @@ export type UserCreateWithoutRolesInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutRolesInput = {
@@ -2284,6 +2420,7 @@ export type UserUncheckedCreateWithoutRolesInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -2315,6 +2452,7 @@ export type UserUncheckedCreateWithoutRolesInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -2329,6 +2467,9 @@ export type UserUncheckedCreateWithoutRolesInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutRolesInput = {
@@ -2372,6 +2513,7 @@ export type UserUpdateWithoutRolesInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -2403,6 +2545,7 @@ export type UserUpdateWithoutRolesInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -2417,6 +2560,9 @@ export type UserUpdateWithoutRolesInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRolesInput = {
@@ -2444,6 +2590,7 @@ export type UserUncheckedUpdateWithoutRolesInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -2475,6 +2622,7 @@ export type UserUncheckedUpdateWithoutRolesInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -2489,6 +2637,9 @@ export type UserUncheckedUpdateWithoutRolesInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutEducationsInput = {
@@ -2516,6 +2667,7 @@ export type UserCreateWithoutEducationsInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -2547,6 +2699,7 @@ export type UserCreateWithoutEducationsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -2561,6 +2714,9 @@ export type UserCreateWithoutEducationsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutEducationsInput = {
@@ -2588,6 +2744,7 @@ export type UserUncheckedCreateWithoutEducationsInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -2619,6 +2776,7 @@ export type UserUncheckedCreateWithoutEducationsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -2633,6 +2791,9 @@ export type UserUncheckedCreateWithoutEducationsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutEducationsInput = {
@@ -2676,6 +2837,7 @@ export type UserUpdateWithoutEducationsInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -2707,6 +2869,7 @@ export type UserUpdateWithoutEducationsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -2721,6 +2884,9 @@ export type UserUpdateWithoutEducationsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEducationsInput = {
@@ -2748,6 +2914,7 @@ export type UserUncheckedUpdateWithoutEducationsInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -2779,6 +2946,7 @@ export type UserUncheckedUpdateWithoutEducationsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -2793,6 +2961,9 @@ export type UserUncheckedUpdateWithoutEducationsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutWorkExperiencesInput = {
@@ -2820,6 +2991,7 @@ export type UserCreateWithoutWorkExperiencesInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -2851,6 +3023,7 @@ export type UserCreateWithoutWorkExperiencesInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -2865,6 +3038,9 @@ export type UserCreateWithoutWorkExperiencesInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutWorkExperiencesInput = {
@@ -2892,6 +3068,7 @@ export type UserUncheckedCreateWithoutWorkExperiencesInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -2923,6 +3100,7 @@ export type UserUncheckedCreateWithoutWorkExperiencesInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -2937,6 +3115,9 @@ export type UserUncheckedCreateWithoutWorkExperiencesInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutWorkExperiencesInput = {
@@ -2980,6 +3161,7 @@ export type UserUpdateWithoutWorkExperiencesInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -3011,6 +3193,7 @@ export type UserUpdateWithoutWorkExperiencesInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -3025,6 +3208,9 @@ export type UserUpdateWithoutWorkExperiencesInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutWorkExperiencesInput = {
@@ -3052,6 +3238,7 @@ export type UserUncheckedUpdateWithoutWorkExperiencesInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -3083,6 +3270,7 @@ export type UserUncheckedUpdateWithoutWorkExperiencesInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -3097,6 +3285,9 @@ export type UserUncheckedUpdateWithoutWorkExperiencesInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutUserSkillsInput = {
@@ -3124,6 +3315,7 @@ export type UserCreateWithoutUserSkillsInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -3155,6 +3347,7 @@ export type UserCreateWithoutUserSkillsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -3169,6 +3362,9 @@ export type UserCreateWithoutUserSkillsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutUserSkillsInput = {
@@ -3196,6 +3392,7 @@ export type UserUncheckedCreateWithoutUserSkillsInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -3227,6 +3424,7 @@ export type UserUncheckedCreateWithoutUserSkillsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -3241,6 +3439,9 @@ export type UserUncheckedCreateWithoutUserSkillsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutUserSkillsInput = {
@@ -3284,6 +3485,7 @@ export type UserUpdateWithoutUserSkillsInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -3315,6 +3517,7 @@ export type UserUpdateWithoutUserSkillsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -3329,6 +3532,9 @@ export type UserUpdateWithoutUserSkillsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutUserSkillsInput = {
@@ -3356,6 +3562,7 @@ export type UserUncheckedUpdateWithoutUserSkillsInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -3387,6 +3594,7 @@ export type UserUncheckedUpdateWithoutUserSkillsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -3401,6 +3609,9 @@ export type UserUncheckedUpdateWithoutUserSkillsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutCertificationsInput = {
@@ -3428,6 +3639,7 @@ export type UserCreateWithoutCertificationsInput = {
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -3459,6 +3671,7 @@ export type UserCreateWithoutCertificationsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -3473,6 +3686,9 @@ export type UserCreateWithoutCertificationsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutCertificationsInput = {
@@ -3500,6 +3716,7 @@ export type UserUncheckedCreateWithoutCertificationsInput = {
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -3531,6 +3748,7 @@ export type UserUncheckedCreateWithoutCertificationsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -3545,6 +3763,9 @@ export type UserUncheckedCreateWithoutCertificationsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutCertificationsInput = {
@@ -3588,6 +3809,7 @@ export type UserUpdateWithoutCertificationsInput = {
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -3619,6 +3841,7 @@ export type UserUpdateWithoutCertificationsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -3633,6 +3856,9 @@ export type UserUpdateWithoutCertificationsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCertificationsInput = {
@@ -3660,6 +3886,7 @@ export type UserUncheckedUpdateWithoutCertificationsInput = {
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -3691,6 +3918,7 @@ export type UserUncheckedUpdateWithoutCertificationsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -3705,6 +3933,9 @@ export type UserUncheckedUpdateWithoutCertificationsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutCvFilesInput = {
@@ -3732,6 +3963,7 @@ export type UserCreateWithoutCvFilesInput = {
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -3763,6 +3995,7 @@ export type UserCreateWithoutCvFilesInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -3777,6 +4010,9 @@ export type UserCreateWithoutCvFilesInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutCvFilesInput = {
@@ -3804,6 +4040,7 @@ export type UserUncheckedCreateWithoutCvFilesInput = {
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -3835,6 +4072,7 @@ export type UserUncheckedCreateWithoutCvFilesInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -3849,6 +4087,9 @@ export type UserUncheckedCreateWithoutCvFilesInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutCvFilesInput = {
@@ -3892,6 +4133,7 @@ export type UserUpdateWithoutCvFilesInput = {
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -3923,6 +4165,7 @@ export type UserUpdateWithoutCvFilesInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -3937,6 +4180,9 @@ export type UserUpdateWithoutCvFilesInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCvFilesInput = {
@@ -3964,6 +4210,7 @@ export type UserUncheckedUpdateWithoutCvFilesInput = {
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -3995,6 +4242,7 @@ export type UserUncheckedUpdateWithoutCvFilesInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -4009,6 +4257,9 @@ export type UserUncheckedUpdateWithoutCvFilesInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutSkillProcessingStateInput = {
@@ -4036,6 +4287,7 @@ export type UserCreateWithoutSkillProcessingStateInput = {
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -4067,6 +4319,7 @@ export type UserCreateWithoutSkillProcessingStateInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -4081,6 +4334,9 @@ export type UserCreateWithoutSkillProcessingStateInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutSkillProcessingStateInput = {
@@ -4108,6 +4364,7 @@ export type UserUncheckedCreateWithoutSkillProcessingStateInput = {
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -4139,6 +4396,7 @@ export type UserUncheckedCreateWithoutSkillProcessingStateInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -4153,6 +4411,9 @@ export type UserUncheckedCreateWithoutSkillProcessingStateInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutSkillProcessingStateInput = {
@@ -4196,6 +4457,7 @@ export type UserUpdateWithoutSkillProcessingStateInput = {
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -4227,6 +4489,7 @@ export type UserUpdateWithoutSkillProcessingStateInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -4241,6 +4504,9 @@ export type UserUpdateWithoutSkillProcessingStateInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSkillProcessingStateInput = {
@@ -4268,6 +4534,7 @@ export type UserUncheckedUpdateWithoutSkillProcessingStateInput = {
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -4299,6 +4566,7 @@ export type UserUncheckedUpdateWithoutSkillProcessingStateInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -4313,6 +4581,9 @@ export type UserUncheckedUpdateWithoutSkillProcessingStateInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutMentorTechnicalAreasInput = {
@@ -4341,6 +4612,7 @@ export type UserCreateWithoutMentorTechnicalAreasInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
   blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutMentorInput
@@ -4371,6 +4643,7 @@ export type UserCreateWithoutMentorTechnicalAreasInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -4385,6 +4658,9 @@ export type UserCreateWithoutMentorTechnicalAreasInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutMentorTechnicalAreasInput = {
@@ -4413,6 +4689,7 @@ export type UserUncheckedCreateWithoutMentorTechnicalAreasInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
   blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutMentorInput
@@ -4443,6 +4720,7 @@ export type UserUncheckedCreateWithoutMentorTechnicalAreasInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -4457,6 +4735,9 @@ export type UserUncheckedCreateWithoutMentorTechnicalAreasInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutMentorTechnicalAreasInput = {
@@ -4501,6 +4782,7 @@ export type UserUpdateWithoutMentorTechnicalAreasInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
   blockedDates?: Prisma.BlockedDateUpdateManyWithoutMentorNestedInput
@@ -4531,6 +4813,7 @@ export type UserUpdateWithoutMentorTechnicalAreasInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -4545,6 +4828,9 @@ export type UserUpdateWithoutMentorTechnicalAreasInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMentorTechnicalAreasInput = {
@@ -4573,6 +4859,7 @@ export type UserUncheckedUpdateWithoutMentorTechnicalAreasInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
   blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutMentorNestedInput
@@ -4603,6 +4890,7 @@ export type UserUncheckedUpdateWithoutMentorTechnicalAreasInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -4617,6 +4905,9 @@ export type UserUncheckedUpdateWithoutMentorTechnicalAreasInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutMentorOrientationTypesInput = {
@@ -4645,6 +4936,7 @@ export type UserCreateWithoutMentorOrientationTypesInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
   blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutMentorInput
@@ -4675,6 +4967,7 @@ export type UserCreateWithoutMentorOrientationTypesInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -4689,6 +4982,9 @@ export type UserCreateWithoutMentorOrientationTypesInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutMentorOrientationTypesInput = {
@@ -4717,6 +5013,7 @@ export type UserUncheckedCreateWithoutMentorOrientationTypesInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
   blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutMentorInput
@@ -4747,6 +5044,7 @@ export type UserUncheckedCreateWithoutMentorOrientationTypesInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -4761,6 +5059,9 @@ export type UserUncheckedCreateWithoutMentorOrientationTypesInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutMentorOrientationTypesInput = {
@@ -4805,6 +5106,7 @@ export type UserUpdateWithoutMentorOrientationTypesInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
   blockedDates?: Prisma.BlockedDateUpdateManyWithoutMentorNestedInput
@@ -4835,6 +5137,7 @@ export type UserUpdateWithoutMentorOrientationTypesInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -4849,6 +5152,9 @@ export type UserUpdateWithoutMentorOrientationTypesInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMentorOrientationTypesInput = {
@@ -4877,6 +5183,7 @@ export type UserUncheckedUpdateWithoutMentorOrientationTypesInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
   blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutMentorNestedInput
@@ -4907,6 +5214,7 @@ export type UserUncheckedUpdateWithoutMentorOrientationTypesInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -4921,6 +5229,9 @@ export type UserUncheckedUpdateWithoutMentorOrientationTypesInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutAvailabilityBlocksInput = {
@@ -4949,6 +5260,7 @@ export type UserCreateWithoutAvailabilityBlocksInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutMentorInput
@@ -4979,6 +5291,7 @@ export type UserCreateWithoutAvailabilityBlocksInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -4993,6 +5306,9 @@ export type UserCreateWithoutAvailabilityBlocksInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutAvailabilityBlocksInput = {
@@ -5021,6 +5337,7 @@ export type UserUncheckedCreateWithoutAvailabilityBlocksInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutMentorInput
@@ -5051,6 +5368,7 @@ export type UserUncheckedCreateWithoutAvailabilityBlocksInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -5065,6 +5383,9 @@ export type UserUncheckedCreateWithoutAvailabilityBlocksInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutAvailabilityBlocksInput = {
@@ -5109,6 +5430,7 @@ export type UserUpdateWithoutAvailabilityBlocksInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   blockedDates?: Prisma.BlockedDateUpdateManyWithoutMentorNestedInput
@@ -5139,6 +5461,7 @@ export type UserUpdateWithoutAvailabilityBlocksInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -5153,6 +5476,9 @@ export type UserUpdateWithoutAvailabilityBlocksInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAvailabilityBlocksInput = {
@@ -5181,6 +5507,7 @@ export type UserUncheckedUpdateWithoutAvailabilityBlocksInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutMentorNestedInput
@@ -5211,6 +5538,7 @@ export type UserUncheckedUpdateWithoutAvailabilityBlocksInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -5225,6 +5553,9 @@ export type UserUncheckedUpdateWithoutAvailabilityBlocksInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutBlockedDatesInput = {
@@ -5253,6 +5584,7 @@ export type UserCreateWithoutBlockedDatesInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -5283,6 +5615,7 @@ export type UserCreateWithoutBlockedDatesInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -5297,6 +5630,9 @@ export type UserCreateWithoutBlockedDatesInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutBlockedDatesInput = {
@@ -5325,6 +5661,7 @@ export type UserUncheckedCreateWithoutBlockedDatesInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -5355,6 +5692,7 @@ export type UserUncheckedCreateWithoutBlockedDatesInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -5369,6 +5707,9 @@ export type UserUncheckedCreateWithoutBlockedDatesInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutBlockedDatesInput = {
@@ -5413,6 +5754,7 @@ export type UserUpdateWithoutBlockedDatesInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -5443,6 +5785,7 @@ export type UserUpdateWithoutBlockedDatesInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -5457,6 +5800,9 @@ export type UserUpdateWithoutBlockedDatesInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutBlockedDatesInput = {
@@ -5485,6 +5831,7 @@ export type UserUncheckedUpdateWithoutBlockedDatesInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -5515,6 +5862,7 @@ export type UserUncheckedUpdateWithoutBlockedDatesInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -5529,6 +5877,9 @@ export type UserUncheckedUpdateWithoutBlockedDatesInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutMentorAppointmentsInput = {
@@ -5557,6 +5908,7 @@ export type UserCreateWithoutMentorAppointmentsInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -5587,6 +5939,7 @@ export type UserCreateWithoutMentorAppointmentsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -5601,6 +5954,9 @@ export type UserCreateWithoutMentorAppointmentsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutMentorAppointmentsInput = {
@@ -5629,6 +5985,7 @@ export type UserUncheckedCreateWithoutMentorAppointmentsInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -5659,6 +6016,7 @@ export type UserUncheckedCreateWithoutMentorAppointmentsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -5673,6 +6031,9 @@ export type UserUncheckedCreateWithoutMentorAppointmentsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutMentorAppointmentsInput = {
@@ -5706,6 +6067,7 @@ export type UserCreateWithoutStudentAppointmentsInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -5736,6 +6098,7 @@ export type UserCreateWithoutStudentAppointmentsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -5750,6 +6113,9 @@ export type UserCreateWithoutStudentAppointmentsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutStudentAppointmentsInput = {
@@ -5778,6 +6144,7 @@ export type UserUncheckedCreateWithoutStudentAppointmentsInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -5808,6 +6175,7 @@ export type UserUncheckedCreateWithoutStudentAppointmentsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -5822,6 +6190,9 @@ export type UserUncheckedCreateWithoutStudentAppointmentsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutStudentAppointmentsInput = {
@@ -5855,6 +6226,7 @@ export type UserCreateWithoutCancelledAppointmentsInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -5885,6 +6257,7 @@ export type UserCreateWithoutCancelledAppointmentsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -5899,6 +6272,9 @@ export type UserCreateWithoutCancelledAppointmentsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutCancelledAppointmentsInput = {
@@ -5927,6 +6303,7 @@ export type UserUncheckedCreateWithoutCancelledAppointmentsInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -5957,6 +6334,7 @@ export type UserUncheckedCreateWithoutCancelledAppointmentsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -5971,6 +6349,9 @@ export type UserUncheckedCreateWithoutCancelledAppointmentsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutCancelledAppointmentsInput = {
@@ -6015,6 +6396,7 @@ export type UserUpdateWithoutMentorAppointmentsInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -6045,6 +6427,7 @@ export type UserUpdateWithoutMentorAppointmentsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -6059,6 +6442,9 @@ export type UserUpdateWithoutMentorAppointmentsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMentorAppointmentsInput = {
@@ -6087,6 +6473,7 @@ export type UserUncheckedUpdateWithoutMentorAppointmentsInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -6117,6 +6504,7 @@ export type UserUncheckedUpdateWithoutMentorAppointmentsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -6131,6 +6519,9 @@ export type UserUncheckedUpdateWithoutMentorAppointmentsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUpsertWithoutStudentAppointmentsInput = {
@@ -6170,6 +6561,7 @@ export type UserUpdateWithoutStudentAppointmentsInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -6200,6 +6592,7 @@ export type UserUpdateWithoutStudentAppointmentsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -6214,6 +6607,9 @@ export type UserUpdateWithoutStudentAppointmentsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutStudentAppointmentsInput = {
@@ -6242,6 +6638,7 @@ export type UserUncheckedUpdateWithoutStudentAppointmentsInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -6272,6 +6669,7 @@ export type UserUncheckedUpdateWithoutStudentAppointmentsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -6286,6 +6684,9 @@ export type UserUncheckedUpdateWithoutStudentAppointmentsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUpsertWithoutCancelledAppointmentsInput = {
@@ -6325,6 +6726,7 @@ export type UserUpdateWithoutCancelledAppointmentsInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -6355,6 +6757,7 @@ export type UserUpdateWithoutCancelledAppointmentsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -6369,6 +6772,9 @@ export type UserUpdateWithoutCancelledAppointmentsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCancelledAppointmentsInput = {
@@ -6397,6 +6803,7 @@ export type UserUncheckedUpdateWithoutCancelledAppointmentsInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -6427,6 +6834,7 @@ export type UserUncheckedUpdateWithoutCancelledAppointmentsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -6441,6 +6849,9 @@ export type UserUncheckedUpdateWithoutCancelledAppointmentsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutAppointmentChangesInput = {
@@ -6469,6 +6880,7 @@ export type UserCreateWithoutAppointmentChangesInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -6499,6 +6911,7 @@ export type UserCreateWithoutAppointmentChangesInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -6513,6 +6926,9 @@ export type UserCreateWithoutAppointmentChangesInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutAppointmentChangesInput = {
@@ -6541,6 +6957,7 @@ export type UserUncheckedCreateWithoutAppointmentChangesInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -6571,6 +6988,7 @@ export type UserUncheckedCreateWithoutAppointmentChangesInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -6585,6 +7003,9 @@ export type UserUncheckedCreateWithoutAppointmentChangesInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutAppointmentChangesInput = {
@@ -6629,6 +7050,7 @@ export type UserUpdateWithoutAppointmentChangesInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -6659,6 +7081,7 @@ export type UserUpdateWithoutAppointmentChangesInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -6673,6 +7096,9 @@ export type UserUpdateWithoutAppointmentChangesInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAppointmentChangesInput = {
@@ -6701,6 +7127,7 @@ export type UserUncheckedUpdateWithoutAppointmentChangesInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -6731,6 +7158,7 @@ export type UserUncheckedUpdateWithoutAppointmentChangesInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -6745,6 +7173,9 @@ export type UserUncheckedUpdateWithoutAppointmentChangesInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutCreatedEventsInput = {
@@ -6773,6 +7204,7 @@ export type UserCreateWithoutCreatedEventsInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -6803,6 +7235,7 @@ export type UserCreateWithoutCreatedEventsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -6817,6 +7250,9 @@ export type UserCreateWithoutCreatedEventsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutCreatedEventsInput = {
@@ -6845,6 +7281,7 @@ export type UserUncheckedCreateWithoutCreatedEventsInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -6875,6 +7312,7 @@ export type UserUncheckedCreateWithoutCreatedEventsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -6889,6 +7327,9 @@ export type UserUncheckedCreateWithoutCreatedEventsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutCreatedEventsInput = {
@@ -6922,6 +7363,7 @@ export type UserCreateWithoutModeratedEventsInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -6952,6 +7394,7 @@ export type UserCreateWithoutModeratedEventsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -6966,6 +7409,9 @@ export type UserCreateWithoutModeratedEventsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutModeratedEventsInput = {
@@ -6994,6 +7440,7 @@ export type UserUncheckedCreateWithoutModeratedEventsInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -7024,6 +7471,7 @@ export type UserUncheckedCreateWithoutModeratedEventsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -7038,6 +7486,9 @@ export type UserUncheckedCreateWithoutModeratedEventsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutModeratedEventsInput = {
@@ -7082,6 +7533,7 @@ export type UserUpdateWithoutCreatedEventsInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -7112,6 +7564,7 @@ export type UserUpdateWithoutCreatedEventsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -7126,6 +7579,9 @@ export type UserUpdateWithoutCreatedEventsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCreatedEventsInput = {
@@ -7154,6 +7610,7 @@ export type UserUncheckedUpdateWithoutCreatedEventsInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -7184,6 +7641,7 @@ export type UserUncheckedUpdateWithoutCreatedEventsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -7198,6 +7656,9 @@ export type UserUncheckedUpdateWithoutCreatedEventsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUpsertWithoutModeratedEventsInput = {
@@ -7237,6 +7698,7 @@ export type UserUpdateWithoutModeratedEventsInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -7267,6 +7729,7 @@ export type UserUpdateWithoutModeratedEventsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -7281,6 +7744,9 @@ export type UserUpdateWithoutModeratedEventsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutModeratedEventsInput = {
@@ -7309,6 +7775,7 @@ export type UserUncheckedUpdateWithoutModeratedEventsInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -7339,6 +7806,7 @@ export type UserUncheckedUpdateWithoutModeratedEventsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -7353,6 +7821,9 @@ export type UserUncheckedUpdateWithoutModeratedEventsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutEventRegistrationsInput = {
@@ -7381,6 +7852,7 @@ export type UserCreateWithoutEventRegistrationsInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -7411,6 +7883,7 @@ export type UserCreateWithoutEventRegistrationsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -7425,6 +7898,9 @@ export type UserCreateWithoutEventRegistrationsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutEventRegistrationsInput = {
@@ -7453,6 +7929,7 @@ export type UserUncheckedCreateWithoutEventRegistrationsInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -7483,6 +7960,7 @@ export type UserUncheckedCreateWithoutEventRegistrationsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -7497,6 +7975,9 @@ export type UserUncheckedCreateWithoutEventRegistrationsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutEventRegistrationsInput = {
@@ -7541,6 +8022,7 @@ export type UserUpdateWithoutEventRegistrationsInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -7571,6 +8053,7 @@ export type UserUpdateWithoutEventRegistrationsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -7585,6 +8068,9 @@ export type UserUpdateWithoutEventRegistrationsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEventRegistrationsInput = {
@@ -7613,6 +8099,7 @@ export type UserUncheckedUpdateWithoutEventRegistrationsInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -7643,6 +8130,7 @@ export type UserUncheckedUpdateWithoutEventRegistrationsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -7657,6 +8145,9 @@ export type UserUncheckedUpdateWithoutEventRegistrationsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutCheckedInAttendancesInput = {
@@ -7685,6 +8176,7 @@ export type UserCreateWithoutCheckedInAttendancesInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -7715,6 +8207,7 @@ export type UserCreateWithoutCheckedInAttendancesInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -7729,6 +8222,9 @@ export type UserCreateWithoutCheckedInAttendancesInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutCheckedInAttendancesInput = {
@@ -7757,6 +8253,7 @@ export type UserUncheckedCreateWithoutCheckedInAttendancesInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -7787,6 +8284,7 @@ export type UserUncheckedCreateWithoutCheckedInAttendancesInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -7801,6 +8299,9 @@ export type UserUncheckedCreateWithoutCheckedInAttendancesInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutCheckedInAttendancesInput = {
@@ -7845,6 +8346,7 @@ export type UserUpdateWithoutCheckedInAttendancesInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -7875,6 +8377,7 @@ export type UserUpdateWithoutCheckedInAttendancesInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -7889,6 +8392,9 @@ export type UserUpdateWithoutCheckedInAttendancesInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCheckedInAttendancesInput = {
@@ -7917,6 +8423,7 @@ export type UserUncheckedUpdateWithoutCheckedInAttendancesInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -7947,6 +8454,7 @@ export type UserUncheckedUpdateWithoutCheckedInAttendancesInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -7961,6 +8469,9 @@ export type UserUncheckedUpdateWithoutCheckedInAttendancesInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutExportHistoriesInput = {
@@ -7989,6 +8500,7 @@ export type UserCreateWithoutExportHistoriesInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -8019,6 +8531,7 @@ export type UserCreateWithoutExportHistoriesInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -8033,6 +8546,9 @@ export type UserCreateWithoutExportHistoriesInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutExportHistoriesInput = {
@@ -8061,6 +8577,7 @@ export type UserUncheckedCreateWithoutExportHistoriesInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -8091,6 +8608,7 @@ export type UserUncheckedCreateWithoutExportHistoriesInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -8105,6 +8623,9 @@ export type UserUncheckedCreateWithoutExportHistoriesInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutExportHistoriesInput = {
@@ -8149,6 +8670,7 @@ export type UserUpdateWithoutExportHistoriesInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -8179,6 +8701,7 @@ export type UserUpdateWithoutExportHistoriesInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -8193,6 +8716,9 @@ export type UserUpdateWithoutExportHistoriesInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutExportHistoriesInput = {
@@ -8221,6 +8747,7 @@ export type UserUncheckedUpdateWithoutExportHistoriesInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -8251,6 +8778,7 @@ export type UserUncheckedUpdateWithoutExportHistoriesInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -8265,6 +8793,9 @@ export type UserUncheckedUpdateWithoutExportHistoriesInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutOpenedAccessRequestsInput = {
@@ -8293,6 +8824,7 @@ export type UserCreateWithoutOpenedAccessRequestsInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -8323,6 +8855,7 @@ export type UserCreateWithoutOpenedAccessRequestsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -8337,6 +8870,9 @@ export type UserCreateWithoutOpenedAccessRequestsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutOpenedAccessRequestsInput = {
@@ -8365,6 +8901,7 @@ export type UserUncheckedCreateWithoutOpenedAccessRequestsInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -8395,6 +8932,7 @@ export type UserUncheckedCreateWithoutOpenedAccessRequestsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -8409,6 +8947,9 @@ export type UserUncheckedCreateWithoutOpenedAccessRequestsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutOpenedAccessRequestsInput = {
@@ -8442,6 +8983,7 @@ export type UserCreateWithoutReviewedAccessRequestsInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -8472,6 +9014,7 @@ export type UserCreateWithoutReviewedAccessRequestsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -8486,6 +9029,9 @@ export type UserCreateWithoutReviewedAccessRequestsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutReviewedAccessRequestsInput = {
@@ -8514,6 +9060,7 @@ export type UserUncheckedCreateWithoutReviewedAccessRequestsInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -8544,6 +9091,7 @@ export type UserUncheckedCreateWithoutReviewedAccessRequestsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -8558,6 +9106,9 @@ export type UserUncheckedCreateWithoutReviewedAccessRequestsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutReviewedAccessRequestsInput = {
@@ -8591,6 +9142,7 @@ export type UserCreateWithoutApprovedAccessRequestInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -8621,6 +9173,7 @@ export type UserCreateWithoutApprovedAccessRequestInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -8635,6 +9188,9 @@ export type UserCreateWithoutApprovedAccessRequestInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutApprovedAccessRequestInput = {
@@ -8663,6 +9219,7 @@ export type UserUncheckedCreateWithoutApprovedAccessRequestInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -8693,6 +9250,7 @@ export type UserUncheckedCreateWithoutApprovedAccessRequestInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -8707,6 +9265,9 @@ export type UserUncheckedCreateWithoutApprovedAccessRequestInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutApprovedAccessRequestInput = {
@@ -8751,6 +9312,7 @@ export type UserUpdateWithoutOpenedAccessRequestsInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -8781,6 +9343,7 @@ export type UserUpdateWithoutOpenedAccessRequestsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -8795,6 +9358,9 @@ export type UserUpdateWithoutOpenedAccessRequestsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOpenedAccessRequestsInput = {
@@ -8823,6 +9389,7 @@ export type UserUncheckedUpdateWithoutOpenedAccessRequestsInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -8853,6 +9420,7 @@ export type UserUncheckedUpdateWithoutOpenedAccessRequestsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -8867,6 +9435,9 @@ export type UserUncheckedUpdateWithoutOpenedAccessRequestsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUpsertWithoutReviewedAccessRequestsInput = {
@@ -8906,6 +9477,7 @@ export type UserUpdateWithoutReviewedAccessRequestsInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -8936,6 +9508,7 @@ export type UserUpdateWithoutReviewedAccessRequestsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -8950,6 +9523,9 @@ export type UserUpdateWithoutReviewedAccessRequestsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReviewedAccessRequestsInput = {
@@ -8978,6 +9554,7 @@ export type UserUncheckedUpdateWithoutReviewedAccessRequestsInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -9008,6 +9585,7 @@ export type UserUncheckedUpdateWithoutReviewedAccessRequestsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -9022,6 +9600,9 @@ export type UserUncheckedUpdateWithoutReviewedAccessRequestsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUpsertWithoutApprovedAccessRequestInput = {
@@ -9061,6 +9642,7 @@ export type UserUpdateWithoutApprovedAccessRequestInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -9091,6 +9673,7 @@ export type UserUpdateWithoutApprovedAccessRequestInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -9105,6 +9688,9 @@ export type UserUpdateWithoutApprovedAccessRequestInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutApprovedAccessRequestInput = {
@@ -9133,6 +9719,7 @@ export type UserUncheckedUpdateWithoutApprovedAccessRequestInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -9163,6 +9750,7 @@ export type UserUncheckedUpdateWithoutApprovedAccessRequestInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -9177,6 +9765,9 @@ export type UserUncheckedUpdateWithoutApprovedAccessRequestInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutMentorParticipationRequestsInput = {
@@ -9205,6 +9796,7 @@ export type UserCreateWithoutMentorParticipationRequestsInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -9235,6 +9827,7 @@ export type UserCreateWithoutMentorParticipationRequestsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -9249,6 +9842,9 @@ export type UserCreateWithoutMentorParticipationRequestsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutMentorParticipationRequestsInput = {
@@ -9277,6 +9873,7 @@ export type UserUncheckedCreateWithoutMentorParticipationRequestsInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -9307,6 +9904,7 @@ export type UserUncheckedCreateWithoutMentorParticipationRequestsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -9321,6 +9919,9 @@ export type UserUncheckedCreateWithoutMentorParticipationRequestsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutMentorParticipationRequestsInput = {
@@ -9365,6 +9966,7 @@ export type UserUpdateWithoutMentorParticipationRequestsInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -9395,6 +9997,7 @@ export type UserUpdateWithoutMentorParticipationRequestsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -9409,6 +10012,9 @@ export type UserUpdateWithoutMentorParticipationRequestsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMentorParticipationRequestsInput = {
@@ -9437,6 +10043,7 @@ export type UserUncheckedUpdateWithoutMentorParticipationRequestsInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -9467,6 +10074,7 @@ export type UserUncheckedUpdateWithoutMentorParticipationRequestsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -9481,6 +10089,9 @@ export type UserUncheckedUpdateWithoutMentorParticipationRequestsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutMentorSlotOffersInput = {
@@ -9509,6 +10120,7 @@ export type UserCreateWithoutMentorSlotOffersInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -9539,6 +10151,7 @@ export type UserCreateWithoutMentorSlotOffersInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -9553,6 +10166,9 @@ export type UserCreateWithoutMentorSlotOffersInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutMentorSlotOffersInput = {
@@ -9581,6 +10197,7 @@ export type UserUncheckedCreateWithoutMentorSlotOffersInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -9611,6 +10228,7 @@ export type UserUncheckedCreateWithoutMentorSlotOffersInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -9625,6 +10243,9 @@ export type UserUncheckedCreateWithoutMentorSlotOffersInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutMentorSlotOffersInput = {
@@ -9669,6 +10290,7 @@ export type UserUpdateWithoutMentorSlotOffersInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -9699,6 +10321,7 @@ export type UserUpdateWithoutMentorSlotOffersInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -9713,6 +10336,9 @@ export type UserUpdateWithoutMentorSlotOffersInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMentorSlotOffersInput = {
@@ -9741,6 +10367,7 @@ export type UserUncheckedUpdateWithoutMentorSlotOffersInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -9771,6 +10398,7 @@ export type UserUncheckedUpdateWithoutMentorSlotOffersInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -9785,6 +10413,9 @@ export type UserUncheckedUpdateWithoutMentorSlotOffersInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutConversationsAsUserAInput = {
@@ -9813,6 +10444,7 @@ export type UserCreateWithoutConversationsAsUserAInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -9843,6 +10475,7 @@ export type UserCreateWithoutConversationsAsUserAInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -9857,6 +10490,9 @@ export type UserCreateWithoutConversationsAsUserAInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutConversationsAsUserAInput = {
@@ -9885,6 +10521,7 @@ export type UserUncheckedCreateWithoutConversationsAsUserAInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -9915,6 +10552,7 @@ export type UserUncheckedCreateWithoutConversationsAsUserAInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -9929,6 +10567,9 @@ export type UserUncheckedCreateWithoutConversationsAsUserAInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutConversationsAsUserAInput = {
@@ -9962,6 +10603,7 @@ export type UserCreateWithoutConversationsAsUserBInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -9992,6 +10634,7 @@ export type UserCreateWithoutConversationsAsUserBInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -10006,6 +10649,9 @@ export type UserCreateWithoutConversationsAsUserBInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutConversationsAsUserBInput = {
@@ -10034,6 +10680,7 @@ export type UserUncheckedCreateWithoutConversationsAsUserBInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -10064,6 +10711,7 @@ export type UserUncheckedCreateWithoutConversationsAsUserBInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -10078,6 +10726,9 @@ export type UserUncheckedCreateWithoutConversationsAsUserBInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutConversationsAsUserBInput = {
@@ -10122,6 +10773,7 @@ export type UserUpdateWithoutConversationsAsUserAInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -10152,6 +10804,7 @@ export type UserUpdateWithoutConversationsAsUserAInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -10166,6 +10819,9 @@ export type UserUpdateWithoutConversationsAsUserAInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutConversationsAsUserAInput = {
@@ -10194,6 +10850,7 @@ export type UserUncheckedUpdateWithoutConversationsAsUserAInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -10224,6 +10881,7 @@ export type UserUncheckedUpdateWithoutConversationsAsUserAInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -10238,6 +10896,9 @@ export type UserUncheckedUpdateWithoutConversationsAsUserAInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUpsertWithoutConversationsAsUserBInput = {
@@ -10277,6 +10938,7 @@ export type UserUpdateWithoutConversationsAsUserBInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -10307,6 +10969,7 @@ export type UserUpdateWithoutConversationsAsUserBInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -10321,6 +10984,9 @@ export type UserUpdateWithoutConversationsAsUserBInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutConversationsAsUserBInput = {
@@ -10349,6 +11015,7 @@ export type UserUncheckedUpdateWithoutConversationsAsUserBInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -10379,6 +11046,7 @@ export type UserUncheckedUpdateWithoutConversationsAsUserBInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -10393,6 +11061,9 @@ export type UserUncheckedUpdateWithoutConversationsAsUserBInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutChatParticipantsInput = {
@@ -10421,6 +11092,7 @@ export type UserCreateWithoutChatParticipantsInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -10451,6 +11123,7 @@ export type UserCreateWithoutChatParticipantsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -10465,6 +11138,9 @@ export type UserCreateWithoutChatParticipantsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutChatParticipantsInput = {
@@ -10493,6 +11169,7 @@ export type UserUncheckedCreateWithoutChatParticipantsInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -10523,6 +11200,7 @@ export type UserUncheckedCreateWithoutChatParticipantsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -10537,6 +11215,9 @@ export type UserUncheckedCreateWithoutChatParticipantsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutChatParticipantsInput = {
@@ -10581,6 +11262,7 @@ export type UserUpdateWithoutChatParticipantsInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -10611,6 +11293,7 @@ export type UserUpdateWithoutChatParticipantsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -10625,6 +11308,9 @@ export type UserUpdateWithoutChatParticipantsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutChatParticipantsInput = {
@@ -10653,6 +11339,7 @@ export type UserUncheckedUpdateWithoutChatParticipantsInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -10683,6 +11370,7 @@ export type UserUncheckedUpdateWithoutChatParticipantsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -10697,6 +11385,9 @@ export type UserUncheckedUpdateWithoutChatParticipantsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutChatMessagesInput = {
@@ -10725,6 +11416,7 @@ export type UserCreateWithoutChatMessagesInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -10755,6 +11447,7 @@ export type UserCreateWithoutChatMessagesInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -10769,6 +11462,9 @@ export type UserCreateWithoutChatMessagesInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutChatMessagesInput = {
@@ -10797,6 +11493,7 @@ export type UserUncheckedCreateWithoutChatMessagesInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -10827,6 +11524,7 @@ export type UserUncheckedCreateWithoutChatMessagesInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -10841,6 +11539,9 @@ export type UserUncheckedCreateWithoutChatMessagesInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutChatMessagesInput = {
@@ -10885,6 +11586,7 @@ export type UserUpdateWithoutChatMessagesInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -10915,6 +11617,7 @@ export type UserUpdateWithoutChatMessagesInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -10929,6 +11632,9 @@ export type UserUpdateWithoutChatMessagesInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutChatMessagesInput = {
@@ -10957,6 +11663,7 @@ export type UserUncheckedUpdateWithoutChatMessagesInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -10987,6 +11694,7 @@ export type UserUncheckedUpdateWithoutChatMessagesInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -11001,6 +11709,9 @@ export type UserUncheckedUpdateWithoutChatMessagesInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutChatBlocksMadeInput = {
@@ -11029,6 +11740,7 @@ export type UserCreateWithoutChatBlocksMadeInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -11059,6 +11771,7 @@ export type UserCreateWithoutChatBlocksMadeInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -11073,6 +11786,9 @@ export type UserCreateWithoutChatBlocksMadeInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutChatBlocksMadeInput = {
@@ -11101,6 +11817,7 @@ export type UserUncheckedCreateWithoutChatBlocksMadeInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -11131,6 +11848,7 @@ export type UserUncheckedCreateWithoutChatBlocksMadeInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -11145,6 +11863,9 @@ export type UserUncheckedCreateWithoutChatBlocksMadeInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutChatBlocksMadeInput = {
@@ -11178,6 +11899,7 @@ export type UserCreateWithoutChatBlocksReceivedInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -11208,6 +11930,7 @@ export type UserCreateWithoutChatBlocksReceivedInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -11222,6 +11945,9 @@ export type UserCreateWithoutChatBlocksReceivedInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutChatBlocksReceivedInput = {
@@ -11250,6 +11976,7 @@ export type UserUncheckedCreateWithoutChatBlocksReceivedInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -11280,6 +12007,7 @@ export type UserUncheckedCreateWithoutChatBlocksReceivedInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -11294,6 +12022,9 @@ export type UserUncheckedCreateWithoutChatBlocksReceivedInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutChatBlocksReceivedInput = {
@@ -11338,6 +12069,7 @@ export type UserUpdateWithoutChatBlocksMadeInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -11368,6 +12100,7 @@ export type UserUpdateWithoutChatBlocksMadeInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -11382,6 +12115,9 @@ export type UserUpdateWithoutChatBlocksMadeInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutChatBlocksMadeInput = {
@@ -11410,6 +12146,7 @@ export type UserUncheckedUpdateWithoutChatBlocksMadeInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -11440,6 +12177,7 @@ export type UserUncheckedUpdateWithoutChatBlocksMadeInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -11454,6 +12192,9 @@ export type UserUncheckedUpdateWithoutChatBlocksMadeInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUpsertWithoutChatBlocksReceivedInput = {
@@ -11493,6 +12234,7 @@ export type UserUpdateWithoutChatBlocksReceivedInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -11523,6 +12265,7 @@ export type UserUpdateWithoutChatBlocksReceivedInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -11537,6 +12280,9 @@ export type UserUpdateWithoutChatBlocksReceivedInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutChatBlocksReceivedInput = {
@@ -11565,6 +12311,7 @@ export type UserUncheckedUpdateWithoutChatBlocksReceivedInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -11595,6 +12342,7 @@ export type UserUncheckedUpdateWithoutChatBlocksReceivedInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -11609,6 +12357,9 @@ export type UserUncheckedUpdateWithoutChatBlocksReceivedInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutSentRequestsInput = {
@@ -11637,6 +12388,7 @@ export type UserCreateWithoutSentRequestsInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -11667,6 +12419,7 @@ export type UserCreateWithoutSentRequestsInput = {
   chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -11681,6 +12434,9 @@ export type UserCreateWithoutSentRequestsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutSentRequestsInput = {
@@ -11709,6 +12465,7 @@ export type UserUncheckedCreateWithoutSentRequestsInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -11739,6 +12496,7 @@ export type UserUncheckedCreateWithoutSentRequestsInput = {
   chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -11753,6 +12511,9 @@ export type UserUncheckedCreateWithoutSentRequestsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutSentRequestsInput = {
@@ -11786,6 +12547,7 @@ export type UserCreateWithoutReceivedRequestsInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -11816,6 +12578,7 @@ export type UserCreateWithoutReceivedRequestsInput = {
   chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -11830,6 +12593,9 @@ export type UserCreateWithoutReceivedRequestsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutReceivedRequestsInput = {
@@ -11858,6 +12624,7 @@ export type UserUncheckedCreateWithoutReceivedRequestsInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -11888,6 +12655,7 @@ export type UserUncheckedCreateWithoutReceivedRequestsInput = {
   chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -11902,6 +12670,9 @@ export type UserUncheckedCreateWithoutReceivedRequestsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutReceivedRequestsInput = {
@@ -11946,6 +12717,7 @@ export type UserUpdateWithoutSentRequestsInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -11976,6 +12748,7 @@ export type UserUpdateWithoutSentRequestsInput = {
   chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -11990,6 +12763,9 @@ export type UserUpdateWithoutSentRequestsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSentRequestsInput = {
@@ -12018,6 +12794,7 @@ export type UserUncheckedUpdateWithoutSentRequestsInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -12048,6 +12825,7 @@ export type UserUncheckedUpdateWithoutSentRequestsInput = {
   chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -12062,6 +12840,9 @@ export type UserUncheckedUpdateWithoutSentRequestsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUpsertWithoutReceivedRequestsInput = {
@@ -12101,6 +12882,7 @@ export type UserUpdateWithoutReceivedRequestsInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -12131,6 +12913,7 @@ export type UserUpdateWithoutReceivedRequestsInput = {
   chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -12145,6 +12928,9 @@ export type UserUpdateWithoutReceivedRequestsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReceivedRequestsInput = {
@@ -12173,6 +12959,7 @@ export type UserUncheckedUpdateWithoutReceivedRequestsInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -12203,6 +12990,7 @@ export type UserUncheckedUpdateWithoutReceivedRequestsInput = {
   chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -12217,6 +13005,9 @@ export type UserUncheckedUpdateWithoutReceivedRequestsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutPresenceInput = {
@@ -12245,6 +13036,7 @@ export type UserCreateWithoutPresenceInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -12275,6 +13067,7 @@ export type UserCreateWithoutPresenceInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -12289,6 +13082,9 @@ export type UserCreateWithoutPresenceInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutPresenceInput = {
@@ -12317,6 +13113,7 @@ export type UserUncheckedCreateWithoutPresenceInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -12347,6 +13144,7 @@ export type UserUncheckedCreateWithoutPresenceInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -12361,6 +13159,9 @@ export type UserUncheckedCreateWithoutPresenceInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutPresenceInput = {
@@ -12405,6 +13206,7 @@ export type UserUpdateWithoutPresenceInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -12435,6 +13237,7 @@ export type UserUpdateWithoutPresenceInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -12449,6 +13252,9 @@ export type UserUpdateWithoutPresenceInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPresenceInput = {
@@ -12477,6 +13283,7 @@ export type UserUncheckedUpdateWithoutPresenceInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -12507,6 +13314,7 @@ export type UserUncheckedUpdateWithoutPresenceInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -12521,9 +13329,12 @@ export type UserUncheckedUpdateWithoutPresenceInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
-export type UserCreateWithoutPasswordResetOtpsInput = {
+export type UserCreateWithoutPasswordHistoriesInput = {
   id?: string
   firstName: string
   lastName: string
@@ -12549,6 +13360,7 @@ export type UserCreateWithoutPasswordResetOtpsInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -12579,6 +13391,7 @@ export type UserCreateWithoutPasswordResetOtpsInput = {
   chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -12593,9 +13406,12 @@ export type UserCreateWithoutPasswordResetOtpsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
-export type UserUncheckedCreateWithoutPasswordResetOtpsInput = {
+export type UserUncheckedCreateWithoutPasswordHistoriesInput = {
   id?: string
   firstName: string
   lastName: string
@@ -12621,6 +13437,7 @@ export type UserUncheckedCreateWithoutPasswordResetOtpsInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -12651,6 +13468,7 @@ export type UserUncheckedCreateWithoutPasswordResetOtpsInput = {
   chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -12665,6 +13483,333 @@ export type UserUncheckedCreateWithoutPasswordResetOtpsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
+}
+
+export type UserCreateOrConnectWithoutPasswordHistoriesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutPasswordHistoriesInput, Prisma.UserUncheckedCreateWithoutPasswordHistoriesInput>
+}
+
+export type UserUpsertWithoutPasswordHistoriesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutPasswordHistoriesInput, Prisma.UserUncheckedUpdateWithoutPasswordHistoriesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutPasswordHistoriesInput, Prisma.UserUncheckedCreateWithoutPasswordHistoriesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutPasswordHistoriesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutPasswordHistoriesInput, Prisma.UserUncheckedUpdateWithoutPasswordHistoriesInput>
+}
+
+export type UserUpdateWithoutPasswordHistoriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
+  city?: Prisma.CityUpdateOneWithoutUsersNestedInput
+  roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  notificationPreferences?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
+  receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
+  triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutPasswordHistoriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  notificationPreferences?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
+  receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
+  triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
+}
+
+export type UserCreateWithoutPasswordResetOtpsInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
+  city?: Prisma.CityCreateNestedOneWithoutUsersInput
+  roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  notificationPreferences?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
+  receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
+  triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
+}
+
+export type UserUncheckedCreateWithoutPasswordResetOtpsInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  cityId?: string | null
+  companyId?: string | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  notificationPreferences?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
+  receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
+  triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutPasswordResetOtpsInput = {
@@ -12709,6 +13854,7 @@ export type UserUpdateWithoutPasswordResetOtpsInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -12739,6 +13885,7 @@ export type UserUpdateWithoutPasswordResetOtpsInput = {
   chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -12753,6 +13900,9 @@ export type UserUpdateWithoutPasswordResetOtpsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPasswordResetOtpsInput = {
@@ -12781,6 +13931,7 @@ export type UserUncheckedUpdateWithoutPasswordResetOtpsInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -12811,6 +13962,7 @@ export type UserUncheckedUpdateWithoutPasswordResetOtpsInput = {
   chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -12825,6 +13977,9 @@ export type UserUncheckedUpdateWithoutPasswordResetOtpsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutMentorParticipationAttemptLimitInput = {
@@ -12853,6 +14008,7 @@ export type UserCreateWithoutMentorParticipationAttemptLimitInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -12883,6 +14039,7 @@ export type UserCreateWithoutMentorParticipationAttemptLimitInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -12897,6 +14054,9 @@ export type UserCreateWithoutMentorParticipationAttemptLimitInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutMentorParticipationAttemptLimitInput = {
@@ -12925,6 +14085,7 @@ export type UserUncheckedCreateWithoutMentorParticipationAttemptLimitInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -12955,6 +14116,7 @@ export type UserUncheckedCreateWithoutMentorParticipationAttemptLimitInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -12969,6 +14131,9 @@ export type UserUncheckedCreateWithoutMentorParticipationAttemptLimitInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutMentorParticipationAttemptLimitInput = {
@@ -13013,6 +14178,7 @@ export type UserUpdateWithoutMentorParticipationAttemptLimitInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -13043,6 +14209,7 @@ export type UserUpdateWithoutMentorParticipationAttemptLimitInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -13057,6 +14224,9 @@ export type UserUpdateWithoutMentorParticipationAttemptLimitInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMentorParticipationAttemptLimitInput = {
@@ -13085,6 +14255,7 @@ export type UserUncheckedUpdateWithoutMentorParticipationAttemptLimitInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -13115,6 +14286,7 @@ export type UserUncheckedUpdateWithoutMentorParticipationAttemptLimitInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -13129,6 +14301,9 @@ export type UserUncheckedUpdateWithoutMentorParticipationAttemptLimitInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutJobApplicationsInput = {
@@ -13157,6 +14332,7 @@ export type UserCreateWithoutJobApplicationsInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -13188,6 +14364,7 @@ export type UserCreateWithoutJobApplicationsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
@@ -13201,6 +14378,9 @@ export type UserCreateWithoutJobApplicationsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutJobApplicationsInput = {
@@ -13229,6 +14409,7 @@ export type UserUncheckedCreateWithoutJobApplicationsInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -13260,6 +14441,7 @@ export type UserUncheckedCreateWithoutJobApplicationsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
@@ -13273,6 +14455,9 @@ export type UserUncheckedCreateWithoutJobApplicationsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutJobApplicationsInput = {
@@ -13317,6 +14502,7 @@ export type UserUpdateWithoutJobApplicationsInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -13348,6 +14534,7 @@ export type UserUpdateWithoutJobApplicationsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
@@ -13361,6 +14548,9 @@ export type UserUpdateWithoutJobApplicationsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutJobApplicationsInput = {
@@ -13389,6 +14579,7 @@ export type UserUncheckedUpdateWithoutJobApplicationsInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -13420,6 +14611,7 @@ export type UserUncheckedUpdateWithoutJobApplicationsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
@@ -13433,6 +14625,9 @@ export type UserUncheckedUpdateWithoutJobApplicationsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutCreatedSurveysInput = {
@@ -13461,6 +14656,7 @@ export type UserCreateWithoutCreatedSurveysInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -13491,6 +14687,7 @@ export type UserCreateWithoutCreatedSurveysInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -13505,6 +14702,9 @@ export type UserCreateWithoutCreatedSurveysInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutCreatedSurveysInput = {
@@ -13533,6 +14733,7 @@ export type UserUncheckedCreateWithoutCreatedSurveysInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -13563,6 +14764,7 @@ export type UserUncheckedCreateWithoutCreatedSurveysInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -13577,6 +14779,9 @@ export type UserUncheckedCreateWithoutCreatedSurveysInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutCreatedSurveysInput = {
@@ -13621,6 +14826,7 @@ export type UserUpdateWithoutCreatedSurveysInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -13651,6 +14857,7 @@ export type UserUpdateWithoutCreatedSurveysInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -13665,6 +14872,9 @@ export type UserUpdateWithoutCreatedSurveysInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCreatedSurveysInput = {
@@ -13693,6 +14903,7 @@ export type UserUncheckedUpdateWithoutCreatedSurveysInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -13723,6 +14934,7 @@ export type UserUncheckedUpdateWithoutCreatedSurveysInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -13737,6 +14949,9 @@ export type UserUncheckedUpdateWithoutCreatedSurveysInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutSurveyResponsesInput = {
@@ -13765,6 +14980,7 @@ export type UserCreateWithoutSurveyResponsesInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -13795,6 +15011,7 @@ export type UserCreateWithoutSurveyResponsesInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -13809,6 +15026,9 @@ export type UserCreateWithoutSurveyResponsesInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutSurveyResponsesInput = {
@@ -13837,6 +15057,7 @@ export type UserUncheckedCreateWithoutSurveyResponsesInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -13867,6 +15088,7 @@ export type UserUncheckedCreateWithoutSurveyResponsesInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -13881,6 +15103,9 @@ export type UserUncheckedCreateWithoutSurveyResponsesInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutSurveyResponsesInput = {
@@ -13925,6 +15150,7 @@ export type UserUpdateWithoutSurveyResponsesInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -13955,6 +15181,7 @@ export type UserUpdateWithoutSurveyResponsesInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -13969,6 +15196,9 @@ export type UserUpdateWithoutSurveyResponsesInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSurveyResponsesInput = {
@@ -13997,6 +15227,7 @@ export type UserUncheckedUpdateWithoutSurveyResponsesInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -14027,6 +15258,7 @@ export type UserUncheckedUpdateWithoutSurveyResponsesInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -14041,6 +15273,9 @@ export type UserUncheckedUpdateWithoutSurveyResponsesInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutAuditEventsInput = {
@@ -14069,6 +15304,7 @@ export type UserCreateWithoutAuditEventsInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -14100,6 +15336,7 @@ export type UserCreateWithoutAuditEventsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
@@ -14113,6 +15350,9 @@ export type UserCreateWithoutAuditEventsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutAuditEventsInput = {
@@ -14141,6 +15381,7 @@ export type UserUncheckedCreateWithoutAuditEventsInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -14172,6 +15413,7 @@ export type UserUncheckedCreateWithoutAuditEventsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
@@ -14185,6 +15427,9 @@ export type UserUncheckedCreateWithoutAuditEventsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutAuditEventsInput = {
@@ -14229,6 +15474,7 @@ export type UserUpdateWithoutAuditEventsInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -14260,6 +15506,7 @@ export type UserUpdateWithoutAuditEventsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
@@ -14273,6 +15520,9 @@ export type UserUpdateWithoutAuditEventsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAuditEventsInput = {
@@ -14301,6 +15551,7 @@ export type UserUncheckedUpdateWithoutAuditEventsInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -14332,6 +15583,7 @@ export type UserUncheckedUpdateWithoutAuditEventsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
@@ -14345,6 +15597,9 @@ export type UserUncheckedUpdateWithoutAuditEventsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutRevertedValidationsInput = {
@@ -14373,6 +15628,7 @@ export type UserCreateWithoutRevertedValidationsInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -14404,6 +15660,7 @@ export type UserCreateWithoutRevertedValidationsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
@@ -14417,6 +15674,9 @@ export type UserCreateWithoutRevertedValidationsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutRevertedValidationsInput = {
@@ -14445,6 +15705,7 @@ export type UserUncheckedCreateWithoutRevertedValidationsInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -14476,6 +15737,7 @@ export type UserUncheckedCreateWithoutRevertedValidationsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
@@ -14489,6 +15751,9 @@ export type UserUncheckedCreateWithoutRevertedValidationsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutRevertedValidationsInput = {
@@ -14533,6 +15798,7 @@ export type UserUpdateWithoutRevertedValidationsInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -14564,6 +15830,7 @@ export type UserUpdateWithoutRevertedValidationsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
@@ -14577,6 +15844,9 @@ export type UserUpdateWithoutRevertedValidationsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRevertedValidationsInput = {
@@ -14605,6 +15875,7 @@ export type UserUncheckedUpdateWithoutRevertedValidationsInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -14636,6 +15907,7 @@ export type UserUncheckedUpdateWithoutRevertedValidationsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
@@ -14649,6 +15921,9 @@ export type UserUncheckedUpdateWithoutRevertedValidationsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutMentorIntakeAttemptsInput = {
@@ -14676,6 +15951,7 @@ export type UserCreateWithoutMentorIntakeAttemptsInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -14707,6 +15983,7 @@ export type UserCreateWithoutMentorIntakeAttemptsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -14721,6 +15998,9 @@ export type UserCreateWithoutMentorIntakeAttemptsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutMentorIntakeAttemptsInput = {
@@ -14748,6 +16028,7 @@ export type UserUncheckedCreateWithoutMentorIntakeAttemptsInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -14779,6 +16060,7 @@ export type UserUncheckedCreateWithoutMentorIntakeAttemptsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -14793,6 +16075,9 @@ export type UserUncheckedCreateWithoutMentorIntakeAttemptsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutMentorIntakeAttemptsInput = {
@@ -14836,6 +16121,7 @@ export type UserUpdateWithoutMentorIntakeAttemptsInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -14867,6 +16153,7 @@ export type UserUpdateWithoutMentorIntakeAttemptsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -14881,6 +16168,9 @@ export type UserUpdateWithoutMentorIntakeAttemptsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMentorIntakeAttemptsInput = {
@@ -14908,6 +16198,7 @@ export type UserUncheckedUpdateWithoutMentorIntakeAttemptsInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -14939,6 +16230,7 @@ export type UserUncheckedUpdateWithoutMentorIntakeAttemptsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -14953,6 +16245,9 @@ export type UserUncheckedUpdateWithoutMentorIntakeAttemptsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutMentorParticipationSanctionsInput = {
@@ -14980,6 +16275,7 @@ export type UserCreateWithoutMentorParticipationSanctionsInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -15011,6 +16307,7 @@ export type UserCreateWithoutMentorParticipationSanctionsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -15025,6 +16322,9 @@ export type UserCreateWithoutMentorParticipationSanctionsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutMentorParticipationSanctionsInput = {
@@ -15052,6 +16352,7 @@ export type UserUncheckedCreateWithoutMentorParticipationSanctionsInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -15083,6 +16384,7 @@ export type UserUncheckedCreateWithoutMentorParticipationSanctionsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -15097,6 +16399,9 @@ export type UserUncheckedCreateWithoutMentorParticipationSanctionsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutMentorParticipationSanctionsInput = {
@@ -15140,6 +16445,7 @@ export type UserUpdateWithoutMentorParticipationSanctionsInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -15171,6 +16477,7 @@ export type UserUpdateWithoutMentorParticipationSanctionsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -15185,6 +16492,9 @@ export type UserUpdateWithoutMentorParticipationSanctionsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMentorParticipationSanctionsInput = {
@@ -15212,6 +16522,7 @@ export type UserUncheckedUpdateWithoutMentorParticipationSanctionsInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -15243,6 +16554,7 @@ export type UserUncheckedUpdateWithoutMentorParticipationSanctionsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -15257,6 +16569,9 @@ export type UserUncheckedUpdateWithoutMentorParticipationSanctionsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutRadarCvOwnedInput = {
@@ -15285,6 +16600,7 @@ export type UserCreateWithoutRadarCvOwnedInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -15316,6 +16632,7 @@ export type UserCreateWithoutRadarCvOwnedInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -15329,6 +16646,9 @@ export type UserCreateWithoutRadarCvOwnedInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutRadarCvOwnedInput = {
@@ -15357,6 +16677,7 @@ export type UserUncheckedCreateWithoutRadarCvOwnedInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -15388,6 +16709,7 @@ export type UserUncheckedCreateWithoutRadarCvOwnedInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -15401,6 +16723,9 @@ export type UserUncheckedCreateWithoutRadarCvOwnedInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutRadarCvOwnedInput = {
@@ -15434,6 +16759,7 @@ export type UserCreateWithoutRadarCvReviewedInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -15465,6 +16791,7 @@ export type UserCreateWithoutRadarCvReviewedInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -15478,6 +16805,9 @@ export type UserCreateWithoutRadarCvReviewedInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutRadarCvReviewedInput = {
@@ -15506,6 +16836,7 @@ export type UserUncheckedCreateWithoutRadarCvReviewedInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -15537,6 +16868,7 @@ export type UserUncheckedCreateWithoutRadarCvReviewedInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -15550,6 +16882,9 @@ export type UserUncheckedCreateWithoutRadarCvReviewedInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutRadarCvReviewedInput = {
@@ -15594,6 +16929,7 @@ export type UserUpdateWithoutRadarCvOwnedInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -15625,6 +16961,7 @@ export type UserUpdateWithoutRadarCvOwnedInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -15638,6 +16975,9 @@ export type UserUpdateWithoutRadarCvOwnedInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRadarCvOwnedInput = {
@@ -15666,6 +17006,7 @@ export type UserUncheckedUpdateWithoutRadarCvOwnedInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -15697,6 +17038,7 @@ export type UserUncheckedUpdateWithoutRadarCvOwnedInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -15710,6 +17052,9 @@ export type UserUncheckedUpdateWithoutRadarCvOwnedInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUpsertWithoutRadarCvReviewedInput = {
@@ -15749,6 +17094,7 @@ export type UserUpdateWithoutRadarCvReviewedInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -15780,6 +17126,7 @@ export type UserUpdateWithoutRadarCvReviewedInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -15793,6 +17140,9 @@ export type UserUpdateWithoutRadarCvReviewedInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRadarCvReviewedInput = {
@@ -15821,6 +17171,7 @@ export type UserUncheckedUpdateWithoutRadarCvReviewedInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -15852,6 +17203,7 @@ export type UserUncheckedUpdateWithoutRadarCvReviewedInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -15865,6 +17217,9 @@ export type UserUncheckedUpdateWithoutRadarCvReviewedInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutRadarSnapshotsInput = {
@@ -15893,6 +17248,7 @@ export type UserCreateWithoutRadarSnapshotsInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -15924,6 +17280,7 @@ export type UserCreateWithoutRadarSnapshotsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -15937,6 +17294,9 @@ export type UserCreateWithoutRadarSnapshotsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutRadarSnapshotsInput = {
@@ -15965,6 +17325,7 @@ export type UserUncheckedCreateWithoutRadarSnapshotsInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -15996,6 +17357,7 @@ export type UserUncheckedCreateWithoutRadarSnapshotsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -16009,6 +17371,9 @@ export type UserUncheckedCreateWithoutRadarSnapshotsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutRadarSnapshotsInput = {
@@ -16053,6 +17418,7 @@ export type UserUpdateWithoutRadarSnapshotsInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -16084,6 +17450,7 @@ export type UserUpdateWithoutRadarSnapshotsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -16097,6 +17464,9 @@ export type UserUpdateWithoutRadarSnapshotsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRadarSnapshotsInput = {
@@ -16125,6 +17495,7 @@ export type UserUncheckedUpdateWithoutRadarSnapshotsInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -16156,6 +17527,7 @@ export type UserUncheckedUpdateWithoutRadarSnapshotsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -16169,6 +17541,9 @@ export type UserUncheckedUpdateWithoutRadarSnapshotsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutRadarAuditSubjectsInput = {
@@ -16197,6 +17572,7 @@ export type UserCreateWithoutRadarAuditSubjectsInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -16228,6 +17604,7 @@ export type UserCreateWithoutRadarAuditSubjectsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -16241,6 +17618,9 @@ export type UserCreateWithoutRadarAuditSubjectsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutRadarAuditSubjectsInput = {
@@ -16269,6 +17649,7 @@ export type UserUncheckedCreateWithoutRadarAuditSubjectsInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -16300,6 +17681,7 @@ export type UserUncheckedCreateWithoutRadarAuditSubjectsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -16313,6 +17695,9 @@ export type UserUncheckedCreateWithoutRadarAuditSubjectsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutRadarAuditSubjectsInput = {
@@ -16346,6 +17731,7 @@ export type UserCreateWithoutRadarAuditActorsInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -16377,6 +17763,7 @@ export type UserCreateWithoutRadarAuditActorsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -16390,6 +17777,9 @@ export type UserCreateWithoutRadarAuditActorsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutRadarAuditActorsInput = {
@@ -16418,6 +17808,7 @@ export type UserUncheckedCreateWithoutRadarAuditActorsInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -16449,6 +17840,7 @@ export type UserUncheckedCreateWithoutRadarAuditActorsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -16462,6 +17854,9 @@ export type UserUncheckedCreateWithoutRadarAuditActorsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutRadarAuditActorsInput = {
@@ -16506,6 +17901,7 @@ export type UserUpdateWithoutRadarAuditSubjectsInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -16537,6 +17933,7 @@ export type UserUpdateWithoutRadarAuditSubjectsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -16550,6 +17947,9 @@ export type UserUpdateWithoutRadarAuditSubjectsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRadarAuditSubjectsInput = {
@@ -16578,6 +17978,7 @@ export type UserUncheckedUpdateWithoutRadarAuditSubjectsInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -16609,6 +18010,7 @@ export type UserUncheckedUpdateWithoutRadarAuditSubjectsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -16622,6 +18024,9 @@ export type UserUncheckedUpdateWithoutRadarAuditSubjectsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUpsertWithoutRadarAuditActorsInput = {
@@ -16661,6 +18066,7 @@ export type UserUpdateWithoutRadarAuditActorsInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -16692,6 +18098,7 @@ export type UserUpdateWithoutRadarAuditActorsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -16705,6 +18112,9 @@ export type UserUpdateWithoutRadarAuditActorsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRadarAuditActorsInput = {
@@ -16733,6 +18143,7 @@ export type UserUncheckedUpdateWithoutRadarAuditActorsInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -16764,6 +18175,7 @@ export type UserUncheckedUpdateWithoutRadarAuditActorsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -16777,6 +18189,9 @@ export type UserUncheckedUpdateWithoutRadarAuditActorsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutSocialAccountsInput = {
@@ -16805,6 +18220,7 @@ export type UserCreateWithoutSocialAccountsInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -16836,6 +18252,7 @@ export type UserCreateWithoutSocialAccountsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -16849,6 +18266,9 @@ export type UserCreateWithoutSocialAccountsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutSocialAccountsInput = {
@@ -16877,6 +18297,7 @@ export type UserUncheckedCreateWithoutSocialAccountsInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -16908,6 +18329,7 @@ export type UserUncheckedCreateWithoutSocialAccountsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -16921,6 +18343,9 @@ export type UserUncheckedCreateWithoutSocialAccountsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutSocialAccountsInput = {
@@ -16965,6 +18390,7 @@ export type UserUpdateWithoutSocialAccountsInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -16996,6 +18422,7 @@ export type UserUpdateWithoutSocialAccountsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -17009,6 +18436,9 @@ export type UserUpdateWithoutSocialAccountsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSocialAccountsInput = {
@@ -17037,6 +18467,7 @@ export type UserUncheckedUpdateWithoutSocialAccountsInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -17068,6 +18499,7 @@ export type UserUncheckedUpdateWithoutSocialAccountsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -17081,6 +18513,9 @@ export type UserUncheckedUpdateWithoutSocialAccountsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutPortfolioProjectsInput = {
@@ -17109,6 +18544,7 @@ export type UserCreateWithoutPortfolioProjectsInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -17140,6 +18576,7 @@ export type UserCreateWithoutPortfolioProjectsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -17153,6 +18590,9 @@ export type UserCreateWithoutPortfolioProjectsInput = {
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutPortfolioProjectsInput = {
@@ -17181,6 +18621,7 @@ export type UserUncheckedCreateWithoutPortfolioProjectsInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -17212,6 +18653,7 @@ export type UserUncheckedCreateWithoutPortfolioProjectsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -17225,6 +18667,9 @@ export type UserUncheckedCreateWithoutPortfolioProjectsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutPortfolioProjectsInput = {
@@ -17269,6 +18714,7 @@ export type UserUpdateWithoutPortfolioProjectsInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -17300,6 +18746,7 @@ export type UserUpdateWithoutPortfolioProjectsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -17313,6 +18760,9 @@ export type UserUpdateWithoutPortfolioProjectsInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPortfolioProjectsInput = {
@@ -17341,6 +18791,7 @@ export type UserUncheckedUpdateWithoutPortfolioProjectsInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -17372,6 +18823,7 @@ export type UserUncheckedUpdateWithoutPortfolioProjectsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -17385,6 +18837,9 @@ export type UserUncheckedUpdateWithoutPortfolioProjectsInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutReceivedNotificationsInput = {
@@ -17413,6 +18868,7 @@ export type UserCreateWithoutReceivedNotificationsInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -17444,6 +18900,7 @@ export type UserCreateWithoutReceivedNotificationsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -17457,6 +18914,9 @@ export type UserCreateWithoutReceivedNotificationsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutReceivedNotificationsInput = {
@@ -17485,6 +18945,7 @@ export type UserUncheckedCreateWithoutReceivedNotificationsInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -17516,6 +18977,7 @@ export type UserUncheckedCreateWithoutReceivedNotificationsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -17529,6 +18991,9 @@ export type UserUncheckedCreateWithoutReceivedNotificationsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutReceivedNotificationsInput = {
@@ -17562,6 +19027,7 @@ export type UserCreateWithoutTriggeredNotificationsInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -17593,6 +19059,7 @@ export type UserCreateWithoutTriggeredNotificationsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -17606,6 +19073,9 @@ export type UserCreateWithoutTriggeredNotificationsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutTriggeredNotificationsInput = {
@@ -17634,6 +19104,7 @@ export type UserUncheckedCreateWithoutTriggeredNotificationsInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -17665,6 +19136,7 @@ export type UserUncheckedCreateWithoutTriggeredNotificationsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -17678,6 +19150,9 @@ export type UserUncheckedCreateWithoutTriggeredNotificationsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutTriggeredNotificationsInput = {
@@ -17722,6 +19197,7 @@ export type UserUpdateWithoutReceivedNotificationsInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -17753,6 +19229,7 @@ export type UserUpdateWithoutReceivedNotificationsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -17766,6 +19243,9 @@ export type UserUpdateWithoutReceivedNotificationsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReceivedNotificationsInput = {
@@ -17794,6 +19274,7 @@ export type UserUncheckedUpdateWithoutReceivedNotificationsInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -17825,6 +19306,7 @@ export type UserUncheckedUpdateWithoutReceivedNotificationsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -17838,6 +19320,9 @@ export type UserUncheckedUpdateWithoutReceivedNotificationsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUpsertWithoutTriggeredNotificationsInput = {
@@ -17877,6 +19362,7 @@ export type UserUpdateWithoutTriggeredNotificationsInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -17908,6 +19394,7 @@ export type UserUpdateWithoutTriggeredNotificationsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -17921,6 +19408,9 @@ export type UserUpdateWithoutTriggeredNotificationsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTriggeredNotificationsInput = {
@@ -17949,6 +19439,7 @@ export type UserUncheckedUpdateWithoutTriggeredNotificationsInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -17980,6 +19471,7 @@ export type UserUncheckedUpdateWithoutTriggeredNotificationsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -17993,6 +19485,9 @@ export type UserUncheckedUpdateWithoutTriggeredNotificationsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserCreateWithoutPushSubscriptionsInput = {
@@ -18021,6 +19516,7 @@ export type UserCreateWithoutPushSubscriptionsInput = {
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -18052,6 +19548,7 @@ export type UserCreateWithoutPushSubscriptionsInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -18065,6 +19562,9 @@ export type UserCreateWithoutPushSubscriptionsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserUncheckedCreateWithoutPushSubscriptionsInput = {
@@ -18093,6 +19593,7 @@ export type UserUncheckedCreateWithoutPushSubscriptionsInput = {
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
   cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -18124,6 +19625,7 @@ export type UserUncheckedCreateWithoutPushSubscriptionsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -18137,6 +19639,9 @@ export type UserUncheckedCreateWithoutPushSubscriptionsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
 export type UserCreateOrConnectWithoutPushSubscriptionsInput = {
@@ -18181,6 +19686,7 @@ export type UserUpdateWithoutPushSubscriptionsInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -18212,6 +19718,7 @@ export type UserUpdateWithoutPushSubscriptionsInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -18225,6 +19732,9 @@ export type UserUpdateWithoutPushSubscriptionsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPushSubscriptionsInput = {
@@ -18253,6 +19763,7 @@ export type UserUncheckedUpdateWithoutPushSubscriptionsInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -18284,6 +19795,7 @@ export type UserUncheckedUpdateWithoutPushSubscriptionsInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -18297,9 +19809,12 @@ export type UserUncheckedUpdateWithoutPushSubscriptionsInput = {
   notificationPreferences?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
-export type UserCreateWithoutNotificationPreferencesInput = {
+export type UserCreateWithoutRefreshTokensInput = {
   id?: string
   firstName: string
   lastName: string
@@ -18356,6 +19871,7 @@ export type UserCreateWithoutNotificationPreferencesInput = {
   sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -18366,12 +19882,16 @@ export type UserCreateWithoutNotificationPreferencesInput = {
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  notificationPreferences?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
   receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
 }
 
-export type UserUncheckedCreateWithoutNotificationPreferencesInput = {
+export type UserUncheckedCreateWithoutRefreshTokensInput = {
   id?: string
   firstName: string
   lastName: string
@@ -18428,6 +19948,7 @@ export type UserUncheckedCreateWithoutNotificationPreferencesInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -18438,28 +19959,32 @@ export type UserUncheckedCreateWithoutNotificationPreferencesInput = {
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  notificationPreferences?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
   receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
 }
 
-export type UserCreateOrConnectWithoutNotificationPreferencesInput = {
+export type UserCreateOrConnectWithoutRefreshTokensInput = {
   where: Prisma.UserWhereUniqueInput
-  create: Prisma.XOR<Prisma.UserCreateWithoutNotificationPreferencesInput, Prisma.UserUncheckedCreateWithoutNotificationPreferencesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutRefreshTokensInput, Prisma.UserUncheckedCreateWithoutRefreshTokensInput>
 }
 
-export type UserUpsertWithoutNotificationPreferencesInput = {
-  update: Prisma.XOR<Prisma.UserUpdateWithoutNotificationPreferencesInput, Prisma.UserUncheckedUpdateWithoutNotificationPreferencesInput>
-  create: Prisma.XOR<Prisma.UserCreateWithoutNotificationPreferencesInput, Prisma.UserUncheckedCreateWithoutNotificationPreferencesInput>
+export type UserUpsertWithoutRefreshTokensInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutRefreshTokensInput, Prisma.UserUncheckedUpdateWithoutRefreshTokensInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutRefreshTokensInput, Prisma.UserUncheckedCreateWithoutRefreshTokensInput>
   where?: Prisma.UserWhereInput
 }
 
-export type UserUpdateToOneWithWhereWithoutNotificationPreferencesInput = {
+export type UserUpdateToOneWithWhereWithoutRefreshTokensInput = {
   where?: Prisma.UserWhereInput
-  data: Prisma.XOR<Prisma.UserUpdateWithoutNotificationPreferencesInput, Prisma.UserUncheckedUpdateWithoutNotificationPreferencesInput>
+  data: Prisma.XOR<Prisma.UserUpdateWithoutRefreshTokensInput, Prisma.UserUncheckedUpdateWithoutRefreshTokensInput>
 }
 
-export type UserUpdateWithoutNotificationPreferencesInput = {
+export type UserUpdateWithoutRefreshTokensInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
@@ -18516,6 +20041,7 @@ export type UserUpdateWithoutNotificationPreferencesInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -18526,12 +20052,16 @@ export type UserUpdateWithoutNotificationPreferencesInput = {
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  notificationPreferences?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
-export type UserUncheckedUpdateWithoutNotificationPreferencesInput = {
+export type UserUncheckedUpdateWithoutRefreshTokensInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
@@ -18588,6 +20118,332 @@ export type UserUncheckedUpdateWithoutNotificationPreferencesInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  notificationPreferences?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
+  receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
+  triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
+}
+
+export type UserCreateWithoutNotificationPreferencesInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
+  city?: Prisma.CityCreateNestedOneWithoutUsersInput
+  roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
+  triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
+}
+
+export type UserUncheckedCreateWithoutNotificationPreferencesInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  cityId?: string | null
+  companyId?: string | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
+  triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
+}
+
+export type UserCreateOrConnectWithoutNotificationPreferencesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutNotificationPreferencesInput, Prisma.UserUncheckedCreateWithoutNotificationPreferencesInput>
+}
+
+export type UserUpsertWithoutNotificationPreferencesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutNotificationPreferencesInput, Prisma.UserUncheckedUpdateWithoutNotificationPreferencesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutNotificationPreferencesInput, Prisma.UserUncheckedCreateWithoutNotificationPreferencesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutNotificationPreferencesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutNotificationPreferencesInput, Prisma.UserUncheckedUpdateWithoutNotificationPreferencesInput>
+}
+
+export type UserUpdateWithoutNotificationPreferencesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
+  city?: Prisma.CityUpdateOneWithoutUsersNestedInput
+  roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
+  triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutNotificationPreferencesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -18601,6 +20457,981 @@ export type UserUncheckedUpdateWithoutNotificationPreferencesInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
+}
+
+export type UserCreateWithoutOpenedCompanyRequestsInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
+  city?: Prisma.CityCreateNestedOneWithoutUsersInput
+  roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  notificationPreferences?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
+  receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
+  triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
+}
+
+export type UserUncheckedCreateWithoutOpenedCompanyRequestsInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  cityId?: string | null
+  companyId?: string | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  notificationPreferences?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
+  receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
+  triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
+}
+
+export type UserCreateOrConnectWithoutOpenedCompanyRequestsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutOpenedCompanyRequestsInput, Prisma.UserUncheckedCreateWithoutOpenedCompanyRequestsInput>
+}
+
+export type UserCreateWithoutReviewedCompanyRequestsInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
+  city?: Prisma.CityCreateNestedOneWithoutUsersInput
+  roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  notificationPreferences?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
+  receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
+  triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
+}
+
+export type UserUncheckedCreateWithoutReviewedCompanyRequestsInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  cityId?: string | null
+  companyId?: string | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  notificationPreferences?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
+  receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
+  triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
+}
+
+export type UserCreateOrConnectWithoutReviewedCompanyRequestsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutReviewedCompanyRequestsInput, Prisma.UserUncheckedCreateWithoutReviewedCompanyRequestsInput>
+}
+
+export type UserCreateWithoutApprovedCompanyAccountInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
+  city?: Prisma.CityCreateNestedOneWithoutUsersInput
+  roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  notificationPreferences?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
+  receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
+  triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+}
+
+export type UserUncheckedCreateWithoutApprovedCompanyAccountInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  cityId?: string | null
+  companyId?: string | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  notificationPreferences?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
+  receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
+  triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+}
+
+export type UserCreateOrConnectWithoutApprovedCompanyAccountInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutApprovedCompanyAccountInput, Prisma.UserUncheckedCreateWithoutApprovedCompanyAccountInput>
+}
+
+export type UserUpsertWithoutOpenedCompanyRequestsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutOpenedCompanyRequestsInput, Prisma.UserUncheckedUpdateWithoutOpenedCompanyRequestsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutOpenedCompanyRequestsInput, Prisma.UserUncheckedCreateWithoutOpenedCompanyRequestsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutOpenedCompanyRequestsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutOpenedCompanyRequestsInput, Prisma.UserUncheckedUpdateWithoutOpenedCompanyRequestsInput>
+}
+
+export type UserUpdateWithoutOpenedCompanyRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
+  city?: Prisma.CityUpdateOneWithoutUsersNestedInput
+  roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  notificationPreferences?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
+  receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
+  triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutOpenedCompanyRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  notificationPreferences?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
+  receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
+  triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
+}
+
+export type UserUpsertWithoutReviewedCompanyRequestsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutReviewedCompanyRequestsInput, Prisma.UserUncheckedUpdateWithoutReviewedCompanyRequestsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutReviewedCompanyRequestsInput, Prisma.UserUncheckedCreateWithoutReviewedCompanyRequestsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutReviewedCompanyRequestsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutReviewedCompanyRequestsInput, Prisma.UserUncheckedUpdateWithoutReviewedCompanyRequestsInput>
+}
+
+export type UserUpdateWithoutReviewedCompanyRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
+  city?: Prisma.CityUpdateOneWithoutUsersNestedInput
+  roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  notificationPreferences?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
+  receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
+  triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutReviewedCompanyRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  notificationPreferences?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
+  receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
+  triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
+}
+
+export type UserUpsertWithoutApprovedCompanyAccountInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutApprovedCompanyAccountInput, Prisma.UserUncheckedUpdateWithoutApprovedCompanyAccountInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutApprovedCompanyAccountInput, Prisma.UserUncheckedCreateWithoutApprovedCompanyAccountInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutApprovedCompanyAccountInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutApprovedCompanyAccountInput, Prisma.UserUncheckedUpdateWithoutApprovedCompanyAccountInput>
+}
+
+export type UserUpdateWithoutApprovedCompanyAccountInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
+  city?: Prisma.CityUpdateOneWithoutUsersNestedInput
+  roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  notificationPreferences?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
+  receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
+  triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutApprovedCompanyAccountInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  notificationPreferences?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
+  receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
+  triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
 }
 
 export type UserCreateManyCityInput = {
@@ -18646,6 +21477,7 @@ export type UserUpdateWithoutCityInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -18677,6 +21509,7 @@ export type UserUpdateWithoutCityInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -18691,6 +21524,9 @@ export type UserUpdateWithoutCityInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCityInput = {
@@ -18718,6 +21554,7 @@ export type UserUncheckedUpdateWithoutCityInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -18749,6 +21586,7 @@ export type UserUncheckedUpdateWithoutCityInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -18763,6 +21601,9 @@ export type UserUncheckedUpdateWithoutCityInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateManyWithoutCityInput = {
@@ -18826,6 +21667,7 @@ export type UserUpdateWithoutCompanyInput = {
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -18857,6 +21699,7 @@ export type UserUpdateWithoutCompanyInput = {
   sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -18871,6 +21714,9 @@ export type UserUpdateWithoutCompanyInput = {
   receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCompanyInput = {
@@ -18898,6 +21744,7 @@ export type UserUncheckedUpdateWithoutCompanyInput = {
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
   cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -18929,6 +21776,7 @@ export type UserUncheckedUpdateWithoutCompanyInput = {
   sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
   receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -18943,6 +21791,9 @@ export type UserUncheckedUpdateWithoutCompanyInput = {
   receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
 }
 
 export type UserUncheckedUpdateManyWithoutCompanyInput = {
@@ -18977,6 +21828,7 @@ export type UserCountOutputType = {
   userSkills: number
   certifications: number
   cvFiles: number
+  refreshTokens: number
   mentorTechnicalAreas: number
   mentorOrientationTypes: number
   availabilityBlocks: number
@@ -19005,6 +21857,7 @@ export type UserCountOutputType = {
   sentRequests: number
   receivedRequests: number
   passwordResetOtps: number
+  passwordHistories: number
   auditEvents: number
   revertedValidations: number
   jobApplications: number
@@ -19018,6 +21871,8 @@ export type UserCountOutputType = {
   receivedNotifications: number
   triggeredNotifications: number
   pushSubscriptions: number
+  openedCompanyRequests: number
+  reviewedCompanyRequests: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -19029,6 +21884,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   userSkills?: boolean | UserCountOutputTypeCountUserSkillsArgs
   certifications?: boolean | UserCountOutputTypeCountCertificationsArgs
   cvFiles?: boolean | UserCountOutputTypeCountCvFilesArgs
+  refreshTokens?: boolean | UserCountOutputTypeCountRefreshTokensArgs
   mentorTechnicalAreas?: boolean | UserCountOutputTypeCountMentorTechnicalAreasArgs
   mentorOrientationTypes?: boolean | UserCountOutputTypeCountMentorOrientationTypesArgs
   availabilityBlocks?: boolean | UserCountOutputTypeCountAvailabilityBlocksArgs
@@ -19057,6 +21913,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   sentRequests?: boolean | UserCountOutputTypeCountSentRequestsArgs
   receivedRequests?: boolean | UserCountOutputTypeCountReceivedRequestsArgs
   passwordResetOtps?: boolean | UserCountOutputTypeCountPasswordResetOtpsArgs
+  passwordHistories?: boolean | UserCountOutputTypeCountPasswordHistoriesArgs
   auditEvents?: boolean | UserCountOutputTypeCountAuditEventsArgs
   revertedValidations?: boolean | UserCountOutputTypeCountRevertedValidationsArgs
   jobApplications?: boolean | UserCountOutputTypeCountJobApplicationsArgs
@@ -19070,6 +21927,8 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   receivedNotifications?: boolean | UserCountOutputTypeCountReceivedNotificationsArgs
   triggeredNotifications?: boolean | UserCountOutputTypeCountTriggeredNotificationsArgs
   pushSubscriptions?: boolean | UserCountOutputTypeCountPushSubscriptionsArgs
+  openedCompanyRequests?: boolean | UserCountOutputTypeCountOpenedCompanyRequestsArgs
+  reviewedCompanyRequests?: boolean | UserCountOutputTypeCountReviewedCompanyRequestsArgs
 }
 
 /**
@@ -19136,6 +21995,13 @@ export type UserCountOutputTypeCountCertificationsArgs<ExtArgs extends runtime.T
  */
 export type UserCountOutputTypeCountCvFilesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.UserCvFileWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountRefreshTokensArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.RefreshTokenWhereInput
 }
 
 /**
@@ -19337,6 +22203,13 @@ export type UserCountOutputTypeCountPasswordResetOtpsArgs<ExtArgs extends runtim
 /**
  * UserCountOutputType without action
  */
+export type UserCountOutputTypeCountPasswordHistoriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PasswordHistoryWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
 export type UserCountOutputTypeCountAuditEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.AuditEventWhereInput
 }
@@ -19425,6 +22298,20 @@ export type UserCountOutputTypeCountPushSubscriptionsArgs<ExtArgs extends runtim
   where?: Prisma.PushSubscriptionWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountOpenedCompanyRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CompanyAccessRequestWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountReviewedCompanyRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CompanyAccessRequestWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -19454,6 +22341,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   certifications?: boolean | Prisma.User$certificationsArgs<ExtArgs>
   cvFiles?: boolean | Prisma.User$cvFilesArgs<ExtArgs>
   skillProcessingState?: boolean | Prisma.User$skillProcessingStateArgs<ExtArgs>
+  refreshTokens?: boolean | Prisma.User$refreshTokensArgs<ExtArgs>
   mentorTechnicalAreas?: boolean | Prisma.User$mentorTechnicalAreasArgs<ExtArgs>
   mentorOrientationTypes?: boolean | Prisma.User$mentorOrientationTypesArgs<ExtArgs>
   availabilityBlocks?: boolean | Prisma.User$availabilityBlocksArgs<ExtArgs>
@@ -19485,6 +22373,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   sentRequests?: boolean | Prisma.User$sentRequestsArgs<ExtArgs>
   receivedRequests?: boolean | Prisma.User$receivedRequestsArgs<ExtArgs>
   passwordResetOtps?: boolean | Prisma.User$passwordResetOtpsArgs<ExtArgs>
+  passwordHistories?: boolean | Prisma.User$passwordHistoriesArgs<ExtArgs>
   auditEvents?: boolean | Prisma.User$auditEventsArgs<ExtArgs>
   revertedValidations?: boolean | Prisma.User$revertedValidationsArgs<ExtArgs>
   jobApplications?: boolean | Prisma.User$jobApplicationsArgs<ExtArgs>
@@ -19499,6 +22388,9 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   receivedNotifications?: boolean | Prisma.User$receivedNotificationsArgs<ExtArgs>
   triggeredNotifications?: boolean | Prisma.User$triggeredNotificationsArgs<ExtArgs>
   pushSubscriptions?: boolean | Prisma.User$pushSubscriptionsArgs<ExtArgs>
+  openedCompanyRequests?: boolean | Prisma.User$openedCompanyRequestsArgs<ExtArgs>
+  reviewedCompanyRequests?: boolean | Prisma.User$reviewedCompanyRequestsArgs<ExtArgs>
+  approvedCompanyAccount?: boolean | Prisma.User$approvedCompanyAccountArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -19576,6 +22468,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   certifications?: boolean | Prisma.User$certificationsArgs<ExtArgs>
   cvFiles?: boolean | Prisma.User$cvFilesArgs<ExtArgs>
   skillProcessingState?: boolean | Prisma.User$skillProcessingStateArgs<ExtArgs>
+  refreshTokens?: boolean | Prisma.User$refreshTokensArgs<ExtArgs>
   mentorTechnicalAreas?: boolean | Prisma.User$mentorTechnicalAreasArgs<ExtArgs>
   mentorOrientationTypes?: boolean | Prisma.User$mentorOrientationTypesArgs<ExtArgs>
   availabilityBlocks?: boolean | Prisma.User$availabilityBlocksArgs<ExtArgs>
@@ -19607,6 +22500,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   sentRequests?: boolean | Prisma.User$sentRequestsArgs<ExtArgs>
   receivedRequests?: boolean | Prisma.User$receivedRequestsArgs<ExtArgs>
   passwordResetOtps?: boolean | Prisma.User$passwordResetOtpsArgs<ExtArgs>
+  passwordHistories?: boolean | Prisma.User$passwordHistoriesArgs<ExtArgs>
   auditEvents?: boolean | Prisma.User$auditEventsArgs<ExtArgs>
   revertedValidations?: boolean | Prisma.User$revertedValidationsArgs<ExtArgs>
   jobApplications?: boolean | Prisma.User$jobApplicationsArgs<ExtArgs>
@@ -19621,6 +22515,9 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   receivedNotifications?: boolean | Prisma.User$receivedNotificationsArgs<ExtArgs>
   triggeredNotifications?: boolean | Prisma.User$triggeredNotificationsArgs<ExtArgs>
   pushSubscriptions?: boolean | Prisma.User$pushSubscriptionsArgs<ExtArgs>
+  openedCompanyRequests?: boolean | Prisma.User$openedCompanyRequestsArgs<ExtArgs>
+  reviewedCompanyRequests?: boolean | Prisma.User$reviewedCompanyRequestsArgs<ExtArgs>
+  approvedCompanyAccount?: boolean | Prisma.User$approvedCompanyAccountArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -19646,6 +22543,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     certifications: Prisma.$CertificationPayload<ExtArgs>[]
     cvFiles: Prisma.$UserCvFilePayload<ExtArgs>[]
     skillProcessingState: Prisma.$ProfileSkillProcessingStatePayload<ExtArgs> | null
+    refreshTokens: Prisma.$RefreshTokenPayload<ExtArgs>[]
     mentorTechnicalAreas: Prisma.$MentorTechnicalAreaPayload<ExtArgs>[]
     mentorOrientationTypes: Prisma.$MentorOrientationTypePayload<ExtArgs>[]
     availabilityBlocks: Prisma.$AvailabilityBlockPayload<ExtArgs>[]
@@ -19677,6 +22575,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     sentRequests: Prisma.$ConnectionRequestPayload<ExtArgs>[]
     receivedRequests: Prisma.$ConnectionRequestPayload<ExtArgs>[]
     passwordResetOtps: Prisma.$PasswordResetOtpPayload<ExtArgs>[]
+    passwordHistories: Prisma.$PasswordHistoryPayload<ExtArgs>[]
     auditEvents: Prisma.$AuditEventPayload<ExtArgs>[]
     revertedValidations: Prisma.$DocumentValidationPayload<ExtArgs>[]
     jobApplications: Prisma.$JobApplicationPayload<ExtArgs>[]
@@ -19691,6 +22590,9 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     receivedNotifications: Prisma.$NotificationPayload<ExtArgs>[]
     triggeredNotifications: Prisma.$NotificationPayload<ExtArgs>[]
     pushSubscriptions: Prisma.$PushSubscriptionPayload<ExtArgs>[]
+    openedCompanyRequests: Prisma.$CompanyAccessRequestPayload<ExtArgs>[]
+    reviewedCompanyRequests: Prisma.$CompanyAccessRequestPayload<ExtArgs>[]
+    approvedCompanyAccount: Prisma.$CompanyAccessRequestPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -20114,6 +23016,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   certifications<T extends Prisma.User$certificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$certificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CertificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   cvFiles<T extends Prisma.User$cvFilesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$cvFilesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserCvFilePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   skillProcessingState<T extends Prisma.User$skillProcessingStateArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$skillProcessingStateArgs<ExtArgs>>): Prisma.Prisma__ProfileSkillProcessingStateClient<runtime.Types.Result.GetResult<Prisma.$ProfileSkillProcessingStatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  refreshTokens<T extends Prisma.User$refreshTokensArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$refreshTokensArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RefreshTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   mentorTechnicalAreas<T extends Prisma.User$mentorTechnicalAreasArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$mentorTechnicalAreasArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MentorTechnicalAreaPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   mentorOrientationTypes<T extends Prisma.User$mentorOrientationTypesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$mentorOrientationTypesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MentorOrientationTypePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   availabilityBlocks<T extends Prisma.User$availabilityBlocksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$availabilityBlocksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AvailabilityBlockPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -20145,6 +23048,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   sentRequests<T extends Prisma.User$sentRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sentRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConnectionRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   receivedRequests<T extends Prisma.User$receivedRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$receivedRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConnectionRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   passwordResetOtps<T extends Prisma.User$passwordResetOtpsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$passwordResetOtpsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PasswordResetOtpPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  passwordHistories<T extends Prisma.User$passwordHistoriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$passwordHistoriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PasswordHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   auditEvents<T extends Prisma.User$auditEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$auditEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuditEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   revertedValidations<T extends Prisma.User$revertedValidationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$revertedValidationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentValidationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   jobApplications<T extends Prisma.User$jobApplicationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$jobApplicationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$JobApplicationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -20159,6 +23063,9 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   receivedNotifications<T extends Prisma.User$receivedNotificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$receivedNotificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   triggeredNotifications<T extends Prisma.User$triggeredNotificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$triggeredNotificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   pushSubscriptions<T extends Prisma.User$pushSubscriptionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$pushSubscriptionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PushSubscriptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  openedCompanyRequests<T extends Prisma.User$openedCompanyRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$openedCompanyRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CompanyAccessRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  reviewedCompanyRequests<T extends Prisma.User$reviewedCompanyRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$reviewedCompanyRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CompanyAccessRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  approvedCompanyAccount<T extends Prisma.User$approvedCompanyAccountArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$approvedCompanyAccountArgs<ExtArgs>>): Prisma.Prisma__CompanyAccessRequestClient<runtime.Types.Result.GetResult<Prisma.$CompanyAccessRequestPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -20851,6 +23758,30 @@ export type User$skillProcessingStateArgs<ExtArgs extends runtime.Types.Extensio
    */
   include?: Prisma.ProfileSkillProcessingStateInclude<ExtArgs> | null
   where?: Prisma.ProfileSkillProcessingStateWhereInput
+}
+
+/**
+ * User.refreshTokens
+ */
+export type User$refreshTokensArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the RefreshToken
+   */
+  select?: Prisma.RefreshTokenSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the RefreshToken
+   */
+  omit?: Prisma.RefreshTokenOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RefreshTokenInclude<ExtArgs> | null
+  where?: Prisma.RefreshTokenWhereInput
+  orderBy?: Prisma.RefreshTokenOrderByWithRelationInput | Prisma.RefreshTokenOrderByWithRelationInput[]
+  cursor?: Prisma.RefreshTokenWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.RefreshTokenScalarFieldEnum | Prisma.RefreshTokenScalarFieldEnum[]
 }
 
 /**
@@ -21583,6 +24514,30 @@ export type User$passwordResetOtpsArgs<ExtArgs extends runtime.Types.Extensions.
 }
 
 /**
+ * User.passwordHistories
+ */
+export type User$passwordHistoriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PasswordHistory
+   */
+  select?: Prisma.PasswordHistorySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PasswordHistory
+   */
+  omit?: Prisma.PasswordHistoryOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PasswordHistoryInclude<ExtArgs> | null
+  where?: Prisma.PasswordHistoryWhereInput
+  orderBy?: Prisma.PasswordHistoryOrderByWithRelationInput | Prisma.PasswordHistoryOrderByWithRelationInput[]
+  cursor?: Prisma.PasswordHistoryWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PasswordHistoryScalarFieldEnum | Prisma.PasswordHistoryScalarFieldEnum[]
+}
+
+/**
  * User.auditEvents
  */
 export type User$auditEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -21911,6 +24866,73 @@ export type User$pushSubscriptionsArgs<ExtArgs extends runtime.Types.Extensions.
   take?: number
   skip?: number
   distinct?: Prisma.PushSubscriptionScalarFieldEnum | Prisma.PushSubscriptionScalarFieldEnum[]
+}
+
+/**
+ * User.openedCompanyRequests
+ */
+export type User$openedCompanyRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CompanyAccessRequest
+   */
+  select?: Prisma.CompanyAccessRequestSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CompanyAccessRequest
+   */
+  omit?: Prisma.CompanyAccessRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompanyAccessRequestInclude<ExtArgs> | null
+  where?: Prisma.CompanyAccessRequestWhereInput
+  orderBy?: Prisma.CompanyAccessRequestOrderByWithRelationInput | Prisma.CompanyAccessRequestOrderByWithRelationInput[]
+  cursor?: Prisma.CompanyAccessRequestWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CompanyAccessRequestScalarFieldEnum | Prisma.CompanyAccessRequestScalarFieldEnum[]
+}
+
+/**
+ * User.reviewedCompanyRequests
+ */
+export type User$reviewedCompanyRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CompanyAccessRequest
+   */
+  select?: Prisma.CompanyAccessRequestSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CompanyAccessRequest
+   */
+  omit?: Prisma.CompanyAccessRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompanyAccessRequestInclude<ExtArgs> | null
+  where?: Prisma.CompanyAccessRequestWhereInput
+  orderBy?: Prisma.CompanyAccessRequestOrderByWithRelationInput | Prisma.CompanyAccessRequestOrderByWithRelationInput[]
+  cursor?: Prisma.CompanyAccessRequestWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CompanyAccessRequestScalarFieldEnum | Prisma.CompanyAccessRequestScalarFieldEnum[]
+}
+
+/**
+ * User.approvedCompanyAccount
+ */
+export type User$approvedCompanyAccountArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CompanyAccessRequest
+   */
+  select?: Prisma.CompanyAccessRequestSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CompanyAccessRequest
+   */
+  omit?: Prisma.CompanyAccessRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompanyAccessRequestInclude<ExtArgs> | null
+  where?: Prisma.CompanyAccessRequestWhereInput
 }
 
 /**

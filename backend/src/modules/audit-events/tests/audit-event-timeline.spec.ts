@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { AUDIT_ACTION_LABELS } from '../constants/audit-action-labels.constants.js';
+import { AuditEventNotFoundException } from '../exceptions/index.js';
 import { AuditEventsRepository } from '../repositories/audit-events.repository.js';
 import { AuditEventTimelineService } from '../services/audit-event-timeline.service.js';
 
@@ -75,4 +76,55 @@ describe('nuevas acciones de auditoría', () => {
     );
     expect(AUDIT_ACTION_LABELS.approval_reverted).toBe('Aprobación revertida');
   });
+});
+
+describe('listForEvent', () => {
+  it('devuelve el historial de la solicitud con el evento consultado marcado', async () => {
+    const repository = {
+      findTimelineOwner: vi.fn().mockResolvedValue({
+        id: 'evt-2',
+        accessRequestId: 'req-1',
+        requestCode: 'SOL-2026-0018',
+      }),
+      findTimeline: vi.fn().mockResolvedValue([
+        {
+          id: 'evt-1',
+          occurredAt: new Date('2026-11-07T09:53:00.000Z'),
+          actorName: 'Xavier Daniel Soria Flores',
+          actorRole: 'titulado',
+          detail: null,
+          action: { title: 'submitted' },
+        },
+        {
+          id: 'evt-2',
+          occurredAt: new Date('2026-11-07T09:54:00.000Z'),
+          actorName: 'Admin Uno',
+          actorRole: 'administrativo',
+          detail: 'Motivo: Documento ilegible',
+          action: { title: 'rejected' },
+        },
+      ]),
+    };
+    const service = new AuditEventTimelineService(repository as never);
+
+    const result = await service.listForEvent('evt-2');
+
+    expect(result.requestCode).toBe('SOL-2026-0018');
+    expect(result.focusedEventId).toBe('evt-2');
+    expect(result.items.map((item) => item.id)).toEqual(['evt-1', 'evt-2']);
+    expect(repository.findTimeline).toHaveBeenCalledWith('req-1');
+  });
+
+    it('rechaza un evento inexistente', async () => {
+      const repository = {
+        findTimelineOwner: vi.fn().mockResolvedValue(null),
+        findTimeline: vi.fn(),
+      };
+      const service = new AuditEventTimelineService(repository as never);
+
+      await expect(service.listForEvent('evt-x')).rejects.toThrow(
+        AuditEventNotFoundException,
+      );
+      expect(repository.findTimeline).not.toHaveBeenCalled();
+    });
 });

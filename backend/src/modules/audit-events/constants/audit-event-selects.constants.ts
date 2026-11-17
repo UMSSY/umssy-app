@@ -19,6 +19,17 @@ export const AUDIT_EVENT_LIST_SELECT = {
   evidenceFile: AUDIT_EVIDENCE_SELECT,
 } satisfies Prisma.AuditEventSelect;
 
+export const AUDIT_EVENT_DETAIL_SELECT = {
+  ...AUDIT_EVENT_LIST_SELECT,
+  applicantCareer: true,
+  accessRequest: {
+    select: {
+      graduationYear: true,
+      documentType: { select: { title: true } },
+    },
+  },
+} satisfies Prisma.AuditEventSelect;
+
 export const AUDIT_EVENT_ORDER = [
   { occurredAt: 'desc' },
   { number: 'desc' },

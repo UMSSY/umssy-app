@@ -73,4 +73,17 @@ describe('authService', () => {
     expect(apiClient.post).toHaveBeenCalledWith('/auth/forgot-password/reset', { email: 'user@test.com', code: '123456', password: 'NewPassword1' });
   });
 
+  it("refreshSession llama a POST /auth/refresh con credenciales", async () => {
+    vi.mocked(apiClient.post).mockResolvedValueOnce({ data: { ok: true } });
+    const result = await authService.refreshSession();
+    expect(apiClient.post).toHaveBeenCalledWith("/auth/refresh");
+    expect(result).toEqual({ ok: true });
+  });
+
+  it("logout llama a POST /auth/logout para revocar sesión en servidor", async () => {
+    vi.mocked(apiClient.post).mockResolvedValueOnce({ data: { ok: true } });
+    const result = await authService.logout();
+    expect(apiClient.post).toHaveBeenCalledWith("/auth/logout");
+    expect(result).toEqual({ ok: true });
+  });
 });

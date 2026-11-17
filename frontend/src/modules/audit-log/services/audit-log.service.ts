@@ -2,7 +2,9 @@ import { GENERIC_ERROR_MESSAGE, NETWORK_ERROR_MESSAGE } from "@/shared/constants
 import { apiClient } from "@/shared/services/api-client";
 import { AUDIT_PAGE_SIZE } from "../constants/audit-log.constants";
 import type { AuditApiResult } from "../types/audit-api-result.types";
+import type { AuditEventDetail } from "../types/audit-event-detail.types";
 import type { AuditEventPage } from "../types/audit-event-page.types";
+import type { AuditEventTimeline } from "../types/audit-event-timeline.types";
 import type { AuditLogFilters } from "../types/audit-log-filters.types";
 import { isRecord, toAuditFailure } from "../utils/to-audit-failure";
 
@@ -58,4 +60,43 @@ async function getEvidenceBlob(eventId: string): Promise<AuditApiResult<Blob>> {
   }
 }
 
-export const auditLogService = { listEvents, getEvidenceBlob };
+async function getEventDetail(eventId: string): Promise<AuditApiResult<AuditEventDetail>> {
+  try {
+    const response = await apiClient.get(`/audit-events/${eventId}`, { validateStatus: () => true });
+    if (response.status < 200 || response.status >= 300) return toAuditFailure(response.status, response.data);
+
+    const body: unknown = response.data;
+    const payload = isRecord(body) && isRecord(body.data) ? body.data : null;
+    if (!payload || typeof payload.id !== "string" || !isRecord(payload.request) || !isRecord(payload.applicant)) {
+      return { ok: false, status: 0, message: GENERIC_ERROR_MESSAGE };
+    }
+    return { ok: true, data: payload as unknown as AuditEventDetail };
+  } catch {
+    return { ok: false, status: 0, message: NETWORK_ERROR_MESSAGE };
+  }
+}
+
+async function getEventTimeline(eventId: string): Promise<AuditApiResult<AuditEventTimeline>> {
+  try {
+    const response = await apiClient.get(`/audit-events/${eventId}/timeline`, { validateStatus: () => true });
+    if (response.status < 200 || response.status >= 300) return toAuditFailure(response.status, response.data);
+
+    const body: unknown = response.data;
+    const payload = isRecord(body) && isRecord(body.data) ? body.data : null;
+    if (!payload || !Array.isArray(payload.items) || typeof payload.requestCode !== "string") {
+      return { ok: false, status: 0, message: GENERIC_ERROR_MESSAGE };
+    }
+    return {
+      ok: true,
+      data: {
+        requestCode: payload.requestCode,
+        focusedEventId: typeof payload.focusedEventId === "string" ? payload.focusedEventId : eventId,
+        items: payload.items as AuditEventTimeline["items"],
+      },
+    };
+  } catch {
+    return { ok: false, status: 0, message: NETWORK_ERROR_MESSAGE };
+  }
+}
+
+export const auditLogService = { listEvents, getEventDetail, getEventTimeline, getEvidenceBlob };

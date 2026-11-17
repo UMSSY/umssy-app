@@ -12,7 +12,9 @@ import {
   EyeOff,
   ArrowLeft,
   ArrowRight,
+  LockKeyhole,
   Mail,
+  Clock,
 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -21,6 +23,12 @@ import { Label } from '@/components/ui/label';
 import { GoogleIcon } from '@/shared/components/icons/google-icon';
 import { googleAuthService } from '../services/google-auth.service';
 import { useLogin } from '../hooks/use-login';
+import { useCredentialRestrictions } from '../hooks/use-credential-restrictions';
+import { CredentialRestrictionNotice } from '../components/credential-restriction-notice';
+import {
+  getCredentialLimit,
+  toAuthRequestError,
+} from '../utils/auth-request-error';
 import { useRedirectAuthenticated } from '../hooks/use-redirect-authenticated';
 import { NEXT_PARAM } from '../constants/session.constants';
 import { resolvePostLoginPath } from '../utils/resolve-post-login-path';
@@ -32,7 +40,14 @@ import {
 
 export function LoginView() {
   const router = useRouter();
-  const { login, isLoading, error } = useLogin();
+  const restrictions = useCredentialRestrictions();
+  const { login, isLoading, error } = useLogin((cause, payload) =>
+    restrictions.restrict(
+      payload.email,
+      getCredentialLimit(cause),
+      toAuthRequestError(cause, 'No se pudo iniciar sesión.').message,
+    ),
+  );
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -40,10 +55,20 @@ export function LoginView() {
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [isAccessDenied, setIsAccessDenied] = useState(false);
+
+  const [isExpiredNoticeVisible] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const reason = new URLSearchParams(window.location.search).get('reason');
+    return reason === 'SESSION_EXPIRED' || reason === 'session_expired';
+  });
+
   useRedirectAuthenticated(!isSigningIn);
+  const loginRestriction = restrictions.getRestriction('login', email);
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
+    if (isLoading || isSigningIn || restrictions.isBlocked('login', email))
+      return;
     const errors = validateLoginFields(email, password);
     setFieldErrors(errors);
     if (errors.email || errors.password) return;
@@ -51,7 +76,17 @@ export function LoginView() {
     if (result) {
       setIsSigningIn(true);
       await startSession(result.accessToken);
-      const next = new URLSearchParams(window.location.search).get(NEXT_PARAM);
+      const urlNext = new URLSearchParams(window.location.search).get(
+        NEXT_PARAM,
+      );
+      const storedNext =
+        typeof window !== 'undefined'
+          ? sessionStorage.getItem('umssy_post_login_redirect')
+          : null;
+      if (typeof window !== 'undefined' && storedNext) {
+        sessionStorage.removeItem('umssy_post_login_redirect');
+      }
+      const next = urlNext || storedNext;
       router.push(resolvePostLoginPath(result.roles ?? result.roleTag, next));
     }
   }
@@ -167,6 +202,28 @@ export function LoginView() {
                 Ingresa con tu cuenta de UMSSY.
               </p>
 
+              {isExpiredNoticeVisible ? (
+                <div
+                  role="alert"
+                  className="mb-6 flex items-start gap-3 rounded-lg border border-amber-300 bg-amber-50 p-4 text-amber-900 dark:border-amber-700/50 dark:bg-amber-950/30 dark:text-amber-200"
+                >
+                  <Clock
+                    className="mt-0.5 size-5 shrink-0 text-amber-600 dark:text-amber-400"
+                    aria-hidden="true"
+                  />
+                  <div>
+                    <h2 className="text-sm font-bold text-amber-900 dark:text-amber-200">
+                      Tu sesión expiró
+                    </h2>
+                    <p className="mt-0.5 text-xs text-amber-800 dark:text-amber-300">
+                      Por seguridad la cerramos tras 15 minutos sin actividad.
+                      Inicia sesión de nuevo y volverás a la página donde
+                      estabas.
+                    </p>
+                  </div>
+                </div>
+              ) : null}
+
               <div className="mb-4">
                 <Label
                   htmlFor="login-email"
@@ -184,17 +241,23 @@ export function LoginView() {
                     type="email"
                     required
                     autoComplete="username"
+                    disabled={isLoading}
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
                     aria-invalid={fieldErrors.email ? true : undefined}
                     aria-describedby={
-                      fieldErrors.email ? 'login-email-error' : undefined
+                      fieldErrors.email
+                        ? 'login-email-hint login-email-error'
+                        : 'login-email-hint'
                     }
                     className="h-13 rounded-lg border-border-strong bg-surface px-12 text-base text-ink focus-visible:border-accent focus-visible:ring-accent/15 md:text-base"
                     placeholder="nombre@ejemplo.com"
                   />
                 </div>
-                <p className="mt-1 text-xs text-text-secondary">
+                <p
+                  id="login-email-hint"
+                  className="mt-2 text-xs text-text-secondary"
+                >
                   Usa el correo con el que solicitaste acceso.
                 </p>
                 {fieldErrors.email ? (
@@ -208,7 +271,7 @@ export function LoginView() {
                 ) : null}
               </div>
 
-              <div className="mb-4">
+              <div className="mb-6">
                 <div className="mb-1.5 flex items-center justify-between">
                   <Label
                     htmlFor="login-password"
@@ -218,17 +281,22 @@ export function LoginView() {
                   </Label>
                   <Link
                     href="/forgot-password"
-                    className="text-xs font-semibold text-accent hover:underline focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none"
+                    className="text-xs font-semibold text-accent hover:underline focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-hidden"
                   >
                     ¿Olvidaste tu contraseña?
                   </Link>
                 </div>
                 <div className="relative">
+                  <LockKeyhole
+                    className="pointer-events-none absolute top-4 left-4 size-5 text-accent"
+                    aria-hidden="true"
+                  />
                   <Input
                     id="login-password"
                     type={isPasswordVisible ? 'text' : 'password'}
                     required
                     autoComplete="current-password"
+                    disabled={isLoading}
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
                     aria-invalid={fieldErrors.password ? true : undefined}
@@ -269,6 +337,8 @@ export function LoginView() {
                 ) : null}
               </div>
 
+              <CredentialRestrictionNotice restriction={loginRestriction} />
+
               {error ? (
                 <Alert className="mb-4 border-danger/25 bg-surface text-danger">
                   <CircleAlert aria-hidden="true" />
@@ -281,7 +351,7 @@ export function LoginView() {
               <Button
                 type="submit"
                 variant="institutional"
-                disabled={isLoading || isGoogleLoading}
+                disabled={isLoading || isGoogleLoading || isSigningIn || Boolean(loginRestriction)}
                 className="h-12 w-full text-base font-extrabold tracking-wide uppercase institutional-button"
               >
                 {isLoading ? (
@@ -307,7 +377,7 @@ export function LoginView() {
                 type="button"
                 variant="outline"
                 onClick={handleGoogleLogin}
-                disabled={isLoading || isGoogleLoading}
+                disabled={isLoading || isGoogleLoading || isSigningIn || Boolean(loginRestriction)}
                 className="flex h-12 w-full items-center justify-center gap-3 rounded-lg border-border-strong bg-surface text-base font-semibold text-ink hover:bg-neutral-50"
               >
                 {isGoogleLoading ? (

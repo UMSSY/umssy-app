@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { MAX_OTP_ATTEMPTS } from '../constants/password-reset.constants.js';
+import { InvalidResetCodeException } from '../exceptions/invalid-reset-code.exception.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 
 @Injectable()
@@ -46,18 +48,15 @@ export class AuthRepository {
     codeHash: string,
     expiresAt: Date,
   ) {
-    // Invalida códigos anteriores no usados
-    await this.prisma.passwordResetOtp.updateMany({
-      where: { userId, usedAt: null },
-      data: { usedAt: new Date() },
-    });
+    return this.prisma.$transaction(async (transaction) => {
+      await transaction.passwordResetOtp.updateMany({
+        where: { userId, usedAt: null },
+        data: { usedAt: new Date() },
+      });
 
-    return this.prisma.passwordResetOtp.create({
-      data: {
-        userId,
-        codeHash,
-        expiresAt,
-      },
+      return transaction.passwordResetOtp.create({
+        data: { userId, codeHash, expiresAt },
+      });
     });
   }
 
@@ -97,15 +96,27 @@ export class AuthRepository {
     newPasswordHash: string,
     otpId: string,
   ) {
-    return this.prisma.$transaction([
-      this.prisma.user.update({
+    return this.prisma.$transaction(async (transaction) => {
+      const now = new Date();
+      const consumed = await transaction.passwordResetOtp.updateMany({
+        where: {
+          id: otpId,
+          userId,
+          usedAt: null,
+          expiresAt: { gt: now },
+          attempts: { lt: MAX_OTP_ATTEMPTS },
+        },
+        data: { usedAt: now },
+      });
+
+      if (consumed.count !== 1) {
+        throw new InvalidResetCodeException();
+      }
+
+      return transaction.user.update({
         where: { id: userId },
         data: { password: newPasswordHash },
-      }),
-      this.prisma.passwordResetOtp.update({
-        where: { id: otpId },
-        data: { usedAt: new Date() },
-      }),
-    ]);
+      });
+    });
   }
 }

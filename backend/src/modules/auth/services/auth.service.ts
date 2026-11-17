@@ -11,8 +11,14 @@ import {
   TooManyAttemptsException,
 } from '../exceptions/index.js';
 import { LOGIN_ROLE_PRIORITY } from '../constants/login-role-priority.constants.js';
+import {
+  SESSION_IDLE_SECONDS,
+  SESSION_MAX_MS,
+  SESSION_WARNING_SECONDS,
+} from '../constants/session.constants.js';
 import { MailService } from '../../mail/services/mail.service.js';
 import { loadMailTemplate } from '../../mail/helpers/load-mail-template.js';
+import { RefreshTokenService } from './refresh-token.service.js';
 import type { SessionResponse } from '../types/session-response.types.js';
 import type { LoginResponse } from '../types/login-response.types.js';
 import type { AuthenticatedUser } from '../../../common/types/authenticated-user.types.js';
@@ -21,9 +27,11 @@ import type { RequestPasswordResetDto } from '../requests/request-password-reset
 import type { VerifyPasswordResetDto } from '../requests/verify-password-reset.schema.js';
 import type { ResetPasswordDto } from '../requests/reset-password.schema.js';
 
-const OTP_EXPIRATION_MINUTES = 5;
-const RESEND_COOLDOWN_SECONDS = 120;
-const MAX_OTP_ATTEMPTS = 5;
+import {
+  MAX_OTP_ATTEMPTS,
+  OTP_EXPIRATION_MINUTES,
+  RESEND_COOLDOWN_SECONDS,
+} from '../constants/password-reset.constants.js';
 
 @Injectable()
 export class AuthService {
@@ -33,18 +41,33 @@ export class AuthService {
     private readonly authRepository: AuthRepository,
     private readonly jwtService: JwtService,
     private readonly mailService: MailService,
+    private readonly refreshTokenService: RefreshTokenService,
   ) {}
 
   existsByEmail(email: string) {
     return this.authRepository.existsByEmail(email);
   }
 
-  getSession(user: AuthenticatedUser): SessionResponse {
+  getAccessTokenMaxAgeMs(accessToken: string): number {
+    const payload = this.jwtService.decode<{ exp?: unknown } | null>(
+      accessToken,
+    );
+    if (typeof payload?.exp !== 'number') return SESSION_MAX_MS;
+    return Math.max(payload.exp * 1000 - Date.now(), 0);
+  }
+
+  getSession(
+    user: AuthenticatedUser,
+    absoluteExpiresAt: Date | null = null,
+  ): SessionResponse {
     return {
       id: user.id,
       email: user.email,
       roles: user.roles,
       company: user.company ?? null,
+      idleTimeoutSeconds: SESSION_IDLE_SECONDS,
+      warningSeconds: SESSION_WARNING_SECONDS,
+      absoluteExpiresAt: absoluteExpiresAt?.toISOString() ?? null,
     };
   }
 
@@ -181,6 +204,7 @@ export class AuthService {
       newPasswordHash,
       otp.id,
     );
+    await this.refreshTokenService.revokeAllForUser(user.id);
 
     return { ok: true, message: 'Contraseña actualizada correctamente.' };
   }

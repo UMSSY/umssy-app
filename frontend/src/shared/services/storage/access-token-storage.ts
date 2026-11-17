@@ -1,9 +1,5 @@
 import { ACCESS_TOKEN_STORAGE_KEY } from "@/shared/constants/auth.constants";
-import {
-  readIndexedDb,
-  writeIndexedDb,
-  removeIndexedDb,
-} from "./browser-indexed-db";
+import { removeIndexedDb } from "./browser-indexed-db";
 
 let token: string | null = null;
 let ready = false;
@@ -23,14 +19,8 @@ export function initializeAccessTokenStorage(): Promise<void> {
   if (ready) return Promise.resolve();
   if (loading) return loading;
   const currentRevision = revision;
-  loading = readIndexedDb<unknown>(ACCESS_TOKEN_STORAGE_KEY)
-    .then((stored) => {
-      if (revision === currentRevision)
-        token = typeof stored === "string" ? stored : null;
-    })
-    .catch(() => {
-      if (revision === currentRevision) token = null;
-    })
+  loading = removeIndexedDb(ACCESS_TOKEN_STORAGE_KEY)
+    .catch(() => {})
     .finally(() => {
       if (revision !== currentRevision) return;
       ready = true;
@@ -41,32 +31,28 @@ export function initializeAccessTokenStorage(): Promise<void> {
 }
 
 export async function saveAccessToken(value: string): Promise<boolean> {
-  const writeRevision = ++revision;
+  revision++;
+  token = value;
+  ready = true;
+  emit();
+  channel?.postMessage("changed");
   const operation = writes.then(() =>
-    writeIndexedDb(ACCESS_TOKEN_STORAGE_KEY, value),
+    removeIndexedDb(ACCESS_TOKEN_STORAGE_KEY),
   );
   writes = operation.catch(() => {});
   try {
     await operation;
   } catch {
-    if (revision === writeRevision) {
-      ready = true;
-      loading = null;
-      emit();
-    }
-    return false;
+    // Ignore legacy cleanup error
   }
-  if (revision !== writeRevision) return false;
-  token = value;
-  ready = true;
-  emit();
-  channel?.postMessage("changed");
   return true;
 }
 
 export function getAccessToken(): string | null {
   return token;
 }
+
+export const getAuthToken = getAccessToken;
 
 export function clearAccessToken(): boolean {
   revision++;
