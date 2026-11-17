@@ -12,6 +12,7 @@ import type { NotifyResult } from '../types/notify-result.type.js';
 import { NotificationType } from '../types/notification-type.enum.js';
 import type { NotificationTemplateDefinition } from '../types/notification-template-definition.type.js';
 import { normalizeNotificationPayload } from '../utils/normalize-notification-payload.js';
+import { buildFrontendUrl } from '../../access-requests/mail/helpers/frontend-url.js';
 
 @Injectable()
 export class NotificationsService {
@@ -137,7 +138,17 @@ export class NotificationsService {
 
     if (includeEmail && emailTargets.length > 0) {
       try {
-        emailStatus = await this.mailDispatcher.dispatchToUsers(emailTargets, title, body, actionUrl);
+        const emailContent = template.renderEmail?.(
+          normalizedPayload,
+          buildFrontendUrl(actionUrl),
+        );
+        emailStatus = await this.mailDispatcher.dispatchToUsers(
+          emailTargets,
+          title,
+          body,
+          actionUrl,
+          emailContent,
+        );
       } catch (e) {
         this.logger.error('Fallo crítico en MailDispatcher', e);
         emailStatus = 'failed';

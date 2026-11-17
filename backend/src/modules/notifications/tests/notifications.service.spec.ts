@@ -174,6 +174,7 @@ describe('NotificationsService', () => {
       expect.any(String),
       expect.any(String),
       expect.any(String),
+      undefined,
     );
   });
 
@@ -214,6 +215,7 @@ describe('NotificationsService', () => {
       expect.any(String),
       expect.any(String),
       expect.any(String),
+      undefined,
     );
     expect(result).toEqual({
       inAppCount: 0,
