@@ -10,8 +10,10 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
+import { CREDENTIAL_LIMIT_RESPONSE } from '../constants/credential-limit-response.constants.js';
+import { CredentialLimitsService } from '../services/credential-limits.service.js';
 import { AuthService } from '../services/auth.service.js';
 import { RefreshTokenService } from '../services/refresh-token.service.js';
 import {
@@ -45,6 +47,7 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly refreshTokens: RefreshTokenService,
+    private readonly credentialLimits: CredentialLimitsService,
   ) {}
 
   @Get('session')
@@ -61,29 +64,32 @@ export class AuthController {
   }
 
   @Post('login')
+  @ApiResponse(CREDENTIAL_LIMIT_RESPONSE)
   async login(
     @Body() body: LoginDto,
     @Res({ passthrough: true }) response: Response,
     @Headers('user-agent') userAgent?: string,
   ) {
-    const result = await this.authService.login(body);
-    response.cookie(
-      ACCESS_TOKEN_COOKIE,
-      result.accessToken,
-      buildAccessTokenCookieOptions(
-        this.authService.getAccessTokenMaxAgeMs(result.accessToken),
-      ),
-    );
-    const refresh = await this.refreshTokens.startFromLogin(
-      result.accessToken,
-      userAgent,
-    );
-    response.cookie(
-      REFRESH_TOKEN_COOKIE,
-      refresh.refreshToken,
-      buildRefreshTokenCookieOptions(refresh.refreshMaxAgeMs),
-    );
-    return result;
+    return this.credentialLimits.run('login', body.email, async () => {
+      const result = await this.authService.login(body);
+      response.cookie(
+        ACCESS_TOKEN_COOKIE,
+        result.accessToken,
+        buildAccessTokenCookieOptions(
+          this.authService.getAccessTokenMaxAgeMs(result.accessToken),
+        ),
+      );
+      const refresh = await this.refreshTokens.startFromLogin(
+        result.accessToken,
+        userAgent,
+      );
+      response.cookie(
+        REFRESH_TOKEN_COOKIE,
+        refresh.refreshToken,
+        buildRefreshTokenCookieOptions(refresh.refreshMaxAgeMs),
+      );
+      return result;
+    });
   }
 
   @Post('refresh')
@@ -142,17 +148,26 @@ export class AuthController {
   }
 
   @Post('forgot-password/request')
+  @ApiResponse(CREDENTIAL_LIMIT_RESPONSE)
   requestPasswordReset(@Body() body: RequestPasswordResetDto) {
-    return this.authService.requestPasswordReset(body);
+    return this.credentialLimits.run('request', body.email, () =>
+      this.authService.requestPasswordReset(body),
+    );
   }
 
   @Post('forgot-password/verify')
+  @ApiResponse(CREDENTIAL_LIMIT_RESPONSE)
   verifyPasswordReset(@Body() body: VerifyPasswordResetDto) {
-    return this.authService.verifyPasswordReset(body);
+    return this.credentialLimits.run('verify', body.email, () =>
+      this.authService.verifyPasswordReset(body),
+    );
   }
 
   @Post('forgot-password/reset')
+  @ApiResponse(CREDENTIAL_LIMIT_RESPONSE)
   resetPassword(@Body() body: ResetPasswordDto) {
-    return this.authService.resetPassword(body);
+    return this.credentialLimits.run('reset', body.email, () =>
+      this.authService.resetPassword(body),
+    );
   }
 }

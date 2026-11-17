@@ -48,18 +48,15 @@ export class AuthRepository {
     codeHash: string,
     expiresAt: Date,
   ) {
-    // Invalida códigos anteriores no usados
-    await this.prisma.passwordResetOtp.updateMany({
-      where: { userId, usedAt: null },
-      data: { usedAt: new Date() },
-    });
+    return this.prisma.$transaction(async (transaction) => {
+      await transaction.passwordResetOtp.updateMany({
+        where: { userId, usedAt: null },
+        data: { usedAt: new Date() },
+      });
 
-    return this.prisma.passwordResetOtp.create({
-      data: {
-        userId,
-        codeHash,
-        expiresAt,
-      },
+      return transaction.passwordResetOtp.create({
+        data: { userId, codeHash, expiresAt },
+      });
     });
   }
 
