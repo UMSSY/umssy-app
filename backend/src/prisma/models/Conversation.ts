@@ -250,7 +250,6 @@ export type ConversationOrderByWithRelationInput = {
 export type ConversationWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   eventId?: string
-  userAId_userBId?: Prisma.ConversationUserAIdUserBIdCompoundUniqueInput
   contextId?: string
   AND?: Prisma.ConversationWhereInput | Prisma.ConversationWhereInput[]
   OR?: Prisma.ConversationWhereInput[]
