@@ -4,9 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
 import { APPOINTMENTS_TEXT } from "../constants/appointments.constants";
+import { APPOINTMENTS_SEARCH_DEBOUNCE_MS } from "../constants/appointments-search.constants";
 import type { AppointmentsSearchBarProps } from "../types/appointments-search-bar-props.types";
-
-const SEARCH_DEBOUNCE_MS = 300;
 
 export function AppointmentsSearchBar({
   value,
@@ -16,7 +15,10 @@ export function AppointmentsSearchBar({
   const inputValueRef = useRef(value);
   const syncingExternalValueRef = useRef(false);
 
-  const debouncedValue = useDebouncedValue(inputValue, SEARCH_DEBOUNCE_MS);
+  const debouncedValue = useDebouncedValue(
+    inputValue,
+    APPOINTMENTS_SEARCH_DEBOUNCE_MS,
+  );
 
   useEffect(() => {
     if (inputValueRef.current === value) {
