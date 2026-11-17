@@ -1,32 +1,42 @@
 import { AVERAGE_YEAR_MS } from '../constants/heatmap.constants.js';
+import type { TimeRange } from '../types/time-range.types.js';
 import type { WorkPeriod } from '../types/work-period.types.js';
 
-// Une periodos superpuestos para no contar dos veces el mismo tiempo trabajado.
-export function computeExperienceYears(
-  periods: WorkPeriod[],
-  now: Date,
-): number | null {
-  const ranges = (periods ?? [])
+function toElapsedRanges(periods: WorkPeriod[], now: Date): TimeRange[] {
+  return (periods ?? [])
     .map((period) => ({
       start: period.startDate.getTime(),
       end: Math.min((period.endDate ?? now).getTime(), now.getTime()),
     }))
     .filter((range) => range.end > range.start)
     .sort((first, second) => first.start - second.start);
-  if (ranges.length === 0) return null;
+}
 
-  let total = 0;
-  let current = { ...ranges[0]! };
-  for (const range of ranges.slice(1)) {
-    if (range.start <= current.end) {
-      current.end = Math.max(current.end, range.end);
+function mergeOverlappingRanges(sortedRanges: TimeRange[]): TimeRange[] {
+  const merged: TimeRange[] = [];
+  for (const range of sortedRanges) {
+    const last = merged.at(-1);
+    if (last && range.start <= last.end) {
+      last.end = Math.max(last.end, range.end);
     } else {
-      total += current.end - current.start;
-      current = { ...range };
+      merged.push({ ...range });
     }
   }
-  total += current.end - current.start;
-  return Math.round((total / AVERAGE_YEAR_MS) * 10) / 10;
+  return merged;
+}
+
+function sumDurations(ranges: TimeRange[]): number {
+  return ranges.reduce((total, range) => total + (range.end - range.start), 0);
+}
+
+export function computeExperienceYears(
+  periods: WorkPeriod[],
+  now: Date,
+): number | null {
+  const ranges = toElapsedRanges(periods, now);
+  if (ranges.length === 0) return null;
+  const workedMs = sumDurations(mergeOverlappingRanges(ranges));
+  return Math.round((workedMs / AVERAGE_YEAR_MS) * 10) / 10;
 }
 
 export function getExperienceLevelIndex(years: number): number {
