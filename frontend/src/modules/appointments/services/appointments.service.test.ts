@@ -119,3 +119,20 @@ describe("downloadDocument", () => {
     expect(get).toHaveBeenCalledWith("/appointments/a1/document", { responseType: "blob" })
   })
 })
+
+describe("cancel", () => {
+  beforeEach(() => vi.restoreAllMocks());
+
+  it("envía el motivo al endpoint y devuelve la cita cancelada", async () => {
+    const appointment = { id: "a1", status: "CANCELLED" };
+    const patch = vi.spyOn(apiClient, "patch").mockResolvedValue(envelope(appointment));
+    expect(await appointmentsApi.cancel("a1", "No puedo asistir")).toEqual(appointment);
+    expect(patch).toHaveBeenCalledWith("/appointments/a1/cancel", { reason: "No puedo asistir" });
+  });
+
+  it("permite omitir el motivo y propaga los errores", async () => {
+    const patch = vi.spyOn(apiClient, "patch").mockRejectedValue(new Error("network"));
+    await expect(appointmentsApi.cancel("a1")).rejects.toThrow("network");
+    expect(patch).toHaveBeenCalledWith("/appointments/a1/cancel", { reason: undefined });
+  });
+});

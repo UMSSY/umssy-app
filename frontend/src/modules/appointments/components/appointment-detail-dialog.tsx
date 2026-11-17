@@ -30,6 +30,7 @@ import { AppointmentStatusBadge } from "./appointment-status-badge";
 import { useAppointment } from "../hooks/use-appointment";
 import { useCounterpartPhoto } from "../hooks/use-counterpart-photo";
 import { useDownloadAppointmentDocument } from "../hooks/use-download-appointment-document";
+import { CancelAppointmentDialog } from "./cancel-appointment-dialog";
 import { JoinMeetingButton } from "./join-meeting-button";
 import type { AppointmentDetailDialogProps } from "../types/appointment-detail-dialog-props.types";
 import {
@@ -185,7 +186,8 @@ export function AppointmentDetailDialog({ appointmentId, onClose }: AppointmentD
               </section>
             ) : null}
 
-            <DialogFooter>
+            <DialogFooter className="sm:flex-wrap">
+              <CancelAppointmentDialog key={appointment.id} appointment={appointment} />
               <DialogClose render={<Button variant="outline" />}>
                 {APPOINTMENT_DETAIL_TEXT.close}
               </DialogClose>

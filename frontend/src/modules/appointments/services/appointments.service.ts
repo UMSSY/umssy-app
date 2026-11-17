@@ -17,6 +17,14 @@ export const appointmentsApi = {
     return response.data.data;
   },
 
+  cancel: async (appointmentId: string, reason?: string): Promise<Appointment> => {
+    const response = await apiClient.patch<ApiResponse<Appointment>>(
+      `${getAppointmentEndpoint(appointmentId)}/cancel`,
+      { reason },
+    );
+    return response.data.data;
+  },
+
   getById: async (appointmentId: string): Promise<AppointmentDetail> => {
     const response = await apiClient.get<ApiResponse<AppointmentDetail>>(
       getAppointmentEndpoint(appointmentId),
