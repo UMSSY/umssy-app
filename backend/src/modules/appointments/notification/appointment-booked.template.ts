@@ -6,6 +6,7 @@ import type { NotificationType } from '../../notifications/types/notification-ty
 import {
   APPOINTMENT_BOOKED_EMAIL_SUBJECT,
   APPOINTMENT_BOOKED_EMAIL_TEMPLATE,
+  APPOINTMENT_BOOKED_NO_TOPIC,
   APPOINTMENT_BOOKED_NOTIFICATION_TITLE,
   APPOINTMENT_BOOKED_TIME_ZONE_LABEL,
 } from '../constants/appointment-booked-notification.constants.js';
@@ -58,6 +59,7 @@ const renderEmail = (
     ? `${payload.counterpartName} reservó una cita de orientación contigo.`
     : `Tu cita de orientación con ${payload.counterpartName} quedó confirmada.`;
   const time = `${payload.time} (${APPOINTMENT_BOOKED_TIME_ZONE_LABEL})`;
+  const topic = payload.topic.trim() || APPOINTMENT_BOOKED_NO_TOPIC;
 
   return {
     template: APPOINTMENT_BOOKED_EMAIL_TEMPLATE,
@@ -67,7 +69,7 @@ const renderEmail = (
       `${counterpartLabel}: ${payload.counterpartName}`,
       `Fecha: ${payload.date}`,
       `Hora: ${time}`,
-      `Tema: ${payload.topic}`,
+      `Tema: ${topic}`,
       `Ver mis citas: ${actionUrl}`,
     ].join('\n'),
     values: {
@@ -76,7 +78,7 @@ const renderEmail = (
       counterpartName: payload.counterpartName,
       date: payload.date,
       time,
-      topic: payload.topic,
+      topic,
       actionUrl,
     },
   };

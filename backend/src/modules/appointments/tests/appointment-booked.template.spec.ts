@@ -118,6 +118,16 @@ describe('Plantilla del aviso «Nueva cita reservada»', () => {
       });
     });
 
+    it('muestra «Tema no especificado» si la cita no tiene tema', () => {
+      const email = APPOINTMENT_BOOKED_TEMPLATE.renderEmail?.(
+        { ...payloadFor(AppointmentParticipantRole.MENTOR, 'Luis Flores'), topic: '' },
+        actionUrl,
+      );
+
+      expect(email?.values.topic).toBe('Tema no especificado');
+      expect(email?.text).toContain('Tema: Tema no especificado');
+    });
+
     it('le presenta al titulado su mentor', () => {
       const email = emailFor(AppointmentParticipantRole.STUDENT, 'Ana Pérez');
 
