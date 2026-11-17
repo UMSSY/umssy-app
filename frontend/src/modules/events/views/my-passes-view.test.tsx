@@ -532,6 +532,109 @@ describe("Mis pases", () => {
     vi.restoreAllMocks();
     onlineManager.setOnline(true);
   });
+
+  it('opens the cancel confirmation dialog when clicking Cancelar on an upcoming confirmed pass', async () => {
+    vi.setSystemTime(new Date('2026-10-20T12:00:00Z'));
+    getMine.mockResolvedValue([pass]);
+    render(<MyPassesView />);
+
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Cancelar inscripción' }),
+    );
+
+    expect(
+      await screen.findByRole('dialog', {
+        name: '¿Estás seguro de que deseas cancelar tu inscripción a este taller?',
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Esta acción liberará tu cupo y ya no podrás acceder a los detalles de este taller.',
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Volver' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Sí, cancelar' }),
+    ).toBeInTheDocument();
+  });
+
+  it('closes the confirmation dialog without cancelling when clicking Volver', async () => {
+    vi.setSystemTime(new Date('2026-10-20T12:00:00Z'));
+    const onConfirmCancelRegistration = vi.fn();
+    getMine.mockResolvedValue([pass]);
+    render(
+      <MyPassesView
+        onConfirmCancelRegistration={onConfirmCancelRegistration}
+      />,
+    );
+
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Cancelar inscripción' }),
+    );
+    fireEvent.click(await screen.findByRole('button', { name: 'Volver' }));
+
+    await waitFor(() =>
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument(),
+    );
+    expect(onConfirmCancelRegistration).not.toHaveBeenCalled();
+  });
+
+  it('closes the confirmation dialog without cancelling when pressing Escape or clicking Close', async () => {
+    vi.setSystemTime(new Date('2026-10-20T12:00:00Z'));
+    const onConfirmCancelRegistration = vi.fn();
+    getMine.mockResolvedValue([pass]);
+    render(
+      <MyPassesView
+        onConfirmCancelRegistration={onConfirmCancelRegistration}
+      />,
+    );
+
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Cancelar inscripción' }),
+    );
+    fireEvent.click(await screen.findByRole('button', { name: 'Close' }));
+
+    await waitFor(() =>
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument(),
+    );
+    expect(onConfirmCancelRegistration).not.toHaveBeenCalled();
+  });
+
+  it('confirms cancellation and disables buttons while processing', async () => {
+    vi.setSystemTime(new Date('2026-10-20T12:00:00Z'));
+    let resolveConfirm: (() => void) | undefined;
+    const onConfirmCancelRegistration = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveConfirm = resolve;
+        }),
+    );
+    getMine.mockResolvedValue([pass]);
+    render(
+      <MyPassesView
+        onConfirmCancelRegistration={onConfirmCancelRegistration}
+      />,
+    );
+
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Cancelar inscripción' }),
+    );
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Sí, cancelar' }),
+    );
+
+    expect(onConfirmCancelRegistration).toHaveBeenCalledWith('reg-1');
+    expect(
+      await screen.findByRole('button', { name: 'Cancelando...' }),
+    ).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Volver' })).toBeDisabled();
+
+    resolveConfirm?.();
+    await waitFor(() =>
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument(),
+    );
+  });
+
 });
 
 describe('Mis pases sin conexión', () => {
