@@ -6,6 +6,7 @@ import type { Prisma } from '../../../prisma/client.js';
 import { seedEvents } from '../seeds/events.seed.js';
 import {
   EVENT_PASS_LIFECYCLE_FIXTURES,
+  REGISTRATION_CANCELLATION_FIXTURES,
   getUpcomingPassSchedule,
   seedEventPassLifecycleEvents,
 } from '../seeds/event-pass-lifecycle-fixtures.seed.js';
@@ -34,7 +35,9 @@ describe('seedEvents', () => {
     await seedEvents(tx as unknown as Prisma.TransactionClient, 'creator');
 
     expect(upsert).toHaveBeenCalledTimes(
-      SEED_EVENTS.length + EVENT_PASS_LIFECYCLE_FIXTURES.length,
+      SEED_EVENTS.length +
+        EVENT_PASS_LIFECYCLE_FIXTURES.length +
+        REGISTRATION_CANCELLATION_FIXTURES.length,
     );
     for (const event of SEED_EVENTS) {
       expect(event.capacity).toBeGreaterThanOrEqual(20);
@@ -62,8 +65,10 @@ describe('seedEvents', () => {
   it('starts the active pass five minutes after the seed and closes it one minute later', async () => {
     const now = new Date('2026-10-25T02:00:20.123Z');
     const schedule = getUpcomingPassSchedule(now);
-    const startMinute = schedule.startTime.getUTCHours() * 60 + schedule.startTime.getUTCMinutes();
-    const closeMinute = schedule.endTime.getUTCHours() * 60 + schedule.endTime.getUTCMinutes();
+    const startMinute =
+      schedule.startTime.getUTCHours() * 60 + schedule.startTime.getUTCMinutes();
+    const closeMinute =
+      schedule.endTime.getUTCHours() * 60 + schedule.endTime.getUTCMinutes();
 
     expect(schedule.eventDate.toISOString().slice(0, 10)).toBe('2026-10-24');
     expect(startMinute).toBe(22 * 60 + 5);
@@ -82,7 +87,9 @@ describe('seedEvents', () => {
   });
 
   it('keeps the active one-minute schedule on the same event day around midnight', () => {
-    const schedule = getUpcomingPassSchedule(new Date('2026-10-25T03:59:30.000Z'));
+    const schedule = getUpcomingPassSchedule(
+      new Date('2026-10-25T03:59:30.000Z'),
+    );
     expect(schedule.eventDate.toISOString().slice(0, 10)).toBe('2026-10-25');
     expect(schedule.startTime.toISOString()).toBe('1970-01-01T00:04:30.000Z');
     expect(schedule.endTime.toISOString()).toBe('1970-01-01T00:05:30.000Z');
