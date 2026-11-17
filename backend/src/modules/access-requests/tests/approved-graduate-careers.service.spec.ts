@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { APPROVED_GRADUATE_CAREER_SELECT } from '../constants/approved-graduate-career-select.constants.js';
+import { APPROVED_GRADUATE_USER_SELECT } from '../constants/approved-graduate-user-select.constants.js';
 import { ApprovedGraduateCareersRepository } from '../repositories/approved-graduate-careers.repository.js';
 import { ApprovedGraduateCareersService } from '../services/approved-graduate-careers.service.js';
 
@@ -33,5 +34,35 @@ describe('ApprovedGraduateCareersService', () => {
 
     await expect(service.findByUserIds([])).resolves.toEqual([]);
     expect(findMany).not.toHaveBeenCalled();
+  });
+
+  it('devuelve los titulados aprobados de la carrera y gestión indicadas', async () => {
+    const { findMany, service } = createService([
+      { approvedUserId: 'user-1' },
+      { approvedUserId: null },
+    ]);
+
+    await expect(
+      service.findApprovedUserIds({ careerId: 'career-1', graduationYear: 2020 }),
+    ).resolves.toEqual(['user-1']);
+    expect(findMany).toHaveBeenCalledWith({
+      where: {
+        approvedUserId: { not: null },
+        careerId: 'career-1',
+        graduationYear: 2020,
+      },
+      select: APPROVED_GRADUATE_USER_SELECT,
+    });
+  });
+
+  it('no filtra por carrera ni gestión cuando no se indican', async () => {
+    const { findMany, service } = createService([]);
+
+    await service.findApprovedUserIds({ careerId: null, graduationYear: null });
+
+    expect(findMany).toHaveBeenCalledWith({
+      where: { approvedUserId: { not: null } },
+      select: APPROVED_GRADUATE_USER_SELECT,
+    });
   });
 });
