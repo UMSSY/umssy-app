@@ -593,9 +593,11 @@ describe('AppointmentsService', () => {
 
     await service.create(user, payload);
 
-    expect(
-      appointmentNotifications.notifyBooked,
-    ).toHaveBeenCalledExactlyOnceWith(created);
+    await vi.waitFor(() => {
+      expect(
+        appointmentNotifications.notifyBooked,
+      ).toHaveBeenCalledExactlyOnceWith(created);
+    });
     expect(
       appointmentsRepository.createAppointment.mock.invocationCallOrder[0],
     ).toBeLessThan(
