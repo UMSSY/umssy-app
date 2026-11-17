@@ -1,3 +1,4 @@
+import { type Mock, vi } from 'vitest';
 import { BOLIVIA_OFFSET_MS } from '../../../common/constants/date-time.constants.js';
 import { PUBLISHED_STATUS_TITLE } from '../../events/index.js';
 import { EventFinishedException } from '../exceptions/event-finished.exception.js';
@@ -29,37 +30,37 @@ describe('EventRegistrationsService cancellation', () => {
   };
 
   let repository: {
-    transaction: jest.Mock;
-    findById: jest.Mock;
-    findOwn: jest.Mock;
-    findConfirmedEventIds: jest.Mock;
-    countConfirmed: jest.Mock;
-    createConfirmed: jest.Mock;
-    cancel: jest.Mock;
+    transaction: Mock;
+    findById: Mock;
+    findOwn: Mock;
+    findConfirmedEventIds: Mock;
+    countConfirmed: Mock;
+    createConfirmed: Mock;
+    cancel: Mock;
   };
   let eventsService: {
-    lockEventRow: jest.Mock;
-    findForRegistration: jest.Mock;
-    isFinished: jest.Mock;
-    hasScheduleConflict: jest.Mock;
+    lockEventRow: Mock;
+    findForRegistration: Mock;
+    isFinished: Mock;
+    hasScheduleConflict: Mock;
   };
   let service: EventRegistrationsService;
 
   beforeEach(() => {
     repository = {
-      transaction: jest.fn((op: (tx: unknown) => Promise<unknown>) => op({})),
-      findById: jest.fn(),
-      findOwn: jest.fn(),
-      findConfirmedEventIds: jest.fn().mockResolvedValue([]),
-      countConfirmed: jest.fn().mockResolvedValue(0),
-      createConfirmed: jest.fn(),
-      cancel: jest.fn(),
+      transaction: vi.fn((op: (tx: unknown) => Promise<unknown>) => op({})),
+      findById: vi.fn(),
+      findOwn: vi.fn(),
+      findConfirmedEventIds: vi.fn().mockResolvedValue([]),
+      countConfirmed: vi.fn().mockResolvedValue(0),
+      createConfirmed: vi.fn(),
+      cancel: vi.fn(),
     };
     eventsService = {
-      lockEventRow: jest.fn().mockResolvedValue(undefined),
-      findForRegistration: jest.fn().mockResolvedValue(futureEvent),
-      isFinished: jest.fn().mockReturnValue(false),
-      hasScheduleConflict: jest.fn().mockResolvedValue(false),
+      lockEventRow: vi.fn().mockResolvedValue(undefined),
+      findForRegistration: vi.fn().mockResolvedValue(futureEvent),
+      isFinished: vi.fn().mockReturnValue(false),
+      hasScheduleConflict: vi.fn().mockResolvedValue(false),
     };
     service = new EventRegistrationsService(
       repository as never,
@@ -68,13 +69,13 @@ describe('EventRegistrationsService cancellation', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('performs logical cancellation, locks event row and preserves registration id', async () => {
     const startsAt =
       Date.UTC(2026, 10, 20, 10, 0, 0, 0) - BOLIVIA_OFFSET_MS;
-    jest.spyOn(Date, 'now').mockReturnValue(startsAt - 1000);
+    vi.spyOn(Date, 'now').mockReturnValue(startsAt - 1000);
 
     repository.findById.mockResolvedValue(confirmedRecord);
     repository.cancel.mockImplementation(
@@ -132,7 +133,7 @@ describe('EventRegistrationsService cancellation', () => {
   it('rejects cancellation at the exact start timestamp in Bolivia time', async () => {
     const startsAt =
       Date.UTC(2026, 10, 20, 10, 0, 0, 0) - BOLIVIA_OFFSET_MS;
-    jest.spyOn(Date, 'now').mockReturnValue(startsAt);
+    vi.spyOn(Date, 'now').mockReturnValue(startsAt);
     repository.findById.mockResolvedValue(confirmedRecord);
 
     await expect(service.cancel('reg-1', 'user-owner')).rejects.toThrow(
@@ -154,7 +155,7 @@ describe('EventRegistrationsService cancellation', () => {
   it('frees a spot so another user can register in a full workshop after cancellation', async () => {
     const startsAt =
       Date.UTC(2026, 10, 20, 10, 0, 0, 0) - BOLIVIA_OFFSET_MS;
-    jest.spyOn(Date, 'now').mockReturnValue(startsAt - 60_000);
+    vi.spyOn(Date, 'now').mockReturnValue(startsAt - 60_000);
 
     repository.findById.mockResolvedValue(confirmedRecord);
     repository.cancel.mockResolvedValue({
@@ -187,13 +188,13 @@ describe('assertRegistrationOpen', () => {
   };
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('allows cancellation one second before Bolivia start time', () => {
     const startsAt =
       Date.UTC(2026, 10, 20, 10, 0, 0, 0) - BOLIVIA_OFFSET_MS;
-    jest.spyOn(Date, 'now').mockReturnValue(startsAt - 1000);
+    vi.spyOn(Date, 'now').mockReturnValue(startsAt - 1000);
 
     expect(() => assertRegistrationOpen(sampleEvent, false)).not.toThrow();
   });
@@ -201,7 +202,7 @@ describe('assertRegistrationOpen', () => {
   it('throws RegistrationClosedException at exact start time', () => {
     const startsAt =
       Date.UTC(2026, 10, 20, 10, 0, 0, 0) - BOLIVIA_OFFSET_MS;
-    jest.spyOn(Date, 'now').mockReturnValue(startsAt);
+    vi.spyOn(Date, 'now').mockReturnValue(startsAt);
 
     expect(() => assertRegistrationOpen(sampleEvent, false)).toThrow(
       RegistrationClosedException,
