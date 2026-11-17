@@ -23,6 +23,7 @@ import {
   listAuditEventsQuerySchema,
   type ListAuditEventsQuery,
 } from '../requests/list-audit-events.schema.js';
+import { AuditEventTimelineService } from '../services/audit-event-timeline.service.js';
 import { AuditEventsExportService } from '../services/audit-events-export.service.js';
 import { AuditEventsService } from '../services/audit-events.service.js';
 
@@ -47,6 +48,7 @@ export class AuditEventsController {
   constructor(
     private readonly auditEventsService: AuditEventsService,
     private readonly auditEventsExportService: AuditEventsExportService,
+    private readonly auditEventTimelineService: AuditEventTimelineService,
   ) {}
 
   @Get()
@@ -79,6 +81,11 @@ export class AuditEventsController {
   @Get(':id')
   getDetail(@Param('id', uuidPipe) id: string) {
     return this.auditEventsService.getDetail(id);
+  }
+
+  @Get(':id/timeline')
+  getTimeline(@Param('id', uuidPipe) id: string) {
+    return this.auditEventTimelineService.listForEvent(id);
   }
 
   @Get(':id/document')

@@ -1,3 +1,7 @@
+import type { AuthService } from '../services/auth.service.js';
+import type { RefreshTokenService } from '../services/refresh-token.service.js';
+import type { CredentialLimitsService } from '../services/credential-limits.service.js';
+import type { CredentialOperation } from '../types/credential-operation.types.js';
 import { describe, expect, it, vi } from 'vitest';
 import { AuthController } from '../controllers/auth.controller.js';
 import { SessionExpiredException } from '../exceptions/index.js';
@@ -13,6 +17,23 @@ function buildRefreshTokens() {
   };
 }
 
+function buildController(auth: unknown, refresh: unknown) {
+  const limits = {
+    run<T>(
+      _operation: CredentialOperation,
+      _email: string,
+      action: () => Promise<T>,
+    ): Promise<T> {
+      return action();
+    },
+  };
+  return new AuthController(
+    auth as AuthService,
+    refresh as RefreshTokenService,
+    limits as unknown as CredentialLimitsService,
+  );
+}
+
 describe('AuthController', () => {
   it('delega el login al servicio con el cuerpo recibido', async () => {
     const authService = {
@@ -21,7 +42,7 @@ describe('AuthController', () => {
         .mockResolvedValue({ accessToken: 'token', roleTag: 'titulado' }),
       getAccessTokenMaxAgeMs: vi.fn().mockReturnValue(1000),
     };
-    const controller = new AuthController(
+    const controller = buildController(
       authService as any,
       buildRefreshTokens() as any,
     );
@@ -43,7 +64,7 @@ describe('AuthController', () => {
       login: vi.fn().mockResolvedValue({ accessToken: 'token' }),
       getAccessTokenMaxAgeMs: vi.fn().mockReturnValue(60_000),
     };
-    const controller = new AuthController(
+    const controller = buildController(
       authService as any,
       buildRefreshTokens() as any,
     );
@@ -70,7 +91,7 @@ describe('AuthController', () => {
       getAccessTokenMaxAgeMs: vi.fn().mockReturnValue(60_000),
     };
     const refreshTokens = buildRefreshTokens();
-    const controller = new AuthController(
+    const controller = buildController(
       authService as any,
       refreshTokens as any,
     );
@@ -104,7 +125,7 @@ describe('AuthController', () => {
       roleTag: 'titulado',
       roles: ['titulado'],
     });
-    const controller = new AuthController({} as any, refreshTokens as any);
+    const controller = buildController({} as any, refreshTokens as any);
     const response = { cookie: vi.fn(), clearCookie: vi.fn() };
     const request = { cookies: { umssy_refresh: 'old-refresh' } };
 
@@ -134,7 +155,7 @@ describe('AuthController', () => {
   it('clears both cookies and rethrows when refresh is rejected', async () => {
     const refreshTokens = buildRefreshTokens();
     refreshTokens.rotate.mockRejectedValue(new SessionExpiredException());
-    const controller = new AuthController({} as any, refreshTokens as any);
+    const controller = buildController({} as any, refreshTokens as any);
     const response = { cookie: vi.fn(), clearCookie: vi.fn() };
 
     await expect(
@@ -154,10 +175,7 @@ describe('AuthController', () => {
   });
 
   it('clears the access token cookie on logout', async () => {
-    const controller = new AuthController(
-      {} as any,
-      buildRefreshTokens() as any,
-    );
+    const controller = buildController({} as any, buildRefreshTokens() as any);
     const response = { clearCookie: vi.fn() };
 
     await controller.logout(response as any);
@@ -173,7 +191,7 @@ describe('AuthController', () => {
 
   it('revokes the refresh family and clears the refresh cookie on logout', async () => {
     const refreshTokens = buildRefreshTokens();
-    const controller = new AuthController({} as any, refreshTokens as any);
+    const controller = buildController({} as any, refreshTokens as any);
     const response = { clearCookie: vi.fn() };
     const request = { cookies: { umssy_refresh: 'refresh' } };
 
@@ -193,7 +211,7 @@ describe('AuthController', () => {
       roles: ['titulado', 'mentor'],
     };
     const authService = { getSession: vi.fn().mockReturnValue(user) };
-    const controller = new AuthController(
+    const controller = buildController(
       authService as any,
       buildRefreshTokens() as any,
     );
@@ -207,7 +225,7 @@ describe('AuthController', () => {
         .fn()
         .mockResolvedValue({ ok: true, message: 'Enviado' }),
     };
-    const controller = new AuthController(
+    const controller = buildController(
       authService as any,
       buildRefreshTokens() as any,
     );
@@ -225,7 +243,7 @@ describe('AuthController', () => {
         .fn()
         .mockResolvedValue({ ok: true, message: 'Validado' }),
     };
-    const controller = new AuthController(
+    const controller = buildController(
       authService as any,
       buildRefreshTokens() as any,
     );
@@ -243,7 +261,7 @@ describe('AuthController', () => {
         .fn()
         .mockResolvedValue({ ok: true, message: 'Actualizado' }),
     };
-    const controller = new AuthController(
+    const controller = buildController(
       authService as any,
       buildRefreshTokens() as any,
     );

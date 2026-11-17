@@ -9,7 +9,6 @@ import type { AuditEvent } from "../types/audit-event.types";
 import { getCurrentMonthPeriod } from "../utils/get-current-month-period";
 import { AuditLogView } from "./audit-log-view";
 
-// La pantalla arranca con el mes en curso como período
 const INITIAL_FILTERS = { ...DEFAULT_AUDIT_FILTERS, ...getCurrentMonthPeriod() };
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ replace: vi.fn() }), usePathname: () => "/backoffice/audit" }));
@@ -19,6 +18,8 @@ const listEvents = vi.spyOn(auditLogService, "listEvents");
 const getEvidenceBlob = vi.spyOn(auditLogService, "getEvidenceBlob");
 const listResponsibles = vi.spyOn(auditLogRecordsService, "listResponsibles");
 const exportCsv = vi.spyOn(auditLogRecordsService, "exportCsv");
+const getEventDetail = vi.spyOn(auditLogService, "getEventDetail");
+const getEventTimeline = vi.spyOn(auditLogService, "getEventTimeline");
 
 const event = (index: number, overrides: Partial<AuditEvent> = {}): AuditEvent => ({
   id: `evt-${index}`,
@@ -41,6 +42,8 @@ describe("AuditLogView", () => {
     listEvents.mockReset();
     getEvidenceBlob.mockReset();
     exportCsv.mockReset();
+    getEventDetail.mockReset();
+    getEventTimeline.mockReset();
     listResponsibles.mockResolvedValue({ ok: true, data: [{ id: "admin-1", name: "Carla Montaño" }, { id: "system", name: "Sistema" }] });
   });
   afterEach(() => {
@@ -161,5 +164,46 @@ describe("AuditLogView", () => {
     listEvents.mockResolvedValue(page([event(1)]));
     fireEvent.click(screen.getByRole("button", { name: "Reintentar" }));
     expect(await screen.findAllByText("SOL-2026-0141")).not.toHaveLength(0);
+  });
+
+  it("abre el detalle desde la tabla y al cerrarlo conserva la página y los filtros", async () => {
+    listEvents.mockResolvedValue(page([event(1)], 25));
+    getEventDetail.mockResolvedValue({
+      ok: true,
+      data: {
+        id: "evt-1",
+        code: "EVT-2026-000001",
+        occurredAt: "2026-09-22T15:41:00.000Z",
+        action: "approved",
+        request: { id: "req-1", code: "SOL-2026-0141" },
+        applicant: { fullName: "Persona 1", career: "Ingeniería de Sistemas", graduationYear: 2024 },
+        responsible: { id: "admin-1", name: "Carla Montaño", role: "administrativo" },
+        rejectionReason: null,
+        documentType: "Diploma académico",
+        evidence: null,
+      },
+    });
+    getEventTimeline.mockResolvedValue({
+      ok: true,
+      data: { requestCode: "SOL-2026-0141", focusedEventId: "evt-1", items: [] },
+    });
+    renderWithQuery(<AuditLogView />);
+    await screen.findAllByText("SOL-2026-0141");
+
+    fireEvent.change(screen.getAllByLabelText("Desde")[0], { target: { value: "2026-09-01" } });
+    const filtered = { ...INITIAL_FILTERS, from: "2026-09-01" };
+    await waitFor(() => expect(listEvents).toHaveBeenLastCalledWith(1, filtered));
+    fireEvent.click(await screen.findByRole("button", { name: "Página 2" }));
+    await waitFor(() => expect(listEvents).toHaveBeenLastCalledWith(2, filtered));
+
+    fireEvent.click((await screen.findAllByRole("button", { name: /SOL-2026-0141/ }))[0]);
+    const panel = await screen.findByRole("dialog");
+    expect(within(panel).getByText("Detalle del evento")).toBeInTheDocument();
+    expect(getEventDetail).toHaveBeenCalledWith("evt-1");
+
+    fireEvent.click(within(panel).getByRole("button", { name: "Cerrar" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    expect(screen.getByRole("button", { name: "Página 2" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getAllByLabelText("Desde")[0]).toHaveValue("01/09/2026");
   });
 });

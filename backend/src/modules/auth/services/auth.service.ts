@@ -27,9 +27,11 @@ import type { RequestPasswordResetDto } from '../requests/request-password-reset
 import type { VerifyPasswordResetDto } from '../requests/verify-password-reset.schema.js';
 import type { ResetPasswordDto } from '../requests/reset-password.schema.js';
 
-const OTP_EXPIRATION_MINUTES = 5;
-const RESEND_COOLDOWN_SECONDS = 120;
-const MAX_OTP_ATTEMPTS = 5;
+import {
+  MAX_OTP_ATTEMPTS,
+  OTP_EXPIRATION_MINUTES,
+  RESEND_COOLDOWN_SECONDS,
+} from '../constants/password-reset.constants.js';
 
 @Injectable()
 export class AuthService {

@@ -4,6 +4,7 @@ import { AUDIT_PAGE_SIZE } from "../constants/audit-log.constants";
 import type { AuditApiResult } from "../types/audit-api-result.types";
 import type { AuditEventDetail } from "../types/audit-event-detail.types";
 import type { AuditEventPage } from "../types/audit-event-page.types";
+import type { AuditEventTimeline } from "../types/audit-event-timeline.types";
 import type { AuditLogFilters } from "../types/audit-log-filters.types";
 import { isRecord, toAuditFailure } from "../utils/to-audit-failure";
 
@@ -75,4 +76,27 @@ async function getEventDetail(eventId: string): Promise<AuditApiResult<AuditEven
   }
 }
 
-export const auditLogService = { listEvents, getEventDetail, getEvidenceBlob };
+async function getEventTimeline(eventId: string): Promise<AuditApiResult<AuditEventTimeline>> {
+  try {
+    const response = await apiClient.get(`/audit-events/${eventId}/timeline`, { validateStatus: () => true });
+    if (response.status < 200 || response.status >= 300) return toAuditFailure(response.status, response.data);
+
+    const body: unknown = response.data;
+    const payload = isRecord(body) && isRecord(body.data) ? body.data : null;
+    if (!payload || !Array.isArray(payload.items) || typeof payload.requestCode !== "string") {
+      return { ok: false, status: 0, message: GENERIC_ERROR_MESSAGE };
+    }
+    return {
+      ok: true,
+      data: {
+        requestCode: payload.requestCode,
+        focusedEventId: typeof payload.focusedEventId === "string" ? payload.focusedEventId : eventId,
+        items: payload.items as AuditEventTimeline["items"],
+      },
+    };
+  } catch {
+    return { ok: false, status: 0, message: NETWORK_ERROR_MESSAGE };
+  }
+}
+
+export const auditLogService = { listEvents, getEventDetail, getEventTimeline, getEvidenceBlob };
