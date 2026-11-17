@@ -1,0 +1,39 @@
+import { PUSH_TEXT_MAX_LENGTH } from '../../notifications/constants/push-notification.constants.js';
+import type { NotificationPayloadMap } from '../../notifications/types/notification-payload-map.type.js';
+import type { NotificationTemplateDefinition } from '../../notifications/types/notification-template-definition.type.js';
+import type { NotificationType } from '../../notifications/types/notification-type.enum.js';
+import { APPOINTMENT_BOOKED_NOTIFICATION_TITLE } from '../constants/appointment-booked-notification.constants.js';
+import { AppointmentParticipantRole } from '../enums/appointment-participant-role.enum.js';
+
+type AppointmentBookedPayload =
+  NotificationPayloadMap[NotificationType.APPOINTMENT_BOOKED];
+
+const ELLIPSIS = '...';
+
+// Texto del aviso según quién lo recibe; name es la otra persona.
+const bodyFor = (payload: AppointmentBookedPayload, name: string): string =>
+  payload.recipientRole === AppointmentParticipantRole.MENTOR
+    ? `${name} reservó una cita contigo para el ${payload.date} a las ${payload.time}.`
+    : `Tu cita con ${name} quedó confirmada para el ${payload.date} a las ${payload.time}.`;
+
+// Si el texto supera el límite del push, se acorta solo el nombre para que la
+// fecha y la hora sigan visibles.
+const renderBody = (payload: AppointmentBookedPayload): string => {
+  const body = bodyFor(payload, payload.counterpartName);
+  if (body.length <= PUSH_TEXT_MAX_LENGTH) {
+    return body;
+  }
+  const fixedLength = bodyFor(payload, '').length;
+  const nameLength = Math.max(
+    PUSH_TEXT_MAX_LENGTH - fixedLength - ELLIPSIS.length,
+    0,
+  );
+  const name = `${payload.counterpartName.slice(0, nameLength).trimEnd()}${ELLIPSIS}`;
+  return bodyFor(payload, name);
+};
+
+export const APPOINTMENT_BOOKED_TEMPLATE: NotificationTemplateDefinition<NotificationType.APPOINTMENT_BOOKED> =
+  {
+    renderTitle: () => APPOINTMENT_BOOKED_NOTIFICATION_TITLE,
+    renderBody,
+  };

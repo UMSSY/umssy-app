@@ -10,6 +10,7 @@ import { MailDispatcherService } from '../services/mail-dispatcher.service.js';
 import { NotificationGateway } from '../gateways/notification.gateway.js';
 import { AppVisibilityService } from '../services/app-visibility.service.js';
 import { NotificationType } from '../types/notification-type.enum.js';
+import { AppointmentParticipantRole } from '../../appointments/enums/appointment-participant-role.enum.js';
 
 interface MockNotificationsRepo {
   findTypeByCode: ReturnType<typeof vi.fn>;
@@ -56,6 +57,7 @@ describe('NotificationsService', () => {
     date: '2023-01-01',
     time: '10:00',
     topic: 'Test Topic',
+    recipientRole: AppointmentParticipantRole.STUDENT,
   };
 
   beforeAll(() => {

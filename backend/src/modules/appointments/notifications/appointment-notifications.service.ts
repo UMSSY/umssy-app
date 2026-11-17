@@ -1,5 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { toBoliviaTime } from '../../../common/utils/date-time.js';
+import {
+  formatBoliviaDate,
+  formatBoliviaTime,
+  toBoliviaTime,
+} from '../../../common/utils/date-time.js';
 import { NotificationsService } from '../../notifications/services/notifications.service.js';
 import { NotificationType } from '../../notifications/types/notification-type.enum.js';
 import type { NotifyChannel } from '../../notifications/types/notify-channel.type.js';
@@ -13,6 +17,7 @@ import {
 } from '../constants/appointment-notification.constants.js';
 import { AppointmentNotificationChannel } from '../enums/appointment-notification-channel.enum.js';
 import { AppointmentNotificationEvent } from '../enums/appointment-notification-event.enum.js';
+import { AppointmentParticipantRole } from '../enums/appointment-participant-role.enum.js';
 import { AppointmentNotificationsRepository } from '../repositories/appointment-notifications.repository.js';
 import type { AppointmentNotificationCatalog } from '../types/appointment-notification-catalog.type.js';
 import type { AppointmentNotificationDispatch } from '../types/appointment-notification-dispatch.type.js';
@@ -31,7 +36,8 @@ export class AppointmentNotificationsService {
   ) {}
 
   async notifyBooked(appointment: AppointmentRecord): Promise<void> {
-    const { date, time } = toBoliviaTime(appointment.startAt);
+    const date = formatBoliviaDate(appointment.startAt);
+    const time = formatBoliviaTime(appointment.startAt);
 
     await this.dispatch({
       appointment,
@@ -45,6 +51,7 @@ export class AppointmentNotificationsService {
           date,
           time,
           topic: appointment.orientationType?.name ?? '',
+          recipientRole: this.roleOf(appointment, recipientId),
         },
         actionUrl: APPOINTMENT_NOTIFICATION_ACTION_URL,
         groupKey,
@@ -239,6 +246,15 @@ export class AppointmentNotificationsService {
         ? appointment.student
         : appointment.mentor;
     return this.fullName(counterpart);
+  }
+
+  private roleOf(
+    appointment: AppointmentRecord,
+    recipientId: string,
+  ): AppointmentParticipantRole {
+    return recipientId === appointment.mentorId
+      ? AppointmentParticipantRole.MENTOR
+      : AppointmentParticipantRole.STUDENT;
   }
 
   private participantOf(appointment: AppointmentRecord, userId: string) {
