@@ -14,6 +14,7 @@ const buttonVariants = cva(
           "hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50",
         brand: "bg-brand-red text-brand-red-foreground hover:bg-danger focus-visible:ring-brand-red/30",
         institutional: "rounded-none bg-brand-red font-tight font-extrabold tracking-wide text-brand-red-foreground uppercase institutional-button hover:bg-danger focus-visible:border-brand-red-foreground focus-visible:ring-2 focus-visible:ring-brand-red-foreground focus-visible:ring-inset",
+        success: "bg-success text-surface hover:bg-success-hover focus-visible:ring-success/30",
         destructive:
           "bg-critical-action text-critical-action-foreground hover:bg-critical-action-hover focus-visible:border-ring focus-visible:ring-ring/20",
         link: "text-accent underline-offset-4 hover:underline",

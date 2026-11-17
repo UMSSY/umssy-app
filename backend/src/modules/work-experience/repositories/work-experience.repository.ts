@@ -24,6 +24,13 @@ const workExperienceSelect = {
 
 @Injectable()
 export class WorkExperienceRepository {
+  findVerificationSources(userId: string, context?: TransactionContext) {
+    return (context?.client ?? this.prisma).workExperience.findMany({
+      where: { userId },
+      select: { id: true },
+    });
+  }
+
   constructor(private readonly prisma: PrismaService) {}
 
   async hasByUserId(userId: string): Promise<boolean> {

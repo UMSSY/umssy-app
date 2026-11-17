@@ -1,3 +1,4 @@
+import { ProfileSkillsEvents } from '../../../common/profile-skills/profile-skills-events.service.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CityNotFoundException } from '../exceptions/city-not-found.exception.js';
 import { ProfileNotFoundException } from '../exceptions/profile-not-found.exception.js';
@@ -56,6 +57,7 @@ describe('ProfileService', () => {
       profileRepository as unknown as ProfileRepository,
       cityCatalogService as unknown as CityCatalogService,
       new ProfileMapper(),
+      new ProfileSkillsEvents(),
     );
   });
 

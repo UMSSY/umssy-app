@@ -135,13 +135,16 @@ export const ModelName = {
   RadarCvReviewStatus: 'RadarCvReviewStatus',
   MentorParticipationStatus: 'MentorParticipationStatus',
   MentorOfferStatus: 'MentorOfferStatus',
+  RadarDocumentVerification: 'RadarDocumentVerification',
   PortfolioProvider: 'PortfolioProvider',
   UserSocialAccount: 'UserSocialAccount',
   UserPortfolioProject: 'UserPortfolioProject',
   NotificationType: 'NotificationType',
   Notification: 'Notification',
   PushSubscription: 'PushSubscription',
-  NotificationPreference: 'NotificationPreference'
+  NotificationPreference: 'NotificationPreference',
+  RadarDocumentStatus: 'RadarDocumentStatus',
+  RadarDocumentSourceType: 'RadarDocumentSourceType'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -359,6 +362,7 @@ export type JobOfferSkillScalarFieldEnum = (typeof JobOfferSkillScalarFieldEnum)
 
 
 export const UserSkillScalarFieldEnum = {
+  radarAutoVerified: 'radarAutoVerified',
   id: 'id',
   userId: 'userId',
   skillId: 'skillId',
@@ -847,6 +851,8 @@ export const ConversationScalarFieldEnum = {
   lastMessageId: 'lastMessageId',
   lastMessageAt: 'lastMessageAt',
   eventId: 'eventId',
+  contextType: 'contextType',
+  contextId: 'contextId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1292,6 +1298,36 @@ export const MentorOfferStatusScalarFieldEnum = {
 export type MentorOfferStatusScalarFieldEnum = (typeof MentorOfferStatusScalarFieldEnum)[keyof typeof MentorOfferStatusScalarFieldEnum]
 
 
+export const RadarDocumentVerificationScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  sourceTypeId: 'sourceTypeId',
+  sourceId: 'sourceId',
+  filename: 'filename',
+  mime: 'mime',
+  content: 'content',
+  sizeBytes: 'sizeBytes',
+  active: 'active',
+  digest: 'digest',
+  statusId: 'statusId',
+  confidence: 'confidence',
+  reason: 'reason',
+  skills: 'skills',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  decidedAt: 'decidedAt',
+  reviewerId: 'reviewerId',
+  noticeRead: 'noticeRead',
+  publishedIds: 'publishedIds',
+  radarVersion: 'radarVersion',
+  synced: 'synced',
+  lease: 'lease',
+  retryAt: 'retryAt'
+} as const
+
+export type RadarDocumentVerificationScalarFieldEnum = (typeof RadarDocumentVerificationScalarFieldEnum)[keyof typeof RadarDocumentVerificationScalarFieldEnum]
+
+
 export const PortfolioProviderScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -1391,6 +1427,28 @@ export const NotificationPreferenceScalarFieldEnum = {
 } as const
 
 export type NotificationPreferenceScalarFieldEnum = (typeof NotificationPreferenceScalarFieldEnum)[keyof typeof NotificationPreferenceScalarFieldEnum]
+
+
+export const RadarDocumentStatusScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RadarDocumentStatusScalarFieldEnum = (typeof RadarDocumentStatusScalarFieldEnum)[keyof typeof RadarDocumentStatusScalarFieldEnum]
+
+
+export const RadarDocumentSourceTypeScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RadarDocumentSourceTypeScalarFieldEnum = (typeof RadarDocumentSourceTypeScalarFieldEnum)[keyof typeof RadarDocumentSourceTypeScalarFieldEnum]
 
 
 export const SortOrder = {
