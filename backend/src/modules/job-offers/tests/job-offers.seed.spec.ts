@@ -196,7 +196,7 @@ describe('seedJobOffers', () => {
     });
   });
 
-  it('asigna vencimiento a los ejemplos y completa solo fechas ausentes', async () => {
+  it('assigns demo deadlines and backfills only missing expiration dates', async () => {
     const { stores, tx } = createTransaction();
     await seedJobOffers(tx, NOW);
     const id = SEED_JOB_OFFERS[0].id;
