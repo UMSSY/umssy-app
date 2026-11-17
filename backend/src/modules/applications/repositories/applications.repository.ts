@@ -1,3 +1,4 @@
+import { ApplicationStatus } from '../types/applications.types.js';
 import {
   APPLICATION_DECISION_CONTEXT_SELECT,
   RECRUITMENT_APPLICATION_SELECT,
@@ -70,7 +71,7 @@ export class ApplicationsRepository {
   reactivateApplication(id: string, userId: string, now: Date) {
     return this.prisma.$transaction(async (tx) => {
       const status = await tx.jobApplicationStatus.findUniqueOrThrow({
-        where: { title: 'En revisión' },
+        where: { title: ApplicationStatus.IN_REVIEW },
         select: { id: true },
       });
 
@@ -78,7 +79,7 @@ export class ApplicationsRepository {
         where: {
           id,
           userId,
-          status: { title: 'Retirada' },
+          status: { title: ApplicationStatus.WITHDRAWN },
           jobOffer: {
             status: { title: JobOfferStatus.PUBLISHED },
             OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
@@ -110,7 +111,7 @@ export class ApplicationsRepository {
   }
   findRecruitmentApplicants(jobId: string) {
     return this.prisma.jobApplication.findMany({
-      where: { jobOfferId: jobId, status: { title: { not: 'Retirada' } } },
+      where: { jobOfferId: jobId, status: { title: { not: ApplicationStatus.WITHDRAWN } } },
       orderBy: { appliedAt: 'desc' },
       select: RECRUITMENT_APPLICATION_SELECT,
     });
