@@ -20,7 +20,7 @@ export const appointmentsApi = {
   cancel: async (appointmentId: string, reason?: string): Promise<Appointment> => {
     const response = await apiClient.patch<ApiResponse<Appointment>>(
       `${getAppointmentEndpoint(appointmentId)}/cancel`,
-      { reason: reason?.trim() || undefined },
+      { reason },
     );
     return response.data.data;
   },
