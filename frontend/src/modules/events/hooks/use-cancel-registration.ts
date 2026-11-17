@@ -3,9 +3,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getAccessToken } from '@/shared/services/storage/access-token-storage';
 import { parseApiError } from '@/shared/utils/parse-api-error';
-import { getRegistrationErrorMessage } from '@/modules/registrations/utils/registration-error';
-import { REGISTRATION_QUERY_KEYS } from '@/modules/registrations/constants/registration-query-keys.constants';
-import { useRegistrationSession } from '@/modules/registrations/hooks/use-registration-session';
+import {
+  getRegistrationErrorMessage,
+  REGISTRATION_QUERY_KEYS,
+  useRegistrationSession,
+} from '@/modules/event-registrations';
 import { registrationsService } from '../services/registrations.service';
 import { removeOfflinePass } from '../services/offline-passes.service';
 import { OFFLINE_PASSES_SNAPSHOT_QUERY_KEY } from '../constants/offline-passes.constants';
