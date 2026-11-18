@@ -1,11 +1,7 @@
-import {
-  ApiBearerAuth,
-  ApiBody,
-  ApiOperation,
-  ApiQuery,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { mentorApiOperation } from '../decorators/mentor-api-operation.decorator.js';
+import { MENTOR_API_SCHEMAS } from '../responses/mentor-openapi.response.js';
+import { ApiTags, ApiBody, ApiQuery } from '@nestjs/swagger';
+
 import { toApiBody } from '../../../common/utils/to-api-body.js';
 import {
   Body,
@@ -32,9 +28,6 @@ import {
 import { MentorCapacityAdminService } from '../services/mentor-capacity-admin.service.js';
 
 @ApiTags('mentor-capacity')
-@ApiBearerAuth()
-@ApiResponse({ status: 401, description: 'Sesión ausente o inválida.' })
-@ApiResponse({ status: 403, description: 'Se requiere el rol administrativo y una cuenta habilitada.' })
 @Controller('admin/mentor-capacity')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @UseInterceptors(ResponseInterceptor)
@@ -42,17 +35,52 @@ import { MentorCapacityAdminService } from '../services/mentor-capacity-admin.se
 export class MentorCapacityAdminController {
   constructor(private readonly service: MentorCapacityAdminService) {}
 
-  @ApiOperation({ operationId: 'getMentorCapacityOverview', summary: 'Consultar cupos', description: 'Requiere rol administrativo. Lectura sin reconciliación ni escrituras.' })
-  @ApiResponse({ status: 200, description: 'Resumen en data: percentage, approvedGraduates, activeMentors, reservedOffers, capacity, occupied, available y pendingRequests.' })
+  @mentorApiOperation({
+    operationId: 'getMentorCapacityOverview',
+    summary: 'Consultar cupos',
+    description:
+      'Rol administrativo. Lectura sin reconciliación ni escrituras.',
+    data: MENTOR_API_SCHEMAS.overview,
+    example: {
+      percentage: 40,
+      approvedGraduates: 10,
+      activeMentors: 2,
+      reservedOffers: 1,
+      capacity: 4,
+      occupied: 3,
+      available: 1,
+      pendingRequests: 1,
+    },
+    auth: true,
+    errors: [],
+    status: 200,
+  })
   @Get()
   getOverview() {
     return this.service.getOverview();
   }
 
-  @ApiOperation({ operationId: 'updateMentorCapacityPercentage', summary: 'Actualizar porcentaje máximo', description: 'Requiere rol administrativo. Actualiza y reconcilia ofertas FIFO en una transacción; conserva participaciones y reservas vigentes.' })
+  @mentorApiOperation({
+    operationId: 'updateMentorCapacityPercentage',
+    summary: 'Actualizar porcentaje máximo',
+    description:
+      'Rol administrativo. Actualiza y reconcilia FIFO en una transacción; conserva participaciones y reservas vigentes.',
+    data: MENTOR_API_SCHEMAS.overview,
+    example: {
+      percentage: 40,
+      approvedGraduates: 10,
+      activeMentors: 2,
+      reservedOffers: 1,
+      capacity: 4,
+      occupied: 3,
+      available: 1,
+      pendingRequests: 1,
+    },
+    auth: true,
+    errors: [400],
+    status: 200,
+  })
   @ApiBody(toApiBody(updateMentorCapacitySchema))
-  @ApiResponse({ status: 200, description: 'Resumen actualizado bajo el envoltorio estándar de respuesta.' })
-  @ApiResponse({ status: 400, description: 'El cuerpo debe contener únicamente percentage, entero entre 1 y 100.' })
   @Put()
   updatePercentage(
     @Body(new ZodValidationPipe(updateMentorCapacitySchema))
@@ -61,11 +89,27 @@ export class MentorCapacityAdminController {
     return this.service.updatePercentage(body.percentage);
   }
 
-  @ApiOperation({ operationId: 'listMentorCapacityWaitingRequests', summary: 'Solicitudes PENDING ordenadas por queuedAt ASC e id ASC.', description: 'Requiere rol administrativo. Paginación sin escrituras.' })
-  @ApiQuery({ name: 'page', required: false, schema: { type: 'integer', minimum: 1, default: 1 } })
-  @ApiQuery({ name: 'limit', required: false, schema: { type: 'integer', minimum: 1, maximum: 50, default: 10 } })
-  @ApiResponse({ status: 200, description: 'data contiene items, totalItems, page, limit y totalPages.' })
-  @ApiResponse({ status: 400, description: 'Parámetros de paginación inválidos.' })
+  @mentorApiOperation({
+    operationId: 'listMentorCapacityWaitingRequests',
+    summary: 'Listar solicitudes pendientes',
+    description:
+      'Rol administrativo. PENDING por queuedAt ASC e ID ASC. Paginación sin escrituras.',
+    data: MENTOR_API_SCHEMAS.waiting,
+    example: { items: [], totalItems: 0, page: 1, limit: 10, totalPages: 0 },
+    auth: true,
+    errors: [400],
+    status: 200,
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    schema: { type: 'integer', minimum: 1, default: 1 },
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    schema: { type: 'integer', minimum: 1, maximum: 50, default: 10 },
+  })
   @Get('requests')
   listWaitingRequests(
     @Query(new ZodValidationPipe(mentorCapacityListSchema))
@@ -74,11 +118,27 @@ export class MentorCapacityAdminController {
     return this.service.listWaitingRequests(query.page, query.limit);
   }
 
-  @ApiOperation({ operationId: 'listMentorCapacityOfferHistory', summary: 'Ofertas ordenadas por offeredAt DESC e id DESC; confirmedAt puede ser null.', description: 'Requiere rol administrativo. Paginación sin escrituras.' })
-  @ApiQuery({ name: 'page', required: false, schema: { type: 'integer', minimum: 1, default: 1 } })
-  @ApiQuery({ name: 'limit', required: false, schema: { type: 'integer', minimum: 1, maximum: 50, default: 10 } })
-  @ApiResponse({ status: 200, description: 'data contiene items, totalItems, page, limit y totalPages.' })
-  @ApiResponse({ status: 400, description: 'Parámetros de paginación inválidos.' })
+  @mentorApiOperation({
+    operationId: 'listMentorCapacityOfferHistory',
+    summary: 'Consultar historial de ofertas',
+    description:
+      'Rol administrativo. offeredAt DESC e ID DESC; confirmedAt nullable. Paginación sin escrituras.',
+    data: MENTOR_API_SCHEMAS.offers,
+    example: { items: [], totalItems: 0, page: 1, limit: 10, totalPages: 0 },
+    auth: true,
+    errors: [400],
+    status: 200,
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    schema: { type: 'integer', minimum: 1, default: 1 },
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    schema: { type: 'integer', minimum: 1, maximum: 50, default: 10 },
+  })
   @Get('offers')
   listOfferHistory(
     @Query(new ZodValidationPipe(mentorCapacityListSchema))

@@ -423,9 +423,9 @@ export function MentorCapacityView() {
                 ) : null}
                 {savePercentage.isError ? (
                   <p className="mt-1 text-sm text-destructive" role="alert">
-                    Error del servidor o de conexión. El último porcentaje consultado
-                    es {data?.percentage}%. Actualiza los datos para verificar el estado antes de volver
-                    a intentarlo.
+                    Error del servidor o de conexión. El último porcentaje
+                    consultado es {data?.percentage}%. Actualiza los datos para
+                    verificar el estado antes de volver a intentarlo.
                   </p>
                 ) : null}
               </div>

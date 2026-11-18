@@ -1,4 +1,3 @@
-
 'use client';
 
 import type { MentorProfilePreviewProps } from '../../types/mentor-profile-preview-props.types';

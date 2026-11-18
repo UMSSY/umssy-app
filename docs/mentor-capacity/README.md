@@ -38,12 +38,12 @@ The frontend depends on shared API/session infrastructure, institutional UI comp
 
 All paths have the `/api` prefix and require administrative authorization.
 
-| Method and path | Contract |
-| --- | --- |
-| GET `/admin/mentor-capacity` | Capacity fields and pendingRequests |
-| PUT `/admin/mentor-capacity` | Body `{ percentage: integer }`; returns refreshed overview |
-| GET `/admin/mentor-capacity/requests` | page and limit; PENDING requests in FIFO order |
-| GET `/admin/mentor-capacity/offers` | page and limit; complete offer history |
+| Method and path                       | Contract                                                   |
+| ------------------------------------- | ---------------------------------------------------------- |
+| GET `/admin/mentor-capacity`          | Capacity fields and pendingRequests                        |
+| PUT `/admin/mentor-capacity`          | Body `{ percentage: integer }`; returns refreshed overview |
+| GET `/admin/mentor-capacity/requests` | page and limit; PENDING requests in FIFO order             |
+| GET `/admin/mentor-capacity/offers`   | page and limit; complete offer history                     |
 
 List parameters are coerced integers: page >= 1, default 1; limit 1..50, default 10. Responses contain items, totalItems, page, limit and totalPages under the shared data envelope. Waiting rows include id, firstName, lastName, email and queuedAt, ordered queuedAt ascending then ID ascending. Offer rows include person information, status, offeredAt, expiresAt and nullable confirmedAt, ordered offeredAt descending then ID descending. OFFERED, CONFIRMED and EXPIRED are displayed as Vigente, Confirmada and Vencida.
 

@@ -1,60 +1,59 @@
+'use client';
 
-"use client";
-
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { useRouter } from "next/navigation";
-import { isAxiosError } from "axios";
-import { toast } from "sonner";
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { useRouter } from 'next/navigation';
+import { isAxiosError } from 'axios';
+import { toast } from 'sonner';
 import {
   keepPreviousData,
   useQuery,
   useQueryClient,
-} from "@tanstack/react-query";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Alert } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { useAuth } from "@/shared/contexts/auth-context";
-import { PageBreadcrumb } from "@/shared/components/layout/page-breadcrumb";
+} from '@tanstack/react-query';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Alert } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/shared/contexts/auth-context';
+import { PageBreadcrumb } from '@/shared/components/layout/page-breadcrumb';
 import {
   getAccessToken,
   subscribeAccessToken,
-} from "@/shared/services/storage/access-token-storage";
-import { mentorParticipationService } from "../services/mentor-participation.service";
-import { PARTICIPATION_BREADCRUMB_ITEMS } from "../constants/participation-breadcrumb.constants";
-import { ParticipationEmptyState } from "../components/participation/participation-empty-state";
-import { ParticipationLoading } from "../components/participation/participation-loading";
-import { ParticipationOverview } from "../components/participation/participation-overview";
-import { PendingParticipation } from "../components/participation/pending-participation";
-import { SlotOfferParticipation } from "../components/participation/slot-offer-participation";
-import { SlotAvailability } from "../components/participation/slot-availability";
-import { ActivateParticipationModal } from "../components/participation/activate-participation-modal";
-import { DeactivateParticipationModal } from "../components/participation/deactivate-participation-modal";
-import { MentorRequestHistoryDetails } from "../components/participation/mentor-request-history-details";
-import { MentorRequestHistoryEmptyState } from "../components/participation/mentor-request-history-empty-state";
-import { useParticipation } from "../hooks/use-participation";
+} from '@/shared/services/storage/access-token-storage';
+import { mentorParticipationService } from '../services/mentor-participation.service';
+import { PARTICIPATION_BREADCRUMB_ITEMS } from '../constants/participation-breadcrumb.constants';
+import { ParticipationEmptyState } from '../components/participation/participation-empty-state';
+import { ParticipationLoading } from '../components/participation/participation-loading';
+import { ParticipationOverview } from '../components/participation/participation-overview';
+import { PendingParticipation } from '../components/participation/pending-participation';
+import { SlotOfferParticipation } from '../components/participation/slot-offer-participation';
+import { SlotAvailability } from '../components/participation/slot-availability';
+import { ActivateParticipationModal } from '../components/participation/activate-participation-modal';
+import { DeactivateParticipationModal } from '../components/participation/deactivate-participation-modal';
+import { MentorRequestHistoryDetails } from '../components/participation/mentor-request-history-details';
+import { MentorRequestHistoryEmptyState } from '../components/participation/mentor-request-history-empty-state';
+import { useParticipation } from '../hooks/use-participation';
 import {
   participationErrorCode,
   participationErrorMessage,
-} from "../utils/participation-error";
-import { getMentorRequestStatusLabel } from "../utils/mentor-request-status";
+} from '../utils/participation-error';
+import { getMentorRequestStatusLabel } from '../utils/mentor-request-status';
 import {
   loadMentorshipWizardDraft,
   saveMentorshipWizardDraft,
   useMentorProfileDraft,
-} from "@/modules/mentorship";
-import { useCurrentUserId } from "@/modules/mentorship/hooks/use-current-user-id";
-import { MentorProfilePreview } from "@/modules/mentorship/components/preview/mentor-profile-preview";
+} from '@/modules/mentorship';
+import { useCurrentUserId } from '@/modules/mentorship';
+import { MentorProfilePreview } from '@/modules/mentorship';
 
 const HISTORY_PAGE_SIZE = 10;
 
 const HISTORY_BREADCRUMB_ITEMS = [
   ...PARTICIPATION_BREADCRUMB_ITEMS.slice(0, -1),
   {
-    label: "Mi participación",
-    href: "/mentors/participation",
+    label: 'Mi participación',
+    href: '/mentors/participation',
   },
   {
-    label: "Historial de solicitudes",
+    label: 'Historial de solicitudes',
   },
 ];
 
@@ -62,7 +61,7 @@ const getServerToken = () => null;
 
 const notifySuccess = (message: string) => {
   toast.success(message, {
-    id: "mentor-participation-feedback",
+    id: 'mentor-participation-feedback',
     duration: 4000,
     closeButton: true,
   });
@@ -72,50 +71,33 @@ const formatRequestDate = (date: string) => {
   const parsedDate = new Date(date);
 
   if (Number.isNaN(parsedDate.getTime())) {
-    return "Fecha no disponible";
+    return 'Fecha no disponible';
   }
 
-  return new Intl.DateTimeFormat("es-BO", {
-    year: "numeric",
-    month: "short",
-    day: "2-digit",
+  return new Intl.DateTimeFormat('es-BO', {
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
   }).format(parsedDate);
 };
 
-const requestStatusStyles: Record<string, string> = {
-  PENDING:
-    "border-border bg-surface-soft text-ink",
-  OFFERED:
-    "border-border bg-surface-soft text-ink",
-  ACTIVE:
-    "border-border bg-surface-soft text-ink",
-  ENDED:
-    "border-border bg-surface-soft text-ink",
-  CANCELLED:
-    "border-border bg-surface-soft text-ink",
-  EXPIRED:
-    "border-border bg-surface-soft text-ink",
-};
-
-const getRequestStatusStyle = (status: string) =>
-  requestStatusStyles[status] ??
-  "border-border bg-muted text-muted-foreground";
+const REQUEST_STATUS_STYLE = 'border-border bg-surface-soft text-ink';
 
 const getHistoryErrorMessage = (error: unknown) => {
   if (isAxiosError(error)) {
     if (!error.response) {
-      return "No se pudo conectar con el servidor. Verifica tu conexión e inténtalo nuevamente.";
+      return 'No se pudo conectar con el servidor. Verifica tu conexión e inténtalo nuevamente.';
     }
 
     if (error.response.status >= 500) {
-      return "El servidor presentó un problema al consultar el historial. Inténtalo nuevamente.";
+      return 'El servidor presentó un problema al consultar el historial. Inténtalo nuevamente.';
     }
   }
 
-  return "No se pudo consultar el historial de solicitudes. Inténtalo nuevamente.";
+  return 'No se pudo consultar el historial de solicitudes. Inténtalo nuevamente.';
 };
 
-type ParticipationTab = "current" | "history";
+type ParticipationTab = 'current' | 'history';
 
 export function ParticipationView({
   registered = false,
@@ -141,7 +123,7 @@ export function ParticipationView({
   const participation = useParticipation(token);
 
   const request = useQuery({
-    queryKey: ["mentor-participation-requests", token],
+    queryKey: ['mentor-participation-requests', token],
     queryFn: () => mentorParticipationService.getCurrent(),
     enabled: Boolean(token),
     retry: false,
@@ -149,27 +131,27 @@ export function ParticipationView({
     refetchOnWindowFocus: true,
   });
 
-  const [activeTab, setActiveTab] = useState<ParticipationTab>("current");
+  const [activeTab, setActiveTab] = useState<ParticipationTab>('current');
   const [selectedHistoryId, setSelectedHistoryId] = useState<string | null>(
     null,
   );
   const [historyPage, setHistoryPage] = useState(1);
 
   const history = useQuery({
-    queryKey: ["mentor-participation-history", token, historyPage],
+    queryKey: ['mentor-participation-history', token, historyPage],
     queryFn: ({ signal }) =>
       mentorParticipationService.getHistoryPaginated(
         historyPage,
         HISTORY_PAGE_SIZE,
         signal,
       ),
-    enabled: Boolean(token) && activeTab === "history",
+    enabled: Boolean(token) && activeTab === 'history',
     retry: false,
     staleTime: 30_000,
     placeholderData: keepPreviousData,
   });
 
-  const [modal, setModal] = useState<"activate" | "deactivate" | null>(null);
+  const [modal, setModal] = useState<'activate' | 'deactivate' | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<unknown>(null);
   const [hasDraftStorageError, setHasDraftStorageError] = useState(false);
@@ -191,29 +173,29 @@ export function ParticipationView({
     const url = new URL(window.location.href);
 
     const hasActivationFeedback =
-      activated && url.searchParams.get("activated") === "1";
+      activated && url.searchParams.get('activated') === '1';
 
     const hasRegistrationFeedback =
-      registered && url.searchParams.get("registered") === "1";
+      registered && url.searchParams.get('registered') === '1';
 
-    url.searchParams.delete("registered");
-    url.searchParams.delete("activated");
+    url.searchParams.delete('registered');
+    url.searchParams.delete('activated');
 
     window.history.replaceState(
       window.history.state,
-      "",
+      '',
       `${url.pathname}${url.search}${url.hash}`,
     );
 
-    if (hasActivationFeedback && participation.state?.status === "ACTIVE") {
-      notifySuccess("Participación activada correctamente");
+    if (hasActivationFeedback && participation.state?.status === 'ACTIVE') {
+      notifySuccess('Participación activada correctamente');
     } else if (
       hasRegistrationFeedback &&
       !hasActivationFeedback &&
-      participation.state?.status !== "ACTIVE" &&
-      ["PENDING", "OFFERED"].includes(request.data?.status ?? "")
+      participation.state?.status !== 'ACTIVE' &&
+      ['PENDING', 'OFFERED'].includes(request.data?.status ?? '')
     ) {
-      notifySuccess("Solicitud de cupo registrada correctamente");
+      notifySuccess('Solicitud de cupo registrada correctamente');
     }
   }, [
     registered,
@@ -237,22 +219,22 @@ export function ParticipationView({
       await Promise.allSettled([
         refreshRoles(),
         client.invalidateQueries({
-          queryKey: ["mentors", "participation"],
+          queryKey: ['mentors', 'participation'],
         }),
         client.invalidateQueries({
-          queryKey: ["mentor-participation-requests"],
+          queryKey: ['mentor-participation-requests'],
         }),
         client.invalidateQueries({
-          queryKey: ["mentorship", "directory"],
+          queryKey: ['mentorship', 'directory'],
         }),
         client.invalidateQueries({
-          queryKey: ["mentorship", "profile"],
+          queryKey: ['mentorship', 'profile'],
         }),
       ]);
 
       setModal(null);
       setIsPreviewOpen(false);
-      notifySuccess("Participación desactivada correctamente");
+      notifySuccess('Participación desactivada correctamente');
     } catch (failure) {
       setError(failure);
     } finally {
@@ -269,12 +251,12 @@ export function ParticipationView({
   if (!token) return <ParticipationLoading />;
 
   const state = participation.state;
-  const isActive = state?.status === "ACTIVE";
-  const hasHistory = state?.status === "DEACTIVATED";
+  const isActive = state?.status === 'ACTIVE';
+  const hasHistory = state?.status === 'DEACTIVATED';
   const currentRequest = request.data;
 
-  const hasOpenRequest = ["PENDING", "OFFERED"].includes(
-    currentRequest?.status ?? "",
+  const hasOpenRequest = ['PENDING', 'OFFERED'].includes(
+    currentRequest?.status ?? '',
   );
 
   const historyItems = history.data?.items ?? [];
@@ -311,7 +293,7 @@ export function ParticipationView({
     <div className="mx-auto max-w-7xl space-y-6">
       <PageBreadcrumb
         items={
-          activeTab === "history"
+          activeTab === 'history'
             ? HISTORY_BREADCRUMB_ITEMS
             : PARTICIPATION_BREADCRUMB_ITEMS
         }
@@ -337,10 +319,10 @@ export function ParticipationView({
             id="participation-current-tab"
             type="button"
             role="tab"
-            aria-selected={activeTab === "current"}
+            aria-selected={activeTab === 'current'}
             aria-controls="participation-current-panel"
-            variant={activeTab === "current" ? "default" : "outline"}
-            onClick={() => setActiveTab("current")}
+            variant={activeTab === 'current' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('current')}
           >
             Mi participación
           </Button>
@@ -349,10 +331,10 @@ export function ParticipationView({
             id="participation-history-tab"
             type="button"
             role="tab"
-            aria-selected={activeTab === "history"}
+            aria-selected={activeTab === 'history'}
             aria-controls="participation-history-panel"
-            variant={activeTab === "history" ? "default" : "outline"}
-            onClick={() => setActiveTab("history")}
+            variant={activeTab === 'history' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('history')}
           >
             Historial de solicitudes
           </Button>
@@ -363,7 +345,7 @@ export function ParticipationView({
         id="participation-current-panel"
         role="tabpanel"
         aria-labelledby="participation-current-tab"
-        hidden={activeTab !== "current"}
+        hidden={activeTab !== 'current'}
         className="space-y-6"
       >
         {participation.isLoading && <ParticipationLoading />}
@@ -373,10 +355,7 @@ export function ParticipationView({
           <Alert variant="destructive">
             <p>No se pudo cargar tu participación como mentor.</p>
 
-            <Button
-              variant="outline"
-              onClick={() => participation.retry()}
-            >
+            <Button variant="outline" onClick={() => participation.retry()}>
               Reintentar participación
             </Button>
           </Alert>
@@ -390,10 +369,7 @@ export function ParticipationView({
           <Alert variant="destructive">
             <p>No se pudo consultar tu solicitud de cupo.</p>
 
-            <Button
-              variant="outline"
-              onClick={() => void request.refetch()}
-            >
+            <Button variant="outline" onClick={() => void request.refetch()}>
               Reintentar solicitud
             </Button>
           </Alert>
@@ -406,9 +382,7 @@ export function ParticipationView({
             actionEnabled={
               isActive ||
               (request.isSuccess &&
-                !["PENDING", "OFFERED"].includes(
-                  currentRequest?.status ?? "",
-                ))
+                !['PENDING', 'OFFERED'].includes(currentRequest?.status ?? ''))
             }
             areas={(state?.areas ?? []).map((area) => area.name)}
             orientations={(state?.orientations ?? []).map(
@@ -416,7 +390,7 @@ export function ParticipationView({
             )}
             onPreview={() => {
               if (!currentUserId) {
-                toast.error("No se pudo identificar tu perfil de mentor.");
+                toast.error('No se pudo identificar tu perfil de mentor.');
                 return;
               }
 
@@ -425,22 +399,22 @@ export function ParticipationView({
             onAction={() => {
               setError(null);
               setHasDraftStorageError(false);
-              setModal(isActive ? "deactivate" : "activate");
+              setModal(isActive ? 'deactivate' : 'activate');
             }}
           />
         )}
 
-        {!isActive && currentRequest?.status === "PENDING" && (
+        {!isActive && currentRequest?.status === 'PENDING' && (
           <PendingParticipation
             request={currentRequest}
             onCancelled={() =>
-              notifySuccess("Solicitud cancelada correctamente")
+              notifySuccess('Solicitud cancelada correctamente')
             }
           />
         )}
 
         {!isActive &&
-          currentRequest?.status === "OFFERED" &&
+          currentRequest?.status === 'OFFERED' &&
           (currentRequest.offer ? (
             <SlotOfferParticipation
               key={currentRequest.offer.id}
@@ -449,18 +423,18 @@ export function ParticipationView({
                 void refreshRoles();
 
                 void client.invalidateQueries({
-                  queryKey: ["mentors", "participation"],
+                  queryKey: ['mentors', 'participation'],
                 });
 
                 void client.invalidateQueries({
-                  queryKey: ["mentorship", "directory"],
+                  queryKey: ['mentorship', 'directory'],
                 });
 
                 void client.invalidateQueries({
-                  queryKey: ["mentorship", "profile"],
+                  queryKey: ['mentorship', 'profile'],
                 });
 
-                notifySuccess("Participación activada correctamente");
+                notifySuccess('Participación activada correctamente');
               }}
             />
           ) : (
@@ -474,16 +448,14 @@ export function ParticipationView({
           request.isSuccess &&
           !isActive &&
           !hasHistory &&
-          !["PENDING", "OFFERED"].includes(
-            currentRequest?.status ?? "",
-          ) && (
+          !['PENDING', 'OFFERED'].includes(currentRequest?.status ?? '') && (
             <div className="space-y-6">
               <SlotAvailability />
               <ParticipationEmptyState />
             </div>
           )}
 
-        {!isActive && currentRequest?.status === "EXPIRED" && (
+        {!isActive && currentRequest?.status === 'EXPIRED' && (
           <p role="status">
             La oferta venció. Puedes revisar las condiciones vigentes en el
             proceso de incorporación.
@@ -495,14 +467,12 @@ export function ParticipationView({
         id="participation-history-panel"
         role="tabpanel"
         aria-labelledby="participation-history-tab"
-        hidden={activeTab !== "history"}
+        hidden={activeTab !== 'history'}
         className="space-y-4"
       >
-        <h2 className="text-xl font-semibold">
-          Historial de solicitudes
-        </h2>
+        <h2 className="text-xl font-semibold">Historial de solicitudes</h2>
 
-        {history.isPending && activeTab === "history" && (
+        {history.isPending && activeTab === 'history' && (
           <div
             role="status"
             aria-label="Cargando historial de solicitudes"
@@ -585,7 +555,7 @@ export function ParticipationView({
             <div
               aria-busy={history.isFetching}
               className={`overflow-x-auto rounded-lg border transition-opacity ${
-                isChangingHistoryPage ? "opacity-60" : "opacity-100"
+                isChangingHistoryPage ? 'opacity-60' : 'opacity-100'
               }`}
             >
               <table className="w-full min-w-[760px] text-left text-sm">
@@ -622,7 +592,7 @@ export function ParticipationView({
 
                       <td className="px-4 py-3">
                         <span
-                          className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${getRequestStatusStyle(item.status)}`}
+                          className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${REQUEST_STATUS_STYLE}`}
                         >
                           {getMentorRequestStatusLabel(item.status)}
                         </span>
@@ -650,8 +620,8 @@ export function ParticipationView({
                           }
                         >
                           {selectedHistoryId === item.id
-                            ? "Ocultar detalles"
-                            : "Ver detalles"}
+                            ? 'Ocultar detalles'
+                            : 'Ver detalles'}
                         </Button>
                       </td>
                     </tr>
@@ -661,8 +631,8 @@ export function ParticipationView({
             </div>
 
             <p className="text-xs text-muted-foreground">
-              Las columnas de áreas técnicas y orientaciones muestran
-              la cantidad seleccionada en cada solicitud.
+              Las columnas de áreas técnicas y orientaciones muestran la
+              cantidad seleccionada en cada solicitud.
             </p>
 
             {totalHistoryPages > 1 && (
@@ -675,7 +645,7 @@ export function ParticipationView({
                   {Math.min(
                     historyStartIndex + historyItems.length,
                     totalHistoryRequests,
-                  )}{" "}
+                  )}{' '}
                   de {totalHistoryRequests} solicitudes.
                 </p>
 
@@ -684,9 +654,7 @@ export function ParticipationView({
                     type="button"
                     variant="outline"
                     disabled={currentHistoryPage === 1 || history.isFetching}
-                    onClick={() =>
-                      changeHistoryPage(currentHistoryPage - 1)
-                    }
+                    onClick={() => changeHistoryPage(currentHistoryPage - 1)}
                   >
                     <ChevronLeft aria-hidden="true" className="size-4" />
                     Anterior
@@ -703,9 +671,7 @@ export function ParticipationView({
                       currentHistoryPage >= totalHistoryPages ||
                       history.isFetching
                     }
-                    onClick={() =>
-                      changeHistoryPage(currentHistoryPage + 1)
-                    }
+                    onClick={() => changeHistoryPage(currentHistoryPage + 1)}
                   >
                     Siguiente
                     <ChevronRight aria-hidden="true" className="size-4" />
@@ -727,13 +693,13 @@ export function ParticipationView({
       </div>
 
       <DeactivateParticipationModal
-        isOpen={modal === "deactivate"}
+        isOpen={modal === 'deactivate'}
         onClose={() => setModal(null)}
         onConfirm={() => void deactivate()}
         isLoading={submitting}
         errorMessage={error ? participationErrorMessage(error) : null}
         hasFutureAppointments={
-          participationErrorCode(error) === "MENTOR_HAS_FUTURE_APPOINTMENTS"
+          participationErrorCode(error) === 'MENTOR_HAS_FUTURE_APPOINTMENTS'
         }
         areas={(state?.areas ?? []).map((area) => area.name)}
         orientations={(state?.orientations ?? []).map(
@@ -742,23 +708,22 @@ export function ParticipationView({
       />
 
       <ActivateParticipationModal
-        isOpen={modal === "activate"}
+        isOpen={modal === 'activate'}
         onClose={() => setModal(null)}
         onConfirm={() => {
           void (async () => {
             if (hasDraftStorageError) {
               setModal(null);
-              router.push("/mentorship");
+              router.push('/mentorship');
               return;
             }
 
             try {
               if (!authUserId) {
-                throw new Error("Identidad no disponible");
+                throw new Error('Identidad no disponible');
               }
 
-              const draft =
-                await loadMentorshipWizardDraft(authUserId);
+              const draft = await loadMentorshipWizardDraft(authUserId);
 
               if (!draft) {
                 await saveMentorshipWizardDraft(authUserId, {
@@ -767,14 +732,14 @@ export function ParticipationView({
                   selectedTechnicalAreaIds: (state?.areas ?? []).map(
                     (area) => area.id,
                   ),
-                  selectedOrientationTypeIds: (
-                    state?.orientations ?? []
-                  ).map((orientation) => orientation.id),
+                  selectedOrientationTypeIds: (state?.orientations ?? []).map(
+                    (orientation) => orientation.id,
+                  ),
                 });
               }
 
               setModal(null);
-              router.push("/mentorship");
+              router.push('/mentorship');
             } catch {
               setHasDraftStorageError(true);
             }
@@ -783,7 +748,7 @@ export function ParticipationView({
         isLoading={false}
         errorMessage={
           hasDraftStorageError
-            ? "No se pudo recuperar el borrador. Puedes continuar y seleccionar tus preferencias nuevamente."
+            ? 'No se pudo recuperar el borrador. Puedes continuar y seleccionar tus preferencias nuevamente.'
             : null
         }
       />

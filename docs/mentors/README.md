@@ -30,12 +30,54 @@ flowchart LR
 
 The authenticated suggestions endpoint evaluates four independent conditions, in order:
 
-| Code | Missing condition | Editing destination |
-| --- | --- | --- |
-| MISSING_PROFILE_PHOTO | Null or zero-byte photograph | `/profile/personal-info` |
-| MISSING_PROFESSIONAL_DESCRIPTION | Null, empty or whitespace-only description | `/profile/presentation` |
-| MISSING_SPECIALTY | No technical areas | `/mentors/participation/technical-areas` |
-| MISSING_WORK_EXPERIENCE | No work experience | `/profile/trajectory/experience` |
+| Code                             | Missing condition                          | Editing destination                      |
+| -------------------------------- | ------------------------------------------ | ---------------------------------------- |
+| MISSING_PROFILE_PHOTO            | Null or zero-byte photograph               | `/profile/personal-info`                 |
+| MISSING_PROFESSIONAL_DESCRIPTION | Null, empty or whitespace-only description | `/profile/presentation`                  |
+| MISSING_SPECIALTY                | No technical areas                         | `/mentors/participation/technical-areas` |
+| MISSING_WORK_EXPERIENCE          | No work experience                         | `/profile/trajectory/experience`         |
+
+Each item has this contract:
+
+| Field                | Contract                                                                              |
+| -------------------- | ------------------------------------------------------------------------------------- |
+| `code`               | One of the four stable codes above, once per response                                 |
+| `field`              | `photoUrl`, `aboutMe`, `mentorTechnicalAreas` or `workExperiences`, matching the code |
+| `message`            | Spanish explanation of the missing information                                        |
+| `title`              | Spanish heading from `MENTOR_PROFILE_SUGGESTION_PRESENTATION`                         |
+| `benefitDescription` | Spanish explanation of the benefit of completing the section                          |
+| `editReference`      | `{ section: field, action: "edit" }`; semantic reference, not a frontend URL          |
+
+The mapper preserves photo, description, specialty and experience order and computes `pendingCount` as the final array length (0..4). A complete profile returns `data: { suggestions: [], pendingCount: 0 }`. For example:
+
+```json
+{
+  "statusCode": 200,
+  "ok": true,
+  "detail": "OK",
+  "data": {
+    "suggestions": [
+      {
+        "code": "MISSING_SPECIALTY",
+        "field": "mentorTechnicalAreas",
+        "message": "Agrega al menos un área técnica como especialidad.",
+        "title": "Completa tus áreas técnicas",
+        "benefitDescription": "Ayuda a los estudiantes a identificar tus especialidades.",
+        "editReference": { "section": "mentorTechnicalAreas", "action": "edit" }
+      }
+    ],
+    "pendingCount": 1
+  }
+}
+```
+
+JWT signature/expiry and the reloaded session are checked; identity comes exclusively from `CurrentUser`, never a query or body-selected user. Invalid/missing sessions return 401; inactive accounts or sessions without valid roles are rejected by existing authorization. No extra mentor role guard is added. Repository/session failures return HTTP 500 with `ok: false`, `data: null`, `code: "INTERNAL_ERROR"` and a generic public detail. A failed query is never converted into an empty suggestions array.
+
+Each request reads current persisted values. Saving photo, presentation, technical areas or experience and querying again removes only resolved suggestions; discarding a draft does not change them. Detection is read-only and does not impose mentoring restrictions. A professional headline does not replace specialty, and empty orientation types do not create a fifth backend suggestion.
+
+Active participation requires an active user and a mentor role with `deletedAt = null` and `startAt <= now`. Pending requests and offers do not substitute for that role. Deleted, deactivated or future roles are not active. `isAvailableForMentoring = false` does not exclude an otherwise active mentor.
+
+**Pending business decision:** There is no official rule equating mentoring unavailability with paused participation. Do not introduce `PAUSED` or change existing participation behavior until that decision is defined.
 
 A specialized snapshot selects photo byte length, description and existence flags in one read, without loading photo/document binaries. Suggestions are not persisted and do not block mentoring. Orientation types do not substitute for technical areas. A valid session without active mentor participation receives an empty list: combine this with participation status rather than interpreting it as a complete profile. Participation distinguishes ACTIVE, DEACTIVATED and NEVER; availability is independent of role participation.
 
@@ -91,39 +133,50 @@ flowchart LR
   Roles --> Allocation
 ```
 
-Database field definitions, indexes and deletion behavior belong to the Database-owned Prisma documentation.
+Database field definitions, indexes, SQL-only constraints and deletion behavior are documented in the [Database README](../../backend/prisma/README.md). The mentor section requires review by the Database team.
 
 ## Endpoints and authorization
 
 Paths below are relative to `/api`. Session routes derive ownership from CurrentUser; UUID path inputs are validated. Administrative routes also require the administrativo role.
 
-| Method and path | Purpose and access |
-| --- | --- |
-| GET `/mentors` | Public active mentor list |
-| GET `/mentors/directory` | Authenticated filtered directory, pages of six, including affinity ordering |
-| GET `/mentors/:userId` | Public active mentor profile |
-| GET `/mentors/:userId/similar` | Public similar mentors, maximum three |
-| GET `/mentors/me/profile-suggestions` | Authenticated optional completeness suggestions |
-| GET `/mentors/me/participation` | Authenticated participation status |
-| GET, PATCH `/mentors/me/technical-areas` | Current active mentor's technical selections |
-| GET, PATCH `/mentors/me/orientation-types` | Current active mentor's orientation selections |
-| GET `/mentors/capacity` | Authenticated capacity snapshot |
-| POST `/mentors/activate` | Authenticated idempotent activation |
-| POST `/mentor-participation/requests` | Authenticated idempotent waiting request |
-| GET `/mentor-participation/requests/me` | Current user's latest relevant request |
-| GET `/mentor-participation/requests/me/history` | Current user's history |
-| PATCH, DELETE `/mentor-participation/requests/me` | Update pending preferences or cancel |
-| POST `/mentors/offers/:offerId/confirm` | Confirm the authenticated user's offer |
-| POST `/mentors/me/leave` | Leave mentor participation |
-| GET, PUT `/admin/mentor-capacity` | Administrative overview and percentage update |
-| GET `/admin/mentor-capacity/requests` | Administrative FIFO waiting list |
-| GET `/admin/mentor-capacity/offers` | Administrative offer history |
+| Method and path                                   | Purpose and access                                                          |
+| ------------------------------------------------- | --------------------------------------------------------------------------- |
+| GET `/mentors`                                    | Public active mentor list                                                   |
+| GET `/mentors/directory`                          | Authenticated filtered directory, pages of six, including affinity ordering |
+| GET `/mentors/:userId`                            | Public active mentor profile                                                |
+| GET `/mentors/:userId/photo`                      | Public binary photo; UUID v4, no session required                           |
+| GET `/mentors/:userId/similar`                    | Public similar mentors, maximum three                                       |
+| GET `/mentors/me/profile-suggestions`             | Authenticated optional completeness suggestions                             |
+| GET `/mentors/me/participation`                   | Authenticated participation status                                          |
+| GET, PATCH `/mentors/me/technical-areas`          | Current active mentor's technical selections                                |
+| GET, PATCH `/mentors/me/orientation-types`        | Current active mentor's orientation selections                              |
+| GET `/mentors/capacity`                           | Authenticated capacity snapshot                                             |
+| POST `/mentors/activate`                          | Authenticated idempotent activation                                         |
+| POST `/mentor-participation/requests`             | Authenticated idempotent waiting request                                    |
+| GET `/mentor-participation/requests/me`           | Current user's latest relevant request                                      |
+| GET `/mentor-participation/requests/me/history`   | Current user's history                                                      |
+| PATCH, DELETE `/mentor-participation/requests/me` | Update pending preferences or cancel                                        |
+| POST `/mentors/offers/:offerId/confirm`           | Confirm the authenticated user's offer                                      |
+| POST `/mentors/me/leave`                          | Leave mentor participation                                                  |
+| GET, PUT `/admin/mentor-capacity`                 | Administrative overview and percentage update                               |
+| GET `/admin/mentor-capacity/requests`             | Administrative FIFO waiting list                                            |
+| GET `/admin/mentor-capacity/offers`               | Administrative offer history                                                |
+
+### Public photograph
+
+`GET /mentors/:userId/photo` validates UUID v4 and returns a `StreamableFile`, outside the JSON success envelope. It sends `Cache-Control: no-store`, `Content-Disposition: inline`, byte `Content-Length` and detected `Content-Type`. Normal uploads permit `image/jpeg` and `image/png`. The existing download detector also recognizes `application/pdf` if such bytes are already stored; it does not reapply upload validation. The `v` URL suffix used by profiles is a cache-version hint, not an access requirement.
+
+Invalid UUIDs return 400. Missing/inactive mentor (`MENTOR_NOT_FOUND`), missing profile (`PROFILE_NOT_FOUND`) or absent/unrecognized photo (`PHOTO_NOT_FOUND`) return 404. Unexpected repository failures return 500 (`INTERNAL_ERROR`). Error responses use the standard JSON error envelope. There is no authentication guard or role-based 403 on this public operation.
 
 ## History and errors
 
 User history orders by queuedAt descending, then ID descending. Without pagination parameters it preserves the legacy array response. With either parameter it returns items, page, limit, total and totalPages; page defaults to 1 (maximum 1000000), limit to 10 (maximum 100). The frontend loads history only on its tab, includes session and page in the query key, and renders loading, empty, error/retry, pagination and a read-only detail containing selection counts.
 
 Invalid input is rejected before service execution. Authentication/authorization failures remain 401/403; absent mentors and invalid selections retain existing domain exceptions. Intake conflicts retain their existing machine-readable codes and participation navigation. No new HTTP contract is introduced here.
+
+## Verification boundaries
+
+Existing tests exercise all 16 combinations of missing fields, order, uniqueness, count, mapper metadata, authenticated identity isolation, invalid sessions, active/unavailable and inactive/future roles, error propagation, edits and discarded drafts. The optimized snapshot uses parameterized `Prisma.sql`, photo byte length and two `EXISTS` flags in one coherent read; it does not fetch binaries or certifications. No latency improvement is claimed. Historical coverage and database checks are not a certification of current integration; rerun focused checks after synchronization. Independent participation and suggestions reads must be refreshed together if participation changes between requests.
 
 ## Sprint History
 
