@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
 import { Prisma } from '../../../prisma/client.js';
 import { CertificationNotFoundException } from '../exceptions/certification-not-found.exception.js';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
@@ -36,6 +37,21 @@ describe('CertificationsRepository', () => {
     repository = new CertificationsRepository({
       certification,
     } as unknown as PrismaService);
+  });
+
+  it('lee únicamente IDs propios con el cliente transaccional de publicación', async () => {
+    const findMany = vi.fn().mockResolvedValue([{ id: certificationId }]);
+    const context = {
+      client: { certification: { findMany } },
+    } as unknown as TransactionContext;
+    await expect(
+      repository.findPublicationEvidenceIds(userId, context),
+    ).resolves.toEqual([{ id: certificationId }]);
+    expect(findMany).toHaveBeenCalledExactlyOnceWith({
+      where: { userId },
+      select: { id: true },
+    });
+    expect(certification.findMany).not.toHaveBeenCalled();
   });
 
   it('finds the certifications of a user ordered by issue date descending', async () => {

@@ -33,3 +33,4 @@ export {
 export { useOrientationConfig } from './hooks/use-orientation-config';
 export { useCurrentUserId } from './hooks/use-current-user-id';
 export { MentorProfilePreview } from './components/preview/mentor-profile-preview';
+export { useMentorDirectory } from './hooks/use-mentor-directory';

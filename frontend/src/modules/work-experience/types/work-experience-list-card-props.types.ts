@@ -1,5 +1,3 @@
-
-import type { SkillsAnalysisResult } from "@/modules/matching";
 import type { WorkExperienceItem } from "./work-experience-item.types";
 
 export interface WorkExperienceListCardProps {
@@ -10,5 +8,4 @@ export interface WorkExperienceListCardProps {
   onEdit?: (experience: WorkExperienceItem) => void;
   onDelete?: (experience: WorkExperienceItem) => void;
   skillsByExperience?: Record<string, string[]>;
-  analysis?: SkillsAnalysisResult | null;
 }

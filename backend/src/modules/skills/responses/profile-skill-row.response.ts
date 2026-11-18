@@ -3,6 +3,7 @@ export interface ProfileSkillRowResponse {
   skillId: string;
   source: string;
   verificationStatus: string;
+  radarAutoVerified?: boolean;
   isHighRelevance: boolean;
   evidenceRefs: unknown;
   skill: {

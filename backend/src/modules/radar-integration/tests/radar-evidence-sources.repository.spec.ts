@@ -2,9 +2,14 @@ import { describe, expect, it, vi } from 'vitest';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { RadarEvidenceSourcesRepository } from '../repositories/radar-evidence-sources.repository.js';
 
-function build(current: unknown) {
+function build(current: unknown, status?: string) {
   const findFirst = vi.fn().mockResolvedValue(current);
   const repository = new RadarEvidenceSourcesRepository({
+    radarDocumentVerification: {
+      findFirst: vi
+        .fn()
+        .mockResolvedValue(status ? { statusEntry: { title: status } } : null),
+    },
     radarCvEvidence: { findFirst },
   } as unknown as PrismaService);
   return { repository, findFirst };
@@ -18,6 +23,38 @@ const current = {
 };
 
 describe('RadarEvidenceSourcesRepository', () => {
+  it.each([
+    'queued',
+    'reading',
+    'review',
+    'low_confidence',
+    'manual_rejected',
+    'cancelled',
+  ])(
+    'no recupera texto anterior si la verificación vigente es %s',
+    async (status) => {
+      const { repository, findFirst } = build(current, status);
+      await expect(
+        repository.findCurrentCvText('user', 'current-cv'),
+      ).resolves.toEqual([]);
+      expect(findFirst).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          where: { userId: 'user', cvId: 'current-cv' },
+        }),
+      );
+    },
+  );
+  it.each(['approved', 'manual_approved', 'legacy'])(
+    'usa el CV vigente con estado %s',
+    async (status) => {
+      const { repository } = build(current, status);
+      await expect(
+        repository.findCurrentCvText('user', 'current-cv'),
+      ).resolves.toEqual([
+        { id: 'current-cv', type: 'cv', text: 'Texto vigente' },
+      ]);
+    },
+  );
   it('devuelve el texto del CV vigente listo para analizar', async () => {
     const { repository } = build(current);
     await expect(repository.findCurrentCvText('user')).resolves.toEqual([

@@ -1045,3 +1045,18 @@ describe("MentorDirectoryView", () => {
     },
   );
 });
+
+it("recibe el área del radar, mantiene disponibles y permite cambiar de competencia", async () => {
+  navigationMocks.search = "?area=Desarrollo&from=radar&available=false";
+  const query = vi.spyOn(directoryService, "getMentorDirectory").mockResolvedValue(makeDirectoryPage([]));
+  const view = render(<MentorDirectoryView />);
+  await waitFor(() => expect(query).toHaveBeenCalledWith(expect.objectContaining({ area: "Desarrollo", available: true }), expect.anything()));
+  expect(screen.getByRole("link", { name: "Volver al radar" })).toHaveAttribute("href", "/profile/radar");
+  expect(screen.getByRole("checkbox", { name: "Solo disponibles" })).toHaveAttribute("aria-disabled", "true");
+  fireEvent.click(screen.getByRole("button", { name: "QA" }));
+  applyNavigation(view.rerender);
+  await waitFor(() => expect(query).toHaveBeenLastCalledWith(expect.objectContaining({ area: "QA", available: true }), expect.anything()));
+  fireEvent.click(screen.getByRole("button", { name: "Todos" }));
+  applyNavigation(view.rerender);
+  await waitFor(() => expect(query).toHaveBeenLastCalledWith(expect.objectContaining({ area: "", available: true }), expect.anything()));
+});
