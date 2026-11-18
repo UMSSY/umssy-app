@@ -1,4 +1,4 @@
-import { Bell, BookOpen, BriefcaseBusiness, Building2, CalendarClock, ClipboardList, FileText, GraduationCap, History, Inbox, ListChecks, MessageCircle, Radar, Search, ShieldCheck, Sparkles, SquarePlus, Ticket, UserRound, Users, Award } from "lucide-react";
+import { Bell, BookOpen, BriefcaseBusiness, Building2, CalendarClock, ClipboardList, FileText, GraduationCap, History, Inbox, LayoutGrid, ListChecks, MessageCircle, Radar, Search, ShieldCheck, Sparkles, SquarePlus, Ticket, UserRound, Users, Award } from "lucide-react";
 import type { WorkspaceArea, WorkspaceTask } from "@/shared/types/workspace-navigation.types";
 
 export const WORKSPACE_AREAS: readonly WorkspaceArea[] = [
@@ -18,6 +18,11 @@ export const WORKSPACE_TASKS: readonly WorkspaceTask[] = [
   { label: "Registro de auditoría", href: "/backoffice/audit", icon: History, area: "management", keywords: "auditoría historial eventos trazabilidad" },
   { label: "Encuestas", href: "/backoffice/surveys", icon: ClipboardList, area: "management", keywords: "formularios cuestionarios satisfacción historial resultados estadísticas" },
   { label: "Crear encuesta", href: "/backoffice/surveys/create", icon: SquarePlus, area: "management", keywords: "nueva encuesta formulario preguntas" },
+  { label: "Mapas de calor", href: "/backoffice/reports/heatmaps", icon: LayoutGrid, area: "management", keywords: "mapa de calor analíticas datos gráficos visualización estadísticas" },
+  { label: "Habilidades por Carrera", href: "/backoffice/reports/heatmaps/skills-by-career", icon: LayoutGrid, area: "management", keywords: "mapa calor habilidades carrera egresados tecnologías" },
+  { label: "Habilidades vs. Rango Salarial", href: "/backoffice/reports/heatmaps/skills-by-salary", icon: LayoutGrid, area: "management", keywords: "mapa calor habilidades salario ingresos rangos" },
+  { label: "Empleabilidad y Habilidades", href: "/backoffice/reports/heatmaps/employability", icon: LayoutGrid, area: "management", keywords: "mapa calor empleabilidad habilidades inserción laboral titulados" },
+  { label: "Habilidades vs. Experiencia", href: "/backoffice/reports/heatmaps/skills-by-experience", icon: LayoutGrid, area: "management", keywords: "mapa calor habilidades experiencia años madurez profesional" },
   { label: "Portal de empresa", href: "/recruiters", icon: Building2, area: "company" },
   { label: "Publicar vacante", href: "/recruiters/job-offers/new", icon: SquarePlus, area: "company", keywords: "empleo oferta trabajo" },
   { label: "Buscar candidatos", href: "/matching", icon: Search, area: "company", keywords: "afinidad reclutamiento" },

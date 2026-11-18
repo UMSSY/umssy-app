@@ -145,6 +145,54 @@ Tables `skills` and `user_skills` (see [backend/prisma/README.md](../../backend/
 - **The catalog is the single source of names.** Vacancies, detection and profile all point to `skills`, so affinity compares ids and names that really match.
 - **Planning is separated from writing.** `planSkillReconciliation` and `planManualSkillChanges` are pure functions that decide what to create, update or delete; the repository only applies the plan inside a transaction.
 
+## Read services for other domains
+
+The `skills` module keeps the skill catalog and the skills of each profile, both the ones added by hand (`source = manual`) and the ones detected by the NLP pipeline (`source = nlp`). `SkillAnalysisModule` groups the skill analysis and read services that other domains consume.
+
+`SkillAnalysisService` (exported by `SkillAnalysisModule`):
+
+| Method | Returns | Consumer |
+| --- | --- | --- |
+| `findSkillSummariesByUserIds(userIds)` | `UserSkillSummaryResponse[]` (`userId`, `skillId`, `skillName`, `source`) with all the skills of those users. With an empty list it does not query the database | [analytics](../analytics/README.md) (heatmap rows; the salary map uses only `source = nlp`) |
+
+```mermaid
+flowchart LR
+  AN[analytics: HeatmapGraduatesService] --> S[SkillAnalysisService]
+  S --> R[SkillAnalysisRepository]
+  R --> DB[(user_skills + skills)]
+  S --> M[toUserSkillSummary]
+```
+
+```mermaid
+sequenceDiagram
+  participant AN as analytics: HeatmapGraduatesService
+  participant S as SkillAnalysisService
+  participant R as SkillAnalysisRepository
+  AN->>S: findSkillSummariesByUserIds(userIds)
+  alt userIds empty
+    S-->>AN: []
+  else
+    S->>R: userSkill.findMany(userId in userIds, USER_SKILL_SUMMARY_SELECT)
+    R-->>S: records with skill { id, name }
+    S-->>AN: UserSkillSummaryResponse[]
+  end
+```
+
+### Read rules
+
+- Returns all the skills of the user, without filtering by origin; the consumer decides (for example, analytics deduplicates by `skillId` and flags the ones with origin `nlp`).
+- Read only; it has no HTTP endpoint of its own.
+
+### Read dependencies
+
+| Direction | Module | Use |
+| --- | --- | --- |
+| Used by | [analytics](../analytics/README.md) | Skills per graduate for the heatmaps |
+
+### Read frontend integration
+
+The frontend does not call this service; its data is shown in the backoffice heatmaps (`frontend/src/modules/heatmaps`, `/backoffice/reports/heatmaps/*`).
+
 ## Sprint History
 
 ### Sprint 3
@@ -154,3 +202,4 @@ Tables `skills` and `user_skills` (see [backend/prisma/README.md](../../backend/
 - Cleanup of detected skills when a work experience is deleted.
 - Detected skills panel with analysis state and manual re-analysis.
 - Skill chips in light blue for experiences and vacancies.
+- `SkillAnalysisService.findSkillSummariesByUserIds` and the `UserSkillSummaryResponse` contract to feed the heatmaps.
