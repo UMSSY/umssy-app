@@ -12,6 +12,7 @@ export function ReportFilterSelect<TValue extends string>({
   options,
   value,
   onChange,
+  disabled = false,
 }: ReportFilterSelectProps<TValue>) {
   const labelId = useId();
   const items = allLabel ? [{ value: "ALL", label: allLabel }, ...options] : options;
@@ -23,7 +24,7 @@ export function ReportFilterSelect<TValue extends string>({
 
   return (
     <div className="w-full sm:w-72 sm:shrink-0">
-      <Select items={items} value={selectedValue} onValueChange={handleValueChange}>
+      <Select items={items} value={selectedValue} onValueChange={handleValueChange} disabled={disabled}>
         <SelectTrigger
           aria-labelledby={labelId}
           className="w-full cursor-pointer rounded-md border-border bg-surface px-3 pt-1.5 pb-2 hover:border-ink-soft hover:bg-surface-soft focus-visible:border-accent focus-visible:ring-3 focus-visible:ring-interaction data-popup-open:border-accent data-popup-open:ring-3 data-popup-open:ring-interaction data-[size=default]:h-auto"
