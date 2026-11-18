@@ -9,5 +9,6 @@ export { getRegistrationErrorMessage } from "./utils/registration-error";
 export { parseRegistrationResponse } from "./utils/registration-contract-response";
 export { useRegistration } from "./hooks/use-registration";
 export { useRegistrationActions } from "./hooks/use-registration-actions";
+export { useCancelRegistration } from './hooks/use-cancel-registration';
 export { useRegistrationSession } from "./hooks/use-registration-session";
 export { parseRegistration } from './utils/registration-response';
