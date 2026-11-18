@@ -19,6 +19,13 @@ import type { EducationPeriodSnapshot } from '../types/education-period-snapshot
 
 @Injectable()
 export class EducationsRepository {
+  findVerificationSources(userId: string, context?: TransactionContext) {
+    return (context?.client ?? this.prisma).education.findMany({
+      where: { userId },
+      select: { id: true },
+    });
+  }
+
   constructor(private readonly prisma: PrismaService) {}
 
   async hasByUserId(userId: string): Promise<boolean> {

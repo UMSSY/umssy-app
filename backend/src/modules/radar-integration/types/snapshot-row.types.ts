@@ -1,0 +1,16 @@
+import type { Scores } from '../utils/radar-scoring.js';
+import type { PublishedSkill } from './published-skill.types.js';
+
+export type SnapshotRow = {
+  id: string;
+  user_id: string;
+  version: number;
+  rubric_version: string;
+  fingerprint: string;
+  scores: Scores;
+  evidence: Record<string, { id: string; name: string }[]>;
+  average_score: string | number;
+  created_at: Date;
+  source_revision: number | null;
+  skills: PublishedSkill[];
+};

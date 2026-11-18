@@ -13,5 +13,7 @@ export function toVacancy(offer: PublishedJobOffer): Vacancy {
     languages: offer.languages,
     positionsAvailable: offer.positionsAvailable,
     locationUrl: offer.locationUrl,
+    publishedAt: offer.publishedAt,
+    expiresAt: offer.expiresAt,
   };
 }

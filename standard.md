@@ -143,7 +143,7 @@ Each environment has its own Kubernetes namespace and PostgreSQL database inside
 
 ### 2.1 Language
 
-- **English:** Variables, functions, classes, interfaces, files, folders, branches, commits, and database entities.
+- **English:** Variables, functions, classes, interfaces, files, folders, branches, commits, database entities, and documentation (`docs/`).
 - **Spanish:** Interface text (messages, labels, buttons, modals, alerts) and code comments.
 - Mark pending work with `TODO: <message>`.
 - Do not use emojis anywhere.
@@ -235,12 +235,16 @@ When a new GitHub task is created (Frontend, Backend, or General), the form requ
 
 ## 4. DOCUMENTATION STANDARDS
 
+- All documentation in `docs/` must be written in English (not in Spanish).
 - Every module must have one README at `docs/<module>/README.md`, matching its directory name in `src/modules/`. This requirement applies to all modules. Document the complete module, including its backend and frontend responsibilities, in the same README; do not separate documentation by application layer.
+- Creating additional documentation files inside `backend/` or `frontend/` is prohibited, except for `backend/prisma/README.md`.
+- Preserve existing root `README` and general standard files.
 - Each module README must document its purpose, key flows, business rules, dependencies, and main endpoints it exposes or consumes.
 - Changes to a module must include corresponding updates to its documentation. Deprecation documentation is not required.
 - Architecture, database relationships, and key flows must be represented with Mermaid diagrams inside the relevant READMEs. Sequence diagrams must use Mermaid `sequenceDiagram`; standalone diagrams or images do not replace the required embedded diagrams.
 - Every documentation README must include a **Sprint History** section. Documenting Sprint 3 functionality is mandatory; documenting Sprints 1 and 2 is optional.
 - Database documentation must live in `backend/prisma/README.md`, alongside `schema.prisma`, and follow the backend database documentation standard.
+- Never add HU or epic references in the documentation.
 
 ## 5. APPENDICES
 

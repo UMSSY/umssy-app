@@ -12,6 +12,8 @@ vi.mock("@/modules/applications/services/application.service", () => ({
 
 vi.mock("@/hooks/use-mobile", () => ({ useIsMobile: () => false }));
 
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
+
 afterEach(cleanup);
 
 describe("Mis postulaciones route", () => {

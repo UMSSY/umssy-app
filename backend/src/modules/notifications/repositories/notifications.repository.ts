@@ -12,29 +12,57 @@ const INBOX_TYPE_FILTER = {
 export class NotificationsRepository {
   constructor(
     @Inject(PrismaService)
-    private readonly prisma: PrismaService
+    private readonly prisma: PrismaService,
   ) {}
 
-  async createMany(data: {
-    recipientId: string;
-    actorId?: string;
-    typeId: string;
-    title: string;
-    body: string;
-    link: string;
-    groupKey?: string;
-  }[]): Promise<CreatedNotification[]> {
-    return this.prisma.notification.createManyAndReturn({
-      data: data.map((item) => ({
-        recipientId: item.recipientId,
-        actorId: item.actorId,
-        typeId: item.typeId,
-        title: item.title,
-        body: item.body,
-        link: item.link,
-        groupKey: item.groupKey,
-      })),
-      select: { id: true, recipientId: true },
+  async createMany(
+    data: {
+      recipientId: string;
+      actorId?: string;
+      typeId: string;
+      title: string;
+      body: string;
+      link: string;
+      groupKey?: string;
+    }[],
+  ): Promise<CreatedNotification[]> {
+    if (!data.some((item) => item.groupKey?.startsWith('radar:'))) {
+      return this.prisma.notification.createManyAndReturn({
+        data,
+        select: { id: true, recipientId: true },
+      });
+    }
+    return this.prisma.$transaction(async (tx) => {
+      const created: CreatedNotification[] = [];
+      for (const item of data) {
+        if (item.groupKey?.startsWith('radar:')) {
+          await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${item.recipientId + ':' + item.groupKey}, 0))`;
+          const existing = await tx.notification.findFirst({
+            where: {
+              recipientId: item.recipientId,
+              typeId: item.typeId,
+              groupKey: item.groupKey,
+            },
+            select: { id: true },
+          });
+          if (existing) continue;
+        }
+        created.push(
+          await tx.notification.create({
+            data: item,
+            select: { id: true, recipientId: true },
+          }),
+        );
+      }
+      return created;
+    });
+  }
+
+  findByType(userId: string, typeCode: string) {
+    return this.prisma.notification.findMany({
+      where: { recipientId: userId, type: { code: typeCode } },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      select: { id: true, groupKey: true, createdAt: true, readAt: true },
     });
   }
 
@@ -44,7 +72,7 @@ export class NotificationsRepository {
     take: number,
   ): Promise<NotificationResponse[]> {
     const records = await this.prisma.notification.findMany({
-      where: { recipientId: userId, type: INBOX_TYPE_FILTER},
+      where: { recipientId: userId, type: INBOX_TYPE_FILTER },
       orderBy: { createdAt: 'desc' },
       skip,
       take,
@@ -87,12 +115,11 @@ export class NotificationsRepository {
 
   async markAllAsRead(userId: string): Promise<void> {
     await this.prisma.notification.updateMany({
-      where: { recipientId: userId, readAt: null,
-        type: INBOX_TYPE_FILTER,},
+      where: { recipientId: userId, readAt: null, type: INBOX_TYPE_FILTER },
       data: { readAt: new Date() },
     });
   }
-    async findTypeByCode(code: string) {
+  async findTypeByCode(code: string) {
     return this.prisma.notificationType.findUnique({
       where: { code },
     });

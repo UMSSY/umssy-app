@@ -1,6 +1,5 @@
 import type { RoleTag } from "@/modules/auth";
 import type { DocumentType } from "@/modules/access-requests";
-import type { AcademicPeriod } from "./registered-user.types";
 
 export interface RejectedUser {
   id: string;
@@ -12,14 +11,3 @@ export interface RejectedUser {
   rejectionReason: string | null;
   registeredAt: string;
 }
-
-export interface RejectedUsersParams {
-  page: number;
-  limit: number;
-  userType?: RoleTag;
-  period?: AcademicPeriod;
-  search?: string;
-  snapshotAt?: string;
-}
-
-export type RejectedUsersExportParams = Pick<RejectedUsersParams, "userType" | "period" | "search">;

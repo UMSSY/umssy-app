@@ -67,7 +67,7 @@ export function planSkillReconciliation(
     const isApproved =
       row.verificationStatus === USER_SKILL_VERIFICATION_STATUSES.approved;
 
-    if (!detection && !isManualRow && !isApproved) {
+    if (!detection && !isManualRow && (!isApproved || row.radarAutoVerified)) {
       plan.deleteIds.push(row.id);
       continue;
     }
