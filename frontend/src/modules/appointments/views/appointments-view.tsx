@@ -62,7 +62,7 @@ export function AppointmentsView() {
   return (
     <WorkspacePage
       title={APPOINTMENTS_TEXT.title}
-      description={"Mentorías"}
+      description={APPOINTMENTS_TEXT.description}
       className="min-w-0"
     >
       <Tabs

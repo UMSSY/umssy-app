@@ -10,7 +10,6 @@ import {
 const ACTION_URL = 'https://umssy.test/appointments';
 
 const payload = (reason?: string) => ({
-  counterpartName: 'Ana Pérez',
   cancelledByName: 'Luis Flores',
   date: '23/10/2026',
   time: '10:00',
@@ -57,19 +56,35 @@ describe('Plantilla del aviso «Cita cancelada»', () => {
     );
     const body = APPOINTMENT_CANCELLED_TEMPLATE.renderBody(withReason);
     expect(body).toBe(
-      'Luis Flores canceló la cita con Ana Pérez el 23/10/2026 a las 10:00.',
+      'Luis Flores canceló tu cita del 23/10/2026 a las 10:00.',
     );
     expect(body).not.toContain('Me surgió un viaje');
   });
 
-  it('no supera 100 caracteres en el texto corto con nombres largos', () => {
+  it('no supera 100 caracteres con nombres largos y conserva la fecha y la hora', () => {
     const body = APPOINTMENT_CANCELLED_TEMPLATE.renderBody({
       ...payload(),
-      cancelledByName: 'María Fernanda de los Ángeles Gutiérrez Villarroel',
-      counterpartName: 'José Antonio Fernández de la Cruz Montaño',
+      cancelledByName:
+        'María Fernanda de los Ángeles Gutiérrez Villarroel de la Santísima Trinidad y Montaño',
     });
 
     expect(body.length).toBeLessThanOrEqual(100);
+    expect(body).toMatch(
+      /\.\.\. canceló tu cita del 23\/10\/2026 a las 10:00\.$/,
+    );
+  });
+
+  it('no parte un emoji del nombre al acortar el texto', () => {
+    const body = APPOINTMENT_CANCELLED_TEMPLATE.renderBody({
+      ...payload(),
+      cancelledByName: '😀'.repeat(60),
+    });
+
+    expect(body.length).toBeLessThanOrEqual(100);
+    expect(body).not.toMatch(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])/);
+    expect(body.endsWith('canceló tu cita del 23/10/2026 a las 10:00.')).toBe(
+      true,
+    );
   });
 
   describe('correo «Cita cancelada»', () => {

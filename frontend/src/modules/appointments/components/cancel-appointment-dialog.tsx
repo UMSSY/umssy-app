@@ -87,7 +87,10 @@ export function CancelAppointmentDialog({
       <AlertDialogTrigger render={<Button variant="destructive" />}>
         {TEXT.title}
       </AlertDialogTrigger>
-      <AlertDialogContent overlayProps={{ forceRender: true, className: "bg-black/50" }} className="max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] min-w-0 overflow-y-auto">
+      <AlertDialogContent
+        overlayProps={{ forceRender: true, className: 'bg-black/50' }}
+        className="max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] min-w-0 overflow-y-auto"
+      >
         <AlertDialogHeader>
           <AlertDialogTitle>{TEXT.title}</AlertDialogTitle>
           <AlertDialogDescription>{TEXT.description}</AlertDialogDescription>

@@ -22,9 +22,10 @@ import {
 vi.mock(
   '../constants/appointment-notification.constants.js',
   async (importOriginal) => {
-    const actual = await importOriginal<
-      typeof import('../constants/appointment-notification.constants.js')
-    >();
+    const actual =
+      await importOriginal<
+        typeof import('../constants/appointment-notification.constants.js')
+      >();
     return {
       ...actual,
       APPOINTMENT_NOTIFICATION_RETRY_DELAY_MS: 0,
@@ -135,7 +136,12 @@ const createFakeRepository = () => {
       return Promise.resolve();
     }),
     recordFailure: vi.fn(
-      (id: string, error: string, attempts: number, failedStatusId?: string) => {
+      (
+        id: string,
+        error: string,
+        attempts: number,
+        failedStatusId?: string,
+      ) => {
         const row = pending(id);
         if (row) {
           row.attempts = attempts;
@@ -150,8 +156,7 @@ const createFakeRepository = () => {
     discard: vi.fn((id: string) => {
       const index = rows.findIndex(
         (row) =>
-          row.id === id &&
-          row.status === AppointmentNotificationStatus.PENDING,
+          row.id === id && row.status === AppointmentNotificationStatus.PENDING,
       );
       if (index >= 0) {
         rows.splice(index, 1);
@@ -206,9 +211,7 @@ describe('AppointmentNotificationsService', () => {
     );
     expect(rows).toHaveLength(6);
     expect(
-      rows.every(
-        (row) => row.status === AppointmentNotificationStatus.SENT,
-      ),
+      rows.every((row) => row.status === AppointmentNotificationStatus.SENT),
     ).toBe(true);
   });
 
@@ -331,7 +334,9 @@ describe('AppointmentNotificationsService', () => {
 
     await service.notifyBooked(createAppointmentRecord());
 
-    expect(notify).toHaveBeenCalledTimes(2 * APPOINTMENT_NOTIFICATION_MAX_ATTEMPTS);
+    expect(notify).toHaveBeenCalledTimes(
+      2 * APPOINTMENT_NOTIFICATION_MAX_ATTEMPTS,
+    );
     const failed = rows.filter(
       (row) => row.status === AppointmentNotificationStatus.FAILED,
     );
@@ -359,7 +364,9 @@ describe('AppointmentNotificationsService', () => {
       service.notifyBooked(createAppointmentRecord()),
     ).resolves.toBeUndefined();
 
-    expect(notify).toHaveBeenCalledTimes(2 * APPOINTMENT_NOTIFICATION_MAX_ATTEMPTS);
+    expect(notify).toHaveBeenCalledTimes(
+      2 * APPOINTMENT_NOTIFICATION_MAX_ATTEMPTS,
+    );
     expect(
       rows.every(
         (row) =>
@@ -422,15 +429,15 @@ describe('AppointmentNotificationsService', () => {
       groupKey: `appointment-notification:CANCELLED:${APPOINTMENT_ID}`,
       payload: {
         cancelledByName: 'Luis Flores',
-        counterpartName: 'Ana Pérez',
         date: '23/10/2026',
         time: '10:00',
         reason: 'Imprevisto',
       },
     });
+    expect(request.payload).not.toHaveProperty('counterpartName');
   });
 
-  it('muestra en el texto de la cancelación quién canceló y a quién se avisa', async () => {
+  it('muestra en el texto de la cancelación quién canceló, sin nombrar a quien recibe el aviso', async () => {
     await service.notifyCancelled(
       createAppointmentRecord({
         status: { title: 'CANCELLED' },
@@ -448,9 +455,9 @@ describe('AppointmentNotificationsService', () => {
 
     expect(title).toBe('Cita cancelada');
     expect(body).toBe(
-      'Luis Flores canceló la cita con Ana Pérez el 23/10/2026 a las 10:00.',
+      'Luis Flores canceló tu cita del 23/10/2026 a las 10:00.',
     );
-    expect(body).not.toContain('Luis Flores canceló la cita con Luis Flores');
+    expect(body).not.toContain('Ana Pérez');
     expect(body.length).toBeLessThanOrEqual(100);
   });
 
@@ -476,7 +483,7 @@ describe('AppointmentNotificationsService', () => {
       NOTIFICATION_TEMPLATES[NotificationType.APPOINTMENT_CANCELLED];
     const body = template.renderBody(request.payload as never);
     expect(body).toBe(
-      'Luis Flores canceló la cita con Ana Pérez el 23/10/2026 a las 21:30.',
+      'Luis Flores canceló tu cita del 23/10/2026 a las 21:30.',
     );
   });
 
@@ -514,7 +521,8 @@ describe('AppointmentNotificationsService', () => {
       }),
     );
 
-    const template = NOTIFICATION_TEMPLATES[NotificationType.APPOINTMENT_BOOKED];
+    const template =
+      NOTIFICATION_TEMPLATES[NotificationType.APPOINTMENT_BOOKED];
     for (const [request] of notify.mock.calls) {
       const body = template.renderBody(request.payload as never);
       expect(template.renderTitle(request.payload as never)).toBe(

@@ -8,7 +8,7 @@ export type NotificationPayloadMap = {
   [NotificationType.CONNECTION_REQUEST_ACCEPTED]: { receiverName: string };
   [NotificationType.MENTOR_SLOT_OFFERED]: { offerId: string; expiresAt: string };
   [NotificationType.RADAR_PUBLISHED]: { radarVersion: string; publishedAt: string };
-  [NotificationType.APPOINTMENT_CANCELLED]: { counterpartName: string; date: string; time: string; cancelledByName: string; reason?: string };
+  [NotificationType.APPOINTMENT_CANCELLED]: { date: string; time: string; cancelledByName: string; reason?: string };
   [NotificationType.APPOINTMENT_BOOKED]: { counterpartName: string; date: string; time: string; topic: string; recipientRole: AppointmentParticipantRole };
   [NotificationType.SURVEY_PUBLISHED]: { surveyTitle: string; previousPeriod: string; currentPeriod: string; change: string };
   [NotificationType.SURVEY_REMINDER]: { surveyTitle: string; closesAtFormatted: string };

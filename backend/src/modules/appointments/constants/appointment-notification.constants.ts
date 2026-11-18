@@ -13,3 +13,6 @@ export const APPOINTMENT_NOTIFICATION_CHANNELS = [
   AppointmentNotificationChannel.EMAIL,
   AppointmentNotificationChannel.PUSH,
 ] as const;
+
+export const APPOINTMENT_NOTIFICATION_TIME_ZONE_LABEL =
+  'hora de Bolivia, GMT-4';

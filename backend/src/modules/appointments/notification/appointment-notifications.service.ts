@@ -85,9 +85,6 @@ export class AppointmentNotificationsService {
       recipientIds: [recipientId],
       buildRequest: (recipientIdOfRequest, channels, groupKey) => {
         const payload = {
-          counterpartName: this.fullName(
-            this.participantOf(appointment, recipientId),
-          ),
           cancelledByName: this.fullName(canceller),
           date,
           time,
@@ -128,6 +125,8 @@ export class AppointmentNotificationsService {
         ),
       );
 
+      // TODO: reprocesar con un job programado las filas que quedan PENDING si el
+      // proceso se reinicia en medio de los reintentos.
       for (
         let attempt = 1;
         attempt <= APPOINTMENT_NOTIFICATION_MAX_ATTEMPTS;

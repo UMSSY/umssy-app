@@ -4,23 +4,23 @@ import type { NotificationMailContext } from '../../notifications/types/notifica
 import type { NotificationPayloadMap } from '../../notifications/types/notification-payload-map.type.js';
 import type { NotificationTemplateDefinition } from '../../notifications/types/notification-template-definition.type.js';
 import type { NotificationType } from '../../notifications/types/notification-type.enum.js';
-import { PUSH_TEXT_MAX_LENGTH } from '../../notifications/constants/push-notification.constants.js';
-import { APPOINTMENT_BOOKED_TIME_ZONE_LABEL } from '../constants/appointment-booked-notification.constants.js';
 import {
   APPOINTMENT_CANCELLED_EMAIL_SUBJECT,
   APPOINTMENT_CANCELLED_NOTIFICATION_TITLE,
 } from '../constants/appointment-cancelled-notification.constants.js';
+import { APPOINTMENT_NOTIFICATION_TIME_ZONE_LABEL } from '../constants/appointment-notification.constants.js';
+import { fitPushName } from '../utils/fit-push-name.js';
 import { loadAppointmentMailTemplate } from './load-appointment-mail-template.js';
 
 type AppointmentCancelledPayload =
   NotificationPayloadMap[NotificationType.APPOINTMENT_CANCELLED];
 
-const renderBody = (payload: AppointmentCancelledPayload): string => {
-  const body = `${payload.cancelledByName} canceló la cita con ${payload.counterpartName} el ${payload.date} a las ${payload.time}.`;
-  return body.length > PUSH_TEXT_MAX_LENGTH
-    ? `${body.substring(0, PUSH_TEXT_MAX_LENGTH - 3)}...`
-    : body;
-};
+const renderBody = (payload: AppointmentCancelledPayload): string =>
+  fitPushName(
+    payload.cancelledByName,
+    (name) =>
+      `${name} canceló tu cita del ${payload.date} a las ${payload.time}.`,
+  );
 
 export const renderAppointmentCancelledMail = async (
   payload: AppointmentCancelledPayload,
@@ -28,7 +28,7 @@ export const renderAppointmentCancelledMail = async (
 ): Promise<NotificationMailContent> => {
   const actionUrl = buildFrontendUrl(context.actionUrl);
   const intro = `${payload.cancelledByName} canceló la cita de orientación que tenían agendada.`;
-  const time = `${payload.time} (${APPOINTMENT_BOOKED_TIME_ZONE_LABEL})`;
+  const time = `${payload.time} (${APPOINTMENT_NOTIFICATION_TIME_ZONE_LABEL})`;
   const reason = payload.reason?.trim();
   const values: Record<string, string> = {
     intro,
