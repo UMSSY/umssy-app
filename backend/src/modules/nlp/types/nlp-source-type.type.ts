@@ -1,2 +1,2 @@
 export type NlpSourceType =
-  'work-experience' | 'education' | 'certification' | 'cv';
+  'work-experience' | 'education' | 'presentation' | 'certification' | 'cv';

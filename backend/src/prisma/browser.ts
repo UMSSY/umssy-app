@@ -304,7 +304,7 @@ export type ConnectionRequest = Prisma.ConnectionRequestModel
 export type UserPresence = Prisma.UserPresenceModel
 /**
  * Model PasswordHistory
- *
+ * 
  */
 export type PasswordHistory = Prisma.PasswordHistoryModel
 /**
@@ -352,6 +352,11 @@ export type SurveyTargetAudience = Prisma.SurveyTargetAudienceModel
  * 
  */
 export type Survey = Prisma.SurveyModel
+/**
+ * Model SurveyAlertConfig
+ * 
+ */
+export type SurveyAlertConfig = Prisma.SurveyAlertConfigModel
 /**
  * Model SurveyQuestion
  * 
@@ -438,6 +443,11 @@ export type MentorParticipationStatus = Prisma.MentorParticipationStatusModel
  */
 export type MentorOfferStatus = Prisma.MentorOfferStatusModel
 /**
+ * Model RadarDocumentVerification
+ * 
+ */
+export type RadarDocumentVerification = Prisma.RadarDocumentVerificationModel
+/**
  * Model PortfolioProvider
  * 
  */
@@ -497,3 +507,13 @@ export type CompanyAccessRequest = Prisma.CompanyAccessRequestModel
  * 
  */
 export type CompanyActivationOtp = Prisma.CompanyActivationOtpModel
+/**
+ * Model RadarDocumentStatus
+ * 
+ */
+export type RadarDocumentStatus = Prisma.RadarDocumentStatusModel
+/**
+ * Model RadarDocumentSourceType
+ * 
+ */
+export type RadarDocumentSourceType = Prisma.RadarDocumentSourceTypeModel

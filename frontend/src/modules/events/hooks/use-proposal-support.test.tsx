@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { InfiniteData } from "@tanstack/react-query";
 import { renderHookWithQuery } from "@/shared/testing/render-hook-with-query";
 import { clearAccessToken, saveAccessToken } from "@/shared/services/storage/access-token-storage";
-import { REGISTRATION_QUERY_KEYS } from "@/modules/registrations";
+import { REGISTRATION_QUERY_KEYS } from "@/modules/event-registrations";
 import { registrationsService } from "../services/registrations.service";
 import type { EventItem } from "../types/event-item.types";
 import type { EventDetail } from "../types/event-detail.types";

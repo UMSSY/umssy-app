@@ -12,4 +12,6 @@ export interface SkillsSelectorProps {
   hasLoadError?: boolean;
   onRetry?: () => void;
   feedback?: Feedback | null;
+  onCustomDraftChange?: (hasDraft: boolean) => void;
+  saveLabel?: string;
 }

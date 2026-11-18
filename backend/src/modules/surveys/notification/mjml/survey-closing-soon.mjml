@@ -1,0 +1,19 @@
+<mj-section padding="8px 24px">
+  <mj-column>
+    <mj-text mj-class="heading">Cierre próximo de encuesta</mj-text>
+    <mj-text
+      >Hola {{ recipientName }}, este es un aviso sobre una encuesta que
+      creaste.</mj-text
+    >
+    <mj-text
+      >La encuesta <strong>«{{ surveyTitle }}»</strong> está próxima a
+      cerrar.</mj-text
+    >
+    <mj-text mj-class="secondary">Cierra el: {{ closesAtFormatted }}</mj-text>
+    <mj-text mj-class="secondary"
+      >Respuestas hasta ahora: {{ responsesCount }}</mj-text
+    >
+    <mj-text mj-class="secondary">Estado: Publicada</mj-text>
+    <mj-button href="{{ actionUrl }}">Ver analíticas</mj-button>
+  </mj-column>
+</mj-section>

@@ -5,11 +5,11 @@ import { useEffect, useState } from "react";
 import { Building2, Clock, FileText, Loader2, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { companyAccessRequestService } from "@/modules/access-request/services/company-access-request.service";
+import { companyAccessRequestService } from "@/modules/access-requests/services/company-access-request.service";
 import type {
   CompanyAccessRequestItem,
   CompanyRequestsSummary,
-} from "@/modules/access-request/types/company-access-request.types";
+} from "@/modules/access-requests/types/company-access-request.types";
 
 const TABS = [
   { value: "PENDING", label: "Pendientes" },

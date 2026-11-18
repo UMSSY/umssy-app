@@ -47,12 +47,12 @@ import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Textarea } from '@/components/ui/textarea';
-import { companyAccessRequestService } from '@/modules/access-request/services/company-access-request.service';
+import { companyAccessRequestService } from '@/modules/access-requests/services/company-access-request.service';
 import type {
   CompanyAccessRequestItem,
   CompanyOcrFieldDetail,
   UpdateCompanyPayload,
-} from '@/modules/access-request/types/company-access-request.types';
+} from '@/modules/access-requests/types/company-access-request.types';
 import { DocumentViewer } from '../components/detail/document-viewer';
 
 const STATUS_CONFIG: Record<

@@ -6,7 +6,7 @@ import {
   getRegistrationErrorMessage,
   REGISTRATION_QUERY_KEYS,
   useRegistrationSession,
-} from "@/modules/registrations";
+} from "@/modules/event-registrations";
 import { registrationsService } from "../services/registrations.service";
 
 export function useMyPasses() {

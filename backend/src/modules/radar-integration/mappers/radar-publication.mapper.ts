@@ -45,7 +45,6 @@ export class RadarPublicationMapper {
   ) {
     const last = rows[0];
     const prev = rows[1];
-    const pending = Number(pendingDocs[0]?.count ?? 0) + pendingSkills;
     const sourceRevision = state?.inputRevision ?? 0;
     const failed =
       state?.status === 'error' ||
@@ -74,8 +73,8 @@ export class RadarPublicationMapper {
             skills: [],
           }),
       previous: prev ? { version: prev.version, updatedAt: prev.created_at, scores: prev.scores } : null,
-      pending,
-      hasPending: pending > 0,
+      pending: pendingSkills,
+      hasPending: pendingSkills > 0 || Number(pendingDocs[0]?.count ?? 0) > 0,
       processingStatus: failed
         ? ('error' as const)
         : updating
