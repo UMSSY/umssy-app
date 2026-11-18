@@ -6,4 +6,7 @@ export const applicationConsentsSchema = z
     consentCv: z.boolean(),
     consentContact: z.boolean(),
   })
-  .strict();
+  .strict()
+  .meta({
+    example: { consent: true, consentCv: false, consentContact: false },
+  });

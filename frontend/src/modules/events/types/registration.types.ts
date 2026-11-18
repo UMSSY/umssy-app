@@ -1,1 +1,1 @@
-export type { Registration } from '@/modules/registrations';
+export type { Registration } from '@/modules/event-registrations';

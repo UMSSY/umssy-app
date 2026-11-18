@@ -1,12 +1,13 @@
 "use client";
 
-import { BriefcaseBusiness, ExternalLink, X } from "lucide-react";
+import { BriefcaseBusiness, CalendarDays, ExternalLink, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { getSafeMapsUrl } from "@/modules/job-offers";
 import { JobApplicationAction } from "@/modules/matching";
 import { ModalityIcon } from "@/shared/components/modality-icon";
 import { getAccessToken } from "@/shared/services/storage/access-token-storage";
+import { formatBoliviaDate } from "@/shared/utils/date-time";
 import type { VacancyDetailDialogProps } from "../types/vacancy-detail-dialog-props.types";
 import { canApplyToVacancies } from "../utils/can-apply-to-vacancies";
 
@@ -26,6 +27,8 @@ export function VacancyDetailDialog({ vacancy, onClose }: VacancyDetailDialogPro
           <div><dt className="text-xs text-availability-foreground">Puestos disponibles</dt><dd className="mt-1 text-ink tabular-nums">{vacancy.positionsAvailable}</dd></div>
           <div><dt className="text-xs text-availability-foreground">Idiomas</dt><dd className="mt-1 text-ink">{vacancy.languages}</dd></div>
           {locationUrl ? <div><dt className="text-xs text-availability-foreground">Ubicación</dt><dd className="mt-1"><a href={locationUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-accent underline-offset-4 hover:underline">Ver en el mapa<ExternalLink className="size-3.5" aria-hidden="true" /></a></dd></div> : null}
+          <div><dt className="flex items-center gap-1 text-xs text-availability-foreground"><CalendarDays className="size-3.5" aria-hidden="true" />Publicado</dt><dd className="mt-1 text-ink tabular-nums">{formatBoliviaDate(vacancy.publishedAt)}</dd></div>
+          <div><dt className="flex items-center gap-1 text-xs text-availability-foreground"><CalendarDays className="size-3.5" aria-hidden="true" />Expira</dt><dd className="mt-1 text-ink tabular-nums">{vacancy.expiresAt ? formatBoliviaDate(vacancy.expiresAt) : "Sin fecha de expiración"}</dd></div>
         </dl>
         <section aria-labelledby="vacancy-description"><h2 id="vacancy-description" className="mb-3 text-lg font-semibold">Descripción</h2><p className="max-w-prose text-sm leading-relaxed wrap-anywhere whitespace-pre-line text-ink-soft">{vacancy.description}</p></section>
         {vacancy.requirements.length > 0 ? <section aria-labelledby="vacancy-requirements" className="border-t border-border pt-5"><h2 id="vacancy-requirements" className="mb-3 text-lg font-semibold">Tecnologías requeridas</h2><ul className="list-disc space-y-2 pl-5 text-sm leading-relaxed text-ink-soft">{vacancy.requirements.map((requirement) => <li key={requirement}>{requirement}</li>)}</ul></section> : null}
