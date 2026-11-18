@@ -15,31 +15,42 @@ export class ChatVisibilityService {
     socketId: string,
     conversationId: string | null,
     isFocused: boolean,
+    isOpen?: boolean,
   ): void {
-    let userSockets = this.visibilityByUser.get(userId);
+    const normalizedUserId = userId.toLowerCase();
+    let userSockets = this.visibilityByUser.get(normalizedUserId);
     if (!userSockets) {
       userSockets = new Map();
-      this.visibilityByUser.set(userId, userSockets);
+      this.visibilityByUser.set(normalizedUserId, userSockets);
     }
-    userSockets.set(socketId, { conversationId, isFocused });
+    userSockets.set(socketId, {
+      conversationId: conversationId ? conversationId.toLowerCase() : null,
+      isFocused,
+      isOpen: isOpen ?? isFocused,
+    });
   }
 
   removeSocket(userId: string, socketId: string): void {
-    const userSockets = this.visibilityByUser.get(userId);
+    const normalizedUserId = userId.toLowerCase();
+    const userSockets = this.visibilityByUser.get(normalizedUserId);
     if (!userSockets) return;
 
     userSockets.delete(socketId);
     if (userSockets.size === 0) {
-      this.visibilityByUser.delete(userId);
+      this.visibilityByUser.delete(normalizedUserId);
     }
   }
 
   isConversationOpen(userId: string, conversationId: string): boolean {
-    const userSockets = this.visibilityByUser.get(userId);
+    const userSockets = this.visibilityByUser.get(userId.toLowerCase());
     if (!userSockets || userSockets.size === 0) return false;
 
+    const normalizedConvId = conversationId.toLowerCase();
     for (const state of userSockets.values()) {
-      if (state.conversationId === conversationId && state.isFocused) {
+      if (
+        state.conversationId === normalizedConvId &&
+        (state.isFocused || state.isOpen)
+      ) {
         return true;
       }
     }
