@@ -33,6 +33,13 @@ import {
   buildRefreshTokenCookieOptions,
 } from '../../../common/utils/refresh-token-cookie.js';
 import { LoginDto } from '../requests/login.schema.js';
+import { GoogleLoginDto } from '../requests/google-login.schema.js';
+import { GoogleLinkDto } from '../requests/google-link.schema.js';
+import { GoogleAuthService } from '../services/google-auth.service.js';
+import {
+  InvalidCredentialsException,
+  MissingGoogleCredentialException,
+} from '../exceptions/index.js';
 import { RequestPasswordResetDto } from '../requests/request-password-reset.schema.js';
 import { VerifyPasswordResetDto } from '../requests/verify-password-reset.schema.js';
 import { ResetPasswordDto } from '../requests/reset-password.schema.js';
@@ -48,6 +55,7 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly refreshTokens: RefreshTokenService,
     private readonly credentialLimits: CredentialLimitsService,
+    private readonly googleAuthService: GoogleAuthService,
   ) {}
 
   @Get('session')
@@ -90,6 +98,68 @@ export class AuthController {
       );
       return result;
     });
+  }
+
+  @Post('google/login')
+  @ApiResponse(CREDENTIAL_LIMIT_RESPONSE)
+  async googleLogin(
+    @Body() body: GoogleLoginDto,
+    @Res({ passthrough: true }) response: Response,
+    @Headers('user-agent') userAgent?: string,
+  ) {
+    const token = body.credential ?? body.idToken;
+    if (!token) {
+      throw new InvalidCredentialsException(
+        'Credencial de Google no proporcionada.',
+      );
+    }
+
+    const verifiedUser = await this.googleAuthService.verifyCredential(token);
+
+    return this.credentialLimits.run('login', verifiedUser.email, async () => {
+      const result = await this.authService.loginWithGoogle(
+        verifiedUser,
+        body.roleTag,
+      );
+
+      response.cookie(
+        ACCESS_TOKEN_COOKIE,
+        result.accessToken,
+        buildAccessTokenCookieOptions(
+          this.authService.getAccessTokenMaxAgeMs(result.accessToken),
+        ),
+      );
+
+      const refresh = await this.refreshTokens.startFromLogin(
+        result.accessToken,
+        userAgent,
+      );
+
+      response.cookie(
+        REFRESH_TOKEN_COOKIE,
+        refresh.refreshToken,
+        buildRefreshTokenCookieOptions(refresh.refreshMaxAgeMs),
+      );
+
+      return result;
+    });
+  }
+
+  @Post('google/link')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  async googleLink(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() body: GoogleLinkDto,
+  ) {
+    const token = body.credential ?? body.idToken;
+    if (!token) {
+      throw new MissingGoogleCredentialException();
+    }
+
+    const verifiedGoogle = await this.googleAuthService.verifyCredential(token);
+
+    return this.authService.linkGoogle(user, verifiedGoogle);
   }
 
   @Post('refresh')
@@ -165,6 +235,14 @@ export class AuthController {
 
   @Post('forgot-password/reset')
   @ApiResponse(CREDENTIAL_LIMIT_RESPONSE)
+  @ApiResponse({
+    status: 400,
+    description: 'Código no válido o contraseña reutilizada (PASSWORD_REUSED).',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Otro cambio de contraseña invalidó la comprobación (PASSWORD_RESET_CONFLICT).',
+  })
   resetPassword(@Body() body: ResetPasswordDto) {
     return this.credentialLimits.run('reset', body.email, () =>
       this.authService.resetPassword(body),

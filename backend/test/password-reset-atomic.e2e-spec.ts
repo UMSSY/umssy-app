@@ -1,3 +1,4 @@
+import { PasswordHistoryRepository } from '../src/modules/auth/repositories/password-history.repository.js';
 import { randomUUID } from 'node:crypto';
 import {
   afterAll,
@@ -46,7 +47,7 @@ describe.skipIf(process.env.RUN_HU17_DB_TESTS !== '1')(
           'La conexión no corresponde a la base de pruebas esperada.',
         );
       }
-      repository = new AuthRepository(prisma);
+      repository = new AuthRepository(prisma, new PasswordHistoryRepository(prisma));
     });
 
     beforeEach(async () => {
@@ -88,14 +89,13 @@ describe.skipIf(process.env.RUN_HU17_DB_TESTS !== '1')(
       if (!prisma || !userId)
         throw new Error('No se creó la solicitud de prueba.');
       const hash = await bcrypt.hash('NuevaPassword1', 4);
-      await repository.updateUserPasswordAndInvalidateOtp(userId, hash, otpId);
+      await repository.updateUserPasswordAndInvalidateOtp(userId, hash, otpId, originalHash);
 
       await expect(
         repository.updateUserPasswordAndInvalidateOtp(
           userId,
           originalHash,
-          otpId,
-        ),
+          otpId, originalHash),
       ).rejects.toBeInstanceOf(InvalidResetCodeException);
       const user = await prisma.user.findUniqueOrThrow({
         where: { id: userId },
@@ -125,8 +125,7 @@ describe.skipIf(process.env.RUN_HU17_DB_TESTS !== '1')(
           repository.updateUserPasswordAndInvalidateOtp(
             currentUserId,
             hash,
-            otpId,
-          ),
+            otpId, originalHash),
         ),
       );
       expect(
@@ -160,8 +159,7 @@ describe.skipIf(process.env.RUN_HU17_DB_TESTS !== '1')(
         repository.updateUserPasswordAndInvalidateOtp(
           userId,
           'x'.repeat(256),
-          otpId,
-        ),
+          otpId, originalHash),
       ).rejects.toThrow();
       const user = await prisma.user.findUniqueOrThrow({
         where: { id: userId },
@@ -173,7 +171,7 @@ describe.skipIf(process.env.RUN_HU17_DB_TESTS !== '1')(
       expect(otp.usedAt).toBeNull();
 
       const hash = await bcrypt.hash('ReintentoPassword1', 4);
-      await repository.updateUserPasswordAndInvalidateOtp(userId, hash, otpId);
+      await repository.updateUserPasswordAndInvalidateOtp(userId, hash, otpId, originalHash);
       const updated = await prisma.user.findUniqueOrThrow({
         where: { id: userId },
       });
@@ -187,8 +185,7 @@ describe.skipIf(process.env.RUN_HU17_DB_TESTS !== '1')(
         repository.updateUserPasswordAndInvalidateOtp(
           randomUUID(),
           'new-hash',
-          otpId,
-        ),
+          otpId, originalHash),
       ).rejects.toBeInstanceOf(InvalidResetCodeException);
       const user = await prisma.user.findUniqueOrThrow({
         where: { id: userId },
@@ -258,8 +255,7 @@ describe.skipIf(process.env.RUN_HU17_DB_TESTS !== '1')(
           repository.updateUserPasswordAndInvalidateOtp(
             userId,
             'new-hash',
-            otpId,
-          ),
+            otpId, originalHash),
         ).rejects.toBeInstanceOf(InvalidResetCodeException);
         const user = await prisma.user.findUniqueOrThrow({
           where: { id: userId },

@@ -3,7 +3,10 @@ import { JwtModule, type JwtSignOptions } from '@nestjs/jwt';
 import { CredentialSecurityModule } from './credential-security.module.js';
 import { AuthController } from './controllers/auth.controller.js';
 import { AuthService } from './services/auth.service.js';
+import { GoogleAuthService } from './services/google-auth.service.js';
 import { AuthRepository } from './repositories/auth.repository.js';
+import { PasswordHistoryRepository } from './repositories/password-history.repository.js';
+import { PasswordHistoryService } from './services/password-history.service.js';
 import { RefreshTokenRepository } from './repositories/refresh-token.repository.js';
 import { RefreshTokenService } from './services/refresh-token.service.js';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
@@ -30,11 +33,14 @@ import { MailModule } from '../mail/mail.module.js';
   controllers: [AuthController],
   providers: [
     AuthService,
+    GoogleAuthService,
     AuthRepository,
+    PasswordHistoryRepository,
+    PasswordHistoryService,
     RefreshTokenService,
     RefreshTokenRepository,
     JwtAuthGuard,
   ],
-  exports: [AuthService, JwtModule, JwtAuthGuard, SessionModule],
+  exports: [AuthService, GoogleAuthService, JwtModule, JwtAuthGuard, SessionModule],
 })
 export class AuthModule {}

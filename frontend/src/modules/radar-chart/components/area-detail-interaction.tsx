@@ -1,16 +1,12 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
-import { useState } from "react";
-import { AREA_DETAILS } from "../data/area-details.data";
-import type { AreaId } from "../types/area-detail.types";
-import { AreaDetailPanel } from "./area-detail-panel";
+import { Button } from '@/components/ui/button';
+import { useState } from 'react';
+import { AREA_DETAILS } from '../data/area-details.data';
+import type { AreaId } from '../types/area-id.types';
+import { AreaDetailPanel } from './area-detail-panel';
 
-interface AreaDetailInteractionProps {
-  initialArea?: AreaId | null;
-  selectedArea?: AreaId | null;
-  onAreaSelect?: (areaId: AreaId) => void;
-}
+import type { AreaDetailInteractionProps } from '../types/area-detail-interaction-props.types';
 
 export function AreaDetailInteraction({
   initialArea = null,
@@ -33,30 +29,31 @@ export function AreaDetailInteraction({
   };
 
   return (
-  <div className="space-y-4">
-    <div className="flex flex-wrap gap-2">
-      {Object.values(AREA_DETAILS).map((area) => (
-        <Button variant="ghost"
-          key={area.id}
-          type="button"
-          onClick={() => handleSelectArea(area.id)}
-          className="rounded-lg border border-border px-3 py-2 text-sm hover:bg-muted"
-        >
-          {area.name}
-        </Button>
-      ))}
-    </div>
+    <div className="space-y-4">
+      <div className="flex flex-wrap gap-2">
+        {Object.values(AREA_DETAILS).map((area) => (
+          <Button
+            variant="ghost"
+            key={area.id}
+            type="button"
+            onClick={() => handleSelectArea(area.id)}
+            className="rounded-lg border border-border px-3 py-2 text-sm hover:bg-muted"
+          >
+            {area.name}
+          </Button>
+        ))}
+      </div>
 
-    {selectedAreaId ? (
-      <AreaDetailPanel
-        area={AREA_DETAILS[selectedAreaId]}
-        onClose={handleClose}
-      />
-    ) : (
-      <p className="text-sm text-muted-foreground">
-        Selecciona un área para ver su detalle.
-      </p>
-    )}
-  </div>
-);
+      {selectedAreaId ? (
+        <AreaDetailPanel
+          area={AREA_DETAILS[selectedAreaId]}
+          onClose={handleClose}
+        />
+      ) : (
+        <p className="text-sm text-muted-foreground">
+          Selecciona un área para ver su detalle.
+        </p>
+      )}
+    </div>
+  );
 }

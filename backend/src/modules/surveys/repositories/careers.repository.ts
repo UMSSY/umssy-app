@@ -1,16 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { CAREER_SELECT } from '../constants/survey.constants.js';
+import type { CareerSortOrder } from '../types/career-sort-order.type.js';
 import type { CareerRecord } from '../types/survey-record.type.js';
 
 @Injectable()
 export class CareersRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  findAll(): Promise<CareerRecord[]> {
+  findAll(sortOrder: CareerSortOrder = 'asc'): Promise<CareerRecord[]> {
     return this.prisma.career.findMany({
       select: CAREER_SELECT,
-      orderBy: { title: 'asc' },
+      orderBy: { title: sortOrder },
     });
   }
 

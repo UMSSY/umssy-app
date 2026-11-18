@@ -1,4 +1,5 @@
 import { NotificationType } from './notification-type.enum.js';
+import type { NotificationMailRenderer } from './notification-mail-renderer.type.js';
 import type { NotificationPayloadMap } from './notification-payload-map.type.js';
 
 export type NotifyRequest = {
@@ -9,5 +10,6 @@ export type NotifyRequest = {
     payload: NotificationPayloadMap[K];
     actionUrl: string;
     groupKey?: string;
+    renderMail?: NotificationMailRenderer;
   };
 }[NotificationType];

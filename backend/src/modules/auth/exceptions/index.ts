@@ -8,3 +8,8 @@ export * from './session-expired.exception.js';
 export * from './session-revoked.exception.js';
 export * from './refresh-invalid.exception.js';
 export * from './password-changed.exception.js';
+export * from './google-email-mismatch.exception.js';
+export * from './google-account-already-linked.exception.js';
+export * from './missing-google-credential.exception.js';
+export { PasswordReusedException } from './password-reused.exception.js';
+export { PasswordResetConflictException } from './password-reset-conflict.exception.js';

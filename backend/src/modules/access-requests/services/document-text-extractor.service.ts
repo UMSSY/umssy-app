@@ -22,15 +22,15 @@ export class DocumentTextExtractorService implements OnModuleDestroy {
   private queue: Promise<unknown> = Promise.resolve();
   private closing = false;
 
-  extract(file: FileContent): Promise<DocumentText> {
+  extract(file: FileContent, limits?: { maxPages: number; maxPixels: number }): Promise<DocumentText> {
     if (this.closing)
       return Promise.reject(new Error('OCR service is shutting down'));
     const job = this.queue.then(async () => {
       const worker = await this.getTesseractWorker();
       try {
         return file.mimeType === 'application/pdf'
-          ? await this.recognizePdf(worker, file.content)
-          : await this.recognizeImage(worker, file.content);
+          ? await this.recognizePdf(worker, file.content, limits)
+          : await this.recognizeImage(worker, file.content, limits?.maxPixels);
       } catch (error) {
         this.tesseractWorker = null;
         await worker.terminate().catch(() => undefined);
@@ -81,9 +81,11 @@ export class DocumentTextExtractorService implements OnModuleDestroy {
   private async recognizeImage(
     worker: Worker,
     content: Buffer,
+    maxPixels?: number,
   ): Promise<DocumentText> {
     const image = new mupdf.Image(content);
     try {
+      if (maxPixels && image.getWidth() * image.getHeight() > maxPixels) throw new Error('Image exceeds OCR budget');
       const source = image.toPixmap();
       try {
         const rgb = source.convertToColorSpace(
@@ -106,13 +108,19 @@ export class DocumentTextExtractorService implements OnModuleDestroy {
   private async recognizePdf(
     worker: Worker,
     content: Buffer,
+    limits?: { maxPages: number; maxPixels: number },
   ): Promise<DocumentText> {
     const document = mupdf.Document.openDocument(content, 'application/pdf');
     const pages: DocumentText[] = [];
     try {
+      if(limits && document.countPages()>limits.maxPages) throw new Error('PDF exceeds OCR page budget');
       for (let index = 0; index < document.countPages(); index += 1) {
         const page = document.loadPage(index);
         try {
+          if (limits) {
+            const [left, top, right, bottom] = page.getBounds();
+            if ((right-left)*(bottom-top)*4 > limits.maxPixels) throw new Error('PDF page exceeds OCR budget');
+          }
           const pixmap = page.toPixmap(
             mupdf.Matrix.scale(2, 2),
             mupdf.ColorSpace.DeviceRGB,

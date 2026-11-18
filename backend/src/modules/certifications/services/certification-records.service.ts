@@ -23,6 +23,9 @@ function metadataOf(
 
 @Injectable()
 export class CertificationRecordsService {
+  findVerificationSources(userId: string, context?: TransactionContext) {
+    return this.repository.findVerificationSources(userId, context);
+  }
   constructor(
     private readonly repository: CertificationsRepository,
     private readonly audit: RadarAuditService,

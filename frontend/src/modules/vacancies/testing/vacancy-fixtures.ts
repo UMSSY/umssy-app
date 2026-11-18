@@ -13,6 +13,8 @@ export function buildVacancy(overrides: Partial<Vacancy> = {}): Vacancy {
     languages: "Español",
     positionsAvailable: 1,
     locationUrl: "https://maps.app.goo.gl/abc123",
+    publishedAt: "2026-11-10T15:00:00.000Z",
+    expiresAt: "2026-11-29T15:00:00.000Z",
     ...overrides,
   };
 }

@@ -1,9 +1,10 @@
+import type { PasswordHistoryRepository } from '../repositories/password-history.repository.js';
 import { describe, expect, it, vi } from 'vitest';
 import { AuthRepository } from '../repositories/auth.repository.js';
 
 function build() {
   const user = { findUnique: vi.fn(), findFirst: vi.fn() };
-  return { user, repository: new AuthRepository({ user } as any) };
+  return { user, repository: new AuthRepository({ user } as any, {} as PasswordHistoryRepository) };
 }
 
 describe('AuthRepository', () => {

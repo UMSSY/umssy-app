@@ -25,4 +25,3 @@ export function GoogleIcon({ className = "size-5" }: { className?: string }) {
     </svg>
   );
 }
-

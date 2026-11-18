@@ -5,7 +5,7 @@ import { AuthService } from '../services/auth.service.js';
 
 describe('AuthService.getAccessTokenMaxAgeMs', () => {
   const jwt = new JwtService({ secret: 'max-age-test-secret' });
-  const service = new AuthService({} as any, jwt, {} as any);
+  const service = new AuthService({} as never, jwt, {} as never, {} as never, {} as never);
 
   beforeEach(() => {
     vi.useFakeTimers();
