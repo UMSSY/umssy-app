@@ -19,6 +19,13 @@ const certificationSelect = {
 
 @Injectable()
 export class CertificationsRepository {
+  findVerificationSources(userId: string, context?: TransactionContext) {
+    return (context?.client ?? this.prisma).$queryRaw<
+      { id: string; hasDocument: boolean }[]
+    >`
+      SELECT id, document_url IS NOT NULL AS "hasDocument" FROM certifications WHERE user_id=${userId}::uuid`;
+  }
+
   constructor(private readonly prisma: PrismaService) {}
 
   async hasByUserId(userId: string): Promise<boolean> {
@@ -31,7 +38,7 @@ export class CertificationsRepository {
 
   findPublicationEvidenceIds(userId: string, context: TransactionContext) {
     return context.client.certification.findMany({
-      where: { userId, documentUrl: { not: null } },
+      where: { userId },
       select: { id: true },
     });
   }

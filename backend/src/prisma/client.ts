@@ -377,6 +377,11 @@ export type SurveyTargetAudience = Prisma.SurveyTargetAudienceModel
  */
 export type Survey = Prisma.SurveyModel
 /**
+ * Model SurveyAlertConfig
+ * 
+ */
+export type SurveyAlertConfig = Prisma.SurveyAlertConfigModel
+/**
  * Model SurveyQuestion
  * 
  */
@@ -462,6 +467,11 @@ export type MentorParticipationStatus = Prisma.MentorParticipationStatusModel
  */
 export type MentorOfferStatus = Prisma.MentorOfferStatusModel
 /**
+ * Model RadarDocumentVerification
+ * 
+ */
+export type RadarDocumentVerification = Prisma.RadarDocumentVerificationModel
+/**
  * Model PortfolioProvider
  * 
  */
@@ -496,3 +506,13 @@ export type PushSubscription = Prisma.PushSubscriptionModel
  * 
  */
 export type NotificationPreference = Prisma.NotificationPreferenceModel
+/**
+ * Model RadarDocumentStatus
+ * 
+ */
+export type RadarDocumentStatus = Prisma.RadarDocumentStatusModel
+/**
+ * Model RadarDocumentSourceType
+ * 
+ */
+export type RadarDocumentSourceType = Prisma.RadarDocumentSourceTypeModel

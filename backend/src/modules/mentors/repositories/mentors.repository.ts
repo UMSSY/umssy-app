@@ -1,3 +1,4 @@
+import { resolveMentorAreas } from '../constants/radar-mentor-areas.constants.js';
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '../../../prisma/client.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
@@ -307,7 +308,7 @@ export class MentorsRepository extends MentorIntakeRepository {
 
     if (filters.area) {
       where.mentorTechnicalAreas = {
-        some: { technicalArea: { name: filters.area } },
+        some: { technicalArea: { name: { in: resolveMentorAreas(filters.area) } } },
       };
     }
 

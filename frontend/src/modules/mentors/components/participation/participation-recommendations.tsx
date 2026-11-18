@@ -22,7 +22,7 @@ import { buttonVariants } from '@/components/ui/button-variants';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { availabilityApi } from '@/modules/availability';
-import { educationsService } from '@/modules/education';
+import { educationsService } from '@/modules/educations';
 import { profileService, type ProfileResponse } from '@/modules/profile';
 import {
   getAccessToken,

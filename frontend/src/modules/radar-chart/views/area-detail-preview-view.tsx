@@ -1,43 +1,37 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
-import {
-  useRef,
-  useState,
-  type KeyboardEvent,
-} from "react";
-import { ChevronRight, MousePointerClick } from "lucide-react";
+import { Button } from '@/components/ui/button';
+import { useRef, useState, type KeyboardEvent } from 'react';
+import { ChevronRight, MousePointerClick } from 'lucide-react';
 
-import { getInitials } from "@/shared/utils/get-initials";
+import { getInitials } from '@/shared/utils/get-initials';
 
-import { AreaDetailPanel } from "../components/area-detail-panel";
+import { AreaDetailPanel } from '../components/area-detail-panel';
 import {
   AREA_DETAILS,
   AREA_ORDER,
   CANDIDATE,
   GLOBAL_AVERAGE,
-} from "../data/area-details.data";
-import type { AreaId } from "../types/area-detail.types";
-import { formatDecimal } from "../utils/format-decimal";
+} from '../data/area-details.data';
+import type { AreaId } from '../types/area-id.types';
+import { formatDecimal } from '../utils/format-decimal';
 
-const CARD_CLASS =
-  "rounded-lg border border-border bg-surface";
+const CARD_CLASS = 'rounded-lg border border-border bg-surface';
 
-const TAB_PANEL_ID = "area-detail-tabpanel";
+const TAB_PANEL_ID = 'area-detail-tabpanel';
 
 function getTabId(id: AreaId): string {
   return `area-detail-tab-${id}`;
 }
 
 export function AreaDetailPreviewView() {
-  const [selectedAreaId, setSelectedAreaId] =
-    useState<AreaId | null>("desarrollo");
+  const [selectedAreaId, setSelectedAreaId] = useState<AreaId | null>(
+    'desarrollo',
+  );
 
-  const tabRefs =
-    useRef<Array<HTMLButtonElement | null>>([]);
+  const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
-  const focusableAreaId =
-    selectedAreaId ?? AREA_ORDER[0];
+  const focusableAreaId = selectedAreaId ?? AREA_ORDER[0];
 
   function handleTabKeyDown(
     event: KeyboardEvent<HTMLButtonElement>,
@@ -46,12 +40,10 @@ export function AreaDetailPreviewView() {
     const lastIndex = AREA_ORDER.length - 1;
 
     const nextIndexByKey: Record<string, number> = {
-    ArrowRight:
-      index === lastIndex ? 0 : index + 1,
-    ArrowLeft:
-      index === 0 ? lastIndex : index - 1,
-    Home: 0,
-    End: lastIndex,
+      ArrowRight: index === lastIndex ? 0 : index + 1,
+      ArrowLeft: index === 0 ? lastIndex : index - 1,
+      Home: 0,
+      End: lastIndex,
     };
 
     const nextIndex = nextIndexByKey[event.key];
@@ -76,10 +68,7 @@ export function AreaDetailPreviewView() {
                 className="flex items-center gap-1 font-medium text-ink-soft"
                 aria-current="page"
               >
-                <ChevronRight
-                  className="size-3"
-                  aria-hidden="true"
-                />
+                <ChevronRight className="size-3" aria-hidden="true" />
                 Radar Charts
               </li>
             </ol>
@@ -90,9 +79,7 @@ export function AreaDetailPreviewView() {
           </h1>
         </div>
 
-        <div
-          className={`${CARD_CLASS} flex flex-wrap items-center gap-4 p-5`}
-        >
+        <div className={`${CARD_CLASS} flex flex-wrap items-center gap-4 p-5`}>
           <span
             className="flex size-12 shrink-0 items-center justify-center rounded-full bg-ink font-heading text-sm font-semibold text-surface"
             aria-hidden="true"
@@ -105,9 +92,7 @@ export function AreaDetailPreviewView() {
               {CANDIDATE.name}
             </p>
 
-            <p className="text-sm text-text-secondary">
-              {CANDIDATE.title}
-            </p>
+            <p className="text-sm text-text-secondary">{CANDIDATE.title}</p>
           </div>
 
           <p className="flex items-baseline gap-1.5 whitespace-nowrap">
@@ -115,9 +100,7 @@ export function AreaDetailPreviewView() {
               {formatDecimal(GLOBAL_AVERAGE)}
             </span>
 
-            <span className="text-xs text-text-secondary">
-              promedio
-            </span>
+            <span className="text-xs text-text-secondary">promedio</span>
           </p>
         </div>
 
@@ -127,8 +110,7 @@ export function AreaDetailPreviewView() {
           className={`${CARD_CLASS} flex [scrollbar-width:thin] gap-1 overflow-x-auto px-2 py-1.5`}
         >
           {AREA_ORDER.map((id, index) => {
-            const isSelected =
-              selectedAreaId === id;
+            const isSelected = selectedAreaId === id;
 
             return (
               <Button
@@ -140,25 +122,10 @@ export function AreaDetailPreviewView() {
                 role="tab"
                 id={getTabId(id)}
                 aria-selected={isSelected}
-                aria-controls={
-                  isSelected
-                    ? TAB_PANEL_ID
-                    : undefined
-                }
-                tabIndex={
-                  focusableAreaId === id
-                    ? 0
-                    : -1
-                }
-                onClick={() =>
-                  setSelectedAreaId(id)
-                }
-                onKeyDown={(event) =>
-                  handleTabKeyDown(
-                    event,
-                    index,
-                  )
-                }
+                aria-controls={isSelected ? TAB_PANEL_ID : undefined}
+                tabIndex={focusableAreaId === id ? 0 : -1}
+                onClick={() => setSelectedAreaId(id)}
+                onKeyDown={(event) => handleTabKeyDown(event, index)}
                 className="group relative flex shrink-0 items-center gap-2 rounded-md px-3 py-2 text-sm font-medium whitespace-nowrap text-text-secondary outline-none after:absolute after:inset-x-3 after:-bottom-1.5 after:h-0.5 after:rounded-full hover:text-ink focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 aria-selected:text-ink aria-selected:after:bg-accent motion-safe:transition-colors"
               >
                 <span
@@ -171,10 +138,7 @@ export function AreaDetailPreviewView() {
                 {AREA_DETAILS[id].name}
 
                 <span className="text-xs font-normal text-text-secondary tabular-nums">
-                  {formatDecimal(
-                    AREA_DETAILS[id].score,
-                    1,
-                  )}
+                  {formatDecimal(AREA_DETAILS[id].score, 1)}
                 </span>
               </Button>
             );
@@ -185,17 +149,11 @@ export function AreaDetailPreviewView() {
           <div
             role="tabpanel"
             id={TAB_PANEL_ID}
-            aria-labelledby={getTabId(
-              selectedAreaId,
-            )}
+            aria-labelledby={getTabId(selectedAreaId)}
           >
             <AreaDetailPanel
-              area={
-                AREA_DETAILS[selectedAreaId]
-              }
-              onClose={() =>
-                setSelectedAreaId(null)
-              }
+              area={AREA_DETAILS[selectedAreaId]}
+              onClose={() => setSelectedAreaId(null)}
             />
           </div>
         ) : (

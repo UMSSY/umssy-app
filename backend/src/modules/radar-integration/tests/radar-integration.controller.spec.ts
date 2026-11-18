@@ -37,7 +37,7 @@ describe('RadarRecruitmentController', () => {
     await controller.apply('user', {
       jobOfferId: 'job',
       consent: true,
-      consentCv: false,
+      consentCv: true,
       consentContact: true,
     });
     await controller.myApplications('user');
@@ -58,7 +58,7 @@ describe('RadarRecruitmentController', () => {
       'user',
       'job',
       true,
-      false,
+      true,
       true,
     );
     expect(recruitment.myApplications).toHaveBeenCalledWith('user');
