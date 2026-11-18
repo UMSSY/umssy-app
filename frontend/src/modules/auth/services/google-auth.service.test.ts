@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { googleAuthService } from "./google-auth.service";
+import { googleAuthService, decodeGoogleIdToken } from "./google-auth.service";
 import { apiClient } from "@/shared/services/api-client";
 
 vi.mock("@/shared/services/api-client", () => ({
@@ -95,5 +95,30 @@ describe("googleAuthService.linkGoogleAccount", () => {
     expect(result.message).toBe(
       "No se pudo conectar con el servidor para vincular la cuenta. Inténtalo de nuevo."
     );
+  });
+});
+
+describe("decodeGoogleIdToken", () => {
+  it("decodifica el payload de un ID Token JWT de Google correctamente", () => {
+    const payload = {
+      email: "dania@umss.edu",
+      name: "Dania Gomez",
+      picture: "https://photo.url/avatar.jpg",
+      sub: "1234567890",
+    };
+    const b64Payload = Buffer.from(JSON.stringify(payload)).toString("base64url");
+    const fakeJwt = `header.${b64Payload}.signature`;
+
+    const decoded = decodeGoogleIdToken(fakeJwt);
+    expect(decoded).toEqual({
+      email: "dania@umss.edu",
+      name: "Dania Gomez",
+      picture: "https://photo.url/avatar.jpg",
+      sub: "1234567890",
+    });
+  });
+
+  it("devuelve objeto vacío si el token no tiene el formato adecuado", () => {
+    expect(decodeGoogleIdToken("invalid-token")).toEqual({});
   });
 });

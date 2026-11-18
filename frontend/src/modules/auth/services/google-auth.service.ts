@@ -41,6 +41,29 @@ export interface GoogleProfile {
   credential?: string;
 }
 
+export function decodeGoogleIdToken(token: string): {
+  email?: string;
+  name?: string;
+  picture?: string;
+  sub?: string;
+} {
+  try {
+    const parts = token.split(".");
+    if (parts.length < 2) return {};
+    const base64Url = parts[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .join("")
+    );
+    return JSON.parse(jsonPayload);
+  } catch {
+    return {};
+  }
+}
+
 export interface LinkGoogleResult {
   success: boolean;
   message?: string;
@@ -56,7 +79,7 @@ export interface GoogleLoginResult {
 
 export const googleAuthService = {
   /**
-   * Triggers the official native Google account selector popup (accounts.google.com).
+   * Triggers the official native Google Identity Services ID Token flow (google.accounts.id).
    */
   promptSelectAccount: (): Promise<GoogleProfile> => {
     return new Promise((resolve, reject) => {
@@ -76,63 +99,75 @@ export const googleAuthService = {
         );
       }
 
-      // Check if official Google Identity Services SDK is available
+      // Check if official Google Identity Services (GIS) ID Token SDK is available
       const google = (window as unknown as {
         google?: {
           accounts?: {
-            oauth2?: {
-              initTokenClient: (config: {
+            id?: {
+              initialize: (config: {
                 client_id: string;
-                scope: string;
-                prompt: string;
-                callback: (res: { access_token?: string; error?: string }) => void;
-              }) => { requestAccessToken: () => void };
+                callback: (res: { credential?: string }) => void;
+                auto_select?: boolean;
+                cancel_on_tap_outside?: boolean;
+              }) => void;
+              prompt: (momentListener?: (notification: {
+                isNotDisplayed: () => boolean;
+                isSkippedMoment: () => boolean;
+                isDismissedMoment: () => boolean;
+                getDismissedReason: () => string;
+              }) => void) => void;
             };
+            oauth2?: unknown;
           };
         };
       }).google;
 
-      if (clientId && google?.accounts?.oauth2) {
-        const tokenClient = google.accounts.oauth2.initTokenClient({
+      if (clientId && google?.accounts?.id) {
+        google.accounts.id.initialize({
           client_id: clientId,
-          scope: "openid email profile",
-          prompt: "select_account",
-          callback: async (tokenResponse) => {
-            if (tokenResponse.error || !tokenResponse.access_token) {
-              return reject(new Error(tokenResponse.error || "No se seleccionó cuenta."));
+          auto_select: false,
+          cancel_on_tap_outside: true,
+          callback: (idResponse: { credential?: string }) => {
+            if (!idResponse?.credential) {
+              return reject(new Error("No se recibió credencial de Google."));
             }
             try {
-              const res = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
-                headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
-              });
-              const info = await res.json();
-              if (info?.email) {
+              const payload = decodeGoogleIdToken(idResponse.credential);
+              if (payload?.email) {
                 resolve({
-                  email: info.email,
-                  name: info.name,
-                  picture: info.picture,
-                  idToken: tokenResponse.access_token,
-                  credential: tokenResponse.access_token,
+                  email: payload.email,
+                  name: payload.name,
+                  picture: payload.picture,
+                  idToken: idResponse.credential,
+                  credential: idResponse.credential,
                 });
               } else {
-                reject(new Error("No se pudo obtener el correo de Google."));
+                reject(new Error("El ID Token no contiene correo electrónico."));
               }
             } catch (err) {
               reject(err);
             }
           },
         });
-        tokenClient.requestAccessToken();
+
+        google.accounts.id.prompt((notification) => {
+          if (notification?.isDismissedMoment?.() || notification?.isSkippedMoment?.()) {
+            reject(new Error("User closed prompt"));
+          }
+        });
         return;
       }
 
-      // Standard Google OAuth 2.0 authorization URL redirect
+      // Standard Google OpenID Connect authorization URL for ID Token
       const redirectUri = `${window.location.origin}/login`;
+      const nonce = Math.random().toString(36).substring(2);
       const googleOAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(
         clientId
       )}&redirect_uri=${encodeURIComponent(
         redirectUri
-      )}&response_type=token&scope=openid%20email%20profile&prompt=select_account`;
+      )}&response_type=id_token&scope=openid%20email%20profile&nonce=${encodeURIComponent(
+        nonce
+      )}&prompt=select_account`;
 
       const popup = window.open(
         googleOAuthUrl,
