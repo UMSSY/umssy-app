@@ -1,4 +1,1 @@
-export type MentorParticipationPreferences = {
-  technicalAreaIds: string[];
-  orientationTypeIds: string[];
-};
+export type { MentorParticipationPreferences } from '@/modules/mentor-participation';

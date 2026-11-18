@@ -30,4 +30,7 @@ export {
   PROFILE_CHANGES_SAVE_ERROR_MESSAGE,
   PROFILE_SELECTION_REQUIRED_MESSAGE,
 } from './constants/profile-changes-messages.constants';
+export { useOrientationConfig } from './hooks/use-orientation-config';
+export { useCurrentUserId } from './hooks/use-current-user-id';
+export { MentorProfilePreview } from './components/preview/mentor-profile-preview';
 export { useMentorDirectory } from './hooks/use-mentor-directory';

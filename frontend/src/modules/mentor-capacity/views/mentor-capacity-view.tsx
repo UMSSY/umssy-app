@@ -281,10 +281,10 @@ export function MentorCapacityView() {
       title="Control de cupos"
       description="Supervisa la capacidad de la red, configura el porcentaje de participación y consulta la asignación automática FIFO."
       actions={
-        <div className="flex items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-900">
+        <div className="flex items-center gap-2 rounded-lg border border-border bg-surface-soft px-3 py-2 text-xs font-medium text-ink">
           <span
             aria-hidden="true"
-            className="size-2 rounded-full bg-amber-500"
+            className="size-2 rounded-full bg-ink-soft"
           />
           Algoritmo de asignación FIFO activo (primero en entrar, primero en
           salir)
@@ -423,9 +423,9 @@ export function MentorCapacityView() {
                 ) : null}
                 {savePercentage.isError ? (
                   <p className="mt-1 text-sm text-destructive" role="alert">
-                    Error del servidor o de conexión. El porcentaje vigente
-                    sigue siendo {data?.percentage}% y no cambió; puedes volver
-                    a intentarlo.
+                    Error del servidor o de conexión. El último porcentaje
+                    consultado es {data?.percentage}%. Actualiza los datos para
+                    verificar el estado antes de volver a intentarlo.
                   </p>
                 ) : null}
               </div>
@@ -479,10 +479,10 @@ export function MentorCapacityView() {
                 {savePercentage.isPending ? 'Guardando...' : 'Guardar límite'}
               </Button>
             </form>
-            <div className="flex gap-3 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm">
+            <div className="flex gap-3 rounded-lg border border-border bg-surface-soft p-4 text-sm">
               <AlertTriangle
                 aria-hidden="true"
-                className="mt-0.5 size-4 shrink-0 text-amber-700"
+                className="mt-0.5 size-4 shrink-0 text-ink-soft"
               />
               <p>
                 <strong>Límite inferior obligatorio:</strong> las

@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -302,10 +301,7 @@ export function ParticipationRecommendations({
                           >
                             <div className="flex min-w-0 items-start gap-3">
                               <span className="rounded-md bg-surface p-2 text-primary">
-                                <Icon
-                                  aria-hidden="true"
-                                  className="size-5"
-                                />
+                                <Icon aria-hidden="true" className="size-5" />
                               </span>
 
                               <div>
