@@ -3,6 +3,7 @@ import type { AppointmentStatus } from "../types/appointment-status.types";
 
 export const APPOINTMENTS_TEXT = {
   title: "Mis citas",
+  description: "Mentorías",
   tabsLabel: "Listado de citas",
   upcoming: "Próximas",
   past: "Pasadas",
