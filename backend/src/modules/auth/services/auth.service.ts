@@ -110,12 +110,12 @@ export class AuthService {
     verifiedGoogle: { email: string; sub: string; picture?: string },
     requestedRoleTag?: RoleName,
   ): Promise<LoginResponse> {
-    // 1. Verificar si el usuario ya está asociado mediante Google sub
     let user = await this.authRepository.findUserByGoogleSubWithRoles(
       verifiedGoogle.sub,
     );
 
-    // Si no está asociado por sub, buscar por el correo verificado de Google
+    const needsGoogleLink = !user;
+
     if (!user) {
       user = await this.authRepository.findUserByEmailWithRoles(
         verifiedGoogle.email,
@@ -130,31 +130,21 @@ export class AuthService {
             'Esta cuenta de Google ya está vinculada a otro usuario.',
           );
         }
-        // Auto-persistir la vinculación si el correo coincide
-        await this.authRepository.linkGoogleAccount(
-          user.id,
-          verifiedGoogle.sub,
-          verifiedGoogle.email,
-          verifiedGoogle.picture,
-        );
       }
     }
 
-    // Restricción 1: La cuenta UMSSY debe existir. No crear cuentas automáticamente.
     if (!user) {
       throw new InvalidCredentialsException(
         'Esta cuenta de Google no está registrada en el sistema.',
       );
     }
 
-    // Restricción 2: La cuenta debe estar habilitada (activa)
     if (user.isActive === false) {
       throw new InvalidCredentialsException(
         'Esta cuenta de usuario se encuentra inactiva o deshabilitada.',
       );
     }
 
-    // Restricción 3: Validar roles permitidos (solo estudiante, titulado y mentor)
     const assignedRoles = new Set(user.roles.map(({ role }) => role.name));
     const authorizedRoles = LOGIN_ROLE_PRIORITY.filter(
       (role) =>
@@ -173,6 +163,15 @@ export class AuthService {
         requestedRoleTag
           ? 'El rol seleccionado no está autorizado para acceder con Google.'
           : 'El usuario no tiene roles habilitados para acceder con Google.',
+      );
+    }
+
+    if (needsGoogleLink) {
+      await this.authRepository.linkGoogleAccount(
+        user.id,
+        verifiedGoogle.sub,
+        verifiedGoogle.email,
+        verifiedGoogle.picture,
       );
     }
 

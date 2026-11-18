@@ -768,4 +768,92 @@ describe('AuthService', () => {
       });
     });
   });
+
+  describe('regresión: login Google rechazado no guarda vinculación', () => {
+    beforeEach(() => {
+      authRepository.findUserByGoogleSubWithRoles.mockReset();
+      authRepository.findUserByEmailWithRoles.mockReset();
+      authRepository.findGoogleSocialAccountBySub.mockReset();
+      authRepository.linkGoogleAccount.mockReset();
+      jwtService.sign.mockReset();
+
+      authRepository.findUserByGoogleSubWithRoles.mockResolvedValue(null);
+      authRepository.findGoogleSocialAccountBySub.mockResolvedValue(null);
+    });
+
+    it.each([
+      {
+        scenario: 'cuenta inactiva',
+        isActive: false,
+        role: 'titulado',
+        requestedRole: undefined,
+        exception: InvalidCredentialsException,
+      },
+      {
+        scenario: 'rol empresa',
+        isActive: true,
+        role: 'empresa',
+        requestedRole: undefined,
+        exception: RoleNotAssignedException,
+      },
+      {
+        scenario: 'rol administrativo',
+        isActive: true,
+        role: 'administrativo',
+        requestedRole: undefined,
+        exception: RoleNotAssignedException,
+      },
+      {
+        scenario: 'rol solicitado no asignado',
+        isActive: true,
+        role: 'titulado',
+        requestedRole: 'mentor',
+        exception: RoleNotAssignedException,
+      },
+    ] as const)(
+      'rechaza $scenario sin vincular ni emitir token',
+      async ({ isActive, role, requestedRole, exception }) => {
+        authRepository.findUserByEmailWithRoles.mockResolvedValue({
+          id: 'google-regression-user',
+          isActive,
+          roles: [{ role: { name: role } }],
+        });
+
+        await expect(
+          service.loginWithGoogle(
+            {
+              email: 'regresion@umssy.test',
+              sub: 'google-regression-sub',
+            },
+            requestedRole,
+          ),
+        ).rejects.toBeInstanceOf(exception);
+
+        expect(authRepository.linkGoogleAccount).not.toHaveBeenCalled();
+        expect(jwtService.sign).not.toHaveBeenCalled();
+      },
+    );
+
+    it('no emite token si falla la persistencia de la vinculación', async () => {
+      authRepository.findUserByEmailWithRoles.mockResolvedValue({
+        id: 'google-regression-user',
+        isActive: true,
+        roles: [{ role: { name: 'titulado' } }],
+      });
+      authRepository.linkGoogleAccount.mockRejectedValue(
+        new Error('Fallo de persistencia'),
+      );
+
+      await expect(
+        service.loginWithGoogle({
+          email: 'regresion@umssy.test',
+          sub: 'google-regression-sub',
+        }),
+      ).rejects.toThrow('Fallo de persistencia');
+
+      expect(authRepository.linkGoogleAccount).toHaveBeenCalledTimes(1);
+      expect(jwtService.sign).not.toHaveBeenCalled();
+    });
+  });
+
 });
