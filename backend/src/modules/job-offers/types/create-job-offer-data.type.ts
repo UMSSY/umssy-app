@@ -13,5 +13,6 @@ export interface CreateJobOfferData {
   requiredCareers: string[];
   minExperienceYears: number | null;
   otherRequirements: string[];
+  expiresAt: Date | null;
   skillIds: string[];
 }

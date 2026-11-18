@@ -37,6 +37,7 @@ export const JOB_OFFER_VALIDATION_MESSAGES = {
   EXPERIENCE_OUT_OF_RANGE: `Los años de experiencia deben estar entre 0 y 40`,
   INVALID_JOB_OFFER_ID: 'El identificador de la vacante no es válido',
   INVALID_DATE: 'La fecha debe tener el formato AAAA-MM-DD',
+  INVALID_EXPIRES_AT: 'La fecha de cierre debe ser una fecha y hora ISO 8601 válida',
   DATE_RANGE_INVALID: 'La fecha inicial no puede ser mayor a la fecha final',
   INVALID_SORT_BY: 'Solo se puede ordenar por fecha o por postulantes',
   INVALID_SORT_ORDER: 'El orden debe ser ascendente o descendente',

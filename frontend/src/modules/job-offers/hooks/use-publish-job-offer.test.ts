@@ -135,4 +135,18 @@ describe("usePublishJobOffer", () => {
     await waitFor(() => expect(result.current.status).toBe("success"));
     expect(invalidate).toHaveBeenCalledWith({ queryKey: JOB_OFFERS_QUERY_KEYS.company(COMPANY_ID) });
   });
+
+  it("incluye la fecha de cierre en el payload cuando se envía", async () => {
+    vi.mocked(jobOffersService.publish).mockResolvedValue(CREATED);
+    const { result } = renderPublishHook();
+    const closingDate = new Date(2026, 11, 15);
+
+    await act(() => result.current.submit(VALID_CONDITIONS, closingDate));
+
+    expect(jobOffersService.publish).toHaveBeenCalledWith(
+      COMPANY_ID,
+      toJobOfferPayload(VALID_CONDITIONS, closingDate),
+    );
+    expect(vi.mocked(jobOffersService.publish).mock.calls[0][1].expiresAt).toBe("2026-12-16T03:59:00.000Z");
+  });
 });

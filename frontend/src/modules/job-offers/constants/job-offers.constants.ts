@@ -40,6 +40,8 @@ export const PUBLISH_MESSAGES = {
   session: "Tu sesión no es válida. Inicia sesión nuevamente.",
   noCompany: "No hay una empresa asociada a tu sesión. Inicia sesión como empresa.",
   incompleteForm: "Faltan datos en los pasos anteriores. Vuelve atrás y complétalos.",
+  expirationNotConfirmed:
+    "Elige y confirma una fecha de cierre, o desmarca la opción para publicar sin fecha límite.",
 } as const;
 
 export const SKILLS_CATALOG_MESSAGES = {

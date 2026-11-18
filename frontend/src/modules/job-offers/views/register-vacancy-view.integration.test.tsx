@@ -110,6 +110,17 @@ async function fillRequirements() {
   click("Continuar");
 }
 
+async function chooseAndConfirmClosingDate() {
+  fireEvent.click(screen.getByText("Establecer fecha de expiración"));
+  const firstAvailableDay = screen
+    .getAllByRole("button")
+    .find((button) => button.hasAttribute("data-day") && !button.hasAttribute("disabled"));
+  if (!firstAvailableDay) throw new Error("No hay días disponibles en el calendario");
+  fireEvent.click(firstAvailableDay);
+  fireEvent.click(await screen.findByRole("button", { name: "Sí, confirmar" }));
+  await screen.findByText(/se cerrará automáticamente el/i);
+}
+
 async function goToPreview() {
   fillInformation();
   await fillRequirements();
@@ -326,5 +337,66 @@ describe("Registrar vacante: wizard completo conectado al backend", () => {
 
     expect(await screen.findByRole("alert")).toHaveTextContent("La vacante no existe o no pertenece a la empresa.");
     expect(document.getElementById("title")).toBeNull();
+  });
+
+  it("publica con la fecha de cierre confirmada y la muestra en la confirmación", async () => {
+    vi.mocked(apiClient.post).mockResolvedValue(CREATED);
+    renderWithQuery(<RegisterVacancyView />);
+    await goToPreview();
+
+    await chooseAndConfirmClosingDate();
+    click("Confirmar publicación");
+
+    expect(await screen.findByText("Vacante publicada")).toBeInTheDocument();
+    expect(screen.getByText(/Se cerrará automáticamente el .* a las 23:59\./)).toBeInTheDocument();
+    const [, payload] = vi.mocked(apiClient.post).mock.calls[0];
+    expect(payload).toEqual({
+      ...EXPECTED_PAYLOAD,
+      expiresAt: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T03:59:00\.000Z$/),
+    });
+  });
+
+  it("sin fecha de cierre lo indica en la confirmación", async () => {
+    vi.mocked(apiClient.post).mockResolvedValue(CREATED);
+    renderWithQuery(<RegisterVacancyView />);
+    await goToPreview();
+
+    click("Confirmar publicación");
+
+    expect(await screen.findByText("Vacante publicada")).toBeInTheDocument();
+    expect(screen.getByText(/No tiene fecha de cierre/)).toBeInTheDocument();
+  });
+
+  it("no publica si se marcó la fecha de cierre sin confirmarla, y el aviso se va al desmarcarla", async () => {
+    renderWithQuery(<RegisterVacancyView />);
+    await goToPreview();
+
+    fireEvent.click(screen.getByText("Establecer fecha de expiración"));
+    click("Confirmar publicación");
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("Elige y confirma una fecha de cierre");
+    expect(apiClient.post).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByText("Establecer fecha de expiración"));
+    await waitFor(() => expect(screen.queryByRole("alert")).not.toBeInTheDocument());
+  });
+
+  it("si el backend rechaza la fecha de cierre muestra su motivo", async () => {
+    vi.mocked(apiClient.post).mockRejectedValue(
+      responseError(422, {
+        code: "JOB_OFFER_EXPIRY_IN_PAST",
+        data: null,
+        detail: "La fecha de cierre debe ser posterior al momento actual.",
+      }),
+    );
+    renderWithQuery(<RegisterVacancyView />);
+    await goToPreview();
+
+    await chooseAndConfirmClosingDate();
+    click("Confirmar publicación");
+
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent("Algunos datos de la vacante no son válidos");
+    expect(alert).toHaveTextContent("La fecha de cierre debe ser posterior al momento actual.");
   });
 });

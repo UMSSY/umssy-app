@@ -205,7 +205,8 @@ describe("RegisterVacancyView", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Confirmar" }));
 
-    expect(publication.submit).toHaveBeenCalledWith(VALID_CONDITIONS);
+    // Sin fecha de cierre, el segundo argumento (expiresAt) va en null.
+    expect(publication.submit).toHaveBeenCalledWith(VALID_CONDITIONS, null);
     expect(screen.getByText("enviando")).toBeInTheDocument();
     expect(screen.getByText("TechBolivia S.R.L.")).toBeInTheDocument();
   });
