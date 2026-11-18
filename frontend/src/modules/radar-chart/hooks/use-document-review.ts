@@ -1,11 +1,15 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { useRadarReviewOperationRecovery } from '../hooks/use-radar-integration-queries';
+import { submitRadarReviewDecision } from '../services/radar-review-operation.service';
+
 import { verificationApi, type DocumentVerification } from '@/modules/cv';
 import type { DocumentReviewConfirmation } from '../types/document-review-confirmation.types';
 import type { DocumentReviewPreview } from '../types/document-review-preview.types';
 import type { DocumentReviewDecision } from '../types/document-review-decision.types';
 export function useDocumentReview() {
+  useRadarReviewOperationRecovery('cv');
   const [filter, setFilter] = useState('pending');
   const queue = useQuery({
     queryKey: ['radar-integration', 'document-reviews', filter],
@@ -24,20 +28,25 @@ export function useDocumentReview() {
     [preview],
   );
   const mutation = useMutation({
-    mutationFn: ({ id, decision }: DocumentReviewConfirmation) =>
-      verificationApi.decide(id, decision),
+    mutationFn: async ({ id, decision }: DocumentReviewConfirmation) => {
+      if (decision !== 'approved' && decision !== 'rejected') {
+        return verificationApi.decide(id, decision);
+      }
+
+      return submitRadarReviewDecision({ kind: 'cv', id, decision });
+    },
     onSuccess: () => {
       setConfirmation(null);
       setError('');
     },
     onError: () => {
-      setConfirmation(null);
       setError(
-        'No se pudo confirmar la decisión. Comprueba el estado actualizado.',
+        'No se pudo confirmar la decisión. Puedes reintentar; se conservará el identificador de la operación.',
       );
     },
     onSettled: () => queue.refetch(),
   });
+
   const rows = queue.data ?? [];
   const item = rows.find((d) => d.id === selected) ?? rows[0];
   const actions: DocumentReviewDecision[] = !item

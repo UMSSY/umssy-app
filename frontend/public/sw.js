@@ -1,9 +1,286 @@
-self.addEventListener('install', () => {
-  self.skipWaiting();
+const CACHE_VERSION = 'v5';
+const CACHE_PREFIX = 'umssy-';
+const SHELL_CACHE = `${CACHE_PREFIX}shell-${CACHE_VERSION}`;
+const ASSETS_CACHE = `${CACHE_PREFIX}assets-${CACHE_VERSION}`;
+const OFFLINE_URL = '/offline.html';
+const NAVIGATION_TIMEOUT_MS = 4000;
+const SHELL_ROUTES = ['/', '/events/my-passes', '/dashboard'];
+const REQUIRED_ROUTES = [...SHELL_ROUTES, '/login', '/events'];
+const ADDITIONAL_ROUTES = [
+  "/affinity-radar/review-queue",
+  "/appointments",
+  "/backoffice/audit",
+  "/backoffice",
+  "/backoffice/reports/history",
+  "/backoffice/reports/registered-users",
+  "/backoffice/reports/rejected-users",
+  "/backoffice/solicitudes",
+  "/backoffice/surveys/create",
+  "/backoffice/surveys",
+  "/backoffice/surveys/statistics",
+  "/chat",
+  "/events/my-workshops",
+  "/events",
+  "/events/propose",
+  "/matching",
+  "/mentor/availability",
+  "/mentors/participation",
+  "/mentors/participation/technical-areas",
+  "/mentors/register/technical-areas",
+  "/mentorship/mentors",
+  "/mentorship/orientation",
+  "/mentorship",
+  "/profile/documents",
+  "/profile",
+  "/profile/personal-info",
+  "/profile/presentation",
+  "/profile/radar",
+  "/profile/settings",
+  "/profile/trajectory/certifications",
+  "/profile/trajectory/education",
+  "/profile/trajectory/experience",
+  "/profile/trajectory/skills",
+  "/recruiters/history",
+  "/recruiters/job-offers/new",
+  "/recruiters",
+  "/surveys",
+  "/vacancies/my-applications",
+  "/vacancies",
+  "/vacancies/recommended",
+  "/vacancies/vacancies",
+  "/forgot-password",
+  "/login",
+  "/request-access/activation",
+  "/request-access",
+  "/request-access/status",
+  "/workshops"
+];
+const STATIC_ASSETS = [
+  '/manifest.json',
+  '/icons/icon-umssy.svg',
+  '/icons/icon-192x192.png',
+  '/icons/icon-512x512.png',
+  '/icons/icon-maskable-512x512.png',
+  '/icons/umssy-simbolo-web.svg',
+  '/icons/umssy-logo-web.svg',
+  '/icons/umssy-logo-on-dark.svg',
+  '/icons/umss-institutional-seal.svg',
+];
+const NEXT_STATIC_PREFIX = '/_next/static/';
+const NEXT_STATIC_PATTERN = /\/_next\/static\/[^"'\s<>\\]+/g;
+const CACHE_URLS_MESSAGE = 'CACHE_URLS';
+const assetFetches = new Map();
+
+const sameOriginUrl = (value) => {
+  try {
+    const url = new URL(value, self.location.origin);
+    return url.origin === self.location.origin ? url : null;
+  } catch {
+    return null;
+  }
+};
+
+const normalizePath = (pathname) =>
+  pathname.length > 1 && pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
+
+const shellKey = (value) => {
+  const url = sameOriginUrl(value);
+  if (!url) return null;
+  const path = normalizePath(url.pathname);
+  return [...SHELL_ROUTES, ...ADDITIONAL_ROUTES].includes(path) ? new URL(path, self.location.origin).href : null;
+};
+
+const isStaticAsset = (pathname) => STATIC_ASSETS.includes(pathname);
+const isNextStatic = (pathname) => pathname.startsWith(NEXT_STATIC_PREFIX);
+
+const isCacheable = (response) => {
+  if (!response || !response.ok || response.redirected) return false;
+  if (response.type === 'opaqueredirect' || response.type === 'opaque') return false;
+  const cacheControl = response.headers.get('Cache-Control') || '';
+  return !/(^|[,\s])(private|no-store)([,\s=]|$)/i.test(cacheControl);
+};
+
+const isRscRequest = (request, url) =>
+  request.headers.get('RSC') !== null || url.searchParams.has('_rsc');
+
+const putIfCacheable = async (cacheName, key, response) => {
+  if (!isCacheable(response)) return false;
+  const cache = await caches.open(cacheName);
+  await cache.put(key, response);
+  return true;
+};
+
+const fetchAndCache = (cacheName, value) => {
+  const url = sameOriginUrl(value);
+  if (!url) return;
+  const key = url.href;
+  if (assetFetches.has(key)) return assetFetches.get(key);
+  const pending = (async () => {
+    const cache = await caches.open(cacheName);
+    if (await cache.match(key)) return true;
+    const response = await fetch(new Request(key, { cache: 'reload', credentials: 'omit' }));
+    return putIfCacheable(cacheName, key, response);
+  })().finally(() => assetFetches.delete(key));
+  assetFetches.set(key, pending);
+  return pending;
+};
+
+const extractNextStaticUrls = (html) =>
+  [...new Set(html.match(NEXT_STATIC_PATTERN) || [])];
+
+const precacheRoute = async (route) => {
+  const key = shellKey(route);
+  const response = await fetch(new Request(key, { cache: 'reload', credentials: 'omit' }));
+  return cacheShell(key, response);
+};
+
+const cacheShell = async (key, response) => {
+  if (!isCacheable(response) || !response.headers.get('Content-Type')?.startsWith('text/html')) return;
+  const html = await response.clone().text();
+  const assets = await Promise.all(extractNextStaticUrls(html).map((url) => fetchAndCache(ASSETS_CACHE, url)));
+  if (assets.some((saved) => !saved)) return false;
+  return putIfCacheable(SHELL_CACHE, key, response);
+};
+
+const precache = async () => {
+  const offline = await fetch(new Request(new URL(OFFLINE_URL, self.location.origin), { cache: 'reload' }));
+  if (!(await putIfCacheable(SHELL_CACHE, OFFLINE_URL, offline))) {
+    throw new Error('offline fallback could not be cached');
+  }
+  await Promise.all([
+    Promise.allSettled(STATIC_ASSETS.map((url) => fetchAndCache(SHELL_CACHE, url))),
+    Promise.all(REQUIRED_ROUTES.map(precacheRoute)).then((routes) => {
+      if (!routes.every(Boolean)) throw new Error('required offline routes could not be cached');
+    }),
+    Promise.allSettled(ADDITIONAL_ROUTES.filter((route) => !REQUIRED_ROUTES.includes(route)).map(precacheRoute)),
+  ]);
+};
+
+const withTimeout = (promise, ms) =>
+  new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error('timeout')), ms);
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (error) => {
+        clearTimeout(timer);
+        reject(error);
+      },
+    );
+  });
+
+const offlineFallback = async () =>
+  (await caches.match(OFFLINE_URL, { cacheName: SHELL_CACHE })) || Response.error();
+
+const handleNavigation = async (event) => {
+  const key = shellKey(event.request.url);
+  const network = fetch(event.request);
+  if (key) {
+    event.waitUntil(
+      network
+        .then((response) => {
+          if (!isCacheable(response)) return;
+          return precacheRoute(key);
+        })
+        .catch(() => undefined),
+    );
+  }
+  try {
+    return await withTimeout(network, NAVIGATION_TIMEOUT_MS);
+  } catch {
+    const cached = key ? await caches.match(key, { cacheName: SHELL_CACHE }) : undefined;
+    if (cached) return cached;
+    try {
+      return await network;
+    } catch {
+      return offlineFallback();
+    }
+  }
+};
+
+const cacheFirst = async (event) => {
+  const cached = await caches.match(event.request, { cacheName: ASSETS_CACHE });
+  if (cached) return cached;
+  const response = await fetch(event.request);
+  event.waitUntil(putIfCacheable(ASSETS_CACHE, event.request, response.clone()).catch(() => undefined));
+  return response;
+};
+
+const staleWhileRevalidate = async (event) => {
+  const network = fetch(event.request).then((response) => {
+    event.waitUntil(putIfCacheable(SHELL_CACHE, event.request, response.clone()).catch(() => undefined));
+    return response;
+  });
+  const cached = await caches.match(event.request, { cacheName: SHELL_CACHE });
+  if (cached) {
+    event.waitUntil(network.catch(() => undefined));
+    return cached;
+  }
+  return network;
+};
+
+const selectStrategy = (request) => {
+  if (request.method !== 'GET') return null;
+  const url = sameOriginUrl(request.url);
+  if (!url) return null;
+  if (url.pathname === '/api' || url.pathname.startsWith('/api/')) return null;
+  if (url.pathname.startsWith('/_next/image')) return null;
+  if (isRscRequest(request, url)) return null;
+  if (request.mode === 'navigate') return handleNavigation;
+  if (isNextStatic(url.pathname)) return cacheFirst;
+  if (isStaticAsset(url.pathname)) return staleWhileRevalidate;
+  return null;
+};
+
+self.addEventListener('install', (event) => {
+  event.waitUntil(precache().then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil(self.clients.claim());
+  const current = [SHELL_CACHE, ASSETS_CACHE];
+  event.waitUntil(
+    caches
+      .keys()
+      .then((names) =>
+        Promise.all(
+          names
+            .filter((name) => name.startsWith(CACHE_PREFIX) && !current.includes(name))
+            .map((name) => caches.delete(name)),
+        ),
+      )
+      .then(() => self.clients.claim()),
+  );
+});
+
+self.addEventListener('fetch', (event) => {
+  const strategy = selectStrategy(event.request);
+  if (strategy) event.respondWith(strategy(event));
+});
+
+self.addEventListener('message', (event) => {
+  const data = event.data;
+  if (data?.type === 'PREPARE_OFFLINE_PASSES' && event.ports?.[0]) {
+    event.waitUntil(Promise.all(REQUIRED_ROUTES.map(precacheRoute)).then(
+      (routes) => event.ports[0].postMessage(routes.every(Boolean)),
+      () => event.ports[0].postMessage(false),
+    ));
+    return;
+  }
+  if (!data || data.type !== CACHE_URLS_MESSAGE || !Array.isArray(data.urls)) return;
+  const urls = data.urls
+    .map((value) => (typeof value === 'string' ? sameOriginUrl(value) : null))
+    .filter((url) => url && isNextStatic(url.pathname) && !url.searchParams.has('_rsc'))
+    .map((url) => url.href);
+  event.waitUntil(Promise.allSettled([
+    ...urls.map((url) => fetchAndCache(ASSETS_CACHE, url)),
+    // Recover routes missed during installation, even after client-side navigation.
+    ...SHELL_ROUTES.map(async (route) => {
+      const key = shellKey(route);
+      if (!(await caches.match(key, { cacheName: SHELL_CACHE }))) await precacheRoute(key);
+    }),
+  ]));
 });
 
 (function webPushHandlers() {
