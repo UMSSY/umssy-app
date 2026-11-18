@@ -3,7 +3,7 @@ import { cleanup, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { renderWithQuery } from '@/shared/testing/render-with-query';
 import { availabilityApi } from '@/modules/availability';
-import { educationsService } from '@/modules/education';
+import { educationsService } from '@/modules/educations';
 import {
   profilePhotoService,
   profileService,

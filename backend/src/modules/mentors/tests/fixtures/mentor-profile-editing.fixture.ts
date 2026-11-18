@@ -111,6 +111,9 @@ export function createMentorProfileEditingFixture(userId: string) {
     profileRepository,
     {} as CityCatalogService,
     new ProfileMapper(),
+    {
+      sourceChanged: vi.fn().mockResolvedValue(undefined),
+    } as unknown as ConstructorParameters<typeof ProfileService>[3],
   );
   const photoService = new ProfilePhotoService(
     profileRepository,

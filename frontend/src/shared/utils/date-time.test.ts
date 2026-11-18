@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   addWeeks,
   formatBlockRange,
+  formatBoliviaDate,
   formatBoliviaDay,
   formatBoliviaMonthShort,
   formatBoliviaWeekdayShort,
@@ -201,5 +202,29 @@ describe("formatBoliviaWeekdayShort, formatBoliviaDay y formatBoliviaMonthShort"
     expect(formatBoliviaWeekdayShort(startAt)).toBe("SÁB");
     expect(formatBoliviaDay(startAt)).toBe("31");
     expect(formatBoliviaMonthShort(startAt)).toBe("oct");
+  });
+});
+
+describe("formatBoliviaDate", () => {
+  it("muestra DD/MM/AAAA con la fecha de Bolivia", () => {
+    expect(formatBoliviaDate("2026-11-10T15:30:00.000Z")).toBe("10/11/2026");
+  });
+
+  it("usa el día de Bolivia cuando en UTC ya es el día siguiente", () => {
+    expect(formatBoliviaDate("2026-11-10T02:00:00.000Z")).toBe("09/11/2026");
+  });
+
+  it("completa con cero el día y el mes", () => {
+    expect(formatBoliviaDate("2026-03-05T12:00:00.000Z")).toBe("05/03/2026");
+  });
+
+  it("acepta una fecha como objeto Date", () => {
+    expect(formatBoliviaDate(new Date("2026-12-31T22:00:00.000Z"))).toBe(
+      "31/12/2026",
+    );
+  });
+
+  it("rechaza una fecha inválida", () => {
+    expect(() => formatBoliviaDate("sin fecha")).toThrow(RangeError);
   });
 });

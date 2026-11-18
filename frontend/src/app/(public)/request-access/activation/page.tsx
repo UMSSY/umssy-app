@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { AccountActivationView } from "@/modules/access-request/views/account-activation-view";
+import { AccountActivationView } from "@/modules/access-requests/views/account-activation-view";
 
 export const metadata: Metadata = {
   title: "Activación de cuenta",

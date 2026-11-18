@@ -17,6 +17,8 @@ import { SectionCard } from "./section-card";
 import { FormFieldset } from "@/shared/components/layout/form-fieldset";
 
 export function PresentationForm({
+  idPrefix = "",
+  saveLabel = "Guardar presentación",
   initialValues,
   isSaving = false,
   serverErrors = {},
@@ -26,10 +28,14 @@ export function PresentationForm({
   const [values, setValues] = useState<PresentationValues>(initialValues);
   const [localErrors, setErrors] = useState<PresentationErrors>({});
   const errors = { ...localErrors, ...serverErrors };
+  const fieldIds = {
+    headline: `${idPrefix}headline`,
+    aboutMe: `${idPrefix}aboutMe`,
+  };
   useProfileCompletionFocus('presentation', {
-    headline: values.headline,
-    aboutMe: values.aboutMe,
-  }, !isSaving);
+    [fieldIds.headline]: values.headline,
+    [fieldIds.aboutMe]: values.aboutMe,
+  }, !isSaving && !idPrefix);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const field = event.target.name as keyof PresentationValues;
@@ -64,9 +70,9 @@ export function PresentationForm({
       >
         <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
           <FormFieldset title="Tu especialidad">
-          <FormField id="headline" label="Titular profesional" isRequired error={errors.headline}>
+          <FormField id={fieldIds.headline} label="Titular profesional" isRequired error={errors.headline}>
             <Input
-              id="headline"
+              id={fieldIds.headline}
               name="headline"
               type="text"
               placeholder="Ej. Desarrolladora web junior"
@@ -74,14 +80,14 @@ export function PresentationForm({
               disabled={isSaving}
               onChange={handleChange}
               className="h-11"
-              {...getFieldErrorProps("headline", errors.headline)}
+              {...getFieldErrorProps(fieldIds.headline, errors.headline)}
             />
           </FormField>
           </FormFieldset>
           <FormFieldset title="Sobre ti">
-          <FormField id="aboutMe" label="Acerca de" isRequired error={errors.aboutMe}>
+          <FormField id={fieldIds.aboutMe} label="Acerca de" isRequired error={errors.aboutMe}>
             <Textarea
-              id="aboutMe"
+              id={fieldIds.aboutMe}
               name="aboutMe"
               rows={6}
               placeholder="Cuenta quién eres, en qué te especializas y qué oportunidades laborales te interesan."
@@ -89,7 +95,7 @@ export function PresentationForm({
               disabled={isSaving}
               onChange={handleChange}
               className="field-sizing-fixed min-h-36 resize-y text-sm"
-              {...getFieldErrorProps("aboutMe", errors.aboutMe)}
+              {...getFieldErrorProps(fieldIds.aboutMe, errors.aboutMe)}
             />
           </FormField>
 
@@ -109,7 +115,7 @@ export function PresentationForm({
                 Cancelar
               </Button>
               <Button type="submit" className={cn("h-10 bg-primary px-4 text-sm text-primary-foreground hover:bg-brand-hover", "min-w-44")} disabled={isSaving}>
-                {isSaving ? "Guardando..." : "Guardar presentación"}
+                {isSaving ? "Guardando..." : saveLabel}
               </Button>
             </div>
           </div>

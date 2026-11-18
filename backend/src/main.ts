@@ -5,6 +5,7 @@ import { cleanupOpenApiDoc } from 'nestjs-zod';
 import { AppModule } from './app.module.js';
 import { validateEnv } from './common/utils/validate-env.js';
 import { buildSwaggerConfig } from './config/swagger.config.js';
+import { documentCommonResponses } from './common/utils/document-common-responses.js';
 
 async function bootstrap(): Promise<void> {
   validateEnv();
@@ -25,7 +26,9 @@ async function bootstrap(): Promise<void> {
   const config = buildSwaggerConfig();
 
   const documentFactory = () =>
-    cleanupOpenApiDoc(SwaggerModule.createDocument(app, config));
+    documentCommonResponses(
+      cleanupOpenApiDoc(SwaggerModule.createDocument(app, config)),
+    );
   SwaggerModule.setup('docs', app, documentFactory, {
     swaggerOptions: { persistAuthorization: true },
   });

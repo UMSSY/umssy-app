@@ -8,6 +8,7 @@ import type { SkillOption } from "../types/skill-option.types";
 import type { JobOfferListParams } from "../types/job-offer-list-params.types";
 
 const SKILL_CATALOG_ENDPOINT = "/job-offers/skills";
+const REQUIREMENT_TERMS_ENDPOINT = "/matching/requirements/terms";
 
 function buildCompanyJobOffersEndpoint(companyId: string): string {
   return `/companies/${companyId}/job-offers`;
@@ -16,6 +17,11 @@ function buildCompanyJobOffersEndpoint(companyId: string): string {
 export const jobOffersService = {
   getSkillCatalog: async (): Promise<SkillOption[]> => {
     const response = await apiClient.get<ApiResponse<SkillOption[]>>(SKILL_CATALOG_ENDPOINT);
+    return (response.data.data ?? []).map(({ id, name }) => ({ id, name }));
+  },
+
+  detectRequirementSkills: async (text: string): Promise<SkillOption[]> => {
+    const response = await apiClient.post<ApiResponse<SkillOption[]>>(REQUIREMENT_TERMS_ENDPOINT, { text });
     return (response.data.data ?? []).map(({ id, name }) => ({ id, name }));
   },
 

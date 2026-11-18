@@ -1,4 +1,6 @@
 export { EventsView } from './views/events-view';
+export { MyWorkshopsView } from './views/my-workshops-view';
+export { AttendanceHandoffView } from './views/attendance-handoff-view';
 export { ProposeWorkshopView } from './views/propose-workshop-view';
 export { EventCard } from './components/event-card';
 export { EventDetailPanel } from './components/event-detail-panel';
@@ -19,6 +21,7 @@ export { PublicWorkshopsView } from "./views/public-workshops-view";
 export { PublicWorkshopDetailView } from "./views/public-workshop-detail-view";
 
 export { MyPassesView } from "./views/my-passes-view";
+export { OfflinePreparation, OfflinePreparationProvider } from "./components/offline-preparation";
 export { MyPassesRouteView } from "./views/my-passes-route-view";
 export { readRecord, readArray, readString } from "./utils/response-validation";
 export { REQUEST_TIMEOUT_MS } from "./constants/events.constants";
@@ -28,8 +31,8 @@ export {
   useRegistrationActions,
   REGISTRATION_ERROR_MESSAGES,
   getRegistrationErrorMessage,
-} from '@/modules/registrations';
+} from '@/modules/event-registrations';
 export type {
   RegistrationResponse,
   RegistrationErrorCode,
-} from '@/modules/registrations';
+} from '@/modules/event-registrations';

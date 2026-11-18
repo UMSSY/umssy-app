@@ -6,7 +6,7 @@
 /*
  * This file should be your main import to use Prisma-related types and utilities in a browser. 
  * Use it to get access to models, enums, and input types.
- *
+ * 
  * This file does not contain a `PrismaClient` class, nor several other helpers that are intended as server-side only.
  * See `client.ts` for the standard, server-side entry point.
  *
@@ -353,6 +353,11 @@ export type SurveyTargetAudience = Prisma.SurveyTargetAudienceModel
  */
 export type Survey = Prisma.SurveyModel
 /**
+ * Model SurveyAlertConfig
+ * 
+ */
+export type SurveyAlertConfig = Prisma.SurveyAlertConfigModel
+/**
  * Model SurveyQuestion
  * 
  */
@@ -438,6 +443,11 @@ export type MentorParticipationStatus = Prisma.MentorParticipationStatusModel
  */
 export type MentorOfferStatus = Prisma.MentorOfferStatusModel
 /**
+ * Model RadarDocumentVerification
+ * 
+ */
+export type RadarDocumentVerification = Prisma.RadarDocumentVerificationModel
+/**
  * Model PortfolioProvider
  * 
  */
@@ -472,3 +482,13 @@ export type PushSubscription = Prisma.PushSubscriptionModel
  * 
  */
 export type NotificationPreference = Prisma.NotificationPreferenceModel
+/**
+ * Model RadarDocumentStatus
+ * 
+ */
+export type RadarDocumentStatus = Prisma.RadarDocumentStatusModel
+/**
+ * Model RadarDocumentSourceType
+ * 
+ */
+export type RadarDocumentSourceType = Prisma.RadarDocumentSourceTypeModel

@@ -1,4 +1,4 @@
-import type { ReportType } from "../types/generated-report.types";
+import type { ReportType } from "../types/report-type.types";
 
 export const REPORT_TYPE_LABELS: Record<ReportType, string> = {
   REGISTERED_USERS: "Lista de Usuarios",
