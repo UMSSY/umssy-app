@@ -76,12 +76,72 @@ export class ApplicationsController {
   })
   @ApiForbiddenResponse({
     description: 'El usuario no tiene permisos sobre la postulación',
+    schema: {
+      type: 'object',
+      required: ['statusCode', 'code', 'data', 'detail', 'ok'],
+      properties: {
+        statusCode: { type: 'integer', example: 403 },
+        code: { type: 'string', example: 'APPLICATION_FORBIDDEN' },
+        data: { type: 'object', nullable: true, example: null },
+        detail: {
+          type: 'string',
+          example: 'No tienes permisos para retirar esta postulación',
+        },
+        ok: { type: 'boolean', example: false },
+      },
+      example: {
+        statusCode: 403,
+        code: 'APPLICATION_FORBIDDEN',
+        data: null,
+        detail: 'No tienes permisos para retirar esta postulación',
+        ok: false,
+      },
+    },
   })
   @ApiNotFoundResponse({
     description: 'La postulación no existe o el identificador no es válido',
+    schema: {
+      type: 'object',
+      required: ['statusCode', 'code', 'data', 'detail', 'ok'],
+      properties: {
+        statusCode: { type: 'integer', example: 404 },
+        code: { type: 'string', example: 'APPLICATION_NOT_FOUND' },
+        data: { type: 'object', nullable: true, example: null },
+        detail: { type: 'string', example: 'La postulación no existe' },
+        ok: { type: 'boolean', example: false },
+      },
+      example: {
+        statusCode: 404,
+        code: 'APPLICATION_NOT_FOUND',
+        data: null,
+        detail: 'La postulación no existe',
+        ok: false,
+      },
+    },
   })
   @ApiConflictResponse({
     description: 'La postulación no puede reactivarse o la vacante no está disponible',
+    schema: {
+      type: 'object',
+      required: ['statusCode', 'code', 'data', 'detail', 'ok'],
+      properties: {
+        statusCode: { type: 'integer', example: 409 },
+        code: { type: 'string', example: 'APPLICATION_NOT_REACTIVABLE' },
+        data: { type: 'object', nullable: true, example: null },
+        detail: {
+          type: 'string',
+          example: 'La postulación no puede reactivarse en su estado actual o la vacante ya no está disponible.',
+        },
+        ok: { type: 'boolean', example: false },
+      },
+      example: {
+        statusCode: 409,
+        code: 'APPLICATION_NOT_REACTIVABLE',
+        data: null,
+        detail: 'La postulación no puede reactivarse en su estado actual o la vacante ya no está disponible.',
+        ok: false,
+      },
+    },
   })
   reactivateApplication(
     @Param('id', applicationIdPipe) id: string,
