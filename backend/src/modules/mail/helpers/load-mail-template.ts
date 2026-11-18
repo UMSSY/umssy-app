@@ -6,7 +6,9 @@ type MailTemplateName =
   | 'access-request-rejection'
   | 'password-reset-email'
   | 'notification'
-  | 'appointment-booked';
+  | 'appointment-booked'
+  | 'appointment-cancelled'
+  | 'appointment-cancelled-with-reason';
 
 export function loadMailTemplate(name: MailTemplateName): Promise<string> {
   return readFile(new URL(`../mjml/${name}.mjml`, import.meta.url), 'utf8');
