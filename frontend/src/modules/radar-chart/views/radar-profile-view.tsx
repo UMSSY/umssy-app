@@ -1,5 +1,7 @@
 'use client';
 
+import { useSearchParams } from 'next/navigation';
+
 import { MentorshipProjection } from '../components/mentorship-projection';
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
@@ -13,14 +15,39 @@ import { RadarEvidencePanel } from '../components/radar-evidence-panel';
 import { RadarSkillSources } from '../components/radar-skill-sources';
 import { useLiveRadar } from '../hooks/use-live-radar';
 
+import { mapPublishedRadar } from '../mappers/radar-published.mapper';
+import type { IntegrationRadar } from '../types/integration-radar.types';
+import { useHistoricalRadar } from '../hooks/use-historical-radar';
+
 const DATE_FORMAT: Intl.DateTimeFormatOptions = {
   dateStyle: 'medium',
   timeStyle: 'short',
 };
 
 export function RadarProfileView() {
-  const { data, loading, error, variation, previous, retry, retrying } =
-    useLiveRadar();
+  const {
+    data: liveData,
+    loading,
+    error,
+    variation: liveVariation,
+    previous: livePrevious,
+    retry,
+    retrying,
+  } = useLiveRadar();
+  const searchParams = useSearchParams();
+  const [dismissedSnapshot, setDismissedSnapshot] = useState<string | null>(
+    null,
+  );
+  const requestedSnapshot = searchParams.get('snapshot');
+  const snapshotId =
+    requestedSnapshot === dismissedSnapshot ? null : requestedSnapshot;
+  const historical = useHistoricalRadar(snapshotId);
+  const openedRadar: IntegrationRadar | null = snapshotId
+    ? (historical.data ?? null)
+    : null;
+  const data = openedRadar ? mapPublishedRadar(openedRadar) : liveData;
+  const previous = openedRadar ? openedRadar.previous : livePrevious;
+  const variation = openedRadar ? openedRadar.variation : liveVariation;
   const [selectedArea, setSelectedArea] = useState<AreaId | null>(null);
   const [projection, setProjection] = useState<{
     areaId: AreaId;
@@ -70,6 +97,33 @@ export function RadarProfileView() {
         title="Radar de afinidad"
         description="Competencias verificadas de tu perfil. Las habilidades pendientes no alteran las puntuaciones publicadas."
       />
+      {snapshotId && historical.isPending ? (
+        <p role="status">Cargando publicacion...</p>
+      ) : null}
+      {snapshotId && historical.isError ? (
+        <p role="alert" className="text-destructive">
+          No se pudo abrir la publicacion solicitada.
+        </p>
+      ) : null}
+      {openedRadar ? (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-surface p-4">
+          <p role="status" className="text-sm font-medium text-ink">
+            Consultando la versión histórica {openedRadar.version}
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              setDismissedSnapshot(snapshotId);
+              window.history.replaceState(null, '', window.location.pathname);
+              setIsComparing(false);
+              setSelectedArea(null);
+            }}
+          >
+            Volver al radar actual
+          </Button>
+        </div>
+      ) : null}{' '}
       {loading && !data ? (
         <p
           role="status"
