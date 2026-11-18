@@ -15,14 +15,20 @@ import {
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { onlineManager } from '@tanstack/react-query';
 import { registrationsService } from '../services/registrations.service';
+import { registrationsService as sharedRegistrationsService } from '@/modules/event-registrations/services/registrations.service';
 import { saveOfflinePass } from '../services/offline-passes.service';
 import { offlinePassesStore } from '../utils/offline-passes-store';
 import { MyPassesView } from './my-passes-view';
 
 vi.mock('../services/registrations.service', () => ({ registrationsService: { getMine: vi.fn(), getPass: vi.fn(), getFinished: vi.fn(), cancel: vi.fn(),},}));
+// Cancellation goes through the shared registrations service used by useCancelRegistration.
+vi.mock('@/modules/event-registrations/services/registrations.service', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/modules/event-registrations/services/registrations.service')>();
+  return { registrationsService: { ...actual.registrationsService, cancel: vi.fn() } };
+});
 const getMine = vi.mocked(registrationsService.getMine);
 const getFinished = vi.mocked(registrationsService.getFinished);
-const cancelRegistration = vi.mocked(registrationsService.cancel);
+const cancelRegistration = vi.mocked(sharedRegistrationsService.cancel);
 const pass = { id: 'reg-1', eventName: 'React', date: '2026-10-20T00:00:00Z', startTime: '1970-01-01T09:00:00Z', endTime: '1970-01-01T12:00:00Z', location: 'Aula 101', status: 'Confirmada' };
 beforeEach(async () => {
   vi.useFakeTimers({ now: new Date('2026-10-19T12:00:00Z'), toFake: ['Date'] });
