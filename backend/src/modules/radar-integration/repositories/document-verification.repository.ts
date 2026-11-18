@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { Prisma } from '../../../prisma/client.js';
+import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
 import type { VerificationJob } from '../types/verification-job.types.js';
 import type { VerificationResult } from '../types/verification-result.types.js';
 
@@ -87,11 +88,35 @@ export class DocumentVerificationRepository {
       return count;
     });
   }
-  decide(admin: string, id: string, approve: boolean) {
-    return this.db
-      .$executeRaw`UPDATE radar_document_verifications SET updated_at=clock_timestamp(),reviewer_id=${admin}::uuid,
-      status_id=(SELECT id FROM radar_document_statuses WHERE title=${approve ? 'manual_approved' : 'manual_rejected'}),reason=${approve ? 'Aprobación administrativa.' : 'Rechazo administrativo.'},
-      synced=false,notice_read=false,lease=NULL,retry_at=now(),decided_at=clock_timestamp()
-      WHERE id=${id}::uuid AND active AND status_id IN (SELECT id FROM radar_document_statuses WHERE title IN ('review','low_confidence'))`;
+  decide(
+    admin: string,
+    id: string,
+    approve: boolean,
+    context: TransactionContext,
+  ) {
+    return context.client.$queryRaw<{ userId: string }[]>`
+      UPDATE radar_document_verifications
+      SET updated_at = clock_timestamp(),
+        reviewer_id = ${admin}::uuid,
+        status_id = (
+          SELECT id FROM radar_document_statuses
+          WHERE title = ${approve ? 'manual_approved' : 'manual_rejected'}
+        ),
+        reason = ${
+          approve ? 'Aprobación administrativa.' : 'Rechazo administrativo.'
+        },
+        synced = false,
+        notice_read = false,
+        lease = NULL,
+        retry_at = now(),
+        decided_at = clock_timestamp()
+      WHERE id = ${id}::uuid
+        AND active
+        AND status_id IN (
+          SELECT id FROM radar_document_statuses
+          WHERE title IN ('review', 'low_confidence')
+        )
+      RETURNING user_id AS "userId"
+    `;
   }
 }

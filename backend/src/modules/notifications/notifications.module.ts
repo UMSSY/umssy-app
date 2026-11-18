@@ -21,15 +21,15 @@ import { NotificationsController } from './controllers/notifications.controller.
 import { PushSubscriptionsController } from './controllers/push-subscriptions.controller.js';
 import { PreferencesController } from './controllers/preferences.controller.js';
 import { NotificationsInboxService } from './services/notifications-inbox.service.js';
-import { UsersModule } from '../users/users.module.js'; 
-import { ChatModule } from '../chat/chat.module.js'; 
+import { UsersModule } from '../users/users.module.js';
+import { ChatModule } from '../chat/chat.module.js';
 
 @Module({
   imports: [
     PrismaModule,
     JwtAuthModule,
-    AuthModule, 
-    JwtModule.register({}), 
+    AuthModule,
+    JwtModule.register({}),
     MailModule,
     UsersModule,
     forwardRef(() => ChatModule),
@@ -52,6 +52,10 @@ import { ChatModule } from '../chat/chat.module.js';
     NotificationsInboxService,
     AppVisibilityService,
   ],
-  exports: [NotificationsService, SubscriptionsService],
+  exports: [
+    NotificationsService,
+    SubscriptionsService,
+    NotificationsInboxService,
+  ],
 })
 export class NotificationsModule {}
