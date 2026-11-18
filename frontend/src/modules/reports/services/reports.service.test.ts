@@ -156,6 +156,28 @@ describe("reportsService.exportRegisteredUsersCsv", () => {
     expect(result).toEqual({ file, fileName: "usuarios-registrados-2026-10-03.csv" });
   });
 
+  it("incluye la página actual y su fecha de corte cuando se solicita", async () => {
+    const getSpy = vi.spyOn(apiClient, "get").mockResolvedValueOnce({ data: new Blob([]), headers: {} });
+
+    await reportsService.exportRegisteredUsersCsv({ page: 2, limit: 10, snapshotAt: "2026-10-03T15:00:00.000Z" });
+
+    expect(getSpy).toHaveBeenCalledWith("/reports/registered-users/export", {
+      params: { userType: undefined, period: undefined, search: undefined, page: 2, limit: 10, snapshotAt: "2026-10-03T15:00:00.000Z" },
+      responseType: "blob",
+    });
+  });
+
+  it("indica al historial que el CSV descargado se convertirá en PDF", async () => {
+    const getSpy = vi.spyOn(apiClient, "get").mockResolvedValueOnce({ data: new Blob([]), headers: {} });
+
+    await reportsService.exportRegisteredUsersCsv({ format: "pdf" });
+
+    expect(getSpy).toHaveBeenCalledWith("/reports/registered-users/export", {
+      params: { userType: undefined, period: undefined, search: undefined, format: "pdf" },
+      responseType: "blob",
+    });
+  });
+
   it("usa un nombre por defecto si el backend no envía el nombre del archivo", async () => {
     vi.spyOn(apiClient, "get").mockResolvedValueOnce({ data: new Blob([]), headers: {} });
 
@@ -184,6 +206,35 @@ describe("reportsService.exportRejectedUsersCsv", () => {
       responseType: "blob",
     });
     expect(result).toEqual({ file, fileName: "usuarios-rechazados-2026-10-03.csv" });
+  });
+
+  it("incluye la página actual y su fecha de corte cuando se solicita", async () => {
+    const getSpy = vi.spyOn(apiClient, "get").mockResolvedValueOnce({ data: new Blob([]), headers: {} });
+
+    await reportsService.exportRejectedUsersCsv({ page: 3, limit: 10, search: "ana", snapshotAt: "2026-10-03T15:00:00.000Z" });
+
+    expect(getSpy).toHaveBeenCalledWith("/reports/rejected-users/export", {
+      params: {
+        userType: undefined,
+        period: undefined,
+        search: "ana",
+        page: 3,
+        limit: 10,
+        snapshotAt: "2026-10-03T15:00:00.000Z",
+      },
+      responseType: "blob",
+    });
+  });
+
+  it("indica al historial que el CSV descargado se convertirá en PDF", async () => {
+    const getSpy = vi.spyOn(apiClient, "get").mockResolvedValueOnce({ data: new Blob([]), headers: {} });
+
+    await reportsService.exportRejectedUsersCsv({ format: "pdf" });
+
+    expect(getSpy).toHaveBeenCalledWith("/reports/rejected-users/export", {
+      params: { userType: undefined, period: undefined, search: undefined, format: "pdf" },
+      responseType: "blob",
+    });
   });
 
   it("descarga el CSV con el filtro de tipo de usuario", async () => {

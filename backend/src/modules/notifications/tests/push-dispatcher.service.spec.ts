@@ -107,8 +107,11 @@ describe('PushDispatcherService', () => {
       mockPushRepo.findManyByUserIds.mockResolvedValue([]);
       
       const result = await service.dispatchToUsers(['user-1'], 'Title', 'Body', '/url');
-      
-      expect(result).toBe('skipped');
+
+      expect(result).toEqual({
+        status: 'skipped',
+        deliveries: [{ recipientId: 'user-1', channel: 'push', status: 'skipped' }],
+      });
     });
 
     it('debe ignorar (skipped) los userAgents de escritorio', async () => {
@@ -125,7 +128,7 @@ describe('PushDispatcherService', () => {
       const result = await service.dispatchToUsers(['user-1'], 'Title', 'Body', '/url');
 
       expect(webpush.sendNotification).not.toHaveBeenCalled();
-      expect(result).toBe('skipped');
+      expect(result.status).toBe('skipped');
     });
 
     it('debe eliminar la suscripción si el push service responde 410 (Gone)', async () => {
@@ -146,7 +149,10 @@ describe('PushDispatcherService', () => {
       const result = await service.dispatchToUsers(['user-1'], 'Title', 'Body', '/url');
 
       expect(mockPushRepo.deleteByEndpointAndUserId).toHaveBeenCalledWith('https://fcm...', 'user-1');
-      expect(result).toBe('failed');
+      expect(result).toEqual({
+        status: 'failed',
+        deliveries: [{ recipientId: 'user-1', channel: 'push', status: 'failed' }],
+      });
     });
 
     it('debe enviar el payload con title, body, icon, actionUrl y groupKey', async () => {
@@ -169,7 +175,7 @@ describe('PushDispatcherService', () => {
         actionUrl: '/appointments',
         groupKey: 'group-1',
       });
-      expect(result).toBe('sent');
+      expect(result.status).toBe('sent');
     });
 
     it('debe limitar title y body a 100 caracteres', async () => {
@@ -189,7 +195,7 @@ describe('PushDispatcherService', () => {
       const result = await service.dispatchToUsers(['user-1'], 'Title', 'Body', '/url');
 
       expect(webpushMock.sendNotification).toHaveBeenCalledTimes(2);
-      expect(result).toBe('sent');
+      expect(result.status).toBe('sent');
     });
 
     it('debe enviar solo a los móviles cuando también hay un escritorio', async () => {
@@ -198,7 +204,7 @@ describe('PushDispatcherService', () => {
       const result = await service.dispatchToUsers(['user-1'], 'Title', 'Body', '/url');
 
       expect(webpushMock.sendNotification).toHaveBeenCalledTimes(1);
-      expect(result).toBe('sent');
+      expect(result.status).toBe('sent');
     });
 
     it('debe eliminar la suscripción si el push service responde 404', async () => {
@@ -211,7 +217,7 @@ describe('PushDispatcherService', () => {
         androidSubscription.endpoint,
         'user-1',
       );
-      expect(result).toBe('failed');
+      expect(result.status).toBe('failed');
     });
 
     it('registra la purga cuando el push service responde 410', async () => {
@@ -239,7 +245,7 @@ describe('PushDispatcherService', () => {
         '[PushAudit] userId=user-1 endpointHost=fcm.googleapis.com statusCode=500 subscriptionRemoved=false',
         expect.any(String),
       );
-      expect(result).toBe('partial');
+      expect(result.status).toBe('partial');
     });
 
     it('debe incluir en cada push el id del aviso de su destinatario', async () => {
