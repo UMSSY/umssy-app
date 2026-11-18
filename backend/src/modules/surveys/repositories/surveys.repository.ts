@@ -11,6 +11,7 @@ import {
   buildSurveyStatisticsInclude,
   SURVEY_SUMMARY_SELECT,
 } from '../constants/survey.constants.js';
+import { SURVEY_PARTICIPATION_TARGET_SELECT } from '../constants/survey-participation.constants.js';
 import { SurveysStorageUnavailableException } from '../exceptions/surveys-storage-unavailable.exception.js';
 import type { SurveyDetailResponse } from '../responses/survey-detail.response.js';
 import type { SurveyNotificationResponse } from '../responses/survey-notification.response.js';
@@ -26,6 +27,7 @@ import type {
   SurveyTitleScope,
 } from '../types/survey-record.type.js';
 import type { GraduateProfile } from '../types/graduate-profile.type.js';
+import type { SurveyParticipationTarget } from '../types/survey-participation-target.type.js';
 import type { SemesterRange } from '../types/semester-range.type.js';
 import {
   SurveyStatus,
@@ -426,5 +428,121 @@ export class SurveysRepository {
       })),
     );
     return { questionRows, optionRows };
+  }
+
+  async findAlertConfig(surveyId: string) {
+    return this.prisma.surveyAlertConfig.findUnique({
+      where: { surveyId },
+    });
+  }
+
+  findParticipationTarget(
+    surveyId: string,
+  ): Promise<SurveyParticipationTarget | null> {
+    return this.prisma.survey.findUnique({
+      where: { id: surveyId },
+      select: SURVEY_PARTICIPATION_TARGET_SELECT,
+    });
+  }
+
+  async findRespondentIds(surveyId: string): Promise<string[]> {
+    const responses = await this.prisma.surveyResponse.findMany({
+      where: { surveyId },
+      select: { respondentId: true },
+    });
+    return responses.map((response) => response.respondentId);
+  }
+
+  async upsertAlertConfig(
+    surveyId: string,
+    data: {
+      isEnabled: boolean;
+      threshold: number;
+      questionIds?: string[] | null;
+    },
+  ) {
+    return this.prisma.surveyAlertConfig.upsert({
+      where: { surveyId },
+      create: {
+        surveyId,
+        isEnabled: data.isEnabled,
+        threshold: data.threshold,
+        questionIds: data.questionIds
+          ? JSON.parse(JSON.stringify(data.questionIds))
+          : null,
+      },
+      update: {
+        isEnabled: data.isEnabled,
+        threshold: data.threshold,
+        questionIds: data.questionIds
+          ? JSON.parse(JSON.stringify(data.questionIds))
+          : null,
+      },
+    });
+  }
+
+  async findSurveysClosingSoon(thresholdDate: Date, now: Date) {
+    return this.prisma.survey.findMany({
+      where: {
+        closesAt: { lte: thresholdDate, gt: now },
+        closingSoonNotifiedAt: null,
+        status: { title: SurveyStatus.PUBLISHED },
+      },
+      include: {
+        createdBy: {
+          select: { id: true, firstName: true, lastName: true, email: true },
+        },
+        _count: { select: { responses: true } },
+      },
+    });
+  }
+
+  async findSurveysExpiredForClosure(now: Date) {
+    return this.prisma.survey.findMany({
+      where: {
+        closesAt: { lte: now },
+        closedNotifiedAt: null,
+        status: { title: SurveyStatus.PUBLISHED },
+      },
+      include: {
+        createdBy: {
+          select: { id: true, firstName: true, lastName: true, email: true },
+        },
+        alertConfig: true,
+        questions: {
+          include: {
+            options: true,
+            answers: {
+              select: {
+                optionId: true,
+                response: { select: { submittedAt: true } },
+              },
+            },
+          },
+        },
+        _count: { select: { responses: true } },
+      },
+    });
+  }
+
+  async markClosingSoonNotified(surveyId: string, date: Date = new Date()) {
+    return this.prisma.survey.update({
+      where: { id: surveyId },
+      data: { closingSoonNotifiedAt: date },
+    });
+  }
+
+  async markClosedNotified(surveyId: string, date: Date = new Date()) {
+    return this.prisma.survey.update({
+      where: { id: surveyId },
+      data: { closedNotifiedAt: date },
+    });
+  }
+
+  async updateLastReminderSent(surveyId: string, date: Date = new Date()) {
+    return this.prisma.survey.update({
+      where: { id: surveyId },
+      data: { lastReminderSentAt: date },
+    });
   }
 }

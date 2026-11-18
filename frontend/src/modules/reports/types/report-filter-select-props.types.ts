@@ -1,7 +1,4 @@
-export interface ReportFilterOption<TValue extends string> {
-  value: TValue;
-  label: string;
-}
+import type { ReportFilterOption } from "./report-filter-option.types";
 
 export interface ReportFilterSelectProps<TValue extends string> {
   label: string;
@@ -10,4 +7,5 @@ export interface ReportFilterSelectProps<TValue extends string> {
   options: ReportFilterOption<TValue>[];
   value?: TValue;
   onChange: (value?: TValue) => void;
+  disabled?: boolean;
 }

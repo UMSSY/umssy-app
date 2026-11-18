@@ -1,5 +1,9 @@
+import type { NotificationChannelStatus } from './notification-channel-status.type.js';
+import type { NotificationRecipientDelivery } from './notification-recipient-delivery.type.js';
+
 export type NotifyResult = {
   inAppCount: number;
-  pushStatus: 'sent' | 'partial' | 'failed' | 'skipped';
-  emailStatus: 'sent' | 'partial' | 'failed' | 'skipped';
+  pushStatus: NotificationChannelStatus;
+  emailStatus: NotificationChannelStatus;
+  deliveries: NotificationRecipientDelivery[];
 };

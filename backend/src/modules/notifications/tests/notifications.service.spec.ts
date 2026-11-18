@@ -74,8 +74,8 @@ describe('NotificationsService', () => {
     };
     mockPreferencesRepo = { findManyByUserIds: vi.fn().mockResolvedValue([]) };
     mockUserLookupRepo = { hasBlockBetween: vi.fn().mockResolvedValue(false) };
-    mockPushDispatcher = { dispatchToUsers: vi.fn().mockResolvedValue('sent') };
-    mockMailDispatcher = { dispatchToUsers: vi.fn().mockResolvedValue('sent') };
+    mockPushDispatcher = { dispatchToUsers: vi.fn().mockResolvedValue({ status: 'sent', deliveries: [] }) };
+    mockMailDispatcher = { dispatchToUsers: vi.fn().mockResolvedValue({ status: 'sent', deliveries: [] }) };
     mockGateway = { emitToUser: vi.fn() };
     mockAppVisibilityService = { isVisible: vi.fn().mockReturnValue(false) };
 
@@ -174,6 +174,7 @@ describe('NotificationsService', () => {
       expect.any(String),
       expect.any(String),
       expect.any(String),
+      undefined,
     );
   });
 
@@ -194,6 +195,48 @@ describe('NotificationsService', () => {
     expect(result.inAppCount).toBe(1);
     expect(result.pushStatus).toBe('failed');
     expect(result.emailStatus).toBe('sent');
+  });
+
+  it('entrega al despachador de correo el renderizador del dominio y devuelve la entrega por destinatario y canal', async () => {
+    mockNotificationsRepo.findTypeByCode.mockResolvedValue({
+      id: 'type-reminder',
+      code: 'SURVEY_REMINDER',
+      sendsPush: true,
+      sendsEmail: true,
+    });
+    mockPreferencesRepo.findManyByUserIds.mockResolvedValue([
+      { userId: 'user-2', pushEnabled: true, emailEnabled: true },
+    ]);
+    mockPushDispatcher.dispatchToUsers.mockResolvedValue({
+      status: 'skipped',
+      deliveries: [{ recipientId: 'user-2', channel: 'push', status: 'skipped' }],
+    });
+    mockMailDispatcher.dispatchToUsers.mockResolvedValue({
+      status: 'sent',
+      deliveries: [{ recipientId: 'user-2', channel: 'email', status: 'sent' }],
+    });
+    const renderMail = vi.fn();
+
+    const result = await service.notify({
+      recipientIds: ['user-2'],
+      actorId: 'admin-1',
+      type: NotificationType.SURVEY_REMINDER,
+      payload: { surveyTitle: 'Empleabilidad', closesAtFormatted: '30/11/2026 20:00.' },
+      actionUrl: 'http://localhost:3000/surveys/survey-1',
+      renderMail,
+    });
+
+    expect(mockMailDispatcher.dispatchToUsers).toHaveBeenCalledWith(
+      ['user-2'],
+      expect.any(String),
+      expect.any(String),
+      'http://localhost:3000/surveys/survey-1',
+      renderMail,
+    );
+    expect(result.deliveries).toEqual([
+      { recipientId: 'user-2', channel: 'push', status: 'skipped' },
+      { recipientId: 'user-2', channel: 'email', status: 'sent' },
+    ]);
   });
 
   it('no debe enviar push a un destinatario con la app visible', async () => {
