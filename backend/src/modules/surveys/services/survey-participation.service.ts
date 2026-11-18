@@ -127,8 +127,7 @@ export class SurveyParticipationService {
     );
     if (eligible.length === 0) return undefined;
 
-    const currentPeriod =
-      target.academicPeriod ?? getAcademicPeriod(now.toISOString()) ?? '';
+    const currentPeriod = getAcademicPeriod(now.toISOString()) ?? '';
 
     return this.notificationsService.notify({
       recipientIds: eligible.map((recipient) => recipient.id),
