@@ -370,10 +370,25 @@ export async function seedRadar(
   }
 
   if (users.company) {
+    await tx.user.update({
+      where: { id: users.company.id },
+      data: { companyId: techCompanyId },
+    });
     // `RadarCompanyAccess` está ignorado por Prisma y usa clave compuesta.
     await tx.$executeRaw`
       INSERT INTO radar_company_access (company_id,user_id)
       VALUES (${techCompanyId}::uuid,${users.company.id}::uuid)
+      ON CONFLICT (company_id,user_id) DO NOTHING`;
+  }
+
+  if (users.multiRole) {
+    await tx.user.update({
+      where: { id: users.multiRole.id },
+      data: { companyId: techCompanyId },
+    });
+    await tx.$executeRaw`
+      INSERT INTO radar_company_access (company_id,user_id)
+      VALUES (${techCompanyId}::uuid,${users.multiRole.id}::uuid)
       ON CONFLICT (company_id,user_id) DO NOTHING`;
   }
 }

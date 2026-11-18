@@ -57,7 +57,10 @@ function setup() {
       create: vi.fn().mockResolvedValue({ id: 'experience' }),
     },
     userSkill: { upsert: vi.fn().mockResolvedValue({}) },
-    user: { updateMany: vi.fn().mockResolvedValue({ count: 1 }) },
+    user: {
+      updateMany: vi.fn().mockResolvedValue({ count: 1 }),
+      update: vi.fn().mockResolvedValue({}),
+    },
     radarScoreSnapshot: { upsert: vi.fn().mockResolvedValue({}) },
     jobApplication: {
       upsert: vi.fn().mockImplementation(async ({ create }) => ({
