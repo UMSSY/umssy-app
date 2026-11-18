@@ -1,28 +1,32 @@
-import type { NotificationEmailContent } from '../../notifications/types/notification-email-content.type.js';
+import { buildFrontendUrl } from '../../access-requests/mail/helpers/frontend-url.js';
+import type { NotificationMailContent } from '../../notifications/types/notification-mail-content.type.js';
+import type { NotificationMailContext } from '../../notifications/types/notification-mail-context.type.js';
 import type { NotificationPayloadMap } from '../../notifications/types/notification-payload-map.type.js';
 import type { NotificationTemplateDefinition } from '../../notifications/types/notification-template-definition.type.js';
 import type { NotificationType } from '../../notifications/types/notification-type.enum.js';
-import { truncateNotificationText } from '../../notifications/utils/truncate-notification-text.js';
+import { PUSH_TEXT_MAX_LENGTH } from '../../notifications/constants/push-notification.constants.js';
 import { APPOINTMENT_BOOKED_TIME_ZONE_LABEL } from '../constants/appointment-booked-notification.constants.js';
 import {
   APPOINTMENT_CANCELLED_EMAIL_SUBJECT,
-  APPOINTMENT_CANCELLED_EMAIL_TEMPLATE,
   APPOINTMENT_CANCELLED_NOTIFICATION_TITLE,
-  APPOINTMENT_CANCELLED_WITH_REASON_EMAIL_TEMPLATE,
 } from '../constants/appointment-cancelled-notification.constants.js';
+import { loadAppointmentMailTemplate } from './load-appointment-mail-template.js';
 
 type AppointmentCancelledPayload =
   NotificationPayloadMap[NotificationType.APPOINTMENT_CANCELLED];
 
-const renderBody = (payload: AppointmentCancelledPayload): string =>
-  truncateNotificationText(
-    `${payload.cancelledByName} canceló la cita con ${payload.counterpartName} el ${payload.date} a las ${payload.time}.`,
-  );
+const renderBody = (payload: AppointmentCancelledPayload): string => {
+  const body = `${payload.cancelledByName} canceló la cita con ${payload.counterpartName} el ${payload.date} a las ${payload.time}.`;
+  return body.length > PUSH_TEXT_MAX_LENGTH
+    ? `${body.substring(0, PUSH_TEXT_MAX_LENGTH - 3)}...`
+    : body;
+};
 
-const renderEmail = (
+export const renderAppointmentCancelledMail = async (
   payload: AppointmentCancelledPayload,
-  actionUrl: string,
-): NotificationEmailContent => {
+  context: NotificationMailContext,
+): Promise<NotificationMailContent> => {
+  const actionUrl = buildFrontendUrl(context.actionUrl);
   const intro = `${payload.cancelledByName} canceló la cita de orientación que tenían agendada.`;
   const time = `${payload.time} (${APPOINTMENT_BOOKED_TIME_ZONE_LABEL})`;
   const reason = payload.reason?.trim();
@@ -35,9 +39,9 @@ const renderEmail = (
   };
 
   return {
-    template: reason
-      ? APPOINTMENT_CANCELLED_WITH_REASON_EMAIL_TEMPLATE
-      : APPOINTMENT_CANCELLED_EMAIL_TEMPLATE,
+    mjml: await loadAppointmentMailTemplate(
+      reason ? 'appointment-cancelled-with-reason' : 'appointment-cancelled',
+    ),
     subject: APPOINTMENT_CANCELLED_EMAIL_SUBJECT,
     text: [
       intro,
@@ -55,5 +59,4 @@ export const APPOINTMENT_CANCELLED_TEMPLATE: NotificationTemplateDefinition<Noti
   {
     renderTitle: () => APPOINTMENT_CANCELLED_NOTIFICATION_TITLE,
     renderBody,
-    renderEmail,
   };

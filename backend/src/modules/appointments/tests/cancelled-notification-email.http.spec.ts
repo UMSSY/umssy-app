@@ -172,7 +172,12 @@ describe('Correo de cita cancelada (integración HTTP)', () => {
       .overrideProvider(NotificationUserLookupRepository)
       .useValue({
         hasBlockBetween: () => Promise.resolve(false),
-        findEmailByUserId: (userId: string) => Promise.resolve(emailOf(userId)),
+        findContactByUserId: (userId: string) =>
+          Promise.resolve({
+            email: emailOf(userId),
+            firstName: seed.nameOf(userId),
+            lastName: '',
+          }),
       })
       .overrideProvider(NotificationGateway)
       .useValue({ emitToUser: vi.fn() })

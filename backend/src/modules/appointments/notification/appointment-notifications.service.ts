@@ -22,6 +22,8 @@ import type { AppointmentNotificationCatalog } from '../types/appointment-notifi
 import type { AppointmentNotificationDispatch } from '../types/appointment-notification-dispatch.type.js';
 import type { AppointmentNotificationRecord } from '../types/appointment-notification-record.type.js';
 import type { AppointmentRecord } from '../types/appointment-record.types.js';
+import { renderAppointmentBookedMail } from './appointment-booked.template.js';
+import { renderAppointmentCancelledMail } from './appointment-cancelled.template.js';
 
 type RowOutcome = 'sent' | 'failed' | 'omit';
 
@@ -42,20 +44,25 @@ export class AppointmentNotificationsService {
       appointment,
       event: AppointmentNotificationEvent.BOOKED,
       recipientIds: [appointment.mentorId, appointment.studentId],
-      buildRequest: (recipientId, channels, groupKey) => ({
-        recipientIds: [recipientId],
-        type: NotificationType.APPOINTMENT_BOOKED,
-        payload: {
+      buildRequest: (recipientId, channels, groupKey) => {
+        const payload = {
           counterpartName: this.counterpartName(appointment, recipientId),
           date,
           time,
           topic: appointment.orientationType?.name ?? '',
           recipientRole: this.roleOf(appointment, recipientId),
-        },
-        actionUrl: APPOINTMENT_NOTIFICATION_ACTION_URL,
-        groupKey,
-        channels,
-      }),
+        };
+        return {
+          recipientIds: [recipientId],
+          type: NotificationType.APPOINTMENT_BOOKED,
+          payload,
+          actionUrl: APPOINTMENT_NOTIFICATION_ACTION_URL,
+          groupKey,
+          channels,
+          renderMail: (context) =>
+            renderAppointmentBookedMail(payload, context),
+        };
+      },
     });
   }
 
@@ -76,10 +83,8 @@ export class AppointmentNotificationsService {
       appointment,
       event: AppointmentNotificationEvent.CANCELLED,
       recipientIds: [recipientId],
-      buildRequest: (recipientIdOfRequest, channels, groupKey) => ({
-        recipientIds: [recipientIdOfRequest],
-        type: NotificationType.APPOINTMENT_CANCELLED,
-        payload: {
+      buildRequest: (recipientIdOfRequest, channels, groupKey) => {
+        const payload = {
           counterpartName: this.fullName(
             this.participantOf(appointment, recipientId),
           ),
@@ -87,12 +92,19 @@ export class AppointmentNotificationsService {
           date,
           time,
           ...(reason ? { reason } : {}),
-        },
-        actionUrl: APPOINTMENT_NOTIFICATION_ACTION_URL,
-        groupKey,
-        actorId,
-        channels,
-      }),
+        };
+        return {
+          recipientIds: [recipientIdOfRequest],
+          type: NotificationType.APPOINTMENT_CANCELLED,
+          payload,
+          actionUrl: APPOINTMENT_NOTIFICATION_ACTION_URL,
+          groupKey,
+          actorId,
+          channels,
+          renderMail: (context) =>
+            renderAppointmentCancelledMail(payload, context),
+        };
+      },
     });
   }
 
@@ -164,10 +176,7 @@ export class AppointmentNotificationsService {
           }
         }
 
-        if (
-          hasFailures &&
-          attempt < APPOINTMENT_NOTIFICATION_MAX_ATTEMPTS
-        ) {
+        if (hasFailures && attempt < APPOINTMENT_NOTIFICATION_MAX_ATTEMPTS) {
           await new Promise<void>((resolve) => {
             setTimeout(resolve, APPOINTMENT_NOTIFICATION_RETRY_DELAY_MS);
           });
@@ -196,11 +205,7 @@ export class AppointmentNotificationsService {
       await this.repository.discard(row.id);
       return false;
     }
-    await this.failRow(
-      row,
-      `Falló el envío por ${row.channel.title}`,
-      catalog,
-    );
+    await this.failRow(row, `Falló el envío por ${row.channel.title}`, catalog);
     return true;
   }
 

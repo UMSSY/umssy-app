@@ -1,10 +1,12 @@
-import { describe, expect, it } from 'vitest';
-import { loadMailTemplate } from '../../mail/helpers/load-mail-template.js';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { MailTemplateService } from '../../mail/services/mail-template.service.js';
 import { NOTIFICATION_TEMPLATES } from '../../notifications/constants/notification-templates.constants.js';
 import { NotificationType } from '../../notifications/types/notification-type.enum.js';
 import { AppointmentParticipantRole } from '../enums/appointment-participant-role.enum.js';
-import { APPOINTMENT_BOOKED_TEMPLATE } from '../notification/appointment-booked.template.js';
+import {
+  APPOINTMENT_BOOKED_TEMPLATE,
+  renderAppointmentBookedMail,
+} from '../notification/appointment-booked.template.js';
 
 const payloadFor = (
   recipientRole: AppointmentParticipantRole,
@@ -37,7 +39,9 @@ describe('Plantilla del aviso «Nueva cita reservada»', () => {
       APPOINTMENT_BOOKED_TEMPLATE.renderBody(
         payloadFor(AppointmentParticipantRole.MENTOR, 'Luis Flores'),
       ),
-    ).toBe('Luis Flores reservó una cita contigo para el 23/10/2026 a las 10:00.');
+    ).toBe(
+      'Luis Flores reservó una cita contigo para el 23/10/2026 a las 10:00.',
+    );
   });
 
   it('le confirma al titulado la cita con su mentor, con la fecha y la hora', () => {
@@ -45,14 +49,19 @@ describe('Plantilla del aviso «Nueva cita reservada»', () => {
       APPOINTMENT_BOOKED_TEMPLATE.renderBody(
         payloadFor(AppointmentParticipantRole.STUDENT, 'Ana Pérez'),
       ),
-    ).toBe('Tu cita con Ana Pérez quedó confirmada para el 23/10/2026 a las 10:00.');
+    ).toBe(
+      'Tu cita con Ana Pérez quedó confirmada para el 23/10/2026 a las 10:00.',
+    );
   });
 
   it.each(Object.values(AppointmentParticipantRole))(
     'acorta solo el nombre largo para no superar 100 caracteres (%s)',
     (role) => {
       const body = APPOINTMENT_BOOKED_TEMPLATE.renderBody(
-        payloadFor(role, 'María Fernanda de los Ángeles Gutiérrez Villarroel Montaño'),
+        payloadFor(
+          role,
+          'María Fernanda de los Ángeles Gutiérrez Villarroel Montaño',
+        ),
       );
 
       expect(body.length).toBeLessThanOrEqual(100);
@@ -86,26 +95,35 @@ describe('Plantilla del aviso «Nueva cita reservada»', () => {
 
   describe('correo «Cita confirmada»', () => {
     const actionUrl = 'https://umssy.test/appointments';
-    const emailFor = (role: AppointmentParticipantRole, name: string) => {
-      const email = APPOINTMENT_BOOKED_TEMPLATE.renderEmail?.(
-        payloadFor(role, name),
-        actionUrl,
+    const emailFor = (role: AppointmentParticipantRole, name: string) =>
+      renderAppointmentBookedMail(payloadFor(role, name), {
+        recipientName: '',
+        actionUrl: '/appointments',
+      });
+
+    beforeAll(() => {
+      vi.stubEnv('FRONTEND_URL', 'https://umssy.test');
+    });
+
+    afterAll(() => {
+      vi.unstubAllEnvs();
+    });
+
+    it('usa la plantilla propia y el asunto «Cita confirmada»', async () => {
+      const email = await emailFor(
+        AppointmentParticipantRole.MENTOR,
+        'Luis Flores',
       );
-      if (!email) {
-        throw new Error('La plantilla debe definir el correo');
-      }
-      return email;
-    };
 
-    it('usa la plantilla propia y el asunto «Cita confirmada»', () => {
-      const email = emailFor(AppointmentParticipantRole.MENTOR, 'Luis Flores');
-
-      expect(email.template).toBe('appointment-booked');
+      expect(email.mjml).toContain('Cita confirmada');
       expect(email.subject).toBe('Cita confirmada');
     });
 
-    it('le presenta al mentor el titulado con la fecha, la hora GMT-4 y el tema', () => {
-      const email = emailFor(AppointmentParticipantRole.MENTOR, 'Luis Flores');
+    it('le presenta al mentor el titulado con la fecha, la hora GMT-4 y el tema', async () => {
+      const email = await emailFor(
+        AppointmentParticipantRole.MENTOR,
+        'Luis Flores',
+      );
 
       expect(email.values).toEqual({
         intro: 'Luis Flores reservó una cita de orientación contigo.',
@@ -118,18 +136,24 @@ describe('Plantilla del aviso «Nueva cita reservada»', () => {
       });
     });
 
-    it('muestra «Tema no especificado» si la cita no tiene tema', () => {
-      const email = APPOINTMENT_BOOKED_TEMPLATE.renderEmail?.(
-        { ...payloadFor(AppointmentParticipantRole.MENTOR, 'Luis Flores'), topic: '' },
-        actionUrl,
+    it('muestra «Tema no especificado» si la cita no tiene tema', async () => {
+      const email = await renderAppointmentBookedMail(
+        {
+          ...payloadFor(AppointmentParticipantRole.MENTOR, 'Luis Flores'),
+          topic: '',
+        },
+        { recipientName: '', actionUrl: '/appointments' },
       );
 
-      expect(email?.values.topic).toBe('Tema no especificado');
-      expect(email?.text).toContain('Tema: Tema no especificado');
+      expect(email.values.topic).toBe('Tema no especificado');
+      expect(email.text).toContain('Tema: Tema no especificado');
     });
 
-    it('le presenta al titulado su mentor', () => {
-      const email = emailFor(AppointmentParticipantRole.STUDENT, 'Ana Pérez');
+    it('le presenta al titulado su mentor', async () => {
+      const email = await emailFor(
+        AppointmentParticipantRole.STUDENT,
+        'Ana Pérez',
+      );
 
       expect(email.values).toMatchObject({
         intro: 'Tu cita de orientación con Ana Pérez quedó confirmada.',
@@ -138,8 +162,11 @@ describe('Plantilla del aviso «Nueva cita reservada»', () => {
       });
     });
 
-    it('incluye los mismos datos en la versión de texto plano', () => {
-      const email = emailFor(AppointmentParticipantRole.STUDENT, 'Ana Pérez');
+    it('incluye los mismos datos en la versión de texto plano', async () => {
+      const email = await emailFor(
+        AppointmentParticipantRole.STUDENT,
+        'Ana Pérez',
+      );
 
       expect(email.text.split('\n')).toEqual([
         'Tu cita de orientación con Ana Pérez quedó confirmada.',
@@ -152,14 +179,15 @@ describe('Plantilla del aviso «Nueva cita reservada»', () => {
     });
 
     it('se arma sobre el layout institucional con todos los datos y escapa el nombre', async () => {
-      const email = emailFor(
+      const email = await emailFor(
         AppointmentParticipantRole.MENTOR,
         'Luis <b>Flores</b>',
       );
-      const html = await new MailTemplateService().render(
-        await loadMailTemplate(email.template),
-        { ...email.values, brandName: 'UMSSY', logoUrl: '' },
-      );
+      const html = await new MailTemplateService().render(email.mjml, {
+        ...email.values,
+        brandName: 'UMSSY',
+        logoUrl: '',
+      });
 
       expect(html).toContain('Cita confirmada');
       expect(html).toContain('23/10/2026');

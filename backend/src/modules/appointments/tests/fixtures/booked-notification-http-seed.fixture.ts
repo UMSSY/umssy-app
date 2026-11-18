@@ -1,10 +1,15 @@
-import type { NotificationEmailContent } from '../../../notifications/types/notification-email-content.type.js';
-import type { NotificationEmailRenderer } from '../../../notifications/types/notification-email-renderer.type.js';
+import type { NotificationMailContent } from '../../../notifications/types/notification-mail-content.type.js';
+import type { NotificationMailRenderer } from '../../../notifications/types/notification-mail-renderer.type.js';
 import { NotificationType } from '../../../notifications/types/notification-type.enum.js';
 import { AppointmentNotificationChannel } from '../../enums/appointment-notification-channel.enum.js';
 import { AppointmentNotificationEvent } from '../../enums/appointment-notification-event.enum.js';
 import { AppointmentNotificationStatus } from '../../enums/appointment-notification-status.enum.js';
 import { InMemoryOverlapSeed } from './overlap-http-seed.fixture.js';
+
+const channelResult = (status: 'sent' | 'failed') => ({
+  status,
+  deliveries: [],
+});
 
 export type InMemoryNotificationPreference = {
   pushEnabled: boolean;
@@ -40,7 +45,7 @@ export type EmailDispatch = {
   title: string;
   body: string;
   actionUrl: string;
-  content?: NotificationEmailContent;
+  content?: NotificationMailContent;
 };
 
 export type PushDispatch = {
@@ -84,8 +89,6 @@ const DEFAULT_PREFERENCE: InMemoryNotificationPreference = {
   emailEnabled: true,
   inAppEnabled: true,
 };
-
-const DEFAULT_APP_URL = 'http://localhost:3000';
 
 /**
  * Seed en memoria para la integración HTTP del aviso de reserva.
@@ -355,14 +358,14 @@ export class BookedNotificationHttpSeed extends InMemoryOverlapSeed {
 
   get mailDispatcher() {
     return {
-      dispatchToUsers: (
+      dispatchToUsers: async (
         userIds: string[],
         title: string,
         body: string,
         actionUrl: string,
-        renderEmail?: NotificationEmailRenderer,
+        renderMail?: NotificationMailRenderer,
       ) => {
-        const content = renderEmail?.(this.absoluteUrl(actionUrl));
+        const content = await renderMail?.({ recipientName: '', actionUrl });
         this.emailDispatches.push({
           userIds,
           title,
@@ -374,13 +377,13 @@ export class BookedNotificationHttpSeed extends InMemoryOverlapSeed {
           throw new Error('Correo no disponible');
         }
         if (this.emailAlwaysFails) {
-          return Promise.resolve('failed' as const);
+          return channelResult('failed');
         }
         if (this.emailFailuresRemaining > 0) {
           this.emailFailuresRemaining--;
-          return Promise.resolve('failed' as const);
+          return channelResult('failed');
         }
-        return Promise.resolve('sent' as const);
+        return channelResult('sent');
       },
     };
   }
@@ -405,9 +408,9 @@ export class BookedNotificationHttpSeed extends InMemoryOverlapSeed {
         });
         if (this.pushFailuresRemaining > 0) {
           this.pushFailuresRemaining--;
-          return Promise.resolve('failed' as const);
+          return Promise.resolve(channelResult('failed'));
         }
-        return Promise.resolve('sent' as const);
+        return Promise.resolve(channelResult('sent'));
       },
     };
   }
@@ -419,9 +422,5 @@ export class BookedNotificationHttpSeed extends InMemoryOverlapSeed {
       (row) =>
         row.id === id && row.status === AppointmentNotificationStatus.PENDING,
     );
-  }
-
-  private absoluteUrl(actionUrl: string): string {
-    return new URL(actionUrl, DEFAULT_APP_URL).toString();
   }
 }

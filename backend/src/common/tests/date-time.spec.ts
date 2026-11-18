@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   addWeeks,
   formatBlockRange,
+  formatBoliviaDateTime,
   getWeekRange,
   toBoliviaTime,
   toUtcIso,
@@ -137,6 +138,14 @@ describe('addWeeks', () => {
     const { startAt } = getWeekRange('2026-12-30T12:00:00Z');
     expect(getWeekRange(addWeeks(startAt, 1)).startAt).toBe(
       '2027-01-04T04:00:00.000Z',
+    );
+  });
+});
+
+describe('formatBoliviaDateTime', () => {
+  it('muestra fecha y hora de Bolivia sin depender de la zona del proceso', () => {
+    expect(formatBoliviaDateTime('2026-11-20T03:30:00.000Z')).toBe(
+      '19/11/2026 23:30',
     );
   });
 });

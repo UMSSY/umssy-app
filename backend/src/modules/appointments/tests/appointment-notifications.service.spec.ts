@@ -167,6 +167,7 @@ const successFor = (request: NotifyRequest): NotifyResult => ({
   inAppCount: request.channels?.includes('IN_APP') ? 1 : 0,
   pushStatus: request.channels?.includes('PUSH') ? 'sent' : 'skipped',
   emailStatus: request.channels?.includes('EMAIL') ? 'sent' : 'skipped',
+  deliveries: [],
 });
 
 describe('AppointmentNotificationsService', () => {

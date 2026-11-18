@@ -8,9 +8,6 @@ const MAIL_CONFIG_SCHEMA = z.object({
   MAIL_LOGO_URL: z
     .union([z.url({ protocol: /^https$/ }), z.literal('')])
     .default('https://umssy.zer4c.dev/icons/umssy-logo-web.svg'),
-  MAIL_APP_URL: z
-    .url({ protocol: /^https?$/ })
-    .default('http://localhost:3000'),
   SMTP_HOST: z.string().trim().default('localhost'),
   SMTP_PORT: z.coerce.number().int().min(1).max(65535).default(1025),
   SMTP_SECURE: z

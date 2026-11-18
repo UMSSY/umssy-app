@@ -4,7 +4,8 @@ import { useCallback, useEffect, useState } from "react";
 import { REPORT_HISTORY_PAGE_SIZE } from "../constants/reports.constants";
 import { reportsService } from "../services/reports.service";
 import { useReportSnapshot } from "./use-report-snapshot";
-import type { ReportHistoryState, ReportType } from "../types/generated-report.types";
+import type { ReportHistoryState } from "../types/report-history-state.types";
+import type { ReportType } from "../types/report-type.types";
 
 export function useReportHistory(page: number, reportType?: ReportType, search = "") {
   const [state, setState] = useState<ReportHistoryState | null>(null);

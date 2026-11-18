@@ -1,9 +1,11 @@
-import { describe, expect, it } from 'vitest';
-import { loadMailTemplate } from '../../mail/helpers/load-mail-template.js';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { MailTemplateService } from '../../mail/services/mail-template.service.js';
 import { NOTIFICATION_TEMPLATES } from '../../notifications/constants/notification-templates.constants.js';
 import { NotificationType } from '../../notifications/types/notification-type.enum.js';
-import { APPOINTMENT_CANCELLED_TEMPLATE } from '../notification/appointment-cancelled.template.js';
+import {
+  APPOINTMENT_CANCELLED_TEMPLATE,
+  renderAppointmentCancelledMail,
+} from '../notification/appointment-cancelled.template.js';
 
 const ACTION_URL = 'https://umssy.test/appointments';
 
@@ -15,30 +17,30 @@ const payload = (reason?: string) => ({
   ...(reason === undefined ? {} : { reason }),
 });
 
-const emailFor = (reason?: string) => {
-  const email = APPOINTMENT_CANCELLED_TEMPLATE.renderEmail?.(
-    payload(reason),
-    ACTION_URL,
-  );
-  if (!email) {
-    throw new Error('La plantilla debe definir el correo');
-  }
-  return email;
-};
+const context = { recipientName: '', actionUrl: '/appointments' };
+
+const emailFor = (reason?: string) =>
+  renderAppointmentCancelledMail(payload(reason), context);
 
 const render = async (reason?: string, cancelledByName?: string) => {
-  const email = APPOINTMENT_CANCELLED_TEMPLATE.renderEmail?.(
+  const email = await renderAppointmentCancelledMail(
     { ...payload(reason), ...(cancelledByName ? { cancelledByName } : {}) },
-    ACTION_URL,
+    context,
   );
-  if (!email) {
-    throw new Error('La plantilla debe definir el correo');
-  }
-  return new MailTemplateService().render(
-    await loadMailTemplate(email.template),
-    { ...email.values, brandName: 'UMSSY', logoUrl: '' },
-  );
+  return new MailTemplateService().render(email.mjml, {
+    ...email.values,
+    brandName: 'UMSSY',
+    logoUrl: '',
+  });
 };
+
+beforeAll(() => {
+  vi.stubEnv('FRONTEND_URL', 'https://umssy.test');
+});
+
+afterAll(() => {
+  vi.unstubAllEnvs();
+});
 
 describe('Plantilla del aviso «Cita cancelada»', () => {
   it('es la plantilla que usa la plataforma para APPOINTMENT_CANCELLED', () => {
@@ -71,8 +73,8 @@ describe('Plantilla del aviso «Cita cancelada»', () => {
   });
 
   describe('correo «Cita cancelada»', () => {
-    it('indica quién canceló, la fecha y la hora GMT-4 con el enlace a mis citas', () => {
-      const email = emailFor('Me surgió un viaje');
+    it('indica quién canceló, la fecha y la hora GMT-4 con el enlace a mis citas', async () => {
+      const email = await emailFor('Me surgió un viaje');
 
       expect(email.subject).toBe('Cita cancelada');
       expect(email.values).toEqual({
@@ -86,10 +88,10 @@ describe('Plantilla del aviso «Cita cancelada»', () => {
       });
     });
 
-    it('incluye el motivo cuando lo hay, también en el texto plano', () => {
-      const email = emailFor('  Me surgió un viaje  ');
+    it('incluye el motivo cuando lo hay, también en el texto plano', async () => {
+      const email = await emailFor('  Me surgió un viaje  ');
 
-      expect(email.template).toBe('appointment-cancelled-with-reason');
+      expect(email.mjml).toContain('{{ reason }}');
       expect(email.text.split('\n')).toEqual([
         'Luis Flores canceló la cita de orientación que tenían agendada.',
         'Canceló: Luis Flores',
@@ -103,10 +105,10 @@ describe('Plantilla del aviso «Cita cancelada»', () => {
     it.each([
       { label: 'sin motivo', reason: undefined },
       { label: 'con un motivo vacío', reason: '   ' },
-    ])('no muestra la sección del motivo $label', ({ reason }) => {
-      const email = emailFor(reason);
+    ])('no muestra la sección del motivo $label', async ({ reason }) => {
+      const email = await emailFor(reason);
 
-      expect(email.template).toBe('appointment-cancelled');
+      expect(email.mjml).not.toContain('{{ reason }}');
       expect(email.values).not.toHaveProperty('reason');
       expect(email.text).not.toContain('Motivo');
     });

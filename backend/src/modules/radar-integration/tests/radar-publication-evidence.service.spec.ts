@@ -10,16 +10,27 @@ import type { TransactionContext } from '../../../common/types/transaction-conte
 describe('Fuentes de evidencia de publicacion', () => {
   it('propaga el mismo contexto transaccional a todos los dominios', async () => {
     const skillRead = vi.fn().mockResolvedValue([]);
+    const blockedRead = vi
+      .fn()
+      .mockResolvedValue([{ sourceId: 'pending' }, { sourceId: 'rejected' }]);
     const cvRead = vi.fn().mockResolvedValue([]);
     const workRead = vi.fn().mockResolvedValue([]);
     const educationRead = vi.fn().mockResolvedValue([]);
-    const certificationRead = vi.fn().mockResolvedValue([]);
+    const certificationRead = vi
+      .fn()
+      .mockResolvedValue([
+        { id: 'pending' },
+        { id: 'rejected' },
+        { id: 'approved' },
+        { id: 'without-document' },
+      ]);
     const service = new RadarPublicationEvidenceService(
       {
         findApprovedPublicationSkills: skillRead,
       } as unknown as SkillAnalysisService,
       {
         findPublicationCvStates: cvRead,
+        findUnapprovedCertificateIds: blockedRead,
       } as unknown as RadarEvidenceSourcesService,
       {
         findPublicationEvidenceIds: workRead,
@@ -33,10 +44,17 @@ describe('Fuentes de evidencia de publicacion', () => {
     );
     const context = { client: {} } as unknown as TransactionContext;
     const results = await service.read('owner', context);
-    expect(results).toEqual([[], [], [], [], []]);
+    expect(results).toEqual([
+      [],
+      [],
+      [],
+      [],
+      [{ id: 'approved' }, { id: 'without-document' }],
+    ]);
     for (const mock of [
       skillRead,
       cvRead,
+      blockedRead,
       workRead,
       educationRead,
       certificationRead,

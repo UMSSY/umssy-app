@@ -11,6 +11,10 @@ export type NotificationPayloadMap = {
   [NotificationType.APPOINTMENT_CANCELLED]: { counterpartName: string; date: string; time: string; cancelledByName: string; reason?: string };
   [NotificationType.APPOINTMENT_BOOKED]: { counterpartName: string; date: string; time: string; topic: string; recipientRole: AppointmentParticipantRole };
   [NotificationType.SURVEY_PUBLISHED]: { surveyTitle: string; previousPeriod: string; currentPeriod: string; change: string };
+  [NotificationType.SURVEY_REMINDER]: { surveyTitle: string; closesAtFormatted: string };
+  [NotificationType.SURVEY_CLOSING_SOON]: { surveyTitle: string; closesAtFormatted: string; responsesCount: number };
+  [NotificationType.SURVEY_CLOSED]: { surveyTitle: string; closesAtFormatted: string; responsesCount: number };
+  [NotificationType.SURVEY_VARIATION_ALERT]: { surveyTitle: string; threshold: number; summaryText: string };
   [NotificationType.APPLICATION_STATUS_CHANGED]: { vacancyTitle: string; companyName: string; newStatus: string };
   [NotificationType.NEW_JOB_APPLICANT]: { jobTitle: string; applicantName: string; applicantCount: number };
   [NotificationType.EVENT_STARTING_SOON]: { eventName: string; time: string };

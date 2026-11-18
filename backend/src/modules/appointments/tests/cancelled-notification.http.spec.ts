@@ -74,6 +74,7 @@ const delivered = (): NotifyResult => ({
   inAppCount: 1,
   pushStatus: 'sent',
   emailStatus: 'sent',
+  deliveries: [],
 });
 
 describe('Aviso de cita cancelada (integración HTTP)', () => {
@@ -226,6 +227,7 @@ describe('Aviso de cita cancelada (integración HTTP)', () => {
       groupKey: `appointment-notification:CANCELLED:${appointment.id}`,
       actorId: studentId,
       channels: ALL_CHANNELS,
+      renderMail: expect.any(Function),
     });
     expect(
       notifications.rowsOf(appointment.id).map((row) => row.recipientId),

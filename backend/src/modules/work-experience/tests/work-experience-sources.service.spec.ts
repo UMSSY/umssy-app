@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
+import { WORK_PERIOD_SELECT } from '../constants/work-period-select.constants.js';
 import { WorkExperienceRepository } from '../repositories/work-experience.repository.js';
 import { WorkExperienceSourcesService } from '../services/work-experience-sources.service.js';
 
@@ -40,5 +41,37 @@ describe('WorkExperienceSourcesService', () => {
       orderBy: [{ startDate: 'desc' }, { id: 'desc' }],
       select: { id: true, position: true, description: true },
     });
+  });
+});
+
+describe('WorkExperienceSourcesService.findPeriodsByUserIds', () => {
+  it('reads only the work periods of the requested users', async () => {
+    const records = [
+      { userId: 'owner-1', startDate: new Date('2024-01-01'), endDate: null },
+    ];
+    const findMany = vi.fn().mockResolvedValue(records);
+    const repository = new WorkExperienceRepository({
+      workExperience: { findMany },
+    } as unknown as PrismaService);
+    const service = new WorkExperienceSourcesService(repository);
+
+    await expect(service.findPeriodsByUserIds(['owner-1'])).resolves.toBe(
+      records,
+    );
+    expect(findMany).toHaveBeenCalledWith({
+      where: { userId: { in: ['owner-1'] } },
+      select: WORK_PERIOD_SELECT,
+    });
+  });
+
+  it('skips the query when there are no users', async () => {
+    const findMany = vi.fn();
+    const repository = new WorkExperienceRepository({
+      workExperience: { findMany },
+    } as unknown as PrismaService);
+    const service = new WorkExperienceSourcesService(repository);
+
+    await expect(service.findPeriodsByUserIds([])).resolves.toEqual([]);
+    expect(findMany).not.toHaveBeenCalled();
   });
 });

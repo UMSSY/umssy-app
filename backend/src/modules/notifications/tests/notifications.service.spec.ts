@@ -1,4 +1,5 @@
 import { vi, describe, it, expect, beforeAll, beforeEach } from 'vitest';
+import { AppointmentParticipantRole } from '../../appointments/enums/appointment-participant-role.enum.js';
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException, Logger } from '@nestjs/common';
 import { NotificationsService } from '../services/notifications.service.js';
@@ -10,7 +11,6 @@ import { MailDispatcherService } from '../services/mail-dispatcher.service.js';
 import { NotificationGateway } from '../gateways/notification.gateway.js';
 import { AppVisibilityService } from '../services/app-visibility.service.js';
 import { NotificationType } from '../types/notification-type.enum.js';
-import { AppointmentParticipantRole } from '../../appointments/enums/appointment-participant-role.enum.js';
 
 interface MockNotificationsRepo {
   findTypeByCode: ReturnType<typeof vi.fn>;
@@ -76,8 +76,8 @@ describe('NotificationsService', () => {
     };
     mockPreferencesRepo = { findManyByUserIds: vi.fn().mockResolvedValue([]) };
     mockUserLookupRepo = { hasBlockBetween: vi.fn().mockResolvedValue(false) };
-    mockPushDispatcher = { dispatchToUsers: vi.fn().mockResolvedValue('sent') };
-    mockMailDispatcher = { dispatchToUsers: vi.fn().mockResolvedValue('sent') };
+    mockPushDispatcher = { dispatchToUsers: vi.fn().mockResolvedValue({ status: 'sent', deliveries: [] }) };
+    mockMailDispatcher = { dispatchToUsers: vi.fn().mockResolvedValue({ status: 'sent', deliveries: [] }) };
     mockGateway = { emitToUser: vi.fn() };
     mockAppVisibilityService = { isVisible: vi.fn().mockReturnValue(false) };
 
@@ -176,7 +176,7 @@ describe('NotificationsService', () => {
       expect.any(String),
       expect.any(String),
       expect.any(String),
-      expect.any(Function),
+      undefined,
     );
   });
 
@@ -199,6 +199,48 @@ describe('NotificationsService', () => {
     expect(result.emailStatus).toBe('sent');
   });
 
+  it('entrega al despachador de correo el renderizador del dominio y devuelve la entrega por destinatario y canal', async () => {
+    mockNotificationsRepo.findTypeByCode.mockResolvedValue({
+      id: 'type-reminder',
+      code: 'SURVEY_REMINDER',
+      sendsPush: true,
+      sendsEmail: true,
+    });
+    mockPreferencesRepo.findManyByUserIds.mockResolvedValue([
+      { userId: 'user-2', pushEnabled: true, emailEnabled: true },
+    ]);
+    mockPushDispatcher.dispatchToUsers.mockResolvedValue({
+      status: 'skipped',
+      deliveries: [{ recipientId: 'user-2', channel: 'push', status: 'skipped' }],
+    });
+    mockMailDispatcher.dispatchToUsers.mockResolvedValue({
+      status: 'sent',
+      deliveries: [{ recipientId: 'user-2', channel: 'email', status: 'sent' }],
+    });
+    const renderMail = vi.fn();
+
+    const result = await service.notify({
+      recipientIds: ['user-2'],
+      actorId: 'admin-1',
+      type: NotificationType.SURVEY_REMINDER,
+      payload: { surveyTitle: 'Empleabilidad', closesAtFormatted: '30/11/2026 20:00.' },
+      actionUrl: 'http://localhost:3000/surveys/survey-1',
+      renderMail,
+    });
+
+    expect(mockMailDispatcher.dispatchToUsers).toHaveBeenCalledWith(
+      ['user-2'],
+      expect.any(String),
+      expect.any(String),
+      'http://localhost:3000/surveys/survey-1',
+      renderMail,
+    );
+    expect(result.deliveries).toEqual([
+      { recipientId: 'user-2', channel: 'push', status: 'skipped' },
+      { recipientId: 'user-2', channel: 'email', status: 'sent' },
+    ]);
+  });
+
   it('debe enviar solo el correo cuando el reintento lo pide por canal', async () => {
     const result = await service.notify({
       recipientIds: ['user-2'],
@@ -212,17 +254,12 @@ describe('NotificationsService', () => {
     expect(mockNotificationsRepo.createMany).not.toHaveBeenCalled();
     expect(mockGateway.emitToUser).not.toHaveBeenCalled();
     expect(mockPushDispatcher.dispatchToUsers).not.toHaveBeenCalled();
-    expect(mockMailDispatcher.dispatchToUsers).toHaveBeenCalledExactlyOnceWith(
-      ['user-2'],
-      expect.any(String),
-      expect.any(String),
-      expect.any(String),
-      expect.any(Function),
-    );
+    expect(mockMailDispatcher.dispatchToUsers).toHaveBeenCalledOnce();
     expect(result).toEqual({
       inAppCount: 0,
       pushStatus: 'skipped',
       emailStatus: 'sent',
+      deliveries: [],
     });
   });
 
@@ -248,10 +285,11 @@ describe('NotificationsService', () => {
       inAppCount: 0,
       pushStatus: 'sent',
       emailStatus: 'skipped',
+      deliveries: [],
     });
   });
 
-  it('debe enviar solo la notificación en la aplicación cuando el reintento lo pide por canal', async () => {
+  it('debe crear solo la notificación en la aplicación cuando el reintento lo pide por canal', async () => {
     mockPreferencesRepo.findManyByUserIds.mockResolvedValue([
       { userId: 'user-2', pushEnabled: true, emailEnabled: true },
     ]);
@@ -273,6 +311,7 @@ describe('NotificationsService', () => {
       inAppCount: 1,
       pushStatus: 'skipped',
       emailStatus: 'skipped',
+      deliveries: [],
     });
   });
 
