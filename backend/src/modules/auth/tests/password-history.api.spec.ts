@@ -9,6 +9,7 @@ import { CredentialSecurityModule } from '../credential-security.module.js';
 import { AuthController } from '../controllers/auth.controller.js';
 import { AuthService } from '../services/auth.service.js';
 import { RefreshTokenService } from '../services/refresh-token.service.js';
+import { GoogleAuthService } from '../services/google-auth.service.js';
 import { PasswordReusedException } from '../exceptions/password-reused.exception.js';
 import { PasswordResetConflictException } from '../exceptions/password-reset-conflict.exception.js';
 
@@ -24,6 +25,7 @@ describe('Contrato HTTP de errores del historial', () => {
       providers: [
         { provide: AuthService, useValue: auth },
         { provide: RefreshTokenService, useValue: {} },
+        { provide: GoogleAuthService, useValue: {} },
       ],
     }).overrideGuard(JwtAuthGuard).useValue({ canActivate: () => true }).compile();
     app = moduleRef.createNestApplication();

@@ -20,6 +20,7 @@ import { CredentialSecurityModule } from '../credential-security.module.js';
 import { AuthController } from '../controllers/auth.controller.js';
 import { AuthService } from '../services/auth.service.js';
 import { RefreshTokenService } from '../services/refresh-token.service.js';
+import { GoogleAuthService } from '../services/google-auth.service.js';
 import { SessionRevokedException } from '../exceptions/index.js';
 
 const FRONTEND_ORIGIN = 'https://front.example.test';
@@ -56,6 +57,7 @@ describe('session cookie over HTTP', () => {
       providers: [
         { provide: AuthService, useValue: authService },
         { provide: RefreshTokenService, useValue: refreshTokens },
+        { provide: GoogleAuthService, useValue: { verifyCredential: vi.fn() } },
       ],
     })
       .overrideGuard(JwtAuthGuard)

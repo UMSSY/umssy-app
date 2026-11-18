@@ -8,12 +8,16 @@ import {
   InvalidResetCodeException,
   ExpiredResetCodeException,
   TooManyAttemptsException,
-  ResetCodeCooldownException,
+  GoogleEmailMismatchException,
+  GoogleAccountAlreadyLinkedException,
 } from '../exceptions/index.js';
 
 describe('AuthService', () => {
   const authRepository = {
     findUserByEmailWithRoles: vi.fn(),
+    findUserByGoogleSubWithRoles: vi.fn(),
+    findGoogleSocialAccountBySub: vi.fn(),
+    linkGoogleAccount: vi.fn(),
     existsByEmail: vi.fn(),
     findUserByEmail: vi.fn(),
     createPasswordResetOtp: vi.fn(),
@@ -506,4 +510,350 @@ describe('AuthService', () => {
       ).rejects.toBeInstanceOf(TooManyAttemptsException);
     });
   });
+
+  describe('loginWithGoogle', () => {
+    const verifiedGoogle = {
+      email: 'dania@umss.edu',
+      sub: 'google-sub-123',
+      picture: 'https://photo.url',
+    };
+
+    it('1. Usuario registrado, activo y con rol permitido: inicia sesión exitosamente', async () => {
+      authRepository.findUserByGoogleSubWithRoles.mockResolvedValue(null);
+      authRepository.findUserByEmailWithRoles.mockResolvedValue({
+        id: 'u-1',
+        email: 'dania@umss.edu',
+        isActive: true,
+        roles: [{ role: { name: 'titulado' } }],
+      });
+      authRepository.findGoogleSocialAccountBySub.mockResolvedValue(null);
+      authRepository.linkGoogleAccount.mockResolvedValue({});
+      jwtService.sign.mockReturnValue('jwt-token-123');
+
+      const result = await service.loginWithGoogle(verifiedGoogle);
+
+      expect(authRepository.linkGoogleAccount).toHaveBeenCalledWith(
+        'u-1',
+        'google-sub-123',
+        'dania@umss.edu',
+        'https://photo.url',
+      );
+      expect(result).toEqual({
+        accessToken: 'jwt-token-123',
+        roleTag: 'titulado',
+        roles: ['titulado'],
+      });
+    });
+
+    it('2. Usuario no registrado: rechaza el acceso sin crear cuenta automáticamente', async () => {
+      authRepository.findUserByGoogleSubWithRoles.mockResolvedValue(null);
+      authRepository.findUserByEmailWithRoles.mockResolvedValue(null);
+
+      await expect(
+        service.loginWithGoogle({
+          email: 'noexiste@gmail.com',
+          sub: 'unknown-sub',
+        }),
+      ).rejects.toBeInstanceOf(InvalidCredentialsException);
+
+      expect(authRepository.linkGoogleAccount).not.toHaveBeenCalled();
+    });
+
+    it('3. Usuario inactivo: rechaza el acceso si la cuenta está deshabilitada', async () => {
+      authRepository.findUserByGoogleSubWithRoles.mockResolvedValue(null);
+      authRepository.findUserByEmailWithRoles.mockResolvedValue({
+        id: 'u-inactivo',
+        email: 'inactivo@umss.edu',
+        isActive: false,
+        roles: [{ role: { name: 'titulado' } }],
+      });
+
+      await expect(
+        service.loginWithGoogle({
+          email: 'inactivo@umss.edu',
+          sub: 'inactivo-sub',
+        }),
+      ).rejects.toThrow(
+        'Esta cuenta de usuario se encuentra inactiva o deshabilitada.',
+      );
+    });
+
+    it('4. Usuario con rol no permitido: rechaza acceso a administrativo o empresa', async () => {
+      authRepository.findUserByGoogleSubWithRoles.mockResolvedValue(null);
+      authRepository.findUserByEmailWithRoles.mockResolvedValue({
+        id: 'u-admin',
+        email: 'admin@umss.edu',
+        isActive: true,
+        roles: [{ role: { name: 'administrativo' } }],
+      });
+
+      await expect(
+        service.loginWithGoogle({
+          email: 'admin@umss.edu',
+          sub: 'admin-sub',
+        }),
+      ).rejects.toBeInstanceOf(RoleNotAssignedException);
+    });
+
+    it('8. Inicio de sesión posterior usando la vinculación persistida por Google sub', async () => {
+      authRepository.findUserByGoogleSubWithRoles.mockResolvedValue({
+        id: 'u-1',
+        email: 'dania@umss.edu',
+        isActive: true,
+        roles: [{ role: { name: 'estudiante' } }],
+      });
+      jwtService.sign.mockReturnValue('sub-session-token');
+
+      const result = await service.loginWithGoogle({
+        email: 'dania@umss.edu',
+        sub: 'google-sub-123',
+      });
+
+      expect(authRepository.findUserByGoogleSubWithRoles).toHaveBeenCalledWith(
+        'google-sub-123',
+      );
+      expect(result).toEqual({
+        accessToken: 'sub-session-token',
+        roleTag: 'estudiante',
+        roles: ['estudiante'],
+      });
+    });
+
+    it('9. Error si la identidad de Google ya está vinculada a otro usuario', async () => {
+      authRepository.findUserByGoogleSubWithRoles.mockResolvedValue(null);
+      authRepository.findUserByEmailWithRoles.mockResolvedValue({
+        id: 'u-2',
+        email: 'otro@umss.edu',
+        isActive: true,
+        roles: [{ role: { name: 'titulado' } }],
+      });
+      authRepository.findGoogleSocialAccountBySub.mockResolvedValue({
+        id: 'link-1',
+        userId: 'u-1', // Perteneciente a otro usuario
+      });
+
+      await expect(
+        service.loginWithGoogle({
+          email: 'otro@umss.edu',
+          sub: 'google-sub-belonging-to-u1',
+        }),
+      ).rejects.toThrow(
+        'Esta cuenta de Google ya está vinculada a otro usuario.',
+      );
+    });
+  });
+
+  describe('linkGoogle', () => {
+    const authUser = {
+      id: 'u-1',
+      email: 'dania@umss.edu',
+      roles: ['titulado'],
+    };
+
+    it('5. Cuenta Google diferente de la cuenta que se desea vincular: rechaza con 400', async () => {
+      await expect(
+        service.linkGoogle(authUser as any, {
+          email: 'otra_cuenta@gmail.com',
+          sub: 'sub-123',
+        }),
+      ).rejects.toThrow(
+        'La cuenta de Google no coincide con el correo de tu cuenta registrada.',
+      );
+      expect(authRepository.linkGoogleAccount).not.toHaveBeenCalled();
+    });
+
+    it('4b. Usuario con rol no permitido no puede vincular cuenta', async () => {
+      const adminUser = {
+        id: 'u-admin',
+        email: 'admin@umss.edu',
+        roles: ['administrativo'],
+      };
+      authRepository.findUserByEmailWithRoles.mockResolvedValueOnce({
+        id: 'u-admin',
+        email: 'admin@umss.edu',
+        isActive: true,
+        roles: [{ role: { name: 'administrativo' } }],
+      });
+
+      await expect(
+        service.linkGoogle(adminUser as any, {
+          email: 'admin@umss.edu',
+          sub: 'sub-admin',
+        }),
+      ).rejects.toBeInstanceOf(RoleNotAssignedException);
+      expect(authRepository.linkGoogleAccount).not.toHaveBeenCalled();
+    });
+
+    it('4c. Cuenta no registrada en base de datos: rechaza la vinculación', async () => {
+      authRepository.findUserByEmailWithRoles.mockResolvedValueOnce(null);
+
+      await expect(
+        service.linkGoogle(authUser as any, {
+          email: 'dania@umss.edu',
+          sub: 'sub-dania',
+        }),
+      ).rejects.toThrow(
+        'Esta cuenta de Google no está registrada en el sistema.',
+      );
+      expect(authRepository.linkGoogleAccount).not.toHaveBeenCalled();
+    });
+
+    it('4d. Cuenta inactiva o deshabilitada en base de datos: rechaza la vinculación', async () => {
+      authRepository.findUserByEmailWithRoles.mockResolvedValueOnce({
+        id: 'u-1',
+        email: 'dania@umss.edu',
+        isActive: false,
+        roles: [{ role: { name: 'titulado' } }],
+      });
+
+      await expect(
+        service.linkGoogle(authUser as any, {
+          email: 'dania@umss.edu',
+          sub: 'sub-dania',
+        }),
+      ).rejects.toThrow(
+        'Esta cuenta de usuario se encuentra inactiva o deshabilitada.',
+      );
+      expect(authRepository.linkGoogleAccount).not.toHaveBeenCalled();
+    });
+
+    it('6. Identidad Google ya vinculada a otro usuario: lanza excepción y no vincula', async () => {
+      authRepository.findUserByEmailWithRoles.mockResolvedValueOnce({
+        id: 'u-1',
+        email: 'dania@umss.edu',
+        isActive: true,
+        roles: [{ role: { name: 'titulado' } }],
+      });
+      authRepository.findGoogleSocialAccountBySub.mockResolvedValueOnce({
+        id: 'other-link',
+        userId: 'u-otro-usuario',
+      });
+
+      await expect(
+        service.linkGoogle(authUser as any, {
+          email: 'dania@umss.edu',
+          sub: 'sub-belonging-to-other',
+        }),
+      ).rejects.toThrow(
+        'Esta cuenta de Google ya está vinculada a otro usuario.',
+      );
+      expect(authRepository.linkGoogleAccount).not.toHaveBeenCalled();
+    });
+
+    it('7. Vinculación exitosa y persistida: guarda en repositorio atómicamente', async () => {
+      authRepository.findUserByEmailWithRoles.mockResolvedValueOnce({
+        id: 'u-1',
+        email: 'dania@umss.edu',
+        isActive: true,
+        roles: [{ role: { name: 'titulado' } }],
+      });
+      authRepository.findGoogleSocialAccountBySub.mockResolvedValueOnce(null);
+      authRepository.linkGoogleAccount.mockResolvedValueOnce({ id: 'link-1' });
+
+      const result = await service.linkGoogle(authUser as any, {
+        email: 'dania@umss.edu',
+        sub: 'sub-dania',
+        picture: 'https://photo.url',
+      });
+
+      expect(authRepository.linkGoogleAccount).toHaveBeenCalledWith(
+        'u-1',
+        'sub-dania',
+        'dania@umss.edu',
+        'https://photo.url',
+      );
+      expect(result).toEqual({
+        ok: true,
+        detail: 'Cuenta vinculada exitosamente.',
+      });
+    });
+  });
+
+  describe('regresión: login Google rechazado no guarda vinculación', () => {
+    beforeEach(() => {
+      authRepository.findUserByGoogleSubWithRoles.mockReset();
+      authRepository.findUserByEmailWithRoles.mockReset();
+      authRepository.findGoogleSocialAccountBySub.mockReset();
+      authRepository.linkGoogleAccount.mockReset();
+      jwtService.sign.mockReset();
+
+      authRepository.findUserByGoogleSubWithRoles.mockResolvedValue(null);
+      authRepository.findGoogleSocialAccountBySub.mockResolvedValue(null);
+    });
+
+    it.each([
+      {
+        scenario: 'cuenta inactiva',
+        isActive: false,
+        role: 'titulado',
+        requestedRole: undefined,
+        exception: InvalidCredentialsException,
+      },
+      {
+        scenario: 'rol empresa',
+        isActive: true,
+        role: 'empresa',
+        requestedRole: undefined,
+        exception: RoleNotAssignedException,
+      },
+      {
+        scenario: 'rol administrativo',
+        isActive: true,
+        role: 'administrativo',
+        requestedRole: undefined,
+        exception: RoleNotAssignedException,
+      },
+      {
+        scenario: 'rol solicitado no asignado',
+        isActive: true,
+        role: 'titulado',
+        requestedRole: 'mentor',
+        exception: RoleNotAssignedException,
+      },
+    ] as const)(
+      'rechaza $scenario sin vincular ni emitir token',
+      async ({ isActive, role, requestedRole, exception }) => {
+        authRepository.findUserByEmailWithRoles.mockResolvedValue({
+          id: 'google-regression-user',
+          isActive,
+          roles: [{ role: { name: role } }],
+        });
+
+        await expect(
+          service.loginWithGoogle(
+            {
+              email: 'regresion@umssy.test',
+              sub: 'google-regression-sub',
+            },
+            requestedRole,
+          ),
+        ).rejects.toBeInstanceOf(exception);
+
+        expect(authRepository.linkGoogleAccount).not.toHaveBeenCalled();
+        expect(jwtService.sign).not.toHaveBeenCalled();
+      },
+    );
+
+    it('no emite token si falla la persistencia de la vinculación', async () => {
+      authRepository.findUserByEmailWithRoles.mockResolvedValue({
+        id: 'google-regression-user',
+        isActive: true,
+        roles: [{ role: { name: 'titulado' } }],
+      });
+      authRepository.linkGoogleAccount.mockRejectedValue(
+        new Error('Fallo de persistencia'),
+      );
+
+      await expect(
+        service.loginWithGoogle({
+          email: 'regresion@umssy.test',
+          sub: 'google-regression-sub',
+        }),
+      ).rejects.toThrow('Fallo de persistencia');
+
+      expect(authRepository.linkGoogleAccount).toHaveBeenCalledTimes(1);
+      expect(jwtService.sign).not.toHaveBeenCalled();
+    });
+  });
+
 });
