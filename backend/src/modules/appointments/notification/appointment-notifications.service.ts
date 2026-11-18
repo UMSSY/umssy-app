@@ -85,9 +85,6 @@ export class AppointmentNotificationsService {
       recipientIds: [recipientId],
       buildRequest: (recipientIdOfRequest, channels, groupKey) => {
         const payload = {
-          counterpartName: this.fullName(
-            this.participantOf(appointment, recipientId),
-          ),
           cancelledByName: this.fullName(canceller),
           date,
           time,

@@ -217,7 +217,6 @@ describe('Aviso de cita cancelada (integración HTTP)', () => {
       recipientIds: [mentorId],
       type: NotificationType.APPOINTMENT_CANCELLED,
       payload: {
-        counterpartName: seed.nameOf(mentorId),
         cancelledByName: seed.nameOf(studentId),
         date: formatBoliviaDate(appointment.startAt),
         time: formatBoliviaTime(appointment.startAt),
@@ -247,7 +246,6 @@ describe('Aviso de cita cancelada (integración HTTP)', () => {
       recipientIds: [studentId],
       actorId: mentorId,
       payload: {
-        counterpartName: seed.nameOf(studentId),
         cancelledByName: seed.nameOf(mentorId),
       },
     });
