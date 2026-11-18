@@ -8,15 +8,19 @@ import {
   Controller,
   Delete,
   Get,
+  Header,
   HttpCode,
   Param,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
   ApiParam,
+  ApiQuery,
+  ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { CurrentUserId } from '../../../common/decorators/current-user-id.decorator.js';
@@ -25,6 +29,7 @@ import { ZodValidationPipe } from '../../../common/pipes/zod-validation.pipe.js'
 import { ValidationException } from '../../../common/exceptions/validation.exception.js';
 import { EventRegistrationsService } from '../services/event-registrations.service.js';
 import { RegistrationResponses } from '../decorators/registration-responses.decorator.js';
+import { MyRegistrationsResponses } from '../decorators/my-registrations-responses.decorator.js';
 import {
   EVENT_REGISTRATION_PARAMS_SCHEMA,
   REGISTRATION_ID_SCHEMA,
@@ -33,6 +38,8 @@ import type { EventRegistrationParams } from '../types/event-registration-params
 import type { RegistrationIdParam } from '../types/registration-id-param.types.js';
 import { CREATE_EVENT_REGISTRATION_BODY_SCHEMA } from '../requests/create-event-registration-body.schema.js';
 import type { CreateEventRegistrationBody } from '../types/create-event-registration-body.types.js';
+import { GetMyRegistrationsSchema } from '../requests/get-my-registrations.request.js';
+import type { GetMyRegistrationsPayload } from '../types/get-my-registrations-payload.types.js';
 
 @ApiTags('Registrations')
 @ApiBearerAuth()
@@ -106,9 +113,39 @@ export class EventRegistrationsController {
     return this.registrationsService.cancel(params.id, userId);
   }
   @Get('event-registrations/me')
-  @ApiOperation({ summary: 'Consultar los pases activos del usuario' })
-  findMine(@CurrentUser() user: AuthenticatedUser) {
-    return this.registrationsService.findMine(user.id);
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({ operationId: 'getMyEventRegistrations', summary: 'Consultar pases activos o historial terminado del usuario', description: 'Requiere sesión. Sin scope devuelve un arreglo de pases vigentes; scope=finished devuelve un objeto paginado con items, total, limit y totalPages.' })
+  @ApiQuery({
+    name: 'scope',
+    required: false,
+    enum: ['finished'],
+    description: 'Filtra las inscripciones por talleres finalizados',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Página del historial (mínimo 1, por defecto 1)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description:
+      'Resultados del historial por página (máximo 50, por defecto 10)',
+  })
+  @MyRegistrationsResponses()
+  findMine(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query(
+      new ZodValidationPipe(
+        GetMyRegistrationsSchema,
+        () => new ValidationException(),
+      ),
+    )
+    query: GetMyRegistrationsPayload,
+  ) {
+    return this.registrationsService.findMine(user.id, query);
   }
   @Post('events/:eventId/supports')
   @UseGuards(RolesGuard)
