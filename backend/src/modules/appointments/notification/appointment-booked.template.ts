@@ -8,8 +8,8 @@ import {
   APPOINTMENT_BOOKED_EMAIL_SUBJECT,
   APPOINTMENT_BOOKED_NO_TOPIC,
   APPOINTMENT_BOOKED_NOTIFICATION_TITLE,
-  APPOINTMENT_BOOKED_TIME_ZONE_LABEL,
 } from '../constants/appointment-booked-notification.constants.js';
+import { APPOINTMENT_NOTIFICATION_TIME_ZONE_LABEL } from '../constants/appointment-notification.constants.js';
 import { AppointmentParticipantRole } from '../enums/appointment-participant-role.enum.js';
 import { fitPushName } from '../utils/fit-push-name.js';
 import { loadAppointmentMailTemplate } from './load-appointment-mail-template.js';
@@ -36,7 +36,7 @@ export const renderAppointmentBookedMail = async (
   const intro = isMentor
     ? `${payload.counterpartName} reservó una cita de orientación contigo.`
     : `Tu cita de orientación con ${payload.counterpartName} quedó confirmada.`;
-  const time = `${payload.time} (${APPOINTMENT_BOOKED_TIME_ZONE_LABEL})`;
+  const time = `${payload.time} (${APPOINTMENT_NOTIFICATION_TIME_ZONE_LABEL})`;
   const topic = payload.topic.trim() || APPOINTMENT_BOOKED_NO_TOPIC;
   const actionUrl = buildFrontendUrl(context.actionUrl);
 

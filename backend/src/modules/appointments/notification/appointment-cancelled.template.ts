@@ -4,11 +4,11 @@ import type { NotificationMailContext } from '../../notifications/types/notifica
 import type { NotificationPayloadMap } from '../../notifications/types/notification-payload-map.type.js';
 import type { NotificationTemplateDefinition } from '../../notifications/types/notification-template-definition.type.js';
 import type { NotificationType } from '../../notifications/types/notification-type.enum.js';
-import { APPOINTMENT_BOOKED_TIME_ZONE_LABEL } from '../constants/appointment-booked-notification.constants.js';
 import {
   APPOINTMENT_CANCELLED_EMAIL_SUBJECT,
   APPOINTMENT_CANCELLED_NOTIFICATION_TITLE,
 } from '../constants/appointment-cancelled-notification.constants.js';
+import { APPOINTMENT_NOTIFICATION_TIME_ZONE_LABEL } from '../constants/appointment-notification.constants.js';
 import { fitPushName } from '../utils/fit-push-name.js';
 import { loadAppointmentMailTemplate } from './load-appointment-mail-template.js';
 
@@ -28,7 +28,7 @@ export const renderAppointmentCancelledMail = async (
 ): Promise<NotificationMailContent> => {
   const actionUrl = buildFrontendUrl(context.actionUrl);
   const intro = `${payload.cancelledByName} canceló la cita de orientación que tenían agendada.`;
-  const time = `${payload.time} (${APPOINTMENT_BOOKED_TIME_ZONE_LABEL})`;
+  const time = `${payload.time} (${APPOINTMENT_NOTIFICATION_TIME_ZONE_LABEL})`;
   const reason = payload.reason?.trim();
   const values: Record<string, string> = {
     intro,
