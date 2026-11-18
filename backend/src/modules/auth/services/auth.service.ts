@@ -188,7 +188,7 @@ export class AuthService {
     user: AuthenticatedUser,
     verifiedGoogle: { email: string; sub: string; picture?: string },
   ): Promise<{ ok: boolean; detail: string }> {
-    // Restricción 4: El correo de Google debe coincidir con la cuenta del usuario autenticado
+    // 1. Comprueba que la identidad Google corresponda al usuario autenticado
     if (
       user.email.trim().toLowerCase() !==
       verifiedGoogle.email.trim().toLowerCase()
@@ -196,19 +196,43 @@ export class AuthService {
       throw new GoogleEmailMismatchException();
     }
 
-    // Restricción 3: La vinculación solo está permitida para roles autorizados
-    const hasAllowedRole = user.roles.some((r) =>
-      GOOGLE_ALLOWED_ROLES.includes(r as RoleName),
-    );
+    // 2. Verifica que la cuenta UMSSY exista en la base de datos
+    const dbUser = await this.authRepository.findUserByEmailWithRoles(user.email);
+    if (!dbUser) {
+      throw new InvalidCredentialsException(
+        'Esta cuenta de Google no está registrada en el sistema.',
+      );
+    }
+
+    // 3. Comprueba que esté activa y habilitada
+    if (dbUser.isActive === false) {
+      throw new InvalidCredentialsException(
+        'Esta cuenta de usuario se encuentra inactiva o deshabilitada.',
+      );
+    }
+
+    // 4. Comprueba que tenga un rol permitido: estudiante, titulado o mentor
+    const assignedRoles = new Set(dbUser.roles.map(({ role }) => role.name));
+    const hasAllowedRole = GOOGLE_ALLOWED_ROLES.some((r) => assignedRoles.has(r));
     if (!hasAllowedRole) {
       throw new RoleNotAssignedException(
         'La vinculación con Google solo está permitida para estudiantes, titulados y mentores.',
       );
     }
 
-    // Restricción 5: Persistir la vinculación en la base de datos de forma atómica
+    // 5. Verifica que la identidad Google no esté vinculada a otro usuario
+    const existingLink = await this.authRepository.findGoogleSocialAccountBySub(
+      verifiedGoogle.sub,
+    );
+    if (existingLink && existingLink.userId !== dbUser.id) {
+      throw new InvalidCredentialsException(
+        'Esta cuenta de Google ya está vinculada a otro usuario.',
+      );
+    }
+
+    // 6. Si todas las validaciones pasaron, persistir la vinculación de forma atómica
     await this.authRepository.linkGoogleAccount(
-      user.id,
+      dbUser.id,
       verifiedGoogle.sub,
       verifiedGoogle.email,
       verifiedGoogle.picture,

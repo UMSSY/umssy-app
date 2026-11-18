@@ -150,4 +150,25 @@ describe('GoogleAuthService', () => {
       ),
     );
   });
+
+  it('rechaza si GOOGLE_CLIENT_ID no está configurado en el servidor (obligatorio)', async () => {
+    delete process.env.GOOGLE_CLIENT_ID;
+    const token = createTestJwt();
+
+    await expect(service.verifyCredential(token)).rejects.toThrow(
+      new InvalidCredentialsException(
+        'Configuración de autenticación con Google incompleta: GOOGLE_CLIENT_ID no está configurado en el servidor',
+      ),
+    );
+  });
+
+  it('rechaza access tokens y formatos que no correspondan a un ID Token de 3 partes', async () => {
+    const opaqueAccessToken = 'ya29.a0AXooCgt-fake-access-token-opaque-string';
+
+    await expect(service.verifyCredential(opaqueAccessToken)).rejects.toThrow(
+      new InvalidCredentialsException(
+        'Credencial de Google inválida: se requiere un ID Token (JWT) válido',
+      ),
+    );
+  });
 });

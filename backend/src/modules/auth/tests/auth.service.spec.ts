@@ -668,6 +668,12 @@ describe('AuthService', () => {
         email: 'admin@umss.edu',
         roles: ['administrativo'],
       };
+      authRepository.findUserByEmailWithRoles.mockResolvedValueOnce({
+        id: 'u-admin',
+        email: 'admin@umss.edu',
+        isActive: true,
+        roles: [{ role: { name: 'administrativo' } }],
+      });
 
       await expect(
         service.linkGoogle(adminUser as any, {
@@ -678,10 +684,50 @@ describe('AuthService', () => {
       expect(authRepository.linkGoogleAccount).not.toHaveBeenCalled();
     });
 
-    it('6. Identidad Google ya vinculada a otro usuario: repositorio lanza excepción y no vincula', async () => {
-      authRepository.linkGoogleAccount.mockRejectedValueOnce(
-        new GoogleAccountAlreadyLinkedException(),
+    it('4c. Cuenta no registrada en base de datos: rechaza la vinculación', async () => {
+      authRepository.findUserByEmailWithRoles.mockResolvedValueOnce(null);
+
+      await expect(
+        service.linkGoogle(authUser as any, {
+          email: 'dania@umss.edu',
+          sub: 'sub-dania',
+        }),
+      ).rejects.toThrow(
+        'Esta cuenta de Google no está registrada en el sistema.',
       );
+      expect(authRepository.linkGoogleAccount).not.toHaveBeenCalled();
+    });
+
+    it('4d. Cuenta inactiva o deshabilitada en base de datos: rechaza la vinculación', async () => {
+      authRepository.findUserByEmailWithRoles.mockResolvedValueOnce({
+        id: 'u-1',
+        email: 'dania@umss.edu',
+        isActive: false,
+        roles: [{ role: { name: 'titulado' } }],
+      });
+
+      await expect(
+        service.linkGoogle(authUser as any, {
+          email: 'dania@umss.edu',
+          sub: 'sub-dania',
+        }),
+      ).rejects.toThrow(
+        'Esta cuenta de usuario se encuentra inactiva o deshabilitada.',
+      );
+      expect(authRepository.linkGoogleAccount).not.toHaveBeenCalled();
+    });
+
+    it('6. Identidad Google ya vinculada a otro usuario: lanza excepción y no vincula', async () => {
+      authRepository.findUserByEmailWithRoles.mockResolvedValueOnce({
+        id: 'u-1',
+        email: 'dania@umss.edu',
+        isActive: true,
+        roles: [{ role: { name: 'titulado' } }],
+      });
+      authRepository.findGoogleSocialAccountBySub.mockResolvedValueOnce({
+        id: 'other-link',
+        userId: 'u-otro-usuario',
+      });
 
       await expect(
         service.linkGoogle(authUser as any, {
@@ -691,9 +737,17 @@ describe('AuthService', () => {
       ).rejects.toThrow(
         'Esta cuenta de Google ya está vinculada a otro usuario.',
       );
+      expect(authRepository.linkGoogleAccount).not.toHaveBeenCalled();
     });
 
     it('7. Vinculación exitosa y persistida: guarda en repositorio atómicamente', async () => {
+      authRepository.findUserByEmailWithRoles.mockResolvedValueOnce({
+        id: 'u-1',
+        email: 'dania@umss.edu',
+        isActive: true,
+        roles: [{ role: { name: 'titulado' } }],
+      });
+      authRepository.findGoogleSocialAccountBySub.mockResolvedValueOnce(null);
       authRepository.linkGoogleAccount.mockResolvedValueOnce({ id: 'link-1' });
 
       const result = await service.linkGoogle(authUser as any, {

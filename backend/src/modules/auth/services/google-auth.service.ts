@@ -98,12 +98,13 @@ export class GoogleAuthService {
     }
 
     const parts = trimmed.split('.');
-    if (parts.length === 3) {
-      return this.verifyIdToken(parts[0], parts[1], parts[2]);
+    if (parts.length !== 3) {
+      throw new InvalidCredentialsException(
+        'Credencial de Google inválida: se requiere un ID Token (JWT) válido',
+      );
     }
 
-    // Fallback: if not a 3-part JWT, attempt validation via Google's tokeninfo / userinfo
-    return this.verifyViaGoogleApi(trimmed);
+    return this.verifyIdToken(parts[0], parts[1], parts[2]);
   }
 
   private async verifyIdToken(
@@ -165,9 +166,14 @@ export class GoogleAuthService {
       throw new InvalidCredentialsException('La credencial de Google ha expirado');
     }
 
-    // Verify Audience (if configured in environment)
+    // Verify Audience (mandatory: GOOGLE_CLIENT_ID must be configured and match payload.aud)
     const expectedAudience = process.env.GOOGLE_CLIENT_ID?.trim();
-    if (expectedAudience && payload.aud !== expectedAudience) {
+    if (!expectedAudience) {
+      throw new InvalidCredentialsException(
+        'Configuración de autenticación con Google incompleta: GOOGLE_CLIENT_ID no está configurado en el servidor',
+      );
+    }
+    if (payload.aud !== expectedAudience) {
       throw new InvalidCredentialsException('La credencial no corresponde a esta aplicación');
     }
 
@@ -183,35 +189,5 @@ export class GoogleAuthService {
       name: payload.name,
       picture: payload.picture,
     };
-  }
-
-  private async verifyViaGoogleApi(token: string): Promise<VerifiedGoogleUser> {
-    try {
-      const res = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(token)}`);
-      if (res.ok) {
-        const info = (await res.json()) as GoogleJwtPayload;
-        const validIssuers = ['https://accounts.google.com', 'accounts.google.com'];
-        if (!validIssuers.includes(info.iss)) {
-          throw new InvalidCredentialsException('Emisor de credencial inválido');
-        }
-        const expectedAudience = process.env.GOOGLE_CLIENT_ID?.trim();
-        if (expectedAudience && info.aud !== expectedAudience) {
-          throw new InvalidCredentialsException('La credencial no corresponde a esta aplicación');
-        }
-        const isEmailVerified = info.email_verified === true || info.email_verified === 'true';
-        if (info.email && isEmailVerified) {
-          return {
-            email: info.email.trim().toLowerCase(),
-            sub: info.sub,
-            name: info.name,
-            picture: info.picture,
-          };
-        }
-      }
-    } catch {
-      // Fall through to error below
-    }
-
-    throw new InvalidCredentialsException('Credencial de Google inválida o expirada');
   }
 }
