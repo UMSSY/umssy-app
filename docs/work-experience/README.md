@@ -158,6 +158,55 @@ Table `work_experiences`, related to `users` and `companies` (see [backend/prism
 - **Collapsible only when it helps.** A company with a single position is not collapsible; groups start collapsed to keep long histories short.
 - **The save does not wait for the skills refresh**, so the guide can continue immediately.
 
+## Read services for other domains
+
+The `work-experience` module manages the work experiences of each person's profile. `WorkExperienceSourcesModule` exposes reads of those experiences to other domains without giving direct access to the table.
+
+`WorkExperienceSourcesService` (exported by `WorkExperienceSourcesModule`):
+
+| Method | Returns | Consumer |
+| --- | --- | --- |
+| `findPeriodsByUserIds(userIds)` | `WorkPeriodResponse[]` (`userId`, `startDate`, `endDate` null if still ongoing). With an empty list it does not query the database | [analytics](../analytics/README.md) (years of experience in the skills vs. experience map) |
+
+```mermaid
+flowchart LR
+  AN[analytics: HeatmapGraduatesService] --> S[WorkExperienceSourcesService]
+  S --> R[WorkExperienceRepository]
+  R --> DB[(work_experiences)]
+```
+
+```mermaid
+sequenceDiagram
+  participant AN as analytics: HeatmapGraduatesService
+  participant S as WorkExperienceSourcesService
+  participant R as WorkExperienceRepository
+  AN->>S: findPeriodsByUserIds(userIds)
+  alt userIds empty
+    S-->>AN: []
+  else
+    S->>R: workExperience.findMany(userId in userIds, WORK_PERIOD_SELECT)
+    R-->>S: { userId, startDate, endDate }[]
+    S-->>AN: WorkPeriodResponse[]
+  end
+  AN->>AN: computeExperienceYears (clips to today, merges overlaps, sums)
+```
+
+### Read rules
+
+- Only the start and end dates of each experience are exposed (`WORK_PERIOD_SELECT`); company, position and description are not exposed.
+- Computing the years of experience is the consumer's responsibility.
+- Read only; it has no HTTP endpoint of its own.
+
+### Read dependencies
+
+| Direction | Module | Use |
+| --- | --- | --- |
+| Used by | [analytics](../analytics/README.md) | Work periods per graduate |
+
+### Read frontend integration
+
+The frontend does not call this service; its data is shown in the backoffice heatmaps (`frontend/src/modules/heatmaps`, `/backoffice/reports/heatmaps/*`).
+
 ## Sprint History
 
 ### Sprint 3
@@ -167,3 +216,4 @@ Table `work_experiences`, related to `users` and `companies` (see [backend/prism
 - Live skill suggestions while typing the description, with debounce and stale-answer protection.
 - Skills of the profile refreshed after each change, including cleanup when an experience is deleted.
 - Skill chips of each experience in light blue.
+- `WorkExperienceSourcesService.findPeriodsByUserIds` and the `WorkPeriodResponse` contract for the heatmaps.

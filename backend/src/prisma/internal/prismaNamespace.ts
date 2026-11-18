@@ -463,6 +463,7 @@ export const ModelName = {
   SurveyQuestionType: 'SurveyQuestionType',
   SurveyTargetAudience: 'SurveyTargetAudience',
   Survey: 'Survey',
+  SurveyAlertConfig: 'SurveyAlertConfig',
   SurveyQuestion: 'SurveyQuestion',
   SurveyQuestionOption: 'SurveyQuestionOption',
   SurveyResponse: 'SurveyResponse',
@@ -505,7 +506,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "appointmentStatus" | "proposalStatus" | "eventModality" | "eventOrigin" | "eventStatus" | "registrationStatus" | "city" | "company" | "user" | "role" | "userRole" | "education" | "workExperience" | "radarArea" | "skill" | "jobOfferSkill" | "userSkill" | "certification" | "userCvFile" | "profileSkillProcessingState" | "technicalArea" | "orientationType" | "mentorTechnicalArea" | "mentorOrientationType" | "availabilityBlock" | "blockedDate" | "appointment" | "appointmentDocument" | "timeProposal" | "appointmentHistory" | "eventCategory" | "event" | "eventRegistration" | "eventAttendance" | "jobOffer" | "jobOfferModality" | "jobOfferContractType" | "jobOfferStatus" | "adminExportHistory" | "accessRequestStatus" | "accessRequestDocumentType" | "file" | "career" | "accessRequest" | "mentorParticipationRequest" | "mentorSlotOffer" | "activationOtp" | "messageStatus" | "connectionRequestStatus" | "attachmentType" | "conversation" | "conversationParticipant" | "message" | "messageAttachment" | "chatUserBlock" | "connectionRequest" | "userPresence" | "passwordResetOtp" | "mentorParticipationAttemptLimit" | "jobApplicationStatus" | "jobApplication" | "radarApplicationConsent" | "surveyStatus" | "surveyQuestionType" | "surveyTargetAudience" | "survey" | "surveyQuestion" | "surveyQuestionOption" | "surveyResponse" | "surveyAnswer" | "auditAction" | "auditEvent" | "documentValidation" | "mentorIntakeAttempt" | "mentorParticipationSanction" | "mentorIntakeOperation" | "radarCvEvidence" | "radarScoreSnapshot" | "radarAuditEvent" | "radarCvExtractionStatus" | "radarCvReviewStatus" | "mentorParticipationStatus" | "mentorOfferStatus" | "radarDocumentVerification" | "portfolioProvider" | "userSocialAccount" | "userPortfolioProject" | "notificationType" | "notification" | "pushSubscription" | "notificationPreference" | "radarDocumentStatus" | "radarDocumentSourceType"
+    modelProps: "appointmentStatus" | "proposalStatus" | "eventModality" | "eventOrigin" | "eventStatus" | "registrationStatus" | "city" | "company" | "user" | "role" | "userRole" | "education" | "workExperience" | "radarArea" | "skill" | "jobOfferSkill" | "userSkill" | "certification" | "userCvFile" | "profileSkillProcessingState" | "technicalArea" | "orientationType" | "mentorTechnicalArea" | "mentorOrientationType" | "availabilityBlock" | "blockedDate" | "appointment" | "appointmentDocument" | "timeProposal" | "appointmentHistory" | "eventCategory" | "event" | "eventRegistration" | "eventAttendance" | "jobOffer" | "jobOfferModality" | "jobOfferContractType" | "jobOfferStatus" | "adminExportHistory" | "accessRequestStatus" | "accessRequestDocumentType" | "file" | "career" | "accessRequest" | "mentorParticipationRequest" | "mentorSlotOffer" | "activationOtp" | "messageStatus" | "connectionRequestStatus" | "attachmentType" | "conversation" | "conversationParticipant" | "message" | "messageAttachment" | "chatUserBlock" | "connectionRequest" | "userPresence" | "passwordResetOtp" | "mentorParticipationAttemptLimit" | "jobApplicationStatus" | "jobApplication" | "radarApplicationConsent" | "surveyStatus" | "surveyQuestionType" | "surveyTargetAudience" | "survey" | "surveyAlertConfig" | "surveyQuestion" | "surveyQuestionOption" | "surveyResponse" | "surveyAnswer" | "auditAction" | "auditEvent" | "documentValidation" | "mentorIntakeAttempt" | "mentorParticipationSanction" | "mentorIntakeOperation" | "radarCvEvidence" | "radarScoreSnapshot" | "radarAuditEvent" | "radarCvExtractionStatus" | "radarCvReviewStatus" | "mentorParticipationStatus" | "mentorOfferStatus" | "radarDocumentVerification" | "portfolioProvider" | "userSocialAccount" | "userPortfolioProject" | "notificationType" | "notification" | "pushSubscription" | "notificationPreference" | "radarDocumentStatus" | "radarDocumentSourceType"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -5393,6 +5394,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    SurveyAlertConfig: {
+      payload: Prisma.$SurveyAlertConfigPayload<ExtArgs>
+      fields: Prisma.SurveyAlertConfigFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SurveyAlertConfigFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SurveyAlertConfigPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SurveyAlertConfigFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SurveyAlertConfigPayload>
+        }
+        findFirst: {
+          args: Prisma.SurveyAlertConfigFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SurveyAlertConfigPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SurveyAlertConfigFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SurveyAlertConfigPayload>
+        }
+        findMany: {
+          args: Prisma.SurveyAlertConfigFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SurveyAlertConfigPayload>[]
+        }
+        create: {
+          args: Prisma.SurveyAlertConfigCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SurveyAlertConfigPayload>
+        }
+        createMany: {
+          args: Prisma.SurveyAlertConfigCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SurveyAlertConfigCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SurveyAlertConfigPayload>[]
+        }
+        delete: {
+          args: Prisma.SurveyAlertConfigDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SurveyAlertConfigPayload>
+        }
+        update: {
+          args: Prisma.SurveyAlertConfigUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SurveyAlertConfigPayload>
+        }
+        deleteMany: {
+          args: Prisma.SurveyAlertConfigDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SurveyAlertConfigUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SurveyAlertConfigUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SurveyAlertConfigPayload>[]
+        }
+        upsert: {
+          args: Prisma.SurveyAlertConfigUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SurveyAlertConfigPayload>
+        }
+        aggregate: {
+          args: Prisma.SurveyAlertConfigAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSurveyAlertConfig>
+        }
+        groupBy: {
+          args: Prisma.SurveyAlertConfigGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SurveyAlertConfigGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SurveyAlertConfigCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SurveyAlertConfigCountAggregateOutputType> | number
+        }
+      }
+    }
     SurveyQuestion: {
       payload: Prisma.$SurveyQuestionPayload<ExtArgs>
       fields: Prisma.SurveyQuestionFieldRefs
@@ -8311,11 +8386,27 @@ export const SurveyScalarFieldEnum = {
   closesAt: 'closesAt',
   statusId: 'statusId',
   createdById: 'createdById',
+  closingSoonNotifiedAt: 'closingSoonNotifiedAt',
+  closedNotifiedAt: 'closedNotifiedAt',
+  lastReminderSentAt: 'lastReminderSentAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type SurveyScalarFieldEnum = (typeof SurveyScalarFieldEnum)[keyof typeof SurveyScalarFieldEnum]
+
+
+export const SurveyAlertConfigScalarFieldEnum = {
+  id: 'id',
+  surveyId: 'surveyId',
+  isEnabled: 'isEnabled',
+  threshold: 'threshold',
+  questionIds: 'questionIds',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SurveyAlertConfigScalarFieldEnum = (typeof SurveyAlertConfigScalarFieldEnum)[keyof typeof SurveyAlertConfigScalarFieldEnum]
 
 
 export const SurveyQuestionScalarFieldEnum = {
@@ -9077,6 +9168,7 @@ export type GlobalOmitConfig = {
   surveyQuestionType?: Prisma.SurveyQuestionTypeOmit
   surveyTargetAudience?: Prisma.SurveyTargetAudienceOmit
   survey?: Prisma.SurveyOmit
+  surveyAlertConfig?: Prisma.SurveyAlertConfigOmit
   surveyQuestion?: Prisma.SurveyQuestionOmit
   surveyQuestionOption?: Prisma.SurveyQuestionOptionOmit
   surveyResponse?: Prisma.SurveyResponseOmit
