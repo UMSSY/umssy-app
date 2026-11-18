@@ -320,6 +320,8 @@ export type UserWhereInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceListRelationFilter
   radarCvReviewed?: Prisma.RadarCvEvidenceListRelationFilter
   radarSnapshots?: Prisma.RadarScoreSnapshotListRelationFilter
+  documentVerifications?: Prisma.RadarDocumentVerificationListRelationFilter
+  reviewedDocuments?: Prisma.RadarDocumentVerificationListRelationFilter
   radarAuditSubjects?: Prisma.RadarAuditEventListRelationFilter
   radarAuditActors?: Prisma.RadarAuditEventListRelationFilter
   socialAccounts?: Prisma.UserSocialAccountListRelationFilter
@@ -400,6 +402,8 @@ export type UserOrderByWithRelationInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceOrderByRelationAggregateInput
   radarCvReviewed?: Prisma.RadarCvEvidenceOrderByRelationAggregateInput
   radarSnapshots?: Prisma.RadarScoreSnapshotOrderByRelationAggregateInput
+  documentVerifications?: Prisma.RadarDocumentVerificationOrderByRelationAggregateInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationOrderByRelationAggregateInput
   radarAuditSubjects?: Prisma.RadarAuditEventOrderByRelationAggregateInput
   radarAuditActors?: Prisma.RadarAuditEventOrderByRelationAggregateInput
   socialAccounts?: Prisma.UserSocialAccountOrderByRelationAggregateInput
@@ -483,6 +487,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   radarCvOwned?: Prisma.RadarCvEvidenceListRelationFilter
   radarCvReviewed?: Prisma.RadarCvEvidenceListRelationFilter
   radarSnapshots?: Prisma.RadarScoreSnapshotListRelationFilter
+  documentVerifications?: Prisma.RadarDocumentVerificationListRelationFilter
+  reviewedDocuments?: Prisma.RadarDocumentVerificationListRelationFilter
   radarAuditSubjects?: Prisma.RadarAuditEventListRelationFilter
   radarAuditActors?: Prisma.RadarAuditEventListRelationFilter
   socialAccounts?: Prisma.UserSocialAccountListRelationFilter
@@ -605,6 +611,8 @@ export type UserCreateInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -683,6 +691,8 @@ export type UserUncheckedCreateInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -761,6 +771,8 @@ export type UserUpdateInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -839,6 +851,8 @@ export type UserUncheckedUpdateInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -1788,6 +1802,36 @@ export type UserUpdateOneWithoutRadarAuditActorsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutRadarAuditActorsInput, Prisma.UserUpdateWithoutRadarAuditActorsInput>, Prisma.UserUncheckedUpdateWithoutRadarAuditActorsInput>
 }
 
+export type UserCreateNestedOneWithoutDocumentVerificationsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDocumentVerificationsInput, Prisma.UserUncheckedCreateWithoutDocumentVerificationsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDocumentVerificationsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutReviewedDocumentsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutReviewedDocumentsInput, Prisma.UserUncheckedCreateWithoutReviewedDocumentsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutReviewedDocumentsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutDocumentVerificationsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDocumentVerificationsInput, Prisma.UserUncheckedCreateWithoutDocumentVerificationsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDocumentVerificationsInput
+  upsert?: Prisma.UserUpsertWithoutDocumentVerificationsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutDocumentVerificationsInput, Prisma.UserUpdateWithoutDocumentVerificationsInput>, Prisma.UserUncheckedUpdateWithoutDocumentVerificationsInput>
+}
+
+export type UserUpdateOneWithoutReviewedDocumentsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutReviewedDocumentsInput, Prisma.UserUncheckedCreateWithoutReviewedDocumentsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutReviewedDocumentsInput
+  upsert?: Prisma.UserUpsertWithoutReviewedDocumentsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutReviewedDocumentsInput, Prisma.UserUpdateWithoutReviewedDocumentsInput>, Prisma.UserUncheckedUpdateWithoutReviewedDocumentsInput>
+}
+
 export type UserCreateNestedOneWithoutSocialAccountsInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutSocialAccountsInput, Prisma.UserUncheckedCreateWithoutSocialAccountsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutSocialAccountsInput
@@ -2000,6 +2044,8 @@ export type UserCreateWithoutCityInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -2077,6 +2123,8 @@ export type UserUncheckedCreateWithoutCityInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -2202,6 +2250,8 @@ export type UserCreateWithoutCompanyInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -2279,6 +2329,8 @@ export type UserUncheckedCreateWithoutCompanyInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -2382,6 +2434,8 @@ export type UserCreateWithoutRolesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -2459,6 +2513,8 @@ export type UserUncheckedCreateWithoutRolesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -2552,6 +2608,8 @@ export type UserUpdateWithoutRolesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -2629,6 +2687,8 @@ export type UserUncheckedUpdateWithoutRolesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -2706,6 +2766,8 @@ export type UserCreateWithoutEducationsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -2783,6 +2845,8 @@ export type UserUncheckedCreateWithoutEducationsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -2876,6 +2940,8 @@ export type UserUpdateWithoutEducationsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -2953,6 +3019,8 @@ export type UserUncheckedUpdateWithoutEducationsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -3030,6 +3098,8 @@ export type UserCreateWithoutWorkExperiencesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -3107,6 +3177,8 @@ export type UserUncheckedCreateWithoutWorkExperiencesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -3200,6 +3272,8 @@ export type UserUpdateWithoutWorkExperiencesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -3277,6 +3351,8 @@ export type UserUncheckedUpdateWithoutWorkExperiencesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -3354,6 +3430,8 @@ export type UserCreateWithoutUserSkillsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -3431,6 +3509,8 @@ export type UserUncheckedCreateWithoutUserSkillsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -3524,6 +3604,8 @@ export type UserUpdateWithoutUserSkillsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -3601,6 +3683,8 @@ export type UserUncheckedUpdateWithoutUserSkillsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -3678,6 +3762,8 @@ export type UserCreateWithoutCertificationsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -3755,6 +3841,8 @@ export type UserUncheckedCreateWithoutCertificationsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -3848,6 +3936,8 @@ export type UserUpdateWithoutCertificationsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -3925,6 +4015,8 @@ export type UserUncheckedUpdateWithoutCertificationsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -4002,6 +4094,8 @@ export type UserCreateWithoutCvFilesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -4079,6 +4173,8 @@ export type UserUncheckedCreateWithoutCvFilesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -4172,6 +4268,8 @@ export type UserUpdateWithoutCvFilesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -4249,6 +4347,8 @@ export type UserUncheckedUpdateWithoutCvFilesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -4326,6 +4426,8 @@ export type UserCreateWithoutSkillProcessingStateInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -4403,6 +4505,8 @@ export type UserUncheckedCreateWithoutSkillProcessingStateInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -4496,6 +4600,8 @@ export type UserUpdateWithoutSkillProcessingStateInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -4573,6 +4679,8 @@ export type UserUncheckedUpdateWithoutSkillProcessingStateInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -4650,6 +4758,8 @@ export type UserCreateWithoutMentorTechnicalAreasInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -4727,6 +4837,8 @@ export type UserUncheckedCreateWithoutMentorTechnicalAreasInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -4820,6 +4932,8 @@ export type UserUpdateWithoutMentorTechnicalAreasInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -4897,6 +5011,8 @@ export type UserUncheckedUpdateWithoutMentorTechnicalAreasInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -4974,6 +5090,8 @@ export type UserCreateWithoutMentorOrientationTypesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -5051,6 +5169,8 @@ export type UserUncheckedCreateWithoutMentorOrientationTypesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -5144,6 +5264,8 @@ export type UserUpdateWithoutMentorOrientationTypesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -5221,6 +5343,8 @@ export type UserUncheckedUpdateWithoutMentorOrientationTypesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -5298,6 +5422,8 @@ export type UserCreateWithoutAvailabilityBlocksInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -5375,6 +5501,8 @@ export type UserUncheckedCreateWithoutAvailabilityBlocksInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -5468,6 +5596,8 @@ export type UserUpdateWithoutAvailabilityBlocksInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -5545,6 +5675,8 @@ export type UserUncheckedUpdateWithoutAvailabilityBlocksInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -5622,6 +5754,8 @@ export type UserCreateWithoutBlockedDatesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -5699,6 +5833,8 @@ export type UserUncheckedCreateWithoutBlockedDatesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -5792,6 +5928,8 @@ export type UserUpdateWithoutBlockedDatesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -5869,6 +6007,8 @@ export type UserUncheckedUpdateWithoutBlockedDatesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -5946,6 +6086,8 @@ export type UserCreateWithoutMentorAppointmentsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -6023,6 +6165,8 @@ export type UserUncheckedCreateWithoutMentorAppointmentsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -6105,6 +6249,8 @@ export type UserCreateWithoutStudentAppointmentsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -6182,6 +6328,8 @@ export type UserUncheckedCreateWithoutStudentAppointmentsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -6264,6 +6412,8 @@ export type UserCreateWithoutCancelledAppointmentsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -6341,6 +6491,8 @@ export type UserUncheckedCreateWithoutCancelledAppointmentsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -6434,6 +6586,8 @@ export type UserUpdateWithoutMentorAppointmentsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -6511,6 +6665,8 @@ export type UserUncheckedUpdateWithoutMentorAppointmentsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -6599,6 +6755,8 @@ export type UserUpdateWithoutStudentAppointmentsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -6676,6 +6834,8 @@ export type UserUncheckedUpdateWithoutStudentAppointmentsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -6764,6 +6924,8 @@ export type UserUpdateWithoutCancelledAppointmentsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -6841,6 +7003,8 @@ export type UserUncheckedUpdateWithoutCancelledAppointmentsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -6918,6 +7082,8 @@ export type UserCreateWithoutAppointmentChangesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -6995,6 +7161,8 @@ export type UserUncheckedCreateWithoutAppointmentChangesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -7088,6 +7256,8 @@ export type UserUpdateWithoutAppointmentChangesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -7165,6 +7335,8 @@ export type UserUncheckedUpdateWithoutAppointmentChangesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -7242,6 +7414,8 @@ export type UserCreateWithoutCreatedEventsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -7319,6 +7493,8 @@ export type UserUncheckedCreateWithoutCreatedEventsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -7401,6 +7577,8 @@ export type UserCreateWithoutModeratedEventsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -7478,6 +7656,8 @@ export type UserUncheckedCreateWithoutModeratedEventsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -7571,6 +7751,8 @@ export type UserUpdateWithoutCreatedEventsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -7648,6 +7830,8 @@ export type UserUncheckedUpdateWithoutCreatedEventsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -7736,6 +7920,8 @@ export type UserUpdateWithoutModeratedEventsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -7813,6 +7999,8 @@ export type UserUncheckedUpdateWithoutModeratedEventsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -7890,6 +8078,8 @@ export type UserCreateWithoutEventRegistrationsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -7967,6 +8157,8 @@ export type UserUncheckedCreateWithoutEventRegistrationsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -8060,6 +8252,8 @@ export type UserUpdateWithoutEventRegistrationsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -8137,6 +8331,8 @@ export type UserUncheckedUpdateWithoutEventRegistrationsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -8214,6 +8410,8 @@ export type UserCreateWithoutCheckedInAttendancesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -8291,6 +8489,8 @@ export type UserUncheckedCreateWithoutCheckedInAttendancesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -8384,6 +8584,8 @@ export type UserUpdateWithoutCheckedInAttendancesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -8461,6 +8663,8 @@ export type UserUncheckedUpdateWithoutCheckedInAttendancesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -8538,6 +8742,8 @@ export type UserCreateWithoutExportHistoriesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -8615,6 +8821,8 @@ export type UserUncheckedCreateWithoutExportHistoriesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -8708,6 +8916,8 @@ export type UserUpdateWithoutExportHistoriesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -8785,6 +8995,8 @@ export type UserUncheckedUpdateWithoutExportHistoriesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -8862,6 +9074,8 @@ export type UserCreateWithoutOpenedAccessRequestsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -8939,6 +9153,8 @@ export type UserUncheckedCreateWithoutOpenedAccessRequestsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -9021,6 +9237,8 @@ export type UserCreateWithoutReviewedAccessRequestsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -9098,6 +9316,8 @@ export type UserUncheckedCreateWithoutReviewedAccessRequestsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -9180,6 +9400,8 @@ export type UserCreateWithoutApprovedAccessRequestInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -9257,6 +9479,8 @@ export type UserUncheckedCreateWithoutApprovedAccessRequestInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -9350,6 +9574,8 @@ export type UserUpdateWithoutOpenedAccessRequestsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -9427,6 +9653,8 @@ export type UserUncheckedUpdateWithoutOpenedAccessRequestsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -9515,6 +9743,8 @@ export type UserUpdateWithoutReviewedAccessRequestsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -9592,6 +9822,8 @@ export type UserUncheckedUpdateWithoutReviewedAccessRequestsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -9680,6 +9912,8 @@ export type UserUpdateWithoutApprovedAccessRequestInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -9757,6 +9991,8 @@ export type UserUncheckedUpdateWithoutApprovedAccessRequestInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -9834,6 +10070,8 @@ export type UserCreateWithoutMentorParticipationRequestsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -9911,6 +10149,8 @@ export type UserUncheckedCreateWithoutMentorParticipationRequestsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -10004,6 +10244,8 @@ export type UserUpdateWithoutMentorParticipationRequestsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -10081,6 +10323,8 @@ export type UserUncheckedUpdateWithoutMentorParticipationRequestsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -10158,6 +10402,8 @@ export type UserCreateWithoutMentorSlotOffersInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -10235,6 +10481,8 @@ export type UserUncheckedCreateWithoutMentorSlotOffersInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -10328,6 +10576,8 @@ export type UserUpdateWithoutMentorSlotOffersInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -10405,6 +10655,8 @@ export type UserUncheckedUpdateWithoutMentorSlotOffersInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -10482,6 +10734,8 @@ export type UserCreateWithoutConversationsAsUserAInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -10559,6 +10813,8 @@ export type UserUncheckedCreateWithoutConversationsAsUserAInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -10641,6 +10897,8 @@ export type UserCreateWithoutConversationsAsUserBInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -10718,6 +10976,8 @@ export type UserUncheckedCreateWithoutConversationsAsUserBInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -10811,6 +11071,8 @@ export type UserUpdateWithoutConversationsAsUserAInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -10888,6 +11150,8 @@ export type UserUncheckedUpdateWithoutConversationsAsUserAInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -10976,6 +11240,8 @@ export type UserUpdateWithoutConversationsAsUserBInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -11053,6 +11319,8 @@ export type UserUncheckedUpdateWithoutConversationsAsUserBInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -11130,6 +11398,8 @@ export type UserCreateWithoutChatParticipantsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -11207,6 +11477,8 @@ export type UserUncheckedCreateWithoutChatParticipantsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -11300,6 +11572,8 @@ export type UserUpdateWithoutChatParticipantsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -11377,6 +11651,8 @@ export type UserUncheckedUpdateWithoutChatParticipantsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -11454,6 +11730,8 @@ export type UserCreateWithoutChatMessagesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -11531,6 +11809,8 @@ export type UserUncheckedCreateWithoutChatMessagesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -11624,6 +11904,8 @@ export type UserUpdateWithoutChatMessagesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -11701,6 +11983,8 @@ export type UserUncheckedUpdateWithoutChatMessagesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -11778,6 +12062,8 @@ export type UserCreateWithoutChatBlocksMadeInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -11855,6 +12141,8 @@ export type UserUncheckedCreateWithoutChatBlocksMadeInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -11937,6 +12225,8 @@ export type UserCreateWithoutChatBlocksReceivedInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -12014,6 +12304,8 @@ export type UserUncheckedCreateWithoutChatBlocksReceivedInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -12107,6 +12399,8 @@ export type UserUpdateWithoutChatBlocksMadeInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -12184,6 +12478,8 @@ export type UserUncheckedUpdateWithoutChatBlocksMadeInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -12272,6 +12568,8 @@ export type UserUpdateWithoutChatBlocksReceivedInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -12349,6 +12647,8 @@ export type UserUncheckedUpdateWithoutChatBlocksReceivedInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -12426,6 +12726,8 @@ export type UserCreateWithoutSentRequestsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -12503,6 +12805,8 @@ export type UserUncheckedCreateWithoutSentRequestsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -12585,6 +12889,8 @@ export type UserCreateWithoutReceivedRequestsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -12662,6 +12968,8 @@ export type UserUncheckedCreateWithoutReceivedRequestsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -12755,6 +13063,8 @@ export type UserUpdateWithoutSentRequestsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -12832,6 +13142,8 @@ export type UserUncheckedUpdateWithoutSentRequestsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -12920,6 +13232,8 @@ export type UserUpdateWithoutReceivedRequestsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -12997,6 +13311,8 @@ export type UserUncheckedUpdateWithoutReceivedRequestsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -13074,6 +13390,8 @@ export type UserCreateWithoutPresenceInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -13151,6 +13469,8 @@ export type UserUncheckedCreateWithoutPresenceInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -13244,6 +13564,8 @@ export type UserUpdateWithoutPresenceInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -13321,6 +13643,8 @@ export type UserUncheckedUpdateWithoutPresenceInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -13398,6 +13722,8 @@ export type UserCreateWithoutPasswordHistoriesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -13475,6 +13801,8 @@ export type UserUncheckedCreateWithoutPasswordHistoriesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -13568,6 +13896,8 @@ export type UserUpdateWithoutPasswordHistoriesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -13645,6 +13975,8 @@ export type UserUncheckedUpdateWithoutPasswordHistoriesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -13722,6 +14054,8 @@ export type UserCreateWithoutPasswordResetOtpsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -13799,6 +14133,8 @@ export type UserUncheckedCreateWithoutPasswordResetOtpsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -13892,6 +14228,8 @@ export type UserUpdateWithoutPasswordResetOtpsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -13969,6 +14307,8 @@ export type UserUncheckedUpdateWithoutPasswordResetOtpsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -14046,6 +14386,8 @@ export type UserCreateWithoutMentorParticipationAttemptLimitInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -14123,6 +14465,8 @@ export type UserUncheckedCreateWithoutMentorParticipationAttemptLimitInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -14216,6 +14560,8 @@ export type UserUpdateWithoutMentorParticipationAttemptLimitInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -14293,6 +14639,8 @@ export type UserUncheckedUpdateWithoutMentorParticipationAttemptLimitInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -14370,6 +14718,8 @@ export type UserCreateWithoutJobApplicationsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -14447,6 +14797,8 @@ export type UserUncheckedCreateWithoutJobApplicationsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -14540,6 +14892,8 @@ export type UserUpdateWithoutJobApplicationsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -14617,6 +14971,8 @@ export type UserUncheckedUpdateWithoutJobApplicationsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -14694,6 +15050,8 @@ export type UserCreateWithoutCreatedSurveysInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -14771,6 +15129,8 @@ export type UserUncheckedCreateWithoutCreatedSurveysInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -14864,6 +15224,8 @@ export type UserUpdateWithoutCreatedSurveysInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -14941,6 +15303,8 @@ export type UserUncheckedUpdateWithoutCreatedSurveysInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -15018,6 +15382,8 @@ export type UserCreateWithoutSurveyResponsesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -15095,6 +15461,8 @@ export type UserUncheckedCreateWithoutSurveyResponsesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -15188,6 +15556,8 @@ export type UserUpdateWithoutSurveyResponsesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -15265,6 +15635,8 @@ export type UserUncheckedUpdateWithoutSurveyResponsesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -15342,6 +15714,8 @@ export type UserCreateWithoutAuditEventsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -15419,6 +15793,8 @@ export type UserUncheckedCreateWithoutAuditEventsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -15512,6 +15888,8 @@ export type UserUpdateWithoutAuditEventsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -15589,6 +15967,8 @@ export type UserUncheckedUpdateWithoutAuditEventsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -15666,6 +16046,8 @@ export type UserCreateWithoutRevertedValidationsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -15743,6 +16125,8 @@ export type UserUncheckedCreateWithoutRevertedValidationsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -15836,6 +16220,8 @@ export type UserUpdateWithoutRevertedValidationsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -15913,6 +16299,8 @@ export type UserUncheckedUpdateWithoutRevertedValidationsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -15990,6 +16378,8 @@ export type UserCreateWithoutMentorIntakeAttemptsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -16067,6 +16457,8 @@ export type UserUncheckedCreateWithoutMentorIntakeAttemptsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -16160,6 +16552,8 @@ export type UserUpdateWithoutMentorIntakeAttemptsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -16237,6 +16631,8 @@ export type UserUncheckedUpdateWithoutMentorIntakeAttemptsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -16314,6 +16710,8 @@ export type UserCreateWithoutMentorParticipationSanctionsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -16391,6 +16789,8 @@ export type UserUncheckedCreateWithoutMentorParticipationSanctionsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -16484,6 +16884,8 @@ export type UserUpdateWithoutMentorParticipationSanctionsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -16561,6 +16963,8 @@ export type UserUncheckedUpdateWithoutMentorParticipationSanctionsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -16638,6 +17042,8 @@ export type UserCreateWithoutRadarCvOwnedInput = {
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -16715,6 +17121,8 @@ export type UserUncheckedCreateWithoutRadarCvOwnedInput = {
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -16797,6 +17205,8 @@ export type UserCreateWithoutRadarCvReviewedInput = {
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -16874,6 +17284,8 @@ export type UserUncheckedCreateWithoutRadarCvReviewedInput = {
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -16967,6 +17379,8 @@ export type UserUpdateWithoutRadarCvOwnedInput = {
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -17044,6 +17458,8 @@ export type UserUncheckedUpdateWithoutRadarCvOwnedInput = {
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -17132,6 +17548,8 @@ export type UserUpdateWithoutRadarCvReviewedInput = {
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -17209,6 +17627,8 @@ export type UserUncheckedUpdateWithoutRadarCvReviewedInput = {
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -17286,6 +17706,8 @@ export type UserCreateWithoutRadarSnapshotsInput = {
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -17363,6 +17785,8 @@ export type UserUncheckedCreateWithoutRadarSnapshotsInput = {
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -17456,6 +17880,8 @@ export type UserUpdateWithoutRadarSnapshotsInput = {
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -17533,6 +17959,8 @@ export type UserUncheckedUpdateWithoutRadarSnapshotsInput = {
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -17611,6 +18039,8 @@ export type UserCreateWithoutRadarAuditSubjectsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
@@ -17688,6 +18118,8 @@ export type UserUncheckedCreateWithoutRadarAuditSubjectsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
@@ -17770,6 +18202,8 @@ export type UserCreateWithoutRadarAuditActorsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
@@ -17847,6 +18281,8 @@ export type UserUncheckedCreateWithoutRadarAuditActorsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
@@ -17940,6 +18376,8 @@ export type UserUpdateWithoutRadarAuditSubjectsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
@@ -18017,6 +18455,8 @@ export type UserUncheckedUpdateWithoutRadarAuditSubjectsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
@@ -18105,6 +18545,8 @@ export type UserUpdateWithoutRadarAuditActorsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
@@ -18182,7 +18624,673 @@ export type UserUncheckedUpdateWithoutRadarAuditActorsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  notificationPreferences?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
+  receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
+  triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
+}
+
+export type UserCreateWithoutDocumentVerificationsInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
+  city?: Prisma.CityCreateNestedOneWithoutUsersInput
+  roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  notificationPreferences?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
+  receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
+  triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
+}
+
+export type UserUncheckedCreateWithoutDocumentVerificationsInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  cityId?: string | null
+  companyId?: string | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  notificationPreferences?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
+  receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
+  triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
+}
+
+export type UserCreateOrConnectWithoutDocumentVerificationsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutDocumentVerificationsInput, Prisma.UserUncheckedCreateWithoutDocumentVerificationsInput>
+}
+
+export type UserCreateWithoutReviewedDocumentsInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
+  city?: Prisma.CityCreateNestedOneWithoutUsersInput
+  roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryCreateNestedManyWithoutUserInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  notificationPreferences?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
+  receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
+  triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestCreateNestedOneWithoutApprovedUserInput
+}
+
+export type UserUncheckedCreateWithoutReviewedDocumentsInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  cityId?: string | null
+  companyId?: string | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedCreateNestedManyWithoutUserInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  notificationPreferences?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
+  receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
+  triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
+}
+
+export type UserCreateOrConnectWithoutReviewedDocumentsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutReviewedDocumentsInput, Prisma.UserUncheckedCreateWithoutReviewedDocumentsInput>
+}
+
+export type UserUpsertWithoutDocumentVerificationsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutDocumentVerificationsInput, Prisma.UserUncheckedUpdateWithoutDocumentVerificationsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutDocumentVerificationsInput, Prisma.UserUncheckedCreateWithoutDocumentVerificationsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutDocumentVerificationsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutDocumentVerificationsInput, Prisma.UserUncheckedUpdateWithoutDocumentVerificationsInput>
+}
+
+export type UserUpdateWithoutDocumentVerificationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
+  city?: Prisma.CityUpdateOneWithoutUsersNestedInput
+  roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  notificationPreferences?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
+  receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
+  triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutDocumentVerificationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  notificationPreferences?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
+  receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
+  triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
+}
+
+export type UserUpsertWithoutReviewedDocumentsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutReviewedDocumentsInput, Prisma.UserUncheckedUpdateWithoutReviewedDocumentsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutReviewedDocumentsInput, Prisma.UserUncheckedCreateWithoutReviewedDocumentsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutReviewedDocumentsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutReviewedDocumentsInput, Prisma.UserUncheckedUpdateWithoutReviewedDocumentsInput>
+}
+
+export type UserUpdateWithoutReviewedDocumentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
+  city?: Prisma.CityUpdateOneWithoutUsersNestedInput
+  roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  notificationPreferences?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
+  receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
+  triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  openedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedCompanyRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedCompanyAccount?: Prisma.CompanyAccessRequestUpdateOneWithoutApprovedUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutReviewedDocumentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  passwordHistories?: Prisma.PasswordHistoryUncheckedUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
   notificationPreferences?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
@@ -18259,6 +19367,8 @@ export type UserCreateWithoutSocialAccountsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
@@ -18336,6 +19446,8 @@ export type UserUncheckedCreateWithoutSocialAccountsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
@@ -18429,6 +19541,8 @@ export type UserUpdateWithoutSocialAccountsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
@@ -18506,6 +19620,8 @@ export type UserUncheckedUpdateWithoutSocialAccountsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
@@ -18583,6 +19699,8 @@ export type UserCreateWithoutPortfolioProjectsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -18660,6 +19778,8 @@ export type UserUncheckedCreateWithoutPortfolioProjectsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -18753,6 +19873,8 @@ export type UserUpdateWithoutPortfolioProjectsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -18830,6 +19952,8 @@ export type UserUncheckedUpdateWithoutPortfolioProjectsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -18907,6 +20031,8 @@ export type UserCreateWithoutReceivedNotificationsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -18984,6 +20110,8 @@ export type UserUncheckedCreateWithoutReceivedNotificationsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -19066,6 +20194,8 @@ export type UserCreateWithoutTriggeredNotificationsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -19143,6 +20273,8 @@ export type UserUncheckedCreateWithoutTriggeredNotificationsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -19236,6 +20368,8 @@ export type UserUpdateWithoutReceivedNotificationsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -19313,6 +20447,8 @@ export type UserUncheckedUpdateWithoutReceivedNotificationsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -19401,6 +20537,8 @@ export type UserUpdateWithoutTriggeredNotificationsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -19478,6 +20616,8 @@ export type UserUncheckedUpdateWithoutTriggeredNotificationsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -19555,6 +20695,8 @@ export type UserCreateWithoutPushSubscriptionsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -19632,6 +20774,8 @@ export type UserUncheckedCreateWithoutPushSubscriptionsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -19725,6 +20869,8 @@ export type UserUpdateWithoutPushSubscriptionsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -19802,6 +20948,8 @@ export type UserUncheckedUpdateWithoutPushSubscriptionsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -19878,6 +21026,8 @@ export type UserCreateWithoutRefreshTokensInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -19955,6 +21105,8 @@ export type UserUncheckedCreateWithoutRefreshTokensInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -20048,6 +21200,8 @@ export type UserUpdateWithoutRefreshTokensInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -20125,6 +21279,8 @@ export type UserUncheckedUpdateWithoutRefreshTokensInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -20203,6 +21359,8 @@ export type UserCreateWithoutNotificationPreferencesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -20280,6 +21438,8 @@ export type UserUncheckedCreateWithoutNotificationPreferencesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -20373,6 +21533,8 @@ export type UserUpdateWithoutNotificationPreferencesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -20450,6 +21612,8 @@ export type UserUncheckedUpdateWithoutNotificationPreferencesInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -20527,6 +21691,8 @@ export type UserCreateWithoutOpenedCompanyRequestsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -20604,6 +21770,8 @@ export type UserUncheckedCreateWithoutOpenedCompanyRequestsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -20686,6 +21854,8 @@ export type UserCreateWithoutReviewedCompanyRequestsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -20763,6 +21933,8 @@ export type UserUncheckedCreateWithoutReviewedCompanyRequestsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -20845,6 +22017,8 @@ export type UserCreateWithoutApprovedCompanyAccountInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
@@ -20922,6 +22096,8 @@ export type UserUncheckedCreateWithoutApprovedCompanyAccountInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
@@ -21015,6 +22191,8 @@ export type UserUpdateWithoutOpenedCompanyRequestsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -21092,6 +22270,8 @@ export type UserUncheckedUpdateWithoutOpenedCompanyRequestsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -21180,6 +22360,8 @@ export type UserUpdateWithoutReviewedCompanyRequestsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -21257,6 +22439,8 @@ export type UserUncheckedUpdateWithoutReviewedCompanyRequestsInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -21345,6 +22529,8 @@ export type UserUpdateWithoutApprovedCompanyAccountInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -21422,6 +22608,8 @@ export type UserUncheckedUpdateWithoutApprovedCompanyAccountInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -21516,6 +22704,8 @@ export type UserUpdateWithoutCityInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -21593,6 +22783,8 @@ export type UserUncheckedUpdateWithoutCityInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -21706,6 +22898,8 @@ export type UserUpdateWithoutCompanyInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
@@ -21783,6 +22977,8 @@ export type UserUncheckedUpdateWithoutCompanyInput = {
   radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
   radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
   radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
   radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
   radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
   socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
@@ -21864,6 +23060,8 @@ export type UserCountOutputType = {
   radarCvOwned: number
   radarCvReviewed: number
   radarSnapshots: number
+  documentVerifications: number
+  reviewedDocuments: number
   radarAuditSubjects: number
   radarAuditActors: number
   socialAccounts: number
@@ -21920,6 +23118,8 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   radarCvOwned?: boolean | UserCountOutputTypeCountRadarCvOwnedArgs
   radarCvReviewed?: boolean | UserCountOutputTypeCountRadarCvReviewedArgs
   radarSnapshots?: boolean | UserCountOutputTypeCountRadarSnapshotsArgs
+  documentVerifications?: boolean | UserCountOutputTypeCountDocumentVerificationsArgs
+  reviewedDocuments?: boolean | UserCountOutputTypeCountReviewedDocumentsArgs
   radarAuditSubjects?: boolean | UserCountOutputTypeCountRadarAuditSubjectsArgs
   radarAuditActors?: boolean | UserCountOutputTypeCountRadarAuditActorsArgs
   socialAccounts?: boolean | UserCountOutputTypeCountSocialAccountsArgs
@@ -22252,6 +23452,20 @@ export type UserCountOutputTypeCountRadarSnapshotsArgs<ExtArgs extends runtime.T
 /**
  * UserCountOutputType without action
  */
+export type UserCountOutputTypeCountDocumentVerificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.RadarDocumentVerificationWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountReviewedDocumentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.RadarDocumentVerificationWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
 export type UserCountOutputTypeCountRadarAuditSubjectsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.RadarAuditEventWhereInput
 }
@@ -22380,6 +23594,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   radarCvOwned?: boolean | Prisma.User$radarCvOwnedArgs<ExtArgs>
   radarCvReviewed?: boolean | Prisma.User$radarCvReviewedArgs<ExtArgs>
   radarSnapshots?: boolean | Prisma.User$radarSnapshotsArgs<ExtArgs>
+  documentVerifications?: boolean | Prisma.User$documentVerificationsArgs<ExtArgs>
+  reviewedDocuments?: boolean | Prisma.User$reviewedDocumentsArgs<ExtArgs>
   radarAuditSubjects?: boolean | Prisma.User$radarAuditSubjectsArgs<ExtArgs>
   radarAuditActors?: boolean | Prisma.User$radarAuditActorsArgs<ExtArgs>
   socialAccounts?: boolean | Prisma.User$socialAccountsArgs<ExtArgs>
@@ -22507,6 +23723,8 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   radarCvOwned?: boolean | Prisma.User$radarCvOwnedArgs<ExtArgs>
   radarCvReviewed?: boolean | Prisma.User$radarCvReviewedArgs<ExtArgs>
   radarSnapshots?: boolean | Prisma.User$radarSnapshotsArgs<ExtArgs>
+  documentVerifications?: boolean | Prisma.User$documentVerificationsArgs<ExtArgs>
+  reviewedDocuments?: boolean | Prisma.User$reviewedDocumentsArgs<ExtArgs>
   radarAuditSubjects?: boolean | Prisma.User$radarAuditSubjectsArgs<ExtArgs>
   radarAuditActors?: boolean | Prisma.User$radarAuditActorsArgs<ExtArgs>
   socialAccounts?: boolean | Prisma.User$socialAccountsArgs<ExtArgs>
@@ -22582,6 +23800,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     radarCvOwned: Prisma.$RadarCvEvidencePayload<ExtArgs>[]
     radarCvReviewed: Prisma.$RadarCvEvidencePayload<ExtArgs>[]
     radarSnapshots: Prisma.$RadarScoreSnapshotPayload<ExtArgs>[]
+    documentVerifications: Prisma.$RadarDocumentVerificationPayload<ExtArgs>[]
+    reviewedDocuments: Prisma.$RadarDocumentVerificationPayload<ExtArgs>[]
     radarAuditSubjects: Prisma.$RadarAuditEventPayload<ExtArgs>[]
     radarAuditActors: Prisma.$RadarAuditEventPayload<ExtArgs>[]
     socialAccounts: Prisma.$UserSocialAccountPayload<ExtArgs>[]
@@ -23055,6 +24275,8 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   radarCvOwned<T extends Prisma.User$radarCvOwnedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$radarCvOwnedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RadarCvEvidencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   radarCvReviewed<T extends Prisma.User$radarCvReviewedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$radarCvReviewedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RadarCvEvidencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   radarSnapshots<T extends Prisma.User$radarSnapshotsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$radarSnapshotsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RadarScoreSnapshotPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  documentVerifications<T extends Prisma.User$documentVerificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$documentVerificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RadarDocumentVerificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  reviewedDocuments<T extends Prisma.User$reviewedDocumentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$reviewedDocumentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RadarDocumentVerificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   radarAuditSubjects<T extends Prisma.User$radarAuditSubjectsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$radarAuditSubjectsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RadarAuditEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   radarAuditActors<T extends Prisma.User$radarAuditActorsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$radarAuditActorsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RadarAuditEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   socialAccounts<T extends Prisma.User$socialAccountsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$socialAccountsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserSocialAccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -24679,6 +25901,54 @@ export type User$radarSnapshotsArgs<ExtArgs extends runtime.Types.Extensions.Int
   take?: number
   skip?: number
   distinct?: Prisma.RadarScoreSnapshotScalarFieldEnum | Prisma.RadarScoreSnapshotScalarFieldEnum[]
+}
+
+/**
+ * User.documentVerifications
+ */
+export type User$documentVerificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the RadarDocumentVerification
+   */
+  select?: Prisma.RadarDocumentVerificationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the RadarDocumentVerification
+   */
+  omit?: Prisma.RadarDocumentVerificationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RadarDocumentVerificationInclude<ExtArgs> | null
+  where?: Prisma.RadarDocumentVerificationWhereInput
+  orderBy?: Prisma.RadarDocumentVerificationOrderByWithRelationInput | Prisma.RadarDocumentVerificationOrderByWithRelationInput[]
+  cursor?: Prisma.RadarDocumentVerificationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.RadarDocumentVerificationScalarFieldEnum | Prisma.RadarDocumentVerificationScalarFieldEnum[]
+}
+
+/**
+ * User.reviewedDocuments
+ */
+export type User$reviewedDocumentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the RadarDocumentVerification
+   */
+  select?: Prisma.RadarDocumentVerificationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the RadarDocumentVerification
+   */
+  omit?: Prisma.RadarDocumentVerificationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RadarDocumentVerificationInclude<ExtArgs> | null
+  where?: Prisma.RadarDocumentVerificationWhereInput
+  orderBy?: Prisma.RadarDocumentVerificationOrderByWithRelationInput | Prisma.RadarDocumentVerificationOrderByWithRelationInput[]
+  cursor?: Prisma.RadarDocumentVerificationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.RadarDocumentVerificationScalarFieldEnum | Prisma.RadarDocumentVerificationScalarFieldEnum[]
 }
 
 /**

@@ -61,6 +61,28 @@ describe("skillsService", () => {
     );
   });
 
+  it("keeps the origins that the API returns for the skills of the current user", async () => {
+    vi.mocked(apiClient.get).mockResolvedValue(
+      wrapResponse([
+        { ...PYTHON_RESPONSE, origins: ["manual", "experience"] },
+        { id: "44444444-4444-4444-8444-444444444444", name: "Docker", isCustom: false, origins: ["cv"] },
+      ]),
+    );
+
+    await expect(skillsService.getMySkills()).resolves.toEqual([
+      { ...PYTHON_ITEM, origins: ["manual", "experience"] },
+      { id: "44444444-4444-4444-8444-444444444444", name: "Docker", origins: ["cv"] },
+    ]);
+  });
+
+  it("does not add origins to the skills of the catalog", async () => {
+    vi.mocked(apiClient.get).mockResolvedValue(wrapResponse([PYTHON_RESPONSE]));
+
+    const [skill] = await skillsService.getCatalog();
+
+    expect(skill).not.toHaveProperty("origins");
+  });
+
   it("saves the skills of the current user with authorization headers", async () => {
     vi.mocked(apiClient.put).mockResolvedValue(wrapResponse([PYTHON_RESPONSE]));
 

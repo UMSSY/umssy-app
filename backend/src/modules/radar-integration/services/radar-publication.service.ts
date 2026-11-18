@@ -51,6 +51,7 @@ export class RadarPublicationService {
         );
         const living: Record<string, Set<string>> = {
           'work-experience': new Set(experiences.map((x) => x.id)),
+          presentation: new Set([userId]),
           education: new Set(educations.map((x) => x.id)),
           certification: new Set(certifications.map((x) => x.id)),
           cv: cvApproved,
@@ -93,6 +94,7 @@ export class RadarPublicationService {
         });
         const calculated = scoreVerifiedSkills(accepted);
         const last = await store.snapshots(userId, 1);
+        if (!last.length && !accepted.length) return null;
         if (last[0]?.fingerprint === calculated.fingerprint) {
           await store.recordSynchronized(
             userId,

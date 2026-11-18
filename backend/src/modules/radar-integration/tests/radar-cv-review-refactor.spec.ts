@@ -174,13 +174,19 @@ describe('Separación de CV y revisión', () => {
     expect(
       Reflect.getMetadata(
         ROLES_KEY,
-        RadarIntegrationController.prototype.reprocessCv,
+        Object.getOwnPropertyDescriptor(
+          RadarIntegrationController.prototype,
+          'reprocessCv',
+        )!.value,
       ),
     ).toEqual(['administrativo']);
     expect(
       Reflect.getMetadata(
         ROLES_KEY,
-        RadarIntegrationController.prototype.download,
+        Object.getOwnPropertyDescriptor(
+          RadarIntegrationController.prototype,
+          'download',
+        )!.value,
       ),
     ).toEqual(['administrativo']);
   });
@@ -188,13 +194,19 @@ describe('Separación de CV y revisión', () => {
     expect(
       Reflect.getMetadata(
         ROLES_KEY,
-        RadarIntegrationController.prototype.queue,
+        Object.getOwnPropertyDescriptor(
+          RadarIntegrationController.prototype,
+          'queue',
+        )!.value,
       ),
     ).toEqual(['administrativo']);
     expect(
       Reflect.getMetadata(
         ROLES_KEY,
-        RadarIntegrationController.prototype.decision,
+        Object.getOwnPropertyDescriptor(
+          RadarIntegrationController.prototype,
+          'decision',
+        )!.value,
       ),
     ).toEqual(['administrativo']);
   });

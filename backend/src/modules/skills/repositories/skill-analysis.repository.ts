@@ -9,12 +9,15 @@ import type { ProfileSkillRowResponse } from '../responses/profile-skill-row.res
 import type { SkillAnalysisCatalogResponse } from '../responses/skill-analysis-catalog.response.js';
 import type { SkillEvidenceRefPayload } from '../types/skill-evidence-ref-payload.type.js';
 import type { SkillReconciliationPayload } from '../types/skill-reconciliation-payload.type.js';
+import { USER_SKILL_SUMMARY_SELECT } from '../constants/user-skill-summary-select.constants.js';
+import type { UserSkillSummaryRecord } from '../types/user-skill-summary-record.type.js';
 
 export const profileSkillRowSelect = {
   id: true,
   skillId: true,
   source: true,
   verificationStatus: true,
+  radarAutoVerified: true,
   isHighRelevance: true,
   evidenceRefs: true,
   skill: { select: { name: true, areaId: true } },
@@ -44,7 +47,6 @@ export class SkillAnalysisRepository {
       },
       include: {
         skill: true,
-        user: { select: { firstName: true, lastName: true } },
       },
       take: 300,
       orderBy: { createdAt: 'desc' },
@@ -65,7 +67,7 @@ export class SkillAnalysisRepository {
   ) {
     return context.client.userSkill.updateMany({
       where: { id: skillId, verificationStatus: { not: action } },
-      data: { verificationStatus: action },
+      data: { verificationStatus: action, radarAutoVerified: false },
     });
   }
 
@@ -73,12 +75,6 @@ export class SkillAnalysisRepository {
     return this.prisma.skill.findMany({
       where: { isCustom: false },
       select: { id: true, name: true, areaId: true },
-    });
-  }
-
-  countPendingPublicationSkills(userId: string): Promise<number> {
-    return this.prisma.userSkill.count({
-      where: { userId, verificationStatus: 'pending' },
     });
   }
 
@@ -111,7 +107,7 @@ export class SkillAnalysisRepository {
     userId: string,
     plan: SkillReconciliationPayload,
     context: TransactionContext,
-  ): Promise<void> {
+  ): Promise<number> {
     const client = context.client;
     if (plan.deleteIds.length > 0) {
       await client.userSkill.deleteMany({
@@ -140,6 +136,33 @@ export class SkillAnalysisRepository {
         skipDuplicates: true,
       });
     }
+    return plan.creates.length + plan.updates.length + plan.deleteIds.length;
+  }
+
+  async applyAutomaticDecisions(
+    userId: string,
+    approvedIds: string[],
+    pendingIds: string[],
+    context: TransactionContext,
+  ) {
+    const approved = await context.client.userSkill.updateMany({
+      where: { userId, id: { in: approvedIds } },
+      data: { verificationStatus: 'approved', radarAutoVerified: true },
+    });
+    const pending = await context.client.userSkill.updateMany({
+      where: { userId, id: { in: pendingIds } },
+      data: { verificationStatus: 'pending', radarAutoVerified: false },
+    });
+    return approved.count + pending.count;
+  }
+
+  findSkillSummariesByUserIds(
+    userIds: string[],
+  ): Promise<UserSkillSummaryRecord[]> {
+    return this.prisma.userSkill.findMany({
+      where: { userId: { in: userIds } },
+      select: USER_SKILL_SUMMARY_SELECT,
+    });
   }
 
   findApprovedRecruitmentReferences(userId: string, ids: string[]) {

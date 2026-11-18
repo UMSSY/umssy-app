@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common';
+import { Logger, Optional } from '@nestjs/common';
 import {
   OnGatewayConnection,
   OnGatewayDisconnect,
@@ -16,6 +16,7 @@ import { ChatService } from '../services/chat.service.js';
 import { UserPresenceService } from '../services/user-presence.service.js';
 import { MessageService } from '../services/message.service.js';
 import { EventRoomService } from '../services/event-room.service.js';
+import { ChatVisibilityService } from '../services/chat-visibility.service.js';
 import { NotRegisteredForEventException } from '../exceptions/not-registered-for-event.exception.js';
 import { eventRoomJoinSchema } from '../requests/event-room-join.request.js';
 import type { SocketMessagePayload } from '../types/socket-message-payload.types.js';
@@ -46,6 +47,8 @@ export class ChatGateway
     private readonly userPresenceService: UserPresenceService,
     private readonly messageService: MessageService,
     private readonly eventRoomService: EventRoomService,
+    @Optional()
+    private readonly chatVisibilityService?: ChatVisibilityService,
   ) {}
 
   afterInit(server: Server) {
@@ -111,6 +114,8 @@ export class ChatGateway
     const user = client.data.user;
     if (!user) return;
 
+    this.chatVisibilityService?.removeSocket(user.id, client.id);
+
     try {
       await this.userPresenceService.markOffline(user.id);
       this.server.emit('presence:offline', {
@@ -152,6 +157,12 @@ export class ChatGateway
       }
 
       await client.join(body.conversationId);
+      this.chatVisibilityService?.setConversationVisibility(
+        user.id,
+        client.id,
+        body.conversationId,
+        true,
+      );
       return { ok: true };
     } catch (error) {
       this.logger.error(
@@ -164,6 +175,36 @@ export class ChatGateway
         error: 'No se pudo abrir la conversación',
       };
     }
+  }
+
+  @SubscribeMessage('visibility:changed')
+  handleVisibilityChanged(
+    @ConnectedSocket() client: Socket,
+    @MessageBody()
+    body?: {
+      conversationId?: string | null;
+      isFocused?: boolean;
+      visible?: boolean;
+    },
+  ) {
+    const user = client.data.user;
+    if (!user) return { ok: false };
+
+    const conversationId =
+      typeof body?.conversationId === 'string' ? body.conversationId : null;
+    const isFocused =
+      typeof body?.isFocused === 'boolean'
+        ? body.isFocused
+        : (body?.visible ?? true);
+
+    this.chatVisibilityService?.setConversationVisibility(
+      user.id,
+      client.id,
+      conversationId,
+      Boolean(isFocused),
+    );
+
+    return { ok: true };
   }
 
   @SubscribeMessage('event_room:join')

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { LoaderCircle } from 'lucide-react';
-import { CompanyAccountActivationView } from '@/modules/access-request/views/company-account-activation-view';
+import { CompanyAccountActivationView } from '@/modules/access-requests/views/company-account-activation-view';
 
 export const metadata: Metadata = {
   title: 'Activación Institucional de Empresa | UMSSY',
