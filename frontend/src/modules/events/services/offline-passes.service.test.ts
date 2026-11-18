@@ -12,6 +12,7 @@ import {
 } from '@/shared/services/storage/browser-indexed-db';
 import { loadSessionOfflinePasses } from '../utils/offline-passes-store';
 import { registrationsService } from './registrations.service';
+import { registrationsService as registrationApi } from '@/modules/event-registrations';
 import { reconcileOfflinePasses } from './offline-passes.service';
 
 const accountA = `header.${btoa(JSON.stringify({ sub: 'titulado-a' }))}.test`;
@@ -69,6 +70,19 @@ describe('HU-08-14 offline pass copies', () => {
         location: pass.event.location,
       },
     ]);
+  });
+
+  it('removes a saved QR when cancellation succeeds through the shared registration service', async () => {
+    await saveAccessToken(accountA);
+    vi.spyOn(apiClient, 'get').mockResolvedValue(response);
+    await registrationsService.getPass(pass.id);
+    vi.spyOn(apiClient, 'delete').mockResolvedValue({ data: { statusCode: 200, ok: true, detail: 'Operación exitosa', data: {
+      id: pass.id, eventId: 'event-1', status: 'cancelled', qrToken: pass.qrToken,
+      registeredAt: '2026-11-10T14:00:00.000Z', cancelledAt: '2026-11-17T14:00:00.000Z',
+    } } });
+
+    await registrationApi.cancel(pass.id, accountA);
+    expect((await loadSessionOfflinePasses(accountA))?.passes).toEqual([]);
   });
 
   it('returns an empty list with no saved pass, even after a cancelled detail response', async () => {

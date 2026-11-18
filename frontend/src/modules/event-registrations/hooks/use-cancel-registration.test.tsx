@@ -2,12 +2,11 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, renderHook } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { OFFLINE_PASSES_SNAPSHOT_QUERY_KEY } from '../constants/offline-passes.constants';
-import { useCancelRegistration } from './use-cancel-registration';
+import { OFFLINE_PASSES_SNAPSHOT_QUERY_KEY } from '@/shared/constants/offline-passes.constants';
+import { useCancelRegistration } from '@/modules/event-registrations/hooks/use-cancel-registration';
 
 const mockGetAccessToken = vi.fn<() => string | null>();
 const mockCancelRegistration = vi.fn();
-const mockRemoveOfflinePass = vi.fn();
 
 vi.mock('@/shared/services/storage/access-token-storage', () => ({
   getAccessToken: () => mockGetAccessToken(),
@@ -22,7 +21,7 @@ vi.mock('@/shared/utils/parse-api-error', () => ({
   },
 }));
 
-vi.mock('@/modules/event-registrations', () => ({
+vi.mock('@/modules/event-registrations/constants/registration-query-keys.constants', () => ({
   REGISTRATION_QUERY_KEYS: {
     passes: ['registrations', 'passes'],
     list: ['registrations', 'list'],
@@ -34,20 +33,21 @@ vi.mock('@/modules/event-registrations', () => ({
       token,
     ],
   },
+}));
+vi.mock('@/modules/event-registrations/utils/registration-error', () => ({
   getRegistrationErrorMessage: (error: unknown) =>
     error instanceof Error ? error.message : 'No se pudo cancelar la inscripción',
+}));
+vi.mock('@/modules/event-registrations/hooks/use-registration-session', () => ({
   useRegistrationSession: () => mockGetAccessToken(),
 }));
 
-vi.mock('../services/registrations.service', () => ({
+vi.mock('@/modules/event-registrations/services/registrations.service', () => ({
   registrationsService: {
     cancel: (...args: unknown[]) => mockCancelRegistration(...args),
   },
 }));
 
-vi.mock('../services/offline-passes.service', () => ({
-  removeOfflinePass: (...args: unknown[]) => mockRemoveOfflinePass(...args),
-}));
 
 function createWrapper(queryClient: QueryClient) {
   return function Wrapper({ children }: { children: ReactNode }) {
@@ -81,7 +81,6 @@ describe('useCancelRegistration', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockGetAccessToken.mockReturnValue('token-user-a');
-    mockRemoveOfflinePass.mockResolvedValue(undefined);
   });
 
   it('removes cancelled pass from cache, deletes offline pass and invalidates related queries on success', async () => {
@@ -109,7 +108,6 @@ describe('useCancelRegistration', () => {
     });
 
     expect(mockCancelRegistration).toHaveBeenCalledWith('reg-1', 'token-user-a');
-    expect(mockRemoveOfflinePass).toHaveBeenCalledWith('reg-1', 'token-user-a');
 
     const updatedCache = queryClient.getQueryData<typeof initialCache>(passesKey);
     expect(updatedCache?.registrations).toHaveLength(1);
@@ -148,7 +146,6 @@ describe('useCancelRegistration', () => {
     const preservedCache =
       queryClient.getQueryData<typeof initialCache>(passesKey);
     expect(preservedCache?.registrations).toHaveLength(2);
-    expect(mockRemoveOfflinePass).not.toHaveBeenCalled();
   });
 
   it('preserves active cache on REGISTRATION_CLOSED deadline error and invalidates when EVENT_FINISHED', async () => {

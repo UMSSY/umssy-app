@@ -51,17 +51,22 @@ export class AttendanceCheckInController {
       required: ['reference'],
       additionalProperties: false,
       properties: {
-        reference: { type: 'string', minLength: 36, maxLength: 67, description: 'QR v1: seguido de 64 hexadecimales, token de 64 hexadecimales o UUID de inscripción. No se aceptan códigos cortos.', example: '7b8988fd-6818-4929-858b-4d83b72873cf' },
+        reference: { type: 'string', oneOf: [
+          { pattern: '^[Vv]1:[A-Fa-f0-9]{64}$', minLength: 67, maxLength: 67 },
+          { pattern: '^[A-Fa-f0-9]{64}$', minLength: 64, maxLength: 64 },
+          { format: 'uuid', pattern: '^[A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12}$', minLength: 36, maxLength: 36 },
+        ], description: 'QR v1, token hexadecimal de 64 caracteres o UUID de inscripción. No se aceptan códigos cortos.', example: '7b8988fd-6818-4929-858b-4d83b72873cf' },
       },
     },
   })
-  @ApiResponse({ status: 201, description: 'Asistencia registrada', schema: { type: 'object', required: ['statusCode', 'ok', 'detail', 'data'], properties: { statusCode: { type: 'integer', example: 201 }, ok: { type: 'boolean', example: true }, detail: { type: 'string', example: 'Operación exitosa' }, data: { type: 'object', required: ['result', 'checkedInAt'], properties: { result: { type: 'string', enum: ['registered'], example: 'registered' }, checkedInAt: { type: 'string', format: 'date-time', example: '2026-11-16T14:30:00.000Z' } } } } } })
-  @ApiResponse({ status: 200, description: 'Asistencia ya registrada', schema: { type: 'object', required: ['statusCode', 'ok', 'detail', 'data'], properties: { statusCode: { type: 'integer', example: 200 }, ok: { type: 'boolean', example: true }, detail: { type: 'string', example: 'Operación exitosa' }, data: { type: 'object', required: ['result', 'checkedInAt'], properties: { result: { type: 'string', enum: ['duplicate'], example: 'duplicate' }, checkedInAt: { type: 'string', format: 'date-time', example: '2026-11-16T14:30:00.000Z' } } } } } })
-  @ApiResponse({ status: 400, description: 'Referencia o identificador inválido', schema: { type: 'object', properties: { statusCode: { type: 'integer', example: 400 }, ok: { type: 'boolean', example: false }, code: { type: 'string', example: 'VALIDATION_ERROR' }, detail: { type: 'string', example: 'Solicitud inválida.' }, data: { type: 'object', nullable: true, example: null } } } })
-  @ApiResponse({ status: 401, description: 'Sesión requerida', schema: { type: 'object', properties: { statusCode: { type: 'integer', example: 401 }, ok: { type: 'boolean', example: false }, code: { type: 'string', example: 'UNAUTHENTICATED' }, detail: { type: 'string', example: 'Se requiere una sesión válida.' }, data: { type: 'object', nullable: true, example: null } } } })
-  @ApiResponse({ status: 403, description: 'Rol o taller no autorizado', schema: { type: 'object', properties: { statusCode: { type: 'integer', example: 403 }, ok: { type: 'boolean', example: false }, code: { type: 'string', enum: ['FORBIDDEN_ROLE', 'ATTENDANCE_ACCESS_DENIED'] }, detail: { type: 'string', example: 'Acceso denegado.' }, data: { type: 'object', nullable: true, example: null } } } })
-  @ApiResponse({ status: 409, description: 'Fuera de la ventana horaria del taller', schema: { type: 'object', properties: { statusCode: { type: 'integer', example: 409 }, ok: { type: 'boolean', example: false }, code: { type: 'string', example: 'ATTENDANCE_OUTSIDE_WINDOW' }, detail: { type: 'string', example: 'Fuera de la ventana horaria de validación.' }, data: { type: 'object', nullable: true, example: null } } } })
-  @ApiResponse({ status: 422, description: 'Pase inválido o inscripción cancelada', schema: { type: 'object', properties: { statusCode: { type: 'integer', example: 422 }, ok: { type: 'boolean', example: false }, code: { type: 'string', enum: ['ATTENDANCE_PASS_INVALID', 'ATTENDANCE_PASS_CANCELLED'] }, detail: { type: 'string', example: 'Pase inválido.' }, data: { type: 'object', nullable: true, example: null } } } })
+  @ApiResponse({ status: 201, description: 'Asistencia registrada', headers: { 'Cache-Control': { description: 'Respuesta privada sin caché', schema: { type: 'string', example: 'private, no-store' } } }, schema: { type: 'object', required: ['statusCode', 'ok', 'detail', 'data'], properties: { statusCode: { type: 'integer', example: 201 }, ok: { type: 'boolean', example: true }, detail: { type: 'string', example: 'Operación exitosa' }, data: { type: 'object', required: ['result', 'checkedInAt'], properties: { result: { type: 'string', enum: ['registered'], example: 'registered' }, checkedInAt: { type: 'string', format: 'date-time', example: '2026-11-16T14:30:00.000Z' } } } } } })
+  @ApiResponse({ status: 200, description: 'Asistencia ya registrada', headers: { 'Cache-Control': { description: 'Respuesta privada sin caché', schema: { type: 'string', example: 'private, no-store' } } }, schema: { type: 'object', required: ['statusCode', 'ok', 'detail', 'data'], properties: { statusCode: { type: 'integer', example: 200 }, ok: { type: 'boolean', example: true }, detail: { type: 'string', example: 'Operación exitosa' }, data: { type: 'object', required: ['result', 'checkedInAt'], properties: { result: { type: 'string', enum: ['duplicate'], example: 'duplicate' }, checkedInAt: { type: 'string', format: 'date-time', example: '2026-11-16T14:30:00.000Z' } } } } } })
+  @ApiResponse({ status: 400, description: 'Referencia o identificador inválido', schema: { $ref: '#/components/schemas/ApiErrorResponse' }, example: { statusCode: 400, ok: false, code: 'VALIDATION_ERROR', detail: 'Solicitud inválida.', data: null } })
+  @ApiResponse({ status: 401, description: 'Sesión requerida', schema: { $ref: '#/components/schemas/ApiErrorResponse' }, example: { statusCode: 401, ok: false, code: 'UNAUTHENTICATED', detail: 'Se requiere una sesión válida.', data: null } })
+  @ApiResponse({ status: 403, description: 'Rol o taller no autorizado', schema: { $ref: '#/components/schemas/ApiErrorResponse' }, example: { statusCode: 403, ok: false, code: 'ATTENDANCE_ACCESS_DENIED', detail: 'Acceso denegado.', data: null } })
+  @ApiResponse({ status: 409, description: 'Fuera de la ventana horaria del taller', schema: { $ref: '#/components/schemas/ApiErrorResponse' }, example: { statusCode: 409, ok: false, code: 'ATTENDANCE_OUTSIDE_WINDOW', detail: 'Fuera de la ventana horaria de validación.', data: null } })
+  @ApiResponse({ status: 422, description: 'Pase inválido o inscripción cancelada', schema: { $ref: '#/components/schemas/ApiErrorResponse' }, example: { statusCode: 422, ok: false, code: 'ATTENDANCE_PASS_INVALID', detail: 'Pase inválido.', data: null } })
+  @ApiResponse({ status: 500, description: 'Error interno al registrar asistencia', schema: { $ref: '#/components/schemas/ApiErrorResponse' }, example: { statusCode: 500, ok: false, code: 'INTERNAL_ERROR', detail: 'Error interno del servidor.', data: null } })
   async checkIn(
     @Param(new ZodValidationPipe(AttendanceCheckInParamsSchema, () => new ValidationException()))
     params: AttendanceCheckInParams,
@@ -73,6 +78,6 @@ export class AttendanceCheckInController {
     const result = await this.service.checkIn(params.eventId, actor, body.reference.value);
     const statusCode = result.result === 'registered' ? 201 : 200;
     response.status(statusCode);
-    return { statusCode, ok: true, detail: 'Operación exitosa', data: result };
+    return result;
   }
 }
