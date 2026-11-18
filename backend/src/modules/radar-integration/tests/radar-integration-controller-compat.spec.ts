@@ -13,7 +13,9 @@ function setup() {
     reprocessCv: vi.fn(),
     downloadForAdmin: vi.fn(),
   };
-  const controller = new RadarIntegrationController(svc as unknown as RadarIntegrationService);
+  const controller = new RadarIntegrationController(
+    svc as unknown as RadarIntegrationService,
+  );
   return { svc, controller };
 }
 
@@ -27,7 +29,10 @@ describe('RadarIntegrationController (develop)', () => {
     await controller.rescan('user');
     await controller.recalculate('user');
     await controller.queue('admin');
-    await controller.decision('admin', 'cv', 'id', { decision: 'approved' });
+    await controller.decision('admin', 'cv', 'id', {
+      operationId: '55555555-5555-4555-8555-555555555555',
+      decision: 'approved',
+    });
     await controller.reprocessCv('admin', 'id');
     const file = await controller.download('admin', 'id');
 
@@ -40,9 +45,9 @@ describe('RadarIntegrationController (develop)', () => {
       'cv',
       'id',
       'approved',
+      '55555555-5555-4555-8555-555555555555',
     );
     expect(svc.reprocessCv).toHaveBeenCalledWith('admin', 'id');
     expect(file).toBeInstanceOf(StreamableFile);
   });
-
 });
