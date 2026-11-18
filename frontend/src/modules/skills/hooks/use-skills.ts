@@ -15,6 +15,7 @@ import type { SkillItem } from '../types/skill-item.types';
 import type { SkillsProfileResponse } from '../types/skills-profile-response.types';
 import type { UseSkillsResult } from '../types/use-skills-result.types';
 import { getSkillsErrorMessage } from '../utils/get-skills-error-message';
+import { isManualSkill } from '../utils/is-manual-skill';
 
 export function useSkills({
   forGuide = false,
@@ -86,7 +87,9 @@ export function useSkills({
   const mutation = useMutation({
     mutationFn: async (selection: SkillItem[]) => {
       const resolvedSkills = await Promise.all(selection.map(resolveSkill));
-      const skillIds = [...new Set(resolvedSkills.map(({ id }) => id))];
+      const skillIds = [
+        ...new Set(resolvedSkills.filter(isManualSkill).map(({ id }) => id)),
+      ];
       return skillsService.saveMySkills(skillIds);
     },
     onSuccess: invalidateCompleteness,

@@ -1,5 +1,7 @@
 import type { NlpDiscardReason } from '../types/nlp-discard-reason.type.js';
 
+export const MAX_NLP_SOURCE_LENGTH = 20_000;
+
 export const NLP_SKILL_NAME_ALLOWED_CHARACTERS = /^[\p{L}\p{N} +#.\-_/&()]+$/u;
 export const NLP_SKILL_NAME_LETTER = /\p{L}/u;
 export const NLP_SKILL_NAME_REPEATED_CHARACTER = /(.)\1{3,}/iu;

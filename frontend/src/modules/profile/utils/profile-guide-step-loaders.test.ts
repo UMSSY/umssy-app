@@ -4,13 +4,13 @@ const educationStep = () => null;
 
 beforeEach(() => {
   vi.resetModules();
-  vi.doMock('@/modules/education', () => ({
+  vi.doMock('@/modules/educations', () => ({
     EducationGuideStep: educationStep,
   }));
 });
 
 afterEach(() => {
-  vi.doUnmock('@/modules/education');
+  vi.doUnmock('@/modules/educations');
 });
 
 describe('profile guide step loading', () => {
@@ -29,7 +29,7 @@ describe('profile guide step loading', () => {
     const importEducation = vi.fn(() => ({
       EducationGuideStep: educationStep,
     }));
-    vi.doMock('@/modules/education', importEducation);
+    vi.doMock('@/modules/educations', importEducation);
     const { preloadProfileGuideStep } =
       await import('./profile-guide-step-loaders');
 
@@ -42,7 +42,7 @@ describe('profile guide step loading', () => {
   it.each(['foreground', 'speculative'])(
     'allows a new attempt after a %s load failure',
     async (mode) => {
-      vi.doMock('@/modules/education', () => {
+      vi.doMock('@/modules/educations', () => {
         throw new Error('The module could not be downloaded');
       });
       const { loadProfileGuideStep, preloadProfileGuideStep } =
@@ -55,7 +55,7 @@ describe('profile guide step loading', () => {
           preloadProfileGuideStep('education'),
         ).resolves.toBeUndefined();
       }
-      vi.doMock('@/modules/education', () => ({
+      vi.doMock('@/modules/educations', () => ({
         EducationGuideStep: educationStep,
       }));
 

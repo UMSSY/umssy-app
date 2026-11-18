@@ -1,5 +1,8 @@
+import { radarPublishedPayloadSchema } from '../notification/radar-published-payload.schema.js';
+import { NotificationsService } from '../../notifications/services/notifications.service.js';
+import { NotificationType } from '../../notifications/types/notification-type.enum.js';
 import { ProfileSkillsAnalysisService } from '../../nlp/services/profile-skills-analysis.service.js';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { RadarPublicationPendingAnalysisException } from '../exceptions/radar-publication-pending-analysis.exception.js';
 import type { ProfileSkillsPublished } from '../../../common/profile-skills/profile-skills-events.service.js';
 import { AREA_IDS, scoreVerifiedSkills } from '../utils/radar-scoring.js';
@@ -10,11 +13,13 @@ import type { PublishedSkill } from '../types/radar-publication.types.js';
 
 @Injectable()
 export class RadarPublicationService {
+  private readonly logger = new Logger(RadarPublicationService.name);
   constructor(
     private readonly repository: RadarPublicationRepository,
     private readonly mapper: RadarPublicationMapper,
     private readonly sources: RadarPublicationEvidenceService,
     private readonly nlp: ProfileSkillsAnalysisService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   // Inmutable e idempotente por titular; no se publica un snapshot parcial.
@@ -25,8 +30,11 @@ export class RadarPublicationService {
   ) {
     let revision = publication?.inputRevision ?? 0;
     let attemptStartedAt = new Date();
+    let publishedSnapshotId: string | null = null;
+    let publishedVersion = 0;
+    let result;
     try {
-      return await this.repository.withTransaction(async (store, context) => {
+      result = await this.repository.withTransaction(async (store, context) => {
         attemptStartedAt = await store.lockPublication(userId);
         const state = await this.nlp.readLockedRevision(userId, context);
         revision = state?.input_revision ?? 0;
@@ -51,6 +59,7 @@ export class RadarPublicationService {
         );
         const living: Record<string, Set<string>> = {
           'work-experience': new Set(experiences.map((x) => x.id)),
+          presentation: new Set([userId]),
           education: new Set(educations.map((x) => x.id)),
           certification: new Set(certifications.map((x) => x.id)),
           cv: cvApproved,
@@ -93,6 +102,7 @@ export class RadarPublicationService {
         });
         const calculated = scoreVerifiedSkills(accepted);
         const last = await store.snapshots(userId, 1);
+        if (!last.length && !accepted.length) return null;
         if (last[0]?.fingerprint === calculated.fingerprint) {
           await store.recordSynchronized(
             userId,
@@ -113,6 +123,13 @@ export class RadarPublicationService {
           version,
           calculated,
         );
+
+        if (!inserted[0]?.id) {
+          throw new Error(
+            'No se pudo obtener el identificador del radar publicado.',
+          );
+        }
+
         await store.recordPublished(
           userId,
           actorId,
@@ -120,6 +137,10 @@ export class RadarPublicationService {
           revision,
           accepted,
         );
+
+        publishedSnapshotId = inserted[0].id;
+        publishedVersion = version;
+
         return this.mapper.snapshotResponse(
           { ...inserted[0], source_revision: revision, skills: accepted },
           last[0],
@@ -137,6 +158,27 @@ export class RadarPublicationService {
       } catch {}
       throw error;
     }
+    if (publishedSnapshotId) {
+      const snapshotId = String(publishedSnapshotId);
+      try {
+        await this.notifications.notify({
+          recipientIds: [userId],
+          type: NotificationType.RADAR_PUBLISHED,
+          payload: radarPublishedPayloadSchema.parse({
+            radarVersion: String(publishedVersion),
+            publishedAt: new Date().toISOString(),
+          }),
+          actionUrl: `/profile/radar?snapshot=${snapshotId}`,
+          groupKey: `radar:${snapshotId}`,
+        });
+      } catch (error) {
+        this.logger.error(
+          'No se pudo notificar la publicacion del radar.',
+          error,
+        );
+      }
+    }
+    return result;
   }
 
   async myRadar(userId: string) {

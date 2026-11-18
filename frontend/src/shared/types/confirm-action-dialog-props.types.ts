@@ -3,6 +3,7 @@ export interface ConfirmActionDialogProps {
   title: string;
   description: string;
   busy?: boolean;
+  error?: string;
   onConfirm: () => void;
   onOpenChange: (value: boolean) => void;
 }

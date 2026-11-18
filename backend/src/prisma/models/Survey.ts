@@ -36,6 +36,9 @@ export type SurveyMinAggregateOutputType = {
   closesAt: Date | null
   statusId: string | null
   createdById: string | null
+  closingSoonNotifiedAt: Date | null
+  closedNotifiedAt: Date | null
+  lastReminderSentAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -52,6 +55,9 @@ export type SurveyMaxAggregateOutputType = {
   closesAt: Date | null
   statusId: string | null
   createdById: string | null
+  closingSoonNotifiedAt: Date | null
+  closedNotifiedAt: Date | null
+  lastReminderSentAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -68,6 +74,9 @@ export type SurveyCountAggregateOutputType = {
   closesAt: number
   statusId: number
   createdById: number
+  closingSoonNotifiedAt: number
+  closedNotifiedAt: number
+  lastReminderSentAt: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -86,6 +95,9 @@ export type SurveyMinAggregateInputType = {
   closesAt?: true
   statusId?: true
   createdById?: true
+  closingSoonNotifiedAt?: true
+  closedNotifiedAt?: true
+  lastReminderSentAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -102,6 +114,9 @@ export type SurveyMaxAggregateInputType = {
   closesAt?: true
   statusId?: true
   createdById?: true
+  closingSoonNotifiedAt?: true
+  closedNotifiedAt?: true
+  lastReminderSentAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -118,6 +133,9 @@ export type SurveyCountAggregateInputType = {
   closesAt?: true
   statusId?: true
   createdById?: true
+  closingSoonNotifiedAt?: true
+  closedNotifiedAt?: true
+  lastReminderSentAt?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -207,6 +225,9 @@ export type SurveyGroupByOutputType = {
   closesAt: Date | null
   statusId: string
   createdById: string
+  closingSoonNotifiedAt: Date | null
+  closedNotifiedAt: Date | null
+  lastReminderSentAt: Date | null
   createdAt: Date
   updatedAt: Date
   _count: SurveyCountAggregateOutputType | null
@@ -244,6 +265,9 @@ export type SurveyWhereInput = {
   closesAt?: Prisma.DateTimeNullableFilter<"Survey"> | Date | string | null
   statusId?: Prisma.UuidFilter<"Survey"> | string
   createdById?: Prisma.UuidFilter<"Survey"> | string
+  closingSoonNotifiedAt?: Prisma.DateTimeNullableFilter<"Survey"> | Date | string | null
+  closedNotifiedAt?: Prisma.DateTimeNullableFilter<"Survey"> | Date | string | null
+  lastReminderSentAt?: Prisma.DateTimeNullableFilter<"Survey"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Survey"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Survey"> | Date | string
   career?: Prisma.XOR<Prisma.CareerNullableScalarRelationFilter, Prisma.CareerWhereInput> | null
@@ -252,6 +276,7 @@ export type SurveyWhereInput = {
   createdBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   questions?: Prisma.SurveyQuestionListRelationFilter
   responses?: Prisma.SurveyResponseListRelationFilter
+  alertConfig?: Prisma.XOR<Prisma.SurveyAlertConfigNullableScalarRelationFilter, Prisma.SurveyAlertConfigWhereInput> | null
 }
 
 export type SurveyOrderByWithRelationInput = {
@@ -266,6 +291,9 @@ export type SurveyOrderByWithRelationInput = {
   closesAt?: Prisma.SortOrderInput | Prisma.SortOrder
   statusId?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
+  closingSoonNotifiedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  closedNotifiedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastReminderSentAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   career?: Prisma.CareerOrderByWithRelationInput
@@ -274,6 +302,7 @@ export type SurveyOrderByWithRelationInput = {
   createdBy?: Prisma.UserOrderByWithRelationInput
   questions?: Prisma.SurveyQuestionOrderByRelationAggregateInput
   responses?: Prisma.SurveyResponseOrderByRelationAggregateInput
+  alertConfig?: Prisma.SurveyAlertConfigOrderByWithRelationInput
 }
 
 export type SurveyWhereUniqueInput = Prisma.AtLeast<{
@@ -291,6 +320,9 @@ export type SurveyWhereUniqueInput = Prisma.AtLeast<{
   closesAt?: Prisma.DateTimeNullableFilter<"Survey"> | Date | string | null
   statusId?: Prisma.UuidFilter<"Survey"> | string
   createdById?: Prisma.UuidFilter<"Survey"> | string
+  closingSoonNotifiedAt?: Prisma.DateTimeNullableFilter<"Survey"> | Date | string | null
+  closedNotifiedAt?: Prisma.DateTimeNullableFilter<"Survey"> | Date | string | null
+  lastReminderSentAt?: Prisma.DateTimeNullableFilter<"Survey"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Survey"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Survey"> | Date | string
   career?: Prisma.XOR<Prisma.CareerNullableScalarRelationFilter, Prisma.CareerWhereInput> | null
@@ -299,6 +331,7 @@ export type SurveyWhereUniqueInput = Prisma.AtLeast<{
   createdBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   questions?: Prisma.SurveyQuestionListRelationFilter
   responses?: Prisma.SurveyResponseListRelationFilter
+  alertConfig?: Prisma.XOR<Prisma.SurveyAlertConfigNullableScalarRelationFilter, Prisma.SurveyAlertConfigWhereInput> | null
 }, "id">
 
 export type SurveyOrderByWithAggregationInput = {
@@ -313,6 +346,9 @@ export type SurveyOrderByWithAggregationInput = {
   closesAt?: Prisma.SortOrderInput | Prisma.SortOrder
   statusId?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
+  closingSoonNotifiedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  closedNotifiedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastReminderSentAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.SurveyCountOrderByAggregateInput
@@ -335,6 +371,9 @@ export type SurveyScalarWhereWithAggregatesInput = {
   closesAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Survey"> | Date | string | null
   statusId?: Prisma.UuidWithAggregatesFilter<"Survey"> | string
   createdById?: Prisma.UuidWithAggregatesFilter<"Survey"> | string
+  closingSoonNotifiedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Survey"> | Date | string | null
+  closedNotifiedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Survey"> | Date | string | null
+  lastReminderSentAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Survey"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Survey"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Survey"> | Date | string
 }
@@ -347,6 +386,9 @@ export type SurveyCreateInput = {
   academicPeriod?: string | null
   opensAt?: Date | string | null
   closesAt?: Date | string | null
+  closingSoonNotifiedAt?: Date | string | null
+  closedNotifiedAt?: Date | string | null
+  lastReminderSentAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   career?: Prisma.CareerCreateNestedOneWithoutSurveysInput
@@ -355,6 +397,7 @@ export type SurveyCreateInput = {
   createdBy: Prisma.UserCreateNestedOneWithoutCreatedSurveysInput
   questions?: Prisma.SurveyQuestionCreateNestedManyWithoutSurveyInput
   responses?: Prisma.SurveyResponseCreateNestedManyWithoutSurveyInput
+  alertConfig?: Prisma.SurveyAlertConfigCreateNestedOneWithoutSurveyInput
 }
 
 export type SurveyUncheckedCreateInput = {
@@ -369,10 +412,14 @@ export type SurveyUncheckedCreateInput = {
   closesAt?: Date | string | null
   statusId: string
   createdById: string
+  closingSoonNotifiedAt?: Date | string | null
+  closedNotifiedAt?: Date | string | null
+  lastReminderSentAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   questions?: Prisma.SurveyQuestionUncheckedCreateNestedManyWithoutSurveyInput
   responses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutSurveyInput
+  alertConfig?: Prisma.SurveyAlertConfigUncheckedCreateNestedOneWithoutSurveyInput
 }
 
 export type SurveyUpdateInput = {
@@ -383,6 +430,9 @@ export type SurveyUpdateInput = {
   academicPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   opensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   closesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closingSoonNotifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedNotifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastReminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   career?: Prisma.CareerUpdateOneWithoutSurveysNestedInput
@@ -391,6 +441,7 @@ export type SurveyUpdateInput = {
   createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedSurveysNestedInput
   questions?: Prisma.SurveyQuestionUpdateManyWithoutSurveyNestedInput
   responses?: Prisma.SurveyResponseUpdateManyWithoutSurveyNestedInput
+  alertConfig?: Prisma.SurveyAlertConfigUpdateOneWithoutSurveyNestedInput
 }
 
 export type SurveyUncheckedUpdateInput = {
@@ -405,10 +456,14 @@ export type SurveyUncheckedUpdateInput = {
   closesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   statusId?: Prisma.StringFieldUpdateOperationsInput | string
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  closingSoonNotifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedNotifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastReminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   questions?: Prisma.SurveyQuestionUncheckedUpdateManyWithoutSurveyNestedInput
   responses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutSurveyNestedInput
+  alertConfig?: Prisma.SurveyAlertConfigUncheckedUpdateOneWithoutSurveyNestedInput
 }
 
 export type SurveyCreateManyInput = {
@@ -423,6 +478,9 @@ export type SurveyCreateManyInput = {
   closesAt?: Date | string | null
   statusId: string
   createdById: string
+  closingSoonNotifiedAt?: Date | string | null
+  closedNotifiedAt?: Date | string | null
+  lastReminderSentAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -435,6 +493,9 @@ export type SurveyUpdateManyMutationInput = {
   academicPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   opensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   closesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closingSoonNotifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedNotifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastReminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -451,6 +512,9 @@ export type SurveyUncheckedUpdateManyInput = {
   closesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   statusId?: Prisma.StringFieldUpdateOperationsInput | string
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  closingSoonNotifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedNotifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastReminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -477,6 +541,9 @@ export type SurveyCountOrderByAggregateInput = {
   closesAt?: Prisma.SortOrder
   statusId?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
+  closingSoonNotifiedAt?: Prisma.SortOrder
+  closedNotifiedAt?: Prisma.SortOrder
+  lastReminderSentAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -493,6 +560,9 @@ export type SurveyMaxOrderByAggregateInput = {
   closesAt?: Prisma.SortOrder
   statusId?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
+  closingSoonNotifiedAt?: Prisma.SortOrder
+  closedNotifiedAt?: Prisma.SortOrder
+  lastReminderSentAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -509,6 +579,9 @@ export type SurveyMinOrderByAggregateInput = {
   closesAt?: Prisma.SortOrder
   statusId?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
+  closingSoonNotifiedAt?: Prisma.SortOrder
+  closedNotifiedAt?: Prisma.SortOrder
+  lastReminderSentAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -686,6 +759,20 @@ export type SurveyUncheckedUpdateManyWithoutTargetAudienceNestedInput = {
   deleteMany?: Prisma.SurveyScalarWhereInput | Prisma.SurveyScalarWhereInput[]
 }
 
+export type SurveyCreateNestedOneWithoutAlertConfigInput = {
+  create?: Prisma.XOR<Prisma.SurveyCreateWithoutAlertConfigInput, Prisma.SurveyUncheckedCreateWithoutAlertConfigInput>
+  connectOrCreate?: Prisma.SurveyCreateOrConnectWithoutAlertConfigInput
+  connect?: Prisma.SurveyWhereUniqueInput
+}
+
+export type SurveyUpdateOneRequiredWithoutAlertConfigNestedInput = {
+  create?: Prisma.XOR<Prisma.SurveyCreateWithoutAlertConfigInput, Prisma.SurveyUncheckedCreateWithoutAlertConfigInput>
+  connectOrCreate?: Prisma.SurveyCreateOrConnectWithoutAlertConfigInput
+  upsert?: Prisma.SurveyUpsertWithoutAlertConfigInput
+  connect?: Prisma.SurveyWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.SurveyUpdateToOneWithWhereWithoutAlertConfigInput, Prisma.SurveyUpdateWithoutAlertConfigInput>, Prisma.SurveyUncheckedUpdateWithoutAlertConfigInput>
+}
+
 export type SurveyCreateNestedOneWithoutQuestionsInput = {
   create?: Prisma.XOR<Prisma.SurveyCreateWithoutQuestionsInput, Prisma.SurveyUncheckedCreateWithoutQuestionsInput>
   connectOrCreate?: Prisma.SurveyCreateOrConnectWithoutQuestionsInput
@@ -722,6 +809,9 @@ export type SurveyCreateWithoutCreatedByInput = {
   academicPeriod?: string | null
   opensAt?: Date | string | null
   closesAt?: Date | string | null
+  closingSoonNotifiedAt?: Date | string | null
+  closedNotifiedAt?: Date | string | null
+  lastReminderSentAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   career?: Prisma.CareerCreateNestedOneWithoutSurveysInput
@@ -729,6 +819,7 @@ export type SurveyCreateWithoutCreatedByInput = {
   targetAudience?: Prisma.SurveyTargetAudienceCreateNestedOneWithoutSurveysInput
   questions?: Prisma.SurveyQuestionCreateNestedManyWithoutSurveyInput
   responses?: Prisma.SurveyResponseCreateNestedManyWithoutSurveyInput
+  alertConfig?: Prisma.SurveyAlertConfigCreateNestedOneWithoutSurveyInput
 }
 
 export type SurveyUncheckedCreateWithoutCreatedByInput = {
@@ -742,10 +833,14 @@ export type SurveyUncheckedCreateWithoutCreatedByInput = {
   opensAt?: Date | string | null
   closesAt?: Date | string | null
   statusId: string
+  closingSoonNotifiedAt?: Date | string | null
+  closedNotifiedAt?: Date | string | null
+  lastReminderSentAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   questions?: Prisma.SurveyQuestionUncheckedCreateNestedManyWithoutSurveyInput
   responses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutSurveyInput
+  alertConfig?: Prisma.SurveyAlertConfigUncheckedCreateNestedOneWithoutSurveyInput
 }
 
 export type SurveyCreateOrConnectWithoutCreatedByInput = {
@@ -789,6 +884,9 @@ export type SurveyScalarWhereInput = {
   closesAt?: Prisma.DateTimeNullableFilter<"Survey"> | Date | string | null
   statusId?: Prisma.UuidFilter<"Survey"> | string
   createdById?: Prisma.UuidFilter<"Survey"> | string
+  closingSoonNotifiedAt?: Prisma.DateTimeNullableFilter<"Survey"> | Date | string | null
+  closedNotifiedAt?: Prisma.DateTimeNullableFilter<"Survey"> | Date | string | null
+  lastReminderSentAt?: Prisma.DateTimeNullableFilter<"Survey"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Survey"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Survey"> | Date | string
 }
@@ -801,6 +899,9 @@ export type SurveyCreateWithoutCareerInput = {
   academicPeriod?: string | null
   opensAt?: Date | string | null
   closesAt?: Date | string | null
+  closingSoonNotifiedAt?: Date | string | null
+  closedNotifiedAt?: Date | string | null
+  lastReminderSentAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   status: Prisma.SurveyStatusCreateNestedOneWithoutSurveysInput
@@ -808,6 +909,7 @@ export type SurveyCreateWithoutCareerInput = {
   createdBy: Prisma.UserCreateNestedOneWithoutCreatedSurveysInput
   questions?: Prisma.SurveyQuestionCreateNestedManyWithoutSurveyInput
   responses?: Prisma.SurveyResponseCreateNestedManyWithoutSurveyInput
+  alertConfig?: Prisma.SurveyAlertConfigCreateNestedOneWithoutSurveyInput
 }
 
 export type SurveyUncheckedCreateWithoutCareerInput = {
@@ -821,10 +923,14 @@ export type SurveyUncheckedCreateWithoutCareerInput = {
   closesAt?: Date | string | null
   statusId: string
   createdById: string
+  closingSoonNotifiedAt?: Date | string | null
+  closedNotifiedAt?: Date | string | null
+  lastReminderSentAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   questions?: Prisma.SurveyQuestionUncheckedCreateNestedManyWithoutSurveyInput
   responses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutSurveyInput
+  alertConfig?: Prisma.SurveyAlertConfigUncheckedCreateNestedOneWithoutSurveyInput
 }
 
 export type SurveyCreateOrConnectWithoutCareerInput = {
@@ -861,6 +967,9 @@ export type SurveyCreateWithoutStatusInput = {
   academicPeriod?: string | null
   opensAt?: Date | string | null
   closesAt?: Date | string | null
+  closingSoonNotifiedAt?: Date | string | null
+  closedNotifiedAt?: Date | string | null
+  lastReminderSentAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   career?: Prisma.CareerCreateNestedOneWithoutSurveysInput
@@ -868,6 +977,7 @@ export type SurveyCreateWithoutStatusInput = {
   createdBy: Prisma.UserCreateNestedOneWithoutCreatedSurveysInput
   questions?: Prisma.SurveyQuestionCreateNestedManyWithoutSurveyInput
   responses?: Prisma.SurveyResponseCreateNestedManyWithoutSurveyInput
+  alertConfig?: Prisma.SurveyAlertConfigCreateNestedOneWithoutSurveyInput
 }
 
 export type SurveyUncheckedCreateWithoutStatusInput = {
@@ -881,10 +991,14 @@ export type SurveyUncheckedCreateWithoutStatusInput = {
   opensAt?: Date | string | null
   closesAt?: Date | string | null
   createdById: string
+  closingSoonNotifiedAt?: Date | string | null
+  closedNotifiedAt?: Date | string | null
+  lastReminderSentAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   questions?: Prisma.SurveyQuestionUncheckedCreateNestedManyWithoutSurveyInput
   responses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutSurveyInput
+  alertConfig?: Prisma.SurveyAlertConfigUncheckedCreateNestedOneWithoutSurveyInput
 }
 
 export type SurveyCreateOrConnectWithoutStatusInput = {
@@ -921,6 +1035,9 @@ export type SurveyCreateWithoutTargetAudienceInput = {
   academicPeriod?: string | null
   opensAt?: Date | string | null
   closesAt?: Date | string | null
+  closingSoonNotifiedAt?: Date | string | null
+  closedNotifiedAt?: Date | string | null
+  lastReminderSentAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   career?: Prisma.CareerCreateNestedOneWithoutSurveysInput
@@ -928,6 +1045,7 @@ export type SurveyCreateWithoutTargetAudienceInput = {
   createdBy: Prisma.UserCreateNestedOneWithoutCreatedSurveysInput
   questions?: Prisma.SurveyQuestionCreateNestedManyWithoutSurveyInput
   responses?: Prisma.SurveyResponseCreateNestedManyWithoutSurveyInput
+  alertConfig?: Prisma.SurveyAlertConfigCreateNestedOneWithoutSurveyInput
 }
 
 export type SurveyUncheckedCreateWithoutTargetAudienceInput = {
@@ -941,10 +1059,14 @@ export type SurveyUncheckedCreateWithoutTargetAudienceInput = {
   closesAt?: Date | string | null
   statusId: string
   createdById: string
+  closingSoonNotifiedAt?: Date | string | null
+  closedNotifiedAt?: Date | string | null
+  lastReminderSentAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   questions?: Prisma.SurveyQuestionUncheckedCreateNestedManyWithoutSurveyInput
   responses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutSurveyInput
+  alertConfig?: Prisma.SurveyAlertConfigUncheckedCreateNestedOneWithoutSurveyInput
 }
 
 export type SurveyCreateOrConnectWithoutTargetAudienceInput = {
@@ -973,6 +1095,106 @@ export type SurveyUpdateManyWithWhereWithoutTargetAudienceInput = {
   data: Prisma.XOR<Prisma.SurveyUpdateManyMutationInput, Prisma.SurveyUncheckedUpdateManyWithoutTargetAudienceInput>
 }
 
+export type SurveyCreateWithoutAlertConfigInput = {
+  id?: string
+  title: string
+  description?: string | null
+  targetsAllCareers?: boolean
+  academicPeriod?: string | null
+  opensAt?: Date | string | null
+  closesAt?: Date | string | null
+  closingSoonNotifiedAt?: Date | string | null
+  closedNotifiedAt?: Date | string | null
+  lastReminderSentAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  career?: Prisma.CareerCreateNestedOneWithoutSurveysInput
+  status: Prisma.SurveyStatusCreateNestedOneWithoutSurveysInput
+  targetAudience?: Prisma.SurveyTargetAudienceCreateNestedOneWithoutSurveysInput
+  createdBy: Prisma.UserCreateNestedOneWithoutCreatedSurveysInput
+  questions?: Prisma.SurveyQuestionCreateNestedManyWithoutSurveyInput
+  responses?: Prisma.SurveyResponseCreateNestedManyWithoutSurveyInput
+}
+
+export type SurveyUncheckedCreateWithoutAlertConfigInput = {
+  id?: string
+  title: string
+  description?: string | null
+  careerId?: string | null
+  targetsAllCareers?: boolean
+  academicPeriod?: string | null
+  targetAudienceId?: string | null
+  opensAt?: Date | string | null
+  closesAt?: Date | string | null
+  statusId: string
+  createdById: string
+  closingSoonNotifiedAt?: Date | string | null
+  closedNotifiedAt?: Date | string | null
+  lastReminderSentAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  questions?: Prisma.SurveyQuestionUncheckedCreateNestedManyWithoutSurveyInput
+  responses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutSurveyInput
+}
+
+export type SurveyCreateOrConnectWithoutAlertConfigInput = {
+  where: Prisma.SurveyWhereUniqueInput
+  create: Prisma.XOR<Prisma.SurveyCreateWithoutAlertConfigInput, Prisma.SurveyUncheckedCreateWithoutAlertConfigInput>
+}
+
+export type SurveyUpsertWithoutAlertConfigInput = {
+  update: Prisma.XOR<Prisma.SurveyUpdateWithoutAlertConfigInput, Prisma.SurveyUncheckedUpdateWithoutAlertConfigInput>
+  create: Prisma.XOR<Prisma.SurveyCreateWithoutAlertConfigInput, Prisma.SurveyUncheckedCreateWithoutAlertConfigInput>
+  where?: Prisma.SurveyWhereInput
+}
+
+export type SurveyUpdateToOneWithWhereWithoutAlertConfigInput = {
+  where?: Prisma.SurveyWhereInput
+  data: Prisma.XOR<Prisma.SurveyUpdateWithoutAlertConfigInput, Prisma.SurveyUncheckedUpdateWithoutAlertConfigInput>
+}
+
+export type SurveyUpdateWithoutAlertConfigInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  targetsAllCareers?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  academicPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  opensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closingSoonNotifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedNotifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastReminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  career?: Prisma.CareerUpdateOneWithoutSurveysNestedInput
+  status?: Prisma.SurveyStatusUpdateOneRequiredWithoutSurveysNestedInput
+  targetAudience?: Prisma.SurveyTargetAudienceUpdateOneWithoutSurveysNestedInput
+  createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedSurveysNestedInput
+  questions?: Prisma.SurveyQuestionUpdateManyWithoutSurveyNestedInput
+  responses?: Prisma.SurveyResponseUpdateManyWithoutSurveyNestedInput
+}
+
+export type SurveyUncheckedUpdateWithoutAlertConfigInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  careerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  targetsAllCareers?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  academicPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  targetAudienceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  opensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  statusId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  closingSoonNotifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedNotifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastReminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  questions?: Prisma.SurveyQuestionUncheckedUpdateManyWithoutSurveyNestedInput
+  responses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutSurveyNestedInput
+}
+
 export type SurveyCreateWithoutQuestionsInput = {
   id?: string
   title: string
@@ -981,6 +1203,9 @@ export type SurveyCreateWithoutQuestionsInput = {
   academicPeriod?: string | null
   opensAt?: Date | string | null
   closesAt?: Date | string | null
+  closingSoonNotifiedAt?: Date | string | null
+  closedNotifiedAt?: Date | string | null
+  lastReminderSentAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   career?: Prisma.CareerCreateNestedOneWithoutSurveysInput
@@ -988,6 +1213,7 @@ export type SurveyCreateWithoutQuestionsInput = {
   targetAudience?: Prisma.SurveyTargetAudienceCreateNestedOneWithoutSurveysInput
   createdBy: Prisma.UserCreateNestedOneWithoutCreatedSurveysInput
   responses?: Prisma.SurveyResponseCreateNestedManyWithoutSurveyInput
+  alertConfig?: Prisma.SurveyAlertConfigCreateNestedOneWithoutSurveyInput
 }
 
 export type SurveyUncheckedCreateWithoutQuestionsInput = {
@@ -1002,9 +1228,13 @@ export type SurveyUncheckedCreateWithoutQuestionsInput = {
   closesAt?: Date | string | null
   statusId: string
   createdById: string
+  closingSoonNotifiedAt?: Date | string | null
+  closedNotifiedAt?: Date | string | null
+  lastReminderSentAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   responses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutSurveyInput
+  alertConfig?: Prisma.SurveyAlertConfigUncheckedCreateNestedOneWithoutSurveyInput
 }
 
 export type SurveyCreateOrConnectWithoutQuestionsInput = {
@@ -1031,6 +1261,9 @@ export type SurveyUpdateWithoutQuestionsInput = {
   academicPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   opensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   closesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closingSoonNotifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedNotifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastReminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   career?: Prisma.CareerUpdateOneWithoutSurveysNestedInput
@@ -1038,6 +1271,7 @@ export type SurveyUpdateWithoutQuestionsInput = {
   targetAudience?: Prisma.SurveyTargetAudienceUpdateOneWithoutSurveysNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedSurveysNestedInput
   responses?: Prisma.SurveyResponseUpdateManyWithoutSurveyNestedInput
+  alertConfig?: Prisma.SurveyAlertConfigUpdateOneWithoutSurveyNestedInput
 }
 
 export type SurveyUncheckedUpdateWithoutQuestionsInput = {
@@ -1052,9 +1286,13 @@ export type SurveyUncheckedUpdateWithoutQuestionsInput = {
   closesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   statusId?: Prisma.StringFieldUpdateOperationsInput | string
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  closingSoonNotifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedNotifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastReminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   responses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutSurveyNestedInput
+  alertConfig?: Prisma.SurveyAlertConfigUncheckedUpdateOneWithoutSurveyNestedInput
 }
 
 export type SurveyCreateWithoutResponsesInput = {
@@ -1065,6 +1303,9 @@ export type SurveyCreateWithoutResponsesInput = {
   academicPeriod?: string | null
   opensAt?: Date | string | null
   closesAt?: Date | string | null
+  closingSoonNotifiedAt?: Date | string | null
+  closedNotifiedAt?: Date | string | null
+  lastReminderSentAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   career?: Prisma.CareerCreateNestedOneWithoutSurveysInput
@@ -1072,6 +1313,7 @@ export type SurveyCreateWithoutResponsesInput = {
   targetAudience?: Prisma.SurveyTargetAudienceCreateNestedOneWithoutSurveysInput
   createdBy: Prisma.UserCreateNestedOneWithoutCreatedSurveysInput
   questions?: Prisma.SurveyQuestionCreateNestedManyWithoutSurveyInput
+  alertConfig?: Prisma.SurveyAlertConfigCreateNestedOneWithoutSurveyInput
 }
 
 export type SurveyUncheckedCreateWithoutResponsesInput = {
@@ -1086,9 +1328,13 @@ export type SurveyUncheckedCreateWithoutResponsesInput = {
   closesAt?: Date | string | null
   statusId: string
   createdById: string
+  closingSoonNotifiedAt?: Date | string | null
+  closedNotifiedAt?: Date | string | null
+  lastReminderSentAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   questions?: Prisma.SurveyQuestionUncheckedCreateNestedManyWithoutSurveyInput
+  alertConfig?: Prisma.SurveyAlertConfigUncheckedCreateNestedOneWithoutSurveyInput
 }
 
 export type SurveyCreateOrConnectWithoutResponsesInput = {
@@ -1115,6 +1361,9 @@ export type SurveyUpdateWithoutResponsesInput = {
   academicPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   opensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   closesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closingSoonNotifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedNotifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastReminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   career?: Prisma.CareerUpdateOneWithoutSurveysNestedInput
@@ -1122,6 +1371,7 @@ export type SurveyUpdateWithoutResponsesInput = {
   targetAudience?: Prisma.SurveyTargetAudienceUpdateOneWithoutSurveysNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedSurveysNestedInput
   questions?: Prisma.SurveyQuestionUpdateManyWithoutSurveyNestedInput
+  alertConfig?: Prisma.SurveyAlertConfigUpdateOneWithoutSurveyNestedInput
 }
 
 export type SurveyUncheckedUpdateWithoutResponsesInput = {
@@ -1136,9 +1386,13 @@ export type SurveyUncheckedUpdateWithoutResponsesInput = {
   closesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   statusId?: Prisma.StringFieldUpdateOperationsInput | string
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  closingSoonNotifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedNotifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastReminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   questions?: Prisma.SurveyQuestionUncheckedUpdateManyWithoutSurveyNestedInput
+  alertConfig?: Prisma.SurveyAlertConfigUncheckedUpdateOneWithoutSurveyNestedInput
 }
 
 export type SurveyCreateManyCreatedByInput = {
@@ -1152,6 +1406,9 @@ export type SurveyCreateManyCreatedByInput = {
   opensAt?: Date | string | null
   closesAt?: Date | string | null
   statusId: string
+  closingSoonNotifiedAt?: Date | string | null
+  closedNotifiedAt?: Date | string | null
+  lastReminderSentAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1164,6 +1421,9 @@ export type SurveyUpdateWithoutCreatedByInput = {
   academicPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   opensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   closesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closingSoonNotifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedNotifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastReminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   career?: Prisma.CareerUpdateOneWithoutSurveysNestedInput
@@ -1171,6 +1431,7 @@ export type SurveyUpdateWithoutCreatedByInput = {
   targetAudience?: Prisma.SurveyTargetAudienceUpdateOneWithoutSurveysNestedInput
   questions?: Prisma.SurveyQuestionUpdateManyWithoutSurveyNestedInput
   responses?: Prisma.SurveyResponseUpdateManyWithoutSurveyNestedInput
+  alertConfig?: Prisma.SurveyAlertConfigUpdateOneWithoutSurveyNestedInput
 }
 
 export type SurveyUncheckedUpdateWithoutCreatedByInput = {
@@ -1184,10 +1445,14 @@ export type SurveyUncheckedUpdateWithoutCreatedByInput = {
   opensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   closesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   statusId?: Prisma.StringFieldUpdateOperationsInput | string
+  closingSoonNotifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedNotifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastReminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   questions?: Prisma.SurveyQuestionUncheckedUpdateManyWithoutSurveyNestedInput
   responses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutSurveyNestedInput
+  alertConfig?: Prisma.SurveyAlertConfigUncheckedUpdateOneWithoutSurveyNestedInput
 }
 
 export type SurveyUncheckedUpdateManyWithoutCreatedByInput = {
@@ -1201,6 +1466,9 @@ export type SurveyUncheckedUpdateManyWithoutCreatedByInput = {
   opensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   closesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   statusId?: Prisma.StringFieldUpdateOperationsInput | string
+  closingSoonNotifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedNotifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastReminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1216,6 +1484,9 @@ export type SurveyCreateManyCareerInput = {
   closesAt?: Date | string | null
   statusId: string
   createdById: string
+  closingSoonNotifiedAt?: Date | string | null
+  closedNotifiedAt?: Date | string | null
+  lastReminderSentAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1228,6 +1499,9 @@ export type SurveyUpdateWithoutCareerInput = {
   academicPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   opensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   closesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closingSoonNotifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedNotifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastReminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.SurveyStatusUpdateOneRequiredWithoutSurveysNestedInput
@@ -1235,6 +1509,7 @@ export type SurveyUpdateWithoutCareerInput = {
   createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedSurveysNestedInput
   questions?: Prisma.SurveyQuestionUpdateManyWithoutSurveyNestedInput
   responses?: Prisma.SurveyResponseUpdateManyWithoutSurveyNestedInput
+  alertConfig?: Prisma.SurveyAlertConfigUpdateOneWithoutSurveyNestedInput
 }
 
 export type SurveyUncheckedUpdateWithoutCareerInput = {
@@ -1248,10 +1523,14 @@ export type SurveyUncheckedUpdateWithoutCareerInput = {
   closesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   statusId?: Prisma.StringFieldUpdateOperationsInput | string
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  closingSoonNotifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedNotifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastReminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   questions?: Prisma.SurveyQuestionUncheckedUpdateManyWithoutSurveyNestedInput
   responses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutSurveyNestedInput
+  alertConfig?: Prisma.SurveyAlertConfigUncheckedUpdateOneWithoutSurveyNestedInput
 }
 
 export type SurveyUncheckedUpdateManyWithoutCareerInput = {
@@ -1265,6 +1544,9 @@ export type SurveyUncheckedUpdateManyWithoutCareerInput = {
   closesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   statusId?: Prisma.StringFieldUpdateOperationsInput | string
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  closingSoonNotifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedNotifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastReminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1280,6 +1562,9 @@ export type SurveyCreateManyStatusInput = {
   opensAt?: Date | string | null
   closesAt?: Date | string | null
   createdById: string
+  closingSoonNotifiedAt?: Date | string | null
+  closedNotifiedAt?: Date | string | null
+  lastReminderSentAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1292,6 +1577,9 @@ export type SurveyUpdateWithoutStatusInput = {
   academicPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   opensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   closesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closingSoonNotifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedNotifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastReminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   career?: Prisma.CareerUpdateOneWithoutSurveysNestedInput
@@ -1299,6 +1587,7 @@ export type SurveyUpdateWithoutStatusInput = {
   createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedSurveysNestedInput
   questions?: Prisma.SurveyQuestionUpdateManyWithoutSurveyNestedInput
   responses?: Prisma.SurveyResponseUpdateManyWithoutSurveyNestedInput
+  alertConfig?: Prisma.SurveyAlertConfigUpdateOneWithoutSurveyNestedInput
 }
 
 export type SurveyUncheckedUpdateWithoutStatusInput = {
@@ -1312,10 +1601,14 @@ export type SurveyUncheckedUpdateWithoutStatusInput = {
   opensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   closesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  closingSoonNotifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedNotifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastReminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   questions?: Prisma.SurveyQuestionUncheckedUpdateManyWithoutSurveyNestedInput
   responses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutSurveyNestedInput
+  alertConfig?: Prisma.SurveyAlertConfigUncheckedUpdateOneWithoutSurveyNestedInput
 }
 
 export type SurveyUncheckedUpdateManyWithoutStatusInput = {
@@ -1329,6 +1622,9 @@ export type SurveyUncheckedUpdateManyWithoutStatusInput = {
   opensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   closesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  closingSoonNotifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedNotifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastReminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1344,6 +1640,9 @@ export type SurveyCreateManyTargetAudienceInput = {
   closesAt?: Date | string | null
   statusId: string
   createdById: string
+  closingSoonNotifiedAt?: Date | string | null
+  closedNotifiedAt?: Date | string | null
+  lastReminderSentAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1356,6 +1655,9 @@ export type SurveyUpdateWithoutTargetAudienceInput = {
   academicPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   opensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   closesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closingSoonNotifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedNotifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastReminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   career?: Prisma.CareerUpdateOneWithoutSurveysNestedInput
@@ -1363,6 +1665,7 @@ export type SurveyUpdateWithoutTargetAudienceInput = {
   createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedSurveysNestedInput
   questions?: Prisma.SurveyQuestionUpdateManyWithoutSurveyNestedInput
   responses?: Prisma.SurveyResponseUpdateManyWithoutSurveyNestedInput
+  alertConfig?: Prisma.SurveyAlertConfigUpdateOneWithoutSurveyNestedInput
 }
 
 export type SurveyUncheckedUpdateWithoutTargetAudienceInput = {
@@ -1376,10 +1679,14 @@ export type SurveyUncheckedUpdateWithoutTargetAudienceInput = {
   closesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   statusId?: Prisma.StringFieldUpdateOperationsInput | string
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  closingSoonNotifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedNotifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastReminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   questions?: Prisma.SurveyQuestionUncheckedUpdateManyWithoutSurveyNestedInput
   responses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutSurveyNestedInput
+  alertConfig?: Prisma.SurveyAlertConfigUncheckedUpdateOneWithoutSurveyNestedInput
 }
 
 export type SurveyUncheckedUpdateManyWithoutTargetAudienceInput = {
@@ -1393,6 +1700,9 @@ export type SurveyUncheckedUpdateManyWithoutTargetAudienceInput = {
   closesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   statusId?: Prisma.StringFieldUpdateOperationsInput | string
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  closingSoonNotifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedNotifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastReminderSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1449,6 +1759,9 @@ export type SurveySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   closesAt?: boolean
   statusId?: boolean
   createdById?: boolean
+  closingSoonNotifiedAt?: boolean
+  closedNotifiedAt?: boolean
+  lastReminderSentAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   career?: boolean | Prisma.Survey$careerArgs<ExtArgs>
@@ -1457,6 +1770,7 @@ export type SurveySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   questions?: boolean | Prisma.Survey$questionsArgs<ExtArgs>
   responses?: boolean | Prisma.Survey$responsesArgs<ExtArgs>
+  alertConfig?: boolean | Prisma.Survey$alertConfigArgs<ExtArgs>
   _count?: boolean | Prisma.SurveyCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["survey"]>
 
@@ -1472,6 +1786,9 @@ export type SurveySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   closesAt?: boolean
   statusId?: boolean
   createdById?: boolean
+  closingSoonNotifiedAt?: boolean
+  closedNotifiedAt?: boolean
+  lastReminderSentAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   career?: boolean | Prisma.Survey$careerArgs<ExtArgs>
@@ -1492,6 +1809,9 @@ export type SurveySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   closesAt?: boolean
   statusId?: boolean
   createdById?: boolean
+  closingSoonNotifiedAt?: boolean
+  closedNotifiedAt?: boolean
+  lastReminderSentAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   career?: boolean | Prisma.Survey$careerArgs<ExtArgs>
@@ -1512,11 +1832,14 @@ export type SurveySelectScalar = {
   closesAt?: boolean
   statusId?: boolean
   createdById?: boolean
+  closingSoonNotifiedAt?: boolean
+  closedNotifiedAt?: boolean
+  lastReminderSentAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type SurveyOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "careerId" | "targetsAllCareers" | "academicPeriod" | "targetAudienceId" | "opensAt" | "closesAt" | "statusId" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["survey"]>
+export type SurveyOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "careerId" | "targetsAllCareers" | "academicPeriod" | "targetAudienceId" | "opensAt" | "closesAt" | "statusId" | "createdById" | "closingSoonNotifiedAt" | "closedNotifiedAt" | "lastReminderSentAt" | "createdAt" | "updatedAt", ExtArgs["result"]["survey"]>
 export type SurveyInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   career?: boolean | Prisma.Survey$careerArgs<ExtArgs>
   status?: boolean | Prisma.SurveyStatusDefaultArgs<ExtArgs>
@@ -1524,6 +1847,7 @@ export type SurveyInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   questions?: boolean | Prisma.Survey$questionsArgs<ExtArgs>
   responses?: boolean | Prisma.Survey$responsesArgs<ExtArgs>
+  alertConfig?: boolean | Prisma.Survey$alertConfigArgs<ExtArgs>
   _count?: boolean | Prisma.SurveyCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type SurveyIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1548,6 +1872,7 @@ export type $SurveyPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     createdBy: Prisma.$UserPayload<ExtArgs>
     questions: Prisma.$SurveyQuestionPayload<ExtArgs>[]
     responses: Prisma.$SurveyResponsePayload<ExtArgs>[]
+    alertConfig: Prisma.$SurveyAlertConfigPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1561,6 +1886,9 @@ export type $SurveyPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     closesAt: Date | null
     statusId: string
     createdById: string
+    closingSoonNotifiedAt: Date | null
+    closedNotifiedAt: Date | null
+    lastReminderSentAt: Date | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["survey"]>
@@ -1963,6 +2291,7 @@ export interface Prisma__SurveyClient<T, Null = never, ExtArgs extends runtime.T
   createdBy<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   questions<T extends Prisma.Survey$questionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Survey$questionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SurveyQuestionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   responses<T extends Prisma.Survey$responsesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Survey$responsesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SurveyResponsePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  alertConfig<T extends Prisma.Survey$alertConfigArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Survey$alertConfigArgs<ExtArgs>>): Prisma.Prisma__SurveyAlertConfigClient<runtime.Types.Result.GetResult<Prisma.$SurveyAlertConfigPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2003,6 +2332,9 @@ export interface SurveyFieldRefs {
   readonly closesAt: Prisma.FieldRef<"Survey", 'DateTime'>
   readonly statusId: Prisma.FieldRef<"Survey", 'String'>
   readonly createdById: Prisma.FieldRef<"Survey", 'String'>
+  readonly closingSoonNotifiedAt: Prisma.FieldRef<"Survey", 'DateTime'>
+  readonly closedNotifiedAt: Prisma.FieldRef<"Survey", 'DateTime'>
+  readonly lastReminderSentAt: Prisma.FieldRef<"Survey", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Survey", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Survey", 'DateTime'>
 }
@@ -2489,6 +2821,25 @@ export type Survey$responsesArgs<ExtArgs extends runtime.Types.Extensions.Intern
   take?: number
   skip?: number
   distinct?: Prisma.SurveyResponseScalarFieldEnum | Prisma.SurveyResponseScalarFieldEnum[]
+}
+
+/**
+ * Survey.alertConfig
+ */
+export type Survey$alertConfigArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SurveyAlertConfig
+   */
+  select?: Prisma.SurveyAlertConfigSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SurveyAlertConfig
+   */
+  omit?: Prisma.SurveyAlertConfigOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SurveyAlertConfigInclude<ExtArgs> | null
+  where?: Prisma.SurveyAlertConfigWhereInput
 }
 
 /**
