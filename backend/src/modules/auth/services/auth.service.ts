@@ -9,8 +9,16 @@ import {
   InvalidResetCodeException,
   ExpiredResetCodeException,
   TooManyAttemptsException,
+  GoogleEmailMismatchException,
 } from '../exceptions/index.js';
 import { LOGIN_ROLE_PRIORITY } from '../constants/login-role-priority.constants.js';
+import type { RoleName } from '../../../common/enums/roles.enum.js';
+
+export const GOOGLE_ALLOWED_ROLES: readonly RoleName[] = [
+  'estudiante',
+  'titulado',
+  'mentor',
+] as const;
 import {
   SESSION_IDLE_SECONDS,
   SESSION_MAX_MS,
@@ -94,6 +102,120 @@ export class AuthService {
 
     const accessToken = this.jwtService.sign({ sub: user.id, roleTag, roles });
     return { accessToken, roleTag, roles };
+  }
+
+  async loginWithGoogle(
+    verifiedGoogle: { email: string; sub: string; picture?: string },
+    requestedRoleTag?: RoleName,
+  ): Promise<LoginResponse> {
+    // 1. Verificar si el usuario ya está asociado mediante Google sub
+    let user = await this.authRepository.findUserByGoogleSubWithRoles(
+      verifiedGoogle.sub,
+    );
+
+    // Si no está asociado por sub, buscar por el correo verificado de Google
+    if (!user) {
+      user = await this.authRepository.findUserByEmailWithRoles(
+        verifiedGoogle.email,
+      );
+      if (user) {
+        const existingSub =
+          await this.authRepository.findGoogleSocialAccountBySub(
+            verifiedGoogle.sub,
+          );
+        if (existingSub && existingSub.userId !== user.id) {
+          throw new InvalidCredentialsException(
+            'Esta cuenta de Google ya está vinculada a otro usuario.',
+          );
+        }
+        // Auto-persistir la vinculación si el correo coincide
+        await this.authRepository.linkGoogleAccount(
+          user.id,
+          verifiedGoogle.sub,
+          verifiedGoogle.email,
+          verifiedGoogle.picture,
+        );
+      }
+    }
+
+    // Restricción 1: La cuenta UMSSY debe existir. No crear cuentas automáticamente.
+    if (!user) {
+      throw new InvalidCredentialsException(
+        'Esta cuenta de Google no está registrada en el sistema.',
+      );
+    }
+
+    // Restricción 2: La cuenta debe estar habilitada (activa)
+    if (user.isActive === false) {
+      throw new InvalidCredentialsException(
+        'Esta cuenta de usuario se encuentra inactiva o deshabilitada.',
+      );
+    }
+
+    // Restricción 3: Validar roles permitidos (solo estudiante, titulado y mentor)
+    const assignedRoles = new Set(user.roles.map(({ role }) => role.name));
+    const authorizedRoles = LOGIN_ROLE_PRIORITY.filter(
+      (role) =>
+        assignedRoles.has(role) && GOOGLE_ALLOWED_ROLES.includes(role as RoleName),
+    );
+
+    if (authorizedRoles.length === 0) {
+      throw new RoleNotAssignedException(
+        'El acceso con Google solo está permitido para estudiantes, titulados y mentores.',
+      );
+    }
+
+    const roleTag = requestedRoleTag ?? authorizedRoles[0];
+    if (!roleTag || !authorizedRoles.includes(roleTag)) {
+      throw new RoleNotAssignedException(
+        requestedRoleTag
+          ? 'El rol seleccionado no está autorizado para acceder con Google.'
+          : 'El usuario no tiene roles habilitados para acceder con Google.',
+      );
+    }
+
+    const accessToken = this.jwtService.sign({
+      sub: user.id,
+      roleTag,
+      roles: authorizedRoles,
+    });
+    return { accessToken, roleTag, roles: authorizedRoles };
+  }
+
+  async linkGoogle(
+    user: AuthenticatedUser,
+    verifiedGoogle: { email: string; sub: string; picture?: string },
+  ): Promise<{ ok: boolean; detail: string }> {
+    // Restricción 4: El correo de Google debe coincidir con la cuenta del usuario autenticado
+    if (
+      user.email.trim().toLowerCase() !==
+      verifiedGoogle.email.trim().toLowerCase()
+    ) {
+      throw new GoogleEmailMismatchException();
+    }
+
+    // Restricción 3: La vinculación solo está permitida para roles autorizados
+    const hasAllowedRole = user.roles.some((r) =>
+      GOOGLE_ALLOWED_ROLES.includes(r as RoleName),
+    );
+    if (!hasAllowedRole) {
+      throw new RoleNotAssignedException(
+        'La vinculación con Google solo está permitida para estudiantes, titulados y mentores.',
+      );
+    }
+
+    // Restricción 5: Persistir la vinculación en la base de datos de forma atómica
+    await this.authRepository.linkGoogleAccount(
+      user.id,
+      verifiedGoogle.sub,
+      verifiedGoogle.email,
+      verifiedGoogle.picture,
+    );
+
+    return {
+      ok: true,
+      detail: 'Cuenta vinculada exitosamente.',
+    };
   }
 
   async requestPasswordReset(

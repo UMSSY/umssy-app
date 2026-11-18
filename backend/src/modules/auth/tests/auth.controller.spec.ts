@@ -4,7 +4,10 @@ import type { CredentialLimitsService } from '../services/credential-limits.serv
 import type { CredentialOperation } from '../types/credential-operation.types.js';
 import { describe, expect, it, vi } from 'vitest';
 import { AuthController } from '../controllers/auth.controller.js';
-import { SessionExpiredException } from '../exceptions/index.js';
+import {
+  SessionExpiredException,
+  GoogleEmailMismatchException,
+} from '../exceptions/index.js';
 
 function buildRefreshTokens() {
   return {
@@ -17,7 +20,11 @@ function buildRefreshTokens() {
   };
 }
 
-function buildController(auth: unknown, refresh: unknown) {
+function buildController(
+  auth: unknown,
+  refresh: unknown,
+  googleAuth: unknown = { verifyCredential: vi.fn() },
+) {
   const limits = {
     run<T>(
       _operation: CredentialOperation,
@@ -31,6 +38,7 @@ function buildController(auth: unknown, refresh: unknown) {
     auth as AuthService,
     refresh as RefreshTokenService,
     limits as unknown as CredentialLimitsService,
+    googleAuth as any,
   );
 }
 
@@ -275,5 +283,115 @@ describe('AuthController', () => {
 
     expect(authService.resetPassword).toHaveBeenCalledWith(body);
     expect(result).toEqual({ ok: true, message: 'Actualizado' });
+  });
+
+  describe('googleLogin', () => {
+    it('falla con 401 si no se envía credencial o idToken', async () => {
+      const controller = buildController({}, buildRefreshTokens());
+      const response = { cookie: vi.fn() };
+
+      await expect(
+        controller.googleLogin({} as any, response as any),
+      ).rejects.toThrow('Credencial de Google no proporcionada.');
+    });
+
+    it('verifica credencial, ejecuta loginWithGoogle, guarda cookies y devuelve resultado', async () => {
+      const googleAuth = {
+        verifyCredential: vi.fn().mockResolvedValue({
+          email: 'dania@gmail.com',
+          sub: '123456',
+        }),
+      };
+      const authService = {
+        loginWithGoogle: vi.fn().mockResolvedValue({
+          accessToken: 'google-access-token',
+          roleTag: 'titulado',
+          roles: ['titulado'],
+        }),
+        getAccessTokenMaxAgeMs: vi.fn().mockReturnValue(900_000),
+      };
+      const refresh = buildRefreshTokens();
+      const controller = buildController(authService, refresh, googleAuth);
+      const response = { cookie: vi.fn() };
+
+      const body = {
+        credential: 'valid-google-jwt',
+        roleTag: 'titulado' as const,
+      };
+
+      const result = await controller.googleLogin(body as any, response as any);
+
+      expect(googleAuth.verifyCredential).toHaveBeenCalledWith('valid-google-jwt');
+      expect(authService.loginWithGoogle).toHaveBeenCalledWith(
+        { email: 'dania@gmail.com', sub: '123456' },
+        'titulado',
+      );
+      expect(response.cookie).toHaveBeenCalled();
+      expect(result).toEqual({
+        accessToken: 'google-access-token',
+        roleTag: 'titulado',
+        roles: ['titulado'],
+      });
+    });
+  });
+
+  describe('googleLink', () => {
+    it('falla con 400 si no se envía credencial', async () => {
+      const controller = buildController({}, buildRefreshTokens());
+      const user = { id: 'u-1', email: 'user@umss.edu', roles: ['titulado'] };
+
+      await expect(
+        controller.googleLink(user as any, {} as any),
+      ).rejects.toThrow('Credencial de Google no proporcionada.');
+    });
+
+    it('falla con 400 si el correo verificado de Google no coincide con el del usuario autenticado', async () => {
+      const googleAuth = {
+        verifyCredential: vi.fn().mockResolvedValue({
+          email: 'otro@gmail.com',
+          sub: '9999',
+        }),
+      };
+      const authService = {
+        linkGoogle: vi.fn().mockRejectedValue(
+          new GoogleEmailMismatchException(),
+        ),
+      };
+      const controller = buildController(authService, buildRefreshTokens(), googleAuth);
+      const user = { id: 'u-1', email: 'dania@umss.edu', roles: ['titulado'] };
+
+      await expect(
+        controller.googleLink(user as any, { credential: 'google-jwt' } as any),
+      ).rejects.toThrow('La cuenta de Google no coincide con el correo de tu cuenta registrada.');
+    });
+
+    it('vincula exitosamente si el correo de Google coincide con el usuario autenticado', async () => {
+      const googleAuth = {
+        verifyCredential: vi.fn().mockResolvedValue({
+          email: 'dania@umss.edu',
+          sub: '9999',
+        }),
+      };
+      const authService = {
+        linkGoogle: vi.fn().mockResolvedValue({
+          ok: true,
+          detail: 'Cuenta vinculada exitosamente.',
+        }),
+      };
+      const controller = buildController(authService, buildRefreshTokens(), googleAuth);
+      const user = { id: 'u-1', email: 'dania@umss.edu', roles: ['titulado'] };
+
+      const result = await controller.googleLink(user as any, { credential: 'google-jwt' } as any);
+
+      expect(googleAuth.verifyCredential).toHaveBeenCalledWith('google-jwt');
+      expect(authService.linkGoogle).toHaveBeenCalledWith(user, {
+        email: 'dania@umss.edu',
+        sub: '9999',
+      });
+      expect(result).toEqual({
+        ok: true,
+        detail: 'Cuenta vinculada exitosamente.',
+      });
+    });
   });
 });
