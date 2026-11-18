@@ -1,9 +1,12 @@
 import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule } from '@nestjs/swagger';
+import cookieParser from 'cookie-parser';
 import { cleanupOpenApiDoc } from 'nestjs-zod';
 import { AppModule } from './app.module.js';
+import { parseCorsOrigins } from './common/utils/cors-origins.js';
 import { validateEnv } from './common/utils/validate-env.js';
+import { securityHeaders } from './config/security-headers.config.js';
 import { buildSwaggerConfig } from './config/swagger.config.js';
 import { documentCommonResponses } from './common/utils/document-common-responses.js';
 
@@ -11,14 +14,14 @@ async function bootstrap(): Promise<void> {
   validateEnv();
 
   const app = await NestFactory.create(AppModule);
+  app.use(securityHeaders);
+  app.use(cookieParser());
 
-  const corsOrigins = (process.env.CORS_ORIGIN ?? '')
-    .split(',')
-    .map((origin) => origin.trim())
-    .filter((origin) => origin.length > 0);
+  const corsOrigins = parseCorsOrigins();
 
   app.enableCors({
     origin: corsOrigins,
+    credentials: true,
     exposedHeaders: ['Content-Disposition', 'Retry-After'],
   });
   app.setGlobalPrefix('api');

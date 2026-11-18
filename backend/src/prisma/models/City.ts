@@ -183,6 +183,8 @@ export type CityWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"City"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"City"> | Date | string
   users?: Prisma.UserListRelationFilter
+  companyProfiles?: Prisma.CompanyProfileListRelationFilter
+  companyAccessRequests?: Prisma.CompanyAccessRequestListRelationFilter
 }
 
 export type CityOrderByWithRelationInput = {
@@ -192,6 +194,8 @@ export type CityOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   users?: Prisma.UserOrderByRelationAggregateInput
+  companyProfiles?: Prisma.CompanyProfileOrderByRelationAggregateInput
+  companyAccessRequests?: Prisma.CompanyAccessRequestOrderByRelationAggregateInput
 }
 
 export type CityWhereUniqueInput = Prisma.AtLeast<{
@@ -204,6 +208,8 @@ export type CityWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"City"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"City"> | Date | string
   users?: Prisma.UserListRelationFilter
+  companyProfiles?: Prisma.CompanyProfileListRelationFilter
+  companyAccessRequests?: Prisma.CompanyAccessRequestListRelationFilter
 }, "id" | "title">
 
 export type CityOrderByWithAggregationInput = {
@@ -235,6 +241,8 @@ export type CityCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.UserCreateNestedManyWithoutCityInput
+  companyProfiles?: Prisma.CompanyProfileCreateNestedManyWithoutCityInput
+  companyAccessRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutCityInput
 }
 
 export type CityUncheckedCreateInput = {
@@ -244,6 +252,8 @@ export type CityUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.UserUncheckedCreateNestedManyWithoutCityInput
+  companyProfiles?: Prisma.CompanyProfileUncheckedCreateNestedManyWithoutCityInput
+  companyAccessRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutCityInput
 }
 
 export type CityUpdateInput = {
@@ -253,6 +263,8 @@ export type CityUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.UserUpdateManyWithoutCityNestedInput
+  companyProfiles?: Prisma.CompanyProfileUpdateManyWithoutCityNestedInput
+  companyAccessRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutCityNestedInput
 }
 
 export type CityUncheckedUpdateInput = {
@@ -262,6 +274,8 @@ export type CityUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.UserUncheckedUpdateManyWithoutCityNestedInput
+  companyProfiles?: Prisma.CompanyProfileUncheckedUpdateManyWithoutCityNestedInput
+  companyAccessRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutCityNestedInput
 }
 
 export type CityCreateManyInput = {
@@ -317,6 +331,11 @@ export type CityNullableScalarRelationFilter = {
   isNot?: Prisma.CityWhereInput | null
 }
 
+export type CityScalarRelationFilter = {
+  is?: Prisma.CityWhereInput
+  isNot?: Prisma.CityWhereInput
+}
+
 export type CityCreateNestedOneWithoutUsersInput = {
   create?: Prisma.XOR<Prisma.CityCreateWithoutUsersInput, Prisma.CityUncheckedCreateWithoutUsersInput>
   connectOrCreate?: Prisma.CityCreateOrConnectWithoutUsersInput
@@ -333,12 +352,42 @@ export type CityUpdateOneWithoutUsersNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.CityUpdateToOneWithWhereWithoutUsersInput, Prisma.CityUpdateWithoutUsersInput>, Prisma.CityUncheckedUpdateWithoutUsersInput>
 }
 
+export type CityCreateNestedOneWithoutCompanyProfilesInput = {
+  create?: Prisma.XOR<Prisma.CityCreateWithoutCompanyProfilesInput, Prisma.CityUncheckedCreateWithoutCompanyProfilesInput>
+  connectOrCreate?: Prisma.CityCreateOrConnectWithoutCompanyProfilesInput
+  connect?: Prisma.CityWhereUniqueInput
+}
+
+export type CityUpdateOneRequiredWithoutCompanyProfilesNestedInput = {
+  create?: Prisma.XOR<Prisma.CityCreateWithoutCompanyProfilesInput, Prisma.CityUncheckedCreateWithoutCompanyProfilesInput>
+  connectOrCreate?: Prisma.CityCreateOrConnectWithoutCompanyProfilesInput
+  upsert?: Prisma.CityUpsertWithoutCompanyProfilesInput
+  connect?: Prisma.CityWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CityUpdateToOneWithWhereWithoutCompanyProfilesInput, Prisma.CityUpdateWithoutCompanyProfilesInput>, Prisma.CityUncheckedUpdateWithoutCompanyProfilesInput>
+}
+
+export type CityCreateNestedOneWithoutCompanyAccessRequestsInput = {
+  create?: Prisma.XOR<Prisma.CityCreateWithoutCompanyAccessRequestsInput, Prisma.CityUncheckedCreateWithoutCompanyAccessRequestsInput>
+  connectOrCreate?: Prisma.CityCreateOrConnectWithoutCompanyAccessRequestsInput
+  connect?: Prisma.CityWhereUniqueInput
+}
+
+export type CityUpdateOneRequiredWithoutCompanyAccessRequestsNestedInput = {
+  create?: Prisma.XOR<Prisma.CityCreateWithoutCompanyAccessRequestsInput, Prisma.CityUncheckedCreateWithoutCompanyAccessRequestsInput>
+  connectOrCreate?: Prisma.CityCreateOrConnectWithoutCompanyAccessRequestsInput
+  upsert?: Prisma.CityUpsertWithoutCompanyAccessRequestsInput
+  connect?: Prisma.CityWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CityUpdateToOneWithWhereWithoutCompanyAccessRequestsInput, Prisma.CityUpdateWithoutCompanyAccessRequestsInput>, Prisma.CityUncheckedUpdateWithoutCompanyAccessRequestsInput>
+}
+
 export type CityCreateWithoutUsersInput = {
   id?: string
   title: string
   description?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  companyProfiles?: Prisma.CompanyProfileCreateNestedManyWithoutCityInput
+  companyAccessRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutCityInput
 }
 
 export type CityUncheckedCreateWithoutUsersInput = {
@@ -347,6 +396,8 @@ export type CityUncheckedCreateWithoutUsersInput = {
   description?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  companyProfiles?: Prisma.CompanyProfileUncheckedCreateNestedManyWithoutCityInput
+  companyAccessRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutCityInput
 }
 
 export type CityCreateOrConnectWithoutUsersInput = {
@@ -371,6 +422,8 @@ export type CityUpdateWithoutUsersInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  companyProfiles?: Prisma.CompanyProfileUpdateManyWithoutCityNestedInput
+  companyAccessRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutCityNestedInput
 }
 
 export type CityUncheckedUpdateWithoutUsersInput = {
@@ -379,6 +432,120 @@ export type CityUncheckedUpdateWithoutUsersInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  companyProfiles?: Prisma.CompanyProfileUncheckedUpdateManyWithoutCityNestedInput
+  companyAccessRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutCityNestedInput
+}
+
+export type CityCreateWithoutCompanyProfilesInput = {
+  id?: string
+  title: string
+  description?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  users?: Prisma.UserCreateNestedManyWithoutCityInput
+  companyAccessRequests?: Prisma.CompanyAccessRequestCreateNestedManyWithoutCityInput
+}
+
+export type CityUncheckedCreateWithoutCompanyProfilesInput = {
+  id?: string
+  title: string
+  description?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  users?: Prisma.UserUncheckedCreateNestedManyWithoutCityInput
+  companyAccessRequests?: Prisma.CompanyAccessRequestUncheckedCreateNestedManyWithoutCityInput
+}
+
+export type CityCreateOrConnectWithoutCompanyProfilesInput = {
+  where: Prisma.CityWhereUniqueInput
+  create: Prisma.XOR<Prisma.CityCreateWithoutCompanyProfilesInput, Prisma.CityUncheckedCreateWithoutCompanyProfilesInput>
+}
+
+export type CityUpsertWithoutCompanyProfilesInput = {
+  update: Prisma.XOR<Prisma.CityUpdateWithoutCompanyProfilesInput, Prisma.CityUncheckedUpdateWithoutCompanyProfilesInput>
+  create: Prisma.XOR<Prisma.CityCreateWithoutCompanyProfilesInput, Prisma.CityUncheckedCreateWithoutCompanyProfilesInput>
+  where?: Prisma.CityWhereInput
+}
+
+export type CityUpdateToOneWithWhereWithoutCompanyProfilesInput = {
+  where?: Prisma.CityWhereInput
+  data: Prisma.XOR<Prisma.CityUpdateWithoutCompanyProfilesInput, Prisma.CityUncheckedUpdateWithoutCompanyProfilesInput>
+}
+
+export type CityUpdateWithoutCompanyProfilesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  users?: Prisma.UserUpdateManyWithoutCityNestedInput
+  companyAccessRequests?: Prisma.CompanyAccessRequestUpdateManyWithoutCityNestedInput
+}
+
+export type CityUncheckedUpdateWithoutCompanyProfilesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  users?: Prisma.UserUncheckedUpdateManyWithoutCityNestedInput
+  companyAccessRequests?: Prisma.CompanyAccessRequestUncheckedUpdateManyWithoutCityNestedInput
+}
+
+export type CityCreateWithoutCompanyAccessRequestsInput = {
+  id?: string
+  title: string
+  description?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  users?: Prisma.UserCreateNestedManyWithoutCityInput
+  companyProfiles?: Prisma.CompanyProfileCreateNestedManyWithoutCityInput
+}
+
+export type CityUncheckedCreateWithoutCompanyAccessRequestsInput = {
+  id?: string
+  title: string
+  description?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  users?: Prisma.UserUncheckedCreateNestedManyWithoutCityInput
+  companyProfiles?: Prisma.CompanyProfileUncheckedCreateNestedManyWithoutCityInput
+}
+
+export type CityCreateOrConnectWithoutCompanyAccessRequestsInput = {
+  where: Prisma.CityWhereUniqueInput
+  create: Prisma.XOR<Prisma.CityCreateWithoutCompanyAccessRequestsInput, Prisma.CityUncheckedCreateWithoutCompanyAccessRequestsInput>
+}
+
+export type CityUpsertWithoutCompanyAccessRequestsInput = {
+  update: Prisma.XOR<Prisma.CityUpdateWithoutCompanyAccessRequestsInput, Prisma.CityUncheckedUpdateWithoutCompanyAccessRequestsInput>
+  create: Prisma.XOR<Prisma.CityCreateWithoutCompanyAccessRequestsInput, Prisma.CityUncheckedCreateWithoutCompanyAccessRequestsInput>
+  where?: Prisma.CityWhereInput
+}
+
+export type CityUpdateToOneWithWhereWithoutCompanyAccessRequestsInput = {
+  where?: Prisma.CityWhereInput
+  data: Prisma.XOR<Prisma.CityUpdateWithoutCompanyAccessRequestsInput, Prisma.CityUncheckedUpdateWithoutCompanyAccessRequestsInput>
+}
+
+export type CityUpdateWithoutCompanyAccessRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  users?: Prisma.UserUpdateManyWithoutCityNestedInput
+  companyProfiles?: Prisma.CompanyProfileUpdateManyWithoutCityNestedInput
+}
+
+export type CityUncheckedUpdateWithoutCompanyAccessRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  users?: Prisma.UserUncheckedUpdateManyWithoutCityNestedInput
+  companyProfiles?: Prisma.CompanyProfileUncheckedUpdateManyWithoutCityNestedInput
 }
 
 
@@ -388,10 +555,14 @@ export type CityUncheckedUpdateWithoutUsersInput = {
 
 export type CityCountOutputType = {
   users: number
+  companyProfiles: number
+  companyAccessRequests: number
 }
 
 export type CityCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   users?: boolean | CityCountOutputTypeCountUsersArgs
+  companyProfiles?: boolean | CityCountOutputTypeCountCompanyProfilesArgs
+  companyAccessRequests?: boolean | CityCountOutputTypeCountCompanyAccessRequestsArgs
 }
 
 /**
@@ -411,6 +582,20 @@ export type CityCountOutputTypeCountUsersArgs<ExtArgs extends runtime.Types.Exte
   where?: Prisma.UserWhereInput
 }
 
+/**
+ * CityCountOutputType without action
+ */
+export type CityCountOutputTypeCountCompanyProfilesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CompanyProfileWhereInput
+}
+
+/**
+ * CityCountOutputType without action
+ */
+export type CityCountOutputTypeCountCompanyAccessRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CompanyAccessRequestWhereInput
+}
+
 
 export type CitySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -419,6 +604,8 @@ export type CitySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   createdAt?: boolean
   updatedAt?: boolean
   users?: boolean | Prisma.City$usersArgs<ExtArgs>
+  companyProfiles?: boolean | Prisma.City$companyProfilesArgs<ExtArgs>
+  companyAccessRequests?: boolean | Prisma.City$companyAccessRequestsArgs<ExtArgs>
   _count?: boolean | Prisma.CityCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["city"]>
 
@@ -449,6 +636,8 @@ export type CitySelectScalar = {
 export type CityOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "createdAt" | "updatedAt", ExtArgs["result"]["city"]>
 export type CityInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   users?: boolean | Prisma.City$usersArgs<ExtArgs>
+  companyProfiles?: boolean | Prisma.City$companyProfilesArgs<ExtArgs>
+  companyAccessRequests?: boolean | Prisma.City$companyAccessRequestsArgs<ExtArgs>
   _count?: boolean | Prisma.CityCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type CityIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -458,6 +647,8 @@ export type $CityPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   name: "City"
   objects: {
     users: Prisma.$UserPayload<ExtArgs>[]
+    companyProfiles: Prisma.$CompanyProfilePayload<ExtArgs>[]
+    companyAccessRequests: Prisma.$CompanyAccessRequestPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -860,6 +1051,8 @@ readonly fields: CityFieldRefs;
 export interface Prisma__CityClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   users<T extends Prisma.City$usersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.City$usersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  companyProfiles<T extends Prisma.City$companyProfilesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.City$companyProfilesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CompanyProfilePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  companyAccessRequests<T extends Prisma.City$companyAccessRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.City$companyAccessRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CompanyAccessRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1308,6 +1501,54 @@ export type City$usersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs
   take?: number
   skip?: number
   distinct?: Prisma.UserScalarFieldEnum | Prisma.UserScalarFieldEnum[]
+}
+
+/**
+ * City.companyProfiles
+ */
+export type City$companyProfilesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CompanyProfile
+   */
+  select?: Prisma.CompanyProfileSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CompanyProfile
+   */
+  omit?: Prisma.CompanyProfileOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompanyProfileInclude<ExtArgs> | null
+  where?: Prisma.CompanyProfileWhereInput
+  orderBy?: Prisma.CompanyProfileOrderByWithRelationInput | Prisma.CompanyProfileOrderByWithRelationInput[]
+  cursor?: Prisma.CompanyProfileWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CompanyProfileScalarFieldEnum | Prisma.CompanyProfileScalarFieldEnum[]
+}
+
+/**
+ * City.companyAccessRequests
+ */
+export type City$companyAccessRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CompanyAccessRequest
+   */
+  select?: Prisma.CompanyAccessRequestSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CompanyAccessRequest
+   */
+  omit?: Prisma.CompanyAccessRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompanyAccessRequestInclude<ExtArgs> | null
+  where?: Prisma.CompanyAccessRequestWhereInput
+  orderBy?: Prisma.CompanyAccessRequestOrderByWithRelationInput | Prisma.CompanyAccessRequestOrderByWithRelationInput[]
+  cursor?: Prisma.CompanyAccessRequestWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CompanyAccessRequestScalarFieldEnum | Prisma.CompanyAccessRequestScalarFieldEnum[]
 }
 
 /**

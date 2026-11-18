@@ -3,6 +3,7 @@ import { cleanup, fireEvent,  screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { saveAccessToken } from "@/shared/services/storage/access-token-storage";
 import { useLogin } from "../hooks/use-login";
+import { googleAuthService } from "../services/google-auth.service";
 import { LoginView } from "./login-view";
 
 const push = vi.fn();
@@ -15,6 +16,14 @@ vi.mock("next/navigation", () => ({
 
 vi.mock("../hooks/use-login", () => ({
   useLogin: vi.fn(),
+}));
+
+vi.mock("../services/google-auth.service", () => ({
+  googleAuthService: {
+    promptSelectAccount: vi.fn(),
+    loginWithGoogle: vi.fn(),
+    linkGoogleAccount: vi.fn(),
+  },
 }));
 
 vi.mock("@/shared/services/storage/access-token-storage", () => ({
@@ -289,5 +298,86 @@ describe("LoginView", () => {
     fireEvent.click(screen.getByRole("button",{name:"Ocultar contraseña"}));
     expect(input).toHaveAttribute("type","password");
     expect(login).not.toHaveBeenCalled();
+  });
+
+  it("muestra el botón Continuar con Google y permite iniciar sesión con cuenta registrada", async () => {
+    vi.mocked(googleAuthService.promptSelectAccount).mockResolvedValue({
+      email: "dania@gmail.com",
+    });
+    vi.mocked(googleAuthService.loginWithGoogle).mockResolvedValue({
+      success: true,
+      session: { accessToken: "google-token", roleTag: "titulado" },
+    });
+    vi.mocked(useLogin).mockReturnValue({ login: vi.fn(), isLoading: false, error: null });
+    render(<LoginView />);
+
+    const googleBtn = screen.getByRole("button", { name: /continuar con google/i });
+    expect(googleBtn).toBeInTheDocument();
+
+    fireEvent.click(googleBtn);
+
+    await waitFor(() => {
+      expect(googleAuthService.promptSelectAccount).toHaveBeenCalled();
+      expect(googleAuthService.loginWithGoogle).toHaveBeenCalledWith("dania@gmail.com");
+      expect(saveAccessToken).toHaveBeenCalledWith("google-token");
+      expect(push).toHaveBeenCalledWith("/dashboard");
+    });
+  });
+
+  it("muestra la pantalla Acceso no permitido cuando la cuenta de Google no está registrada", async () => {
+    vi.mocked(googleAuthService.promptSelectAccount).mockResolvedValue({
+      email: "dania@gmail.com",
+    });
+    vi.mocked(googleAuthService.loginWithGoogle).mockResolvedValue({
+      success: false,
+      reason: "not_registered",
+      message: "Esta cuenta de Google no está registrada en el sistema.",
+    });
+    vi.mocked(useLogin).mockReturnValue({ login: vi.fn(), isLoading: false, error: null });
+    render(<LoginView />);
+
+    fireEvent.click(screen.getByRole("button", { name: /continuar con google/i }));
+
+    expect(await screen.findByText("Acceso no permitido")).toBeInTheDocument();
+    expect(screen.getByText(/Esta cuenta de Google no está registrada en el sistema/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /probar con otra cuenta/i })).toBeInTheDocument();
+  });
+
+  it("muestra el aviso de sesión expirada cuando reason=SESSION_EXPIRED (CA6)", () => {
+    window.history.replaceState({}, "", "/login?reason=SESSION_EXPIRED&next=/profile");
+    vi.mocked(useLogin).mockReturnValue({ login: vi.fn(), isLoading: false, error: null });
+
+    render(<LoginView />);
+
+    expect(screen.getByRole("heading", { name: "Tu sesión expiró" })).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Por seguridad la cerramos tras 15 minutos sin actividad. Inicia sesión de nuevo y volverás a la página donde estabas.",
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("regresa a la página anterior guardada en sessionStorage tras iniciar sesión (CA9)", async () => {
+    sessionStorage.setItem("umssy_post_login_redirect", "/profile?tab=cv");
+    const login = vi.fn().mockResolvedValue({
+      accessToken: "token-123",
+      roleTag: "titulado",
+    });
+    vi.mocked(useLogin).mockReturnValue({ login, isLoading: false, error: null });
+
+    render(<LoginView />);
+
+    fireEvent.change(screen.getByPlaceholderText("nombre@ejemplo.com"), {
+      target: { value: "person@example.com" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Tu contraseña"), {
+      target: { value: "secret" },
+    });
+    fireEvent.submit(screen.getByRole("button", { name: "Iniciar sesión" }).closest("form")!);
+
+    await waitFor(() => {
+      expect(push).toHaveBeenCalledWith("/profile?tab=cv");
+    });
+    expect(sessionStorage.getItem("umssy_post_login_redirect")).toBeNull();
   });
 });

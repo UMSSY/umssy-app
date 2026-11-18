@@ -25,6 +25,7 @@ import {
 } from './conversation-read-storage';
 import { apiClient } from '@/shared/services/api-client';
 import { getAccessToken } from '@/shared/services/storage/access-token-storage';
+import { getCurrentSessionUserId as getStoredSessionUserId } from '@/shared/services/storage/session-user-id-storage';
 import type { UserRole } from '../types/user.types';
 import type {
   ChatUserResponse,
@@ -37,6 +38,9 @@ import type {
 const DEFAULT_MESSAGE_PAGE_SIZE = 10;
 
 export function getCurrentSessionUserId(): string {
+  const storedId = getStoredSessionUserId();
+  if (storedId) return storedId;
+
   const token = getAccessToken();
   if (!token) return '';
 
