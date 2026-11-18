@@ -1,5 +1,6 @@
 'use client';
 
+import { OfflinePreparation } from '@/modules/events';
 import Link from 'next/link';
 import { ArrowRight, ChevronRight, Compass } from 'lucide-react';
 import { useAuth } from '@/shared/contexts/auth-context';
@@ -45,6 +46,7 @@ export function DashboardView() {
           </div>
         }
       />
+      <OfflinePreparation />
       {!isLoading && canViewProfile ? <ProfileGuideDashboardCard /> : null}
       {isLoading ? (
         <p role="status" className="text-sm text-text-secondary">

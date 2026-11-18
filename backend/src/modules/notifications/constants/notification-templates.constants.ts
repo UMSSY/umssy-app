@@ -1,5 +1,4 @@
 import { NotificationType } from '../types/notification-type.enum.js';
-
 import type { NotificationTemplateMap } from '../types/notification-template-map.type.js';
 
 import { truncateNotificationText as truncate } from '../utils/truncate-notification-text.js';
@@ -60,6 +59,22 @@ export const NOTIFICATION_TEMPLATES: NotificationTemplateMap = {
     renderTitle: () => 'Nueva encuesta publicada',
     renderBody: (p) =>
       truncate(`La encuesta "${p.surveyTitle}" está disponible.`),
+  },
+  [NotificationType.SURVEY_REMINDER]: {
+    renderTitle: () => 'Recordatorio de encuesta',
+    renderBody: (p) => truncate(`Aún no respondiste la encuesta "${p.surveyTitle}".`),
+  },
+  [NotificationType.SURVEY_CLOSING_SOON]: {
+    renderTitle: () => 'Encuesta próxima a cerrar',
+    renderBody: (p) => truncate(`La encuesta "${p.surveyTitle}" cierra el ${p.closesAtFormatted}`),
+  },
+  [NotificationType.SURVEY_CLOSED]: {
+    renderTitle: () => 'Encuesta cerrada',
+    renderBody: (p) => truncate(`La encuesta "${p.surveyTitle}" cerró con ${p.responsesCount} respuestas.`),
+  },
+  [NotificationType.SURVEY_VARIATION_ALERT]: {
+    renderTitle: () => 'Alerta de variación en encuesta',
+    renderBody: (p) => truncate(`Se detectaron cambios significativos en la encuesta "${p.surveyTitle}".`),
   },
 
   [NotificationType.APPLICATION_STATUS_CHANGED]: {

@@ -1,9 +1,9 @@
-import type { ApplicationConsentsResponse } from '../types/application-consents-response.type.js';
-import type { ApplicationResponse } from '../types/application-response.type.js';
+import type { ApplicationConsentsResponse } from '../types/application-consents-response.types.js';
+import type { ApplicationResponse } from '../types/application-response.types.js';
 import type { RecruitmentApplication } from '../../applications/types/recruitment-application.type.js';
-import type { RadarApplicationConsent } from '../types/radar-application-consent.type.js';
-import type { RadarApplicationState } from '../types/radar-application-state.type.js';
-import type { ApplicationRow } from '../types/application-row.type.js';
+import type { RadarApplicationConsent } from '../types/radar-application-consent.types.js';
+import type { RadarApplicationState } from '../types/radar-application-state.types.js';
+import type { ApplicationRow } from '../types/application-row.types.js';
 
 export function mapApplicationStatus(title: string): RadarApplicationState {
   switch (title) {

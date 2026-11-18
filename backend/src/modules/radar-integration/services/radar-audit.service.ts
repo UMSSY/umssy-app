@@ -7,6 +7,18 @@ import { RadarAuditRepository } from '../repositories/radar-audit.repository.js'
 export class RadarAuditService {
   constructor(private readonly repository: RadarAuditRepository) {}
 
+  findActiveCertificationVerification(
+    userId: string,
+    id: string,
+    context: TransactionContext,
+  ) {
+    return this.repository.findActiveCertificationVerification(
+      userId,
+      id,
+      context.client,
+    );
+  }
+
   saveDocumentMetadata(
     userId: string,
     id: string,

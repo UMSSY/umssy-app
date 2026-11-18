@@ -77,6 +77,7 @@ function createRepository() {
     findStatusId: vi.fn().mockResolvedValue('status-deleted'),
     updateStatus: vi.fn().mockResolvedValue(RECORD),
     reopen: vi.fn().mockResolvedValue(RECORD),
+    findOfferSummary: vi.fn(),
   };
 }
 
@@ -535,6 +536,30 @@ describe('JobOffersService', () => {
         service.reopen('company-1', 'offer-1'),
       ).rejects.toBeInstanceOf(JobOfferCatalogNotFoundException);
       expect(repository.reopen).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('findOfferSummary', () => {
+    it('expone título, empresa y nombre de la empresa de la vacante', async () => {
+      repository.findOfferSummary.mockResolvedValue({
+        id: 'offer-1',
+        title: 'Dev Backend',
+        companyId: 'company-1',
+        company: { title: 'Empresa A' },
+      });
+
+      await expect(service.findOfferSummary('offer-1')).resolves.toEqual({
+        id: 'offer-1',
+        title: 'Dev Backend',
+        companyId: 'company-1',
+        companyName: 'Empresa A',
+      });
+    });
+
+    it('retorna null si la vacante no existe', async () => {
+      repository.findOfferSummary.mockResolvedValue(null);
+
+      await expect(service.findOfferSummary('missing')).resolves.toBeNull();
     });
   });
 });

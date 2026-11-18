@@ -9,9 +9,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button-variants";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 import { getSafeMapsUrl } from "@/modules/job-offers";
 import { ModalityIcon } from "@/shared/components/modality-icon";
 import { PageHeading } from "@/shared/components/layout";
+import { VacancyDateBadges } from "@/shared/components/vacancy-date-badges";
+import { VACANCY_CARD_CLASS } from "@/shared/constants/vacancy-card.constants";
 import { getInitials } from "@/shared/utils/get-initials";
 import { useVacancies } from "../hooks/use-vacancies";
 
@@ -77,7 +80,7 @@ export function VacanciesView({ initialVacancyId, onInitialClose }: VacanciesVie
             const locationUrl = getSafeMapsUrl(vacancy.locationUrl);
 
             return (
-              <article key={vacancy.id} className="group grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-5 rounded-lg border border-border bg-surface-soft/50 p-6 transition-colors hover:border-availability-border hover:bg-availability/30">
+              <article key={vacancy.id} className={cn(VACANCY_CARD_CLASS, "grid grid-cols-[auto_minmax(0,1fr)] items-start gap-4 p-4 sm:p-6 md:grid-cols-[auto_minmax(0,1fr)_auto] md:gap-5")}>
                 <div aria-hidden="true" className="flex size-12 items-center justify-center rounded-lg bg-accent text-base font-bold text-surface">{getInitials(vacancy.companyName)}</div>
                 <div className="min-w-0">
                   <h2 className="text-lg font-semibold text-ink"><Link href={`/vacancies/${vacancy.id}`} onClick={(event) => openVacancy(event, vacancy.id)} className="underline-offset-4 hover:text-accent hover:underline">{vacancy.title}</Link></h2>
@@ -89,9 +92,12 @@ export function VacanciesView({ initialVacancyId, onInitialClose }: VacanciesVie
                     <div><dt className="sr-only">Contrato</dt><dd className="flex items-center gap-1.5 text-ink-soft"><BriefcaseBusiness aria-hidden="true" className="size-4" />{vacancy.contractType}</dd></div>
                     {locationUrl ? <div><dt className="sr-only">Ubicación</dt><dd><a href={locationUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-accent underline-offset-4 hover:underline">Ver ubicación<span className="sr-only"> de {vacancy.title}</span><ExternalLink className="size-3.5" aria-hidden="true" /></a></dd></div> : null}
                   </dl>
-                  {vacancy.requirements.length > 0 ? <ul aria-label="Habilidades requeridas" className="mt-3 flex flex-wrap gap-2">{vacancy.requirements.map((requirement) => <li key={requirement}><Badge variant="outline">{requirement}</Badge></li>)}</ul> : null}
+                  {vacancy.requirements.length > 0 ? <ul aria-label="Habilidades requeridas" className="mt-3 flex flex-wrap gap-2">{vacancy.requirements.map((requirement) => <li key={requirement}><Badge className="bg-availability text-availability-foreground">{requirement}</Badge></li>)}</ul> : null}
                 </div>
-                <Link href={`/vacancies/${vacancy.id}`} onClick={(event) => openVacancy(event, vacancy.id)} className={buttonVariants({ variant: "ghost", className: "self-center text-accent hover:text-accent" })} aria-label={`Ver detalles de ${vacancy.title}`}>Ver detalles<ArrowRight aria-hidden="true" className="transition-transform duration-150 group-hover:translate-x-0.5" /></Link>
+                <div className="col-span-2 flex flex-col items-start gap-3 md:col-span-1 md:items-end md:justify-between md:gap-4 md:self-stretch">
+                  <VacancyDateBadges publishedAt={vacancy.publishedAt} expiresAt={vacancy.expiresAt} className="md:justify-end" />
+                  <Link href={`/vacancies/${vacancy.id}`} onClick={(event) => openVacancy(event, vacancy.id)} className={buttonVariants({ variant: "ghost", className: "text-accent hover:text-accent max-md:h-11" })} aria-label={`Ver detalles de ${vacancy.title}`}>Ver detalles<ArrowRight aria-hidden="true" className="transition-transform duration-150 group-hover:translate-x-0.5" /></Link>
+                </div>
               </article>
             );
           })}
