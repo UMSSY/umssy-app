@@ -28,6 +28,8 @@ import { DocumentCorrectionGuard } from './guards/document-correction.guard.js';
 import { DocumentCorrectionRepository } from './repositories/document-correction.repository.js';
 import { DocumentCorrectionAuthorizationService } from './services/document-correction-authorization.service.js';
 import { DocumentCorrectionService } from './services/document-correction.service.js';
+import { ApprovedGraduateCareersRepository } from './repositories/approved-graduate-careers.repository.js';
+import { ApprovedGraduateCareersService } from './services/approved-graduate-careers.service.js';
 
 @Module({
   imports: [
@@ -62,12 +64,15 @@ import { DocumentCorrectionService } from './services/document-correction.servic
     DocumentCorrectionAuthorizationService,
     DocumentCorrectionService,
     DocumentCorrectionGuard,
+    ApprovedGraduateCareersRepository,
+    ApprovedGraduateCareersService,
     { provide: MAIL_SENDER, useClass: MailServiceSender },
   ],
   exports: [
     AccessRequestsService,
     AutomaticValidationService,
     DocumentCorrectionAuthorizationService,
+    ApprovedGraduateCareersService,
   ],
 })
 export class AccessRequestsModule {}

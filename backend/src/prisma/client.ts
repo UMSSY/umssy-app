@@ -372,6 +372,11 @@ export type SurveyTargetAudience = Prisma.SurveyTargetAudienceModel
  */
 export type Survey = Prisma.SurveyModel
 /**
+ * Model SurveyAlertConfig
+ * 
+ */
+export type SurveyAlertConfig = Prisma.SurveyAlertConfigModel
+/**
  * Model SurveyQuestion
  * 
  */
