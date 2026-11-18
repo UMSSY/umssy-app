@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { buttonVariants } from "@/components/ui/button-variants";
 import { OFFLINE_PASSES_TEXTS } from "../constants/offline-passes.constants";
 import { usePassesViewState } from "../hooks/use-passes-view-state";
-import { useCancelRegistration } from "../hooks/use-cancel-registration";
+import { useCancelRegistration } from '@/modules/event-registrations';
 import { OfflineStatusBanner } from "../components/offline-status-banner";
 import { NoOfflineCopyState } from "../components/no-offline-copy-state";
 import { RequestFeedback } from "../components/request-feedback";

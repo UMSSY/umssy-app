@@ -3,14 +3,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getAccessToken } from '@/shared/services/storage/access-token-storage';
 import { parseApiError } from '@/shared/utils/parse-api-error';
-import {
-  getRegistrationErrorMessage,
-  REGISTRATION_QUERY_KEYS,
-  useRegistrationSession,
-} from '@/modules/event-registrations';
+import { getRegistrationErrorMessage } from '../utils/registration-error';
+import { REGISTRATION_QUERY_KEYS } from '../constants/registration-query-keys.constants';
+import { useRegistrationSession } from './use-registration-session';
 import { registrationsService } from '../services/registrations.service';
-import { removeOfflinePass } from '../services/offline-passes.service';
-import { OFFLINE_PASSES_SNAPSHOT_QUERY_KEY } from '../constants/offline-passes.constants';
+import { OFFLINE_PASSES_SNAPSHOT_QUERY_KEY } from '@/shared/constants/offline-passes.constants';
 import type { Registration } from '../types/registration.types';
 
 interface PassesQueryCache {
@@ -34,6 +31,11 @@ export function useCancelRegistration() {
     onSuccess: async (cancelledRegistration, variables) => {
       if (getAccessToken() !== variables.accessToken) return;
 
+      queryClient.setQueryData(
+        REGISTRATION_QUERY_KEYS.own(cancelledRegistration.eventId, variables.accessToken),
+        cancelledRegistration,
+      );
+
       const passesKey = [...REGISTRATION_QUERY_KEYS.passes, variables.accessToken];
       queryClient.setQueryData<PassesQueryCache>(passesKey, (current) =>
         current
@@ -45,13 +47,6 @@ export function useCancelRegistration() {
             }
           : current,
       );
-
-      if (variables.accessToken) {
-        await removeOfflinePass(
-          variables.registrationId,
-          variables.accessToken,
-        ).catch(() => {});
-      }
 
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: REGISTRATION_QUERY_KEYS.passes }),
@@ -95,12 +90,14 @@ export function useCancelRegistration() {
 
   return {
     cancelRegistration: async (registrationId: string) => {
-      await mutation.mutateAsync({
+      return mutation.mutateAsync({
         registrationId,
         accessToken: getAccessToken(),
       });
     },
     isCancelling: mutation.isPending,
+    cancelError: mutation.error,
+    resetCancellation: mutation.reset,
     getErrorMessage: getRegistrationErrorMessage,
   };
 }
