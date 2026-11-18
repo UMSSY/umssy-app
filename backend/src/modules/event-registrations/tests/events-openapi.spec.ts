@@ -40,13 +40,26 @@ describe('events OpenAPI contracts', () => {
       expect(JSON.stringify(reference)).toContain('oneOf');
       expect(JSON.stringify(reference)).toContain('[Vv]1:');
       expect(JSON.stringify(reference)).toContain('[A-Fa-f0-9]{64}');
-      expect(JSON.stringify(reference)).toContain("format\":\"uuid");
+      expect(JSON.stringify(reference)).toContain('^\\\\s*');
+      expect(JSON.stringify(reference)).not.toContain('maxLength');
       for (const status of ['200', '201']) {
         expect(checkIn?.responses[status]).toHaveProperty('headers.Cache-Control');
       }
       for (const status of ['400', '401', '403', '409', '422', '500']) {
         expect(JSON.stringify(checkIn?.responses[status])).toContain(API_ERROR);
       }
+      const errorContent = (status: string) => {
+        const response = checkIn?.responses[status];
+        return response && 'content' in response ? response.content?.['application/json'] : undefined;
+      };
+      const exampleCodes = (status: string) =>
+        Object.values(errorContent(status)?.examples ?? {}).map(
+          (example) => ('value' in example ? (example.value as { code: string }).code : undefined),
+        );
+      expect(exampleCodes('403')).toEqual(['FORBIDDEN_ROLE', 'ATTENDANCE_ACCESS_DENIED']);
+      expect(exampleCodes('422')).toEqual(['ATTENDANCE_PASS_INVALID', 'ATTENDANCE_PASS_CANCELLED']);
+      expect(JSON.stringify(errorContent('403')?.schema)).toContain('"enum":["FORBIDDEN_ROLE","ATTENDANCE_ACCESS_DENIED"]');
+      expect(JSON.stringify(errorContent('422')?.schema)).toContain('"enum":["ATTENDANCE_PASS_INVALID","ATTENDANCE_PASS_CANCELLED"]');
       expect(managed?.operationId).toBe('getManagedWorkshops');
       expect(managed?.responses['200']).toHaveProperty('headers.Cache-Control');
       expect(JSON.stringify(managed?.responses['401'])).toContain(API_ERROR);
