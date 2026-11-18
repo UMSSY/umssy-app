@@ -9,7 +9,11 @@ export class CompaniesRepository {
     return this.prisma.companyProfile.findUnique({
       where: { companyId },
       include: {
-        company: true,
+        company: {
+          include: {
+            logo: true,
+          },
+        },
         city: true,
       },
     });
