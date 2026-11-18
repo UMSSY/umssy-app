@@ -28,22 +28,15 @@ export class NotificationsService {
   ) {}
 
   async notify(request: NotifyRequest): Promise<NotifyResult> {
-    const {
-      recipientIds,
-      actorId,
-      type,
-      payload,
-      actionUrl,
-      groupKey,
-      channels,
-    } = request;
+    const { recipientIds, actorId, type, payload, actionUrl, groupKey, renderMail, channels } =
+      request;
     const includeInApp = !channels || channels.includes('IN_APP');
     const includePush = !channels || channels.includes('PUSH');
     const includeEmail = !channels || channels.includes('EMAIL');
 
     const finalRecipients = recipientIds.filter((id) => id !== actorId);
     if (finalRecipients.length === 0) {
-      return { inAppCount: 0, pushStatus: 'skipped', emailStatus: 'skipped' };
+      return { inAppCount: 0, pushStatus: 'skipped', emailStatus: 'skipped', deliveries: [] };
     }
 
     const validRecipients: string[] = [];
@@ -55,7 +48,7 @@ export class NotificationsService {
     }
 
     if (validRecipients.length === 0) {
-      return { inAppCount: 0, pushStatus: 'skipped', emailStatus: 'skipped' };
+      return { inAppCount: 0, pushStatus: 'skipped', emailStatus: 'skipped', deliveries: [] };
     }
 
     const typeRecord = await this.notificationsRepository.findTypeByCode(type);
@@ -118,10 +111,11 @@ export class NotificationsService {
 
     let pushStatus: NotifyResult['pushStatus'] = 'skipped';
     let emailStatus: NotifyResult['emailStatus'] = 'skipped';
+    const deliveries: NotifyResult['deliveries'] = [];
 
     if (includePush && pushTargets.length > 0) {
       try {
-        pushStatus = await this.pushDispatcher.dispatchToUsers(
+        const push = await this.pushDispatcher.dispatchToUsers(
           pushTargets,
           title,
           body,
@@ -129,6 +123,8 @@ export class NotificationsService {
           groupKey,
           notificationIdsByRecipient,
         );
+        pushStatus = push.status;
+        deliveries.push(...push.deliveries);
       } catch (e) {
         this.logger.error('Fallo crítico en PushDispatcher', e);
         pushStatus = 'failed';
@@ -137,22 +133,21 @@ export class NotificationsService {
 
     if (includeEmail && emailTargets.length > 0) {
       try {
-        const { renderEmail } = template;
-        emailStatus = await this.mailDispatcher.dispatchToUsers(
+        const email = await this.mailDispatcher.dispatchToUsers(
           emailTargets,
           title,
           body,
           actionUrl,
-          renderEmail
-            ? (absoluteActionUrl) => renderEmail(normalizedPayload, absoluteActionUrl)
-            : undefined,
+          renderMail,
         );
+        emailStatus = email.status;
+        deliveries.push(...email.deliveries);
       } catch (e) {
         this.logger.error('Fallo crítico en MailDispatcher', e);
         emailStatus = 'failed';
       }
     }
 
-    return { inAppCount, pushStatus, emailStatus };
+    return { inAppCount, pushStatus, emailStatus, deliveries };
   }
 }

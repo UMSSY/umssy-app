@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import type { KeyboardEvent } from "react";
-import { Text } from "recharts";
-import type { AffinityRadarAxisTickProps } from "../types/radar-profile-components.types";
+import type { KeyboardEvent } from 'react';
+import { Text } from 'recharts';
+import type { AffinityRadarAxisTickProps } from '../types/affinity-radar-axis-tick-props.types';
 
 export function AffinityRadarAxisTick({
   area,
@@ -31,7 +31,7 @@ export function AffinityRadarAxisTick({
   }
 
   function handleKeyDown(event: KeyboardEvent<SVGGElement>) {
-    if (event.key !== "Enter" && event.key !== " ") return;
+    if (event.key !== 'Enter' && event.key !== ' ') return;
 
     event.preventDefault();
     onAreaClick?.(area.id);

@@ -1,5 +1,7 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
+import { RADAR_AXIS_NAMES } from "@/modules/radar-chart/constants/radar-axis-names.constants";
 import { useEffect, useState } from "react";
 import { useLeaveGuard } from "@/modules/job-offers";
 import { useMentorProfile } from "@/modules/mentorship";
@@ -32,6 +34,8 @@ export function BlockSelection({
     markUnavailable,
     clearSelection,
   } = useBlockSelection(fetchFreeBlocks);
+  const requestedArea = useSearchParams().get("area");
+  const selectedArea = RADAR_AXIS_NAMES.find(item => item.name === requestedArea)?.name;
   const mentorProfile = useMentorProfile(mentorId);
   const [isFormDirty, setIsFormDirty] = useState(false);
   const [formVersion, setFormVersion] = useState(0);
@@ -87,7 +91,8 @@ export function BlockSelection({
           error={availabilityError ?? reservationError ?? error}
         >
           <RequestAppointmentForm
-            key={formVersion}
+            key={`${formVersion}:${selectedArea ?? ""}`}
+            selectedArea={selectedArea}
             orientationTypes={mentorProfile.data?.orientationTypes ?? []}
             isLoadingTopics={mentorProfile.isPending}
             isSubmitting={isSubmitting}

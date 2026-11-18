@@ -18,6 +18,7 @@ import { validateAppointmentRequest } from "../../utils/appointment-request.util
 import { AppointmentDocumentField } from "./appointment-document-field";
 
 export function RequestAppointmentForm({
+  selectedArea,
   orientationTypes,
   isLoadingTopics,
   isSubmitting,
@@ -27,7 +28,7 @@ export function RequestAppointmentForm({
 }: RequestAppointmentFormProps) {
   const [values, setValues] = useState<AppointmentRequestValues>({
     orientationTypeId: "",
-    message: "",
+    message: selectedArea ? `Busco orientación en ${selectedArea}. ` : "",
     document: null,
   });
   const [errors, setErrors] = useState<AppointmentRequestErrors>({});
@@ -63,6 +64,7 @@ export function RequestAppointmentForm({
 
   return (
     <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+      {selectedArea ? <p role="note">Área de orientación: <strong>{selectedArea}</strong></p> : null}
       <Field data-invalid={errors.orientationTypeId ? true : undefined}>
         <FieldLabel htmlFor="orientationTypeId" className="font-semibold">
           {REQUEST_APPOINTMENT_TEXT.topicLabel}

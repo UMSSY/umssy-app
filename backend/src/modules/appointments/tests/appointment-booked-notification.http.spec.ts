@@ -237,10 +237,8 @@ describe('POST /appointments (integración HTTP del aviso de reserva)', () => {
     expect(seed.emailDispatches).toHaveLength(2);
     const mentorEmail = seed.emailFor(block.mentorId)[0];
     const studentEmail = seed.emailFor(seed.studentId)[0];
-    expect(mentorEmail.content).toMatchObject({
-      template: 'appointment-booked',
-      subject: 'Cita confirmada',
-    });
+    expect(mentorEmail.content?.subject).toBe('Cita confirmada');
+    expect(mentorEmail.content?.mjml).toContain('Cita confirmada');
     expect(mentorEmail.content?.text).toContain(`Titulado: ${studentName}`);
     expect(mentorEmail.content?.text).toContain(`Fecha: ${date}`);
     expect(mentorEmail.content?.text).toContain(

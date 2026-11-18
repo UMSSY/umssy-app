@@ -39,6 +39,7 @@ export function useRadarSourceNames(userId: string, skills: Epic2Skill[]) {
         ? (item.document?.fileName?.trim() || item.name)
         : (certifications.isLoading ? "Cargando certificación…" : "Certificación de origen no disponible");
     }
+    if (ref.type === "presentation") return "Presentación profesional del perfil";
     if (ref.type === "education") return "Formación académica del perfil";
     if (ref.type === "work-experience") return "Experiencia laboral del perfil";
     return "Fuente de origen no disponible";

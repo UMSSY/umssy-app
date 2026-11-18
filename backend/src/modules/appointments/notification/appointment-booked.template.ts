@@ -1,16 +1,18 @@
 import { PUSH_TEXT_MAX_LENGTH } from '../../notifications/constants/push-notification.constants.js';
-import type { NotificationEmailContent } from '../../notifications/types/notification-email-content.type.js';
+import { buildFrontendUrl } from '../../access-requests/mail/helpers/frontend-url.js';
+import type { NotificationMailContent } from '../../notifications/types/notification-mail-content.type.js';
+import type { NotificationMailContext } from '../../notifications/types/notification-mail-context.type.js';
 import type { NotificationPayloadMap } from '../../notifications/types/notification-payload-map.type.js';
 import type { NotificationTemplateDefinition } from '../../notifications/types/notification-template-definition.type.js';
 import type { NotificationType } from '../../notifications/types/notification-type.enum.js';
 import {
   APPOINTMENT_BOOKED_EMAIL_SUBJECT,
-  APPOINTMENT_BOOKED_EMAIL_TEMPLATE,
   APPOINTMENT_BOOKED_NO_TOPIC,
   APPOINTMENT_BOOKED_NOTIFICATION_TITLE,
   APPOINTMENT_BOOKED_TIME_ZONE_LABEL,
 } from '../constants/appointment-booked-notification.constants.js';
 import { AppointmentParticipantRole } from '../enums/appointment-participant-role.enum.js';
+import { loadAppointmentMailTemplate } from './load-appointment-mail-template.js';
 
 type AppointmentBookedPayload =
   NotificationPayloadMap[NotificationType.APPOINTMENT_BOOKED];
@@ -49,10 +51,10 @@ const renderBody = (payload: AppointmentBookedPayload): string => {
 };
 
 // Correo «Cita confirmada»: la otra persona se nombra según el rol de quien lo recibe.
-const renderEmail = (
+export const renderAppointmentBookedMail = async (
   payload: AppointmentBookedPayload,
-  actionUrl: string,
-): NotificationEmailContent => {
+  context: NotificationMailContext,
+): Promise<NotificationMailContent> => {
   const isMentor = payload.recipientRole === AppointmentParticipantRole.MENTOR;
   const counterpartLabel = isMentor ? 'Titulado' : 'Mentor';
   const intro = isMentor
@@ -60,9 +62,10 @@ const renderEmail = (
     : `Tu cita de orientación con ${payload.counterpartName} quedó confirmada.`;
   const time = `${payload.time} (${APPOINTMENT_BOOKED_TIME_ZONE_LABEL})`;
   const topic = payload.topic.trim() || APPOINTMENT_BOOKED_NO_TOPIC;
+  const actionUrl = buildFrontendUrl(context.actionUrl);
 
   return {
-    template: APPOINTMENT_BOOKED_EMAIL_TEMPLATE,
+    mjml: await loadAppointmentMailTemplate('appointment-booked'),
     subject: APPOINTMENT_BOOKED_EMAIL_SUBJECT,
     text: [
       intro,
@@ -88,5 +91,4 @@ export const APPOINTMENT_BOOKED_TEMPLATE: NotificationTemplateDefinition<Notific
   {
     renderTitle: () => APPOINTMENT_BOOKED_NOTIFICATION_TITLE,
     renderBody,
-    renderEmail,
   };

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 
-import type { CvReview } from '../types/cv-review.type.js';
+import type { CvReview } from '../types/cv-review.types.js';
 
 @Injectable()
 export class RadarReviewRepository {
@@ -18,6 +18,7 @@ export class RadarReviewRepository {
         JOIN radar_cv_review_statuses review ON review.id=e.review_status_id
         JOIN users u ON u.id=e.user_id
         JOIN user_cv_file c ON c.id=e.cv_id
+        WHERE NOT EXISTS (SELECT 1 FROM radar_document_verifications d WHERE d.source_type_id=(SELECT id FROM radar_document_source_types WHERE title='cv') AND d.source_id=e.cv_id AND d.status_id<>(SELECT id FROM radar_document_statuses WHERE title='legacy'))
         ORDER BY e.submitted_at DESC LIMIT 300`;
   }
 
@@ -34,6 +35,7 @@ export class RadarReviewRepository {
       SET review_status_id=status.id,reviewer_id=${adminId}::uuid,decided_at=now(),updated_at=clock_timestamp()
       FROM radar_cv_review_statuses status
       WHERE evidence.cv_id=${cvId}::uuid AND evidence.review_status_id<>status.id AND status.title=${action}
+        AND NOT EXISTS (SELECT 1 FROM radar_document_verifications d WHERE d.source_type_id=(SELECT id FROM radar_document_source_types WHERE title='cv') AND d.source_id=evidence.cv_id AND d.active AND d.status_id<>(SELECT id FROM radar_document_statuses WHERE title='legacy'))
       RETURNING evidence.user_id,status.title AS review_status`;
   }
 
