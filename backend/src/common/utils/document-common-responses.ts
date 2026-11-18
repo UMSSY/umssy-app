@@ -1,4 +1,5 @@
 import type { OpenAPIObject } from '@nestjs/swagger';
+import { API_ERROR_SCHEMA } from '../constants/api-error-swagger.constants.js';
 import { HTTP_ERRORS } from '../constants/http-errors.constants.js';
 
 export function documentCommonResponses(
@@ -16,17 +17,7 @@ export function documentCommonResponses(
   ] as const;
   document.components ??= {};
   document.components.schemas ??= {};
-  document.components.schemas.ApiErrorResponse ??= {
-    type: 'object',
-    required: ['statusCode', 'ok', 'code', 'detail', 'data'],
-    properties: {
-      statusCode: { type: 'integer', description: 'Código de estado HTTP.' },
-      ok: { type: 'boolean', enum: [false] },
-      code: { type: 'string', description: 'Código del error.' },
-      detail: { type: 'string', description: 'Descripción del error.' },
-      data: { nullable: true, description: 'Datos adicionales del error.' },
-    },
-  };
+  document.components.schemas.ApiErrorResponse ??= API_ERROR_SCHEMA;
 
   for (const path of Object.values(document.paths)) {
     if (!path) continue;
