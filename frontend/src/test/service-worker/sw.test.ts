@@ -225,6 +225,31 @@ describe("service worker navigations", () => {
     expect(await fallback.response!.text()).toBe("offline page");
   });
 
+  it("serves the saved passes route when Mis inscripciones is opened without network", async () => {
+    const worker = loadWorker();
+    const shell = await worker.caches.open(SHELL);
+    await shell.put("/events/my-passes", html("session passes shell")());
+    await shell.put("/offline/passes", html("saved passes")());
+
+    const result = await worker.navigate("/events/my-passes/");
+    expect(await result.response!.text()).toBe("saved passes");
+  });
+
+  it("keeps the same route when the network is only slow", async () => {
+    vi.useFakeTimers();
+    const worker = loadWorker({ "/events/my-passes": html("fresh passes") });
+    worker.fetch.mockImplementationOnce(
+      () => new Promise<Response>((resolve) => setTimeout(() => resolve(html("fresh passes")()), 10000)),
+    );
+    const shell = await worker.caches.open(SHELL);
+    await shell.put("/events/my-passes", html("cached passes")());
+    await shell.put("/offline/passes", html("saved passes")());
+
+    const pending = worker.navigate("/events/my-passes");
+    await vi.advanceTimersByTimeAsync(10000);
+    expect(await (await pending).response!.text()).toBe("cached passes");
+  });
+
   it("returns a network error when nothing is cached", async () => {
     const worker = loadWorker();
     const result = await worker.navigate("/events/my-passes");
@@ -275,6 +300,7 @@ describe("service worker lifecycle", () => {
       "/dashboard": html(shellHtml),
       "/events": html(shellHtml),
       "/login": html(shellHtml),
+      "/offline/passes": html(shellHtml),
       "/mentor/availability": html("dynamic", "private, no-cache, no-store, max-age=0, must-revalidate"),
       "/manifest.json": asset("{}"),
       "/_next/static/css/app.css": asset("css"),
@@ -308,12 +334,13 @@ describe("service worker lifecycle", () => {
     const routes: Record<string, Route> = {
       "/offline.html": html("offline"), "/": html("home"), "/dashboard": html("dashboard"),
       "/login": html("login"), "/events": html("events"), "/events/my-passes": html("passes"),
+      "/offline/passes": html("saved passes"),
     };
     const worker = loadWorker(routes);
     await worker.install();
     (await worker.caches.open(SHELL)).entries.delete(keyOf("/events/my-passes"));
     delete routes["/events/my-passes"];
-    expect(await (await worker.navigate("/events/my-passes")).response!.text()).toBe("offline");
+    expect(await (await worker.navigate("/events/my-passes")).response!.text()).toBe("saved passes");
 
     routes["/events/my-passes"] = html(`<script src="${chunk}"></script>`);
     routes[chunk] = asset("passes chunk");
@@ -324,8 +351,10 @@ describe("service worker lifecycle", () => {
       request instanceof Request && request.credentials === "omit",
     )).toBe(true);
 
+    const recovered = await worker.caches.match(keyOf("/events/my-passes"), { cacheName: SHELL });
+    expect(await recovered!.text()).toContain(chunk);
     delete routes["/events/my-passes"];
-    expect(await (await worker.navigate("/events/my-passes")).response!.text()).toContain(chunk);
+    expect(await (await worker.navigate("/events/my-passes")).response!.text()).toBe("saved passes");
   });
 
   it("deletes caches from other versions and claims clients", async () => {
@@ -376,6 +405,7 @@ describe("service worker lifecycle", () => {
       "/": html(shellHtml),
       "/dashboard": html(shellHtml),
       "/events/my-passes": html(shellHtml),
+      "/offline/passes": html(shellHtml),
       "/_next/static/css/app.css": asset("css"),
       "/_next/static/chunks/main.js": asset("main"),
       ...(ready ? { "/_next/static/chunks/page.js": asset("page") } : {}),

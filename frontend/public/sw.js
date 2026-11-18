@@ -4,7 +4,9 @@ const SHELL_CACHE = `${CACHE_PREFIX}shell-${CACHE_VERSION}`;
 const ASSETS_CACHE = `${CACHE_PREFIX}assets-${CACHE_VERSION}`;
 const OFFLINE_URL = '/offline.html';
 const NAVIGATION_TIMEOUT_MS = 4000;
-const SHELL_ROUTES = ['/', '/events/my-passes', '/dashboard'];
+const OFFLINE_PASSES_ROUTE = '/offline/passes';
+const SHELL_ROUTES = ['/', '/events/my-passes', '/dashboard', OFFLINE_PASSES_ROUTE];
+const OFFLINE_ROUTE_FALLBACKS = { '/events/my-passes': OFFLINE_PASSES_ROUTE };
 const REQUIRED_ROUTES = [...SHELL_ROUTES, '/login', '/events'];
 const ADDITIONAL_ROUTES = [
   "/affinity-radar/review-queue",
@@ -174,6 +176,13 @@ const withTimeout = (promise, ms) =>
 const offlineFallback = async () =>
   (await caches.match(OFFLINE_URL, { cacheName: SHELL_CACHE })) || Response.error();
 
+const offlineRouteFor = (key) => {
+  const fallback = OFFLINE_ROUTE_FALLBACKS[new URL(key).pathname];
+  return fallback ? shellKey(fallback) : null;
+};
+
+const isTimeout = (error) => error instanceof Error && error.message === 'timeout';
+
 const handleNavigation = async (event) => {
   const key = shellKey(event.request.url);
   const network = fetch(event.request);
@@ -189,8 +198,12 @@ const handleNavigation = async (event) => {
   }
   try {
     return await withTimeout(network, NAVIGATION_TIMEOUT_MS);
-  } catch {
-    const cached = key ? await caches.match(key, { cacheName: SHELL_CACHE }) : undefined;
+  } catch (error) {
+    const offline = self.navigator?.onLine === false || !isTimeout(error);
+    const offlineKey = key && offline ? offlineRouteFor(key) : null;
+    const cached =
+      (offlineKey ? await caches.match(offlineKey, { cacheName: SHELL_CACHE }) : undefined) ||
+      (key ? await caches.match(key, { cacheName: SHELL_CACHE }) : undefined);
     if (cached) return cached;
     try {
       return await network;
