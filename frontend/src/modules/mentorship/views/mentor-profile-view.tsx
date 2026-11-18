@@ -95,6 +95,7 @@ export function MentorProfileView({
 
         <MentorProfileHeader
           mentor={mentor}
+          selectedArea={new URL(returnTo, "http://localhost").searchParams.get("area") ?? undefined}
           showRequestAction={canVerifyIdentity && currentUserId !== mentor.id}
         />
 

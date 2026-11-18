@@ -1,21 +1,23 @@
-import type { RadarAreaScore, RadarKpis, RadarProfile } from "../types/radar-profile.types";
-import { AREA_DETAILS, AREA_ORDER, CANDIDATE } from "./area-details.data";
+import type { RadarAreaScore } from '../types/radar-area-score.types';
+import type { RadarKpis } from '../types/radar-kpis.types';
+import type { RadarProfile } from '../types/radar-profile.types';
+import { AREA_DETAILS, AREA_ORDER, CANDIDATE } from './area-details.data';
 
 export const RADAR_PROFILE: RadarProfile = {
   name: CANDIDATE.name,
   title: CANDIDATE.title,
   yearsOfExperience: 8,
   technologies: [
-    "React",
-    "Node.js",
-    "AWS",
-    "Docker",
-    "Python",
-    "PostgreSQL",
-    "TypeScript",
-    "Kubernetes",
+    'React',
+    'Node.js',
+    'AWS',
+    'Docker',
+    'Python',
+    'PostgreSQL',
+    'TypeScript',
+    'Kubernetes',
   ],
-  photoUrl: "/carlos.jpg",
+  photoUrl: '/carlos.jpg',
 };
 
 export const RADAR_KPIS: RadarKpis = {

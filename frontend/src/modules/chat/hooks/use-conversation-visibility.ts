@@ -7,7 +7,11 @@ export function useConversationVisibility(conversationId: string | null) {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    let socket;
+    (
+      window as unknown as { __activeConversationId?: string | null }
+    ).__activeConversationId = conversationId;
+
+    let socket: ReturnType<typeof getChatSocket> | undefined;
     try {
       socket = getChatSocket();
     } catch {
@@ -19,7 +23,7 @@ export function useConversationVisibility(conversationId: string | null) {
         document.visibilityState === 'visible' &&
         (typeof document.hasFocus === 'function' ? document.hasFocus() : true);
 
-      socket.emit('visibility:changed', {
+      socket?.emit('visibility:changed', {
         conversationId,
         isFocused,
       });
@@ -27,16 +31,20 @@ export function useConversationVisibility(conversationId: string | null) {
 
     notifyVisibility();
 
+    if (typeof socket?.on === 'function') {
+      socket.on('connect', notifyVisibility);
+    }
+
     const handleFocus = () => notifyVisibility();
     const handleBlur = () => {
-      socket.emit('visibility:changed', {
+      socket?.emit('visibility:changed', {
         conversationId,
         isFocused: false,
       });
     };
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
-        socket.emit('visibility:changed', {
+        socket?.emit('visibility:changed', {
           conversationId,
           isFocused: false,
         });
@@ -49,15 +57,25 @@ export function useConversationVisibility(conversationId: string | null) {
     window.addEventListener('blur', handleBlur);
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
-        return () => {
+    return () => {
+      (
+        window as unknown as { __activeConversationId?: string | null }
+      ).__activeConversationId = null;
+      if (typeof socket?.off === 'function') {
+        socket.off('connect', notifyVisibility);
+      }
       window.removeEventListener('focus', handleFocus);
       window.removeEventListener('blur', handleBlur);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
 
-      socket.emit('visibility:changed', {
-        conversationId: null,
-        isFocused: false,
-      });
+      try {
+        socket?.emit('visibility:changed', {
+          conversationId: null,
+          isFocused: false,
+        });
+      } catch {
+        // Socket may not be available or connected
+      }
     };
   }, [conversationId]);
 }

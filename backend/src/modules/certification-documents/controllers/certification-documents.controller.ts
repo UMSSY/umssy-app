@@ -2,6 +2,7 @@ import { MAX_FILE_UPLOAD_SIZE_BYTES } from '../../../common/constants/file-uploa
 import {
   Controller,
   Delete,
+  Headers,
   Param,
   ParseUUIDPipe,
   Put,
@@ -62,16 +63,18 @@ export class CertificationDocumentsController {
     @CurrentUserId() userId: string,
     @Param('id', ParseUUIDPipe) id: string,
     @UploadedFile() file: MulterFile | undefined,
+    @Headers('x-document-version') version?: string,
   ): Promise<CertificationResponse> {
-    return this.certificationDocumentsService.upload(userId, id, file);
+    return this.certificationDocumentsService.upload(userId, id, file, version);
   }
 
   @Delete()
   async remove(
     @CurrentUserId() userId: string,
     @Param('id', ParseUUIDPipe) id: string,
+    @Headers('x-document-version') version?: string,
   ): Promise<null> {
-    await this.certificationDocumentsService.remove(userId, id);
+    await this.certificationDocumentsService.remove(userId, id, version);
     return null;
   }
 }

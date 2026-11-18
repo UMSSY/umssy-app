@@ -9,7 +9,7 @@ import {
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { renderWithQuery as render } from '@/shared/testing/render-with-query';
-import { EducationProfileSection, EducationView } from '@/modules/education';
+import { EducationProfileSection, EducationView } from '@/modules/educations';
 import {
   WorkExperienceProfileSection,
   WorkExperienceView,
@@ -22,7 +22,7 @@ import { SkillsProfileSection, SkillsView } from '@/modules/skills';
 import { PersonalInfoView } from '../views/personal-info-view';
 import { PresentationView } from '../views/presentation-view';
 import { ProfileSettingsView } from '../views/profile-settings-view';
-import { DEGREE_CATALOG_FIXTURE } from '@/modules/education/testing/degree-catalog.fixture';
+import { DEGREE_CATALOG_FIXTURE } from '@/modules/educations/testing/degree-catalog.fixture';
 import { PersonalInfoSettings } from '../components/personal-info-settings';
 import { PresentationSettings } from '../components/presentation-settings';
 import { ProfileCompletenessProgress } from '../components/profile-completeness-progress';
@@ -64,7 +64,7 @@ vi.mock('../services/profile.service', () => ({
 vi.mock('../services/profile-photo.service', () => ({
   profilePhotoService: { getPhoto: vi.fn().mockResolvedValue(null) },
 }));
-vi.mock('@/modules/education/services/educations.service', () => ({
+vi.mock('@/modules/educations/services/educations.service', () => ({
   educationsService: {
     getEducations: vi.fn().mockResolvedValue([]),
     createEducation: api.education,
@@ -84,7 +84,6 @@ vi.mock('@/modules/work-experience/services/work-experience.service', () => ({
 }));
 vi.mock('@/modules/matching/services/skills-analysis.service', () => ({
   skillsAnalysisService: {
-    analyzeExperience: vi.fn().mockResolvedValue({ skills: [] }),
     previewExperience: vi.fn().mockResolvedValue({ skills: [] }),
   },
 }));
