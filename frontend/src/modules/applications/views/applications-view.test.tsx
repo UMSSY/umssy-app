@@ -179,7 +179,7 @@ describe("ApplicationsView", () => {
     await screen.findByText("Backend Java");
 
     await userEvent.click(screen.getByRole("combobox", { name: "Ordenar postulaciones" }));
-    await userEvent.click(screen.getByRole("option", { name: "Afinidad (menor a mayor)" }));
+    await userEvent.click(await screen.findByRole("option", { name: "Afinidad (menor a mayor)" }));
 
     expect(vacancyColumn()).toEqual(["Backend Java", "Analista de datos"]);
   });
@@ -191,7 +191,7 @@ describe("ApplicationsView", () => {
     await screen.findByText("Backend Java");
 
     await userEvent.click(screen.getByRole("combobox", { name: "Ordenar postulaciones" }));
-    await userEvent.click(screen.getByRole("option", { name: "Afinidad (mayor a menor)" }));
+    await userEvent.click(await screen.findByRole("option", { name: "Afinidad (mayor a menor)" }));
 
     expect(vacancyColumn()).toEqual(["Analista de datos", "Backend Java"]);
   });
@@ -203,7 +203,7 @@ describe("ApplicationsView", () => {
     await screen.findByText("Backend Java");
 
     await userEvent.click(screen.getByRole("combobox", { name: "Ordenar postulaciones" }));
-    await userEvent.click(screen.getByRole("option", { name: "Empresa (A-Z)" }));
+    await userEvent.click(await screen.findByRole("option", { name: "Empresa (A-Z)" }));
 
     expect(vacancyColumn()).toEqual(["Analista de datos", "Backend Java"]);
   });

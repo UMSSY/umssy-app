@@ -74,6 +74,16 @@ export function createIndexedDbStorage({
         }
       });
     },
+    readByPrefix(prefix: string): Promise<Array<{ key: string; value: unknown }>> {
+      return withDatabase(async (database) => {
+        const transaction = database.transaction(storeName, "readonly");
+        const [keys, values] = await Promise.all([transaction.store.getAllKeys(), transaction.store.getAll(), transaction.done]);
+        return keys.reduce<Array<{ key: string; value: unknown }>>((result, key, index) => {
+          if (typeof key === "string" && key.startsWith(prefix)) result.push({ key, value: values[index] });
+          return result;
+        }, []);
+      });
+    },
     removeByPrefix(prefix: string): Promise<void> {
       return withDatabase(async (database) => {
         const transaction = database.transaction(storeName, "readwrite");
