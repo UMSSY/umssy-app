@@ -1,11 +1,8 @@
 import '@/shared/testing/indexed-db.mock';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ACCESS_TOKEN_STORAGE_KEY } from '@/shared/constants/auth.constants';
-import {
-  readIndexedDb,
-  updateIndexedDbPair,
-  writeIndexedDb,
-} from './browser-indexed-db';
+import { readIndexedDb, writeIndexedDb } from './browser-indexed-db';
+import { offlinePassesKey, OFFLINE_PASSES_OWNER_KEY } from '@/shared/constants/offline-passes.constants';
 import {
   clearAccessToken,
   getAccessToken,
@@ -51,7 +48,7 @@ describe('access token IndexedDB storage', () => {
     await vi.waitFor(async () =>
       expect(await readIndexedDb(ACCESS_TOKEN_STORAGE_KEY)).toBeNull(),
     );
-    vi.mocked(updateIndexedDbPair).mockRejectedValueOnce(
+    vi.mocked(writeIndexedDb).mockRejectedValueOnce(
       new Error('storage blocked'),
     );
     expect(await saveAccessToken('token-value')).toBe(false);
@@ -69,4 +66,37 @@ describe('access token IndexedDB storage', () => {
     expect(listener).toHaveBeenCalledOnce();
     unsubscribe();
   });
+
+  describe('offline passes of the device owner', () => {
+    const token = (sub: string) => `h.${btoa(JSON.stringify({ sub }))}.s`;
+    const seedOwner = async (userId: string) => {
+      await writeIndexedDb(OFFLINE_PASSES_OWNER_KEY, userId);
+      await writeIndexedDb(offlinePassesKey(userId), { userId, passes: [] });
+    };
+
+    it('keeps the copy when the same user signs in again', async () => {
+      await seedOwner('user-a');
+      await saveAccessToken(token('user-a'));
+      expect(await readIndexedDb(OFFLINE_PASSES_OWNER_KEY)).toBe('user-a');
+      expect(await readIndexedDb(offlinePassesKey('user-a'))).not.toBeNull();
+    });
+
+    it("removes the previous user's copy when another user signs in", async () => {
+      await seedOwner('user-a');
+      await saveAccessToken(token('user-b'));
+      expect(await readIndexedDb(OFFLINE_PASSES_OWNER_KEY)).toBeNull();
+      expect(await readIndexedDb(offlinePassesKey('user-a'))).toBeNull();
+    });
+
+    it('removes the copy and its owner when the session ends', async () => {
+      await saveAccessToken(token('user-a'));
+      await seedOwner('user-a');
+      clearAccessToken();
+      await vi.waitFor(async () =>
+        expect(await readIndexedDb(OFFLINE_PASSES_OWNER_KEY)).toBeNull(),
+      );
+      expect(await readIndexedDb(offlinePassesKey('user-a'))).toBeNull();
+    });
+  });
 });
+
