@@ -1012,4 +1012,4 @@ Sources for SQL-only constraints and compatibility: `20261026040000_mentor_fifo_
   - Nueva tabla `survey_alert_configs` (`SurveyAlertConfig`) con relación 1:0..1 con `surveys`, índice único sobre `survey_id` y borrado en cascada.
   - Nuevas columnas nullable en `surveys`: `closing_soon_notified_at`, `closed_notified_at` y `last_reminder_sent_at`, que permiten un único aviso de cierre próximo y de cierre por encuesta y registran el último recordatorio manual.
 - Datos de catálogo en `notification_types`: `SURVEY_REMINDER` (push y correo), `SURVEY_CLOSING_SOON`, `SURVEY_CLOSED` y `SURVEY_VARIATION_ALERT` (solo correo).
-- Mentorías (Sprint 3): documentados los modelos de participación, solicitudes, ofertas FIFO, cupos, selecciones técnicas, catálogos, idempotencia, sanciones, índices, restricciones SQL, relaciones y comportamiento de borrado.
+- Mentor network (Sprint 3): documented participation models, requests, FIFO offers, capacity, technical selections, catalogs, idempotency, sanctions, indexes, SQL constraints, relationships, and deletion behavior.

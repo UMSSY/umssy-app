@@ -12,6 +12,43 @@ flowchart LR
   Participation --> Client[Shared API client]
 ```
 
+## Participation request sequence
+
+This sequence describes how an approved graduate submits a waiting-list request when direct mentor activation is unavailable. The frontend uses the shared participation client, while the backend validates the request, enforces idempotency, and persists the result.
+
+```mermaid
+sequenceDiagram
+    actor Graduate as Approved graduate
+    participant UI as Mentorship UI
+    participant Client as Participation client
+    participant API as MentorParticipationController
+    participant Service as MentorParticipationService
+    participant DB as Participation repository
+
+    Graduate->>UI: Confirm participation request
+    UI->>Client: create(preferences)
+    Client->>Client: Obtain Idempotency-Key
+    Client->>API: POST /mentor-participation/requests
+    API->>API: Validate JWT, key and Zod payload
+    API->>Service: create(userId, preferences, key)
+    Service->>DB: Lock and check idempotency
+    DB-->>Service: Existing attempt or new transaction
+    Service->>DB: Validate eligibility, capacity and preferences
+    DB-->>Service: Participation result
+
+    alt Request accepted
+        Service-->>API: PENDING request
+        API-->>Client: HTTP 201
+        Client-->>UI: Participation request
+        UI-->>Graduate: Show waiting status
+    else Request rejected
+        Service-->>API: Business exception
+        API-->>Client: HTTP 400, 403, 409 or 429
+        Client-->>UI: Error response
+        UI-->>Graduate: Show error and next action
+    end
+```
+
 ## Flows and endpoints
 
 `useParticipation` retains `['mentors', 'participation', token]`. `useTechnicalAreas` retains `['mentors', 'technical-areas']`, its concurrent catalog/selection read, disabled retry, access-error handling, save cache update and suggestion/participation/directory/profile invalidations. The preview draft remains a single React context in mentorship. No new backend query or persistence store is introduced.
