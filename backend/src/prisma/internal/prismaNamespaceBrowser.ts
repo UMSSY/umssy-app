@@ -117,6 +117,7 @@ export const ModelName = {
   SurveyQuestionType: 'SurveyQuestionType',
   SurveyTargetAudience: 'SurveyTargetAudience',
   Survey: 'Survey',
+  SurveyAlertConfig: 'SurveyAlertConfig',
   SurveyQuestion: 'SurveyQuestion',
   SurveyQuestionOption: 'SurveyQuestionOption',
   SurveyResponse: 'SurveyResponse',
@@ -1043,11 +1044,27 @@ export const SurveyScalarFieldEnum = {
   closesAt: 'closesAt',
   statusId: 'statusId',
   createdById: 'createdById',
+  closingSoonNotifiedAt: 'closingSoonNotifiedAt',
+  closedNotifiedAt: 'closedNotifiedAt',
+  lastReminderSentAt: 'lastReminderSentAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type SurveyScalarFieldEnum = (typeof SurveyScalarFieldEnum)[keyof typeof SurveyScalarFieldEnum]
+
+
+export const SurveyAlertConfigScalarFieldEnum = {
+  id: 'id',
+  surveyId: 'surveyId',
+  isEnabled: 'isEnabled',
+  threshold: 'threshold',
+  questionIds: 'questionIds',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SurveyAlertConfigScalarFieldEnum = (typeof SurveyAlertConfigScalarFieldEnum)[keyof typeof SurveyAlertConfigScalarFieldEnum]
 
 
 export const SurveyQuestionScalarFieldEnum = {

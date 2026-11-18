@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ManagementMenuProps } from "../types/management-menu-props.types";
-import type { AcademicPeriod } from "../types/registered-user.types";
+import type { AcademicPeriod } from "../types/academic-period.types";
 import { ManagementMenu } from "./management-menu";
 
 function ControlledManagementMenu({ onChange }: ManagementMenuProps) {
