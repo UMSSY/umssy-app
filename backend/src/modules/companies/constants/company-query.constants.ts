@@ -1,0 +1,2 @@
+export const DEFAULT_COMPANY_PAGE_LIMIT = 10;
+export const MAX_COMPANY_PAGE_LIMIT = 100;
