@@ -37,10 +37,12 @@ import { RadarIntegrationModule } from './modules/radar-integration/radar-integr
 import { SurveysModule } from './modules/surveys/surveys.module.js';
 import { AppointmentsModule } from './modules/appointments/appointments.module.js';
 import { NotificationsModule } from './modules/notifications/notifications.module.js';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    ScheduleModule.forRoot(),
     PrismaModule,
     MailModule,
     AvailabilityModule,

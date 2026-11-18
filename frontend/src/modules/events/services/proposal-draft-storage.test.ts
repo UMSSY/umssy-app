@@ -70,3 +70,11 @@ describe('proposal drafts through shared storage', () => {
     expect(await proposalDraftStorage.read('user-a')).toEqual({ values: EMPTY_PROPOSAL, file: null, operationKey: null });
   });
 });
+
+it('persists both modality locations without adding them to proposal values', async () => {
+  const locations = { presencial: 'Aula 1', virtual: 'https://meet.example.org/room' };
+  await proposalDraftStorage.save('user-a', { ...draft, locations });
+  const restored = await proposalDraftStorage.read('user-a');
+  expect(restored?.locations).toEqual(locations);
+  expect(restored?.values).not.toHaveProperty('locations');
+});
