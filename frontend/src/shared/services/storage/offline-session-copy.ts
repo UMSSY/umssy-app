@@ -2,7 +2,6 @@ import { ACCESS_TOKEN_STORAGE_KEY } from '@/shared/constants/auth.constants';
 import { getAccessToken } from './access-token-storage';
 import { readIndexedDbPair, updateIndexedDbPair } from './browser-indexed-db';
 
-// Each read and write checks the persisted session in the same transaction.
 export async function withOfflineSessionCopy<T>(
   key: string,
   token: string | null | undefined,
