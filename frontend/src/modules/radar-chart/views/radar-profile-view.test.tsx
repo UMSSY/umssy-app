@@ -1,4 +1,5 @@
 import '@/shared/testing/indexed-db.mock';
+import { radarIntegrationApi } from '../services/radar-integration.service';
 import { saveAccessToken } from '@/shared/services/storage/access-token-storage';
 import { cloneElement, type ReactElement } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -27,6 +28,7 @@ function renderWithQuery(ui: ReactElement) {
 
 vi.mock('next/navigation', () => ({
   usePathname: () => '/profile/radar',
+  useSearchParams: () => new URLSearchParams(window.location.search),
   useRouter: () => ({ replace: vi.fn() }),
 }));
 vi.mock('@/modules/auth', async (importOriginal) => {
@@ -109,6 +111,7 @@ describe('Radar personal integrado con Épica 2', () => {
   beforeEach(() => {
     stubMatchMedia();
     setRadar();
+    window.history.replaceState(null, '', '/profile/radar');
   });
   afterEach(() => {
     cleanup();
@@ -346,7 +349,71 @@ describe('Radar personal integrado con Épica 2', () => {
       </AppLayout>,
     );
     expect(
-      screen.getAllByRole('navigation', { name: 'Menú principal' }),
+      await screen.findAllByRole('navigation', { name: 'Menú principal' }),
     ).toHaveLength(1);
+  });
+
+  it('consulta la publicacion enlazada desde la bandeja central', async () => {
+    const historical = {
+      compare: true,
+      radar: {
+        userId: 'person-1',
+        status: 'published',
+        version: 2,
+        rubricVersion: 'servidor-v1',
+        updatedAt: '2026-11-14T18:00:00Z',
+        scores: {
+          desarrollo: 0,
+          'cloud-devops': 0,
+          'data-ai': 0,
+          qa: 7,
+          ciberseguridad: 0,
+          'gobernanza-ti': 0,
+        },
+        average: 7,
+        variation: 7,
+        pending: 0,
+        hasPending: false,
+        evidence: {},
+        sourceRevision: 2,
+        inputRevision: 2,
+        processingStatus: 'ready' as const,
+        dictionaryVersion: null,
+        previous: {
+          version: 1,
+          updatedAt: '2026-10-25T08:00:00Z',
+          scores: {
+            desarrollo: 0,
+            'cloud-devops': 0,
+            'data-ai': 0,
+            qa: 0,
+            ciberseguridad: 0,
+            'gobernanza-ti': 0,
+          },
+        },
+        skills: [],
+      },
+    };
+    vi.spyOn(radarIntegrationApi, 'historical').mockResolvedValue(
+      historical.radar,
+    );
+    window.history.replaceState(null, '', '/profile/radar?snapshot=snapshot-2');
+
+    renderWithQuery(<RadarProfileView />);
+
+    expect(
+      await screen.findByText('Consultando la versión histórica 2'),
+    ).toBeInTheDocument();
+
+    expect(radarIntegrationApi.historical).toHaveBeenCalledWith('snapshot-2');
+    expect(screen.getByText('7 / 10')).toBeInTheDocument();
+
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Volver al radar actual' }),
+    );
+
+    expect(
+      screen.queryByText('Consultando la versión histórica 2'),
+    ).not.toBeInTheDocument();
   });
 });

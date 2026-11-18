@@ -12,6 +12,7 @@ import { ProfileSkillsAnalysisService } from '../../nlp/services/profile-skills-
 import { RadarPublicationService } from './radar-publication.service.js';
 import { RadarCvService } from './radar-cv.service.js';
 import { RadarReviewService } from './radar-review.service.js';
+import { RadarNotificationsService } from './radar-notifications.service.js';
 
 @Injectable()
 export class RadarIntegrationService implements OnModuleInit, OnModuleDestroy {
@@ -22,6 +23,7 @@ export class RadarIntegrationService implements OnModuleInit, OnModuleDestroy {
     private readonly publication: RadarPublicationService,
     private readonly cv: RadarCvService,
     private readonly review: RadarReviewService,
+    private readonly notifications: RadarNotificationsService,
   ) {}
 
   onModuleInit(): void {
@@ -64,11 +66,30 @@ export class RadarIntegrationService implements OnModuleInit, OnModuleDestroy {
   myRadar(userId: string) {
     return this.publication.myRadar(userId);
   }
+  historicalRadar(userId: string, snapshotId: string) {
+    return this.notifications.historical(userId, snapshotId);
+  }
+  notificationsList(userId: string) {
+    return this.notifications.list(userId);
+  }
+  openNotification(userId: string, notificationId: string) {
+    return this.notifications.open(userId, notificationId);
+  }
   queue(adminId: string) {
     return this.review.queue(adminId);
   }
-  decision(adminId: string, kind: string, id: string, action: string) {
-    return this.review.decision(adminId, kind, id, action);
+  decision(
+    adminId: string,
+    kind: string,
+    id: string,
+    action: string,
+    operationId: string,
+  ) {
+    return this.review.decision(adminId, kind, id, action, operationId);
+  }
+
+  operationStatus(adminId: string, operationId: string) {
+    return this.review.operationStatus(adminId, operationId);
   }
   downloadForAdmin(adminId: string, cvId: string) {
     return this.review.downloadForAdmin(adminId, cvId);

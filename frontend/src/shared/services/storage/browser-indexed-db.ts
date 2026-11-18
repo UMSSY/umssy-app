@@ -30,6 +30,11 @@ export function updateIndexedDb<T>(
   return storage.update(key, update);
 }
 
+export async function readIndexedDbByPrefix<T>(prefix: string): Promise<Array<{ key: string; value: T }>> {
+  if (typeof indexedDB === "undefined") return [];
+  return (await storage.readByPrefix(prefix)) as Array<{ key: string; value: T }>;
+}
+
 export async function removeIndexedDbByPrefix(prefix: string): Promise<void> {
   if (typeof indexedDB === "undefined") return;
   await storage.removeByPrefix(prefix);
