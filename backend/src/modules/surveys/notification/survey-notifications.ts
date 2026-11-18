@@ -9,10 +9,20 @@ import {
 import {
   surveyClosedPayloadSchema,
   surveyClosingSoonPayloadSchema,
+  surveyPublishedPayloadSchema,
   surveyReminderPayloadSchema,
   surveyVariationAlertPayloadSchema,
 } from './survey-notification-payloads.schema.js';
 import type { SurveyNotification } from '../types/survey-notification.type.js';
+
+export function surveyPublishedNotification(
+  input: NotificationPayloadMap[NotificationType.SURVEY_PUBLISHED],
+): SurveyNotification<NotificationType.SURVEY_PUBLISHED> {
+  return {
+    type: NotificationType.SURVEY_PUBLISHED,
+    payload: surveyPublishedPayloadSchema.parse(input),
+  };
+}
 
 export function surveyReminderNotification(
   input: NotificationPayloadMap[NotificationType.SURVEY_REMINDER],

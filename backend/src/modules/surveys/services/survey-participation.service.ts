@@ -1,8 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { NotificationsService } from '../../notifications/services/notifications.service.js';
 import type { NotifyResult } from '../../notifications/types/notify-result.type.js';
+import { getAcademicPeriod } from '../../reports/utils/academic-period.js';
 import {
   SURVEY_ANSWER_FRONTEND_PATH,
+  SURVEY_PUBLISHED_ACTION_PATH,
+  SURVEY_PUBLISHED_CHANGE_TEXT,
+  SURVEY_PUBLISHED_GROUP_KEY_PREFIX,
   SURVEY_REMINDER_GROUP_KEY_PREFIX,
   SURVEY_WITHOUT_CLOSING_DATE_TEXT,
 } from '../constants/survey-participation.constants.js';
@@ -12,11 +16,15 @@ import {
   SurveyReminderNotAllowedException,
   SurveyWithoutPendingRespondentsException,
 } from '../exceptions/index.js';
-import { surveyReminderNotification } from '../notification/survey-notifications.js';
+import {
+  surveyPublishedNotification,
+  surveyReminderNotification,
+} from '../notification/survey-notifications.js';
 import { SurveysRepository } from '../repositories/surveys.repository.js';
 import type { SurveyParticipationResponse } from '../responses/survey-participation.response.js';
 import type { SurveyReminderResponse } from '../responses/survey-reminder.response.js';
 import type { SurveyParticipationTarget } from '../types/survey-participation-target.type.js';
+import { getPreviousSemester } from '../utils/academic-semester.js';
 import {
   buildSurveyFrontendUrl,
   formatSurveyClosureDate,
@@ -106,6 +114,34 @@ export class SurveyParticipationService {
       pushStatus: result.pushStatus,
       sentAt: now.toISOString(),
     };
+  }
+
+  async notifyPublished(
+    surveyId: string,
+    actorId?: string,
+    now: Date = new Date(),
+  ): Promise<NotifyResult | undefined> {
+    const target = await this.findTarget(surveyId);
+    const { eligible } = await this.surveyAudienceService.resolve(
+      buildSurveyAudienceFilter(target),
+    );
+    if (eligible.length === 0) return undefined;
+
+    const currentPeriod =
+      target.academicPeriod ?? getAcademicPeriod(now.toISOString()) ?? '';
+
+    return this.notificationsService.notify({
+      recipientIds: eligible.map((recipient) => recipient.id),
+      actorId,
+      ...surveyPublishedNotification({
+        surveyTitle: target.title,
+        previousPeriod: getPreviousSemester(currentPeriod) ?? '',
+        currentPeriod,
+        change: SURVEY_PUBLISHED_CHANGE_TEXT,
+      }),
+      actionUrl: SURVEY_PUBLISHED_ACTION_PATH,
+      groupKey: `${SURVEY_PUBLISHED_GROUP_KEY_PREFIX}:${target.id}`,
+    });
   }
 
   private async findTarget(
