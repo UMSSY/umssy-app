@@ -8,7 +8,7 @@ export function useInvalidateProfileCompleteness() {
   const queryClient = useQueryClient();
 
   return useCallback(async () => {
-    // Cancelar lecturas anteriores para evitar datos desactualizados.
+    // Cancelar consultas anteriores antes de actualizar los datos.
     await Promise.all([
       queryClient.cancelQueries({
         queryKey: ['mentors', 'profile-suggestions'],
@@ -18,7 +18,7 @@ export function useInvalidateProfileCompleteness() {
       }),
     ]);
 
-    // Actualizar las cachés independientes en paralelo.
+    // Iniciar todas las invalidaciones sin bloquear unas con otras.
     await Promise.all([
       queryClient.invalidateQueries({
         queryKey: ['mentors', 'profile-suggestions'],
