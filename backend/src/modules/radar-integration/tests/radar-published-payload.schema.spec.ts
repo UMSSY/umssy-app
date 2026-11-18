@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { radarPublishedPayloadSchema } from '../requests/radar-published-payload.schema.js';
+import { radarPublishedPayloadSchema } from '../notification/radar-published-payload.schema.js';
 
 describe('Radar publication notification payload', () => {
   const payload = {
