@@ -6,6 +6,7 @@ import { buttonVariants } from "@/components/ui/button-variants";
 import { cn } from "@/lib/utils";
 import { PUBLISHED_STATUS, STATUS_BADGE_CLASSES, STATUS_LABELS } from "../constants/job-offers.constants";
 import type { VacancyCardProps } from "../types/vacancy-card-props.types";
+import { formatOpenTime } from "../utils/format-open-time";
 import { formatPublicationDate } from "../utils/format-publication-date";
 
 export function VacancyCard({ offer, onDetails, showStatus = false, onReopen, onDelete }: VacancyCardProps) {
@@ -20,27 +21,32 @@ export function VacancyCard({ offer, onDetails, showStatus = false, onReopen, on
         isDeleted ? "border-destructive/30 bg-destructive/10" : "border-border bg-surface",
       )}
     >
-      {showStatus ? (
-        <Badge className={cn("absolute top-4 right-5", STATUS_BADGE_CLASSES[offer.status])}>
-          {STATUS_LABELS[offer.status] ?? offer.status}
-        </Badge>
-      ) : null}
-      <div className={cn("min-w-0", showStatus && "pt-5")}>
-        <h3 className="text-base font-bold text-ink">
-          <Button
-            type="button"
-            variant="link"
-            className={cn(
-              "h-auto min-h-11 justify-start rounded-none border-0 bg-transparent p-0 text-left text-base font-bold text-ink hover:bg-transparent hover:text-ink",
-              isDeleted && "text-text-secondary hover:text-text-secondary",
-            )}
-            onClick={() => onDetails(offer.id)}
-          >
-            {offer.title}
-          </Button>
-        </h3>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-start justify-between gap-4">
+          <h3 className="min-w-0 text-base font-bold text-ink">
+            <Button
+              type="button"
+              variant="link"
+              className={cn(
+                "h-auto min-h-11 justify-start rounded-none border-0 bg-transparent p-0 text-left text-base font-bold text-ink hover:bg-transparent hover:text-ink",
+                isDeleted && "text-text-secondary hover:text-text-secondary",
+              )}
+              onClick={() => onDetails(offer.id)}
+            >
+              {offer.title}
+            </Button>
+          </h3>
+          <div className="flex shrink-0 flex-col items-end gap-1 text-sm text-text-secondary">
+            {showStatus ? (
+              <Badge className={STATUS_BADGE_CLASSES[offer.status]}>
+                {STATUS_LABELS[offer.status] ?? offer.status}
+              </Badge>
+            ) : null}
+            <p>Expiración: {offer.expiresAt ? formatPublicationDate(offer.expiresAt) : "Sin fecha de cierre"}</p>
+          </div>
+        </div>
         <p className="mt-1 text-sm text-text-secondary">
-          Publicado: {formatPublicationDate(offer.publishedAt)} · Modalidad:{" "}
+          Publicado: {formatPublicationDate(offer.publishedAt)} · {formatOpenTime(offer.publishedAt)} · Modalidad:{" "}
           {offer.modality} · Postulantes: {offer.applicantsCount} candidatos
         </p>
         <p className="mt-1 text-sm text-text-secondary">Tipo de contrato: {offer.contractType}</p>
