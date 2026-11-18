@@ -125,6 +125,8 @@ export class AppointmentNotificationsService {
         ),
       );
 
+      // TODO: reprocesar con un job programado las filas que quedan PENDING si el
+      // proceso se reinicia en medio de los reintentos.
       for (
         let attempt = 1;
         attempt <= APPOINTMENT_NOTIFICATION_MAX_ATTEMPTS;
