@@ -69,6 +69,37 @@ export const cvRescanResponseSchema = z.object({
   nlpStatus: z.string().describe('Estado del análisis NLP del perfil.'),
 });
 
+export const radarReviewOperationResponseSchema = z.object({
+  operationId: identifier,
+  status: z.literal('completed'),
+  kind: z.enum(['cv', 'skill']),
+  targetId: identifier,
+  decision: z.enum(['approved', 'rejected', 'revoked']),
+  changed: z.boolean(),
+  userId: identifier.nullable(),
+  completedAt: timestamp,
+});
+
+export const radarNotificationsResponseSchema = z.array(
+  z.object({
+    id: identifier,
+    message: z.string(),
+    version: z.number().int(),
+    createdAt: timestamp,
+    readAt: timestamp.nullable(),
+  }),
+);
+
+export const openedRadarNotificationResponseSchema = z.object({
+  notification: z.object({
+    id: identifier,
+    version: z.number().int(),
+    readAt: timestamp,
+  }),
+  radar: radarResponseSchema,
+  compare: z.boolean(),
+});
+
 export const reviewQueueResponseSchema = z.array(
   z.object({
     id: z.string().describe('Identificador compuesto cv:UUID o skill:UUID.'),
@@ -210,3 +241,8 @@ export const areaEvidenceResponseSchema = z.object({
   ),
   tags: z.array(z.string()),
 });
+
+export const documentDecisionResponseSchema = z.union([
+  documentMutationResponseSchema,
+  radarReviewOperationResponseSchema,
+]);
