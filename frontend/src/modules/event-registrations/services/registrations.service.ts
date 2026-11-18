@@ -2,7 +2,7 @@ import { BEARER_PREFIX } from "@/shared/constants/auth.constants";
 import { readRecord, readArray } from '@/shared/utils/response-validation';
 import { apiClient } from "@/shared/services/api-client";
 import { getAccessToken } from "@/shared/services/storage/access-token-storage";
-import { removeOfflinePass } from '@/shared/services/storage/remove-offline-pass';
+import { removeOfflinePassOrDefer } from '@/shared/services/storage/remove-offline-pass';
 import { parseApiError } from "@/shared/utils/parse-api-error";
 import { parseRegistrationResponse } from "../utils/registration-contract-response";
 import { parseRegistration } from "../utils/registration-response";
@@ -42,7 +42,7 @@ export const registrationsService = {
       timeout: REQUEST_TIMEOUT_MS,
     });
     const registration = parseRegistrationResponse(response.data, 200);
-    if (accessToken) await removeOfflinePass(registrationId, accessToken);
+    if (accessToken) await removeOfflinePassOrDefer(registrationId, accessToken);
     return registration;
   },
 

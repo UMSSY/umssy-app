@@ -9,7 +9,12 @@ import {
 import {
   readIndexedDb,
   readIndexedDbPair,
+  updateIndexedDbPair,
 } from '@/shared/services/storage/browser-indexed-db';
+import {
+  addPendingPassRemoval,
+  readPendingPassRemovals,
+} from '@/shared/services/storage/pending-offline-pass-removals';
 import { loadSessionOfflinePasses } from '../utils/offline-passes-store';
 import { registrationsService } from './registrations.service';
 import { registrationsService as registrationApi } from '@/modules/event-registrations';
@@ -39,6 +44,7 @@ describe('HU-08-14 offline pass copies', () => {
   });
 
   afterEach(() => {
+    localStorage.clear();
     vi.restoreAllMocks();
     apiClient.defaults.baseURL = originalBaseUrl;
   });
@@ -83,6 +89,41 @@ describe('HU-08-14 offline pass copies', () => {
 
     await registrationApi.cancel(pass.id, accountA);
     expect((await loadSessionOfflinePasses(accountA))?.passes).toEqual([]);
+  });
+
+  it('keeps a confirmed cancellation when the local copy cannot be updated and cleans it up later', async () => {
+    await saveAccessToken(accountA);
+    vi.spyOn(apiClient, 'get').mockResolvedValue(response);
+    await registrationsService.getPass(pass.id);
+    const cancelled = {
+      id: pass.id, eventId: 'event-1', status: 'cancelled', qrToken: pass.qrToken,
+      registeredAt: '2026-11-10T14:00:00.000Z', cancelledAt: '2026-11-17T14:00:00.000Z',
+    };
+    const remove = vi.spyOn(apiClient, 'delete').mockResolvedValue({
+      data: { statusCode: 200, ok: true, detail: 'Operación exitosa', data: cancelled },
+    });
+    vi.mocked(updateIndexedDbPair).mockRejectedValueOnce(new Error('QuotaExceededError'));
+
+    await expect(registrationApi.cancel(pass.id, accountA)).resolves.toEqual(cancelled);
+    expect(remove).toHaveBeenCalledTimes(1);
+    expect(readPendingPassRemovals('titulado-a')).toEqual([pass.id]);
+
+    expect((await loadSessionOfflinePasses(accountA))?.passes).toEqual([]);
+    expect(readPendingPassRemovals('titulado-a')).toEqual([]);
+    const stored = await readIndexedDb<{ passes: unknown[] }>(offlinePassesKey('titulado-a'));
+    expect(stored?.passes).toEqual([]);
+    expect(remove).toHaveBeenCalledTimes(1);
+  });
+
+  it('hides a pending cancelled pass even while the local cleanup keeps failing', async () => {
+    await saveAccessToken(accountA);
+    vi.spyOn(apiClient, 'get').mockResolvedValue(response);
+    await registrationsService.getPass(pass.id);
+    addPendingPassRemoval('titulado-a', pass.id);
+    vi.mocked(updateIndexedDbPair).mockRejectedValueOnce(new Error('QuotaExceededError'));
+
+    expect((await loadSessionOfflinePasses(accountA))?.passes).toEqual([]);
+    expect(readPendingPassRemovals('titulado-a')).toEqual([pass.id]);
   });
 
   it('returns an empty list with no saved pass, even after a cancelled detail response', async () => {

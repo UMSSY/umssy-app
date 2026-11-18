@@ -11,6 +11,10 @@ import { getAccessToken } from '@/shared/services/storage/access-token-storage';
 import { offlinePassesKey } from '@/shared/constants/offline-passes.constants';
 import { readAccessTokenSubject } from '@/shared/utils/read-access-token-subject';
 import {
+  clearPendingPassRemovals,
+  readPendingPassRemovals,
+} from '@/shared/services/storage/pending-offline-pass-removals';
+import {
   OFFLINE_PASSES_KEY_PREFIX,
   OFFLINE_QR_TOKEN_PATTERN,
 } from '../constants/offline-passes.constants';
@@ -70,12 +74,45 @@ export async function loadSessionOfflinePasses(
       ACCESS_TOKEN_STORAGE_KEY,
       keyFor(userId),
     );
-    return persistedToken === accessToken && getAccessToken() === accessToken
-      ? toSnapshot(snapshot, userId)
-      : null;
+    if (persistedToken !== accessToken || getAccessToken() !== accessToken)
+      return null;
+    return await withoutPendingRemovals(
+      toSnapshot(snapshot, userId),
+      accessToken,
+      userId,
+    );
   } catch {
     return null;
   }
+}
+
+// Passes whose cancellation was confirmed but could not be removed locally are hidden
+// right away, and their removal is retried without contacting the server again.
+async function withoutPendingRemovals(
+  snapshot: OfflinePassesSnapshot | null,
+  accessToken: string,
+  userId: string,
+): Promise<OfflinePassesSnapshot | null> {
+  const pending = readPendingPassRemovals(userId);
+  if (!snapshot || pending.length === 0) return snapshot;
+  const visible = {
+    ...snapshot,
+    passes: snapshot.passes.filter(({ id }) => !pending.includes(id)),
+  };
+  try {
+    await updateSessionOfflinePasses(accessToken, undefined, (current) =>
+      current
+        ? {
+            ...current,
+            savedAt: new Date().toISOString(),
+            passes: current.passes.filter(({ id }) => !pending.includes(id)),
+          }
+        : undefined,
+    );
+    if (getAccessToken() === accessToken)
+      clearPendingPassRemovals(userId, pending);
+  } catch {}
+  return visible;
 }
 
 export async function updateSessionOfflinePasses(
