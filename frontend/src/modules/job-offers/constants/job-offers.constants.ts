@@ -147,6 +147,11 @@ export const VACANCY_LIST_TEXT = {
   },
 } as const;
 
+export const NO_COMPANY_TEXT = {
+  title: "Tu cuenta aún no está vinculada a una empresa",
+  description: "Por eso no podemos mostrar vacantes. Pide al administrador que vincule tu cuenta con tu empresa.",
+} as const;
+
 export const TOAST_OPTIONS = { position: "top-center", duration: 5000 } as const;
 
 export const DELETE_JOB_OFFER_TEXT = {

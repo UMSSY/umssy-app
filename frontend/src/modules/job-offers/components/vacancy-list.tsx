@@ -8,7 +8,7 @@ import { buttonVariants } from "@/components/ui/button-variants";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { DELETE_JOB_OFFER_TEXT, REOPEN_JOB_OFFER_TEXT, VACANCY_LIST_TEXT } from "../constants/job-offers.constants";
+import { DELETE_JOB_OFFER_TEXT, NO_COMPANY_TEXT, REOPEN_JOB_OFFER_TEXT, VACANCY_LIST_TEXT } from "../constants/job-offers.constants";
 import { useCompanyJobOffers } from "../hooks/use-company-job-offers";
 import { useDeleteJobOffer } from "../hooks/use-delete-job-offer";
 import { useReopenJobOffer } from "../hooks/use-reopen-job-offer";
@@ -114,6 +114,15 @@ export function VacancyList({ scope = "published" }: VacancyListProps) {
             <Skeleton className="h-4 w-1/2" />
           </div>
         ))}
+      </div>
+    );
+  }
+
+  if (status === "no-company") {
+    return (
+      <div role="alert" className="rounded-lg border border-border bg-surface p-5 text-sm">
+        <p className="font-semibold text-ink">{NO_COMPANY_TEXT.title}</p>
+        <p className="mt-1 text-text-secondary">{NO_COMPANY_TEXT.description}</p>
       </div>
     );
   }
