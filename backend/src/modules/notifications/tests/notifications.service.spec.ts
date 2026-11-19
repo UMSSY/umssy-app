@@ -227,9 +227,71 @@ describe('NotificationsService', () => {
     expect(result.emailStatus).toBe('sent');
   });
 
+  it('no debe enviar correo para mensajes de chat aunque el catálogo lo marque', async () => {
+    mockNotificationsRepo.findTypeByCode.mockResolvedValue({
+      id: 'type-chat',
+      code: 'CHAT_MESSAGE',
+      sendsPush: true,
+      sendsEmail: true,
+    });
+    mockPreferencesRepo.findManyByUserIds.mockResolvedValue([
+      { userId: 'user-2', pushEnabled: false, emailEnabled: true },
+    ]);
+
+    const result = await service.notify({
+      recipientIds: ['user-2'],
+      actorId: 'user-1',
+      type: NotificationType.CHAT_MESSAGE,
+      payload: { senderName: 'Ana', previewText: 'Hola', messageCount: 1 },
+      actionUrl: '/chat?conversationId=c1',
+    });
+
+    expect(result.inAppCount).toBe(1);
+    expect(result.emailStatus).toBe('skipped');
+    expect(mockMailDispatcher.dispatchToUsers).not.toHaveBeenCalled();
+  });
+
+  it('no debe enviar correo si el tipo tiene sendsEmail = false', async () => {
+    mockNotificationsRepo.findTypeByCode.mockResolvedValue({
+      id: 'type-123',
+      code: 'APPOINTMENT_BOOKED',
+      sendsPush: true,
+      sendsEmail: false,
+    });
+
+    const result = await service.notify({
+      recipientIds: ['user-2'],
+      actorId: 'user-1',
+      type: NotificationType.APPOINTMENT_BOOKED,
+      payload: validPayload,
+      actionUrl: '/test',
+    });
+
+    expect(result.emailStatus).toBe('skipped');
+    expect(mockMailDispatcher.dispatchToUsers).not.toHaveBeenCalled();
+  });
+
+  it('un fallo del correo no afecta a la notificación in-app', async () => {
+    mockPreferencesRepo.findManyByUserIds.mockResolvedValue([
+      { userId: 'user-2', pushEnabled: false, emailEnabled: true },
+    ]);
+    mockMailDispatcher.dispatchToUsers.mockRejectedValue(new Error('SMTP down'));
+
+    const result = await service.notify({
+      recipientIds: ['user-2'],
+      actorId: 'user-1',
+      type: NotificationType.APPOINTMENT_BOOKED,
+      payload: validPayload,
+      actionUrl: '/test',
+    });
+
+    expect(result.inAppCount).toBe(1);
+    expect(result.pushStatus).toBe('skipped');
+    expect(result.emailStatus).toBe('failed');
+    expect(mockGateway.emitToUser).toHaveBeenCalled();
+  });
+
   it('entrega al despachador de correo el renderizador del dominio y devuelve la entrega por destinatario y canal', async () => {
-    // HU-16: cada destinatario tiene UN solo canal externo, así que el push
-    // y el correo se prueban con dos usuarios distintos.
     mockPreferencesRepo.findManyByUserIds.mockResolvedValue([
       { userId: 'user-2', pushEnabled: true, emailEnabled: false },
       { userId: 'user-3', pushEnabled: false, emailEnabled: true },

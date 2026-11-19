@@ -11,7 +11,14 @@ import type { NotifyRequest } from '../types/notify-request.type.js';
 import type { NotifyResult } from '../types/notify-result.type.js';
 import { NotificationType } from '../types/notification-type.enum.js';
 import type { NotificationTemplateDefinition } from '../types/notification-template-definition.type.js';
+import { normalizeNotificationPayload } from '../utils/normalize-notification-payload.js';
 import { resolveNotificationChannel } from '../utils/resolve-notification-channel.js';
+import { truncateNotificationText } from '../utils/truncate-notification-text.js';
+
+const EMAIL_EXCLUDED_TYPES: ReadonlySet<NotificationType> = new Set([
+  NotificationType.CHAT_MESSAGE,
+  NotificationType.CHAT_GROUP_MESSAGE,
+]);
 
 @Injectable()
 export class NotificationsService {
@@ -88,8 +95,10 @@ export class NotificationsService {
       );
     }
 
-    const title = template.renderTitle(payload);
-    const body = template.renderBody(payload);
+    const normalizedPayload = normalizeNotificationPayload(payload);
+    const title = truncateNotificationText(template.renderTitle(normalizedPayload));
+    const body = truncateNotificationText(template.renderBody(normalizedPayload));
+    const typeSendsEmail = typeRecord.sendsEmail && !EMAIL_EXCLUDED_TYPES.has(type);
 
     const preferences =
       await this.preferencesRepository.findManyByUserIds(validRecipients);
@@ -99,8 +108,6 @@ export class NotificationsService {
     const emailTargets: string[] = [];
 
     for (const recipientId of validRecipients) {
-      // HU-16: la preferencia guardada define UN solo canal externo.
-      // La campana in-app no pasa por aquí: se crea siempre más abajo.
       const channel = resolveNotificationChannel(
         preferenceByUserId.get(recipientId),
       );
@@ -109,7 +116,7 @@ export class NotificationsService {
         const appVisible = this.appVisibilityService.isVisible(recipientId);
         if (typeRecord.sendsPush && !appVisible) pushTargets.push(recipientId);
       } else if (channel === 'email') {
-        if (typeRecord.sendsEmail) emailTargets.push(recipientId);
+        if (typeSendsEmail) emailTargets.push(recipientId);
       }
     }
 
