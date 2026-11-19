@@ -1,7 +1,13 @@
-"use client"
+'use client';
 
-import { Toaster as Sonner, type ToasterProps } from "sonner"
-import { CircleCheckIcon, InfoIcon, TriangleAlertIcon, OctagonXIcon, Loader2Icon } from "lucide-react"
+import { Toaster as Sonner, type ToasterProps } from 'sonner';
+import {
+  CircleCheckIcon,
+  InfoIcon,
+  TriangleAlertIcon,
+  OctagonXIcon,
+  Loader2Icon,
+} from 'lucide-react';
 
 const Toaster = ({ ...props }: ToasterProps) => {
   return (
@@ -9,53 +15,42 @@ const Toaster = ({ ...props }: ToasterProps) => {
       theme="light"
       className="group"
       icons={{
-        success: (
-          <CircleCheckIcon className="size-4" />
-        ),
-        info: (
-          <InfoIcon className="size-4" />
-        ),
-        warning: (
-          <TriangleAlertIcon className="size-4" />
-        ),
-        error: (
-          <OctagonXIcon className="size-4" />
-        ),
-        loading: (
-          <Loader2Icon className="size-4 animate-spin" />
-        ),
+        success: <CircleCheckIcon className="size-4" />,
+        info: <InfoIcon className="size-4" />,
+        warning: <TriangleAlertIcon className="size-4" />,
+        error: <OctagonXIcon className="size-4" />,
+        loading: <Loader2Icon className="size-4 animate-spin" />,
       }}
       style={
         {
-          "--normal-bg": "var(--popover)",
-          "--normal-text": "var(--popover-foreground)",
-          "--normal-border": "var(--border)",
-          "--border-radius": "var(--radius)",
-          "--success-bg": "var(--popover)",
-          "--success-text": "var(--foreground)",
-          "--success-border": "var(--border)",
-          "--info-bg": "var(--popover)",
-          "--info-text": "var(--foreground)",
-          "--info-border": "var(--border)",
-          "--warning-bg": "var(--popover)",
-          "--warning-text": "var(--foreground)",
-          "--warning-border": "var(--border)",
-          "--error-bg": "var(--popover)",
-          "--error-text": "var(--destructive)",
-          "--error-border": "var(--destructive)",
+          '--normal-bg': 'var(--popover)',
+          '--normal-text': 'var(--popover-foreground)',
+          '--normal-border': 'var(--border)',
+          '--border-radius': 'var(--radius)',
+          '--success-bg': 'var(--popover)',
+          '--success-text': 'var(--foreground)',
+          '--success-border': 'var(--border)',
+          '--info-bg': 'var(--popover)',
+          '--info-text': 'var(--foreground)',
+          '--info-border': 'var(--border)',
+          '--warning-bg': 'var(--popover)',
+          '--warning-text': 'var(--foreground)',
+          '--warning-border': 'var(--border)',
+          '--error-bg': 'var(--popover)',
+          '--error-text': 'var(--destructive)',
+          '--error-border': 'var(--destructive)',
         } as React.CSSProperties
       }
       toastOptions={{
         classNames: {
-          toast:
-            "cn-toast [&_[data-description]]:!text-foreground [&_[data-description]]:!text-[#0B1F2E] dark:[&_[data-description]]:!text-slate-100 [&_[data-description]]:!opacity-100",
+          toast: 'cn-toast',
           description:
-            "!text-foreground !text-[#0B1F2E] dark:!text-slate-100 !opacity-100 font-medium text-xs sm:text-sm",
+            '!text-popover-foreground !opacity-100 font-medium text-xs sm:text-sm',
         },
       }}
       {...props}
     />
-  )
-}
+  );
+};
 
-export { Toaster }
+export { Toaster };
