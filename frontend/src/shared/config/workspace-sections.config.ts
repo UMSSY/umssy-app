@@ -65,7 +65,12 @@ export const WORKSPACE_SECTIONS: readonly WorkspaceSectionProps[] = [
       { label: "Crear encuesta", href: "/backoffice/surveys/create" },
     ],
   },
-  { id: "requests", label: "Solicitudes", icon: Inbox, patterns: [/^\/backoffice(?:\/|$)/], items: [] },
+  {
+    id: "requests", label: "Solicitudes", icon: Inbox, patterns: [/^\/backoffice(?:\/|$)/], items: [
+      { label: "Solicitudes de acceso", href: "/backoffice/solicitudes" },
+      { label: "Control de cupos", href: "/backoffice/mentor-capacity" },
+    ],
+  },
   { id: "radar-review", label: "Revisión de radares", icon: Radar, patterns: [/^\/affinity-radar\/review-queue\/?$/], items: [] },
   {
     id: "vacancies",
