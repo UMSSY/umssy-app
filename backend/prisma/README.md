@@ -697,6 +697,156 @@ Configuración opcional de las alertas de variación de una encuesta. Cuando la 
 
 `NotificationType` (`notification_types`): PK `id`, `code` `VARCHAR(50)` único, `name` `VARCHAR(100)`, `sends_push` y `sends_email` `BOOLEAN` (por defecto `false`). Lo referencia `Notification.typeId`. La semilla del catálogo hace upsert por `code`.
 
+## Appointments
+
+Tables used by the [appointments](../../docs/appointments/README.md) module (Epic 7): booked sessions, their status history, the delivery record of their notices and the catalogs behind them. Availability blocks belong to the [availability](../../docs/availability/README.md) module and are only referenced here.
+
+### Relationship diagram
+
+```mermaid
+erDiagram
+  users ||--o{ appointments : "mentor_id"
+  users ||--o{ appointments : "student_id"
+  users |o--o{ appointments : "cancelled_by_id"
+  availability_blocks |o--o{ appointments : "block_id"
+  orientation_types |o--o{ appointments : "orientation_type_id"
+  appointment_statuses ||--o{ appointments : "status_id"
+  appointments ||--o{ appointment_histories : "appointment_id"
+  appointments ||--o| appointment_documents : "appointment_id"
+  appointments ||--o{ appointment_notifications : "appointment_id"
+  users ||--o{ appointment_notifications : "recipient_id"
+  appointment_notification_events ||--o{ appointment_notifications : "event_id"
+  appointment_notification_channels ||--o{ appointment_notifications : "channel_id"
+  appointment_notification_statuses ||--o{ appointment_notifications : "status_id"
+
+  appointments {
+    uuid id PK
+    uuid block_id FK
+    uuid mentor_id FK
+    uuid student_id FK
+    uuid status_id FK
+    uuid orientation_type_id FK
+    timestamptz start_at
+    timestamptz end_at
+    string meeting_url
+    uuid cancelled_by_id FK
+    string cancellation_reason
+    timestamptz cancelled_at
+  }
+  appointment_notifications {
+    uuid id PK
+    uuid appointment_id FK
+    uuid recipient_id FK
+    uuid event_id FK
+    uuid channel_id FK
+    uuid status_id FK
+    int attempts
+    string last_error
+    timestamptz sent_at
+  }
+  appointment_notification_events {
+    uuid id PK
+    string title UK
+  }
+  appointment_notification_channels {
+    uuid id PK
+    string title UK
+  }
+  appointment_notification_statuses {
+    uuid id PK
+    string title UK
+  }
+```
+
+### `appointments`
+
+A mentoring session between a mentor and a student. Prisma model `Appointment`.
+
+| Column                     | Type           | Null | Notes                                                                                                     |
+| -------------------------- | -------------- | ---- | --------------------------------------------------------------------------------------------------------- |
+| `id`                       | uuid           | no   | Primary key                                                                                               |
+| `block_id`                 | uuid           | yes  | FK to `availability_blocks.id` (`AvailabilityBlock.id`), set null                                         |
+| `mentor_id`                | uuid           | no   | FK to `users.id` (`User.id`), restrict                                                                    |
+| `student_id`               | uuid           | no   | FK to `users.id` (`User.id`), restrict. The person who booked; a mentor can also book with another mentor |
+| `start_at`, `end_at`       | timestamptz(6) | no   | Copied from the block when booking                                                                        |
+| `status_id`                | uuid           | no   | FK to `appointment_statuses.id` (`AppointmentStatus.id`), restrict                                        |
+| `orientation_type_id`      | uuid           | yes  | FK to `orientation_types.id` (`OrientationType.id`), set null. Topic of the session                       |
+| `message`                  | varchar(300)   | yes  | Message for the mentor; required by the application when booking                                          |
+| `rejection_reason`         | varchar(300)   | yes  | Only filled by old seed rows (`RECHAZADA`); bookings are now confirmed directly                           |
+| `meeting_url`              | varchar(255)   | yes  | Private Jitsi room `https://meet.jit.si/umssy-<uuid>`, set when booking                                   |
+| `cancelled_by_id`          | uuid           | yes  | FK to `users.id` (`User.id`), set null. Participant who cancelled                                         |
+| `cancellation_reason`      | varchar(300)   | yes  | **Sprint 3.** Reason given when cancelling; required by the application with less than 24 h to the start  |
+| `cancelled_at`             | timestamptz(6) | yes  | **Sprint 3.** When it was cancelled                                                                       |
+| `requested_at`             | timestamptz(6) | no   | Default now                                                                                               |
+| `responded_at`             | timestamptz(6) | yes  |                                                                                                           |
+| `created_at`, `updated_at` | timestamptz(6) | no   |                                                                                                           |
+
+Relationships: belongs to a mentor, a student and a status (N:1 each), and optionally to a block, a topic and a canceller (N:0..1). Has many `appointment_histories` and `appointment_notifications` (1:N) and at most one `appointment_documents` row (1:0..1). Indexes: `(mentor_id, start_at)`, `(student_id, start_at)`, `status_id`, `block_id`, `cancelled_by_id`, `orientation_type_id`.
+
+`cancelled_by_id`, `cancellation_reason` and `cancelled_at` are filled together only when the status changes to `CANCELLED`. The `COMPLETED` status is computed by the application from `end_at`; confirmed rows are not updated when they end.
+
+### `appointment_notifications`
+
+**Sprint 3.** Delivery record of an appointment notice: one row per appointment, recipient, event and channel. Prisma model `AppointmentNotification`.
+
+| Column                     | Type           | Null | Notes                                                                                        |
+| -------------------------- | -------------- | ---- | -------------------------------------------------------------------------------------------- |
+| `id`                       | uuid           | no   | Primary key                                                                                  |
+| `appointment_id`           | uuid           | no   | FK to `appointments.id` (`Appointment.id`), cascade                                          |
+| `recipient_id`             | uuid           | no   | FK to `users.id` (`User.id`), cascade                                                        |
+| `event_id`                 | uuid           | no   | FK to `appointment_notification_events.id` (`AppointmentNotificationEvent.id`), restrict     |
+| `channel_id`               | uuid           | no   | FK to `appointment_notification_channels.id` (`AppointmentNotificationChannel.id`), restrict |
+| `status_id`                | uuid           | no   | FK to `appointment_notification_statuses.id` (`AppointmentNotificationStatus.id`), restrict  |
+| `attempts`                 | integer        | no   | Default 0. Failed attempts; the application stops at 3                                       |
+| `last_error`               | text           | yes  | Error of the last failed attempt                                                             |
+| `sent_at`                  | timestamptz(6) | yes  | When the channel delivered it                                                                |
+| `created_at`, `updated_at` | timestamptz(6) | no   |                                                                                              |
+
+Relationships: belongs to one appointment, one recipient, one event, one channel and one status (N:1 each). Constraints: unique `(appointment_id, recipient_id, event_id, channel_id)`, so a notice is recorded once per channel. Indexes: `recipient_id`, `event_id`, `channel_id`, `status_id`.
+
+Life of a row: created `PENDING`; `SENT` with `sent_at` when the channel delivers; each failure increments `attempts` and saves `last_error`, and the third one sets `FAILED`. A row for a channel the recipient does not use is deleted.
+
+### Other appointment tables
+
+| Table                   | Prisma model          | Content                                                                                                                                                                                                                                           | Deletion                                                                                                   |
+| ----------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `appointment_histories` | `AppointmentHistory`  | Status changes: `appointment_id`, `previous_status_id` (null when booking), `new_status_id`, `changed_by_id`, `changed_at`, `note` (varchar(300)). Indexes `(appointment_id, changed_at)`, `previous_status_id`, `new_status_id`, `changed_by_id` | Cascade with the appointment; set null from the previous status and the user; restrict from the new status |
+| `appointment_documents` | `AppointmentDocument` | Document attached by the student: `appointment_id` (unique), `file_name`, `mime_type`, `size_bytes`, `data` (bytea), `uploaded_at`                                                                                                                | Cascade with the appointment                                                                               |
+
+### Catalog tables
+
+All of them have `id`, a unique `title` (varchar(100)), an optional `description`, `created_at` and `updated_at`, and no `deleted_at`. Rows are inserted by the catalog seeds (`catalog-stages.ts`) with `skipDuplicates`; the code refers to them through enums of the appointments module.
+
+| Table                               | Used by                                | Values                                                                                                                       |
+| ----------------------------------- | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `appointment_statuses`              | `appointments.status_id`, histories    | `CONFIRMED`, `CANCELLED`, `COMPLETED`; older seed rows use `CONFIRMADA`, `CANCELADA`, `COMPLETADA`, `PENDIENTE`, `RECHAZADA` |
+| `appointment_notification_events`   | `appointment_notifications.event_id`   | **Sprint 3.** `BOOKED` (cita confirmada), `CANCELLED` (cita cancelada)                                                       |
+| `appointment_notification_channels` | `appointment_notifications.channel_id` | **Sprint 3.** `IN_APP`, `EMAIL`, `PUSH`                                                                                      |
+| `appointment_notification_statuses` | `appointment_notifications.status_id`  | **Sprint 3.** `PENDING`, `SENT`, `FAILED`                                                                                    |
+
+### Rules enforced by the database and by the application
+
+| Rule                                                                                                                   | Where                                                          |
+| ---------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| A person or a status cannot be deleted while an appointment uses them                                                  | Restrict                                                       |
+| Deleting a block or a topic keeps the appointment with that field null                                                 | Set null                                                       |
+| Deleting an appointment removes its history, document and notice records                                               | Cascade from `appointments`                                    |
+| Deleting a user removes the notice records addressed to them                                                           | Cascade from `users`                                           |
+| One notice record per appointment, recipient, event and channel                                                        | Unique constraint                                              |
+| One document per appointment                                                                                           | Unique `appointment_documents.appointment_id`                  |
+| Reason of up to 300 characters, required with less than 24 h; only a confirmed, unstarted appointment can be cancelled | Application, inside a transaction that locks both participants |
+| No overlapping confirmed appointments per person and at most one booking per person and day (Bolivia time)             | Application, with advisory locks per participant               |
+
+### Migrations
+
+| Migration                                            | What it does                                                                                                 |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `20261104221145_add_appointment_documents`           | `appointment_documents`                                                                                      |
+| `20261112020151_add_appointment_cancellation_fields` | **Sprint 3.** Optional `appointments.cancellation_reason` (varchar(300)) and `cancelled_at`                  |
+| `20261112030833_add_appointment_notifications`       | **Sprint 3.** The three notice catalogs and `appointment_notifications` with its unique key, indexes and FKs |
+
+Both Sprint 3 migrations only add nullable columns and new tables; they do not change existing rows.
+
 ## Sprint History
 
 ### Sprint 3
@@ -709,3 +859,4 @@ Configuración opcional de las alertas de variación de una encuesta. Cuando la 
   - Nueva tabla `survey_alert_configs` (`SurveyAlertConfig`) con relación 1:0..1 con `surveys`, índice único sobre `survey_id` y borrado en cascada.
   - Nuevas columnas nullable en `surveys`: `closing_soon_notified_at`, `closed_notified_at` y `last_reminder_sent_at`, que permiten un único aviso de cierre próximo y de cierre por encuesta y registran el último recordatorio manual.
 - Datos de catálogo en `notification_types`: `SURVEY_REMINDER` (push y correo), `SURVEY_CLOSING_SOON`, `SURVEY_CLOSED` y `SURVEY_VARIATION_ALERT` (solo correo).
+- Documented the Appointments tables: `appointments` with the new `cancellation_reason` and `cancelled_at`, `appointment_notifications` and its three catalogs (`appointment_notification_events`, `appointment_notification_channels`, `appointment_notification_statuses`), with keys, relationships, indexes and deletion behavior.
