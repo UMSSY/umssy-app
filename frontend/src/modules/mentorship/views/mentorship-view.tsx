@@ -1,57 +1,57 @@
-"use client";
+'use client';
 
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@/shared/contexts/auth-context";
-import { isApiError } from "@/shared/services/api-client";
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '@/shared/contexts/auth-context';
+import { isApiError } from '@/shared/services/api-client';
 import {
   mentorParticipationService,
   participationErrorCode,
   participationErrorMessage,
   SlotUnavailableDialog,
   useParticipation,
-} from "@/modules/mentors";
-import { Button } from "@/components/ui/button";
-import { buttonVariants } from "@/components/ui/button-variants";
+} from '@/modules/mentor-participation';
+import { Button } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button-variants';
 import {
   getAccessToken,
   subscribeAccessToken,
-} from "@/shared/services/storage/access-token-storage";
-import { activateMentor } from "../services/mentor-activation.service";
-import { OrientationStep } from "../components/orientation/orientation-step";
-import { ParticipationStep } from "../components/participation/participation-step";
-import { ConfirmationStep } from "../components/wizard/confirmation-step";
-import { MentorshipActivatedSummary } from "../components/wizard/mentorship-activated-summary";
-import { MentorshipWizardShell } from "../components/wizard/mentorship-wizard-shell";
-import { StepTechnicalAreas } from "../components/wizard/step-technical-areas";
-import { useMentorshipCatalogs } from "../hooks/use-mentorship-catalogs";
-import { useMentorshipWizard } from "../hooks/use-mentorship-wizard";
-import { clearMentorshipWizardDraft } from "../services/mentorship-wizard-draft.service";
+} from '@/shared/services/storage/access-token-storage';
+import { activateMentor } from '../services/mentor-activation.service';
+import { OrientationStep } from '../components/orientation/orientation-step';
+import { ParticipationStep } from '../components/participation/participation-step';
+import { ConfirmationStep } from '../components/wizard/confirmation-step';
+import { MentorshipActivatedSummary } from '../components/wizard/mentorship-activated-summary';
+import { MentorshipWizardShell } from '../components/wizard/mentorship-wizard-shell';
+import { StepTechnicalAreas } from '../components/wizard/step-technical-areas';
+import { useMentorshipCatalogs } from '../hooks/use-mentorship-catalogs';
+import { useMentorshipWizard } from '../hooks/use-mentorship-wizard';
+import { clearMentorshipWizardDraft } from '../services/mentorship-wizard-draft.service';
 
 function extractErrorMessage(error: unknown): string | null {
   if (!isApiError(error)) return null;
 
   const body = error.response?.data;
 
-  if (!body || typeof body !== "object") return null;
+  if (!body || typeof body !== 'object') return null;
 
   const record = body as Record<string, unknown>;
 
-  if (typeof record.detail === "string" && record.detail) {
+  if (typeof record.detail === 'string' && record.detail) {
     return record.detail;
   }
 
-  if (typeof record.message === "string" && record.message) {
+  if (typeof record.message === 'string' && record.message) {
     return record.message;
   }
 
   if (
     Array.isArray(record.message) &&
-    record.message.every((item) => typeof item === "string")
+    record.message.every((item) => typeof item === 'string')
   ) {
-    return record.message.join(". ");
+    return record.message.join('. ');
   }
 
   return null;
@@ -66,29 +66,29 @@ export function MentorshipView() {
     getAccessToken,
     () => null,
   );
-  const participation = useParticipation(token, "always");
+  const participation = useParticipation(token, 'always');
   const request = useQuery({
-    queryKey: ["mentor-participation-requests", token],
+    queryKey: ['mentor-participation-requests', token],
     queryFn: () => mentorParticipationService.getCurrent(),
     enabled: Boolean(token),
     retry: false,
-    refetchOnMount: "always",
+    refetchOnMount: 'always',
   });
 
   useEffect(() => {
     const recheck = () => {
       void queryClient.invalidateQueries({
-        queryKey: ["mentors", "participation", token],
+        queryKey: ['mentors', 'participation', token],
       });
       void queryClient.invalidateQueries({
-        queryKey: ["mentor-participation-requests", token],
+        queryKey: ['mentor-participation-requests', token],
       });
     };
-    window.addEventListener("pageshow", recheck);
-    window.addEventListener("popstate", recheck);
+    window.addEventListener('pageshow', recheck);
+    window.addEventListener('popstate', recheck);
     return () => {
-      window.removeEventListener("pageshow", recheck);
-      window.removeEventListener("popstate", recheck);
+      window.removeEventListener('pageshow', recheck);
+      window.removeEventListener('popstate', recheck);
     };
   }, [queryClient, token]);
 
@@ -157,13 +157,14 @@ export function MentorshipView() {
         mentorParticipationService.getMyParticipation(),
         mentorParticipationService.getCurrent(),
       ]);
-      queryClient.setQueryData(["mentors", "participation", token], state);
+      queryClient.setQueryData(['mentors', 'participation', token], state);
       queryClient.setQueryData(
-        ["mentor-participation-requests", token], currentRequest,
+        ['mentor-participation-requests', token],
+        currentRequest,
       );
       if (
-        state.status === "ACTIVE" ||
-        ["PENDING", "OFFERED"].includes(currentRequest?.status ?? "")
+        state.status === 'ACTIVE' ||
+        ['PENDING', 'OFFERED'].includes(currentRequest?.status ?? '')
       ) {
         setUnavailableOpen(false);
         return false;
@@ -180,7 +181,7 @@ export function MentorshipView() {
     if (
       inFlight.current ||
       !wantsToParticipate ||
-      participation.state?.status === "ACTIVE"
+      participation.state?.status === 'ACTIVE'
     )
       return;
 
@@ -189,7 +190,7 @@ export function MentorshipView() {
       selectedOrientationTypeIds.length === 0
     ) {
       setActivationError(
-        "Selecciona al menos un área técnica y un tipo de orientación.",
+        'Selecciona al menos un área técnica y un tipo de orientación.',
       );
       return;
     }
@@ -216,15 +217,15 @@ export function MentorshipView() {
       await Promise.allSettled([
         refreshRoles(),
         queryClient.invalidateQueries({
-          queryKey: ["mentors", "participation"],
+          queryKey: ['mentors', 'participation'],
         }),
         queryClient.invalidateQueries({
-          queryKey: ["mentor-participation-requests"],
+          queryKey: ['mentor-participation-requests'],
         }),
         queryClient.invalidateQueries({
-          queryKey: ["mentorship", "directory"],
+          queryKey: ['mentorship', 'directory'],
         }),
-        queryClient.invalidateQueries({ queryKey: ["mentorship", "profile"] }),
+        queryClient.invalidateQueries({ queryKey: ['mentorship', 'profile'] }),
       ]);
       if (currentUserId) {
         await clearMentorshipWizardDraft(currentUserId).catch(() => {});
@@ -233,16 +234,16 @@ export function MentorshipView() {
     } catch (error) {
       if (
         [
-          "MENTOR_OFFER_CONFIRMATION_REQUIRED",
-          "REQUEST_ALREADY_EXISTS",
-        ].includes(participationErrorCode(error) ?? "")
+          'MENTOR_OFFER_CONFIRMATION_REQUIRED',
+          'REQUEST_ALREADY_EXISTS',
+        ].includes(participationErrorCode(error) ?? '')
       ) {
         if (!(await verifyBeforeSubmit())) return;
         setHasIntakeConflict(true);
         setActivationError(participationErrorMessage(error));
         return;
       }
-      if (participationErrorCode(error) === "NO_SLOTS") {
+      if (participationErrorCode(error) === 'NO_SLOTS') {
         if (!(await verifyBeforeSubmit())) return;
         setUnavailableOpen(true);
         return;
@@ -254,34 +255,34 @@ export function MentorshipView() {
 
         if (status === 400) {
           setActivationError(
-            message ?? "Las preferencias seleccionadas no son válidas.",
+            message ?? 'Las preferencias seleccionadas no son válidas.',
           );
         } else if (status === 401) {
           setActivationError(
-            "Tu sesión ya no es válida. Inicia sesión nuevamente.",
+            'Tu sesión ya no es válida. Inicia sesión nuevamente.',
           );
         } else if (status === 403) {
           setActivationError(
             message ??
-              "No cumples los requisitos para solicitar participación como mentor.",
+              'No cumples los requisitos para solicitar participación como mentor.',
           );
         } else if (status === 409) {
           setActivationError(
-            message ?? "Tu participación como mentor ya está activa.",
+            message ?? 'Tu participación como mentor ya está activa.',
           );
         } else if (status === 429) {
           setActivationError(
             message ??
-              "Has superado el límite de cuatro intentos en 24 horas. Tu participación está bloqueada temporalmente durante 72 horas.",
+              'Has superado el límite de cuatro intentos en 24 horas. Tu participación está bloqueada temporalmente durante 72 horas.',
           );
         } else {
           setActivationError(
-            message ?? "No se pudo procesar tu solicitud. Intenta nuevamente.",
+            message ?? 'No se pudo procesar tu solicitud. Intenta nuevamente.',
           );
         }
       } else {
         setActivationError(
-          "No fue posible conectar con el servidor. Comprueba tu conexión e intenta nuevamente.",
+          'No fue posible conectar con el servidor. Comprueba tu conexión e intenta nuevamente.',
         );
       }
     } finally {
@@ -305,21 +306,21 @@ export function MentorshipView() {
         await clearMentorshipWizardDraft(currentUserId).catch(() => {});
       }
       await queryClient.invalidateQueries({
-        queryKey: ["mentor-participation-requests"],
+        queryKey: ['mentor-participation-requests'],
       });
       setRequestRegistered(true);
     } catch (error) {
       const code = participationErrorCode(error);
-      if (code === "REQUEST_ALREADY_EXISTS") {
+      if (code === 'REQUEST_ALREADY_EXISTS') {
         await queryClient.invalidateQueries({
-          queryKey: ["mentor-participation-requests"],
+          queryKey: ['mentor-participation-requests'],
         });
         setUnavailableOpen(false);
-        router.push("/mentors/participation");
-      } else if (code === "CAPACITY_AVAILABLE") {
+        router.push('/mentors/participation');
+      } else if (code === 'CAPACITY_AVAILABLE') {
         setUnavailableOpen(false);
         setActivationError(
-          "Se liberó un cupo. Confirma nuevamente la activación para incorporarte como mentor.",
+          'Se liberó un cupo. Confirma nuevamente la activación para incorporarte como mentor.',
         );
       } else {
         setActivationError(participationErrorMessage(error));
@@ -342,8 +343,11 @@ export function MentorshipView() {
   }
 
   if (
-    !token || participation.isLoading || participation.isFetching ||
-    request.isPending || request.isFetching
+    !token ||
+    participation.isLoading ||
+    participation.isFetching ||
+    request.isPending ||
+    request.isFetching
   )
     return (
       <main role="status" className="p-6">
@@ -368,28 +372,29 @@ export function MentorshipView() {
       </main>
     );
 
-  const blockingStatus = participation.state?.status === "ACTIVE"
-    ? "ACTIVE"
-    : request.data?.status;
-  if (["ACTIVE", "PENDING", "OFFERED"].includes(blockingStatus ?? "")) {
+  const blockingStatus =
+    participation.state?.status === 'ACTIVE' ? 'ACTIVE' : request.data?.status;
+  if (['ACTIVE', 'PENDING', 'OFFERED'].includes(blockingStatus ?? '')) {
     return (
       <main className="mx-auto max-w-4xl space-y-4 p-6">
         <h1 className="text-2xl font-bold text-ink">
-          {blockingStatus === "ACTIVE"
-            ? "Ya se encuentra registrado como mentor"
-            : blockingStatus === "PENDING"
-              ? "Ya tienes una solicitud pendiente"
-              : "Ya tienes un cupo ofrecido"}
+          {blockingStatus === 'ACTIVE'
+            ? 'Ya se encuentra registrado como mentor'
+            : blockingStatus === 'PENDING'
+              ? 'Ya tienes una solicitud pendiente'
+              : 'Ya tienes un cupo ofrecido'}
         </h1>
         <p className="text-text-secondary">
-          {blockingStatus === "ACTIVE"
-            ? "Tu participación está activa."
-            : blockingStatus === "PENDING"
-              ? "Ya tienes una solicitud registrada. Revisa su estado en Mi participación."
-              : "Revisa y confirma tu oferta de cupo antes de su vencimiento."}
+          {blockingStatus === 'ACTIVE'
+            ? 'Tu participación está activa.'
+            : blockingStatus === 'PENDING'
+              ? 'Ya tienes una solicitud registrada. Revisa su estado en Mi participación.'
+              : 'Revisa y confirma tu oferta de cupo antes de su vencimiento.'}
         </p>
         <Link href="/mentors/participation" className={buttonVariants()}>
-          {blockingStatus === "OFFERED" ? "Ver mi cupo ofrecido" : "Mi participación"}
+          {blockingStatus === 'OFFERED'
+            ? 'Ver mi cupo ofrecido'
+            : 'Mi participación'}
         </Link>
       </main>
     );
@@ -478,7 +483,7 @@ export function MentorshipView() {
         {hasIntakeConflict && (
           <Link
             href="/mentors/participation"
-            className={buttonVariants({ variant: "outline" })}
+            className={buttonVariants({ variant: 'outline' })}
           >
             Revisar mi solicitud u oferta
           </Link>
@@ -513,7 +518,7 @@ export function MentorshipView() {
           setUnavailableOpen(open);
           setActivationError(null);
           if (!open && requestRegistered) {
-            router.push("/mentors/participation?registered=1");
+            router.push('/mentors/participation?registered=1');
           }
         }}
         isSubmitting={isActivating}
