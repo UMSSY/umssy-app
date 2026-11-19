@@ -14,3 +14,9 @@ export const OFFLINE_PASSES_TEXTS = {
   requiresConnection: 'Requiere conexión a Internet',
   retry: 'Reintentar',
 } as const;
+
+export const MY_PASSES_ROUTE = '/events/my-passes';
+
+export const OFFLINE_PASSES_ROUTE_TEXTS = {
+  openMyPasses: 'Ir a Mis inscripciones',
+} as const;
