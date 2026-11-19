@@ -11,14 +11,25 @@ describe("getMyAppointments", () => {
     vi.restoreAllMocks()
   })
 
-  it("pide las citas del usuario con el alcance elegido", async () => {
-    const appointments = [{ id: "a1" }]
-    const get = vi.spyOn(apiClient, "get").mockResolvedValue(envelope(appointments))
+  it("pide las citas del usuario con el alcance y la página elegidos y devuelve la página completa", async () => {
+    const page = { items: [{ id: "a1" }], total: 1, page: 2, pageSize: 10 }
+    const get = vi.spyOn(apiClient, "get").mockResolvedValue(envelope(page))
 
-    const result = await appointmentsApi.getMyAppointments("past")
+    const result = await appointmentsApi.getMyAppointments({ scope: "past", page: 2 })
 
-    expect(get).toHaveBeenCalledWith("/appointments/me", { params: { scope: "past" } })
-    expect(result).toEqual(appointments)
+    expect(get).toHaveBeenCalledWith("/appointments/me", { params: { scope: "past", page: 2 } })
+    expect(result).toEqual(page)
+  })
+
+  it("manda q cuando se busca por nombre", async () => {
+    const page = { items: [], total: 0, page: 1, pageSize: 10 }
+    const get = vi.spyOn(apiClient, "get").mockResolvedValue(envelope(page))
+
+    await appointmentsApi.getMyAppointments({ scope: "upcoming", page: 1, q: "Ana" })
+
+    expect(get).toHaveBeenCalledWith("/appointments/me", {
+      params: { scope: "upcoming", page: 1, q: "Ana" },
+    })
   })
 })
 
@@ -119,3 +130,20 @@ describe("downloadDocument", () => {
     expect(get).toHaveBeenCalledWith("/appointments/a1/document", { responseType: "blob" })
   })
 })
+
+describe("cancel", () => {
+  beforeEach(() => vi.restoreAllMocks());
+
+  it("envía el motivo al endpoint y devuelve la cita cancelada", async () => {
+    const appointment = { id: "a1", status: "CANCELLED" };
+    const patch = vi.spyOn(apiClient, "patch").mockResolvedValue(envelope(appointment));
+    expect(await appointmentsApi.cancel("a1", "No puedo asistir")).toEqual(appointment);
+    expect(patch).toHaveBeenCalledWith("/appointments/a1/cancel", { reason: "No puedo asistir" });
+  });
+
+  it("permite omitir el motivo y propaga los errores", async () => {
+    const patch = vi.spyOn(apiClient, "patch").mockRejectedValue(new Error("network"));
+    await expect(appointmentsApi.cancel("a1")).rejects.toThrow("network");
+    expect(patch).toHaveBeenCalledWith("/appointments/a1/cancel", { reason: undefined });
+  });
+});
