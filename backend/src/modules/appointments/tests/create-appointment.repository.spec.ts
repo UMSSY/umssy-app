@@ -15,6 +15,7 @@ const DATA = {
   statusId: STATUS_ID,
   orientationTypeId: '66666666-6666-4666-8666-666666666666',
   message: 'Hola',
+  meetingUrl: 'https://meet.jit.si/umssy-44444444-4444-4444-8444-444444444444',
 };
 
 describe('AppointmentsRepository', () => {
@@ -115,5 +116,105 @@ describe('AppointmentsRepository', () => {
     expect(prisma.appointmentHistory.create).toHaveBeenCalledWith({
       data: historyData,
     });
+  });
+
+  it('toma un candado por participante, sin repetir y en orden estable', async () => {
+    const tx = { $executeRaw: vi.fn() };
+    const repository = new AppointmentsRepository({} as never);
+
+    await repository.lockParticipants(
+      [DATA.studentId, DATA.mentorId, DATA.studentId],
+      tx as never,
+    );
+
+    expect(tx.$executeRaw).toHaveBeenCalledTimes(2);
+    expect(tx.$executeRaw.mock.calls.map((call) => call[1])).toEqual([
+      `appointment-participant:${DATA.mentorId}`,
+      `appointment-participant:${DATA.studentId}`,
+    ]);
+  });
+
+  it('busca citas activas de la persona que empiezan antes del fin y terminan después del inicio', async () => {
+    const tx = { appointment: { count: vi.fn().mockResolvedValue(1) } };
+    const repository = new AppointmentsRepository({} as never);
+
+    await expect(
+      repository.hasOverlappingAppointment(
+        DATA.studentId,
+        DATA.startAt,
+        DATA.endAt,
+        tx as never,
+      ),
+    ).resolves.toBe(true);
+
+    expect(tx.appointment.count).toHaveBeenCalledWith({
+      where: {
+        OR: [{ mentorId: DATA.studentId }, { studentId: DATA.studentId }],
+        startAt: { lt: DATA.endAt },
+        endAt: { gt: DATA.startAt },
+        status: {
+          title: {
+            in: [
+              AppointmentStatusTitle.CONFIRMED,
+              AppointmentStatusTitle.LEGACY_CONFIRMED,
+            ],
+          },
+        },
+      },
+    });
+  });
+
+  it('responde que no hay cruce cuando no encuentra citas activas', async () => {
+    const prisma = { appointment: { count: vi.fn().mockResolvedValue(0) } };
+    const repository = new AppointmentsRepository(prisma as never);
+
+    await expect(
+      repository.hasOverlappingAppointment(
+        DATA.studentId,
+        DATA.startAt,
+        DATA.endAt,
+      ),
+    ).resolves.toBe(false);
+  });
+
+  it('busca reservas propias confirmadas o completadas que empiezan dentro del día', async () => {
+    const tx = { appointment: { count: vi.fn().mockResolvedValue(1) } };
+    const repository = new AppointmentsRepository({} as never);
+    const day = {
+      start: new Date('2026-10-23T04:00:00.000Z'),
+      end: new Date('2026-10-24T04:00:00.000Z'),
+    };
+
+    await expect(
+      repository.hasReservationOnDay(DATA.studentId, day, tx as never),
+    ).resolves.toBe(true);
+
+    expect(tx.appointment.count).toHaveBeenCalledWith({
+      where: {
+        studentId: DATA.studentId,
+        startAt: { gte: day.start, lt: day.end },
+        status: {
+          title: {
+            in: [
+              AppointmentStatusTitle.CONFIRMED,
+              AppointmentStatusTitle.LEGACY_CONFIRMED,
+              AppointmentStatusTitle.COMPLETED,
+            ],
+          },
+        },
+      },
+    });
+  });
+
+  it('no encuentra reservas cuando el conteo del día es cero', async () => {
+    const prisma = { appointment: { count: vi.fn().mockResolvedValue(0) } };
+    const repository = new AppointmentsRepository(prisma as never);
+
+    await expect(
+      repository.hasReservationOnDay(DATA.studentId, {
+        start: new Date('2026-10-23T04:00:00.000Z'),
+        end: new Date('2026-10-24T04:00:00.000Z'),
+      }),
+    ).resolves.toBe(false);
   });
 });

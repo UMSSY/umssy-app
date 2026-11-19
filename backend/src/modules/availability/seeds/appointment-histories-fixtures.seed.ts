@@ -35,7 +35,7 @@ export async function seedAppointmentHistoriesFixtures(
             previous: 'PENDIENTE',
             changedById:
               status === 'CANCELADA'
-                ? appointment.studentId
+                ? (appointment.cancelledById ?? appointment.studentId)
                 : appointment.mentorId,
             date: appointment.respondedAt!,
             note:
