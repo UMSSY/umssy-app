@@ -1,5 +1,5 @@
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
-import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { PORTFOLIO_ACCOUNT_MESSAGES } from "../constants/portfolio-accounts.constants";
 import { portfolioAccountsService } from "../services/portfolio-accounts.service";
@@ -55,30 +55,35 @@ describe("SocialAccountConnectButtons", () => {
   it("renders connect buttons for GitHub and GitLab when disconnected (CA-1)", async () => {
     render(<SocialAccountConnectButtons />);
 
-    expect(screen.getByText("Cuentas de desarrollo")).toBeInTheDocument();
-    expect(
-      await screen.findByRole("button", { name: "Conectar con GitHub" }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Conectar con GitLab" }),
-    ).toBeInTheDocument();
+    const group = screen.getByRole("group", { name: "Cuentas de desarrollo" });
+    const github = await within(group).findByRole("button", { name: "Conectar con GitHub" });
+    const gitlab = within(group).getByRole("button", { name: "Conectar con GitLab" });
+
+    expect(screen.queryByText("Cuentas de desarrollo")).not.toBeInTheDocument();
+    expect(github.querySelector("img")).toHaveAttribute("src", "/icons/github.svg");
+    expect(gitlab.querySelector("img")).toHaveAttribute("src", "/icons/gitlab.svg");
+    expect(github.querySelector("img")).toHaveAttribute("alt", "");
+    expect(gitlab.querySelector("img")).toHaveAttribute("alt", "");
   });
 
-  it("requests oauth url and redirects on same tab when clicking connect button (CA-2)", async () => {
+  it.each([
+    { provider: "github", label: "GitHub", url: "https://github.com/login/oauth/authorize?client_id=github-id" },
+    { provider: "gitlab", label: "GitLab", url: "https://gitlab.com/oauth/authorize?client_id=gitlab-id" },
+  ])("requests the $label authorization URL and redirects on the same tab (CA-2)", async ({ provider, label, url }) => {
     const mockAuthUrl: PortfolioOAuthUrlResponse = {
-      url: "https://github.com/login/oauth/authorize?client_id=github-id",
+      url,
     };
     vi.mocked(portfolioAccountsService.getOAuthAuthorizationUrl).mockResolvedValueOnce(mockAuthUrl);
 
     render(<SocialAccountConnectButtons />);
 
-    const githubButton = await screen.findByRole("button", { name: "Conectar con GitHub" });
-    fireEvent.click(githubButton);
+    const button = await screen.findByRole("button", { name: `Conectar con ${label}` });
+    fireEvent.click(button);
 
     await waitFor(() => {
       expect(portfolioAccountsService.getOAuthAuthorizationUrl).toHaveBeenCalledWith(
-        "github",
-        "github",
+        provider,
+        provider,
       );
       expect(assignWindowLocation).toHaveBeenCalledWith(mockAuthUrl.url);
     });
@@ -109,6 +114,21 @@ describe("SocialAccountConnectButtons", () => {
     expect(profileLink).toHaveAttribute("href", "https://github.com/valeriaquispe");
     expect(screen.getByRole("button", { name: "Reconectar cuenta de GitHub" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Conectar con GitLab" })).toBeInTheDocument();
+  });
+
+  it("keeps both account links and disconnect actions available when both providers are connected", async () => {
+    vi.mocked(portfolioAccountsService.getSocialAccounts).mockResolvedValue([
+      { provider: "github", connected: true, username: "github-user", profileUrl: "https://github.com/github-user" },
+      { provider: "gitlab", connected: true, username: "gitlab-user", profileUrl: "https://gitlab.com/gitlab-user" },
+    ]);
+
+    render(<SocialAccountConnectButtons />);
+
+    expect(await screen.findByRole("link", { name: "@github-user" })).toHaveAttribute("href", "https://github.com/github-user");
+    expect(screen.getByRole("link", { name: "@gitlab-user" })).toHaveAttribute("href", "https://gitlab.com/gitlab-user");
+    expect(screen.getByRole("button", { name: "Desconectar cuenta de GitHub" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Desconectar cuenta de GitLab" })).toBeInTheDocument();
+    expect(screen.getAllByText("Conectado")).toHaveLength(2);
   });
 
   it("handles user cancellation (error=access_denied) with Spanish message without connecting (CA-2, CA-9)", async () => {
