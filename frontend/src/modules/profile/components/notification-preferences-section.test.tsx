@@ -5,6 +5,11 @@ import {
   NOTIFICATION_PREFERENCES_MESSAGES,
   NOTIFICATION_PUSH_MESSAGES,
 } from "../constants/profile-feedback.constants";
+import {
+  PUSH_GUIDE_CLOSE_LABEL,
+  PUSH_GUIDES,
+  PUSH_PERMISSION_PROMPT,
+} from "@/shared/constants/push-permission.constants";
 import { NotificationPreferencesSection } from "./notification-preferences-section";
 
 type Preferences = {
@@ -34,6 +39,7 @@ const pushMock = vi.hoisted(() => ({
   isSubscribed: false,
   isLoading: false,
   activate: vi.fn(),
+  sync: vi.fn(),
   deactivate: vi.fn(),
 }));
 
@@ -74,11 +80,15 @@ beforeEach(() => {
   pushMock.isSubscribed = false;
   pushMock.isLoading = false;
   pushMock.activate.mockReset();
-  pushMock.activate.mockResolvedValue({ ok: true });
+  pushMock.activate.mockImplementation(async () => {
+    pushMock.isSubscribed = true;
+    return { ok: true };
+  });
 });
 
 afterEach(() => {
   cleanup();
+  vi.unstubAllGlobals();
 });
 
 describe("NotificationPreferencesSection", () => {
@@ -180,107 +190,119 @@ describe("NotificationPreferencesSection", () => {
     expect(screen.queryByRole("radiogroup")).not.toBeInTheDocument();
   });
 
-  it("muestra el diálogo de confirmación al guardar Push, sin pedir permiso aún", async () => {
+  it("al seleccionar Push muestra el aviso propio de UMSSY sin pedir permiso aún (HU-15 CA-U1)", async () => {
     const user = userEvent.setup();
     render(<NotificationPreferencesSection />);
 
     await user.click(radio("Push"));
-    await user.click(saveButton());
 
-    expect(
-      await screen.findByText(NOTIFICATION_PUSH_MESSAGES.dialog.title),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: PUSH_PERMISSION_PROMPT.dismiss })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: PUSH_PERMISSION_PROMPT.confirm })).toBeInTheDocument();
     expect(pushMock.activate).not.toHaveBeenCalled();
     expect(hookMock.state.updatePreferences).not.toHaveBeenCalled();
   });
 
-  it("activa Push y guarda la preferencia cuando se confirma", async () => {
+  it("«Ahora no» conserva la preferencia guardada (HU-16)", async () => {
     const user = userEvent.setup();
     render(<NotificationPreferencesSection />);
 
     await user.click(radio("Push"));
-    await user.click(saveButton());
-    await user.click(
-      await screen.findByRole("button", {
-        name: NOTIFICATION_PUSH_MESSAGES.dialog.confirm,
-      }),
-    );
+    await user.click(await screen.findByRole("button", { name: PUSH_PERMISSION_PROMPT.dismiss }));
+
+    expect(pushMock.activate).not.toHaveBeenCalled();
+    expect(radio("Solo por correo")).toBeChecked();
+    expect(saveButton()).toBeDisabled();
+  });
+
+  it("«Continuar» pide permiso y suscribe; luego «Guardar cambios» guarda Push", async () => {
+    const user = userEvent.setup();
+    render(<NotificationPreferencesSection />);
+
+    await user.click(radio("Push"));
+    await user.click(await screen.findByRole("button", { name: PUSH_PERMISSION_PROMPT.confirm }));
 
     expect(pushMock.activate).toHaveBeenCalledOnce();
+    expect(await screen.findByText(NOTIFICATION_PUSH_MESSAGES.permissionGranted)).toBeInTheDocument();
+    expect(radio("Push")).toBeChecked();
+
+    await user.click(saveButton());
+
     expect(hookMock.state.updatePreferences).toHaveBeenCalledExactlyOnceWith({
       pushEnabled: true,
       emailEnabled: false,
       inAppEnabled: false,
     });
-    expect(
-      await screen.findByText(NOTIFICATION_PREFERENCES_MESSAGES.saved.push),
-    ).toBeInTheDocument();
   });
 
-  it("no guarda la preferencia cuando el usuario rechaza el permiso", async () => {
-    pushMock.activate.mockResolvedValue({
-      ok: false,
-      reason: "permission-denied",
-    });
+    it("si el usuario bloquea el permiso muestra la guía y conserva la preferencia (HU-15 CA-U3, HU-16)", async () => {
+    pushMock.activate.mockResolvedValue({ ok: false, reason: "permission-blocked" });
     const user = userEvent.setup();
     render(<NotificationPreferencesSection />);
 
     await user.click(radio("Push"));
-    await user.click(saveButton());
-    await user.click(
-      await screen.findByRole("button", {
-        name: NOTIFICATION_PUSH_MESSAGES.dialog.confirm,
-      }),
-    );
+    await user.click(await screen.findByRole("button", { name: PUSH_PERMISSION_PROMPT.confirm }));
 
-    expect(pushMock.activate).toHaveBeenCalledOnce();
+    expect(await screen.findByText(PUSH_GUIDES.blocked.title)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: PUSH_GUIDE_CLOSE_LABEL }));
+    expect(radio("Solo por correo")).toBeChecked();
     expect(hookMock.state.updatePreferences).not.toHaveBeenCalled();
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      NOTIFICATION_PUSH_MESSAGES.permissionDismissed,
-    );
+  });
+
+  it("si el usuario cierra el diálogo nativo informa y conserva la preferencia", async () => {
+    pushMock.activate.mockResolvedValue({ ok: false, reason: "permission-dismissed" });
+    const user = userEvent.setup();
+    render(<NotificationPreferencesSection />);
+
+    await user.click(radio("Push"));
+    await user.click(await screen.findByRole("button", { name: PUSH_PERMISSION_PROMPT.confirm }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(NOTIFICATION_PUSH_MESSAGES.permissionDismissed);
     expect(radio("Solo por correo")).toBeChecked();
   });
 
-  it("no guarda la preferencia si falla la suscripción", async () => {
-    pushMock.activate.mockResolvedValue({
-      ok: false,
-      reason: "network-error",
-    });
+  it("si falla la suscripción informa y conserva la preferencia", async () => {
+    pushMock.activate.mockResolvedValue({ ok: false, reason: "network-error" });
     const user = userEvent.setup();
     render(<NotificationPreferencesSection />);
 
     await user.click(radio("Push"));
-    await user.click(saveButton());
-    await user.click(
-      await screen.findByRole("button", {
-        name: NOTIFICATION_PUSH_MESSAGES.dialog.confirm,
-      }),
-    );
+    await user.click(await screen.findByRole("button", { name: PUSH_PERMISSION_PROMPT.confirm }));
 
+    expect(await screen.findByRole("alert")).toHaveTextContent(NOTIFICATION_PUSH_MESSAGES.subscriptionError);
     expect(hookMock.state.updatePreferences).not.toHaveBeenCalled();
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      NOTIFICATION_PUSH_MESSAGES.subscriptionError,
-    );
   });
 
-  it("cancela el diálogo Push sin activar ni guardar la preferencia", async () => {
+    it("con el permiso ya bloqueado muestra la guía sin abrir el aviso ni el diálogo nativo (HU-15 CA-U4)", async () => {
+    vi.stubGlobal("Notification", { permission: "denied" });
     const user = userEvent.setup();
     render(<NotificationPreferencesSection />);
 
     await user.click(radio("Push"));
-    await user.click(saveButton());
-    await user.click(
-      await screen.findByRole("button", {
-        name: NOTIFICATION_PUSH_MESSAGES.dialog.cancel,
-      }),
-    );
 
+    expect(await screen.findByText(PUSH_GUIDES.blocked.title)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: PUSH_PERMISSION_PROMPT.confirm })).not.toBeInTheDocument();
     expect(pushMock.activate).not.toHaveBeenCalled();
-    expect(hookMock.state.updatePreferences).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("button", { name: PUSH_GUIDE_CLOSE_LABEL }));
     expect(radio("Solo por correo")).toBeChecked();
   });
 
-  it("deshabilita Push cuando el dispositivo no lo soporta", () => {
+    it.each([
+    ["ios-old", PUSH_GUIDES["ios-old"].title],
+    ["ios-not-installed", PUSH_GUIDES["ios-not-installed"].title],
+  ] as const)("en iPhone %s muestra la guía correspondiente (HU-15 CA-U5)", async (environment, title) => {
+    pushMock.environment = environment;
+    const user = userEvent.setup();
+    render(<NotificationPreferencesSection />);
+
+    await user.click(radio("Push"));
+
+    expect(await screen.findByText(title)).toBeInTheDocument();
+    expect(pushMock.activate).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("button", { name: PUSH_GUIDE_CLOSE_LABEL }));
+    expect(radio("Solo por correo")).toBeChecked();
+  });
+
+  it("deshabilita Push en escritorio (HU-16)", () => {
     pushMock.environment = "desktop";
 
     render(<NotificationPreferencesSection />);
@@ -289,23 +311,29 @@ describe("NotificationPreferencesSection", () => {
   });
 
   it("indica el estado real de la suscripción cuando Push está guardado", () => {
-    hookMock.state.preferences = {
-      pushEnabled: true,
-      emailEnabled: false,
-      inAppEnabled: false,
-    };
+    hookMock.state.preferences = { pushEnabled: true, emailEnabled: false, inAppEnabled: false };
 
     pushMock.isSubscribed = false;
     const { unmount } = render(<NotificationPreferencesSection />);
-    expect(
-      screen.getByText("No hay una suscripción Push activa en este dispositivo."),
-    ).toBeInTheDocument();
+    expect(screen.getByText(NOTIFICATION_PUSH_MESSAGES.noDeviceSubscription)).toBeInTheDocument();
     unmount();
 
     pushMock.isSubscribed = true;
     render(<NotificationPreferencesSection />);
-    expect(
-      screen.getByText("Las notificaciones Push están activas en este dispositivo."),
-    ).toBeInTheDocument();
+    expect(screen.getByText(NOTIFICATION_PUSH_MESSAGES.deviceSubscriptionActive)).toBeInTheDocument();
+  });
+
+  it("permite reactivar Push en este dispositivo sin volver a guardar la preferencia (HU-15)", async () => {
+    hookMock.state.preferences = { pushEnabled: true, emailEnabled: false, inAppEnabled: false };
+    pushMock.isSubscribed = false;
+    const user = userEvent.setup();
+    render(<NotificationPreferencesSection />);
+
+    await user.click(screen.getByRole("button", { name: NOTIFICATION_PUSH_MESSAGES.activateOnDevice }));
+    await user.click(await screen.findByRole("button", { name: PUSH_PERMISSION_PROMPT.confirm }));
+
+    expect(pushMock.activate).toHaveBeenCalledOnce();
+    expect(hookMock.state.updatePreferences).not.toHaveBeenCalled();
+    expect(await screen.findByText(NOTIFICATION_PUSH_MESSAGES.deviceActivated)).toBeInTheDocument();
   });
 });

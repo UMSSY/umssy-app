@@ -317,8 +317,13 @@ self.addEventListener('message', (event) => {
         actionUrl: payload.actionUrl || payload.url || PUSH_DEFAULT_URL,
         notificationId: payload.notificationId || null,
       },
-      tag: payload.groupKey || payload.tag || undefined,
     };
+
+    const tag = payload.groupKey || payload.tag;
+    if (tag) {
+      options.tag = tag;
+      options.renotify = true;
+    }
 
     event.waitUntil(self.registration.showNotification(title, options));
   });

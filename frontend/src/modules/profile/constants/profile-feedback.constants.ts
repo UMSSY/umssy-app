@@ -32,19 +32,21 @@ export const NOTIFICATION_PREFERENCES_MESSAGES = {
 } as const;
 
 export const NOTIFICATION_PUSH_MESSAGES = {
-  permissionBlocked:
-    "Tienes bloqueadas las notificaciones de este navegador, así que no se guardó el cambio. Actívalas en la configuración del navegador e inténtalo de nuevo.",
+  permissionGranted:
+    "Permiso concedido. Pulsa «Guardar cambios» para recibir tus notificaciones en el celular.",
   permissionDismissed:
-    "No diste el permiso para las notificaciones, así que no se guardó el cambio. Puedes intentarlo de nuevo.",
+    "No diste el permiso para las notificaciones, así que se mantiene tu preferencia anterior. Puedes intentarlo de nuevo.",
   subscriptionError:
-    "No se pudo activar Push en este dispositivo, así que no se guardó el cambio. Revisa tu conexión e inténtalo de nuevo.",
+    "No se pudo activar Push en este dispositivo, así que se mantiene tu preferencia anterior. Revisa tu conexión e inténtalo de nuevo.",
+  serviceWorkerUnavailable:
+    "No se pudo preparar la app para recibir Push. Cierra y vuelve a abrir UMSSY desde la pantalla de inicio e inténtalo de nuevo.",
   unsupported:
     "Este dispositivo no admite notificaciones Push. Elige otra opción.",
-  dialog: {
-    title: "Activar notificaciones en el celular",
-    description:
-      "UMSSY te enviará alertas importantes incluso cuando la app esté cerrada. A continuación, tu navegador te pedirá permiso.",
-    confirm: "Continuar",
-    cancel: "Cancelar",
-  },
+  deviceActivated:
+    "Listo: las notificaciones Push quedaron activas en este dispositivo.",
+  noDeviceSubscription:
+    "No hay una suscripción Push activa en este dispositivo.",
+  deviceSubscriptionActive:
+    "Las notificaciones Push están activas en este dispositivo.",
+  activateOnDevice: "Activar en este dispositivo",
 } as const;

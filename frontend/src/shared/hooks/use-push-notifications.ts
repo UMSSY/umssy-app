@@ -11,6 +11,47 @@ import type {
 } from "@/shared/types/use-push-notifications.types";
 import { subscribeToPush } from "../utils/subscribe-to-push";
 
+const SERVICE_WORKER_READY_TIMEOUT_MS = 10_000;
+
+async function waitForServiceWorker(): Promise<ServiceWorkerRegistration | null> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      navigator.serviceWorker.ready,
+      new Promise<null>((resolve) => {
+        timer = setTimeout(() => resolve(null), SERVICE_WORKER_READY_TIMEOUT_MS);
+      }),
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
+async function ensureBackendSubscription(
+  registration: ServiceWorkerRegistration,
+): Promise<void> {
+  const existingSubscription = await registration.pushManager.getSubscription();
+
+  const subscription =
+    existingSubscription ??
+    (await (async () => {
+      const response = await apiClient.get<{ data: { publicKey: string } }>(
+        "/push/public-key",
+      );
+      const publicKey = response.data?.data?.publicKey;
+      if (!publicKey) throw new Error("VAPID public key no disponible");
+      return subscribeToPush(registration, urlBase64ToUint8Array(publicKey));
+    })());
+
+  const { keys } = subscription.toJSON();
+
+  await apiClient.post("/push/subscriptions", {
+    endpoint: subscription.endpoint,
+    keys: { p256dh: keys?.p256dh, auth: keys?.auth },
+    userAgent: navigator.userAgent,
+  });
+}
+
 function detectEnvironment(): PushEnvironment {
   if (typeof window === "undefined") return "unsupported";
 
@@ -70,8 +111,8 @@ export function usePushNotifications(): UsePushNotificationsResult {
 
     let isMounted = true;
 
-    navigator.serviceWorker.ready
-      .then((registration) => registration.pushManager.getSubscription())
+    waitForServiceWorker()
+      .then((registration) => registration?.pushManager.getSubscription() ?? null)
       .then((subscription) => {
         if (isMounted) {
           setIsSubscribed(!!subscription);
@@ -102,7 +143,7 @@ export function usePushNotifications(): UsePushNotificationsResult {
       setPermission(currentPermission);
 
       if (currentPermission === "denied") {
-        return { ok: false, reason: "permission-denied" };
+        return { ok: false, reason: "permission-blocked" };
       }
 
       if (currentPermission !== "granted") {
@@ -110,37 +151,20 @@ export function usePushNotifications(): UsePushNotificationsResult {
         setPermission(currentPermission);
       }
 
-      if (currentPermission !== "granted") {
-        return { ok: false, reason: "permission-denied" };
+      if (currentPermission === "denied") {
+        return { ok: false, reason: "permission-blocked" };
       }
 
-      const registration = await navigator.serviceWorker.ready;
+      if (currentPermission !== "granted") {
+        return { ok: false, reason: "permission-dismissed" };
+      }
 
-      const existingSubscription =
-        await registration.pushManager.getSubscription();
+      const registration = await waitForServiceWorker();
+      if (!registration) {
+        return { ok: false, reason: "service-worker-unavailable" };
+      }
 
-      const subscription =
-        existingSubscription ??
-        (await (async () => {
-          const response = await apiClient.get<{
-            data: { publicKey: string };
-          }>("/push/public-key");
-
-          const applicationServerKey = urlBase64ToUint8Array(
-            response.data?.data?.publicKey ?? "",
-          );
-
-          return subscribeToPush(registration, applicationServerKey);
-        })());
-
-      await apiClient.post("/push/subscriptions", {
-        endpoint: subscription.endpoint,
-        keys: {
-          p256dh: subscription.toJSON().keys?.p256dh,
-          auth: subscription.toJSON().keys?.auth,
-        },
-        userAgent: navigator.userAgent,
-      });
+      await ensureBackendSubscription(registration);
 
       setIsSubscribed(true);
 
@@ -154,15 +178,32 @@ export function usePushNotifications(): UsePushNotificationsResult {
     }
   }, [environment]);
 
+  const sync = useCallback(async (): Promise<boolean> => {
+    if (environment !== "supported") return false;
+    if (Notification.permission !== "granted") return false;
+
+    try {
+      const registration = await waitForServiceWorker();
+      if (!registration) return false;
+
+      await ensureBackendSubscription(registration);
+      setIsSubscribed(true);
+      return true;
+    } catch (error) {
+      console.warn("[usePushNotifications] Silent sync failed", error);
+      return false;
+    }
+  }, [environment]);
+
   const deactivate = useCallback(async (): Promise<void> => {
     if (environment !== "supported") return;
 
     setIsLoading(true);
 
     try {
-      const registration = await navigator.serviceWorker.ready;
+      const registration = await waitForServiceWorker();
       const subscription =
-        await registration.pushManager.getSubscription();
+        (await registration?.pushManager.getSubscription()) ?? null;
 
       if (!subscription) {
         setIsSubscribed(false);
@@ -189,6 +230,7 @@ export function usePushNotifications(): UsePushNotificationsResult {
     isSubscribed,
     isLoading,
     activate,
+    sync,
     deactivate,
   };
 }

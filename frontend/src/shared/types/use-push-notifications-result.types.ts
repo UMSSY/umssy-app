@@ -8,5 +8,6 @@ export interface UsePushNotificationsResult {
   isSubscribed: boolean;
   isLoading: boolean;
   activate: () => Promise<ActivateResult>;
+  sync: () => Promise<boolean>;
   deactivate: () => Promise<void>;
 }
