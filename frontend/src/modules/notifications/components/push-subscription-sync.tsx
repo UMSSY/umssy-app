@@ -7,8 +7,7 @@ import {
   getAccessToken,
   subscribeAccessToken,
 } from "@/shared/services/storage/access-token-storage";
-import { NOTIFICATION_PREFERENCES_QUERY_KEY } from "../hooks/use-notification-preferences";
-import { notificationPreferencesService } from "../services/notification-preferences.service";
+import { notificationPreferencesQuery } from "../utils/notification-preferences-query";
 
 const getServerToken = () => null;
 
@@ -18,8 +17,7 @@ export function PushSubscriptionSync() {
   const syncedToken = useRef<string | null>(null);
 
   const { data: preferences } = useQuery({
-    queryKey: NOTIFICATION_PREFERENCES_QUERY_KEY,
-    queryFn: () => notificationPreferencesService.get(),
+    ...notificationPreferencesQuery,
     enabled: !!token && environment === "supported",
   });
 

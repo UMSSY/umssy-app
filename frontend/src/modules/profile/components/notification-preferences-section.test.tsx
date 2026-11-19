@@ -40,7 +40,6 @@ const pushMock = vi.hoisted(() => ({
 }));
 
 vi.mock("@/modules/notifications/hooks/use-notification-preferences", () => ({
-  NOTIFICATION_PREFERENCES_QUERY_KEY: ["notifications", "preferences"],
   useNotificationPreferences: () => hookMock.state,
 }));
 
