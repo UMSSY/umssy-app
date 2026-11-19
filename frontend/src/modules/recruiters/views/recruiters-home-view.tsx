@@ -1,11 +1,22 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowRight, Search, SquarePlus, UserRound } from "lucide-react";
 import { PageHeading } from "@/shared/components/layout/page-heading";
 import { buttonVariants } from "@/components/ui/button-variants";
 import { VacancyList } from "@/modules/job-offers";
+import { useAuth } from "@/shared/contexts/auth-context";
 import { RECRUITERS_ROUTES } from "../constants/navigation";
 
 export function RecruitersHomeView() {
+  const { company } = useAuth();
+  const companyId = company?.id;
+
+  // Ruta dinámica apuntando exactamente al perfil de empresa con su ID (HU14)
+  const companyProfileHref = companyId 
+    ? `/backoffice/empresas/${companyId}` 
+    : "/backoffice/empresas";
+
   return (
     <main className="mx-auto w-full max-w-7xl space-y-6">
       <PageHeading
@@ -58,11 +69,11 @@ export function RecruitersHomeView() {
             </li>
             <li>
               <Link
-                href="/profile/personal-info"
+                href={companyProfileHref}
                 className="flex items-center gap-3 p-4 text-sm font-medium text-accent hover:bg-interaction"
               >
                 <UserRound className="size-4" aria-hidden="true" />
-                <span className="flex-1">Datos de mi perfil</span>
+                <span className="flex-1">Perfil de empresa</span>
                 <ArrowRight className="size-4" aria-hidden="true" />
               </Link>
             </li>

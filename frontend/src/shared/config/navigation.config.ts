@@ -16,7 +16,7 @@ const notificationRoles = getRouteRoles("/notifications");
 
 export const SIDEBAR_NAVIGATION: NavigationItem[] = [
   { label: "Inicio", icon: House, href: "/dashboard", roles: getRouteRoles("/dashboard") },
-  { label: "Mi perfil", icon: UserRound, activePathPatterns: [/^\/profile(?:\/|$)/], children: getSectionItems("profile") },
+  { label: "Mi perfil", icon: UserRound, activePathPatterns: [/^\/(?:profile|company-profile)(?:\/|$)/], children: WORKSPACE_SECTIONS.find(s => s.id === "profile")?.items.map((item) => ({ label: item.label, href: item.label === "Resumen" ? "/company-profile" : item.href, roles: getRouteRoles(item.label === "Resumen" ? "/company-profile" : item.href) })) ?? [] }, 
   { label: "Mentorías", icon: Users, activePathPatterns: [/^\/(?:mentorship|mentors|mentor|appointments)(?:\/|$)/], children: getSectionItems("mentorship") },
   { label: "Talleres y eventos", icon: CalendarDays, activePathPatterns: [/^\/events(?:\/|$)/], children: getSectionItems("events") },
   { label: "Vacantes", icon: BriefcaseBusiness, activePathPatterns: [/^\/vacancies(?:\/|$)/], children: getSectionItems("vacancies") },

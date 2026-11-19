@@ -24,6 +24,7 @@ export const WORKSPACE_TASKS: readonly WorkspaceTask[] = [
   { label: "Empleabilidad y Habilidades", href: "/backoffice/reports/heatmaps/employability", icon: LayoutGrid, area: "management", keywords: "mapa calor empleabilidad habilidades inserción laboral titulados" },
   { label: "Habilidades vs. Experiencia", href: "/backoffice/reports/heatmaps/skills-by-experience", icon: LayoutGrid, area: "management", keywords: "mapa calor habilidades experiencia años madurez profesional" },
   { label: "Portal de empresa", href: "/recruiters", icon: Building2, area: "company" },
+  { label: "Perfil de empresa", href: "/company-profile", icon: Building2, area: "company", keywords: "empresa perfil corporativo datos mock" },
   { label: "Publicar vacante", href: "/recruiters/job-offers/new", icon: SquarePlus, area: "company", keywords: "empleo oferta trabajo" },
   { label: "Buscar candidatos", href: "/matching", icon: Search, area: "company", keywords: "afinidad reclutamiento" },
   { label: "Resumen del perfil", href: "/profile", icon: UserRound, area: "profile" },
@@ -48,4 +49,5 @@ export const WORKSPACE_TASKS: readonly WorkspaceTask[] = [
   { label: "Vacantes", href: "/vacancies", icon: BriefcaseBusiness, area: "opportunities", keywords: "empleo trabajo ofertas" },
   { label: "Vacantes para ti", href: "/vacancies/recommended", icon: Sparkles, area: "opportunities", keywords: "afinidad recomendaciones postular" },
   { label: "Radar de afinidad", href: "/profile/radar", icon: Radar, area: "profile", keywords: "competencias perfil" },
+  
 ];

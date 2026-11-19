@@ -30,10 +30,15 @@ export const WORKSPACE_SECTIONS: readonly WorkspaceSectionProps[] = [
       { label: "Mis inscripciones", href: "/events/my-passes" },
     ],
   },
-  {
-    id: "company", label: "Empresas", icon: Building2, patterns: [/^\/(?:recruiters|matching)(?:\/|$)/, /^\/area-detail(?:-interaction)?-preview\/?$/],
+ {
+    id: "company", 
+    label: "Empresas", 
+    icon: Building2, 
+    // Separamos los patrones para que no se encimen y cada ruta active su propio botón
+    patterns: [/^\/company-profile(?:\/|$)/, /^\/(?:recruiters|matching)(?:\/|$)/, /^\/area-detail(?:-interaction)?-preview\/?$/],
     items: [
-      { label: "Portal de empresa", href: "/recruiters" },
+      { label: "Perfil de empresa", href: "/company-profile" }, 
+      { label: "Portal de empresa", href: "/recruiters" }, 
       { label: "Historial", href: "/recruiters/history" },
       { label: "Publicar vacante", href: "/recruiters/job-offers/new" },
       { label: "Buscar candidatos", href: "/matching" },

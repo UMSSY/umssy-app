@@ -21,7 +21,8 @@ export function AccountMenu({ roles }: AccountMenuProps) {
       <DropdownMenuContent align="end" sideOffset={12} className="w-60 p-2">
         <DropdownMenuGroup>
           <DropdownMenuLabel className="px-3 py-2 text-xs">{getRolesLabel(roles)}</DropdownMenuLabel>
-          {canViewProfile ? <DropdownMenuItem render={<Link href="/profile" />} className="gap-3 px-3 py-2.5"><UserRound aria-hidden="true" />Mi perfil</DropdownMenuItem> : null}
+          
+          {roles.includes("empresa") ? <DropdownMenuItem render={<Link href="/company-profile" />} className="gap-3 px-3 py-2.5"><UserRound aria-hidden="true" />Mi perfil</DropdownMenuItem> : canViewProfile ? <DropdownMenuItem render={<Link href="/profile" />} className="gap-3 px-3 py-2.5"><UserRound aria-hidden="true" />Mi perfil</DropdownMenuItem> : null}          
           {canViewProfile ? <DropdownMenuItem render={<Link href="/profile/settings" />} className="gap-3 px-3 py-2.5"><Settings aria-hidden="true" />Configuración del perfil</DropdownMenuItem> : null}
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
