@@ -3,14 +3,18 @@ import type { AppointmentStatus } from "../types/appointment-status.types";
 
 export const APPOINTMENTS_TEXT = {
   title: "Mis citas",
+  description: "Mentorías",
   tabsLabel: "Listado de citas",
   upcoming: "Próximas",
   past: "Pasadas",
   emptyState: "No tienes citas próximas",
   emptyPast: "No tienes citas pasadas",
+  noSearchResults: "No se encontraron citas con ese nombre",
   loadError: "No se pudieron cargar tus citas.",
   loading: "Cargando citas",
   searchMentors: "Buscar mentores",
+  searchLabel: "Buscar citas por nombre",
+  searchPlaceholder: "Buscar por nombre",
   noTopic: "Tema no especificado",
 } as const;
 
@@ -31,8 +35,16 @@ export const APPOINTMENT_STATUS_LABELS: Record<AppointmentStatus, string> = {
 export const APPOINTMENT_STATUS_CLASSES: Record<AppointmentStatus, string> = {
   CONFIRMED: "text-success",
   CANCELLED: "text-text-secondary",
-  COMPLETED: "text-text-secondary",
+  COMPLETED: "border-transparent bg-muted text-text-secondary",
 };
+
+export const APPOINTMENT_CANCELLATION_TEXT = {
+  byMe: "Cancelada por ti",
+  byMentor: "Cancelada por el mentor",
+  byStudent: "Cancelada por el titulado",
+  fallback: "Cancelada",
+  rebook: "Reservar otro horario",
+} as const;
 
 export const APPOINTMENT_DETAIL_TEXT = {
   fallbackTitle: "Detalle de la cita",
@@ -43,6 +55,7 @@ export const APPOINTMENT_DETAIL_TEXT = {
   scheduleLabel: "Horario",
   topicLabel: "Tema",
   requestedAtLabel: "Reservada el",
+  cancellationReasonTitle: "Motivo de la cancelación",
   messageTitle: "Mensaje del titulado",
   noMessage: "Sin mensaje",
   documentTitle: "Documento compartido",
@@ -52,6 +65,11 @@ export const APPOINTMENT_DETAIL_TEXT = {
   close: "Cerrar",
   mentorProfile: "Ver perfil del mentor",
   photoAlt: "Foto de perfil de",
+} as const;
+
+export const JOIN_MEETING_TEXT = {
+  join: "Unirse a la reunión",
+  unavailable: "No se pudo abrir la reunión. Intenta nuevamente.",
 } as const;
 
 export const APPOINTMENT_WEEKDAY_LABELS = [
