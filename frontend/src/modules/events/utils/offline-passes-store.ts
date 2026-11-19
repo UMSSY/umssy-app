@@ -108,6 +108,14 @@ async function withoutPendingRemovals(
   return visible;
 }
 
+export async function claimSessionOfflinePasses(
+  accessToken: string,
+): Promise<void> {
+  const userId = readAccessTokenSubject(accessToken);
+  if (!userId || getAccessToken() !== accessToken) return;
+  await claimOfflinePasses(userId);
+}
+
 export async function updateSessionOfflinePasses(
   accessToken: string,
   signal: AbortSignal | undefined,
