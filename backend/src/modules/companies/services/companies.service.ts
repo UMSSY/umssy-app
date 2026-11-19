@@ -21,7 +21,7 @@ export class CompaniesService {
       city: profile.city.title,
       phone: profile.phone,
       email: profile.email,
-      description: profile.company.description ?? '',
+      description: profile.company.description ?? 'Sin descripción',
       website: profile.websiteUrl ?? null,
       logoUrl: profile.company.logo ? `/api/companies/${companyId}/logo` : null,
     };
