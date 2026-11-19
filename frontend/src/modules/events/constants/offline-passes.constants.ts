@@ -16,10 +16,7 @@ export const OFFLINE_PASSES_TEXTS = {
 } as const;
 
 export const MY_PASSES_ROUTE = '/events/my-passes';
-export const OFFLINE_PASSES_ROUTE = '/offline/passes';
 
 export const OFFLINE_PASSES_ROUTE_TEXTS = {
-  onlineTitle: 'Tienes conexión a Internet',
-  onlineDescription: 'Abre Mis inscripciones para ver tus pases actualizados.',
   openMyPasses: 'Ir a Mis inscripciones',
 } as const;
