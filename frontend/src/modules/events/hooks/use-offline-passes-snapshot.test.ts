@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { saveAccessToken } from '@/shared/services/storage/access-token-storage';
 import { readIndexedDbPair } from '@/shared/services/storage/browser-indexed-db';
 import { renderHookWithQuery } from '@/shared/testing/render-hook-with-query';
-import { activateOfflineUser, revokeOfflineUser } from '@/shared/services/storage/offline-passes-session';
+import { endOfflinePassesSession } from '@/shared/services/storage/offline-passes-owner';
 import { offlinePassesStore } from '../utils/offline-passes-store';
 import { useOfflinePassesSnapshot } from './use-offline-passes-snapshot';
 
@@ -55,7 +55,6 @@ describe('useOfflinePassesSnapshot', () => {
 
   it("reads the owner's copy without a token even while the browser reports a connection", async () => {
     await offlinePassesStore.save('user-a', [pass]);
-    activateOfflineUser('user-a');
     const { result } = renderHookWithQuery(() =>
       useOfflinePassesSnapshot(null, true),
     );
@@ -64,7 +63,7 @@ describe('useOfflinePassesSnapshot', () => {
 
   it('hides the copy without a token once the offline session was revoked', async () => {
     await offlinePassesStore.save('user-a', [pass]);
-    revokeOfflineUser();
+    await endOfflinePassesSession('user-a');
     const { result } = renderHookWithQuery(() =>
       useOfflinePassesSnapshot(null, false),
     );
@@ -75,7 +74,6 @@ describe('useOfflinePassesSnapshot', () => {
   it("reads the device owner's copy offline without a session token", async () => {
     await saveAccessToken(token('user-a'));
     await offlinePassesStore.save('user-a', [pass]);
-    activateOfflineUser('user-a');
     const { result } = renderHookWithQuery(() =>
       useOfflinePassesSnapshot(null, false),
     );

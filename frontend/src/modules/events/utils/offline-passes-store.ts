@@ -3,10 +3,6 @@ import {
   removeIndexedDb,
   writeIndexedDb,
 } from '@/shared/services/storage/browser-indexed-db';
-import {
-  activateOfflineUser,
-  readActiveOfflineUser,
-} from '@/shared/services/storage/offline-passes-session';
 import { getAccessToken } from '@/shared/services/storage/access-token-storage';
 import {
   claimOfflinePasses,
@@ -79,7 +75,6 @@ export async function loadSessionOfflinePasses(
       ? await confirmSessionOwner(sessionUserId)
       : await readOfflinePassesOwner();
     if (!owner || (sessionUserId && owner !== sessionUserId)) return null;
-    if (!sessionUserId && readActiveOfflineUser() !== owner) return null;
     const copy = await readOwnedOfflinePasses(owner);
     if (accessToken && getAccessToken() !== accessToken) return null;
     return await withoutPendingRemovals(toSnapshot(copy, owner), owner);
@@ -89,7 +84,6 @@ export async function loadSessionOfflinePasses(
 }
 
 async function confirmSessionOwner(userId: string): Promise<string | null> {
-  activateOfflineUser(userId);
   const owner = await readOfflinePassesOwner();
   if (owner) return owner;
   if (!toSnapshot(await readIndexedDb<unknown>(keyFor(userId)), userId)) return null;
@@ -128,7 +122,6 @@ export async function claimSessionOfflinePasses(
 ): Promise<void> {
   const userId = readAccessTokenSubject(accessToken);
   if (!userId || getAccessToken() !== accessToken) return;
-  activateOfflineUser(userId);
   await claimOfflinePasses(userId);
 }
 
@@ -142,7 +135,6 @@ export async function updateSessionOfflinePasses(
 ): Promise<OfflinePassesSnapshot | null | undefined> {
   const userId = readAccessTokenSubject(accessToken);
   if (!userId || signal?.aborted || getAccessToken() !== accessToken) return;
-  activateOfflineUser(userId);
   await claimOfflinePasses(userId);
   let next: OfflinePassesSnapshot | null | undefined;
   await updateOwnedOfflinePasses(userId, (copy) => {
