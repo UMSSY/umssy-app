@@ -3,6 +3,7 @@
 import { useEffect, useSyncExternalStore } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { getActiveConversationId } from '@/modules/chat';
 import {
   getAccessToken,
   subscribeAccessToken,
@@ -13,6 +14,14 @@ import type { NotificationNewSocketPayload } from '../types/notification-new-soc
 import { getNotificationActionLabel } from '../utils/get-notification-action-label';
 
 const getServerToken = () => null;
+
+function conversationIdOf(actionUrl: string): string | null {
+  try {
+    return new URL(actionUrl, window.location.origin).searchParams.get('conversationId');
+  } catch {
+    return null;
+  }
+}
 
 function useOptionalRouter(): ReturnType<typeof useRouter> | null {
   try {
@@ -43,6 +52,17 @@ export function useNotificationToasts(): void {
     const handleNewNotification = (data: NotificationNewSocketPayload) => {
       if (!data || typeof data.title !== 'string') return;
 
+      if (typeof window !== 'undefined' && data.actionUrl) {
+        const targetConversationId = conversationIdOf(data.actionUrl);
+        if (
+          targetConversationId &&
+          document.visibilityState === 'visible' &&
+          targetConversationId === getActiveConversationId()
+        ) {
+          return;
+        }
+      }
+
       const actionLabel = getNotificationActionLabel(data.typeCode ?? '');
 
       toast(data.title, {
@@ -52,12 +72,11 @@ export function useNotificationToasts(): void {
           ? {
               label: actionLabel,
               onClick: () => {
-                if (data.actionUrl) {
-                  if (router) {
-                    router.push(data.actionUrl);
-                  } else if (typeof window !== 'undefined') {
-                    window.location.assign(data.actionUrl);
-                  }
+                if (!data.actionUrl) return;
+                if (router) {
+                  router.push(data.actionUrl);
+                } else if (typeof window !== 'undefined') {
+                  window.location.assign(data.actionUrl);
                 }
               },
             }

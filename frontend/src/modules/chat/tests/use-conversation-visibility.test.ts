@@ -1,6 +1,7 @@
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { useConversationVisibility } from '../hooks/use-conversation-visibility';
+import { getActiveConversationId } from '../services/active-conversation';
 import { getChatSocket } from '../services/chat-socket';
 
 vi.mock('../services/chat-socket', () => ({
@@ -92,5 +93,15 @@ describe('useConversationVisibility', () => {
       conversationId: null,
       isFocused: false,
     });
+  });
+
+  it('expone la conversación activa mientras está montado y la limpia al desmontar', () => {
+    const { unmount } = renderHook(() => useConversationVisibility('conv-123'));
+
+    expect(getActiveConversationId()).toBe('conv-123');
+
+    unmount();
+
+    expect(getActiveConversationId()).toBeNull();
   });
 });
