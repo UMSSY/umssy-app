@@ -1,5 +1,5 @@
 import React from "react";
-import { Building2 } from "lucide-react";
+import { Building2, Mail, MapPin, Phone } from "lucide-react";
 import { MOCK_COMPANY_PROFILE } from "../constants/company-mock.data";
 
 export function CompanyProfileView() {
@@ -48,20 +48,32 @@ export function CompanyProfileView() {
           </p>
         </div>
 
-        <div className="space-y-4 rounded-xl border border-border bg-white p-6 shadow-sm">
+        <div
+          aria-label="Información de contacto"
+          className="space-y-4 rounded-xl border border-border bg-white p-6 shadow-sm select-none"
+        >
           <h3 className="text-base font-semibold text-foreground">Contacto</h3>
           <div className="space-y-3 text-sm text-muted-foreground">
-            <div>
-              <span className="block font-medium text-foreground">Ciudad</span>
-              <span>{company.city}</span>
+            <div className="flex items-start gap-2.5">
+              <MapPin className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
+              <div>
+                <span className="block font-medium text-foreground">Ciudad de residencia</span>
+                <span>{company.city}</span>
+              </div>
             </div>
-            <div>
-              <span className="block font-medium text-foreground">Teléfono</span>
-              <span>{company.phone}</span>
+            <div className="flex items-start gap-2.5">
+              <Phone className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
+              <div>
+                <span className="block font-medium text-foreground">Teléfono</span>
+                <span>{company.phone}</span>
+              </div>
             </div>
-            <div>
-              <span className="block font-medium text-foreground">Correo Electrónico</span>
-              <span className="text-primary hover:underline">{company.email}</span>
+            <div className="flex items-start gap-2.5">
+              <Mail className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
+              <div>
+                <span className="block font-medium text-foreground">Correo personal</span>
+                <span className="text-primary">{company.email}</span>
+              </div>
             </div>
             <div>
               <span className="block font-medium text-foreground">Sitio Web</span>
