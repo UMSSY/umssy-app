@@ -105,8 +105,15 @@ const isCacheable = (response) => {
 const isRscRequest = (request, url) =>
   request.headers.get('RSC') !== null || url.searchParams.has('_rsc');
 
+const discard = (response) => {
+  response?.body?.cancel().catch(() => undefined);
+};
+
 const putIfCacheable = async (cacheName, key, response) => {
-  if (!isCacheable(response)) return false;
+  if (!isCacheable(response)) {
+    discard(response);
+    return false;
+  }
   const cache = await caches.open(cacheName);
   await cache.put(key, response);
   return true;
@@ -137,10 +144,16 @@ const precacheRoute = async (route) => {
 };
 
 const cacheShell = async (key, response) => {
-  if (!isCacheable(response) || !response.headers.get('Content-Type')?.startsWith('text/html')) return;
+  if (!isCacheable(response) || !response.headers.get('Content-Type')?.startsWith('text/html')) {
+    discard(response);
+    return;
+  }
   const html = await response.clone().text();
   const assets = await Promise.all(extractNextStaticUrls(html).map((url) => fetchAndCache(ASSETS_CACHE, url)));
-  if (assets.some((saved) => !saved)) return false;
+  if (assets.some((saved) => !saved)) {
+    discard(response);
+    return false;
+  }
   return putIfCacheable(SHELL_CACHE, key, response);
 };
 

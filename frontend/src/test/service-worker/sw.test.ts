@@ -323,6 +323,29 @@ describe("service worker lifecycle", () => {
     expect(worker.fetch.mock.calls.filter(([input]) => keyOf(input).endsWith("main.js"))).toHaveLength(1);
   });
 
+  it("releases the connection of routes that cannot be cached", async () => {
+    const cancelled: string[] = [];
+    const streamed = (name: string, cacheControl: string, contentType = "text/html") => () =>
+      new Response(
+        new ReadableStream({
+          start(controller) { controller.enqueue(new TextEncoder().encode(name)); },
+          cancel() { cancelled.push(name); },
+        }),
+        { headers: { "Content-Type": contentType, "Cache-Control": cacheControl } },
+      );
+    const worker = loadWorker({
+      "/offline.html": html("offline"),
+      "/": html("home"), "/dashboard": html("dashboard"), "/login": html("login"),
+      "/events": html("events"), "/events/my-passes": html("passes"), "/offline/passes": html("saved"),
+      "/mentor/availability": streamed("dynamic", "private, no-cache, no-store, max-age=0, must-revalidate"),
+      "/mentors/participation": streamed("not html", "s-maxage=31536000", "application/json"),
+      "/manifest.json": streamed("private asset", "private, max-age=0", "application/json"),
+    });
+    await worker.install();
+    expect(cancelled.sort()).toEqual(["dynamic", "not html", "private asset"]);
+    expect(worker.caches.cachedUrls(SHELL)).not.toContain("/mentor/availability");
+  });
+
   it("fails the install when the offline fallback cannot be cached", async () => {
     const worker = loadWorker({ "/offline.html": () => new Response("x", { status: 500 }) });
     const result = await worker.install();
