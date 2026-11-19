@@ -5,10 +5,10 @@ export function syncOfflinePassesSession(
   previous: string | null,
   current: string | null,
 ): Promise<void> {
-  if (!previous || previous === current) return Promise.resolve();
-  if (!current) return clearOfflinePasses();
+  if (previous === current) return Promise.resolve();
+  if (!current) return previous ? clearOfflinePasses() : Promise.resolve();
   const nextUser = readAccessTokenSubject(current);
-  if (!nextUser || readAccessTokenSubject(previous) === nextUser)
+  if (!nextUser || (previous && readAccessTokenSubject(previous) === nextUser))
     return Promise.resolve();
   return claimOfflinePasses(nextUser);
 }

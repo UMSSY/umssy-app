@@ -26,9 +26,16 @@ describe('syncOfflinePassesSession', () => {
     expect(await readIndexedDb(offlinePassesKey('user-a'))).toBeNull();
   });
 
+  it('claims the copy when another user signs in after the previous session was lost', async () => {
+    await seed('user-a');
+    await syncOfflinePassesSession(null, token('user-b'));
+    expect(await readIndexedDb(OFFLINE_PASSES_OWNER_KEY)).toBe('user-b');
+    expect(await readIndexedDb(offlinePassesKey('user-a'))).toBeNull();
+  });
+
   it.each([
     ['the app opens without a session', null, null],
-    ['a session starts', null, token('user-a')],
+    ['the same user signs in again', null, token('user-a')],
     ['the same token is reported again', token('user-a'), token('user-a')],
     ['the same user refreshes the token', token('user-a'), `${token('user-a')}2`],
     ['the new token has no user', token('user-a'), 'opaque-token'],
