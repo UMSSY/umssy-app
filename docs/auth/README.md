@@ -43,9 +43,11 @@ The `umssy_session=1` cookie only marks that a session exists. No copy stores a 
 
 `OfflinePassesSessionSync`, mounted in `providers.tsx`, listens to the access token. `offline-passes:owner` is the persisted offline session: ending it and removing that user's copy happen in one IndexedDB transaction, and only for the user whose session ended.
 
+The passes stop being shown only once that transaction commits. If it fails (for example, IndexedDB is blocked, full or unavailable), it is rolled back as a whole: neither the owner nor the copy is removed, the error is not retried, and the saved passes stay readable offline on that device. They are removed by the next session change that completes: another user's login replaces them, and a later logout that commits removes them.
+
 | Event | Effect |
 | --- | --- |
-| Logout or `401` (token changes from a value to `null`) | `endOfflinePassesSession` removes the owner and that user's pass copy in one transaction, only if that user still owns the device, and then its pending removals. A copy saved by another account meanwhile is kept. `endSession` also removes every `umssy:session-draft:` copy |
+| Logout or `401` (token changes from a value to `null`) | `endOfflinePassesSession` removes the owner and that user's pass copy in one transaction, only if that user still owns the device, and then its pending removals. A copy saved by another account meanwhile is kept. If the transaction fails, nothing is removed and the passes stay readable offline until the next session change that completes. `endSession` also removes every `umssy:session-draft:` copy |
 | Login of the same user | Keeps the copy |
 | Login of another user | `claimOfflinePasses` sets the new owner and removes the previous user's passes in one transaction |
 | The PWA reopens without a token | Nothing changes: there is no transition from a token, so the passes stay readable for the owner |

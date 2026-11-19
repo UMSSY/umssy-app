@@ -14,7 +14,8 @@ The backend owns the workshop catalogue, proposal creation, cover images, manage
 - A `titulado` can show their saved passes without a connection at `/offline/passes`, a static route outside `SessionGate`:
   - the service worker precaches it and serves it when the navigation to `Mis inscripciones` (`/events/my-passes`) fails, or when the browser is offline; if the network is only slow, it keeps the normal route;
   - it shows the passes and QR saved on the device with the banner `Sin conexión. Estás viendo tus pases guardados.`, also when the browser reports a connection but the site cannot be reached;
-  - without a session token it shows only the copy of the user who owns the offline session on the device; after logout, a `401` or another user's login, it shows `No hay pases guardados en este dispositivo.`;
+  - without a session token it shows only the copy of the user who owns the offline session on the device;
+  - after logout, a `401` or another user's login, it shows `No hay pases guardados en este dispositivo.` once the IndexedDB transaction that ends the offline session commits. If that transaction fails, nothing is removed and the saved passes are still shown on that device until the next session change that completes;
   - while online it also offers a link to `Mis inscripciones`. Access and cleanup rules are described in [Auth](../auth/README.md#offline-session).
 
 ```mermaid
