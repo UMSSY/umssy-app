@@ -16,6 +16,7 @@ export {
   VISIBILITY_CHANGED_EVENT,
 } from "./constants/notification-socket-events.constants";
 export { AppVisibilityReporter } from "./components/app-visibility-reporter";
+export { PushSubscriptionSync } from "./components/push-subscription-sync";
 export { NotificationBell } from "./components/notification-bell";
 export { NotificationItem } from "./components/notification-item";
 export { NotificationsView } from "./views/notifications-view";
