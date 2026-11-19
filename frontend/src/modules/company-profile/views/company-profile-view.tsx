@@ -1,0 +1,86 @@
+import React from "react";
+import { Building2 } from "lucide-react";
+import { MOCK_COMPANY_PROFILE } from "../constants/company-mock.data";
+
+export function CompanyProfileView() {
+  const company = MOCK_COMPANY_PROFILE;
+
+  return (
+    <div className="mx-auto max-w-5xl space-y-6 p-6">
+      <div className="space-y-1">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">
+          Mi perfil
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Tu información y trayectoria profesional.. en un solo lugar.
+        </p>
+      </div>
+
+      <section
+        aria-label="Cabecera de empresa"
+        className="rounded-xl border border-border bg-white p-6 shadow-sm select-none"
+      >
+        <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-4">
+            <div className="flex size-16 items-center justify-center rounded-xl bg-primary/10 text-xl font-bold text-primary">
+              <Building2 className="size-7 text-primary" aria-hidden="true" />
+            </div>
+            <div>
+              <h2 className="text-xl font-semibold text-foreground">
+                {company.name}
+              </h2>
+              <p className="text-sm text-muted-foreground">{company.sector}</p>
+            </div>
+          </div>
+          <div>
+            <span className="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 ring-1 ring-emerald-600/20 ring-inset">
+              Activo (Mock)
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <div className="space-y-4 rounded-xl border border-border bg-white p-6 shadow-sm md:col-span-2">
+          <h3 className="text-base font-semibold text-foreground">Sobre nosotros</h3>
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            {company.description}
+          </p>
+        </div>
+
+        <div className="space-y-4 rounded-xl border border-border bg-white p-6 shadow-sm">
+          <h3 className="text-base font-semibold text-foreground">Contacto</h3>
+          <div className="space-y-3 text-sm text-muted-foreground">
+            <div>
+              <span className="block font-medium text-foreground">Ciudad</span>
+              <span>{company.city}</span>
+            </div>
+            <div>
+              <span className="block font-medium text-foreground">Teléfono</span>
+              <span>{company.phone}</span>
+            </div>
+            <div>
+              <span className="block font-medium text-foreground">Correo Electrónico</span>
+              <span className="text-primary hover:underline">{company.email}</span>
+            </div>
+            <div>
+              <span className="block font-medium text-foreground">Sitio Web</span>
+              {company.website ? (
+                <a
+                  href={company.website}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  {company.website}
+                </a>
+              ) : (
+                <span className="text-muted-foreground">No registrado</span>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
