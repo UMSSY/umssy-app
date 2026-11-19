@@ -17,6 +17,7 @@ import {
 import { SocketProvider } from '@/modules/chat/contexts/socket-context';
 import { OfflineNavigation } from '@/shared/components/offline-navigation';
 import { OfflinePassesSessionSync } from '@/shared/components/offline-passes-session-sync';
+import { PwaInstallProvider } from '@/shared/contexts/pwa-install-context';
 
 import { AppVisibilityReporter } from '@/modules/notifications';
 
@@ -46,9 +47,9 @@ export function Providers({ children }: { children: ReactNode }) {
     getServerToken,
   );
   return (
-    <>
+    <PwaInstallProvider>
       <OfflinePassesSessionSync />
       <SessionProviders key={token ?? 'anonymous'}>{children}</SessionProviders>
-    </>
+    </PwaInstallProvider>
   );
 }
