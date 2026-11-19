@@ -19,23 +19,15 @@ export function OfflinePassesRouteView() {
 
   return (
     <div className="min-h-screen bg-background px-4 py-6 sm:px-6 lg:px-8">
-      <header className="mx-auto mb-6 flex w-full max-w-7xl items-center">
+      <header className="mx-auto mb-6 flex w-full max-w-7xl items-center justify-between gap-4">
         <BrandLogo />
-      </header>
-      {!isHydrated ? null : isOnline ? (
-        <section
-          role="status"
-          className="mx-auto flex w-full max-w-2xl flex-col items-center gap-4 rounded-lg border border-border bg-surface px-6 py-12 text-center"
-        >
-          <h1 className="text-xl font-bold text-ink">{OFFLINE_PASSES_ROUTE_TEXTS.onlineTitle}</h1>
-          <p className="text-sm text-text-secondary">{OFFLINE_PASSES_ROUTE_TEXTS.onlineDescription}</p>
-          <Link href={MY_PASSES_ROUTE} className={buttonVariants()}>
+        {isHydrated && isOnline ? (
+          <Link href={MY_PASSES_ROUTE} className={buttonVariants({ variant: "outline" })}>
             {OFFLINE_PASSES_ROUTE_TEXTS.openMyPasses}
           </Link>
-        </section>
-      ) : (
-        <MyPassesView />
-      )}
+        ) : null}
+      </header>
+      {isHydrated ? <MyPassesView /> : null}
     </div>
   );
 }

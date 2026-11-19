@@ -3,6 +3,9 @@ import { describe, expect, it } from 'vitest';
 import { OFFLINE_PASSES_OWNER_KEY, offlinePassesKey } from '@/shared/constants/offline-passes.constants';
 import { readIndexedDb, writeIndexedDb } from './browser-indexed-db';
 import { syncOfflinePassesSession } from './offline-passes-session-sync';
+import * as owner from './offline-passes-owner';
+import { activateOfflineUser, readActiveOfflineUser } from './offline-passes-session';
+import { vi, afterEach } from 'vitest';
 
 const token = (sub: string) => `h.${btoa(JSON.stringify({ sub }))}.s`;
 
@@ -45,4 +48,24 @@ describe('syncOfflinePassesSession', () => {
     expect(await readIndexedDb(OFFLINE_PASSES_OWNER_KEY)).toBe('user-a');
     expect(await readIndexedDb(offlinePassesKey('user-a'))).not.toBeNull();
   });
+
+  it('marks the signed in user as the active offline session', async () => {
+    await syncOfflinePassesSession(null, token('user-a'));
+    expect(readActiveOfflineUser()).toBe('user-a');
+  });
+
+  it('revokes the offline session immediately even if removing the copy fails', async () => {
+    await seed('user-a');
+    activateOfflineUser('user-a');
+    vi.spyOn(owner, 'clearOfflinePasses').mockRejectedValueOnce(new Error('blocked'));
+    const pending = syncOfflinePassesSession(token('user-a'), null);
+    expect(readActiveOfflineUser()).toBeNull();
+    await expect(pending).rejects.toThrow('blocked');
+  });
 });
+
+afterEach(() => {
+  vi.restoreAllMocks();
+  localStorage.clear();
+});
+

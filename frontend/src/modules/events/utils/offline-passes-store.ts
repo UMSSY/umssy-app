@@ -1,7 +1,12 @@
 import {
+  readIndexedDb,
   removeIndexedDb,
   writeIndexedDb,
 } from '@/shared/services/storage/browser-indexed-db';
+import {
+  activateOfflineUser,
+  readActiveOfflineUser,
+} from '@/shared/services/storage/offline-passes-session';
 import { getAccessToken } from '@/shared/services/storage/access-token-storage';
 import {
   claimOfflinePasses,
@@ -70,8 +75,11 @@ export async function loadSessionOfflinePasses(
   if (accessToken && (!sessionUserId || getAccessToken() !== accessToken))
     return null;
   try {
-    const owner = await readOfflinePassesOwner();
+    const owner = sessionUserId
+      ? await confirmSessionOwner(sessionUserId)
+      : await readOfflinePassesOwner();
     if (!owner || (sessionUserId && owner !== sessionUserId)) return null;
+    if (!sessionUserId && readActiveOfflineUser() !== owner) return null;
     const copy = await readOwnedOfflinePasses(owner);
     if (accessToken && getAccessToken() !== accessToken) return null;
     return await withoutPendingRemovals(toSnapshot(copy, owner), owner);
@@ -80,8 +88,15 @@ export async function loadSessionOfflinePasses(
   }
 }
 
-// Passes whose cancellation was confirmed but could not be removed locally are hidden
-// right away, and their removal is retried without contacting the server again.
+async function confirmSessionOwner(userId: string): Promise<string | null> {
+  activateOfflineUser(userId);
+  const owner = await readOfflinePassesOwner();
+  if (owner) return owner;
+  if (!toSnapshot(await readIndexedDb<unknown>(keyFor(userId)), userId)) return null;
+  await claimOfflinePasses(userId);
+  return userId;
+}
+
 async function withoutPendingRemovals(
   snapshot: OfflinePassesSnapshot | null,
   userId: string,
@@ -113,6 +128,7 @@ export async function claimSessionOfflinePasses(
 ): Promise<void> {
   const userId = readAccessTokenSubject(accessToken);
   if (!userId || getAccessToken() !== accessToken) return;
+  activateOfflineUser(userId);
   await claimOfflinePasses(userId);
 }
 
@@ -126,6 +142,7 @@ export async function updateSessionOfflinePasses(
 ): Promise<OfflinePassesSnapshot | null | undefined> {
   const userId = readAccessTokenSubject(accessToken);
   if (!userId || signal?.aborted || getAccessToken() !== accessToken) return;
+  activateOfflineUser(userId);
   await claimOfflinePasses(userId);
   let next: OfflinePassesSnapshot | null | undefined;
   await updateOwnedOfflinePasses(userId, (copy) => {

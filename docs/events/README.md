@@ -11,6 +11,11 @@ The backend owns the workshop catalogue, proposal creation, cover images, manage
 - `Mis talleres` lists only published workshops whose `createdById` equals the current user ID. A new unpublished proposal does not appear. Other responsible users are not assigned by the current implementation.
 - `EventsCronService` calls `EventsService.expireOverdueProposals` every five minutes; published proposals are not expired by this job.
 - The organizer opens an attendance route from a listed workshop. On desktop, the screen renders a QR containing that route; the phone requires an authorized session. Check-in belongs to the registration module.
+- A `titulado` can show their saved passes without a connection at `/offline/passes`, a static route outside `SessionGate`:
+  - the service worker precaches it and serves it when the navigation to `Mis inscripciones` (`/events/my-passes`) fails, or when the browser is offline; if the network is only slow, it keeps the normal route;
+  - it shows the passes and QR saved on the device with the banner `Sin conexión. Estás viendo tus pases guardados.`, also when the browser reports a connection but the site cannot be reached;
+  - without a session token it shows only the copy of the active offline user; after logout, a `401` or another user's login, it shows `No hay pases guardados en este dispositivo.`;
+  - while online it also offers a link to `Mis inscripciones`. Access and cleanup rules are described in [Auth](../auth/README.md#offline-session).
 
 ```mermaid
 sequenceDiagram
@@ -24,6 +29,23 @@ sequenceDiagram
     DB-->>API: Managed workshops
     API-->>Frontend: Workshop list
     Frontend-->>Organizer: List and attendance route
+```
+
+```mermaid
+sequenceDiagram
+    actor Titulado
+    participant SW as Service worker
+    participant Route as /offline/passes
+    participant Store as offline-passes-store
+    participant IDB as IndexedDB
+    Titulado->>SW: Opens /events/my-passes without access to the site
+    SW->>SW: Navigation fails
+    SW-->>Route: Cached /offline/passes
+    Route->>Store: loadSessionOfflinePasses(token or null)
+    Store->>IDB: Owner and copy of the active offline user
+    IDB-->>Store: Saved passes
+    Store-->>Route: Passes and QR
+    Route-->>Titulado: Saved passes with the offline banner
 ```
 
 ## Dependencies
@@ -51,4 +73,5 @@ Successful JSON responses use the shared API envelope. The cover endpoint return
 
 - Proposal expiry gained a periodic five-minute backend job independent of catalogue reads.
 - The organizer flow gained `Mis talleres`, its published-owner lookup and a desktop QR link to the mobile attendance screen.
+- Saved passes gained the `/offline/passes` route, served by the service worker when `Mis inscripciones` cannot load, and readable only by the active offline user.
 - Attendance validation remains online and is documented with the registration module.

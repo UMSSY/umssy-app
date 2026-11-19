@@ -10,14 +10,16 @@ import { syncOfflinePassesSession } from '@/shared/services/storage/offline-pass
 
 export function OfflinePassesSessionSync() {
   useEffect(() => {
-    let previous = isAccessTokenReady() ? getAccessToken() : null;
-    return subscribeAccessToken(() => {
+    let previous: string | null = null;
+    const handleSession = () => {
       if (!isAccessTokenReady()) return;
       const current = getAccessToken();
       const last = previous;
       previous = current;
       void syncOfflinePassesSession(last, current).catch(() => undefined);
-    });
+    };
+    handleSession();
+    return subscribeAccessToken(handleSession);
   }, []);
   return null;
 }

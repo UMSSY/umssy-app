@@ -14,10 +14,10 @@ import {
   getAccessToken,
   subscribeAccessToken,
 } from '@/shared/services/storage/access-token-storage';
-import { SocketProvider } from '@/modules/chat/contexts/socket-context';
-import { OfflineNavigation } from '@/shared/components/offline-navigation';
 import { OfflinePassesSessionSync } from '@/shared/components/offline-passes-session-sync';
 import { PwaInstallProvider } from '@/shared/contexts/pwa-install-context';
+import { SocketProvider } from '@/modules/chat/contexts/socket-context';
+import { OfflineNavigation } from '@/shared/components/offline-navigation';
 
 import { AppVisibilityReporter } from '@/modules/notifications';
 

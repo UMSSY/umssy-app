@@ -13,6 +13,7 @@ import {
   updateIndexedDbPair,
 } from './browser-indexed-db';
 import { removeLocalStorage } from './browser-local-storage';
+import { revokeOfflineUser } from './offline-passes-session';
 
 const asOwner = (value: unknown): string | null =>
   typeof value === 'string' && value.trim() ? value : null;
@@ -65,6 +66,7 @@ export async function updateOwnedOfflinePasses(
 }
 
 export async function clearOfflinePasses(): Promise<void> {
+  revokeOfflineUser();
   const owner = await readOfflinePassesOwner().catch(() => null);
   if (owner) removeLocalStorage(pendingPassRemovalsKey(owner));
   await removeIndexedDbByPrefix(OFFLINE_PASSES_KEY_PREFIX);

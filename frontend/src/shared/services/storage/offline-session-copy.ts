@@ -5,7 +5,6 @@ import { readIndexedDb, writeIndexedDb } from './browser-indexed-db';
 const isCurrentSession = (token: string | null | undefined): token is string =>
   Boolean(token) && getAccessToken() === token;
 
-// Each copy belongs to the user of the session that saved it, never to its token.
 export async function withOfflineSessionCopy<T>(
   key: string,
   token: string | null | undefined,
@@ -16,15 +15,14 @@ export async function withOfflineSessionCopy<T>(
   const storageKey = 'umssy:session-draft:offline:' + key;
   const userId = readAccessTokenSubject(token);
   if (typeof navigator !== 'undefined' && navigator.onLine === false) {
-    const saved = (await readIndexedDb<{ userId?: string; data?: T }>(storageKey));
+    const saved = await readIndexedDb<{ userId?: string; token?: string; data?: T }>(storageKey);
     options.signal?.throwIfAborted();
-    if (
-      userId &&
-      isCurrentSession(token) &&
-      saved?.userId === userId &&
-      saved.data !== undefined
-    )
+    const ownsCopy = saved?.userId === userId || (saved?.userId === undefined && saved?.token === token);
+    if (userId && isCurrentSession(token) && ownsCopy && saved?.data !== undefined) {
+      if (saved.userId === undefined)
+        void writeIndexedDb(storageKey, { userId, data: saved.data }).catch(() => undefined);
       return saved.data;
+    }
     throw new Error('Conéctate para descargar estos datos.');
   }
   const data = await fetchData();

@@ -100,3 +100,20 @@ it('does not store copies for tokens without a user', async () => {
   ).rejects.toThrow('No se pudo guardar la copia sin conexión.');
 });
 
+it('reads a copy saved in the previous format when it belongs to the current token', async () => {
+  vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
+  await saveAccessToken(accountA);
+  await database.writeIndexedDb('umssy:session-draft:offline:legacy', { token: accountA, data: 'saved' });
+  await expect(withOfflineSessionCopy('legacy', accountA, vi.fn())).resolves.toBe('saved');
+  await vi.waitFor(async () =>
+    expect(await database.readIndexedDb('umssy:session-draft:offline:legacy')).toEqual({ userId: 'user-a', data: 'saved' }),
+  );
+});
+
+it('rejects a copy in the previous format that belongs to another token', async () => {
+  vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
+  await saveAccessToken(accountB);
+  await database.writeIndexedDb('umssy:session-draft:offline:legacy-b', { token: accountA, data: 'private' });
+  await expect(withOfflineSessionCopy('legacy-b', accountB, vi.fn())).rejects.toThrow('Conéctate');
+});
+
