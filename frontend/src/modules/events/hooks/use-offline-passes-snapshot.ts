@@ -13,16 +13,17 @@ export function useOfflinePassesSnapshot(
   isOnline: boolean,
 ): OfflinePassesSnapshotState {
   const userId = getTokenUserId(accessToken);
+  const enabled = Boolean(userId) || !accessToken;
   const query = useQuery({
     queryKey: [OFFLINE_PASSES_SNAPSHOT_QUERY_KEY, accessToken, isOnline],
-    queryFn: () => (accessToken ? loadSessionOfflinePasses(accessToken) : null),
-    enabled: Boolean(userId),
+    queryFn: () => loadSessionOfflinePasses(accessToken),
+    enabled,
     networkMode: 'always',
     placeholderData: (previous: OfflinePassesSnapshot | null | undefined) =>
       previous?.userId === userId ? previous : undefined,
   });
   return {
-    snapshot: userId ? (query.data ?? null) : null,
-    isLoading: Boolean(userId) && query.isPending,
+    snapshot: enabled ? (query.data ?? null) : null,
+    isLoading: enabled && query.isPending,
   };
 }

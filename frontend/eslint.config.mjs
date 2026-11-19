@@ -112,6 +112,17 @@ const eslintConfig = defineConfig([
             "TemplateElement[value.raw=/[\\u2600-\\u27BF\\uD83C-\\uDBFF\\uDC00-\\uDFFF]/]",
           message: "Standard 2.1: Emojis are not allowed in text templates.",
         },
+        {
+          selector:
+            'JSXOpeningElement[name.name="input"]:not(:has(> JSXAttribute[name.name="type"]:matches([value.value=/^(file|hidden)$/], [value.expression.value=/^(file|hidden)$/])):not(:has(> JSXAttribute[name.name="type"] ~ :matches(JSXSpreadAttribute, JSXAttribute[name.name="type"]))))',
+          message:
+            'UI Standard: Use <Input> unless an explicit type of "file" or "hidden" cannot be overridden by a later attribute.',
+        },
+        {
+          selector:
+            'CallExpression[arguments.0.value="input"]:matches([callee.name="createElement"], [callee.object.name="React"][callee.property.name="createElement"])',
+          message: "UI Standard: Use <Input> instead of creating a native input.",
+        },
       ],
       "react/forbid-elements": [
         "error",
@@ -121,11 +132,6 @@ const eslintConfig = defineConfig([
               element: "button",
               message:
                 "UI Standard: Use the <Button> component from Shadcn/Base UI instead of the native HTML <button> tag.",
-            },
-            {
-              element: "input",
-              message:
-                "UI Standard: Use the <Input> component from Shadcn/Base UI instead of the native HTML <input> tag.",
             },
             {
               element: "select",

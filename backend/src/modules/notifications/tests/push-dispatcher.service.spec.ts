@@ -178,6 +178,15 @@ describe('PushDispatcherService', () => {
       expect(result.status).toBe('sent');
     });
 
+    it('debe enviar con TTL y urgencia alta para entregar con la app cerrada (HU-17)', async () => {
+      mockPushRepo.findManyByUserIds.mockResolvedValue([androidSubscription]);
+
+      await service.dispatchToUsers(['user-1'], 'Title', 'Body', '/chat');
+
+      const [, , options] = webpushMock.sendNotification.mock.calls[0] as [unknown, string, unknown];
+      expect(options).toEqual({ TTL: 86400, urgency: 'high' });
+    });
+
     it('debe limitar title y body a 100 caracteres', async () => {
       mockPushRepo.findManyByUserIds.mockResolvedValue([androidSubscription]);
 
