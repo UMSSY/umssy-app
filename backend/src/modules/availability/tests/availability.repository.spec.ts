@@ -122,6 +122,9 @@ describe('AvailabilityRepository', () => {
           appointments: {
             none: { status: { title: { in: ACTIVE_APPOINTMENT_STATUSES } } },
           },
+          NOT: {
+            appointments: { some: { cancelledById: 'mentor-1' } },
+          },
         },
         orderBy: { startAt: 'asc' },
         include: BLOCK_WITH_ACTIVE_APPOINTMENTS_INCLUDE,

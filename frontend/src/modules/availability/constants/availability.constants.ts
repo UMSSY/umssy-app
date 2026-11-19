@@ -8,6 +8,19 @@ export const BLOCK_MESSAGES = {
   outOfRange: `El horario debe estar entre las ${pad(7)}:00 y las ${pad(22)}:00`,
   invalidStep: `Las horas deben ir en intervalos de 30 minutos`,
   differentDays: "El bloque debe empezar y terminar el mismo día",
+  invalidDuration: "El horario debe poder dividirse en bloques de 1 h 30",
+} as const;
+
+export const BLOCK_DURATION_MINUTES = 90;
+
+export const BLOCK_RANGE_TEXT = {
+  durationHint: "Cada bloque dura 1 h 30.",
+  draftLabel: "Nuevo bloque",
+  blockCount: (count: number): string => (count === 1 ? "1 bloque" : `${count} bloques`),
+  summary: (ranges: string[]): string =>
+    ranges.length === 1
+      ? `Se creará 1 bloque: ${ranges[0]}.`
+      : `Se crearán ${ranges.length} bloques: ${ranges.slice(0, -1).join(", ")} y ${ranges[ranges.length - 1]}.`,
 } as const;
 
 export const FORM_TEXT: Record<
@@ -24,7 +37,7 @@ export const FORM_TEXT: Record<
   },
   edit: {
     title: "Editar bloque",
-    description: "Modifica la hora de inicio o de fin del bloque.",
+    description: "Modifica la hora de inicio del bloque; la hora de fin se ajusta sola a 1 h 30 después.",
     submit: "Guardar cambios",
     dateLabel: "Día",
     startLabel: "Desde",
