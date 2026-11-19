@@ -212,3 +212,42 @@
 @utility institutional-button {
   clip-path: polygon(0.75rem 0, 100% 0, calc(100% - 0.75rem) 100%, 0 100%);
 }
+
+/* Toast institucional HU-20 (Sonner) */
+[data-sonner-toast].cn-toast:not([data-type="success"]):not([data-type="error"]):not([data-type="warning"]):not([data-type="info"]) {
+  padding-top: 2rem !important;
+  position: relative;
+}
+
+[data-sonner-toast].cn-toast:not([data-type="success"]):not([data-type="error"]):not([data-type="warning"]):not([data-type="info"])::before {
+  content: "UMSSY · umssy.com";
+  position: absolute;
+  top: 0.625rem;
+  left: 0.875rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--color-ink-soft, #33465a);
+  letter-spacing: 0.02em;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  background-image: url("/icons/icon-umssy.svg");
+  background-repeat: no-repeat;
+  background-position: left center;
+  background-size: 0.875rem 0.875rem;
+  padding-left: 1.125rem;
+  height: 0.875rem;
+  line-height: 0.875rem;
+}
+
+[data-sonner-toast].cn-toast:not([data-type="success"]):not([data-type="error"]):not([data-type="warning"]):not([data-type="info"])::after {
+  content: "Ahora";
+  position: absolute;
+  top: 0.625rem;
+  right: 2.25rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--color-text-secondary, #5b6470);
+  line-height: 0.875rem;
+}
+

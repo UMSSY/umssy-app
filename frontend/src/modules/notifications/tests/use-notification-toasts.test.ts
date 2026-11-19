@@ -96,7 +96,7 @@ describe('useNotificationToasts', () => {
       description: 'Hola, ¿cómo estás?',
       duration: 7000,
       action: {
-        label: 'Ir al chat',
+        label: 'Ver mensaje',
         onClick: expect.any(Function),
       },
     });

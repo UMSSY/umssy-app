@@ -1,8 +1,8 @@
 import type { NotificationType } from "../types/notification-type.types";
 
 export const NOTIFICATION_ACTION_LABELS: Record<NotificationType, string> = {
-  CHAT_MESSAGE: "Ir al chat",
-  CHAT_GROUP_MESSAGE: "Ir al grupo",
+  CHAT_MESSAGE: "Ver mensaje",
+  CHAT_GROUP_MESSAGE: "Ver mensaje",
   CONNECTION_REQUEST_RECEIVED: "Ver solicitud",
   CONNECTION_REQUEST_ACCEPTED: "Ir a la sala de chat",
   MENTOR_SLOT_OFFERED: "Ver oferta",
