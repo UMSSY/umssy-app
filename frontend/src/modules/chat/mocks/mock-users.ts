@@ -1,12 +1,6 @@
-// modules/chat/mocks/mock-users.ts
 
 import { User, UserRole } from '../types/user.types';
 
-/**
- * Identificador del usuario que tiene la sesion iniciada.
- * Coincide con el id "current-user" ya usado en mock-conversations.ts
- * para que la logica de get-or-create pueda detectar conversaciones existentes.
- */
 export const CURRENT_USER_ID = 'current-user';
 
 export const CURRENT_USER: User = {
@@ -18,17 +12,6 @@ export const CURRENT_USER: User = {
   isActive: true,
 };
 
-/**
- * 100+ usuarios mock para la busqueda en el chat y la creacion de conversaciones.
- *
- * Casos requeridos por la tarea de HU2:
- * - Al menos 100 usuarios
- * - Al menos uno sin avatar (avatarUrl === null)
- * - Al menos uno inactivo (isActive === false)
- * - Roles variados (GRADUATE, MENTOR, RECRUITER, ADMIN)
- *
- * Los ids NO colisionan intencionalmente con CURRENT_USER_ID.
- */
 const HAND_WRITTEN_USERS: User[] = [
   {
     id: 'user-101',
@@ -112,10 +95,6 @@ const HAND_WRITTEN_USERS: User[] = [
   },
 ];
 
-/**
- * Generador para el resto de los usuarios.
- * Sin aleatoriedad: mismo resultado cada vez que se ejecuta la app o los tests.
- */
 const FIRST_NAMES = [
   'Andrea', 'Bruno', 'Camila', 'Daniel', 'Elena', 'Fabian', 'Gabriela', 'Hugo',
   'Irene', 'Javier', 'Karen', 'Luis', 'Marta', 'Nicolas', 'Olivia', 'Pedro',
@@ -145,14 +124,8 @@ const GENERATED_USERS: User[] = Array.from({ length:100 }, (_, i) => {
   };
 });
 
-/**
- * Lista de todos los usuarios mock: escritos a mano + generados.
- */
 export const MOCK_USERS: User[] = [...HAND_WRITTEN_USERS, ...GENERATED_USERS];
 
-/**
- * Busqueda por id
- */
 export const MOCK_USER_BY_ID: Record<string, User> = Object.fromEntries(
   MOCK_USERS.map((u) => [u.id, u])
 );

@@ -3,6 +3,7 @@
 import { useEffect, useSyncExternalStore } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { getActiveConversationId } from '@/modules/chat';
 import {
   getAccessToken,
   subscribeAccessToken,
@@ -13,6 +14,14 @@ import type { NotificationNewSocketPayload } from '../types/notification-new-soc
 import { getNotificationActionLabel } from '../utils/get-notification-action-label';
 
 const getServerToken = () => null;
+
+function conversationIdOf(actionUrl: string): string | null {
+  try {
+    return new URL(actionUrl, window.location.origin).searchParams.get('conversationId');
+  } catch {
+    return null;
+  }
+}
 
 function useOptionalRouter(): ReturnType<typeof useRouter> | null {
   try {
@@ -44,24 +53,13 @@ export function useNotificationToasts(): void {
       if (!data || typeof data.title !== 'string') return;
 
       if (typeof window !== 'undefined' && data.actionUrl) {
-        try {
-          const url = new URL(data.actionUrl, window.location.origin);
-          const targetConvId = url.searchParams.get('conversationId');
-          const activeConvId = (
-            window as unknown as { __activeConversationId?: string | null }
-          ).__activeConversationId;
-          const currentParams = new URLSearchParams(window.location.search);
-          const currentUrlConvId = currentParams.get('conversationId');
-
-          if (
-            targetConvId &&
-            document.visibilityState === 'visible' &&
-            (targetConvId === activeConvId || targetConvId === currentUrlConvId)
-          ) {
-            return;
-          }
-        } catch {
-          // If URL parsing fails, proceed normally
+        const targetConversationId = conversationIdOf(data.actionUrl);
+        if (
+          targetConversationId &&
+          document.visibilityState === 'visible' &&
+          targetConversationId === getActiveConversationId()
+        ) {
+          return;
         }
       }
 
@@ -74,19 +72,11 @@ export function useNotificationToasts(): void {
           ? {
               label: actionLabel,
               onClick: () => {
-                if (data.actionUrl) {
-                  if (router) {
-                    router.push(data.actionUrl);
-                  } else if (typeof window !== 'undefined') {
-                    window.location.assign(data.actionUrl);
-                  }
-                  if (typeof window !== 'undefined') {
-                    window.dispatchEvent(
-                      new CustomEvent('app:navigate', {
-                        detail: { actionUrl: data.actionUrl },
-                      }),
-                    );
-                  }
+                if (!data.actionUrl) return;
+                if (router) {
+                  router.push(data.actionUrl);
+                } else if (typeof window !== 'undefined') {
+                  window.location.assign(data.actionUrl);
                 }
               },
             }

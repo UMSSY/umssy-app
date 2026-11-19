@@ -7,9 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { cn } from "@/lib/utils";
-import type {
-  NotificationChannel,
-  NotificationPreferenceResponse,
+import {
+  useNotificationPreferences,
+  type NotificationChannel,
 } from "@/modules/notifications";
 import { PushGuideDialog } from "@/shared/components/push/push-guide-dialog";
 import { PushPermissionPromptDialog } from "@/shared/components/push/push-permission-prompt-dialog";
@@ -22,7 +22,6 @@ import {
   NOTIFICATION_PREFERENCES_MESSAGES,
   NOTIFICATION_PUSH_MESSAGES,
 } from "../constants/profile-feedback.constants";
-import { useNotificationPreferences } from "../hooks/use-notification-preferences";
 import type { Feedback } from "../types/feedback.types";
 import { FeedbackMessage } from "./feedback-message";
 import { SectionCard } from "./section-card";
@@ -38,23 +37,6 @@ const PUSH_DESCRIPTION_BY_ENVIRONMENT = {
 const DISABLED_PUSH_ENVIRONMENTS = new Set(["desktop", "unsupported"]);
 
 type PromptMode = "select" | "device";
-
-function preferencesToChannel(
-  preferences: NotificationPreferenceResponse | undefined,
-): NotificationChannel | null {
-  if (!preferences) return null;
-  if (preferences.pushEnabled) return "push";
-  if (preferences.emailEnabled) return "email";
-  return "in-app";
-}
-
-function channelToPreferences(channel: NotificationChannel) {
-  return {
-    pushEnabled: channel === "push",
-    emailEnabled: channel === "email",
-    inAppEnabled: channel === "in-app",
-  };
-}
 
 function currentPermission(): NotificationPermission | null {
   if (typeof window === "undefined" || !("Notification" in window)) return null;
@@ -84,7 +66,7 @@ export function NotificationPreferencesSection() {
     activate,
   } = usePushNotifications();
 
-  const { preferences, isLoading, isError, updatePreferences, isUpdating } =
+  const { savedChannel, isLoading, loadError, isSaving, saveChannel } =
     useNotificationPreferences();
 
   const [pendingChannel, setPendingChannel] =
@@ -93,9 +75,8 @@ export function NotificationPreferencesSection() {
   const [promptMode, setPromptMode] = useState<PromptMode | null>(null);
   const [guideKind, setGuideKind] = useState<PushGuideKind | null>(null);
 
-  const savedChannel = preferencesToChannel(preferences);
   const isPushDisabled = DISABLED_PUSH_ENVIRONMENTS.has(environment);
-  const isBusy = isUpdating || isPushLoading;
+  const isBusy = isSaving || isPushLoading;
 
   const selectedChannel = pendingChannel ?? savedChannel;
   const hasChanges = pendingChannel !== null && pendingChannel !== savedChannel;
@@ -176,7 +157,7 @@ export function NotificationPreferencesSection() {
 
   async function savePreference(channel: NotificationChannel) {
     try {
-      await updatePreferences(channelToPreferences(channel));
+      await saveChannel(channel);
       setFeedback({
         type: "success",
         message: NOTIFICATION_PREFERENCES_MESSAGES.saved[channel],
@@ -212,7 +193,7 @@ export function NotificationPreferencesSection() {
         </p>
       ) : null}
 
-      {!isLoading && isError ? (
+      {!isLoading && loadError ? (
         <FeedbackMessage
           feedback={{
             type: "error",
@@ -221,7 +202,7 @@ export function NotificationPreferencesSection() {
         />
       ) : null}
 
-      {!isLoading && !isError ? (
+      {!isLoading && !loadError ? (
         <>
           <FeedbackMessage feedback={feedback} />
 

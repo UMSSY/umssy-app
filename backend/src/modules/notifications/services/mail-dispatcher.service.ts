@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { frontendBaseUrl } from '../../access-requests/mail/helpers/frontend-url.js';
+import { frontendBaseUrl } from '../../mail/helpers/frontend-url.js';
 import { loadMailTemplate } from '../../mail/helpers/load-mail-template.js';
 import { MailService } from '../../mail/services/mail.service.js';
 import { NotificationUserLookupRepository } from '../repositories/notification-user-lookup.repository.js';

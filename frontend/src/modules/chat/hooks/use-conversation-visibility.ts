@@ -1,15 +1,14 @@
 'use client';
 
 import { useEffect } from 'react';
+import { setActiveConversationId } from '../services/active-conversation';
 import { getChatSocket } from '../services/chat-socket';
 
 export function useConversationVisibility(conversationId: string | null) {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    (
-      window as unknown as { __activeConversationId?: string | null }
-    ).__activeConversationId = conversationId;
+    setActiveConversationId(conversationId);
 
     let socket: ReturnType<typeof getChatSocket> | undefined;
     try {
@@ -58,9 +57,7 @@ export function useConversationVisibility(conversationId: string | null) {
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
-      (
-        window as unknown as { __activeConversationId?: string | null }
-      ).__activeConversationId = null;
+      setActiveConversationId(null);
       if (typeof socket?.off === 'function') {
         socket.off('connect', notifyVisibility);
       }
@@ -68,14 +65,10 @@ export function useConversationVisibility(conversationId: string | null) {
       window.removeEventListener('blur', handleBlur);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
 
-      try {
-        socket?.emit('visibility:changed', {
-          conversationId: null,
-          isFocused: false,
-        });
-      } catch {
-        // Socket may not be available or connected
-      }
+      socket?.emit('visibility:changed', {
+        conversationId: null,
+        isFocused: false,
+      });
     };
   }, [conversationId]);
 }

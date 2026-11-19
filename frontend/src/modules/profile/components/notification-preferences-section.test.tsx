@@ -12,19 +12,15 @@ import {
 } from "@/shared/constants/push-permission.constants";
 import { NotificationPreferencesSection } from "./notification-preferences-section";
 
-type Preferences = {
-  pushEnabled: boolean;
-  emailEnabled: boolean;
-  inAppEnabled: boolean;
-};
+type Channel = "push" | "email" | "in-app";
 
 const hookMock = vi.hoisted(() => ({
   state: {
-    preferences: undefined as Preferences | undefined,
+    savedChannel: null as Channel | null,
     isLoading: false,
-    isError: false,
-    isUpdating: false,
-    updatePreferences: vi.fn(),
+    loadError: false,
+    isSaving: false,
+    saveChannel: vi.fn(),
   },
 }));
 
@@ -43,19 +39,14 @@ const pushMock = vi.hoisted(() => ({
   deactivate: vi.fn(),
 }));
 
-vi.mock("../hooks/use-notification-preferences", () => ({
+vi.mock("@/modules/notifications/hooks/use-notification-preferences", () => ({
+  NOTIFICATION_PREFERENCES_QUERY_KEY: ["notifications", "preferences"],
   useNotificationPreferences: () => hookMock.state,
 }));
 
 vi.mock("@/shared/hooks/use-push-notifications", () => ({
   usePushNotifications: () => pushMock,
 }));
-
-const DEFAULT_PREFERENCES: Preferences = {
-  pushEnabled: false,
-  emailEnabled: true,
-  inAppEnabled: true,
-};
 
 const radio = (name: string) =>
   screen.getByRole("radio", { name: new RegExp(name) });
@@ -64,16 +55,14 @@ const saveButton = () =>
 const cancelButton = () => screen.getByRole("button", { name: "Cancelar" });
 
 beforeEach(() => {
-  hookMock.state.preferences = DEFAULT_PREFERENCES;
+  hookMock.state.savedChannel = "email";
   hookMock.state.isLoading = false;
-  hookMock.state.isError = false;
-  hookMock.state.isUpdating = false;
-  hookMock.state.updatePreferences.mockReset();
-  hookMock.state.updatePreferences.mockImplementation(
-    async (next: Preferences) => {
-      hookMock.state.preferences = next;
-    },
-  );
+  hookMock.state.loadError = false;
+  hookMock.state.isSaving = false;
+  hookMock.state.saveChannel.mockReset();
+  hookMock.state.saveChannel.mockImplementation(async (next: Channel) => {
+    hookMock.state.savedChannel = next;
+  });
 
   pushMock.environment = "supported";
   pushMock.permission = "default";
@@ -101,11 +90,7 @@ describe("NotificationPreferencesSection", () => {
   });
 
   it("muestra la preferencia guardada al volver a entrar", () => {
-    hookMock.state.preferences = {
-      pushEnabled: false,
-      emailEnabled: false,
-      inAppEnabled: true,
-    };
+    hookMock.state.savedChannel = "in-app";
 
     render(<NotificationPreferencesSection />);
 
@@ -121,7 +106,7 @@ describe("NotificationPreferencesSection", () => {
     expect(radio("Solo dentro de la app")).toBeChecked();
     expect(saveButton()).toBeEnabled();
     expect(cancelButton()).toBeEnabled();
-    expect(hookMock.state.updatePreferences).not.toHaveBeenCalled();
+    expect(hookMock.state.saveChannel).not.toHaveBeenCalled();
   });
 
   it("«Guardar cambios» envía la preferencia y confirma", async () => {
@@ -131,11 +116,7 @@ describe("NotificationPreferencesSection", () => {
     await user.click(radio("Solo dentro de la app"));
     await user.click(saveButton());
 
-    expect(hookMock.state.updatePreferences).toHaveBeenCalledExactlyOnceWith({
-      pushEnabled: false,
-      emailEnabled: false,
-      inAppEnabled: true,
-    });
+    expect(hookMock.state.saveChannel).toHaveBeenCalledExactlyOnceWith("in-app");
     expect(
       await screen.findByText(NOTIFICATION_PREFERENCES_MESSAGES.saved["in-app"]),
     ).toBeInTheDocument();
@@ -153,11 +134,11 @@ describe("NotificationPreferencesSection", () => {
 
     expect(radio("Solo por correo")).toBeChecked();
     expect(saveButton()).toBeDisabled();
-    expect(hookMock.state.updatePreferences).not.toHaveBeenCalled();
+    expect(hookMock.state.saveChannel).not.toHaveBeenCalled();
   });
 
   it("si el guardado falla muestra un aviso, conserva la selección y permite reintentar", async () => {
-    hookMock.state.updatePreferences.mockRejectedValueOnce(new Error("boom"));
+    hookMock.state.saveChannel.mockRejectedValueOnce(new Error("boom"));
     const user = userEvent.setup();
     render(<NotificationPreferencesSection />);
 
@@ -175,12 +156,12 @@ describe("NotificationPreferencesSection", () => {
     expect(
       await screen.findByText(NOTIFICATION_PREFERENCES_MESSAGES.saved["in-app"]),
     ).toBeInTheDocument();
-    expect(hookMock.state.updatePreferences).toHaveBeenCalledTimes(2);
+    expect(hookMock.state.saveChannel).toHaveBeenCalledTimes(2);
   });
 
   it("muestra un aviso si no se pueden cargar las preferencias", () => {
-    hookMock.state.preferences = undefined;
-    hookMock.state.isError = true;
+    hookMock.state.savedChannel = null;
+    hookMock.state.loadError = true;
 
     render(<NotificationPreferencesSection />);
 
@@ -199,7 +180,7 @@ describe("NotificationPreferencesSection", () => {
     expect(await screen.findByRole("button", { name: PUSH_PERMISSION_PROMPT.dismiss })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: PUSH_PERMISSION_PROMPT.confirm })).toBeInTheDocument();
     expect(pushMock.activate).not.toHaveBeenCalled();
-    expect(hookMock.state.updatePreferences).not.toHaveBeenCalled();
+    expect(hookMock.state.saveChannel).not.toHaveBeenCalled();
   });
 
   it("«Ahora no» conserva la preferencia guardada (HU-16)", async () => {
@@ -227,14 +208,10 @@ describe("NotificationPreferencesSection", () => {
 
     await user.click(saveButton());
 
-    expect(hookMock.state.updatePreferences).toHaveBeenCalledExactlyOnceWith({
-      pushEnabled: true,
-      emailEnabled: false,
-      inAppEnabled: false,
-    });
+    expect(hookMock.state.saveChannel).toHaveBeenCalledExactlyOnceWith("push");
   });
 
-    it("si el usuario bloquea el permiso muestra la guía y conserva la preferencia (HU-15 CA-U3, HU-16)", async () => {
+  it("si el usuario bloquea el permiso muestra la guía y conserva la preferencia (HU-15 CA-U3, HU-16)", async () => {
     pushMock.activate.mockResolvedValue({ ok: false, reason: "permission-blocked" });
     const user = userEvent.setup();
     render(<NotificationPreferencesSection />);
@@ -245,7 +222,7 @@ describe("NotificationPreferencesSection", () => {
     expect(await screen.findByText(PUSH_GUIDES.blocked.title)).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: PUSH_GUIDE_CLOSE_LABEL }));
     expect(radio("Solo por correo")).toBeChecked();
-    expect(hookMock.state.updatePreferences).not.toHaveBeenCalled();
+    expect(hookMock.state.saveChannel).not.toHaveBeenCalled();
   });
 
   it("si el usuario cierra el diálogo nativo informa y conserva la preferencia", async () => {
@@ -269,10 +246,10 @@ describe("NotificationPreferencesSection", () => {
     await user.click(await screen.findByRole("button", { name: PUSH_PERMISSION_PROMPT.confirm }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent(NOTIFICATION_PUSH_MESSAGES.subscriptionError);
-    expect(hookMock.state.updatePreferences).not.toHaveBeenCalled();
+    expect(hookMock.state.saveChannel).not.toHaveBeenCalled();
   });
 
-    it("con el permiso ya bloqueado muestra la guía sin abrir el aviso ni el diálogo nativo (HU-15 CA-U4)", async () => {
+  it("con el permiso ya bloqueado muestra la guía sin abrir el aviso ni el diálogo nativo (HU-15 CA-U4)", async () => {
     vi.stubGlobal("Notification", { permission: "denied" });
     const user = userEvent.setup();
     render(<NotificationPreferencesSection />);
@@ -286,7 +263,7 @@ describe("NotificationPreferencesSection", () => {
     expect(radio("Solo por correo")).toBeChecked();
   });
 
-    it.each([
+  it.each([
     ["ios-old", PUSH_GUIDES["ios-old"].title],
     ["ios-not-installed", PUSH_GUIDES["ios-not-installed"].title],
   ] as const)("en iPhone %s muestra la guía correspondiente (HU-15 CA-U5)", async (environment, title) => {
@@ -311,7 +288,7 @@ describe("NotificationPreferencesSection", () => {
   });
 
   it("indica el estado real de la suscripción cuando Push está guardado", () => {
-    hookMock.state.preferences = { pushEnabled: true, emailEnabled: false, inAppEnabled: false };
+    hookMock.state.savedChannel = "push";
 
     pushMock.isSubscribed = false;
     const { unmount } = render(<NotificationPreferencesSection />);
@@ -324,7 +301,7 @@ describe("NotificationPreferencesSection", () => {
   });
 
   it("permite reactivar Push en este dispositivo sin volver a guardar la preferencia (HU-15)", async () => {
-    hookMock.state.preferences = { pushEnabled: true, emailEnabled: false, inAppEnabled: false };
+    hookMock.state.savedChannel = "push";
     pushMock.isSubscribed = false;
     const user = userEvent.setup();
     render(<NotificationPreferencesSection />);
@@ -333,7 +310,7 @@ describe("NotificationPreferencesSection", () => {
     await user.click(await screen.findByRole("button", { name: PUSH_PERMISSION_PROMPT.confirm }));
 
     expect(pushMock.activate).toHaveBeenCalledOnce();
-    expect(hookMock.state.updatePreferences).not.toHaveBeenCalled();
+    expect(hookMock.state.saveChannel).not.toHaveBeenCalled();
     expect(await screen.findByText(NOTIFICATION_PUSH_MESSAGES.deviceActivated)).toBeInTheDocument();
   });
 });
