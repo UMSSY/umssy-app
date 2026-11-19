@@ -36,6 +36,8 @@ export function buildAppointmentFixtures(context: FixtureContext) {
         blocks.blockKeys[isHistorical ? 24 + slot : slot],
       );
       const block = blocksById.get(blockId)!;
+      const isCancelled = status === 'CANCELADA';
+      const isMentorCancellation = isCancelled && mentorIndex % 2 === 1;
       const requestedMinute = isHistorical ? -44730 + index * 1440 : -90;
       const respondedMinute = isHistorical ? -43260 + index * 1440 : -60;
       return {
@@ -55,11 +57,17 @@ export function buildAppointmentFixtures(context: FixtureContext) {
           status === 'RECHAZADA'
             ? 'Tema fuera del alcance de esta sesión ficticia.'
             : null,
-        meetingUrl: ['COMPLETADA', 'CONFIRMADA'].includes(status)
-          ? `https://meet.example.invalid/seed/${plan.mentorNumber}-${index}`
+        meetingUrl: null,
+        cancelledById: isCancelled
+          ? context.getId(isMentorCancellation ? mentor.key : plan.studentKey)
           : null,
-        cancelledById:
-          status === 'CANCELADA' ? context.getId(plan.studentKey) : null,
+        cancellationReason:
+          isCancelled && !isMentorCancellation
+            ? 'Imprevisto ficticio del titulado; pedirá otro horario.'
+            : null,
+        cancelledAt: isCancelled
+          ? context.getDate('anchor', respondedMinute, false)
+          : null,
         requestedAt: context.getDate('anchor', requestedMinute, false),
         respondedAt:
           status === 'PENDIENTE'
