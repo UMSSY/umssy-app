@@ -1,23 +1,25 @@
 import React from "react";
 import { Building2, Mail, MapPin, Phone } from "lucide-react";
 import { MOCK_COMPANY_PROFILE } from "../constants/company-mock.data";
+import { COMPANY_PROFILE_LABELS } from "../constants/company-profile.labels";
+import type { CompanyProfile } from "../types/company-profile.types";
 
 export function CompanyProfileView() {
-  const company = MOCK_COMPANY_PROFILE;
+  const company: CompanyProfile = MOCK_COMPANY_PROFILE;
 
   return (
     <div className="mx-auto max-w-5xl space-y-6 p-6">
       <div className="space-y-1">
         <h1 className="text-2xl font-bold tracking-tight text-foreground">
-          Mi perfil
+          {COMPANY_PROFILE_LABELS.pageTitle}
         </h1>
         <p className="text-sm text-muted-foreground">
-          Tu información y trayectoria profesional.. en un solo lugar.
+          {COMPANY_PROFILE_LABELS.pageSubtitle}
         </p>
       </div>
 
       <section
-        aria-label="Cabecera de empresa"
+        aria-label={COMPANY_PROFILE_LABELS.headerAriaLabel}
         className="rounded-xl border border-border bg-white p-6 shadow-sm select-none"
       >
         <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
@@ -49,29 +51,37 @@ export function CompanyProfileView() {
         </div>
 
         <div
-          aria-label="Información de contacto"
+          aria-label={COMPANY_PROFILE_LABELS.contactAriaLabel}
           className="space-y-4 rounded-xl border border-border bg-white p-6 shadow-sm select-none"
         >
-          <h3 className="text-base font-semibold text-foreground">Contacto</h3>
+          <h3 className="text-base font-semibold text-foreground">
+            {COMPANY_PROFILE_LABELS.contactTitle}
+          </h3>
           <div className="space-y-3 text-sm text-muted-foreground">
             <div className="flex items-start gap-2.5">
               <MapPin className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
               <div>
-                <span className="block font-medium text-foreground">Ciudad de residencia</span>
+                <span className="block font-medium text-foreground">
+                  {COMPANY_PROFILE_LABELS.cityLabel}
+                </span>
                 <span>{company.city}</span>
               </div>
             </div>
             <div className="flex items-start gap-2.5">
               <Phone className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
               <div>
-                <span className="block font-medium text-foreground">Teléfono</span>
+                <span className="block font-medium text-foreground">
+                  {COMPANY_PROFILE_LABELS.phoneLabel}
+                </span>
                 <span>{company.phone}</span>
               </div>
             </div>
             <div className="flex items-start gap-2.5">
               <Mail className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
               <div>
-                <span className="block font-medium text-foreground">Correo personal</span>
+                <span className="block font-medium text-foreground">
+                  {COMPANY_PROFILE_LABELS.emailLabel}
+                </span>
                 <span className="text-primary">{company.email}</span>
               </div>
             </div>
