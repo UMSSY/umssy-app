@@ -18,6 +18,7 @@ import type { UpdateMentorOrientationTypesDto } from '../requests/update-mentor-
 import { MentorMapper } from '../mappers/mentor.mapper.js';
 import type { MentorDirectoryQuery } from '../requests/mentor-directory-query.schema.js';
 import { MentorAffinityService } from './mentor-affinity.service.js';
+import { MentorProfileSuggestionsService } from './mentor-profile-suggestions.service.js';
 import type { Prisma } from '../../../prisma/client.js';
 
 const DIRECTORY_PAGE_SIZE = 6 as const;
@@ -42,8 +43,15 @@ export class MentorsService {
     private readonly mentorsRepository: MentorsRepository,
     private readonly mentorMapper: MentorMapper,
     private readonly userSkillService: UserSkillService,
+    private readonly mentorProfileSuggestionsService: MentorProfileSuggestionsService,
     private readonly mentorAffinityService?: MentorAffinityService,
   ) {}
+
+  async findMyProfileSuggestions(userId: string) {
+    const suggestions =
+      await this.mentorProfileSuggestionsService.findSuggestions(userId);
+    return this.mentorMapper.toProfileSuggestionsResponse(suggestions);
+  }
 
   async findAll() {
     const now = new Date();
@@ -151,6 +159,61 @@ export class MentorsService {
         query.sort === 'affinity' ? ('default' as const) : query.sort,
       ...(affinityStatus ? { affinityStatus } : {}),
     };
+  }
+
+  async findSimilar(userId: string) {
+    const now = new Date();
+    const source = await this.mentorsRepository.findSimilaritySource(
+      userId,
+      now,
+    );
+    if (!source) throw new MentorNotFoundException();
+
+    const areaIds = new Set(
+      source.mentorTechnicalAreas.map(({ technicalAreaId }) => technicalAreaId),
+    );
+    const orientationIds = new Set(
+      source.mentorOrientationTypes.map(
+        ({ orientationTypeId }) => orientationTypeId,
+      ),
+    );
+    if (!areaIds.size && !orientationIds.size) return [];
+
+    const candidates = await this.mentorsRepository.findSimilarCandidates(
+      userId,
+      [...areaIds],
+      [...orientationIds],
+      now,
+    );
+    const ranked = candidates.map((mentor) => ({
+      id: mentor.id,
+      areas: mentor.mentorTechnicalAreas.filter(({ technicalAreaId }) =>
+        areaIds.has(technicalAreaId),
+      ).length,
+      orientations: mentor.mentorOrientationTypes.filter(
+        ({ orientationTypeId }) => orientationIds.has(orientationTypeId),
+      ).length,
+    }));
+    // El ID ascendente estabiliza empates sin depender del orden de Prisma.
+    ranked.sort(
+      (a, b) =>
+        b.areas - a.areas ||
+        b.orientations - a.orientations ||
+        a.id.localeCompare(b.id),
+    );
+    const ids = ranked.slice(0, 3).map(({ id }) => id);
+    if (!ids.length) return [];
+
+    const mentors = await this.mentorsRepository.findDirectoryByIds(
+      ids,
+      { search: '', available: false },
+      now,
+    );
+    const byId = new Map(mentors.map((mentor) => [mentor.id, mentor]));
+    return ids.flatMap((id) => {
+      const mentor = byId.get(id);
+      return mentor ? [this.mentorMapper.toDirectoryResponse(mentor)] : [];
+    });
   }
 
   async findOne(userId: string) {
