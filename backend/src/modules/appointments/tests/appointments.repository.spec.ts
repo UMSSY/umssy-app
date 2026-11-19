@@ -13,46 +13,101 @@ import { APPOINTMENT_DOCUMENT_METADATA_SELECT } from '../constants/appointment-d
 describe('AppointmentsRepository', () => {
   const findMany = vi.fn();
   const findUnique = vi.fn();
+  const updateMany = vi.fn();
+  const count = vi.fn();
   let repository: AppointmentsRepository;
 
   beforeEach(() => {
     vi.resetAllMocks();
     repository = new AppointmentsRepository({
-      appointment: { findMany, findUnique },
+      appointment: { findMany, findUnique, updateMany, count },
     } as unknown as PrismaService);
   });
 
-  it('filters upcoming confirmed appointments by either participant and the strict end boundary', async () => {
+  it('filters upcoming confirmed and cancelled appointments by either participant and the strict end boundary', async () => {
     const records = [createAppointmentRecord()];
     findMany.mockResolvedValue(records);
 
-    await expect(repository.findMine(MENTOR_ID, 'upcoming', NOW)).resolves.toBe(
-      records,
-    );
+    await expect(
+      repository.findMine(MENTOR_ID, 'upcoming', NOW, 1, 10),
+    ).resolves.toBe(records);
     expect(findMany).toHaveBeenCalledExactlyOnceWith({
       where: {
         OR: [{ mentorId: MENTOR_ID }, { studentId: MENTOR_ID }],
-        status: { title: { in: ['CONFIRMED', 'CONFIRMADA'] } },
+        status: {
+          title: { in: ['CONFIRMED', 'CONFIRMADA', 'CANCELLED', 'CANCELADA'] },
+        },
         endAt: { gt: NOW },
       },
       orderBy: [{ startAt: 'asc' }, { id: 'asc' }],
+      skip: 0,
+      take: 10,
       select: APPOINTMENT_SELECT,
+    });
+  });
+
+  it('asks the database for the requested page instead of slicing in memory', async () => {
+    findMany.mockResolvedValue([]);
+
+    await repository.findMine(MENTOR_ID, 'upcoming', NOW, 4, 10);
+
+    expect(findMany).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({ skip: 30, take: 10 }),
+    );
+  });
+
+  it('counts the same appointments the page query filters', async () => {
+    count.mockResolvedValue(48);
+
+    await expect(repository.countMine(MENTOR_ID, 'past', NOW)).resolves.toBe(
+      48,
+    );
+    expect(count).toHaveBeenCalledExactlyOnceWith({
+      where: {
+        OR: [{ mentorId: MENTOR_ID }, { studentId: MENTOR_ID }],
+        status: {
+          title: {
+            in: [
+              'CONFIRMED',
+              'CONFIRMADA',
+              'COMPLETED',
+              'COMPLETADA',
+              'CANCELLED',
+              'CANCELADA',
+            ],
+          },
+        },
+        endAt: { lte: NOW },
+      },
     });
   });
 
   it('includes the exact end boundary in past and orders by latest finish with stable tie breaks', async () => {
     findMany.mockResolvedValue([]);
 
-    await expect(repository.findMine(MENTOR_ID, 'past', NOW)).resolves.toEqual(
-      [],
-    );
+    await expect(
+      repository.findMine(MENTOR_ID, 'past', NOW, 1, 10),
+    ).resolves.toEqual([]);
     expect(findMany).toHaveBeenCalledExactlyOnceWith({
       where: {
         OR: [{ mentorId: MENTOR_ID }, { studentId: MENTOR_ID }],
-        status: { title: { in: ['CONFIRMED', 'CONFIRMADA'] } },
+        status: {
+          title: {
+            in: [
+              'CONFIRMED',
+              'CONFIRMADA',
+              'COMPLETED',
+              'COMPLETADA',
+              'CANCELLED',
+              'CANCELADA',
+            ],
+          },
+        },
         endAt: { lte: NOW },
       },
       orderBy: [{ endAt: 'desc' }, { startAt: 'desc' }, { id: 'asc' }],
+      skip: 0,
+      take: 10,
       select: APPOINTMENT_SELECT,
     });
   });
@@ -67,6 +122,10 @@ describe('AppointmentsRepository', () => {
       endAt: true,
       message: true,
       requestedAt: true,
+      meetingUrl: true,
+      cancelledById: true,
+      cancellationReason: true,
+      cancelledAt: true,
       mentor: { select: { id: true, firstName: true, lastName: true } },
       student: { select: { id: true, firstName: true, lastName: true } },
       orientationType: { select: { id: true, name: true } },
@@ -98,9 +157,9 @@ describe('AppointmentsRepository', () => {
       const failure = new Error('Database unavailable');
       findMany.mockRejectedValue(failure);
 
-      await expect(repository.findMine(MENTOR_ID, scope, NOW)).rejects.toBe(
-        failure,
-      );
+      await expect(
+        repository.findMine(MENTOR_ID, scope, NOW, 1, 10),
+      ).rejects.toBe(failure);
     },
   );
 
@@ -109,5 +168,67 @@ describe('AppointmentsRepository', () => {
     findUnique.mockRejectedValue(failure);
 
     await expect(repository.findById(APPOINTMENT_ID)).rejects.toBe(failure);
+  });
+
+  it('assigns the meeting url only when the appointment has none and returns the stored one', async () => {
+    const meetingUrl = 'https://meet.jit.si/umssy-new';
+    updateMany.mockResolvedValue({ count: 1 });
+    findUnique.mockResolvedValue({ meetingUrl });
+
+    await expect(
+      repository.assignMeetingUrl(APPOINTMENT_ID, meetingUrl),
+    ).resolves.toBe(meetingUrl);
+    expect(updateMany).toHaveBeenCalledExactlyOnceWith({
+      where: { id: APPOINTMENT_ID, meetingUrl: null },
+      data: { meetingUrl },
+    });
+    expect(findUnique).toHaveBeenCalledExactlyOnceWith({
+      where: { id: APPOINTMENT_ID },
+      select: { meetingUrl: true },
+    });
+  });
+
+  it('keeps the meeting url that another request saved first', async () => {
+    updateMany.mockResolvedValue({ count: 0 });
+    findUnique.mockResolvedValue({
+      meetingUrl: 'https://meet.jit.si/umssy-first',
+    });
+
+    await expect(
+      repository.assignMeetingUrl(
+        APPOINTMENT_ID,
+        'https://meet.jit.si/umssy-late',
+      ),
+    ).resolves.toBe('https://meet.jit.si/umssy-first');
+  });
+
+  it('returns null when the appointment disappears while assigning the meeting url', async () => {
+    updateMany.mockResolvedValue({ count: 0 });
+    findUnique.mockResolvedValue(null);
+
+    await expect(
+      repository.assignMeetingUrl(
+        APPOINTMENT_ID,
+        'https://meet.jit.si/umssy-x',
+      ),
+    ).resolves.toBeNull();
+  });
+
+  it('detects that the mentor cancelled the appointment of the block', async () => {
+    const blockId = '55555555-5555-4555-8555-555555555555';
+    count.mockResolvedValueOnce(1);
+
+    await expect(
+      repository.hasMentorCancellation(blockId, MENTOR_ID),
+    ).resolves.toBe(true);
+    expect(count).toHaveBeenCalledExactlyOnceWith({
+      where: { blockId, cancelledById: MENTOR_ID },
+    });
+
+    count.mockResolvedValueOnce(0);
+
+    await expect(
+      repository.hasMentorCancellation(blockId, MENTOR_ID),
+    ).resolves.toBe(false);
   });
 });

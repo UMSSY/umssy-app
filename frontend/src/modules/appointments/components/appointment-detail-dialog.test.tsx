@@ -4,14 +4,16 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { toast } from "sonner"
 import { renderWithQuery } from "@/shared/testing/render-with-query"
 import * as downloadModule from "@/shared/utils/download-file"
-import { APPOINTMENT_DETAIL_TEXT, APPOINTMENTS_TEXT } from "../constants/appointments.constants"
+import { APPOINTMENT_DETAIL_TEXT, APPOINTMENTS_TEXT, JOIN_MEETING_TEXT } from "../constants/appointments.constants"
 import { appointmentsApi } from "../services/appointments.service"
-import type { Appointment } from "../types/appointment.types"
+import type { AppointmentDetail } from "../types/appointment-detail.types"
 import { AppointmentDetailDialog } from "./appointment-detail-dialog"
 
 vi.mock("sonner", () => ({ toast: { error: vi.fn() } }))
 
-function makeAppointment(overrides: Partial<Appointment> = {}): Appointment {
+const MEETING_URL = "https://meet.jit.si/umssy-3f9c1a2e-5b7d-4c1e-9a2b-1c2d3e4f5a6b"
+
+function makeAppointment(overrides: Partial<AppointmentDetail> = {}): AppointmentDetail {
   return {
     id: "a1",
     blockId: "b1",
@@ -28,6 +30,8 @@ function makeAppointment(overrides: Partial<Appointment> = {}): Appointment {
       sizeBytes: 2.4 * 1024 * 1024,
       uploadedAt: "2026-10-08T22:43:00.000Z",
     },
+    meetingUrl: MEETING_URL,
+    cancellation: null,
     ...overrides,
   }
 }
@@ -47,6 +51,31 @@ describe("AppointmentDetailDialog", () => {
 
   afterEach(() => {
     cleanup()
+  })
+
+  it("abre la confirmación de cancelación desde el pie del detalle sin cerrar la cita", async () => {
+    vi.spyOn(Date, "now").mockReturnValue(new Date("2026-10-13T01:00:00Z").getTime())
+    const { user, onClose } = renderDialog()
+    await user.click(await screen.findByRole("button", { name: "Cancelar cita" }, { timeout: 3000 }))
+    expect(screen.getByRole("alertdialog")).toBeInTheDocument()
+    await user.click(screen.getByRole("button", { name: "Volver" }))
+    expect(onClose).not.toHaveBeenCalled()
+    expect(screen.getByRole("dialog")).toBeInTheDocument()
+  })
+
+  it("al volver sin confirmar la cancelación, el detalle conserva «Confirmada» y permite cancelar", async () => {
+    vi.spyOn(Date, "now").mockReturnValue(new Date("2026-10-13T01:00:00Z").getTime())
+    const cancel = vi.spyOn(appointmentsApi, "cancel")
+    const { user } = renderDialog()
+    await user.click(await screen.findByRole("button", { name: "Cancelar cita" }, { timeout: 3000 }))
+    await user.type(screen.getByLabelText("Motivo"), "No puedo asistir")
+
+    await user.click(screen.getByRole("button", { name: "Volver" }))
+
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument())
+    expect(screen.getByText("Confirmada")).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Cancelar cita" })).toBeInTheDocument()
+    expect(cancel).not.toHaveBeenCalled()
   })
 
   it("no se abre sin una cita elegida", () => {
@@ -82,6 +111,21 @@ describe("AppointmentDetailDialog", () => {
     expect(screen.getByText("09:00 - 10:00 · Hora de Bolivia (GMT-4)")).toBeInTheDocument()
     expect(screen.getByText("Revisión de CV")).toBeInTheDocument()
     expect(screen.getByText("8 de octubre de 2026, 18:42")).toBeInTheDocument()
+  })
+
+  it.each(["mentor", "student"] as const)("muestra Completada con el estilo de la tarjeta para %s", async (role) => {
+    vi.mocked(appointmentsApi.getById).mockResolvedValue(makeAppointment({
+      status: "COMPLETED",
+      counterpart: { id: "other-1", fullName: "Otra persona", role },
+    }))
+    renderDialog()
+
+    expect(await screen.findByText("Completada")).toHaveClass(
+      "h-6", "px-2.5", "text-sm", "bg-muted", "text-text-secondary", "border-transparent",
+    )
+    expect(screen.queryByText("Confirmada")).not.toBeInTheDocument()
+    expect(screen.getByText("09:00 - 10:00 · Hora de Bolivia (GMT-4)")).toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: JOIN_MEETING_TEXT.join })).not.toBeInTheDocument()
   })
 
   it("muestra las iniciales cuando la otra persona no tiene foto", async () => {
@@ -165,6 +209,143 @@ describe("AppointmentDetailDialog", () => {
   })
 })
 
+describe("AppointmentDetailDialog: cita cancelada", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks()
+    vi.spyOn(appointmentsApi, "getCounterpartPhoto").mockResolvedValue(null)
+  })
+
+  afterEach(() => {
+    cleanup()
+  })
+
+  it("muestra «Cancelada por ti» cuando el usuario canceló", async () => {
+    vi.spyOn(appointmentsApi, "getById").mockResolvedValue(
+      makeAppointment({
+        status: "CANCELLED",
+        meetingUrl: null,
+        cancellation: { cancelledBy: "MENTOR", cancelledByMe: true, reason: null, cancelledAt: "2026-10-10T00:00:00.000Z" },
+      }),
+    )
+
+    renderDialog()
+
+    expect(await screen.findByText("Cancelada por ti")).toBeInTheDocument()
+  })
+
+  it("pinta en rojo el texto de cancelación cuando se sabe quién canceló", async () => {
+    vi.spyOn(appointmentsApi, "getById").mockResolvedValue(
+      makeAppointment({
+        status: "CANCELLED",
+        meetingUrl: null,
+        cancellation: { cancelledBy: "MENTOR", cancelledByMe: true, reason: null, cancelledAt: "2026-10-10T00:00:00.000Z" },
+      }),
+    )
+
+    renderDialog()
+
+    expect(await screen.findByText("Cancelada por ti")).toHaveClass("text-destructive")
+  })
+
+  it("muestra el motivo de la cancelación cuando existe", async () => {
+    vi.spyOn(appointmentsApi, "getById").mockResolvedValue(
+      makeAppointment({
+        status: "CANCELLED",
+        meetingUrl: null,
+        cancellation: {
+          cancelledBy: "STUDENT",
+          cancelledByMe: false,
+          reason: "Tuve un imprevisto de salud",
+          cancelledAt: "2026-10-10T00:00:00.000Z",
+        },
+      }),
+    )
+
+    renderDialog()
+
+    expect(await screen.findByText(APPOINTMENT_DETAIL_TEXT.cancellationReasonTitle)).toBeInTheDocument()
+    expect(screen.getByText("Tuve un imprevisto de salud")).toBeInTheDocument()
+  })
+
+  it("no muestra la sección de motivo si no hay razón registrada", async () => {
+    vi.spyOn(appointmentsApi, "getById").mockResolvedValue(
+      makeAppointment({
+        status: "CANCELLED",
+        meetingUrl: null,
+        cancellation: { cancelledBy: "STUDENT", cancelledByMe: false, reason: null, cancelledAt: "2026-10-10T00:00:00.000Z" },
+      }),
+    )
+
+    renderDialog()
+
+    await screen.findByRole("heading", { name: "Cita con Ana Rojas" })
+    expect(screen.queryByText(APPOINTMENT_DETAIL_TEXT.cancellationReasonTitle)).not.toBeInTheDocument()
+  })
+
+  it("no muestra «Cancelar cita» ni «Unirse a la reunión»", async () => {
+    vi.spyOn(appointmentsApi, "getById").mockResolvedValue(
+      makeAppointment({
+        status: "CANCELLED",
+        meetingUrl: null,
+        cancellation: { cancelledBy: "MENTOR", cancelledByMe: false, reason: null, cancelledAt: "2026-10-10T00:00:00.000Z" },
+      }),
+    )
+
+    renderDialog()
+
+    await screen.findByRole("heading", { name: "Cita con Ana Rojas" })
+    expect(screen.queryByText(JOIN_MEETING_TEXT.join)).not.toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: /cancelar cita/i })).not.toBeInTheDocument()
+  })
+
+  it("el titulado ve «Reservar otro horario» cuando el mentor canceló, y abre la agenda de ese mentor", async () => {
+    vi.spyOn(appointmentsApi, "getById").mockResolvedValue(
+      makeAppointment({
+        status: "CANCELLED",
+        meetingUrl: null,
+        cancellation: { cancelledBy: "MENTOR", cancelledByMe: false, reason: null, cancelledAt: "2026-10-10T00:00:00.000Z" },
+      }),
+    )
+
+    renderDialog()
+
+    const rebook = await screen.findByRole("link", { name: "Reservar otro horario" })
+    expect(rebook).toHaveAttribute("href", "/mentors/mentor-1")
+    expect(screen.queryByRole("link", { name: APPOINTMENT_DETAIL_TEXT.mentorProfile })).not.toBeInTheDocument()
+  })
+
+  it("el mentor que canceló no ve «Reservar otro horario»", async () => {
+    vi.spyOn(appointmentsApi, "getById").mockResolvedValue(
+      makeAppointment({
+        status: "CANCELLED",
+        meetingUrl: null,
+        counterpart: { id: "student-1", fullName: "Luis Flores", role: "student" },
+        cancellation: { cancelledBy: "MENTOR", cancelledByMe: true, reason: null, cancelledAt: "2026-10-10T00:00:00.000Z" },
+      }),
+    )
+
+    renderDialog()
+
+    await screen.findByRole("heading", { name: "Cita con Luis Flores" })
+    expect(screen.queryByRole("link", { name: "Reservar otro horario" })).not.toBeInTheDocument()
+  })
+
+  it("no muestra «Reservar otro horario» cuando canceló el titulado", async () => {
+    vi.spyOn(appointmentsApi, "getById").mockResolvedValue(
+      makeAppointment({
+        status: "CANCELLED",
+        meetingUrl: null,
+        cancellation: { cancelledBy: "STUDENT", cancelledByMe: false, reason: null, cancelledAt: "2026-10-10T00:00:00.000Z" },
+      }),
+    )
+
+    renderDialog()
+
+    expect(await screen.findByRole("link", { name: APPOINTMENT_DETAIL_TEXT.mentorProfile })).toBeInTheDocument()
+    expect(screen.queryByRole("link", { name: "Reservar otro horario" })).not.toBeInTheDocument()
+  })
+})
+
 describe("AppointmentDetailDialog: foto, tema y descarga", () => {
   class LoadedImage {
     complete = true
@@ -238,6 +419,44 @@ describe("AppointmentDetailDialog: foto, tema y descarga", () => {
       expect(toast.error).toHaveBeenCalledWith(APPOINTMENT_DETAIL_TEXT.downloadError),
     )
     expect(screen.getByRole("button", { name: APPOINTMENT_DETAIL_TEXT.download })).toBeEnabled()
+  })
+
+  it("en una cita confirmada muestra «Unirse a la reunión», que abre la sala en una pestaña nueva", async () => {
+    renderDialog()
+
+    const join = await screen.findByRole("link", { name: JOIN_MEETING_TEXT.join })
+    expect(join).toHaveAttribute("href", MEETING_URL)
+    expect(join).toHaveAttribute("target", "_blank")
+    expect(join).toHaveAttribute("rel", "noopener noreferrer")
+  })
+
+  it.each(["CANCELLED", "COMPLETED"] as const)("en una cita %s no muestra «Unirse a la reunión»", async (status) => {
+    vi.mocked(appointmentsApi.getById).mockResolvedValue(makeAppointment({ status, meetingUrl: null }))
+
+    renderDialog()
+
+    await screen.findByRole("heading", { name: "Cita con Ana Rojas" })
+    expect(screen.queryByText(JOIN_MEETING_TEXT.join)).not.toBeInTheDocument()
+  })
+
+  it("si la cita confirmada no tiene enlace, avisa que no se pudo abrir la reunión y conserva su estado", async () => {
+    vi.mocked(appointmentsApi.getById).mockResolvedValue(makeAppointment({ meetingUrl: null }))
+    const { user } = renderDialog()
+
+    await user.click(await screen.findByRole("button", { name: JOIN_MEETING_TEXT.join }))
+
+    expect(screen.getByRole("alert")).toHaveTextContent(JOIN_MEETING_TEXT.unavailable)
+    expect(screen.getByText("Confirmada")).toBeInTheDocument()
+  })
+
+  it("el mentor también ve «Unirse a la reunión»", async () => {
+    vi.mocked(appointmentsApi.getById).mockResolvedValue(
+      makeAppointment({ counterpart: { id: "student-1", fullName: "Luis Pérez", role: "student" } }),
+    )
+
+    renderDialog()
+
+    expect(await screen.findByRole("link", { name: JOIN_MEETING_TEXT.join })).toHaveAttribute("href", MEETING_URL)
   })
 
   it("se cierra con la tecla Escape", async () => {

@@ -1,0 +1,17 @@
+<mj-section padding="8px 24px">
+  <mj-column>
+    <mj-text mj-class="heading">Cita confirmada</mj-text>
+    <mj-text>{{ intro }}</mj-text>
+    <mj-divider />
+    <mj-text mj-class="secondary" padding="0">{{ counterpartLabel }}</mj-text>
+    <mj-text>{{ counterpartName }}</mj-text>
+    <mj-text mj-class="secondary" padding="0">Fecha</mj-text>
+    <mj-text>{{ date }}</mj-text>
+    <mj-text mj-class="secondary" padding="0">Hora</mj-text>
+    <mj-text>{{ time }}</mj-text>
+    <mj-text mj-class="secondary" padding="0">Tema</mj-text>
+    <mj-text>{{ topic }}</mj-text>
+    <mj-divider />
+    <mj-button href="{{ actionUrl }}">Ver mis citas</mj-button>
+  </mj-column>
+</mj-section>
