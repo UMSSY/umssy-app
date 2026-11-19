@@ -4,6 +4,7 @@ import { Inter, Inter_Tight } from "next/font/google";
 import "./globals.css";
 import { RegisterServiceWorker } from "./register-service-worker";
 import { Providers } from "./providers";
+import { PwaInstallProvider } from "@/shared/contexts/pwa-install-context";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -50,6 +51,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <RegisterServiceWorker />
           {children}
         </Providers>
+        <PwaInstallProvider>
+          <Providers>
+            <RegisterServiceWorker />
+            {children}
+          </Providers>
+        </PwaInstallProvider>
       </body>
     </html>
   );

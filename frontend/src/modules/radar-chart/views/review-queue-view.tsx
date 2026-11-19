@@ -1,6 +1,7 @@
 'use client';
 import { PageHeading } from '@/shared/components/layout';
 import { DocumentReviewPanel } from '../components/document-review-panel';
+import { SkillReviewPanel } from '../components/skill-review-panel';
 
 export function ReviewQueueView() {
   return (
@@ -10,6 +11,7 @@ export function ReviewQueueView() {
         description="Consulta los respaldos y resuelve las verificaciones documentales."
       />
       <DocumentReviewPanel />
+      <SkillReviewPanel />
     </main>
   );
 }
