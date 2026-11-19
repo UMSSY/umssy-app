@@ -84,18 +84,18 @@ sequenceDiagram
 
 ### Exposed
 
-| Method | Route | Description |
-| --- | --- | --- |
-| GET | `/notifications?page&limit` | Paginated inbox (limit 1–100, default 10) |
-| GET | `/notifications/unread-count` | Number of unread notifications |
-| PATCH | `/notifications/:id/read` | Marks one as read |
-| PATCH | `/notifications/read-all` | Marks all as read |
-| GET | `/notifications/preferences` | Channel preferences |
-| PUT | `/notifications/preferences` | Updates `{ pushEnabled, emailEnabled, inAppEnabled }` |
-| GET | `/push/public-key` | VAPID public key |
-| POST | `/push/subscriptions` | Registers a push subscription |
-| DELETE | `/push/subscriptions` | Deletes a push subscription |
-| WS | namespace `/notifications` (path `/api/socket.io`) | `notification:new` event; `visibility:changed` message |
+| Method | Route                                              | Description                                            |
+| ------ | -------------------------------------------------- | ------------------------------------------------------ |
+| GET    | `/notifications?page&limit`                        | Paginated inbox (limit 1–100, default 10)              |
+| GET    | `/notifications/unread-count`                      | Number of unread notifications                         |
+| PATCH  | `/notifications/:id/read`                          | Marks one as read                                      |
+| PATCH  | `/notifications/read-all`                          | Marks all as read                                      |
+| GET    | `/notifications/preferences`                       | Channel preferences                                    |
+| PUT    | `/notifications/preferences`                       | Updates `{ pushEnabled, emailEnabled, inAppEnabled }`  |
+| GET    | `/push/public-key`                                 | VAPID public key                                       |
+| POST   | `/push/subscriptions`                              | Registers a push subscription                          |
+| DELETE | `/push/subscriptions`                              | Deletes a push subscription                            |
+| WS     | namespace `/notifications` (path `/api/socket.io`) | `notification:new` event; `visibility:changed` message |
 
 All require JWT (any role). The WebSocket authenticates with `handshake.auth.token`.
 
@@ -105,12 +105,12 @@ All require JWT (any role). The WebSocket authenticates with `handshake.auth.tok
 
 ## Dependencies
 
-| Direction | Module | Usage |
-| --- | --- | --- |
-| Uses | [mail](../mail/README.md) | `MailService.send` and `loadMailTemplate('notification')` for the generic template |
-| Uses | [users](../users/README.md) | `findEmailById`, `findContactById` (recipient name and email) |
-| Uses | auth | Session to authenticate the WebSocket |
-| Used by | chat, [surveys](../surveys/README.md) | Sending notifications |
+| Direction | Module                                                                                     | Usage                                                                              |
+| --------- | ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------- |
+| Uses      | [mail](../mail/README.md)                                                                  | `MailService.send` and `loadMailTemplate('notification')` for the generic template |
+| Uses      | [users](../users/README.md)                                                                | `findEmailById`, `findContactById` (recipient name and email)                      |
+| Uses      | auth                                                                                       | Session to authenticate the WebSocket                                              |
+| Used by   | chat, [surveys](../surveys/README.md), [radar-integration](../radar-integration/README.md) | Sending domain notifications                                                       |
 
 ## Data
 
@@ -128,6 +128,9 @@ The frontend does not call `notify()`: the domain that owns the event does. For 
 - Email supports domain-specific content through an async `renderMail` (MJML content, subject, text and values) with the recipient's name.
 - New survey notification types in the catalog; the catalog seed switches to upsert.
 - The survey notification contracts (Zod payloads, emails and MJML) live in the surveys domain.
+
+- Central publication notices retain the exact Radar snapshot reference and support historical navigation.
+- Concurrent duplicate prevention per recipient and snapshot, with central ownership of listing and read state.
 
 ## Radar publication integration
 
@@ -149,9 +152,28 @@ sequenceDiagram
     Inbox->>Radar: Open historical snapshot link
 ```
 
-### Sprint 3 integration updates
+### Opening a radar publication from the inbox
 
-- Central creation and inbox ownership for radar publication notices.
-- Concurrent duplicate prevention per recipient and snapshot, preserving historical navigation.
+The inbox owns listing, unread counts and read acknowledgement. Selecting an unread publication notice calls `PATCH /notifications/:id/read` and navigates to its stored `/profile/radar?snapshot=<snapshotId>` link. An already-read notice can be opened again. The Radar historical endpoint checks the authenticated owner independently, so knowing a snapshot ID does not grant access.
+
+The notice and snapshot identifiers serve different purposes: `notification.id` identifies inbox state; `snapshotId` identifies an immutable Radar publication. The body includes the published version, while the link/group key preserves the exact snapshot. This is separate from a document verification's `noticeRead` acknowledgement in the CV dashboard.
+
+```mermaid
+sequenceDiagram
+  actor Owner
+  participant Inbox as Notifications inbox
+  participant API as Notifications API
+  participant Radar as Radar view and API
+  Owner->>Inbox: Select publication notice
+  opt Notice is unread
+    Inbox->>API: PATCH /notifications/id/read
+    API-->>Inbox: Owner-scoped acknowledgement
+  end
+  Inbox->>Radar: Navigate to profile/radar with snapshot ID
+  Radar->>Radar: Authorize requested snapshot against session owner
+  Radar-->>Owner: Historical publication and preceding version, or unavailable state
+```
+
+Delivery is attempted after the snapshot commits. A validation or dispatcher failure does not roll back the publication; Radar logs a failed notify call. The current integration has no automatic notification retry. Channel preferences and catalog flags still apply, and only newly created recipients receive socket, push and email delivery. The shared service retains per-recipient `deliveries` and optional domain email rendering when filtering duplicates.
 
 The radar publication payload is validated before dispatch with `radarPublishedPayloadSchema` owned by the producing Radar domain at `radar-integration/notification/radar-published-payload.schema.ts`. `radarVersion` must be a positive integer string and `publishedAt` an ISO datetime; unknown fields are rejected. Validation errors are handled with other post-commit delivery failures and never revert the snapshot.
