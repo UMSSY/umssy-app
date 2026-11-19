@@ -16,6 +16,7 @@ import {
 } from '@/shared/services/storage/access-token-storage';
 import { SocketProvider } from '@/modules/chat/contexts/socket-context';
 import { OfflineNavigation } from '@/shared/components/offline-navigation';
+import { OfflinePassesSessionSync } from '@/shared/components/offline-passes-session-sync';
 
 import { AppVisibilityReporter } from '@/modules/notifications';
 
@@ -44,9 +45,10 @@ export function Providers({ children }: { children: ReactNode }) {
     getAccessToken,
     getServerToken,
   );
-  // El cambio de identidad reinicia las vistas privadas y su caché. Las respuestas
-  // tardías de la sesión anterior solo afectan al cliente de consultas descartado.
   return (
-    <SessionProviders key={token ?? 'anonymous'}>{children}</SessionProviders>
+    <>
+      <OfflinePassesSessionSync />
+      <SessionProviders key={token ?? 'anonymous'}>{children}</SessionProviders>
+    </>
   );
 }
