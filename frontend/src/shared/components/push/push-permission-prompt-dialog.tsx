@@ -11,12 +11,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { PUSH_PERMISSION_PROMPT } from "@/shared/constants/push-permission.constants";
-
-interface PushPermissionPromptDialogProps {
-  open: boolean;
-  onDismiss: () => void;
-  onContinue: () => void;
-}
+import type { PushPermissionPromptDialogProps } from "@/shared/types/push-permission-prompt-dialog-props.types";
 
 export function PushPermissionPromptDialog({
   open,
