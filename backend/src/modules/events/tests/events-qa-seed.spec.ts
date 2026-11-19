@@ -66,7 +66,8 @@ describe('seedEvents', () => {
     const now = new Date('2026-10-25T02:00:20.123Z');
     const schedule = getUpcomingPassSchedule(now);
     const startMinute =
-      schedule.startTime.getUTCHours() * 60 + schedule.startTime.getUTCMinutes();
+      schedule.startTime.getUTCHours() * 60 +
+      schedule.startTime.getUTCMinutes();
     const closeMinute =
       schedule.endTime.getUTCHours() * 60 + schedule.endTime.getUTCMinutes();
 
@@ -114,12 +115,20 @@ describe('seedEvents', () => {
     const [active, finished] = upsert.mock.calls.map(([args]) => args);
     expect(active.where.id).toBe('fb69db6e-ded6-4eed-85ef-6135cf88fad4');
     expect(active.create.title).toBe('[QA 08.5] Pase vigente');
-    expect(active.create.eventDate.toISOString().slice(0, 10)).toBe('2026-10-24');
-    expect(active.create.startTime.toISOString()).toBe('1970-01-01T22:05:00.000Z');
-    expect(active.create.endTime.toISOString()).toBe('1970-01-01T22:06:00.000Z');
+    expect(active.create.eventDate.toISOString().slice(0, 10)).toBe(
+      '2026-10-24',
+    );
+    expect(active.create.startTime.toISOString()).toBe(
+      '1970-01-01T22:05:00.000Z',
+    );
+    expect(active.create.endTime.toISOString()).toBe(
+      '1970-01-01T22:06:00.000Z',
+    );
     expect(finished.where.id).toBe('66f39ba1-ebc1-42b9-9169-e773f2eb3d2b');
     expect(finished.create.title).toBe('[QA 08.5] Pase finalizado por horario');
-    expect(finished.create.eventDate.toISOString().slice(0, 10)).toBe('2026-10-23');
+    expect(finished.create.eventDate.toISOString().slice(0, 10)).toBe(
+      '2026-10-23',
+    );
     expect(finished.create.statusId).toBe('published');
   });
 
@@ -137,6 +146,41 @@ describe('seedEvents', () => {
 });
 
 describe('Development event fixtures', () => {
+  it('leaves the QA workshop in voting with one support remaining', async () => {
+    const context = new FixtureContext(
+      new Date('2026-11-19T12:00:00Z'),
+      'admin',
+    );
+    vi.spyOn(context, 'getReference').mockImplementation(
+      (table, value) => `${table}:${value}`,
+    );
+    const createMany = vi.fn().mockResolvedValue({ count: 21 });
+    await seedEventsFixtures(
+      {
+        user: {
+          findUnique: vi
+            .fn()
+            .mockResolvedValue({ id: 'qa-owner', isActive: true }),
+        },
+        event: {
+          createMany,
+          updateMany: vi.fn().mockResolvedValue({ count: 1 }),
+        },
+      } as never,
+      context,
+    );
+    const workshop = createMany.mock.calls[0]![0].data.find(
+      (event: { id: string }) =>
+        event.id === context.getId('qa-workshop-2026-11-19'),
+    );
+    expect(workshop).toMatchObject({
+      createdById: 'qa-owner',
+      capacity: 20,
+      supportThreshold: 10,
+      statusId: 'event_statuses:Votacion',
+    });
+    expect(workshop.eventDate.toISOString().slice(0, 10)).toBe('2026-11-19');
+  });
   it('keeps non-computing categories represented without duplicating fixture IDs', async () => {
     const context = new FixtureContext(
       new Date('2026-10-25T12:00:00Z'),
@@ -147,7 +191,14 @@ describe('Development event fixtures', () => {
     );
     const createMany = vi.fn().mockResolvedValue({ count: 20 });
     const updateMany = vi.fn().mockResolvedValue({ count: 1 });
-    const tx = { event: { createMany, updateMany } };
+    const tx = {
+      user: {
+        findUnique: vi
+          .fn()
+          .mockResolvedValue({ id: 'qa-owner', isActive: true }),
+      },
+      event: { createMany, updateMany },
+    };
     const count = await seedEventsFixtures(
       tx as unknown as Prisma.TransactionClient,
       context,
@@ -184,7 +235,16 @@ describe('Development event fixtures', () => {
     const registrationCreateMany = vi.fn().mockResolvedValue({ count: 0 });
     const updateMany = vi.fn().mockResolvedValue({ count: 1 });
     const tx = {
-      event: { createMany: eventCreateMany, updateMany },
+      user: {
+        findUnique: vi
+          .fn()
+          .mockResolvedValue({ id: 'qa-owner', isActive: true }),
+      },
+      event: {
+        createMany: eventCreateMany,
+        updateMany,
+        findUnique: vi.fn().mockResolvedValue(null),
+      },
       eventRegistration: {
         createMany: registrationCreateMany,
         findMany: vi.fn().mockResolvedValue([]),
