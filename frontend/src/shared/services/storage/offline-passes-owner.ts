@@ -13,7 +13,6 @@ import {
   updateIndexedDbPair,
 } from './browser-indexed-db';
 import { removeLocalStorage } from './browser-local-storage';
-import { revokeOfflineUser } from './offline-passes-session';
 
 const asOwner = (value: unknown): string | null =>
   typeof value === 'string' && value.trim() ? value : null;
@@ -65,8 +64,22 @@ export async function updateOwnedOfflinePasses(
   return applied;
 }
 
+export async function endOfflinePassesSession(userId: string): Promise<void> {
+  let ended = false;
+  await updateIndexedDbPair(
+    OFFLINE_PASSES_OWNER_KEY,
+    offlinePassesKey(userId),
+    (owner) => {
+      const current = asOwner(owner);
+      if (current && current !== userId) return {};
+      ended = true;
+      return { primary: current ? null : undefined, secondary: null };
+    },
+  );
+  if (ended) removeLocalStorage(pendingPassRemovalsKey(userId));
+}
+
 export async function clearOfflinePasses(): Promise<void> {
-  revokeOfflineUser();
   const owner = await readOfflinePassesOwner().catch(() => null);
   if (owner) removeLocalStorage(pendingPassRemovalsKey(owner));
   await removeIndexedDbByPrefix(OFFLINE_PASSES_KEY_PREFIX);

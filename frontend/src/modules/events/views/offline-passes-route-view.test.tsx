@@ -4,7 +4,7 @@ import { cleanup, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { OFFLINE_PASSES_OWNER_KEY, offlinePassesKey } from "@/shared/constants/offline-passes.constants";
 import { writeIndexedDb } from "@/shared/services/storage/browser-indexed-db";
-import { activateOfflineUser, revokeOfflineUser } from "@/shared/services/storage/offline-passes-session";
+import { endOfflinePassesSession } from "@/shared/services/storage/offline-passes-owner";
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import { OfflinePassesRouteView } from "./offline-passes-route-view";
 
@@ -32,7 +32,6 @@ async function seedSavedCopy() {
     savedAt: "2026-11-18T12:00:00.000Z",
     passes: [pass],
   });
-  activateOfflineUser("user-a");
 }
 
 afterEach(() => {
@@ -52,9 +51,9 @@ describe("OfflinePassesRouteView", () => {
     expect(screen.getByRole("link", { name: "Ir a Mis inscripciones" })).toHaveAttribute("href", "/events/my-passes");
   });
 
-  it("hides the saved passes after the session was revoked", async () => {
+  it("hides the saved passes after the session ended", async () => {
     await seedSavedCopy();
-    revokeOfflineUser();
+    await endOfflinePassesSession("user-a");
     goOffline();
     render(<OfflinePassesRouteView />);
     expect(await screen.findByRole("heading", { name: "No hay pases guardados en este dispositivo." })).toBeInTheDocument();

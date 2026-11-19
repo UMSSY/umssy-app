@@ -11,6 +11,7 @@ import { readLocalStorage, writeLocalStorage } from './browser-local-storage';
 import {
   claimOfflinePasses,
   clearOfflinePasses,
+  endOfflinePassesSession,
   readOfflinePassesOwner,
   readOwnedOfflinePasses,
   updateOwnedOfflinePasses,
@@ -79,4 +80,30 @@ describe('offline passes owner', () => {
     await clearOfflinePasses();
     expect(await readIndexedDb(offlinePassesKey('user-a'))).toBeNull();
   });
+
+  it("ends only the outgoing user's offline session in one step", async () => {
+    await claimOfflinePasses('user-a');
+    await writeIndexedDb(offlinePassesKey('user-a'), copy('user-a'));
+    writeLocalStorage(pendingPassRemovalsKey('user-a'), '["reg-1"]');
+    await endOfflinePassesSession('user-a');
+    expect(await readOfflinePassesOwner()).toBeNull();
+    expect(await readIndexedDb(offlinePassesKey('user-a'))).toBeNull();
+    expect(readLocalStorage(pendingPassRemovalsKey('user-a'))).toBeNull();
+  });
+
+  it("does not touch the copy of another account that owns the device", async () => {
+    await claimOfflinePasses('user-b');
+    await writeIndexedDb(offlinePassesKey('user-b'), copy('user-b'));
+    await endOfflinePassesSession('user-a');
+    expect(await readOfflinePassesOwner()).toBe('user-b');
+    expect(await readIndexedDb(offlinePassesKey('user-b'))).toEqual(copy('user-b'));
+  });
+
+  it('hides the copy from a read that starts after the session ended', async () => {
+    await claimOfflinePasses('user-a');
+    await writeIndexedDb(offlinePassesKey('user-a'), copy('user-a'));
+    await endOfflinePassesSession('user-a');
+    expect(await readOwnedOfflinePasses('user-a')).toBeNull();
+  });
 });
+

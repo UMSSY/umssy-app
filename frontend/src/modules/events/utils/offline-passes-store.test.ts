@@ -2,7 +2,7 @@ import "@/shared/testing/indexed-db.mock";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { readIndexedDb, writeIndexedDb } from "@/shared/services/storage/browser-indexed-db";
 import { saveAccessToken } from "@/shared/services/storage/access-token-storage";
-import { revokeOfflineUser } from "@/shared/services/storage/offline-passes-session";
+import { endOfflinePassesSession } from "@/shared/services/storage/offline-passes-owner";
 import { loadSessionOfflinePasses, offlinePassesStore } from "./offline-passes-store";
 
 const pass = {
@@ -115,7 +115,7 @@ describe("offlinePassesStore", () => {
       await saveAccessToken(token("user-a"));
       await offlinePassesStore.save("user-a", [pass]);
       expect(await loadSessionOfflinePasses(token("user-a"))).not.toBeNull();
-      revokeOfflineUser();
+      await endOfflinePassesSession("user-a");
       expect(await loadSessionOfflinePasses(null)).toBeNull();
     });
   });
