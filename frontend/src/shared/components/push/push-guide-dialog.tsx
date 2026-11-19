@@ -13,12 +13,7 @@ import {
   PUSH_GUIDE_CLOSE_LABEL,
   PUSH_GUIDES,
 } from "@/shared/constants/push-permission.constants";
-import type { PushGuideKind } from "@/shared/types/push-guide-kind.types";
-
-interface PushGuideDialogProps {
-  kind: PushGuideKind | null;
-  onClose: () => void;
-}
+import type { PushGuideDialogProps } from "@/shared/types/push-guide-dialog-props.types";
 
 export function PushGuideDialog({ kind, onClose }: PushGuideDialogProps) {
   const guide = kind ? PUSH_GUIDES[kind] : null;

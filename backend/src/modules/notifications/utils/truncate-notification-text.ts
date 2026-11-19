@@ -1,4 +1,4 @@
-export const NOTIFICATION_TEXT_MAX_LENGTH = 100;
+const NOTIFICATION_TEXT_MAX_LENGTH = 100;
 
 export function truncateNotificationText(
   text: string,

@@ -5,12 +5,13 @@ import { PushSubscriptionsRepository } from '../repositories/push-subscriptions.
 import {
   PUSH_NOTIFICATION_ICON,
   PUSH_TEXT_MAX_LENGTH,
-  PUSH_TTL_SECONDS,
-  PUSH_URGENCY,
 } from '../constants/push-notification.constants.js';
 import type { ChannelDispatchResult } from '../types/channel-dispatch-result.type.js';
 import type { PushNotificationPayload } from '../types/push-notification-payload.type.js';
 import { summarizeChannelStatus } from '../utils/summarize-channel-status.js';
+
+const PUSH_TTL_SECONDS = 24 * 60 * 60;
+const PUSH_URGENCY = 'high';
 
 @Injectable()
 export class PushDispatcherService implements OnModuleInit {
