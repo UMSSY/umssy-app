@@ -18,6 +18,7 @@ export function ExportFormatMenu({
   formatTexts,
   onSelectFormat,
   formatHeading,
+  cancelLabel,
   disabled = false,
   isLoading = false,
   contentClassName,
@@ -44,6 +45,12 @@ export function ExportFormatMenu({
             </span>
           </DropdownMenuItem>
         ))}
+        {cancelLabel ? (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="justify-center p-2 text-sm text-muted-foreground">{cancelLabel}</DropdownMenuItem>
+          </>
+        ) : null}
       </DropdownMenuContent>
     </DropdownMenu>
   );
