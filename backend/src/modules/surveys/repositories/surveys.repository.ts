@@ -545,4 +545,21 @@ export class SurveysRepository {
       data: { lastReminderSentAt: date },
     });
   }
+
+  async claimPublishedNotification(
+    surveyId: string,
+    period: string,
+  ): Promise<boolean> {
+    const { count } = await this.prisma.survey.updateMany({
+      where: {
+        id: surveyId,
+        OR: [
+          { publishedNotifiedPeriod: null },
+          { publishedNotifiedPeriod: { not: period } },
+        ],
+      },
+      data: { publishedNotifiedPeriod: period },
+    });
+    return count > 0;
+  }
 }
