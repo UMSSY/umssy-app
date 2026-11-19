@@ -4,4 +4,7 @@ export class CompanyMainProfileResponse {
   city: string;
   phone: string;
   email: string;
+  description: string;
+  website: string | null;
+  logoUrl: string | null;
 }
