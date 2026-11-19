@@ -1,6 +1,9 @@
-import { ACCESS_TOKEN_STORAGE_KEY } from '@/shared/constants/auth.constants';
+import { readAccessTokenSubject } from '@/shared/utils/read-access-token-subject';
 import { getAccessToken } from './access-token-storage';
-import { readIndexedDbPair, updateIndexedDbPair } from './browser-indexed-db';
+import { readIndexedDb, writeIndexedDb } from './browser-indexed-db';
+
+const isCurrentSession = (token: string | null | undefined): token is string =>
+  Boolean(token) && getAccessToken() === token;
 
 export async function withOfflineSessionCopy<T>(
   key: string,
@@ -10,49 +13,34 @@ export async function withOfflineSessionCopy<T>(
 ): Promise<T> {
   options.signal?.throwIfAborted();
   const storageKey = 'umssy:session-draft:offline:' + key;
+  const userId = readAccessTokenSubject(token);
   if (typeof navigator !== 'undefined' && navigator.onLine === false) {
-    const [storedToken, copy] = await readIndexedDbPair(
-      ACCESS_TOKEN_STORAGE_KEY,
-      storageKey,
-    );
-    const saved = copy as { token?: string; data?: T } | null;
+    const saved = await readIndexedDb<{ userId?: string; token?: string; data?: T }>(storageKey);
     options.signal?.throwIfAborted();
-    if (
-      token &&
-      storedToken === token &&
-      getAccessToken() === token &&
-      saved?.token === token &&
-      saved.data !== undefined
-    )
+    const ownsCopy = saved?.userId === userId || (saved?.userId === undefined && saved?.token === token);
+    if (userId && isCurrentSession(token) && ownsCopy && saved?.data !== undefined) {
+      if (saved.userId === undefined)
+        void writeIndexedDb(storageKey, { userId, data: saved.data }).catch(() => undefined);
       return saved.data;
+    }
     throw new Error('Conéctate para descargar estos datos.');
   }
   const data = await fetchData();
   options.signal?.throwIfAborted();
-  if (options.requireStorage && (!token || getAccessToken() !== token))
+  if (options.requireStorage && !isCurrentSession(token))
     throw new Error('La sesión cambió durante la preparación.');
   let stored = false;
-  if (token && getAccessToken() === token) {
-    await updateIndexedDbPair(
-      ACCESS_TOKEN_STORAGE_KEY,
-      () => storageKey,
-      (storedToken) => {
-        if (
-          storedToken !== token ||
-          getAccessToken() !== token ||
-          options.signal?.aborted
-        )
-          return {};
+  if (userId && isCurrentSession(token)) {
+    await writeIndexedDb(storageKey, { userId, data })
+      .then(() => {
         stored = true;
-        return { secondary: { token, data } };
-      },
-    ).catch((error) => {
-      stored = false;
-      if (options.requireStorage) throw error;
-    });
+      })
+      .catch((error) => {
+        if (options.requireStorage) throw error;
+      });
   }
   options.signal?.throwIfAborted();
-  if (options.requireStorage && (!stored || getAccessToken() !== token))
+  if (options.requireStorage && (!stored || !isCurrentSession(token)))
     throw new Error('No se pudo guardar la copia sin conexión.');
   return data;
 }

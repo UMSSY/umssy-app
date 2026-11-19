@@ -1,7 +1,8 @@
 import "@/shared/testing/indexed-db.mock";
 import { waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { saveAccessToken } from "@/shared/services/storage/access-token-storage";
+import { clearAccessToken, saveAccessToken } from "@/shared/services/storage/access-token-storage";
+import { writeIndexedDb } from "@/shared/services/storage/browser-indexed-db";
 import { renderHookWithQuery } from "@/shared/testing/render-hook-with-query";
 import { offlinePassesStore } from "../utils/offline-passes-store";
 import { useMyPasses } from "./use-my-passes";
@@ -96,4 +97,20 @@ describe("usePassesViewState", () => {
     await waitFor(() => expect(result.current.status).toBe("saved"));
     expect(result.current.isConnectionError).toBe(false);
   });
+
+  it("shows the saved copy without a session even when the browser reports a connection", async () => {
+    clearAccessToken();
+    await writeIndexedDb("offline-passes:owner", "user-a");
+    await writeIndexedDb("offline-passes:user-a", { userId: "user-a", savedAt: "2026-11-18T12:00:00.000Z", passes: [saved] });
+    const { result } = setup();
+    await waitFor(() => expect(result.current.status).toBe("saved"));
+    expect(result.current.passes).toHaveLength(1);
+  });
+
+  it("explains there is no saved copy without a session", async () => {
+    clearAccessToken();
+    const { result } = setup();
+    await waitFor(() => expect(result.current.status).toBe("no-offline-copy"));
+  });
 });
+
