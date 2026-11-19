@@ -1,6 +1,7 @@
 export * from './types/notification-type.enum.js';
 export * from './types/notification-payload-map.type.js';
 export * from './types/notify-request.type.js';
+export * from './types/notify-channel.type.js';
 export * from './types/notify-result.type.js';
 export * from './types/notification-response.type.js';
 export * from './types/notification-preference-response.type.js';
