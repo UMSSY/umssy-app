@@ -11,9 +11,9 @@ export function CvGenerateCard() {
   return (
     <section
       aria-label="Generar CV con los datos del perfil"
-      className="flex items-center justify-between gap-4 rounded-lg border border-border bg-surface p-5"
+      className="flex flex-col justify-between gap-4 rounded-lg border border-border bg-surface p-5 sm:flex-row sm:items-center"
     >
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1">
         <h2 className="text-base font-semibold text-ink">
           ¿Sin CV? Crea uno con los datos de tu perfil
         </h2>
@@ -24,7 +24,7 @@ export function CvGenerateCard() {
       </div>
       <Button
         type="button"
-        className="h-11 shrink-0 bg-primary px-5 text-sm font-semibold text-primary-foreground hover:bg-brand-hover"
+        className="h-11 shrink-0 self-start bg-primary px-5 text-sm font-semibold text-primary-foreground hover:bg-brand-hover sm:self-auto"
         onClick={() => setIsOpen(true)}
       >
         <Plus aria-hidden="true" className="size-4" />
