@@ -40,15 +40,16 @@ function extractApiError(err: unknown, fallback: string): never {
 }
 
 export const authService = {
-  getSession: async (accessToken?: string | null, signal?: AbortSignal, requireStorage = false): Promise<SessionResponse> =>
-    withOfflineSessionCopy("auth-session", accessToken, async () => {
+  getSession: async (accessToken?: string | null, signal?: AbortSignal, requireStorage = false): Promise<SessionResponse> => {
+    return withOfflineSessionCopy("auth-session", accessToken, async () => {
       const response = await apiClient.get<ApiResponse<SessionResponse>>("/auth/session", {
         signal,
         timeout: 15_000,
         headers: accessToken ? { Authorization: `${BEARER_PREFIX}${accessToken}` } : undefined,
       });
       return response.data.data;
-    }, { signal, requireStorage }),
+    }, { signal, requireStorage });
+  },
   login: async (payload: LoginPayload): Promise<LoginResponse> => {
     if (!apiClient.defaults.baseURL) {
       throw new Error("La URL del backend no está configurada. Revisa las variables NEXT_PUBLIC_API_URL del frontend.");
