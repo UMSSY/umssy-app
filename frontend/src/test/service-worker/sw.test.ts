@@ -464,3 +464,14 @@ it('keeps push delivery and offline asset caching in the same worker', async () 
     }),
   );
 });
+
+it('groups pushes by groupKey and re-alerts the user (HU-17)', async () => {
+  const worker = loadWorker({});
+  await worker.push({ title: 'Mensaje nuevo de: Ana', body: 'Hola', groupKey: 'chat:1' });
+  await worker.push({ title: 'Sin grupo', body: 'Aviso' });
+
+  const calls = worker.self.registration.showNotification.mock.calls;
+  expect(calls[0][1]).toEqual(expect.objectContaining({ tag: 'chat:1', renotify: true }));
+  expect(calls[1][1]).not.toHaveProperty('tag');
+  expect(calls[1][1]).not.toHaveProperty('renotify');
+});
