@@ -1,4 +1,4 @@
-import { ACCESS_TOKEN_STORAGE_KEY } from '@/shared/constants/auth.constants';
+import { readAccessTokenSubject } from '@/shared/utils/read-access-token-subject';
 import { getAccessToken } from './access-token-storage';
 import { readIndexedDbPair, updateIndexedDbPair } from './browser-indexed-db';
 
@@ -10,18 +10,21 @@ export async function withOfflineSessionCopy<T>(
 ): Promise<T> {
   options.signal?.throwIfAborted();
   const storageKey = 'umssy:session-draft:offline:' + key;
+  const ownerKey = 'umssy:session-draft:offline:owner';
+  const userId = readAccessTokenSubject(token);
   if (typeof navigator !== 'undefined' && navigator.onLine === false) {
-    const [storedToken, copy] = await readIndexedDbPair(
-      ACCESS_TOKEN_STORAGE_KEY,
+    const [storedOwner, copy] = await readIndexedDbPair(
+      ownerKey,
       storageKey,
     );
-    const saved = copy as { token?: string; data?: T } | null;
+    const saved = copy as { userId?: string; data?: T } | null;
     options.signal?.throwIfAborted();
     if (
+      userId &&
       token &&
-      storedToken === token &&
+      storedOwner === userId &&
       getAccessToken() === token &&
-      saved?.token === token &&
+      saved?.userId === userId &&
       saved.data !== undefined
     )
       return saved.data;
@@ -29,22 +32,21 @@ export async function withOfflineSessionCopy<T>(
   }
   const data = await fetchData();
   options.signal?.throwIfAborted();
-  if (options.requireStorage && (!token || getAccessToken() !== token))
+  if (options.requireStorage && (!userId || !token || getAccessToken() !== token))
     throw new Error('La sesión cambió durante la preparación.');
   let stored = false;
-  if (token && getAccessToken() === token) {
+  if (userId && token && getAccessToken() === token) {
     await updateIndexedDbPair(
-      ACCESS_TOKEN_STORAGE_KEY,
+      ownerKey,
       () => storageKey,
-      (storedToken) => {
+      () => {
         if (
-          storedToken !== token ||
           getAccessToken() !== token ||
           options.signal?.aborted
         )
           return {};
         stored = true;
-        return { secondary: { token, data } };
+        return { primary: userId, secondary: { userId, data } };
       },
     ).catch((error) => {
       stored = false;

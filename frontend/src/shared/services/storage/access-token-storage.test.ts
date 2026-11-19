@@ -1,20 +1,20 @@
 import '@/shared/testing/indexed-db.mock';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ACCESS_TOKEN_STORAGE_KEY } from '@/shared/constants/auth.constants';
-import {
-  readIndexedDb,
-  writeIndexedDb,
-} from './browser-indexed-db';
+import { readIndexedDb, writeIndexedDb } from './browser-indexed-db';
+import { offlinePassesKey, OFFLINE_PASSES_OWNER_KEY } from '@/shared/constants/offline-passes.constants';
 import {
   clearAccessToken,
   getAccessToken,
   initializeAccessTokenStorage,
   saveAccessToken,
   subscribeAccessToken,
+  waitForAccessTokenWrites,
 } from './access-token-storage';
 
 describe("access token memory storage (no IndexedDB persistence)", () => {
-  afterEach(() => {
+  afterEach(async () => {
+    await waitForAccessTokenWrites();
     vi.restoreAllMocks();
   });
 
@@ -36,6 +36,7 @@ describe("access token memory storage (no IndexedDB persistence)", () => {
     expect(await readIndexedDb(ACCESS_TOKEN_STORAGE_KEY)).toBeNull();
     expect(storage.getAccessToken()).toBeNull();
     storage.clearAccessToken();
+    await storage.waitForAccessTokenWrites();
   });
 
   it('invalidates the in-memory snapshot immediately on logout', async () => {
@@ -57,5 +58,61 @@ describe("access token memory storage (no IndexedDB persistence)", () => {
     clearAccessToken();
     expect(listener).toHaveBeenCalledOnce();
     unsubscribe();
+  });
+
+  describe('offline passes of the device owner', () => {
+    const token = (sub: string) => `h.${btoa(JSON.stringify({ sub }))}.s`;
+    const seedOwner = async (userId: string) => {
+      await writeIndexedDb(OFFLINE_PASSES_OWNER_KEY, userId);
+      await writeIndexedDb(offlinePassesKey(userId), { userId, passes: [] });
+    };
+
+    it('keeps the copy when the same user signs in again', async () => {
+      await seedOwner('user-a');
+      await saveAccessToken(token('user-a'));
+      expect(await readIndexedDb(OFFLINE_PASSES_OWNER_KEY)).toBe('user-a');
+      expect(await readIndexedDb(offlinePassesKey('user-a'))).not.toBeNull();
+    });
+
+    it("removes the previous user's copy when another user signs in", async () => {
+      await seedOwner('user-a');
+      await saveAccessToken(token('user-b'));
+      expect(await readIndexedDb(OFFLINE_PASSES_OWNER_KEY)).toBeNull();
+      expect(await readIndexedDb(offlinePassesKey('user-a'))).toBeNull();
+    });
+
+    it('removes the copy and its owner when the session ends', async () => {
+      await saveAccessToken(token('user-a'));
+      await seedOwner('user-a');
+      clearAccessToken();
+      await vi.waitFor(async () =>
+        expect(await readIndexedDb(OFFLINE_PASSES_OWNER_KEY)).toBeNull(),
+      );
+      expect(await readIndexedDb(offlinePassesKey('user-a'))).toBeNull();
+    });
+
+    it('keeps the offline copy after a reload without restoring a persisted credential', async () => {
+      await seedOwner('user-a');
+      await writeIndexedDb(ACCESS_TOKEN_STORAGE_KEY, token('user-a'));
+      vi.resetModules();
+      const storage = await import('./access-token-storage');
+      await storage.initializeAccessTokenStorage();
+      expect(storage.getAccessToken()).toBeNull();
+      expect(await readIndexedDb(ACCESS_TOKEN_STORAGE_KEY)).toBeNull();
+      expect(await readIndexedDb(OFFLINE_PASSES_OWNER_KEY)).toBe('user-a');
+      expect(await readIndexedDb(offlinePassesKey('user-a'))).not.toBeNull();
+    });
+
+    it('clears the offline copy on logout even when no token remains in memory', async () => {
+      await seedOwner('user-a');
+      vi.resetModules();
+      const storage = await import('./access-token-storage');
+      await storage.initializeAccessTokenStorage();
+      expect(storage.getAccessToken()).toBeNull();
+      storage.clearAccessToken();
+      await storage.waitForAccessTokenWrites();
+      expect(await readIndexedDb(OFFLINE_PASSES_OWNER_KEY)).toBeNull();
+      expect(await readIndexedDb(offlinePassesKey('user-a'))).toBeNull();
+    });
   });
 });

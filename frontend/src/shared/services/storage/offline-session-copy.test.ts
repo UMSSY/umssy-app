@@ -4,6 +4,8 @@ import { saveAccessToken, clearAccessToken } from './access-token-storage';
 import { withOfflineSessionCopy } from './offline-session-copy';
 import * as database from './browser-indexed-db';
 
+const token = (sub: string) => `h.${btoa(JSON.stringify({ sub }))}.s`;
+
 afterEach(() => {
   vi.restoreAllMocks();
   clearAccessToken();
@@ -11,58 +13,58 @@ afterEach(() => {
 
 it('reopens saved data offline and isolates a different account', async () => {
   vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(true);
-  await saveAccessToken('account-a');
-  await withOfflineSessionCopy('test', 'account-a', async () => ({
+  await saveAccessToken(token('account-a'));
+  await withOfflineSessionCopy('test', token('account-a'), async () => ({
     name: 'Saved',
   }));
   vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
   const fetchData = vi.fn();
   await expect(
-    withOfflineSessionCopy('test', 'account-a', fetchData),
+    withOfflineSessionCopy('test', token('account-a'), fetchData),
   ).resolves.toEqual({ name: 'Saved' });
   expect(fetchData).not.toHaveBeenCalled();
-  await saveAccessToken('account-b');
+  await saveAccessToken(token('account-b'));
   await expect(
-    withOfflineSessionCopy('test', 'account-b', fetchData),
+    withOfflineSessionCopy('test', token('account-b'), fetchData),
   ).rejects.toThrow('Conéctate');
 });
 
 it('rejects a late response from an earlier session', async () => {
   vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(true);
-  await saveAccessToken('account-a');
-  await withOfflineSessionCopy('late', 'account-a', async () => {
-    await saveAccessToken('account-b');
+  await saveAccessToken(token('account-a'));
+  await withOfflineSessionCopy('late', token('account-a'), async () => {
+    await saveAccessToken(token('account-b'));
     return 'private';
   });
   vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
   await expect(
-    withOfflineSessionCopy('late', 'account-b', vi.fn()),
+    withOfflineSessionCopy('late', token('account-b'), vi.fn()),
   ).rejects.toThrow('Conéctate');
 });
 
 it('keeps online reads usable but rejects preparation when persistence fails', async () => {
-  await saveAccessToken('account-a');
+  await saveAccessToken(token('account-a'));
   vi.spyOn(database, 'updateIndexedDbPair')
     .mockRejectedValueOnce(new Error('Storage full'))
     .mockRejectedValueOnce(new Error('Storage full'));
   await expect(
-    withOfflineSessionCopy('quota', 'account-a', async () => 'live'),
+    withOfflineSessionCopy('quota', token('account-a'), async () => 'live'),
   ).resolves.toBe('live');
   await expect(
-    withOfflineSessionCopy('quota', 'account-a', async () => 'live', {
+    withOfflineSessionCopy('quota', token('account-a'), async () => 'live', {
       requireStorage: true,
     }),
   ).rejects.toThrow('Storage full');
 });
 
 it('does not overwrite a saved copy with a canceled response', async () => {
-  await saveAccessToken('account-a');
-  await withOfflineSessionCopy('cancel', 'account-a', async () => 'saved');
+  await saveAccessToken(token('account-a'));
+  await withOfflineSessionCopy('cancel', token('account-a'), async () => 'saved');
   const controller = new AbortController();
   await expect(
     withOfflineSessionCopy(
       'cancel',
-      'account-a',
+      token('account-a'),
       async () => {
         controller.abort();
         return 'late';
@@ -72,6 +74,29 @@ it('does not overwrite a saved copy with a canceled response', async () => {
   ).rejects.toThrow();
   vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
   await expect(
-    withOfflineSessionCopy('cancel', 'account-a', vi.fn()),
+    withOfflineSessionCopy('cancel', token('account-a'), vi.fn()),
   ).resolves.toBe('saved');
+});
+
+it('prepares and reads a copy without persisting its authentication token', async () => {
+  vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(true);
+  const credential = token('owner-a');
+  await saveAccessToken(credential);
+  await withOfflineSessionCopy('safe', credential, async () => 'saved', { requireStorage: true });
+  const copy = await database.readIndexedDb('umssy:session-draft:offline:safe');
+  expect(copy).toEqual({ userId: 'owner-a', data: 'saved' });
+  expect(await database.readIndexedDb('accessToken')).toBeNull();
+  expect(JSON.stringify(copy)).not.toContain(credential);
+  vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
+  await expect(withOfflineSessionCopy('safe', credential, vi.fn())).resolves.toBe('saved');
+  clearAccessToken();
+  await expect(withOfflineSessionCopy('safe', credential, vi.fn())).rejects.toThrow('Conéctate');
+});
+
+it('does not prepare data without a valid in-memory identity', async () => {
+  vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(true);
+  await saveAccessToken('invalid-token');
+  await expect(withOfflineSessionCopy('invalid', 'invalid-token', async () => 'live')).resolves.toBe('live');
+  await expect(withOfflineSessionCopy('invalid', 'invalid-token', async () => 'live', { requireStorage: true })).rejects.toThrow('La sesión cambió');
+  expect(await database.readIndexedDb('umssy:session-draft:offline:invalid')).toBeNull();
 });

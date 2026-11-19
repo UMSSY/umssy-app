@@ -1,10 +1,7 @@
 import { ACCESS_TOKEN_STORAGE_KEY } from '@/shared/constants/auth.constants';
-import {
-  OFFLINE_PASSES_STORAGE_KEY,
-  offlinePassesKey,
-} from '@/shared/constants/offline-passes.constants';
 import { readAccessTokenSubject } from '@/shared/utils/read-access-token-subject';
 import { removeIndexedDb } from './browser-indexed-db';
+import { clearOfflinePasses, readOfflinePassesOwner } from './offline-passes-owner';
 
 let token: string | null = null;
 let ready = false;
@@ -16,10 +13,9 @@ let channel: BroadcastChannel | null = null;
 const emit = () => {
   for (const listener of listeners) listener();
 };
-
-const removeOfflinePasses = async (owner: string | null) => {
-  if (owner) await removeIndexedDb(offlinePassesKey(owner)).catch(() => {});
-  await removeIndexedDb(OFFLINE_PASSES_STORAGE_KEY).catch(() => {});
+const clearOfflinePassesOfOtherUser = async (userId: string | null) => {
+  const owner = await readOfflinePassesOwner();
+  if (owner && owner !== userId) await clearOfflinePasses();
 };
 
 export function isAccessTokenReady(): boolean {
@@ -41,7 +37,6 @@ export function initializeAccessTokenStorage(): Promise<void> {
 }
 
 export async function saveAccessToken(value: string): Promise<boolean> {
-  const previousOwner = readAccessTokenSubject(token);
   const nextOwner = readAccessTokenSubject(value);
   revision++;
   token = value;
@@ -49,17 +44,13 @@ export async function saveAccessToken(value: string): Promise<boolean> {
   emit();
   channel?.postMessage('changed');
   const operation = writes.then(async () => {
-    await removeIndexedDb(ACCESS_TOKEN_STORAGE_KEY);
-    if (previousOwner && previousOwner !== nextOwner) {
-      await removeOfflinePasses(previousOwner);
-    }
-    await removeIndexedDb(OFFLINE_PASSES_STORAGE_KEY).catch(() => {});
+    await removeIndexedDb(ACCESS_TOKEN_STORAGE_KEY).catch(() => {});
+    await clearOfflinePassesOfOtherUser(nextOwner);
   });
   writes = operation.catch(() => {});
   try {
     await operation;
   } catch {
-    // Ignore legacy cleanup error
   }
   return true;
 }
@@ -75,7 +66,6 @@ export async function waitForAccessTokenWrites(): Promise<void> {
 }
 
 export function clearAccessToken(): boolean {
-  const owner = readAccessTokenSubject(token);
   revision++;
   token = null;
   ready = true;
@@ -83,7 +73,7 @@ export function clearAccessToken(): boolean {
   emit();
   const operation = writes.then(async () => {
     await removeIndexedDb(ACCESS_TOKEN_STORAGE_KEY).catch(() => {});
-    await removeOfflinePasses(owner);
+    await clearOfflinePasses();
   });
   writes = operation.catch(() => {});
   void operation.then(() => channel?.postMessage('changed')).catch(() => {});

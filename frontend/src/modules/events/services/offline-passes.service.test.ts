@@ -57,12 +57,13 @@ describe('HU-08-14 offline pass copies', () => {
     get.mockRestore();
 
     vi.resetModules();
-    const { initializeAccessTokenStorage } =
+    const { initializeAccessTokenStorage, getAccessToken } =
       await import('@/shared/services/storage/access-token-storage');
     const { loadSessionOfflinePasses: readAfterRestart } =
       await import('../utils/offline-passes-store');
     await initializeAccessTokenStorage();
-    const restored = await readAfterRestart(accountA);
+    expect(getAccessToken()).toBeNull();
+    const restored = await readAfterRestart(null);
     expect(restored?.savedAt).toEqual(expect.any(String));
     expect(restored?.passes).toEqual([
       {

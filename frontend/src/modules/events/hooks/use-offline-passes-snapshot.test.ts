@@ -43,13 +43,24 @@ describe('useOfflinePassesSnapshot', () => {
     expect(result.current.snapshot).toBeNull();
   });
 
-  it('does not read storage without a user', () => {
+  it('does not read storage online without a user', () => {
     vi.mocked(readIndexedDbPair).mockClear();
     const { result } = renderHookWithQuery(() =>
-      useOfflinePassesSnapshot(null, false),
+      useOfflinePassesSnapshot(null, true),
     );
     expect(result.current).toEqual({ snapshot: null, isLoading: false });
     expect(readIndexedDbPair).not.toHaveBeenCalled();
+  });
+
+  it("reads the device owner's copy offline without a session token", async () => {
+    await saveAccessToken(token('user-a'));
+    await offlinePassesStore.save('user-a', [pass]);
+    const { result } = renderHookWithQuery(() =>
+      useOfflinePassesSnapshot(null, false),
+    );
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.snapshot?.userId).toBe('user-a');
+    expect(result.current.snapshot?.passes).toEqual([pass]);
   });
 
   it('reloads the copy when connectivity changes without flashing a loading state', async () => {
@@ -72,7 +83,7 @@ describe('useOfflinePassesSnapshot', () => {
       expect(result.current.snapshot?.passes).toHaveLength(2),
     );
     expect(readIndexedDbPair).toHaveBeenCalledWith(
-      'accessToken',
+      'offline-passes:owner',
       'offline-passes:user-a',
     );
   });
