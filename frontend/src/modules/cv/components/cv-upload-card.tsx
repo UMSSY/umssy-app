@@ -20,7 +20,7 @@ export function CvUploadCard({
 }: CvUploadCardProps) {
   if (isLoading) {
     return (
-      <SectionCard title="Subir currículum">
+      <SectionCard title="Subir currículum" className="min-w-0">
         <div aria-busy="true" className="flex flex-col items-center gap-3 px-6 py-10">
           <Skeleton className="h-5 w-2/3" />
           <Skeleton className="h-12 w-40" />
@@ -31,7 +31,7 @@ export function CvUploadCard({
 
   if (hasSavedCv) {
     return (
-      <SectionCard title="Subir currículum">
+      <SectionCard title="Subir currículum" className="min-w-0">
         <CvDropzone
           selectId={selectId}
           title="Ya tienes un CV vigente"
@@ -50,7 +50,7 @@ export function CvUploadCard({
   }
 
   return (
-    <SectionCard title="Subir currículum">
+    <SectionCard title="Subir currículum" className="min-w-0">
       <CvDropzone
         selectId={selectId}
         title="Selecciona tu CV en formato PDF"
