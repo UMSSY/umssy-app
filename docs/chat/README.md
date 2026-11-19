@@ -68,10 +68,11 @@ sequenceDiagram
   participant MS as MessageService
   CW->>V: conversationId (null while a request is open)
   V->>AC: setActiveConversationId(id)
-  V->>GW: visibility:changed { conversationId, isFocused }
-  GW->>VS: setConversationVisibility(user, socket, id, isFocused)
+  V->>GW: visibility:changed { conversationId, isFocused, isOpen? }
+  GW->>VS: setConversationVisibility(user, socket, id, isFocused, isOpen ?? isFocused)
   Note over V,GW: Sent again on focus, blur, visibilitychange and reconnect
   MS->>VS: isConversationOpen(recipient, conversation)?
+  Note over VS: true if any socket of the recipient has this conversation with isFocused or isOpen
   alt open
     MS->>MS: No notification for that recipient
   else closed
@@ -86,7 +87,7 @@ sequenceDiagram
 ## Business rules
 
 - One-to-one conversations follow the chat role policy (students and graduates), with an accepted connection or a validated application context. A block between the participants prevents writing and notifying.
-- A recipient who has the conversation open and focused in any of their sockets is not notified about new messages in it.
+- A recipient is not notified about a new message when any of their sockets reports that conversation with `isFocused: true` **or** `isOpen: true`. `isOpen` is optional and defaults to the value of `isFocused`; `isFocused` defaults to `visible` and then to `true` when omitted. The web client sends only `isFocused`, so for it the conversation counts as open while it is focused.
 - Chat notifications open `/chat?conversationId=<id>` and use the conversation id as `groupKey`, so push notifications of the same conversation replace each other on the device.
 - Chat messages never go out by email, even if the notification catalog enables email for the type (see [notifications](../notifications/README.md)).
 
@@ -118,7 +119,7 @@ sequenceDiagram
 | --------------- | -------------------- | ------------------------------------------ |
 | Client → server | `conversation:join`  | Conversation to join                       |
 | Client → server | `message:send`       | New message                                |
-| Client → server | `visibility:changed` | `{ conversationId: string \| null, isFocused: boolean }` |
+| Client → server | `visibility:changed` | `{ conversationId: string \| null, isFocused?: boolean, isOpen?: boolean }`. `isOpen` defaults to `isFocused`; `isFocused` defaults to the legacy `visible` field and then to `true` |
 | Client → server | `event_room:join`    | Event room to join                         |
 | Server → client | `message:new`        | Message created in a joined conversation   |
 | Server → client | `presence:online` and `presence:offline` | Presence of a user     |
