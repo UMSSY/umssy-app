@@ -130,7 +130,7 @@ describe('usePushNotifications', () => {
     );
   });
 
-  it('returns permission-denied when user denies permission', async () => {
+  it('returns permission-blocked when user blocks the permission', async () => {
     (Notification.requestPermission as unknown as ReturnType<typeof vi.fn>).mockResolvedValue('denied');
 
     const { result } = renderHook(() => usePushNotifications());
@@ -140,7 +140,7 @@ describe('usePushNotifications', () => {
     await act(async () => {
       const res = await result.current.activate();
       expect(res.ok).toBe(false);
-      expect(res.reason).toBe('permission-denied');
+      expect(res.reason).toBe('permission-blocked');
     });
 
     expect(result.current.isSubscribed).toBe(false);
@@ -166,5 +166,96 @@ describe('usePushNotifications', () => {
     );
     expect(mockSubscription.unsubscribe).toHaveBeenCalled();
     expect(result.current.isSubscribed).toBe(false);
+  });
+
+  it('returns permission-dismissed when the user closes the native prompt', async () => {
+    (Notification.requestPermission as unknown as ReturnType<typeof vi.fn>).mockResolvedValue('default');
+
+    const { result } = renderHook(() => usePushNotifications());
+
+    await act(async () => {
+      const res = await result.current.activate();
+      expect(res).toEqual({ ok: false, reason: 'permission-dismissed' });
+    });
+  });
+
+  it('sync re-registers an existing browser subscription without prompting (HU-17)', async () => {
+    vi.stubGlobal('Notification', { permission: 'granted', requestPermission: vi.fn() });
+    mockPushManager.getSubscription.mockResolvedValue({
+      endpoint: 'https://fcm.existing',
+      toJSON: () => ({ keys: { p256dh: 'k1', auth: 'k2' } }),
+    });
+    vi.mocked(apiClientModule.apiClient.post).mockResolvedValue({} as unknown as unknown);
+
+    const { result } = renderHook(() => usePushNotifications());
+
+    await act(async () => {
+      expect(await result.current.sync({ token: 'session-a', signal: new AbortController().signal })).toBe(true);
+    });
+
+    expect(Notification.requestPermission).not.toHaveBeenCalled();
+    expect(apiClientModule.apiClient.post).toHaveBeenCalledWith(
+      '/push/subscriptions',
+      expect.objectContaining({ endpoint: 'https://fcm.existing' }),
+      expect.objectContaining({ headers: { Authorization: 'Bearer session-a' } }),
+    );
+    expect(result.current.isSubscribed).toBe(true);
+  });
+
+  it('sync does nothing when permission is not granted', async () => {
+    const { result } = renderHook(() => usePushNotifications());
+
+    await act(async () => {
+      expect(await result.current.sync({ token: 'session-a', signal: new AbortController().signal })).toBe(false);
+    });
+
+    expect(apiClientModule.apiClient.post).not.toHaveBeenCalled();
+  });
+
+  it('sync registers the browser subscription with the session that started it', async () => {
+    vi.stubGlobal('Notification', { permission: 'granted', requestPermission: vi.fn() });
+    mockPushManager.getSubscription.mockResolvedValue({
+      endpoint: 'https://fcm...',
+      toJSON: () => ({ endpoint: 'https://fcm...', keys: { p256dh: 'k1', auth: 'k2' } }),
+    });
+    vi.mocked(apiClientModule.apiClient.post).mockResolvedValue({} as unknown as unknown);
+    const controller = new AbortController();
+
+    const { result } = renderHook(() => usePushNotifications());
+
+    let isRegistered = false;
+    await act(async () => {
+      isRegistered = await result.current.sync({ token: 'session-a', signal: controller.signal });
+    });
+
+    expect(isRegistered).toBe(true);
+    expect(apiClientModule.apiClient.post).toHaveBeenCalledWith(
+      '/push/subscriptions',
+      expect.objectContaining({ endpoint: 'https://fcm...' }),
+      expect.objectContaining({
+        headers: { Authorization: 'Bearer session-a' },
+        signal: controller.signal,
+      }),
+    );
+  });
+
+  it('sync does not register the device when its session was cancelled', async () => {
+    vi.stubGlobal('Notification', { permission: 'granted', requestPermission: vi.fn() });
+    mockPushManager.getSubscription.mockResolvedValue({
+      endpoint: 'https://fcm...',
+      toJSON: () => ({ endpoint: 'https://fcm...', keys: { p256dh: 'k1', auth: 'k2' } }),
+    });
+    const controller = new AbortController();
+    controller.abort();
+
+    const { result } = renderHook(() => usePushNotifications());
+
+    let isRegistered = true;
+    await act(async () => {
+      isRegistered = await result.current.sync({ token: 'session-a', signal: controller.signal });
+    });
+
+    expect(isRegistered).toBe(false);
+    expect(apiClientModule.apiClient.post).not.toHaveBeenCalled();
   });
 });
