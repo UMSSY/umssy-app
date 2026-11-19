@@ -4,7 +4,11 @@ import { ConfigService } from '@nestjs/config';
 import { PushDispatcherService } from '../services/push-dispatcher.service.js';
 import { PushSubscriptionsRepository } from '../repositories/push-subscriptions.repository.js';
 import * as webpush from 'web-push';
-import { PUSH_NOTIFICATION_ICON } from '../constants/push-notification.constants.js';
+import {
+  PUSH_NOTIFICATION_ICON,
+  PUSH_TTL_SECONDS,
+  PUSH_URGENCY,
+} from '../constants/push-notification.constants.js';
 import type { PushNotificationPayload } from '../types/push-notification-payload.type.js';
 
 const webpushMock = vi.hoisted(() => ({
@@ -176,6 +180,15 @@ describe('PushDispatcherService', () => {
         groupKey: 'group-1',
       });
       expect(result.status).toBe('sent');
+    });
+
+    it('debe enviar con TTL y urgencia alta para entregar con la app cerrada (HU-17)', async () => {
+      mockPushRepo.findManyByUserIds.mockResolvedValue([androidSubscription]);
+
+      await service.dispatchToUsers(['user-1'], 'Title', 'Body', '/chat');
+
+      const [, , options] = webpushMock.sendNotification.mock.calls[0] as [unknown, string, unknown];
+      expect(options).toEqual({ TTL: PUSH_TTL_SECONDS, urgency: PUSH_URGENCY });
     });
 
     it('debe limitar title y body a 100 caracteres', async () => {

@@ -3,16 +3,6 @@
 import { useState } from "react";
 import { Bell } from "lucide-react";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -21,7 +11,11 @@ import type {
   NotificationChannel,
   NotificationPreferenceResponse,
 } from "@/modules/notifications";
+import { PushGuideDialog } from "@/shared/components/push/push-guide-dialog";
+import { PushPermissionPromptDialog } from "@/shared/components/push/push-permission-prompt-dialog";
 import { usePushNotifications } from "@/shared/hooks/use-push-notifications";
+import type { ActivateResult } from "@/shared/types/activate-result.types";
+import type { PushGuideKind } from "@/shared/types/push-guide-kind.types";
 
 import { NOTIFICATION_CHANNEL_OPTIONS } from "../constants/notification-channel-options.constants";
 import {
@@ -41,6 +35,10 @@ const PUSH_DESCRIPTION_BY_ENVIRONMENT = {
   unsupported: "Disponible en tu celular.",
 } as const;
 
+const DISABLED_PUSH_ENVIRONMENTS = new Set(["desktop", "unsupported"]);
+
+type PromptMode = "select" | "device";
+
 function preferencesToChannel(
   preferences: NotificationPreferenceResponse | undefined,
 ): NotificationChannel | null {
@@ -58,10 +56,29 @@ function channelToPreferences(channel: NotificationChannel) {
   };
 }
 
+function currentPermission(): NotificationPermission | null {
+  if (typeof window === "undefined" || !("Notification" in window)) return null;
+  return Notification.permission;
+}
+
+function guideForReason(reason: ActivateResult["reason"]): PushGuideKind | null {
+  if (reason === "permission-blocked") return "blocked";
+  if (reason === "ios-old" || reason === "ios-not-installed") return reason;
+  return null;
+}
+
+function errorMessageForReason(reason: ActivateResult["reason"]): string {
+  if (reason === "permission-dismissed") return NOTIFICATION_PUSH_MESSAGES.permissionDismissed;
+  if (reason === "service-worker-unavailable") {
+    return NOTIFICATION_PUSH_MESSAGES.serviceWorkerUnavailable;
+  }
+  if (reason === "unsupported" || reason === "desktop") return NOTIFICATION_PUSH_MESSAGES.unsupported;
+  return NOTIFICATION_PUSH_MESSAGES.subscriptionError;
+}
+
 export function NotificationPreferencesSection() {
   const {
     environment,
-    permission,
     isSubscribed,
     isLoading: isPushLoading,
     activate,
@@ -73,24 +90,88 @@ export function NotificationPreferencesSection() {
   const [pendingChannel, setPendingChannel] =
     useState<NotificationChannel | null>(null);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
-  const [isPushDialogOpen, setIsPushDialogOpen] = useState(false);
+  const [promptMode, setPromptMode] = useState<PromptMode | null>(null);
+  const [guideKind, setGuideKind] = useState<PushGuideKind | null>(null);
 
   const savedChannel = preferencesToChannel(preferences);
-  const isPushAvailable = environment === "supported";
+  const isPushDisabled = DISABLED_PUSH_ENVIRONMENTS.has(environment);
   const isBusy = isUpdating || isPushLoading;
 
   const selectedChannel = pendingChannel ?? savedChannel;
   const hasChanges = pendingChannel !== null && pendingChannel !== savedChannel;
+  const needsDeviceActivation =
+    savedChannel === "push" &&
+    !isSubscribed &&
+    environment === "supported" &&
+    !hasChanges;
+
+  function startPushFlow(mode: PromptMode): boolean {
+    if (environment === "ios-old" || environment === "ios-not-installed") {
+      setGuideKind(environment);
+      return false;
+    }
+    if (currentPermission() === "denied") {
+      setGuideKind("blocked");
+      return false;
+    }
+    setPromptMode(mode);
+    return true;
+  }
 
   function handleChange(value: string) {
+    const channel = value as NotificationChannel;
     setFeedback(null);
-    setPendingChannel(value as NotificationChannel);
+
+    if (channel === "push" && savedChannel !== "push") {
+      const deviceReady = isSubscribed && currentPermission() === "granted";
+      if (deviceReady) {
+        setPendingChannel("push");
+        return;
+      }
+      if (startPushFlow("select")) setPendingChannel("push");
+      return;
+    }
+
+    setPendingChannel(channel);
   }
 
   function handleCancel() {
     setFeedback(null);
     setPendingChannel(null);
-    setIsPushDialogOpen(false);
+    setPromptMode(null);
+  }
+
+  function handlePromptDismiss() {
+    if (promptMode === "select") setPendingChannel(null);
+    setPromptMode(null);
+  }
+
+  async function handlePromptContinue() {
+    const mode = promptMode;
+    setPromptMode(null);
+    setFeedback(null);
+
+    const result = await activate();
+
+    if (result.ok) {
+      setFeedback({
+        type: "success",
+        message:
+          mode === "device"
+            ? NOTIFICATION_PUSH_MESSAGES.deviceActivated
+            : NOTIFICATION_PUSH_MESSAGES.permissionGranted,
+      });
+      return;
+    }
+
+    if (mode === "select") setPendingChannel(null);
+
+    const guide = guideForReason(result.reason);
+    if (guide) {
+      setGuideKind(guide);
+      return;
+    }
+    setFeedback({ type: "error", message: errorMessageForReason(result.reason) });
   }
 
   async function savePreference(channel: NotificationChannel) {
@@ -112,48 +193,12 @@ export function NotificationPreferencesSection() {
   async function handleSave() {
     if (!pendingChannel) return;
 
-    if (pendingChannel === "push") {
-      if (!isPushAvailable) {
-        setFeedback({
-          type: "error",
-          message: NOTIFICATION_PUSH_MESSAGES.unsupported,
-        });
-        return;
-      }
-
-      setIsPushDialogOpen(true);
+    if (pendingChannel === "push" && !isSubscribed) {
+      startPushFlow("select");
       return;
     }
 
     await savePreference(pendingChannel);
-  }
-
-  async function handleConfirmPush() {
-    if (pendingChannel !== "push") return;
-
-    setIsPushDialogOpen(false);
-    setFeedback(null);
-
-    const result = await activate();
-
-    if (!result.ok) {
-      let message: string = NOTIFICATION_PUSH_MESSAGES.subscriptionError;
-
-      if (result.reason === "permission-denied") {
-        message =
-          permission === "denied"
-            ? NOTIFICATION_PUSH_MESSAGES.permissionBlocked
-            : NOTIFICATION_PUSH_MESSAGES.permissionDismissed;
-      } else if (result.reason === "unsupported") {
-        message = NOTIFICATION_PUSH_MESSAGES.unsupported;
-      }
-
-      setFeedback({ type: "error", message });
-      setPendingChannel(null);
-      return;
-    }
-
-    await savePreference("push");
   }
 
   return (
@@ -188,7 +233,7 @@ export function NotificationPreferencesSection() {
             className="flex flex-col gap-3 md:flex-row"
           >
             {NOTIFICATION_CHANNEL_OPTIONS.map(({ value, label, icon: Icon }) => {
-              const isDisabled = value === "push" && !isPushAvailable;
+              const isDisabled = value === "push" && isPushDisabled;
               const description =
                 value === "push"
                   ? PUSH_DESCRIPTION_BY_ENVIRONMENT[environment]
@@ -228,14 +273,30 @@ export function NotificationPreferencesSection() {
           </RadioGroup>
 
           {savedChannel === "push" && !isSubscribed ? (
-            <p role="status" className="mt-3 text-sm text-text-secondary">
-              No hay una suscripción Push activa en este dispositivo.
-            </p>
+            <div className="mt-3 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+              <p role="status" className="text-sm text-text-secondary">
+                {NOTIFICATION_PUSH_MESSAGES.noDeviceSubscription}
+              </p>
+              {needsDeviceActivation ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-10 w-full border-border-strong px-4 text-sm text-ink md:w-auto"
+                  disabled={isBusy}
+                  onClick={() => {
+                    setFeedback(null);
+                    startPushFlow("device");
+                  }}
+                >
+                  {NOTIFICATION_PUSH_MESSAGES.activateOnDevice}
+                </Button>
+              ) : null}
+            </div>
           ) : null}
 
           {savedChannel === "push" && isSubscribed ? (
             <p role="status" className="mt-3 text-sm text-text-secondary">
-              Las notificaciones Push están activas en este dispositivo.
+              {NOTIFICATION_PUSH_MESSAGES.deviceSubscriptionActive}
             </p>
           ) : null}
 
@@ -268,34 +329,12 @@ export function NotificationPreferencesSection() {
         </>
       ) : null}
 
-      <AlertDialog
-        open={isPushDialogOpen}
-        onOpenChange={(open) => {
-          if (!open) setIsPushDialogOpen(false);
-        }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {NOTIFICATION_PUSH_MESSAGES.dialog.title}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {NOTIFICATION_PUSH_MESSAGES.dialog.description}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={handleCancel}>
-              {NOTIFICATION_PUSH_MESSAGES.dialog.cancel}
-            </AlertDialogCancel>
-            <AlertDialogAction
-              type="button"
-              onClick={() => void handleConfirmPush()}
-            >
-              {NOTIFICATION_PUSH_MESSAGES.dialog.confirm}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <PushPermissionPromptDialog
+        open={promptMode !== null}
+        onDismiss={handlePromptDismiss}
+        onContinue={() => void handlePromptContinue()}
+      />
+      <PushGuideDialog kind={guideKind} onClose={() => setGuideKind(null)} />
     </SectionCard>
   );
 }

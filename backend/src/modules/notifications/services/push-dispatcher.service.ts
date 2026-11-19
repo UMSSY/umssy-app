@@ -5,6 +5,8 @@ import { PushSubscriptionsRepository } from '../repositories/push-subscriptions.
 import {
   PUSH_NOTIFICATION_ICON,
   PUSH_TEXT_MAX_LENGTH,
+  PUSH_TTL_SECONDS,
+  PUSH_URGENCY,
 } from '../constants/push-notification.constants.js';
 import type { ChannelDispatchResult } from '../types/channel-dispatch-result.type.js';
 import type { PushNotificationPayload } from '../types/push-notification-payload.type.js';
@@ -77,6 +79,7 @@ export class PushDispatcherService implements OnModuleInit {
             keys: { p256dh: sub.p256dh, auth: sub.auth },
           },
           JSON.stringify(pushPayload),
+          { TTL: PUSH_TTL_SECONDS, urgency: PUSH_URGENCY },
         );
         successCount++;
         sentUserIds.add(sub.userId);

@@ -18,7 +18,7 @@ import { SocketProvider } from '@/modules/chat/contexts/socket-context';
 import { OfflineNavigation } from '@/shared/components/offline-navigation';
 import { MentorProfileDraftProvider } from '@/modules/mentorship';
 
-import { AppVisibilityReporter } from '@/modules/notifications';
+import { AppVisibilityReporter, PushSubscriptionSync } from '@/modules/notifications';
 
 function SessionProviders({ children }: { children: ReactNode }) {
   const [queryClient] = useState(createQueryClient);
@@ -27,6 +27,7 @@ function SessionProviders({ children }: { children: ReactNode }) {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <AppVisibilityReporter />
+        <PushSubscriptionSync />
         <SocketProvider>
           <OfflineNavigation />
           <MentorProfileDraftProvider>{children}</MentorProfileDraftProvider>
