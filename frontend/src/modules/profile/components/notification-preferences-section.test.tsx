@@ -313,4 +313,38 @@ describe("NotificationPreferencesSection", () => {
     expect(hookMock.state.saveChannel).not.toHaveBeenCalled();
     expect(await screen.findByText(NOTIFICATION_PUSH_MESSAGES.deviceActivated)).toBeInTheDocument();
   });
+
+  it("con una suscripción del navegador ya existente, registra el dispositivo en la cuenta antes de guardar Push", async () => {
+    vi.stubGlobal("Notification", { permission: "granted" });
+    pushMock.isSubscribed = true;
+    const user = userEvent.setup();
+    render(<NotificationPreferencesSection />);
+
+    await user.click(radio("Push"));
+
+    expect(screen.queryByRole("button", { name: PUSH_PERMISSION_PROMPT.confirm })).not.toBeInTheDocument();
+
+    await user.click(saveButton());
+
+    expect(pushMock.activate).toHaveBeenCalledOnce();
+    expect(hookMock.state.saveChannel).toHaveBeenCalledExactlyOnceWith("push");
+    expect(pushMock.activate.mock.invocationCallOrder[0]).toBeLessThan(
+      hookMock.state.saveChannel.mock.invocationCallOrder[0],
+    );
+  });
+
+  it("si el registro del dispositivo falla al guardar, no guarda Push", async () => {
+    vi.stubGlobal("Notification", { permission: "granted" });
+    pushMock.isSubscribed = true;
+    pushMock.activate.mockResolvedValue({ ok: false, reason: "network-error" });
+    const user = userEvent.setup();
+    render(<NotificationPreferencesSection />);
+
+    await user.click(radio("Push"));
+    await user.click(saveButton());
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(NOTIFICATION_PUSH_MESSAGES.subscriptionError);
+    expect(hookMock.state.saveChannel).not.toHaveBeenCalled();
+    expect(radio("Solo por correo")).toBeChecked();
+  });
 });

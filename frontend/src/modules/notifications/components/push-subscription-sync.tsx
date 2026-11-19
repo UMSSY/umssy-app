@@ -15,7 +15,7 @@ const getServerToken = () => null;
 export function PushSubscriptionSync() {
   const token = useSyncExternalStore(subscribeAccessToken, getAccessToken, getServerToken);
   const { environment, sync } = usePushNotifications();
-  const hasSynced = useRef(false);
+  const syncedToken = useRef<string | null>(null);
 
   const { data: preferences } = useQuery({
     queryKey: NOTIFICATION_PREFERENCES_QUERY_KEY,
@@ -24,15 +24,17 @@ export function PushSubscriptionSync() {
   });
 
   useEffect(() => {
-    if (!token) {
-      hasSynced.current = false;
-      return;
-    }
-    if (hasSynced.current || environment !== "supported") return;
-    if (!preferences?.pushEnabled) return;
+    if (!token || environment !== "supported") return;
+    if (!preferences?.pushEnabled || syncedToken.current === token) return;
 
-    hasSynced.current = true;
-    void sync();
+    const controller = new AbortController();
+    void sync({ token, signal: controller.signal }).then((isRegistered) => {
+      if (isRegistered && !controller.signal.aborted) {
+        syncedToken.current = token;
+      }
+    });
+
+    return () => controller.abort();
   }, [token, environment, preferences?.pushEnabled, sync]);
 
   return null;

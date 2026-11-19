@@ -1,12 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { BEARER_PREFIX } from "@/shared/constants/auth.constants";
 import { apiClient } from "@/shared/services/api-client";
 import { urlBase64ToUint8Array } from "@/shared/utils/url-base64-to-uint8-array";
 import type {
   PushEnvironment,
   PushPermissionState,
   ActivateResult,
+  PushSyncSession,
   UsePushNotificationsResult,
 } from "@/shared/types/use-push-notifications.types";
 import { subscribeToPush } from "../utils/subscribe-to-push";
@@ -29,27 +31,41 @@ async function waitForServiceWorker(): Promise<ServiceWorkerRegistration | null>
 
 async function ensureBackendSubscription(
   registration: ServiceWorkerRegistration,
+  session?: PushSyncSession,
 ): Promise<void> {
+  const requestConfig = session
+    ? {
+        headers: { Authorization: `${BEARER_PREFIX}${session.token}` },
+        signal: session.signal,
+      }
+    : undefined;
   const existingSubscription = await registration.pushManager.getSubscription();
 
   const subscription =
     existingSubscription ??
     (await (async () => {
-      const response = await apiClient.get<{ data: { publicKey: string } }>(
-        "/push/public-key",
-      );
+      const response = requestConfig
+        ? await apiClient.get<{ data: { publicKey: string } }>("/push/public-key", requestConfig)
+        : await apiClient.get<{ data: { publicKey: string } }>("/push/public-key");
       const publicKey = response.data?.data?.publicKey;
       if (!publicKey) throw new Error("VAPID public key no disponible");
       return subscribeToPush(registration, urlBase64ToUint8Array(publicKey));
     })());
 
-  const { keys } = subscription.toJSON();
+  session?.signal.throwIfAborted();
 
-  await apiClient.post("/push/subscriptions", {
+  const { keys } = subscription.toJSON();
+  const body = {
     endpoint: subscription.endpoint,
     keys: { p256dh: keys?.p256dh, auth: keys?.auth },
     userAgent: navigator.userAgent,
-  });
+  };
+
+  if (requestConfig) {
+    await apiClient.post("/push/subscriptions", body, requestConfig);
+  } else {
+    await apiClient.post("/push/subscriptions", body);
+  }
 }
 
 function detectEnvironment(): PushEnvironment {
@@ -178,19 +194,23 @@ export function usePushNotifications(): UsePushNotificationsResult {
     }
   }, [environment]);
 
-  const sync = useCallback(async (): Promise<boolean> => {
+  const sync = useCallback(async (session: PushSyncSession): Promise<boolean> => {
     if (environment !== "supported") return false;
     if (Notification.permission !== "granted") return false;
 
     try {
       const registration = await waitForServiceWorker();
-      if (!registration) return false;
+      if (!registration || session.signal.aborted) return false;
 
-      await ensureBackendSubscription(registration);
+      await ensureBackendSubscription(registration, session);
+      if (session.signal.aborted) return false;
+
       setIsSubscribed(true);
       return true;
     } catch (error) {
-      console.warn("[usePushNotifications] Silent sync failed", error);
+      if (!session.signal.aborted) {
+        console.warn("[usePushNotifications] Silent sync failed", error);
+      }
       return false;
     }
   }, [environment]);
