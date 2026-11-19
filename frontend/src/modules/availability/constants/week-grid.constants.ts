@@ -1,6 +1,22 @@
 import type { AvailabilityBlockState } from "../types/availability-block-state.types";
+import type { WeekGridDensity } from "../types/week-grid-density.types";
 
 export const HOUR_HEIGHT_PX = 72;
+
+export const COMPACT_HOUR_HEIGHT_PX = 20;
+
+export const HOUR_HEIGHT_PX_BY_DENSITY: Record<WeekGridDensity, number> = {
+  normal: HOUR_HEIGHT_PX,
+  compact: COMPACT_HOUR_HEIGHT_PX,
+};
+
+export const WEEK_GRID_DENSITY_STORAGE_KEY = "umssy-week-grid-density";
+
+export const WEEK_GRID_DENSITY_TEXT = {
+  label: "Densidad de la grilla",
+  normal: "Normal",
+  compact: "Compacta",
+} as const;
 
 export const DAY_LABELS = ["LUN", "MAR", "MIÉ", "JUE", "VIE", "SÁB", "DOM"] as const;
 

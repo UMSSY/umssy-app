@@ -36,7 +36,11 @@ export class NotificationsService {
       actionUrl,
       groupKey,
       renderMail,
+      channels,
     } = request;
+    const includeInApp = !channels || channels.includes('IN_APP');
+    const includePush = !channels || channels.includes('PUSH');
+    const includeEmail = !channels || channels.includes('EMAIL');
 
     const finalRecipients = recipientIds.filter((id) => id !== actorId);
     if (finalRecipients.length === 0) {
@@ -105,17 +109,19 @@ export class NotificationsService {
       if (typeRecord.sendsEmail && emailEnabled) emailTargets.push(recipientId);
     }
 
-    const createdNotifications = await this.notificationsRepository.createMany(
-      validRecipients.map((id) => ({
-        recipientId: id,
-        actorId: actorId,
-        typeId: typeRecord.id,
-        title,
-        body,
-        link: actionUrl,
-        groupKey,
-      })),
-    );
+    const createdNotifications = includeInApp
+      ? await this.notificationsRepository.createMany(
+          validRecipients.map((id) => ({
+            recipientId: id,
+            actorId: actorId,
+            typeId: typeRecord.id,
+            title,
+            body,
+            link: actionUrl,
+            groupKey,
+          })),
+        )
+      : [];
     const inAppCount = createdNotifications.length;
     const notificationIdsByRecipient = new Map(
       createdNotifications.map((notification) => [
@@ -124,12 +130,16 @@ export class NotificationsService {
       ]),
     );
 
-    const createdPushTargets = pushTargets.filter((id) =>
-      notificationIdsByRecipient.has(id),
-    );
-    const createdEmailTargets = emailTargets.filter((id) =>
-      notificationIdsByRecipient.has(id),
-    );
+    const createdPushTargets = includePush
+      ? pushTargets.filter(
+          (id) => !includeInApp || notificationIdsByRecipient.has(id),
+        )
+      : [];
+    const createdEmailTargets = includeEmail
+      ? emailTargets.filter(
+          (id) => !includeInApp || notificationIdsByRecipient.has(id),
+        )
+      : [];
 
     for (const recipientId of notificationIdsByRecipient.keys()) {
       this.notificationGateway.emitToUser(recipientId, 'notification:new', {
