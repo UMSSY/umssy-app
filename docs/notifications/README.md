@@ -133,7 +133,7 @@ The frontend does not call `notify()`: the domain that owns the event does. User
 - Email supports domain-specific content through an async `renderMail` (MJML content, subject, text and values) with the recipient's name.
 - New survey notification types in the catalog; the catalog seed switches to upsert.
 - The survey notification contracts (Zod payloads, emails and MJML) live in the surveys domain.
-- One external channel per recipient (HU-16), with push taking precedence for older rows that enable both channels.
+- One external channel per recipient, with push taking precedence for older rows that enable both channels.
 - Chat messages are excluded from email; the generic email shows a "Ver en UMSSY" button with an absolute link from the shared mail resolver.
 - Optional `channels` in `notify()` to deliver or retry specific channels.
 - Push is sent with TTL and high urgency; push subscriptions are reassigned to the account that registers them.

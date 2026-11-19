@@ -74,6 +74,7 @@ export function NotificationPreferencesSection() {
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [promptMode, setPromptMode] = useState<PromptMode | null>(null);
   const [guideKind, setGuideKind] = useState<PushGuideKind | null>(null);
+  const [isDeviceRegistered, setIsDeviceRegistered] = useState(false);
 
   const isPushDisabled = DISABLED_PUSH_ENVIRONMENTS.has(environment);
   const isBusy = isSaving || isPushLoading;
@@ -127,6 +128,15 @@ export function NotificationPreferencesSection() {
     setPromptMode(null);
   }
 
+  function showActivationFailure(reason: ActivateResult["reason"]) {
+    const guide = guideForReason(reason);
+    if (guide) {
+      setGuideKind(guide);
+      return;
+    }
+    setFeedback({ type: "error", message: errorMessageForReason(reason) });
+  }
+
   async function handlePromptContinue() {
     const mode = promptMode;
     setPromptMode(null);
@@ -135,6 +145,7 @@ export function NotificationPreferencesSection() {
     const result = await activate();
 
     if (result.ok) {
+      setIsDeviceRegistered(true);
       setFeedback({
         type: "success",
         message:
@@ -146,13 +157,7 @@ export function NotificationPreferencesSection() {
     }
 
     if (mode === "select") setPendingChannel(null);
-
-    const guide = guideForReason(result.reason);
-    if (guide) {
-      setGuideKind(guide);
-      return;
-    }
-    setFeedback({ type: "error", message: errorMessageForReason(result.reason) });
+    showActivationFailure(result.reason);
   }
 
   async function savePreference(channel: NotificationChannel) {
@@ -174,9 +179,20 @@ export function NotificationPreferencesSection() {
   async function handleSave() {
     if (!pendingChannel) return;
 
-    if (pendingChannel === "push" && !isSubscribed) {
-      startPushFlow("select");
-      return;
+    if (pendingChannel === "push" && !isDeviceRegistered) {
+      if (currentPermission() !== "granted") {
+        startPushFlow("select");
+        return;
+      }
+
+      setFeedback(null);
+      const result = await activate();
+      if (!result.ok) {
+        setPendingChannel(null);
+        showActivationFailure(result.reason);
+        return;
+      }
+      setIsDeviceRegistered(true);
     }
 
     await savePreference(pendingChannel);

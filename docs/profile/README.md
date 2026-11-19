@@ -58,7 +58,7 @@ sequenceDiagram
     H->>B: pushManager.subscribe()
     H->>API: POST /push/subscriptions
     API->>API: Upsert by endpoint, assigned to the current user
-    H-->>S: ok
+    H-->>S: ok (device registered for this account)
     User->>S: "Guardar cambios"
     S->>API: PUT /notifications/preferences (push)
   end
@@ -66,7 +66,8 @@ sequenceDiagram
 
 - "Ahora no" closes the prompt and keeps the saved preference.
 - If the user blocks or dismisses the native permission, or the subscription fails, the section shows a guide or a message and does not save push.
-- Push is saved only when the device has an active subscription.
+- Two states are kept apart: the **browser subscription** (`isSubscribed`, read with `pushManager.getSubscription()`) only says that the browser holds a push endpoint; the **account registration** is the `POST /push/subscriptions` that links that endpoint to the signed-in account.
+- Push is saved only after the device is registered for the signed-in account. If the browser already has a subscription and the permission is granted, selecting push opens no prompt, but "Guardar cambios" still calls `activate()` to register the endpoint for the current account before `PUT /notifications/preferences`. If that registration fails, push is not saved and the saved preference is kept.
 
 ### Activating push on another device
 
@@ -74,7 +75,15 @@ When the saved preference is already push but the current device has no subscrip
 
 ### Keeping the subscription after signing in again
 
-`PushSubscriptionSync` (mounted in the app providers) runs after sign in. If the saved preference is push and the permission is already granted, it calls `sync()`, which registers the browser subscription again without asking anything. It runs again after a new sign in in the same tab. Signing out deletes the subscription of the current device only.
+`PushSubscriptionSync` (mounted in the app providers) runs after sign in. If the saved preference of the signed-in account is push and the permission is already granted, it calls `sync({ token, signal })`, which registers the browser subscription again without asking anything.
+
+- The registration is bound to the session that started it: the request carries that session's token, and the `AbortSignal` cancels it when the session changes (sign out, another account or a new token). A cancelled sync never registers the endpoint for the next account.
+- The sync is marked as done for a session only after a successful registration for that same session; a failed or cancelled sync is retried the next time the conditions are met.
+- It does not run for accounts whose saved channel is email or in-app.
+
+### Signing out
+
+Signing out tries to delete the current device subscription (`DELETE /push/subscriptions` and `unsubscribe()` in the browser). The sign out waits at most two seconds for it: if the deletion is still pending or fails, the session ends anyway and the deletion may not complete. The endpoint is reassigned to the next account that registers it on that device.
 
 ## Business rules
 
@@ -109,5 +118,6 @@ When the saved preference is already push but the current device has no subscrip
 - Selecting push opens the UMSSY prompt first and the native permission only after "Continuar".
 - Guides for blocked permission, iPhone below iOS 16.4 and app not installed on iPhone.
 - "Activar en este dispositivo" registers push on a new device without changing the saved preference.
-- The device subscription is registered again after signing in, through `PushSubscriptionSync`.
+- The device subscription is registered again after signing in, through `PushSubscriptionSync`, bound to the session that started it and cancelled when the session changes.
+- Saving push always confirms the registration of the device for the signed-in account, even when the browser already holds a subscription.
 - The section uses `useNotificationPreferences` from `@/modules/notifications`; the duplicated profile hook was removed.
