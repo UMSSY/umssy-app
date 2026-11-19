@@ -26,15 +26,13 @@ Branches of type `chore` are reserved exclusively for the DevOps team.
 
 The project adopts Conventional Commits with influences from the Angular standard.
 
-Allowed types: `docs`, `feat`, `fix`, `perf`, `refactor`, `test`, `build`, `chore`.
+Allowed types: docs, feat, fix, perf, refactor, test, build, chore.
 
-```text
 feat: message
 feat(frontend): message
-feat(scope module or function): <message less than 50 chars>
-```
+feat(scope module or function): <message>
 
-The message after the colon must be fewer than 50 characters. When a scope is provided, it identifies the module or function.
+When a scope is provided, it identifies the module or function.
 
 **Strict restriction:** Any commit containing direct changes to continuous integration (CI) will be rejected.
 
