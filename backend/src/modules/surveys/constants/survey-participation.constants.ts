@@ -8,6 +8,7 @@ export const SURVEY_PARTICIPATION_TARGET_SELECT = {
   academicPeriod: true,
   closesAt: true,
   lastReminderSentAt: true,
+  publishedNotifiedPeriod: true,
   status: CATALOG_TITLE_SELECT,
   targetAudience: CATALOG_TITLE_SELECT,
   career: { select: CAREER_SELECT },
@@ -38,6 +39,6 @@ export const SURVEY_REMINDER_ERROR_MESSAGES = {
 export const SURVEY_ANSWER_FRONTEND_PATH = '/surveys';
 export const SURVEY_REMINDER_GROUP_KEY_PREFIX = 'survey-reminder';
 export const SURVEY_PUBLISHED_ACTION_PATH = '/notifications?filter=SURVEYS';
-export const SURVEY_PUBLISHED_GROUP_KEY_PREFIX = 'survey-published';
-export const SURVEY_PUBLISHED_CHANGE_TEXT = 'Nueva encuesta publicada';
+export const SURVEY_PUBLISHED_NO_CHANGES_TEXT =
+  'Sin variaciones registradas respecto al semestre anterior.';
 export const SURVEY_WITHOUT_CLOSING_DATE_TEXT = 'Sin fecha de cierre definida.';

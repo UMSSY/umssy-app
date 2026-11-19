@@ -5,8 +5,6 @@ import { getAcademicPeriod } from '../../reports/utils/academic-period.js';
 import {
   SURVEY_ANSWER_FRONTEND_PATH,
   SURVEY_PUBLISHED_ACTION_PATH,
-  SURVEY_PUBLISHED_CHANGE_TEXT,
-  SURVEY_PUBLISHED_GROUP_KEY_PREFIX,
   SURVEY_REMINDER_GROUP_KEY_PREFIX,
   SURVEY_WITHOUT_CLOSING_DATE_TEXT,
 } from '../constants/survey-participation.constants.js';
@@ -25,6 +23,7 @@ import type { SurveyParticipationResponse } from '../responses/survey-participat
 import type { SurveyReminderResponse } from '../responses/survey-reminder.response.js';
 import type { SurveyParticipationTarget } from '../types/survey-participation-target.type.js';
 import { getPreviousSemester } from '../utils/academic-semester.js';
+import { buildSurveyPublishedChange } from '../utils/build-survey-published-change.js';
 import {
   buildSurveyFrontendUrl,
   formatSurveyClosureDate,
@@ -36,6 +35,7 @@ import {
   isSurveyOpenForReminders,
 } from '../utils/survey-participation.js';
 import { SurveyAudienceService } from './survey-audience.service.js';
+import { SurveyVariationEvaluatorService } from './survey-variation-evaluator.service.js';
 
 @Injectable()
 export class SurveyParticipationService {
@@ -43,6 +43,7 @@ export class SurveyParticipationService {
     private readonly surveysRepository: SurveysRepository,
     private readonly surveyAudienceService: SurveyAudienceService,
     private readonly notificationsService: NotificationsService,
+    private readonly variationEvaluator: SurveyVariationEvaluatorService,
   ) {}
 
   async getParticipation(
@@ -122,24 +123,40 @@ export class SurveyParticipationService {
     now: Date = new Date(),
   ): Promise<NotifyResult | undefined> {
     const target = await this.findTarget(surveyId);
+    const currentPeriod = getAcademicPeriod(now.toISOString());
+    if (!currentPeriod || target.publishedNotifiedPeriod === currentPeriod)
+      return undefined;
+
     const { eligible } = await this.surveyAudienceService.resolve(
       buildSurveyAudienceFilter(target),
     );
     if (eligible.length === 0) return undefined;
 
-    const currentPeriod = getAcademicPeriod(now.toISOString()) ?? '';
+    const claimed = await this.surveysRepository.claimPublishedNotification(
+      surveyId,
+      currentPeriod,
+    );
+    if (!claimed) return undefined;
+
+    const { shifts } = await this.variationEvaluator.evaluateSurvey(surveyId, {
+      closesAt: now,
+    });
+    const previousPeriod = getPreviousSemester(currentPeriod) ?? '';
 
     return this.notificationsService.notify({
       recipientIds: eligible.map((recipient) => recipient.id),
       actorId,
       ...surveyPublishedNotification({
         surveyTitle: target.title,
-        previousPeriod: getPreviousSemester(currentPeriod) ?? '',
+        previousPeriod,
         currentPeriod,
-        change: SURVEY_PUBLISHED_CHANGE_TEXT,
+        change: buildSurveyPublishedChange(
+          shifts,
+          previousPeriod,
+          currentPeriod,
+        ),
       }),
       actionUrl: SURVEY_PUBLISHED_ACTION_PATH,
-      groupKey: `${SURVEY_PUBLISHED_GROUP_KEY_PREFIX}:${target.id}`,
     });
   }
 
