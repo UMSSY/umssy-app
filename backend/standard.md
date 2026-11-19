@@ -51,7 +51,7 @@ Controllers: module-name.controller.ts
 Services: module-name.service.ts
 Modules: module-name.module.ts
 Schemas: module-name.schema.ts
-Exceptions: module-name.exceptions.ts
+Exceptions: one exception per .exception.ts file in exceptions/, named after the exception.
 ```
 
 Custom exception classes must end with `Exception`, for example `UserNotFoundException`.
@@ -116,7 +116,7 @@ backend/
 │       │   │   └── auth.types.ts               # Internal domain interfaces and types
 │       │   ├── notification/                   # Domain notification templates
 │       │   ├── exceptions/
-│       │   │   └── auth.exceptions.ts          # InvalidCredentialsException
+│       │   │   └── invalid-credentials.exception.ts # InvalidCredentialsException
 │       │   ├── interceptors/                   # Only when the domain needs its own interceptor
 │       │   │   └── mentors-cache.interceptor.ts
 │       │   └── tests/                          # Auth domain unit tests
@@ -209,6 +209,7 @@ model EventRegistration {
   event  Event              @relation(fields: [eventId], references: [id], onDelete: Cascade)
   status RegistrationStatus @relation(fields: [statusId], references: [id], onDelete: Restrict)
 
+  @@index([eventId])
   @@index([statusId])
   @@map("event_registrations")
 }
