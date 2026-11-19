@@ -73,4 +73,16 @@ describe("CvListItem", () => {
     expect(screen.getByRole("button", { name: "Ver CV_Valeria_Quispe.pdf" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Eliminar CV_Valeria_Quispe.pdf" })).toBeDisabled();
   });
+
+  it("applies responsive flex classes to prevent overlap with actions", () => {
+    renderItem({ ...CV, isCurrent: true });
+
+    const badge = screen.getByText("Vigente");
+    expect(badge).toHaveClass("shrink-0");
+
+    const fileNameEl = screen.getByText("CV_Valeria_Quispe.pdf");
+    const container = fileNameEl.closest("div.min-w-0");
+    expect(container).toHaveClass("min-w-0", "flex-1");
+  });
 });
+
