@@ -18,6 +18,7 @@ import { OfflinePassesSessionSync } from '@/shared/components/offline-passes-ses
 import { PwaInstallProvider } from '@/shared/contexts/pwa-install-context';
 import { SocketProvider } from '@/modules/chat/contexts/socket-context';
 import { OfflineNavigation } from '@/shared/components/offline-navigation';
+import { MentorProfileDraftProvider } from '@/modules/mentorship';
 
 import { AppVisibilityReporter } from '@/modules/notifications';
 
@@ -30,7 +31,7 @@ function SessionProviders({ children }: { children: ReactNode }) {
         <AppVisibilityReporter />
         <SocketProvider>
           <OfflineNavigation />
-          {children}
+          <MentorProfileDraftProvider>{children}</MentorProfileDraftProvider>
         </SocketProvider>
       </AuthProvider>
       <Toaster />
