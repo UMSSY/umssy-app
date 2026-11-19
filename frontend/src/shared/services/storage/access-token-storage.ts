@@ -1,7 +1,9 @@
-import { ACCESS_TOKEN_STORAGE_KEY } from '@/shared/constants/auth.constants';
-import { readAccessTokenSubject } from '@/shared/utils/read-access-token-subject';
-import { readIndexedDb, removeIndexedDb, writeIndexedDb } from './browser-indexed-db';
-import { clearOfflinePasses, readOfflinePassesOwner } from './offline-passes-owner';
+import { ACCESS_TOKEN_STORAGE_KEY } from "@/shared/constants/auth.constants";
+import {
+  readIndexedDb,
+  writeIndexedDb,
+  removeIndexedDb,
+} from "./browser-indexed-db";
 
 let token: string | null = null;
 let ready = false;
@@ -12,10 +14,6 @@ const listeners = new Set<() => void>();
 let channel: BroadcastChannel | null = null;
 const emit = () => {
   for (const listener of listeners) listener();
-};
-const clearOfflinePassesOfOtherUser = async (userId: string | null) => {
-  const owner = await readOfflinePassesOwner();
-  if (owner && owner !== userId) await clearOfflinePasses();
 };
 
 export function isAccessTokenReady(): boolean {
@@ -28,7 +26,7 @@ export function initializeAccessTokenStorage(): Promise<void> {
   loading = readIndexedDb<unknown>(ACCESS_TOKEN_STORAGE_KEY)
     .then((stored) => {
       if (revision === currentRevision)
-        token = typeof stored === 'string' ? stored : null;
+        token = typeof stored === "string" ? stored : null;
     })
     .catch(() => {
       if (revision === currentRevision) token = null;
@@ -44,11 +42,9 @@ export function initializeAccessTokenStorage(): Promise<void> {
 
 export async function saveAccessToken(value: string): Promise<boolean> {
   const writeRevision = ++revision;
-  const subject = readAccessTokenSubject(value);
-  const operation = writes.then(async () => {
-    await clearOfflinePassesOfOtherUser(subject);
-    await writeIndexedDb(ACCESS_TOKEN_STORAGE_KEY, value);
-  });
+  const operation = writes.then(() =>
+    writeIndexedDb(ACCESS_TOKEN_STORAGE_KEY, value),
+  );
   writes = operation.catch(() => {});
   try {
     await operation;
@@ -64,16 +60,12 @@ export async function saveAccessToken(value: string): Promise<boolean> {
   token = value;
   ready = true;
   emit();
-  channel?.postMessage('changed');
+  channel?.postMessage("changed");
   return true;
 }
 
 export function getAccessToken(): string | null {
   return token;
-}
-
-export async function waitForAccessTokenWrites(): Promise<void> {
-  await writes;
 }
 
 export function clearAccessToken(): boolean {
@@ -82,23 +74,22 @@ export function clearAccessToken(): boolean {
   ready = true;
   loading = null;
   emit();
-  const operation = writes.then(async () => {
-    await removeIndexedDb(ACCESS_TOKEN_STORAGE_KEY);
-    await clearOfflinePasses();
-  });
+  const operation = writes.then(() =>
+    removeIndexedDb(ACCESS_TOKEN_STORAGE_KEY),
+  );
   writes = operation.catch(() => {});
-  void operation.then(() => channel?.postMessage('changed')).catch(() => {});
+  void operation.then(() => channel?.postMessage("changed")).catch(() => {});
   return true;
 }
 
 export function subscribeAccessToken(onChange: () => void): () => void {
   listeners.add(onChange);
   if (
-    typeof window !== 'undefined' &&
-    typeof BroadcastChannel !== 'undefined' &&
+    typeof window !== "undefined" &&
+    typeof BroadcastChannel !== "undefined" &&
     !channel
   ) {
-    channel = new BroadcastChannel('umssy-session');
+    channel = new BroadcastChannel("umssy-session");
     channel.onmessage = () => {
       revision++;
       token = null;
@@ -116,4 +107,8 @@ export function subscribeAccessToken(onChange: () => void): () => void {
       channel = null;
     }
   };
+}
+
+export async function waitForAccessTokenWrites(): Promise<void> {
+  await writes;
 }
