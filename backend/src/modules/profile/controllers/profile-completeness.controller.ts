@@ -38,8 +38,9 @@ export class ProfileCompletenessController {
     summary: 'Calculate the completeness of the authenticated profile',
     description:
       'Contact and presentation must satisfy their existing form validation. ' +
-      'Education, work experience, skills and certifications require at least one saved record. ' +
-      'Saved skills count regardless of source or verification status. ' +
+      'Education, work experience and certifications require at least one saved record. ' +
+      'Skills require a saved manual skill or an NLP skill with a valid display name and at least one valid evidence reference, matching the profile lists. ' +
+      'Skill verification status does not affect completeness; retained NLP history hidden from the lists does not count. ' +
       'CV requires at least one stored PDF with an upload date; downloading a generated CV does not save it. ' +
       'Contact, presentation, education, work experience, skills and CV each contribute 15%; certifications contribute 10%. ' +
       'Each completed section contributes its full weight; incomplete sections contribute zero. ' +

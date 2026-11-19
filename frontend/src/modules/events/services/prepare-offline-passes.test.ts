@@ -1,6 +1,8 @@
 import '@/shared/testing/indexed-db.mock';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { saveAccessToken } from '@/shared/services/storage/access-token-storage';
+import { readIndexedDb, writeIndexedDb } from '@/shared/services/storage/browser-indexed-db';
+import { OFFLINE_PASSES_OWNER_KEY, offlinePassesKey } from '@/shared/constants/offline-passes.constants';
 import { loadSessionOfflinePasses } from '../utils/offline-passes-store';
 import { prepareOfflinePasses } from './prepare-offline-passes';
 import { registrationsService } from './registrations.service';
@@ -41,6 +43,15 @@ describe('preparing passes from the authenticated shell', () => {
     expect((await loadSessionOfflinePasses(token))?.passes).toEqual([
       { ...detail, location: 'Virtual' },
     ]);
+  });
+
+  it("removes another account's copy as soon as preparation starts", async () => {
+    await writeIndexedDb(OFFLINE_PASSES_OWNER_KEY, 'titulado-anterior');
+    await writeIndexedDb(offlinePassesKey('titulado-anterior'), { userId: 'titulado-anterior', passes: [] });
+    vi.mocked(registrationsService.getMine).mockRejectedValue(new Error('Sin servidor'));
+    await expect(prepareOfflinePasses(token, new AbortController().signal)).rejects.toThrow('Sin servidor');
+    expect(await readIndexedDb(offlinePassesKey('titulado-anterior'))).toBeNull();
+    expect(await readIndexedDb(OFFLINE_PASSES_OWNER_KEY)).toBe('titulado-qa');
   });
 
   it('treats a confirmed empty list as ready', async () => {

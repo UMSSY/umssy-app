@@ -1,4 +1,5 @@
 import { vi, describe, it, expect, beforeAll, beforeEach } from 'vitest';
+import { AppointmentParticipantRole } from '../../appointments/enums/appointment-participant-role.enum.js';
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException, Logger } from '@nestjs/common';
 import { NotificationsService } from '../services/notifications.service.js';
@@ -56,6 +57,7 @@ describe('NotificationsService', () => {
     date: '2023-01-01',
     time: '10:00',
     topic: 'Test Topic',
+    recipientRole: AppointmentParticipantRole.STUDENT,
   };
 
   beforeAll(() => {
@@ -260,6 +262,80 @@ describe('NotificationsService', () => {
       { recipientId: 'user-2', channel: 'push', status: 'skipped' },
       { recipientId: 'user-2', channel: 'email', status: 'sent' },
     ]);
+  });
+
+  it('debe enviar solo el correo cuando el reintento lo pide por canal', async () => {
+    const result = await service.notify({
+      recipientIds: ['user-2'],
+      actorId: 'user-1',
+      type: NotificationType.APPOINTMENT_BOOKED,
+      payload: validPayload,
+      actionUrl: '/test',
+      channels: ['EMAIL'],
+    });
+
+    expect(mockNotificationsRepo.createMany).not.toHaveBeenCalled();
+    expect(mockGateway.emitToUser).not.toHaveBeenCalled();
+    expect(mockPushDispatcher.dispatchToUsers).not.toHaveBeenCalled();
+    expect(mockMailDispatcher.dispatchToUsers).toHaveBeenCalledOnce();
+    expect(result).toEqual({
+      inAppCount: 0,
+      pushStatus: 'skipped',
+      emailStatus: 'sent',
+      deliveries: [],
+    });
+  });
+
+  it('debe enviar solo el push cuando el reintento lo pide por canal', async () => {
+    mockPreferencesRepo.findManyByUserIds.mockResolvedValue([
+      { userId: 'user-2', pushEnabled: true, emailEnabled: true },
+    ]);
+
+    const result = await service.notify({
+      recipientIds: ['user-2'],
+      actorId: 'user-1',
+      type: NotificationType.APPOINTMENT_BOOKED,
+      payload: validPayload,
+      actionUrl: '/test',
+      channels: ['PUSH'],
+    });
+
+    expect(mockNotificationsRepo.createMany).not.toHaveBeenCalled();
+    expect(mockGateway.emitToUser).not.toHaveBeenCalled();
+    expect(mockPushDispatcher.dispatchToUsers).toHaveBeenCalledOnce();
+    expect(mockMailDispatcher.dispatchToUsers).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      inAppCount: 0,
+      pushStatus: 'sent',
+      emailStatus: 'skipped',
+      deliveries: [],
+    });
+  });
+
+  it('debe crear solo la notificación en la aplicación cuando el reintento lo pide por canal', async () => {
+    mockPreferencesRepo.findManyByUserIds.mockResolvedValue([
+      { userId: 'user-2', pushEnabled: true, emailEnabled: true },
+    ]);
+
+    const result = await service.notify({
+      recipientIds: ['user-2'],
+      actorId: 'user-1',
+      type: NotificationType.APPOINTMENT_BOOKED,
+      payload: validPayload,
+      actionUrl: '/test',
+      channels: ['IN_APP'],
+    });
+
+    expect(mockNotificationsRepo.createMany).toHaveBeenCalledOnce();
+    expect(mockGateway.emitToUser).toHaveBeenCalledOnce();
+    expect(mockPushDispatcher.dispatchToUsers).not.toHaveBeenCalled();
+    expect(mockMailDispatcher.dispatchToUsers).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      inAppCount: 1,
+      pushStatus: 'skipped',
+      emailStatus: 'skipped',
+      deliveries: [],
+    });
   });
 
   it('no debe enviar push a un destinatario con la app visible', async () => {

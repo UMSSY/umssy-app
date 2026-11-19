@@ -52,4 +52,15 @@ describe("CvGenerateCard", () => {
 
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
   });
+
+  it("applies responsive layout classes to prevent button overlap on small screens", () => {
+    render(<CvGenerateCard />);
+
+    const section = screen.getByRole("region", { name: "Generar CV con los datos del perfil" });
+    expect(section).toHaveClass("flex", "flex-col", "sm:flex-row");
+
+    const button = screen.getByRole("button", { name: "Generar CV" });
+    expect(button).toHaveClass("self-start", "sm:self-auto");
+  });
 });
+

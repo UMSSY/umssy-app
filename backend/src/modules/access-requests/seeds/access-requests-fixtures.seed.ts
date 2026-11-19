@@ -1,4 +1,4 @@
-import type { Prisma } from '../../../prisma/client.js';
+import { Prisma } from '../../../prisma/client.js';
 import type { FixtureContext } from '../../../common/database/fixture-context.js';
 
 export async function seedAccessRequestsFixtures(
@@ -1729,6 +1729,44 @@ export async function seedAccessRequestsFixtures(
     },
   ];
   await tx.accessRequest.createMany({ data, skipDuplicates: true });
+  const approvedStatusId = context.getReference(
+    'access_request_statuses',
+    'approved',
+  );
+  const approvedRequestIds = data
+    .filter((row) => row.statusId === approvedStatusId)
+    .map((row) => row.id);
+  if (approvedRequestIds.length > 0) {
+    await tx.$executeRaw`
+      UPDATE access_requests AS ar
+      SET approved_user_id = u.id
+      FROM users AS u
+      WHERE ar.id IN (${Prisma.join(approvedRequestIds)})
+        AND ar.approved_user_id IS NULL
+        AND lower(ar.email) = lower(u.email)
+        AND u.is_active = true
+        AND EXISTS (
+          SELECT 1
+          FROM user_roles AS ur
+          JOIN roles AS r ON r.id = ur.role_id
+          WHERE ur.user_id = u.id
+            AND r.name = 'titulado'
+            AND ur.deleted_at IS NULL
+            AND ur.start_at <= clock_timestamp()
+        )
+        AND NOT EXISTS (
+          SELECT 1
+          FROM access_requests AS linked
+          WHERE linked.approved_user_id = u.id
+        )
+        AND EXISTS (
+          SELECT 1
+          FROM access_request_statuses AS status
+          WHERE status.id = ar.status_id
+            AND status.title = 'approved'
+        )
+    `;
+  }
   for (const row of data) {
     if (
       [

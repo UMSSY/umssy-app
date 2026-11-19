@@ -1,7 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { CertificationSourcesService } from '../../certifications/services/certification-sources.service.js';
 import type { EducationSourcesService } from '../../educations/services/education-sources.service.js';
-import type { SkillAnalysisService } from '../../skills/services/skill-analysis.service.js';
+import { SkillAnalysisService } from '../../skills/services/skill-analysis.service.js';
+import { SkillAnalysisRepository } from '../../skills/repositories/skill-analysis.repository.js';
+import type { ProfileSkillRowResponse } from '../../skills/responses/profile-skill-row.response.js';
+import type { SkillEvidenceSourcesService } from '../../skills/services/skill-evidence-sources.service.js';
+import type { UsersService } from '../../users/services/users.service.js';
+import type { PrismaService } from '../../../common/prisma/prisma.service.js';
 import type { WorkExperienceSourcesService } from '../../work-experience/services/work-experience-sources.service.js';
 import type { CvSourcesService } from '../../cv/services/cv-sources.service.js';
 import { ProfileNotFoundException } from '../exceptions/profile-not-found.exception.js';
@@ -100,6 +105,78 @@ describe('ProfileCompletenessService', () => {
     expect(result.sections).toHaveLength(7);
     expect(result.sections.every((section) => section.isCompleted)).toBe(true);
   });
+
+  it.each([
+    { otherSectionsComplete: false, baseline: 45 },
+    { otherSectionsComplete: true, baseline: 85 },
+  ])(
+    'excludes hidden skill history and updates its 15 points from $baseline percent',
+    async ({ otherSectionsComplete, baseline }) => {
+      const history: ProfileSkillRowResponse = {
+        id: 'history',
+        skillId: 'python',
+        source: 'nlp',
+        verificationStatus: 'approved',
+        radarAutoVerified: false,
+        isHighRelevance: false,
+        evidenceRefs: [],
+        skill: { name: 'Python', areaId: null },
+      };
+      const rows = [history];
+      const repository = new SkillAnalysisRepository({
+        userSkill: { findMany: vi.fn(async () => rows) },
+      } as unknown as PrismaService);
+      const realSkills = new SkillAnalysisService(
+        repository,
+        {} as SkillEvidenceSourcesService,
+        {} as UsersService,
+      );
+      const completeness = new ProfileCompletenessService(
+        profiles as unknown as ProfileRepository,
+        educations as unknown as EducationSourcesService,
+        experiences as unknown as WorkExperienceSourcesService,
+        realSkills,
+        certifications as unknown as CertificationSourcesService,
+        cvs as unknown as CvSourcesService,
+      );
+      profiles.findByUserId.mockResolvedValue(profile);
+      educations.hasByUserId.mockResolvedValue(true);
+      for (const lookup of [
+        experiences.hasByUserId,
+        certifications.hasByUserId,
+        cvs.hasByUserId,
+      ])
+        lookup.mockResolvedValue(otherSectionsComplete);
+
+      const initial = await completeness.getCompleteness(userId);
+      expect(initial.percentage).toBe(baseline);
+      expect(
+        initial.sections.find((section) => section.id === 'skills')
+          ?.isCompleted,
+      ).toBe(false);
+
+      rows.push({ ...history, id: 'manual', source: 'manual' });
+      const saved = await completeness.getCompleteness(userId);
+      expect(saved.percentage).toBe(baseline + 15);
+      expect(
+        saved.sections.find((section) => section.id === 'skills')?.isCompleted,
+      ).toBe(true);
+      rows.pop();
+      expect((await completeness.getCompleteness(userId)).percentage).toBe(
+        baseline,
+      );
+
+      history.evidenceRefs = [{ type: 'education', id: 'education-1' }];
+      expect((await completeness.getCompleteness(userId)).percentage).toBe(
+        baseline + 15,
+      );
+      history.evidenceRefs = [];
+      expect((await completeness.getCompleteness(userId)).percentage).toBe(
+        baseline,
+      );
+      expect(rows).toEqual([history]);
+    },
+  );
 
   it.each([
     ['education', educations.hasByUserId, 15],
