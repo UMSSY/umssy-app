@@ -77,12 +77,13 @@ sequenceDiagram
 | --- | --- | --- |
 | Uses | config | `parseMailConfig` (`MAIL_*` and `SMTP_*` variables) |
 | Used by | auth | Password reset email |
-| Used by | [access-requests](../access-requests/README.md) | Activation code, account activated and rejection |
+| Used by | [access-requests](../access-requests/README.md) | Activation code, account activated and rejection; `buildFrontendUrl` for their links |
 | Used by | [notifications](../notifications/README.md) | Email for each notification (including those from [surveys](../surveys/README.md)) |
+| Used by | [appointments](../appointments/README.md) | `buildFrontendUrl` for the links of appointment emails |
 
 ## Frontend integration
 
-No interface of its own. Email links (`actionUrl`) point to frontend routes built with `FRONTEND_URL` by the domain that sends the notification.
+No interface of its own. Email links point to frontend routes. `mail/helpers/frontend-url.ts` exports `frontendBaseUrl()`, which resolves the frontend origin from `FRONTEND_URL` or, when it is not set, from the first `CORS_ORIGIN` (default `http://localhost:3000`), and `buildFrontendUrl(path, query)`, which builds an absolute link on that origin. Notifications, access requests and appointments use them to build email links.
 
 ## Sprint History
 
@@ -91,3 +92,4 @@ No interface of its own. Email links (`actionUrl`) point to frontend routes buil
 - Support for domain MJML content: `notifications` passes to `MailService` the MJML returned by the domain (`NotificationMailContent.mjml`). The `survey-*` templates are removed from `mail/mjml/` and from `MailTemplateName`.
 - Survey emails (reminder, closing soon, closed and variation alert) with their `.mjml` templates in `surveys/notification/mjml/`; `mail` provides the layout and header.
 - `loadMailTemplate` accepts the `URL` of a domain template, and the build copies the templates from `modules/*/notification/mjml/` to `dist`.
+- The frontend URL resolver (`frontendBaseUrl`, `buildFrontendUrl`) lives in the mail module, so every domain builds email links from the same origin. The `MAIL_APP_URL` variable was removed.
