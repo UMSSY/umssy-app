@@ -2,10 +2,12 @@
 
 import type { KeyboardEvent } from 'react';
 import { Text } from 'recharts';
+import { cn } from '@/lib/utils';
 import type { AffinityRadarAxisTickProps } from '../types/affinity-radar-axis-tick-props.types';
 
 export function AffinityRadarAxisTick({
   area,
+  highlighted,
   x,
   y,
   textAnchor,
@@ -21,7 +23,10 @@ export function AffinityRadarAxisTick({
       width={76}
       lineHeight={13}
       fontSize={11}
-      className="fill-ink-soft text-[11px] font-semibold sm:text-sm"
+      className={cn(
+        'text-[11px] font-semibold sm:text-sm',
+        highlighted ? 'fill-accent underline' : 'fill-ink-soft',
+      )}
     >
       {area.name}
     </Text>
