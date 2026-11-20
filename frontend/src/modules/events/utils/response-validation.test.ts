@@ -125,4 +125,16 @@ describe('backend response validation', () => {
     expect(() => parseRegistration(null)).toThrow();
     expect(() => parseRegistration({ id: '1' })).toThrow();
   });
+
+  it('reads workshop sessions and tolerates responses without them', () => {
+    expect(parseEventItem(event)).not.toHaveProperty('sessions');
+    expect(parseEventItem({ ...event, sessions: [] }).sessions).toEqual([]);
+    expect(
+      parseEventItem({
+        ...event,
+        sessions: [{ id: 's1', startsAt: '2026-12-01T13:00:00.000Z', endsAt: '2026-12-01T15:00:00.000Z' }],
+      }).sessions,
+    ).toEqual([{ id: 's1', startsAt: '2026-12-01T13:00:00.000Z', endsAt: '2026-12-01T15:00:00.000Z', location: null }]);
+    expect(() => parseEventItem({ ...event, sessions: [{ id: 's1' }] })).toThrow();
+  });
 });
