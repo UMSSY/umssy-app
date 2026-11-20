@@ -352,3 +352,21 @@ export const HEATMAP_EXPORT_OK_RESPONSE: ApiResponseOptions = {
     'application/pdf': { schema: { type: 'string', format: 'binary' } },
   },
 };
+
+export const HEATMAP_EXPORT_AUTHOR_NOT_FOUND_RESPONSE: ApiResponseOptions = {
+  status: 404,
+  description:
+    'No se pudo obtener el nombre del administrador autenticado para firmar el PDF (`REPORT_AUTHOR_NOT_FOUND`).',
+  content: {
+    'application/json': {
+      schema: API_ERROR_SCHEMA,
+      example: {
+        statusCode: 404,
+        code: 'REPORT_AUTHOR_NOT_FOUND',
+        data: { field: 'userId' },
+        detail: 'No se pudo identificar al administrador que genera el reporte.',
+        ok: false,
+      },
+    },
+  },
+};

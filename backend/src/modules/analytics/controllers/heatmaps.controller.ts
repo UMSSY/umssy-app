@@ -29,6 +29,7 @@ import { ResponseInterceptor } from '../../../common/interceptors/index.js';
 import { ZodValidationPipe } from '../../../common/pipes/zod-validation.pipe.js';
 import {
   HEATMAP_BAD_REQUEST_RESPONSE,
+  HEATMAP_EXPORT_AUTHOR_NOT_FOUND_RESPONSE,
   HEATMAP_EXPORT_FORMAT_QUERY,
   HEATMAP_EXPORT_OK_RESPONSE,
   HEATMAP_EXPORT_OPERATION_DESCRIPTION,
@@ -98,6 +99,7 @@ export class HeatmapsController {
   @ApiParam(HEATMAP_TYPE_PARAM)
   @ApiResponse(HEATMAP_EXPORT_OK_RESPONSE)
   @ApiResponse(HEATMAP_BAD_REQUEST_RESPONSE)
+  @ApiResponse(HEATMAP_EXPORT_AUTHOR_NOT_FOUND_RESPONSE)
   @ApiResponse(UNAUTHENTICATED_RESPONSE)
   @ApiResponse(FORBIDDEN_ROLE_RESPONSE)
   @ApiResponse(INTERNAL_ERROR_RESPONSE)
