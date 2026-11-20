@@ -19,6 +19,7 @@ export function ExportFormatMenu({
   onSelectFormat,
   formatHeading,
   cancelLabel,
+  triggerVariant = "brand",
   disabled = false,
   isLoading = false,
   contentClassName,
@@ -27,7 +28,7 @@ export function ExportFormatMenu({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        render={<Button type="button" variant="brand" className="group" disabled={disabled || isLoading} aria-busy={isLoading} />}
+        render={<Button type="button" variant={triggerVariant} className="group" disabled={disabled || isLoading} aria-busy={isLoading} />}
       >
         {triggerLabel}
         <ChevronDown className="size-4 transition-transform group-aria-expanded:rotate-180" aria-hidden="true" />

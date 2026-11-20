@@ -8,6 +8,7 @@ export interface ExportFormatMenuProps {
   onSelectFormat: (format: ExportFormat) => void;
   formatHeading?: string;
   cancelLabel?: string;
+  triggerVariant?: "brand" | "default";
   disabled?: boolean;
   isLoading?: boolean;
   contentClassName?: string;
