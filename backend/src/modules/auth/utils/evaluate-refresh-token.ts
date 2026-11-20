@@ -1,18 +1,8 @@
 import { REFRESH_REVOCATION_REASONS } from '../constants/refresh-token.constants.js';
+import type { RefreshTokenState } from '../types/refresh-token-state.types.js';
+import type { RefreshTokenVerdict } from '../types/refresh-token-verdict.types.js';
 
-export interface RefreshTokenState {
-  usedAt: Date | null;
-  revokedAt: Date | null;
-  revokedReason: string | null;
-  expiresAt: Date;
-  absoluteExpiresAt: Date;
-}
-
-export type RefreshTokenVerdict =
-  | { outcome: 'valid' }
-  | { outcome: 'reuse' }
-  | { outcome: 'expired' }
-  | { outcome: 'revoked'; code: 'SESSION_REVOKED' | 'PASSWORD_CHANGED' };
+export type { RefreshTokenState, RefreshTokenVerdict };
 
 export function evaluateRefreshToken(
   token: RefreshTokenState,
@@ -35,7 +25,6 @@ export function evaluateRefreshToken(
   return { outcome: 'valid' };
 }
 
-// Sliding window: now + idle time, never past the absolute session cap.
 export function computeSlidingExpiry(
   now: Date,
   absoluteExpiresAt: Date,

@@ -3,6 +3,8 @@ import { JwtService } from '@nestjs/jwt';
 import { randomUUID } from 'node:crypto';
 import { SessionService } from '../../../common/services/session.service.js';
 import { UnauthorizedSessionException } from '../../../common/exceptions/unauthorized-session.exception.js';
+import { UserInactiveException } from '../../../common/exceptions/user-inactive.exception.js';
+import type { AuthenticatedUser } from '../../../common/types/authenticated-user.types.js';
 import {
   REFRESH_REVOCATION_REASONS,
   type RefreshRevocationReason,
@@ -17,10 +19,8 @@ import {
   SessionExpiredException,
   SessionRevokedException,
 } from '../exceptions/index.js';
-import {
-  RefreshTokenRepository,
-  type NewRefreshToken,
-} from '../repositories/refresh-token.repository.js';
+import { RefreshTokenRepository } from '../repositories/refresh-token.repository.js';
+import type { NewRefreshToken } from '../types/new-refresh-token.types.js';
 import {
   computeSlidingExpiry,
   evaluateRefreshToken,
@@ -29,18 +29,10 @@ import {
   generateRefreshToken,
   hashRefreshToken,
 } from '../utils/refresh-token.util.js';
+import type { IssuedRefreshToken } from '../types/issued-refresh-token.types.js';
+import type { RotatedSession } from '../types/rotated-session.types.js';
 
-export interface IssuedRefreshToken {
-  refreshToken: string;
-  refreshMaxAgeMs: number;
-}
-
-export interface RotatedSession extends IssuedRefreshToken {
-  accessToken: string;
-  accessMaxAgeMs: number;
-  roleTag: string;
-  roles: string[];
-}
+export type { IssuedRefreshToken, RotatedSession };
 
 @Injectable()
 export class RefreshTokenService {
@@ -50,7 +42,6 @@ export class RefreshTokenService {
     private readonly sessionService: SessionService,
   ) {}
 
-  // Starts a new token family right after a successful login.
   async startFromLogin(
     accessToken: string,
     userAgent?: string,
@@ -103,12 +94,19 @@ export class RefreshTokenService {
     }
     if (verdict.outcome === 'expired') throw new SessionExpiredException();
 
-    const user = await this.sessionService
-      .getAuthenticatedUser(current.userId)
-      .catch(async () => {
+    let user: AuthenticatedUser;
+    try {
+      user = await this.sessionService.getAuthenticatedUser(current.userId);
+    } catch (error) {
+      if (
+        error instanceof UserInactiveException ||
+        error instanceof UnauthorizedSessionException
+      ) {
         await this.revokeFamily(current.familyId, 'userInactive');
         throw new SessionRevokedException();
-      });
+      }
+      throw error;
+    }
     if (!user.roles.includes(current.roleTag)) {
       await this.revokeFamily(current.familyId, 'roleRemoved');
       throw new SessionRevokedException();

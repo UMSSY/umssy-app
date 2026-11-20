@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { RefreshTokenService } from '../services/refresh-token.service.js';
+import { UnauthorizedSessionException } from '../../../common/exceptions/unauthorized-session.exception.js';
+import { UserInactiveException } from '../../../common/exceptions/user-inactive.exception.js';
 import {
   PasswordChangedException,
   RefreshInvalidException,
@@ -228,7 +230,7 @@ describe('RefreshTokenService', () => {
     it('revokes the family when the user is no longer active', async () => {
       repository.findByHash.mockResolvedValue(storedToken());
       sessionService.getAuthenticatedUser.mockRejectedValue(
-        new Error('inactive'),
+        new UserInactiveException(),
       );
 
       await expect(service.rotate('raw-token')).rejects.toBeInstanceOf(
@@ -238,6 +240,32 @@ describe('RefreshTokenService', () => {
         'family-1',
         'user_inactive',
       );
+    });
+
+    it('revokes the family when the user is not found or has no roles', async () => {
+      repository.findByHash.mockResolvedValue(storedToken());
+      sessionService.getAuthenticatedUser.mockRejectedValue(
+        new UnauthorizedSessionException(),
+      );
+
+      await expect(service.rotate('raw-token')).rejects.toBeInstanceOf(
+        SessionRevokedException,
+      );
+      expect(repository.revokeFamily).toHaveBeenCalledWith(
+        'family-1',
+        'user_inactive',
+      );
+    });
+
+    it('re-throws database or infrastructure errors without revoking the family', async () => {
+      repository.findByHash.mockResolvedValue(storedToken());
+      const dbError = new Error('Database connection timeout');
+      sessionService.getAuthenticatedUser.mockRejectedValue(dbError);
+
+      await expect(service.rotate('raw-token')).rejects.toThrow(
+        'Database connection timeout',
+      );
+      expect(repository.revokeFamily).not.toHaveBeenCalled();
     });
 
     it('revokes the family when the session role was removed from the user', async () => {

@@ -31,7 +31,7 @@ import {
 import {
   buildClearRefreshTokenCookieOptions,
   buildRefreshTokenCookieOptions,
-} from '../../../common/utils/refresh-token-cookie.js';
+} from '../utils/refresh-token-cookie.util.js';
 import { LoginDto } from '../requests/login.schema.js';
 import { GoogleLoginDto } from '../requests/google-login.schema.js';
 import { GoogleLinkDto } from '../requests/google-link.schema.js';
