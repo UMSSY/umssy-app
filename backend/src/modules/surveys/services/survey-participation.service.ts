@@ -25,7 +25,6 @@ import type { SurveyParticipationTarget } from '../types/survey-participation-ta
 import { getPreviousSemester } from '../utils/academic-semester.js';
 import { buildSurveyPublishedChange } from '../utils/build-survey-published-change.js';
 import {
-  buildSurveyFrontendUrl,
   formatSurveyClosureDate,
 } from '../utils/survey-frontend-url.js';
 import {
@@ -95,9 +94,7 @@ export class SurveyParticipationService {
           ? formatSurveyClosureDate(target.closesAt)
           : SURVEY_WITHOUT_CLOSING_DATE_TEXT,
       }),
-      actionUrl: buildSurveyFrontendUrl(
-        `${SURVEY_ANSWER_FRONTEND_PATH}/${target.id}`,
-      ),
+      actionUrl: `${SURVEY_ANSWER_FRONTEND_PATH}/${target.id}`,
       groupKey: `${SURVEY_REMINDER_GROUP_KEY_PREFIX}:${target.id}`,
     });
 
