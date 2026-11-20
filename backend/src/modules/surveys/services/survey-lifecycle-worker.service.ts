@@ -20,7 +20,6 @@ import {
 } from '../notification/survey-notifications.js';
 import { SurveysRepository } from '../repositories/surveys.repository.js';
 import {
-  buildSurveyFrontendUrl,
   formatSurveyClosureDate,
 } from '../utils/survey-frontend-url.js';
 import { toQuestionIds } from '../utils/to-question-ids.js';
@@ -163,9 +162,7 @@ export class SurveyLifecycleWorkerService
   }
 
   private statisticsUrl(surveyId: string): string {
-    return buildSurveyFrontendUrl(
-      `${SURVEY_STATISTICS_FRONTEND_PATH}/${surveyId}`,
-    );
+    return `${SURVEY_STATISTICS_FRONTEND_PATH}/${surveyId}`;
   }
 
   private groupKey(event: string, surveyId: string): string {
