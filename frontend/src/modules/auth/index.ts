@@ -5,7 +5,7 @@ export { useLogin } from "./hooks/use-login";
 export { authService } from "./services/auth.service";
 export { SessionGate } from "./components/session-gate";
 export { startSession, endSession } from "./utils/session";
-export { SESSION_DRAFT_STORAGE_PREFIX } from "./constants/session.constants";
+export { SESSION_DRAFT_STORAGE_PREFIX, SESSION_MARKER_COOKIE_NAME, SESSION_MARKER_COOKIE_VALUE } from "./constants/session.constants";
 export { buildLoginUrl } from "./utils/safe-next-path";
 export { SessionUserCard } from "./components/session-user-card";
 export { getSessionRoles } from "./utils/get-session-roles";
