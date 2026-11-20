@@ -11,6 +11,7 @@ import { buildParticipation } from "../testing/survey-participation-fixtures";
 import { SurveyAnalyticsView } from "./survey-analytics-view";
 
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 
 const ALL = buildStatistics();
 const SECOND_SEMESTER = buildStatistics({

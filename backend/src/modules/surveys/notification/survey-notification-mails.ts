@@ -79,3 +79,16 @@ export async function renderSurveyVariationAlertMail(
     },
   };
 }
+
+export async function renderSurveyPublishedMail(
+  { surveyTitle, currentPeriod, change }: NotificationPayloadMap[NotificationType.SURVEY_PUBLISHED],
+  { recipientName, actionUrl }: NotificationMailContext,
+): Promise<NotificationMailContent> {
+  const name = recipientName || GRADUATE_FALLBACK_NAME;
+  return {
+    mjml: await loadSurveyMailTemplate('survey-published'),
+    subject: `Nueva encuesta publicada: «${surveyTitle}»`,
+    text: `Hola ${name}, ya está disponible la encuesta «${surveyTitle}» del semestre ${currentPeriod}.\n${change}\nVer en: ${actionUrl}`,
+    values: { recipientName: name, surveyTitle, currentPeriod, changesContent: change, actionUrl },
+  };
+}

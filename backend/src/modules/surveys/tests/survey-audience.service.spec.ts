@@ -1,5 +1,4 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { ApprovedGraduateCareersService } from '../../access-requests/services/approved-graduate-careers.service.js';
 import type { UsersService } from '../../users/services/users.service.js';
 import type { SurveysRepository } from '../repositories/surveys.repository.js';
 import { SurveyAudienceService } from '../services/survey-audience.service.js';
@@ -17,24 +16,20 @@ function createService() {
       .fn()
       .mockResolvedValue([contact('user-1'), contact('user-2')]),
   };
-  const approvedGraduates = {
-    findApprovedUserIds: vi.fn().mockResolvedValue(['user-1', 'user-2']),
-  };
   const repository = {
+    findApprovedGraduateUserIds: vi.fn().mockResolvedValue(['user-1', 'user-2']),
     findRespondentIds: vi.fn().mockResolvedValue(['user-1', 'user-9']),
   };
   const service = new SurveyAudienceService(
     usersService as unknown as UsersService,
-    approvedGraduates as unknown as ApprovedGraduateCareersService,
     repository as unknown as SurveysRepository,
   );
-  return { service, usersService, approvedGraduates, repository };
+  return { service, usersService, repository };
 }
 
 describe('SurveyAudienceService', () => {
-  it('compone la audiencia con los dominios de usuarios y solicitudes aprobadas', async () => {
-    const { service, usersService, approvedGraduates, repository } =
-      createService();
+  it('compone la audiencia con los usuarios activos y los titulados aprobados', async () => {
+    const { service, usersService, repository } = createService();
 
     await expect(
       service.resolve({
@@ -47,7 +42,7 @@ describe('SurveyAudienceService', () => {
       eligible: [contact('user-1'), contact('user-2')],
       pending: [contact('user-2')],
     });
-    expect(approvedGraduates.findApprovedUserIds).toHaveBeenCalledWith({
+    expect(repository.findApprovedGraduateUserIds).toHaveBeenCalledWith({
       careerId: 'career-1',
       graduationYear: 2020,
     });
@@ -59,7 +54,7 @@ describe('SurveyAudienceService', () => {
   });
 
   it('no consulta solicitudes aprobadas cuando la encuesta no filtra cohorte', async () => {
-    const { service, usersService, approvedGraduates } = createService();
+    const { service, usersService, repository } = createService();
 
     await service.resolve({
       surveyId: 'survey-1',
@@ -68,7 +63,7 @@ describe('SurveyAudienceService', () => {
       graduationYear: null,
     });
 
-    expect(approvedGraduates.findApprovedUserIds).not.toHaveBeenCalled();
+    expect(repository.findApprovedGraduateUserIds).not.toHaveBeenCalled();
     expect(usersService.findActiveContactsByRoles).toHaveBeenCalledWith({
       roles: ['titulado', 'estudiante'],
       userIds: undefined,
