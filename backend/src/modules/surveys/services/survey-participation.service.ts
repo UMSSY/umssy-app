@@ -4,7 +4,6 @@ import type { NotifyResult } from '../../notifications/types/notify-result.type.
 import { getAcademicPeriod } from '../../reports/utils/academic-period.js';
 import {
   SURVEY_ANSWER_FRONTEND_PATH,
-  SURVEY_PUBLISHED_ACTION_PATH,
   SURVEY_REMINDER_GROUP_KEY_PREFIX,
   SURVEY_WITHOUT_CLOSING_DATE_TEXT,
 } from '../constants/survey-participation.constants.js';
@@ -153,7 +152,7 @@ export class SurveyParticipationService {
           currentPeriod,
         ),
       }),
-      actionUrl: SURVEY_PUBLISHED_ACTION_PATH,
+      actionUrl: `${SURVEY_ANSWER_FRONTEND_PATH}/${target.id}`,
     });
   }
 

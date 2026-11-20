@@ -94,7 +94,7 @@ sequenceDiagram
     P->>P: Resolves the eligible audience
     P->>R: claimPublishedNotification(surveyId, semester) (conditional updateMany)
     P->>E: evaluateSurvey(surveyId, { closesAt: now })
-    P->>N: notify(SURVEY_PUBLISHED, eligible, { surveyTitle, previousPeriod, currentPeriod, change }, actionUrl /notifications?filter=SURVEYS, renderMail)
+    P->>N: notify(SURVEY_PUBLISHED, eligible, { surveyTitle, previousPeriod, currentPeriod, change }, actionUrl /surveys/:id, renderMail)
   end
   Note over S,P: A notification error is logged and never blocks the publication
 ```
@@ -215,7 +215,7 @@ sequenceDiagram
 
 - It is sent when a survey is created as published or a draft is published, to the eligible audience of the survey (same criterion as the response rate).
 - Payload validated with Zod: `surveyTitle`, `previousPeriod`, `currentPeriod` (semester of the publication) and `change`, a text summary of the variations between the previous and current semester (or "Sin variaciones registradas respecto al semestre anterior.").
-- Link `/notifications?filter=SURVEYS`, as agreed with Epic 9, without `groupKey`.
+- Link `/surveys/:id` (the answer page, same as the reminder), without `groupKey`. The notification is listed in the inbox under the "Encuestas" filter by its type; the link opens the survey to answer it.
 - A single notice per survey and semester: `published_notified_period` is claimed with a conditional `updateMany` before sending, so republishing in the same semester or concurrent publications do not duplicate it.
 
 ### Automatic lifecycle
