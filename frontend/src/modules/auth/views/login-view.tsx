@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { BrandLogo } from '@/shared/components/layout/brand-logo';
@@ -21,7 +21,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { GoogleIcon } from '@/shared/components/icons/google-icon';
-import { googleAuthService, decodeGoogleIdToken } from '../services/google-auth.service';
+import { googleAuthService } from '../services/google-auth.service';
 import { useLogin } from '../hooks/use-login';
 import { useCredentialRestrictions } from '../hooks/use-credential-restrictions';
 import { CredentialRestrictionNotice } from '../components/credential-restriction-notice';
@@ -68,71 +68,7 @@ export function LoginView() {
     return reason === 'SESSION_EXPIRED' || reason === 'session_expired';
   });
 
-    const [isPopupCallback] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    const isPopup = Boolean(window.opener || window.name === 'google-oauth-popup');
-    const hasHash =
-      window.location.hash.includes('id_token=') ||
-      window.location.hash.includes('error=');
-    return isPopup && hasHash;
-  });
-
-  useEffect(() => {
-    googleAuthService.handleOAuthCallback?.(async (idToken) => {
-      setIsGoogleLoading(true);
-      setAccessDeniedState(null);
-      setGoogleError(null);
-      try {
-        const payload = decodeGoogleIdToken(idToken);
-        if (!payload?.email) return;
-
-        const result = await googleAuthService.loginWithGoogle(
-          payload.email,
-          idToken,
-        );
-        if (result.success && result.session) {
-          setIsSigningIn(true);
-          await startSession(result.session.accessToken);
-          const next = new URLSearchParams(window.location.search).get(
-            NEXT_PARAM,
-          );
-          router.push(
-            resolvePostLoginPath(
-              result.session.roles ?? result.session.roleTag,
-              next,
-            ),
-          );
-        } else if (result.reason === 'role_not_allowed') {
-          setAccessDeniedState({
-            reason: 'role_not_allowed',
-            message:
-              result.message ||
-              'El acceso con Google solo está permitido para estudiantes, titulados y mentores.',
-          });
-        } else if (result.reason === 'not_registered') {
-          setAccessDeniedState({
-            reason: 'not_registered',
-            message:
-              result.message ||
-              'Esta cuenta de Google no está registrada en el sistema. Por favor, inicia sesión con un correo electrónico previamente registrado.',
-          });
-        } else {
-          setGoogleError(
-            result.message ||
-              'Ocurrió un error al intentar iniciar sesión con Google.',
-          );
-        }
-      } catch {
-        setGoogleError(
-          'Ocurrió un error al intentar iniciar sesión con Google.',
-        );
-      } finally {
-        setIsGoogleLoading(false);
-      }
-    });
-
-    // Handled in popup callback
-  }, [router]);
+  
 
   useRedirectAuthenticated(!isSigningIn);
   const loginRestriction = restrictions.getRestriction('login', email);
@@ -170,7 +106,9 @@ export function LoginView() {
     setGoogleError(null);
 
     try {
-      const googleProfile = await googleAuthService.promptSelectAccount();
+      const googleProfile = await googleAuthService.promptSelectAccount({
+        intent: 'login',
+      });
       if (!googleProfile?.email) return;
 
       const credential = googleProfile.idToken || googleProfile.credential;
@@ -223,19 +161,6 @@ export function LoginView() {
     } finally {
       setIsGoogleLoading(false);
     }
-  }
-
-  if (isPopupCallback) {
-    return (
-      <main className="flex min-h-dvh flex-col items-center justify-center bg-surface p-6 text-center">
-        <p className="text-sm font-semibold text-foreground">
-          Conectando con Google...
-        </p>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Esta ventana se cerrará automáticamente.
-        </p>
-      </main>
-    );
   }
 
   return (

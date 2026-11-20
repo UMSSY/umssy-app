@@ -58,8 +58,6 @@ export interface GoogleLoginResult {
   reason?: "not_registered" | "role_not_allowed" | "server_error";
 }
 
-export const GOOGLE_AUTH_STORAGE_KEY = "umssy_google_auth_payload";
-
 export const googleAuthService = {
   /**
    * Triggers the official native Google Identity Services ID Token flow (google.accounts.id)
@@ -141,70 +139,6 @@ export const googleAuthService = {
 
       requestGoogleOAuth(clientId, options).then(resolve, reject);
     });
-  },
-
-  /**
-   * Handles the OAuth redirect hash in popup or main window if received on /login.
-   */
-  handleOAuthCallback: (onToken?: (idToken: string) => void): boolean => {
-    if (typeof window === "undefined") return false;
-    const hash = window.location.hash;
-    if (!hash || (!hash.includes("id_token=") && !hash.includes("error="))) {
-      return false;
-    }
-
-    const params = new URLSearchParams(hash.replace(/^#/, ""));
-    const idToken = params.get("id_token") || undefined;
-    const error = params.get("error") || undefined;
-    const state = params.get("state") || undefined;
-
-    if (!idToken && !error) return false;
-
-    try {
-      if (window.opener && typeof window.opener.postMessage === "function") {
-        window.opener.postMessage(
-          {
-            type: "GOOGLE_AUTH_RESPONSE",
-            requestId: state,
-            idToken,
-            error,
-          },
-          window.location.origin
-        );
-      }
-    } catch {}
-
-    const storageKey = state ? `${GOOGLE_AUTH_STORAGE_KEY}_${state}` : GOOGLE_AUTH_STORAGE_KEY;
-    try {
-      localStorage.setItem(
-        storageKey,
-        JSON.stringify({ requestId: state, idToken, error, timestamp: Date.now() })
-      );
-    } catch {}
-
-    const isPopup =
-      Boolean(window.opener) ||
-      window.name === "google-oauth-popup" ||
-      window.innerWidth < 650;
-
-    if (isPopup) {
-      try {
-        window.history.replaceState(null, "", window.location.pathname);
-      } catch {}
-      try {
-        window.close();
-      } catch {}
-      return true;
-    }
-
-    if (idToken && onToken) {
-      try {
-        window.history.replaceState(null, "", window.location.pathname);
-      } catch {}
-      onToken(idToken);
-    }
-
-    return true;
   },
 
   /**
