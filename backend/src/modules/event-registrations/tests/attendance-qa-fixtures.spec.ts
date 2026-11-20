@@ -57,11 +57,8 @@ function setup() {
         for (const id of where.registrationId.in) attendances.delete(id);
         return Promise.resolve({ count: 0 });
       }),
-      upsert: vi.fn(({ where, update, create }) => {
-        attendances.set(
-          where.registrationId,
-          attendances.has(where.registrationId) ? update : create,
-        );
+      create: vi.fn(({ data }) => {
+        attendances.set(data.registrationId, data);
         return Promise.resolve({});
       }),
     },

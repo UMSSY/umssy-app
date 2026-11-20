@@ -86,6 +86,7 @@ export class EventsRepository {
         endTime: true,
         location: true,
         coverMimeType: true,
+        sessions: EVENT_SESSIONS_SELECT,
       },
       orderBy: [{ eventDate: 'asc' }, { startTime: 'asc' }, { id: 'asc' }],
     });
@@ -102,7 +103,13 @@ export class EventsRepository {
         createdById: userId,
         status: { title: PUBLISHED_STATUS_TITLE },
       },
-      select: { id: true, eventDate: true, startTime: true, endTime: true },
+      select: {
+        id: true,
+        eventDate: true,
+        startTime: true,
+        endTime: true,
+        sessions: { select: { id: true, startsAt: true, endsAt: true } },
+      },
     });
   }
 
