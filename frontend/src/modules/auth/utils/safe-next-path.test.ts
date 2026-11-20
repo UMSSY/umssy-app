@@ -43,6 +43,10 @@ describe("getSafeNextPath", () => {
 });
 
 describe("buildLoginUrl", () => {
+  it("conserva Mis inscripciones como destino después del login", () => {
+    expect(buildLoginUrl("/events/my-passes")).toBe("/login?next=%2Fevents%2Fmy-passes");
+  });
+
   it("agrega la ruta codificada", () => {
     expect(buildLoginUrl("/profile?tab=cv")).toBe("/login?next=%2Fprofile%3Ftab%3Dcv");
   });

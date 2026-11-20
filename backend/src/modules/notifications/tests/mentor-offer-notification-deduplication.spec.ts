@@ -7,7 +7,7 @@ describe('deduplicación central de ofertas de mentoría', () => {
     let existing = false;
     let held = Promise.resolve();
     const tx = {
-      $queryRaw: vi.fn(),
+      $executeRaw: vi.fn(),
       notification: {
         findFirst: vi.fn(async () =>
           existing ? { id: 'notification-id' } : null,
@@ -57,7 +57,7 @@ describe('deduplicación central de ofertas de mentoría', () => {
       results.map((result) => result.length).sort((a, b) => a - b),
     ).toEqual([0, 1]);
 
-    expect(tx.$queryRaw).toHaveBeenCalledTimes(2);
+    expect(tx.$executeRaw).toHaveBeenCalledTimes(2);
     expect(tx.notification.create).toHaveBeenCalledTimes(1);
     expect(tx.notification.findFirst).toHaveBeenCalledWith({
       where: {

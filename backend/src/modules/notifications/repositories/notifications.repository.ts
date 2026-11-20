@@ -44,7 +44,7 @@ export class NotificationsRepository {
       const created: CreatedNotification[] = [];
       for (const item of data) {
         if (isDeduplicatedGroup(item.groupKey)) {
-          await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${item.recipientId + ':' + item.groupKey}, 0))`;
+          await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${item.recipientId + ':' + item.groupKey}, 0))`;
           const existing = await tx.notification.findFirst({
             where: {
               recipientId: item.recipientId,

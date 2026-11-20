@@ -15,7 +15,7 @@ describe('HeatmapsController', () => {
 
   it('delega el cálculo al service', async () => {
     const service = { getHeatmap: vi.fn().mockResolvedValue({ baseCount: 3 }) };
-    const controller = new HeatmapsController(service as unknown as HeatmapsService);
+    const controller = new HeatmapsController(service as unknown as HeatmapsService, {} as never);
 
     await expect(controller.getHeatmap({ type: 'employability' }, { year: 2025 })).resolves.toEqual({ baseCount: 3 });
     expect(service.getHeatmap).toHaveBeenCalledWith('employability', { year: 2025 });
