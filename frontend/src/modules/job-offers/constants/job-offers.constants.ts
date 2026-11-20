@@ -180,9 +180,15 @@ export const CLOSE_JOB_OFFER_TEXT = {
   cancel: "Cancelar",
   confirm: "Cerrar",
   busy: "Cerrando...",
-  success: "La vacante fue cerrada con éxito ",
+  success: "La vacante fue cerrada con éxito",
   error: "No se pudo completar el cierre de la vacante. Inténtalo nuevamente.",
   network: "Sin conexión a internet. Revisa tu conexión e inténtalo nuevamente.",
   server: "No se pudo completar el cierre de la vacante. Inténtalo más tarde.",
   notClosable: "La vacante ya se encuentra cerrada o dejó de estar publicada.",
+} as const;
+
+export const CLOSE_SUCCESS_TOAST_OPTIONS = {
+  ...TOAST_OPTIONS,
+  richColors: true,
+  closeButton: true,
 } as const;
