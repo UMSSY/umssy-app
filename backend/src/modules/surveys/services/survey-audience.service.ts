@@ -18,6 +18,28 @@ export class SurveyAudienceService {
       this.surveysRepository.findRespondentIds(filter.surveyId),
     ]);
     const responded = new Set(respondentIds);
+    const eligibleIds = new Set(eligible.map((member) => member.id));
+
+    // Incluir respondentes de la encuesta que no estén en la lista de elegibles
+    // para asegurar consistencia entre la tasa de participación y las respuestas registradas.
+    // Esto evita que "0 de N hayan respondido" cuando existen respuestas de la audiencia objetivo.
+    const missingRespondentIds = respondentIds.filter(
+      (id) => !eligibleIds.has(id),
+    );
+    if (missingRespondentIds.length > 0) {
+      const respondentContacts =
+        await this.usersService.findActiveContactsByRoles({
+          roles: filter.roles,
+          userIds: missingRespondentIds,
+        });
+      for (const contact of respondentContacts) {
+        if (!eligibleIds.has(contact.id)) {
+          eligible.push(contact);
+          eligibleIds.add(contact.id);
+        }
+      }
+    }
+
     return {
       eligible,
       pending: eligible.filter((member) => !responded.has(member.id)),
