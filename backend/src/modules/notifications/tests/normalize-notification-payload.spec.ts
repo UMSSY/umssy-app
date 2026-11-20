@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { AppointmentParticipantRole } from '../../appointments/enums/appointment-participant-role.enum.js';
 import { normalizeNotificationPayload } from '../utils/normalize-notification-payload.js';
 
 describe('normalizeNotificationPayload', () => {
@@ -9,12 +10,14 @@ describe('normalizeNotificationPayload', () => {
         date: '2026-11-16T14:00:00Z',
         time: '2026-11-16T14:00:00Z',
         topic: 'CV',
+        recipientRole: AppointmentParticipantRole.STUDENT,
       }),
     ).toEqual({
       counterpartName: 'Ana',
       date: '16/11/2026',
       time: '10:00',
       topic: 'CV',
+      recipientRole: AppointmentParticipantRole.STUDENT,
     });
   });
 
@@ -34,8 +37,15 @@ describe('normalizeNotificationPayload', () => {
         date: '2023-01-01',
         time: '10:00',
         topic: 'CV',
+        recipientRole: AppointmentParticipantRole.STUDENT,
       }),
-    ).toEqual({ counterpartName: 'Ana', date: '2023-01-01', time: '10:00', topic: 'CV' });
+    ).toEqual({
+      counterpartName: 'Ana',
+      date: '2023-01-01',
+      time: '10:00',
+      topic: 'CV',
+      recipientRole: AppointmentParticipantRole.STUDENT,
+    });
 
     expect(
       normalizeNotificationPayload({

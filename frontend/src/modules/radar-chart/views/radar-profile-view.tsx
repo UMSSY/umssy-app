@@ -1,5 +1,6 @@
 'use client';
 
+import { useSearchParams } from 'next/navigation';
 import { MentorshipProjection } from '../components/mentorship-projection';
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
@@ -12,6 +13,10 @@ import type { AreaId } from '../types/area-id.types';
 import { RadarEvidencePanel } from '../components/radar-evidence-panel';
 import { RadarSkillSources } from '../components/radar-skill-sources';
 import { useLiveRadar } from '../hooks/use-live-radar';
+import { useMobileViewport } from '../hooks/use-mobile-viewport';
+import { mapPublishedRadar } from '../mappers/radar-published.mapper';
+import type { IntegrationRadar } from '../types/integration-radar.types';
+import { useHistoricalRadar } from '../hooks/use-historical-radar';
 
 const DATE_FORMAT: Intl.DateTimeFormatOptions = {
   dateStyle: 'medium',
@@ -19,8 +24,30 @@ const DATE_FORMAT: Intl.DateTimeFormatOptions = {
 };
 
 export function RadarProfileView() {
-  const { data, loading, error, variation, previous, retry, retrying } =
-    useLiveRadar();
+  const isMobile = useMobileViewport();
+  const {
+    data: liveData,
+    loading,
+    error,
+    variation: liveVariation,
+    previous: livePrevious,
+    retry,
+    retrying,
+  } = useLiveRadar();
+  const searchParams = useSearchParams();
+  const [dismissedSnapshot, setDismissedSnapshot] = useState<string | null>(
+    null,
+  );
+  const requestedSnapshot = searchParams.get('snapshot');
+  const snapshotId =
+    requestedSnapshot === dismissedSnapshot ? null : requestedSnapshot;
+  const historical = useHistoricalRadar(snapshotId);
+  const openedRadar: IntegrationRadar | null = snapshotId
+    ? (historical.data ?? null)
+    : null;
+  const data = openedRadar ? mapPublishedRadar(openedRadar) : liveData;
+  const previous = openedRadar ? openedRadar.previous : livePrevious;
+  const variation = openedRadar ? openedRadar.variation : liveVariation;
   const [selectedArea, setSelectedArea] = useState<AreaId | null>(null);
   const [projection, setProjection] = useState<{
     areaId: AreaId;
@@ -30,6 +57,7 @@ export function RadarProfileView() {
   const [isEvidenceVisible, setIsEvidenceVisible] = useState(false);
   const [isComparing, setIsComparing] = useState(false);
   const selectedPanelRef = useRef<HTMLElement>(null);
+
   useEffect(() => {
     if (!selectedArea || isEvidenceVisible || isSimulationOpen) return;
     const dismissOutside = (event: PointerEvent) => {
@@ -50,6 +78,12 @@ export function RadarProfileView() {
       document.removeEventListener('keydown', dismissWithEscape);
     };
   }, [selectedArea, isEvidenceVisible, isSimulationOpen]);
+
+  const handleSelectArea = (id: AreaId) => {
+    setSelectedArea(id);
+    setIsEvidenceVisible(isMobile);
+  };
+
   const comparison = isComparing ? previous : null;
   const areas = data?.areas ?? [];
   const selected =
@@ -70,6 +104,33 @@ export function RadarProfileView() {
         title="Radar de afinidad"
         description="Competencias verificadas de tu perfil. Las habilidades pendientes no alteran las puntuaciones publicadas."
       />
+      {snapshotId && historical.isPending ? (
+        <p role="status">Cargando publicacion...</p>
+      ) : null}
+      {snapshotId && historical.isError ? (
+        <p role="alert" className="text-destructive">
+          No se pudo abrir la publicacion solicitada.
+        </p>
+      ) : null}
+      {openedRadar ? (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-surface p-4">
+          <p role="status" className="text-sm font-medium text-ink">
+            Consultando la versión histórica {openedRadar.version}
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              setDismissedSnapshot(snapshotId);
+              window.history.replaceState(null, '', window.location.pathname);
+              setIsComparing(false);
+              setSelectedArea(null);
+            }}
+          >
+            Volver al radar actual
+          </Button>
+        </div>
+      ) : null}
       {loading && !data ? (
         <p
           role="status"
@@ -218,10 +279,7 @@ export function RadarProfileView() {
               }}
               areas={data.version === 0 ? [] : areas}
               average={data.average}
-              onAreaClick={(id) => {
-                setSelectedArea(id);
-                setIsEvidenceVisible(false);
-              }}
+              onAreaClick={handleSelectArea}
             />
             <div className="flex min-w-0 flex-col gap-4">
               {selectedArea && selected ? (
@@ -263,12 +321,9 @@ export function RadarProfileView() {
               <AreaBreakdownPanel
                 areas={areas}
                 average={data.average}
-                compact={Boolean(selectedArea)}
+                compact={Boolean(selectedArea) && !isMobile}
                 selectedArea={selectedArea}
-                onAreaClick={(id) => {
-                  setSelectedArea(id);
-                  setIsEvidenceVisible(false);
-                }}
+                onAreaClick={handleSelectArea}
               />
             </div>
           </div>

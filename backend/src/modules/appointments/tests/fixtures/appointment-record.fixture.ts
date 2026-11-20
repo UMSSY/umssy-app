@@ -18,6 +18,10 @@ export function createAppointmentRecord(
     endAt: new Date('2026-10-23T14:30:00.000Z'),
     message: null,
     requestedAt: new Date('2026-10-22T13:00:00.000Z'),
+    meetingUrl: null,
+    cancelledById: null,
+    cancellationReason: null,
+    cancelledAt: null,
     mentor: { id: MENTOR_ID, firstName: 'Ana', lastName: 'Pérez' },
     student: { id: STUDENT_ID, firstName: 'Luis', lastName: 'Flores' },
     orientationType: {

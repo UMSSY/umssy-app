@@ -12,7 +12,7 @@ import { CompanyRegistrationConflictException } from '../exceptions/company-regi
 import { FilesService } from '../../files/services/files.service.js';
 import { MailService } from '../../mail/services/mail.service.js';
 import { loadMailTemplate } from '../../mail/helpers/load-mail-template.js';
-import { buildFrontendUrl } from '../../access-requests/mail/helpers/frontend-url.js';
+import { buildFrontendUrl } from '../../mail/helpers/frontend-url.js';
 import { CompanyAccessRequestsRepository } from '../repositories/company-access-requests.repository.js';
 import { CompanyDocumentOcrService } from './company-document-ocr.service.js';
 import type {

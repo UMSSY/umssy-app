@@ -12,6 +12,13 @@ import type { NotifyResult } from '../types/notify-result.type.js';
 import { NotificationType } from '../types/notification-type.enum.js';
 import type { NotificationTemplateDefinition } from '../types/notification-template-definition.type.js';
 import { normalizeNotificationPayload } from '../utils/normalize-notification-payload.js';
+import { resolveNotificationChannel } from '../utils/resolve-notification-channel.js';
+import { truncateNotificationText } from '../utils/truncate-notification-text.js';
+
+const EMAIL_EXCLUDED_TYPES: ReadonlySet<NotificationType> = new Set([
+  NotificationType.CHAT_MESSAGE,
+  NotificationType.CHAT_GROUP_MESSAGE,
+]);
 
 @Injectable()
 export class NotificationsService {
@@ -28,72 +35,125 @@ export class NotificationsService {
   ) {}
 
   async notify(request: NotifyRequest): Promise<NotifyResult> {
-    const { recipientIds, actorId, type, payload, actionUrl, groupKey, renderMail } = request;
+    const {
+      recipientIds,
+      actorId,
+      type,
+      payload,
+      actionUrl,
+      groupKey,
+      renderMail,
+      channels,
+    } = request;
+    const includeInApp = !channels || channels.includes('IN_APP');
+    const includePush = !channels || channels.includes('PUSH');
+    const includeEmail = !channels || channels.includes('EMAIL');
 
     const finalRecipients = recipientIds.filter((id) => id !== actorId);
     if (finalRecipients.length === 0) {
-      return { inAppCount: 0, pushStatus: 'skipped', emailStatus: 'skipped', deliveries: [] };
+      return {
+        inAppCount: 0,
+        pushStatus: 'skipped',
+        emailStatus: 'skipped',
+        deliveries: [],
+      };
     }
 
     const validRecipients: string[] = [];
     for (const recipientId of finalRecipients) {
-      if (actorId && (await this.userLookupRepository.hasBlockBetween(actorId, recipientId))) {
-        continue; 
+      if (
+        actorId &&
+        (await this.userLookupRepository.hasBlockBetween(actorId, recipientId))
+      ) {
+        continue;
       }
       validRecipients.push(recipientId);
     }
 
     if (validRecipients.length === 0) {
-      return { inAppCount: 0, pushStatus: 'skipped', emailStatus: 'skipped', deliveries: [] };
+      return {
+        inAppCount: 0,
+        pushStatus: 'skipped',
+        emailStatus: 'skipped',
+        deliveries: [],
+      };
     }
 
     const typeRecord = await this.notificationsRepository.findTypeByCode(type);
     if (!typeRecord) {
-      throw new NotFoundException(`NotificationType ${type} no encontrado en el catálogo`);
+      throw new NotFoundException(
+        `NotificationType ${type} no encontrado en el catálogo`,
+      );
     }
 
-    const template = NOTIFICATION_TEMPLATES[type] as NotificationTemplateDefinition<NotificationType>;
+    const template = NOTIFICATION_TEMPLATES[
+      type
+    ] as NotificationTemplateDefinition<NotificationType>;
     if (!template) {
-      throw new NotFoundException(`Plantilla no encontrada para el tipo ${type}`);
+      throw new NotFoundException(
+        `Plantilla no encontrada para el tipo ${type}`,
+      );
     }
 
     const normalizedPayload = normalizeNotificationPayload(payload);
-    const title = template.renderTitle(normalizedPayload);
-    const body = template.renderBody(normalizedPayload);
+    const title = truncateNotificationText(template.renderTitle(normalizedPayload));
+    const body = truncateNotificationText(template.renderBody(normalizedPayload));
+    const typeSendsEmail = typeRecord.sendsEmail && !EMAIL_EXCLUDED_TYPES.has(type);
 
-    const preferences = await this.preferencesRepository.findManyByUserIds(validRecipients);
-    
+    const preferences =
+      await this.preferencesRepository.findManyByUserIds(validRecipients);
+    const preferenceByUserId = new Map(preferences.map((p) => [p.userId, p]));
+
     const pushTargets: string[] = [];
     const emailTargets: string[] = [];
 
     for (const recipientId of validRecipients) {
-      const userPref = preferences.find((p) => p.userId === recipientId);
-      const pushEnabled = userPref ? userPref.pushEnabled : false;
-      const emailEnabled = userPref ? userPref.emailEnabled : true;
+      const channel = resolveNotificationChannel(
+        preferenceByUserId.get(recipientId),
+      );
 
-      const appVisible = this.appVisibilityService.isVisible(recipientId);
-      if (typeRecord.sendsPush && pushEnabled && !appVisible) pushTargets.push(recipientId);
-      if (typeRecord.sendsEmail && emailEnabled) emailTargets.push(recipientId);
+      if (channel === 'push') {
+        const appVisible = this.appVisibilityService.isVisible(recipientId);
+        if (typeRecord.sendsPush && !appVisible) pushTargets.push(recipientId);
+      } else if (channel === 'email') {
+        if (typeSendsEmail) emailTargets.push(recipientId);
+      }
     }
 
-    const createdNotifications = await this.notificationsRepository.createMany(
-      validRecipients.map((id) => ({
-        recipientId: id,
-        actorId: actorId,
-        typeId: typeRecord.id, 
-        title,
-        body,
-        link: actionUrl,
-        groupKey,
-      })),
-    );
+    const createdNotifications = includeInApp
+      ? await this.notificationsRepository.createMany(
+          validRecipients.map((id) => ({
+            recipientId: id,
+            actorId: actorId,
+            typeId: typeRecord.id,
+            title,
+            body,
+            link: actionUrl,
+            groupKey,
+          })),
+        )
+      : [];
     const inAppCount = createdNotifications.length;
     const notificationIdsByRecipient = new Map(
-      createdNotifications.map((notification) => [notification.recipientId, notification.id]),
+      createdNotifications.map((notification) => [
+        notification.recipientId,
+        notification.id,
+      ]),
     );
 
-    for (const recipientId of validRecipients) {
-        this.notificationGateway.emitToUser(recipientId, 'notification:new', {
+    const createdPushTargets = includePush
+      ? pushTargets.filter(
+          (id) => !includeInApp || notificationIdsByRecipient.has(id),
+        )
+      : [];
+    const createdEmailTargets = includeEmail
+      ? emailTargets.filter(
+          (id) => !includeInApp || notificationIdsByRecipient.has(id),
+        )
+      : [];
+
+    for (const recipientId of notificationIdsByRecipient.keys()) {
+      this.notificationGateway.emitToUser(recipientId, 'notification:new', {
         typeCode: type,
         title,
         body,
@@ -105,10 +165,10 @@ export class NotificationsService {
     let emailStatus: NotifyResult['emailStatus'] = 'skipped';
     const deliveries: NotifyResult['deliveries'] = [];
 
-    if (pushTargets.length > 0) {
+    if (createdPushTargets.length > 0) {
       try {
         const push = await this.pushDispatcher.dispatchToUsers(
-          pushTargets,
+          createdPushTargets,
           title,
           body,
           actionUrl,
@@ -123,10 +183,10 @@ export class NotificationsService {
       }
     }
 
-    if (emailTargets.length > 0) {
+    if (createdEmailTargets.length > 0) {
       try {
         const email = await this.mailDispatcher.dispatchToUsers(
-          emailTargets,
+          createdEmailTargets,
           title,
           body,
           actionUrl,
