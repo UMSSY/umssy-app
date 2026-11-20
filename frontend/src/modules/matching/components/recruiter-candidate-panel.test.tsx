@@ -3,6 +3,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithQuery } from "@/shared/testing/render-with-query";
 import { radarRecruiterApi } from "../services/radar-recruiter.service";
 import { RADAR_AXES } from "../constants/radar-axes.constants";
+import { MessagingUiProvider } from "@/modules/chat/contexts/messaging-ui-context";
+import * as chatApi from "@/modules/chat/services/chat-api";
 import type { AreaEvidence } from "../types/area-evidence.types";
 import type { RecruiterApplicant } from "../types/recruiter-applicant.types";
 import type { RecruiterTarget } from "../types/recruiter-target.types";
@@ -100,11 +102,13 @@ const EVIDENCE: AreaEvidence = {
 
 function renderPanel(candidate: RecruiterApplicant | null) {
   return renderWithQuery(
-    <RecruiterCandidatePanel
-      candidate={candidate}
-      vacancy={TARGET}
-      axes={RADAR_AXES}
-    />,
+    <MessagingUiProvider>
+      <RecruiterCandidatePanel
+        candidate={candidate}
+        vacancy={TARGET}
+        axes={RADAR_AXES}
+      />
+    </MessagingUiProvider>,
   );
 }
 
@@ -127,6 +131,18 @@ describe("RecruiterCandidatePanel", () => {
     vi.spyOn(radarRecruiterApi, "recruiterCv").mockResolvedValue(
       new Blob(["pdf"], { type: "application/pdf" }),
     );
+    vi.spyOn(chatApi, "getOrCreateConversation").mockResolvedValue({
+      id: "conversation-carlos",
+      contact: {
+        id: "user-carlos",
+        fullName: "Carlos Mendoza Ríos",
+        isOnline: false,
+      },
+      unreadCount: 0,
+      updatedAt: "2026-11-20T20:00:00.000Z",
+      contextType: "POSTULACION",
+      contextId: "app-carlos",
+    });
   });
 
   afterEach(() => {
@@ -180,6 +196,40 @@ describe("RecruiterCandidatePanel", () => {
     expect(
       screen.queryByRole("button", { name: "Revisar CV" }),
     ).not.toBeInTheDocument();
+  });
+
+  it("abre o reutiliza el chat directo del postulante", async () => {
+    renderPanel(CARLOS);
+
+    fireEvent.click(screen.getByRole("button", { name: "Contactar" }));
+
+    await waitFor(() => {
+      expect(chatApi.getOrCreateConversation).toHaveBeenCalledWith(
+        "user-carlos",
+        {
+          contextType: "POSTULACION",
+          contextId: "app-carlos",
+        },
+      );
+    });
+  });
+
+  it("permite reintentar si no se puede abrir el chat", async () => {
+    vi.mocked(chatApi.getOrCreateConversation).mockRejectedValueOnce(
+      new Error("sin conexión"),
+    );
+    renderPanel(CARLOS);
+
+    fireEvent.click(screen.getByRole("button", { name: "Contactar" }));
+
+    expect(
+      await screen.findByRole("alert"),
+    ).toHaveTextContent(
+      "No se pudo abrir el chat del postulante",
+    );
+    expect(
+      screen.getByRole("button", { name: "Reintentar Contactar" }),
+    ).toBeInTheDocument();
   });
 
   it("carga la evidencia autorizada al elegir un eje y la cierra", async () => {

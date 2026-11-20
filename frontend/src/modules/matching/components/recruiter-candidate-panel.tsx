@@ -6,8 +6,12 @@ import {
 } from "./candidate-comparison-panel";
 
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { AreaDetailPanel } from "@/modules/radar-chart";
+import { useMessagingUi } from "@/modules/chat/contexts/messaging-ui-context";
+import { getOrCreateConversation } from "@/modules/chat/services/chat-api";
+import type { Conversation } from "@/modules/chat/types/conversation.types";
 import {
   useRecruiterAreaEvidence,
   useRecruiterDecision,
@@ -33,6 +37,10 @@ export function RecruiterCandidatePanel({
   const [selectedAreaId, setSelectedAreaId] = useState<RadarAxisId | null>(
     null,
   );
+  const [isStartingChat, setIsStartingChat] = useState(false);
+  const [chatError, setChatError] = useState<string | null>(null);
+  const messagingUi = useMessagingUi();
+  const queryClient = useQueryClient();
   const cv = useRecruiterCv(candidate?.applicationId ?? "");
   const evidenceQuery = useRecruiterAreaEvidence(
     candidate?.applicationId ?? "",
@@ -46,6 +54,45 @@ export function RecruiterCandidatePanel({
 
   const stateLabel =
     RECRUITER_APPLICATION_STATE_LABELS[candidate.state] ?? candidate.state;
+
+  async function openCandidateChat() {
+    if (isStartingChat) return;
+
+    setIsStartingChat(true);
+    setChatError(null);
+
+    try {
+      const conversation = await getOrCreateConversation(candidate.userId, {
+        contextType: "POSTULACION",
+        contextId: candidate.applicationId,
+      });
+
+      queryClient.setQueryData(
+        ["chat", "conversations"],
+        (current: Conversation[] | undefined) => {
+          const conversations = current ?? [];
+          const existingIndex = conversations.findIndex(
+            (item) => item.id === conversation.id,
+          );
+          if (existingIndex >= 0) {
+            return conversations.map((item, index) =>
+              index === existingIndex ? conversation : item,
+            );
+          }
+          return [conversation, ...conversations];
+        },
+      );
+
+      messagingUi?.setSelectedId(conversation.id);
+      messagingUi?.setIsPanelOpen(true);
+    } catch {
+      setChatError(
+        "No se pudo abrir el chat del postulante. Verifica tu conexión e intenta nuevamente.",
+      );
+    } finally {
+      setIsStartingChat(false);
+    }
+  }
 
   return (
     <CandidateComparisonPanel
@@ -105,6 +152,25 @@ export function RecruiterCandidatePanel({
       )}
 
       <div className="mt-auto flex flex-col gap-2 pt-2">
+        <Button
+          type="button"
+          className="min-h-11 w-full"
+          disabled={isStartingChat}
+          onClick={() => void openCandidateChat()}
+        >
+          {isStartingChat
+            ? "Abriendo mensajes..."
+            : chatError
+              ? "Reintentar Contactar"
+              : "Contactar"}
+        </Button>
+
+        {chatError && (
+          <p role="alert" className="text-sm text-destructive">
+            {chatError}
+          </p>
+        )}
+
         <div className="rounded-lg border border-border bg-muted/30 p-3 text-sm">
           <p className="font-medium text-foreground">
             Datos de contacto autorizados
