@@ -14,6 +14,7 @@ const RECORD: JobOfferRecord = {
   languages: 'Español',
   locationUrl: 'https://maps.google.com/?q=x',
   expiresAt: null,
+  publishedAt: CREATED_AT,
   createdAt: CREATED_AT,
   company: { id: 'company-1', title: 'TechBolivia S.R.L.' },
   modality: { title: 'Híbrido' },
@@ -40,6 +41,7 @@ describe('JobOfferMapper', () => {
       languages: 'Español',
       locationUrl: 'https://maps.google.com/?q=x',
       expiresAt: null,
+      publishedAt: CREATED_AT.toISOString(),
       createdAt: CREATED_AT.toISOString(),
       company: { id: 'company-1', name: 'TechBolivia S.R.L.' },
       skills: [{ id: 'skill-1', name: 'Docker' }],
@@ -47,14 +49,28 @@ describe('JobOfferMapper', () => {
     });
   });
 
+  it('no incluye la cantidad de postulantes en la respuesta pública', () => {
+    const { applicantsCount: _applicantsCount, ...expected } =
+      mapper.toResponse(RECORD);
+
+    expect(mapper.toPublishedResponse(RECORD)).toEqual(expected);
+    expect(mapper.toPublishedResponse(RECORD)).not.toHaveProperty(
+      'applicantsCount',
+    );
+  });
+
   it('convierte la fecha de vencimiento a texto ISO', () => {
     const expiresAt = new Date('2026-12-31T00:00:00.000Z');
 
-    expect(mapper.toResponse({ ...RECORD, expiresAt }).expiresAt).toBe(expiresAt.toISOString());
+    expect(mapper.toResponse({ ...RECORD, expiresAt }).expiresAt).toBe(
+      expiresAt.toISOString(),
+    );
   });
 
   it('arma la respuesta de una vacante creada', () => {
-    expect(mapper.toCreatedResponse({ id: 'offer-1', createdAt: CREATED_AT })).toEqual({
+    expect(
+      mapper.toCreatedResponse({ id: 'offer-1', createdAt: CREATED_AT }),
+    ).toEqual({
       id: 'offer-1',
       createdAt: CREATED_AT.toISOString(),
     });

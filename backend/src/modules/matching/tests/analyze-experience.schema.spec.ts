@@ -9,23 +9,34 @@ const VALID_ID = '5b1f0c3e-8a4d-4f0b-9a52-1d6c7e2a9b10';
 
 describe('analyzeExperienceParamsSchema', () => {
   it('acepta un UUID valido', () => {
-    expect(analyzeExperienceParamsSchema.safeParse({ id: VALID_ID }).success).toBe(true);
+    expect(
+      analyzeExperienceParamsSchema.safeParse({ id: VALID_ID }).success,
+    ).toBe(true);
   });
 
   it('rechaza un id que no es UUID', () => {
-    expect(analyzeExperienceParamsSchema.safeParse({ id: '123' }).success).toBe(false);
+    expect(analyzeExperienceParamsSchema.safeParse({ id: '123' }).success).toBe(
+      false,
+    );
   });
 });
 
 describe('analyzeExperienceBodySchema', () => {
   it('acepta un texto valido', () => {
-    const result = analyzeExperienceBodySchema.safeParse({ text: 'Trabaje con Python y Django' });
+    const result = analyzeExperienceBodySchema.safeParse({
+      text: 'Trabaje con Python y Django',
+    });
     expect(result.success).toBe(true);
   });
 
-  it.each([[''], [null], [undefined]])('acepta un texto vacio, nulo o ausente (%o)', (text) => {
-    expect(analyzeExperienceBodySchema.safeParse({ text }).success).toBe(true);
-  });
+  it.each([[''], [null], [undefined]])(
+    'acepta un texto vacio, nulo o ausente (%o)',
+    (text) => {
+      expect(analyzeExperienceBodySchema.safeParse({ text }).success).toBe(
+        true,
+      );
+    },
+  );
 
   it('acepta un body sin la propiedad text', () => {
     expect(analyzeExperienceBodySchema.safeParse({}).success).toBe(true);
@@ -42,6 +53,8 @@ describe('analyzeExperienceBodySchema', () => {
   });
 
   it('rechaza un texto que no es string', () => {
-    expect(analyzeExperienceBodySchema.safeParse({ text: 123 }).success).toBe(false);
+    expect(analyzeExperienceBodySchema.safeParse({ text: 123 }).success).toBe(
+      false,
+    );
   });
 });

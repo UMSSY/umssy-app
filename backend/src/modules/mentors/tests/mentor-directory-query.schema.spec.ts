@@ -7,7 +7,7 @@ describe('mentorDirectoryQuerySchema', () => {
       page: 1,
       search: 'Ana',
       available: false,
-      sort: 'name_asc',
+      sort: 'default',
     });
   });
 
@@ -48,6 +48,9 @@ describe('mentorDirectoryQuerySchema', () => {
   });
 
   it('acepta los valores reservados para dar una respuesta explícita en el servicio', () => {
+    expect(mentorDirectoryQuerySchema.parse({ sort: 'default' }).sort).toBe(
+      'default',
+    );
     expect(mentorDirectoryQuerySchema.parse({ sort: 'affinity' }).sort).toBe(
       'affinity',
     );

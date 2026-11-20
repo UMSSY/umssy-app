@@ -70,6 +70,24 @@ describe("AutomaticValidationPanel", () => {
     expect(rows[4]).toContain("No se compara");
   });
 
+  it("si la lectura no dejó datos, lista igual los campos declarados como No se compara", () => {
+    renderWithQuery(
+      <AutomaticValidationPanel detail={detail({ status: "in_review", validation: { ...VALIDATION, result: "manual_review", matchScore: null, fields: [] } })} />,
+    );
+
+    const panel = screen.getByRole("region", { name: "Validación automática" });
+    expect(within(panel).getByRole("columnheader", { name: "En el documento" })).toBeInTheDocument();
+    const rows = within(panel).getAllByRole("row").slice(1).map((row) => row.textContent);
+    expect(rows).toHaveLength(5);
+    expect(rows[0]).toContain("María Quispe Mamani");
+    expect(rows[2]).toContain("2019");
+    expect(rows[4]).toContain("201502277");
+    for (const row of rows) {
+      expect(row).toContain("—");
+      expect(row).toContain("No se compara");
+    }
+  });
+
   it("CA9: mientras está en cola indica la lectura OCR pendiente", () => {
     renderWithQuery(<AutomaticValidationPanel detail={detail({ status: "pending", validation: { ...VALIDATION, result: "queued", matchScore: null, fields: [] } })} />);
     expect(screen.getAllByText(/En cola de lectura OCR/).length).toBeGreaterThan(0);

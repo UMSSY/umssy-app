@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
+import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
 import { mapRecordNotFound } from '../../../common/utils/map-record-not-found.js';
 import { CertificationNotFoundException } from '../exceptions/certification-not-found.exception.js';
 import type { CreateCertificationRequest } from '../requests/create-certification.request.js';
 import type { UpdateCertificationRequest } from '../requests/update-certification.request.js';
-import type { CertificationRecord } from '../types/certification-record.type.js';
+import type { CertificationDocumentData } from '../../certification-documents/types/certification-document-data.type.js';
 
 const certificationSelect = {
   id: true,
@@ -18,9 +19,31 @@ const certificationSelect = {
 
 @Injectable()
 export class CertificationsRepository {
+  findVerificationSources(userId: string, context?: TransactionContext) {
+    return (context?.client ?? this.prisma).$queryRaw<
+      { id: string; hasDocument: boolean }[]
+    >`
+      SELECT id, document_url IS NOT NULL AS "hasDocument" FROM certifications WHERE user_id=${userId}::uuid`;
+  }
+
   constructor(private readonly prisma: PrismaService) {}
 
-  findManyByUserId(userId: string): Promise<CertificationRecord[]> {
+  async hasByUserId(userId: string): Promise<boolean> {
+    const record = await this.prisma.certification.findFirst({
+      where: { userId },
+      select: { id: true },
+    });
+    return record !== null;
+  }
+
+  findPublicationEvidenceIds(userId: string, context: TransactionContext) {
+    return context.client.certification.findMany({
+      where: { userId },
+      select: { id: true },
+    });
+  }
+
+  findManyByUserId(userId: string) {
     return this.prisma.certification.findMany({
       where: { userId },
       orderBy: { issueDate: 'desc' },
@@ -28,7 +51,7 @@ export class CertificationsRepository {
     });
   }
 
-  findById(id: string): Promise<CertificationRecord | null> {
+  findById(id: string) {
     return this.prisma.certification.findUnique({
       where: { id },
       select: certificationSelect,
@@ -38,9 +61,16 @@ export class CertificationsRepository {
   create(
     userId: string,
     data: CreateCertificationRequest,
-  ): Promise<CertificationRecord> {
-    return this.prisma.certification.create({
-      data: { ...data, userId },
+    document?: CertificationDocumentData,
+    context?: TransactionContext,
+  ) {
+    const client = context?.client ?? this.prisma;
+    return client.certification.create({
+      data: {
+        ...data,
+        userId,
+        ...(document && { documentUrl: document.documentUrl }),
+      },
       select: certificationSelect,
     });
   }
@@ -48,11 +78,17 @@ export class CertificationsRepository {
   update(
     id: string,
     data: UpdateCertificationRequest,
-  ): Promise<CertificationRecord> {
+    document?: CertificationDocumentData,
+    context?: TransactionContext,
+  ) {
+    const client = context?.client ?? this.prisma;
     return mapRecordNotFound(
-      this.prisma.certification.update({
+      client.certification.update({
         where: { id },
-        data,
+        data: {
+          ...data,
+          ...(document && { documentUrl: document.documentUrl }),
+        },
         select: certificationSelect,
       }),
       () => new CertificationNotFoundException(),
@@ -64,5 +100,17 @@ export class CertificationsRepository {
       this.prisma.certification.delete({ where: { id } }),
       () => new CertificationNotFoundException(),
     );
+  }
+
+  findRecruitmentEvidence(userId: string, ids: string[]) {
+    return this.prisma.certification.findMany({
+      where: { userId, id: { in: ids } },
+      select: {
+        id: true,
+        name: true,
+        issuingOrganization: true,
+        issueDate: true,
+      },
+    });
   }
 }

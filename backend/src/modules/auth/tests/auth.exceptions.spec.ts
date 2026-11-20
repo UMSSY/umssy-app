@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { DomainException } from '../../../common/exceptions/domain.exception.js';
-import { InvalidCredentialsException, RoleNotAssignedException } from '../exceptions/index.js';
+import {
+  InvalidCredentialsException,
+  RoleNotAssignedException,
+} from '../exceptions/index.js';
 
 describe('auth exceptions', () => {
   it.each([

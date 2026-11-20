@@ -6,7 +6,10 @@ import { JobOffersModule } from '../job-offers.module.js';
 
 describe('JobOffersModule registration', () => {
   it('is imported by AppModule so its routes are exposed', () => {
-    const imports: unknown[] = Reflect.getMetadata(MODULE_METADATA.IMPORTS, AppModule);
+    const imports: unknown[] = Reflect.getMetadata(
+      MODULE_METADATA.IMPORTS,
+      AppModule,
+    );
 
     expect(imports).toContain(JobOffersModule);
   });

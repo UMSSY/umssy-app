@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ScheduleModule } from '@nestjs/schedule';
 import { MailModule } from './modules/mail/index.js';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
@@ -20,10 +21,12 @@ import { EducationsModule } from './modules/educations/educations.module.js';
 import { MentorsModule } from './modules/mentors/mentors.module.js';
 import { OrientationTypesModule } from './modules/orientation-types/orientation-types.module.js';
 import { ProfileModule } from './modules/profile/profile.module.js';
+import { PortfolioModule } from './modules/portfolio/portfolio.module.js';
 import { SkillsModule } from './modules/skills/skills.module.js';
 import { TechnicalAreasModule } from './modules/technical-areas/technical-areas.module.js';
 import { WorkExperienceModule } from './modules/work-experience/work-experience.module.js';
 import { ReportsModule } from './modules/reports/reports.module.js';
+import { AnalyticsModule } from './modules/analytics/analytics.module.js';
 import { AccessRequestsModule } from './modules/access-requests/access-requests.module.js';
 import { AuditEventsModule } from './modules/audit-events/audit-events.module.js';
 import { ChatModule } from './modules/chat/chat.module.js';
@@ -31,12 +34,15 @@ import { ApplicationsModule } from './modules/applications/applications.module.j
 import { MatchingModule } from './modules/matching/matching.module.js';
 import { JobOffersModule } from './modules/job-offers/job-offers.module.js';
 import { NlpModule } from './modules/nlp/nlp.module.js';
+import { RadarIntegrationModule } from './modules/radar-integration/radar-integration.module.js';
 import { SurveysModule } from './modules/surveys/surveys.module.js';
 import { AppointmentsModule } from './modules/appointments/appointments.module.js';
+import { NotificationsModule } from './modules/notifications/notifications.module.js';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    ScheduleModule.forRoot(),
     PrismaModule,
     MailModule,
     AvailabilityModule,
@@ -46,6 +52,7 @@ import { AppointmentsModule } from './modules/appointments/appointments.module.j
     EventCategoriesModule,
     EventRegistrationsModule,
     ProfileModule,
+    PortfolioModule,
     CvModule,
     SkillsModule,
     EducationsModule,
@@ -58,12 +65,15 @@ import { AppointmentsModule } from './modules/appointments/appointments.module.j
     AccessRequestsModule,
     AuditEventsModule,
     ReportsModule,
+    AnalyticsModule,
     ChatModule,
     MatchingModule,
     ApplicationsModule,
     JobOffersModule,
     NlpModule,
+    RadarIntegrationModule,
     SurveysModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [

@@ -17,6 +17,8 @@ describe('escapePgWildcards', () => {
   });
 
   it('leaves standard alphanumeric strings untouched', () => {
-    expect(escapePgWildcards('Node.js Workshop 2026')).toBe('Node.js Workshop 2026');
+    expect(escapePgWildcards('Node.js Workshop 2026')).toBe(
+      'Node.js Workshop 2026',
+    );
   });
 });

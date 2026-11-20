@@ -1,16 +1,5 @@
-
-import {
-  Controller,
-  Get,
-  Param,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiQuery,
-  ApiTags,
-} from '@nestjs/swagger';
+import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { CurrentUserId } from '../../../common/decorators/current-user-id.decorator.js';
 import { Roles } from '../../../common/decorators/roles.decorator.js';
 import { RolesGuard } from '../../../common/guards/roles.guard.js';
@@ -22,7 +11,7 @@ import { MessageService } from '../services/message.service.js';
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('titulado', 'estudiante', 'mentor', 'empresa')
-@Controller('conversations')
+@Controller('chat/conversations')
 export class ChatController {
   constructor(
     private readonly chatService: ChatService,
@@ -58,4 +47,3 @@ export class ChatController {
     });
   }
 }
-

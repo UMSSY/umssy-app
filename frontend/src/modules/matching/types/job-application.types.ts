@@ -7,7 +7,4 @@ export interface JobApplication {
   status: string;
 }
 
-export interface MyJobApplication {
-  hasApplied: boolean;
-  application: JobApplication | null;
-}
+export type { MyJobApplication } from "./my-job-application.types";

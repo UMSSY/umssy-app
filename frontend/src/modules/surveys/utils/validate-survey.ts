@@ -1,13 +1,20 @@
 import { SURVEY_LIMITS, SURVEY_TEXT } from "../constants/survey-builder.constants";
 import { SURVEY_ERROR_SUMMARIES, SURVEY_FIELD_LABELS, SURVEY_MESSAGES } from "../constants/survey-messages.constants";
-import type { SurveyBuilderState } from "../types/survey-builder.types";
-import type { SurveyErrorMap, SurveyValidationError } from "../types/survey-validation.types";
+import type { SurveyBuilderState } from "../types/survey-builder-state.types";
+import type { SurveyErrorMap } from "../types/survey-error-map.types";
+import type { SurveyValidationError } from "../types/survey-validation-error.types";
 import { hasDuplicatedLabels } from "./find-duplicated-labels";
 import { toCompleteDateValue } from "./survey-dates";
 
 type SurveyValidationInput = Pick<
   SurveyBuilderState,
-  "title" | "careerId" | "targetAudience" | "academicPeriod" | "opensAt" | "closesAt" | "questions"
+  | "title"
+  | "careerId"
+  | "targetAudience"
+  | "academicPeriod"
+  | "opensAt"
+  | "closesAt"
+  | "questions"
 >;
 
 function getTitleError(title: string): SurveyValidationError | null {

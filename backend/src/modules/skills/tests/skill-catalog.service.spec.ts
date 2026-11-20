@@ -33,14 +33,19 @@ describe('SkillCatalogService', () => {
     it('returns the catalog filtered by the search term', async () => {
       skillRepository.findCatalog.mockResolvedValue([python]);
 
-      await expect(service.listCatalog({ search: 'py' })).resolves.toEqual([python]);
+      await expect(service.listCatalog({ search: 'py' })).resolves.toEqual([
+        python,
+      ]);
       expect(skillRepository.findCatalog).toHaveBeenCalledWith('py');
     });
 
     it('returns the whole catalog when the search term is empty', async () => {
       skillRepository.findCatalog.mockResolvedValue([python, sql]);
 
-      await expect(service.listCatalog({ search: '' })).resolves.toEqual([python, sql]);
+      await expect(service.listCatalog({ search: '' })).resolves.toEqual([
+        python,
+        sql,
+      ]);
       expect(skillRepository.findCatalog).toHaveBeenCalledWith(undefined);
     });
   });
@@ -51,7 +56,9 @@ describe('SkillCatalogService', () => {
       skillRepository.findByName.mockResolvedValue(null);
       skillRepository.createCustom.mockResolvedValue(kubernetes);
 
-      await expect(service.createCustomSkill({ name: 'Kubernetes' })).resolves.toEqual(kubernetes);
+      await expect(
+        service.createCustomSkill({ name: 'Kubernetes' }),
+      ).resolves.toEqual(kubernetes);
       expect(skillRepository.findByName).toHaveBeenCalledWith('Kubernetes');
       expect(skillRepository.createCustom).toHaveBeenCalledWith('Kubernetes');
     });
@@ -59,7 +66,9 @@ describe('SkillCatalogService', () => {
     it('reuses the existing skill when the name is already in the catalog', async () => {
       skillRepository.findByName.mockResolvedValue(python);
 
-      await expect(service.createCustomSkill({ name: 'python' })).resolves.toEqual(python);
+      await expect(
+        service.createCustomSkill({ name: 'python' }),
+      ).resolves.toEqual(python);
       expect(skillRepository.createCustom).not.toHaveBeenCalled();
     });
   });

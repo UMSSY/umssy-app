@@ -1,12 +1,23 @@
 import { REGISTRATION_STATUS_TITLES } from '../../../common/constants/registration-status.constants.js';
+import type { RegistrationScheduleEvent } from '../types/registration-schedule-event.types.js';
 import type { EventSupportContext } from '../types/event-support-context.types.js';
 import { mapSupportContext } from '../mappers/support-context.mapper.js';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { escapePgWildcards } from '../../../common/utils/escape-pg-wildcards.js';
 import type { Prisma } from '../../../prisma/client.js';
-import type { FindEventsPayload, FindEventsResponse, EventWithRelations } from '../types/events.types.js';
-import { CATALOG_STATUS_TITLES, COMMUNITY_ORIGIN_TITLE, CONFIRMED_REGISTRATION_TITLE, EXPIRED_STATUS_TITLE, PUBLISHED_STATUS_TITLE, VOTING_STATUS_TITLES } from '../constants/events.constants.js';
+import type {
+  FindEventsPayload,
+  FindEventsResponse,
+  EventWithRelations,
+} from '../types/events.types.js';
+import {
+  CATALOG_STATUS_TITLES,
+  COMMUNITY_ORIGIN_TITLE,
+  EXPIRED_STATUS_TITLE,
+  PUBLISHED_STATUS_TITLE,
+  VOTING_STATUS_TITLES,
+} from '../constants/events.constants.js';
 
 function buildSelect(userId?: string): Prisma.EventSelect {
   return {
@@ -32,7 +43,7 @@ function buildSelect(userId?: string): Prisma.EventSelect {
         registrations: {
           where: {
             cancelledAt: null,
-            status: { title: CONFIRMED_REGISTRATION_TITLE },
+            status: { title: REGISTRATION_STATUS_TITLES.confirmed },
           },
         },
       },
@@ -42,7 +53,7 @@ function buildSelect(userId?: string): Prisma.EventSelect {
         where: {
           userId,
           cancelledAt: null,
-          status: { title: CONFIRMED_REGISTRATION_TITLE },
+          status: { title: REGISTRATION_STATUS_TITLES.confirmed },
         },
         select: { id: true },
         take: 1,
@@ -54,6 +65,32 @@ function buildSelect(userId?: string): Prisma.EventSelect {
 @Injectable()
 export class EventsRepository {
   constructor(private readonly prisma: PrismaService) {}
+
+  findManaged(userId: string) {
+    return this.prisma.event.findMany({
+      where: {
+        createdById: userId,
+        status: { title: PUBLISHED_STATUS_TITLE },
+      },
+      select: {
+        id: true,
+        title: true,
+        eventDate: true,
+        startTime: true,
+        endTime: true,
+        location: true,
+        coverMimeType: true,
+      },
+      orderBy: [{ eventDate: 'asc' }, { startTime: 'asc' }, { id: 'asc' }],
+    });
+  }
+
+  findManagedWorkshop(eventId: string, userId: string, tx: Prisma.TransactionClient = this.prisma) {
+    return tx.event.findFirst({
+      where: { id: eventId, createdById: userId, status: { title: PUBLISHED_STATUS_TITLE } },
+      select: { id: true, eventDate: true, startTime: true, endTime: true },
+    });
+  }
 
   async expireOverdueProposals(now: Date): Promise<number> {
     const expiredStatus = await this.prisma.eventStatus.findUnique({
@@ -76,15 +113,28 @@ export class EventsRepository {
   }
 
   async findAndCount(payload: FindEventsPayload): Promise<FindEventsResponse> {
-    const { categoryId, statusId, isPublishedOnly, search, userId, skip, take } =
-      payload;
+    const {
+      categoryId,
+      statusId,
+      isPublishedOnly,
+      search,
+      userId,
+      skip,
+      take,
+    } = payload;
 
     const where: Prisma.EventWhereInput = {
       ...(categoryId !== undefined && { categoryId }),
       ...(statusId !== undefined
         ? { statusId }
         : isPublishedOnly
-          ? { status: { title: payload.includeProposals ? { in: CATALOG_STATUS_TITLES } : PUBLISHED_STATUS_TITLE } }
+          ? {
+              status: {
+                title: payload.includeProposals
+                  ? { in: CATALOG_STATUS_TITLES }
+                  : PUBLISHED_STATUS_TITLE,
+              },
+            }
           : {}),
       ...(search !== undefined && {
         title: {
@@ -98,7 +148,7 @@ export class EventsRepository {
       this.prisma.event.findMany({
         select: buildSelect(userId),
         where,
-        orderBy: [{ eventDate: 'asc' }, { startTime: 'asc' }],
+        orderBy: [{ eventDate: 'asc' }, { startTime: 'asc' }, { id: 'asc' }],
         skip,
         take,
       }),
@@ -126,11 +176,30 @@ export class EventsRepository {
     });
 
     return event as unknown as
-      | (EventWithRelations & { modality: { id: string; title: string } })
-      | null;
+      (EventWithRelations & { modality: { id: string; title: string } }) | null;
   }
 
-  async findForRegistration(id: string, tx: Prisma.TransactionClient = this.prisma) {
+  findScheduleConflict(
+    tx: Prisma.TransactionClient,
+    event: RegistrationScheduleEvent,
+    registeredEventIds: string[],
+  ) {
+    return tx.event.findFirst({
+      where: {
+        id: { in: registeredEventIds, not: event.id },
+        status: { title: PUBLISHED_STATUS_TITLE },
+        eventDate: event.eventDate,
+        startTime: { lt: event.endTime },
+        endTime: { gt: event.startTime },
+      },
+      select: { id: true },
+    });
+  }
+
+  async findForRegistration(
+    id: string,
+    tx: Prisma.TransactionClient = this.prisma,
+  ) {
     const event = await tx.event.findUnique({
       where: { id },
       select: {
@@ -144,12 +213,19 @@ export class EventsRepository {
     });
     return event;
   }
-  async lockEventRow(tx: Prisma.TransactionClient, eventId: string): Promise<void> {
+  async lockEventRow(
+    tx: Prisma.TransactionClient,
+    eventId: string,
+  ): Promise<void> {
     await tx.$queryRaw`SELECT id FROM events WHERE id = ${eventId}::uuid FOR UPDATE`;
   }
 
   publish(tx: Prisma.TransactionClient, eventId: string) {
-    return tx.event.update({ where: { id: eventId }, data: { status: { connect: { title: PUBLISHED_STATUS_TITLE } } }, select: { id: true } });
+    return tx.event.update({
+      where: { id: eventId },
+      data: { status: { connect: { title: PUBLISHED_STATUS_TITLE } } },
+      select: { id: true },
+    });
   }
 
   async loadSupportContext(

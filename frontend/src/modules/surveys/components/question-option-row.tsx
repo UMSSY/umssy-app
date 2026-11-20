@@ -6,7 +6,7 @@ import { cn } from "cn";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SURVEY_ARIA, SURVEY_LIMITS, SURVEY_TEXT } from "../constants/survey-builder.constants";
-import type { QuestionOptionRowProps } from "../types/survey-component-props.types";
+import type { QuestionOptionRowProps } from "../types/question-option-row-props.types";
 import { OptionMarker } from "./option-marker";
 
 export function QuestionOptionRow({

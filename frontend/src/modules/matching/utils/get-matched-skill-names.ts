@@ -1,4 +1,4 @@
-import type { CategorizedJobRequirement } from "../types/requirement-category.types";
+import type { CategorizedJobRequirement } from "../types/categorized-job-requirement.types";
 
 export function getMatchedSkillNames(requirements: CategorizedJobRequirement[]): string[] {
   return requirements

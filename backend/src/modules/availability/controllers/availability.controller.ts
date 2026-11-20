@@ -9,7 +9,14 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBadRequestResponse, ApiBearerAuth, ApiCreatedResponse, ApiOperation, ApiParam, ApiQuery } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator.js';
 import { Roles } from '../../../common/decorators/roles.decorator.js';
@@ -40,7 +47,10 @@ export class AvailabilityController {
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('mentor')
-  @ApiOperation({ summary: CREATE_BLOCK_DOCS.summary, description: CREATE_BLOCK_DOCS.description })
+  @ApiOperation({
+    summary: CREATE_BLOCK_DOCS.summary,
+    description: CREATE_BLOCK_DOCS.description,
+  })
   @ApiCreatedResponse({ description: CREATE_BLOCK_DOCS.createdResponse })
   @ApiBadRequestResponse({ description: CREATE_BLOCK_DOCS.badRequestResponse })
   create(
@@ -53,7 +63,10 @@ export class AvailabilityController {
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('mentor')
-  @ApiOperation({ summary: FIND_MY_BLOCKS_DOCS.summary, description: FIND_MY_BLOCKS_DOCS.description })
+  @ApiOperation({
+    summary: FIND_MY_BLOCKS_DOCS.summary,
+    description: FIND_MY_BLOCKS_DOCS.description,
+  })
   @ApiQuery({ name: 'from', description: FIND_MY_BLOCKS_DOCS.fromDescription })
   @ApiQuery({ name: 'to', description: FIND_MY_BLOCKS_DOCS.toDescription })
   findMyBlocks(
@@ -79,7 +92,10 @@ export class AvailabilityController {
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('mentor')
-  @ApiOperation({ summary: DELETE_BLOCK_DOCS.summary, description: DELETE_BLOCK_DOCS.description })
+  @ApiOperation({
+    summary: DELETE_BLOCK_DOCS.summary,
+    description: DELETE_BLOCK_DOCS.description,
+  })
   @ApiParam({ name: 'id', description: DELETE_BLOCK_DOCS.idDescription })
   remove(
     @CurrentUser() user: AuthenticatedUser,

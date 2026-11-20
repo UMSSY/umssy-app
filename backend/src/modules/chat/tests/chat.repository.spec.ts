@@ -33,8 +33,11 @@ describe('ConversationRepository', () => {
   });
 
   describe('findUserConversations', () => {
-    it('should exclude group chats (eventId NOT NULL) from the result list', async () => {
-      const conversations = [{ id: 'conv-1', eventId: null }];
+    it('includes direct conversations and event rooms where the user is a participant', async () => {
+      const conversations = [
+        { id: 'conv-1', eventId: null },
+        { id: 'conv-event-1', eventId: 'event-1' },
+      ];
       conversationFindMany.mockResolvedValue(conversations);
 
       const result = await repository.findUserConversations('user-1');
@@ -42,11 +45,28 @@ describe('ConversationRepository', () => {
       expect(conversationFindMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: {
-            AND: [
-              { OR: [{ userAId: 'user-1' }, { userBId: 'user-1' }] },
-              { eventId: null },
+            OR: [
+              {
+                eventId: null,
+                OR: [{ userAId: 'user-1' }, { userBId: 'user-1' }],
+              },
+              {
+                eventId: { not: null },
+                participants: {
+                  some: { userId: 'user-1' },
+                },
+              },
             ],
           },
+          include: expect.objectContaining({
+            participants: {
+              include: {
+                user: {
+                  select: { id: true, firstName: true, lastName: true },
+                },
+              },
+            },
+          }),
         }),
       );
       expect(result).toEqual(conversations);
@@ -73,11 +93,7 @@ describe('ConversationRepository', () => {
       conversationUpsert.mockResolvedValue({ id: 'conv-group-1' });
       participantUpsert.mockResolvedValue({});
 
-      const result = await repository.upsertByEventId(
-        'event-1',
-        'user-1',
-        now,
-      );
+      const result = await repository.upsertByEventId('event-1', 'user-1', now);
 
       expect(conversationUpsert).toHaveBeenCalledWith(
         expect.objectContaining({

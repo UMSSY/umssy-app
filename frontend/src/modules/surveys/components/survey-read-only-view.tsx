@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft, Info } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { WorkspacePage } from "@/shared/components/layout/workspace-page";
 import {
   ALL_CAREERS_LABEL,
@@ -12,7 +12,7 @@ import {
 } from "../constants/survey-builder.constants";
 import { SURVEY_MESSAGES } from "../constants/survey-messages.constants";
 import { SURVEYS_PATH } from "../constants/survey-routes.constants";
-import type { SurveyReadOnlyViewProps } from "../types/survey-component-props.types";
+import type { SurveyReadOnlyViewProps } from "../types/survey-read-only-view-props.types";
 import { formatIsoDisplayDate } from "../utils/survey-dates";
 import { toSurveyBuilderState } from "../utils/to-survey-builder-state";
 import { PreviewQuestion } from "./preview-question";

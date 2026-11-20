@@ -2,15 +2,12 @@ import { DAY_MS } from '../../../common/constants/date-time.constants.js';
 import { toUtcIso } from '../../../common/utils/date-time.js';
 import type { Prisma } from '../../../prisma/client.js';
 import type { ListCompanyJobOffersRequest } from '../requests/list-company-job-offers.request.js';
+import type { CompanyJobOffersQuery } from '../types/company-job-offers-query.type.js';
 
-export interface CompanyJobOffersQuery {
-  where: Prisma.JobOfferWhereInput;
-  orderBy: Prisma.JobOfferOrderByWithRelationInput[];
-}
+const startOfBoliviaDay = (date: string): Date =>
+  new Date(toUtcIso(date, '00:00'));
 
-const startOfBoliviaDay = (date: string): Date => new Date(toUtcIso(date, '00:00'));
-
-function buildCreatedAtFilter(
+function buildPublishedAtFilter(
   dateFrom: string | undefined,
   dateTo: string | undefined,
 ): Prisma.DateTimeFilter | undefined {
@@ -18,7 +15,9 @@ function buildCreatedAtFilter(
 
   return {
     ...(dateFrom && { gte: startOfBoliviaDay(dateFrom) }),
-    ...(dateTo && { lt: new Date(startOfBoliviaDay(dateTo).getTime() + DAY_MS) }),
+    ...(dateTo && {
+      lt: new Date(startOfBoliviaDay(dateTo).getTime() + DAY_MS),
+    }),
   };
 }
 
@@ -26,21 +25,22 @@ export function buildCompanyJobOffersQuery(
   companyId: string,
   filters: ListCompanyJobOffersRequest,
 ): CompanyJobOffersQuery {
-  const createdAt = buildCreatedAtFilter(filters.dateFrom, filters.dateTo);
+  const publishedAt = buildPublishedAtFilter(filters.dateFrom, filters.dateTo);
 
   const where: Prisma.JobOfferWhereInput = {
     companyId,
     ...(filters.modality && { modality: { title: filters.modality } }),
-    ...(filters.contractType && { contractType: { title: filters.contractType } }),
-    ...(createdAt && { createdAt }),
+    ...(filters.contractType && {
+      contractType: { title: filters.contractType },
+    }),
+    ...(publishedAt && { publishedAt }),
     ...(filters.search && {
-    title: { contains: filters.search, mode: 'insensitive' },
+      title: { contains: filters.search, mode: 'insensitive' },
     }),
   };
 
   const orderBy: Prisma.JobOfferOrderByWithRelationInput[] = [
-    ...(filters.sortBy === 'applicants' ? [{ applications: { _count: filters.order } }] : []),
-    { createdAt: filters.order },
+    { publishedAt: filters.order },
     { id: filters.order },
   ];
 

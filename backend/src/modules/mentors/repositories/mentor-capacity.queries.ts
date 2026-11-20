@@ -6,6 +6,7 @@ export async function readMentorCapacity(tx: Prisma.TransactionClient) {
   const [counts] = await tx.$queryRaw<MentorCapacityCounts[]>`
     WITH instant AS (SELECT clock_timestamp() AS now)
     SELECT
+      (SELECT percentage FROM mentor_capacity_settings WHERE id = 1) AS percentage,
       (SELECT count(*)::int FROM users u WHERE u.is_active = true
         AND EXISTS (SELECT 1 FROM user_roles ur JOIN roles r ON r.id = ur.role_id
           WHERE ur.user_id = u.id AND r.name = 'titulado' AND ur.deleted_at IS NULL
@@ -23,8 +24,13 @@ export async function readMentorCapacity(tx: Prisma.TransactionClient) {
   return mentorCapacity(counts);
 }
 
-export async function readMentorEligibility(tx: Prisma.TransactionClient, userId: string) {
-  const [eligibility] = await tx.$queryRaw<{ eligible: boolean; alreadyMentor: boolean }[]>`
+export async function readMentorEligibility(
+  tx: Prisma.TransactionClient,
+  userId: string,
+) {
+  const [eligibility] = await tx.$queryRaw<
+    { eligible: boolean; alreadyMentor: boolean }[]
+  >`
     SELECT EXISTS (
       SELECT 1 FROM users u WHERE u.id = ${userId}::uuid AND u.is_active = true
         AND EXISTS (SELECT 1 FROM user_roles ur JOIN roles r ON r.id = ur.role_id

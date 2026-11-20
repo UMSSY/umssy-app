@@ -1,5 +1,7 @@
 "use client";
 
+import type { RadarChartProps } from "../types/radar-chart-props.types";
+
 import {
   PolarAngleAxis,
   PolarGrid,
@@ -12,58 +14,6 @@ import {
 import { AffinityRadarAxisTick } from "@/modules/radar-chart";
 import { AffinityRadarDot } from "@/modules/radar-chart";
 import { cn } from "@/lib/utils";
-import type { AffinityAxisId } from "../types/matching-types";
-
-/**
- * Gráfico de radar comparativo del módulo Matching (HU3).
- *
- * Qué dibuja
- * - Una o más series sobre los mismos ejes. En Matching son el perfil del candidato
- *   (primera serie, relleno rojo UMSS) y el perfil objetivo de la vacante (segunda
- *   serie, contorno punteado en tinta). La primera serie siempre lleva relleno y
- *   trazo continuo; las siguientes, trazo punteado y sin relleno, para que se
- *   distingan aunque se superpongan.
- *
- * Por qué no reutiliza AffinityRadarChart (modules/radar-chart)
- * - AffinityRadarChart dibuja una sola serie dentro de su propia tarjeta, con
- *   promedio y ejes clicables. Aquí se necesita comparar dos series sin tarjeta ni
- *   interacción por eje. Este componente no importa tipos de matching-types.ts, así
- *   que puede moverse a shared/components si otra épica necesita comparar series.
- *
- * Contrato de datos (se define en types/, data/ y services/ del módulo)
- * - Ejes: desarrollo, cloud-devops, data-ai, qa, ciberseguridad y gobernanza-ti,
- *   en ese orden. Son los mismos ids que AreaId en modules/radar-chart (HU1, HU2
- *   y HU4); los puntajes de Carlos Mendoza Ríos coinciden con los de su perfil.
- * - Escala: puntaje de 0 a 10 por eje (prop maxValue).
- * - Brecha por eje = puntaje del candidato - puntaje objetivo. Negativa es brecha,
- *   positiva es fortaleza.
- * - % de afinidad = 100 - (suma de |brechas| / (cantidad de ejes x 10)) x 100,
- *   redondeado y limitado entre 0 y 100. Es una fórmula simple y determinista,
- *   pensada para datos de ejemplo.
- * - Los datos son fijos en el frontend: buscar, filtrar, ordenar y cambiar de
- *   vacante no generan peticiones de red.
- *
- */
-
-export interface RadarChartAxis {
-  id: AffinityAxisId;
-  label: string;
-}
-
-export interface RadarChartSeries {
-  id: string;
-  name: string;
-  color: string;
-  values: Record<string, number>;
-}
-
-interface RadarChartProps {
-  axes: RadarChartAxis[];
-  series: RadarChartSeries[];
-  maxValue?: number;
-  height?: number;
-  onAxisSelect?: (axisId: AffinityAxisId) => void;
-}
 
 export function RadarChart({
   axes,

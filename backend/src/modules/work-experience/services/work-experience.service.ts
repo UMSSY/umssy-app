@@ -18,6 +18,12 @@ export class WorkExperienceService {
     private readonly skillsAnalysis: ProfileSkillsAnalysisService,
   ) {}
 
+  async belongsToUser(experienceId: string, userId: string): Promise<boolean> {
+    return (
+      (await this.repository.findByIdAndUserId(experienceId, userId)) !== null
+    );
+  }
+
   async findAll(userId: string): Promise<WorkExperienceResponse[]> {
     return this.mapper.toResponseList(
       await this.repository.findManyByUserId(userId),

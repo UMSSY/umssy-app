@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { getApiErrorDetail } from "@/shared/utils/api-error-detail";
 import { AVAILABILITY_QUERY_KEYS } from "../constants/availability-query-keys.constants";
 import { AVAILABILITY_TOAST_TEXT } from "../constants/availability-toast.constants";
-import { DELETE_BLOCK_ERROR } from "../constants/delete-block.constants";
+
 import { availabilityApi } from "../services/availability.service";
 
 export function useDeleteBlock() {
@@ -17,7 +17,7 @@ export function useDeleteBlock() {
       return queryClient.invalidateQueries({ queryKey: AVAILABILITY_QUERY_KEYS.all });
     },
     onError: (error) => {
-      toast.error(getApiErrorDetail(error) ?? DELETE_BLOCK_ERROR);
+      toast.error(getApiErrorDetail(error) ?? "Error al eliminar el bloque de disponibilidad");
     },
   });
 

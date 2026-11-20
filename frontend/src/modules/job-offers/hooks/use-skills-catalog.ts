@@ -1,10 +1,9 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { JOB_OFFERS_QUERY_KEYS } from "../constants/vacancies.constants";
+import { JOB_OFFERS_QUERY_KEYS } from "../constants/job-offers-query-keys.constants";
 import { jobOffersService } from "../services/job-offers.service";
-
-export type SkillsCatalogStatus = "loading" | "ready" | "error";
+import type { SkillsCatalogStatus } from "../types/skills-catalog-status.types";
 
 export function useSkillsCatalog() {
   const query = useQuery({

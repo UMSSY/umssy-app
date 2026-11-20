@@ -2,7 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { DocumentReadingService } from './document-reading.service.js';
 import { AuditEventRecorderService } from '../../audit-events/services/audit-event-recorder.service.js';
 import { FilesService } from '../../files/services/files.service.js';
-import { InvalidDocumentTypeException, MissingDocumentFileException } from '../exceptions/index.js';
+import {
+  InvalidDocumentTypeException,
+  MissingDocumentFileException,
+} from '../exceptions/index.js';
 import { decodeUploadFileName } from '../helpers/decode-upload-file-name.js';
 import { toDocumentReplacedAuditEvent } from '../mappers/access-request-audit-event.mapper.js';
 import { DocumentCorrectionRepository } from '../repositories/document-correction.repository.js';
@@ -21,19 +24,37 @@ export class DocumentCorrectionService {
     private readonly documentReading: DocumentReadingService,
   ) {}
 
-  async resubmit(context: DocumentCorrectionContext, input: AttachDocumentInput) {
+  async resubmit(
+    context: DocumentCorrectionContext,
+    input: AttachDocumentInput,
+  ) {
     const { file, documentType } = input;
     if (!file) throw new MissingDocumentFileException();
-    if (!documentType || !Object.values<string>(ACCESS_REQUEST_DOCUMENT_TYPE).includes(documentType)) {
+    if (
+      !documentType ||
+      !Object.values<string>(ACCESS_REQUEST_DOCUMENT_TYPE).includes(
+        documentType,
+      )
+    ) {
       throw new InvalidDocumentTypeException();
     }
 
     const result = await this.repository.replaceRejectedDocument({
       context,
       documentType,
-      createFile: (tx) => this.files.create({ name: decodeUploadFileName(file.originalname), content: file.buffer }, tx),
+      createFile: (tx) =>
+        this.files.create(
+          {
+            name: decodeUploadFileName(file.originalname),
+            content: file.buffer,
+          },
+          tx,
+        ),
       onReplaced: async (previous, created, tx) => {
-        await this.audit.record(toDocumentReplacedAuditEvent(previous, created.id), tx);
+        await this.audit.record(
+          toDocumentReplacedAuditEvent(previous, created.id),
+          tx,
+        );
         await this.validation.queue(context.accessRequestId, tx);
       },
     });

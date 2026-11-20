@@ -4,7 +4,10 @@ import { buildSkillKey } from '../utils/build-skill-key.js';
 
 @Injectable()
 export class SkillsClassifierService {
-  classify(candidates: string[], catalog: DetectedSkillResponse[]): DetectedSkillResponse[] {
+  classify(
+    candidates: string[],
+    catalog: DetectedSkillResponse[],
+  ): DetectedSkillResponse[] {
     const catalogByKey = this.buildCatalogIndex(catalog);
     const detected = new Map<string, DetectedSkillResponse>();
 
@@ -18,7 +21,9 @@ export class SkillsClassifierService {
     return [...detected.values()];
   }
 
-  private buildCatalogIndex(catalog: DetectedSkillResponse[]): Map<string, DetectedSkillResponse> {
+  private buildCatalogIndex(
+    catalog: DetectedSkillResponse[],
+  ): Map<string, DetectedSkillResponse> {
     const skillsByKey = new Map<string, DetectedSkillResponse[]>();
 
     for (const skill of catalog) {

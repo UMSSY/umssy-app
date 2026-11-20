@@ -1,15 +1,17 @@
-
 "use client";
 
 import { useMemo, useState } from "react";
 import {
   ConfirmDeleteDialog,
   FeedbackMessage,
+  useProfileSkillsRadar,
+  useProfileCompletionRequest,
+  ProfileCompletenessProgress,
 } from "@/modules/profile";
-import { useProfileSkillsRadar } from "@/modules/profile";
+import type { DetectedSkill } from "@/modules/matching";
 import { RecordEditorDialog } from "@/shared/components/layout/record-editor-dialog";
-import { WorkExperienceForm } from "../components/work-experience-form";
-import { WorkExperienceListCard } from "../components/work-experience-list-card";
+import { WorkExperienceForm } from "./work-experience-form";
+import { WorkExperienceListCard } from "./work-experience-list-card";
 import { useDeleteWorkExperience } from "../hooks/use-delete-work-experience";
 import { useSaveWorkExperience } from "../hooks/use-save-work-experience";
 import { useWorkExperiences } from "../hooks/use-work-experiences";
@@ -31,34 +33,6 @@ export function WorkExperienceProfileSection() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [formVersion, setFormVersion] = useState(0);
 
-  const skillsByExperience = useMemo(() => {
-    const result: Record<string, string[]> = {};
-
-    for (const skill of radar?.skills ?? []) {
-      if (skill.source !== "nlp") {
-        continue;
-      }
-
-      for (const ref of skill.evidenceRefs) {
-        if (ref.type !== "work-experience") {
-          continue;
-        }
-
-        const current = result[ref.id] ?? [];
-
-        if (
-          !current.some(
-            (name) => name.toLowerCase() === skill.name.toLowerCase(),
-          )
-        ) {
-          result[ref.id] = [...current, skill.name];
-        }
-      }
-    }
-
-    return result;
-  }, [radar]);
-
   const resetForm = () => {
     setHasChanges(false);
     setIsFormOpen(false);
@@ -79,14 +53,53 @@ export function WorkExperienceProfileSection() {
     void reload();
   });
 
+  const detectedSkillsByExperience = useMemo(() => {
+    const result: Record<string, DetectedSkill[]> = {};
+
+    for (const skill of radar?.skills ?? []) {
+      if (!Array.isArray(skill.evidenceRefs)) {
+        continue;
+      }
+
+      for (const ref of skill.evidenceRefs) {
+        if (ref.type !== "work-experience" || !ref.id) {
+          continue;
+        }
+
+        const current = result[ref.id] ?? [];
+
+        if (!current.some((item) =>
+          item.id === skill.id || item.name.toLowerCase() === skill.name.toLowerCase(),
+        )) {
+          result[ref.id] = [
+            ...current,
+            {
+              id: skill.id,
+              name: skill.name,
+            },
+          ];
+        }
+      }
+    }
+
+    return result;
+  }, [radar]);
+
+  const skillsByExperience = useMemo(() =>
+    Object.fromEntries(
+      Object.entries(detectedSkillsByExperience).map(([id, skills]) => [
+        id,
+        skills.map((skill) => skill.name),
+      ]),
+    ),
+  [detectedSkillsByExperience]);
+
   const isBusy = saveMutation.isSaving || deleteMutation.isDeleting;
 
   const listFeedback: Feedback | null =
     deleteMutation.feedback ??
     (!isFormOpen ? saveMutation.feedback : null) ??
-    (error
-      ? { type: "error", message: error }
-      : null);
+    (error ? { type: "error", message: error } : null);
 
   const handleEdit = (experience: WorkExperienceItem) => {
     if (isBusy) {
@@ -112,6 +125,8 @@ export function WorkExperienceProfileSection() {
     setHasChanges(false);
     setIsFormOpen(true);
   };
+
+  useProfileCompletionRequest('work-experience', !isLoading && !error && !isBusy, handleCreate);
 
   const handleDelete = (experience: WorkExperienceItem) => {
     if (isBusy) {
@@ -160,7 +175,6 @@ export function WorkExperienceProfileSection() {
         onEdit={handleEdit}
         onDelete={handleDelete}
         skillsByExperience={skillsByExperience}
-        analysis={saveMutation.analysis}
       />
 
       {isFormOpen ? (
@@ -175,23 +189,32 @@ export function WorkExperienceProfileSection() {
           onClose={resetForm}
         >
           {(requestClose) => (
-            <WorkExperienceForm
-              key={
-                editingExperience
-                  ? editingExperience.id
-                  : `new-${formVersion}`
-              }
-              initialValues={
-                editingExperience
-                  ? toWorkExperienceFormValues(editingExperience)
-                  : undefined
-              }
-              isPending={saveMutation.isSaving}
-              feedback={saveMutation.feedback}
-              onValuesChange={() => setHasChanges(true)}
-              onSubmit={handleSubmit}
-              onCancel={requestClose}
-            />
+            <>
+              <ProfileCompletenessProgress showChecklist={false} />
+              <WorkExperienceForm
+                key={
+                  editingExperience
+                    ? editingExperience.id
+                    : `new-${formVersion}`
+                }
+                initialValues={
+                  editingExperience
+                    ? toWorkExperienceFormValues(editingExperience)
+                    : undefined
+                }
+                experienceId={editingExperience?.id}
+                initialDetectedSkills={
+                  editingExperience
+                    ? detectedSkillsByExperience[editingExperience.id] ?? []
+                    : []
+                }
+                isPending={saveMutation.isSaving}
+                feedback={saveMutation.feedback}
+                onValuesChange={() => setHasChanges(true)}
+                onSubmit={handleSubmit}
+                onCancel={requestClose}
+              />
+            </>
           )}
         </RecordEditorDialog>
       ) : null}

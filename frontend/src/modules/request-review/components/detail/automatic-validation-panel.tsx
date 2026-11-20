@@ -1,16 +1,32 @@
 import { CircleAlert, CircleCheck, CircleMinus } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { FIELD_RESULT_LABELS, QUEUED_DESCRIPTION, VALIDATION_FIELD_LABELS } from "../../constants/automatic-validation.constants";
+import { FIELD_RESULT_LABELS, QUEUED_DESCRIPTION, VALIDATION_FIELD_LABELS, VALIDATION_FIELD_ORDER } from "../../constants/automatic-validation.constants";
 import type { AutomaticValidationPanelProps } from "../../types/automatic-validation-props.types";
+import type { ValidationField, ValidationFieldOutcome } from "../../types/automatic-validation.types";
+import type { ReviewDetail } from "../../types/request-review.types";
 import { AutomationStatus } from "../inbox/automation-status";
 import { MatchScoreBar } from "../inbox/match-score-bar";
 
 const RESULT_ICONS = { match: CircleCheck, mismatch: CircleAlert, not_compared: CircleMinus } as const;
 const RESULT_CLASS = { match: "text-ink", mismatch: "text-danger", not_compared: "text-text-secondary" } as const;
+const HEAD_CLASS = "whitespace-normal";
+
+// Si la lectura no dejó datos, la tabla igual lista los campos declarados para que se vea qué quedó sin comparar
+function buildNotComparedFields(detail: ReviewDetail): ValidationFieldOutcome[] {
+  const declared: Record<ValidationField, string> = {
+    fullName: `${detail.firstName} ${detail.lastName}`.trim(),
+    career: detail.career,
+    graduationYear: String(detail.graduationYear),
+    idCardNumber: detail.idCardNumber,
+    sisCode: detail.sisCode,
+  };
+  return VALIDATION_FIELD_ORDER.map((field) => ({ field, declared: declared[field], read: null, result: "not_compared" }));
+}
 
 export function AutomaticValidationPanel({ detail }: AutomaticValidationPanelProps) {
   const validation = detail.validation;
   if (!validation) return null;
+  const fields = validation.fields.length > 0 ? validation.fields : buildNotComparedFields(detail);
 
   return (
     <section className="overflow-hidden rounded-lg border border-border bg-surface" aria-label="Validación automática">
@@ -29,14 +45,14 @@ export function AutomaticValidationPanel({ detail }: AutomaticValidationPanelPro
         <Table className="table-fixed">
           <TableHeader>
             <TableRow className="hover:bg-transparent">
-              <TableHead className="w-[26%]">Dato</TableHead>
-              <TableHead className="w-[28%]">Declarado</TableHead>
-              <TableHead className="w-[28%]">En el documento</TableHead>
-              <TableHead>Resultado</TableHead>
+              <TableHead className={`w-[26%] ${HEAD_CLASS}`}>Dato</TableHead>
+              <TableHead className={`w-[28%] ${HEAD_CLASS}`}>Declarado</TableHead>
+              <TableHead className={`w-[28%] ${HEAD_CLASS}`}>En el documento</TableHead>
+              <TableHead className={HEAD_CLASS}>Resultado</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {validation.fields.map((field) => {
+            {fields.map((field) => {
               const Icon = RESULT_ICONS[field.result];
               return (
                 <TableRow key={field.field} className="border-border">

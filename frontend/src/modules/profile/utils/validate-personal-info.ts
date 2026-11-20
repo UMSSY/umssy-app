@@ -1,4 +1,4 @@
-import { NAME_MAX_LENGTH, PROFILE_VALIDATION_MESSAGES } from "../constants/profile-validation.constants";
+import { PROFILE_VALIDATION_MESSAGES } from "../constants/profile-validation.constants";
 import type { PersonalInfoErrors } from "../types/personal-info-errors.types";
 import type { PersonalInfoValues } from "../types/personal-info-values.types";
 import { isValidEmail } from "./is-valid-email";
@@ -9,7 +9,7 @@ function validateName(name: string): string | undefined {
     return PROFILE_VALIDATION_MESSAGES.required;
   }
 
-  if (name.length > NAME_MAX_LENGTH) {
+  if (name.length > 100) {
     return PROFILE_VALIDATION_MESSAGES.nameTooLong;
   }
 

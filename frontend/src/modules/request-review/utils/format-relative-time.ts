@@ -1,7 +1,6 @@
-import { DAY_MS, MINUTE_MS } from "@/shared/constants/date-time.constants";
+import { DAY_MS, HOUR_MS, MINUTE_MS } from "@/shared/constants/date-time.constants";
 import { formatDate } from "@/shared/utils/date.utils";
 
-const HOUR_MS = 60 * MINUTE_MS;
 const MAX_RELATIVE_DAYS = 30;
 
 export function formatRelativeTime(isoDate: string | null | undefined, now: Date = new Date()): string {

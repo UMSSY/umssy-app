@@ -1,4 +1,11 @@
-import { Controller, Get, Param, ParseUUIDPipe, Patch, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator.js';
 import { Roles } from '../../../common/decorators/roles.decorator.js';
@@ -11,7 +18,10 @@ import { BACKOFFICE_ROLE } from '../constants/backoffice.constants.js';
 import { AutomaticValidationService } from '../services/automatic-validation.service.js';
 
 const uuidPipe = new ParseUUIDPipe({
-  exceptionFactory: () => new RequestValidationException([{ field: 'id', message: 'El identificador de la solicitud no es válido' }]),
+  exceptionFactory: () =>
+    new RequestValidationException([
+      { field: 'id', message: 'El identificador de la solicitud no es válido' },
+    ]),
 });
 
 @ApiTags('Validación automática')
@@ -35,7 +45,10 @@ export class AccessRequestAutomationController {
   }
 
   @Patch(':id/revert-approval')
-  revertApproval(@Param('id', uuidPipe) id: string, @CurrentUser() user: AuthenticatedUser) {
+  revertApproval(
+    @Param('id', uuidPipe) id: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
     return this.automaticValidationService.revertApproval(id, user.id);
   }
 }

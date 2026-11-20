@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { NLP_SOURCE_TEXT_MAX_LENGTH, NLP_VALIDATION_MESSAGES } from '../constants/nlp-validation.constants.js';
+import { NLP_VALIDATION_MESSAGES } from '../constants/nlp-validation.constants.js';
 import { SkillValidationService } from '../services/skill-validation.service.js';
 import type { NlpCatalogSkill } from '../types/nlp-catalog-skill.type.js';
 import { validateSkillName } from '../utils/validate-skill-name.js';
@@ -13,7 +13,10 @@ const catalog: NlpCatalogSkill[] = [
 
 describe('validateSkillName', () => {
   it('accepts a valid name and corrects extra spaces', () => {
-    expect(validateSkillName('  Spring    Boot ')).toEqual({ isValid: true, name: 'Spring Boot' });
+    expect(validateSkillName('  Spring    Boot ')).toEqual({
+      isValid: true,
+      name: 'Spring Boot',
+    });
     expect(validateSkillName('C++')).toEqual({ isValid: true, name: 'C++' });
     expect(validateSkillName('C#')).toEqual({ isValid: true, name: 'C#' });
   });
@@ -30,7 +33,10 @@ describe('validateSkillName', () => {
   });
 
   it('treats a missing name as empty', () => {
-    expect(validateSkillName(null as unknown as string)).toEqual({ isValid: false, reason: 'empty-name' });
+    expect(validateSkillName(null as unknown as string)).toEqual({
+      isValid: false,
+      reason: 'empty-name',
+    });
   });
 
   it('has a message for every discard reason', () => {
@@ -46,18 +52,35 @@ describe('SkillValidationService', () => {
   it('rejects a whole text over the limit instead of truncating it', () => {
     const validation = service.validateSources([
       { id: 'short', type: 'work-experience', text: 'Docker' },
-      { id: 'long', type: 'education', text: 'x'.repeat(NLP_SOURCE_TEXT_MAX_LENGTH + 1) },
+      {
+        id: 'long',
+        type: 'education',
+        text: 'x'.repeat(20_000 + 1),
+      },
     ]);
 
     expect(validation.accepted.map((source) => source.id)).toEqual(['short']);
     expect(validation.rejected).toEqual([
-      { id: 'long', type: 'education', reason: 'source-too-long', message: NLP_VALIDATION_MESSAGES['source-too-long'] },
+      {
+        id: 'long',
+        type: 'education',
+        reason: 'source-too-long',
+        message: NLP_VALIDATION_MESSAGES['source-too-long'],
+      },
     ]);
   });
 
   it('keeps detections that exist in the catalog with their catalog id', () => {
     const validation = service.validateDetected(
-      [{ name: 'Node.js', evidenceRefs: [{ type: 'work-experience', id: 'b' }, { type: 'work-experience', id: 'a' }] }],
+      [
+        {
+          name: 'Node.js',
+          evidenceRefs: [
+            { type: 'work-experience', id: 'b' },
+            { type: 'work-experience', id: 'a' },
+          ],
+        },
+      ],
       catalog,
     );
 
@@ -67,7 +90,10 @@ describe('SkillValidationService', () => {
         name: 'Node.js',
         source: 'nlp',
         verificationStatus: 'pending',
-        evidenceRefs: [{ type: 'work-experience', id: 'a' }, { type: 'work-experience', id: 'b' }],
+        evidenceRefs: [
+          { type: 'work-experience', id: 'a' },
+          { type: 'work-experience', id: 'b' },
+        ],
       },
     ]);
     expect(validation.discarded).toEqual([]);
@@ -81,7 +107,11 @@ describe('SkillValidationService', () => {
 
     expect(validation.accepted).toEqual([]);
     expect(validation.discarded).toEqual([
-      { name: 'Kubernetes', reason: 'not-in-catalog', message: NLP_VALIDATION_MESSAGES['not-in-catalog'] },
+      {
+        name: 'Kubernetes',
+        reason: 'not-in-catalog',
+        message: NLP_VALIDATION_MESSAGES['not-in-catalog'],
+      },
     ]);
   });
 
@@ -90,14 +120,20 @@ describe('SkillValidationService', () => {
       [{ name: 'PostgreSQL', evidenceRefs: [{ type: 'education', id: 'e1' }] }],
       catalog,
     );
-    expect(validation.accepted.map((skill) => [skill.id, skill.name])).toEqual([['skill-postgres', 'Postgres']]);
+
+    expect(validation.accepted.map((skill) => [skill.id, skill.name])).toEqual([
+      ['skill-postgres', 'Postgres'],
+    ]);
   });
 
   it('merges two detections that point to the same catalog skill', () => {
     const validation = service.validateDetected(
       [
         { name: 'HTML5', evidenceRefs: [{ type: 'education', id: 'e1' }] },
-        { name: 'html5', evidenceRefs: [{ type: 'work-experience', id: 'w1' }] },
+        {
+          name: 'html5',
+          evidenceRefs: [{ type: 'work-experience', id: 'w1' }],
+        },
       ],
       catalog,
     );
@@ -117,7 +153,11 @@ describe('SkillValidationService', () => {
 
     expect(validation.accepted).toEqual([]);
     expect(validation.discarded).toEqual([
-      { name: 'Docker', reason: 'invalid-characters', message: NLP_VALIDATION_MESSAGES['invalid-characters'] },
+      {
+        name: 'Docker',
+        reason: 'invalid-characters',
+        message: NLP_VALIDATION_MESSAGES['invalid-characters'],
+      },
     ]);
   });
 
@@ -128,5 +168,30 @@ describe('SkillValidationService', () => {
     );
 
     expect(validation.accepted.map((skill) => skill.name)).toEqual(['Docker']);
+  });
+
+  it('accepts a new official catalog skill without a static dictionary entry', () => {
+    const validation = service.validateDetected(
+      [
+        {
+          name: 'Power Automate',
+          evidenceRefs: [{ type: 'work-experience', id: 'e1' }],
+        },
+      ],
+      [
+        ...catalog,
+        {
+          id: 'skill-power-automate',
+          name: 'Power Automate',
+          areaId: 'automation',
+        },
+      ],
+    );
+
+    expect(validation.accepted.map(({ id, name }) => [id, name])).toEqual([
+      ['skill-power-automate', 'Power Automate'],
+    ]);
+
+    expect(validation.discarded).toEqual([]);
   });
 });

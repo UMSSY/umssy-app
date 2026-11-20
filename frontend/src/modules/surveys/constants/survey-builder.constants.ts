@@ -1,7 +1,9 @@
-import { SESSION_DRAFT_STORAGE_PREFIX } from "@/modules/auth";
+import { SESSION_DRAFT_STORAGE_PREFIX } from "@/modules/auth/constants/session.constants";
 import { CircleDot, SquareCheck, SquareChevronDown } from "lucide-react";
 import type { QuestionTypeOption } from "../types/question-type-option.types";
-import type { QuestionType, SurveyDisplayStatus, SurveyTargetAudience } from "../types/survey.types";
+import type { QuestionType } from "../types/question-type.types";
+import type { SurveyDisplayStatus } from "../types/survey-display-status.types";
+import type { SurveyTargetAudience } from "../types/survey-target-audience.types";
 
 export const SURVEY_LIMITS = {
   titleMin: 5,
@@ -12,10 +14,6 @@ export const SURVEY_LIMITS = {
   minOptions: 2,
 } as const;
 
-export const DEFAULT_QUESTION_TYPE: QuestionType = "single_choice";
-export const DEFAULT_OPTION_COUNT = 2;
-
-export const FIRST_SURVEY_YEAR = 2020;
 export const ALL_ACADEMIC_PERIODS_VALUE = "Todas";
 export const ALL_ACADEMIC_PERIODS_OPTION_LABEL = "Todas";
 export const ALL_CAREERS_VALUE = "all";
@@ -54,8 +52,8 @@ export const SURVEY_STATUS_LABELS: Readonly<Record<SurveyDisplayStatus, string>>
 
 export const SURVEY_STATUS_BADGE_CLASSES: Readonly<Record<SurveyDisplayStatus, string>> = {
   draft: "border-gold/50 bg-gold/15 text-ink",
-  published: "border-accent/30 bg-interaction text-accent",
-  closed: "border-border bg-surface-soft text-text-secondary",
+  published: "border-success/30 bg-success/10 text-success",
+  closed: "border-danger/30 bg-danger/10 text-danger",
 };
 
 export const SURVEY_TEXT = {
@@ -87,8 +85,10 @@ export const SURVEY_TEXT = {
   keepEditing: "Seguir editando",
   close: "Cerrar",
   optionPlaceholder: (position: number) => `Opción ${position}`,
-  optionsCount: (count: number) => `${count} ${count === 1 ? "opción" : "opciones"}`,
-  questionsSummary: (total: number, required: number) => `${total} (${required} ${required === 1 ? "obligatoria" : "obligatorias"})`,
+  optionsCount: (count: number) =>
+    `${count} ${count === 1 ? "opción" : "opciones"}`,
+  questionsSummary: (total: number, required: number) =>
+    `${total} (${required} ${required === 1 ? "obligatoria" : "obligatorias"})`,
   questionLabel: (position: number) => `Pregunta ${position}`,
 } as const;
 
@@ -118,3 +118,6 @@ export const SURVEY_ARIA = {
 export const SURVEY_CREATE_DRAFT_STORAGE_KEY = `${SESSION_DRAFT_STORAGE_PREFIX}survey-create`;
 
 export const SURVEY_EDIT_DRAFT_STORAGE_KEY = (surveyId: string) => `${SESSION_DRAFT_STORAGE_PREFIX}survey-edit:${surveyId}`;
+
+export const SURVEY_EDIT_DRAFT_BASE_STORAGE_KEY = (surveyId: string) =>
+  `${SESSION_DRAFT_STORAGE_PREFIX}survey-edit-base:${surveyId}`;

@@ -18,4 +18,3 @@ export const linkPreviewQuerySchema = z
 
 export type LinkPreviewQuery = z.infer<typeof linkPreviewQuerySchema>;
 export type LinkPreviewQueryDto = LinkPreviewQuery;
-

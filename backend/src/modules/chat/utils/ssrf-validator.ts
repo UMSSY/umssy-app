@@ -6,7 +6,10 @@ import * as net from 'node:net';
  */
 export function isPrivateOrReservedIPv4(ip: string): boolean {
   const parts = ip.split('.').map((part) => Number.parseInt(part, 10));
-  if (parts.length !== 4 || parts.some((part) => Number.isNaN(part) || part < 0 || part > 255)) {
+  if (
+    parts.length !== 4 ||
+    parts.some((part) => Number.isNaN(part) || part < 0 || part > 255)
+  ) {
     return true; // Malformed IPv4 is treated as unsafe
   }
 
@@ -64,12 +67,19 @@ export function isPrivateOrReservedIPv6(ip: string): boolean {
   const normalized = ip.toLowerCase().trim();
 
   // :: or ::1 (Unspecified / Loopback)
-  if (normalized === '::' || normalized === '::1' || normalized === '0:0:0:0:0:0:0:1') {
+  if (
+    normalized === '::' ||
+    normalized === '::1' ||
+    normalized === '0:0:0:0:0:0:0:1'
+  ) {
     return true;
   }
 
   // IPv4-mapped IPv6 (::ffff:192.168.1.1 or ::ffff:c0a8:0101)
-  if (normalized.startsWith('::ffff:') || normalized.startsWith('0:0:0:0:0:ffff:')) {
+  if (
+    normalized.startsWith('::ffff:') ||
+    normalized.startsWith('0:0:0:0:0:ffff:')
+  ) {
     const rawIpv4 = normalized.split(':').pop() ?? '';
     if (net.isIPv4(rawIpv4)) {
       return isPrivateOrReservedIPv4(rawIpv4);
@@ -169,4 +179,3 @@ export async function validateSafeUrl(rawUrl: string): Promise<boolean> {
 
   return true;
 }
-

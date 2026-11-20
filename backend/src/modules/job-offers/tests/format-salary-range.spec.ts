@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { formatBolivianos, formatSalaryRange } from '../utils/format-salary-range.js';
+import {
+  formatBolivianos,
+  formatSalaryRange,
+} from '../utils/format-salary-range.js';
 
 describe('formatBolivianos', () => {
   it('agrega el prefijo Bs y el separador de miles', () => {

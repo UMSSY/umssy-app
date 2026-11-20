@@ -48,8 +48,10 @@ describe('EducationsRepository', () => {
     vi.resetAllMocks();
     education.findMany.mockResolvedValue([]);
     education.findFirst.mockResolvedValue(record);
-    transaction.mockImplementation((operation: (tx: Prisma.TransactionClient) => Promise<unknown>) =>
-      operation({ education } as unknown as Prisma.TransactionClient));
+    transaction.mockImplementation(
+      (operation: (tx: Prisma.TransactionClient) => Promise<unknown>) =>
+        operation({ education } as unknown as Prisma.TransactionClient),
+    );
     repository = new EducationsRepository({
       education,
       $transaction: transaction,
@@ -58,72 +60,140 @@ describe('EducationsRepository', () => {
 
   it('rejects a degree invalidated by a concurrent institution change before writing', async () => {
     education.findFirst.mockResolvedValue({ ...record, institution: 'UMSS' });
-    await expect(repository.update(educationId, userId, { degree: 'Ingeniería en Inteligencia Artificial' }, expectedPeriod))
-      .rejects.toBeInstanceOf(RequestValidationException);
+    await expect(
+      repository.update(
+        educationId,
+        userId,
+        { degree: 'Ingeniería en Inteligencia Artificial' },
+        expectedPeriod,
+      ),
+    ).rejects.toBeInstanceOf(RequestValidationException);
     expect(education.updateManyAndReturn).not.toHaveBeenCalled();
   });
 
   it('rejects equivalent institution names and titles despite case, accents and extra spaces', async () => {
-    education.findMany.mockResolvedValue([{ institution: '  UNIVERSIDAD   MAYOR DE SAN SIMON ', degree: '  INGENIERIA   QUIMICA ' }]);
-    await expect(repository.create(userId, {
-      institution: 'Universidad Mayor de San Simón', degree: 'Ingeniería Química',
-      startDate: record.startDate, endDate: new Date('2024-01-01'),
-    })).rejects.toBeInstanceOf(DuplicateEducationException);
+    education.findMany.mockResolvedValue([
+      {
+        institution: '  UNIVERSIDAD   MAYOR DE SAN SIMON ',
+        degree: '  INGENIERIA   QUIMICA ',
+      },
+    ]);
+    await expect(
+      repository.create(userId, {
+        institution: 'Universidad Mayor de San Simón',
+        degree: 'Ingeniería Química',
+        startDate: record.startDate,
+        endDate: new Date('2024-01-01'),
+      }),
+    ).rejects.toBeInstanceOf(DuplicateEducationException);
     expect(education.create).not.toHaveBeenCalled();
-    expect(transaction).toHaveBeenCalledWith(expect.any(Function), { isolationLevel: 'Serializable' });
+    expect(transaction).toHaveBeenCalledWith(expect.any(Function), {
+      isolationLevel: 'Serializable',
+    });
     expect(education.findMany).toHaveBeenCalledWith({
-      where: { userId, startDate: record.startDate, endDate: new Date('2024-01-01') },
+      where: {
+        userId,
+        startDate: record.startDate,
+        endDate: new Date('2024-01-01'),
+      },
       select: { institution: true, degree: true },
     });
   });
 
   it('rejects an edit that becomes another record, excluding only the edited ID', async () => {
-    education.findMany.mockResolvedValue([{ institution: record.institution, degree: 'Ingeniería Civil' }]);
-    await expect(repository.update(educationId, userId, { degree: 'Ingeniería Civil' }, expectedPeriod))
-      .rejects.toBeInstanceOf(DuplicateEducationException);
+    education.findMany.mockResolvedValue([
+      { institution: record.institution, degree: 'Ingeniería Civil' },
+    ]);
+    await expect(
+      repository.update(
+        educationId,
+        userId,
+        { degree: 'Ingeniería Civil' },
+        expectedPeriod,
+      ),
+    ).rejects.toBeInstanceOf(DuplicateEducationException);
     expect(education.updateManyAndReturn).not.toHaveBeenCalled();
-    expect(education.findMany).toHaveBeenCalledWith(expect.objectContaining({
-      where: { userId, startDate: record.startDate, endDate: null, id: { not: educationId } },
-    }));
+    expect(education.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          userId,
+          startDate: record.startDate,
+          endDate: null,
+          id: { not: educationId },
+        },
+      }),
+    );
   });
 
   it('does not overwrite a newer period after retrying a transaction conflict', async () => {
     transaction.mockRejectedValueOnce({ code: 'P2034' });
     education.findFirst.mockResolvedValue(null);
-    await expect(repository.update(educationId, userId, { degree: 'Ingeniería Industrial' }, expectedPeriod)).resolves.toBeNull();
+    await expect(
+      repository.update(
+        educationId,
+        userId,
+        { degree: 'Ingeniería Industrial' },
+        expectedPeriod,
+      ),
+    ).resolves.toBeNull();
     expect(transaction).toHaveBeenCalledTimes(2);
     expect(education.create).not.toHaveBeenCalled();
     expect(education.updateManyAndReturn).not.toHaveBeenCalled();
   });
 
-  it.each(['UMSS', 'universidad mayor de san simon', 'Universidad Mayor de San Simón (UMSS)'])('keeps duplicate protection for legacy alias %s on create and edit', async (institution) => {
-    education.findMany.mockResolvedValue([{ institution, degree: record.degree }]);
-    const data = { institution: 'Universidad Mayor de San Simón (UMSS)', degree: record.degree };
-    await expect(repository.create(userId, { ...data, startDate: record.startDate, endDate: new Date('2024-01-01') }))
-      .rejects.toBeInstanceOf(DuplicateEducationException);
-    await expect(repository.update(educationId, userId, data, expectedPeriod)).rejects.toBeInstanceOf(DuplicateEducationException);
-    expect(education.create).not.toHaveBeenCalled();
-    expect(education.updateManyAndReturn).not.toHaveBeenCalled();
-  });
+  it.each([
+    'UMSS',
+    'universidad mayor de san simon',
+    'Universidad Mayor de San Simón (UMSS)',
+  ])(
+    'keeps duplicate protection for legacy alias %s on create and edit',
+    async (institution) => {
+      education.findMany.mockResolvedValue([
+        { institution, degree: record.degree },
+      ]);
+      const data = {
+        institution: 'Universidad Mayor de San Simón (UMSS)',
+        degree: record.degree,
+      };
+      await expect(
+        repository.create(userId, {
+          ...data,
+          startDate: record.startDate,
+          endDate: new Date('2024-01-01'),
+        }),
+      ).rejects.toBeInstanceOf(DuplicateEducationException);
+      await expect(
+        repository.update(educationId, userId, data, expectedPeriod),
+      ).rejects.toBeInstanceOf(DuplicateEducationException);
+      expect(education.create).not.toHaveBeenCalled();
+      expect(education.updateManyAndReturn).not.toHaveBeenCalled();
+    },
+  );
 
   it('rechecks for duplicates after a serializable conflict instead of repeating just the write', async () => {
     transaction.mockRejectedValueOnce({ code: 'P2034' });
-    education.findMany.mockResolvedValue([{ institution: record.institution, degree: record.degree }]);
-    await expect(repository.create(userId, { ...record, endDate: new Date('2024-01-01') }))
-      .rejects.toBeInstanceOf(DuplicateEducationException);
+    education.findMany.mockResolvedValue([
+      { institution: record.institution, degree: record.degree },
+    ]);
+    await expect(
+      repository.create(userId, { ...record, endDate: new Date('2024-01-01') }),
+    ).rejects.toBeInstanceOf(DuplicateEducationException);
     expect(transaction).toHaveBeenCalledTimes(2);
     expect(education.create).not.toHaveBeenCalled();
   });
 
   it('bounds transaction retries and propagates unrelated database errors', async () => {
     transaction.mockRejectedValue({ code: 'P2034' });
-    await expect(repository.create(userId, { ...record, endDate: new Date('2024-01-01') }))
-      .rejects.toBeInstanceOf(EducationWriteConflictException);
+    await expect(
+      repository.create(userId, { ...record, endDate: new Date('2024-01-01') }),
+    ).rejects.toBeInstanceOf(EducationWriteConflictException);
     expect(transaction).toHaveBeenCalledTimes(3);
     transaction.mockClear();
     const error = new Error('Connection unavailable');
     transaction.mockRejectedValue(error);
-    await expect(repository.create(userId, { ...record, endDate: new Date('2024-01-01') })).rejects.toBe(error);
+    await expect(
+      repository.create(userId, { ...record, endDate: new Date('2024-01-01') }),
+    ).rejects.toBe(error);
     expect(transaction).toHaveBeenCalledOnce();
   });
 
@@ -195,15 +265,18 @@ describe('EducationsRepository', () => {
   });
 
   it('scopes updates to the owner and returns only selected fields', async () => {
-    const data = { degree: 'Ingeniería Química', endDate: new Date('2024-01-01') };
+    const data = {
+      degree: 'Ingeniería Química',
+      endDate: new Date('2024-01-01'),
+    };
     education.updateManyAndReturn.mockResolvedValue([{ ...record, ...data }]);
 
-    await expect(repository.update(educationId, userId, data, expectedPeriod)).resolves.toEqual(
-      {
-        ...record,
-        ...data,
-      },
-    );
+    await expect(
+      repository.update(educationId, userId, data, expectedPeriod),
+    ).resolves.toEqual({
+      ...record,
+      ...data,
+    });
     expect(education.updateManyAndReturn).toHaveBeenCalledWith({
       where: { id: educationId, userId, ...expectedPeriod },
       data,
@@ -214,7 +287,12 @@ describe('EducationsRepository', () => {
   it('returns null when no owned record can be updated', async () => {
     education.updateManyAndReturn.mockResolvedValue([]);
     await expect(
-      repository.update(educationId, userId, { degree: 'Ingeniería Industrial' }, expectedPeriod),
+      repository.update(
+        educationId,
+        userId,
+        { degree: 'Ingeniería Industrial' },
+        expectedPeriod,
+      ),
     ).resolves.toBeNull();
   });
 
@@ -233,13 +311,46 @@ describe('EducationsRepository', () => {
   );
 
   it('matches non-null dates in the atomic update filter', async () => {
-    const period = { startDate: record.startDate, endDate: new Date('2024-01-01') };
+    const period = {
+      startDate: record.startDate,
+      endDate: new Date('2024-01-01'),
+    };
     education.updateManyAndReturn.mockResolvedValue([]);
-    await expect(repository.update(educationId, userId, { degree: 'Ingeniería Industrial' }, period)).resolves.toBeNull();
+    await expect(
+      repository.update(
+        educationId,
+        userId,
+        { degree: 'Ingeniería Industrial' },
+        period,
+      ),
+    ).resolves.toBeNull();
     expect(education.updateManyAndReturn).toHaveBeenCalledWith({
       where: { id: educationId, userId, ...period },
       data: { degree: 'Ingeniería Industrial' },
       select: expectedSelect,
+    });
+  });
+
+  it('extracts text sources for NLP processing', async () => {
+    education.findMany.mockResolvedValue([
+      {
+        id: 'e1',
+        degree: 'Ingeniería de Sistemas',
+        description: 'Mención software',
+      },
+    ]);
+
+    await expect(repository.findAnalysisSources(userId)).resolves.toEqual([
+      {
+        id: 'e1',
+        degree: 'Ingeniería de Sistemas',
+        description: 'Mención software',
+      },
+    ]);
+    expect(education.findMany).toHaveBeenCalledWith({
+      where: { userId },
+      orderBy: [{ startDate: 'desc' }, { id: 'desc' }],
+      select: { id: true, degree: true, description: true },
     });
   });
 });

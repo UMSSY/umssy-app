@@ -43,7 +43,9 @@ export function validateWorkExperience(values: WorkExperienceFormValues): WorkEx
     errors.position = WORK_EXPERIENCE_VALIDATION_MESSAGES.positionTooLong;
   }
 
-  if (description.length > WORK_EXPERIENCE_DESCRIPTION_MAX_LENGTH) {
+  if (!description) {
+    errors.description = WORK_EXPERIENCE_VALIDATION_MESSAGES.required;
+  } else if (description.length > WORK_EXPERIENCE_DESCRIPTION_MAX_LENGTH) {
     errors.description = WORK_EXPERIENCE_VALIDATION_MESSAGES.descriptionTooLong;
   }
 

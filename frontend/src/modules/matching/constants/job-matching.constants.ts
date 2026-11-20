@@ -1,13 +1,11 @@
 import type { JobFeedFilters } from "../types/job-feed-filters.types";
 import type { BreadcrumbEntry } from "@/shared/types/breadcrumb-entry.types";
 
-export const RECOMMENDED_JOBS_ENDPOINT = "/job-offers/recommendations";
 export function getJobMatchEndpoint(jobOfferId: string): string {
   return `/job-offers/${jobOfferId}/match`;
 }
 
 export const JOBS_ROUTE = "/vacancies/recommended";
-export const PROFILE_SKILLS_ROUTE = "/profile/trajectory/skills";
 
 export const JOB_MATCHING_QUERY_KEYS = {
   recommendations: ["job-matching", "recommendations"] as const,
@@ -33,15 +31,16 @@ export const JOB_MATCHING_MESSAGES = {
   pageDescription: "Encuentra ofertas según las habilidades de tu perfil.",
   scoreInfoTitle: "¿Qué es la afinidad?",
   scoreInfoText:
-    "Comparamos tu perfil con los requisitos de cada vacante para calcular su afinidad; es una guía para priorizar, no una garantía de contratación.",
+    "Comparamos tus habilidades con las que pide cada vacante para calcular su afinidad; es una guía para priorizar, no una garantía de contratación.",
   matchedLabel: "Coincide contigo",
+  highAffinityLabel: "Alta afinidad",
   viewJob: "Ver vacante",
   viewLocation: "Ver ubicación",
   back: "Volver",
   requirementsTitle: "Requisitos vs. tu perfil",
   descriptionTitle: "Descripción",
   scoreCaption: "de afinidad con tu perfil",
-  noPendingRequirements: "No tienes habilidades ni requisitos visibles pendientes para esta oportunidad",
+  noPendingRequirements: "Para esta oportunidad no tienes habilidades pendientes",
   loadError: "No pudimos cargar la información. Intenta nuevamente.",
   retry: "Reintentar",
   notFound: "Esta vacante ya no está disponible.",
@@ -62,8 +61,6 @@ export const EMPTY_JOB_FEED_FILTERS: JobFeedFilters = {
   modality: null,
   onlyHighAffinity: false,
 };
-
-export const JOB_FEED_MODALITIES = ["Presencial", "Remoto", "Híbrido"] as const;
 
 export const JOB_FEED_MESSAGES = {
   listTitle: "Vacantes recomendadas para ti",

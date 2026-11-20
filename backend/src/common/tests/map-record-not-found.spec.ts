@@ -14,7 +14,8 @@ const buildPrismaError = (code: string) =>
 
 class RecordNotFoundException extends DomainException {}
 
-const createNotFound = () => new RecordNotFoundException('Record not found', 404, 'RECORD_NOT_FOUND');
+const createNotFound = () =>
+  new RecordNotFoundException('Record not found', 404, 'RECORD_NOT_FOUND');
 
 describe('isRecordNotFoundError', () => {
   it('recognizes the Prisma record not found error', () => {
@@ -29,20 +30,25 @@ describe('isRecordNotFoundError', () => {
 
 describe('mapRecordNotFound', () => {
   it('returns the result of the operation', async () => {
-    await expect(mapRecordNotFound(Promise.resolve('saved'), createNotFound)).resolves.toBe(
-      'saved',
-    );
+    await expect(
+      mapRecordNotFound(Promise.resolve('saved'), createNotFound),
+    ).resolves.toBe('saved');
   });
 
   it('throws the domain exception when the record does not exist', async () => {
     await expect(
-      mapRecordNotFound(Promise.reject(buildPrismaError('P2025')), createNotFound),
+      mapRecordNotFound(
+        Promise.reject(buildPrismaError('P2025')),
+        createNotFound,
+      ),
     ).rejects.toMatchObject({ message: 'Record not found', statusCode: 404 });
   });
 
   it('rethrows any other error', async () => {
     const error = buildPrismaError('P2002');
 
-    await expect(mapRecordNotFound(Promise.reject(error), createNotFound)).rejects.toBe(error);
+    await expect(
+      mapRecordNotFound(Promise.reject(error), createNotFound),
+    ).rejects.toBe(error);
   });
 });

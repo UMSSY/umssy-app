@@ -1,3 +1,5 @@
+import "@/shared/testing/indexed-db.mock";
+import { saveAccessToken } from "@/shared/services/storage/access-token-storage";
 import { cleanup, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import userEvent from "@testing-library/user-event";
@@ -36,9 +38,11 @@ vi.mock("@/modules/matching/services/job-application.service", () => ({
 }));
 
 describe("Vacancy routes", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     stubMatchMedia();
-    sessionStorage.setItem("accessToken", `h.${btoa(JSON.stringify({ roleTag: "titulado" }))}.s`);
+    await saveAccessToken(
+      `h.${btoa(JSON.stringify({ roleTag: "titulado" }))}.s`,
+    );
   });
   afterEach(() => {
     cleanup();
@@ -46,13 +50,16 @@ describe("Vacancy routes", () => {
     vi.unstubAllGlobals();
   });
 
-  it.each([VacanciesPage])("renders vacancy listings inside one app navigation", async (Page) => {
-    renderWithQuery(<AppLayout><Page /></AppLayout>);
+  it.each([VacanciesPage])(
+    "renders vacancy listings inside one app navigation",
+    async (Page) => {
+      renderWithQuery(<AppLayout><Page /></AppLayout>);
 
-    expect(screen.getAllByRole("navigation", { name: "Menú principal" })).toHaveLength(1);
-    expect(screen.getByRole("heading", { name: "Vacantes", level: 1 })).toBeDefined();
-    expect((await screen.findAllByRole("link", { name: /^Ver detalles de / }, ASYNC_RENDER))[0]).toHaveAttribute("href", `/vacancies/${VACANCY.id}`);
-  });
+      expect(screen.getAllByRole("navigation", { name: "Menú principal" })).toHaveLength(1);
+      expect(screen.getByRole("heading", { name: "Vacantes", level: 1 })).toBeDefined();
+      expect((await screen.findAllByRole("link", { name: /^Ver detalles de / }, ASYNC_RENDER))[0]).toHaveAttribute("href", `/vacancies/${VACANCY.id}`);
+    },
+  );
 
   it("opens details over the listing and restores the listing on Escape", async () => {
     const user = userEvent.setup();

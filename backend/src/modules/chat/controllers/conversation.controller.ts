@@ -17,6 +17,7 @@ import { CurrentUser } from '../../../common/decorators/current-user.decorator.j
 import { ResponseInterceptor } from '../../../common/interceptors/index.js';
 import type { AuthenticatedUser } from '../../../common/types/authenticated-user.types.js';
 import { ConversationService } from '../services/conversation.service.js';
+import { ChatGateway } from '../gateways/chat.gateway.js';
 import {
   createConversationSchema,
   type CreateConversationDto,
@@ -28,7 +29,10 @@ import type { ConversationResponse } from '../responses/conversation.response.js
 @Roles('titulado', 'estudiante', 'mentor', 'empresa')
 @UseInterceptors(ResponseInterceptor)
 export class ConversationController {
-  constructor(private readonly conversationService: ConversationService) {}
+  constructor(
+    private readonly conversationService: ConversationService,
+    private readonly chatGateway: ChatGateway,
+  ) {}
 
   @Get()
   findAll(
@@ -47,10 +51,27 @@ export class ConversationController {
     const result = await this.conversationService.getOrCreateWithStatus(
       user.id,
       body.contactId,
+      body.contextType && body.contextId
+        ? { contextType: body.contextType, contextId: body.contextId }
+        : undefined,
     );
     if (!result.isCreated) {
       res.status(HttpStatus.OK);
     }
+
+    if (result.isCreated) {
+      this.chatGateway.joinUsersToConversation(
+        [user.id, body.contactId],
+        result.conversation.id,
+      );
+
+      this.chatGateway.notifyUser(
+        body.contactId,
+        'conversation:new',
+        result.conversation,
+      );
+    }
+
     return result.conversation;
   }
 }

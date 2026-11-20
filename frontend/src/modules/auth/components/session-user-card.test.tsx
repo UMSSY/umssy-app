@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { profileService } from "@/modules/profile";
@@ -18,7 +18,18 @@ function renderCard() {
 }
 
 describe("SessionUserCard", () => {
-  it("ends the session, clears cached data and redirects to login", async () => {
+  it("asks for confirmation before ending the session", async () => {
+    vi.mocked(getAccessToken).mockReturnValue("token");
+    vi.mocked(profileService.getProfile).mockResolvedValue({ firstName: "Usuario", lastName: "De Prueba" } as Awaited<ReturnType<typeof profileService.getProfile>>);
+    renderCard();
+    await screen.findByText("Usuario De Prueba");
+    fireEvent.click(screen.getByRole("button", { name: "Cerrar sesión" }));
+
+    expect(await screen.findByText("¿Seguro que deseas cerrar sesión?")).toBeInTheDocument();
+    expect(clearAccessToken).not.toHaveBeenCalled();
+    expect(replace).not.toHaveBeenCalled();
+  });
+  it("ends the session, clears cached data and redirects to login once confirmed", async () => {
     vi.mocked(getAccessToken).mockReturnValue("token");
     vi.mocked(profileService.getProfile).mockResolvedValue({ firstName: "Usuario", lastName: "De Prueba" } as Awaited<ReturnType<typeof profileService.getProfile>>);
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -26,9 +37,11 @@ describe("SessionUserCard", () => {
     render(<QueryClientProvider client={client}><SessionUserCard /></QueryClientProvider>);
     await screen.findByText("Usuario De Prueba");
     fireEvent.click(screen.getByRole("button", { name: "Cerrar sesión" }));
-    expect(clearAccessToken).toHaveBeenCalledOnce();
+    const dialog = await screen.findByRole("alertdialog");
+    fireEvent.click(within(dialog).getByRole("button", { name: "Cerrar sesión" }));
+    await waitFor(() => expect(clearAccessToken).toHaveBeenCalledOnce());
     expect(client.getQueryCache().getAll()).toHaveLength(0);
-    expect(replace).toHaveBeenCalledWith("/login");
+    await waitFor(() => expect(replace).toHaveBeenCalledWith("/login"));
   });
   it("shows the authenticated profile and role", async () => {
     vi.mocked(getAccessToken).mockReturnValue(`header.${btoa(JSON.stringify({ roleTag: "titulado" }))}.signature`);

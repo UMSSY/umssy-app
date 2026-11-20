@@ -65,7 +65,6 @@ describe("ChatLinkPreviewCard Component (HU-11 Task 5)", () => {
     fireEvent.error(img);
 
     expect(screen.queryByTestId("link-preview-image-container")).not.toBeInTheDocument();
-    // La tarjeta, el dominio y el titulo deben seguir presentes
     expect(screen.getByTestId("link-preview-title")).toBeInTheDocument();
   });
 

@@ -1,139 +1,95 @@
-import {
-  cleanup,
-  fireEvent,
-  render,
-  screen,
-} from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import userEvent from '@testing-library/user-event';
+import { cleanup, fireEvent, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { renderWithQuery } from '@/shared/testing/render-with-query';
+import { useAuth } from '@/shared/contexts/auth-context';
+import { jobOffersService } from '@/modules/job-offers';
+import { getCompanyApplicants } from '@/modules/matching/services/matching.service';
+import MatchingPage from './page';
 
-import MatchingPage from "./page";
-
-vi.mock("@/modules/matching/components/radar-chart", () => ({
-  RadarChart: () => (
-    <div data-testid="matching-radar-chart">
-      Radar de compatibilidad
-    </div>
-  ),
+vi.mock('@/shared/contexts/auth-context', () => ({ useAuth: vi.fn() }));
+vi.mock('@/modules/job-offers', () => ({
+  jobOffersService: { getByCompany: vi.fn() },
 }));
-
+vi.mock('@/modules/matching/services/matching.service', () => ({
+  getCompanyApplicants: vi.fn(),
+}));
+vi.mock('@/modules/matching/services/radar-recruiter.service', () => ({
+  radarRecruiterApi: {
+    vacancies: vi.fn().mockResolvedValue([]),
+    applicants: vi.fn(),
+  },
+}));
 afterEach(() => {
   cleanup();
+  vi.clearAllMocks();
 });
 
-describe("MatchingPage", () => {
-  it("renderiza la pantalla principal de matching", () => {
-    render(<MatchingPage />);
-
+describe('MatchingPage', () => {
+  it('loads the real company vacancy and its applicants', async () => {
+    vi.mocked(useAuth).mockReturnValue({
+      currentUserId: 'user-1',
+      roles: ['empresa'],
+      company: { id: 'company-1', name: 'Empresa real' },
+      isLoading: false,
+      refreshRoles: vi.fn(),
+    });
+    vi.mocked(jobOffersService.getByCompany).mockResolvedValue([
+      { id: 'offer-1', title: 'Vacante real' },
+    ] as Awaited<ReturnType<typeof jobOffersService.getByCompany>>);
+    vi.mocked(getCompanyApplicants).mockResolvedValue({
+      jobOfferId: 'offer-1',
+      jobTitle: 'Vacante real',
+      total: 1,
+      applicants: [
+        {
+          id: 'application-1',
+          userId: 'applicant-1',
+          fullName: 'Ana Pérez',
+          email: 'ana@example.com',
+          headline: 'Ingeniera',
+          appliedAt: '2026-11-08T12:00:00Z',
+          status: 'En revisión',
+        },
+      ],
+    });
+    const user = userEvent.setup();
+    renderWithQuery(<MatchingPage />);
     expect(
-      screen.getByRole("heading", {
-        name: "Buscar candidatos",
-      }),
+      screen.getByRole('heading', { name: 'Buscar candidatos' }),
     ).toBeInTheDocument();
-
+    expect(getCompanyApplicants).not.toHaveBeenCalled();
+    await user.click(screen.getByRole('button', { name: 'Postulaciones' }));
     expect(
-      screen.getByRole("option", {
-        name: "Tech Lead",
-      }),
+      await screen.findByRole('option', { name: 'Vacante real' }),
     ).toBeInTheDocument();
-
     expect(
-      screen.getByRole("option", {
-        name: "Data Scientist Sr.",
-      }),
+      await screen.findByRole('heading', { name: 'Ana Pérez' }),
     ).toBeInTheDocument();
-
-    expect(
-      screen.getByRole("option", {
-        name: "DevOps Engineer",
-      }),
-    ).toBeInTheDocument();
-
-    expect(
-      screen.getByText(/6 candidatos/i),
-    ).toBeInTheDocument();
-
-    expect(
-      screen.getByTestId("matching-radar-chart"),
-    ).toBeInTheDocument();
+    expect(jobOffersService.getByCompany).toHaveBeenCalledWith('company-1');
+    expect(getCompanyApplicants).toHaveBeenCalledWith(
+      'company-1',
+      'offer-1',
+      expect.any(AbortSignal),
+    );
+    expect(screen.queryByText('Tech Lead')).not.toBeInTheDocument();
   });
-
-  it("filtra candidatos mediante el buscador", () => {
-    render(<MatchingPage />);
-
-    const searchInput = screen.getByRole("searchbox", {
-      name: "Buscar candidato",
+  it('does not request another company when the session has no relationship', () => {
+    vi.mocked(useAuth).mockReturnValue({
+      currentUserId: 'user-1',
+      roles: ['empresa'],
+      company: null,
+      isLoading: false,
+      refreshRoles: vi.fn(),
     });
-
-    fireEvent.change(searchInput, {
-      target: {
-        value: "Carlos",
-      },
-    });
-
-    expect(
-      screen.getByText(/1 candidato/i),
-    ).toBeInTheDocument();
-
-    expect(
-      screen.getAllByText(/Carlos Mendoza/i).length,
-    ).toBeGreaterThan(0);
-
-    expect(
-      screen.queryByText(/Lucía Flores/i),
-    ).not.toBeInTheDocument();
-  });
-
-  it("muestra el estado vacío cuando no existen coincidencias", () => {
-    render(<MatchingPage />);
-
-    const searchInput = screen.getByRole("searchbox", {
-      name: "Buscar candidato",
-    });
-
-    fireEvent.change(searchInput, {
-      target: {
-        value: "candidato inexistente",
-      },
-    });
-
+    renderWithQuery(<MatchingPage />);
+    fireEvent.click(screen.getByRole('button', { name: 'Postulaciones' }));
     expect(
       screen.getByText(
-        /No se encontraron candidatos para "candidato inexistente"/i,
+        'No tienes una empresa asignada para consultar postulaciones.',
       ),
     ).toBeInTheDocument();
-
-    expect(
-      screen.getByText(
-        "Selecciona un candidato de la lista para ver su detalle.",
-      ),
-    ).toBeInTheDocument();
-  });
-
-  it("actualiza el perfil objetivo al cambiar de vacante", () => {
-    render(<MatchingPage />);
-
-    expect(
-      screen.getByText(/Compatibilidad vs\. Tech Lead/i),
-    ).toBeInTheDocument();
-
-    fireEvent.change(screen.getByRole("combobox", { name: "Vacante activa" }), {
-      target: { value: screen.getByRole("option", { name: "Data Scientist Sr." }).getAttribute("value") },
-    });
-
-    expect(
-      screen.getByText(
-        /Compatibilidad vs\. Data Scientist Sr\./i,
-      ),
-    ).toBeInTheDocument();
-
-    fireEvent.change(screen.getByRole("combobox", { name: "Vacante activa" }), {
-      target: { value: screen.getByRole("option", { name: "DevOps Engineer" }).getAttribute("value") },
-    });
-
-    expect(
-      screen.getByText(
-        /Compatibilidad vs\. DevOps Engineer/i,
-      ),
-    ).toBeInTheDocument();
+    expect(jobOffersService.getByCompany).not.toHaveBeenCalled();
+    expect(getCompanyApplicants).not.toHaveBeenCalled();
   });
 });

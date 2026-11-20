@@ -1,4 +1,9 @@
-const REQUIRED_ENV_VARS = ['JWT_SECRET', 'JWT_EXPIRES_IN', 'JWT_ALGORITHM', 'CORS_ORIGIN'] as const;
+const REQUIRED_ENV_VARS = [
+  'JWT_SECRET',
+  'JWT_EXPIRES_IN',
+  'JWT_ALGORITHM',
+  'CORS_ORIGIN',
+] as const;
 
 export function validateEnv(env: NodeJS.ProcessEnv = process.env): void {
   const missing = REQUIRED_ENV_VARS.filter((name) => !env[name]?.trim());

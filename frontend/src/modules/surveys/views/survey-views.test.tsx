@@ -1,9 +1,13 @@
-import { cleanup, fireEvent, screen } from "@testing-library/react";
+import { downloadFile } from "@/shared/utils/download-file";
+import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithQuery } from "@/shared/testing/render-with-query";
 import { surveysService } from "../services/surveys.service";
 import { apiResponse, SURVEY_SUMMARIES } from "../testing/survey-fixtures";
 import { SurveyAnalyticsView } from "./survey-analytics-view";
+
+vi.mock("@/shared/utils/download-file", () => ({ downloadFile: vi.fn() }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 
 describe("Pantallas de encuestas", () => {
   beforeEach(() => {
@@ -26,6 +30,9 @@ describe("Pantallas de encuestas", () => {
       opensAt: "2026-08-14T00:00:00.000Z",
       closesAt: "2027-02-10T00:00:00.000Z",
       totalResponses: 105,
+      hasData: true,
+      period: null,
+      availablePeriods: ["I-2026"],
       questions: [
         {
           id: "q1",
@@ -39,6 +46,7 @@ describe("Pantallas de encuestas", () => {
             { id: "o1", label: "Diariamente", count: 21, percentage: 20 },
             { id: "o2", label: "Frecuentemente", count: 34, percentage: 32.4 },
           ],
+          trend: { text: "La opción más elegida es «Frecuentemente».", direction: "neutral" as const },
         },
       ],
     };
@@ -60,7 +68,8 @@ describe("Pantallas de encuestas", () => {
 
     fireEvent.click(generatePdfButton);
 
-    expect(exportSpy).toHaveBeenCalledWith("survey-1");
+    await waitFor(() => expect(exportSpy).toHaveBeenCalledWith("survey-1", undefined));
     expect(await screen.findByText("PDF generado correctamente")).toBeInTheDocument();
+    expect(downloadFile).toHaveBeenCalledWith(expect.any(Blob), "reporte-encuesta-ia.pdf");
   });
 });

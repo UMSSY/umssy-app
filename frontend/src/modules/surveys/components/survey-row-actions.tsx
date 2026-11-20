@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { BarChart3, Eye, Pencil } from "lucide-react";
 import { cn } from "cn";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { Separator } from "@/components/ui/separator";
 import { SURVEY_ROW_ACTION_LABELS, getSurveyDetailPath, getSurveyStatisticsPath } from "../constants/survey-routes.constants";
-import type { SurveyRowActionsProps } from "../types/survey-component-props.types";
+import type { SurveyRowActionsProps } from "../types/survey-row-actions-props.types";
 import { UnpublishSurveyAction } from "./unpublish-survey-action";
 
 const ACTION_CLASSES = cn(buttonVariants({ variant: "outline", size: "icon-sm" }), "bg-surface");

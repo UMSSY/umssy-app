@@ -1,16 +1,12 @@
+import type { MissingRequirementsProps } from "../types/missing-requirements-props.types";
 import { Check, Circle } from "lucide-react";
 import { JOB_MATCHING_MESSAGES } from "../constants/job-matching.constants";
 import {
   REQUIREMENT_GROUP_LABELS,
   REQUIREMENT_STATUS_LABELS,
 } from "../constants/requirement-display.constants";
-import type { CategorizedJobRequirement } from "../types/requirement-category.types";
-import { groupRequirements } from "../utils/group-requirements";
 
-interface MissingRequirementsProps {
-  requirements: CategorizedJobRequirement[];
-  title?: string;
-}
+import { groupRequirements } from "../utils/group-requirements";
 
 export function MissingRequirements({
   requirements,

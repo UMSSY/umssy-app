@@ -1,0 +1,118 @@
+import { DATE_PATTERN } from "@/shared/constants/date-time.constants";
+import { CAREERS } from "../constants/careers.constants";
+import { ID_CARD_ISSUED_IN } from "../constants/id-card-issued-in.constants";
+import { ID_CARD_MAX_LENGTH, SIS_CODE_LENGTH } from "../constants/personal-data-rules.constants";
+import type { FieldErrors } from "../types/field-errors.types";
+import type { PersonalDataValues } from "../types/personal-data-values.types";
+import { detectEmailTypo } from "./detect-email-typo";
+
+export const MIN_AGE = 18;
+
+const NAME_REGEX = /^\p{L}[\p{L}\p{M}]*(?:[ '’-]\p{L}[\p{L}\p{M}]*)*$/u;
+const DIGITS_REGEX = /^\d+$/;
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)*\.[a-z]{2,}$/;
+
+function isRealIsoDate(value: string): boolean {
+  const date = new Date(`${value}T00:00:00.000Z`);
+  return (
+    !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value
+  );
+}
+
+function isAdult(birthDate: string, now: Date): boolean {
+  const cutoff = Date.UTC(now.getUTCFullYear() - MIN_AGE, now.getUTCMonth(), now.getUTCDate());
+  return new Date(`${birthDate}T00:00:00.000Z`).getTime() <= cutoff;
+}
+
+function validateName(value: string, label: string): string | undefined {
+  const text = value.trim();
+  if (text.length === 0) return `${label} son obligatorios`;
+  if (text.length > 100) return `${label} no pueden superar los 100 caracteres`;
+  if (!NAME_REGEX.test(text)) return `${label} solo pueden contener letras, espacios, guiones y apóstrofes`;
+}
+
+function validateDigits(value: string, label: string): string | undefined {
+  const text = value.trim();
+  if (text.length === 0) return `${label} es obligatorio`;
+  if (!DIGITS_REGEX.test(text)) return `${label} solo puede contener dígitos`;
+}
+
+function validateIdCard(value: string): string | undefined {
+  const digitsError = validateDigits(value, "El carnet de identidad");
+  if (digitsError) return digitsError;
+  const length = value.trim().length;
+  if (length < 6 || length > ID_CARD_MAX_LENGTH) {
+    return `El carnet de identidad debe tener entre 6 y ${ID_CARD_MAX_LENGTH} dígitos`;
+  }
+}
+
+function validateSisCode(value: string): string | undefined {
+  const digitsError = validateDigits(value, "El código SIS");
+  if (digitsError) return digitsError;
+  if (value.trim().length !== SIS_CODE_LENGTH) return `El código SIS debe tener exactamente ${SIS_CODE_LENGTH} dígitos`;
+}
+
+function validateEmail(value: string): string | undefined {
+  const text = value.trim().toLowerCase();
+  if (text.length === 0) return "El correo es obligatorio";
+  if (text.length > 150) return "El correo no puede superar los 150 caracteres";
+  if (!EMAIL_REGEX.test(text)) return "El correo no tiene un formato válido";
+  const suggestion = detectEmailTypo(text);
+  if (suggestion) return `Revisa el dominio del correo. ¿Quisiste decir @${suggestion}?`;
+}
+
+function validateBirthDate(value: string, now: Date): string | undefined {
+  const text = value.trim();
+  if (text.length === 0) return "La fecha de nacimiento es obligatoria";
+  if (!DATE_PATTERN.test(text)) return "La fecha de nacimiento debe tener el formato AAAA-MM-DD";
+  if (!isRealIsoDate(text)) return "La fecha de nacimiento no es válida";
+  if (!isAdult(text, now)) return `Debes ser mayor de ${MIN_AGE} años`;
+}
+
+function validateGraduationYear(value: string, now: Date): string | undefined {
+  const text = value.trim();
+  if (text.length === 0) return "El año de titulación es obligatorio";
+  if (!DIGITS_REGEX.test(text)) return "El año de titulación debe ser un número entero";
+  if (Number(text) > now.getUTCFullYear()) return "El año de titulación no puede ser futuro";
+}
+
+export function validatePersonalData(values: PersonalDataValues, now: Date = new Date()): FieldErrors {
+  const errors: FieldErrors = {};
+  const assign = (field: keyof FieldErrors, message: string | undefined) => {
+    if (message) errors[field] = message;
+  };
+
+  assign("firstName", validateName(values.firstName, "Los nombres"));
+  assign("lastName", validateName(values.lastName, "Los apellidos"));
+  assign("idCardNumber", validateIdCard(values.idCardNumber));
+  assign(
+    "idCardIssuedIn",
+    (ID_CARD_ISSUED_IN as readonly string[]).includes(values.idCardIssuedIn)
+      ? undefined
+      : "El departamento de expedición no es válido",
+  );
+  assign("sisCode", validateSisCode(values.sisCode));
+  assign("email", validateEmail(values.email));
+
+  const phone = (values.phone ?? "").trim();
+  if (phone.length > 0 && !/^\d{6,8}$/.test(phone)) {
+    errors.phone = "El teléfono debe tener entre 6 y 8 dígitos";
+  }
+
+  assign("birthDate", validateBirthDate(values.birthDate, now));
+  assign("graduationYear", validateGraduationYear(values.graduationYear, now));
+  assign(
+    "career",
+    (CAREERS as readonly string[]).includes(values.career) ? undefined : "La carrera no es válida",
+  );
+
+  if (!errors.birthDate && !errors.graduationYear) {
+    const birthYear = Number(values.birthDate.trim().slice(0, 4));
+    if (Number(values.graduationYear.trim()) < birthYear + MIN_AGE) {
+      errors.graduationYear = `El año de titulación no puede ser anterior a los ${MIN_AGE} años de edad`;
+    }
+  }
+
+  return errors;
+}

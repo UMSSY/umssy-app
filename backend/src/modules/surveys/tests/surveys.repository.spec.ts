@@ -38,9 +38,10 @@ function createPrisma() {
   };
   return {
     tx,
-    survey: { findFirst: vi.fn(), findMany: vi.fn() },
+    survey: { findFirst: vi.fn(), findMany: vi.fn(), findUnique: vi.fn() },
     career: { findMany: vi.fn(), findUnique: vi.fn() },
     user: { findUnique: vi.fn() },
+    surveyResponse: { findMany: vi.fn() },
     accessRequest: { findFirst: vi.fn() },
     $transaction: vi.fn((operation: (client: typeof tx) => unknown) =>
       operation(tx),
@@ -90,7 +91,11 @@ describe('SurveysRepository', () => {
         title: { equals: 'Encuesta', mode: 'insensitive' },
         careerId: 'career-1',
         academicPeriod: 'II-2026',
-        OR: [{ status: { title: 'draft' } }, { closesAt: null }, { closesAt: { gte: now } }],
+        OR: [
+          { status: { title: 'draft' } },
+          { closesAt: null },
+          { closesAt: { gte: now } },
+        ],
       },
       select: { id: true },
     });
@@ -236,7 +241,9 @@ describe('SurveysRepository', () => {
 
     expect(prisma.survey.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: expect.objectContaining({ targetAudience: { title: { in: ['all', 'graduates'] } } }),
+        where: expect.objectContaining({
+          targetAudience: { title: { in: ['all', 'graduates'] } },
+        }),
       }),
     );
 
@@ -260,6 +267,59 @@ describe('SurveysRepository', () => {
         status: 'answered',
       },
     ]);
+  });
+
+  describe('estadísticas por semestre', () => {
+    const range = {
+      start: new Date('2026-07-01T04:00:00.000Z'),
+      end: new Date('2027-01-01T04:00:00.000Z'),
+    };
+    const submittedBetween = {
+      response: { submittedAt: { gte: range.start, lt: range.end } },
+    };
+
+    it('sin semestre cuenta todas las respuestas', async () => {
+      prisma.survey.findUnique.mockResolvedValue(null);
+
+      await repository.findStatistics('survey-1');
+
+      const { include } = prisma.survey.findUnique.mock.calls[0][0];
+      expect(include._count.select.responses).toBe(true);
+      expect(include.questions.include._count.select.answers).toBe(true);
+      expect(
+        include.questions.include.options.include._count.select.answers,
+      ).toBe(true);
+    });
+
+    it('con un semestre solo cuenta las respuestas enviadas dentro de ese rango', async () => {
+      prisma.survey.findUnique.mockResolvedValue(null);
+
+      await repository.findStatistics('survey-1', range);
+
+      const { include } = prisma.survey.findUnique.mock.calls[0][0];
+      expect(include._count.select.responses).toEqual({
+        where: { submittedAt: { gte: range.start, lt: range.end } },
+      });
+      expect(include.questions.include._count.select.answers).toEqual({
+        where: submittedBetween,
+      });
+      expect(
+        include.questions.include.options.include._count.select.answers,
+      ).toEqual({ where: submittedBetween });
+    });
+
+    it('mantiene las preguntas y opciones en orden aunque se filtre por semestre', async () => {
+      prisma.survey.findUnique.mockResolvedValue(null);
+
+      await repository.findStatistics('survey-1', range);
+
+      const { include, where } = prisma.survey.findUnique.mock.calls[0][0];
+      expect(where).toEqual({ id: 'survey-1' });
+      expect(include.questions.orderBy).toEqual({ position: 'asc' });
+      expect(include.questions.include.options.orderBy).toEqual({
+        position: 'asc',
+      });
+    });
   });
 });
 
@@ -300,18 +360,39 @@ describe('CareersRepository', () => {
   });
 });
 
-
 describe('SurveysRepository sin catálogos de encuestas', () => {
   it('responde que el registro de encuestas no está disponible', async () => {
     const prisma = createPrisma();
     prisma.tx.surveyStatus.findMany.mockResolvedValue([]);
-    const repository = new SurveysRepository(prisma as unknown as PrismaService);
+    const repository = new SurveysRepository(
+      prisma as unknown as PrismaService,
+    );
 
     await expect(repository.create(BASE_DATA)).rejects.toBeInstanceOf(
       SurveysStorageUnavailableException,
     );
     await expect(repository.create(BASE_DATA)).rejects.toMatchObject({
       statusCode: 503,
+    });
+  });
+
+  it('obtiene solo los identificadores de quienes respondieron la encuesta', async () => {
+    const prisma = createPrisma();
+    prisma.surveyResponse.findMany.mockResolvedValue([
+      { respondentId: 'user-1' },
+      { respondentId: 'user-2' },
+    ]);
+    const repository = new SurveysRepository(
+      prisma as unknown as PrismaService,
+    );
+
+    await expect(repository.findRespondentIds('survey-1')).resolves.toEqual([
+      'user-1',
+      'user-2',
+    ]);
+    expect(prisma.surveyResponse.findMany).toHaveBeenCalledWith({
+      where: { surveyId: 'survey-1' },
+      select: { respondentId: true },
     });
   });
 });

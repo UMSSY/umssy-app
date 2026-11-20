@@ -1,4 +1,5 @@
 import type { MessageAttachment } from './attachment.types';
+import type { EventRoomParticipant } from './event-room-participant.types';
 
 export type AttachmentType = 'image' | 'file' | 'audio';
 
@@ -54,12 +55,18 @@ export interface DirectConversation {
   unreadCount: number;
   updatedAt: string;
   isBlockedByMe?: boolean;
+  contextType?: string | null;
+  contextId?: string | null;
 }
 
 export interface EventConversation extends Omit<DirectConversation, 'contact' | 'eventId'> {
   eventId: string;
   eventTitle?: string;
+  createdAt?: string;
+  participants?: EventRoomParticipant[];
   contact?: never;
+  contextType?: string | null;
+  contextId?: string | null;
 }
 
 export type Conversation = DirectConversation | EventConversation;

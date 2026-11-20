@@ -20,12 +20,10 @@ describe('AuthModule', () => {
       .compile();
   });
 
-  it.each([
-    AuthController,
-    AuthService,
-    AuthRepository,
-    JwtAuthGuard,
-  ])('resuelve %o', (provider) => {
-    expect(moduleRef.get(provider)).toBeInstanceOf(provider);
-  });
+  it.each([AuthController, AuthService, AuthRepository, JwtAuthGuard])(
+    'resuelve %o',
+    (provider) => {
+      expect(moduleRef.get(provider)).toBeInstanceOf(provider);
+    },
+  );
 });

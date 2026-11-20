@@ -133,7 +133,7 @@ export function useCertificationDocument() {
         fileName: getDocumentFileName(
           certification.name,
           file.type,
-          uploadedInfo[certification.id]?.fileName,
+          certification.document?.fileName ?? uploadedInfo[certification.id]?.fileName,
         ),
         file,
         previewUrl,

@@ -1,3 +1,4 @@
+import { BOLIVIA_TIME_ZONE } from "@/shared/constants/date-time.constants";
 import type { EventDisplayStatus } from '../types/event-display-status.types';
 export type { EventDisplayStatus } from '../types/event-display-status.types';
 import type { EventItem } from '../types/event-item.types';
@@ -19,6 +20,6 @@ export function formatVotingDeadline(value: string | null | undefined): string |
     day: 'numeric',
     month: 'short',
     year: 'numeric',
-    timeZone: 'America/La_Paz',
+    timeZone: BOLIVIA_TIME_ZONE,
   }).format(date);
 }

@@ -27,6 +27,7 @@ describe("MentorAvailabilityView", () => {
   beforeEach(() => {
     vi.restoreAllMocks()
     vi.spyOn(availabilityApi, "getBlockedDates").mockResolvedValue([])
+    vi.spyOn(availabilityApi, "getFutureBlockedDates").mockResolvedValue([])
     vi.mocked(toast.success).mockClear()
     vi.mocked(toast.error).mockClear()
     vi.useFakeTimers({ toFake: ["Date"], now: NOW })
@@ -36,6 +37,7 @@ describe("MentorAvailabilityView", () => {
   afterEach(() => {
     cleanup()
     vi.useRealTimers()
+    window.localStorage.clear()
   })
 
   it("muestra el skeleton mientras carga", () => {
@@ -96,6 +98,38 @@ describe("MentorAvailabilityView", () => {
     fireEvent.click(screen.getByRole("button", { name: "Semana anterior" }))
     expect(screen.getByText("28 de septiembre – 4 de octubre de 2026")).toBeInTheDocument()
     await waitFor(() => expect(lastRequestedRange()?.from).toBe("2026-09-28T04:00:00.000Z"))
+  })
+
+  it("muestra el selector de densidad y se mantiene al recargar", async () => {
+    vi.spyOn(availabilityApi, "getAvailabilityBlocks").mockResolvedValue([])
+    const user = userEvent.setup({ delay: null })
+    const { unmount } = renderWithQuery(<MentorAvailabilityView />)
+
+    expect(screen.getByRole("button", { name: "Normal" })).toHaveAttribute("aria-pressed", "true")
+
+    await user.click(screen.getByRole("button", { name: "Compacta" }))
+    expect(screen.getByRole("button", { name: "Compacta" })).toHaveAttribute("aria-pressed", "true")
+
+    unmount()
+    renderWithQuery(<MentorAvailabilityView />)
+    expect(screen.getByRole("button", { name: "Compacta" })).toHaveAttribute("aria-pressed", "true")
+  })
+
+  it("conserva la densidad compacta al cambiar de semana", async () => {
+    vi.spyOn(availabilityApi, "getAvailabilityBlocks").mockResolvedValue([])
+    const user = userEvent.setup({ delay: null })
+    renderWithQuery(<MentorAvailabilityView />)
+
+    await user.click(screen.getByRole("button", { name: "Compacta" }))
+    fireEvent.click(screen.getByRole("button", { name: "Semana siguiente" }))
+
+    expect(screen.getByText("12 – 18 de octubre de 2026")).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Compacta" })).toHaveAttribute("aria-pressed", "true")
+
+    fireEvent.click(screen.getByRole("button", { name: "Semana anterior" }))
+
+    expect(screen.getByText("5 – 11 de octubre de 2026")).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Compacta" })).toHaveAttribute("aria-pressed", "true")
   })
 
   it("Hoy vuelve a la semana actual", async () => {
@@ -212,7 +246,7 @@ describe("MentorAvailabilityView", () => {
         state: "confirmed",
         appointment: {
           id: "a1",
-          counterpart: { id: "s1", fullName: "Titulado Uno" },
+          counterpart: { id: "s1", fullName: "Titulado Uno", role: "student" },
           orientationType: { id: "o1", name: "Orientación profesional" },
         },
       },
@@ -285,7 +319,7 @@ describe("MentorAvailabilityView", () => {
     expect(screen.getByText("Editar bloque")).toBeInTheDocument()
     await user.click(screen.getByRole("button", { name: "Cancelar" }))
 
-    expect(screen.getByLabelText(/Fecha/)).toHaveValue("Viernes 9 de octubre de 2026")
+    expect(screen.getByLabelText(/Fecha/, { selector: "input" })).toHaveValue("Viernes 9 de octubre de 2026")
     expect(screen.getByLabelText(/Hora de inicio/)).toHaveTextContent("15:00")
   })
 
@@ -312,9 +346,31 @@ describe("MentorAvailabilityView", () => {
       await user.click(screen.getByLabelText(/Hora de inicio/))
       await user.click(await screen.findByRole("option", { name: "18:00" }))
       await user.click(screen.getByLabelText(/Hora de fin/))
-      await user.click(await screen.findByRole("option", { name: "18:30" }))
+      await user.click(await screen.findByRole("option", { name: /^19:30/ }))
       await user.click(screen.getByRole("button", { name: "Guardar bloque" }))
     }
+
+    it("muestra en la grilla los bloques de 1 h 30 que se crearán antes de guardar", async () => {
+      vi.spyOn(availabilityApi, "getAvailabilityBlocks").mockResolvedValue([])
+      const user = userEvent.setup()
+
+      renderWithQuery(<MentorAvailabilityView />)
+      await screen.findByText("Aún no registraste bloques esta semana")
+      await user.click(screen.getByRole("button", { name: "jueves, 8 de octubre de 2026" }))
+      await user.click(screen.getByLabelText(/Hora de inicio/))
+      await user.click(await screen.findByRole("option", { name: "15:00" }))
+      await user.click(screen.getByLabelText(/Hora de fin/))
+      await user.click(await screen.findByRole("option", { name: /^19:30/ }))
+
+      const drafts = screen.getAllByTestId("draft-block")
+      expect(drafts.map((draft) => draft.textContent)).toEqual([
+        "15:00 – 16:30Nuevo bloque",
+        "16:30 – 18:00Nuevo bloque",
+        "18:00 – 19:30Nuevo bloque",
+      ])
+      await user.click(screen.getByRole("button", { name: "Cancelar" }))
+      expect(screen.queryAllByTestId("draft-block")).toHaveLength(0)
+    })
 
     it("muestra siempre el formulario, a la derecha de la grilla", async () => {
       vi.spyOn(availabilityApi, "getAvailabilityBlocks").mockResolvedValue([])
@@ -362,7 +418,7 @@ describe("MentorAvailabilityView", () => {
       await user.click(screen.getByLabelText(/Hora de inicio/))
       await user.click(await screen.findByRole("option", { name: "18:00" }))
       await user.click(screen.getByLabelText(/Hora de fin/))
-      await user.click(await screen.findByRole("option", { name: "18:30" }))
+      await user.click(await screen.findByRole("option", { name: /^19:30/ }))
       await user.click(screen.getByRole("button", { name: "Guardar bloque" }))
 
       await waitFor(() =>
@@ -417,7 +473,7 @@ describe("MentorAvailabilityView", () => {
       await user.click(screen.getByLabelText(/Hora de inicio/))
       await user.click(await screen.findByRole("option", { name: "18:00" }))
       await user.click(screen.getByLabelText(/Hora de fin/))
-      await user.click(await screen.findByRole("option", { name: "18:30" }))
+      await user.click(await screen.findByRole("option", { name: /^19:30/ }))
       await user.click(screen.getByRole("checkbox", { name: /Repetir cada semana/ }))
       const repeatGroup = screen.getByRole("group", { name: "Repetir hasta" })
       await user.click(within(repeatGroup).getByRole("button", { name: "jueves, 15 de octubre de 2026" }))

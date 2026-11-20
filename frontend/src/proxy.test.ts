@@ -1,12 +1,12 @@
 import { NextRequest } from "next/server";
 import { describe, expect, it } from "vitest";
-import { SESSION_COOKIE_NAME } from "@/modules/auth/constants/session.constants";
+
 import { config, proxy } from "./proxy";
 
 const BASE_ORIGIN = "http://localhost:3000";
 
 function callProxy(path: string, cookieValue?: string) {
-  const headers = cookieValue ? { cookie: `${SESSION_COOKIE_NAME}=${cookieValue}` } : undefined;
+  const headers = cookieValue ? { cookie: `umssy_session=${cookieValue}` } : undefined;
   return proxy(new NextRequest(`${BASE_ORIGIN}${path}`, { headers }));
 }
 

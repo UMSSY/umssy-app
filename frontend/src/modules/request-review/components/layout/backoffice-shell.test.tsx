@@ -1,3 +1,5 @@
+import "@/shared/testing/indexed-db.mock";
+import { clearAccessToken, getAccessToken, saveAccessToken } from "@/shared/services/storage/access-token-storage";
 import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { renderWithQuery } from "@/shared/testing/render-with-query";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -18,6 +20,11 @@ vi.mock("../../hooks/use-backoffice-user", async () => {
     useBackofficeUser: () => ({ fullName: "Personal administrativo", role: getRolesLabel(useAuth().roles) }),
   };
 });
+vi.mock("@/modules/notifications/hooks/use-notifications", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/modules/notifications/hooks/use-notifications")>()),
+  useNotificationsRealtimeSync: vi.fn(),
+  useUnreadNotificationsCount: () => ({ data: { count: 0 } }),
+}));
 
 const tokenFor = (roleTag: string) => `h.${btoa(JSON.stringify({ sub: "u1", roleTag }))}.s`;
 
@@ -28,12 +35,12 @@ describe("BackofficeShell", () => {
   });
   afterEach(() => {
     cleanup();
-    sessionStorage.clear();
+    clearAccessToken();
     vi.unstubAllGlobals();
   });
 
-  it("un administrativo ve el layout con la opción Solicitudes y su contenido", () => {
-    sessionStorage.setItem("accessToken", tokenFor("administrativo"));
+  it("un administrativo ve el layout con la opción Solicitudes y su contenido", async () => {
+    expect(await saveAccessToken(tokenFor("administrativo"))).toBe(true);
     renderWithQuery(
       <BackofficeShell>
         <p>Contenido del backoffice</p>
@@ -57,20 +64,23 @@ describe("BackofficeShell", () => {
     expect(screen.queryByText("Contenido del backoffice")).toBeNull();
   });
 
-  it.each(["titulado", "estudiante", "mentor", "empresa"])("el rol %s es redirigido al inicio", async (role) => {
-    sessionStorage.setItem("accessToken", tokenFor(role));
-    renderWithQuery(
+  it.each(["titulado", "estudiante", "mentor", "empresa"])(
+    "el rol %s es redirigido al inicio",
+    async (role) => {
+      expect(await saveAccessToken(tokenFor(role))).toBe(true);
+      renderWithQuery(
       <BackofficeShell>
         <p>Contenido del backoffice</p>
       </BackofficeShell>,
     );
 
-    await waitFor(() => expect(replace).toHaveBeenCalledWith("/"));
-    expect(screen.queryByText("Contenido del backoffice")).toBeNull();
-  });
+      await waitFor(() => expect(replace).toHaveBeenCalledWith("/"));
+      expect(screen.queryByText("Contenido del backoffice")).toBeNull();
+    },
+  );
 
-  it("Cerrar sesión borra el token y va al login", () => {
-    sessionStorage.setItem("accessToken", tokenFor("administrativo"));
+  it("Cerrar sesión borra el token y va al login", async () => {
+    expect(await saveAccessToken(tokenFor("administrativo"))).toBe(true);
     renderWithQuery(
       <BackofficeShell>
         <p>Contenido</p>
@@ -79,7 +89,7 @@ describe("BackofficeShell", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /Cerrar sesión/ }));
 
-    expect(sessionStorage.getItem("accessToken")).toBeNull();
+    expect(getAccessToken()).toBeNull();
     expect(replace).toHaveBeenCalledWith("/login");
   });
 
@@ -88,7 +98,7 @@ describe("BackofficeShell", () => {
     beforeEach(() => listRequests.mockReset());
 
     it("muestra la insignia de pendientes con el total que devuelve el listado (limit=1)", async () => {
-      sessionStorage.setItem("accessToken", tokenFor("administrativo"));
+      expect(await saveAccessToken(tokenFor("administrativo"))).toBe(true);
       listRequests.mockResolvedValue({ ok: true, data: { items: [], total: 18, page: 1, offset: 0 } });
       renderWithQuery(
         <BackofficeShell>
@@ -101,7 +111,7 @@ describe("BackofficeShell", () => {
     });
 
     it("si el conteo falla no hay insignia ni error", async () => {
-      sessionStorage.setItem("accessToken", tokenFor("administrativo"));
+      expect(await saveAccessToken(tokenFor("administrativo"))).toBe(true);
       listRequests.mockResolvedValue({ ok: false, status: 0, message: "sin red" });
       renderWithQuery(
         <BackofficeShell>
@@ -124,7 +134,7 @@ describe("BackofficeShell", () => {
     });
 
     it("la barra tiene la marca de texto, el pie con iniciales y no menciona egresados ni el lema", async () => {
-      sessionStorage.setItem("accessToken", tokenFor("administrativo"));
+      expect(await saveAccessToken(tokenFor("administrativo"))).toBe(true);
       listRequests.mockResolvedValue({ ok: false, status: 0, message: "x" });
       renderWithQuery(
         <BackofficeShell>
@@ -148,8 +158,8 @@ describe("BackofficeShell", () => {
     const listRequests = vi.spyOn(requestReviewService, "listRequests");
     beforeEach(() => listRequests.mockResolvedValue({ ok: false, status: 0, message: "x" }));
 
-    it("usa un solo AppShell: una barra lateral de 264 px y el botón de menú accesible", () => {
-      sessionStorage.setItem("accessToken", tokenFor("administrativo"));
+    it("usa un solo AppShell: una barra lateral de 264 px y el botón de menú accesible", async () => {
+      expect(await saveAccessToken(tokenFor("administrativo"))).toBe(true);
       const { container } = renderWithQuery(
         <BackofficeShell>
           <p>Contenido</p>
@@ -160,11 +170,11 @@ describe("BackofficeShell", () => {
       expect(container.querySelector("[style*='--sidebar-width: 16.5rem']")).not.toBeNull();
       expect(screen.getByRole("button", { name: "Cerrar barra lateral" })).toBeInTheDocument();
       expect(screen.queryByRole("button", { name: "Abrir menú" })).not.toBeInTheDocument();
-      expect(screen.getByText("Contenido").parentElement).toHaveClass("px-12", "py-10");
+      expect(screen.getByText("Contenido").parentElement).toHaveClass("px-4", "py-6", "lg:px-12", "lg:py-10");
     });
 
-    it("la barra lateral no muestra un chevron junto a la marca y el ítem activo muestra un punto claro", () => {
-      sessionStorage.setItem("accessToken", tokenFor("administrativo"));
+    it("la barra lateral no muestra un chevron junto a la marca y el ítem activo muestra un punto claro", async () => {
+      expect(await saveAccessToken(tokenFor("administrativo"))).toBe(true);
       renderWithQuery(
         <BackofficeShell>
           <p>Contenido</p>

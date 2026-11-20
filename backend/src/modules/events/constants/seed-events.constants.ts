@@ -14,7 +14,8 @@ export const SEED_EVENTS = [
     date: '2026-10-20',
     location: 'Aula 101, Facultad de Ciencias y Tecnología',
     instructorName: 'Carlos Mendoza',
-    description: 'Aprende a construir una API modular con NestJS. Prerrequisitos: conocimientos básicos de TypeScript y Node.js. Materiales: computadora portátil con Node.js y un editor de código instalados.',
+    description:
+      'Aprende a construir una API modular con NestJS. Prerrequisitos: conocimientos básicos de TypeScript y Node.js. Materiales: computadora portátil con Node.js y un editor de código instalados.',
     enroll: true,
     categoryIndex: 0,
     capacity: 30,
@@ -25,7 +26,8 @@ export const SEED_EVENTS = [
     date: '2026-10-25',
     location: 'Laboratorio 2, Facultad de Ciencias y Tecnología',
     instructorName: 'Laura Fernández',
-    description: 'Practica el modelado y las consultas de bases de datos con Prisma. Prerrequisitos: conocimientos básicos de SQL y TypeScript. Materiales: computadora portátil con Node.js, PostgreSQL y un editor de código.',
+    description:
+      'Practica el modelado y las consultas de bases de datos con Prisma. Prerrequisitos: conocimientos básicos de SQL y TypeScript. Materiales: computadora portátil con Node.js, PostgreSQL y un editor de código.',
     enroll: true,
     categoryIndex: 0,
     capacity: 20,
@@ -36,7 +38,8 @@ export const SEED_EVENTS = [
     date: '2026-11-02',
     location: 'Aula 203, Facultad de Ciencias y Tecnología',
     instructorName: 'Andrés Rojas',
-    description: 'Escribe pruebas unitarias para aplicaciones TypeScript con Vitest. Prerrequisitos: fundamentos de JavaScript o TypeScript. Materiales: computadora portátil con Node.js y un editor de código.',
+    description:
+      'Escribe pruebas unitarias para aplicaciones TypeScript con Vitest. Prerrequisitos: fundamentos de JavaScript o TypeScript. Materiales: computadora portátil con Node.js y un editor de código.',
     enroll: false,
     categoryIndex: 0,
     capacity: 30,
@@ -47,7 +50,8 @@ export const SEED_EVENTS = [
     date: '2026-11-03',
     location: 'Laboratorio 1, Facultad de Ciencias y Tecnología',
     instructorName: 'María Vargas',
-    description: 'Construye interfaces con componentes y estado en React. Prerrequisitos: conocimientos básicos de HTML, CSS y JavaScript. Materiales: computadora portátil con Node.js, navegador y editor de código.',
+    description:
+      'Construye interfaces con componentes y estado en React. Prerrequisitos: conocimientos básicos de HTML, CSS y JavaScript. Materiales: computadora portátil con Node.js, navegador y editor de código.',
     enroll: false,
     categoryIndex: 0,
     capacity: 30,
@@ -58,7 +62,8 @@ export const SEED_EVENTS = [
     date: '2026-11-04',
     location: 'Laboratorio 3, Facultad de Ciencias y Tecnología',
     instructorName: 'Daniela Torres',
-    description: 'Explora y visualiza datos con Python. Prerrequisitos: fundamentos de Python y estadística básica. Materiales: computadora portátil con Python y Jupyter Notebook instalados.',
+    description:
+      'Explora y visualiza datos con Python. Prerrequisitos: fundamentos de Python y estadística básica. Materiales: computadora portátil con Python y Jupyter Notebook instalados.',
     enroll: false,
     categoryIndex: 1,
     capacity: 20,
@@ -69,7 +74,8 @@ export const SEED_EVENTS = [
     date: '2026-11-05',
     location: 'Aula 204, Facultad de Ciencias y Tecnología',
     instructorName: 'Gabriel López',
-    description: 'Diseña interfaces con criterios de accesibilidad y evalúa su usabilidad. Prerrequisitos: nociones básicas de diseño de interfaces. Materiales: computadora portátil, navegador y una cuenta en Figma.',
+    description:
+      'Diseña interfaces con criterios de accesibilidad y evalúa su usabilidad. Prerrequisitos: nociones básicas de diseño de interfaces. Materiales: computadora portátil, navegador y una cuenta en Figma.',
     enroll: false,
     categoryIndex: 2,
     capacity: 25,
@@ -80,7 +86,8 @@ export const SEED_EVENTS = [
     date: '2026-11-06',
     location: 'Laboratorio 4, Facultad de Ciencias y Tecnología',
     instructorName: 'Sofía Herrera',
-    description: 'Identifica vulnerabilidades comunes y aplica medidas de protección en aplicaciones web. Prerrequisitos: conocimientos básicos de desarrollo web y HTTP. Materiales: computadora portátil con Node.js, navegador y editor de código.',
+    description:
+      'Identifica vulnerabilidades comunes y aplica medidas de protección en aplicaciones web. Prerrequisitos: conocimientos básicos de desarrollo web y HTTP. Materiales: computadora portátil con Node.js, navegador y editor de código.',
     enroll: false,
     categoryIndex: 3,
     capacity: 20,
@@ -91,7 +98,8 @@ export const SEED_EVENTS = [
     date: '2026-11-07',
     location: 'Aula 105, Facultad de Ciencias y Tecnología',
     instructorName: 'Valeria Pérez',
-    description: 'Mejora tu currículum y practica entrevistas para oportunidades de distintas áreas profesionales. Prerrequisitos: interés en la búsqueda laboral. Materiales: currículum actualizado y cuaderno de apuntes.',
+    description:
+      'Mejora tu currículum y practica entrevistas para oportunidades de distintas áreas profesionales. Prerrequisitos: interés en la búsqueda laboral. Materiales: currículum actualizado y cuaderno de apuntes.',
     enroll: false,
     categoryIndex: 4,
     capacity: 30,
@@ -102,7 +110,8 @@ export const SEED_EVENTS = [
     date: '2026-11-08',
     location: 'Aula 106, Facultad de Ciencias y Tecnología',
     instructorName: 'Roberto Salazar',
-    description: 'Aprende a formular preguntas de investigación y organizar un proyecto académico en diferentes disciplinas. Prerrequisitos: contar con una idea de investigación. Materiales: cuaderno de apuntes y bibliografía de interés.',
+    description:
+      'Aprende a formular preguntas de investigación y organizar un proyecto académico en diferentes disciplinas. Prerrequisitos: contar con una idea de investigación. Materiales: cuaderno de apuntes y bibliografía de interés.',
     enroll: false,
     categoryIndex: 5,
     capacity: 25,
@@ -113,7 +122,8 @@ export const SEED_EVENTS = [
     date: '2026-11-09',
     location: 'Aula 107, Facultad de Ciencias y Tecnología',
     instructorName: 'Patricia Flores',
-    description: 'Desarrolla una propuesta de valor y un modelo de negocio para iniciativas de distintos sectores. Prerrequisitos: una idea de emprendimiento. Materiales: cuaderno de apuntes y una descripción de la idea.',
+    description:
+      'Desarrolla una propuesta de valor y un modelo de negocio para iniciativas de distintos sectores. Prerrequisitos: una idea de emprendimiento. Materiales: cuaderno de apuntes y una descripción de la idea.',
     enroll: false,
     categoryIndex: 6,
     capacity: 30,

@@ -2,7 +2,9 @@ import { z } from 'zod';
 
 export const eventRoomJoinSchema = z
   .object({
-    eventId: z.string().uuid('El ID del evento no es válido'),
+    registrationId: z
+      .string({ error: 'El ID de la inscripción es obligatorio' })
+      .uuid('El ID de la inscripción no es válido'),
   })
   .strict();
 

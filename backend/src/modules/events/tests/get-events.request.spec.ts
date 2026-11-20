@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { GetEventsSchema, MAX_SEARCH_LENGTH } from '../requests/get-events.request.js';
+import {
+  GetEventsSchema,
+  MAX_SEARCH_LENGTH,
+} from '../requests/get-events.request.js';
 
 describe('GetEventsSchema', () => {
   it('applies default page and limit when not provided', () => {
@@ -37,11 +40,15 @@ describe('GetEventsSchema', () => {
   });
 
   it('accepts 50 characters and rejects the 51st character', () => {
-    expect(GetEventsSchema.safeParse({ search: 'a'.repeat(50) }).success).toBe(true);
+    expect(GetEventsSchema.safeParse({ search: 'a'.repeat(50) }).success).toBe(
+      true,
+    );
     const result = GetEventsSchema.safeParse({ search: 'a'.repeat(51) });
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0].message).toBe('search no puede tener más de 50 caracteres');
+      expect(result.error.issues[0].message).toBe(
+        'search no puede tener más de 50 caracteres',
+      );
     }
   });
 
@@ -66,5 +73,4 @@ describe('GetEventsSchema', () => {
     expect(parsed.categoryId).toBe('22222222-2222-2222-2222-222222222221');
     expect(parsed.statusId).toBe('22222222-2222-2222-2222-222222222224');
   });
-
 });

@@ -1,7 +1,9 @@
 import type { AccessRequestsRepository } from '../repositories/access-requests.repository.js';
 import { ACCESS_REQUEST_STATUS } from '../types/access-request.enum.js';
 
-type RequestStatusRow = NonNullable<Awaited<ReturnType<AccessRequestsRepository['findByRequestCode']>>>;
+type RequestStatusRow = NonNullable<
+  Awaited<ReturnType<AccessRequestsRepository['findByRequestCode']>>
+>;
 
 // Incluye el nombre completo únicamente cuando la solicitud está rechazada.
 // No expone C.I., SIS, teléfono, correo, fecha de nacimiento ni contenido del archivo.
@@ -17,7 +19,11 @@ export function toRequestStatusResponse(row: RequestStatusRow) {
     rejectionReason: row.rejectionReason,
     document:
       row.documentType && row.documentFile
-        ? { type: row.documentType.title, size: row.documentFile.size, mimeType: row.documentFile.mimeType }
+        ? {
+            type: row.documentType.title,
+            size: row.documentFile.size,
+            mimeType: row.documentFile.mimeType,
+          }
         : null,
   };
 }

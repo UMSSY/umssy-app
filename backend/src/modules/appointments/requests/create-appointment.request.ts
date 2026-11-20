@@ -1,9 +1,6 @@
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
-import {
-  APPOINTMENT_MESSAGES,
-  APPOINTMENT_MESSAGE_MAX_LENGTH,
-} from '../constants/appointment-docs.constants.js';
+import { APPOINTMENT_MESSAGES } from '../constants/appointment-docs.constants.js';
 
 export const createAppointmentSchema = z.strictObject({
   blockId: z.uuid({ error: APPOINTMENT_MESSAGES.invalidBlockId }),
@@ -14,13 +11,14 @@ export const createAppointmentSchema = z.strictObject({
         : APPOINTMENT_MESSAGES.invalidTopic,
   }),
   message: z
-    .string()
+    .string({ error: APPOINTMENT_MESSAGES.missingMessage })
     .trim()
-    .max(APPOINTMENT_MESSAGE_MAX_LENGTH, {
+    .min(1, { error: APPOINTMENT_MESSAGES.missingMessage })
+    .max(300, {
       error: APPOINTMENT_MESSAGES.messageTooLong,
-    })
-    .nullish()
-    .transform((message) => message || null),
+    }),
 });
 
-export class CreateAppointmentDto extends createZodDto(createAppointmentSchema) {}
+export class CreateAppointmentDto extends createZodDto(
+  createAppointmentSchema,
+) {}

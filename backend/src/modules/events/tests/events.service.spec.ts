@@ -36,7 +36,9 @@ describe('EventsService', () => {
   beforeEach(() => {
     repositoryMock = { findAndCount: vi.fn(), findById: vi.fn() };
     service = new EventsService(new EventsRepository({} as never));
-    vi.spyOn(service, 'findAndCount').mockImplementation(repositoryMock.findAndCount);
+    vi.spyOn(service, 'findAndCount').mockImplementation(
+      repositoryMock.findAndCount,
+    );
     vi.spyOn(service, 'findById').mockImplementation(repositoryMock.findById);
     vi.spyOn(service, 'expireOverdueProposals').mockResolvedValue(0);
   });

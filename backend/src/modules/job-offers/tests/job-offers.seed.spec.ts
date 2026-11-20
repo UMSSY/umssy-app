@@ -32,7 +32,9 @@ const MODELS = [
 ] as const;
 
 function createTransaction() {
-  const stores = Object.fromEntries(MODELS.map((model) => [model, new Map<string, Record<string, unknown>>()]));
+  const stores = Object.fromEntries(
+    MODELS.map((model) => [model, new Map<string, Record<string, unknown>>()]),
+  );
   const tx = Object.fromEntries(
     MODELS.map((model) => [
       model,
@@ -47,7 +49,13 @@ function createTransaction() {
           }
           return { count };
         },
-        updateMany: async ({ where, data }: { where: { name: { in: string[] } }; data: Record<string, unknown> }) => {
+        updateMany: async ({
+          where,
+          data,
+        }: {
+          where: { name: { in: string[] } };
+          data: Record<string, unknown>;
+        }) => {
           let count = 0;
           for (const name of where.name.in) {
             const existing = stores[model].get(name);
@@ -60,12 +68,17 @@ function createTransaction() {
         findMany: async (args?: { where?: { name?: { in: string[] } } }) => {
           const records = [...stores[model].values()];
           const names = args?.where?.name?.in;
-          return names ? records.filter((record) => names.includes(String(record.name))) : records;
+          return names
+            ? records.filter((record) => names.includes(String(record.name)))
+            : records;
         },
         upsert: async (args: UpsertArgs) => {
           const [key] = Object.keys(args.where);
           const current = stores[model].get(args.where[key]);
-          const record = current === undefined ? args.create : { ...current, ...args.update };
+          const record =
+            current === undefined
+              ? args.create
+              : { ...current, ...args.update };
           stores[model].set(args.where[key], record);
           return record;
         },
@@ -82,8 +95,12 @@ describe('seedJobOffers', () => {
 
     await seedJobOffers(tx);
 
-    expect([...stores.jobOfferModality.keys()]).toEqual(SEED_JOB_OFFER_MODALITIES);
-    expect([...stores.jobOfferContractType.keys()]).toEqual(SEED_JOB_OFFER_CONTRACT_TYPES);
+    expect([...stores.jobOfferModality.keys()]).toEqual(
+      SEED_JOB_OFFER_MODALITIES,
+    );
+    expect([...stores.jobOfferContractType.keys()]).toEqual(
+      SEED_JOB_OFFER_CONTRACT_TYPES,
+    );
     expect([...stores.jobOfferStatus.keys()]).toEqual(SEED_JOB_OFFER_STATUSES);
     expect(stores.jobOfferStatus.has(JobOfferStatus.PUBLISHED)).toBe(true);
   });
@@ -94,7 +111,9 @@ describe('seedJobOffers', () => {
     await seedJobOffers(tx);
 
     expect(stores.skill.size).toBe(20);
-    expect([...stores.skill.values()].every((skill) => skill.isCustom === false)).toBe(true);
+    expect(
+      [...stores.skill.values()].every((skill) => skill.isCustom === false),
+    ).toBe(true);
   });
 
   it('carga las empresas de demostración con id fijo', async () => {
@@ -110,14 +129,27 @@ describe('seedJobOffers', () => {
 
   it('actualiza tecnologías del catálogo sin alterar habilidades personalizadas ajenas', async () => {
     const { stores, tx } = createTransaction();
-    stores.skill.set('Python', { id: 'skill:Python', name: 'Python', isCustom: true });
-    stores.skill.set('Otra habilidad', { id: 'skill:Otra habilidad', name: 'Otra habilidad', isCustom: true });
-    stores.company.set('TechBolivia S.R.L.', { id: 'existing-id', title: 'TechBolivia S.R.L.', description: 'Anterior' });
+    stores.skill.set('Python', {
+      id: 'skill:Python',
+      name: 'Python',
+      isCustom: true,
+    });
+    stores.skill.set('Otra habilidad', {
+      id: 'skill:Otra habilidad',
+      name: 'Otra habilidad',
+      isCustom: true,
+    });
+    stores.company.set('TechBolivia S.R.L.', {
+      id: 'existing-id',
+      title: 'TechBolivia S.R.L.',
+      description: 'Anterior',
+    });
     await seedJobOffers(tx);
     expect(stores.skill.get('Python')?.isCustom).toBe(false);
     expect(stores.skill.get('Otra habilidad')?.isCustom).toBe(true);
     expect(stores.company.get('TechBolivia S.R.L.')).toMatchObject({
-      id: 'existing-id', description: SEED_JOB_OFFER_COMPANIES[0].description,
+      id: 'existing-id',
+      description: SEED_JOB_OFFER_COMPANIES[0].description,
     });
   });
 
@@ -138,7 +170,9 @@ describe('seedJobOffers', () => {
     await seedJobOffers(tx, NOW);
 
     expect(stores.jobOffer.size).toBe(SEED_JOB_OFFERS.length);
-    expect(stores.jobOffer.get('b0000000-0000-4000-8000-000000000001')).toMatchObject({
+    expect(
+      stores.jobOffer.get('b0000000-0000-4000-8000-000000000001'),
+    ).toMatchObject({
       companyId: 'a0000000-0000-4000-8000-000000000001',
       modalityId: 'jobOfferModality:Remoto',
       contractTypeId: 'jobOfferContractType:Tiempo completo',
@@ -161,16 +195,24 @@ describe('seedJobOffers', () => {
 
     await seedJobOffers(tx, NOW);
 
-    expect(stores.jobOffer.get('b0000000-0000-4000-8000-000000000002')?.salaryRange).toBe('A convenir');
+    expect(
+      stores.jobOffer.get('b0000000-0000-4000-8000-000000000002')?.salaryRange,
+    ).toBe('A convenir');
   });
 
   it('usa el id real de la empresa si ya existía con otro id', async () => {
     const { stores, tx } = createTransaction();
-    stores.company.set('TechBolivia S.R.L.', { id: 'existing-id', title: 'TechBolivia S.R.L.', description: 'Anterior' });
+    stores.company.set('TechBolivia S.R.L.', {
+      id: 'existing-id',
+      title: 'TechBolivia S.R.L.',
+      description: 'Anterior',
+    });
 
     await seedJobOffers(tx, NOW);
 
-    const techBoliviaOffers = [...stores.jobOffer.values()].filter((offer) => offer.companyId === 'existing-id');
+    const techBoliviaOffers = [...stores.jobOffer.values()].filter(
+      (offer) => offer.companyId === 'existing-id',
+    );
     expect(techBoliviaOffers).toHaveLength(6);
   });
 
@@ -180,20 +222,28 @@ describe('seedJobOffers', () => {
     await seedJobOffers(tx, NOW);
     await seedJobOffers(tx, new Date(NOW.getTime() + 30 * DAY_MS));
 
-    expect(stores.jobOffer.get('b0000000-0000-4000-8000-000000000001')?.createdAt).toEqual(
-      new Date(NOW.getTime() - DAY_MS),
-    );
+    expect(
+      stores.jobOffer.get('b0000000-0000-4000-8000-000000000001')?.createdAt,
+    ).toEqual(new Date(NOW.getTime() - DAY_MS));
   });
 
   it('cubre todas las modalidades, contratos y varios estados para probar los filtros', () => {
-    const techBolivia = SEED_JOB_OFFERS.filter((offer) => offer.companyTitle === 'TechBolivia S.R.L.');
+    const techBolivia = SEED_JOB_OFFERS.filter(
+      (offer) => offer.companyTitle === 'TechBolivia S.R.L.',
+    );
 
-    expect(new Set(techBolivia.map((offer) => offer.modality))).toEqual(new Set(SEED_JOB_OFFER_MODALITIES));
+    expect(new Set(techBolivia.map((offer) => offer.modality))).toEqual(
+      new Set(SEED_JOB_OFFER_MODALITIES),
+    );
     expect(new Set(techBolivia.map((offer) => offer.contractType))).toEqual(
       new Set(SEED_JOB_OFFER_CONTRACT_TYPES),
     );
-    expect(new Set(techBolivia.map((offer) => offer.status)).size).toBeGreaterThan(1);
-    expect(new Set(SEED_JOB_OFFERS.map((offer) => offer.companyTitle)).size).toBeGreaterThan(1);
+    expect(
+      new Set(techBolivia.map((offer) => offer.status)).size,
+    ).toBeGreaterThan(1);
+    expect(
+      new Set(SEED_JOB_OFFERS.map((offer) => offer.companyTitle)).size,
+    ).toBeGreaterThan(1);
   });
 
   it('cada vacante de demostración cumple las reglas del formulario de publicación', () => {

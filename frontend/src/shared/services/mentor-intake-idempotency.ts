@@ -1,5 +1,5 @@
 import { isApiError } from "@/shared/services/api-client";
-import { getAccessToken } from "@/shared/services/storage/access-token-storage";
+import { getAccessToken, initializeAccessTokenStorage } from "@/shared/services/storage/access-token-storage";
 import { updateIndexedDb } from "@/shared/services/storage/browser-indexed-db";
 import {
   readSessionStorage,
@@ -66,6 +66,7 @@ export async function withMentorIntakeKey<T>(
   preferences: MentorIntakePreferences,
   submit: (key: string) => Promise<T>,
 ): Promise<T> {
+  await initializeAccessTokenStorage();
   const name = storageKey(operation);
   const fingerprint = JSON.stringify({
     technicalAreaIds: [...preferences.technicalAreaIds].sort(),

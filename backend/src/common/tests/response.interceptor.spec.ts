@@ -22,6 +22,15 @@ function buildCallHandler(value: unknown): CallHandler {
 describe('ResponseInterceptor', () => {
   const interceptor = new ResponseInterceptor();
 
+  it('uses a status set by the handler after interception begins', async () => {
+    const response = { statusCode: 200 };
+    const context = { switchToHttp: () => ({ getResponse: () => response }) } as unknown as ExecutionContext;
+    const result = await firstValueFrom(interceptor.intercept(context, {
+      handle: () => { response.statusCode = 201; return of({ result: 'registered' }); },
+    }));
+    expect(result).toMatchObject({ statusCode: 201, data: { result: 'registered' } });
+  });
+
   it.each([200, 201, 202])(
     'envuelve los datos usando el status HTTP real %s',
     async (statusCode) => {
@@ -101,7 +110,11 @@ describe('ResponseInterceptor', () => {
   });
 
   it('propaga la excepcion original para que la procese el filtro existente', async () => {
-    const exception = new TestDomainException('Conflicto de dominio', 409, 'TEST_ERROR');
+    const exception = new TestDomainException(
+      'Conflicto de dominio',
+      409,
+      'TEST_ERROR',
+    );
 
     await expect(
       firstValueFrom(

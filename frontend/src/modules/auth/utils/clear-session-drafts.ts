@@ -1,8 +1,6 @@
-import { canUseLocalStorage, removeLocalStorage } from "@/shared/services/storage/browser-local-storage";
+import { removeIndexedDbByPrefix } from "@/shared/services/storage/browser-indexed-db";
 import { SESSION_DRAFT_STORAGE_PREFIX } from "../constants/session.constants";
 
-export function clearSessionDrafts(): void {
-  if (!canUseLocalStorage()) return;
-  const draftKeys = Object.keys(window.localStorage).filter((key) => key.startsWith(SESSION_DRAFT_STORAGE_PREFIX));
-  draftKeys.forEach((key) => removeLocalStorage(key));
+export function clearSessionDrafts(): Promise<void> {
+  return removeIndexedDbByPrefix(SESSION_DRAFT_STORAGE_PREFIX).catch(() => undefined);
 }

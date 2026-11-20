@@ -1,9 +1,7 @@
+import "@/shared/testing/indexed-db.mock";
 import { apiClient } from "@/shared/services/api-client";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { activateMentor } from "./mentor-activation.service";
-vi.mock("@/shared/services/storage/browser-indexed-db", () => ({
-  updateIndexedDb: vi.fn(async (_key, update) => update(null)),
-}));
 
 afterEach(() => {
   vi.restoreAllMocks();

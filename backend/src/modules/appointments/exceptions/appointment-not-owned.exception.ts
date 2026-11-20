@@ -3,6 +3,10 @@ import { APPOINTMENT_ERROR_CODES } from '../constants/appointment-error-codes.co
 
 export class AppointmentNotOwnedException extends DomainException {
   constructor() {
-    super('No tienes acceso a esta cita', 403, APPOINTMENT_ERROR_CODES.appointmentNotOwned);
+    super(
+      'No tienes acceso a esta cita',
+      403,
+      APPOINTMENT_ERROR_CODES.appointmentNotOwned,
+    );
   }
 }

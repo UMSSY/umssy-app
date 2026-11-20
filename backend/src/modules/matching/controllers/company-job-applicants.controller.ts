@@ -1,3 +1,4 @@
+import { CompanyOwnershipGuard } from '../../../common/guards/company-ownership.guard.js';
 import {
   Controller,
   Get,
@@ -7,6 +8,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiForbiddenResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
@@ -26,8 +28,9 @@ const uuidPipe = new ParseUUIDPipe({
 
 @ApiTags('job-applications')
 @ApiBearerAuth()
+@ApiForbiddenResponse({ description: 'La cuenta no pertenece a esta empresa' })
 @ApiUnauthorizedResponse({ description: 'A valid access token is required' })
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard, CompanyOwnershipGuard)
 @Roles('empresa')
 @Controller('companies/:companyId/job-offers/:jobOfferId/applications')
 export class CompanyJobApplicantsController {
@@ -37,10 +40,12 @@ export class CompanyJobApplicantsController {
 
   @Get()
   @ApiOperation({
-    summary: 'Lista cuántos y quiénes se postularon a una vacante de la empresa',
+    summary:
+      'Lista cuántos y quiénes se postularon a una vacante de la empresa',
   })
   @ApiOkResponse({
-    description: 'Total de postulantes y su detalle, del más reciente al más antiguo',
+    description:
+      'Total de postulantes y su detalle, del más reciente al más antiguo',
   })
   @ApiNotFoundResponse({
     description: 'La vacante no existe o no pertenece a la empresa',

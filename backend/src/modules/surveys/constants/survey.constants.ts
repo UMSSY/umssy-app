@@ -1,10 +1,5 @@
-export const SURVEY_TITLE_MIN_LENGTH = 5;
-export const SURVEY_TITLE_MAX_LENGTH = 150;
-export const SURVEY_DESCRIPTION_MAX_LENGTH = 500;
-export const SURVEY_STATEMENT_MAX_LENGTH = 250;
-export const SURVEY_OPTION_MAX_LENGTH = 100;
-export const SURVEY_MIN_OPTIONS_TO_PUBLISH = 2;
-export const SURVEY_MIN_QUESTIONS_TO_PUBLISH = 1;
+import type { SemesterRange } from '../types/semester-range.type.js';
+
 export const SURVEY_ALL_ACADEMIC_PERIODS = 'Todas';
 export const SURVEY_ACADEMIC_PERIOD_PATTERN = /^(\d{4}|Todas)$/;
 export const SURVEY_ACADEMIC_PERIOD_YEAR_PATTERN = /(\d{4})$/;
@@ -12,14 +7,17 @@ export const SURVEY_ALL_CAREERS = 'all';
 
 export const SURVEY_VALIDATION_MESSAGES = {
   TITLE_REQUIRED: 'El título de la encuesta es obligatorio',
-  TITLE_TOO_SHORT: `El título debe tener al menos ${SURVEY_TITLE_MIN_LENGTH} caracteres`,
-  TITLE_TOO_LONG: `El título no debe exceder los ${SURVEY_TITLE_MAX_LENGTH} caracteres`,
-  DESCRIPTION_TOO_LONG: `La descripción no debe exceder los ${SURVEY_DESCRIPTION_MAX_LENGTH} caracteres`,
+  TITLE_TOO_SHORT: `El título debe tener al menos 5 caracteres`,
+  TITLE_TOO_LONG: `El título no debe exceder los 150 caracteres`,
+  DESCRIPTION_TOO_LONG: `La descripción no debe exceder los 500 caracteres`,
   INVALID_STATUS: 'El estado de la encuesta no es válido',
   INVALID_CAREER_ID: 'El identificador de la carrera no es válido',
   INVALID_SURVEY_ID: 'El identificador de la encuesta no es válido',
   CAREER_REQUIRED: 'La carrera dirigida es obligatoria',
-  INVALID_ACADEMIC_PERIOD: 'La gestión debe ser un año, por ejemplo 2026, o Todas',
+  INVALID_STATISTICS_PERIOD:
+    'El periodo debe tener el formato I-2026 o II-2026',
+  INVALID_ACADEMIC_PERIOD:
+    'La gestión debe ser un año, por ejemplo 2026, o Todas',
   ACADEMIC_PERIOD_REQUIRED: 'La gestión es obligatoria',
   TARGET_AUDIENCE_REQUIRED: 'El público objetivo es obligatorio',
   INVALID_TARGET_AUDIENCE: 'El público objetivo no es válido',
@@ -28,11 +26,11 @@ export const SURVEY_VALIDATION_MESSAGES = {
   CLOSES_AT_REQUIRED: 'La fecha de cierre es obligatoria',
   QUESTIONS_REQUIRED: 'La encuesta debe tener al menos una pregunta',
   STATEMENT_REQUIRED: 'El enunciado de la pregunta es obligatorio',
-  STATEMENT_TOO_LONG: `El enunciado no debe exceder los ${SURVEY_STATEMENT_MAX_LENGTH} caracteres`,
+  STATEMENT_TOO_LONG: `El enunciado no debe exceder los 250 caracteres`,
   INVALID_QUESTION_TYPE: 'El tipo de pregunta no es válido',
   OPTION_REQUIRED: 'La opción no puede estar vacía',
-  OPTION_TOO_LONG: `La opción no debe exceder los ${SURVEY_OPTION_MAX_LENGTH} caracteres`,
-  OPTIONS_TOO_FEW: `La pregunta debe tener al menos ${SURVEY_MIN_OPTIONS_TO_PUBLISH} opciones`,
+  OPTION_TOO_LONG: `La opción no debe exceder los 100 caracteres`,
+  OPTIONS_TOO_FEW: `La pregunta debe tener al menos 2 opciones`,
   OPTIONS_DUPLICATED: 'Las opciones de una pregunta no pueden repetirse',
 } as const;
 
@@ -49,7 +47,8 @@ export const SURVEY_ERROR_MESSAGES = {
   SURVEY_NOT_PUBLISHED: 'Solo se pueden inhabilitar las encuestas publicadas',
   SURVEY_HAS_RESPONSES:
     'No se puede inhabilitar una encuesta que ya tiene respuestas registradas',
-  SURVEY_NOT_OPEN: 'La encuesta todavía no está abierta para recibir respuestas',
+  SURVEY_NOT_OPEN:
+    'La encuesta todavía no está abierta para recibir respuestas',
   SURVEY_NOT_AVAILABLE:
     'Esta encuesta no está dirigida a tu perfil, carrera o año de egreso',
   STORAGE_UNAVAILABLE:
@@ -105,6 +104,43 @@ export const SURVEY_DETAIL_INCLUDE = {
     },
   },
 } as const;
+
+const buildAnswersCount = (range?: SemesterRange) =>
+  range
+    ? {
+        where: {
+          response: { submittedAt: { gte: range.start, lt: range.end } },
+        },
+      }
+    : true;
+
+export const buildSurveyStatisticsInclude = (
+  range?: SemesterRange,
+): typeof SURVEY_STATISTICS_INCLUDE =>
+  ({
+    career: { select: CAREER_SELECT },
+    status: CATALOG_TITLE_SELECT,
+    questions: {
+      orderBy: { position: 'asc' },
+      include: {
+        type: CATALOG_TITLE_SELECT,
+        options: {
+          orderBy: { position: 'asc' },
+          include: {
+            _count: { select: { answers: buildAnswersCount(range) } },
+          },
+        },
+        _count: { select: { answers: buildAnswersCount(range) } },
+      },
+    },
+    _count: {
+      select: {
+        responses: range
+          ? { where: { submittedAt: { gte: range.start, lt: range.end } } }
+          : true,
+      },
+    },
+  }) as unknown as typeof SURVEY_STATISTICS_INCLUDE;
 
 export const SURVEY_STATISTICS_INCLUDE = {
   career: { select: CAREER_SELECT },

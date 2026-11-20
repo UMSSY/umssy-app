@@ -1,4 +1,4 @@
-import type { RequirementStatus } from "../types/job-matching.types";
+import type { RequirementStatus } from "../types/requirement-status.types";
 import type { RequirementCategory } from "../types/requirement-category.types";
 
 export const REQUIREMENT_STATUS_LABELS: Record<RequirementStatus, string> = {

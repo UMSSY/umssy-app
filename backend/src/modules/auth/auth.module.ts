@@ -16,8 +16,10 @@ import { MailModule } from '../mail/mail.module.js';
     JwtModule.register({
       secret: process.env.JWT_SECRET,
       signOptions: {
-        expiresIn: (process.env.JWT_EXPIRES_IN || '8h') as JwtSignOptions['expiresIn'],
-        algorithm: (process.env.JWT_ALGORITHM || undefined) as JwtSignOptions['algorithm'],
+        expiresIn: (process.env.JWT_EXPIRES_IN ||
+          '8h') as JwtSignOptions['expiresIn'],
+        algorithm: (process.env.JWT_ALGORITHM ||
+          undefined) as JwtSignOptions['algorithm'],
       },
     }),
   ],

@@ -41,7 +41,11 @@ export class AuthRepository {
     });
   }
 
-  async createPasswordResetOtp(userId: string, codeHash: string, expiresAt: Date) {
+  async createPasswordResetOtp(
+    userId: string,
+    codeHash: string,
+    expiresAt: Date,
+  ) {
     // Invalida códigos anteriores no usados
     await this.prisma.passwordResetOtp.updateMany({
       where: { userId, usedAt: null },
@@ -88,7 +92,11 @@ export class AuthRepository {
     });
   }
 
-  async updateUserPasswordAndInvalidateOtp(userId: string, newPasswordHash: string, otpId: string) {
+  async updateUserPasswordAndInvalidateOtp(
+    userId: string,
+    newPasswordHash: string,
+    otpId: string,
+  ) {
     return this.prisma.$transaction([
       this.prisma.user.update({
         where: { id: userId },

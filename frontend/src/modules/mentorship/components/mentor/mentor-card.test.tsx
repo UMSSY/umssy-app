@@ -99,7 +99,9 @@ describe("MentorCard", () => {
   it("omite formación ausente y muestra disponibilidad explícita", () => {
     render(<MentorCard mentor={mentor} />);
     expect(screen.queryByText(/Ingeniería/)).not.toBeInTheDocument();
-    expect(screen.getByText("No disponible")).toBeInTheDocument();
+    expect(
+      screen.queryByText("No disponible"),
+    ).not.toBeInTheDocument();
     expect(screen.queryByText("Disponible para mentoría")).not.toBeInTheDocument();
   });
 
@@ -110,7 +112,9 @@ describe("MentorCard", () => {
       />,
     );
     expect(screen.getByText("Orientación técnica")).toBeVisible();
-    expect(screen.getByText("No disponible")).toBeInTheDocument();
+    expect(
+      screen.queryByText("No disponible"),
+    ).not.toBeInTheDocument();
   });
 
   it("muestra orientaciones reales y conserva un vacío discreto", () => {
@@ -162,7 +166,9 @@ describe("MentorCard", () => {
     expect(screen.getByText("APIs")).toBeDefined();
     expect(screen.getByText("Bases de datos")).toBeDefined();
     expect(screen.queryByText("Disponible")).toBeNull();
-    expect(screen.getByText("No disponible")).toBeVisible();
+    expect(
+      screen.queryByText("No disponible"),
+    ).not.toBeInTheDocument();
   });
 
   it("no fabrica un cargo cuando headline es null", () => {
@@ -249,7 +255,9 @@ describe("MentorCard", () => {
       />,
     );
     expect(screen.getByText(label)).toBeVisible();
-    expect(screen.getByText("No disponible")).toBeInTheDocument();
+    expect(
+      screen.queryByText("No disponible"),
+    ).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: `Ver perfil de ${mentor.fullName}` }))
       .toHaveAttribute("href", `/mentors/${mentor.id}`);
   });

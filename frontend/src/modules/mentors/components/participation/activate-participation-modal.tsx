@@ -1,4 +1,5 @@
 "use client";
+import type { ActivateParticipationModalProps } from "../../types/activate-participation-modal-props.types";
 
 import { AlertTriangle, X, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,14 +10,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-
-type ActivateParticipationModalProps = {
-  isOpen: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
-  isLoading: boolean;
-  errorMessage: string | null;
-};
 
 export function ActivateParticipationModal({
   isOpen,

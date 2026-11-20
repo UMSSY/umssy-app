@@ -1,9 +1,10 @@
+import type { CertificationDocumentsService } from '../../certification-documents/services/certification-documents.service.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CertificationNotFoundException } from '../exceptions/certification-not-found.exception.js';
 import { CertificationMapper } from '../mappers/certification.mapper.js';
-import { CertificationDocumentsRepository } from '../../certification-documents/repositories/certification-documents.repository.js';
-import { CertificationsRepository } from '../repositories/certifications.repository.js';
+import { CertificationRecordsService } from '../services/certification-records.service.js';
 import { CertificationsService } from '../services/certifications.service.js';
+import type { ProfileSkillsAnalysisService } from '../../nlp/services/profile-skills-analysis.service.js';
 import type { CertificationRecord } from '../types/certification-record.type.js';
 
 const userId = '11111111-1111-4111-8111-111111111111';
@@ -50,9 +51,12 @@ describe('CertificationsService', () => {
       findIdsWithDocument: vi.fn().mockResolvedValue(new Set<string>()),
     };
     service = new CertificationsService(
-      repository as unknown as CertificationsRepository,
-      documentsRepository as unknown as CertificationDocumentsRepository,
+      repository as unknown as CertificationRecordsService,
       new CertificationMapper(),
+      {
+        refreshAfterChange: vi.fn().mockResolvedValue(undefined),
+      } as unknown as ProfileSkillsAnalysisService,
+      documentsRepository as unknown as CertificationDocumentsService,
     );
   });
 
@@ -99,7 +103,9 @@ describe('CertificationsService', () => {
 
     const result = await service.findAll(userId);
 
-    expect(documentsRepository.findIdsWithDocument).toHaveBeenCalledWith(userId);
+    expect(documentsRepository.findIdsWithDocument).toHaveBeenCalledWith(
+      userId,
+    );
     expect(result.map((item) => item.hasDocument)).toEqual([false, true]);
   });
 
@@ -132,7 +138,9 @@ describe('CertificationsService', () => {
       name: 'Updated name',
     });
 
-    expect(documentsRepository.hasDocument).toHaveBeenCalledWith(certificationId);
+    expect(documentsRepository.hasDocument).toHaveBeenCalledWith(
+      certificationId,
+    );
     expect(result.hasDocument).toBe(true);
   });
 

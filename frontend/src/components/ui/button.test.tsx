@@ -1,7 +1,8 @@
 import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
-import { Button, buttonVariants } from "./button"
+import { Button } from "./button"
+import { buttonVariants } from "./button-variants"
 
 describe("Button", () => {
   it("renders with default variant and size classes", () => {
@@ -51,6 +52,13 @@ describe("Button", () => {
     render(<Button variant="destructive">Eliminar</Button>)
     const button = screen.getByRole("button", { name: "Eliminar" })
     expect(button.className).toContain("bg-critical-action")
+  })
+
+  it("renders the success variant with its class", () => {
+    render(<Button variant="success">Confirmar</Button>)
+    const button = screen.getByRole("button", { name: "Confirmar" })
+    expect(button.className).toContain("bg-success")
+    expect(button.className).toContain("hover:bg-success-hover")
   })
 
   it("renders the small size with its class", () => {

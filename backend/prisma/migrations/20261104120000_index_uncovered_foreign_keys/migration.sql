@@ -1,0 +1,12 @@
+CREATE INDEX "access_requests_document_type_id_idx" ON "access_requests"("document_type_id");
+CREATE INDEX "access_requests_opened_by_id_idx" ON "access_requests"("opened_by_id");
+CREATE INDEX "access_requests_reviewed_by_id_idx" ON "access_requests"("reviewed_by_id");
+CREATE INDEX "appointment_histories_changed_by_id_idx" ON "appointment_histories"("changed_by_id");
+CREATE INDEX "appointments_cancelled_by_id_idx" ON "appointments"("cancelled_by_id");
+CREATE INDEX "appointments_orientation_type_id_idx" ON "appointments"("orientation_type_id");
+CREATE INDEX "connection_requests_status_id_idx" ON "connection_requests"("status_id");
+CREATE INDEX "conversation_participants_user_id_idx" ON "conversation_participants"("user_id");
+CREATE INDEX "event_attendances_checked_in_by_id_idx" ON "event_attendances"("checked_in_by_id");
+CREATE INDEX "events_moderated_by_id_idx" ON "events"("moderated_by_id");
+CREATE INDEX "mentor_participation_requests_user_id_idx" ON "mentor_participation_requests"("user_id");
+CREATE INDEX "mentor_slot_offers_user_id_idx" ON "mentor_slot_offers"("user_id");

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ChangeEvent, type FormEvent } from "react";
+import { useProfileCompletionFocus } from "../hooks/use-profile-completion-focus";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -8,16 +9,26 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import type { PersonalInfoErrors } from "../types/personal-info-errors.types";
 import type { PersonalInfoFormProps } from "../types/personal-info-form-props.types";
 import type { PersonalInfoValues } from "../types/personal-info-values.types";
-import { PHONE_HINT, PHONE_HINT_ID } from "../constants/profile-validation.constants";
+import { PHONE_HINT } from "../constants/profile-validation.constants";
 import { getFieldErrorId, getFieldErrorProps } from "../utils/get-field-error-props";
-import { limitPhoneDigits } from "../utils/limit-phone-digits";
+import { sanitizeNameInput } from "../utils/sanitize-name-input";
+import { sanitizePhoneInput } from "../utils/sanitize-phone-input";
 import { trimFormValues } from "../utils/trim-form-values";
 import { validatePersonalInfo } from "../utils/validate-personal-info";
 import { FormField } from "./form-field";
 import { ProfilePhotoField } from "./profile-photo-field";
+import { SocialAccountConnectButtons } from "./social-account-connect-buttons";
 import { FormSection } from "@/shared/components/layout/form-section";
 
+function sanitizeFieldValue(field: keyof PersonalInfoValues, value: string): string {
+  if (field === "phone") return sanitizePhoneInput(value);
+  if (field === "firstName" || field === "lastName") return sanitizeNameInput(value);
+  return value;
+}
+
 export function PersonalInfoForm({
+  idPrefix = "",
+  saveLabel = "Guardar perfil",
   initialValues,
   cities = [],
   isSaving = false,
@@ -29,6 +40,21 @@ export function PersonalInfoForm({
   const [values, setValues] = useState<PersonalInfoValues>(initialValues);
   const [localErrors, setErrors] = useState<PersonalInfoErrors>({});
   const errors = { ...localErrors, ...serverErrors };
+  const fieldIds = {
+    firstName: `${idPrefix}firstName`,
+    lastName: `${idPrefix}lastName`,
+    cityId: `${idPrefix}cityId`,
+    phone: `${idPrefix}phone`,
+    personalEmail: `${idPrefix}personalEmail`,
+    phoneHint: `${idPrefix}phone-hint`,
+  };
+  useProfileCompletionFocus('contact', {
+    [fieldIds.firstName]: values.firstName,
+    [fieldIds.lastName]: values.lastName,
+    [fieldIds.cityId]: values.cityId,
+    [fieldIds.phone]: values.phone,
+    [fieldIds.personalEmail]: values.personalEmail,
+  }, !isSaving && !idPrefix);
 
   const updateField = (field: keyof PersonalInfoValues, value: string) => {
     onEdit?.(field);
@@ -38,8 +64,7 @@ export function PersonalInfoForm({
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const field = event.target.name as keyof PersonalInfoValues;
-    const value = field === "phone" ? limitPhoneDigits(event.target.value) : event.target.value;
-    updateField(field, value);
+    updateField(field, sanitizeFieldValue(field, event.target.value));
   };
 
   const handleCityChange = (cityId: string | null) => {
@@ -67,15 +92,15 @@ export function PersonalInfoForm({
   return (
     <div className="rounded-lg border border-border bg-surface">
       <div className="border-b border-border p-6 lg:px-8">
-      <ProfilePhotoField {...photo} />
+      <ProfilePhotoField {...photo} idPrefix={idPrefix} />
 
       </div>
       <form onSubmit={handleSubmit} noValidate className="px-6 pt-6 lg:px-8">
         <FormSection title="Identidad" description="Tu nombre en la comunidad.">
           <div className="grid gap-5 md:grid-cols-2">
-          <FormField id="firstName" label="Nombres" isRequired error={errors.firstName}>
+          <FormField id={fieldIds.firstName} label="Nombres" isRequired error={errors.firstName}>
             <Input
-              id="firstName"
+              id={fieldIds.firstName}
               name="firstName"
               type="text"
               autoComplete="given-name"
@@ -84,12 +109,12 @@ export function PersonalInfoForm({
               disabled={isSaving}
               onChange={handleChange}
               className="h-11"
-              {...getFieldErrorProps("firstName", errors.firstName)}
+              {...getFieldErrorProps(fieldIds.firstName, errors.firstName)}
             />
           </FormField>
-          <FormField id="lastName" label="Apellidos" isRequired error={errors.lastName}>
+          <FormField id={fieldIds.lastName} label="Apellidos" isRequired error={errors.lastName}>
             <Input
-              id="lastName"
+              id={fieldIds.lastName}
               name="lastName"
               type="text"
               autoComplete="family-name"
@@ -98,14 +123,14 @@ export function PersonalInfoForm({
               disabled={isSaving}
               onChange={handleChange}
               className="h-11"
-              {...getFieldErrorProps("lastName", errors.lastName)}
+              {...getFieldErrorProps(fieldIds.lastName, errors.lastName)}
             />
           </FormField>
           </div>
         </FormSection>
         <FormSection title="Contacto" description="Dónde pueden encontrarte.">
           <div className="grid gap-5 md:grid-cols-2">
-          <FormField id="cityId" label="Ciudad de residencia" isRequired error={errors.cityId}>
+          <FormField id={fieldIds.cityId} label="Ciudad de residencia" isRequired error={errors.cityId}>
             <Select
               name="cityId"
               value={values.cityId || null}
@@ -114,9 +139,9 @@ export function PersonalInfoForm({
               onValueChange={handleCityChange}
             >
               <SelectTrigger
-                id="cityId"
+                id={fieldIds.cityId}
                 className="w-full data-[size=default]:h-11"
-                {...getFieldErrorProps("cityId", errors.cityId)}
+                {...getFieldErrorProps(fieldIds.cityId, errors.cityId)}
               >
                 <SelectValue placeholder="Selecciona tu ciudad" />
               </SelectTrigger>
@@ -129,9 +154,9 @@ export function PersonalInfoForm({
               </SelectContent>
             </Select>
           </FormField>
-          <FormField id="phone" label="Teléfono" isRequired error={errors.phone}>
+          <FormField id={fieldIds.phone} label="Teléfono" isRequired error={errors.phone}>
             <Input
-              id="phone"
+              id={fieldIds.phone}
               name="phone"
               type="tel"
               autoComplete="tel"
@@ -140,23 +165,23 @@ export function PersonalInfoForm({
               disabled={isSaving}
               onChange={handleChange}
               className="h-11"
-              {...getFieldErrorProps("phone", errors.phone)}
-              aria-describedby={[PHONE_HINT_ID, errors.phone ? getFieldErrorId("phone") : null]
+              {...getFieldErrorProps(fieldIds.phone, errors.phone)}
+              aria-describedby={[fieldIds.phoneHint, errors.phone ? getFieldErrorId(fieldIds.phone) : null]
                 .filter(Boolean)
                 .join(" ")}
             />
-            <p id={PHONE_HINT_ID} className="text-sm text-text-secondary">
+            <p id={fieldIds.phoneHint} className="text-sm text-text-secondary">
               {PHONE_HINT}
             </p>
           </FormField>
           <FormField
-            id="personalEmail"
+            id={fieldIds.personalEmail}
             label="Correo personal"
             isRequired
             error={errors.personalEmail}
           >
             <Input
-              id="personalEmail"
+              id={fieldIds.personalEmail}
               name="personalEmail"
               type="email"
               autoComplete="email"
@@ -165,9 +190,10 @@ export function PersonalInfoForm({
               disabled={isSaving}
               onChange={handleChange}
               className="h-11"
-              {...getFieldErrorProps("personalEmail", errors.personalEmail)}
+              {...getFieldErrorProps(fieldIds.personalEmail, errors.personalEmail)}
             />
           </FormField>
+          <SocialAccountConnectButtons />
           </div>
         </FormSection>
         <div className="-mx-6 flex flex-wrap items-center justify-between gap-4 rounded-b-lg border-t border-border bg-surface px-6 py-5 lg:-mx-8 lg:px-8">
@@ -183,7 +209,7 @@ export function PersonalInfoForm({
               Cancelar
             </Button>
             <Button type="submit" className={cn("h-10 bg-primary px-4 text-sm text-primary-foreground hover:bg-brand-hover", "min-w-44")} disabled={isSaving}>
-              {isSaving ? "Guardando..." : "Guardar perfil"}
+              {isSaving ? "Guardando..." : saveLabel}
             </Button>
           </div>
         </div>

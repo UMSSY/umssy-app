@@ -7,7 +7,8 @@ import { WorkshopCover } from "../components/workshop-cover";
 import { usePublicEvent } from "../hooks/use-public-events";
 import { formatEventDate, formatTimeRange } from "../utils/event-card";
 import { PublicHeader, PublicFooter, PageHeading } from "@/shared/components/layout";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import type { PublicWorkshopDetailViewProps } from "../types/public-workshop-detail-view-props.types";
 export function PublicWorkshopDetailView({ id }: PublicWorkshopDetailViewProps) {
  const query = usePublicEvent(id);

@@ -47,7 +47,9 @@ export class JwtAuthGuard implements CanActivate {
       (payload.roles !== undefined &&
         (!Array.isArray(payload.roles) ||
           payload.roles.length === 0 ||
-          payload.roles.some((role) => !ROLE_NAMES.some((knownRole) => knownRole === role))))
+          payload.roles.some(
+            (role) => !ROLE_NAMES.some((knownRole) => knownRole === role),
+          )))
     ) {
       throw new UnauthorizedSessionException();
     }

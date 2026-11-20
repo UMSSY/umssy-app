@@ -4,6 +4,8 @@ export interface GetPaginatedMessagesParams {
   conversationId: string;
   cursor?: string | null;
   limit?: number;
+  signal?: AbortSignal;
+  requireServer?: boolean;
 }
 
 export interface PaginatedMessagesResponse {
@@ -46,4 +48,5 @@ export interface ChatUserResponse {
   headline: string | null;
   role: string;
   isOnline: boolean;
+  canChatByApplication?: boolean;
 }

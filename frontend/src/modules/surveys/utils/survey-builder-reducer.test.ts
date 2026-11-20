@@ -1,10 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { buildSurveyState } from "../testing/survey-fixtures";
-import type { SurveyBuilderState } from "../types/survey-builder.types";
+import type { SurveyBuilderState } from "../types/survey-builder-state.types";
 import { createInitialSurveyState, createQuestion, surveyBuilderReducer as reduce } from "./survey-builder-reducer";
 
 function withQuestions(count: number): SurveyBuilderState {
-  const questions = Array.from({ length: count }, (_, index) => ({ ...createQuestion(), statement: `P${index + 1}` }));
+  const questions = Array.from({ length: count }, (_, index) => ({
+    ...createQuestion(),
+    statement: `P${index + 1}`,
+  }));
   return buildSurveyState({ questions, activeQuestionId: questions[0].id });
 }
 

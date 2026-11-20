@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import {
   CareerNotFoundException,
   InvalidSurveyScheduleException,
@@ -12,18 +12,31 @@ import {
   SurveyNotPublishedException,
   SurveyTitleAlreadyExistsException,
 } from '../exceptions/index.js';
+import {
+  toSurveyAlertConfigResponse,
+  toSurveyAlertConfigSavedResponse,
+} from '../mappers/survey-alert-config.mapper.js';
 import { SurveyMapper } from '../mappers/survey.mapper.js';
 import { CareersRepository } from '../repositories/careers.repository.js';
 import { SurveysRepository } from '../repositories/surveys.repository.js';
 import type { CreateSurveyRequest } from '../requests/create-survey.schema.js';
 import type { SubmitSurveyResponseRequest } from '../requests/submit-survey-response.schema.js';
+import type { SurveyAlertConfigResponse } from '../responses/survey-alert-config.response.js';
+import type { SurveyAlertConfigSavedResponse } from '../responses/survey-alert-config-saved.response.js';
 import type { SurveyCreatedResponse } from '../responses/survey-created.response.js';
 import type { SurveyDetailResponse } from '../responses/survey-detail.response.js';
 import type { SurveyNotificationResponse } from '../responses/survey-notification.response.js';
 import type { SurveyStatisticsResponse } from '../responses/survey-statistics.response.js';
+import {
+  getPreviousSemester,
+  getSemesterRange,
+} from '../utils/academic-semester.js';
 import type { SurveySummaryResponse } from '../responses/survey-summary.response.js';
+import { SURVEY_ALERT_CONFIG_DEFAULTS } from '../constants/survey-alert-config.constants.js';
 import { SURVEYS_ROLE } from '../constants/surveys-access.constants.js';
+import type { SurveyAlertConfigDto } from '../types/survey-alert-config-dto.type.js';
 import type { UpdateSurveyData } from '../types/create-survey-data.type.js';
+import type { PreviousStatistics } from '../types/survey-statistics.type.js';
 import { SurveyQuestionType, SurveyStatus } from '../types/survey.enum.js';
 import {
   getSurveyAudiencesForRoles,
@@ -32,16 +45,20 @@ import {
 import { getScheduleError } from '../utils/survey-schedule.js';
 
 import { ReportHistoryService } from '../../reports/services/report-history.service.js';
+import { SurveyParticipationService } from './survey-participation.service.js';
 import { SurveyPdfService } from './survey-pdf.service.js';
 
 @Injectable()
 export class SurveysService {
+  private readonly logger = new Logger(SurveysService.name);
+
   constructor(
     private readonly surveysRepository: SurveysRepository,
     private readonly careersRepository: CareersRepository,
     private readonly surveyMapper: SurveyMapper,
     private readonly surveyPdfService: SurveyPdfService,
     private readonly reportHistoryService: ReportHistoryService,
+    private readonly surveyParticipationService: SurveyParticipationService,
   ) {}
 
   async create(
@@ -53,10 +70,15 @@ export class SurveysService {
     await this.ensureSurveyIsValid(data, request, now);
 
     const record = await this.surveysRepository.create(data);
+    if (request.status === SurveyStatus.PUBLISHED)
+      await this.notifyPublished(record.id, createdById, now);
     return this.surveyMapper.toCreatedResponse(record);
   }
 
-  async getDetail(id: string, now: Date = new Date()): Promise<SurveyDetailResponse> {
+  async getDetail(
+    id: string,
+    now: Date = new Date(),
+  ): Promise<SurveyDetailResponse> {
     const record = await this.surveysRepository.findDetail(id);
     if (!record) throw new SurveyNotFoundException();
     return this.surveyMapper.toDetailResponse(record, now);
@@ -69,19 +91,23 @@ export class SurveysService {
   ): Promise<SurveyCreatedResponse> {
     const current = await this.surveysRepository.findStatus(id);
     if (!current) throw new SurveyNotFoundException();
-    if (current.status !== SurveyStatus.DRAFT) throw new SurveyNotEditableException();
+    if (current.status !== SurveyStatus.DRAFT)
+      throw new SurveyNotEditableException();
 
     const data = this.surveyMapper.toUpdateData(request);
     await this.ensureSurveyIsValid(data, request, now, id);
 
     const record = await this.surveysRepository.update(id, data);
+    if (request.status === SurveyStatus.PUBLISHED)
+      await this.notifyPublished(record.id, undefined, now);
     return this.surveyMapper.toCreatedResponse(record);
   }
 
   async unpublish(id: string): Promise<void> {
     const current = await this.surveysRepository.findPublicationState(id);
     if (!current) throw new SurveyNotFoundException();
-    if (current.status !== SurveyStatus.PUBLISHED) throw new SurveyNotPublishedException();
+    if (current.status !== SurveyStatus.PUBLISHED)
+      throw new SurveyNotPublishedException();
     if (current.responseCount > 0) throw new SurveyHasResponsesException();
 
     const unpublished = await this.surveysRepository.unpublish(id);
@@ -90,20 +116,48 @@ export class SurveysService {
 
   async listSurveys(now: Date = new Date()): Promise<SurveySummaryResponse[]> {
     const records = await this.surveysRepository.findAll();
-    return records.map((record) => this.surveyMapper.toSummaryResponse(record, now));
+    return records.map((record) =>
+      this.surveyMapper.toSummaryResponse(record, now),
+    );
   }
 
-  async getStatistics(id: string, now: Date = new Date()): Promise<SurveyStatisticsResponse> {
-    const record = await this.surveysRepository.findStatistics(id);
+  async getStatistics(
+    id: string,
+    period?: string,
+    now: Date = new Date(),
+  ): Promise<SurveyStatisticsResponse> {
+    const range = period ? getSemesterRange(period) : undefined;
+    const record = await this.surveysRepository.findStatistics(id, range);
     if (!record) throw new SurveyNotFoundException();
-    return this.surveyMapper.toStatisticsResponse(record, now);
+
+    const previous =
+      period && range
+        ? await this.findPreviousStatistics(id, period)
+        : undefined;
+    return this.surveyMapper.toStatisticsResponse(record, now, {
+      period: range ? (period ?? null) : null,
+      previous,
+    });
+  }
+
+  private async findPreviousStatistics(
+    id: string,
+    period: string,
+  ): Promise<PreviousStatistics | undefined> {
+    const previousPeriod = getPreviousSemester(period);
+    const range = previousPeriod ? getSemesterRange(previousPeriod) : undefined;
+    if (!previousPeriod || !range) return undefined;
+
+    const record = await this.surveysRepository.findStatistics(id, range);
+    return record ? { period: previousPeriod, record } : undefined;
   }
 
   async exportSurveyPdf(
     id: string,
     userId: string,
+    period?: string,
   ): Promise<{ fileName: string; buffer: Buffer }> {
-    const stats = await this.getStatistics(id);
+    const stats = await this.getStatistics(id, period);
     const buffer = await this.surveyPdfService.generatePdf(stats);
 
     const safeTitle = stats.title
@@ -115,7 +169,8 @@ export class SurveysService {
       .slice(0, 40);
 
     const dateSuffix = new Date().toISOString().slice(0, 10);
-    const fileName = `reporte-encuesta-${safeTitle || 'estadisticas'}-${dateSuffix}.pdf`;
+    const periodSuffix = stats.period ? `-${stats.period.toLowerCase()}` : '';
+    const fileName = `reporte-encuesta-${safeTitle || 'estadisticas'}${periodSuffix}-${dateSuffix}.pdf`;
 
     await this.reportHistoryService.registerGeneratedReport(userId, {
       fileName,
@@ -132,7 +187,11 @@ export class SurveysService {
     const audiences = getSurveyAudiencesForRoles(sessionRoles);
     if (audiences.length === 0) return [];
     const graduate = await this.surveysRepository.findGraduateProfile(userId);
-    return this.surveysRepository.findNotificationsForUser(userId, graduate, audiences);
+    return this.surveysRepository.findNotificationsForUser(
+      userId,
+      graduate,
+      audiences,
+    );
   }
 
   async getSurveyForAnswering(
@@ -140,7 +199,10 @@ export class SurveysService {
     userId: string,
     sessionRoles: readonly string[] = [],
   ): Promise<SurveyDetailResponse> {
-    const survey = await this.surveysRepository.findByIdWithQuestions(id, userId);
+    const survey = await this.surveysRepository.findByIdWithQuestions(
+      id,
+      userId,
+    );
     if (!survey) throw new SurveyNotFoundException();
     if (!sessionRoles.includes(SURVEYS_ROLE)) {
       if (survey.status !== 'published') throw new SurveyNotFoundException();
@@ -156,7 +218,10 @@ export class SurveysService {
     request: SubmitSurveyResponseRequest,
     sessionRoles: readonly string[] = [],
   ): Promise<{ success: boolean; message: string }> {
-    const survey = await this.surveysRepository.findByIdWithQuestions(id, userId);
+    const survey = await this.surveysRepository.findByIdWithQuestions(
+      id,
+      userId,
+    );
     if (!survey || survey.status !== 'published') {
       throw new SurveyNotFoundException();
     }
@@ -178,20 +243,72 @@ export class SurveysService {
       if (q.isRequired) {
         const answer = request.answers.find((a) => a.questionId === q.id);
         if (!answer || answer.optionIds.length === 0) {
-          throw new BadRequestException(`La pregunta "${q.statement}" es obligatoria`);
+          throw new BadRequestException(
+            `La pregunta "${q.statement}" es obligatoria`,
+          );
         }
       }
     }
 
     for (const ans of request.answers) {
-      const q = survey.questions.find((question) => question.id === ans.questionId);
-      if (q && q.type !== SurveyQuestionType.MULTIPLE_CHOICE && ans.optionIds.length > 1) {
-        throw new BadRequestException(`La pregunta "${q.statement}" solo permite una respuesta`);
+      const q = survey.questions.find(
+        (question) => question.id === ans.questionId,
+      );
+      if (
+        q &&
+        q.type !== SurveyQuestionType.MULTIPLE_CHOICE &&
+        ans.optionIds.length > 1
+      ) {
+        throw new BadRequestException(
+          `La pregunta "${q.statement}" solo permite una respuesta`,
+        );
       }
     }
 
     await this.surveysRepository.submitResponse(id, userId, request.answers);
     return { success: true, message: 'Respuestas guardadas con éxito' };
+  }
+
+  async getAlertConfig(surveyId: string): Promise<SurveyAlertConfigResponse> {
+    return toSurveyAlertConfigResponse(
+      await this.surveysRepository.findAlertConfig(surveyId),
+    );
+  }
+
+  async saveAlertConfig(
+    surveyId: string,
+    dto: SurveyAlertConfigDto,
+  ): Promise<SurveyAlertConfigSavedResponse> {
+    const survey = await this.surveysRepository.findStatus(surveyId);
+    if (!survey) throw new SurveyNotFoundException();
+
+    const isEnabled =
+      dto.enabled ?? dto.isEnabled ?? SURVEY_ALERT_CONFIG_DEFAULTS.enabled;
+    const config = await this.surveysRepository.upsertAlertConfig(surveyId, {
+      isEnabled,
+      threshold: dto.threshold,
+      questionIds: dto.questionIds ?? null,
+    });
+    return toSurveyAlertConfigSavedResponse(config);
+  }
+
+  private async notifyPublished(
+    surveyId: string,
+    actorId: string | undefined,
+    now: Date,
+  ): Promise<void> {
+    try {
+      await this.surveyParticipationService.notifyPublished(
+        surveyId,
+        actorId,
+        now,
+      );
+    } catch (err) {
+      this.logger.error(
+        `Error notificando la publicación de la encuesta ${surveyId}`,
+        err instanceof Error ? err.stack : String(err),
+      );
+    }
   }
 
   private async ensureSurveyIsValid(
@@ -206,7 +323,8 @@ export class SurveysService {
 
     if (request.status === 'published' && data.opensAt && data.closesAt) {
       const scheduleError = getScheduleError(data.opensAt, data.closesAt, now);
-      if (scheduleError) throw new InvalidSurveyScheduleException(scheduleError);
+      if (scheduleError)
+        throw new InvalidSurveyScheduleException(scheduleError);
     }
 
     const titleTaken = await this.surveysRepository.existsWithTitle({
@@ -230,7 +348,10 @@ export class SurveysService {
     }
   }
 
-  private ensureSurveyIsOpen(survey: SurveyDetailResponse, now: Date = new Date()): void {
+  private ensureSurveyIsOpen(
+    survey: SurveyDetailResponse,
+    now: Date = new Date(),
+  ): void {
     if (survey.opensAt && new Date(survey.opensAt).getTime() > now.getTime()) {
       throw new SurveyNotOpenException();
     }
@@ -241,4 +362,3 @@ export class SurveysService {
     if (!exists) throw new CareerNotFoundException();
   }
 }
-

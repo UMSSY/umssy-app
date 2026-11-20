@@ -16,5 +16,9 @@ export const analyzeExperienceBodySchema = z.object({
     .nullish(),
 });
 
-export class AnalyzeExperienceParamsDto extends createZodDto(analyzeExperienceParamsSchema) {}
-export class AnalyzeExperienceBodyDto extends createZodDto(analyzeExperienceBodySchema) {}
+export class AnalyzeExperienceParamsDto extends createZodDto(
+  analyzeExperienceParamsSchema,
+) {}
+export class AnalyzeExperienceBodyDto extends createZodDto(
+  analyzeExperienceBodySchema,
+) {}

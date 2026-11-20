@@ -93,10 +93,17 @@ describe('buildScoreRequirements: habilidades (AC-04.2, AC-04.3, AC-04.8)', () =
   });
 });
 
-describe('buildScoreRequirements: académicos, experiencia y otros (AC-04.1, AC-04.5, AC-04.6)', () => {
-  it('sin datos de carrera, experiencia ni otros no crea esos requisitos', () => {
+describe('buildScoreRequirements: solo habilidades', () => {
+  const vacancyWithOtherRequirements: VacancyRequirements = {
+    skills: ['Docker'],
+    careers: ['Ingeniería de Sistemas'],
+    minExperienceYears: 5,
+    others: ['Carta de motivación'],
+  };
+
+  it('no crea requisitos de carrera, experiencia ni otros aunque la vacante los traiga', () => {
     const requirements = buildScoreRequirements(
-      { skills: ['Docker'] },
+      vacancyWithOtherRequirements,
       candidate({ skills: ['Docker'] }),
     );
 
@@ -105,88 +112,23 @@ describe('buildScoreRequirements: académicos, experiencia y otros (AC-04.1, AC-
     expect(requirements.otherRequirements).toEqual([]);
   });
 
-  it('cumple la carrera con cualquiera de las aceptadas, sin distinguir tildes ni mayúsculas', () => {
-    const { academicRequirements } = buildScoreRequirements(
-      {
-        skills: [],
-        careers: ['Ingeniería de Sistemas', 'Ingeniería Informática'],
-      },
-      candidate({ career: '  ingenieria informatica ' }),
+  it('el perfil con otra carrera, pocos años y sin entregas no cambia el resultado', () => {
+    const matching = buildScoreRequirements(
+      vacancyWithOtherRequirements,
+      candidate({
+        skills: ['Docker'],
+        career: 'Ingeniería Comercial',
+        experienceYears: 0,
+        presentedOthers: [],
+      }),
+    );
+    const plain = buildScoreRequirements(
+      { skills: ['Docker'] },
+      candidate({ skills: ['Docker'] }),
     );
 
-    expect(academicRequirements).toEqual([
-      {
-        name: 'Ingeniería de Sistemas o Ingeniería Informática',
-        status: 'Cumple',
-      },
-    ]);
-  });
-
-  it.each([['Ingeniería Comercial'], [''], [null], [undefined]])(
-    'una carrera distinta o vacía (%o) deja el requisito académico Pendiente',
-    (career) => {
-      const { academicRequirements } = buildScoreRequirements(
-        { skills: [], careers: ['Ingeniería de Sistemas'] },
-        candidate({ career }),
-      );
-
-      expect(academicRequirements).toEqual([
-        { name: 'Ingeniería de Sistemas', status: 'Pendiente' },
-      ]);
-    },
-  );
-
-  it.each([
-    [2, 3, 'Experiencia mínima: 2 años', 'Cumple'],
-    [2, 2, 'Experiencia mínima: 2 años', 'Cumple'],
-    [2, 1.5, 'Experiencia mínima: 2 años', 'Pendiente'],
-    [2, null, 'Experiencia mínima: 2 años', 'Pendiente'],
-    [1, 0, 'Experiencia mínima: 1 año', 'Pendiente'],
-  ])(
-    'con %p años pedidos y %p del perfil: "%s" es %s',
-    (minYears, years, name, status) => {
-      const { experienceRequirements } = buildScoreRequirements(
-        { skills: [], minExperienceYears: minYears },
-        candidate({ experienceYears: years }),
-      );
-
-      expect(experienceRequirements).toEqual([{ name, status }]);
-    },
-  );
-
-  it.each([[0], [-1], [null], [undefined], [Number.NaN]])(
-    'no crea requisito de experiencia con %p años',
-    (minYears) => {
-      const { experienceRequirements } = buildScoreRequirements(
-        { skills: [], minExperienceYears: minYears },
-        candidate({ experienceYears: 10 }),
-      );
-
-      expect(experienceRequirements).toEqual([]);
-    },
-  );
-
-  it('los otros requisitos quedan Pendiente mientras la persona no los haya presentado', () => {
-    const { otherRequirements } = buildScoreRequirements(
-      { skills: [], others: ['Carta de motivación', 'Carta de recomendación'] },
-      candidate({ presentedOthers: ['carta de motivacion'] }),
-    );
-
-    expect(otherRequirements).toEqual([
-      { name: 'Carta de motivación', status: 'Cumple' },
-      { name: 'Carta de recomendación', status: 'Pendiente' },
-    ]);
-  });
-
-  it('sin entregas registradas todos los otros requisitos son Pendiente', () => {
-    const { otherRequirements } = buildScoreRequirements(
-      { skills: [], others: ['Carta de motivación'] },
-      candidate(),
-    );
-
-    expect(otherRequirements).toEqual([
-      { name: 'Carta de motivación', status: 'Pendiente' },
-    ]);
+    expect(matching).toEqual(plain);
+    expect(calculateWeightedScore(matching)).toBe(100);
   });
 });
 
@@ -198,7 +140,7 @@ describe('toCategorizedRequirements y hasPendingRequirements', () => {
     others: ['Carta de motivación'],
   };
 
-  it('lista habilidades, académicos (carrera y experiencia) y otros, en ese orden, con su categoría', () => {
+  it('lista solo las habilidades, con su categoría', () => {
     const requirements = buildScoreRequirements(
       vacancy,
       candidate({
@@ -211,33 +153,17 @@ describe('toCategorizedRequirements y hasPendingRequirements', () => {
     expect(toCategorizedRequirements(requirements)).toEqual([
       { name: 'Docker', status: 'Cumple', category: 'skill' },
       { name: 'Terraform', status: 'Pendiente', category: 'skill' },
-      {
-        name: 'Ingeniería de Sistemas',
-        status: 'Cumple',
-        category: 'academic',
-      },
-      {
-        name: 'Experiencia mínima: 2 años',
-        status: 'Pendiente',
-        category: 'academic',
-      },
-      { name: 'Carta de motivación', status: 'Pendiente', category: 'other' },
     ]);
   });
 
-  it('informa si queda algún requisito pendiente', () => {
+  it('informa si queda alguna habilidad pendiente', () => {
     const missing = buildScoreRequirements(
       vacancy,
       candidate({ skills: ['Docker'] }),
     );
     const complete = buildScoreRequirements(
       vacancy,
-      candidate({
-        skills: ['Docker', 'Terraform'],
-        career: 'Ingeniería de Sistemas',
-        experienceYears: 3,
-        presentedOthers: ['Carta de motivación'],
-      }),
+      candidate({ skills: ['Docker', 'Terraform'] }),
     );
 
     expect(hasPendingRequirements(missing)).toBe(true);
@@ -255,19 +181,23 @@ describe('toCategorizedRequirements y hasPendingRequirements', () => {
     expect(calculateWeightedScore(requirements)).toBe(100);
   });
 
-  it('cumplir todo da 100 % y no cumplir nada da 0 % (AC-03.5)', () => {
+  it('cumplir todas las habilidades da 100 % y no cumplir ninguna da 0 % (AC-03.5)', () => {
     const all = buildScoreRequirements(
       vacancy,
-      candidate({
-        skills: ['Docker', 'Terraform'],
-        career: 'Ingeniería de Sistemas',
-        experienceYears: 2,
-        presentedOthers: ['Carta de motivación'],
-      }),
+      candidate({ skills: ['Docker', 'Terraform'] }),
     );
     const none = buildScoreRequirements(vacancy, candidate());
 
     expect(calculateWeightedScore(all)).toBe(100);
     expect(calculateWeightedScore(none)).toBe(0);
+  });
+
+  it('el porcentaje es el de habilidades cumplidas sobre las pedidas', () => {
+    const requirements = buildScoreRequirements(
+      vacancy,
+      candidate({ skills: ['Docker'] }),
+    );
+
+    expect(calculateWeightedScore(requirements)).toBe(50);
   });
 });

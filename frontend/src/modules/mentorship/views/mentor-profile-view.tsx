@@ -1,25 +1,23 @@
+'use client';
+import type { MentorProfileViewProps } from '../types/mentor-profile-view-props.types';
 
-"use client";
-
-import { MentorProfileHeader } from "../components/mentor/mentor-profile-header";
-import { MentorAbout } from "../components/mentor/mentor-about";
-import { MentorCareer } from "../components/mentor/mentor-career";
-import { MentorGuidanceTypes } from "../components/mentor/mentor-guidance-types";
-import { MentorTechnicalAreas } from "../components/mentor/mentor-technical-areas";
-import { useMentorProfile } from "../hooks/use-mentor-profile";
-import { MentorQueryFeedback } from "../components/mentor/mentor-query-feedback";
-import { MentorQuerySkeleton } from "../components/mentor/mentor-query-skeleton";
-import { MentorProfileNavigation } from "../components/mentor/mentor-profile-navigation";
-import { useCurrentUserId } from "../hooks/use-current-user-id";
-
-type MentorProfileViewProps = {
-  mentorId: string;
-  returnTo?: string;
-};
+import { MentorProfileHeader } from '../components/mentor/mentor-profile-header';
+import { MentorAbout } from '../components/mentor/mentor-about';
+import { MentorCareer } from '../components/mentor/mentor-career';
+import { MentorGuidanceTypes } from '../components/mentor/mentor-guidance-types';
+import { MentorTechnicalAreas } from '../components/mentor/mentor-technical-areas';
+import { useMentorProfile } from '../hooks/use-mentor-profile';
+import { MentorQueryFeedback } from '../components/mentor/mentor-query-feedback';
+import { MentorQuerySkeleton } from '../components/mentor/mentor-query-skeleton';
+import { MentorProfileNavigation } from '../components/mentor/mentor-profile-navigation';
+import { useCurrentUserId } from '../hooks/use-current-user-id';
+import { SimilarMentorsSection } from '../components/mentor/similar-mentors-section';
+import { useSimilarMentors } from '../hooks/use-similar-mentors';
+import type { SimilarMentorsSectionProps } from '../types/similar-mentor.types';
 
 export function MentorProfileView({
   mentorId,
-  returnTo = "/mentorship/mentors",
+  returnTo = '/mentorship/mentors',
 }: MentorProfileViewProps) {
   const { currentUserId, canVerifyIdentity } = useCurrentUserId();
 
@@ -30,6 +28,11 @@ export function MentorProfileView({
     isFetching,
     refetch,
   } = useMentorProfile(mentorId);
+
+  const similar = useSimilarMentors(
+    mentorId,
+    !isError && Boolean(mentor?.fullName?.trim()),
+  );
 
   if (isPending || (isError && isFetching)) {
     return (
@@ -67,9 +70,30 @@ export function MentorProfileView({
   }
 
   if (!mentor.fullName?.trim()) {
-    return <main className="mx-auto w-full max-w-7xl"><MentorQueryFeedback title="Perfil incompleto" description="Falta el nombre del mentor. El perfil completo todavía no está disponible." showDirectoryLink /></main>;
+    return (
+      <main className="mx-auto w-full max-w-7xl">
+        <MentorQueryFeedback
+          title="Perfil incompleto"
+          description="Falta el nombre del mentor. El perfil completo todavía no está disponible."
+          showDirectoryLink
+        />
+      </main>
+    );
   }
-  const professionalInterests = mentor.skills.filter((skill) => skill.name?.trim());
+  const professionalInterests = mentor.skills.filter((skill) =>
+    skill.name?.trim(),
+  );
+  const similarProps: SimilarMentorsSectionProps =
+    similar.isPending || (similar.isError && similar.isFetching)
+      ? { status: 'loading' }
+      : similar.isError
+        ? {
+            status: 'error',
+            onRetry: () => {
+              void similar.refetch();
+            },
+          }
+        : { status: 'success', mentors: similar.data };
 
   return (
     <main className="bg-background">
@@ -79,26 +103,47 @@ export function MentorProfileView({
           returnTo={returnTo}
         />
 
-        {!mentor.workExperiences.some((experience) => experience.isCurrent && experience.position?.trim()) && (
-          <p role="status" className="mt-4 rounded-lg border border-border bg-surface-soft p-4 text-sm text-text-secondary">Perfil profesional incompleto: cargo actual no registrado.</p>
+        {!mentor.workExperiences.some(
+          (experience) => experience.isCurrent && experience.position?.trim(),
+        ) && (
+          <p
+            role="status"
+            className="mt-4 rounded-lg border border-border bg-surface-soft p-4 text-sm text-text-secondary"
+          >
+            Perfil profesional incompleto: cargo actual no registrado.
+          </p>
         )}
 
         <MentorProfileHeader
           mentor={mentor}
-          showRequestAction={
-            canVerifyIdentity && currentUserId !== mentor.id
-          }
+          selectedArea={new URL(returnTo, "http://localhost").searchParams.get("area") ?? undefined}
+          showRequestAction={canVerifyIdentity && currentUserId !== mentor.id}
         />
 
         <div className="mt-6 grid min-w-0 grid-cols-12 gap-6">
           <div className="col-span-8 flex min-w-0 flex-col gap-6">
-            {mentor.aboutMe && (
-              <MentorAbout description={mentor.aboutMe} />
-            )}
+            {mentor.aboutMe && <MentorAbout description={mentor.aboutMe} />}
 
             <section className="rounded-xl border border-border bg-surface p-6">
-              <h2 className="text-xl font-bold text-ink">Intereses profesionales</h2>
-              {professionalInterests.length ? <ul className="mt-3 flex flex-wrap gap-2">{professionalInterests.map((skill) => <li key={skill.id} className="rounded-md border border-border bg-surface-soft px-3 py-1 text-sm text-ink">{skill.name}</li>)}</ul> : <p className="mt-3 text-sm text-text-secondary">Sin intereses profesionales registrados</p>}
+              <h2 className="text-xl font-bold text-ink">
+                Intereses profesionales
+              </h2>
+              {professionalInterests.length ? (
+                <ul className="mt-3 flex flex-wrap gap-2">
+                  {professionalInterests.map((skill) => (
+                    <li
+                      key={skill.id}
+                      className="rounded-md border border-border bg-surface-soft px-3 py-1 text-sm text-ink"
+                    >
+                      {skill.name}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mt-3 text-sm text-text-secondary">
+                  Sin intereses profesionales registrados
+                </p>
+              )}
             </section>
 
             <MentorGuidanceTypes
@@ -113,6 +158,7 @@ export function MentorProfileView({
             <MentorTechnicalAreas areas={mentor.technicalAreas} />
           </div>
         </div>
+        <SimilarMentorsSection {...similarProps} returnTo={returnTo} />
       </div>
     </main>
   );

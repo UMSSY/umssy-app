@@ -4,10 +4,13 @@ import { ProfileNotFoundException } from '../exceptions/profile-not-found.except
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { PhotoFileRepository } from '../repositories/photo-file.repository.js';
 
-const recordNotFoundError = new Prisma.PrismaClientKnownRequestError('Record not found', {
-  code: 'P2025',
-  clientVersion: 'test',
-});
+const recordNotFoundError = new Prisma.PrismaClientKnownRequestError(
+  'Record not found',
+  {
+    code: 'P2025',
+    clientVersion: 'test',
+  },
+);
 
 const userId = '11111111-1111-4111-8111-111111111111';
 const content = Buffer.from([0x89, 0x50, 0x4e, 0x47]);
@@ -55,7 +58,9 @@ describe('PhotoFileRepository', () => {
   });
 
   it('checks the photo without loading its bytes', async () => {
-    user.findFirst.mockResolvedValueOnce({ id: userId }).mockResolvedValueOnce(null);
+    user.findFirst
+      .mockResolvedValueOnce({ id: userId })
+      .mockResolvedValueOnce(null);
 
     await expect(repository.exists(userId)).resolves.toBe(true);
     await expect(repository.exists(userId)).resolves.toBe(false);
@@ -81,6 +86,8 @@ describe('PhotoFileRepository', () => {
     await expect(repository.save(userId, content)).rejects.toBeInstanceOf(
       ProfileNotFoundException,
     );
-    await expect(repository.remove(userId)).rejects.toBeInstanceOf(ProfileNotFoundException);
+    await expect(repository.remove(userId)).rejects.toBeInstanceOf(
+      ProfileNotFoundException,
+    );
   });
 });

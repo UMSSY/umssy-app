@@ -6,7 +6,11 @@ const userId = '11111111-1111-4111-8111-111111111111';
 const skillId = '33333333-3333-4333-8333-333333333333';
 const otherSkillId = '44444444-4444-4444-8444-444444444444';
 const detectedSkillId = '55555555-5555-4555-8555-555555555555';
-const select = { skill: { select: { id: true, name: true, isCustom: true } } };
+const select = {
+  skill: { select: { id: true, name: true, isCustom: true } },
+  source: true,
+  evidenceRefs: true,
+};
 
 describe('UserSkillRepository', () => {
   let repository: UserSkillRepository;
@@ -31,18 +35,40 @@ describe('UserSkillRepository', () => {
         createMany: vi.fn(),
       },
     };
-    transaction = vi.fn((operation: (client: typeof tx) => unknown) => operation(tx));
+    transaction = vi.fn((operation: (client: typeof tx) => unknown) =>
+      operation(tx),
+    );
     repository = new UserSkillRepository({
       userSkill,
       $transaction: transaction,
     } as unknown as PrismaService);
   });
 
-  it('lists the manual skills of the user ordered by name', async () => {
-    const records = [{ skill: { id: skillId, name: 'Python', isCustom: false } }];
+  it('reads all professional skills in one query without source or verification filters', async () => {
+    const records = [
+      { skill: { id: skillId, name: 'Python', isCustom: false } },
+      { skill: { id: detectedSkillId, name: 'HTML5', isCustom: false } },
+    ];
+    userSkill.findMany.mockResolvedValue(records);
+
+    await expect(repository.findAllByUserId(userId)).resolves.toBe(records);
+    expect(userSkill.findMany).toHaveBeenCalledExactlyOnceWith({
+      where: { userId },
+      orderBy: { skill: { name: 'asc' } },
+      select,
+    });
+    expect(transaction).not.toHaveBeenCalled();
+  });
+
+  it('loads only manually selected skills into the editable list', async () => {
+    const records = [
+      { skill: { id: skillId, name: 'Python', isCustom: false } },
+      { skill: { id: detectedSkillId, name: 'HTML5', isCustom: false } },
+    ];
     userSkill.findMany.mockResolvedValue(records);
 
     await expect(repository.findByUserId(userId)).resolves.toBe(records);
+
     expect(userSkill.findMany).toHaveBeenCalledWith({
       where: { userId, source: 'manual' },
       orderBy: { skill: { name: 'asc' } },
@@ -51,10 +77,14 @@ describe('UserSkillRepository', () => {
   });
 
   it('adds the new manual skills in a single transaction', async () => {
-    const records = [{ skill: { id: skillId, name: 'Python', isCustom: false } }];
+    const records = [
+      { skill: { id: skillId, name: 'Python', isCustom: false } },
+    ];
     userSkill.findMany.mockResolvedValue(records);
 
-    await expect(repository.replaceForUser(userId, [skillId, otherSkillId])).resolves.toBe(records);
+    await expect(
+      repository.replaceForUser(userId, [skillId, otherSkillId]),
+    ).resolves.toBe(records);
     expect(transaction).toHaveBeenCalledOnce();
     expect(tx.userSkill.createMany).toHaveBeenCalledWith({
       data: [
@@ -69,14 +99,26 @@ describe('UserSkillRepository', () => {
   it('keeps the detected rows and their data while reconciling the manual list', async () => {
     tx.userSkill.findMany.mockResolvedValue([
       { id: 'row-removed', skillId, source: 'manual', evidenceRefs: [] },
-      { id: 'row-supported', skillId: otherSkillId, source: 'manual', evidenceRefs: [{ type: 'education', id: 'e1' }] },
-      { id: 'row-detected', skillId: detectedSkillId, source: 'nlp', evidenceRefs: [{ type: 'work-experience', id: 'w1' }] },
+      {
+        id: 'row-supported',
+        skillId: otherSkillId,
+        source: 'manual',
+        evidenceRefs: [{ type: 'education', id: 'e1' }],
+      },
+      {
+        id: 'row-detected',
+        skillId: detectedSkillId,
+        source: 'nlp',
+        evidenceRefs: [{ type: 'work-experience', id: 'w1' }],
+      },
     ]);
     userSkill.findMany.mockResolvedValue([]);
 
     await repository.replaceForUser(userId, [detectedSkillId]);
 
-    expect(tx.userSkill.deleteMany).toHaveBeenCalledWith({ where: { userId, id: { in: ['row-removed'] } } });
+    expect(tx.userSkill.deleteMany).toHaveBeenCalledWith({
+      where: { userId, id: { in: ['row-removed'] } },
+    });
     expect(tx.userSkill.updateMany).toHaveBeenCalledWith({
       where: { userId, id: { in: ['row-supported'] } },
       data: { source: 'nlp' },
@@ -91,8 +133,18 @@ describe('UserSkillRepository', () => {
   it('clears the manual list while preserving detected skills and evidence', async () => {
     tx.userSkill.findMany.mockResolvedValue([
       { id: 'row-manual', skillId, source: 'manual', evidenceRefs: [] },
-      { id: 'row-supported', skillId: otherSkillId, source: 'manual', evidenceRefs: [{ type: 'education', id: 'e1' }] },
-      { id: 'row-detected', skillId: detectedSkillId, source: 'nlp', evidenceRefs: [{ type: 'work-experience', id: 'w1' }] },
+      {
+        id: 'row-supported',
+        skillId: otherSkillId,
+        source: 'manual',
+        evidenceRefs: [{ type: 'education', id: 'e1' }],
+      },
+      {
+        id: 'row-detected',
+        skillId: detectedSkillId,
+        source: 'nlp',
+        evidenceRefs: [{ type: 'work-experience', id: 'w1' }],
+      },
     ]);
     userSkill.findMany.mockResolvedValue([]);
 

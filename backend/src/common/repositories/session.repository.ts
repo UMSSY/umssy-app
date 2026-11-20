@@ -11,6 +11,7 @@ export class SessionRepository {
       select: {
         id: true,
         email: true,
+        company: { select: { id: true, title: true } },
         roles: {
           where: { deletedAt: null, startAt: { lte: new Date() } },
           select: { role: { select: { name: true } } },
@@ -25,6 +26,7 @@ export class SessionRepository {
       select: {
         id: true,
         email: true,
+        company: { select: { id: true, title: true } },
         isActive: true,
         roles: {
           where: { deletedAt: null, startAt: { lte: new Date() } },

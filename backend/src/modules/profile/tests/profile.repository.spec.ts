@@ -4,10 +4,13 @@ import { ProfileNotFoundException } from '../exceptions/profile-not-found.except
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { ProfileRepository } from '../repositories/profile.repository.js';
 
-const recordNotFoundError = new Prisma.PrismaClientKnownRequestError('Record not found', {
-  code: 'P2025',
-  clientVersion: 'test',
-});
+const recordNotFoundError = new Prisma.PrismaClientKnownRequestError(
+  'Record not found',
+  {
+    code: 'P2025',
+    clientVersion: 'test',
+  },
+);
 
 const userId = '11111111-1111-4111-8111-111111111111';
 
@@ -16,10 +19,11 @@ describe('ProfileRepository', () => {
   let user: {
     findUnique: ReturnType<typeof vi.fn>;
     update: ReturnType<typeof vi.fn>;
+    count: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
-    user = { findUnique: vi.fn(), update: vi.fn() };
+    user = { findUnique: vi.fn(), update: vi.fn(), count: vi.fn() };
     repository = new ProfileRepository({ user } as unknown as PrismaService);
   });
 
@@ -76,7 +80,9 @@ describe('ProfileRepository', () => {
 
     await expect(repository.update(userId, data)).resolves.toBe(record);
 
-    const [args] = user.update.mock.calls[0] as [{ where: object; data: object; select: object }];
+    const [args] = user.update.mock.calls[0] as [
+      { where: object; data: object; select: object },
+    ];
     expect(args.where).toEqual({ id: userId });
     expect(args.data).toBe(data);
     expect(args.select).not.toHaveProperty('password');
@@ -86,7 +92,18 @@ describe('ProfileRepository', () => {
     user.update.mockRejectedValue(recordNotFoundError);
 
     await expect(
-      repository.update(userId, { headline: 'Junior web developer', aboutMe: 'Graduate.' }),
+      repository.update(userId, {
+        headline: 'Junior web developer',
+        aboutMe: 'Graduate.',
+      }),
     ).rejects.toBeInstanceOf(ProfileNotFoundException);
+  });
+
+  it('checks if a user exists', async () => {
+    user.count.mockResolvedValueOnce(1).mockResolvedValueOnce(0);
+
+    await expect(repository.userExists(userId)).resolves.toBe(true);
+    await expect(repository.userExists(userId)).resolves.toBe(false);
+    expect(user.count).toHaveBeenCalledWith({ where: { id: userId } });
   });
 });

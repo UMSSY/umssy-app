@@ -6,24 +6,22 @@ export interface SeedMessageStatusDefinition {
 }
 
 export interface SeedUserPresenceDefinition {
- 
   email: string;
   isOnline: boolean;
- 
+
   minutesAgo?: number;
 }
 
 export interface SeedMessageDefinition {
- 
   fromA: boolean;
   content: string;
-   
+
   minutesAgo: number;
   status: MessageStatusTitle;
 }
 
 export interface SeedConversationDefinition {
-  key: string; 
+  key: string;
   userAEmail: string;
   userBEmail: string;
   lastReadAtByA: 'now' | { minutesAgo: number };

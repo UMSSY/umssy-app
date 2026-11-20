@@ -1,9 +1,9 @@
 import { toBoliviaTime } from "@/shared/utils/date-time";
-import { ALL_ACADEMIC_PERIODS_VALUE, FIRST_SURVEY_YEAR } from "../constants/survey-builder.constants";
+import { ALL_ACADEMIC_PERIODS_VALUE } from "../constants/survey-builder.constants";
 
 const YEAR_SUFFIX = /(\d{4})$/;
 
-export function getSurveyYears(today: Date = new Date(), firstYear = FIRST_SURVEY_YEAR): string[] {
+export function getSurveyYears(today: Date = new Date(), firstYear = 2020): string[] {
   const currentYear = toBoliviaTime(today).year;
   const years: string[] = [];
 

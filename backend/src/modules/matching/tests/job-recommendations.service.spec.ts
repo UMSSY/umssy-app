@@ -2,7 +2,8 @@ import type { JobOffersService } from '../../job-offers/services/job-offers.serv
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ProfileNotFoundException } from '../../profile/exceptions/profile-not-found.exception.js';
 import type { UserSkillService } from '../../skills/services/user-skill.service.js';
-import type { JobMatchRepository } from '../repositories/job-match.repository.js';
+import type { JobMatchSourceService } from '../services/job-match-source.service.js';
+import { VacancyScoringService } from '../services/vacancy-scoring.service.js';
 import type { CandidateProfileService } from '../services/candidate-profile.service.js';
 import { JobRecommendationsService } from '../services/job-recommendations.service.js';
 import { VacancyRankingService } from '../services/vacancy-ranking.service.js';
@@ -13,7 +14,13 @@ import type { RequirementTermsService } from '../services/requirement-terms.serv
 interface OfferOptions {
   careers?: string[];
   minExperienceYears?: number | null;
+  createdAt?: Date;
+  expiresAt?: Date | null;
 }
+
+const PUBLISHED_AT = new Date('2026-10-10T12:00:00.000Z');
+const PUBLISHED_LATER = new Date('2026-10-20T12:00:00.000Z');
+const EXPIRES_AT = new Date('2026-11-25T03:59:59.000Z');
 
 function offer(
   id: string,
@@ -24,6 +31,9 @@ function offer(
     id,
     title: id,
     description: 'Descripción',
+    createdAt: options.createdAt ?? PUBLISHED_AT,
+    publishedAt: options.createdAt ?? PUBLISHED_AT,
+    expiresAt: options.expiresAt === undefined ? null : options.expiresAt,
     locationUrl: 'https://maps.google.com/?q=x',
     requiredCareers: options.careers ?? [],
     minExperienceYears: options.minExperienceYears ?? null,
@@ -52,7 +62,7 @@ describe('HU-06 recommendations contract', () => {
         offer('partial', ['Python', 'SQL']),
         offer('none', ['Java']),
         offer('perfect', ['python']),
-        offer('unrestricted', []),
+        offer('unrestricted', [], { createdAt: PUBLISHED_LATER }),
       ]);
     findCandidateProfile
       .mockReset()
@@ -62,12 +72,14 @@ describe('HU-06 recommendations contract', () => {
     } as unknown as RequirementTermsService;
     service = new JobRecommendationsService(
       { findScoringOffers } as unknown as JobOffersService,
-      { getUserSkills } as unknown as UserSkillService,
-      { findCandidateProfile } as unknown as CandidateProfileService,
-      { findPublished } as unknown as JobMatchRepository,
+      { findPublished } as unknown as JobMatchSourceService,
+      new VacancyScoringService(
+        { getUserSkills } as unknown as UserSkillService,
+        { findCandidateProfile } as unknown as CandidateProfileService,
+        requirementTermsService,
+        new WeightedScoreService(),
+      ),
       new VacancyRankingService(),
-      new WeightedScoreService(),
-      requirementTermsService,
     );
   });
 
@@ -89,13 +101,12 @@ describe('HU-06 recommendations contract', () => {
     expect(findPublished).not.toHaveBeenCalled();
   });
 
-  it('orders by affinity and keeps matching skill count as tie breaker', async () => {
+  it('AC-06.1 and AC-02.5: orders by affinity and does not list offers with 0 %', async () => {
     const result = await service.recommendations('user');
     expect(result.items.map((item) => [item.jobOfferId, item.score])).toEqual([
-      ['perfect', 100],
       ['unrestricted', 100],
+      ['perfect', 100],
       ['partial', 50],
-      ['none', 0],
     ]);
     expect(getUserSkills).toHaveBeenCalledWith('user');
     expect(findCandidateProfile).toHaveBeenCalledWith('user');
@@ -111,9 +122,27 @@ describe('HU-06 recommendations contract', () => {
       companyName: 'Empresa',
       modality: 'Remoto',
       locationUrl: 'https://maps.google.com/?q=x',
+      publishedAt: '2026-10-10T12:00:00.000Z',
+      expiresAt: null,
       score: 50,
       skills: ['Python', 'SQL'],
       matchedSkills: ['Python'],
+    });
+  });
+
+  it('returns the publication and the expiry dates of every offer', async () => {
+    findPublished.mockResolvedValue([
+      offer('expiring', ['Python'], {
+        createdAt: PUBLISHED_LATER,
+        expiresAt: EXPIRES_AT,
+      }),
+    ]);
+
+    const result = await service.recommendations('user');
+
+    expect(result.items[0]).toMatchObject({
+      publishedAt: '2026-10-20T12:00:00.000Z',
+      expiresAt: '2026-11-25T03:59:59.000Z',
     });
   });
 
@@ -127,7 +156,7 @@ describe('HU-06 recommendations contract', () => {
     expect(await scoreOf()).toBe(100);
   });
 
-  it('uses the career and the experience of the profile in the score and in the tie break', async () => {
+  it('ignores the career, the minimum experience and the other requirements of the offers', async () => {
     findCandidateProfile.mockResolvedValue({
       career: 'Ingeniería de Sistemas',
       experienceYears: 1,
@@ -140,29 +169,39 @@ describe('HU-06 recommendations contract', () => {
 
     const result = await service.recommendations('user');
 
-    expect(result.items.map((item) => [item.jobOfferId, item.score])).toEqual([
-      ['match', 100],
-      ['needs-experience', 86],
-      ['other-career', 71],
+    expect(result.items.map((item) => item.score)).toEqual([100, 100, 100]);
+    expect(result.items.map((item) => item.jobOfferId).sort()).toEqual([
+      'match',
+      'needs-experience',
+      'other-career',
     ]);
   });
 
-  it('breaks a tie by career first and by experience second', async () => {
-    findCandidateProfile.mockResolvedValue({
-      career: 'Ingeniería de Sistemas',
-      experienceYears: 0,
-    });
+  it('AC-06.2: lists the most recently published offer first when two offers tie', async () => {
+    getUserSkills.mockResolvedValue([skill('Python'), skill('SQL')]);
     findPublished.mockResolvedValue([
-      offer('other-career', ['Python'], { careers: ['Ingeniería Comercial'] }),
-      offer('same-career', ['Python'], { careers: ['Ingeniería de Sistemas'] }),
+      offer('older', ['Python', 'SQL'], { createdAt: PUBLISHED_AT }),
+      offer('newer', ['Python'], { createdAt: PUBLISHED_LATER }),
     ]);
 
     const result = await service.recommendations('user');
 
-    expect(result.items.map((item) => item.jobOfferId)).toEqual([
-      'same-career',
-      'other-career',
+    expect(result.items.map((item) => [item.jobOfferId, item.score])).toEqual([
+      ['newer', 100],
+      ['older', 100],
     ]);
+  });
+
+  it('AC-02.5: returns an empty list when no offer has affinity above 0 %', async () => {
+    findPublished.mockResolvedValue([
+      offer('java', ['Java']),
+      offer('go', ['Go']),
+    ]);
+
+    await expect(service.recommendations('user')).resolves.toEqual({
+      isProfileComplete: true,
+      items: [],
+    });
   });
 
   it('returns an incomplete profile without listing offers when there are no skills', async () => {

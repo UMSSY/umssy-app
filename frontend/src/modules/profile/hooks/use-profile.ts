@@ -1,25 +1,32 @@
-"use client";
+'use client';
 
-import type { SetStateAction } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { PROFILE_FEEDBACK_MESSAGES } from "../constants/profile-feedback.constants";
-import { profileService } from "../services/profile.service";
-import type { ProfileResponse } from "../types/profile-response.types";
-import { getProfileErrorMessage } from "../utils/get-profile-error-message";
+import type { SetStateAction } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { PROFILE_FEEDBACK_MESSAGES } from '../constants/profile-feedback.constants';
+import { PROFILE_ME_QUERY_KEY } from '../constants/profile.constants';
+import { profileService } from '../services/profile.service';
+import type { ProfileResponse } from '../types/profile-response.types';
+import { getProfileErrorMessage } from '../utils/get-profile-error-message';
 
-export function useProfile() {
+export function useProfile({ forGuide = false }: { forGuide?: boolean } = {}) {
   const queryClient = useQueryClient();
-  const queryKey = ["profile", "me"];
-  const query = useQuery({ queryKey, queryFn: () => profileService.getProfile() });
+  const queryKey = PROFILE_ME_QUERY_KEY;
+  const query = useQuery({
+    queryKey,
+    queryFn: () => profileService.getProfile(),
+    staleTime: forGuide ? 30_000 : undefined,
+  });
   function setProfile(value: SetStateAction<ProfileResponse | null>) {
     queryClient.setQueryData<ProfileResponse | null>(queryKey, (current) =>
-      typeof value === "function" ? value(current ?? null) : value,
+      typeof value === 'function' ? value(current ?? null) : value,
     );
   }
   return {
     profile: query.data ?? null,
     isLoading: query.isPending,
-    error: query.error ? getProfileErrorMessage(query.error, PROFILE_FEEDBACK_MESSAGES.loadError) : null,
+    error: query.error
+      ? getProfileErrorMessage(query.error, PROFILE_FEEDBACK_MESSAGES.loadError)
+      : null,
     setProfile,
   };
 }

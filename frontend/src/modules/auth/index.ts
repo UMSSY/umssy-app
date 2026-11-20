@@ -13,5 +13,7 @@ export type { RoleTag, LoginResponse } from "./types/auth-types";
 export { getRolesLabel } from "./utils/get-session-role-label";
 
 export { SessionLogoutMenuItem } from "./components/session-logout-menu-item";
+export { LogoutConfirmDialog } from "./components/logout-confirm-dialog";
 export { resolvePostLoginPath } from "./utils/resolve-post-login-path";
 
+export { getSafeNextPath } from "./utils/safe-next-path";

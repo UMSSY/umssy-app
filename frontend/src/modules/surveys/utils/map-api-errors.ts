@@ -1,6 +1,6 @@
 import { SURVEY_TEXT } from "../constants/survey-builder.constants";
 import { SURVEY_FIELD_LABELS } from "../constants/survey-messages.constants";
-import type { SurveyValidationError } from "../types/survey-validation.types";
+import type { SurveyValidationError } from "../types/survey-validation-error.types";
 
 const QUESTION_PATH = /^questions\.(\d+)\.(statement|options)/;
 
@@ -23,7 +23,10 @@ function normalizePath(field: string): string {
 function getLabel(path: string): string {
   const match = QUESTION_PATH.exec(path);
   if (match) return SURVEY_TEXT.questionLabel(Number(match[1]) + 1);
-  return SURVEY_FIELD_LABELS[path as keyof typeof SURVEY_FIELD_LABELS] ?? SURVEY_TEXT.untitledSurvey;
+  return (
+    SURVEY_FIELD_LABELS[path as keyof typeof SURVEY_FIELD_LABELS] ??
+    SURVEY_TEXT.untitledSurvey
+  );
 }
 
 function toError(field: string, message: string): SurveyValidationError {
@@ -31,9 +34,14 @@ function toError(field: string, message: string): SurveyValidationError {
   return { path, label: getLabel(path), message, summary: message };
 }
 
-function isFieldError(value: unknown): value is { field: string; message: string } {
+function isFieldError(
+  value: unknown,
+): value is { field: string; message: string } {
   const candidate = value as ApiFieldError | null;
-  return typeof candidate?.field === "string" && typeof candidate?.message === "string";
+  return (
+    typeof candidate?.field === "string" &&
+    typeof candidate?.message === "string"
+  );
 }
 
 export function mapApiErrors(error: unknown): SurveyValidationError[] {

@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
-import { ExperienceSkillsRepository } from '../repositories/experience-skills.repository.js';
-import { buildExperienceRef } from '../utils/build-experience-ref.js';
-import { appendEvidenceRef } from '../utils/append-evidence-ref.js';
-import { readEvidenceRefs } from '../utils/read-evidence-refs.js';
+import { UserSkillEvidenceRepository } from '../../skills/repositories/user-skill-evidence.repository.js';
+import { buildExperienceRef } from '../../skills/utils/build-experience-ref.js';
+import { appendEvidenceRef } from '../../skills/utils/append-evidence-ref.js';
+import { readEvidenceRefs } from '../../skills/utils/read-evidence-refs.js';
 
 const USER_ID = '0b9f8a52-3c1d-4e7a-9d55-6f1c2a8b7e10';
 const EXPERIENCE_ID = '5b1f0c3e-8a4d-4f0b-9a52-1d6c7e2a9b10';
@@ -38,7 +38,11 @@ describe('appendEvidenceRef', () => {
   it('agrega la referencia al final y conserva las referencias que no son texto', () => {
     const evidence = { type: 'work-experience', id: 'other-experience' };
 
-    expect(appendEvidenceRef([OTHER_REF, evidence], REF)).toEqual([OTHER_REF, evidence, REF]);
+    expect(appendEvidenceRef([OTHER_REF, evidence], REF)).toEqual([
+      OTHER_REF,
+      evidence,
+      REF,
+    ]);
   });
 
   it('no repite una referencia que ya estaba', () => {
@@ -46,7 +50,7 @@ describe('appendEvidenceRef', () => {
   });
 });
 
-describe('ExperienceSkillsRepository', () => {
+describe('UserSkillEvidenceRepository', () => {
   let userSkill: {
     findMany: ReturnType<typeof vi.fn>;
     create: ReturnType<typeof vi.fn>;
@@ -54,7 +58,7 @@ describe('ExperienceSkillsRepository', () => {
     delete: ReturnType<typeof vi.fn>;
   };
   let workExperience: { findFirst: ReturnType<typeof vi.fn> };
-  let repository: ExperienceSkillsRepository;
+  let repository: UserSkillEvidenceRepository;
 
   beforeEach(() => {
     userSkill = {
@@ -67,27 +71,13 @@ describe('ExperienceSkillsRepository', () => {
     const prisma = {
       workExperience,
       userSkill,
-      $transaction: vi.fn((callback: (tx: unknown) => Promise<void>) => callback({ userSkill })),
+      $transaction: vi.fn((callback: (tx: unknown) => Promise<void>) =>
+        callback({ userSkill }),
+      ),
     };
-    repository = new ExperienceSkillsRepository(prisma as unknown as PrismaService);
-  });
-
-  describe('belongsToUser', () => {
-    it('es verdadero cuando la experiencia pertenece a la persona', async () => {
-      workExperience.findFirst.mockResolvedValue({ id: EXPERIENCE_ID });
-
-      await expect(repository.belongsToUser(EXPERIENCE_ID, USER_ID)).resolves.toBe(true);
-      expect(workExperience.findFirst).toHaveBeenCalledWith({
-        where: { id: EXPERIENCE_ID, userId: USER_ID },
-        select: { id: true },
-      });
-    });
-
-    it('es falso cuando la experiencia no existe o es de otra persona', async () => {
-      workExperience.findFirst.mockResolvedValue(null);
-
-      await expect(repository.belongsToUser(EXPERIENCE_ID, USER_ID)).resolves.toBe(false);
-    });
+    repository = new UserSkillEvidenceRepository(
+      prisma as unknown as PrismaService,
+    );
   });
 
   describe('replaceDetected', () => {
@@ -95,7 +85,12 @@ describe('ExperienceSkillsRepository', () => {
       await repository.replaceDetected(USER_ID, EXPERIENCE_ID, ['skill-1']);
 
       expect(userSkill.create).toHaveBeenCalledWith({
-        data: { userId: USER_ID, skillId: 'skill-1', source: 'manual', evidenceRefs: [REF] },
+        data: {
+          userId: USER_ID,
+          skillId: 'skill-1',
+          source: 'manual',
+          evidenceRefs: [REF],
+        },
       });
       expect(userSkill.update).not.toHaveBeenCalled();
       expect(userSkill.delete).not.toHaveBeenCalled();
@@ -111,11 +106,14 @@ describe('ExperienceSkillsRepository', () => {
     });
 
     it('agrega la referencia a una habilidad que la persona ya tenia sin cambiar su origen', async () => {
-      userSkill.findMany
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([
-          { id: 'row-1', skillId: 'skill-1', source: 'manual', evidenceRefs: [] },
-        ]);
+      userSkill.findMany.mockResolvedValueOnce([]).mockResolvedValueOnce([
+        {
+          id: 'row-1',
+          skillId: 'skill-1',
+          source: 'manual',
+          evidenceRefs: [],
+        },
+      ]);
 
       await repository.replaceDetected(USER_ID, EXPERIENCE_ID, ['skill-1']);
 
@@ -129,10 +127,20 @@ describe('ExperienceSkillsRepository', () => {
     it('promueve a habilidad del perfil la habilidad nlp que la experiencia vuelve a detectar', async () => {
       userSkill.findMany
         .mockResolvedValueOnce([
-          { id: 'row-1', skillId: 'skill-1', source: 'nlp', evidenceRefs: [REF] },
+          {
+            id: 'row-1',
+            skillId: 'skill-1',
+            source: 'nlp',
+            evidenceRefs: [REF],
+          },
         ])
         .mockResolvedValueOnce([
-          { id: 'row-1', skillId: 'skill-1', source: 'nlp', evidenceRefs: [REF] },
+          {
+            id: 'row-1',
+            skillId: 'skill-1',
+            source: 'nlp',
+            evidenceRefs: [REF],
+          },
         ]);
 
       await repository.replaceDetected(USER_ID, EXPERIENCE_ID, ['skill-1']);
@@ -147,11 +155,14 @@ describe('ExperienceSkillsRepository', () => {
 
     it('promueve la habilidad nlp detectada por otro proceso y conserva sus referencias', async () => {
       const otherEvidence = { type: 'work-experience', id: 'other-experience' };
-      userSkill.findMany
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([
-          { id: 'row-1', skillId: 'skill-1', source: 'nlp', evidenceRefs: [otherEvidence] },
-        ]);
+      userSkill.findMany.mockResolvedValueOnce([]).mockResolvedValueOnce([
+        {
+          id: 'row-1',
+          skillId: 'skill-1',
+          source: 'nlp',
+          evidenceRefs: [otherEvidence],
+        },
+      ]);
 
       await repository.replaceDetected(USER_ID, EXPERIENCE_ID, ['skill-1']);
 
@@ -164,10 +175,20 @@ describe('ExperienceSkillsRepository', () => {
     it('no repite la referencia cuando la habilidad ya estaba vinculada', async () => {
       userSkill.findMany
         .mockResolvedValueOnce([
-          { id: 'row-1', skillId: 'skill-1', source: 'manual', evidenceRefs: [REF] },
+          {
+            id: 'row-1',
+            skillId: 'skill-1',
+            source: 'manual',
+            evidenceRefs: [REF],
+          },
         ])
         .mockResolvedValueOnce([
-          { id: 'row-1', skillId: 'skill-1', source: 'manual', evidenceRefs: [REF] },
+          {
+            id: 'row-1',
+            skillId: 'skill-1',
+            source: 'manual',
+            evidenceRefs: [REF],
+          },
         ]);
 
       await repository.replaceDetected(USER_ID, EXPERIENCE_ID, ['skill-1']);
@@ -189,7 +210,12 @@ describe('ExperienceSkillsRepository', () => {
 
     it('conserva la habilidad nlp que otra experiencia sigue respaldando', async () => {
       userSkill.findMany.mockResolvedValueOnce([
-        { id: 'row-1', skillId: 'skill-1', source: 'nlp', evidenceRefs: [REF, OTHER_REF] },
+        {
+          id: 'row-1',
+          skillId: 'skill-1',
+          source: 'nlp',
+          evidenceRefs: [REF, OTHER_REF],
+        },
       ]);
 
       await repository.replaceDetected(USER_ID, EXPERIENCE_ID, []);
@@ -203,7 +229,12 @@ describe('ExperienceSkillsRepository', () => {
 
     it('conserva la habilidad manual aunque deje de detectarse', async () => {
       userSkill.findMany.mockResolvedValueOnce([
-        { id: 'row-1', skillId: 'skill-1', source: 'manual', evidenceRefs: [REF] },
+        {
+          id: 'row-1',
+          skillId: 'skill-1',
+          source: 'manual',
+          evidenceRefs: [REF],
+        },
       ]);
 
       await repository.replaceDetected(USER_ID, EXPERIENCE_ID, []);

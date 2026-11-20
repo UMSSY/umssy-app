@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import {
   formatConversationDate,
+  formatEventRoomCreatedAt,
+  formatEventRoomTime,
   formatMessageDateSeparator,
   formatTime12h,
   getInitials,
@@ -75,5 +77,27 @@ describe('date-formatter', () => {
     expect(formatMessageDateSeparator(null)).toBe('');
     expect(formatMessageDateSeparator(undefined)).toBe('');
     expect(formatMessageDateSeparator('fecha-invalida')).toBe('');
+  });
+
+  it('debe formatear la fecha de creacion como dd/mm/aa en zona horaria de Bolivia', () => {
+    const resultado = formatEventRoomCreatedAt('2026-11-01T10:00:00.000Z');
+    expect(resultado).toMatch(/^\d{2}\/\d{2}\/\d{2}$/);
+  });
+
+  it('debe devolver vacio ante fecha invalida en formatEventRoomCreatedAt', () => {
+    expect(formatEventRoomCreatedAt(null)).toBe('');
+    expect(formatEventRoomCreatedAt(undefined)).toBe('');
+    expect(formatEventRoomCreatedAt('fecha-invalida')).toBe('');
+  });
+
+  it('debe formatear la hora del mensaje en zona horaria de Bolivia', () => {
+    const resultado = formatEventRoomTime('2026-11-01T10:00:00.000Z');
+    expect(resultado).toMatch(/\d{1,2}:\d{2}/);
+  });
+
+  it('debe devolver vacio ante fecha invalida en formatEventRoomTime', () => {
+    expect(formatEventRoomTime(null)).toBe('');
+    expect(formatEventRoomTime(undefined)).toBe('');
+    expect(formatEventRoomTime('fecha-invalida')).toBe('');
   });
 });

@@ -7,6 +7,10 @@ import * as service from "@/modules/mentorship/services/mentor-profile.service";
 import { MENTOR_PROFILE_FIXTURE } from "@/modules/mentorship/testing/mentor-profile.fixture";
 import MentorProfilePage from "./page";
 
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn() }),
+}));
+
 afterEach(() => {
   vi.restoreAllMocks();
 });
@@ -32,8 +36,15 @@ describe("MentorProfilePage", () => {
     expect(screen.getByText("Arquitecta de Software")).toBeInTheDocument();
     expect(screen.getByText("Sobre mí")).toBeInTheDocument();
     expect(screen.getByText("Trayectoria actual")).toBeInTheDocument();
-    expect(screen.getByText("Áreas técnicas")).toBeInTheDocument();
-    expect(screen.getByText("Tipos de orientación")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Áreas técnicas", level: 2 }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        name: "Tipos de orientación",
+        level: 2,
+      }),
+    ).toBeInTheDocument();
 
     expect(request).toHaveBeenCalledWith(
       MENTOR_PROFILE_FIXTURE.id,

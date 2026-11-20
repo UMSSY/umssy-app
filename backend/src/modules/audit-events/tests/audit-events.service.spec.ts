@@ -5,7 +5,10 @@ import {
   AuditEvidenceNotFoundException,
   AuditEvidenceUnavailableException,
 } from '../exceptions/index.js';
-import { toAuditEventListItem, toAuditResponsibleOptions } from '../mappers/audit-event.mapper.js';
+import {
+  toAuditEventListItem,
+  toAuditResponsibleOptions,
+} from '../mappers/audit-event.mapper.js';
 import { AuditEventsService } from '../services/audit-events.service.js';
 
 const ROW = {
@@ -20,17 +23,28 @@ const ROW = {
   actorRole: 'administrativo',
   detail: 'Documento revisado: Diploma académico.',
   action: { title: 'approved' },
-  evidenceFile: { name: 'diploma', extension: 'pdf', mimeType: 'application/pdf', size: 1200 },
+  evidenceFile: {
+    name: 'diploma',
+    extension: 'pdf',
+    mimeType: 'application/pdf',
+    size: 1200,
+  },
 };
 
 function build() {
   const repository = {
     findPage: vi.fn().mockResolvedValue({ rows: [ROW], total: 21 }),
-    findResponsibles: vi.fn().mockResolvedValue({ people: [], hasSystemEvents: false }),
+    findResponsibles: vi
+      .fn()
+      .mockResolvedValue({ people: [], hasSystemEvents: false }),
     findEvidenceReference: vi.fn(),
   };
   const files = { getContent: vi.fn() };
-  return { repository, files, service: new AuditEventsService(repository as any, files as any) };
+  return {
+    repository,
+    files,
+    service: new AuditEventsService(repository as any, files as any),
+  };
 }
 
 describe('toAuditEventListItem', () => {
@@ -42,14 +56,25 @@ describe('toAuditEventListItem', () => {
       request: { id: 'req-1', code: 'SOL-2026-0141' },
       applicantName: 'Andrea Camacho',
       action: 'approved',
-      responsible: { id: 'admin-1', name: 'Carla Montaño', role: 'administrativo' },
+      responsible: {
+        id: 'admin-1',
+        name: 'Carla Montaño',
+        role: 'administrativo',
+      },
       detail: 'Documento revisado: Diploma académico.',
-      evidence: { name: 'diploma', extension: 'pdf', mimeType: 'application/pdf', size: 1200 },
+      evidence: {
+        name: 'diploma',
+        extension: 'pdf',
+        mimeType: 'application/pdf',
+        size: 1200,
+      },
     });
   });
 
   it('un evento sin documento lleva evidence en null, no un enlace ficticio', () => {
-    expect(toAuditEventListItem({ ...ROW, evidenceFile: null } as any).evidence).toBeNull();
+    expect(
+      toAuditEventListItem({ ...ROW, evidenceFile: null } as any).evidence,
+    ).toBeNull();
   });
 });
 
@@ -60,12 +85,16 @@ describe('toAuditResponsibleOptions', () => {
       { actorId: null, actorName: 'Sin id' },
       { actorId: 'a', actorName: 'Carla Montaño' },
     ];
-    expect(toAuditResponsibleOptions({ people, hasSystemEvents: true })).toEqual([
+    expect(
+      toAuditResponsibleOptions({ people, hasSystemEvents: true }),
+    ).toEqual([
       { id: 'a', name: 'Carla Montaño' },
       { id: 'b', name: 'Marco Rivera' },
       { id: 'system', name: 'Sistema' },
     ]);
-    expect(toAuditResponsibleOptions({ people: [], hasSystemEvents: false })).toEqual([]);
+    expect(
+      toAuditResponsibleOptions({ people: [], hasSystemEvents: false }),
+    ).toEqual([]);
   });
 });
 
@@ -73,9 +102,17 @@ describe('AuditEventsService', () => {
   it('list calcula el desplazamiento, pasa los filtros y devuelve items, total, page y limit', async () => {
     const { repository, service } = build();
 
-    const result = await service.list({ page: 3, limit: 10, action: 'approved' });
+    const result = await service.list({
+      page: 3,
+      limit: 10,
+      action: 'approved',
+    });
 
-    expect(repository.findPage).toHaveBeenCalledWith({ filters: { action: 'approved' }, skip: 20, take: 10 });
+    expect(repository.findPage).toHaveBeenCalledWith({
+      filters: { action: 'approved' },
+      skip: 20,
+      take: 10,
+    });
     expect(result.page).toBe(3);
     expect(result.offset).toBe(20);
     expect(result.data.total).toBe(21);
@@ -85,14 +122,27 @@ describe('AuditEventsService', () => {
 
   it('listResponsibles devuelve las opciones del filtro', async () => {
     const { repository, service } = build();
-    repository.findResponsibles.mockResolvedValue({ people: [{ actorId: 'a', actorName: 'Carla' }], hasSystemEvents: false });
-    await expect(service.listResponsibles()).resolves.toEqual([{ id: 'a', name: 'Carla' }]);
+    repository.findResponsibles.mockResolvedValue({
+      people: [{ actorId: 'a', actorName: 'Carla' }],
+      hasSystemEvents: false,
+    });
+    await expect(service.listResponsibles()).resolves.toEqual([
+      { id: 'a', name: 'Carla' },
+    ]);
   });
 
   it('getDocument sirve el archivo guardado en el evento', async () => {
     const { repository, files, service } = build();
-    const file = { name: 'diploma', extension: 'pdf', mimeType: 'application/pdf', content: Buffer.from('%PDF') };
-    repository.findEvidenceReference.mockResolvedValue({ id: 'evt-1', evidenceFileId: 'file-historico' });
+    const file = {
+      name: 'diploma',
+      extension: 'pdf',
+      mimeType: 'application/pdf',
+      content: Buffer.from('%PDF'),
+    };
+    repository.findEvidenceReference.mockResolvedValue({
+      id: 'evt-1',
+      evidenceFileId: 'file-historico',
+    });
     files.getContent.mockResolvedValue(file);
 
     await expect(service.getDocument('evt-1')).resolves.toBe(file);
@@ -103,21 +153,36 @@ describe('AuditEventsService', () => {
     const { repository, files, service } = build();
 
     repository.findEvidenceReference.mockResolvedValue(null);
-    await expect(service.getDocument('evt-x')).rejects.toBeInstanceOf(AuditEventNotFoundException);
+    await expect(service.getDocument('evt-x')).rejects.toBeInstanceOf(
+      AuditEventNotFoundException,
+    );
 
-    repository.findEvidenceReference.mockResolvedValue({ id: 'evt-1', evidenceFileId: null });
-    await expect(service.getDocument('evt-1')).rejects.toBeInstanceOf(AuditEvidenceNotFoundException);
+    repository.findEvidenceReference.mockResolvedValue({
+      id: 'evt-1',
+      evidenceFileId: null,
+    });
+    await expect(service.getDocument('evt-1')).rejects.toBeInstanceOf(
+      AuditEvidenceNotFoundException,
+    );
     expect(files.getContent).not.toHaveBeenCalled();
 
-    repository.findEvidenceReference.mockResolvedValue({ id: 'evt-1', evidenceFileId: 'file-1' });
+    repository.findEvidenceReference.mockResolvedValue({
+      id: 'evt-1',
+      evidenceFileId: 'file-1',
+    });
     files.getContent.mockRejectedValue(new FileNotFoundException());
-    await expect(service.getDocument('evt-1')).rejects.toBeInstanceOf(AuditEvidenceUnavailableException);
+    await expect(service.getDocument('evt-1')).rejects.toBeInstanceOf(
+      AuditEvidenceUnavailableException,
+    );
   });
 
   it('getDocument no oculta otros errores', async () => {
     const { repository, files, service } = build();
     const boom = new Error('fallo de base');
-    repository.findEvidenceReference.mockResolvedValue({ id: 'evt-1', evidenceFileId: 'file-1' });
+    repository.findEvidenceReference.mockResolvedValue({
+      id: 'evt-1',
+      evidenceFileId: 'file-1',
+    });
     files.getContent.mockRejectedValue(boom);
     await expect(service.getDocument('evt-1')).rejects.toBe(boom);
   });

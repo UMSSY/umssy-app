@@ -1,6 +1,9 @@
+'use client';
+
 import { UserRoundPen } from "lucide-react";
+import { useProfileGuide } from '../contexts/profile-guide-context';
 import Link from "next/link";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { cn } from "@/lib/utils";
 
 interface ProfileCompletionBannerProps {
@@ -8,6 +11,8 @@ interface ProfileCompletionBannerProps {
 }
 
 export function ProfileCompletionBanner({ hasContactInfo = false }: ProfileCompletionBannerProps) {
+  const guide = useProfileGuide();
+  if (guide?.isEnabled) return null;
   return (
     <div
       role="status"

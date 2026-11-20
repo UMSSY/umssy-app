@@ -8,6 +8,6 @@ export interface DocumentTextRegion {
 export interface DocumentText {
   text: string;
   confidence: number;
-  engine?: 'paddle';
+  engine?: 'tesseract';
   regions?: DocumentTextRegion[];
 }

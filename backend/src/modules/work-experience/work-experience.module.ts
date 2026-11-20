@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { JwtAuthModule } from '../../common/guards/jwt-auth.module.js';
 import { PrismaModule } from '../../common/prisma/prisma.module.js';
 import { NlpModule } from '../nlp/nlp.module.js';
@@ -8,13 +8,13 @@ import { WorkExperienceRepository } from './repositories/work-experience.reposit
 import { WorkExperienceService } from './services/work-experience.service.js';
 
 @Module({
-  imports: [PrismaModule, JwtAuthModule, NlpModule],
+  imports: [PrismaModule, JwtAuthModule, forwardRef(() => NlpModule)],
   controllers: [WorkExperienceController],
   providers: [
     WorkExperienceService,
     WorkExperienceRepository,
     WorkExperienceMapper,
   ],
-  exports: [WorkExperienceService],
+  exports: [WorkExperienceRepository, WorkExperienceService],
 })
 export class WorkExperienceModule {}

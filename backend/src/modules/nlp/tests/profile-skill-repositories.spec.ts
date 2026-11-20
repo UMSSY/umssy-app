@@ -1,16 +1,33 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
-import { ProfileSkillResultsRepository, processingStateSelect } from '../repositories/profile-skill-results.repository.js';
+import {
+  ProfileSkillResultsRepository,
+  processingStateSelect,
+} from '../repositories/profile-skill-results.repository.js';
 
 const userId = '11111111-1111-4111-8111-111111111111';
 const now = new Date('2026-10-23T12:00:00.000Z');
 
 describe('ProfileSkillResultsRepository', () => {
-  const state = { userId, status: 'ready', inputRevision: 2, processedRevision: 2, resultVersion: 3, updatedAt: now, dictionaryVersion: '1.0.0' };
-  let reconcileSkills: ReturnType<typeof vi.fn<(context: TransactionContext) => Promise<boolean>>>;
+  const state = {
+    userId,
+    status: 'ready',
+    inputRevision: 2,
+    processedRevision: 2,
+    resultVersion: 3,
+    updatedAt: now,
+    dictionaryVersion: '1.0.0',
+  };
+  let reconcileSkills: ReturnType<
+    typeof vi.fn<(context: TransactionContext) => Promise<boolean>>
+  >;
   let tx: {
-    profileSkillProcessingState: { updateMany: ReturnType<typeof vi.fn>; findUnique: ReturnType<typeof vi.fn>; update: ReturnType<typeof vi.fn> };
+    profileSkillProcessingState: {
+      updateMany: ReturnType<typeof vi.fn>;
+      findUnique: ReturnType<typeof vi.fn>;
+      update: ReturnType<typeof vi.fn>;
+    };
   };
   let prisma: Record<string, unknown> & {
     profileSkillProcessingState: Record<string, ReturnType<typeof vi.fn>>;
@@ -31,15 +48,40 @@ describe('ProfileSkillResultsRepository', () => {
         upsert: vi.fn().mockResolvedValue(state),
         updateMany: vi.fn().mockResolvedValue({ count: 1 }),
       },
-      $transaction: vi.fn((operation: (client: typeof tx) => unknown) => operation(tx)),
+      $transaction: vi.fn((operation: (client: typeof tx) => unknown) =>
+        operation(tx),
+      ),
     };
     reconcileSkills = vi.fn().mockResolvedValue(true);
-    repository = new ProfileSkillResultsRepository(prisma as unknown as PrismaService);
+    repository = new ProfileSkillResultsRepository(
+      prisma as unknown as PrismaService,
+    );
+  });
+
+  it('locks the revision through the supplied transaction instead of the global client', async () => {
+    const row = { input_revision: 4, processed_revision: 4, status: 'ready' };
+    const query = vi.fn().mockResolvedValue([row]);
+    const context = {
+      client: { $queryRaw: query },
+    } as unknown as TransactionContext;
+    expect(await repository.readLockedRevision(userId, context)).toBe(row);
+    expect(query.mock.calls[0][0].join('')).toContain('FOR SHARE');
+    expect(query.mock.calls[0][1]).toBe(userId);
+    expect(
+      prisma.profileSkillProcessingState.findUnique,
+    ).not.toHaveBeenCalled();
+    query.mockResolvedValueOnce([]);
+    expect(
+      await repository.readLockedRevision(userId, context),
+    ).toBeUndefined();
   });
 
   it('reads only its processing state', async () => {
     await expect(repository.findState(userId)).resolves.toBe(state);
-    expect(prisma.profileSkillProcessingState.findUnique).toHaveBeenCalledWith({ where: { userId }, select: processingStateSelect });
+    expect(prisma.profileSkillProcessingState.findUnique).toHaveBeenCalledWith({
+      where: { userId },
+      select: processingStateSelect,
+    });
   });
 
   it('registers each source change as a new pending revision', async () => {
@@ -48,24 +90,36 @@ describe('ProfileSkillResultsRepository', () => {
     expect(prisma.profileSkillProcessingState.upsert).toHaveBeenCalledWith({
       where: { userId },
       create: { userId, status: 'pending', inputRevision: 1, updatedAt: now },
-      update: { status: 'pending', inputRevision: { increment: 1 }, updatedAt: now },
+      update: {
+        status: 'pending',
+        inputRevision: { increment: 1 },
+        updatedAt: now,
+      },
       select: processingStateSelect,
     });
   });
 
   it('retries once when another first change created the state at the same time', async () => {
     prisma.profileSkillProcessingState.upsert
-      .mockRejectedValueOnce(Object.assign(new Error('Unique constraint failed'), { code: 'P2002' }))
+      .mockRejectedValueOnce(
+        Object.assign(new Error('Unique constraint failed'), { code: 'P2002' }),
+      )
       .mockResolvedValueOnce(state);
 
-    await expect(repository.registerSourceChange(userId, now)).resolves.toBe(state);
+    await expect(repository.registerSourceChange(userId, now)).resolves.toBe(
+      state,
+    );
     expect(prisma.profileSkillProcessingState.upsert).toHaveBeenCalledTimes(2);
   });
 
   it('does not retry other errors', async () => {
-    prisma.profileSkillProcessingState.upsert.mockRejectedValueOnce(Object.assign(new Error('down'), { code: 'P1001' }));
+    prisma.profileSkillProcessingState.upsert.mockRejectedValueOnce(
+      Object.assign(new Error('down'), { code: 'P1001' }),
+    );
 
-    await expect(repository.registerSourceChange(userId, now)).rejects.toMatchObject({ code: 'P1001' });
+    await expect(
+      repository.registerSourceChange(userId, now),
+    ).rejects.toMatchObject({ code: 'P1001' });
     expect(prisma.profileSkillProcessingState.upsert).toHaveBeenCalledOnce();
   });
 
@@ -90,7 +144,9 @@ describe('ProfileSkillResultsRepository', () => {
   });
 
   it('publishes the reconciliation and the new version in one transaction', async () => {
-    await expect(repository.publish(userId, 2, '1.0.0', now, reconcileSkills)).resolves.toEqual({ state, changed: true });
+    await expect(
+      repository.publish(userId, 2, '1.0.0', now, reconcileSkills),
+    ).resolves.toEqual({ state, changed: true });
 
     expect(tx.profileSkillProcessingState.updateMany).toHaveBeenCalledWith({
       where: { userId, inputRevision: 2 },
@@ -113,24 +169,34 @@ describe('ProfileSkillResultsRepository', () => {
   it('keeps the version when nothing changed after the first result', async () => {
     reconcileSkills.mockResolvedValue(false);
 
-    await expect(repository.publish(userId, 2, '1.0.0', now, reconcileSkills)).resolves.toEqual({ state, changed: false });
+    await expect(
+      repository.publish(userId, 2, '1.0.0', now, reconcileSkills),
+    ).resolves.toEqual({ state, changed: false });
 
-    expect(tx.profileSkillProcessingState.update.mock.calls[0][0].data).not.toHaveProperty('resultVersion');
+    expect(
+      tx.profileSkillProcessingState.update.mock.calls[0][0].data,
+    ).not.toHaveProperty('resultVersion');
   });
 
   it('gives the first result its own version even without changes', async () => {
     reconcileSkills.mockResolvedValue(false);
-    tx.profileSkillProcessingState.findUnique.mockResolvedValue({ processedRevision: null });
+    tx.profileSkillProcessingState.findUnique.mockResolvedValue({
+      processedRevision: null,
+    });
 
     await repository.publish(userId, 1, '1.0.0', now, reconcileSkills);
 
-    expect(tx.profileSkillProcessingState.update.mock.calls[0][0].data).toMatchObject({ resultVersion: { increment: 1 } });
+    expect(
+      tx.profileSkillProcessingState.update.mock.calls[0][0].data,
+    ).toMatchObject({ resultVersion: { increment: 1 } });
   });
 
   it('does not write anything for a stale revision', async () => {
     tx.profileSkillProcessingState.updateMany.mockResolvedValue({ count: 0 });
 
-    await expect(repository.publish(userId, 1, '1.0.0', now, reconcileSkills)).resolves.toBeNull();
+    await expect(
+      repository.publish(userId, 1, '1.0.0', now, reconcileSkills),
+    ).resolves.toBeNull();
 
     expect(reconcileSkills).not.toHaveBeenCalled();
     expect(tx.profileSkillProcessingState.update).not.toHaveBeenCalled();
@@ -139,7 +205,9 @@ describe('ProfileSkillResultsRepository', () => {
   it('propagates a reconciliation failure without marking the result ready', async () => {
     reconcileSkills.mockRejectedValue(new Error('skill write failed'));
 
-    await expect(repository.publish(userId, 2, '1.0.0', now, reconcileSkills)).rejects.toThrow('skill write failed');
+    await expect(
+      repository.publish(userId, 2, '1.0.0', now, reconcileSkills),
+    ).rejects.toThrow('skill write failed');
 
     expect(tx.profileSkillProcessingState.update).not.toHaveBeenCalled();
   });

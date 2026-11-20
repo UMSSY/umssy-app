@@ -8,11 +8,25 @@ import { EventsController } from './controllers/events.controller.js';
 import { EventProposalsRepository } from './repositories/event-proposals.repository.js';
 import { EventsRepository } from './repositories/events.repository.js';
 import { EventsService } from './services/events.service.js';
+import { EventsCronService } from './services/events-cron.service.js';
+import { ManagedWorkshopsController } from './controllers/managed-workshops.controller.js';
 
 @Module({
   imports: [JwtAuthModule],
-  controllers: [EventsController, EventProposalsController],
-  providers: [EventProposalsRepository, EventsRepository, EventsService, EventProposalsService, RolesGuard, FileValidationService],
+  controllers: [
+    ManagedWorkshopsController,
+    EventsController,
+    EventProposalsController,
+  ],
+  providers: [
+    EventProposalsRepository,
+    EventsRepository,
+    EventsService,
+    EventProposalsService,
+    EventsCronService,
+    RolesGuard,
+    FileValidationService,
+  ],
   exports: [EventsService],
 })
 export class EventsModule {}

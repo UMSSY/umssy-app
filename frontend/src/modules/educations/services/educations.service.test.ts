@@ -1,0 +1,180 @@
+import "@/shared/testing/indexed-db.mock";
+import { clearAccessToken } from "@/shared/services/storage/access-token-storage";
+import { saveAccessToken } from "@/shared/services/storage/access-token-storage";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { apiClient } from "@/shared/services/api-client";
+import type { EducationItem } from "../types/education-item.types";
+import { educationsService } from "./educations.service";
+
+vi.mock("@/shared/services/api-client", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/shared/services/api-client")>()),
+  apiClient: { get: vi.fn(), post: vi.fn(), patch: vi.fn(), delete: vi.fn() },
+}));
+
+const EDUCATION: EducationItem = {
+  id: "11111111-1111-4111-8111-111111111111",
+  institution: "Example University",
+  degree: "Computer Science",
+  startDate: "2021-02-01",
+  endDate: "2025-11-30",
+  description: "Software development studies.",
+  createdAt: "2025-12-01T00:00:00.000Z",
+  updatedAt: "2025-12-01T00:00:00.000Z",
+};
+
+describe("educationsService", () => {
+  beforeEach(async () => {
+    await saveAccessToken("test-access-token");
+  });
+
+  afterEach(() => {
+    clearAccessToken();
+    vi.resetAllMocks();
+  });
+
+  it("unwraps education records and authenticates with the login token", async () => {
+    vi.mocked(apiClient.get).mockResolvedValue({
+      data: { statusCode: 200, data: [EDUCATION], detail: "Success", ok: true },
+    });
+
+    await expect(educationsService.getEducations()).resolves.toEqual([EDUCATION]);
+    expect(apiClient.get).toHaveBeenCalledWith("/educations", {
+      headers: { Authorization: "Bearer test-access-token" },
+    });
+  });
+
+  it('loads the real catalogue using the current login token', async () => {
+    const catalogue = [{ name: 'Universidad Mayor de San Simón (UMSS)', aliases: ['UMSS'] }];
+    vi.mocked(apiClient.get).mockResolvedValue({ data: { data: catalogue } });
+    await expect(educationsService.getInstitutions()).resolves.toEqual(catalogue);
+    expect(apiClient.get).toHaveBeenCalledWith('/educations/institutions', { headers: { Authorization: 'Bearer test-access-token' } });
+  });
+
+  it.each([null, undefined, [], [null], [{ name: null, aliases: [] }], [{ name: 'UMSS', aliases: [null] }]])('rejects a malformed or empty catalogue: %j', async (data) => {
+    vi.mocked(apiClient.get).mockResolvedValue({ data: { data } });
+    await expect(educationsService.getInstitutions()).rejects.toThrow('No se pudo cargar la lista de universidades.');
+  });
+
+  it('propagates catalogue HTTP errors without substituting a local list', async () => {
+    const error = { response: { status: 401 } };
+    vi.mocked(apiClient.get).mockRejectedValue(error);
+    await expect(educationsService.getInstitutions()).rejects.toBe(error);
+  });
+
+  it("returns an empty list when the user has no records", async () => {
+    vi.mocked(apiClient.get).mockResolvedValue({ data: { data: [] } });
+
+    await expect(educationsService.getEducations()).resolves.toEqual([]);
+  });
+
+  it("reads the current token on every request", async () => {
+    vi.mocked(apiClient.get).mockResolvedValue({ data: { data: [] } });
+    await educationsService.getEducations();
+    await saveAccessToken("new-access-token");
+    await educationsService.getEducations();
+
+    expect(apiClient.get).toHaveBeenLastCalledWith("/educations", {
+      headers: { Authorization: "Bearer new-access-token" },
+    });
+  });
+
+  it("does not invent credentials when the login token is missing", async () => {
+    clearAccessToken();
+    const error = { response: { status: 401 } };
+    vi.mocked(apiClient.get).mockRejectedValue(error);
+
+    await expect(educationsService.getEducations()).rejects.toBe(error);
+    expect(apiClient.get).toHaveBeenCalledWith("/educations", { headers: {} });
+  });
+
+  it.each([401, 404, 500])("propagates HTTP %i instead of returning sample records", async (status) => {
+    const error = { response: { status } };
+    vi.mocked(apiClient.get).mockRejectedValue(error);
+
+    await expect(educationsService.getEducations()).rejects.toBe(error);
+  });
+
+  it("propagates network failures", async () => {
+    const error = new Error("Network Error");
+    vi.mocked(apiClient.get).mockRejectedValue(error);
+
+    await expect(educationsService.getEducations()).rejects.toBe(error);
+  });
+
+  describe("mutations", () => {
+    const PAYLOAD = {
+      institution: "Example University",
+      degree: "Computer Science",
+      startDate: "2021-02-01",
+      endDate: "2025-11-30",
+      description: null,
+    };
+    const HEADERS = { headers: { Authorization: "Bearer test-access-token" } };
+
+    it("creates an education record", async () => {
+      vi.mocked(apiClient.post).mockResolvedValue({ data: { data: EDUCATION } });
+
+      await expect(educationsService.createEducation(PAYLOAD)).resolves.toEqual(EDUCATION);
+      expect(apiClient.post).toHaveBeenCalledWith("/educations", PAYLOAD, HEADERS);
+    });
+
+    it("updates an education record", async () => {
+      vi.mocked(apiClient.patch).mockResolvedValue({ data: { data: EDUCATION } });
+
+      await expect(educationsService.updateEducation(EDUCATION.id, PAYLOAD)).resolves.toEqual(
+        EDUCATION,
+      );
+      expect(apiClient.patch).toHaveBeenCalledWith(
+        `/educations/${EDUCATION.id}`,
+        PAYLOAD,
+        HEADERS,
+      );
+    });
+
+    it("sends a legacy edit without introducing a missing end date", async () => {
+      const payload = {
+        institution: PAYLOAD.institution,
+        degree: PAYLOAD.degree,
+        startDate: PAYLOAD.startDate,
+        description: "Updated description",
+      };
+      vi.mocked(apiClient.patch).mockResolvedValue({ data: { data: { ...EDUCATION, endDate: null } } });
+      await educationsService.updateEducation(EDUCATION.id, payload);
+      expect(apiClient.patch).toHaveBeenCalledWith(
+        `/educations/${EDUCATION.id}`,
+        payload,
+        HEADERS,
+      );
+      expect(vi.mocked(apiClient.patch).mock.calls[0][1]).not.toHaveProperty("endDate");
+    });
+
+    it("propagates conflicts without substituting a success response", async () => {
+      const error = { response: { status: 409 } };
+      vi.mocked(apiClient.patch).mockRejectedValue(error);
+      await expect(educationsService.updateEducation(EDUCATION.id, PAYLOAD)).rejects.toBe(error);
+      expect(apiClient.patch).toHaveBeenCalledTimes(1);
+    });
+
+    it("deletes an education record", async () => {
+      vi.mocked(apiClient.delete).mockResolvedValue({});
+
+      await educationsService.deleteEducation(EDUCATION.id);
+
+      expect(apiClient.delete).toHaveBeenCalledWith(
+        `/educations/${EDUCATION.id}`,
+        HEADERS,
+      );
+    });
+
+    it("propagates mutation errors without local data", async () => {
+      const error = { response: { status: 404 } };
+      vi.mocked(apiClient.post).mockRejectedValue(error);
+      vi.mocked(apiClient.patch).mockRejectedValue(error);
+      vi.mocked(apiClient.delete).mockRejectedValue(error);
+
+      await expect(educationsService.createEducation(PAYLOAD)).rejects.toBe(error);
+      await expect(educationsService.updateEducation(EDUCATION.id, PAYLOAD)).rejects.toBe(error);
+      await expect(educationsService.deleteEducation(EDUCATION.id)).rejects.toBe(error);
+    });
+  });
+});

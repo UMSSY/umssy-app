@@ -1,3 +1,4 @@
+import "@/shared/testing/indexed-db.mock";
 import type { AxiosHeaders, AxiosRequestConfig } from "axios";
 import { afterEach, describe, expect, it } from "vitest";
 import { apiClient } from "./api-client";
@@ -33,7 +34,7 @@ describe("apiClient authorization", () => {
   });
 
   it("adds a Bearer token when an access token exists", async () => {
-    saveAccessToken("stored-token");
+    await saveAccessToken("stored-token");
 
     const headers = await captureRequestHeaders();
 
@@ -47,7 +48,7 @@ describe("apiClient authorization", () => {
   });
 
   it("preserves an explicitly supplied Authorization header", async () => {
-    saveAccessToken("stored-token");
+    await saveAccessToken("stored-token");
 
     const headers = await captureRequestHeaders({
       headers: { Authorization: "Basic explicit-credentials" },
@@ -63,27 +64,30 @@ describe("apiClient session errors", () => {
   function rejectWithStatus(status: number, tokenDuringResponse?: string) {
     return apiClient.get("/private-resource", {
       adapter: async (config) => {
-        if (tokenDuringResponse) saveAccessToken(tokenDuringResponse);
+        if (tokenDuringResponse) await saveAccessToken(tokenDuringResponse);
         throw Object.assign(new Error("Solicitud rechazada"), { isAxiosError: true, config, response: { status, data: { detail: "Solicitud rechazada" } } });
       },
     });
   }
 
   it("invalidates the current session on an authenticated 401 without a mounted guard", async () => {
-    saveAccessToken("expired-token");
+    await saveAccessToken("expired-token");
     await expect(rejectWithStatus(401)).rejects.toThrow("Solicitud rechazada");
     expect(getAccessToken()).toBeNull();
   });
 
   it("does not invalidate a newer session when an old request returns 401", async () => {
-    saveAccessToken("old-token");
+    await saveAccessToken("old-token");
     await expect(rejectWithStatus(401, "new-token")).rejects.toThrow();
     expect(getAccessToken()).toBe("new-token");
   });
 
-  it.each([400, 403, 404, 422, 500])("preserves the session and original error on HTTP %s", async (status) => {
-    saveAccessToken("valid-token");
-    await expect(rejectWithStatus(status)).rejects.toMatchObject({ response: { status, data: { detail: "Solicitud rechazada" } } });
-    expect(getAccessToken()).toBe("valid-token");
-  });
+  it.each([400, 403, 404, 422, 500])(
+    "preserves the session and original error on HTTP %s",
+    async (status) => {
+      await saveAccessToken("valid-token");
+      await expect(rejectWithStatus(status)).rejects.toMatchObject({ response: { status, data: { detail: "Solicitud rechazada" } } });
+      expect(getAccessToken()).toBe("valid-token");
+    },
+  );
 });

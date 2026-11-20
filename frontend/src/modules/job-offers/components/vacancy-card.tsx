@@ -1,36 +1,17 @@
 import { Trash2 } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { cn } from "@/lib/utils";
-import {
-  CLOSED_STATUS,
-  DELETED_STATUS,
-  PUBLISHED_STATUS,
-  STATUS_BADGE_CLASSES,
-  STATUS_LABELS,
-} from "../constants/vacancies.constants";
-import type { JobOffer } from "../types/job-offer.types";
-
-const dateFormatter = new Intl.DateTimeFormat("es-BO", {
-  day: "2-digit",
-  month: "2-digit",
-  year: "numeric",
-  timeZone: "UTC",
-});
-
-interface VacancyCardProps {
-  offer: JobOffer;
-  onDetails: (id: string) => void;
-  showStatus?: boolean;
-  onReopen?: (id: string) => void;
-  onDelete?: (offer: JobOffer) => void; // <--- 1. Añadimos la prop para manejar la eliminación
-}
+import { PUBLISHED_STATUS, STATUS_BADGE_CLASSES, STATUS_LABELS } from "../constants/job-offers.constants";
+import type { VacancyCardProps } from "../types/vacancy-card-props.types";
+import { formatPublicationDate } from "../utils/format-publication-date";
 
 export function VacancyCard({ offer, onDetails, showStatus = false, onReopen, onDelete }: VacancyCardProps) {
   const isPublished = offer.status === PUBLISHED_STATUS;
-  const isClosed = offer.status === CLOSED_STATUS;
-  const isDeleted = offer.status === DELETED_STATUS;
+  const isClosed = offer.status === "Cerrada";
+  const isDeleted = offer.status === "Eliminada";
 
   return (
     <li
@@ -59,14 +40,16 @@ export function VacancyCard({ offer, onDetails, showStatus = false, onReopen, on
           </Button>
         </h3>
         <p className="mt-1 text-sm text-text-secondary">
-          Publicado: {dateFormatter.format(new Date(offer.createdAt))} · Modalidad:{" "}
+          Publicado: {formatPublicationDate(offer.publishedAt)} · Modalidad:{" "}
           {offer.modality} · Postulantes: {offer.applicantsCount} candidatos
         </p>
         <p className="mt-1 text-sm text-text-secondary">Tipo de contrato: {offer.contractType}</p>
         {isPublished ? (
           <div className="mt-3 flex flex-wrap gap-2">
-            <Link href={`/matching?vacancyId=${offer.id}`}
-            className={cn(buttonVariants({ variant: "outline", size: "sm" }), "max-md:h-11")}>
+            <Link
+              href={`/matching?vacancyId=${offer.id}`}
+              className={cn(buttonVariants({ variant: "outline", size: "sm" }), "max-md:h-11")}
+            >
               Ver postulantes
             </Link>
             <Link
@@ -95,10 +78,11 @@ export function VacancyCard({ offer, onDetails, showStatus = false, onReopen, on
       {isPublished ? (
         <Button
           type="button"
+          variant="destructive"
           size="icon-sm"
           aria-label={`Eliminar vacante ${offer.title}`}
-          className="bg-destructive text-white hover:bg-destructive/90 max-md:size-11"
-          onClick={() => onDelete?.(offer)} // <--- 2. Conectamos el evento click para invocar el modal
+          className="max-md:size-11"
+          onClick={() => onDelete?.(offer)}
         >
           <Trash2 aria-hidden="true" />
         </Button>

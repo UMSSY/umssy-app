@@ -1,5 +1,19 @@
-import { Body, Controller, Delete, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator.js';
 import { Roles } from '../../../common/decorators/roles.decorator.js';
@@ -13,7 +27,7 @@ import {
 } from '../constants/availability-docs.constants.js';
 import { BlockDateDto } from '../requests/block-date.request.js';
 import { blockedDateIdSchema } from '../requests/blocked-date-id.request.js';
-import { WeekQueryDto } from '../requests/week-query.request.js';
+import { BlockedDatesQueryDto } from '../requests/blocked-dates-query.request.js';
 import { BlockedDatesService } from '../services/blocked-dates.service.js';
 import type { BlockedDateResponse } from '../types/blocked-date-response.types.js';
 import type { DeletedBlockedDateResponse } from '../types/deleted-blocked-date-response.types.js';
@@ -26,7 +40,10 @@ export class BlockedDatesController {
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('mentor')
-  @ApiOperation({ summary: BLOCK_DATE_DOCS.summary, description: BLOCK_DATE_DOCS.description })
+  @ApiOperation({
+    summary: BLOCK_DATE_DOCS.summary,
+    description: BLOCK_DATE_DOCS.description,
+  })
   blockDate(
     @CurrentUser() user: AuthenticatedUser,
     @Body() body: BlockDateDto,
@@ -38,11 +55,18 @@ export class BlockedDatesController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('mentor')
   @ApiOperation({ summary: FIND_BLOCKED_DATES_DOCS.summary })
-  @ApiQuery({ name: 'from', description: FIND_BLOCKED_DATES_DOCS.fromDescription })
-  @ApiQuery({ name: 'to', description: FIND_BLOCKED_DATES_DOCS.toDescription })
+  @ApiQuery({
+    name: 'from',
+    description: FIND_BLOCKED_DATES_DOCS.fromDescription,
+  })
+  @ApiQuery({
+    name: 'to',
+    required: false,
+    description: FIND_BLOCKED_DATES_DOCS.toDescription,
+  })
   findBlockedDates(
     @CurrentUser() user: AuthenticatedUser,
-    @Query() query: WeekQueryDto,
+    @Query() query: BlockedDatesQueryDto,
   ): Promise<BlockedDateResponse[]> {
     return this.blockedDatesService.findBlockedDates(user.id, query);
   }

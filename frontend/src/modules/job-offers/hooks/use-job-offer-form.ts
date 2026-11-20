@@ -1,16 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { JobOfferDetailsResponse } from "../types/job-offer.types";
+import type { JobOfferDetailsResponse } from "../types/job-offer-details-response.types";
 import { formatSalaryInput } from "../utils/format-salary-input";
-import { getCurrentCompany } from "../utils/get-current-company";
+import { useCurrentCompany } from "../hooks/use-current-company";
 import { useJobOfferDetails } from "./use-job-offer-details";
-import type {
-    Modality,
-    UpdateVacancyField,
-    VacancyConditions,
-    VacancyErrors,
-} from "../types/vacancy-conditions.types";
+import type { VacancyConditions } from "../types/vacancy-conditions.types";
+import type { Modality } from "../types/modality.types";
+import type { UpdateVacancyField } from "../types/update-vacancy-field.types";
+import type { VacancyErrors } from "../types/vacancy-errors.types";
 import {
     INFORMATION_FIELDS_ORDER,
     isFieldEmpty,
@@ -72,31 +70,34 @@ function focusField(field: keyof VacancyConditions) {
 }
 
 export function useJobOfferForm(jobOfferId?: string) {
-    const [currentStep, setCurrentStep] = useState(1);
-    const [conditions, setConditions] = useState<VacancyConditions>(INITIAL_CONDITIONS);
-    const [errors, setErrors] = useState<VacancyErrors>({});
+  const [currentStep, setCurrentStep] = useState(1);
+  const [conditions, setConditions] = useState<VacancyConditions>(INITIAL_CONDITIONS);
+  const [errors, setErrors] = useState<VacancyErrors>({});
 
-    // Modo edición: se reutiliza el hook de detalles (misma clave de caché y mismo endpoint).
-    const details = useJobOfferDetails(jobOfferId ? getCurrentCompany().id : null, jobOfferId ?? null);
-    const baseline = details.offer ? toConditions(details.offer) : null;
-    const [loadedOffer, setLoadedOffer] = useState(details.offer);
-    if (details.offer !== loadedOffer) {
-        setLoadedOffer(details.offer);
-        if (details.offer) setConditions(toConditions(details.offer));
+  const company = useCurrentCompany();
+  const details = useJobOfferDetails(
+    jobOfferId ? company.id : null,
+    jobOfferId ?? null,
+  );
+  const baseline = details.offer ? toConditions(details.offer) : null;
+  const [loadedOfferId, setLoadedOfferId] = useState<string | null>(null);
+  if (details.offer && details.offer.id !== loadedOfferId) {
+        setLoadedOfferId(details.offer.id);
+        setConditions(toConditions(details.offer));
     }
 
-    useEffect(() => {
+  useEffect(() => {
         if (readStepFromUrl() > 1) writeStepToUrl(1, "replace");
         const handlePopState = () => setCurrentStep(readStepFromUrl());
         window.addEventListener("popstate", handlePopState);
         return () => window.removeEventListener("popstate", handlePopState);
     }, []);
 
-    useEffect(() => {
+  useEffect(() => {
         if (currentStep > readStepFromUrl()) writeStepToUrl(currentStep, "push");
     }, [currentStep]);
 
-    function clearError(field: keyof VacancyConditions) {
+  function clearError(field: keyof VacancyConditions) {
         setErrors((prev) => {
             if (!prev[field]) return prev;
             const next = { ...prev };
@@ -105,16 +106,16 @@ export function useJobOfferForm(jobOfferId?: string) {
         });
     }
 
-    const updateField: UpdateVacancyField = (field, value) => {
+  const updateField: UpdateVacancyField = (field, value) => {
         setConditions((prev) => ({ ...prev, [field]: value }));
         clearError(field);
     };
 
-    function selectModality(modality: Modality) {
+  function selectModality(modality: Modality) {
         updateField("modality", modality);
     }
 
-    function validateField(field: keyof VacancyConditions) {
+  function validateField(field: keyof VacancyConditions) {
         if (isFieldEmpty(field, conditions)) {
             clearError(field);
             return;
@@ -127,11 +128,11 @@ export function useJobOfferForm(jobOfferId?: string) {
         }
     }
 
-    function validateMapsLink() {
+  function validateMapsLink() {
         validateField("mapsLink");
     }
 
-    function applyStepErrors(
+  function applyStepErrors(
         fields: (keyof VacancyConditions)[],
         found: VacancyErrors,
     ): keyof VacancyConditions | undefined {
@@ -143,16 +144,16 @@ export function useJobOfferForm(jobOfferId?: string) {
         return fields.find((field) => found[field]);
     }
 
-    function goNext() {
+  function goNext() {
         setCurrentStep((step) => Math.min(step + 1, LAST_STEP));
     }
 
-    function goBack() {
+  function goBack() {
         setCurrentStep((step) => Math.max(step - 1, 1));
         if (readStepFromUrl() > 1) window.history.back();
     }
 
-    function handleContinue() {
+  function handleContinue() {
         const firstInvalid = applyStepErrors(INFORMATION_FIELDS_ORDER, validateInformation(conditions));
         if (firstInvalid) {
             focusField(firstInvalid);
@@ -161,7 +162,7 @@ export function useJobOfferForm(jobOfferId?: string) {
         goNext();
     }
 
-    function handleRequirementsContinue() {
+  function handleRequirementsContinue() {
         const firstInvalid = applyStepErrors(REQUIREMENTS_FIELDS_ORDER, validateRequirements(conditions));
         if (firstInvalid) {
             focusField(firstInvalid);
@@ -170,21 +171,20 @@ export function useJobOfferForm(jobOfferId?: string) {
         goNext();
     }
 
-    // En edición se compara contra la vacante cargada; en alta, contra el formulario vacío.
-    const hasUnsavedChanges = baseline
+  const hasUnsavedChanges = baseline
         ? JSON.stringify(conditions) !== JSON.stringify(baseline)
         : (Object.keys(INITIAL_CONDITIONS) as (keyof VacancyConditions)[]).some(
               (field) => !isFieldEmpty(field, conditions),
           );
 
-    function reset() {
+  function reset() {
         setConditions(baseline ?? INITIAL_CONDITIONS);
         setErrors({});
         setCurrentStep(1);
         writeStepToUrl(1, "replace");
     }
 
-    return {
+  return {
         currentStep,
         conditions,
         errors,

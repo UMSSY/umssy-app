@@ -2,7 +2,7 @@
 
 import { Label } from "@/components/ui/label";
 import { DateField } from "@/shared/components/date-field";
-import type { SurveyDateFieldProps } from "../types/survey-component-props.types";
+import type { SurveyDateFieldProps } from "../types/survey-date-field-props.types";
 import { toDateValue } from "../utils/survey-dates";
 import { FieldErrorMessage } from "./field-error-message";
 import { RequiredMark } from "./required-mark";

@@ -5,8 +5,6 @@ export const STATE_LABELS: Record<AvailabilityBlockState, string> = {
   confirmed: "BLOQUE CONFIRMADO",
 };
 
-export const DELETE_BLOCK_ERROR = "Error al eliminar el bloque de disponibilidad";
-
 export const DELETE_BLOCK_TEXT = {
   action: "Eliminar bloque",
   title: "¿Eliminar este bloque?",

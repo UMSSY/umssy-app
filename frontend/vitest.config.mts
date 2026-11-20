@@ -1,7 +1,13 @@
 import path from 'path'
 import { availableParallelism } from 'node:os'
-import { defineConfig } from 'vitest/config'
+import { configDefaults, defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
+
+const processTestFiles = [
+  'shared/utils/date-time.test.ts',
+  'shared/services/storage/browser-session-storage.test.ts',
+  'modules/events/components/pass-qr.test.tsx',
+]
 
 export default defineConfig({
   plugins: [react()],
@@ -14,6 +20,24 @@ export default defineConfig({
     maxWorkers: Math.min(4, availableParallelism()),
     setupFiles: ['./vitest.setup.ts'],
     environment: 'jsdom',
+    dir: './src',
+    projects: [
+      {
+        test: {
+          name: 'unit',
+          pool: 'vmForks',
+          vmMemoryLimit: '768MB',
+          exclude: [...configDefaults.exclude, ...processTestFiles],
+        },
+      },
+      {
+        test: {
+          name: 'process',
+          pool: 'forks',
+          include: processTestFiles,
+        },
+      },
+    ],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],

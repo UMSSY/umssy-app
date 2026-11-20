@@ -1,11 +1,10 @@
+import { NOT_FOUND_MESSAGE } from "@/modules/request-review/constants/request-review-errors.constants";
+import { GENERIC_ERROR_MESSAGE, NETWORK_ERROR_MESSAGE } from "@/shared/constants/error-messages.constants";
 import { apiClient } from "@/shared/services/api-client";
 import type { AutomationSummary, TimelineItem } from "../types/automatic-validation.types";
 import type { ReviewApiResult } from "../types/request-review.types";
 import { authHeaders, failureOf } from "./request-review.service";
 
-const NETWORK_ERROR_MESSAGE = "No se pudo conectar con el servidor. Inténtalo de nuevo.";
-const GENERIC_ERROR_MESSAGE = "No se pudo completar la operación. Inténtalo de nuevo.";
-const NOT_FOUND_MESSAGE = "La solicitud no existe.";
 const SUMMARY_KEYS = ["manualReviewCount", "autoApprovedTodayCount", "autoRejectedTodayCount", "receivedTodayCount"] as const;
 
 function isRecord(value: unknown): value is Record<string, unknown> {

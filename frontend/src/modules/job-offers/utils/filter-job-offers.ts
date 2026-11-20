@@ -1,18 +1,9 @@
-import { HISTORY_STATUSES, PUBLISHED_STATUS } from "../constants/vacancies.constants";
-import type { JobOffer, JobOfferListScope } from "../types/job-offer.types";
+import { HISTORY_STATUSES, PUBLISHED_STATUS } from "../constants/job-offers.constants";
+import type { JobOffer } from "../types/job-offer.types";
+import type { JobOfferListScope } from "../types/job-offer-list-scope.types";
 import { normalizeSearchText } from "@/shared/utils/normalize-search-text";
-
-export type ApplicantsOrder = "none" | "most" | "least";
-
-export interface JobOfferFilters {
-  search: string;
-  modality: string;
-  contractType: string;
-  applicants: ApplicantsOrder;
-  dateFrom: string;
-  dateTo: string;
-  status: string;
-}
+import type { JobOfferFilters } from "../types/job-offer-filters.types";
+import type { JobOfferListParams } from "../types/job-offer-list-params.types";
 
 export const DEFAULT_JOB_OFFER_FILTERS: JobOfferFilters = {
   search: "",
@@ -24,26 +15,15 @@ export const DEFAULT_JOB_OFFER_FILTERS: JobOfferFilters = {
   status: "",
 };
 
-export interface JobOfferListParams {
-  search?: string;
-  modality?: string;
-  contractType?: string;
-  dateFrom?: string;
-  dateTo?: string;
-  sortBy: "createdAt" | "applicants";
-  order: "asc" | "desc";
-}
-
 export function toListParams(filters: JobOfferFilters): JobOfferListParams {
   const byApplicants = filters.applicants !== "none";
 
   return {
-    search: filters.search.trim() || undefined,
     modality: filters.modality || undefined,
     contractType: filters.contractType || undefined,
     dateFrom: filters.dateFrom || undefined,
     dateTo: filters.dateTo || undefined,
-    sortBy: byApplicants ? "applicants" : "createdAt",
+    sortBy: byApplicants ? "applicants" : "publishedAt",
     order: filters.applicants === "least" ? "asc" : "desc",
   };
 }
@@ -53,16 +33,18 @@ export function selectVisibleOffers(
   scope: JobOfferListScope,
   filters: JobOfferFilters,
 ): JobOffer[] {
-  if (scope === "published") {
-    return offers.filter((offer) => offer.status === PUBLISHED_STATUS);
-  }
-
   const normalizedSearch = normalizeSearchText(filters.search);
+  const matchesSearch = (offer: JobOffer) =>
+    normalizeSearchText(offer.title).includes(normalizedSearch);
+
+  if (scope === "published") {
+    return offers.filter((offer) => offer.status === PUBLISHED_STATUS && matchesSearch(offer));
+  }
 
   return offers.filter(
     (offer) =>
       HISTORY_STATUSES.includes(offer.status) &&
       (filters.status === "" || offer.status === filters.status) &&
-      normalizeSearchText(offer.title).includes(normalizedSearch),
+      matchesSearch(offer),
   );
 }

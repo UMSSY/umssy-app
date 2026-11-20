@@ -1,3 +1,4 @@
+import "@/shared/testing/indexed-db.mock";
 import { act, cleanup, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createQueryWrapper } from '@/shared/testing/create-query-wrapper';
@@ -9,10 +10,13 @@ import { useCreateProposal } from './use-create-proposal';
 vi.mock('../services/proposals.service', () => ({ proposalsService: { create: vi.fn() } }));
 const response = { id: 'proposal', status: 'voting' as const, coverUrl: '/cover', supportThreshold: 15, votingDeadline: '2026-11-01T16:00:00Z' };
 const variables = { values: { ...EMPTY_PROPOSAL }, cover: new File(['image'], 'cover.png'), operationKey: 'operation', accessToken: 'session-a' };
-beforeEach(() => { vi.clearAllMocks(); saveAccessToken('session-a'); });
+beforeEach(async () => {
+  vi.clearAllMocks();
+  await saveAccessToken("session-a");
+});
 afterEach(() => { cleanup(); clearAccessToken(); });
 
-describe('proposal creation mutation', () => {
+describe("proposal creation mutation", () => {
   it('invalidates proposal and catalog queries only after confirmed success', async () => {
     vi.mocked(proposalsService.create).mockResolvedValue(response);
     const { wrapper, client } = createQueryWrapper();
@@ -35,14 +39,14 @@ describe('proposal creation mutation', () => {
     expect(invalidate).not.toHaveBeenCalled();
   });
 
-  it('rejects an operation captured from a previous session before sending', async () => {
+  it("rejects an operation captured from a previous session before sending", async () => {
     const { result } = renderHook(() => useCreateProposal('session-a'), { wrapper: createQueryWrapper().wrapper });
-    saveAccessToken('session-b');
+    await saveAccessToken("session-b");
     await act(async () => { await expect(result.current.mutateAsync(variables)).rejects.toThrow('La sesión cambió'); });
     expect(proposalsService.create).not.toHaveBeenCalled();
   });
 
-  it('does not invalidate another user queries when an old session request completes', async () => {
+  it("does not invalidate another user queries when an old session request completes", async () => {
     let resolve!: (data: typeof response) => void;
     vi.mocked(proposalsService.create).mockReturnValue(new Promise((done) => { resolve = done; }));
     const { wrapper, client } = createQueryWrapper();
@@ -51,7 +55,7 @@ describe('proposal creation mutation', () => {
     let pending!: Promise<typeof response>;
     act(() => { pending = result.current.mutateAsync(variables); });
     await waitFor(() => expect(proposalsService.create).toHaveBeenCalledTimes(1));
-    saveAccessToken('session-b');
+    await saveAccessToken("session-b");
     await act(async () => { resolve(response); await pending; });
     expect(invalidate).not.toHaveBeenCalled();
   });

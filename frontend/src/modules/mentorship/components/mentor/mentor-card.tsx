@@ -1,55 +1,14 @@
+import type { MentorCardProps } from '../../types/mentor-card-props.types';
 
-import Link from "next/link";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { getInitials } from "@/shared/utils/get-initials";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-} from "@/components/ui/card";
-import type { MentorDirectoryItem } from "../../types/mentor-directory.types";
+import Link from 'next/link';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { getInitials } from '@/shared/utils/get-initials';
+import { buttonVariants } from '@/components/ui/button-variants';
+import { cn } from '@/lib/utils';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 
-type MentorCardProps = {
-  mentor: MentorDirectoryItem;
-  isOwnProfile?: boolean;
-  returnTo?: string;
-  showAffinityBadge?: boolean;
-  selectedArea?: string;
-};
-
-function getSafeReturnTo(returnTo?: string): string | null {
-  if (!returnTo) {
-    return null;
-  }
-
-  if (
-    !returnTo.startsWith("/mentorship/mentors") ||
-    returnTo.startsWith("//") ||
-    returnTo.includes("\\") ||
-    returnTo.includes("#")
-  ) {
-    return null;
-  }
-
-  try {
-    const url = new URL(returnTo, "http://localhost");
-
-    if (url.origin !== "http://localhost") {
-      return null;
-    }
-
-    if (url.pathname !== "/mentorship/mentors") {
-      return null;
-    }
-
-    return `${url.pathname}${url.search}`;
-  } catch {
-    return null;
-  }
-}
+import { getSafeReturnTo } from '../../utils/get-safe-mentor-return-to';
 
 export function MentorCard({
   mentor,
@@ -57,6 +16,7 @@ export function MentorCard({
   returnTo,
   showAffinityBadge = false,
   selectedArea,
+  highlightAvailability = false,
 }: MentorCardProps) {
   const hasTechnicalAreas = mentor.technicalAreas.length > 0;
   const safeReturnTo = getSafeReturnTo(returnTo);
@@ -107,39 +67,55 @@ export function MentorCard({
           </div>
 
           <div className="ml-auto flex shrink-0 flex-col items-end gap-2">
-            <Badge variant="outline" className="border-border bg-surface-soft px-2.5 whitespace-nowrap text-ink">
-              {mentor.isAvailable ? "Disponible para mentoría" : "No disponible"}
-            </Badge>
-            {showAffinityBadge &&
-              mentor.sharedInterestsCount !== undefined && (
-                <Badge variant="secondary" className="whitespace-nowrap">
-                  {mentor.sharedInterestsCount} {mentor.sharedInterestsCount === 1 ? "interés" : "intereses"} en común
-                </Badge>
-              )}
+            {mentor.isAvailable ? (
+              <Badge
+                variant="outline"
+                aria-current={highlightAvailability ? 'true' : undefined}
+                className={cn(
+                  'border-border bg-surface-soft px-2.5 whitespace-nowrap text-ink',
+                  highlightAvailability &&
+                    'border-accent bg-interaction font-semibold text-accent ring-1 ring-accent',
+                )}
+              >
+                <span
+                  aria-hidden="true"
+                  className="size-1.5 rounded-full bg-accent"
+                />
+                Disponible para mentoría
+              </Badge>
+            ) : null}
+            {showAffinityBadge && mentor.sharedInterestsCount !== undefined && (
+              <Badge variant="secondary" className="whitespace-nowrap">
+                {mentor.sharedInterestsCount}{' '}
+                {mentor.sharedInterestsCount === 1 ? 'interés' : 'intereses'} en
+                común
+              </Badge>
+            )}
           </div>
         </div>
 
         <div>
-          <p className="mb-2 text-sm font-semibold text-ink">
-            Áreas técnicas
-          </p>
+          <p className="mb-2 text-sm font-semibold text-ink">Áreas técnicas</p>
 
           {hasTechnicalAreas ? (
             <ul className="flex flex-wrap gap-2">
               {mentor.technicalAreas.map((area) => (
                 <li
                   key={area}
-                  aria-current={area === selectedArea ? "true" : undefined}
-                  className={cn("max-w-full min-w-0 rounded-md border bg-interaction px-2.5 py-1 text-xs [overflow-wrap:anywhere] text-accent", area === selectedArea ? "border-accent font-semibold ring-1 ring-accent" : "border-accent/15")}
+                  aria-current={area === selectedArea ? 'true' : undefined}
+                  className={cn(
+                    'max-w-full min-w-0 rounded-md border bg-interaction px-2.5 py-1 text-xs [overflow-wrap:anywhere] text-accent',
+                    area === selectedArea
+                      ? 'border-accent font-semibold ring-1 ring-accent'
+                      : 'border-accent/15',
+                  )}
                 >
                   {area}
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="text-sm text-text-secondary">
-              Sin áreas registradas
-            </p>
+            <p className="text-sm text-text-secondary">Sin áreas registradas</p>
           )}
         </div>
 
@@ -171,8 +147,8 @@ export function MentorCard({
         <Link
           href={profileHref}
           className={buttonVariants({
-            variant: "outline",
-            className: "max-w-full border-border-strong text-ink",
+            variant: 'outline',
+            className: 'max-w-full border-border-strong text-ink',
           })}
           aria-label={
             isOwnProfile
@@ -180,7 +156,7 @@ export function MentorCard({
               : `Ver perfil de ${mentor.fullName}`
           }
         >
-          {isOwnProfile ? "Ver mi perfil" : "Ver perfil"}
+          {isOwnProfile ? 'Ver mi perfil' : 'Ver perfil'}
         </Link>
       </CardFooter>
     </Card>

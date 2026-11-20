@@ -1,15 +1,16 @@
 "use client";
 
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { profileService } from "@/modules/profile";
 import { SidebarUserCard } from "@/shared/components/layout/sidebar-user-card";
 import { getAccessToken } from "@/shared/services/storage/access-token-storage";
 import { useAuth } from "@/shared/contexts/auth-context";
 import { getRolesLabel } from "../utils/get-session-role-label";
-import { useLogout } from "../hooks/use-logout";
+import { LogoutConfirmDialog } from "./logout-confirm-dialog";
 
 export function SessionUserCard() {
-  const handleLogout = useLogout();
+  const [isConfirmingLogout, setIsConfirmingLogout] = useState(false);
   const { roles } = useAuth();
   const accessToken = getAccessToken();
   const { data: profile, isPending } = useQuery({
@@ -27,12 +28,15 @@ export function SessionUserCard() {
     .trim();
 
   return (
-    <SidebarUserCard
-      user={{
-        fullName: fullName || (isPending ? "Cargando usuario…" : "Usuario"),
-        role: getRolesLabel(roles),
-      }}
-      onLogout={handleLogout}
-    />
+    <>
+      <SidebarUserCard
+        user={{
+          fullName: fullName || (isPending ? "Cargando usuario…" : "Usuario"),
+          role: getRolesLabel(roles),
+        }}
+        onLogout={() => setIsConfirmingLogout(true)}
+      />
+      <LogoutConfirmDialog open={isConfirmingLogout} onOpenChange={setIsConfirmingLogout} />
+    </>
   );
 }

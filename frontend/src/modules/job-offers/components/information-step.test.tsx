@@ -3,7 +3,8 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { EMPTY_CONDITIONS } from "../testing/vacancy-fixtures";
-import type { UpdateVacancyField, VacancyConditions } from "../types/vacancy-conditions.types";
+import type { VacancyConditions } from "../types/vacancy-conditions.types";
+import type { UpdateVacancyField } from "../types/update-vacancy-field.types";
 import { InformationStep } from "./information-step";
 
 vi.mock("@/components/ui/select", () => ({
@@ -92,7 +93,7 @@ describe("InformationStep", () => {
     expect(fireEvent.keyDown(input(/Título del puesto/), { key: "b" })).toBe(false);
   });
 
-  it("solo admite dígitos en el número de vacantes sin recortar el valor", () => {
+  it("solo admite dígitos en el número de vacantes", () => {
     const { updateField } = renderStep();
     const count = input(/Número de vacantes/);
 
@@ -107,6 +108,37 @@ describe("InformationStep", () => {
 
     fireEvent.change(count, { target: { value: "1a2" } });
     expect(updateField).toHaveBeenLastCalledWith("vacancyCount", "12");
+  });
+
+  it("limita el número de vacantes a 4 dígitos aunque se pegue un valor enorme", () => {
+    const { updateField } = renderStep();
+    const count = input(/Número de vacantes/);
+
+    expect(count).toHaveAttribute("maxLength", "4");
+    fireEvent.change(count, {
+      target: { value: "42342342342342342342342342342342gr45345345345345" },
+    });
+    expect(updateField).toHaveBeenLastCalledWith("vacancyCount", "4234");
+  });
+
+  it("limita el enlace de Google Maps a 2048 caracteres aunque se pegue uno más largo", () => {
+    const { updateField } = renderStep();
+    const input = screen.getByLabelText(/Enlace de Google Maps/);
+
+    const longLink = `https://maps.app.goo.gl/${"a".repeat(3000)}`;
+
+    expect(input).toHaveAttribute("maxLength", "2048");
+    fireEvent.change(input, { target: { value: longLink } });
+    expect(updateField).toHaveBeenLastCalledWith("mapsLink", longLink.slice(0, 2048));
+  });
+
+  it("limita la categoría a 100 caracteres", () => {
+    const { updateField } = renderStep();
+    const input = screen.getByLabelText(/Categoría/);
+
+    expect(input).toHaveAttribute("maxLength", "100");
+    fireEvent.change(input, { target: { value: "a".repeat(600) } });
+    expect(updateField).toHaveBeenLastCalledWith("category", "a".repeat(100));
   });
 
   it("marca en tiempo real un número de vacantes mayor a 500", () => {

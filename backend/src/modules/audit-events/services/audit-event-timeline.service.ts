@@ -8,7 +8,9 @@ import type { AuditTimelineItemResponse } from '../types/audit-timeline-item.typ
 export class AuditEventTimelineService {
   constructor(private readonly auditEventsRepository: AuditEventsRepository) {}
 
-  async listForRequest(accessRequestId: string): Promise<AuditTimelineItemResponse[]> {
+  async listForRequest(
+    accessRequestId: string,
+  ): Promise<AuditTimelineItemResponse[]> {
     const rows = await this.auditEventsRepository.findTimeline(accessRequestId);
     return rows.map((row) => ({
       id: row.id,

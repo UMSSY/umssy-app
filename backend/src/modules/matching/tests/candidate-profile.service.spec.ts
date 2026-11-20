@@ -67,7 +67,9 @@ describe('CandidateProfileService', () => {
   });
 
   it('propaga el error de los servicios de formación y experiencia', async () => {
-    educationsService.findAll.mockRejectedValue(new Error('Database unavailable'));
+    educationsService.findAll.mockRejectedValue(
+      new Error('Database unavailable'),
+    );
 
     await expect(service.findCandidateProfile(USER_ID)).rejects.toThrow(
       'Database unavailable',

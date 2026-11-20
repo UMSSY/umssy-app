@@ -4,7 +4,12 @@ export { appointmentsApi } from "./services/appointments.service";
 export type { Appointment } from "./types/appointment.types";
 export type { AppointmentScope } from "./types/appointment-scope.types";
 export type { CreateAppointmentInput } from "./types/create-appointment-input.types";
+export type { AppointmentDocument } from "./types/appointment-document.types";
 export type { AppointmentStatus } from "./types/appointment-status.types";
 export type { AppointmentCounterpart } from "./types/appointment-counterpart.types";
 export type { AppointmentOrientationType } from "./types/appointment-orientation-type.types";
 export { APPOINTMENTS_QUERY_KEYS } from "./constants/appointments-query-keys.constants";
+export {
+  APPOINTMENT_DOCUMENT_FALLBACK_TYPE_LABEL,
+  APPOINTMENT_DOCUMENT_TYPE_LABELS,
+} from "./constants/appointment-document.constants";

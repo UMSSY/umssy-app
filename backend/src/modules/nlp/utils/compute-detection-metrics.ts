@@ -1,9 +1,12 @@
 import type { NlpDetectionMetrics } from '../types/nlp-detection-metrics.type.js';
 import type { NlpDetectionSample } from '../types/nlp-detection-sample.type.js';
 
-const ratio = (numerator: number, denominator: number) => (denominator === 0 ? null : numerator / denominator);
+const ratio = (numerator: number, denominator: number) =>
+  denominator === 0 ? null : numerator / denominator;
 
-export function computeDetectionMetrics(samples: readonly NlpDetectionSample[]): NlpDetectionMetrics {
+export function computeDetectionMetrics(
+  samples: readonly NlpDetectionSample[],
+): NlpDetectionMetrics {
   let truePositives = 0;
   let falsePositives = 0;
   let falseNegatives = 0;
@@ -27,5 +30,13 @@ export function computeDetectionMetrics(samples: readonly NlpDetectionSample[]):
       ? null
       : (2 * precision * recall) / (precision + recall);
 
-  return { samples: samples.length, truePositives, falsePositives, falseNegatives, precision, recall, f1 };
+  return {
+    samples: samples.length,
+    truePositives,
+    falsePositives,
+    falseNegatives,
+    precision,
+    recall,
+    f1,
+  };
 }

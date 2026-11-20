@@ -1,9 +1,31 @@
 import { Injectable } from '@nestjs/common';
 import { createHash } from 'node:crypto';
+import { MENTOR_PROFILE_SUGGESTION_PRESENTATION } from '../constants/mentor-profile-suggestions.constants.js';
+import type { MentorProfileSuggestion } from '../types/mentor-profile-suggestion.types.js';
+import type {
+  MentorProfileSuggestionResponse,
+  MentorProfileSuggestionsResponse,
+} from '../responses/mentor-profile-suggestions.response.js';
+import type { SkillResponse } from '../../skills/responses/skill.response.js';
 import type { MentorsRepository } from '../repositories/mentors.repository.js';
 
 @Injectable()
 export class MentorMapper {
+  toProfileSuggestionsResponse(
+    suggestions: readonly MentorProfileSuggestion[],
+  ): MentorProfileSuggestionsResponse {
+    const items = suggestions.map((suggestion) => {
+      const presentation =
+        MENTOR_PROFILE_SUGGESTION_PRESENTATION[suggestion.code];
+      return {
+        ...suggestion,
+        ...presentation,
+        editReference: { ...presentation.editReference },
+      } as MentorProfileSuggestionResponse;
+    });
+    return { suggestions: items, pendingCount: items.length };
+  }
+
   toDirectoryResponse(
     mentor: Awaited<ReturnType<MentorsRepository['findActiveMentors']>>[number],
   ) {
@@ -33,6 +55,7 @@ export class MentorMapper {
     mentor: NonNullable<
       Awaited<ReturnType<MentorsRepository['findActiveMentorById']>>
     >,
+    skills: SkillResponse[],
   ) {
     return {
       id: mentor.id,
@@ -49,7 +72,7 @@ export class MentorMapper {
       city: mentor.city,
       educations: mentor.educations,
       workExperiences: mentor.workExperiences,
-      skills: mentor.userSkills.map((relation) => relation.skill),
+      skills,
       certifications: mentor.certifications.map((certification) => ({
         ...certification,
         documentUrl: this.bytesToString(certification.documentUrl),

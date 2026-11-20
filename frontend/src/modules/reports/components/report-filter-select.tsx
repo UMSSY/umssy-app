@@ -2,7 +2,7 @@
 
 import { useId } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ALL_USER_TYPES_VALUE as ALL_FILTER_VALUE } from "../constants/registered-users.constants";
+
 import type { ReportFilterSelectProps } from "../types/report-filter-select-props.types";
 
 export function ReportFilterSelect<TValue extends string>({
@@ -12,18 +12,19 @@ export function ReportFilterSelect<TValue extends string>({
   options,
   value,
   onChange,
+  disabled = false,
 }: ReportFilterSelectProps<TValue>) {
   const labelId = useId();
-  const items = allLabel ? [{ value: ALL_FILTER_VALUE, label: allLabel }, ...options] : options;
-  const selectedValue = value ?? (allLabel ? ALL_FILTER_VALUE : null);
+  const items = allLabel ? [{ value: "ALL", label: allLabel }, ...options] : options;
+  const selectedValue = value ?? (allLabel ? "ALL" : null);
 
   const handleValueChange = (selectedValue: string | null) => {
-    onChange(!selectedValue || selectedValue === ALL_FILTER_VALUE ? undefined : (selectedValue as TValue));
+    onChange(!selectedValue || selectedValue === "ALL" ? undefined : (selectedValue as TValue));
   };
 
   return (
     <div className="w-full sm:w-72 sm:shrink-0">
-      <Select items={items} value={selectedValue} onValueChange={handleValueChange}>
+      <Select items={items} value={selectedValue} onValueChange={handleValueChange} disabled={disabled}>
         <SelectTrigger
           aria-labelledby={labelId}
           className="w-full cursor-pointer rounded-md border-border bg-surface px-3 pt-1.5 pb-2 hover:border-ink-soft hover:bg-surface-soft focus-visible:border-accent focus-visible:ring-3 focus-visible:ring-interaction data-popup-open:border-accent data-popup-open:ring-3 data-popup-open:ring-interaction data-[size=default]:h-auto"

@@ -1,4 +1,9 @@
-import { Injectable, Logger, type OnApplicationBootstrap, type OnModuleDestroy } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  type OnApplicationBootstrap,
+  type OnModuleDestroy,
+} from '@nestjs/common';
 import { FilesService } from '../../files/services/files.service.js';
 import { parseDocumentReading } from '../helpers/parse-document-reading.js';
 import { DocumentValidationRepository } from '../repositories/document-validation.repository.js';
@@ -8,7 +13,9 @@ import { AutomaticValidationService } from './automatic-validation.service.js';
 import { DocumentTextExtractorService } from './document-text-extractor.service.js';
 
 @Injectable()
-export class DocumentReadingService implements OnApplicationBootstrap, OnModuleDestroy {
+export class DocumentReadingService
+  implements OnApplicationBootstrap, OnModuleDestroy
+{
   private readonly logger = new Logger(DocumentReadingService.name);
   private queue: Promise<unknown> = Promise.resolve();
   private recoveryTimer: ReturnType<typeof setInterval> | null = null;
@@ -25,7 +32,9 @@ export class DocumentReadingService implements OnApplicationBootstrap, OnModuleD
 
   onApplicationBootstrap() {
     void this.recoverQueued();
-    this.recoveryTimer = setInterval(() => { void this.recoverQueued(); }, 60_000);
+    this.recoveryTimer = setInterval(() => {
+      void this.recoverQueued();
+    }, 60_000);
     this.recoveryTimer.unref();
   }
 
@@ -39,18 +48,29 @@ export class DocumentReadingService implements OnApplicationBootstrap, OnModuleD
     if (this.closing || this.recovering || this.scheduled.size > 0) return;
     this.recovering = true;
     try {
-      const pending = await this.documentValidationRepository.findQueuedRequests(20);
+      const pending =
+        await this.documentValidationRepository.findQueuedRequests(20);
       for (const request of pending) this.scheduleReading(request.id);
     } catch (error) {
-      this.logger.error('No se pudieron recuperar las lecturas pendientes', error);
+      this.logger.error(
+        'No se pudieron recuperar las lecturas pendientes',
+        error,
+      );
     } finally {
       this.recovering = false;
     }
   }
 
   async readAndEvaluate(accessRequestId: string, now: Date = new Date()) {
-    const state = await this.documentValidationRepository.findAutomationState(accessRequestId);
-    if (!state?.documentFileId || state.documentValidation?.result !== VALIDATION_RESULT.QUEUED) return null;
+    const state =
+      await this.documentValidationRepository.findAutomationState(
+        accessRequestId,
+      );
+    if (
+      !state?.documentFileId ||
+      state.documentValidation?.result !== VALIDATION_RESULT.QUEUED
+    )
+      return null;
 
     let reading: DocumentReading;
     try {
@@ -59,11 +79,20 @@ export class DocumentReadingService implements OnApplicationBootstrap, OnModuleD
       if (!text.text.trim()) throw new Error('OCR returned empty text');
       reading = parseDocumentReading(
         text,
-        { firstName: state.firstName, lastName: state.lastName, career: state.career.title, graduationYear: state.graduationYear },
+        {
+          firstName: state.firstName,
+          lastName: state.lastName,
+          career: state.career.title,
+          graduationYear: state.graduationYear,
+        },
         now.getFullYear(),
       );
     } catch (error) {
-      await this.automaticValidation.markOcrFailed(accessRequestId, state.documentFileId, now);
+      await this.automaticValidation.markOcrFailed(
+        accessRequestId,
+        state.documentFileId,
+        now,
+      );
       this.logger.error(
         'No se pudo leer el documento de la solicitud ' + accessRequestId,
         error instanceof Error ? error.stack : String(error),
@@ -71,20 +100,27 @@ export class DocumentReadingService implements OnApplicationBootstrap, OnModuleD
       return null;
     }
 
-    return this.automaticValidation.evaluateReading(accessRequestId, reading, now, state.documentFileId);
+    return this.automaticValidation.evaluateReading(
+      accessRequestId,
+      reading,
+      now,
+      state.documentFileId,
+    );
   }
 
   scheduleReading(accessRequestId: string) {
     if (this.closing || this.scheduled.has(accessRequestId)) return;
     this.scheduled.add(accessRequestId);
     this.queue = this.queue
-      .then(() => this.closing ? null : this.readAndEvaluate(accessRequestId))
+      .then(() => (this.closing ? null : this.readAndEvaluate(accessRequestId)))
       .catch((error: unknown) => {
         this.logger.error(
           'No se pudo procesar la lectura de la solicitud ' + accessRequestId,
           error instanceof Error ? error.stack : String(error),
         );
       })
-      .finally(() => { this.scheduled.delete(accessRequestId); });
+      .finally(() => {
+        this.scheduled.delete(accessRequestId);
+      });
   }
 }

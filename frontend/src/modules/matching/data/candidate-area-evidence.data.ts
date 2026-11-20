@@ -2,7 +2,7 @@ import type { AreaDetail, AreaId } from "@/modules/radar-chart";
 import { AREA_DETAILS } from "@/modules/radar-chart";
 import { calculateGap } from "@/modules/radar-chart";
 import { getAreaLevel } from "@/modules/radar-chart";
-import type { Candidate } from "../types/matching-types";
+import type { Candidate } from "../types/candidate.types";
 import { AFFINITY_AXES } from "./matching.data";
 
 /** Datos de demostración por persona. No representan historiales verificados. */

@@ -6,6 +6,11 @@ interface ConversationBaseResponse {
     fullName: string;
     avatarUrl: string | null;
     isOnline: boolean;
+    role?: string | null;
+    roleName?: string | null;
+    email?: string | null;
+    academicTitle?: string | null;
+    skills?: string[];
   };
   lastMessage: {
     id: string;
@@ -17,6 +22,8 @@ interface ConversationBaseResponse {
   } | null;
   unreadCount: number;
   isBlockedByMe: boolean;
+  contextType?: string | null;
+  contextId?: string | null;
   updatedAt: string;
 }
 export interface DirectConversationResponse extends ConversationBaseResponse {
@@ -29,6 +36,11 @@ export interface EventConversationResponse extends Omit<
 > {
   eventId: string;
   eventTitle: string;
+  createdAt: string;
+  participants: Array<{
+    id: string;
+    fullName: string;
+  }>;
   contact?: never;
 }
 

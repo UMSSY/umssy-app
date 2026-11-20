@@ -1,11 +1,7 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem } from "@/components/ui/pagination";
-import {
-  CURRENT_PAGE_CLASSES,
-  NAV_BUTTON_CLASSES,
-  PAGE_BUTTON_CLASSES,
-} from "../constants/table-pagination.constants";
+import { NAV_BUTTON_CLASSES } from "../constants/table-pagination.constants";
 import type { TablePaginationProps } from "../types/table-pagination-props.types";
 import { getPaginationItems } from "../utils/pagination-items";
 
@@ -49,7 +45,7 @@ export function TablePagination({ currentPage, totalPages, onPageChange }: Table
                 onClick={() => onPageChange(page)}
                 aria-current={isCurrent ? "page" : undefined}
                 aria-label={`Página ${page}`}
-                className={isCurrent ? CURRENT_PAGE_CLASSES : PAGE_BUTTON_CLASSES}
+                className={isCurrent ? "size-9 rounded-md border-transparent bg-accent text-sm font-semibold text-surface hover:bg-accent" : "size-9 rounded-md border-border bg-surface text-sm font-semibold text-ink-soft hover:bg-surface-soft hover:text-ink"}
               >
                 {page}
               </Button>

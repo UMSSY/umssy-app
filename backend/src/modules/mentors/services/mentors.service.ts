@@ -1,9 +1,12 @@
 import { withMentorIntake } from './mentor-intake.service.js';
 import { Injectable } from '@nestjs/common';
+import { UserSkillService } from '../../skills/services/user-skill.service.js';
 import { MentorParticipationException } from '../exceptions/mentor-participation.exception.js';
 import { MentorsRepository } from '../repositories/mentors.repository.js';
 import {
   AlreadyMentorException,
+  MentorCapacityException,
+  MentorEligibilityException,
   InvalidOrientationTypesException,
   InvalidTechnicalAreasException,
   MentorNotFoundException,
@@ -15,6 +18,7 @@ import type { UpdateMentorOrientationTypesDto } from '../requests/update-mentor-
 import { MentorMapper } from '../mappers/mentor.mapper.js';
 import type { MentorDirectoryQuery } from '../requests/mentor-directory-query.schema.js';
 import { MentorAffinityService } from './mentor-affinity.service.js';
+import { MentorProfileSuggestionsService } from './mentor-profile-suggestions.service.js';
 import type { Prisma } from '../../../prisma/client.js';
 
 const DIRECTORY_PAGE_SIZE = 6 as const;
@@ -38,8 +42,16 @@ export class MentorsService {
   constructor(
     private readonly mentorsRepository: MentorsRepository,
     private readonly mentorMapper: MentorMapper,
+    private readonly userSkillService: UserSkillService,
+    private readonly mentorProfileSuggestionsService: MentorProfileSuggestionsService,
     private readonly mentorAffinityService?: MentorAffinityService,
   ) {}
+
+  async findMyProfileSuggestions(userId: string) {
+    const suggestions =
+      await this.mentorProfileSuggestionsService.findSuggestions(userId);
+    return this.mentorMapper.toProfileSuggestionsResponse(suggestions);
+  }
 
   async findAll() {
     const now = new Date();
@@ -133,7 +145,7 @@ export class MentorsService {
           now,
           page,
           DIRECTORY_PAGE_SIZE,
-          query.sort === 'affinity' ? 'name_asc' : query.sort,
+          query.sort === 'affinity' ? 'default' : query.sort,
         )
       : [];
 
@@ -144,9 +156,64 @@ export class MentorsService {
       totalItems,
       totalPages,
       effectiveSort:
-        query.sort === 'affinity' ? ('name_asc' as const) : query.sort,
+        query.sort === 'affinity' ? ('default' as const) : query.sort,
       ...(affinityStatus ? { affinityStatus } : {}),
     };
+  }
+
+  async findSimilar(userId: string) {
+    const now = new Date();
+    const source = await this.mentorsRepository.findSimilaritySource(
+      userId,
+      now,
+    );
+    if (!source) throw new MentorNotFoundException();
+
+    const areaIds = new Set(
+      source.mentorTechnicalAreas.map(({ technicalAreaId }) => technicalAreaId),
+    );
+    const orientationIds = new Set(
+      source.mentorOrientationTypes.map(
+        ({ orientationTypeId }) => orientationTypeId,
+      ),
+    );
+    if (!areaIds.size && !orientationIds.size) return [];
+
+    const candidates = await this.mentorsRepository.findSimilarCandidates(
+      userId,
+      [...areaIds],
+      [...orientationIds],
+      now,
+    );
+    const ranked = candidates.map((mentor) => ({
+      id: mentor.id,
+      areas: mentor.mentorTechnicalAreas.filter(({ technicalAreaId }) =>
+        areaIds.has(technicalAreaId),
+      ).length,
+      orientations: mentor.mentorOrientationTypes.filter(
+        ({ orientationTypeId }) => orientationIds.has(orientationTypeId),
+      ).length,
+    }));
+    // El ID ascendente estabiliza empates sin depender del orden de Prisma.
+    ranked.sort(
+      (a, b) =>
+        b.areas - a.areas ||
+        b.orientations - a.orientations ||
+        a.id.localeCompare(b.id),
+    );
+    const ids = ranked.slice(0, 3).map(({ id }) => id);
+    if (!ids.length) return [];
+
+    const mentors = await this.mentorsRepository.findDirectoryByIds(
+      ids,
+      { search: '', available: false },
+      now,
+    );
+    const byId = new Map(mentors.map((mentor) => [mentor.id, mentor]));
+    return ids.flatMap((id) => {
+      const mentor = byId.get(id);
+      return mentor ? [this.mentorMapper.toDirectoryResponse(mentor)] : [];
+    });
   }
 
   async findOne(userId: string) {
@@ -160,7 +227,8 @@ export class MentorsService {
       throw new MentorNotFoundException();
     }
 
-    return this.mentorMapper.toProfileResponse(mentor);
+    const skills = await this.userSkillService.getProfessionalSkills(userId);
+    return this.mentorMapper.toProfileResponse(mentor, skills);
   }
 
   async findMyTechnicalAreas(userId: string) {
@@ -249,6 +317,20 @@ export class MentorsService {
       throw new InvalidTechnicalAreasException();
     if (!data.orientationTypeIds.length)
       throw new InvalidOrientationTypesException();
+    if (!tx) {
+      const result = await this.mentorsRepository.withLock(
+        async (transaction) => {
+          try {
+            return await this.activate(userId, data, undefined, transaction);
+          } catch (error) {
+            if (error instanceof MentorParticipationException) return { error };
+            throw error;
+          }
+        },
+      );
+      if ('error' in result) throw result.error;
+      return result;
+    }
     const mentorRole = await this.mentorsRepository.findMentorRole(tx);
     if (!mentorRole) {
       throw new MentorRoleNotFoundException();
@@ -280,6 +362,31 @@ export class MentorsService {
       throw new InvalidOrientationTypesException();
     }
 
+    await this.mentorsRepository.reconcileOffers(tx);
+    const eligibility = await this.mentorsRepository.readEligibility(
+      userId,
+      tx,
+    );
+    if (!eligibility.eligible) throw new MentorEligibilityException();
+    if (eligibility.alreadyMentor) throw new AlreadyMentorException();
+    const intake = await this.mentorsRepository.readIntake(userId, tx);
+    if (intake.hasOffer || intake.hasPendingRequest) {
+      throw new MentorParticipationException(
+        intake.hasOffer
+          ? 'Ya tienes un cupo reservado. Confirma tu oferta desde Mi participación.'
+          : 'Ya tienes una solicitud vigente. Revisa su estado en Mi participación.',
+        409,
+        {
+          code: intake.hasOffer
+            ? 'MENTOR_OFFER_CONFIRMATION_REQUIRED'
+            : 'REQUEST_ALREADY_EXISTS',
+          participationPath: '/mentors/participation',
+        },
+      );
+    }
+    const capacity = await this.mentorsRepository.readCapacity(tx);
+    if (capacity.available < 1) throw new MentorCapacityException();
+
     const activation = await this.mentorsRepository.activate(
       userId,
       mentorRole.id,
@@ -287,21 +394,6 @@ export class MentorsService {
       data.orientationTypeIds,
       tx,
     );
-    if ('result' in activation) {
-      const hasOffer = activation.result === 'OFFER_EXISTS';
-      throw new MentorParticipationException(
-        hasOffer
-          ? 'Ya tienes un cupo reservado. Confirma tu oferta desde Mi participación.'
-          : 'Ya tienes una solicitud vigente. Revisa su estado en Mi participación.',
-        409,
-        {
-          code: hasOffer
-            ? 'MENTOR_OFFER_CONFIRMATION_REQUIRED'
-            : 'REQUEST_ALREADY_EXISTS',
-          participationPath: '/mentors/participation',
-        },
-      );
-    }
     return activation;
   }
 

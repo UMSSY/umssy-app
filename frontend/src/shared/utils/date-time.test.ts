@@ -2,6 +2,10 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   addWeeks,
   formatBlockRange,
+  formatBoliviaDate,
+  formatBoliviaDay,
+  formatBoliviaMonthShort,
+  formatBoliviaWeekdayShort,
   getWeekRange,
   toBoliviaTime,
   toUtcIso,
@@ -173,4 +177,54 @@ describe("independencia de la zona horaria del navegador", () => {
       );
     },
   );
+});
+
+describe("formatBoliviaWeekdayShort, formatBoliviaDay y formatBoliviaMonthShort", () => {
+  it("etiqueta el día de Bolivia que en UTC todavía es el día siguiente", () => {
+    const startAt = "2026-10-27T00:00:00.000Z";
+
+    expect(formatBoliviaWeekdayShort(startAt)).toBe("LUN");
+    expect(formatBoliviaDay(startAt)).toBe("26");
+    expect(formatBoliviaMonthShort(startAt)).toBe("oct");
+  });
+
+  it("mantiene la fecha de Bolivia en la última hora del día", () => {
+    const startAt = "2026-10-27T03:00:00.000Z";
+
+    expect(formatBoliviaWeekdayShort(startAt)).toBe("LUN");
+    expect(formatBoliviaDay(startAt)).toBe("26");
+    expect(formatBoliviaMonthShort(startAt)).toBe("oct");
+  });
+
+  it("cruza el mes con la fecha de Bolivia y no con la de UTC", () => {
+    const startAt = "2026-11-01T02:00:00.000Z";
+
+    expect(formatBoliviaWeekdayShort(startAt)).toBe("SÁB");
+    expect(formatBoliviaDay(startAt)).toBe("31");
+    expect(formatBoliviaMonthShort(startAt)).toBe("oct");
+  });
+});
+
+describe("formatBoliviaDate", () => {
+  it("muestra DD/MM/AAAA con la fecha de Bolivia", () => {
+    expect(formatBoliviaDate("2026-11-10T15:30:00.000Z")).toBe("10/11/2026");
+  });
+
+  it("usa el día de Bolivia cuando en UTC ya es el día siguiente", () => {
+    expect(formatBoliviaDate("2026-11-10T02:00:00.000Z")).toBe("09/11/2026");
+  });
+
+  it("completa con cero el día y el mes", () => {
+    expect(formatBoliviaDate("2026-03-05T12:00:00.000Z")).toBe("05/03/2026");
+  });
+
+  it("acepta una fecha como objeto Date", () => {
+    expect(formatBoliviaDate(new Date("2026-12-31T22:00:00.000Z"))).toBe(
+      "31/12/2026",
+    );
+  });
+
+  it("rechaza una fecha inválida", () => {
+    expect(() => formatBoliviaDate("sin fecha")).toThrow(RangeError);
+  });
 });

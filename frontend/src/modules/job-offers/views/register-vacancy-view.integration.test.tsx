@@ -1,5 +1,8 @@
+import "@/shared/testing/indexed-db.mock";
+import "@/modules/job-offers/testing/current-company.mock";
 import { AxiosError, type AxiosResponse } from "axios";
 import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
+import { toast } from "sonner";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { apiClient } from "@/shared/services/api-client";
 import { clearAccessToken, saveAccessToken } from "@/shared/services/storage/access-token-storage";
@@ -9,16 +12,51 @@ import { RegisterVacancyView } from "./register-vacancy-view";
 
 const push = vi.fn();
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
+vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 vi.mock("@/shared/services/api-client", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/shared/services/api-client")>()), apiClient: { get: vi.fn(), post: vi.fn(), put: vi.fn() } }));
+vi.mock("../hooks/use-requirements-skills-preview", () => {
+  const none: never[] = [];
+  return {
+    useRequirementsSkillsPreview: () => ({
+      detectedSkills: none,
+      processingTimeMs: undefined,
+      isAnalyzing: false,
+      isError: false,
+    }),
+  };
+});
 vi.mock("@/components/ui/select", () => ({
-  Select: ({ children, onValueChange }: { children: React.ReactNode; onValueChange?: (value: string) => void }) => (
-    <div data-testid="select" onClick={() => onValueChange?.("Tiempo completo")}>{children}</div>
+  Select: ({
+    children,
+    onValueChange,
+  }: {
+    children: React.ReactNode;
+    onValueChange?: (value: string) => void;
+  }) => (
+    <div
+      data-testid="select"
+      onClick={() => onValueChange?.("Tiempo completo")}
+    >
+      {children}
+    </div>
   ),
-  SelectTrigger: ({ children, id }: { children: React.ReactNode; id?: string }) => <div id={id}>{children}</div>,
-  SelectValue: ({ placeholder }: { placeholder?: string }) => <span>{placeholder}</span>,
-  SelectContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  SelectItem: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  SelectTrigger: ({
+    children,
+    id,
+  }: {
+    children: React.ReactNode;
+    id?: string;
+  }) => <div id={id}>{children}</div>,
+  SelectValue: ({ placeholder }: { placeholder?: string }) => (
+    <span>{placeholder}</span>
+  ),
+  SelectContent: ({ children }: { children: React.ReactNode }) => (
+    <div>{children}</div>
+  ),
+  SelectItem: ({ children }: { children: React.ReactNode }) => (
+    <div>{children}</div>
+  ),
 }));
 
 const EXPECTED_PAYLOAD = {
@@ -57,15 +95,18 @@ function fillInformation() {
   click("Continuar");
 }
 
-async function fillRequirements() {
-  await screen.findByRole("button", { name: "Docker" });
-  type("description", "Buscamos un DevOps con Docker y Kubernetes.");
-  click("Docker");
+function addSkillFromDialog(search: string, name: string) {
   click("+ Añadir habilidad");
-  fireEvent.change(screen.getByLabelText(/Buscar tecnología/), { target: { value: "kuber" } });
-  click("Kubernetes");
+  fireEvent.change(screen.getByLabelText(/Buscar tecnología/), { target: { value: search } });
+  click(name);
   click("Añadir habilidad");
-  await waitFor(() => expect(screen.queryByText("Buscar habilidad")).not.toBeInTheDocument());
+}
+
+async function fillRequirements() {
+  await screen.findByRole("button", { name: "+ Añadir habilidad" });
+  type("description", "Buscamos un DevOps con Docker y Kubernetes.");
+  addSkillFromDialog("docker", "Docker");
+  addSkillFromDialog("kuber", "Kubernetes");
   click("Continuar");
 }
 
@@ -76,11 +117,11 @@ async function goToPreview() {
 }
 
 describe("Registrar vacante: wizard completo conectado al backend", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     Element.prototype.scrollIntoView = vi.fn();
     window.history.pushState({}, "", "/vacancies/register");
     vi.stubEnv("NEXT_PUBLIC_DEMO_COMPANY_ID", COMPANY_ID);
-    saveAccessToken(buildSessionToken("empresa"));
+    await saveAccessToken(buildSessionToken("empresa"));
     vi.mocked(apiClient.get).mockResolvedValue({
       data: { statusCode: 200, ok: true, detail: "", data: [PYTHON, DOCKER, KUBERNETES] },
     });
@@ -106,7 +147,10 @@ describe("Registrar vacante: wizard completo conectado al backend", () => {
     expect(await screen.findByText("Vacante publicada")).toBeInTheDocument();
     expect(apiClient.get).toHaveBeenCalledWith("/job-offers/skills");
     expect(apiClient.post).toHaveBeenCalledTimes(1);
-    expect(apiClient.post).toHaveBeenCalledWith(`/companies/${COMPANY_ID}/job-offers`, EXPECTED_PAYLOAD);
+    expect(apiClient.post).toHaveBeenCalledWith(
+      `/companies/${COMPANY_ID}/job-offers`,
+      EXPECTED_PAYLOAD,
+    );
 
     click("Publicar otra vacante");
     await waitFor(() => expect(byId("title")).toBeInTheDocument());
@@ -118,11 +162,11 @@ describe("Registrar vacante: wizard completo conectado al backend", () => {
     await goToPreview();
 
     click("Anterior");
-    await screen.findByRole("button", { name: "Docker" });
+    await screen.findByRole("button", { name: "Quitar Docker" });
 
-    expect(screen.getByRole("button", { name: "Docker" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByRole("button", { name: "Kubernetes" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByRole("button", { name: "Python" })).toHaveAttribute("aria-pressed", "false");
+    expect(screen.getByRole("button", { name: "Quitar Docker" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Quitar Kubernetes" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Quitar Python" })).not.toBeInTheDocument();
     expect(byId("description").value).toBe("Buscamos un DevOps con Docker y Kubernetes.");
   });
 
@@ -171,7 +215,7 @@ describe("Registrar vacante: wizard completo conectado al backend", () => {
   });
 
   it("no llama al backend si la sesión no es de empresa", async () => {
-    saveAccessToken(buildSessionToken("titulado"));
+    await saveAccessToken(buildSessionToken("titulado"));
     renderWithQuery(<RegisterVacancyView />);
     await goToPreview();
 
@@ -193,7 +237,7 @@ describe("Registrar vacante: wizard completo conectado al backend", () => {
   it("paso 2: exige descripción y al menos una tecnología", async () => {
     renderWithQuery(<RegisterVacancyView />);
     fillInformation();
-    await screen.findByRole("button", { name: "Docker" });
+    await screen.findByRole("button", { name: "+ Añadir habilidad" });
 
     click("Continuar");
 
@@ -227,13 +271,14 @@ describe("Registrar vacante: wizard completo conectado al backend", () => {
     expect(push).toHaveBeenCalledWith("/profile");
   });
 
-  it("edita una vacante existente: carga sus datos, guarda con PUT y confirma la actualización", async () => {
+  it("edita una vacante existente: carga sus datos, guarda con PUT, avisa y vuelve al listado", async () => {
     const OFFER = {
       ...EXPECTED_PAYLOAD,
       id: "offer-1",
       salaryRange: "Bs 6.500 - 8.000",
       status: "Publicada",
       expiresAt: null,
+      publishedAt: "2026-10-12T00:00:00.000Z",
       createdAt: "2026-10-12T00:00:00.000Z",
       company: { id: COMPANY_ID, name: "TechBolivia" },
       skills: [DOCKER, KUBERNETES],
@@ -250,16 +295,25 @@ describe("Registrar vacante: wizard completo conectado al backend", () => {
     renderWithQuery(<RegisterVacancyView jobOfferId="offer-1" />);
 
     await screen.findByText("Editar vacante");
-    expect(apiClient.get).toHaveBeenCalledWith(`/companies/${COMPANY_ID}/job-offers/offer-1`);
+    expect(apiClient.get).toHaveBeenCalledWith(
+      `/companies/${COMPANY_ID}/job-offers/offer-1`,
+    );
     expect(byId("title").value).toBe("DevOps Senior");
     click("Continuar");
-    await screen.findByRole("button", { name: "Docker" });
+    await screen.findByRole("button", { name: "Quitar Docker" });
     click("Continuar");
     await screen.findByText("Revisa tu publicación");
     click("Confirmar edición");
 
-    expect(await screen.findByText("Vacante actualizada")).toBeInTheDocument();
-    expect(apiClient.put).toHaveBeenCalledWith(`/companies/${COMPANY_ID}/job-offers/offer-1`, EXPECTED_PAYLOAD);
+    await waitFor(() => expect(push).toHaveBeenCalledWith("/recruiters"));
+    expect(toast.success).toHaveBeenCalledWith("Vacante actualizada correctamente", {
+      position: "top-center",
+      duration: 5000,
+    });
+    expect(apiClient.put).toHaveBeenCalledWith(
+      `/companies/${COMPANY_ID}/job-offers/offer-1`,
+      EXPECTED_PAYLOAD,
+    );
     expect(apiClient.post).not.toHaveBeenCalled();
   });
 

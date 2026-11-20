@@ -6,4 +6,6 @@ export const verifyPasswordResetSchema = z.object({
   code: z.string().regex(/^\d{6}$/, 'El código debe tener 6 dígitos numéricos'),
 });
 
-export class VerifyPasswordResetDto extends createZodDto(verifyPasswordResetSchema) {}
+export class VerifyPasswordResetDto extends createZodDto(
+  verifyPasswordResetSchema,
+) {}

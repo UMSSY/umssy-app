@@ -1,14 +1,6 @@
+import type { MentorDirectoryGridProps } from "../../types/mentor-directory-grid-props.types";
 
 import { MentorCard } from "./mentor-card";
-import type { MentorDirectoryItem } from "../../types/mentor-directory.types";
-
-type MentorDirectoryGridProps = {
-  mentors: MentorDirectoryItem[];
-  currentUserId?: string | null;
-  returnTo?: string;
-  showAffinityBadge?: boolean;
-  selectedArea?: string;
-};
 
 export function MentorDirectoryGrid({
   mentors,
@@ -16,6 +8,7 @@ export function MentorDirectoryGrid({
   returnTo = "/mentorship/mentors",
   showAffinityBadge = false,
   selectedArea,
+  highlightAvailability = false,
 }: MentorDirectoryGridProps) {
   return (
     <section
@@ -31,6 +24,7 @@ export function MentorDirectoryGrid({
             returnTo={returnTo}
             showAffinityBadge={showAffinityBadge}
             selectedArea={selectedArea}
+            highlightAvailability={highlightAvailability}
           />
         ))}
       </div>

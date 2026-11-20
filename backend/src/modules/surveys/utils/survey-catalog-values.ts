@@ -26,5 +26,8 @@ export function toSurveyQuestionTypeValue(
 export function toSurveyTargetAudienceValue(
   targetAudience: { title: string } | null,
 ): SurveyTargetAudienceValue | null {
-  return SURVEY_TARGET_AUDIENCES.find((value) => value === targetAudience?.title) ?? null;
+  return (
+    SURVEY_TARGET_AUDIENCES.find((value) => value === targetAudience?.title) ??
+    null
+  );
 }

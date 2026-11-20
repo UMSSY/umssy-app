@@ -19,6 +19,8 @@ function setQueryState(state: {
       title: string;
       companyName: string;
       modality: string;
+      publishedAt: string;
+      expiresAt: string | null;
       score: number;
       matchedSkills: string[];
       skills: string[];
@@ -78,6 +80,34 @@ describe("HU-02A T2.4 - RecommendedJobsView", () => {
     ).toBeInTheDocument();
   });
 
+  it("explains the affinity only with the skills of the profile", () => {
+    setQueryState({
+      data: {
+        isProfileComplete: true,
+        items: [
+          {
+            jobOfferId: "123",
+            title: "Vacante de prueba",
+            companyName: "Empresa de prueba",
+            modality: "Remoto",
+            publishedAt: "2026-11-10T15:00:00.000Z",
+            expiresAt: null,
+            score: 90,
+            matchedSkills: ["React"],
+            skills: ["React", "SQL"],
+          },
+        ],
+      },
+    });
+
+    const { container } = render(<RecommendedJobsView />);
+    const text = container.textContent ?? "";
+
+    expect(text).toContain("Encuentra ofertas según las habilidades de tu perfil.");
+    expect(text).toContain("Comparamos tus habilidades con las que pide cada vacante");
+    expect(text).not.toMatch(/carrera|experiencia/i);
+  });
+
   it("shows an empty state when there are no matching jobs", () => {
     setQueryState({
       data: {
@@ -103,6 +133,8 @@ describe("HU-02A T2.4 - RecommendedJobsView", () => {
             title: "Vacante de prueba",
             companyName: "Empresa de prueba",
             modality: "Remoto",
+            publishedAt: "2026-11-10T15:00:00.000Z",
+            expiresAt: null,
             score: 90,
             matchedSkills: ["React"],
             skills: ["React", "SQL"],

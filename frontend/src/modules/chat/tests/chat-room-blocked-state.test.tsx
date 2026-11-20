@@ -1,14 +1,32 @@
+
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { AxiosError, type AxiosResponse } from "axios";
+import { toast } from "sonner";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ChatRoom } from "../components/chat-room";
 import type { Conversation, Message } from "../types/conversation.types";
 
+vi.mock("sonner", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("sonner")>();
+  return {
+    ...actual,
+    toast: {
+      ...actual.toast,
+      error: vi.fn(),
+    },
+  };
+});
+
 const conversation: Conversation = {
   id: "conv-blocked-1",
-  contact: { id: "user-contact-1", fullName: "Maria Fernandez", avatarUrl: null, isOnline: true },
+  contact: {
+    id: "user-contact-1",
+    fullName: "Maria Fernandez",
+    avatarUrl: null,
+    isOnline: true,
+  },
   lastMessage: null,
   unreadCount: 0,
   updatedAt: new Date().toISOString(),
@@ -45,9 +63,12 @@ function renderRoom(
 ) {
   const props = {
     onBlockUser: vi.fn().mockResolvedValue(undefined),
-    onUnblockUser: overrides.onUnblockUser ?? vi.fn().mockResolvedValue(undefined),
-    onSendMessage: overrides.onSendMessage ?? vi.fn().mockResolvedValue(undefined),
+    onUnblockUser:
+      overrides.onUnblockUser ?? vi.fn().mockResolvedValue(undefined),
+    onSendMessage:
+      overrides.onSendMessage ?? vi.fn().mockResolvedValue(undefined),
   };
+
   const utils = render(
     <ChatRoom
       conversation={conv}
@@ -57,14 +78,23 @@ function renderRoom(
       {...props}
     />,
   );
+
   return { ...utils, ...props };
 }
 
 function forbiddenError(): AxiosError {
-  return new AxiosError("Request failed with status code 403", "ERR_BAD_REQUEST", undefined, undefined, {
-    status: 403,
-    data: { detail: "No es posible enviar mensajes en esta conversación" },
-  } as AxiosResponse);
+  return new AxiosError(
+    "Request failed with status code 403",
+    "ERR_BAD_REQUEST",
+    undefined,
+    undefined,
+    {
+      status: 403,
+      data: {
+        detail: "No es posible enviar mensajes en esta conversación",
+      },
+    } as AxiosResponse,
+  );
 }
 
 describe("ChatRoom · conversación bloqueada", () => {
@@ -76,7 +106,9 @@ describe("ChatRoom · conversación bloqueada", () => {
   it("la cabecera muestra 'Bloqueado' en lugar de 'En línea'", () => {
     renderRoom(conversation);
 
-    expect(screen.getByTestId("chat-blocked-status")).toHaveTextContent("Bloqueado");
+    expect(screen.getByTestId("chat-blocked-status")).toHaveTextContent(
+      "Bloqueado",
+    );
     expect(screen.queryByText("En línea")).not.toBeInTheDocument();
     expect(screen.queryByTestId("online-indicator")).not.toBeInTheDocument();
   });
@@ -85,19 +117,30 @@ describe("ChatRoom · conversación bloqueada", () => {
     renderRoom(conversation);
 
     const notice = screen.getByTestId("blocked-conversation-notice");
-    expect(notice).toHaveTextContent("Has bloqueado a Maria Fernandez.");
-    expect(notice).toHaveTextContent("No puedes enviar ni recibir mensajes de esta persona");
-    expect(screen.getByRole("button", { name: "Desbloquear" })).toBeInTheDocument();
+
+    expect(notice).toHaveTextContent(
+      "Has bloqueado a Maria Fernandez.",
+    );
+    expect(notice).toHaveTextContent(
+      "No puedes enviar ni recibir mensajes de esta persona",
+    );
+    expect(
+      screen.getByRole("button", { name: "Desbloquear" }),
+    ).toBeInTheDocument();
   });
 
   it("el campo de texto queda oculto mientras dure el bloqueo", () => {
     renderRoom(conversation);
+
     expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
   });
 
   it("el historial sigue visible", () => {
     renderRoom(conversation);
-    expect(screen.getByText("Hola, buenas tardes")).toBeInTheDocument();
+
+    expect(
+      screen.getByText("Hola, buenas tardes"),
+    ).toBeInTheDocument();
     expect(screen.getByText("Hola Maria")).toBeInTheDocument();
   });
 
@@ -105,7 +148,9 @@ describe("ChatRoom · conversación bloqueada", () => {
     const user = userEvent.setup();
     const { onUnblockUser } = renderRoom(conversation);
 
-    await user.click(screen.getByRole("button", { name: "Desbloquear" }));
+    await user.click(
+      screen.getByRole("button", { name: "Desbloquear" }),
+    );
 
     expect(onUnblockUser).toHaveBeenCalledTimes(1);
   });
@@ -115,9 +160,16 @@ describe("ChatRoom · conversación bloqueada", () => {
     const { onUnblockUser } = renderRoom(conversation);
 
     fireEvent.click(screen.getByRole("button", { name: "Más opciones" }));
-    await user.click(await screen.findByRole("menuitem", { name: "Desbloquear usuario" }));
 
-    await waitFor(() => expect(onUnblockUser).toHaveBeenCalledTimes(1));
+    await user.click(
+      await screen.findByRole("menuitem", {
+        name: "Desbloquear usuario",
+      }),
+    );
+
+    await waitFor(() => {
+      expect(onUnblockUser).toHaveBeenCalledTimes(1);
+    });
   });
 
   it("al desbloquear vuelve el campo de mensajes, sin duplicar el historial", () => {
@@ -125,7 +177,10 @@ describe("ChatRoom · conversación bloqueada", () => {
 
     rerender(
       <ChatRoom
-        conversation={{ ...conversation, isBlockedByMe: false }}
+        conversation={{
+          ...conversation,
+          isBlockedByMe: false,
+        }}
         messages={messages}
         currentUserId="current-user"
         onBack={vi.fn()}
@@ -135,7 +190,9 @@ describe("ChatRoom · conversación bloqueada", () => {
       />,
     );
 
-    expect(screen.queryByTestId("blocked-conversation-notice")).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("blocked-conversation-notice"),
+    ).not.toBeInTheDocument();
     expect(screen.getByRole("textbox")).toBeInTheDocument();
     expect(screen.getByText("En línea")).toBeInTheDocument();
     expect(screen.getAllByText("Hola, buenas tardes")).toHaveLength(1);
@@ -143,39 +200,72 @@ describe("ChatRoom · conversación bloqueada", () => {
 
   it("si falla el desbloqueo muestra el error y mantiene las restricciones", async () => {
     const user = userEvent.setup();
+
     renderRoom(conversation, {
-      onUnblockUser: vi.fn().mockRejectedValue(new Error("Network Error")),
+      onUnblockUser: vi
+        .fn()
+        .mockRejectedValue(new Error("Network Error")),
     });
 
-    await user.click(screen.getByRole("button", { name: "Desbloquear" }));
+    await user.click(
+      screen.getByRole("button", { name: "Desbloquear" }),
+    );
 
-    expect(await screen.findByRole("alert")).toHaveTextContent("No se pudo desbloquear. Intenta de nuevo.");
-    expect(screen.getByTestId("blocked-conversation-notice")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith(
+        "No se pudo desbloquear. Intenta de nuevo.",
+      );
+    });
+
+    expect(
+      screen.getByTestId("blocked-conversation-notice"),
+    ).toBeInTheDocument();
     expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
   });
 
   it("si el envío responde 403 muestra 'No es posible enviar mensajes en esta conversación'", async () => {
     const user = userEvent.setup();
-    const onSendMessage = vi.fn().mockRejectedValue(forbiddenError());
-    // Lado del usuario bloqueado: para él isBlockedByMe es false y ve el campo.
-    renderRoom({ ...conversation, isBlockedByMe: false }, { onSendMessage });
+    const onSendMessage = vi
+      .fn()
+      .mockRejectedValue(forbiddenError());
+
+    renderRoom(
+      { ...conversation, isBlockedByMe: false },
+      { onSendMessage },
+    );
 
     await user.type(screen.getByRole("textbox"), "Hola{Enter}");
 
-    expect(await screen.findByTestId("blocked-send-error")).toHaveTextContent(
+    expect(
+      await screen.findByTestId("blocked-send-error"),
+    ).toHaveTextContent(
       "No es posible enviar mensajes en esta conversación",
     );
+
     expect(onSendMessage).toHaveBeenCalledTimes(1);
   });
 
-  it("otros errores de envío siguen mostrando el mensaje genérico", async () => {
+  it("muestra el mensaje de restricción cuando falla el envío", async () => {
     const user = userEvent.setup();
-    const onSendMessage = vi.fn().mockRejectedValue(new Error("Network Error"));
-    renderRoom({ ...conversation, isBlockedByMe: false }, { onSendMessage });
+
+    const onSendMessage = vi
+      .fn()
+      .mockRejectedValue(new Error("Network Error"));
+
+    renderRoom(
+      { ...conversation, isBlockedByMe: false },
+      { onSendMessage },
+    );
 
     await user.type(screen.getByRole("textbox"), "Hola{Enter}");
 
-    expect(await screen.findByRole("alert")).toHaveTextContent("No se pudo enviar el mensaje");
-    expect(screen.queryByTestId("blocked-send-error")).not.toBeInTheDocument();
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "No es posible enviar mensajes en esta conversación. La comunicación con esta persona está restringida",
+    );
+
+    expect(onSendMessage).toHaveBeenCalledTimes(1);
+    expect(
+      screen.queryByTestId("blocked-send-error"),
+    ).not.toBeInTheDocument();
   });
 });

@@ -1,7 +1,7 @@
 import { CircleAlert } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { SURVEY_MESSAGES } from "../constants/survey-messages.constants";
-import type { SurveyValidationAlertProps } from "../types/survey-component-props.types";
+import type { SurveyValidationAlertProps } from "../types/survey-validation-alert-props.types";
 
 export function SurveyValidationAlert({ errors }: SurveyValidationAlertProps) {
   if ((errors ?? []).length === 0) return null;

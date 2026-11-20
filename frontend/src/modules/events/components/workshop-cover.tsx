@@ -6,5 +6,5 @@ import type { WorkshopCoverProps } from "../types/workshop-cover-props.types";
 
 export function WorkshopCover({ eventId, coverUrl, className }: WorkshopCoverProps) {
   const source = coverUrl?.startsWith('/events/') ? `${ENV_CONFIG.apiUrl?.replace(/\/$/, '')}${coverUrl}` : getWorkshopCover(eventId);
-  return <div className={cn("relative aspect-workshop-cover overflow-hidden bg-interaction", className)}><Image src={source} unoptimized={Boolean(coverUrl)} alt="" fill sizes="(min-width: 1280px) 360px, 480px" className="object-cover" /></div>;
+  return <div className={cn("relative aspect-workshop-cover overflow-hidden bg-interaction", className)}><Image src={source} unoptimized={Boolean(coverUrl)} alt="" fill sizes="(min-width: 1280px) 24rem, (min-width: 640px) 50vw, 100vw" className="object-cover" /></div>;
 }

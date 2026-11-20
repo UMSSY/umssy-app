@@ -49,4 +49,13 @@ describe("toPublishError", () => {
     });
     expect(toPublishError(new Error("boom")).kind).toBe("server");
   });
+  it("en la edición usa el mensaje acordado ante un corte de red o un error del servidor", () => {
+    const message = "No se pudo guardar la edición. Inténtelo más tarde";
+
+    expect(toPublishError(new AxiosError("Network Error", "ERR_NETWORK"), "edit")).toMatchObject({
+      kind: "network",
+      message,
+    });
+    expect(toPublishError(responseError(500, {}), "edit")).toMatchObject({ kind: "server", message });
+  });
 });

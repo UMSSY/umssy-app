@@ -12,14 +12,17 @@ function getFactory(): ParamFactory {
     handler(): void {}
   }
   CurrentUserId()(TestController.prototype, 'handler', 0);
-  const metadata = Reflect.getMetadata(ROUTE_ARGS_METADATA, TestController, 'handler') as Record<
-    string,
-    { factory: ParamFactory }
-  >;
+  const metadata = Reflect.getMetadata(
+    ROUTE_ARGS_METADATA,
+    TestController,
+    'handler',
+  ) as Record<string, { factory: ParamFactory }>;
   return Object.values(metadata)[0].factory;
 }
 
-const buildContext = (request: Partial<AuthenticatedRequest>): ExecutionContext =>
+const buildContext = (
+  request: Partial<AuthenticatedRequest>,
+): ExecutionContext =>
   ({
     switchToHttp: () => ({ getRequest: () => request }),
   }) as unknown as ExecutionContext;
@@ -28,7 +31,9 @@ describe('CurrentUserId', () => {
   const factory = getFactory();
 
   it('returns the id of the user authenticated by the guard', () => {
-    const request = { user: { id: 'user-1', email: 'user@umss.edu', roles: ['titulado'] } };
+    const request = {
+      user: { id: 'user-1', email: 'user@umss.edu', roles: ['titulado'] },
+    };
 
     expect(factory(undefined, buildContext(request))).toBe('user-1');
   });
@@ -36,6 +41,8 @@ describe('CurrentUserId', () => {
   it('ignores the x-user-id header', () => {
     const request = { headers: { 'x-user-id': 'user-1' } };
 
-    expect(() => factory(undefined, buildContext(request))).toThrow(MissingUserException);
+    expect(() => factory(undefined, buildContext(request))).toThrow(
+      MissingUserException,
+    );
   });
 });

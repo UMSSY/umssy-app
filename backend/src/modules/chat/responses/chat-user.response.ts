@@ -5,4 +5,5 @@ export interface ChatUserResponse {
   headline: string | null;
   role: string;
   isOnline: boolean;
+  canChatByApplication?: boolean;
 }

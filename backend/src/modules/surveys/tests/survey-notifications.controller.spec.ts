@@ -11,11 +11,17 @@ import { SurveyNotificationsController } from '../controllers/survey-notificatio
 import type { SurveyNotificationResponse } from '../responses/survey-notification.response.js';
 import { SurveysService } from '../services/surveys.service.js';
 
-function contextFor(roles: string[], handler: () => unknown, controller: object): ExecutionContext {
+function contextFor(
+  roles: string[],
+  handler: () => unknown,
+  controller: object,
+): ExecutionContext {
   return {
     getHandler: () => handler,
     getClass: () => controller,
-    switchToHttp: () => ({ getRequest: () => ({ user: { id: 'user-1', roles } }) }),
+    switchToHttp: () => ({
+      getRequest: () => ({ user: { id: 'user-1', roles } }),
+    }),
   } as unknown as ExecutionContext;
 }
 
@@ -46,42 +52,54 @@ describe('SurveyNotificationsController', () => {
   });
 
   it('exige sesión con rol destinatario de encuestas o administrativo', () => {
-    expect(Reflect.getMetadata(GUARDS_METADATA, SurveyNotificationsController)).toEqual([
-      JwtAuthGuard,
-      RolesGuard,
-    ]);
-    expect(Reflect.getMetadata(ROLES_KEY, SurveyNotificationsController)).toEqual([
-      'titulado',
-      'estudiante',
-      'mentor',
-      'administrativo',
-    ]);
+    expect(
+      Reflect.getMetadata(GUARDS_METADATA, SurveyNotificationsController),
+    ).toEqual([JwtAuthGuard, RolesGuard]);
+    expect(
+      Reflect.getMetadata(ROLES_KEY, SurveyNotificationsController),
+    ).toEqual(['titulado', 'estudiante', 'mentor', 'administrativo']);
   });
 
   it('permite el acceso a un titulado', () => {
     const guard = new RolesGuard(new Reflector());
-    const context = contextFor(['titulado'], () => undefined, SurveyNotificationsController);
+    const context = contextFor(
+      ['titulado'],
+      () => undefined,
+      SurveyNotificationsController,
+    );
 
     expect(guard.canActivate(context)).toBe(true);
   });
 
   it('permite el acceso a un administrativo', () => {
     const guard = new RolesGuard(new Reflector());
-    const context = contextFor(['administrativo'], () => undefined, SurveyNotificationsController);
+    const context = contextFor(
+      ['administrativo'],
+      () => undefined,
+      SurveyNotificationsController,
+    );
 
     expect(guard.canActivate(context)).toBe(true);
   });
 
   it.each(['estudiante', 'mentor'])('permite el acceso a un %s', (role) => {
     const guard = new RolesGuard(new Reflector());
-    const context = contextFor([role], () => undefined, SurveyNotificationsController);
+    const context = contextFor(
+      [role],
+      () => undefined,
+      SurveyNotificationsController,
+    );
 
     expect(guard.canActivate(context)).toBe(true);
   });
 
   it('rechaza el acceso a una empresa', () => {
     const guard = new RolesGuard(new Reflector());
-    const context = contextFor(['empresa'], () => undefined, SurveyNotificationsController);
+    const context = contextFor(
+      ['empresa'],
+      () => undefined,
+      SurveyNotificationsController,
+    );
 
     expect(() => guard.canActivate(context)).toThrow(ForbiddenRoleException);
   });
@@ -108,7 +126,9 @@ describe('SurveyNotificationsController', () => {
       },
     ];
 
-    const spy = vi.spyOn(surveysService, 'getNotificationsForUser').mockResolvedValue(mockNotifications);
+    const spy = vi
+      .spyOn(surveysService, 'getNotificationsForUser')
+      .mockResolvedValue(mockNotifications);
 
     const result = await controller.getNotifications('user-1', {
       id: 'user-1',

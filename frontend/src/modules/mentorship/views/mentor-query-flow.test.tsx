@@ -62,7 +62,7 @@ const directoryPage: DirectoryPage = {
   pageSize: 6,
   totalItems: mentors.length,
   totalPages: 1,
-  effectiveSort: "name_asc",
+  effectiveSort: "default",
 };
 
 const emptyDirectoryPage: DirectoryPage = {
@@ -71,7 +71,7 @@ const emptyDirectoryPage: DirectoryPage = {
   pageSize: 6,
   totalItems: 0,
   totalPages: 0,
-  effectiveSort: "name_asc",
+  effectiveSort: "default",
 };
 
 afterEach(() => {

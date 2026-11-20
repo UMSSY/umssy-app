@@ -2,6 +2,11 @@ import { describe, expect, it } from 'vitest';
 import { SurveyPdfService } from '../services/survey-pdf.service.js';
 import type { SurveyStatisticsResponse } from '../responses/survey-statistics.response.js';
 
+const NEUTRAL_TREND = {
+  text: 'Sin cambios frente al semestre anterior.',
+  direction: 'neutral',
+} as const;
+
 describe('SurveyPdfService', () => {
   const service = new SurveyPdfService();
 
@@ -15,6 +20,9 @@ describe('SurveyPdfService', () => {
     opensAt: '2026-08-19T00:00:00.000Z',
     closesAt: '2027-01-31T00:00:00.000Z',
     totalResponses: 99,
+    hasData: true,
+    period: null,
+    availablePeriods: ['II-2025'],
     questions: [
       {
         id: 'q1',
@@ -24,9 +32,20 @@ describe('SurveyPdfService', () => {
         isRequired: true,
         answeredCount: 99,
         totalSelections: 99,
+        trend: NEUTRAL_TREND,
         options: [
-          { id: 'o1', label: 'Desarrollo de Software', count: 19, percentage: 19.2 },
-          { id: 'o2', label: 'Administración de Redes', count: 28, percentage: 28.3 },
+          {
+            id: 'o1',
+            label: 'Desarrollo de Software',
+            count: 19,
+            percentage: 19.2,
+          },
+          {
+            id: 'o2',
+            label: 'Administración de Redes',
+            count: 28,
+            percentage: 28.3,
+          },
           { id: 'o3', label: 'Ciencia de Datos', count: 13, percentage: 13.1 },
         ],
       },
@@ -38,6 +57,7 @@ describe('SurveyPdfService', () => {
         isRequired: true,
         answeredCount: 99,
         totalSelections: 99,
+        trend: NEUTRAL_TREND,
         options: [
           { id: 'o4', label: 'Menos de 3 meses', count: 19, percentage: 19.2 },
           { id: 'o5', label: 'De 3 a 6 meses', count: 20, percentage: 20.2 },
@@ -79,10 +99,26 @@ describe('SurveyPdfService', () => {
       isRequired: true,
       answeredCount: 99,
       totalSelections: 99,
+      trend: NEUTRAL_TREND,
       options: [
-        { id: `o${i}_1`, label: 'Opción 1 - Desarrollo de Software y Aplicaciones', count: 40, percentage: 40.4 },
-        { id: `o${i}_2`, label: 'Opción 2 - Redes y Administración de Sistemas', count: 35, percentage: 35.4 },
-        { id: `o${i}_3`, label: 'Opción 3 - Soporte Técnico y Mantenimiento', count: 24, percentage: 24.2 },
+        {
+          id: `o${i}_1`,
+          label: 'Opción 1 - Desarrollo de Software y Aplicaciones',
+          count: 40,
+          percentage: 40.4,
+        },
+        {
+          id: `o${i}_2`,
+          label: 'Opción 2 - Redes y Administración de Sistemas',
+          count: 35,
+          percentage: 35.4,
+        },
+        {
+          id: `o${i}_3`,
+          label: 'Opción 3 - Soporte Técnico y Mantenimiento',
+          count: 24,
+          percentage: 24.2,
+        },
       ],
     }));
 
@@ -107,7 +143,10 @@ describe('SurveyPdfService', () => {
           isRequired: true,
           answeredCount: 50,
           totalSelections: 50,
-          options: [{ id: 'o1', label: 'Opción 1', count: 50, percentage: 100 }],
+          trend: NEUTRAL_TREND,
+          options: [
+            { id: 'o1', label: 'Opción 1', count: 50, percentage: 100 },
+          ],
         },
         {
           id: 'q2',
@@ -117,7 +156,10 @@ describe('SurveyPdfService', () => {
           isRequired: true,
           answeredCount: 80,
           totalSelections: 120,
-          options: [{ id: 'o2', label: 'Opción A', count: 80, percentage: 66.7 }],
+          trend: NEUTRAL_TREND,
+          options: [
+            { id: 'o2', label: 'Opción A', count: 80, percentage: 66.7 },
+          ],
         },
       ],
     };

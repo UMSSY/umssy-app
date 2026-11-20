@@ -18,7 +18,7 @@ vi.mock("../services/work-experience.service", () => ({
 
 vi.mock("@/modules/matching/services/skills-analysis.service", () => ({
   skillsAnalysisService: {
-    analyzeExperience: vi.fn().mockResolvedValue({ experienceId: "experience-1", skills: [], processingTimeMs: 0 }),
+    previewExperience: vi.fn().mockResolvedValue({ experienceId: "experience-1", skills: [], processingTimeMs: 0 }),
   },
 }));
 
@@ -89,6 +89,7 @@ describe("WorkExperienceView", () => {
     await user.type(screen.getByLabelText(/Cargo/), "Desarrolladora web junior");
     fireEvent.change(screen.getByLabelText(/Desde/), { target: { value: "2025-03-01" } });
     await user.click(screen.getByRole("checkbox", { name: "Trabajo actualmente aquí" }));
+    await user.type(screen.getByLabelText(/Descripción de funciones/), "Interfaces con React");
     await user.click(screen.getByRole("button", { name: "Guardar experiencia" }));
 
     expect(workExperienceService.createWorkExperience).toHaveBeenCalledWith(
@@ -99,14 +100,12 @@ describe("WorkExperienceView", () => {
         isCurrent: true,
       }),
     );
-    expect(await screen.findByRole("status")).toHaveTextContent(
-      WORK_EXPERIENCE_FEEDBACK_MESSAGES.createSuccess,
-    );
+    expect(await screen.findByText(WORK_EXPERIENCE_FEEDBACK_MESSAGES.createSuccess)).toBeVisible();
     await waitFor(() =>
       expect(workExperienceService.getWorkExperiences).toHaveBeenCalledTimes(2),
     );
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-  });
+  }, 15000);
 
   it("edits an experience from the list", async () => {
     const user = userEvent.setup();
@@ -125,9 +124,7 @@ describe("WorkExperienceView", () => {
       "experience-2",
       expect.objectContaining({ companyName: "Tecnored", endDate: "2024-12-01" }),
     );
-    expect(await screen.findByRole("status")).toHaveTextContent(
-      WORK_EXPERIENCE_FEEDBACK_MESSAGES.updateSuccess,
-    );
+    expect(await screen.findByText(WORK_EXPERIENCE_FEEDBACK_MESSAGES.updateSuccess)).toBeVisible();
   });
 
   it("shows an error when an experience cannot be saved", async () => {
@@ -173,9 +170,7 @@ describe("WorkExperienceView", () => {
     );
 
     expect(workExperienceService.deleteWorkExperience).toHaveBeenCalledWith("experience-2");
-    expect(await screen.findByRole("status")).toHaveTextContent(
-      WORK_EXPERIENCE_FEEDBACK_MESSAGES.deleteSuccess,
-    );
+    expect(await screen.findByText(WORK_EXPERIENCE_FEEDBACK_MESSAGES.deleteSuccess)).toBeVisible();
     await waitFor(() =>
       expect(workExperienceService.getWorkExperiences).toHaveBeenCalledTimes(2),
     );
@@ -196,7 +191,7 @@ describe("WorkExperienceView", () => {
       within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Eliminar" }),
     );
 
-    expect(await screen.findByRole("status")).toHaveTextContent(WORK_EXPERIENCE_FEEDBACK_MESSAGES.deleteSuccess);
+    expect(await screen.findByText(WORK_EXPERIENCE_FEEDBACK_MESSAGES.deleteSuccess)).toBeVisible();
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 

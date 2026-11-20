@@ -4,4 +4,5 @@ export const AUDIT_ACTOR_ROLE = {
   SYSTEM: 'sistema',
 } as const;
 
-export type AuditActorRole = (typeof AUDIT_ACTOR_ROLE)[keyof typeof AUDIT_ACTOR_ROLE];
+export type AuditActorRole =
+  (typeof AUDIT_ACTOR_ROLE)[keyof typeof AUDIT_ACTOR_ROLE];

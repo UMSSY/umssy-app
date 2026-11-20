@@ -1,6 +1,9 @@
 "use client";
 
-import { format, parseISO } from "date-fns";
+import { JOB_MODALITIES } from "@/shared/constants/job-offer.constants";
+
+import { format } from "date-fns/format";
+import { parseISO } from "date-fns/parseISO";
 import { ListFilter } from "lucide-react";
 import type { DateRange } from "react-day-picker";
 import { es } from "react-day-picker/locale";
@@ -13,30 +16,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  CONTRACT_TYPES,
-  MODALITIES,
-  STATUS_FILTER_OPTIONS,
-} from "../constants/vacancies.constants";
-import {
-  DEFAULT_JOB_OFFER_FILTERS,
-  type ApplicantsOrder,
-  type JobOfferFilters,
-} from "../utils/filter-job-offers";
+import { CONTRACT_TYPES, STATUS_FILTER_OPTIONS } from "../constants/job-offers.constants";
+import { DEFAULT_JOB_OFFER_FILTERS } from "../utils/filter-job-offers";
+import type { ApplicantsOrder } from "../types/applicants-order.types";
+import type { FilterOption } from "../types/filter-option.types";
+import type { FilterColumnProps } from "../types/filter-column-props.types";
+import type { VacancyFiltersDialogProps } from "../types/vacancy-filters-dialog-props.types";
 
 const DATE_FORMAT = "yyyy-MM-dd";
-
-interface FilterOption<T extends string> {
-  value: T;
-  label: string;
-}
-
-interface FilterColumnProps<T extends string> {
-  title: string;
-  options: Array<FilterOption<T>>;
-  selected: T;
-  onSelect: (value: T) => void;
-}
 
 function FilterColumn<T extends string>({
   title,
@@ -73,13 +60,6 @@ const APPLICANTS_OPTIONS: Array<FilterOption<ApplicantsOrder>> = [
   { value: "most", label: "Más postulantes" },
   { value: "least", label: "Menos postulantes" },
 ];
-
-interface VacancyFiltersDialogProps {
-  filters: JobOfferFilters;
-  onChange: <K extends keyof JobOfferFilters>(key: K, value: JobOfferFilters[K]) => void;
-  onReset: () => void;
-  showStatusFilter?: boolean;
-}
 
 export function VacancyFiltersDialog({
   filters,
@@ -140,7 +120,7 @@ export function VacancyFiltersDialog({
           </div>
           <FilterColumn
             title="Modalidad"
-            options={MODALITIES.map((item) => ({ value: item as string, label: item }))}
+            options={JOB_MODALITIES.map((item) => ({ value: item as string, label: item }))}
             selected={filters.modality}
             onSelect={(value) => onChange("modality", value === filters.modality ? "" : value)}
           />

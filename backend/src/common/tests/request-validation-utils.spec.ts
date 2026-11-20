@@ -14,7 +14,9 @@ describe('buildRequestValidationException', () => {
 
     expect(exception).toBeInstanceOf(RequestValidationException);
     expect(exception.statusCode).toBe(400);
-    expect(exception.message).toBe('firstName: Required; contact.email: Invalid email');
+    expect(exception.message).toBe(
+      'firstName: Required; contact.email: Invalid email',
+    );
     expect(exception.errors).toEqual([
       { field: 'firstName', message: 'Required' },
       { field: 'contact.email', message: 'Invalid email' },
@@ -23,9 +25,9 @@ describe('buildRequestValidationException', () => {
   });
 
   it('keeps the message alone when the issue has no path', () => {
-    expect(buildRequestValidationException([{ message: 'Invalid body' }]).message).toBe(
-      'Invalid body',
-    );
+    expect(
+      buildRequestValidationException([{ message: 'Invalid body' }]).message,
+    ).toBe('Invalid body');
   });
 });
 
@@ -46,7 +48,9 @@ describe('RequestValidationPipe', () => {
   });
 
   it('throws the structured validation errors', () => {
-    expect(() => pipe.transform({ name: '' })).toThrow(RequestValidationException);
+    expect(() => pipe.transform({ name: '' })).toThrow(
+      RequestValidationException,
+    );
 
     try {
       pipe.transform({ name: '' });

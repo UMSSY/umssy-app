@@ -13,6 +13,8 @@ describe('ZodValidationPipe', () => {
 
   it('lanza RequestValidationException cuando el valor no es valido', () => {
     const pipe = new ZodValidationPipe(schema);
-    expect(() => pipe.transform({ name: '' })).toThrow(RequestValidationException);
+    expect(() => pipe.transform({ name: '' })).toThrow(
+      RequestValidationException,
+    );
   });
 });

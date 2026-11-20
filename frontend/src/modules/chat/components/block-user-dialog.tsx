@@ -15,13 +15,12 @@ interface BlockUserDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   contactName: string;
-  /** Llama a la API; si falla, debe lanzar el error. */
+
   onConfirm: () => Promise<void>;
 }
 
 const BLOCK_ERROR_MESSAGE = "No se pudo bloquear. Intenta de nuevo.";
 
-/** Confirmación antes de bloquear a un contacto. */
 export function BlockUserDialog({
   open,
   onOpenChange,
@@ -32,7 +31,7 @@ export function BlockUserDialog({
   const [hasError, setHasError] = useState(false);
 
   const handleOpenChange = (nextOpen: boolean) => {
-    if (isPending) return; // no se cierra mientras se procesa
+    if (isPending) return; 
     setHasError(false);
     onOpenChange(nextOpen);
   };
@@ -43,10 +42,10 @@ export function BlockUserDialog({
     setHasError(false);
     try {
       await onConfirm();
-      // Éxito: se cierra sin toast ni mensaje adicional.
+      
       onOpenChange(false);
     } catch {
-      // Error: no se presenta el bloqueo como exitoso; la ventana sigue abierta.
+      
       setHasError(true);
     } finally {
       setIsPending(false);

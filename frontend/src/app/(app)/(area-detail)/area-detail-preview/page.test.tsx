@@ -1,11 +1,16 @@
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
+import "@/shared/testing/indexed-db.mock";
+import { saveAccessToken } from "@/shared/services/storage/access-token-storage";
 import type { ReactNode } from "react";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import AreaDetailPreviewPage from "./page";
 import AppLayout from "../../layout";
 
 vi.mock("@/shared/components/layout/app-shell", () => ({
-  AppShell: ({ children }: { children: ReactNode }) => <div data-testid="app-shell">{children}</div>,
+  AppShell: ({ children }: { children: ReactNode }) => (
+    <div data-testid="app-shell">{children}</div>
+  ),
 }));
 
 function getTab(name: RegExp) {
@@ -18,7 +23,12 @@ vi.mock("next/navigation", () => ({
 }));
 
 describe("AreaDetailPreviewPage", () => {
-  beforeEach(() => sessionStorage.setItem("accessToken", `h.${btoa(JSON.stringify({ roleTag: "empresa" }))}.s`));
+  beforeEach(
+    async () =>
+      await saveAccessToken(
+        `h.${btoa(JSON.stringify({ roleTag: "empresa" }))}.s`,
+      ),
+  );
   afterEach(() => {
     cleanup();
     sessionStorage.clear();

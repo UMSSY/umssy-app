@@ -31,14 +31,24 @@ function row(overrides: Record<string, unknown> = {}) {
 }
 
 describe('AccessRequestsService', () => {
-  const repository = { createDraft: vi.fn(), findById: vi.fn(), findActiveDuplicates: vi.fn(), updateDraft: vi.fn(), deleteDraft: vi.fn() };
+  const repository = {
+    createDraft: vi.fn(),
+    findById: vi.fn(),
+    findActiveDuplicates: vi.fn(),
+    updateDraft: vi.fn(),
+    deleteDraft: vi.fn(),
+  };
   const filesService = { delete: vi.fn() };
   const authService = { existsByEmail: vi.fn() };
   let service: AccessRequestsService;
 
   beforeEach(() => {
     vi.resetAllMocks();
-    service = new AccessRequestsService(repository as any, authService as any, filesService as any);
+    service = new AccessRequestsService(
+      repository as any,
+      authService as any,
+      filesService as any,
+    );
     authService.existsByEmail.mockResolvedValue(false);
     repository.findActiveDuplicates.mockResolvedValue([]);
   });
@@ -55,14 +65,20 @@ describe('AccessRequestsService', () => {
   it('update lanza 404 si la solicitud no existe', async () => {
     repository.findById.mockResolvedValue(null);
 
-    await expect(service.update('id-1', { phone: '71234567' })).rejects.toBeInstanceOf(AccessRequestNotFoundException);
+    await expect(
+      service.update('id-1', { phone: '71234567' }),
+    ).rejects.toBeInstanceOf(AccessRequestNotFoundException);
     expect(repository.updateDraft).not.toHaveBeenCalled();
   });
 
   it('update lanza 409 si la solicitud ya fue enviada', async () => {
-    repository.findById.mockResolvedValue(row({ status: { title: 'pending' } }));
+    repository.findById.mockResolvedValue(
+      row({ status: { title: 'pending' } }),
+    );
 
-    await expect(service.update('id-1', { phone: '71234567' })).rejects.toBeInstanceOf(AccessRequestNotEditableException);
+    await expect(
+      service.update('id-1', { phone: '71234567' }),
+    ).rejects.toBeInstanceOf(AccessRequestNotEditableException);
     expect(repository.updateDraft).not.toHaveBeenCalled();
   });
 
@@ -72,21 +88,32 @@ describe('AccessRequestsService', () => {
 
     const result = await service.update('id-1', { phone: '71234567' });
 
-    expect(repository.updateDraft).toHaveBeenCalledWith('id-1', { phone: '71234567' });
-    expect(result).toMatchObject({ id: 'id-1', phone: '71234567', status: 'draft', birthDate: '2000-05-10' });
+    expect(repository.updateDraft).toHaveBeenCalledWith('id-1', {
+      phone: '71234567',
+    });
+    expect(result).toMatchObject({
+      id: 'id-1',
+      phone: '71234567',
+      status: 'draft',
+      birthDate: '2000-05-10',
+    });
   });
 
   it('update valida el año de titulación nuevo contra la fecha de nacimiento guardada', async () => {
     repository.findById.mockResolvedValue(row());
 
-    await expect(service.update('id-1', { graduationYear: 2017 })).rejects.toBeInstanceOf(InvalidGraduationYearException);
+    await expect(
+      service.update('id-1', { graduationYear: 2017 }),
+    ).rejects.toBeInstanceOf(InvalidGraduationYearException);
     expect(repository.updateDraft).not.toHaveBeenCalled();
   });
 
   it('update valida la fecha de nacimiento nueva contra el año de titulación guardado', async () => {
     repository.findById.mockResolvedValue(row());
 
-    await expect(service.update('id-1', { birthDate: new Date('2008-01-01T00:00:00Z') })).rejects.toBeInstanceOf(InvalidGraduationYearException);
+    await expect(
+      service.update('id-1', { birthDate: new Date('2008-01-01T00:00:00Z') }),
+    ).rejects.toBeInstanceOf(InvalidGraduationYearException);
   });
 
   it('update acepta solo graduationYear coherente con la fecha de nacimiento guardada', async () => {
@@ -95,11 +122,17 @@ describe('AccessRequestsService', () => {
 
     await service.update('id-1', { graduationYear: 2018 });
 
-    expect(repository.updateDraft).toHaveBeenCalledWith('id-1', { graduationYear: 2018 });
+    expect(repository.updateDraft).toHaveBeenCalledWith('id-1', {
+      graduationYear: 2018,
+    });
   });
 
   describe('duplicados', () => {
-    const dto = { email: 'ana@umss.edu.bo', idCardNumber: '123', sisCode: '456' } as any;
+    const dto = {
+      email: 'ana@umss.edu.bo',
+      idCardNumber: '123',
+      sisCode: '456',
+    } as any;
 
     it('create no consulta excludeId y guarda si no hay duplicados', async () => {
       repository.createDraft.mockResolvedValue(row());
@@ -107,33 +140,51 @@ describe('AccessRequestsService', () => {
       await service.create(dto);
 
       expect(authService.existsByEmail).toHaveBeenCalledWith('ana@umss.edu.bo');
-      expect(repository.findActiveDuplicates).toHaveBeenCalledWith({ ...dto, excludeId: undefined });
+      expect(repository.findActiveDuplicates).toHaveBeenCalledWith({
+        ...dto,
+        excludeId: undefined,
+      });
       expect(repository.createDraft).toHaveBeenCalled();
     });
 
     it('create responde 409 si el correo pertenece a una cuenta registrada', async () => {
       authService.existsByEmail.mockResolvedValue(true);
 
-      await expect(service.create(dto)).rejects.toMatchObject({ statusCode: 409, message: 'El correo ya está registrado' });
+      await expect(service.create(dto)).rejects.toMatchObject({
+        statusCode: 409,
+        message: 'El correo ya está registrado',
+      });
       expect(repository.createDraft).not.toHaveBeenCalled();
     });
 
     it('create responde 409 si el correo pertenece a una solicitud activa', async () => {
-      repository.findActiveDuplicates.mockResolvedValue([{ email: 'ANA@umss.edu.bo', idCardNumber: '999', sisCode: '999' }]);
+      repository.findActiveDuplicates.mockResolvedValue([
+        { email: 'ANA@umss.edu.bo', idCardNumber: '999', sisCode: '999' },
+      ]);
 
-      await expect(service.create(dto)).rejects.toMatchObject({ message: 'El correo ya está registrado' });
+      await expect(service.create(dto)).rejects.toMatchObject({
+        message: 'El correo ya está registrado',
+      });
     });
 
     it('create responde 409 si el C.I. está repetido', async () => {
-      repository.findActiveDuplicates.mockResolvedValue([{ email: 'otro@umss.edu.bo', idCardNumber: '123', sisCode: '999' }]);
+      repository.findActiveDuplicates.mockResolvedValue([
+        { email: 'otro@umss.edu.bo', idCardNumber: '123', sisCode: '999' },
+      ]);
 
-      await expect(service.create(dto)).rejects.toMatchObject({ message: 'El carnet de identidad ya está registrado' });
+      await expect(service.create(dto)).rejects.toMatchObject({
+        message: 'El carnet de identidad ya está registrado',
+      });
     });
 
     it('create responde 409 si el código SIS está repetido', async () => {
-      repository.findActiveDuplicates.mockResolvedValue([{ email: 'otro@umss.edu.bo', idCardNumber: '999', sisCode: '456' }]);
+      repository.findActiveDuplicates.mockResolvedValue([
+        { email: 'otro@umss.edu.bo', idCardNumber: '999', sisCode: '456' },
+      ]);
 
-      await expect(service.create(dto)).rejects.toMatchObject({ message: 'El código SIS ya está registrado' });
+      await expect(service.create(dto)).rejects.toMatchObject({
+        message: 'El código SIS ya está registrado',
+      });
     });
 
     it('create lista todos los campos repetidos en orden correo, C.I., SIS', async () => {
@@ -146,13 +197,19 @@ describe('AccessRequestsService', () => {
       const error = await service.create(dto).catch((e) => e);
 
       expect(error).toBeInstanceOf(DuplicateAccessRequestDataException);
-      expect(error.message).toBe('El correo, el carnet de identidad y el código SIS ya están registrados');
+      expect(error.message).toBe(
+        'El correo, el carnet de identidad y el código SIS ya están registrados',
+      );
     });
 
     it('create con dos campos repetidos los une con "y"', async () => {
-      repository.findActiveDuplicates.mockResolvedValue([{ email: 'x@umss.edu.bo', idCardNumber: '123', sisCode: '456' }]);
+      repository.findActiveDuplicates.mockResolvedValue([
+        { email: 'x@umss.edu.bo', idCardNumber: '123', sisCode: '456' },
+      ]);
 
-      await expect(service.create(dto)).rejects.toMatchObject({ message: 'El carnet de identidad y el código SIS ya están registrados' });
+      await expect(service.create(dto)).rejects.toMatchObject({
+        message: 'El carnet de identidad y el código SIS ya están registrados',
+      });
     });
 
     it('update excluye el propio id al buscar duplicados', async () => {
@@ -162,14 +219,19 @@ describe('AccessRequestsService', () => {
       await service.update('id-1', { sisCode: '456' });
 
       expect(authService.existsByEmail).not.toHaveBeenCalled();
-      expect(repository.findActiveDuplicates).toHaveBeenCalledWith({ sisCode: '456', excludeId: 'id-1' });
+      expect(repository.findActiveDuplicates).toHaveBeenCalledWith({
+        sisCode: '456',
+        excludeId: 'id-1',
+      });
     });
 
     it('update responde 409 si otro dato ya existe', async () => {
       repository.findById.mockResolvedValue(row());
       authService.existsByEmail.mockResolvedValue(true);
 
-      await expect(service.update('id-1', { email: 'ana@umss.edu.bo' })).rejects.toBeInstanceOf(DuplicateAccessRequestDataException);
+      await expect(
+        service.update('id-1', { email: 'ana@umss.edu.bo' }),
+      ).rejects.toBeInstanceOf(DuplicateAccessRequestDataException);
       expect(repository.updateDraft).not.toHaveBeenCalled();
     });
 
@@ -185,10 +247,16 @@ describe('AccessRequestsService', () => {
 
     it('update revisa 404 y "no editable" antes que los duplicados', async () => {
       repository.findById.mockResolvedValue(null);
-      await expect(service.update('id-1', { sisCode: '456' })).rejects.toBeInstanceOf(AccessRequestNotFoundException);
+      await expect(
+        service.update('id-1', { sisCode: '456' }),
+      ).rejects.toBeInstanceOf(AccessRequestNotFoundException);
 
-      repository.findById.mockResolvedValue(row({ status: { title: 'pending' } }));
-      await expect(service.update('id-1', { sisCode: '456' })).rejects.toBeInstanceOf(AccessRequestNotEditableException);
+      repository.findById.mockResolvedValue(
+        row({ status: { title: 'pending' } }),
+      );
+      await expect(
+        service.update('id-1', { sisCode: '456' }),
+      ).rejects.toBeInstanceOf(AccessRequestNotEditableException);
 
       expect(repository.findActiveDuplicates).not.toHaveBeenCalled();
     });
@@ -204,7 +272,9 @@ describe('AccessRequestsService', () => {
 
       expect(repository.deleteDraft).toHaveBeenCalledWith('id-1');
       expect(filesService.delete).toHaveBeenCalledWith('file-1');
-      expect(repository.deleteDraft.mock.invocationCallOrder[0]).toBeLessThan(filesService.delete.mock.invocationCallOrder[0]);
+      expect(repository.deleteDraft.mock.invocationCallOrder[0]).toBeLessThan(
+        filesService.delete.mock.invocationCallOrder[0],
+      );
     });
 
     it('no llama a FilesService si no hay archivo adjunto', async () => {
@@ -235,28 +305,38 @@ describe('AccessRequestsService', () => {
     it('responde 404 si la solicitud no existe', async () => {
       repository.findById.mockResolvedValue(null);
 
-      await expect(service.delete('id-1')).rejects.toBeInstanceOf(AccessRequestNotFoundException);
+      await expect(service.delete('id-1')).rejects.toBeInstanceOf(
+        AccessRequestNotFoundException,
+      );
       expect(repository.deleteDraft).not.toHaveBeenCalled();
       expect(filesService.delete).not.toHaveBeenCalled();
     });
 
     it('responde 409 con mensaje propio si la solicitud ya fue enviada', async () => {
-      repository.findById.mockResolvedValue(row({ status: { title: 'pending' }, documentFileId: 'file-1' }));
+      repository.findById.mockResolvedValue(
+        row({ status: { title: 'pending' }, documentFileId: 'file-1' }),
+      );
 
       const error = await service.delete('id-1').catch((e) => e);
 
       expect(error).toBeInstanceOf(AccessRequestNotEditableException);
       expect(error.statusCode).toBe(409);
-      expect(error.message).toBe('La solicitud ya fue enviada y no se puede eliminar');
+      expect(error.message).toBe(
+        'La solicitud ya fue enviada y no se puede eliminar',
+      );
       expect(repository.deleteDraft).not.toHaveBeenCalled();
       expect(filesService.delete).not.toHaveBeenCalled();
     });
 
     it('si la fila desaparece entre la lectura y el borrado responde 404 y no toca el archivo', async () => {
       repository.findById.mockResolvedValue(row({ documentFileId: 'file-1' }));
-      repository.deleteDraft.mockRejectedValue(new AccessRequestNotFoundException());
+      repository.deleteDraft.mockRejectedValue(
+        new AccessRequestNotFoundException(),
+      );
 
-      await expect(service.delete('id-1')).rejects.toBeInstanceOf(AccessRequestNotFoundException);
+      await expect(service.delete('id-1')).rejects.toBeInstanceOf(
+        AccessRequestNotFoundException,
+      );
       expect(filesService.delete).not.toHaveBeenCalled();
     });
   });

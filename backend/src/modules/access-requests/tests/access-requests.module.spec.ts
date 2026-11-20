@@ -1,4 +1,12 @@
-import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+  afterAll,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AccessRequestsModule } from '../access-requests.module.js';
 import { AccessRequestsController } from '../controllers/access-requests.controller.js';
@@ -28,7 +36,11 @@ describe('AccessRequestsModule', () => {
       .compile();
   });
 
-  it.each([AccessRequestsController, AccessRequestsService, AccessRequestsRepository])('resuelve %o', (provider) => {
+  it.each([
+    AccessRequestsController,
+    AccessRequestsService,
+    AccessRequestsRepository,
+  ])('resuelve %o', (provider) => {
     expect(moduleRef.get(provider)).toBeInstanceOf(provider);
   });
 });

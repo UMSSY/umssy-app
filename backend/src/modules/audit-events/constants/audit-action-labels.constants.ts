@@ -1,5 +1,11 @@
-import { AUDIT_ACTION, type AuditActionName } from '../types/audit-action.enum.js';
-import { AUDIT_ACTOR_ROLE, type AuditActorRole } from '../types/audit-actor-role.enum.js';
+import {
+  AUDIT_ACTION,
+  type AuditActionName,
+} from '../types/audit-action.enum.js';
+import {
+  AUDIT_ACTOR_ROLE,
+  type AuditActorRole,
+} from '../types/audit-actor-role.enum.js';
 
 export const AUDIT_ACTION_LABELS: Record<AuditActionName, string> = {
   [AUDIT_ACTION.SUBMITTED]: 'Solicitud enviada',

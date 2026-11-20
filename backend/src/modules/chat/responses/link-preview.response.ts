@@ -6,4 +6,3 @@ export interface LinkPreviewResponse {
   imageUrl: string | null;
   hasPreview: boolean;
 }
-

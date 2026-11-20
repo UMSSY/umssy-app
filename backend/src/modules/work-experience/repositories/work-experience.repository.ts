@@ -1,10 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import type { WorkExperienceAnalysisSourceResponse } from '../responses/work-experience-analysis-source.response.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
+import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
 import { isRecordNotFoundError } from '../../../common/utils/map-record-not-found.js';
 import type { WorkExperiencePeriodSnapshot } from '../types/work-experience-period-snapshot.type.js';
 import type { WorkExperienceRecord } from '../types/work-experience-record.type.js';
 import type { WorkExperienceWriteData } from '../types/work-experience-write-data.type.js';
+import { WORK_PERIOD_SELECT } from '../constants/work-period-select.constants.js';
+import type { WorkPeriodRecord } from '../types/work-period-record.type.js';
 
 const workExperienceSelect = {
   id: true,
@@ -21,13 +24,44 @@ const workExperienceSelect = {
 
 @Injectable()
 export class WorkExperienceRepository {
+  findVerificationSources(userId: string, context?: TransactionContext) {
+    return (context?.client ?? this.prisma).workExperience.findMany({
+      where: { userId },
+      select: { id: true },
+    });
+  }
+
   constructor(private readonly prisma: PrismaService) {}
 
-  findAnalysisSources(userId: string): Promise<WorkExperienceAnalysisSourceResponse[]> {
+  async hasByUserId(userId: string): Promise<boolean> {
+    const record = await this.prisma.workExperience.findFirst({
+      where: { userId },
+      select: { id: true },
+    });
+    return record !== null;
+  }
+
+  findAnalysisSources(
+    userId: string,
+  ): Promise<WorkExperienceAnalysisSourceResponse[]> {
     return this.prisma.workExperience.findMany({
       where: { userId },
       orderBy: [{ startDate: 'desc' }, { id: 'desc' }],
       select: { id: true, position: true, description: true },
+    });
+  }
+
+  findPeriodsByUserIds(userIds: string[]): Promise<WorkPeriodRecord[]> {
+    return this.prisma.workExperience.findMany({
+      where: { userId: { in: userIds } },
+      select: WORK_PERIOD_SELECT,
+    });
+  }
+
+  findPublicationEvidenceIds(userId: string, context: TransactionContext) {
+    return context.client.workExperience.findMany({
+      where: { userId },
+      select: { id: true },
     });
   }
 
@@ -110,5 +144,19 @@ export class WorkExperienceRepository {
         create: { title: companyName },
       },
     };
+  }
+
+  findRecruitmentEvidence(userId: string, ids: string[]) {
+    return this.prisma.workExperience.findMany({
+      where: { userId, id: { in: ids } },
+      select: {
+        id: true,
+        position: true,
+        startDate: true,
+        endDate: true,
+        description: true,
+        company: { select: { title: true } },
+      },
+    });
   }
 }

@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { RADAR_AXIS_NAMES } from "@/modules/radar-chart/constants/radar-axis-names.constants";
+import { useEffect, useState } from "react";
 import { useLeaveGuard } from "@/modules/job-offers";
 import { useMentorProfile } from "@/modules/mentorship";
 import { useBlockSelection } from "../../hooks/use-block-selection";
@@ -19,6 +21,8 @@ export function BlockSelection({
   weekRange,
   fetchFreeBlocks,
   stickyOffset,
+  density,
+  onActivityChange,
 }: BlockSelectionProps) {
   const {
     selectedBlock,
@@ -30,27 +34,41 @@ export function BlockSelection({
     markUnavailable,
     clearSelection,
   } = useBlockSelection(fetchFreeBlocks);
+  const requestedArea = useSearchParams().get("area");
+  const selectedArea = RADAR_AXIS_NAMES.find(item => item.name === requestedArea)?.name;
   const mentorProfile = useMentorProfile(mentorId);
   const [isFormDirty, setIsFormDirty] = useState(false);
-  const { createAppointment, isSubmitting } = useCreateAppointment((block) => {
-    setIsFormDirty(false);
-    markUnavailable(block);
-  });
-  const leaveGuard = useLeaveGuard(isFormDirty && selectedBlock !== null);
+  const [formVersion, setFormVersion] = useState(0);
+  const [reservationError, setReservationError] = useState<string | null>(null);
+  const { createAppointment, isSubmitting, availabilityError, canRetry, resetAvailabilityError } = useCreateAppointment(
+    markUnavailable,
+    setReservationError,
+    clearSelection,
+  );
+  const leaveGuard = useLeaveGuard(isFormDirty);
+  const hasSelectionOrDraft = selectedBlock !== null || isFormDirty;
+
+  useEffect(() => {
+    onActivityChange?.(hasSelectionOrDraft);
+    return () => onActivityChange?.(false);
+  }, [hasSelectionOrDraft, onActivityChange]);
 
   const selectableBlocks = blocks.filter((block) => !unavailableBlockIds.includes(block.id));
 
   const handleSelectBlock = (block: AvailabilityBlock) => {
-    setIsFormDirty(false);
+    setReservationError(null);
+    resetAvailabilityError();
     selectBlock(block);
   };
 
   const handleSubmit = async (values: AppointmentRequestValues) => {
     if (!selectedBlock) return;
+    setReservationError(null);
     const created = await createAppointment({ block: selectedBlock, values });
     if (created) {
       setIsFormDirty(false);
       clearSelection();
+      setFormVersion((version) => version + 1);
     }
   };
 
@@ -64,18 +82,21 @@ export function BlockSelection({
           selectedBlockId={selectedBlock?.id}
           onSelectBlock={handleSelectBlock}
           stickyOffset={stickyOffset}
+          density={density}
         />
         <BlockSelectionPanel
           selectedBlock={selectedBlock}
           unavailableBlock={unavailableBlock}
           isChecking={isChecking}
-          error={error}
+          error={availabilityError ?? reservationError ?? error}
         >
           <RequestAppointmentForm
-            key={selectedBlock?.id}
+            key={`${formVersion}:${selectedArea ?? ""}`}
+            selectedArea={selectedArea}
             orientationTypes={mentorProfile.data?.orientationTypes ?? []}
             isLoadingTopics={mentorProfile.isPending}
             isSubmitting={isSubmitting}
+            canRetry={canRetry}
             onSubmit={handleSubmit}
             onDirtyChange={setIsFormDirty}
           />

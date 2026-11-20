@@ -19,10 +19,31 @@ describe('SkillMapper', () => {
   });
 
   it('maps a user skill record to the skill response', () => {
-    expect(mapper.toUserSkillResponse({ skill: { ...skill, isCustom: true } })).toEqual({
+    expect(
+      mapper.toUserSkillResponse({
+        skill: { ...skill, isCustom: true },
+        source: 'manual',
+        evidenceRefs: [],
+      }),
+    ).toEqual({
       id: '33333333-3333-4333-8333-333333333333',
       name: 'Python',
       isCustom: true,
+    });
+  });
+
+  it('adds the origins of the skill to the response of the own skills', () => {
+    expect(
+      mapper.toOwnSkillResponse({
+        skill,
+        source: 'manual',
+        evidenceRefs: ['work_experience:exp-1', { type: 'cv', id: 'cv-1' }],
+      }),
+    ).toEqual({
+      id: '33333333-3333-4333-8333-333333333333',
+      name: 'Python',
+      isCustom: false,
+      origins: ['manual', 'experience', 'cv'],
     });
   });
 });

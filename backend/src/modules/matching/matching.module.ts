@@ -1,3 +1,4 @@
+import { RadarConsentsModule } from '../radar-integration/radar-consents.module.js';
 import { CompanyJobApplicantsController } from './controllers/company-job-applicants.controller.js';
 import { JobApplicationsController } from './controllers/job-applications.controller.js';
 import { CompanyJobApplicantsService } from './services/company-job-applicants.service.js';
@@ -18,17 +19,20 @@ import { SkillsClassifierService } from './services/skills-classifier.service.js
 import { VacancyRankingService } from './services/vacancy-ranking.service.js';
 import { WeightedScoreService } from './services/weighted-score.service.js';
 import { ActiveJobOffersService } from './services/active-job-offers.service.js';
-import { ExperienceSkillsRepository } from './repositories/experience-skills.repository.js';
+import { ExperienceSkillsService } from './services/experience-skills.service.js';
 import { JobMatchController } from './controllers/job-match.controller.js';
-import { JobMatchRepository } from './repositories/job-match.repository.js';
+import { JobMatchSourceService } from './services/job-match-source.service.js';
 import { JobMatchService } from './services/job-match.service.js';
+import { VacancyScoringService } from './services/vacancy-scoring.service.js';
 import { CandidateProfileService } from './services/candidate-profile.service.js';
 import { JobApplicationMapper } from './mappers/job-application.mapper.js';
 import { JobRecommendationsController } from './controllers/job-recommendations.controller.js';
 import { JobRecommendationsService } from './services/job-recommendations.service.js';
+import { RequirementsController } from './controllers/requirements.controller.js'; 
 
 @Module({
   imports: [
+    RadarConsentsModule,
     PrismaModule,
     JwtAuthModule,
     SkillsModule,
@@ -42,6 +46,7 @@ import { JobRecommendationsService } from './services/job-recommendations.servic
     JobApplicationsController,
     JobRecommendationsController,
     CompanyJobApplicantsController,
+    RequirementsController,
   ],
   providers: [
     JobApplicationsService,
@@ -55,13 +60,15 @@ import { JobRecommendationsService } from './services/job-recommendations.servic
     SkillsClassifierService,
     VacancyRankingService,
     WeightedScoreService,
-    ExperienceSkillsRepository,
-    JobMatchRepository,
+    ExperienceSkillsService,
+    JobMatchSourceService,
+    VacancyScoringService,
     JobMatchService,
     CandidateProfileService,
     JobRecommendationsService,
   ],
   exports: [
+    JobApplicationsService,
     JobRecommendationsService,
     MatchingService,
     ActiveJobOffersService,

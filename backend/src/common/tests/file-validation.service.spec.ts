@@ -56,17 +56,46 @@ function makeMinimalPdf(): Buffer {
 function makeMinimalPng(): Buffer {
   const sig = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
   const ihdr = Buffer.from([
-    0x00, 0x00, 0x00, 0x0d, // length 13
-    0x49, 0x48, 0x44, 0x52, // IHDR
-    0x00, 0x00, 0x00, 0x01, // width 1
-    0x00, 0x00, 0x00, 0x01, // height 1
-    0x08, 0x06, 0x00, 0x00, 0x00, // bit depth, color, comp, filter, interlace
-    0x1f, 0x15, 0xc4, 0x89, // CRC
+    0x00,
+    0x00,
+    0x00,
+    0x0d, // length 13
+    0x49,
+    0x48,
+    0x44,
+    0x52, // IHDR
+    0x00,
+    0x00,
+    0x00,
+    0x01, // width 1
+    0x00,
+    0x00,
+    0x00,
+    0x01, // height 1
+    0x08,
+    0x06,
+    0x00,
+    0x00,
+    0x00, // bit depth, color, comp, filter, interlace
+    0x1f,
+    0x15,
+    0xc4,
+    0x89, // CRC
   ]);
   const body = Buffer.alloc(20, 0x20);
   const iend = Buffer.from([
-    0x00, 0x00, 0x00, 0x00, // length 0
-    0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82, // IEND + CRC
+    0x00,
+    0x00,
+    0x00,
+    0x00, // length 0
+    0x49,
+    0x45,
+    0x4e,
+    0x44,
+    0xae,
+    0x42,
+    0x60,
+    0x82, // IEND + CRC
   ]);
   return Buffer.concat([sig, ihdr, body, iend]);
 }
@@ -93,16 +122,7 @@ function makeMinimalJpg(sofMarker = 0xc0): Buffer {
     0x00,
   ]);
   const sos = Buffer.from([
-    0xff,
-    0xda,
-    0x00,
-    0x08,
-    0x01,
-    0x01,
-    0x00,
-    0x00,
-    0x3f,
-    0x00,
+    0xff, 0xda, 0x00, 0x08, 0x01, 0x01, 0x00, 0x00, 0x3f, 0x00,
   ]);
   const scanData = Buffer.alloc(16, 0x7f);
   const eoi = Buffer.from([0xff, 0xd9]);
@@ -133,20 +153,23 @@ describe('FileValidationService', () => {
       ['a line feed', '\n'],
       ['a carriage return and line feed', '\r\n'],
       ['spaces and line breaks', '  \n\n \r\n'],
-    ])('accepts a pdf whose %%EOF marker is followed by %s', (_name, suffix) => {
-      const buffer = Buffer.concat([
-        Buffer.from('%PDF-1.4\n'),
-        Buffer.alloc(60, 0x20),
-        Buffer.from(`\n%%EOF${suffix}`),
-      ]);
+    ])(
+      'accepts a pdf whose %%EOF marker is followed by %s',
+      (_name, suffix) => {
+        const buffer = Buffer.concat([
+          Buffer.from('%PDF-1.4\n'),
+          Buffer.alloc(60, 0x20),
+          Buffer.from(`\n%%EOF${suffix}`),
+        ]);
 
-      const result = service.validate(
-        buildFileFromBuffer(buffer, { mimeType: 'application/pdf' }),
-        cvRules,
-      );
+        const result = service.validate(
+          buildFileFromBuffer(buffer, { mimeType: 'application/pdf' }),
+          cvRules,
+        );
 
-      expect(result.detectedType).toBe('pdf');
-    });
+        expect(result.detectedType).toBe('pdf');
+      },
+    );
 
     it('accepts a structurally complete png', () => {
       const file = buildFileFromBuffer(makeMinimalPng(), {
@@ -176,16 +199,19 @@ describe('FileValidationService', () => {
       ['null bytes', Buffer.from([0x00, 0x00])],
       ['line breaks', Buffer.from('\r\n')],
       ['spaces and line breaks', Buffer.from(' \n\t')],
-    ])('accepts a jpg whose EOI marker is followed by legitimate %s', (_name, suffix) => {
-      const buffer = Buffer.concat([makeMinimalJpg(), suffix]);
-      const file = buildFileFromBuffer(buffer, {
-        originalName: 'photo.jpg',
-        mimeType: 'image/jpeg',
-      });
+    ])(
+      'accepts a jpg whose EOI marker is followed by legitimate %s',
+      (_name, suffix) => {
+        const buffer = Buffer.concat([makeMinimalJpg(), suffix]);
+        const file = buildFileFromBuffer(buffer, {
+          originalName: 'photo.jpg',
+          mimeType: 'image/jpeg',
+        });
 
-      const result = service.validate(file, documentRules);
-      expect(result.detectedType).toBe('jpg');
-    });
+        const result = service.validate(file, documentRules);
+        expect(result.detectedType).toBe('jpg');
+      },
+    );
 
     it('accepts a progressive jpg with SOF2 (0xC2)', () => {
       const file = buildFileFromBuffer(makeMinimalJpg(0xc2), {
@@ -248,7 +274,10 @@ describe('FileValidationService', () => {
     });
 
     it('rejects a jpg with excessive trailing residual bytes after EOI', () => {
-      const excessive = Buffer.concat([makeMinimalJpg(), Buffer.alloc(100, 0x00)]);
+      const excessive = Buffer.concat([
+        makeMinimalJpg(),
+        Buffer.alloc(100, 0x00),
+      ]);
       const file = buildFileFromBuffer(excessive, { mimeType: 'image/jpeg' });
 
       expect(() => service.validate(file, documentRules)).toThrow(
@@ -263,7 +292,9 @@ describe('FileValidationService', () => {
         Buffer.from([0xff, 0x20]),
         base.subarray(2),
       ]);
-      const file = buildFileFromBuffer(withIllegalMarker, { mimeType: 'image/jpeg' });
+      const file = buildFileFromBuffer(withIllegalMarker, {
+        mimeType: 'image/jpeg',
+      });
 
       expect(() => service.validate(file, documentRules)).toThrow(
         CorruptedFileException,
@@ -297,7 +328,9 @@ describe('FileValidationService', () => {
         Buffer.alloc(50, 0x00),
         Buffer.from([0xff, 0xd9]),
       ]);
-      const file = buildFileFromBuffer(syntheticJpg, { mimeType: 'image/jpeg' });
+      const file = buildFileFromBuffer(syntheticJpg, {
+        mimeType: 'image/jpeg',
+      });
 
       const result = service.validate(file, documentRules);
       expect(result.detectedType).toBe('jpg');
@@ -336,7 +369,9 @@ describe('FileValidationService', () => {
         Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x00, 0x00, 0x00, 0x00]),
         makeMinimalPng().subarray(8),
       ]);
-      const file = buildFileFromBuffer(incompleteHeader, { mimeType: 'image/png' });
+      const file = buildFileFromBuffer(incompleteHeader, {
+        mimeType: 'image/png',
+      });
 
       expect(() => service.validate(file, documentRules)).toThrow(
         CorruptedFileException,
@@ -372,7 +407,9 @@ describe('FileValidationService', () => {
         makeMinimalPng(),
         Buffer.from('tEXtSomeDataPayload'),
       ]);
-      const file = buildFileFromBuffer(withTrailingBlock, { mimeType: 'image/png' });
+      const file = buildFileFromBuffer(withTrailingBlock, {
+        mimeType: 'image/png',
+      });
 
       expect(() => service.validate(file, documentRules)).toThrow(
         CorruptedFileException,
@@ -380,7 +417,10 @@ describe('FileValidationService', () => {
     });
 
     it('rejects a png with excessive trailing bytes after IEND', () => {
-      const excessive = Buffer.concat([makeMinimalPng(), Buffer.alloc(100, 0x00)]);
+      const excessive = Buffer.concat([
+        makeMinimalPng(),
+        Buffer.alloc(100, 0x00),
+      ]);
       const file = buildFileFromBuffer(excessive, { mimeType: 'image/png' });
 
       expect(() => service.validate(file, documentRules)).toThrow(
@@ -395,7 +435,9 @@ describe('FileValidationService', () => {
         Buffer.from('MZ\x90\x00'),
         makeMinimalPdf(),
       ]);
-      const file = buildFileFromBuffer(polyglot, { mimeType: 'application/pdf' });
+      const file = buildFileFromBuffer(polyglot, {
+        mimeType: 'application/pdf',
+      });
 
       expect(() => service.validate(file, cvRules)).toThrow(
         InvalidFileTypeException,
@@ -408,7 +450,9 @@ describe('FileValidationService', () => {
         Buffer.alloc(60, 0x20),
         Buffer.from('\n%%EOF\n'),
       ]);
-      const file = buildFileFromBuffer(noHeader, { mimeType: 'application/pdf' });
+      const file = buildFileFromBuffer(noHeader, {
+        mimeType: 'application/pdf',
+      });
 
       expect(() => service.validate(file, cvRules)).toThrow(
         CorruptedFileException,
@@ -420,7 +464,9 @@ describe('FileValidationService', () => {
         makeMinimalPdf(),
         Buffer.from([0x50, 0x4b, 0x03, 0x04, 0x00]),
       ]);
-      const file = buildFileFromBuffer(polyglot, { mimeType: 'application/pdf' });
+      const file = buildFileFromBuffer(polyglot, {
+        mimeType: 'application/pdf',
+      });
 
       expect(() => service.validate(file, cvRules)).toThrow(
         CorruptedFileException,
@@ -432,7 +478,9 @@ describe('FileValidationService', () => {
         makeMinimalPdf(),
         Buffer.from('MZ\x90\x00'),
       ]);
-      const file = buildFileFromBuffer(polyglot, { mimeType: 'application/pdf' });
+      const file = buildFileFromBuffer(polyglot, {
+        mimeType: 'application/pdf',
+      });
 
       expect(() => service.validate(file, cvRules)).toThrow(
         CorruptedFileException,
@@ -440,8 +488,13 @@ describe('FileValidationService', () => {
     });
 
     it('rejects a pdf with excessive trailing bytes after %%EOF', () => {
-      const excessive = Buffer.concat([makeMinimalPdf(), Buffer.alloc(100, 0x00)]);
-      const file = buildFileFromBuffer(excessive, { mimeType: 'application/pdf' });
+      const excessive = Buffer.concat([
+        makeMinimalPdf(),
+        Buffer.alloc(100, 0x00),
+      ]);
+      const file = buildFileFromBuffer(excessive, {
+        mimeType: 'application/pdf',
+      });
 
       expect(() => service.validate(file, cvRules)).toThrow(
         CorruptedFileException,
@@ -543,7 +596,10 @@ describe('FileValidationService', () => {
 
     it('throws an empty file exception when the reported size is zero', () => {
       expect(() =>
-        service.validate(buildFileFromBuffer(makeMinimalPdf(), { size: 0 }), cvRules),
+        service.validate(
+          buildFileFromBuffer(makeMinimalPdf(), { size: 0 }),
+          cvRules,
+        ),
       ).toThrow(EmptyFileException);
     });
 

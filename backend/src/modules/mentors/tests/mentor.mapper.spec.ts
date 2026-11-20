@@ -35,9 +35,6 @@ function buildProfileRecord(): NonNullable<
         company: { id: 'company-1', title: 'Acme' },
       },
     ],
-    userSkills: [
-      { skill: { id: 'skill-1', name: 'TypeScript', isCustom: false } },
-    ],
     certifications: [
       {
         id: 'cert-1',
@@ -67,6 +64,7 @@ function buildProfileRecord(): NonNullable<
 }
 
 describe('MentorMapper', () => {
+  const skills = [{ id: 'skill-1', name: 'TypeScript', isCustom: false }];
   const mapper = new MentorMapper();
 
   it('expone solo los datos públicos previstos para la tarjeta', () => {
@@ -96,11 +94,17 @@ describe('MentorMapper', () => {
   it('mantiene el endpoint compartido y versiona ambos consumidores sin exponer bytes', () => {
     const record = { ...buildProfileRecord(), photoVersion: 'version-1' };
     const directory = mapper.toDirectoryResponse(record);
-    const profile = mapper.toProfileResponse(record);
-    expect(directory.photoUrl?.split('?')[0]).toBe(profile.photoUrl?.split('?')[0]);
+    const profile = mapper.toProfileResponse(record, skills);
+    expect(directory.photoUrl?.split('?')[0]).toBe(
+      profile.photoUrl?.split('?')[0],
+    );
     record.photoVersion = 'version-2';
-    expect(mapper.toDirectoryResponse(record).photoUrl).not.toBe(directory.photoUrl);
-    expect(mapper.toDirectoryResponse({ ...record, photoVersion: null }).photoUrl).toBeNull();
+    expect(mapper.toDirectoryResponse(record).photoUrl).not.toBe(
+      directory.photoUrl,
+    );
+    expect(
+      mapper.toDirectoryResponse({ ...record, photoVersion: null }).photoUrl,
+    ).toBeNull();
   });
 
   it('usa solo el estudio seleccionado, o ninguno, sin inventar formación', () => {
@@ -113,8 +117,12 @@ describe('MentorMapper', () => {
       ],
       mentorOrientationTypes: [],
     };
-    expect(mapper.toDirectoryResponse(record).education).toEqual(record.educations[0]);
-    expect(mapper.toDirectoryResponse({ ...record, educations: [] }).education).toBeNull();
+    expect(mapper.toDirectoryResponse(record).education).toEqual(
+      record.educations[0],
+    );
+    expect(
+      mapper.toDirectoryResponse({ ...record, educations: [] }).education,
+    ).toBeNull();
   });
 
   it('construye fullName y technicalAreas sin exponer campos internos del directorio', () => {
@@ -187,13 +195,15 @@ describe('MentorMapper', () => {
   it('mapea la foto a una ruta API sin alterar certificados, fechas ni records', () => {
     const record = buildProfileRecord();
 
-    expect(mapper.toProfileResponse(record)).toEqual({
+    expect(mapper.toProfileResponse(record, skills)).toEqual({
       id: 'mentor-1',
       fullName: 'Ana María Rojas',
       headline: 'Arquitecta de Software',
       aboutMe: 'Mentora de ingeniería.',
       isAvailable: true,
-      photoUrl: expect.stringMatching(/^\/mentors\/mentor-1\/photo\?v=[a-f0-9]{64}$/),
+      photoUrl: expect.stringMatching(
+        /^\/mentors\/mentor-1\/photo\?v=[a-f0-9]{64}$/,
+      ),
       city: { id: 'city-1', title: 'Cochabamba' },
       educations: [
         {
@@ -246,7 +256,7 @@ describe('MentorMapper', () => {
       documentUrl: bytes,
     }));
 
-    const result = mapper.toProfileResponse(record);
+    const result = mapper.toProfileResponse(record, skills);
 
     expect(result.photoUrl).toBeNull();
     expect(result.certifications[0]?.documentUrl).toBe(expected);
@@ -254,12 +264,14 @@ describe('MentorMapper', () => {
 
   it('cambia la URL al actualizar los bytes y devuelve null al eliminar la foto', () => {
     const record = buildProfileRecord();
-    const original = mapper.toProfileResponse(record).photoUrl;
-    expect(mapper.toProfileResponse(record).photoUrl).toBe(original);
+    const original = mapper.toProfileResponse(record, skills).photoUrl;
+    expect(mapper.toProfileResponse(record, skills).photoUrl).toBe(original);
     record.photoUrl = new Uint8Array([0xff, 0xd8, 0xff]);
-    expect(mapper.toProfileResponse(record).photoUrl).not.toBe(original);
+    expect(mapper.toProfileResponse(record, skills).photoUrl).not.toBe(
+      original,
+    );
     record.photoUrl = null;
-    expect(mapper.toProfileResponse(record).photoUrl).toBeNull();
+    expect(mapper.toProfileResponse(record, skills).photoUrl).toBeNull();
   });
 
   it('conserva todos los campos del perfil con nulls y relaciones vacias', () => {
@@ -274,13 +286,12 @@ describe('MentorMapper', () => {
       city: null,
       educations: [],
       workExperiences: [],
-      userSkills: [],
       certifications: [],
       mentorTechnicalAreas: [],
       mentorOrientationTypes: [],
     };
 
-    expect(mapper.toProfileResponse(record)).toEqual({
+    expect(mapper.toProfileResponse(record, [])).toEqual({
       id: 'mentor-1',
       fullName: 'Ana Rojas',
       headline: null,

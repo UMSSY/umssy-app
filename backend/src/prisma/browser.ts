@@ -153,6 +153,11 @@ export type BlockedDate = Prisma.BlockedDateModel
  */
 export type Appointment = Prisma.AppointmentModel
 /**
+ * Model AppointmentDocument
+ * 
+ */
+export type AppointmentDocument = Prisma.AppointmentDocumentModel
+/**
  * Model TimeProposal
  * 
  */
@@ -162,6 +167,26 @@ export type TimeProposal = Prisma.TimeProposalModel
  * 
  */
 export type AppointmentHistory = Prisma.AppointmentHistoryModel
+/**
+ * Model AppointmentNotificationEvent
+ * 
+ */
+export type AppointmentNotificationEvent = Prisma.AppointmentNotificationEventModel
+/**
+ * Model AppointmentNotificationChannel
+ * 
+ */
+export type AppointmentNotificationChannel = Prisma.AppointmentNotificationChannelModel
+/**
+ * Model AppointmentNotificationStatus
+ * 
+ */
+export type AppointmentNotificationStatus = Prisma.AppointmentNotificationStatusModel
+/**
+ * Model AppointmentNotification
+ * 
+ */
+export type AppointmentNotification = Prisma.AppointmentNotificationModel
 /**
  * Model EventCategory
  * 
@@ -243,6 +268,11 @@ export type MentorParticipationRequest = Prisma.MentorParticipationRequestModel
  */
 export type MentorSlotOffer = Prisma.MentorSlotOfferModel
 /**
+ * Model MentorCapacitySetting
+ * 
+ */
+export type MentorCapacitySetting = Prisma.MentorCapacitySettingModel
+/**
  * Model ActivationOtp
  * 
  */
@@ -318,6 +348,11 @@ export type JobApplicationStatus = Prisma.JobApplicationStatusModel
  */
 export type JobApplication = Prisma.JobApplicationModel
 /**
+ * Model RadarApplicationConsent
+ * 
+ */
+export type RadarApplicationConsent = Prisma.RadarApplicationConsentModel
+/**
  * Model SurveyStatus
  * 
  */
@@ -337,6 +372,11 @@ export type SurveyTargetAudience = Prisma.SurveyTargetAudienceModel
  * 
  */
 export type Survey = Prisma.SurveyModel
+/**
+ * Model SurveyAlertConfig
+ * 
+ */
+export type SurveyAlertConfig = Prisma.SurveyAlertConfigModel
 /**
  * Model SurveyQuestion
  * 
@@ -387,3 +427,88 @@ export type MentorParticipationSanction = Prisma.MentorParticipationSanctionMode
  * 
  */
 export type MentorIntakeOperation = Prisma.MentorIntakeOperationModel
+/**
+ * Model RadarCvEvidence
+ * 
+ */
+export type RadarCvEvidence = Prisma.RadarCvEvidenceModel
+/**
+ * Model RadarScoreSnapshot
+ * 
+ */
+export type RadarScoreSnapshot = Prisma.RadarScoreSnapshotModel
+/**
+ * Model RadarAuditEvent
+ * 
+ */
+export type RadarAuditEvent = Prisma.RadarAuditEventModel
+/**
+ * Model RadarCvExtractionStatus
+ * 
+ */
+export type RadarCvExtractionStatus = Prisma.RadarCvExtractionStatusModel
+/**
+ * Model RadarCvReviewStatus
+ * 
+ */
+export type RadarCvReviewStatus = Prisma.RadarCvReviewStatusModel
+/**
+ * Model MentorParticipationStatus
+ * 
+ */
+export type MentorParticipationStatus = Prisma.MentorParticipationStatusModel
+/**
+ * Model MentorOfferStatus
+ * 
+ */
+export type MentorOfferStatus = Prisma.MentorOfferStatusModel
+/**
+ * Model RadarDocumentVerification
+ * 
+ */
+export type RadarDocumentVerification = Prisma.RadarDocumentVerificationModel
+/**
+ * Model PortfolioProvider
+ * 
+ */
+export type PortfolioProvider = Prisma.PortfolioProviderModel
+/**
+ * Model UserSocialAccount
+ * 
+ */
+export type UserSocialAccount = Prisma.UserSocialAccountModel
+/**
+ * Model UserPortfolioProject
+ * 
+ */
+export type UserPortfolioProject = Prisma.UserPortfolioProjectModel
+/**
+ * Model NotificationType
+ * 
+ */
+export type NotificationType = Prisma.NotificationTypeModel
+/**
+ * Model Notification
+ * 
+ */
+export type Notification = Prisma.NotificationModel
+/**
+ * Model PushSubscription
+ * 
+ */
+export type PushSubscription = Prisma.PushSubscriptionModel
+/**
+ * Model NotificationPreference
+ * 
+ */
+export type NotificationPreference = Prisma.NotificationPreferenceModel
+/**
+ * Model RadarDocumentStatus
+ * 
+ */
+export type RadarDocumentStatus = Prisma.RadarDocumentStatusModel
+/**
+ * Model RadarDocumentSourceType
+ * 
+ */
+export type RadarDocumentSourceType = Prisma.RadarDocumentSourceTypeModel

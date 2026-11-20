@@ -2,7 +2,7 @@ import { ArrowLeft, Eye, Save, Send } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SURVEY_TEXT } from "../constants/survey-builder.constants";
-import type { SurveyBuilderTopbarProps } from "../types/survey-component-props.types";
+import type { SurveyBuilderTopbarProps } from "../types/survey-builder-topbar-props.types";
 
 export function SurveyBuilderTopbar({ title, isSaving, onCancel, onPreview, onSaveDraft, onPublish }: SurveyBuilderTopbarProps) {
   return (

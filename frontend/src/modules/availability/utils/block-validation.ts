@@ -1,5 +1,5 @@
 import { toBoliviaTime } from "@/shared/utils/date-time";
-import { BLOCK_MAX_HOUR, BLOCK_MESSAGES, BLOCK_MIN_HOUR, BLOCK_STEP_MINUTES } from "../constants/availability.constants";
+import { BLOCK_DURATION_MINUTES, BLOCK_MESSAGES } from "../constants/availability.constants";
 import type { BlockValidationErrors } from "../types/block-validation-errors.types";
 import type { CreateAvailabilityBlockInput } from "../types/create-availability-block-input.types";
 
@@ -9,7 +9,7 @@ const getBoliviaParts = (value: string) => {
   return {
     day,
     minutesOfDay: hours * 60 + minutes,
-    isOnStep: minutes % BLOCK_STEP_MINUTES === 0 && date.getUTCSeconds() === 0 && date.getUTCMilliseconds() === 0,
+    isOnStep: minutes % 30 === 0 && date.getUTCSeconds() === 0 && date.getUTCMilliseconds() === 0,
   };
 };
 
@@ -23,6 +23,10 @@ export function validateBlock(
 
   if (endTime <= startTime) {
     return { endAt: BLOCK_MESSAGES.endBeforeStart };
+  }
+
+  if ((endTime - startTime) % (BLOCK_DURATION_MINUTES * 60_000) !== 0) {
+    errors.endAt = BLOCK_MESSAGES.invalidDuration;
   }
 
   if (startTime <= now.getTime()) {
@@ -41,8 +45,8 @@ export function validateBlock(
     return errors;
   }
 
-  if (start.minutesOfDay < BLOCK_MIN_HOUR * 60) errors.startAt ??= BLOCK_MESSAGES.outOfRange;
-  if (end.minutesOfDay > BLOCK_MAX_HOUR * 60) errors.endAt ??= BLOCK_MESSAGES.outOfRange;
+  if (start.minutesOfDay < 7 * 60) errors.startAt ??= BLOCK_MESSAGES.outOfRange;
+  if (end.minutesOfDay > 22 * 60) errors.endAt ??= BLOCK_MESSAGES.outOfRange;
 
   return errors;
 }

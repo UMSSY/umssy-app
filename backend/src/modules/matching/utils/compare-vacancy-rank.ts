@@ -1,8 +1,7 @@
 interface VacancyRank {
+  id: string;
   compatibility: number;
-  careerMatch: boolean;
-  experienceMatch: boolean;
-  matchingSkills: number;
+  publishedAt: Date;
 }
 
 export function compareVacancyRank(
@@ -11,8 +10,7 @@ export function compareVacancyRank(
 ): number {
   return (
     right.compatibility - left.compatibility ||
-    Number(right.careerMatch) - Number(left.careerMatch) ||
-    Number(right.experienceMatch) - Number(left.experienceMatch) ||
-    right.matchingSkills - left.matchingSkills
+    right.publishedAt.getTime() - left.publishedAt.getTime() ||
+    left.id.localeCompare(right.id)
   );
 }

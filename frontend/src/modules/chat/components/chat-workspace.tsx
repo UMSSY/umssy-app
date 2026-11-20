@@ -1,12 +1,12 @@
-
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-
 
 import { useMessagingUi } from "../contexts/messaging-ui-context";
 
@@ -16,7 +16,7 @@ import type { ConnectionRequest } from "../types/connection-request.types";
 import type { User } from "../types/user.types";
 
 import { useConversations } from "../hooks/use-conversations";
-import { useMessages, messagesQueryKey } from "../hooks/use-messages";
+import { useMessages } from "../hooks/use-messages";
 import { useSendConnectionRequest } from "../hooks/use-send-connection-request";
 import { useReceivedConnectionRequests } from "../hooks/use-received-connection-requests";
 import { useRespondConnectionRequest } from "../hooks/use-respond-connection-request";
@@ -28,6 +28,7 @@ import { EmptyChatState } from "./empty-chat-state";
 import { ContactSearchModal } from "./contact-search-modal";
 import { ChatRoom } from "./chat-room";
 import { ChatConnectionDialog } from "./chat-connection-dialog";
+import { ChatConnectionBanner } from "./chat-connection-banner";
 import { ChatErrorState } from "./chat-error-state";
 import { SendConnectionRequestDialog } from "./send-connection-request-dialog";
 
@@ -37,7 +38,9 @@ import {
   blockUser,
   unblockUser,
 } from '../services/chat-api';
-import { getChatSocket } from './chat-socket';
+import { getChatSocket } from '../services/chat-socket';
+import { useChatConnection } from '../hooks/use-chat-connection';
+import { useConversationVisibility } from '../hooks/use-conversation-visibility';
 
 interface SocketMessage {
   id?: string;
@@ -49,9 +52,17 @@ interface SocketMessage {
 }
 
 interface SocketSendResponse {
+  data?: SocketSendResponse;
   ok: boolean;
   message?: SocketMessage;
   error?: string;
+}
+
+function removeSearchParam(name: string): void {
+  const url = new URL(window.location.href);
+  if (!url.searchParams.has(name)) return;
+  url.searchParams.delete(name);
+  window.history.replaceState(window.history.state, "", url);
 }
 
 export function ChatWorkspace({
@@ -91,7 +102,6 @@ export function ChatWorkspace({
   const [isStartingConversation, setIsStartingConversation] =
     useState(false);
 
-  // Evita selecciones simultáneas antes del siguiente render.
   const startingConversationRef = useRef(false);
 
   const ui = useMessagingUi();
@@ -135,9 +145,80 @@ export function ChatWorkspace({
     clearSelectedConversation,
     findExistingConversationByContact,
     startConversationWithContact,
+    openContextualConversation,
     updateConversationLastMessage,
     setConversationBlocked,
   } = useConversations();
+
+  useConversationVisibility(selectedRequestId ? null : selectedId);
+
+  const handledQueryParamRef = useRef<string | null>(null);
+  const searchParams = useSearchParams();
+  const tabParam = searchParams?.get("tab") ?? null;
+  const conversationIdParam = searchParams?.get("conversationId") ?? null;
+
+  useEffect(() => {
+    if (tabParam !== "requests" || receivedRequests.length === 0) {
+      return;
+    }
+
+    clearSelectedConversation();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSelectedRequestId(receivedRequests[0].id);
+    removeSearchParam("tab");
+  }, [tabParam, receivedRequests, clearSelectedConversation]);
+
+  useEffect(() => {
+    if (!conversationIdParam || isLoading) {
+      return;
+    }
+
+    const targetConv = conversations.find((c) => c.id === conversationIdParam);
+    if (targetConv) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSelectedRequestId(null);
+      handleSelectConversation(targetConv);
+      removeSearchParam("conversationId");
+    } else if (conversations.length > 0) {
+      toast.error("Conversación no encontrada o sin acceso.");
+      removeSearchParam("conversationId");
+    }
+  }, [conversationIdParam, conversations, isLoading, handleSelectConversation]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const contactIdParam = urlParams.get("contactId");
+    const contextTypeParam = urlParams.get("contextType");
+    const contextIdParam = urlParams.get("contextId");
+
+    if (!contactIdParam || !contextTypeParam || !contextIdParam) {
+      return;
+    }
+
+    const queryKey = `${contactIdParam}-${contextTypeParam}-${contextIdParam}`;
+    if (handledQueryParamRef.current === queryKey) {
+      return;
+    }
+
+    handledQueryParamRef.current = queryKey;
+
+    const initContextualChat = async () => {
+      try {
+        await openContextualConversation(contactIdParam, {
+          contextType: contextTypeParam,
+          contextId: contextIdParam,
+        });
+      } catch {
+        setContactSelectionError("No se pudo iniciar la conversación de la postulación.");
+      }
+    };
+
+    void initContextualChat();
+  }, [openContextualConversation]);
 
   const {
     data: messages = [],
@@ -162,48 +243,7 @@ export function ChatWorkspace({
   const showConnectionDialog =
     isError && !dismissedError;
 
-  useEffect(() => {
-    if (!selectedId) return;
-
-    let socket: ReturnType<typeof getChatSocket>;
-
-    try {
-      socket = getChatSocket();
-    } catch (error) {
-      console.error('No se pudo conectar al chat:', error);
-      return;
-    }
-
-    const handleNewMessage = (message: SocketMessage) => {
-      if (message.conversationId) {
-        void queryClient.invalidateQueries({
-          queryKey: messagesQueryKey(message.conversationId),
-        });
-      }
-
-      void queryClient.invalidateQueries({
-        queryKey: ['conversations'],
-      });
-    };
-
-    const joinConversation = () => {
-      socket.emit('conversation:join', {
-        conversationId: selectedId,
-      });
-    };
-
-    socket.on('connect', joinConversation);
-    socket.on('message:new', handleNewMessage);
-
-    if (socket.connected) {
-      joinConversation();
-    }
-
-    return () => {
-      socket.off('connect', joinConversation);
-      socket.off('message:new', handleNewMessage);
-    };
-  }, [selectedId, queryClient]);
+  const { status: connectionStatus, refreshMessages } = useChatConnection(selectedRequestId ? null : selectedId);
 
   const handleBackToList = () => {
     setSelectedRequestId(null);
@@ -238,15 +278,6 @@ export function ChatWorkspace({
     setIsSearchModalOpen(true);
   };
 
-  /**
-   * HU-09: Iniciar una conversación según el estado
-   * de conexión entre los usuarios.
-   *
-   * 1. Si existe un chat, abrirlo.
-   * 2. Si la conexión está aceptada, crear el chat.
-   * 3. Si no está aceptada, mostrar el diálogo
-   *    para enviar una solicitud.
-   */
   const handleStartChatWithContact = async (
     contactUser: User,
   ): Promise<void> => {
@@ -262,6 +293,7 @@ export function ChatWorkspace({
     }
 
     setIsSearchModalOpen(false);
+    setSelectedContactForRequest(null);
     setRequestError(null);
     setRequestSuccess(null);
     setContactSelectionError(null);
@@ -275,7 +307,13 @@ export function ChatWorkspace({
         return;
       }
 
-      // Consultar el estado actualizado desde el backend.
+      if (contactUser.canChatByApplication === true) {
+        await startConversationWithContact(contactUser);
+        setSelectedRequestId(null);
+        setResponseError(null);
+        return;
+      }
+
       const result = await refetchAcceptedConnections();
 
       if (result.isError) {
@@ -299,20 +337,14 @@ export function ChatWorkspace({
       );
 
       if (hasAcceptedConnection) {
-        // Reutilizar la lógica existente de TanStack Query.
         await startConversationWithContact(contactUser);
-
-        // Asegurar que se muestre la conversación.
         setSelectedRequestId(null);
         setResponseError(null);
         return;
       }
 
-      // No existe conexión aceptada.
       setSelectedContactForRequest(contactUser);
     } catch (error) {
-      // No mostrar el diálogo de solicitud si falla
-      // la consulta o la creación de la conversación.
       setSelectedContactForRequest(null);
 
       setContactSelectionError(
@@ -403,15 +435,15 @@ export function ChatWorkspace({
     }
   };
 
-const handleSendMessage = async (
-  content: string,
-  file?: File | null
-): Promise<void> => {
-  if (!selectedId || selectedRequestId || isSending) {
-    throw new Error(
-      "No hay una conversación seleccionada o ya se está enviando un mensaje."
-    );
-  }
+  const handleSendMessage = async (
+    content: string,
+    file?: File | null
+  ): Promise<void> => {
+    if (!selectedId || selectedRequestId || isSending || connectionStatus !== "connected") {
+      throw new Error(
+        "No hay una conversación seleccionada o ya se está enviando un mensaje."
+      );
+    }
 
     const trimmedContent = content.trim();
 
@@ -432,15 +464,16 @@ const handleSendMessage = async (
         );
       } else {
         const socket = getChatSocket();
-
         if (!socket.connected) {
-          throw new Error(
-            'No hay conexión con el chat. Comprueba la conexión e inténtalo de nuevo.',
-          );
+          throw new Error("No estás conectado al servidor de chat. Revisa tu conexión a internet.");
         }
 
         const response = await new Promise<SocketSendResponse>(
           (resolve, reject) => {
+            const timeoutId = setTimeout(() => {
+              reject(new Error('El servidor tardó demasiado en responder. Intenta de nuevo.'));
+            }, 10000);
+
             socket.emit(
               'message:send',
               {
@@ -448,36 +481,28 @@ const handleSendMessage = async (
                 content: trimmedContent,
               },
               (result: SocketSendResponse) => {
-                if (result?.ok && result.message) {
-                  resolve(result);
+                clearTimeout(timeoutId);
+                const acknowledgement = result?.data ?? result;
+                if (acknowledgement?.ok && acknowledgement.message) {
+                  resolve(acknowledgement);
                 } else {
-                  reject(
-                    new Error(
-                      result?.error || 'No se pudo enviar el mensaje.',
-                    ),
-                  );
+                  reject(new Error(acknowledgement?.error || 'No se pudo enviar el mensaje.'));
                 }
               },
             );
           },
         );
 
-        const message = response.message!;
-
         updateConversationLastMessage(
           selectedId,
-          message.content || trimmedContent,
-          message.senderId || currentUserId,
+          response.message?.content || trimmedContent,
+          response.message?.senderId || currentUserId,
         );
       }
 
-      await queryClient.invalidateQueries({
-        queryKey: messagesQueryKey(selectedId),
-      });
+      await queryClient.invalidateQueries({ queryKey: ['chat', 'conversations'] });
+      refreshMessages(selectedId);
 
-      await queryClient.invalidateQueries({
-        queryKey: ['conversations'],
-      });
     } finally {
       setIsSending(false);
     }
@@ -492,7 +517,7 @@ const handleSendMessage = async (
 
   const handleUnblockUser = async (): Promise<void> => {
     if (!selectedConversation) return;
-   try {
+    try {
       if (!selectedConversation.contact) return;
       await unblockUser(selectedConversation.contact.id);
     } catch (error) {
@@ -513,6 +538,10 @@ const handleSendMessage = async (
   };
 
   return (
+    <>
+      {(!selectedConversation || selectedRequest) && connectionStatus !== "connected" && (
+        <ChatConnectionBanner key={connectionStatus} status={connectionStatus} />
+      )}
     <div className="relative flex size-full min-h-0 max-w-full flex-1 overflow-hidden bg-surface-soft font-sans">
       <aside
         className={cn(
@@ -549,12 +578,12 @@ const handleSendMessage = async (
             activeFilter={activeFilter}
             searchQuery={searchQuery}
             onSelectConversation={handleSelectChat}
-onSelectRequest={handleSelectRequest}
-onFilterChange={setActiveFilter}
-onSearchChange={setSearchQuery}
-onLoadMore={loadMore}
-onStartNewChat={handleStartNewChat}
-/>
+            onSelectRequest={handleSelectRequest}
+            onFilterChange={setActiveFilter}
+            onSearchChange={setSearchQuery}
+            onLoadMore={loadMore}
+            onStartNewChat={handleStartNewChat}
+          />
         )}
       </aside>
 
@@ -584,6 +613,7 @@ onStartNewChat={handleStartNewChat}
           />
         ) : selectedConversation ? (
           <ChatRoom
+            connectionStatus={connectionStatus}
             isCompact={isCompact}
             key={selectedConversation.id}
             conversation={selectedConversation}
@@ -601,7 +631,6 @@ onStartNewChat={handleStartNewChat}
             onRetryMessages={() => {
               void retryMessages();
             }}
-
             onBlockUser={handleBlockUser}
             onUnblockUser={handleUnblockUser}
           />
@@ -680,5 +709,6 @@ onStartNewChat={handleStartNewChat}
         </div>
       )}
     </div>
+    </>
   );
 }

@@ -25,7 +25,16 @@ describe("RequestTable: columnas fijas", () => {
     render(<RequestTable items={[item({})]} />);
 
     expect(screen.getByRole("table")).toHaveClass("table-fixed");
-    expect(columnWidths()).toEqual(["w-[22%]", "w-[10%]", "w-[15%]", "w-[14%]", "w-[9%]", "w-[13%]", "w-[9%]", "w-[8%]"]);
+    expect(columnWidths()).toEqual(["w-[19%]", "w-[9%]", "w-[13%]", "w-[11%]", "w-[10%]", "w-[16%]", "w-[13%]", "w-[9%]"]);
+  });
+
+  it("deja partir el texto de Enviada y de la insignia de Estado, que se montaban sobre la columna vecina", () => {
+    const { container } = render(
+      <RequestTable items={[item({ status: "approved", validation: { result: "auto_approved", matchScore: 97, reason: null } })]} />,
+    );
+
+    expect(container.querySelector('[data-label="Enviada"]')?.className).toContain("whitespace-normal");
+    expect(screen.getByText("Aprobada automáticamente").className).not.toContain("whitespace-nowrap");
   });
 
   it("los anchos no cambian aunque cambie el contenido de las filas", () => {

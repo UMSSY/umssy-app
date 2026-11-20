@@ -1,3 +1,4 @@
+import { ProfileSkillsEvents } from '../../../common/profile-skills/profile-skills-events.service.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CityNotFoundException } from '../exceptions/city-not-found.exception.js';
 import { ProfileNotFoundException } from '../exceptions/profile-not-found.exception.js';
@@ -46,7 +47,9 @@ describe('ProfileService', () => {
   beforeEach(() => {
     profileRepository = { findByUserId: vi.fn(), update: vi.fn() };
     cityCatalogService = {
-      listCities: vi.fn().mockResolvedValue([{ id: cityId, title: 'Cochabamba' }]),
+      listCities: vi
+        .fn()
+        .mockResolvedValue([{ id: cityId, title: 'Cochabamba' }]),
       exists: vi.fn(),
       ensureCityExists: vi.fn().mockResolvedValue(undefined),
     };
@@ -54,6 +57,7 @@ describe('ProfileService', () => {
       profileRepository as unknown as ProfileRepository,
       cityCatalogService as unknown as CityCatalogService,
       new ProfileMapper(),
+      new ProfileSkillsEvents(),
     );
   });
 
@@ -74,7 +78,9 @@ describe('ProfileService', () => {
     it('throws when the user does not exist', async () => {
       profileRepository.findByUserId.mockResolvedValue(null);
 
-      await expect(service.getProfile(userId)).rejects.toBeInstanceOf(ProfileNotFoundException);
+      await expect(service.getProfile(userId)).rejects.toBeInstanceOf(
+        ProfileNotFoundException,
+      );
     });
   });
 
@@ -87,56 +93,74 @@ describe('ProfileService', () => {
       const response = await service.updatePersonalInfo(userId, personalInfo);
 
       expect(cityCatalogService.ensureCityExists).toHaveBeenCalledWith(cityId);
-      expect(profileRepository.update).toHaveBeenCalledWith(userId, personalInfo);
+      expect(profileRepository.update).toHaveBeenCalledWith(
+        userId,
+        personalInfo,
+      );
       expect(response.firstName).toBe('Valeria');
     });
 
     it('throws when the city does not exist', async () => {
       profileRepository.findByUserId.mockResolvedValue(record);
-      cityCatalogService.ensureCityExists.mockRejectedValue(new CityNotFoundException());
-
-      await expect(service.updatePersonalInfo(userId, personalInfo)).rejects.toBeInstanceOf(
-        CityNotFoundException,
+      cityCatalogService.ensureCityExists.mockRejectedValue(
+        new CityNotFoundException(),
       );
+
+      await expect(
+        service.updatePersonalInfo(userId, personalInfo),
+      ).rejects.toBeInstanceOf(CityNotFoundException);
       expect(profileRepository.update).not.toHaveBeenCalled();
     });
 
     it('throws when the user does not exist', async () => {
       profileRepository.findByUserId.mockResolvedValue(null);
 
-      await expect(service.updatePersonalInfo(userId, personalInfo)).rejects.toBeInstanceOf(
-        ProfileNotFoundException,
-      );
+      await expect(
+        service.updatePersonalInfo(userId, personalInfo),
+      ).rejects.toBeInstanceOf(ProfileNotFoundException);
       expect(profileRepository.update).not.toHaveBeenCalled();
     });
   });
 
   describe('updatePresentation', () => {
-    const presentation = { headline: 'Junior web developer', aboutMe: 'Graduate.' };
+    const presentation = {
+      headline: 'Junior web developer',
+      aboutMe: 'Graduate.',
+    };
 
     it('saves the presentation', async () => {
       profileRepository.findByUserId.mockResolvedValue(record);
-      profileRepository.update.mockResolvedValue({ ...record, aboutMe: 'Graduate.' });
+      profileRepository.update.mockResolvedValue({
+        ...record,
+        aboutMe: 'Graduate.',
+      });
 
       const response = await service.updatePresentation(userId, presentation);
 
-      expect(profileRepository.update).toHaveBeenCalledWith(userId, presentation);
+      expect(profileRepository.update).toHaveBeenCalledWith(
+        userId,
+        presentation,
+      );
       expect(response.aboutMe).toBe('Graduate.');
     });
 
     it('throws when the user does not exist', async () => {
       profileRepository.findByUserId.mockResolvedValue(null);
 
-      await expect(service.updatePresentation(userId, presentation)).rejects.toBeInstanceOf(
-        ProfileNotFoundException,
-      );
+      await expect(
+        service.updatePresentation(userId, presentation),
+      ).rejects.toBeInstanceOf(ProfileNotFoundException);
     });
   });
 
   it('lists the cities', async () => {
-    cityCatalogService.listCities.mockResolvedValue([{ id: cityId, title: 'Cochabamba' }]);
+    cityCatalogService.listCities.mockResolvedValue([
+      { id: cityId, title: 'Cochabamba' },
+    ]);
 
-    await expect(service.listCities()).resolves.toEqual([{ id: cityId, title: 'Cochabamba' }]);
+    await expect(service.listCities()).resolves.toEqual([
+      { id: cityId, title: 'Cochabamba' },
+    ]);
     expect(cityCatalogService.listCities).toHaveBeenCalled();
   });
 });

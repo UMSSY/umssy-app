@@ -15,7 +15,9 @@ export const mentorDirectoryQuerySchema = z
       .enum(['true', 'false'])
       .default('false')
       .transform((value) => value === 'true'),
-    sort: z.enum(['name_asc', 'name_desc', 'affinity']).default('name_asc'),
+    sort: z
+      .enum(['default', 'name_asc', 'name_desc', 'affinity'])
+      .default('default'),
   })
   .strict();
 

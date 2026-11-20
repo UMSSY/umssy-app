@@ -1,25 +1,25 @@
 import {
-    Body,
-    Controller,
-    Delete,
-    HttpCode,
-    HttpStatus,
-    Param,
-    Post,
-    UseGuards,
-    UseInterceptors,
+  Body,
+  Controller,
+  Delete,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+  UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import {
-    ApiBadRequestResponse,
-    ApiBearerAuth,
-    ApiBody,
-    ApiConflictResponse,
-    ApiCreatedResponse,
-    ApiNoContentResponse,
-    ApiNotFoundResponse,
-    ApiOperation,
-    ApiParam,
-    ApiTags,
+  ApiBadRequestResponse,
+  ApiBearerAuth,
+  ApiBody,
+  ApiConflictResponse,
+  ApiCreatedResponse,
+  ApiNoContentResponse,
+  ApiNotFoundResponse,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
 } from '@nestjs/swagger';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { Roles } from '../../../common/decorators/roles.decorator.js';
@@ -31,9 +31,9 @@ import type { AuthenticatedUser } from '../../../common/types/authenticated-user
 import { toApiBody } from '../../../common/utils/to-api-body.js';
 import { BlockService } from '../services/block.service.js';
 import {
-    blockUserIdField,
-    blockUserSchema,
-    type BlockUserDto,
+  blockUserIdField,
+  blockUserSchema,
+  type BlockUserDto,
 } from '../requests/block-user.schema.js';
 import type { BlockResponse } from '../responses/block.response.js';
 
@@ -44,16 +44,20 @@ import type { BlockResponse } from '../responses/block.response.js';
 @Roles('titulado', 'estudiante', 'mentor', 'empresa')
 @UseInterceptors(ResponseInterceptor)
 export class BlockController {
-    constructor(private readonly blockService: BlockService) {}
+  constructor(private readonly blockService: BlockService) {}
 
-    @Post()
-    @HttpCode(HttpStatus.CREATED)
-    @ApiOperation({ summary: 'Bloquear a un usuario del chat' })
-    @ApiBody(toApiBody(blockUserSchema))
-    @ApiCreatedResponse({ description: 'Usuario bloqueado: { blockedUserId, createdAt }' })
-    @ApiBadRequestResponse({ description: 'Identificador inválido o intento de bloquearse a sí mismo' })
-    @ApiNotFoundResponse({ description: 'El usuario a bloquear no existe' })
-    @ApiConflictResponse({ description: 'El usuario ya está bloqueado' })
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Bloquear a un usuario del chat' })
+  @ApiBody(toApiBody(blockUserSchema))
+  @ApiCreatedResponse({
+    description: 'Usuario bloqueado: { blockedUserId, createdAt }',
+  })
+  @ApiBadRequestResponse({
+    description: 'Identificador inválido o intento de bloquearse a sí mismo',
+  })
+  @ApiNotFoundResponse({ description: 'El usuario a bloquear no existe' })
+  @ApiConflictResponse({ description: 'El usuario ya está bloqueado' })
   block(
     @Body(new ZodValidationPipe(blockUserSchema)) body: BlockUserDto,
     @CurrentUser() user: AuthenticatedUser,
@@ -67,7 +71,9 @@ export class BlockController {
   @ApiParam({ name: 'userId', description: 'UUID del usuario a desbloquear' })
   @ApiNoContentResponse({ description: 'Usuario desbloqueado' })
   @ApiBadRequestResponse({ description: 'Identificador inválido' })
-  @ApiNotFoundResponse({ description: 'No existía un bloqueo para este usuario' })
+  @ApiNotFoundResponse({
+    description: 'No existía un bloqueo para este usuario',
+  })
   async unblock(
     @Param('userId', new ZodValidationPipe(blockUserIdField)) userId: string,
     @CurrentUser() user: AuthenticatedUser,

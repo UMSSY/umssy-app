@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common';
+import { Logger, Optional } from '@nestjs/common';
 import {
   OnGatewayConnection,
   OnGatewayDisconnect,
@@ -16,11 +16,14 @@ import { ChatService } from '../services/chat.service.js';
 import { UserPresenceService } from '../services/user-presence.service.js';
 import { MessageService } from '../services/message.service.js';
 import { EventRoomService } from '../services/event-room.service.js';
+import { ChatVisibilityService } from '../services/chat-visibility.service.js';
 import { NotRegisteredForEventException } from '../exceptions/not-registered-for-event.exception.js';
-import type {
-  SocketMessagePayload,
-  EventRoomJoinPayload,
-} from '../types/chat-gateway.types.js';
+import { eventRoomJoinSchema } from '../requests/event-room-join.request.js';
+import type { SocketMessagePayload } from '../types/socket-message-payload.types.js';
+import type { EventRoomJoinPayload } from '../types/event-room-join-payload.types.js';
+import type { EventRoomJoinedPayload } from '../types/event-room-joined-payload.types.js';
+import type { EventRoomErrorPayload } from '../types/event-room-error-payload.types.js';
+import type { MessageResponse } from '../responses/message.response.js';
 
 @WebSocketGateway({
   namespace: '/chat',
@@ -44,6 +47,8 @@ export class ChatGateway
     private readonly userPresenceService: UserPresenceService,
     private readonly messageService: MessageService,
     private readonly eventRoomService: EventRoomService,
+    @Optional()
+    private readonly chatVisibilityService?: ChatVisibilityService,
   ) {}
 
   afterInit(server: Server) {
@@ -85,6 +90,8 @@ export class ChatGateway
     }
 
     try {
+      await client.join(`user:${user.id}`);
+
       const conversationIds = await this.chatService.getActiveConversationIds(
         user.id,
       );
@@ -106,6 +113,8 @@ export class ChatGateway
   async handleDisconnect(client: Socket) {
     const user = client.data.user;
     if (!user) return;
+
+    this.chatVisibilityService?.removeSocket(user.id, client.id);
 
     try {
       await this.userPresenceService.markOffline(user.id);
@@ -148,6 +157,13 @@ export class ChatGateway
       }
 
       await client.join(body.conversationId);
+      this.chatVisibilityService?.setConversationVisibility(
+        user.id,
+        client.id,
+        body.conversationId,
+        true,
+        true,
+      );
       return { ok: true };
     } catch (error) {
       this.logger.error(
@@ -162,27 +178,70 @@ export class ChatGateway
     }
   }
 
+  @SubscribeMessage('visibility:changed')
+  handleVisibilityChanged(
+    @ConnectedSocket() client: Socket,
+    @MessageBody()
+    body?: {
+      conversationId?: string | null;
+      isFocused?: boolean;
+      isOpen?: boolean;
+      visible?: boolean;
+    },
+  ) {
+    const user = client.data.user;
+    if (!user) return { ok: false };
+
+    const conversationId =
+      typeof body?.conversationId === 'string' ? body.conversationId : null;
+    const isFocused =
+      typeof body?.isFocused === 'boolean'
+        ? body.isFocused
+        : (body?.visible ?? true);
+    const isOpen = typeof body?.isOpen === 'boolean' ? body.isOpen : isFocused;
+
+    this.chatVisibilityService?.setConversationVisibility(
+      user.id,
+      client.id,
+      conversationId,
+      Boolean(isFocused),
+      Boolean(isOpen),
+    );
+
+    return { ok: true };
+  }
+
   @SubscribeMessage('event_room:join')
   async handleEventRoomJoin(
     @ConnectedSocket() client: Socket,
     @MessageBody() payload: EventRoomJoinPayload,
   ) {
     const user = client.data.user;
-    if (!user || typeof payload?.eventId !== 'string') {
+    const parsedPayload = eventRoomJoinSchema.safeParse(payload);
+
+    if (!user) {
       return {
         ok: false,
-        error: 'Identificador de evento inválido',
+        error: 'Sesión no válida',
+      };
+    }
+
+    if (!parsedPayload.success) {
+      client.emit('event_room:error', { code: 'generic_error' });
+      return {
+        ok: false,
+        error: 'Identificador de inscripción inválido',
       };
     }
 
     try {
-      const conversationId = await this.eventRoomService.joinEventRoom(
+      const room = await this.eventRoomService.joinEventRoom(
         user.id,
-        payload.eventId,
+        parsedPayload.data.registrationId,
       );
-      await client.join(conversationId);
-      client.emit('event_room:joined', { conversationId });
-      return { ok: true, conversationId };
+      await client.join(room.conversationId);
+      client.emit('event_room:joined', room);
+      return { ok: true, conversationId: room.conversationId };
     } catch (error) {
       if (error instanceof NotRegisteredForEventException) {
         client.emit('event_room:error', { code: 'not_registered' });
@@ -194,6 +253,24 @@ export class ChatGateway
         error:
           error instanceof Error ? error.message : 'Error al unirse a la sala',
       };
+    }
+  }
+
+  broadcastMessage(message: MessageResponse): void {
+    this.server.to(message.conversationId).emit('message:new', message);
+  }
+
+  notifyUser(userId: string, event: string, payload: unknown): void {
+    const room = `user:${userId}`;
+
+    this.logger.log(`[Socket] Enviando ${event} al usuario ${userId}`);
+
+    this.server.to(room).emit(event, payload);
+  }
+
+  joinUsersToConversation(userIds: string[], conversationId: string): void {
+    for (const id of userIds) {
+      this.server.in(`user:${id}`).socketsJoin(conversationId);
     }
   }
 
@@ -222,7 +299,7 @@ export class ChatGateway
         content: body.content,
       });
 
-      this.server.to(body.conversationId).emit('message:new', message);
+      this.broadcastMessage(message);
 
       return {
         ok: true,

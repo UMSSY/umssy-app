@@ -54,7 +54,9 @@ describe('CvMapper', () => {
   });
 
   it('keeps an older cv flagged as not current', () => {
-    expect(mapper.toResponse(buildRecord({ isCurrent: false }))?.isCurrent).toBe(false);
+    expect(
+      mapper.toResponse(buildRecord({ isCurrent: false }))?.isCurrent,
+    ).toBe(false);
   });
 
   it('returns null when the user has no cv', () => {
@@ -78,7 +80,12 @@ describe('CvMapper', () => {
   });
 
   it('leaves out of the page the records without a cv', () => {
-    const page = mapper.toPage([buildRecord(), buildRecord({ id: null })], 1, 1, 5);
+    const page = mapper.toPage(
+      [buildRecord(), buildRecord({ id: null })],
+      1,
+      1,
+      5,
+    );
 
     expect(page.items).toHaveLength(1);
   });
@@ -98,14 +105,20 @@ describe('CvMapper', () => {
   });
 
   it('keeps the original file name chosen by the user in the response', () => {
-    const response = mapper.toResponse(buildRecord({ fileName: 'Mi CV Año 2026.pdf' }));
+    const response = mapper.toResponse(
+      buildRecord({ fileName: 'Mi CV Año 2026.pdf' }),
+    );
 
     expect(response?.fileName).toBe('Mi CV Año 2026.pdf');
   });
 
   it('builds an ascii file name without accents or spaces', () => {
     const response = mapper.toResponse(
-      buildRecord({ fileName: null, firstName: 'José Luis', lastName: 'Pérez Núñez' }),
+      buildRecord({
+        fileName: null,
+        firstName: 'José Luis',
+        lastName: 'Pérez Núñez',
+      }),
     );
 
     expect(response?.fileName).toBe('CV-Jose-Luis-Perez-Nunez.pdf');
@@ -113,7 +126,11 @@ describe('CvMapper', () => {
 
   it('removes characters that are not valid in a header file name', () => {
     const response = mapper.toResponse(
-      buildRecord({ fileName: null, firstName: ' "Ana" ', lastName: "O'Brien;" }),
+      buildRecord({
+        fileName: null,
+        firstName: ' "Ana" ',
+        lastName: "O'Brien;",
+      }),
     );
 
     expect(response?.fileName).toBe('CV-Ana-O-Brien.pdf');
@@ -140,9 +157,9 @@ describe('CvMapper', () => {
   it('falls back to the generated name on download when none is stored', () => {
     const content = Buffer.from([0x25, 0x50, 0x44, 0x46]);
 
-    expect(mapper.toFileDownload(content, buildRecord({ fileName: null })).fileName).toBe(
-      'CV-Test-User.pdf',
-    );
+    expect(
+      mapper.toFileDownload(content, buildRecord({ fileName: null })).fileName,
+    ).toBe('CV-Test-User.pdf');
   });
 
   it('makes the stored name safe for the content-disposition header', () => {

@@ -38,17 +38,18 @@ describe('useEventRoom', () => {
     expect(result.current.conversationId).toBeNull();
     expect(result.current.isJoined).toBe(false);
     expect(result.current.error).toBeNull();
+    expect(result.current.room).toBeNull();
   });
 
-  it('should emit the join event with the event id', () => {
+  it('should emit the join event with the registration id', () => {
     const { result } = renderHook(() => useEventRoom());
 
     act(() => {
-      result.current.joinEventRoom('event-1');
+      result.current.joinEventRoom('registration-1');
     });
 
     expect(mocks.socket.emit).toHaveBeenCalledWith('event_room:join', {
-      eventId: 'event-1',
+      registrationId: 'registration-1',
     });
   });
 
@@ -56,12 +57,25 @@ describe('useEventRoom', () => {
     const { result } = renderHook(() => useEventRoom());
 
     act(() => {
-      mocks.handlers.get('event_room:joined')?.({ conversationId: 'conv-1' });
+      mocks.handlers.get('event_room:joined')?.({
+        conversationId: 'conv-1',
+        eventId: 'event-1',
+        name: 'Taller de React',
+        createdAt: '2026-11-01T10:00:00.000Z',
+        participants: [{ id: 'user-1', fullName: 'Maria Fernandez' }],
+      });
     });
 
     expect(result.current.conversationId).toBe('conv-1');
     expect(result.current.isJoined).toBe(true);
     expect(result.current.error).toBeNull();
+    expect(result.current.room).toEqual({
+      conversationId: 'conv-1',
+      eventId: 'event-1',
+      name: 'Taller de React',
+      createdAt: '2026-11-01T10:00:00.000Z',
+      participants: [{ id: 'user-1', fullName: 'Maria Fernandez' }],
+    });
   });
 
   it('should set the error state for a generic room error', () => {
@@ -88,14 +102,20 @@ describe('useEventRoom', () => {
         description: 'No tienes una inscripción confirmada para este evento.',
       }),
     );
-    expect(result.current.error).toBeNull();
+    expect(result.current.error).toBe('not_registered');
   });
 
   it('should reset the state when leaving the room', () => {
     const { result } = renderHook(() => useEventRoom());
 
     act(() => {
-      mocks.handlers.get('event_room:joined')?.({ conversationId: 'conv-1' });
+      mocks.handlers.get('event_room:joined')?.({
+        conversationId: 'conv-1',
+        eventId: 'event-1',
+        name: 'Taller de React',
+        createdAt: '2026-11-01T10:00:00.000Z',
+        participants: [],
+      });
     });
 
     act(() => {
@@ -104,6 +124,7 @@ describe('useEventRoom', () => {
 
     expect(result.current.conversationId).toBeNull();
     expect(result.current.isJoined).toBe(false);
+    expect(result.current.room).toBeNull();
   });
 
   it('should remove the socket listeners on unmount', () => {

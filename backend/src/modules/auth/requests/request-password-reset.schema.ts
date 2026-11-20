@@ -5,4 +5,6 @@ export const requestPasswordResetSchema = z.object({
   email: z.string().email(),
 });
 
-export class RequestPasswordResetDto extends createZodDto(requestPasswordResetSchema) {}
+export class RequestPasswordResetDto extends createZodDto(
+  requestPasswordResetSchema,
+) {}

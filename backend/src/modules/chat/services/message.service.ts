@@ -1,9 +1,23 @@
-import { Injectable } from '@nestjs/common';
+import { MessageMapper } from '../mappers/message.mapper.js';
+
+import {
+  Inject,
+  Injectable,
+  Logger,
+  Optional,
+  forwardRef,
+} from '@nestjs/common';
 import { MessageRepository } from '../repositories/message.repository.js';
 import { ConversationRepository } from '../repositories/conversation.repository.js';
 import { ConversationParticipantRepository } from '../repositories/conversation-participant.repository.js';
+import { UserLookupRepository } from '../repositories/user-lookup.repository.js';
 import { MessageStatusService } from './message-status.service.js';
+import { ChatRolePolicyService } from './chat-role-policy.service.js';
 import { BlockService } from './block.service.js';
+import { ChatVisibilityService } from './chat-visibility.service.js';
+import { NotificationsService } from '../../notifications/services/notifications.service.js';
+import { NotificationType } from '../../notifications/types/notification-type.enum.js';
+import { EventsService } from '../../events/services/events.service.js';
 import {
   ConversationNotFoundException,
   InvalidMessageContentException,
@@ -16,13 +30,30 @@ import { countCharacters } from '../utils/unicode-counter.js';
 
 @Injectable()
 export class MessageService {
+  private readonly logger = new Logger(MessageService.name);
+
   constructor(
     private readonly messageRepository: MessageRepository,
     private readonly conversationRepository: ConversationRepository,
     private readonly participantRepository: ConversationParticipantRepository,
     private readonly messageStatusService: MessageStatusService,
     private readonly blockService: BlockService,
-    ) {}
+    private readonly chatRolePolicyService: ChatRolePolicyService,
+    private readonly messageMapper: MessageMapper,
+    @Optional()
+    @Inject(forwardRef(() => NotificationsService))
+    private readonly notificationsService?: NotificationsService,
+    @Optional()
+    @Inject(forwardRef(() => ChatVisibilityService))
+    private readonly chatVisibilityService?: ChatVisibilityService,
+    @Optional()
+    @Inject(forwardRef(() => UserLookupRepository))
+    private readonly userLookupRepository?: UserLookupRepository,
+    @Optional()
+    @Inject(forwardRef(() => EventsService))
+    private readonly eventsService?: EventsService,
+  ) {}
+
   async send(params: {
     conversationId: string;
     senderId: string;
@@ -31,6 +62,7 @@ export class MessageService {
     const conversation = await this.conversationRepository.findById(
       params.conversationId,
     );
+
     if (!conversation) {
       throw new ConversationNotFoundException();
     }
@@ -40,6 +72,7 @@ export class MessageService {
         params.conversationId,
         params.senderId,
       );
+
     if (!participant) {
       throw new NotConversationParticipantException();
     }
@@ -48,11 +81,26 @@ export class MessageService {
       conversation,
       params.senderId,
     );
+
     if (
       otherParticipantId &&
-      (await this.blockService.isBlockedBetween(params.senderId, otherParticipantId))
+      (await this.blockService.isBlockedBetween(
+        params.senderId,
+        otherParticipantId,
+      ))
     ) {
       throw new UserBlockedException();
+    }
+
+    if (otherParticipantId) {
+      await this.chatRolePolicyService.assertCanCommunicate(
+        params.senderId,
+        otherParticipantId,
+        {
+          contextType: conversation.contextType ?? undefined,
+          contextId: conversation.contextId ?? undefined,
+        },
+      );
     }
 
     const content = this.sanitize(params.content);
@@ -93,17 +141,143 @@ export class MessageService {
       now,
     );
 
-    return {
-      id: created.id,
-      conversationId: created.conversationId,
-      senderId: created.senderId,
-      content: created.content ?? '',
-      timestamp: created.sentAt.toISOString(),
-      createdAt: created.createdAt.toISOString(),
-      status: 'sent',
-      isAttachment: false,
-      attachmentType: null,
-    };
+    await this.dispatchMessageNotification({
+      conversationId: params.conversationId,
+      senderId: params.senderId,
+      previewText: content,
+      conversation,
+    });
+
+    return this.messageMapper.toResponse(created);
+  }
+
+  async dispatchMessageNotification(params: {
+    conversationId: string;
+    senderId: string;
+    previewText: string;
+    conversation?: {
+      id: string;
+      eventId?: string | null;
+      userAId?: string | null;
+      userBId?: string | null;
+    } | null;
+  }): Promise<void> {
+    if (!this.notificationsService) return;
+
+    try {
+      const conversation =
+        params.conversation ??
+        (await this.conversationRepository.findById(params.conversationId));
+      if (!conversation) return;
+
+      const sender = await this.userLookupRepository?.findActiveById(
+        params.senderId,
+      );
+      const senderName = sender
+        ? `${sender.firstName} ${sender.lastName}`.trim()
+        : 'Usuario';
+
+      const isGroup = Boolean(conversation.eventId);
+      let recipientIds: string[] = [];
+
+      if (isGroup) {
+        const participants =
+          await this.conversationRepository.findParticipantsByConversationId(
+            params.conversationId,
+          );
+        recipientIds = participants
+          .map((p) => p.userId)
+          .filter((uid) => uid !== params.senderId);
+      } else {
+        const otherId = this.getOtherParticipantId(
+          conversation,
+          params.senderId,
+        );
+        if (otherId) {
+          recipientIds = [otherId];
+        }
+      }
+
+      if (recipientIds.length === 0) return;
+
+      const eligibleRecipients: string[] = [];
+      let lastRecipientCount = 1;
+
+      for (const recipientId of recipientIds) {
+        if (
+          await this.blockService.isBlockedBetween(params.senderId, recipientId)
+        ) {
+          continue;
+        }
+
+        if (
+          this.chatVisibilityService?.isConversationOpen(
+            recipientId,
+            params.conversationId,
+          )
+        ) {
+          continue;
+        }
+
+        eligibleRecipients.push(recipientId);
+
+        const participant =
+          await this.participantRepository.findByConversationAndUser(
+            params.conversationId,
+            recipientId,
+          );
+        const count = await this.participantRepository.countUnread(
+          params.conversationId,
+          recipientId,
+          participant?.lastReadAt ?? null,
+        );
+        lastRecipientCount = Math.max(1, count);
+      }
+
+      if (eligibleRecipients.length === 0) return;
+
+      if (isGroup) {
+        let groupName = 'Grupo de chat';
+        if (conversation.eventId && this.eventsService) {
+          const event = await this.eventsService.findById(conversation.eventId);
+          if (event?.title) {
+            groupName = event.title;
+          }
+        }
+
+        await this.notificationsService.notify({
+          recipientIds: eligibleRecipients,
+          actorId: params.senderId,
+          type: NotificationType.CHAT_GROUP_MESSAGE,
+          payload: {
+            groupName,
+            senderName,
+            previewText: params.previewText,
+            messageCount: lastRecipientCount,
+          },
+          actionUrl: `/chat?conversationId=${params.conversationId}`,
+          groupKey: params.conversationId,
+        });
+      } else {
+        await this.notificationsService.notify({
+          recipientIds: eligibleRecipients,
+          actorId: params.senderId,
+          type: NotificationType.CHAT_MESSAGE,
+          payload: {
+            senderName,
+            previewText: params.previewText,
+            messageCount: lastRecipientCount,
+          },
+          actionUrl: `/chat?conversationId=${params.conversationId}`,
+          groupKey: params.conversationId,
+        });
+      }
+    } catch (error) {
+      this.logger.error(
+        `Failed to dispatch message notification for conversation ${params.conversationId}`,
+        error instanceof Error ? error.stack : String(error),
+      );
+    }
   }
 
   async getPage(params: {
@@ -117,6 +291,7 @@ export class MessageService {
         params.conversationId,
         params.userId,
       );
+
     if (!participant) {
       throw new NotConversationParticipantException();
     }
@@ -128,69 +303,7 @@ export class MessageService {
     });
 
     return {
-      data: page.data.map((m) => {
-        const rawContent = m.content ?? '';
-        const rawAttachments = (m as {
-          attachments?: Array<{
-            id: string;
-            messageId: string;
-            typeId: string;
-            fileName: string;
-            mimeType: string | null;
-            fileSize: number | null;
-            url: string | null;
-            thumbnailUrl: string | null;
-            createdAt: Date;
-            type?: { title: string } | null;
-          }>;
-        }).attachments;
-
-        const firstAttachment = rawAttachments?.[0];
-        const isAttachment = Boolean(
-          firstAttachment || rawContent.startsWith('[Archivo] '),
-        );
-        const content = rawContent.startsWith('[Archivo] ')
-          ? rawContent.slice(10)
-          : rawContent;
-        const attachmentType = firstAttachment
-          ? (firstAttachment.type?.title?.toLowerCase() === 'image'
-              ? ('image' as const)
-              : ('file' as const))
-          : isAttachment
-            ? ('file' as const)
-            : null;
-        const statusTitle = (m as { status?: { title?: string } }).status?.title?.toLowerCase();
-        const status = statusTitle === 'read' ? ('read' as const) : ('sent' as const);
-
-        const mappedAttachments = rawAttachments?.map((att) => ({
-          id: att.id,
-          messageId: att.messageId,
-          fileName: att.fileName,
-          mimeType: att.mimeType ?? 'application/octet-stream',
-          fileSize: att.fileSize ?? 0,
-          url: att.url ?? `/api/chat/attachments/${att.id}/download`,
-          thumbnailUrl: att.thumbnailUrl,
-          type: att.type?.title ?? 'FILE',
-          createdAt:
-            att.createdAt instanceof Date
-              ? att.createdAt.toISOString()
-              : String(att.createdAt),
-        }));
-
-        return {
-          id: m.id,
-          conversationId: m.conversationId,
-          senderId: m.senderId,
-          content,
-          timestamp: m.sentAt.toISOString(),
-          createdAt: m.createdAt.toISOString(),
-          status,
-          isAttachment,
-          attachmentType,
-          attachments: mappedAttachments,
-          attachment: mappedAttachments?.[0],
-        };
-      }),
+      data: page.data.map((record) => this.messageMapper.toResponse(record)),
       hasMore: page.hasMore,
       nextCursor: page.nextCursor,
     };
@@ -202,6 +315,7 @@ export class MessageService {
         conversationId,
         userId,
       );
+
     if (!participant) {
       throw new NotConversationParticipantException();
     }
@@ -213,18 +327,25 @@ export class MessageService {
     );
   }
 
-   private getOtherParticipantId(
-    conversation: { userAId?: string | null; userBId?: string | null },
+  private getOtherParticipantId(
+    conversation: {
+      userAId?: string | null;
+      userBId?: string | null;
+    },
     senderId: string,
   ): string | null {
     const { userAId, userBId } = conversation;
-    if (!userAId || !userBId) return null;
+
+    if (!userAId || !userBId) {
+      return null;
+    }
+
     const sender = senderId.trim().toLowerCase();
+
     return userAId.toLowerCase() === sender ? userBId : userAId;
   }
 
-    private sanitize(raw: string): string {
-  
+  private sanitize(raw: string): string {
     const cleaned = raw
       .split('')
       .filter((char) => {

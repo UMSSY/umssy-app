@@ -11,7 +11,13 @@ import { AuditEventsService } from './services/audit-events.service.js';
 @Module({
   imports: [JwtAuthModule, FilesModule],
   controllers: [AuditEventsController],
-  providers: [AuditEventsService, AuditEventsRepository, AuditEventRecorderService, AuditEventsExportService, AuditEventTimelineService],
+  providers: [
+    AuditEventsService,
+    AuditEventsRepository,
+    AuditEventRecorderService,
+    AuditEventsExportService,
+    AuditEventTimelineService,
+  ],
   exports: [AuditEventRecorderService, AuditEventTimelineService],
 })
 export class AuditEventsModule {}

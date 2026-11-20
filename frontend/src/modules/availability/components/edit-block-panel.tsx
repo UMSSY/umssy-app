@@ -6,7 +6,7 @@ import { BlockAppointmentDetail } from "./block-appointment-detail";
 import { BlockForm } from "./block-form";
 import { DeleteBlockDialog } from "./delete-block-dialog";
 import { DangerZone } from "@/shared/components/layout/danger-zone";
-import { BLOCK_LOAD_ERROR, EDIT_BLOCK_HINT } from "../constants/availability.constants";
+
 import { DELETE_BLOCK_TEXT } from "../constants/delete-block.constants";
 import { useUpdateAvailabilityBlock } from "../hooks/use-update-availability-block";
 import type { CreateAvailabilityBlockInput } from "../types/create-availability-block-input.types";
@@ -19,7 +19,7 @@ export function EditBlockPanel({ block, onClose }: EditBlockPanelProps) {
   if (!block) {
     return (
       <p role="alert" className="rounded-lg border border-dashed border-border p-6 text-center text-destructive">
-        {BLOCK_LOAD_ERROR}
+        {"No se pudo cargar el bloque de disponibilidad"}
       </p>
     );
   }
@@ -58,7 +58,7 @@ export function EditBlockPanel({ block, onClose }: EditBlockPanelProps) {
           {DELETE_BLOCK_TEXT.action}
         </Button>
         {!isEditable && (
-          <p className="text-center text-xs text-muted-foreground">{EDIT_BLOCK_HINT}</p>
+          <p className="text-center text-xs text-muted-foreground">{"Solo se puede editar si el bloque no tiene ninguna cita asociada."}</p>
         )}
       </DangerZone>
 

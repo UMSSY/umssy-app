@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { useAuth } from "@/shared/contexts/auth-context";
 import { getRouteRoles } from "@/shared/utils/get-route-roles";
 

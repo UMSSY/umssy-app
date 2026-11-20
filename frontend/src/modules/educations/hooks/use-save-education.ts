@@ -1,0 +1,63 @@
+"use client";
+
+import { CONFLICT_STATUS } from "@/shared/constants/http.constants";
+
+import { useMutation } from "@tanstack/react-query";
+
+import { useRef, useState } from "react";
+import { EDUCATION_FEEDBACK_MESSAGES } from "../constants/education-feedback.constants";
+
+import { educationsService } from "../services/educations.service";
+import type { SaveEducationArguments } from "../types/save-education-arguments.types";
+import type { Feedback } from "@/modules/profile";
+import { getHttpStatus } from "@/modules/profile";
+import { getEducationSaveError } from "../utils/get-education-save-error";
+import { useInvalidateProfileCompleteness } from "@/modules/profile";
+
+export function useSaveEducation(onSaved: () => void | Promise<void>) {
+  const invalidateCompleteness = useInvalidateProfileCompleteness();
+  const mutation = useMutation({ mutationFn: (request: () => Promise<unknown>) => request(), onSuccess: invalidateCompleteness });
+  const [isSaving, setIsSaving] = useState(false);
+  const [feedback, setFeedback] = useState<Feedback | null>(null);
+  const isSavingRef = useRef(false);
+
+  async function save(...args: SaveEducationArguments): Promise<void> {
+    if (isSavingRef.current) {
+      return;
+    }
+    isSavingRef.current = true;
+    setIsSaving(true);
+    setFeedback(null);
+    const id = args[1];
+    try {
+      if (args.length === 2) {
+        await mutation.mutateAsync(() => educationsService.updateEducation(args[1], args[0]));
+      } else {
+        await mutation.mutateAsync(() => educationsService.createEducation(args[0]));
+      }
+      setFeedback({
+        type: "success",
+        message: id
+          ? EDUCATION_FEEDBACK_MESSAGES.updateSuccess
+          : EDUCATION_FEEDBACK_MESSAGES.createSuccess,
+      });
+      await onSaved();
+    } catch (error) {
+      setFeedback({
+        type: "error",
+        message: getEducationSaveError(error) ?? (id !== undefined && getHttpStatus(error) === CONFLICT_STATUS
+          ? EDUCATION_FEEDBACK_MESSAGES.updateConflict
+          : id ? EDUCATION_FEEDBACK_MESSAGES.updateError : EDUCATION_FEEDBACK_MESSAGES.createError),
+      });
+    } finally {
+      isSavingRef.current = false;
+      setIsSaving(false);
+    }
+  }
+
+  function clearFeedback() {
+    setFeedback(null);
+  }
+
+  return { save, isSaving, feedback, clearFeedback };
+}

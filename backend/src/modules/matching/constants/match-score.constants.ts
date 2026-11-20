@@ -12,7 +12,7 @@ export const SCORE_CATEGORIES = [
   'otherRequirements',
 ] as const;
 
-export type ScoreCategory = typeof SCORE_CATEGORIES[number];
+export type ScoreCategory = (typeof SCORE_CATEGORIES)[number];
 
 export type MatchScoreWeights = Readonly<Record<ScoreCategory, number>>;
 
@@ -24,4 +24,3 @@ export const MATCH_SCORE_WEIGHT_ENV_VARS: Readonly<
   experienceRequirements: 'MATCH_SCORE_WEIGHT_EXPERIENCE',
   otherRequirements: 'MATCH_SCORE_WEIGHT_OTHER',
 };
-

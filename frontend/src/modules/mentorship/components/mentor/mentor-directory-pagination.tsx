@@ -1,3 +1,4 @@
+import type { MentorDirectoryPaginationProps } from "../../types/mentor-directory-pagination-props.types";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -5,14 +6,6 @@ import {
   PaginationContent,
   PaginationItem,
 } from "@/components/ui/pagination";
-
-interface MentorDirectoryPaginationProps {
-  page: number;
-  pageSize: number;
-  totalItems: number;
-  totalPages: number;
-  onPageChange: (page: number) => void;
-}
 
 export function MentorDirectoryPagination({
   page,
@@ -49,7 +42,7 @@ export function MentorDirectoryPagination({
       </p>
 
       <Pagination aria-label="Páginas de mentores" className="mx-0 w-auto">
-        <PaginationContent className="flex-wrap justify-center gap-2">
+        <PaginationContent className="flex-nowrap justify-center gap-1">
           {totalPages > 1 && (
             <PaginationItem>
               <Button

@@ -41,13 +41,13 @@ export function ProposalReviewDialog({ open, values, cover, tutor, category, pen
               </dl>
               <p className="text-xs text-text-secondary">Duración: {formatProposalDuration(values.startTime, values.endTime)}</p>
               <div className="space-y-2 border-t border-border pt-3"><h4 className="text-xs font-semibold text-ink">DESCRIPCIÓN</h4><p className="text-sm wrap-anywhere whitespace-pre-wrap text-text-secondary">{values.description}</p></div>
-              <p className="flex justify-between gap-2 text-sm text-ink"><span>Cupo máximo</span><strong>{values.capacity} participantes</strong></p>
+              <p className="flex justify-between gap-2 text-sm text-ink"><span>Cupo del taller</span><strong>{values.capacity} participantes</strong></p>
             </div>
           </article>
           <div className="flex gap-3 rounded-lg border border-availability-border bg-availability p-4">
             <Info className="size-5 shrink-0 text-availability-foreground" aria-hidden="true" />
             <div className="space-y-1"><p className="text-sm font-semibold text-ink">Tu propuesta quedará en votación</p>
-              <p className="text-sm text-text-secondary">Necesita {Math.max(8, Math.ceil(Number(values.capacity) / 2))} apoyos: el 50 % del cupo, con un mínimo de 8. La votación dura 10 días desde el envío.</p></div>
+              <p className="text-sm text-text-secondary">La comunidad podrá apoyar tu propuesta para que se publique como taller. La votación dura 10 días desde el envío.</p></div>
           </div>
           {error && <p role="alert" className="text-sm text-danger">{error}</p>}
           {unavailable && <p role="alert" className="text-sm text-danger">No se pudo verificar la sesión o los datos del formulario. Vuelve al formulario para revisarlos.</p>}

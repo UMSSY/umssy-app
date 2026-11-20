@@ -39,14 +39,15 @@ vi.mock("@/shared/contexts/auth-context", () => ({
 }));
 
 vi.mock("next/navigation", () => ({
+  useSearchParams: () => new URLSearchParams(window.location.search),
   usePathname: () => "/dashboard",
   useRouter: () => ({
     replace: vi.fn(),
   }),
 }));
 
-vi.mock("./chat-socket", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("./chat-socket")>();
+vi.mock("../services/chat-socket", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../services/chat-socket")>();
 
   return {
     ...actual,
@@ -367,3 +368,7 @@ describe("ChatPanel", () => {
     },
   );
 });
+
+vi.mock('../hooks/use-chat-connection', () => ({
+  useChatConnection: () => ({ status: 'connected', refreshMessages: vi.fn() }),
+}));

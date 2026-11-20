@@ -7,17 +7,19 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { buildLoginUrl } from "@/modules/auth/utils/safe-next-path";
-import { useRegistration, useRegistrationActions, useRegistrationSession } from "@/modules/registrations";
-import { getRegistrationErrorMessage } from "@/modules/registrations";
+import { buildLoginUrl } from "@/modules/auth";
+import { useRegistration, useRegistrationActions, useRegistrationSession } from "@/modules/event-registrations";
+import { getRegistrationErrorMessage } from "@/modules/event-registrations";
 import { parseApiError } from "@/shared/utils/parse-api-error";
 import { RequestFeedback } from "./request-feedback";
 import { RegistrationConfirmationDialog } from "./registration-confirmation-dialog";
 import { useEventFinished } from "../hooks/use-event-finished";
 import { hasValidEventCapacity } from "../utils/has-valid-event-capacity";
 
-
-export function EventRegistrationAction({ event, onEventNotFound }: EventRegistrationActionProps) {
+export function EventRegistrationAction({
+  event,
+  onEventNotFound,
+}: EventRegistrationActionProps) {
   const router = useRouter();
   const hasFinished = useEventFinished(event);
   const session = useRegistrationSession();
@@ -74,19 +76,45 @@ export function EventRegistrationAction({ event, onEventNotFound }: EventRegistr
   return (
     <div className="space-y-2">
       <Button
-        className="mt-2 min-h-11 w-full bg-brand-red text-white hover:bg-brand-red/90 disabled:bg-muted disabled:text-text-secondary disabled:opacity-100"
+        className="mt-2 min-h-11 w-full bg-brand-red text-brand-red-foreground hover:bg-brand-red/90 disabled:bg-muted disabled:text-text-secondary disabled:opacity-100"
         disabled={disabled}
         size="lg"
         type="button"
         onClick={start}
       >
-        {action.isPending && <Loader2 className="animate-spin" aria-hidden="true" />}
+        {action.isPending && (
+          <Loader2 className="animate-spin" aria-hidden="true" />
+        )}
         {label}
       </Button>
-      {action.isSuccess && <RequestFeedback message="Inscripción confirmada." />}
-      {showInlineError && <RequestFeedback message={action.error!} isError={!isRegistered && !isClosed} onRetry={retryable && !disabled ? start : undefined} />}
-      {own.error && session && <RequestFeedback message={own.error} isError onRetry={() => { void own.retry(); }} />}
-      <RegistrationConfirmationDialog event={event} open={open} pending={action.isPending} onClose={() => setOpen(false)} onConfirm={() => { void confirm(); }} />
+      {action.isSuccess && (
+        <RequestFeedback message="Inscripción confirmada." />
+      )}
+      {showInlineError && (
+        <RequestFeedback
+          message={action.error!}
+          isError={!isRegistered && !isClosed}
+          onRetry={retryable && !disabled ? start : undefined}
+        />
+      )}
+      {own.error && session && (
+        <RequestFeedback
+          message={own.error}
+          isError
+          onRetry={() => {
+            void own.retry();
+          }}
+        />
+      )}
+      <RegistrationConfirmationDialog
+        event={event}
+        open={open}
+        pending={action.isPending}
+        onClose={() => setOpen(false)}
+        onConfirm={() => {
+          void confirm();
+        }}
+      />
     </div>
   );
 }

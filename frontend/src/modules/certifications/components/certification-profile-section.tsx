@@ -2,12 +2,12 @@
 
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { CertificationCard } from "../components/certification-card";
-import { CertificationDeleteDialog } from "../components/certification-delete-dialog";
-import { CertificationDocumentViewer } from "../components/certification-document-viewer";
-import { CertificationForm } from "../components/certification-form";
+import { CertificationCard } from "./certification-card";
+import { CertificationDeleteDialog } from "./certification-delete-dialog";
+import { CertificationDocumentViewer } from "./certification-document-viewer";
+import { CertificationForm } from "./certification-form";
 import { DEFAULT_DOCUMENT_TITLE } from "../constants/certification-form.constants";
-import { FeedbackMessage } from "@/modules/profile";
+import { FeedbackMessage, ProfileCompletenessProgress, useProfileCompletionRequest } from "@/modules/profile";
 import { RecordEditorDialog } from "@/shared/components/layout/record-editor-dialog";
 import { Plus } from "lucide-react";
 import { SectionCard } from "@/modules/profile";
@@ -43,7 +43,6 @@ export function CertificationProfileSection() {
   });
   const certificationDocument = useCertificationDocument();
   const saveCertification = useSaveCertification({
-    applyDocumentChange: certificationDocument.applyDocumentChange,
     onPersisted: () => {
       void reload();
     },
@@ -70,14 +69,12 @@ export function CertificationProfileSection() {
 
   const openEditForm = (certification: Certification) => {
     clearFeedback();
-    saveCertification.reset();
     setIsCreating(false);
     setEditing(certification);
     startNewFormVersion();
   };
 
   const closeForm = () => {
-    saveCertification.reset();
     setEditing(null);
     setIsCreating(false);
     startNewFormVersion();
@@ -85,11 +82,16 @@ export function CertificationProfileSection() {
 
   const openCreateForm = () => {
     clearFeedback();
-    saveCertification.reset();
     setEditing(null);
     setIsCreating(true);
     startNewFormVersion();
   };
+
+  useProfileCompletionRequest(
+    'certifications',
+    !isLoading && !error && !isSaving && !deleteMutation.isDeleting && !isOpeningDocument,
+    openCreateForm,
+  );
 
   const handleSubmit = async (
     values: CreateCertificationDto,
@@ -132,7 +134,7 @@ export function CertificationProfileSection() {
     if (!certification?.hasDocument) {
       return undefined;
     }
-    return certificationDocument.uploadedInfo[certification.id]?.fileName ?? DEFAULT_DOCUMENT_TITLE;
+    return certification.document?.fileName ?? certificationDocument.uploadedInfo[certification.id]?.fileName ?? DEFAULT_DOCUMENT_TITLE;
   };
 
   const renderAddButton = (className: string) => (
@@ -193,8 +195,9 @@ export function CertificationProfileSection() {
           onClose={closeForm}
         >
           {(requestClose) => <>
+            <ProfileCompletenessProgress showChecklist={false} />
             <FeedbackMessage feedback={visibleFeedback} />
-            <CertificationForm
+            <CertificationForm requireDocument={false}
               initialData={editing ? toFormValues(editing) : undefined}
               currentDocumentName={getCurrentDocumentName(editing)}
               onValuesChange={() => setHasChanges(true)}

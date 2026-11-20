@@ -5,16 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { WorkspacePage } from "@/shared/components/layout/workspace-page";
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
-import {
-  CONNECTION_ERROR_MESSAGE,
-  EMAIL_SEARCH_LABEL,
-  REGISTERED_USERS_CONNECTION_TOAST_ID,
-  REGISTERED_USERS_PAGE_SIZE,
-  REGISTERED_USERS_SLOW_TOAST_ID,
-  REPORT_ALERT_DURATION_MS,
-  SEARCH_DEBOUNCE_MS,
-  SLOW_REQUEST_MESSAGE,
-} from "../constants/reports.constants";
+import { CONNECTION_ERROR_MESSAGE, EMAIL_SEARCH_LABEL, REGISTERED_USERS_PAGE_SIZE, REPORT_ALERT_DURATION_MS, SEARCH_DEBOUNCE_MS, SLOW_REQUEST_MESSAGE } from "../constants/reports.constants";
 import { ExportSuccessToast } from "../components/export-success-toast";
 import { RegisteredUsersTable } from "../components/registered-users-table";
 import { ReportActions } from "../components/report-actions";
@@ -23,7 +14,7 @@ import { ReportTableFooter } from "../components/report-table-footer";
 import { UserTypeFilter } from "../components/user-type-filter";
 import { useExportRegisteredUsersCsv } from "../hooks/use-export-registered-users-csv";
 import { useRegisteredUsers } from "../hooks/use-registered-users";
-import type { AcademicPeriod } from "../types/registered-user.types";
+import type { AcademicPeriod } from "../types/academic-period.types";
 import type { RoleTag } from "@/modules/auth";
 
 export function RegisteredUsersReportView() {
@@ -32,37 +23,37 @@ export function RegisteredUsersReportView() {
   const [period, setPeriod] = useState<AcademicPeriod | undefined>(undefined);
   const [searchInput, setSearchInput] = useState("");
   const search = useDebouncedValue(searchInput.trim(), SEARCH_DEBOUNCE_MS);
-  const { users, totalItems, totalPages, isLoading, errorMessage, isSlow, hasConnectionError, refresh } =
+  const { users, totalItems, totalPages, isLoading, errorMessage, isSlow, hasConnectionError, refresh, snapshotAt } =
     useRegisteredUsers(currentPage, userType, period, search);
   const {
     exportCsv,
     isExporting,
     successMessage: exportSuccessMessage,
-  } = useExportRegisteredUsersCsv(userType, period, search);
+  } = useExportRegisteredUsersCsv(userType, period, search, currentPage, REGISTERED_USERS_PAGE_SIZE, snapshotAt);
 
   useEffect(() => {
     if (isSlow) {
       toast.warning(SLOW_REQUEST_MESSAGE, {
-        id: REGISTERED_USERS_SLOW_TOAST_ID,
+        id: "registered-users-slow-request",
         duration: Infinity,
         closeButton: true,
         richColors: true,
       });
     } else {
-      toast.dismiss(REGISTERED_USERS_SLOW_TOAST_ID);
+      toast.dismiss("registered-users-slow-request");
     }
   }, [isSlow]);
 
   useEffect(() => {
     if (hasConnectionError) {
       toast.error(CONNECTION_ERROR_MESSAGE, {
-        id: REGISTERED_USERS_CONNECTION_TOAST_ID,
+        id: "registered-users-connection-error",
         duration: REPORT_ALERT_DURATION_MS,
         closeButton: true,
         richColors: true,
       });
     } else {
-      toast.dismiss(REGISTERED_USERS_CONNECTION_TOAST_ID);
+      toast.dismiss("registered-users-connection-error");
     }
   }, [hasConnectionError]);
 
@@ -93,8 +84,14 @@ export function RegisteredUsersReportView() {
           <UserTypeFilter value={userType} onChange={handleUserTypeChange} />
           <ReportSearchInput value={searchInput} onChange={handleSearchChange} label={EMAIL_SEARCH_LABEL} />
         </div>
-        {userType || period || searchInput ? <Button variant="brand" onClick={() => { setUserType(undefined); setPeriod(undefined); setSearchInput(""); setCurrentPage(1); }}>Limpiar filtros</Button> : null}
-        <ReportActions onExport={exportCsv} isExporting={isExporting} period={period} onPeriodChange={handlePeriodChange} />
+        {userType || period || searchInput ? <Button onClick={() => { setUserType(undefined); setPeriod(undefined); setSearchInput(""); setCurrentPage(1); }}>Limpiar filtros</Button> : null}
+        <ReportActions
+          onExport={exportCsv}
+          isExporting={isExporting}
+          hasResults={users.length > 0 && !isLoading && !errorMessage && !hasConnectionError && searchInput.trim() === search}
+          period={period}
+          onPeriodChange={handlePeriodChange}
+        />
       </div>
 
       <RegisteredUsersTable users={users} isLoading={isLoading} errorMessage={errorMessage} searchTerm={search} />

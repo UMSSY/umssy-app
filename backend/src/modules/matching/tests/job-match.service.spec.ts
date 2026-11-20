@@ -2,7 +2,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { UserSkillService } from '../../skills/services/user-skill.service.js';
 import { JOB_OFFER_NOT_AVAILABLE_MESSAGE } from '../constants/job-match.constants.js';
 import { JobOfferNotAvailableException } from '../exceptions/job-offer-not-available.exception.js';
-import type { JobMatchRepository } from '../repositories/job-match.repository.js';
+import type { JobMatchSourceService } from '../services/job-match-source.service.js';
+import { ProfileNotFoundException } from '../../profile/exceptions/profile-not-found.exception.js';
+import type { RequirementTermsService } from '../services/requirement-terms.service.js';
+import { VacancyScoringService } from '../services/vacancy-scoring.service.js';
 import type { CandidateProfileService } from '../services/candidate-profile.service.js';
 import { JobMatchService } from '../services/job-match.service.js';
 import { WeightedScoreService } from '../services/weighted-score.service.js';
@@ -11,11 +14,14 @@ import type { JobMatchRecord } from '../types/job-match.types.js';
 const USER_ID = '0b9f8a52-3c1d-4e7a-9d55-6f1c2a8b7e10';
 const JOB_OFFER_ID = '5b1f0c3e-8a4d-4f0b-9a52-1d6c7e2a9b10';
 const NO_PROFILE = { career: null, experienceYears: 0 };
+const PUBLISHED_AT = new Date('2026-11-10T15:00:00.000Z');
+const EXPIRES_AT = new Date('2026-11-25T03:59:59.000Z');
 
 interface VacancyOptions {
   careers?: string[];
   minExperienceYears?: number | null;
   others?: string[];
+  expiresAt?: Date | null;
 }
 
 function vacancyRecord(
@@ -26,6 +32,8 @@ function vacancyRecord(
     id: JOB_OFFER_ID,
     title: 'DevOps Senior',
     description: 'Infraestructura en la nube.',
+    publishedAt: PUBLISHED_AT,
+    expiresAt: options.expiresAt === undefined ? EXPIRES_AT : options.expiresAt,
     locationUrl: 'https://maps.google.com/?q=x',
     requiredCareers: options.careers ?? [],
     minExperienceYears: options.minExperienceYears ?? null,
@@ -52,10 +60,15 @@ describe('JobMatchService', () => {
     userSkillService = { getUserSkills: vi.fn().mockResolvedValue([]) };
 
     service = new JobMatchService(
-      repository as unknown as JobMatchRepository,
-      userSkillService as unknown as UserSkillService,
-      candidateProfile as unknown as CandidateProfileService,
-      new WeightedScoreService(),
+      repository as unknown as JobMatchSourceService,
+      new VacancyScoringService(
+        userSkillService as unknown as UserSkillService,
+        candidateProfile as unknown as CandidateProfileService,
+        {
+          extractAndMatchRequirements: vi.fn().mockResolvedValue([]),
+        } as unknown as RequirementTermsService,
+        new WeightedScoreService(),
+      ),
     );
   });
 
@@ -74,6 +87,8 @@ describe('JobMatchService', () => {
       companyName: 'TechBolivia',
       modality: 'Remoto',
       description: 'Infraestructura en la nube.',
+      publishedAt: '2026-11-10T15:00:00.000Z',
+      expiresAt: '2026-11-25T03:59:59.000Z',
       score: 67,
       hasPendingRequirements: true,
       requirements: [
@@ -81,6 +96,19 @@ describe('JobMatchService', () => {
         { name: 'Docker', status: 'Cumple', category: 'skill' },
         { name: 'Terraform', status: 'Pendiente', category: 'skill' },
       ],
+    });
+  });
+
+  it('devuelve la expiración en null cuando la vacante no vence', async () => {
+    repository.findPublishedById.mockResolvedValue(
+      vacancyRecord(['Docker'], { expiresAt: null }),
+    );
+
+    await expect(
+      service.getMatch(USER_ID, JOB_OFFER_ID),
+    ).resolves.toMatchObject({
+      publishedAt: '2026-11-10T15:00:00.000Z',
+      expiresAt: null,
     });
   });
 
@@ -185,7 +213,21 @@ describe('JobMatchService', () => {
     expect(await scoreWith('Docker')).toBe(50);
   });
 
-  describe('requisitos académicos, de experiencia y otros', () => {
+  it('calcula la afinidad de un usuario sin perfil en lugar de responder 404', async () => {
+    repository.findPublishedById.mockResolvedValue(vacancyRecord(['Docker']));
+    userSkillService.getUserSkills.mockRejectedValue(
+      new ProfileNotFoundException(),
+    );
+
+    await expect(
+      service.getMatch(USER_ID, JOB_OFFER_ID),
+    ).resolves.toMatchObject({
+      score: 0,
+      hasPendingRequirements: true,
+    });
+  });
+
+  describe('solo habilidades', () => {
     const FULL_VACANCY: VacancyOptions = {
       careers: ['Ingeniería de Sistemas'],
       minExperienceYears: 3,
@@ -199,62 +241,50 @@ describe('JobMatchService', () => {
       userSkillService.getUserSkills.mockResolvedValue([skill('Docker')]);
     });
 
-    it('lista las tres categorías con su estado y pondera con los pesos de cada una (AC-04.5, AC-04.6)', async () => {
+    it('ignora la carrera, los años mínimos y los otros requisitos de la vacante', async () => {
       candidateProfile.findCandidateProfile.mockResolvedValue({
-        career: 'Ingeniería de Sistemas',
-        experienceYears: 1,
+        career: 'Ingeniería Comercial',
+        experienceYears: 0,
       });
 
       await expect(
         service.getMatch(USER_ID, JOB_OFFER_ID),
       ).resolves.toMatchObject({
-        score: 85,
-        hasPendingRequirements: true,
-        requirements: [
-          { name: 'Docker', status: 'Cumple', category: 'skill' },
-          { name: 'Ingeniería de Sistemas', status: 'Cumple', category: 'academic' },
-          { name: 'Experiencia mínima: 3 años', status: 'Pendiente', category: 'academic' },
-          { name: 'Carta de motivación', status: 'Pendiente', category: 'other' },
-        ],
+        score: 100,
+        hasPendingRequirements: false,
+        requirements: [{ name: 'Docker', status: 'Cumple', category: 'skill' }],
       });
     });
 
-    it('marca la carrera como pendiente cuando la formación es otra', async () => {
-      candidateProfile.findCandidateProfile.mockResolvedValue({
-        career: 'Ingeniería Comercial',
-        experienceYears: 5,
-      });
+    it('el resultado es el mismo con cualquier carrera y cualquier cantidad de años', async () => {
+      const resultFor = async (
+        career: string | null,
+        experienceYears: number,
+      ) => {
+        candidateProfile.findCandidateProfile.mockResolvedValue({
+          career,
+          experienceYears,
+        });
+        return service.getMatch(USER_ID, JOB_OFFER_ID);
+      };
 
-      const result = await service.getMatch(USER_ID, JOB_OFFER_ID);
+      const matching = await resultFor('Ingeniería de Sistemas', 10);
+      const other = await resultFor('Ingeniería Comercial', 0);
+      const none = await resultFor(null, 0);
 
-      expect(result.score).toBe(70);
-      expect(result.requirements[1]).toEqual({
-        name: 'Ingeniería de Sistemas',
-        status: 'Pendiente',
-        category: 'academic',
-      });
-      expect(result.requirements[2].status).toBe('Cumple');
+      expect(other).toEqual(matching);
+      expect(none).toEqual(matching);
     });
 
-    it('acepta la carrera sin tildes ni mayúsculas y los años mínimos exactos', async () => {
-      candidateProfile.findCandidateProfile.mockResolvedValue({
-        career: 'ingenieria de sistemas',
-        experienceYears: 3,
-      });
+    it('lo que falta son solo habilidades', async () => {
+      userSkillService.getUserSkills.mockResolvedValue([]);
 
       const result = await service.getMatch(USER_ID, JOB_OFFER_ID);
 
-      expect(result.score).toBe(95);
-      expect(result.requirements[1].status).toBe('Cumple');
-      expect(result.requirements[2].status).toBe('Cumple');
-    });
-
-    it('deja pendiente la carrera cuando la persona no registró formación', async () => {
-      candidateProfile.findCandidateProfile.mockResolvedValue(NO_PROFILE);
-
-      const result = await service.getMatch(USER_ID, JOB_OFFER_ID);
-
-      expect(result.requirements[1].status).toBe('Pendiente');
+      expect(result.score).toBe(0);
+      expect(result.requirements).toEqual([
+        { name: 'Docker', status: 'Pendiente', category: 'skill' },
+      ]);
     });
   });
 });

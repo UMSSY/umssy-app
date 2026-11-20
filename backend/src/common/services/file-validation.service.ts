@@ -16,15 +16,19 @@ const MAX_SAFE_TRAILING_BYTES = 64;
 const PDF_HEADER = Buffer.from('%PDF-');
 const PDF_EOF_MARKER = Buffer.from('%%EOF');
 
-const PNG_FULL_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+const PNG_FULL_SIGNATURE = Buffer.from([
+  0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+]);
 const PNG_IHDR_CHUNK_TYPE = Buffer.from([0x49, 0x48, 0x44, 0x52]);
-const PNG_IEND_CHUNK = Buffer.from([0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82]);
+const PNG_IEND_CHUNK = Buffer.from([
+  0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82,
+]);
 
 const FORBIDDEN_POLYGLOT_SIGNATURES: readonly Buffer[] = [
   Buffer.from([0x50, 0x4b, 0x03, 0x04]), // ZIP local file header
   Buffer.from([0x50, 0x4b, 0x05, 0x06]), // ZIP End of Central Directory
   Buffer.from([0x50, 0x4b, 0x07, 0x08]), // ZIP spanned
-  Buffer.from([0x4d, 0x5a]),             // DOS/PE MZ executable
+  Buffer.from([0x4d, 0x5a]), // DOS/PE MZ executable
   Buffer.from([0x7f, 0x45, 0x4c, 0x46]), // Linux ELF executable
   Buffer.from([0x37, 0x7a, 0xbc, 0xaf]), // 7-Zip
   Buffer.from([0x52, 0x61, 0x72, 0x21]), // RAR
@@ -47,7 +51,10 @@ export class FileValidationService {
       throw new EmptyFileException();
     }
 
-    if (file.size > rules.maxSizeBytes || file.buffer.length > rules.maxSizeBytes) {
+    if (
+      file.size > rules.maxSizeBytes ||
+      file.buffer.length > rules.maxSizeBytes
+    ) {
       throw new FileTooLargeException();
     }
 
@@ -137,7 +144,10 @@ export class FileValidationService {
     }
 
     // If IHDR chunk is explicitly present at standard offset (bytes 12..16), verify its structure
-    if (buffer.length >= 16 && buffer.subarray(12, 16).equals(PNG_IHDR_CHUNK_TYPE)) {
+    if (
+      buffer.length >= 16 &&
+      buffer.subarray(12, 16).equals(PNG_IHDR_CHUNK_TYPE)
+    ) {
       const ihdrLength = buffer.readUInt32BE(8);
       if (ihdrLength < 13 || 12 + 4 + ihdrLength > iendIndex) {
         return false;

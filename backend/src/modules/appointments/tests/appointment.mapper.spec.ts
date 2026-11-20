@@ -1,8 +1,10 @@
 import { beforeEach, describe, expect, it } from 'vitest';
+import { AppointmentDocumentMapper } from '../mappers/appointment-document.mapper.js';
 import { AppointmentMapper } from '../mappers/appointment.mapper.js';
 import {
   createAppointmentRecord,
   MENTOR_ID,
+  NOW,
   OTHER_USER_ID,
   STUDENT_ID,
 } from './fixtures/appointment-record.fixture.js';
@@ -11,7 +13,7 @@ describe('AppointmentMapper', () => {
   let mapper: AppointmentMapper;
 
   beforeEach(() => {
-    mapper = new AppointmentMapper();
+    mapper = new AppointmentMapper(new AppointmentDocumentMapper());
   });
 
   it('returns the persisted appointment times as ISO UTC and the student to its mentor', () => {
@@ -20,21 +22,56 @@ describe('AppointmentMapper', () => {
       endAt: new Date('2026-10-23T10:30:00-04:00'),
     });
 
-    expect(mapper.toResponse(record, MENTOR_ID)).toEqual({
+    expect(mapper.toResponse(record, MENTOR_ID, NOW)).toEqual({
       id: record.id,
       blockId: record.blockId,
       startAt: '2026-10-23T14:00:00.000Z',
       endAt: '2026-10-23T14:30:00.000Z',
       orientationType: record.orientationType,
-      counterpart: { id: STUDENT_ID, fullName: 'Luis Flores' },
+      counterpart: { id: STUDENT_ID, fullName: 'Luis Flores', role: 'student' },
       status: 'CONFIRMED',
+      message: null,
+      requestedAt: '2026-10-22T13:00:00.000Z',
+      document: null,
+      cancellation: null,
     });
+  });
+
+  it('returns the message, request date and document metadata of the appointment', () => {
+    const document = {
+      fileName: 'cv-luis-flores.pdf',
+      sizeBytes: 245760,
+      mimeType: 'application/pdf',
+      uploadedAt: new Date('2026-10-22T09:20:00-04:00'),
+    };
+    const record = createAppointmentRecord({
+      message: 'Quiero revisar mi CV',
+      requestedAt: new Date('2026-10-22T09:15:00-04:00'),
+      document,
+    });
+
+    expect(mapper.toResponse(record, MENTOR_ID, NOW)).toMatchObject({
+      message: 'Quiero revisar mi CV',
+      requestedAt: '2026-10-22T13:15:00.000Z',
+      document: {
+        fileName: 'cv-luis-flores.pdf',
+        sizeBytes: 245760,
+        mimeType: 'application/pdf',
+        uploadedAt: '2026-10-22T13:20:00.000Z',
+      },
+    });
+  });
+
+  it('returns null message and document when the appointment has none', () => {
+    expect(
+      mapper.toResponse(createAppointmentRecord(), STUDENT_ID, NOW),
+    ).toMatchObject({ message: null, document: null });
   });
 
   it('returns the same appointment data for both participants, changing only the counterpart', () => {
     const record = createAppointmentRecord();
-    const mentorResponse = mapper.toResponse(record, MENTOR_ID);
-    const studentResponse = mapper.toResponse(record, STUDENT_ID);
+    const mentorResponse = mapper.toResponse(record, MENTOR_ID, NOW);
+    const studentResponse = mapper.toResponse(record, STUDENT_ID, NOW);
     const { counterpart: mentorCounterpart, ...mentorData } = mentorResponse;
     const { counterpart: studentCounterpart, ...studentData } = studentResponse;
 
@@ -42,10 +79,12 @@ describe('AppointmentMapper', () => {
     expect(mentorCounterpart).toEqual({
       id: STUDENT_ID,
       fullName: 'Luis Flores',
+      role: 'student',
     });
     expect(studentCounterpart).toEqual({
       id: MENTOR_ID,
       fullName: 'Ana Pérez',
+      role: 'mentor',
     });
   });
 
@@ -55,7 +94,7 @@ describe('AppointmentMapper', () => {
       orientationType: null,
     });
 
-    expect(mapper.toResponse(record, STUDENT_ID)).toMatchObject({
+    expect(mapper.toResponse(record, STUDENT_ID, NOW)).toMatchObject({
       blockId: null,
       orientationType: null,
       startAt: record.startAt.toISOString(),
@@ -68,6 +107,7 @@ describe('AppointmentMapper', () => {
       mapper.toResponse(
         createAppointmentRecord({ status: { title: 'CONFIRMADA' } }),
         MENTOR_ID,
+        NOW,
       ).status,
     ).toBe('CONFIRMED');
   });
@@ -79,6 +119,7 @@ describe('AppointmentMapper', () => {
         mapper.toResponse(
           createAppointmentRecord({ status: { title } }),
           MENTOR_ID,
+          NOW,
         ).status,
       ).toBe(title);
     },
@@ -95,15 +136,195 @@ describe('AppointmentMapper', () => {
 
     expect(
       mapper
-        .toResponseList([asMentor, asStudent], MENTOR_ID)
+        .toResponseList([asMentor, asStudent], MENTOR_ID, NOW)
         .map((row) => row.counterpart),
     ).toEqual([
-      { id: STUDENT_ID, fullName: 'Luis Flores' },
-      { id: OTHER_USER_ID, fullName: 'Marta Vargas' },
+      { id: STUDENT_ID, fullName: 'Luis Flores', role: 'student' },
+      { id: OTHER_USER_ID, fullName: 'Marta Vargas', role: 'mentor' },
     ]);
   });
 
   it('maps an empty result to an empty list', () => {
-    expect(mapper.toResponseList([], MENTOR_ID)).toEqual([]);
+    expect(mapper.toResponseList([], MENTOR_ID, NOW)).toEqual([]);
+  });
+
+  it('returns COMPLETED for a confirmed appointment from its exact end time', () => {
+    const record = createAppointmentRecord();
+
+    expect(mapper.toResponse(record, MENTOR_ID, record.endAt).status).toBe(
+      'COMPLETED',
+    );
+    expect(
+      mapper.toResponse(record, MENTOR_ID, new Date(record.endAt.getTime() - 1))
+        .status,
+    ).toBe('CONFIRMED');
+  });
+
+  it('keeps a cancelled appointment CANCELLED after its end time', () => {
+    const record = createAppointmentRecord({ status: { title: 'CANCELLED' } });
+
+    expect(
+      mapper.toResponse(
+        record,
+        STUDENT_ID,
+        new Date('2026-12-01T00:00:00.000Z'),
+      ).status,
+    ).toBe('CANCELLED');
+  });
+
+  it('classifies every appointment of a list with the same instant', () => {
+    const ended = createAppointmentRecord({
+      endAt: new Date(NOW.getTime() - 60_000),
+    });
+    const upcoming = createAppointmentRecord();
+
+    expect(
+      mapper
+        .toResponseList([ended, upcoming], MENTOR_ID, NOW)
+        .map((row) => row.status),
+    ).toEqual(['COMPLETED', 'CONFIRMED']);
+  });
+
+  it('adds the meeting url only to the appointment detail', () => {
+    const record = createAppointmentRecord({
+      meetingUrl: 'https://meet.jit.si/umssy-stored',
+    });
+    const meetingUrl = 'https://meet.jit.si/umssy-shared';
+
+    expect(
+      mapper.toDetailResponse(record, STUDENT_ID, meetingUrl, NOW),
+    ).toEqual({
+      ...mapper.toResponse(record, STUDENT_ID, NOW),
+      meetingUrl,
+    });
+    expect(mapper.toResponse(record, STUDENT_ID, NOW)).not.toHaveProperty(
+      'meetingUrl',
+    );
+  });
+
+  it('returns a null meeting url when it must not be shared', () => {
+    expect(
+      mapper.toDetailResponse(createAppointmentRecord(), MENTOR_ID, null, NOW)
+        .meetingUrl,
+    ).toBeNull();
+  });
+
+  it('returns who cancelled, whether it was the viewer and the reason only for cancelled appointments', () => {
+    const record = createAppointmentRecord({
+      status: { title: 'CANCELLED' },
+      cancelledById: MENTOR_ID,
+      cancellationReason: 'Tengo una reunión imprevista',
+      cancelledAt: new Date('2026-10-22T10:00:00-04:00'),
+    });
+
+    expect(mapper.toResponse(record, MENTOR_ID, NOW).cancellation).toEqual({
+      cancelledBy: 'MENTOR',
+      cancelledByMe: true,
+      reason: 'Tengo una reunión imprevista',
+      cancelledAt: '2026-10-22T14:00:00.000Z',
+    });
+    expect(mapper.toResponse(record, STUDENT_ID, NOW).cancellation).toEqual({
+      cancelledBy: 'MENTOR',
+      cancelledByMe: false,
+      reason: 'Tengo una reunión imprevista',
+      cancelledAt: '2026-10-22T14:00:00.000Z',
+    });
+  });
+
+  it('returns the cancellation of a legacy cancelled appointment that already ended', () => {
+    const record = createAppointmentRecord({
+      status: { title: 'CANCELADA' },
+      endAt: new Date(NOW.getTime() - 60_000),
+      cancelledById: STUDENT_ID,
+      cancelledAt: NOW,
+    });
+
+    expect(mapper.toResponse(record, STUDENT_ID, NOW)).toMatchObject({
+      status: 'CANCELLED',
+      cancellation: { cancelledBy: 'STUDENT', cancelledByMe: true },
+    });
+  });
+
+  it.each([
+    ['CONFIRMED', NOW],
+    ['COMPLETED', null],
+  ])(
+    'returns a null cancellation for a %s appointment even with stale cancellation data',
+    (title, cancelledAt) => {
+      const record = createAppointmentRecord({
+        status: { title },
+        cancelledById: MENTOR_ID,
+        cancellationReason: 'Motivo antiguo',
+        cancelledAt,
+      });
+
+      expect(mapper.toResponse(record, MENTOR_ID, NOW).cancellation).toBeNull();
+    },
+  );
+
+  it('includes the cancellation in the appointment detail', () => {
+    const record = createAppointmentRecord({
+      status: { title: 'CANCELLED' },
+      cancelledById: STUDENT_ID,
+      cancelledAt: NOW,
+    });
+
+    expect(
+      mapper.toDetailResponse(record, MENTOR_ID, null, NOW).cancellation,
+    ).toEqual({
+      cancelledBy: 'STUDENT',
+      cancelledByMe: false,
+      reason: null,
+      cancelledAt: NOW.toISOString(),
+    });
+  });
+
+  describe('completed status seen by each participant', () => {
+    const MINUTE = 60_000;
+    const scenarios: Array<[string, string, string, number, number]> = [
+      ['COMPLETED', 'an ended confirmed appointment', 'CONFIRMED', -90, -60],
+      ['CONFIRMED', 'an appointment in progress', 'CONFIRMED', -10, 20],
+      [
+        'COMPLETED',
+        'an appointment ending at this exact minute',
+        'CONFIRMED',
+        -30,
+        0,
+      ],
+      [
+        'CANCELLED',
+        'a cancelled appointment that already passed',
+        'CANCELLED',
+        -90,
+        -60,
+      ],
+    ];
+    const viewers = [
+      ['mentor', MENTOR_ID],
+      ['student', STUDENT_ID],
+    ] as const;
+
+    it.each(
+      scenarios.flatMap((scenario) =>
+        viewers.map(([viewer, userId]) => {
+          const [expected, description, ...rest] = scenario;
+          return [expected, description, viewer, ...rest, userId] as const;
+        }),
+      ),
+    )(
+      'returns %s for %s to the %s',
+      (expected, _case, _viewer, title, startOffset, endOffset, userId) => {
+        const record = createAppointmentRecord({
+          status: { title },
+          startAt: new Date(NOW.getTime() + startOffset * MINUTE),
+          endAt: new Date(NOW.getTime() + endOffset * MINUTE),
+        });
+
+        expect(mapper.toResponse(record, userId, NOW).status).toBe(expected);
+        expect(mapper.toDetailResponse(record, userId, null, NOW).status).toBe(
+          expected,
+        );
+      },
+    );
   });
 });

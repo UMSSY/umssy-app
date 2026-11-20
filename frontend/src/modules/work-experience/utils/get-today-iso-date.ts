@@ -1,8 +1,8 @@
-import { BUSINESS_TIMEZONE } from "@/modules/profile";
+import { BOLIVIA_TIME_ZONE } from "@/shared/constants/date-time.constants";
 
 export function getTodayIsoDate(): string {
   return new Intl.DateTimeFormat("en-CA", {
-    timeZone: BUSINESS_TIMEZONE,
+    timeZone: BOLIVIA_TIME_ZONE,
     year: "numeric",
     month: "2-digit",
     day: "2-digit",

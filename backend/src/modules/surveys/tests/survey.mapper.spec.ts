@@ -18,8 +18,18 @@ describe('SurveyMapper', () => {
         closesAt: '2026-12-16T03:59:59.999Z',
         status: 'published',
         questions: [
-          { statement: 'A', type: 'single_choice', isRequired: true, options: [{ label: 'x' }] },
-          { statement: 'B', type: 'multiple_choice', isRequired: false, options: [] },
+          {
+            statement: 'A',
+            type: 'single_choice',
+            isRequired: true,
+            options: [{ label: 'x' }],
+          },
+          {
+            statement: 'B',
+            type: 'multiple_choice',
+            isRequired: false,
+            options: [],
+          },
         ],
       },
       'admin-1',
@@ -37,14 +47,29 @@ describe('SurveyMapper', () => {
       status: 'published',
       createdById: 'admin-1',
       questions: [
-        { statement: 'A', type: 'single_choice', isRequired: true, options: [{ label: 'x' }] },
-        { statement: 'B', type: 'multiple_choice', isRequired: false, options: [] },
+        {
+          statement: 'A',
+          type: 'single_choice',
+          isRequired: true,
+          options: [{ label: 'x' }],
+        },
+        {
+          statement: 'B',
+          type: 'multiple_choice',
+          isRequired: false,
+          options: [],
+        },
       ],
     });
   });
 
   it('usa null en los campos opcionales ausentes de un borrador', () => {
-    expect(mapper.toCreateData({ title: 'Borrador', status: 'draft', questions: [] }, 'admin-1')).toEqual({
+    expect(
+      mapper.toCreateData(
+        { title: 'Borrador', status: 'draft', questions: [] },
+        'admin-1',
+      ),
+    ).toEqual({
       title: 'Borrador',
       description: null,
       careerId: null,
@@ -60,16 +85,34 @@ describe('SurveyMapper', () => {
   });
 
   it('guarda Todas las carreras como una encuesta sin carrera', () => {
-    const request = { title: 'Global', status: 'draft', careerId: 'all', questions: [] } as const;
-    const data = mapper.toCreateData(request as unknown as CreateSurveyRequest, 'admin-1');
+    const request = {
+      title: 'Global',
+      status: 'draft',
+      careerId: 'all',
+      questions: [],
+    } as const;
+    const data = mapper.toCreateData(
+      request as unknown as CreateSurveyRequest,
+      'admin-1',
+    );
 
     expect(data).toMatchObject({ careerId: null, targetsAllCareers: true });
   });
 
   it('expone el estado de la encuesta creada en minúsculas', () => {
     expect(
-      mapper.toCreatedResponse({ id: 'survey-1', title: 'Encuesta', status: { title: 'draft' }, createdAt: CREATED_AT }),
-    ).toEqual({ id: 'survey-1', title: 'Encuesta', status: 'draft', createdAt: CREATED_AT.toISOString() });
+      mapper.toCreatedResponse({
+        id: 'survey-1',
+        title: 'Encuesta',
+        status: { title: 'draft' },
+        createdAt: CREATED_AT,
+      }),
+    ).toEqual({
+      id: 'survey-1',
+      title: 'Encuesta',
+      status: 'draft',
+      createdAt: CREATED_AT.toISOString(),
+    });
   });
 
   it('resume una encuesta sin carrera ni fechas', () => {
@@ -84,7 +127,11 @@ describe('SurveyMapper', () => {
         closesAt: null,
         createdAt: CREATED_AT,
         career: null,
-        createdBy: { firstName: 'Admin', lastName: 'Uno', email: 'admin.1@umssy.test' },
+        createdBy: {
+          firstName: 'Admin',
+          lastName: 'Uno',
+          email: 'admin.1@umssy.test',
+        },
         _count: { questions: 0, responses: 0 },
       }),
     ).toEqual({
@@ -104,7 +151,9 @@ describe('SurveyMapper', () => {
   });
 
   it('convierte una carrera a su respuesta', () => {
-    expect(mapper.toCareerResponse({ id: 'career-1', title: 'Sistemas' })).toEqual({
+    expect(
+      mapper.toCareerResponse({ id: 'career-1', title: 'Sistemas' }),
+    ).toEqual({
       id: 'career-1',
       title: 'Sistemas',
     });

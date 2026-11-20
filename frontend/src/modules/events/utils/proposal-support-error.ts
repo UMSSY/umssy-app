@@ -1,8 +1,5 @@
 import { parseApiError } from '@/shared/utils/parse-api-error';
-import {
-  DEFAULT_PROPOSAL_SUPPORT_ERROR_MESSAGE,
-  PROPOSAL_SUPPORT_ERROR_MESSAGES,
-} from '../constants/proposal-support-errors.constants';
+import { PROPOSAL_SUPPORT_ERROR_MESSAGES } from '../constants/proposal-support-errors.constants';
 
 function isProposalSupportErrorCode(
   code: string,
@@ -14,5 +11,5 @@ export function getProposalSupportErrorMessage(error: unknown): string {
   const code = parseApiError(error)?.code;
   return code && isProposalSupportErrorCode(code)
     ? PROPOSAL_SUPPORT_ERROR_MESSAGES[code]
-    : DEFAULT_PROPOSAL_SUPPORT_ERROR_MESSAGE;
+    : 'No pudimos registrar tu apoyo. Revisa la conexión e inténtalo nuevamente.';
 }

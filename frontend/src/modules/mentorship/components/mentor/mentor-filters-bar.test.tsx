@@ -36,7 +36,7 @@ describe("MentorFiltersBar", () => {
     await user.click(
       screen.getByRole("combobox", { name: "Área técnica" }),
     );
-    await user.click(screen.getByRole("option", { name: "Backend" }));
+    await user.click(await screen.findByRole("option", { name: "Backend" }));
 
     expect(onAreaChange).toHaveBeenCalledWith("Backend");
   });
@@ -105,7 +105,7 @@ describe("MentorFiltersBar", () => {
 
     for (const option of orientationTypes) {
       expect(
-        screen.getByRole("option", { name: option }),
+        await screen.findByRole("option", { name: option }),
       ).toBeInTheDocument();
     }
 

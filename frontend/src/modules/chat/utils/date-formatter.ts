@@ -1,3 +1,4 @@
+import { BOLIVIA_TIME_ZONE } from "@/shared/constants/date-time.constants";
 const pad = (value: number): string => String(value).padStart(2, '0');
 
 
@@ -43,7 +44,6 @@ export function formatConversationDate(isoDateString?: string | null): string {
   }
     return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${pad(date.getFullYear() % 100)}`;
 
-  
 }
 
 export function getInitials(fullName: string): string {
@@ -90,4 +90,42 @@ export function formatMessageDateSeparator(isoString?: string | null): string {
   })
     .format(date)
     .toUpperCase();
+}
+
+export function formatEventRoomCreatedAt(
+  isoDateString?: string | null,
+): string {
+  if (!isoDateString) {
+    return '';
+  }
+
+  const date = new Date(isoDateString);
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+
+  return new Intl.DateTimeFormat('es-BO', {
+    timeZone: BOLIVIA_TIME_ZONE,
+    day: '2-digit',
+    month: '2-digit',
+    year: '2-digit',
+  }).format(date);
+}
+
+export function formatEventRoomTime(isoDateString?: string | null): string {
+  if (!isoDateString) {
+    return '';
+  }
+
+  const date = new Date(isoDateString);
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+
+  return new Intl.DateTimeFormat('es-BO', {
+    timeZone: BOLIVIA_TIME_ZONE,
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h12',
+  }).format(date);
 }

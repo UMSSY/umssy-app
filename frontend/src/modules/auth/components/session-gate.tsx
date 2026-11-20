@@ -3,7 +3,11 @@
 import { useEffect, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { subscribeAccessToken } from "@/shared/services/storage/access-token-storage";
-import { getAccessToken } from "@/shared/services/storage/access-token-storage";
+import {
+  getAccessToken,
+  isAccessTokenReady,
+  waitForAccessTokenWrites,
+} from "@/shared/services/storage/access-token-storage";
 import { buildLoginUrl } from "../utils/safe-next-path";
 import { endSession } from "../utils/session";
 import { setSessionMarker } from "../utils/session-cookie";
@@ -18,14 +22,19 @@ export function SessionGate({ children }: SessionGateProps) {
 
   const state = useSyncExternalStore<SessionGateState>(
     subscribeAccessToken,
-    () => (getAccessToken() ? "open" : "login"),
+    () =>
+      !isAccessTokenReady() ? "checking" : getAccessToken() ? "open" : "login",
     () => "checking",
   );
 
   useEffect(() => {
     if (state === "login") {
       endSession();
-      router.replace(buildLoginUrl(currentPath()));
+      const loginUrl = buildLoginUrl(currentPath());
+      if (navigator.onLine === false) {
+        void waitForAccessTokenWrites().then(() => window.location.replace(loginUrl));
+      }
+      else router.replace(loginUrl);
       return;
     }
     if (state === "open") setSessionMarker();

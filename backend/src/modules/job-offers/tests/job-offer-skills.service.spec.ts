@@ -13,8 +13,12 @@ const CATALOG = [
 ];
 
 function createService() {
-  const skillCatalogService = { listCatalog: vi.fn().mockResolvedValue(CATALOG) };
-  const service = new JobOfferSkillsService(skillCatalogService as unknown as SkillCatalogService);
+  const skillCatalogService = {
+    listCatalog: vi.fn().mockResolvedValue(CATALOG),
+  };
+  const service = new JobOfferSkillsService(
+    skillCatalogService as unknown as SkillCatalogService,
+  );
   return { service, skillCatalogService };
 }
 
@@ -32,23 +36,25 @@ describe('JobOfferSkillsService', () => {
   it('acepta tecnologías del catálogo', async () => {
     const { service } = createService();
 
-    await expect(service.validateSkillIds(['docker', 'kubernetes'])).resolves.toBeUndefined();
+    await expect(
+      service.validateSkillIds(['docker', 'kubernetes']),
+    ).resolves.toBeUndefined();
   });
 
   it('rechaza tecnologías que no están en el catálogo', async () => {
     const { service } = createService();
 
-    await expect(service.validateSkillIds(['docker', 'otra'])).rejects.toBeInstanceOf(
-      JobOfferSkillNotFoundException,
-    );
+    await expect(
+      service.validateSkillIds(['docker', 'otra']),
+    ).rejects.toBeInstanceOf(JobOfferSkillNotFoundException);
   });
 
   it('rechaza tecnologías duplicadas sin consultar el catálogo', async () => {
     const { service, skillCatalogService } = createService();
 
-    await expect(service.validateSkillIds(['docker', 'docker'])).rejects.toBeInstanceOf(
-      DuplicateJobOfferSkillsException,
-    );
+    await expect(
+      service.validateSkillIds(['docker', 'docker']),
+    ).rejects.toBeInstanceOf(DuplicateJobOfferSkillsException);
     expect(skillCatalogService.listCatalog).not.toHaveBeenCalled();
   });
 

@@ -2,13 +2,19 @@ import {
   Body,
   Controller,
   Get,
+  Post,
   Put,
   StandardSchemaValidationPipe,
   UseGuards,
   UseInterceptors,
   UsePipes,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CurrentUserId } from '../../../common/decorators/current-user-id.decorator.js';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { ResponseInterceptor } from '../../../common/interceptors/response.interceptor.js';
@@ -18,7 +24,7 @@ import {
   updateUserSkillsSchema,
   type UpdateUserSkillsRequest,
 } from '../requests/update-user-skills.request.js';
-import type { SkillResponse } from '../responses/skill.response.js';
+import type { OwnSkillResponse } from '../responses/own-skill.response.js';
 import { UserSkillService } from '../services/user-skill.service.js';
 
 @ApiTags('skills')
@@ -36,7 +42,7 @@ export class UserSkillController {
 
   @Get()
   @ApiOkResponse({ description: 'Skills of the authenticated user' })
-  getUserSkills(@CurrentUserId() userId: string): Promise<SkillResponse[]> {
+  getUserSkills(@CurrentUserId() userId: string): Promise<OwnSkillResponse[]> {
     return this.userSkillService.getUserSkills(userId);
   }
 
@@ -46,7 +52,17 @@ export class UserSkillController {
   updateUserSkills(
     @CurrentUserId() userId: string,
     @Body({ schema: updateUserSkillsSchema }) request: UpdateUserSkillsRequest,
-  ): Promise<SkillResponse[]> {
+  ): Promise<OwnSkillResponse[]> {
     return this.userSkillService.updateUserSkills(userId, request);
+  }
+
+  @Post()
+  @ApiBody(toApiBody(updateUserSkillsSchema))
+  @ApiOkResponse({ description: 'Added skills of the authenticated user' })
+  addSkills(
+    @CurrentUserId() userId: string,
+    @Body({ schema: updateUserSkillsSchema }) request: UpdateUserSkillsRequest,
+  ): Promise<OwnSkillResponse[]> {
+    return this.userSkillService.addSkills(userId, request);
   }
 }

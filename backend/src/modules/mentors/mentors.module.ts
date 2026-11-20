@@ -1,11 +1,12 @@
-
 import { Module } from '@nestjs/common';
 import { ProfileModule } from '../profile/profile.module.js';
+import { SkillsModule } from '../skills/skills.module.js';
 import { MentorPhotoController } from './controllers/mentor-photo.controller.js';
 import { MentorPhotoService } from './services/mentor-photo.service.js';
 import { AuthModule } from '../auth/auth.module.js';
 import { MentorsController } from './controllers/mentors.controller.js';
 import { MentorsService } from './services/mentors.service.js';
+import { MentorProfileSuggestionsService } from './services/mentor-profile-suggestions.service.js';
 import { MentorsRepository } from './repositories/mentors.repository.js';
 import { MentorMapper } from './mappers/mentor.mapper.js';
 import { MentorAffinityService } from './services/mentor-affinity.service.js';
@@ -19,18 +20,23 @@ import { MentorExitService } from './services/mentor-exit.service.js';
 import { MentorParticipationController } from './controllers/mentor-participation.controller.js';
 import { MentorParticipationService } from './services/mentor-participation.service.js';
 import { MentorParticipationRepository } from './repositories/mentor-participation.repository.js';
+import { MentorCapacityAdminController } from './controllers/mentor-capacity-admin.controller.js';
+import { MentorCapacityAdminRepository } from './repositories/mentor-capacity-admin.repository.js';
+import { MentorCapacityAdminService } from './services/mentor-capacity-admin.service.js';
 
 @Module({
-  imports: [AuthModule, ProfileModule],
+  imports: [AuthModule, ProfileModule, SkillsModule],
   controllers: [
     MentorsController,
     MentorPhotoController,
     MentorOffersController,
     MentorExitController,
     MentorParticipationController,
+    MentorCapacityAdminController,
   ],
   providers: [
     MentorsService,
+    MentorProfileSuggestionsService,
     MentorsRepository,
     MentorMapper,
     MentorPhotoService,
@@ -42,7 +48,9 @@ import { MentorParticipationRepository } from './repositories/mentor-participati
     MentorExitService,
     MentorParticipationService,
     MentorParticipationRepository,
+    MentorCapacityAdminRepository,
+    MentorCapacityAdminService,
   ],
-  exports: [MentorsService],
+  exports: [MentorsService, MentorProfileSuggestionsService],
 })
 export class MentorsModule {}

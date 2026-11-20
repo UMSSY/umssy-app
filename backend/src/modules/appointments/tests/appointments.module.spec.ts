@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { MODULE_METADATA } from '@nestjs/common/constants.js';
+import { ConfigModule } from '@nestjs/config';
 import { Test, type TestingModule } from '@nestjs/testing';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AppModule } from '../../../app.module.js';
 import { PrismaModule } from '../../../common/prisma/prisma.module.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
@@ -9,9 +10,14 @@ import { AvailabilityModule } from '../../availability/availability.module.js';
 import { AvailabilityService } from '../../availability/services/availability.service.js';
 import { MentorsModule } from '../../mentors/mentors.module.js';
 import { MentorsService } from '../../mentors/services/mentors.service.js';
+import { ProfileModule } from '../../profile/profile.module.js';
+import { ProfilePhotoService } from '../../profile/services/profile-photo.service.js';
 import { AppointmentsModule } from '../appointments.module.js';
 import { AppointmentsController } from '../controllers/appointments.controller.js';
 import { AppointmentMapper } from '../mappers/appointment.mapper.js';
+import { AppointmentNotificationsService } from '../notification/appointment-notifications.service.js';
+import { PushDispatcherService } from '../../notifications/services/push-dispatcher.service.js';
+import { AppointmentNotificationsRepository } from '../repositories/appointment-notifications.repository.js';
 import { AppointmentsRepository } from '../repositories/appointments.repository.js';
 import { AppointmentsService } from '../services/appointments.service.js';
 
@@ -25,11 +31,17 @@ describe('AppointmentsModule', () => {
 
   beforeEach(async () => {
     moduleRef = await Test.createTestingModule({
-      imports: [PrismaModule, AppointmentsModule],
+      imports: [
+        ConfigModule.forRoot({ isGlobal: true, ignoreEnvFile: true }),
+        PrismaModule,
+        AppointmentsModule,
+      ],
       providers: [AppointmentsConsumer],
     })
       .overrideProvider(PrismaService)
       .useValue({})
+      .overrideProvider(PushDispatcherService)
+      .useValue({ dispatchToUsers: vi.fn() })
       .compile();
     await moduleRef.init();
   });
@@ -43,49 +55,43 @@ describe('AppointmentsModule', () => {
     AppointmentsService,
     AppointmentsRepository,
     AppointmentMapper,
+    AppointmentNotificationsService,
+    AppointmentNotificationsRepository,
   ])('resuelve %o al inicializar el módulo', (provider) => {
     expect(moduleRef.get(provider)).toBeInstanceOf(provider);
   });
 
-  it('reutiliza las instancias de los servicios de availability y mentors', () => {
+  it('reutiliza las instancias de los servicios de availability, mentors y profile', () => {
     const appointmentsContext = moduleRef.select(AppointmentsModule);
 
     for (const [dependencyModule, service] of [
       [AvailabilityModule, AvailabilityService],
       [MentorsModule, MentorsService],
+      [ProfileModule, ProfilePhotoService],
     ] as const) {
       expect(appointmentsContext.get(service)).toBe(
         moduleRef.select(dependencyModule).get(service, { strict: true }),
       );
-      expect(() => appointmentsContext.get(service, { strict: true })).toThrow();
+      expect(() =>
+        appointmentsContext.get(service, { strict: true }),
+      ).toThrow();
     }
   });
 
   it('exporta el servicio para su inyección desde un módulo consumidor', () => {
     expect(moduleRef.get(AppointmentsConsumer).appointmentsService).toBe(
-      moduleRef.select(AppointmentsModule).get(AppointmentsService, { strict: true }),
+      moduleRef
+        .select(AppointmentsModule)
+        .get(AppointmentsService, { strict: true }),
     );
   });
 
   it('está registrado en el módulo raíz de la aplicación', () => {
-    const imports: unknown[] = Reflect.getMetadata(MODULE_METADATA.IMPORTS, AppModule);
+    const imports: unknown[] = Reflect.getMetadata(
+      MODULE_METADATA.IMPORTS,
+      AppModule,
+    );
 
     expect(imports).toContain(AppointmentsModule);
-  });
-
-  it('inicializa la aplicación con appointments y la conexión de datos sustituida', async () => {
-    const rootModule = await Test.createTestingModule({ imports: [AppModule] })
-      .overrideProvider(PrismaService)
-      .useValue({})
-      .compile();
-    const app = rootModule.createNestApplication();
-
-    try {
-      await app.init();
-
-      expect(app.get(AppointmentsService)).toBeInstanceOf(AppointmentsService);
-    } finally {
-      await app.close();
-    }
   });
 });

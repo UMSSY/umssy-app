@@ -1,3 +1,4 @@
+import { ProfileSkillsEvents } from '../../../common/profile-skills/profile-skills-events.service.js';
 import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
 import type { SkillAnalysisService } from '../services/skill-analysis.service.js';
 import { Logger } from '@nestjs/common';
@@ -14,12 +15,13 @@ import type { NlpTextSource } from '../../nlp/types/nlp-text-source.type.js';
 import type { ProfileSkillProcessingState } from '../../nlp/types/profile-skill-processing-state.type.js';
 import type { ProfileSkillRow } from '../../nlp/types/profile-skill-row.type.js';
 import { planSkillReconciliation } from '../utils/plan-skill-reconciliation.js';
-import type { ProfileRepository } from '../../profile/repositories/profile.repository.js';
+import type { ProfileService } from '../../profile/services/profile.service.js';
 import { DuplicateSkillException } from '../exceptions/duplicate-skill.exception.js';
 import { SkillNotFoundException } from '../exceptions/skill-not-found.exception.js';
 import { SkillMapper } from '../mappers/skill.mapper.js';
 import type { SkillRepository } from '../repositories/skill.repository.js';
 import type { UserSkillRepository } from '../repositories/user-skill.repository.js';
+import type { UserSkillEvidenceRepository } from '../repositories/user-skill-evidence.repository.js';
 import { UserSkillService } from '../services/user-skill.service.js';
 import { planManualSkillChanges } from '../utils/plan-manual-skill-changes.js';
 
@@ -34,6 +36,7 @@ const catalog: NlpCatalogSkill[] = [
   { id: pythonId, name: 'Python', areaId: 'data-ai' },
   { id: reactId, name: 'React', areaId: 'desarrollo' },
 ];
+
 const catalogById = new Map(catalog.map((skill) => [skill.id, skill]));
 
 class InMemoryProfileSkills {
@@ -42,7 +45,11 @@ class InMemoryProfileSkills {
   beforePublish?: () => Promise<void>;
   private sequence = 0;
 
-  addRow(skillId: string, source: 'manual' | 'nlp', evidenceRefs: readonly unknown[] = []): void {
+  addRow(
+    skillId: string,
+    source: 'manual' | 'nlp',
+    evidenceRefs: readonly unknown[] = [],
+  ): void {
     const skill = catalogById.get(skillId)!;
     this.sequence += 1;
     this.rows.push({
@@ -63,11 +70,17 @@ class InMemoryProfileSkills {
       this.rows = this.rows
         .filter((row) => !changes.deleteIds.includes(row.id))
         .map((row) => {
-          if (changes.toDetectedIds.includes(row.id)) return { ...row, source: 'nlp' };
-          if (changes.toManualIds.includes(row.id)) return { ...row, source: 'manual' };
+          if (changes.toDetectedIds.includes(row.id))
+            return { ...row, source: 'nlp' };
+          if (changes.toManualIds.includes(row.id))
+            return { ...row, source: 'manual' };
           return row;
         });
-      for (const skillId of changes.createSkillIds) this.addRow(skillId, 'manual');
+
+      for (const skillId of changes.createSkillIds) {
+        this.addRow(skillId, 'manual');
+      }
+
       return this.manualRecords();
     },
   };
@@ -84,11 +97,14 @@ class InMemoryProfileSkills {
         updatedAt: now,
         dictionaryVersion: this.state?.dictionaryVersion ?? null,
       };
+
       return this.state;
     },
     ensureState: async () => this.state,
     markError: async (_userId: string, revision: number, now: Date) => {
-      if (this.state?.inputRevision === revision) this.state = { ...this.state, status: 'error', updatedAt: now };
+      if (this.state?.inputRevision === revision) {
+        this.state = { ...this.state, status: 'error', updatedAt: now };
+      }
     },
     publish: async (
       _userId: string,
@@ -100,44 +116,75 @@ class InMemoryProfileSkills {
       const hook = this.beforePublish;
       this.beforePublish = undefined;
       await hook?.();
-      if (!this.state || this.state.inputRevision !== revision) return null;
+
+      if (!this.state || this.state.inputRevision !== revision) {
+        return null;
+      }
 
       const changed = await reconcile({} as TransactionContext);
       const isFirstResult = this.state.processedRevision === null;
+
       this.state = {
         ...this.state,
         status: 'ready',
         processedRevision: revision,
         dictionaryVersion,
         updatedAt: now,
-        resultVersion: this.state.resultVersion + (changed || isFirstResult ? 1 : 0),
+        resultVersion:
+          this.state.resultVersion + (changed || isFirstResult ? 1 : 0),
       };
+
       return { state: this.state, changed };
     },
   };
 
   readonly skills = {
     findProfileSkillRows: async () => [...this.rows],
-    reconcileDetected: async (_userId: string, detected: readonly NlpDetectedSkill[]) => {
+    reconcileDetected: async (
+      _userId: string,
+      detected: readonly NlpDetectedSkill[],
+    ) => {
       const plan = planSkillReconciliation(this.rows, detected);
+
       this.rows = this.rows
         .filter((row) => !plan.deleteIds.includes(row.id))
         .map((row) => {
-          const update = plan.updates.find((candidate) => candidate.id === row.id);
-          return update ? { ...row, evidenceRefs: update.evidenceRefs, isHighRelevance: update.isHighRelevance } : row;
-        });
-      for (const create of plan.creates) this.addRow(create.skillId, 'nlp', create.evidenceRefs);
+          const update = plan.updates.find(
+            (candidate) => candidate.id === row.id,
+          );
 
-      const changed = plan.creates.length + plan.updates.length + plan.deleteIds.length > 0;
-      return changed;
+          return update
+            ? {
+                ...row,
+                evidenceRefs: update.evidenceRefs,
+                isHighRelevance: update.isHighRelevance,
+              }
+            : row;
+        });
+
+      for (const create of plan.creates) {
+        this.addRow(create.skillId, 'nlp', create.evidenceRefs);
+      }
+
+      return (
+        plan.creates.length + plan.updates.length + plan.deleteIds.length > 0
+      );
     },
   };
 
   private manualRecords() {
     return this.rows
       .filter((row) => row.source === 'manual')
-      .sort((first, second) => first.skill.name.localeCompare(second.skill.name))
-      .map((row) => ({ skill: { id: row.skillId, name: row.skill.name, isCustom: false } }));
+      .sort((first, second) =>
+        first.skill.name.localeCompare(second.skill.name),
+      )
+      .map((row) => ({
+        skill: {
+          id: row.skillId,
+          name: row.skill.name,
+          isCustom: false,
+        },
+      }));
   }
 }
 
@@ -149,7 +196,10 @@ describe('Skill changes sent to the radar', () => {
   let service: UserSkillService;
 
   const radarSkills = async () =>
-    (await analysis.getRadarSnapshot(userId)).skills.map((skill) => [skill.name, skill.source]);
+    (await analysis.getRadarSnapshot(userId)).skills.map((skill) => [
+      skill.name,
+      skill.source,
+    ]);
 
   beforeEach(() => {
     vi.useFakeTimers();
@@ -158,13 +208,30 @@ describe('Skill changes sent to the radar', () => {
     vi.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
 
     store = new InMemoryProfileSkills();
-    textSources = [{ id: 'w1', type: 'work-experience', text: 'Microservicios con Docker y Python' }];
+    textSources = [
+      {
+        id: 'w1',
+        type: 'work-experience',
+        text: 'Microservicios con Docker y Python',
+      },
+    ];
+
+    const prisma = {
+      skill: {
+        findMany: vi
+          .fn()
+          .mockResolvedValue(catalog.map(({ id, name }) => ({ id, name }))),
+      },
+    };
+
     detection = new SkillDetectionService();
+
     const sources = {
       ensureProfileExists: vi.fn().mockResolvedValue(undefined),
       findTextSources: vi.fn(async () => textSources),
       findCatalog: vi.fn().mockResolvedValue(catalog),
     };
+
     analysis = new ProfileSkillsAnalysisService(
       sources as unknown as ProfileSkillSourcesService,
       store.results as unknown as ProfileSkillResultsRepository,
@@ -172,21 +239,31 @@ describe('Skill changes sent to the radar', () => {
       new SkillValidationService(),
       new ProfileSkillsRadarMapper(),
       store.skills as unknown as SkillAnalysisService,
+      new ProfileSkillsEvents(),
     );
+
     const skillRepository = {
       findByIds: async (ids: string[]) =>
         ids.flatMap((id) => {
           const skill = catalogById.get(id);
-          return skill ? [{ id: skill.id, name: skill.name, isCustom: false }] : [];
+
+          return skill
+            ? [{ id: skill.id, name: skill.name, isCustom: false }]
+            : [];
         }),
     };
-    const profileRepository = { findByUserId: vi.fn().mockResolvedValue({ id: userId }) };
+
+    const profileService = {
+      ensureProfileExists: vi.fn().mockResolvedValue({ id: userId }),
+    };
+
     service = new UserSkillService(
       store.userSkills as unknown as UserSkillRepository,
       skillRepository as unknown as SkillRepository,
-      profileRepository as unknown as ProfileRepository,
+      profileService as unknown as ProfileService,
       new SkillMapper(),
       analysis,
+      { replaceDetected: vi.fn() } as unknown as UserSkillEvidenceRepository,
     );
   });
 
@@ -196,10 +273,16 @@ describe('Skill changes sent to the radar', () => {
   });
 
   it('sends an added skill to the radar together with the detected ones', async () => {
-    const saved = await service.updateUserSkills(userId, { skillIds: [reactId] });
+    const saved = await service.updateUserSkills(userId, {
+      skillIds: [reactId],
+    });
 
     expect(saved.map((skill) => skill.name)).toEqual(['React']);
-    expect(await analysis.getRadarSnapshot(userId)).toMatchObject({ status: 'ready', version: 1 });
+    expect(await analysis.getRadarSnapshot(userId)).toMatchObject({
+      status: 'ready',
+      version: 1,
+    });
+
     expect(await radarSkills()).toEqual([
       ['Docker', 'nlp'],
       ['Python', 'nlp'],
@@ -211,25 +294,37 @@ describe('Skill changes sent to the radar', () => {
     await service.updateUserSkills(userId, { skillIds: [reactId] });
     vi.setSystemTime(new Date('2026-10-24T12:05:00.000Z'));
 
-    const saved = await service.updateUserSkills(userId, { skillIds: [dockerId] });
+    const saved = await service.updateUserSkills(userId, {
+      skillIds: [dockerId],
+    });
+
     const snapshot = await analysis.getRadarSnapshot(userId);
 
     expect(saved.map((skill) => skill.name)).toEqual(['Docker']);
-    expect(snapshot).toMatchObject({ status: 'ready', updatedAt: '2026-10-24T12:05:00.000Z' });
+    expect(snapshot).toMatchObject({
+      status: 'ready',
+      updatedAt: '2026-10-24T12:05:00.000Z',
+    });
     expect(snapshot.version).toBe(1);
+
     expect(await radarSkills()).toEqual([
       ['Docker', 'manual'],
       ['Python', 'nlp'],
     ]);
-    expect(snapshot.skills.find((skill) => skill.id === dockerId)?.evidenceRefs).toEqual([
-      { type: 'work-experience', id: 'w1' },
-    ]);
+
+    expect(
+      snapshot.skills.find((skill) => skill.id === dockerId)?.evidenceRefs,
+    ).toEqual([{ type: 'work-experience', id: 'w1' }]);
   });
 
   it('removes a deleted skill from the radar when no text supports it', async () => {
-    await service.updateUserSkills(userId, { skillIds: [reactId, pythonId] });
+    await service.updateUserSkills(userId, {
+      skillIds: [reactId, pythonId],
+    });
 
-    await service.updateUserSkills(userId, { skillIds: [pythonId] });
+    await service.updateUserSkills(userId, {
+      skillIds: [pythonId],
+    });
 
     expect(await radarSkills()).toEqual([
       ['Docker', 'nlp'],
@@ -240,9 +335,12 @@ describe('Skill changes sent to the radar', () => {
   it('keeps a deleted skill as detected when the texts still support it', async () => {
     await service.updateUserSkills(userId, { skillIds: [dockerId] });
 
-    const saved = await service.updateUserSkills(userId, { skillIds: [] });
+    const saved = await service.updateUserSkills(userId, {
+      skillIds: [],
+    });
 
     expect(saved).toEqual([]);
+
     expect(await radarSkills()).toEqual([
       ['Docker', 'nlp'],
       ['Python', 'nlp'],
@@ -253,12 +351,17 @@ describe('Skill changes sent to the radar', () => {
     await service.updateUserSkills(userId, { skillIds: [reactId] });
     const before = await analysis.getRadarSnapshot(userId);
 
-    await expect(service.updateUserSkills(userId, { skillIds: [reactId, reactId] })).rejects.toBeInstanceOf(
-      DuplicateSkillException,
-    );
-    await expect(service.updateUserSkills(userId, { skillIds: [unknownId] })).rejects.toBeInstanceOf(
-      SkillNotFoundException,
-    );
+    await expect(
+      service.updateUserSkills(userId, {
+        skillIds: [reactId, reactId],
+      }),
+    ).rejects.toBeInstanceOf(DuplicateSkillException);
+
+    await expect(
+      service.updateUserSkills(userId, {
+        skillIds: [unknownId],
+      }),
+    ).rejects.toBeInstanceOf(SkillNotFoundException);
 
     expect(await analysis.getRadarSnapshot(userId)).toEqual(before);
     expect(store.state?.inputRevision).toBe(1);
@@ -266,29 +369,44 @@ describe('Skill changes sent to the radar', () => {
 
   it('never replaces a newer list with the result of an older change', async () => {
     store.beforePublish = async () => {
-      await service.updateUserSkills(userId, { skillIds: [pythonId] });
+      await service.updateUserSkills(userId, {
+        skillIds: [pythonId],
+      });
     };
 
-    await service.updateUserSkills(userId, { skillIds: [reactId] });
+    await service.updateUserSkills(userId, {
+      skillIds: [reactId],
+    });
 
-    expect(store.state).toMatchObject({ status: 'ready', inputRevision: 2, processedRevision: 2 });
+    expect(store.state).toMatchObject({
+      status: 'ready',
+      inputRevision: 2,
+      processedRevision: 2,
+    });
+
     expect(await radarSkills()).toEqual([
       ['Docker', 'nlp'],
       ['Python', 'manual'],
     ]);
   });
 
-  it('keeps the saved skills and sends only the manual ones when the analysis fails', async () => {
+  it('keeps the saved skills and preserves previous detections when the analysis fails', async () => {
     await service.updateUserSkills(userId, { skillIds: [reactId] });
+
     vi.spyOn(detection, 'detect').mockImplementation(() => {
       throw new Error('Detection failed');
     });
 
-    const saved = await service.updateUserSkills(userId, { skillIds: [reactId, pythonId] });
+    const saved = await service.updateUserSkills(userId, {
+      skillIds: [reactId, pythonId],
+    });
 
     expect(saved.map((skill) => skill.name)).toEqual(['Python', 'React']);
+
     expect((await analysis.getRadarSnapshot(userId)).status).toBe('error');
+
     expect(await radarSkills()).toEqual([
+      ['Docker', 'nlp'],
       ['Python', 'manual'],
       ['React', 'manual'],
     ]);

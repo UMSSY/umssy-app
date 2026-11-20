@@ -1,4 +1,5 @@
 "use client";
+import type { MentorFiltersBarProps } from "../../types/mentor-filters-bar-props.types";
 
 import { Label } from "@/components/ui/label";
 import {
@@ -10,15 +11,6 @@ import {
 } from "@/components/ui/select";
 
 const ALL_VALUE = "__all__";
-
-interface MentorFiltersBarProps {
-  area: string;
-  orientation: string;
-  technicalAreas: string[];
-  orientationTypes: string[];
-  onAreaChange: (value: string) => void;
-  onOrientationChange: (value: string) => void;
-}
 
 export function MentorFiltersBar({
   area,

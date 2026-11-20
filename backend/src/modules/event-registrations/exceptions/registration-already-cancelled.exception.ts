@@ -3,6 +3,10 @@ import { REGISTRATION_ERRORS } from '../constants/registration-errors.constants.
 
 export class RegistrationAlreadyCancelledException extends DomainException {
   constructor() {
-    super(REGISTRATION_ERRORS.REGISTRATION_ALREADY_CANCELLED.detail, REGISTRATION_ERRORS.REGISTRATION_ALREADY_CANCELLED.statusCode, 'REGISTRATION_ALREADY_CANCELLED');
+    super(
+      REGISTRATION_ERRORS.REGISTRATION_ALREADY_CANCELLED.detail,
+      REGISTRATION_ERRORS.REGISTRATION_ALREADY_CANCELLED.statusCode,
+      'REGISTRATION_ALREADY_CANCELLED',
+    );
   }
 }

@@ -9,7 +9,6 @@ interface BlockedConversationNoticeProps {
   onUnblock: () => void;
 }
 
-/** Aviso que reemplaza al campo de mensajes mientras el contacto está bloqueado. */
 export function BlockedConversationNotice({
   contactName,
   isUnblocking = false,

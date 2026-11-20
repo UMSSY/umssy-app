@@ -1,15 +1,14 @@
 import { apiClient } from "@/shared/services/api-client";
 import type { ApiResponse } from "@/shared/types/api-response.types";
-import type {
-  CreateJobOfferPayload,
-  JobOffer,
-  JobOfferCreatedResponse,
-  JobOfferDetailsResponse,
-} from "../types/job-offer.types";
-import type { SkillOption } from "../types/vacancy-conditions.types";
-import type { JobOfferListParams } from "../utils/filter-job-offers";
+import type { JobOffer } from "../types/job-offer.types";
+import type { CreateJobOfferPayload } from "../types/create-job-offer-payload.types";
+import type { JobOfferCreatedResponse } from "../types/job-offer-created-response.types";
+import type { JobOfferDetailsResponse } from "../types/job-offer-details-response.types";
+import type { SkillOption } from "../types/skill-option.types";
+import type { JobOfferListParams } from "../types/job-offer-list-params.types";
 
 const SKILL_CATALOG_ENDPOINT = "/job-offers/skills";
+const REQUIREMENT_TERMS_ENDPOINT = "/matching/requirements/terms";
 
 function buildCompanyJobOffersEndpoint(companyId: string): string {
   return `/companies/${companyId}/job-offers`;
@@ -18,6 +17,11 @@ function buildCompanyJobOffersEndpoint(companyId: string): string {
 export const jobOffersService = {
   getSkillCatalog: async (): Promise<SkillOption[]> => {
     const response = await apiClient.get<ApiResponse<SkillOption[]>>(SKILL_CATALOG_ENDPOINT);
+    return (response.data.data ?? []).map(({ id, name }) => ({ id, name }));
+  },
+
+  detectRequirementSkills: async (text: string): Promise<SkillOption[]> => {
+    const response = await apiClient.post<ApiResponse<SkillOption[]>>(REQUIREMENT_TERMS_ENDPOINT, { text });
     return (response.data.data ?? []).map(({ id, name }) => ({ id, name }));
   },
 
@@ -50,6 +54,17 @@ export const jobOffersService = {
       `${buildCompanyJobOffersEndpoint(companyId)}/${jobOfferId}`,
     );
     return response.data.data;
+  },
+
+  reopen: async (companyId: string, jobOfferId: string): Promise<JobOfferDetailsResponse> => {
+    const response = await apiClient.patch<ApiResponse<JobOfferDetailsResponse>>(
+      `${buildCompanyJobOffersEndpoint(companyId)}/${jobOfferId}/reopen`,
+    );
+    return response.data.data;
+  },
+
+  remove: async (companyId: string, jobOfferId: string): Promise<void> => {
+    await apiClient.delete(`${buildCompanyJobOffersEndpoint(companyId)}/${jobOfferId}`);
   },
 
   update: async (

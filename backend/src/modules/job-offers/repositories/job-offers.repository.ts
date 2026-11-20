@@ -1,9 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
+import { mapRecordNotFound } from '../../../common/utils/map-record-not-found.js';
+import type { Prisma } from '../../../prisma/client.js';
 import {
   JOB_OFFER_CREATED_SELECT,
   JOB_OFFER_SELECT,
 } from '../constants/job-offer.constants.js';
+import { JobOfferNotFoundException } from '../exceptions/index.js';
 import type { ListCompanyJobOffersRequest } from '../requests/list-company-job-offers.request.js';
 import type { CreateJobOfferData } from '../types/create-job-offer-data.type.js';
 import type { JobOfferCatalogIds } from '../types/job-offer-catalog-ids.type.js';
@@ -27,6 +30,18 @@ export class JobOffersRepository {
         requiredCareers: true,
         minExperienceYears: true,
         otherRequirements: true,
+      },
+    });
+  }
+
+  findOfferSummary(id: string) {
+    return this.prisma.jobOffer.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        title: true,
+        companyId: true,
+        company: { select: { title: true } },
       },
     });
   }
@@ -79,6 +94,14 @@ export class JobOffersRepository {
     };
   }
 
+  async findStatusId(status: JobOfferStatus): Promise<string | null> {
+    const row = await this.prisma.jobOfferStatus.findUnique({
+      where: { title: status },
+      select: { id: true },
+    });
+    return row?.id ?? null;
+  }
+
   create(data: CreateJobOfferData): Promise<JobOfferCreatedRecord> {
     const { skillIds, ...jobOffer } = data;
     return this.prisma.jobOffer.create({
@@ -96,7 +119,7 @@ export class JobOffersRepository {
         status: { title: JobOfferStatus.PUBLISHED },
         OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { publishedAt: 'desc' },
       select: JOB_OFFER_SELECT,
     });
   }
@@ -145,26 +168,74 @@ export class JobOffersRepository {
     data: UpdateJobOfferData,
   ): Promise<JobOfferRecord> {
     const { skillIds, ...jobOffer } = data;
-    return this.prisma.jobOffer.update({
-      where: { id: jobOfferId },
-      data: {
-        ...jobOffer,
-        ...(skillIds && {
-          skills: {
-            deleteMany: {},
-            create: skillIds.map((skillId) => ({ skillId })),
-          },
-        }),
-      },
-      select: JOB_OFFER_SELECT,
+    return this.updateExisting(jobOfferId, {
+      ...jobOffer,
+      ...(skillIds && {
+        skills: {
+          deleteMany: {},
+          create: skillIds.map((skillId) => ({ skillId })),
+        },
+      }),
     });
   }
 
+  reopen(
+    jobOfferId: string,
+    statusId: string,
+    publishedAt: Date,
+  ): Promise<JobOfferRecord> {
+    return this.updateExisting(jobOfferId, { statusId, publishedAt });
+  }
+
   updateStatus(jobOfferId: string, statusId: string): Promise<JobOfferRecord> {
-    return this.prisma.jobOffer.update({
-      where: { id: jobOfferId },
-      data: { statusId },
-      select: JOB_OFFER_SELECT,
+    return this.updateExisting(jobOfferId, { statusId });
+  }
+
+  private updateExisting(
+    jobOfferId: string,
+    data: Prisma.JobOfferUncheckedUpdateInput,
+  ): Promise<JobOfferRecord> {
+    return mapRecordNotFound(
+      this.prisma.jobOffer.update({
+        where: { id: jobOfferId },
+        data,
+        select: JOB_OFFER_SELECT,
+      }),
+      () => new JobOfferNotFoundException(),
+    );
+  }
+
+  activeRecruitmentVacancies() {
+    return this.prisma.jobOffer.findMany({
+      where: {
+        status: { title: 'Publicada' },
+        OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+      },
+      include: { skills: { include: { skill: true } } },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  recruiterVacancies(companyIds: string[]) {
+    return this.prisma.jobOffer.findMany({
+      where: {
+        companyId: { in: companyIds },
+        status: { title: 'Publicada' },
+        OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+      },
+      include: { skills: { include: { skill: true } } },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  publishedRecruitmentJob(jobId: string) {
+    return this.prisma.jobOffer.findFirst({
+      where: {
+        id: jobId,
+        status: { title: 'Publicada' },
+        OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+      },
+      include: { skills: { include: { skill: true } } },
     });
   }
 }

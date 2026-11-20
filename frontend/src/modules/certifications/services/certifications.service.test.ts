@@ -1,6 +1,8 @@
+import "@/shared/testing/indexed-db.mock";
+import { saveAccessToken, clearAccessToken } from "@/shared/services/storage/access-token-storage";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { apiClient } from "@/shared/services/api-client";
-import { ACCESS_TOKEN_STORAGE_KEY } from "@/modules/profile/config/auth-storage.config";
+
 import type { Certification } from "../types/certification.types";
 import type { CreateCertificationDto } from "../types/create-certification-dto.types";
 
@@ -50,15 +52,14 @@ function makeEndpointsUnavailable() {
 }
 
 describe("certificationsService", () => {
-  beforeEach(() => {
-    vi.resetModules();
+  beforeEach(async () => {
     vi.clearAllMocks();
-    window.sessionStorage.setItem(ACCESS_TOKEN_STORAGE_KEY, "token-123");
+    await saveAccessToken("token-123");
   });
 
   describe("without an access token", () => {
     it("sends the requests without an authorization header", async () => {
-      window.sessionStorage.clear();
+      clearAccessToken();
       vi.mocked(apiClient.get).mockResolvedValue({ data: { data: [] } });
       const service = await loadService();
 

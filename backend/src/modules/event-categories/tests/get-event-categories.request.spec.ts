@@ -17,7 +17,10 @@ describe('GetEventCategoriesSchema', () => {
   });
 
   it('coerces string page and limit into numbers', () => {
-    const result = GetEventCategoriesSchema.safeParse({ page: '2', limit: '20' });
+    const result = GetEventCategoriesSchema.safeParse({
+      page: '2',
+      limit: '20',
+    });
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.page).toBe(2);
@@ -42,7 +45,9 @@ describe('GetEventCategoriesSchema', () => {
   });
 
   it('rejects limit greater than MAX_PAGE_SIZE', () => {
-    const result = GetEventCategoriesSchema.safeParse({ limit: MAX_PAGE_SIZE + 1 });
+    const result = GetEventCategoriesSchema.safeParse({
+      limit: MAX_PAGE_SIZE + 1,
+    });
     expect(result.success).toBe(false);
   });
 

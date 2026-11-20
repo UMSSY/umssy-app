@@ -1,9 +1,10 @@
-import { SHORT_MONTH_LABELS } from "@/modules/profile";
+import { BOLIVIA_MONTH_SHORT_LABELS } from "@/shared/constants/date-time.constants";
+
 import { CURRENT_JOB_LABEL } from "../constants/work-experience.constants";
 
 function getMonthAndYear(yearMonth: string): { month: string; year: string } {
   const [year, month] = yearMonth.split("-");
-  const label = SHORT_MONTH_LABELS[Number(month) - 1];
+  const label = BOLIVIA_MONTH_SHORT_LABELS[Number(month) - 1];
   return { month: label.charAt(0).toUpperCase() + label.slice(1), year };
 }
 

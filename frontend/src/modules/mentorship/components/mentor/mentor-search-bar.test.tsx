@@ -21,7 +21,7 @@ describe("MentorSearchBar", () => {
       screen.getByRole("searchbox", {
         name: "Buscar mentores por nombre",
       }),
-    ).toHaveAttribute("placeholder", "Buscar por nombre");
+    ).toHaveAttribute("placeholder", "Nombre, cargo o palabra clave");
   });
 
   it("actualiza la búsqueda al dejar de escribir sin presionar Enter", () => {
@@ -51,6 +51,58 @@ describe("MentorSearchBar", () => {
       vi.advanceTimersByTime(1);
     });
     expect(onSearchChange).toHaveBeenCalledWith("Mar");
+  });
+
+  it("sincroniza el valor externo sin perder el foco", () => {
+    const { rerender } = render(
+      <MentorSearchBar value="" onSearchChange={vi.fn()} />,
+    );
+    const input = screen.getByRole("searchbox");
+
+    input.focus();
+    fireEvent.change(input, { target: { value: "And" } });
+    rerender(<MentorSearchBar value="And" onSearchChange={vi.fn()} />);
+
+    expect(input).toHaveFocus();
+    expect(input).toHaveValue("And");
+  });
+
+  it("limpia el texto externo sin restaurar la búsqueda anterior", () => {
+    vi.useFakeTimers();
+    const onSearchChange = vi.fn();
+
+    const { rerender } = render(
+      <MentorSearchBar value="" onSearchChange={onSearchChange} />,
+    );
+
+    fireEvent.change(screen.getByRole("searchbox"), {
+      target: { value: "Andres" },
+    });
+
+    act(() => {
+      vi.advanceTimersByTime(300);
+    });
+
+    expect(onSearchChange).toHaveBeenCalledWith("Andres");
+
+    rerender(
+      <MentorSearchBar value="Andres" onSearchChange={onSearchChange} />,
+    );
+
+    onSearchChange.mockClear();
+
+    rerender(
+      <MentorSearchBar value="" onSearchChange={onSearchChange} />,
+    );
+
+    expect(screen.getByRole("searchbox")).toHaveValue("");
+
+    act(() => {
+      vi.advanceTimersByTime(300);
+    });
+
+    expect(onSearchChange).not.toHaveBeenCalled();
+    expect(screen.getByRole("searchbox")).toHaveValue("");
   });
 
   it("elimina espacios de los extremos", () => {

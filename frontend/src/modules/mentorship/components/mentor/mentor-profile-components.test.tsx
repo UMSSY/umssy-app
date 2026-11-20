@@ -2,7 +2,9 @@ import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { toast } from "sonner";
 
+import { availabilityApi } from "@/modules/availability";
 import { MENTOR_PROFILE_FIXTURE } from "../../testing/mentor-profile.fixture";
 import { MentorAbout } from "./mentor-about";
 import { MentorCareer } from "./mentor-career";
@@ -11,9 +13,25 @@ import { MentorProfileHeader } from "./mentor-profile-header";
 import { MentorTechnicalAreas } from "./mentor-technical-areas";
 import { MentorProfileNavigation } from "./mentor-profile-navigation";
 
+const push = vi.fn();
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
+vi.mock("sonner", () => ({ toast: { error: vi.fn() } }));
+
+const freeBlock = {
+  id: "block-1",
+  mentorId: MENTOR_PROFILE_FIXTURE.id,
+  startAt: "2026-11-05T13:00:00.000Z",
+  endAt: "2026-11-05T13:30:00.000Z",
+  state: "free" as const,
+  createdAt: "",
+  updatedAt: "",
+};
+
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
+  push.mockClear();
+  vi.mocked(toast.error).mockClear();
 });
 
 describe("Mentor profile components", () => {
@@ -221,21 +239,46 @@ describe("Mentor profile components", () => {
     ).toBeInTheDocument();
   });
 
-  it("permite solicitar mentoría cuando el mentor está disponible", () => {
+  it("muestra el botón habilitado cuando el mentor está disponible", () => {
     render(<MentorProfileHeader mentor={MENTOR_PROFILE_FIXTURE} />);
 
-    const requestLink = screen.getByRole("link", {
+    const requestButton = screen.getByRole("button", {
       name: "Solicitar mentoría",
     });
 
-    expect(requestLink).toHaveAttribute(
-      "href",
-      `/mentors/${MENTOR_PROFILE_FIXTURE.id}/availability`,
-    );
-    expect(requestLink).toHaveClass("w-full", "px-4", "sm:px-6", "xl:w-auto");
+    expect(requestButton).toBeEnabled();
+    expect(requestButton).toHaveClass("w-full", "px-4", "sm:px-6", "xl:w-auto");
   });
 
-  it("deshabilita la solicitud cuando el mentor no está disponible", () => {
+  it("navega a la disponibilidad del mentor si hay horarios libres (CA5)", async () => {
+    vi.spyOn(availabilityApi, "getMentorFreeBlocks").mockResolvedValue([freeBlock]);
+    const user = userEvent.setup();
+    render(<MentorProfileHeader mentor={MENTOR_PROFILE_FIXTURE} />);
+
+    await user.click(screen.getByRole("button", { name: "Solicitar mentoría" }));
+
+    await waitFor(() =>
+      expect(push).toHaveBeenCalledWith(`/mentors/${MENTOR_PROFILE_FIXTURE.id}/availability`),
+    );
+    expect(
+      screen.queryByText("Este mentor no tiene horarios disponibles por ahora"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("muestra el aviso y no navega si no hay horarios libres en ninguna semana (CA5)", async () => {
+    vi.spyOn(availabilityApi, "getMentorFreeBlocks").mockResolvedValue([]);
+    const user = userEvent.setup();
+    render(<MentorProfileHeader mentor={MENTOR_PROFILE_FIXTURE} />);
+
+    await user.click(screen.getByRole("button", { name: "Solicitar mentoría" }));
+
+    expect(
+      await screen.findByText("Este mentor no tiene horarios disponibles por ahora"),
+    ).toBeInTheDocument();
+    expect(push).not.toHaveBeenCalled();
+  });
+
+  it("deshabilita la solicitud y muestra el texto del CA6 cuando el mentor no está disponible", () => {
     render(
       <MentorProfileHeader
         mentor={{
@@ -246,8 +289,11 @@ describe("Mentor profile components", () => {
     );
 
     expect(
-      screen.getByRole("button", { name: "Solicitar mentoría" }),
+      screen.getByRole("button", {
+        name: "Este mentor no está recibiendo solicitudes por ahora",
+      }),
     ).toBeDisabled();
+    expect(screen.queryByRole("button", { name: "Solicitar mentoría" })).not.toBeInTheDocument();
     expect(screen.getByText("No disponible")).toHaveClass(
       "border-transparent",
       "text-text-secondary",

@@ -3,12 +3,14 @@
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { useSocket } from '../contexts/socket-context';
+import type { EventRoomSummary } from '../types/event-room-summary.types';
 
 interface UseEventRoomReturn {
   conversationId: string | null;
   isJoined: boolean;
   error: string | null;
-  joinEventRoom: (eventId: string) => void;
+  room: EventRoomSummary | null;
+  joinEventRoom: (registrationId: string) => void;
   leaveEventRoom: () => void;
 }
 
@@ -17,14 +19,16 @@ export function useEventRoom(): UseEventRoomReturn {
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [isJoined, setIsJoined] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [room, setRoom] = useState<EventRoomSummary | null>(null);
 
   useEffect(() => {
     if (!socket || !isConnected) return;
 
-    const handleJoined = (payload: { conversationId: string }) => {
+    const handleJoined = (payload: EventRoomSummary) => {
       setConversationId(payload.conversationId);
       setIsJoined(true);
       setError(null);
+      setRoom(payload);
     };
 
     const handleError = (payload: { code: string }) => {
@@ -32,7 +36,6 @@ export function useEventRoom(): UseEventRoomReturn {
         toast.error('Solo los asistentes registrados pueden entrar', {
           description: 'No tienes una inscripción confirmada para este evento.',
         });
-        return;
       }
 
       setError(payload.code ?? 'error_desconocido');
@@ -48,9 +51,9 @@ export function useEventRoom(): UseEventRoomReturn {
   }, [socket, isConnected]);
 
   const joinEventRoom = useCallback(
-    (eventId: string) => {
+    (registrationId: string) => {
       if (!socket) return;
-      socket.emit('event_room:join', { eventId });
+      socket.emit('event_room:join', { registrationId });
     },
     [socket],
   );
@@ -59,12 +62,14 @@ export function useEventRoom(): UseEventRoomReturn {
     setConversationId(null);
     setIsJoined(false);
     setError(null);
+    setRoom(null);
   }, []);
 
   return {
     conversationId,
     isJoined,
     error,
+    room,
     joinEventRoom,
     leaveEventRoom,
   };

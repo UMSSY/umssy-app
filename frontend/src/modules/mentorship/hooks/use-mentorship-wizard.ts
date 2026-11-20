@@ -1,67 +1,137 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type SetStateAction } from "react";
+import { useCallback, useEffect, useState, type SetStateAction } from "react";
 import { INITIAL_MENTORSHIP_WIZARD_STATE } from "../constants/mentorship-wizard.constants";
 import {
   loadMentorshipWizardDraft,
   saveMentorshipWizardDraft,
 } from "../services/mentorship-wizard-draft.service";
+import type { OwnedWizardState } from "../types/owned-wizard-state.types";
 import type { MentorshipStep } from "../types/mentorship-step.types";
 import type { MentorshipWizardState } from "../types/mentorship-wizard-state.types";
 
-export function useMentorshipWizard() {
-  const [state, setState] = useState<MentorshipWizardState>(
-    INITIAL_MENTORSHIP_WIZARD_STATE,
+function createOwnedWizardState(userId: string | null): OwnedWizardState {
+  return {
+    userId,
+    state: INITIAL_MENTORSHIP_WIZARD_STATE,
+    isHydrated: false,
+    hasUserEdited: false,
+    hasDraftLoadFailed: false,
+    hasDraftStorageError: false,
+  };
+}
+
+export function useMentorshipWizard(userId: string | null) {
+  const [ownedState, setOwnedState] = useState<OwnedWizardState>(() =>
+    createOwnedWizardState(userId),
   );
-  const [isDraftHydrated, setIsDraftHydrated] = useState(false);
-  const [hasDraftStorageError, setHasDraftStorageError] = useState(false);
-  const hasUserEdited = useRef(false);
-  const hasDraftLoadFailed = useRef(false);
+  const currentOwnedState =
+    ownedState.userId === userId
+      ? ownedState
+      : createOwnedWizardState(userId);
+  const state = currentOwnedState.state;
 
   const updateState = useCallback((update: SetStateAction<MentorshipWizardState>) => {
-    hasUserEdited.current = true;
-    setState(update);
-  }, []);
+    setOwnedState((previous) => {
+      const current =
+        previous.userId === userId
+          ? previous
+          : createOwnedWizardState(userId);
+      return {
+        ...current,
+        userId,
+        state:
+          typeof update === "function"
+            ? update(current.state)
+            : update,
+        hasUserEdited: true,
+      };
+    });
+  }, [userId]);
 
   useEffect(() => {
     let isMounted = true;
 
-    void loadMentorshipWizardDraft().then((draft) => {
-      if (!isMounted) {
-        return;
-      }
+    if (!userId) {
+      return () => {
+        isMounted = false;
+      };
+    }
 
-      if (draft && !hasUserEdited.current) {
-        setState(draft);
-      }
-
-      setIsDraftHydrated(true);
+    void loadMentorshipWizardDraft(userId).then((draft) => {
+      if (!isMounted) return;
+      setOwnedState((previous) => {
+        const current =
+          previous.userId === userId
+            ? previous
+            : createOwnedWizardState(userId);
+        return {
+          ...current,
+          state:
+            draft && !current.hasUserEdited
+              ? draft
+              : current.state,
+          isHydrated: true,
+          hasDraftLoadFailed: false,
+          hasDraftStorageError: false,
+        };
+      });
     }).catch(() => {
-      if (isMounted) {
-        hasDraftLoadFailed.current = true;
-        setHasDraftStorageError(true);
-        setIsDraftHydrated(true);
-      }
+      if (!isMounted) return;
+      setOwnedState((previous) => {
+        const current =
+          previous.userId === userId
+            ? previous
+            : createOwnedWizardState(userId);
+        return {
+          ...current,
+          isHydrated: true,
+          hasDraftLoadFailed: true,
+          hasDraftStorageError: true,
+        };
+      });
     });
 
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [userId]);
 
   useEffect(() => {
-    if (!isDraftHydrated || (hasDraftLoadFailed.current && !hasUserEdited.current)) {
+    if (
+      !userId ||
+      ownedState.userId !== userId ||
+      !ownedState.isHydrated ||
+      (ownedState.hasDraftLoadFailed && !ownedState.hasUserEdited)
+    ) {
       return;
     }
 
     let isActive = true;
-    void saveMentorshipWizardDraft(state).then(() => {
-      if (isActive) setHasDraftStorageError(false);
+    void saveMentorshipWizardDraft(userId, state).then(() => {
+      if (!isActive) return;
+      setOwnedState((previous) =>
+        previous.userId === userId
+          ? { ...previous, hasDraftStorageError: false }
+          : previous,
+      );
     }).catch(() => {
-      if (isActive) setHasDraftStorageError(true);
+      if (!isActive) return;
+      setOwnedState((previous) =>
+        previous.userId === userId
+          ? { ...previous, hasDraftStorageError: true }
+          : previous,
+      );
     });
     return () => { isActive = false; };
-  }, [isDraftHydrated, state]);
+  }, [
+    ownedState.hasDraftLoadFailed,
+    ownedState.hasUserEdited,
+    ownedState.isHydrated,
+    ownedState.userId,
+    state,
+    userId,
+  ]);
 
   const goToStep = useCallback((step: MentorshipStep) => {
     updateState((prev) => ({
@@ -122,7 +192,7 @@ export function useMentorshipWizard() {
     goNext,
     goBack,
     toggleTechnicalArea,
-    hasDraftStorageError,
+    hasDraftStorageError: currentOwnedState.hasDraftStorageError,
     canGoBack: state.currentStep > 1,
     canGoNext:
       state.currentStep === 2

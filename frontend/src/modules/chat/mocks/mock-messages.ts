@@ -370,7 +370,7 @@ export const MOCK_MESSAGES: Message[] = [
       fileName: 'Oferta_desarrollo.pdf',
       fileSize: 245 * 1024,
       mimeType: 'application/pdf',
-      url: '/api/chat/attachments/att-mock-pdf-1/download',
+      url: '/api/chat/attachments/att-mock-pdf-1/file',
       type: 'PDF',
     },
     createdAt: minutesAgo(1440),

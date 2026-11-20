@@ -17,7 +17,10 @@ describe('AuditEventRecorderService', () => {
   it('guarda el evento con el cliente de la transacción recibido', async () => {
     const repository = { create: vi.fn().mockResolvedValue({ id: 'evt-1' }) };
     const tx = {};
-    await new AuditEventRecorderService(repository as any).record(INPUT, tx as any);
+    await new AuditEventRecorderService(repository as any).record(
+      INPUT,
+      tx as any,
+    );
     expect(repository.create).toHaveBeenCalledWith(INPUT, tx);
   });
 
@@ -35,6 +38,8 @@ describe('AuditEventRecorderService', () => {
   it('si la base falla, propaga el error para que la transacción del dictamen se revierta', async () => {
     const boom = new Error('fallo de base');
     const repository = { create: vi.fn().mockRejectedValue(boom) };
-    await expect(new AuditEventRecorderService(repository as any).record(INPUT, {} as any)).rejects.toBe(boom);
+    await expect(
+      new AuditEventRecorderService(repository as any).record(INPUT, {} as any),
+    ).rejects.toBe(boom);
   });
 });

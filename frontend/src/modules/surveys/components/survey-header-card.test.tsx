@@ -2,7 +2,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { buildSurveyState, CAREERS } from "../testing/survey-fixtures";
-import type { SurveyHeaderCardProps } from "../types/survey-component-props.types";
+import type { SurveyHeaderCardProps } from "../types/survey-header-card-props.types";
 import { SurveyHeaderCard } from "./survey-header-card";
 
 function renderHeader(overrides: Partial<SurveyHeaderCardProps> = {}) {

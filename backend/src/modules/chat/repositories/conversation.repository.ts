@@ -1,6 +1,25 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 
+const CONTACT_USER_SELECT = {
+  select: {
+    id: true,
+    firstName: true,
+    lastName: true,
+    photoUrl: true,
+    email: true,
+    headline: true,
+    roles: {
+      where: { deletedAt: null },
+      select: {
+        role: {
+          select: { name: true },
+        },
+      },
+    },
+  },
+};
+
 @Injectable()
 export class ConversationRepository {
   constructor(private readonly prisma: PrismaService) {}
@@ -12,11 +31,33 @@ export class ConversationRepository {
   }
 
   async findByOrderedPair(userAId: string, userBId: string) {
-    return this.prisma.conversation.findUnique({
-      where: { userAId_userBId: { userAId, userBId } },
+    return this.prisma.conversation.findFirst({
+      where: { userAId, userBId, contextId: null },
       include: {
-        userA: { select: { id: true, firstName: true, lastName: true, photoUrl: true } },
-        userB: { select: { id: true, firstName: true, lastName: true, photoUrl: true } },
+        userA: CONTACT_USER_SELECT,
+        userB: CONTACT_USER_SELECT,
+        messages: {
+          orderBy: { sentAt: 'desc' },
+          take: 1,
+          include: { status: { select: { title: true } } },
+        },
+      },
+    });
+  }
+
+  async findByContextId(contextId: string, userAId?: string, userBId?: string) {
+    const where: Record<string, unknown> = { contextId };
+    if (userAId && userBId) {
+      where.OR = [
+        { userAId, userBId },
+        { userAId: userBId, userBId: userAId },
+      ];
+    }
+    return this.prisma.conversation.findFirst({
+      where,
+      include: {
+        userA: CONTACT_USER_SELECT,
+        userB: CONTACT_USER_SELECT,
         messages: {
           orderBy: { sentAt: 'desc' },
           take: 1,
@@ -30,11 +71,17 @@ export class ConversationRepository {
     userAId: string,
     userBId: string,
     lastReadAt: Date,
+    context?: {
+      contextType?: string | null;
+      contextId?: string | null;
+    },
   ) {
     return this.prisma.conversation.create({
       data: {
         userAId,
         userBId,
+        contextType: context?.contextType ?? null,
+        contextId: context?.contextId ?? null,
         participants: {
           createMany: {
             data: [
@@ -45,8 +92,8 @@ export class ConversationRepository {
         },
       },
       include: {
-        userA: { select: { id: true, firstName: true, lastName: true, photoUrl: true } },
-        userB: { select: { id: true, firstName: true, lastName: true, photoUrl: true } },
+        userA: CONTACT_USER_SELECT,
+        userB: CONTACT_USER_SELECT,
         messages: {
           orderBy: { sentAt: 'desc' },
           take: 1,
@@ -57,8 +104,7 @@ export class ConversationRepository {
   }
 
   async upsertByEventId(eventId: string, userId: string, now: Date) {
-    return this.prisma.$transaction(async tx => {
-      // Conversación grupal: unique sobre eventId, userAId/userBId opcionales
+    return this.prisma.$transaction(async (tx) => {
       const conversation = await tx.conversation.upsert({
         where: { eventId },
         update: {},
@@ -72,14 +118,24 @@ export class ConversationRepository {
         select: { id: true, userAId: true, userBId: true },
       });
 
-      // Participante: misma clave única (conversationId, userId), por lo que es idempotente
       await tx.conversationParticipant.upsert({
-        where: { conversationId_userId: { conversationId: conversation.id, userId } },
+        where: {
+          conversationId_userId: { conversationId: conversation.id, userId },
+        },
         update: { lastReadAt: now },
         create: { conversationId: conversation.id, userId, lastReadAt: now },
       });
 
       return conversation.id;
+    });
+  }
+
+  async findParticipantsByConversationId(conversationId: string) {
+    return this.prisma.conversationParticipant.findMany({
+      where: { conversationId },
+      include: {
+        user: { select: { id: true, firstName: true, lastName: true } },
+      },
     });
   }
 
@@ -97,22 +153,28 @@ export class ConversationRepository {
   async findUserConversations(userId: string) {
     return this.prisma.conversation.findMany({
       where: {
-        AND: [
-          {
-            OR: [
-              { userAId: userId },
-              { userBId: userId },
-            ],
-          },
+        OR: [
           {
             eventId: null,
+            OR: [{ userAId: userId }, { userBId: userId }],
+          },
+          {
+            eventId: { not: null },
+            participants: {
+              some: { userId },
+            },
           },
         ],
       },
       include: {
-        userA: { select: { id: true, firstName: true, lastName: true, photoUrl: true } },
-        userB: { select: { id: true, firstName: true, lastName: true, photoUrl: true } },
+        userA: CONTACT_USER_SELECT,
+        userB: CONTACT_USER_SELECT,
         event: { select: { id: true, title: true } },
+        participants: {
+          include: {
+            user: { select: { id: true, firstName: true, lastName: true } },
+          },
+        },
         messages: {
           orderBy: { sentAt: 'desc' },
           take: 1,
@@ -125,5 +187,4 @@ export class ConversationRepository {
       ],
     });
   }
-
 }

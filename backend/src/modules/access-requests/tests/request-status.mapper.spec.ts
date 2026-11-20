@@ -110,17 +110,13 @@ describe('toRequestStatusResponse', () => {
   });
 
   it('devuelve document nulo cuando no existe el archivo', () => {
-    const result = toRequestStatusResponse(
-      buildRow({ documentFile: null }),
-    );
+    const result = toRequestStatusResponse(buildRow({ documentFile: null }));
 
     expect(result.document).toBeNull();
   });
 
   it('devuelve document nulo cuando no existe el tipo documental', () => {
-    const result = toRequestStatusResponse(
-      buildRow({ documentType: null }),
-    );
+    const result = toRequestStatusResponse(buildRow({ documentType: null }));
 
     expect(result.document).toBeNull();
   });

@@ -1,14 +1,18 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
+import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from '../../../common/prisma/prisma.module.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { FileValidationService } from '../../../common/services/file-validation.service.js';
+import { CvExtractionController } from '../controllers/cv-extraction.controller.js';
 import { CvFileController } from '../controllers/cv-file.controller.js';
 import { CvHistoryController } from '../controllers/cv-history.controller.js';
 import { CvModule } from '../cv.module.js';
+import { CvExtractionMapper } from '../mappers/cv-extraction.mapper.js';
 import { CvMapper } from '../mappers/cv.mapper.js';
 import { CvFileRepository } from '../repositories/cv-file.repository.js';
 import { CvMetadataRepository } from '../repositories/cv-metadata.repository.js';
+import { CvExtractionService } from '../services/cv-extraction.service.js';
 import { CvService } from '../services/cv.service.js';
 import { CvFileStorage } from '../types/cv-file-storage.type.js';
 
@@ -17,7 +21,11 @@ describe('CvModule', () => {
 
   beforeEach(async () => {
     moduleRef = await Test.createTestingModule({
-      imports: [CvModule, PrismaModule],
+      imports: [
+        ConfigModule.forRoot({ isGlobal: true }),
+        CvModule,
+        PrismaModule,
+      ],
     })
       .overrideProvider(PrismaService)
       .useValue({})
@@ -33,6 +41,9 @@ describe('CvModule', () => {
     CvFileStorage,
     CvMapper,
     FileValidationService,
+    CvExtractionController,
+    CvExtractionService,
+    CvExtractionMapper,
   ])('provides %p', (provider) => {
     expect(moduleRef.get(provider)).toBeDefined();
   });

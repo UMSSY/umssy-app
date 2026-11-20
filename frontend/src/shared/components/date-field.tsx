@@ -2,7 +2,7 @@
 
 import { useLayoutEffect, useRef, useState } from "react";
 import { CalendarDays, X } from "lucide-react";
-import { es } from "date-fns/locale";
+import { es } from "date-fns/locale/es";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Dialog, DialogClose, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -27,7 +27,7 @@ function parseDate(value: string) {
   return Number.isFinite(date.getTime()) && date.getUTCDate() === Number(day) && date.getUTCMonth() + 1 === Number(month) ? `${year}-${month}-${day}` : "";
 }
 
-export function DateField({ value, onValueChange, onBlur, ...props }: DateFieldProps) {
+export function DateField({ value, onValueChange, onBlur, initialMonth, ...props }: DateFieldProps) {
   const [draft, setDraft] = useState({ value, display: formatDate(value) });
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const pendingCaret = useRef<{ input: HTMLInputElement; position: number } | null>(null);
@@ -75,7 +75,7 @@ export function DateField({ value, onValueChange, onBlur, ...props }: DateFieldP
       <DialogContent showCloseButton={false} className="w-fit p-5">
         <DialogClose render={<Button variant="ghost" size="icon-sm" className="absolute top-3 right-3" aria-label="Cerrar calendario" />}><X aria-hidden="true" /></DialogClose>
         <DialogHeader><DialogTitle>Seleccionar fecha</DialogTitle></DialogHeader>
-        <Calendar locale={es} labels={{ labelMonthDropdown: () => "Mes", labelYearDropdown: () => "Año", labelNext: () => "Mes siguiente", labelPrevious: () => "Mes anterior" }} mode="single" captionLayout="dropdown" selected={selectedDate} defaultMonth={selectedDate ?? maxDate} startMonth={minDate ?? new Date(1900, 0, 1)} endMonth={maxDate ?? new Date(new Date().getFullYear() + 10, 11, 31)} disabled={[...(minDate ? [{ before: minDate }] : []), ...(maxDate ? [{ after: maxDate }] : [])]} onSelect={(date) => {
+        <Calendar locale={es} labels={{ labelMonthDropdown: () => "Mes", labelYearDropdown: () => "Año", labelNext: () => "Mes siguiente", labelPrevious: () => "Mes anterior" }} mode="single" captionLayout="dropdown" selected={selectedDate} defaultMonth={selectedDate ?? (initialMonth ? getCalendarDate(initialMonth) : maxDate)} startMonth={minDate ?? new Date(1900, 0, 1)} endMonth={maxDate ?? new Date(new Date().getFullYear() + 10, 11, 31)} disabled={[...(minDate ? [{ before: minDate }] : []), ...(maxDate ? [{ after: maxDate }] : [])]} onSelect={(date) => {
           if (!date) return;
           const iso = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
           setDraft({ value: iso, display: formatDate(iso) });
