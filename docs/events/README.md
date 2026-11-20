@@ -8,6 +8,8 @@ The backend owns the workshop catalogue, proposal creation, cover images, manage
 
 - An authenticated `titulado` submits a workshop proposal with an optional cover and idempotency key. Creating it does not immediately publish it.
 - The public catalogue and detail display the state returned by the server.
+- An online visit to `/events/my-passes` without the session marker redirects to `/login` with the requested path in `next`.
+- The service worker precaches `/events/my-passes` with `credentials: 'omit'` and `X-UMSSY-Offline-Shell: 1`. This keeps PWA installation and access to previously saved passes available offline. Client-side session checks still protect private data.
 - `Mis talleres` lists only published workshops whose `createdById` equals the current user ID. A new unpublished proposal does not appear. Other responsible users are not assigned by the current implementation.
 - `EventsCronService` calls `EventsService.expireOverdueProposals` every five minutes; published proposals are not expired by this job.
 - The organizer opens an attendance route from a listed workshop. On desktop, the screen renders a QR containing that route; the phone requires an authorized session. Check-in belongs to the registration module.
