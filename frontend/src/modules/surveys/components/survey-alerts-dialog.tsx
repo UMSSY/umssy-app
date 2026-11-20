@@ -16,7 +16,7 @@ export function SurveyAlertsDialog({ open, onOpenChange, questions, config, isLo
   const router = useRouter();
   const [isDirty, setIsDirty] = useState(false);
   const [isDiscardDialogOpen, setIsDiscardDialogOpen] = useState(false);
-  const { pendingHref, clearPendingHref } = useUnsavedChangesGuard(open && isDirty);
+  const { pendingHref, clearPendingHref } = useUnsavedChangesGuard(isDirty);
 
   const closeDialog = () => {
     setIsDirty(false);
@@ -49,44 +49,46 @@ export function SurveyAlertsDialog({ open, onOpenChange, questions, config, isLo
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="gap-5 p-6 sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-lg font-bold text-ink">
-            <BellRing className="size-5 text-accent" aria-hidden="true" />
-            {SURVEY_ALERTS_TEXT.title}
-          </DialogTitle>
-          <DialogDescription className="text-text-secondary">{SURVEY_ALERTS_TEXT.description}</DialogDescription>
-        </DialogHeader>
+    <>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
+        <DialogContent className="gap-5 p-6 sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-lg font-bold text-ink">
+              <BellRing className="size-5 text-accent" aria-hidden="true" />
+              {SURVEY_ALERTS_TEXT.title}
+            </DialogTitle>
+            <DialogDescription className="text-text-secondary">{SURVEY_ALERTS_TEXT.description}</DialogDescription>
+          </DialogHeader>
 
-        {hasError ? (
-          <p role="alert" className="rounded-lg border border-destructive/20 bg-destructive/5 p-3 text-sm text-destructive">
-            {SURVEY_ALERTS_TEXT.loadError}
-          </p>
-        ) : isLoading || !config ? (
-          <div className="flex flex-col gap-3" aria-busy="true">
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-40" />
-            <Skeleton className="h-28 w-full" />
-          </div>
-        ) : (
-          <SurveyAlertsForm
-            questions={questions}
-            config={config}
-            isSaving={isSaving}
-            onCancel={closeDialog}
-            onDirtyChange={setIsDirty}
-            onSave={onSave}
-          />
-        )}
+          {hasError ? (
+            <p role="alert" className="rounded-lg border border-destructive/20 bg-destructive/5 p-3 text-sm text-destructive">
+              {SURVEY_ALERTS_TEXT.loadError}
+            </p>
+          ) : isLoading || !config ? (
+            <div className="flex flex-col gap-3" aria-busy="true">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-40" />
+              <Skeleton className="h-28 w-full" />
+            </div>
+          ) : (
+            <SurveyAlertsForm
+              questions={questions}
+              config={config}
+              isSaving={isSaving}
+              onCancel={closeDialog}
+              onDirtyChange={setIsDirty}
+              onSave={onSave}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
 
-        <DiscardChangesDialog
-          open={isDiscardDialogOpen || pendingHref !== null}
-          onOpenChange={handleDiscardOpenChange}
-          onConfirm={handleConfirmDiscard}
-          description={SURVEY_ALERTS_TEXT.discardDescription}
-        />
-      </DialogContent>
-    </Dialog>
+      <DiscardChangesDialog
+        open={isDiscardDialogOpen || pendingHref !== null}
+        onOpenChange={handleDiscardOpenChange}
+        onConfirm={handleConfirmDiscard}
+        description={SURVEY_ALERTS_TEXT.discardDescription}
+      />
+    </>
   );
 }
