@@ -131,7 +131,7 @@ sequenceDiagram
         W->>E: evaluateSurvey(id, { closesAt, threshold, questionIds })
         E->>R: findStatistics(current semester) and findStatistics(previous semester)
         E-->>W: hasShifts, summaryText
-        opt there are variations >= threshold
+        opt there are variations > threshold
           W->>N: notify(SURVEY_VARIATION_ALERT, [creator])
         end
       end
@@ -183,7 +183,7 @@ sequenceDiagram
 
 - Optional 1:1 configuration with the survey. Without a record, the default values `enabled = true`, `threshold = 10`, `questionIds = null` (all questions) are used.
 - `threshold`: integer from 1 to 50 percentage points. `questionIds`: list of ids of the questions to watch; `null` or empty watches all of them. The body accepts `enabled` or `isEnabled` (`enabled` takes precedence).
-- When the survey closes, the percentage of responses of the current semester is compared with that of the previous semester, per question and option. The current semester is derived only from `closesAt` (or from the current date if the survey has no closing date); `academicPeriod` is the cohort year (`AAAA` or `Todas`), not a semester, and plays no part in the comparison. For example, a survey that closes on 15/11/2024 compares II-2024 with I-2024. Every option with `|diferencia| >= threshold` is reported. If either of the two semesters has no responses, there is no alert.
+- When the survey closes, the percentage of responses of the current semester is compared with that of the previous semester, per question and option. The current semester is derived only from `closesAt` (or from the current date if the survey has no closing date); `academicPeriod` is the cohort year (`AAAA` or `Todas`), not a semester, and plays no part in the comparison. For example, a survey that closes on 15/11/2024 compares II-2024 with I-2024. Every option with `|diferencia| > threshold` is reported (a variation equal to the threshold does not trigger an alert). If either of the two semesters has no responses, there is no alert.
 - Frontend: with alerts enabled it requires at least one selected question; on save it sends the ids of the checked questions.
 
 ### Automatic lifecycle
