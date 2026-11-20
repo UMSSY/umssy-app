@@ -20,6 +20,8 @@ flowchart LR
 
 The module uses TanStack Query and the centralized HTTP client. It integrates profile, certifications, and radar through their `index.ts` files. Mutations update CV data and profile completeness; the dashboard also refreshes verification history and radar data. It does not open IndexedDB directly.
 
+On the documents page, the left column contains CV upload and saved CVs. The right column contains profile-based CV generation, the selected document analysis, and the automatic verification flow with its history dialog. CV upload has a single entry point in the upload card.
+
 ## Flows and rules
 
 ```mermaid
