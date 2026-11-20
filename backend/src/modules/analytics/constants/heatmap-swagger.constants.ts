@@ -315,3 +315,58 @@ export const HEATMAP_BAD_REQUEST_RESPONSE: ApiResponseOptions = {
     },
   },
 };
+
+export const HEATMAP_EXPORT_OPERATION_DESCRIPTION = [
+  'Genera el mapa de calor solicitado como documento PDF con el encabezado institucional (logotipos de la UMSS y UMSSY), los filtros aplicados y el administrador que lo generó.',
+  '',
+  '**Autenticación:** Bearer JWT. **Roles:** `administrativo`.',
+  '',
+  'Acepta los mismos filtros que `GET /analytics/heatmap/{type}`. `format=pdf` (por defecto) es el único formato del servidor; el CSV se genera en el cliente.',
+].join('\n');
+
+export const HEATMAP_EXPORT_FORMAT_QUERY: ApiQueryOptions = {
+  name: 'format',
+  required: false,
+  description: 'Formato del archivo exportado.',
+  enum: ['pdf'],
+  example: 'pdf',
+};
+
+export const HEATMAP_EXPORT_OK_RESPONSE: ApiResponseOptions = {
+  status: 200,
+  description: 'Documento PDF generado.',
+  headers: {
+    'Content-Type': {
+      description: 'Tipo del archivo.',
+      schema: { type: 'string', enum: ['application/pdf'] },
+    },
+    'Content-Disposition': {
+      description: 'Descarga como adjunto con el nombre del archivo.',
+      schema: {
+        type: 'string',
+        example: 'attachment; filename="mapa-calor-employability.pdf"',
+      },
+    },
+  },
+  content: {
+    'application/pdf': { schema: { type: 'string', format: 'binary' } },
+  },
+};
+
+export const HEATMAP_EXPORT_AUTHOR_NOT_FOUND_RESPONSE: ApiResponseOptions = {
+  status: 404,
+  description:
+    'No se pudo obtener el nombre del administrador autenticado para firmar el PDF (`REPORT_AUTHOR_NOT_FOUND`).',
+  content: {
+    'application/json': {
+      schema: API_ERROR_SCHEMA,
+      example: {
+        statusCode: 404,
+        code: 'REPORT_AUTHOR_NOT_FOUND',
+        data: { field: 'userId' },
+        detail: 'No se pudo identificar al administrador que genera el reporte.',
+        ok: false,
+      },
+    },
+  },
+};

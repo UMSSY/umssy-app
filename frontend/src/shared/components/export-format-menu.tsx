@@ -18,6 +18,8 @@ export function ExportFormatMenu({
   formatTexts,
   onSelectFormat,
   formatHeading,
+  cancelLabel,
+  triggerVariant = "brand",
   disabled = false,
   isLoading = false,
   contentClassName,
@@ -26,7 +28,7 @@ export function ExportFormatMenu({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        render={<Button type="button" variant="brand" className="group" disabled={disabled || isLoading} aria-busy={isLoading} />}
+        render={<Button type="button" variant={triggerVariant} className="group" disabled={disabled || isLoading} aria-busy={isLoading} />}
       >
         {triggerLabel}
         <ChevronDown className="size-4 transition-transform group-aria-expanded:rotate-180" aria-hidden="true" />
@@ -44,6 +46,12 @@ export function ExportFormatMenu({
             </span>
           </DropdownMenuItem>
         ))}
+        {cancelLabel ? (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="justify-center p-2 text-sm text-muted-foreground">{cancelLabel}</DropdownMenuItem>
+          </>
+        ) : null}
       </DropdownMenuContent>
     </DropdownMenu>
   );
