@@ -1,6 +1,5 @@
 const DEFAULT_FRONTEND_URL = 'http://localhost:3000';
 
-// Origen del frontend para los enlaces de los correos: FRONTEND_URL o, si no existe, el primer CORS_ORIGIN
 export function frontendBaseUrl(
   env: Record<string, string | undefined> = process.env,
 ): string {

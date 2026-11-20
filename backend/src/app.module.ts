@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ScheduleModule } from '@nestjs/schedule';
 import { MailModule } from './modules/mail/index.js';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
@@ -36,7 +37,6 @@ import { NlpModule } from './modules/nlp/nlp.module.js';
 import { RadarIntegrationModule } from './modules/radar-integration/radar-integration.module.js';
 import { SurveysModule } from './modules/surveys/surveys.module.js';
 import { AppointmentsModule } from './modules/appointments/appointments.module.js';
-import { ScheduleModule } from '@nestjs/schedule';
 import { NotificationsModule } from './modules/notifications/notifications.module.js';
 
 @Module({

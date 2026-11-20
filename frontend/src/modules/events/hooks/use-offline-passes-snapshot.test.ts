@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { saveAccessToken } from '@/shared/services/storage/access-token-storage';
 import { readIndexedDbPair } from '@/shared/services/storage/browser-indexed-db';
 import { renderHookWithQuery } from '@/shared/testing/render-hook-with-query';
+import { endOfflinePassesSession } from '@/shared/services/storage/offline-passes-owner';
 import { offlinePassesStore } from '../utils/offline-passes-store';
 import { useOfflinePassesSnapshot } from './use-offline-passes-snapshot';
 
@@ -43,13 +44,42 @@ describe('useOfflinePassesSnapshot', () => {
     expect(result.current.snapshot).toBeNull();
   });
 
-  it('does not read storage without a user', () => {
+  it('does not read storage for a token without a user', () => {
     vi.mocked(readIndexedDbPair).mockClear();
     const { result } = renderHookWithQuery(() =>
-      useOfflinePassesSnapshot(null, false),
+      useOfflinePassesSnapshot('opaque-token', true),
     );
     expect(result.current).toEqual({ snapshot: null, isLoading: false });
     expect(readIndexedDbPair).not.toHaveBeenCalled();
+  });
+
+  it("reads the owner's copy without a token even while the browser reports a connection", async () => {
+    await offlinePassesStore.save('user-a', [pass]);
+    const { result } = renderHookWithQuery(() =>
+      useOfflinePassesSnapshot(null, true),
+    );
+    await waitFor(() => expect(result.current.snapshot?.userId).toBe('user-a'));
+  });
+
+  it('hides the copy without a token once the offline session was revoked', async () => {
+    await offlinePassesStore.save('user-a', [pass]);
+    await endOfflinePassesSession('user-a');
+    const { result } = renderHookWithQuery(() =>
+      useOfflinePassesSnapshot(null, false),
+    );
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.snapshot).toBeNull();
+  });
+
+  it("reads the device owner's copy offline without a session token", async () => {
+    await saveAccessToken(token('user-a'));
+    await offlinePassesStore.save('user-a', [pass]);
+    const { result } = renderHookWithQuery(() =>
+      useOfflinePassesSnapshot(null, false),
+    );
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.snapshot?.userId).toBe('user-a');
+    expect(result.current.snapshot?.passes).toEqual([pass]);
   });
 
   it('reloads the copy when connectivity changes without flashing a loading state', async () => {
@@ -72,7 +102,7 @@ describe('useOfflinePassesSnapshot', () => {
       expect(result.current.snapshot?.passes).toHaveLength(2),
     );
     expect(readIndexedDbPair).toHaveBeenCalledWith(
-      'accessToken',
+      'offline-passes:owner',
       'offline-passes:user-a',
     );
   });

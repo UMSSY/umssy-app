@@ -23,6 +23,7 @@ export { PublicWorkshopDetailView } from "./views/public-workshop-detail-view";
 export { MyPassesView } from "./views/my-passes-view";
 export { OfflinePreparation, OfflinePreparationProvider } from "./components/offline-preparation";
 export { MyPassesRouteView } from "./views/my-passes-route-view";
+export { OfflinePassesRouteView } from "./views/offline-passes-route-view";
 export { readRecord, readArray, readString } from "./utils/response-validation";
 export { REQUEST_TIMEOUT_MS } from "./constants/events.constants";
 export {
