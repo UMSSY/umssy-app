@@ -9,3 +9,11 @@ export interface CompanyProfile {
   website: string | null;
   logoUrl: string | null;
 }
+
+export type ProfileLoadStatus = "idle" | "loading" | "success" | "error";
+
+export interface CompanyProfileViewState {
+  status: ProfileLoadStatus;
+  profile: CompanyMainProfile | null;
+  errorMessage: string | null;
+}
