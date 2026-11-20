@@ -2,6 +2,10 @@ import type { Prisma } from '../../../prisma/client.js';
 import { SurveyTargetAudience } from '../types/survey.enum.js';
 import { CAREER_SELECT, CATALOG_TITLE_SELECT } from './survey.constants.js';
 
+export const APPROVED_ACCESS_REQUEST_WHERE = {
+  status: { title: { equals: 'approved', mode: 'insensitive' } },
+} satisfies Prisma.AccessRequestWhereInput;
+
 export const SURVEY_PARTICIPATION_TARGET_SELECT = {
   id: true,
   title: true,
