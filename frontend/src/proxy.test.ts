@@ -24,12 +24,36 @@ describe("Root proxy", () => {
   });
 
   it("matches only the root, leaving authentication to route layouts", () => {
-    expect(config.matcher).toEqual(["/"]);
+    expect(config.matcher).toEqual(["/", "/events/my-passes"]);
   });
 
   it.each(["/login", "/request-access", "/future-public-page", "/profile", "/chat", "/backoffice/solicitudes"])("does not apply a global session check to %s", (pathname) => {
     const response = callProxy(pathname);
     expect(response.headers.get("location")).toBeNull();
     expect(response.headers.get("x-middleware-next")).toBe("1");
+  });
+
+  it("redirects a logged-out direct visit to Mis inscripciones before rendering", () => {
+    const response = callProxy("/events/my-passes");
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get("location")).toBe(
+      `${BASE_ORIGIN}/login?next=%2Fevents%2Fmy-passes`,
+    );
+  });
+
+  it("keeps Mis inscripciones reachable when the session marker exists", () => {
+    const response = callProxy("/events/my-passes", "1");
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("location")).toBeNull();
+  });
+
+  it("preserves the requested route and query when redirecting to login", () => {
+    const response = callProxy("/events/my-passes?tab=historial");
+
+    expect(response.headers.get("location")).toBe(
+      `${BASE_ORIGIN}/login?next=%2Fevents%2Fmy-passes%3Ftab%3Dhistorial`,
+    );
   });
 });
