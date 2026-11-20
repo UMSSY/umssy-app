@@ -10,7 +10,7 @@ export { useReportHistory } from "./hooks/use-report-history";
 export { REPORTS_NAVIGATION_ITEM } from "./constants/reports-navigation.constants";
 export { reportsService } from "./services/reports.service";
 export { getAcademicPeriods } from "./utils/academic-periods";
-export { CONNECTION_ERROR_MESSAGE } from "./constants/reports.constants";
+export { CONNECTION_ERROR_MESSAGE, EMAIL_SEARCH_LABEL } from "./constants/reports.constants";
 export { ExportSuccessToast } from "./components/export-success-toast";
 export { RefreshButton } from "./components/refresh-button";
 export { ReportFilterSelect } from "./components/report-filter-select";
