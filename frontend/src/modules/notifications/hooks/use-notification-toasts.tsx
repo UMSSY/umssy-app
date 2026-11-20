@@ -3,6 +3,7 @@
 import { useEffect, useSyncExternalStore } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { MessageCircle, UserCheck, UserPlus } from 'lucide-react';
 import { getActiveConversationId } from '@/modules/chat';
 import {
   getAccessToken,
@@ -12,6 +13,23 @@ import { NOTIFICATION_NEW_EVENT } from '../constants/notification-socket-events.
 import { getNotificationsSocket } from '../services/notifications-socket';
 import type { NotificationNewSocketPayload } from '../types/notification-new-socket-payload.types';
 import { getNotificationActionLabel } from '../utils/get-notification-action-label';
+import { getNotificationIcon } from '../utils/get-notification-icon';
+
+function getToastIcon(typeCode?: string) {
+  switch (typeCode) {
+    case 'CONNECTION_REQUEST_RECEIVED':
+      return <UserPlus className="size-6 stroke-[1.75] text-[#08365C]" />;
+    case 'CONNECTION_REQUEST_ACCEPTED':
+      return <UserCheck className="size-6 stroke-[1.75] text-[#08365C]" />;
+    case 'CHAT_MESSAGE':
+    case 'CHAT_GROUP_MESSAGE':
+      return <MessageCircle className="size-6 stroke-[1.75] text-[#08365C]" />;
+    default: {
+      const IconComponent = getNotificationIcon(typeCode ?? '');
+      return <IconComponent className="size-6 stroke-[1.75] text-[#08365C]" />;
+    }
+  }
+}
 
 const getServerToken = () => null;
 
@@ -64,9 +82,11 @@ export function useNotificationToasts(): void {
       }
 
       const actionLabel = getNotificationActionLabel(data.typeCode ?? '');
+      const toastIcon = getToastIcon(data.typeCode);
 
       toast(data.title, {
         description: data.body,
+        icon: toastIcon,
         duration: 7000,
         action: data.actionUrl
           ? {
