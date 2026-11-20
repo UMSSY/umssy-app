@@ -90,6 +90,11 @@ describe("useCloseJobOffer", () => {
         duration: 5000,
         richColors: true,
         closeButton: true,
+        style: expect.objectContaining({
+          background: "#f0fdf4",
+          color: "#166534",
+          border: "1px solid #bbf7d0",
+        }),
       }),
     );
 

@@ -191,4 +191,9 @@ export const CLOSE_SUCCESS_TOAST_OPTIONS = {
   ...TOAST_OPTIONS,
   richColors: true,
   closeButton: true,
+  style: {
+    background: "#f0fdf4",
+    color: "#166534",
+    border: "1px solid #bbf7d0",
+  },
 } as const;

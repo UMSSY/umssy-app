@@ -40,12 +40,12 @@ export function CloseVacancyDialog({
         overlayClassName="bg-black/70"
         className="max-w-[calc(100%-2rem)] bg-white text-slate-950 sm:max-w-sm"
       >
-        <DialogHeader>
-          <DialogTitle className="text-base font-semibold text-slate-950">
+        <DialogHeader className="items-center text-center sm:text-center">
+            <DialogTitle className="text-center text-base font-semibold text-slate-950">
             {CLOSE_JOB_OFFER_TEXT.title}
           </DialogTitle>
-          <DialogDescription className="text-slate-700">
-            La vacante &quot;{offer?.title}&quot; dejará de recibir postulaciones.
+          <DialogDescription className="text-center text-slate-700">
+            La vacante {offer?.title} dejará de recibir postulaciones.
           </DialogDescription>
         </DialogHeader>
 
@@ -56,7 +56,7 @@ export function CloseVacancyDialog({
               <Button
                 type="button"
                 variant="outline"
-                className="max-md:min-h-11"
+                className="cursor-pointer max-md:min-h-11"
               />
             }
           >
