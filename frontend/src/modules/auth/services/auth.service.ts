@@ -1,6 +1,8 @@
+import { toAuthRequestError } from "../utils/auth-request-error";
 import { BEARER_PREFIX } from "@/shared/constants/auth.constants";
 import { ROLE_TAGS } from "@/shared/constants/roles.constants";
 import { apiClient } from "@/shared/services/api-client";
+import { broadcastAuthEvent } from "../utils/auth-broadcast";
 import type { ApiResponse } from "@/shared/types/api-response.types";
 import type { SessionResponse } from "../types/session-response.types";
 import type { LoginPayload, LoginResponse } from "../types/auth-types";
@@ -29,14 +31,7 @@ function extractLoginResponse(body: unknown): LoginResponse {
 }
 
 function extractApiError(err: unknown, fallback: string): never {
-  const detail = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
-  if (detail) {
-    throw new Error(detail);
-  }
-  if (err instanceof Error) {
-    throw err;
-  }
-  throw new Error(fallback);
+  throw toAuthRequestError(err, fallback);
 }
 
 export const authService = {
@@ -49,6 +44,31 @@ export const authService = {
       });
       return response.data.data;
     }, { signal, requireStorage });
+  },
+  refreshSession: async (): Promise<{ ok: boolean }> => {
+    try {
+      const response = await apiClient.post<ApiResponse<{ ok: boolean }> | { ok: boolean }>("/auth/refresh");
+      const res = response.data;
+      if (res && typeof res === "object" && "data" in res && res.data) {
+        return res.data;
+      }
+      return (res as { ok: boolean }) ?? { ok: true };
+    } catch (err: unknown) {
+      extractApiError(err, "No se pudo renovar la sesión");
+    }
+  },
+  logout: async (): Promise<{ ok: boolean }> => {
+    broadcastAuthEvent({ type: "SESSION_CLOSED", reason: "SESSION_REVOKED" });
+    try {
+      const response = await apiClient.post<ApiResponse<{ ok: boolean }> | { ok: boolean }>("/auth/logout");
+      const res = response.data;
+      if (res && typeof res === "object" && "data" in res && res.data) {
+        return res.data;
+      }
+      return (res as { ok: boolean }) ?? { ok: true };
+    } catch {
+      return { ok: true };
+    }
   },
   login: async (payload: LoginPayload): Promise<LoginResponse> => {
     if (!apiClient.defaults.baseURL) {

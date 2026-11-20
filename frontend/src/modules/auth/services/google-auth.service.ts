@@ -1,0 +1,262 @@
+import { decodeGoogleIdToken } from "../utils/decode-google-id-token";
+import { requestGoogleOAuth } from "../utils/google-oauth-redirect";
+import type { GoogleOAuthRequestOptions } from "../types/google-oauth-flow.types";
+export { decodeGoogleIdToken } from "../utils/decode-google-id-token";
+import { apiClient } from "@/shared/services/api-client";
+import type { ApiResponse } from "@/shared/types/api-response.types";
+import type { LoginResponse } from "../types/auth-types";
+import { ROLE_TAGS } from "@/shared/constants/roles.constants";
+
+function isLoginResponse(value: unknown): value is LoginResponse {
+  if (typeof value !== "object" || value === null) return false;
+  const { accessToken, roleTag, roles } = value as Record<string, unknown>;
+  return (
+    typeof accessToken === "string" &&
+    accessToken !== "" &&
+    ROLE_TAGS.some((role) => role === roleTag) &&
+    (roles === undefined ||
+      (Array.isArray(roles) &&
+        roles.length > 0 &&
+        roles.every((role) => ROLE_TAGS.some((knownRole) => knownRole === role))))
+  );
+}
+
+function extractLoginResponse(body: unknown): LoginResponse {
+  const wrapped =
+    typeof body === "object" && body !== null
+      ? (body as { data?: unknown }).data
+      : undefined;
+  const candidate = isLoginResponse(wrapped) ? wrapped : body;
+  if (!isLoginResponse(candidate)) {
+    throw new Error("El backend no devolvió un token de sesión válido.");
+  }
+  return {
+    accessToken: candidate.accessToken,
+    roleTag: candidate.roleTag,
+    ...(candidate.roles ? { roles: candidate.roles } : {}),
+  };
+}
+
+export interface GoogleProfile {
+  email: string;
+  name?: string;
+  picture?: string;
+  idToken?: string;
+  credential?: string;
+}
+
+export interface LinkGoogleResult {
+  success: boolean;
+  message?: string;
+  reason?: "email_mismatch" | "role_not_allowed" | "server_error";
+}
+
+export interface GoogleLoginResult {
+  success: boolean;
+  session?: LoginResponse;
+  message?: string;
+  reason?: "not_registered" | "role_not_allowed" | "server_error";
+}
+
+export const googleAuthService = {
+  /**
+   * Triggers the official native Google Identity Services ID Token flow (google.accounts.id)
+   * or falls back to Google OAuth redirect / popup flow (/oauth/google/callback).
+   */
+  promptSelectAccount: (options: GoogleOAuthRequestOptions = {}): Promise<GoogleProfile> => {
+    return new Promise((resolve, reject) => {
+      if (typeof window === "undefined") {
+        return reject(new Error("No disponible en el servidor."));
+      }
+
+      const clientId =
+        process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID?.trim() || "";
+
+      if (!clientId) {
+        return reject(
+          new Error("NEXT_PUBLIC_GOOGLE_CLIENT_ID no está configurado.")
+        );
+      }
+
+      // Check if official Google Identity Services (GIS) ID Token SDK is available
+      const google = (window as unknown as {
+        google?: {
+          accounts?: {
+            id?: {
+              initialize: (config: {
+                client_id: string;
+                callback: (res: { credential?: string }) => void;
+                auto_select?: boolean;
+                cancel_on_tap_outside?: boolean;
+              }) => void;
+              prompt: (momentListener?: (notification: {
+                isNotDisplayed: () => boolean;
+                isSkippedMoment: () => boolean;
+                isDismissedMoment: () => boolean;
+                getDismissedReason: () => string;
+              }) => void) => void;
+            };
+            oauth2?: unknown;
+          };
+        };
+      }).google;
+
+      if (clientId && google?.accounts?.id) {
+        google.accounts.id.initialize({
+          client_id: clientId,
+          auto_select: false,
+          cancel_on_tap_outside: true,
+          callback: (idResponse: { credential?: string }) => {
+            if (!idResponse?.credential) {
+              return reject(new Error("No se recibió credencial de Google."));
+            }
+            try {
+              const payload = decodeGoogleIdToken(idResponse.credential);
+              if (payload?.email) {
+                resolve({
+                  email: payload.email,
+                  name: payload.name,
+                  picture: payload.picture,
+                  idToken: idResponse.credential,
+                  credential: idResponse.credential,
+                });
+              } else {
+                reject(new Error("El ID Token no contiene correo electrónico."));
+              }
+            } catch (err) {
+              reject(err);
+            }
+          },
+        });
+
+        google.accounts.id.prompt((notification) => {
+          if (notification?.isDismissedMoment?.() || notification?.isSkippedMoment?.()) {
+            reject(new Error("User closed prompt"));
+          }
+        });
+        return;
+      }
+
+      requestGoogleOAuth(clientId, options).then(resolve, reject);
+    });
+  },
+
+  /**
+   * Compares the selected Google email with the activated account's email
+   * and links the Google account.
+   */
+  linkGoogleAccount: async (
+    accountEmail: string,
+    googleEmail: string,
+    credentialOrIdToken?: string,
+  ): Promise<LinkGoogleResult> => {
+    const cleanAccount = accountEmail.trim().toLowerCase();
+    const cleanGoogle = googleEmail.trim().toLowerCase();
+
+    // Verification: emails must match
+    if (cleanAccount !== cleanGoogle) {
+      return {
+        success: false,
+        reason: "email_mismatch",
+        message: "Esta cuenta de Google no coincide con el correo registrado.",
+      };
+    }
+
+    try {
+      const payload: { email: string; googleEmail: string; credential?: string; idToken?: string } = {
+        email: cleanAccount,
+        googleEmail: cleanGoogle,
+      };
+      if (credentialOrIdToken) {
+        payload.credential = credentialOrIdToken;
+        payload.idToken = credentialOrIdToken;
+      }
+
+      const response = await apiClient.post<ApiResponse<{ ok: boolean }>>("/auth/google/link", payload);
+
+      if (response.data && response.data.ok === false) {
+        return {
+          success: false,
+          reason: "server_error",
+          message: response.data.detail || "No se pudo vincular la cuenta de Google.",
+        };
+      }
+
+      return {
+        success: true,
+        message: response.data?.detail ?? "Cuenta vinculada correctamente.",
+      };
+    } catch (err: unknown) {
+      const errorDetail =
+        (err as { response?: { data?: { detail?: string; message?: string } } })?.response?.data?.detail ||
+        (err as { response?: { data?: { detail?: string; message?: string } } })?.response?.data?.message ||
+        "No se pudo conectar con el servidor para vincular la cuenta. Inténtalo de nuevo.";
+
+      if ((err as { response?: { status?: number } })?.response?.status === 403) {
+        return {
+          success: false,
+          reason: "role_not_allowed",
+          message: errorDetail,
+        };
+      }
+
+      return {
+        success: false,
+        reason: "server_error",
+        message: errorDetail,
+      };
+    }
+  },
+
+  /**
+   * Logs in using the selected Google account.
+   */
+  loginWithGoogle: async (
+    googleEmail: string,
+    credentialOrIdToken?: string,
+  ): Promise<GoogleLoginResult> => {
+    const cleanGoogle = googleEmail.trim().toLowerCase();
+
+    try {
+      const payload: { email: string; credential?: string; idToken?: string } = {
+        email: cleanGoogle,
+      };
+      if (credentialOrIdToken) {
+        payload.credential = credentialOrIdToken;
+        payload.idToken = credentialOrIdToken;
+      }
+
+      const response = await apiClient.post<unknown>("/auth/google/login", payload);
+      const session = extractLoginResponse(response.data);
+      return {
+        success: true,
+        session,
+      };
+    } catch (err: unknown) {
+      const status = (err as { response?: { status?: number } })?.response?.status;
+      if (status === 403) {
+        const errorDetail =
+          (err as { response?: { data?: { detail?: string; message?: string } } })?.response?.data?.detail ||
+          (err as { response?: { data?: { detail?: string; message?: string } } })?.response?.data?.message ||
+          "El acceso con Google solo está permitido para estudiantes, titulados y mentores.";
+        return {
+          success: false,
+          reason: "role_not_allowed",
+          message: errorDetail,
+        };
+      }
+      if (status === 404 || status === 401 || status === 400) {
+        return {
+          success: false,
+          reason: "not_registered",
+          message: "Esta cuenta de Google no está registrada en el sistema.",
+        };
+      }
+      return {
+        success: false,
+        reason: "server_error",
+        message: "Ocurrió un error al intentar iniciar sesión con Google.",
+      };
+    }
+  },
+};

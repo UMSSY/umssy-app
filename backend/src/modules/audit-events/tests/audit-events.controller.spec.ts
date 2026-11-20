@@ -17,7 +17,7 @@ describe('AuditEventsController', () => {
     };
     return {
       service,
-      controller: new AuditEventsController(service as any, {} as any),
+      controller: new AuditEventsController(service as any, {} as any, {} as any),
     };
   };
 

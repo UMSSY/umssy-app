@@ -2,6 +2,10 @@ import {
   saveAccessToken,
   getAccessToken,
 } from "@/shared/services/storage/access-token-storage";
+import {
+  getCurrentSessionUserId,
+  setCurrentSessionUserId,
+} from "@/shared/services/storage/session-user-id-storage";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { withMentorIntakeKey } from "./mentor-intake-idempotency";
 import { updateIndexedDb } from "@/shared/services/storage/browser-indexed-db";
@@ -32,8 +36,10 @@ const serverFailure = { isAxiosError: true, response: { status: 503 } };
 beforeEach(async () => {
   records.clear();
   sessionStorage.clear();
+  const sub = crypto.randomUUID();
+  setCurrentSessionUserId(sub);
   await saveAccessToken(
-    `header.${btoa(JSON.stringify({ sub: crypto.randomUUID() }))}.signature`,
+    `header.${btoa(JSON.stringify({ sub }))}.signature`,
   );
 });
 
@@ -66,6 +72,7 @@ describe("UUID para intenciones de participación", () => {
       withMentorIntakeKey("request", preferences, first),
     ).rejects.toEqual(networkFailure);
     expect(first).toHaveBeenCalledWith(key);
+    setCurrentSessionUserId(subject);
     vi.resetModules();
     const reloaded = await import("./mentor-intake-idempotency");
     const retry = vi.fn(async (retriedKey: string) => retriedKey);
@@ -131,6 +138,8 @@ describe("UUID para intenciones de participación", () => {
       withMentorIntakeKey("activate", preferences, submit),
     ).rejects.toEqual(networkFailure);
     const key = submit.mock.calls[0][0];
+    const subject = getCurrentSessionUserId();
+    setCurrentSessionUserId(subject);
     vi.resetModules();
     const reloaded = await import("./mentor-intake-idempotency");
     const retry = vi.fn(async (key: string) => ({ key }));

@@ -3,12 +3,18 @@
 import { createContext, useContext, useEffect, useSyncExternalStore } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { isApiError } from "@/shared/services/api-client";
-import { authService, endSession, getSessionRoles } from "@/modules/auth";
+import {
+  authService,
+  endSession,
+  getSessionRoles,
+  SessionInactivityGuard,
+} from "@/modules/auth";
 import {
   getAccessToken,
   subscribeAccessToken,
   isAccessTokenReady,
 } from "@/shared/services/storage/access-token-storage";
+import { setCurrentSessionUserId } from "@/shared/services/storage/session-user-id-storage";
 import type { AuthContextValue } from "@/shared/types/auth-context-value.types";
 import type { AuthProviderProps } from "@/shared/types/auth-provider-props.types";
 
@@ -36,6 +42,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
     if (isApiError(session.error) && session.error.response?.status === 401) endSession();
   }, [session.error]);
 
+  useEffect(() => {
+    if (session.data?.id) {
+      setCurrentSessionUserId(session.data.id);
+    }
+  }, [session.data?.id]);
+
   async function refreshRoles() {
     if (!accessToken) return;
     await session.refetch();
@@ -55,6 +67,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }}
     >
       {children}
+      {Boolean(accessToken || session.data?.id) ? (
+        <SessionInactivityGuard />
+      ) : null}
     </AuthContext.Provider>
   );
 }
