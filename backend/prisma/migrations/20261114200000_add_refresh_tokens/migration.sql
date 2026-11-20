@@ -12,6 +12,7 @@ CREATE TABLE "refresh_tokens" (
     "revoked_reason" VARCHAR(30),
     "user_agent" VARCHAR(255),
     "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMPTZ(6) NOT NULL,
 
     CONSTRAINT "refresh_tokens_pkey" PRIMARY KEY ("id")
 );
