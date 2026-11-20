@@ -312,6 +312,11 @@ export class CompanyAccessRequestsRepository {
         },
       });
 
+      await tx.$executeRaw`
+        INSERT INTO radar_company_access (company_id,user_id)
+        VALUES (${company.id}::uuid,${user.id}::uuid)
+        ON CONFLICT (company_id,user_id) DO NOTHING`;
+
       const updated = await tx.companyAccessRequest.update({
         where: { id },
         data: {

@@ -57,7 +57,11 @@ function setup() {
       create: vi.fn().mockResolvedValue({ id: 'experience' }),
     },
     userSkill: { upsert: vi.fn().mockResolvedValue({}) },
-    user: { updateMany: vi.fn().mockResolvedValue({ count: 1 }) },
+    user: {
+      updateMany: vi.fn().mockResolvedValue({ count: 1 }),
+      update: vi.fn().mockResolvedValue({}),
+      findUnique: vi.fn().mockResolvedValue({ companyId: 'company-tech' }),
+    },
     radarScoreSnapshot: { upsert: vi.fn().mockResolvedValue({}) },
     jobApplication: {
       upsert: vi.fn().mockImplementation(async ({ create }) => ({
@@ -153,5 +157,86 @@ describe('seedRadar', () => {
     await expect(
       seedRadar(tx as unknown as Prisma.TransactionClient, users),
     ).rejects.toThrow('no hay vacantes');
+  });
+
+  it('vincula empresa por defecto y acceso a radar a cuentas sin empresa previa', async () => {
+    const tx = setup();
+    tx.user.findUnique.mockResolvedValue({ companyId: 'company-tech' });
+
+    await seedRadar(tx as unknown as Prisma.TransactionClient, {
+      ...users,
+      company: { id: 'user-company-no-id', email: 'empresa@umssy.test' },
+    });
+
+    expect(tx.user.updateMany).toHaveBeenCalledWith({
+      where: { id: 'user-company-no-id', companyId: null },
+      data: { companyId: 'company-tech' },
+    });
+    expect(tx.user.findUnique).toHaveBeenCalledWith({
+      where: { id: 'user-company-no-id' },
+      select: { companyId: true },
+    });
+    expect(tx.$executeRaw).toHaveBeenCalled();
+    const calls = tx.$executeRaw.mock.calls;
+    const rawSql = calls.map((c) => JSON.stringify(c)).join(' ');
+    expect(rawSql).toContain('company-tech');
+    expect(rawSql).toContain('user-company-no-id');
+  });
+
+  it('no sobrescribe empresa existente y otorga acceso a radar para su empresa correspondiente', async () => {
+    const tx = setup();
+    tx.user.findUnique.mockResolvedValue({
+      companyId: 'company-custom-existing',
+    });
+
+    await seedRadar(tx as unknown as Prisma.TransactionClient, {
+      ...users,
+      company: { id: 'user-company-with-id', email: 'empresa@umssy.test' },
+    });
+
+    expect(tx.user.updateMany).toHaveBeenCalledWith({
+      where: { id: 'user-company-with-id', companyId: null },
+      data: { companyId: 'company-tech' },
+    });
+    const calls = tx.$executeRaw.mock.calls;
+    const rawSql = calls.map((c) => JSON.stringify(c)).join(' ');
+    expect(rawSql).toContain('company-custom-existing');
+    expect(rawSql).toContain('user-company-with-id');
+  });
+
+  it('procesa correctamente cuenta multirrol vinculándola a empresa y radar', async () => {
+    const tx = setup();
+    tx.user.findUnique.mockResolvedValue({ companyId: 'company-tech' });
+
+    await seedRadar(tx as unknown as Prisma.TransactionClient, {
+      ...users,
+      company: undefined,
+      multiRole: { id: 'user-multirole', email: 'multi.role@umssy.test' },
+    });
+
+    expect(tx.user.updateMany).toHaveBeenCalledWith({
+      where: { id: 'user-multirole', companyId: null },
+      data: { companyId: 'company-tech' },
+    });
+    expect(tx.user.findUnique).toHaveBeenCalledWith({
+      where: { id: 'user-multirole' },
+      select: { companyId: true },
+    });
+    const calls = tx.$executeRaw.mock.calls;
+    const rawSql = calls.map((c) => JSON.stringify(c)).join(' ');
+    expect(rawSql).toContain('company-tech');
+    expect(rawSql).toContain('user-multirole');
+  });
+
+  it('no otorga acceso a radar si el usuario no tiene ninguna empresa vinculada', async () => {
+    const tx = setup();
+    tx.user.findUnique.mockResolvedValue(null);
+
+    await seedRadar(tx as unknown as Prisma.TransactionClient, {
+      ...users,
+      company: { id: 'user-unlinked', email: 'empresa@umssy.test' },
+    });
+
+    expect(tx.$executeRaw).not.toHaveBeenCalled();
   });
 });
