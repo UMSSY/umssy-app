@@ -1,6 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { SESSION_MARKER_COOKIE_NAME, SESSION_MARKER_COOKIE_VALUE } from "./modules/auth/constants/session.constants";
-import { buildLoginUrl } from "./modules/auth/utils/safe-next-path";
+import { buildLoginUrl, SESSION_MARKER_COOKIE_NAME, SESSION_MARKER_COOKIE_VALUE } from "@/modules/auth";
 
 const OFFLINE_SHELL_HEADER = "x-umssy-offline-shell";
 
