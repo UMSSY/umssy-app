@@ -74,7 +74,10 @@ function ActivationFlow({ email }: { email: string }) {
     setIsLinking(true);
     setLinkError(null);
     try {
-      const googleProfile = await googleAuthService.promptSelectAccount();
+      const googleProfile = await googleAuthService.promptSelectAccount({
+        intent: "link",
+        accountEmail: email,
+      });
       if (!googleProfile?.email) return;
 
       const credential = googleProfile.idToken || googleProfile.credential;

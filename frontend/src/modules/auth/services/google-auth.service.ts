@@ -1,3 +1,7 @@
+import { decodeGoogleIdToken } from "../utils/decode-google-id-token";
+import { requestGoogleOAuth } from "../utils/google-oauth-redirect";
+import type { GoogleOAuthRequestOptions } from "../types/google-oauth-flow.types";
+export { decodeGoogleIdToken } from "../utils/decode-google-id-token";
 import { apiClient } from "@/shared/services/api-client";
 import type { ApiResponse } from "@/shared/types/api-response.types";
 import type { LoginResponse } from "../types/auth-types";
@@ -41,29 +45,6 @@ export interface GoogleProfile {
   credential?: string;
 }
 
-export function decodeGoogleIdToken(token: string): {
-  email?: string;
-  name?: string;
-  picture?: string;
-  sub?: string;
-} {
-  try {
-    const parts = token.split(".");
-    if (parts.length < 2) return {};
-    const base64Url = parts[1];
-    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-    const jsonPayload = decodeURIComponent(
-      atob(base64)
-        .split("")
-        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-        .join("")
-    );
-    return JSON.parse(jsonPayload);
-  } catch {
-    return {};
-  }
-}
-
 export interface LinkGoogleResult {
   success: boolean;
   message?: string;
@@ -81,7 +62,7 @@ export const googleAuthService = {
   /**
    * Triggers the official native Google Identity Services ID Token flow (google.accounts.id).
    */
-  promptSelectAccount: (): Promise<GoogleProfile> => {
+  promptSelectAccount: (options: GoogleOAuthRequestOptions = {}): Promise<GoogleProfile> => {
     return new Promise((resolve, reject) => {
       if (typeof window === "undefined") {
         return reject(new Error("No disponible en el servidor."));
@@ -158,26 +139,7 @@ export const googleAuthService = {
         return;
       }
 
-      // Standard Google OpenID Connect authorization URL for ID Token
-      const redirectUri = `${window.location.origin}/login`;
-      const nonce = Math.random().toString(36).substring(2);
-      const googleOAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(
-        clientId
-      )}&redirect_uri=${encodeURIComponent(
-        redirectUri
-      )}&response_type=id_token&scope=openid%20email%20profile&nonce=${encodeURIComponent(
-        nonce
-      )}&prompt=select_account`;
-
-      const popup = window.open(
-        googleOAuthUrl,
-        "google-oauth-popup",
-        "width=520,height=630,left=300,top=100,menubar=no,status=no,toolbar=no"
-      );
-
-      if (!popup) {
-        window.location.href = googleOAuthUrl;
-      }
+      requestGoogleOAuth(clientId, options).then(resolve, reject);
     });
   },
 
