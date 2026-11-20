@@ -1,4 +1,9 @@
-import { REGISTERED_USERS_PDF } from '../constants/report-pdf.constants.js';
+import {
+  REGISTERED_USERS_PDF,
+  REPORT_PDF_BASE_COLUMNS,
+  REPORT_PDF_DATE_COLUMN_WIDTH,
+  REPORT_PDF_TEXT,
+} from '../constants/report-pdf.constants.js';
 import { ReportPdfService } from '../services/report-pdf.service.js';
 import type { ReportPdfContent } from '../types/report-pdf-content.types.js';
 
@@ -6,7 +11,10 @@ const GENERATED_AT = new Date('2026-11-13T18:30:00.000Z');
 
 function content(rows: string[][]): ReportPdfContent {
   return {
-    ...REGISTERED_USERS_PDF,
+    title: REGISTERED_USERS_PDF.title,
+    subtitle: REGISTERED_USERS_PDF.subtitle,
+    columns: [...REPORT_PDF_BASE_COLUMNS, { label: REGISTERED_USERS_PDF.dateColumnLabel, width: REPORT_PDF_DATE_COLUMN_WIDTH }],
+    totalLabel: REPORT_PDF_TEXT.totalRecords(rows.length),
     generatedBy: 'Ana Perez (Administrativo)',
     generatedAt: GENERATED_AT,
     filters: [{ label: 'Tipo de usuario', value: 'Todos' }],
@@ -26,7 +34,9 @@ describe('ReportPdfService', () => {
 
     expect(text.startsWith('%PDF-1.4')).toBe(true);
     expect(text.trimEnd().endsWith('%%EOF')).toBe(true);
-    expect(text).toContain('(UMSSY)');
+    expect(text).toContain('/Subtype /Image');
+    expect(text).toContain('/Im1 Do');
+    expect(text).toContain('/Im2 Do');
     expect(text).toContain('(Reporte de usuarios aceptados)');
     expect(text).toContain('(Ana Perez \\(Administrativo\\))');
     expect(text).toContain('(usuario1@umssy.test)');

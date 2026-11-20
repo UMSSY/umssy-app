@@ -1,0 +1,26 @@
+<mj-section padding="8px 24px">
+  <mj-column>
+    <mj-text mj-class="heading">Nueva encuesta publicada</mj-text>
+    <mj-text
+      >Hola {{ recipientName }}, ya está disponible la encuesta
+      <strong>«{{ surveyTitle }}»</strong> del semestre
+      {{ currentPeriod }}.</mj-text
+    >
+    <mj-text
+      >Tu respuesta nos ayuda a obtener resultados más representativos sobre la
+      empleabilidad de los titulados.</mj-text
+    >
+    <mj-text padding="0 0 16px"
+      ><div
+        style="
+          white-space: pre-wrap;
+          font-family: monospace, sans-serif;
+          font-size: 13px;
+        "
+      >
+        {{ changesContent }}
+      </div></mj-text
+    >
+    <mj-button href="{{ actionUrl }}">Ver encuesta</mj-button>
+  </mj-column>
+</mj-section>
