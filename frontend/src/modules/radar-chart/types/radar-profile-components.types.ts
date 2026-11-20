@@ -18,6 +18,7 @@ export interface KpiCardsProps {
 }
 
 export interface AffinityRadarChartProps {
+  plotClassName?: string;
   previousScores?: Partial<Record<AreaId, number>>;
   comparisonEnabled?: boolean;
   onComparisonChange?: (enabled: boolean) => void;

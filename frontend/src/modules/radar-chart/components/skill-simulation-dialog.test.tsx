@@ -48,4 +48,28 @@ describe("Simulación temporal de habilidades", () => {
     render(<SkillSimulationDialog areas={areas} initialArea="desarrollo" onClose={close} />);
     expect(screen.getByRole("spinbutton")).toHaveValue(0);
   });
+
+  it("agrupa habilidades reales no verificadas y selecciona el eje correspondiente", () => {
+    render(<SkillSimulationDialog areas={areas} initialArea="desarrollo" onClose={vi.fn()}
+      catalog={[{ id: "react", name: "React" }, { id: "jest", name: "Jest" }]}
+      approved={[{ id: "react", name: "React" }]} />);
+
+    expect(screen.queryByRole("option", { name: "React" })).not.toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Jest" }).parentElement).toHaveAttribute("label", "QA");
+    fireEvent.change(screen.getByRole("combobox"), { target: { value: "jest" } });
+    expect(screen.getByRole("spinbutton")).toHaveValue(2);
+  });
+
+  it("conserva la edición decimal y ajusta los valores fuera de rango al salir", () => {
+    render(<SkillSimulationDialog areas={areas} initialArea="cloud-devops" onClose={vi.fn()} />);
+    const score = screen.getByRole("spinbutton");
+    fireEvent.change(score, { target: { value: "6.7" } });
+    expect(screen.getByRole("slider")).toHaveValue("6.7");
+    fireEvent.change(score, { target: { value: "15" } });
+    fireEvent.blur(score);
+    expect(score).toHaveValue(10);
+    fireEvent.change(score, { target: { value: "0" } });
+    fireEvent.blur(score);
+    expect(score).toHaveValue(4.5);
+  });
 });

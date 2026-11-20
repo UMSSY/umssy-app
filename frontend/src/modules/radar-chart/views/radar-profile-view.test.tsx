@@ -61,7 +61,7 @@ describe("Radar personal integrado con Épica 2", () => {
     fireEvent.click(screen.getByRole("button", { name: /Cerrar detalle del/ }));
     fireEvent.click(screen.getByRole("button", { name: `Seleccionar ${axis.name}` }));
     expect(screen.getByRole("region", { name: "Competencia seleccionada" })).toHaveTextContent(axis.name);
-    fireEvent.click(screen.getByRole("button", { name: "Simular habilidad" }));
+    fireEvent.click(screen.getByRole("button", { name: "Simular una habilidad" }));
     expect(screen.getByRole("dialog", { name: "Proyecta una habilidad" })).toBeInTheDocument();
     expect(screen.getByRole("spinbutton")).toHaveValue(0);
   });

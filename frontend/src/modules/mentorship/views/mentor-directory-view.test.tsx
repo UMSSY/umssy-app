@@ -137,6 +137,31 @@ it("no presenta otra especialidad cuando falta el área del radar en el catálog
   expect(screen.queryByText(mentors[0].fullName)).not.toBeInTheDocument();
 });
 
+it("exige disponibilidad desde el radar aunque la URL solicite lo contrario", async () => {
+  navigationMocks.search = "?radarArea=cloud-devops&available=false";
+  const get = vi.spyOn(directoryService, "getMentorDirectory").mockResolvedValue(makeDirectoryPage([]));
+  render(<MentorDirectoryView />);
+  await waitFor(() => expect(get).toHaveBeenCalledWith(expect.objectContaining({ available: true }), expect.anything()));
+  expect(screen.getByRole("checkbox")).toHaveAttribute("aria-disabled", "true");
+  fireEvent.click(screen.getByRole("checkbox"));
+  expect(screen.getByRole("checkbox")).toBeChecked();
+});
+
+it("conserva disponibilidad obligatoria al limpiar filtros y elegir todas las áreas en HU2", async () => {
+  navigationMocks.search = "?hu2=radar&area=Cloud&areaId=area-cloud&available=false";
+  const get = vi.spyOn(directoryService, "getMentorDirectory").mockResolvedValue(makeDirectoryPage([]));
+  const { rerender } = render(<MentorDirectoryView />);
+  fireEvent.click(screen.getByRole("button", { name: /^Limpiar$/ }));
+  const destination = new URL(navigationMocks.replace.mock.lastCall![0], "http://localhost");
+  expect(destination.searchParams.get("hu2")).toBe("radar");
+  expect(destination.searchParams.has("area")).toBe(false);
+  expect(destination.searchParams.has("areaId")).toBe(false);
+  expect(destination.searchParams.has("available")).toBe(false);
+  applyNavigation(rerender);
+  await waitFor(() => expect(get).toHaveBeenLastCalledWith(expect.objectContaining({ area: "", available: true }), expect.anything()));
+  expect(screen.getByRole("checkbox")).toHaveAttribute("aria-disabled", "true");
+});
+
 const ownId = "0424f370-00f0-43cf-9b8a-997af81840b9";
 const otherId = "0fa5e6de-63a4-430e-87fb-22f5eb700ecd";
 
@@ -341,7 +366,7 @@ describe("MentorDirectoryView", () => {
 
     expect(
       screen.getByRole("heading", {
-        name: "Encuentra un mentor",
+        name: "Encuentra un mentor para tu próximo desafío",
       }),
     ).toBeInTheDocument();
   });

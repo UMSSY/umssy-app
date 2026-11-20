@@ -84,15 +84,15 @@ describe("MentorCard", () => {
     expect(screen.getByText("Ingeniería · UMSS")).toBeVisible();
     const availability = screen.getByText("Disponible para mentoría");
     expect(availability).toBeVisible();
-    expect(availability).toHaveClass("border-border", "text-ink");
+    expect(availability).toHaveClass("absolute", "border-transparent");
     const indicators = availability.parentElement;
-    expect(indicators).toHaveClass("ml-auto", "flex-col", "items-end");
+    expect(indicators).toHaveClass("flex-wrap", "items-center");
     const header = indicators?.parentElement;
-    expect(header).toHaveClass("flex-wrap");
+    expect(header).toHaveClass("flex-col");
     expect(header?.firstElementChild).toContainElement(
       screen.getByRole("heading", { name: mentor.fullName }),
     );
-    expect(header?.firstElementChild).toHaveClass("basis-56", "min-w-0");
+    expect(header?.firstElementChild).toHaveClass("w-full", "min-w-0");
     expect(header?.lastElementChild).toBe(indicators);
   });
 
@@ -146,10 +146,10 @@ describe("MentorCard", () => {
       expect(screen.getByText(text)).toHaveClass("[overflow-wrap:anywhere]");
     }
     expect(screen.getByText("Disponible para mentoría").parentElement).toHaveClass(
-      "flex-col",
+      "flex-wrap",
     );
     expect(screen.getByText("Disponible para mentoría").parentElement?.parentElement).toHaveClass(
-      "flex-wrap",
+      "flex-col",
     );
     expect(screen.getByRole("link")).toHaveAttribute(
       "href",
@@ -203,8 +203,8 @@ describe("MentorCard", () => {
     expect(profileLink.getAttribute("href")).toBe(
       "/mentors/0424f370-00f0-43cf-9b8a-997af81840b9",
     );
-    expect(profileLink).not.toHaveClass("w-full");
-    expect(profileLink.parentElement).toHaveClass("justify-end", "mt-auto");
+    expect(profileLink).toHaveClass("w-full");
+    expect(profileLink.parentElement).toHaveClass("border-t", "mt-auto");
   });
 
   it("genera la ruta correcta para otro UUID de mentor", () => {

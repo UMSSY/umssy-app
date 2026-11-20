@@ -15,7 +15,7 @@ export function MentorDirectoryGrid({
       aria-label="Listado de mentores"
       className="@container w-full min-w-0"
     >
-      <div className="grid grid-cols-1 gap-5 @min-[50rem]:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 @min-[50rem]:grid-cols-2 @min-[66rem]:grid-cols-3">
         {mentors.map((mentor) => (
           <MentorCard
             key={mentor.id}

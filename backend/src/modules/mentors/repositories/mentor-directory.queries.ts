@@ -38,6 +38,7 @@ export function directoryPredicate(
     conditions.push(Prisma.sql`(
       strpos(${normalized(Prisma.sql`u.first_name`)}, ${normalized(Prisma.sql`${term}::text`)}) > 0
       OR strpos(${normalized(Prisma.sql`u.last_name`)}, ${normalized(Prisma.sql`${term}::text`)}) > 0
+      OR strpos(${normalized(Prisma.sql`coalesce(u.headline, '')`)}, ${normalized(Prisma.sql`${term}::text`)}) > 0
       OR strpos(${normalized(Prisma.sql`coalesce(u.about_me, '')`)}, ${normalized(Prisma.sql`${term}::text`)}) > 0
       OR EXISTS (SELECT 1 FROM work_experiences we WHERE we.user_id = u.id
         AND (strpos(${normalized(Prisma.sql`we.position`)}, ${normalized(Prisma.sql`${term}::text`)}) > 0

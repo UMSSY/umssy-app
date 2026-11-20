@@ -4,6 +4,19 @@ import { directoryPredicate } from '../repositories/mentor-directory.queries.js'
 import { MentorsRepository } from '../repositories/mentors.repository.js';
 
 describe('MentorsRepository directory page', () => {
+  it('incluye el cargo del perfil aunque no exista experiencia laboral', () => {
+    const predicate = directoryPredicate(
+      { search: 'Arquitecta Senior', available: true },
+      new Date('2026-11-15T12:00:00Z'),
+    );
+    expect(predicate.sql).toContain("coalesce(u.headline, '')");
+    expect(predicate.sql.indexOf('u.headline')).toBeLessThan(
+      predicate.sql.indexOf('FROM work_experiences'),
+    );
+    expect(predicate.values).toContain('Arquitecta');
+    expect(predicate.values).toContain('Senior');
+    expect(predicate.sql).not.toContain('Arquitecta');
+  });
   it('busca por cargo, biografía, especialidad y habilidades con parámetros', () => {
     const predicate = directoryPredicate({ search: "Cloud' OR true", available: true, area: '06d773ee-90d1-40c0-9744-c7c3601b84ef' }, new Date());
     for (const field of ['we.position', 'u.about_me', 'ta.name', 's.name', 'ta.id::text']) expect(predicate.sql).toContain(field);
