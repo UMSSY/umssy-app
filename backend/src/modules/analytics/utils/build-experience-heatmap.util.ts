@@ -21,6 +21,7 @@ export function buildExperienceHeatmap(
     ),
   }));
 
+  const leaderLevelsBySkill = new Map<string, string[]>();
   const rows: HeatmapRow[] = selectTopSkills(base, allSkills)
     .map((skill) => {
       const cells = groups.map((group) =>
@@ -32,7 +33,9 @@ export function buildExperienceHeatmap(
       );
       const total = countWithSkill(base, skill.id, allSkills);
       const percentage = toPercentage(total, base.length);
-      const leaderLabel = buildLeaderLabel(cells);
+      const leaderLevels = findLeaderLevels(cells);
+      const leaderLabel = joinLevels(leaderLevels);
+      leaderLevelsBySkill.set(skill.id, leaderLevels);
 
       return {
         skillId: skill.id,
@@ -50,7 +53,8 @@ export function buildExperienceHeatmap(
     })
     .sort((first, second) => masteringOf(second) - masteringOf(first));
   const [top] = rows;
-  const topAdoption = top?.extraValues?.[HEATMAP_EXTRA_COLUMNS.highestAdoption.id]?.badgeText;
+  const topLevels = top ? (leaderLevelsBySkill.get(top.skillId) ?? []) : [];
+  const topAdoption = joinLevels(topLevels);
 
   return {
     heatmapType: 'skills-by-experience',
@@ -69,18 +73,21 @@ export function buildExperienceHeatmap(
     rows,
     quickReadSummary:
       top && topAdoption
-        ? `${top.skillName} es la habilidad más dominada (${masteringOf(top)} titulados, ${top.extraValues?.[HEATMAP_EXTRA_COLUMNS.totalMastering.id]?.percentage ?? 0}% del total) y alcanza su mayor adopción en el nivel ${topAdoption}.`
+        ? `${top.skillName} es la habilidad más dominada (${masteringOf(top)} titulados, ${top.extraValues?.[HEATMAP_EXTRA_COLUMNS.totalMastering.id]?.percentage ?? 0}% del total) y alcanza su mayor adopción en ${topLevels.length > 1 ? 'los niveles' : 'el nivel'} ${topAdoption}.`
         : undefined,
   };
 }
 
-function buildLeaderLabel(cells: HeatmapRow['cells']): string | undefined {
+function findLeaderLevels(cells: HeatmapRow['cells']): string[] {
   const candidates = cells.filter((cell) => !cell.isEmpty && (cell.count ?? 0) > 0);
-  if (candidates.length === 0) return undefined;
+  if (candidates.length === 0) return [];
   const maxPercentage = Math.max(...candidates.map((cell) => cell.percentage ?? 0));
-  const labels = EXPERIENCE_LEVELS.filter((level) =>
+  return EXPERIENCE_LEVELS.filter((level) =>
     candidates.some((cell) => cell.columnId === level.id && (cell.percentage ?? 0) === maxPercentage),
   ).map((level) => level.label);
+}
+
+function joinLevels(labels: string[]): string | undefined {
   if (labels.length <= 1) return labels[0];
   return `${labels.slice(0, -1).join(', ')} y ${labels[labels.length - 1]}`;
 }

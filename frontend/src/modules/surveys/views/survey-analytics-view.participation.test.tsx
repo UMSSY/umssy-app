@@ -13,6 +13,7 @@ import type { SurveyParticipation } from "../types/survey-participation.types";
 import { SurveyAnalyticsView } from "./survey-analytics-view";
 
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 
 const STATISTICS = buildStatistics({ totalResponses: 48 });
 const REMINDER_RESULT = {
