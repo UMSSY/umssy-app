@@ -6,12 +6,44 @@ import { MentorsService } from '../services/mentors.service.js';
 import { MentorMapper } from '../mappers/mentor.mapper.js';
 import type { UserSkillService } from '../../skills/services/user-skill.service.js';
 import { mentorCapacity } from '../utils/mentor-capacity.js';
+import { MentorCapacityAdminRepository } from '../repositories/mentor-capacity-admin.repository.js';
+import { reconcileMentorOffers } from '../repositories/mentor-offers.queries.js';
 
 vi.mock('../repositories/mentor-offers.queries.js', () => ({
   reconcileMentorOffers: vi.fn(),
 }));
 
 describe('capacidad HU-7-1', () => {
+  it('reconcilia ofertas dentro de la actualización administrativa de capacidad', async () => {
+    const tx = {
+      $executeRaw: vi.fn(),
+      $queryRaw: vi
+        .fn()
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([
+          {
+            approvedGraduates: 10,
+            activeMentors: 2,
+            reservedOffers: 1,
+            percentage: 40,
+          },
+        ])
+        .mockResolvedValueOnce([{ count: 0 }]),
+    };
+    const prisma = {
+      $transaction: vi.fn(
+        async (operation: (transaction: typeof tx) => Promise<unknown>) =>
+          operation(tx),
+      ),
+    } as unknown as PrismaService;
+
+    const repository = new MentorCapacityAdminRepository(prisma);
+
+    await repository.updatePercentage(40);
+
+    expect(reconcileMentorOffers).toHaveBeenCalledExactlyOnceWith(tx);
+  });
+
   it.each([
     [0, 0],
     [1, 1],

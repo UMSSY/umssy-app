@@ -998,7 +998,7 @@ erDiagram
 - Intake operation catalog values are ACTIVATE, REQUEST and LEGACY; the operation compatibility trigger keeps operation and operationId synchronized. `mentor_intake_attempts_identity` and its legacy compatibility index enforce user/operation/idempotency-key uniqueness. Sanction and attempt legacy records have the exact time fields listed above, not invented createdAt/updatedAt fields.
 - Technical/orientation joins have their own UUID PK and unique mentor/catalog pairs; deleting a user cascades selections, but deleting a referenced catalog is restricted. Current role participation is distinct from availability and requests.
 
-Sources for SQL-only constraints and compatibility: `20261026040000_mentor_fifo_offers`, `20261028010000_mentor_intake_compatibility`, `20261029020000_mentor_intake_catalogs`, `20261104120000_index_uncovered_foreign_keys`, and `20261108160000_complete_document_audit_and_mentor_catalogs`. Also inspected: `20261026030000_mentor_eligibility_capacity`, `20261026190000_mentor_participation_attempt_limits` and `20261116150000_mentor_capacity_setting`. Reconcile against the synchronized schema before applying this proposal; no migration was run.
+Sources for SQL-only constraints and compatibility: `20261026040000_mentor_fifo_offers`, `20261028010000_mentor_intake_compatibility`, `20261029020000_mentor_intake_catalogs`, `20261104120000_index_uncovered_foreign_keys`, and `20261108160000_complete_document_audit_and_mentor_catalogs`. Also inspected: `20261026030000_mentor_eligibility_capacity`, `20261026190000_mentor_participation_attempt_limits` and `20261116150000_mentor_capacity_setting`.
 
 ## Appointments
 
