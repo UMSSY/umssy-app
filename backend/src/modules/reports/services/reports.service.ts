@@ -16,10 +16,12 @@ import {
   PDF_EXTENSION,
   REGISTERED_USERS_PDF,
   REJECTED_USERS_PDF,
+  REPORT_PDF_BASE_COLUMNS,
+  REPORT_PDF_DATE_COLUMN_WIDTH,
   REPORT_PDF_TEXT,
 } from '../constants/report-pdf.constants.js';
-import { ReportAuthorNotFoundException } from '../exceptions/report-author-not-found.exception.js';
 import { buildReportPdfFilters } from '../utils/report-pdf-filters.util.js';
+import { ReportAuthorService } from './report-author.service.js';
 import { ReportPdfService } from './report-pdf.service.js';
 import {
   toRegisteredUserResponse,
@@ -91,6 +93,7 @@ export class ReportsService {
   constructor(
     private readonly reportUsersRepository: ReportUsersRepository,
     private readonly reportPdfService: ReportPdfService,
+    private readonly reportAuthorService: ReportAuthorService,
   ) {}
 
   async getRegisteredUsers(
@@ -173,19 +176,18 @@ export class ReportsService {
     users: (RegisteredUserResponse | RejectedUserResponse)[],
     authorId: string,
   ): Promise<Buffer> {
-    const author = await this.reportUsersRepository.findAuthor(authorId);
-    const fullName = [author?.firstName, author?.lastName]
-      .map((name) => (name ?? '').trim())
-      .filter(Boolean)
-      .join(' ');
-    if (!fullName) throw new ReportAuthorNotFoundException();
-
     return this.reportPdfService.render({
-      ...definition,
-      generatedBy: REPORT_PDF_TEXT.author(fullName, USER_TYPE_LABELS.administrativo),
+      title: definition.title,
+      subtitle: definition.subtitle,
+      generatedBy: await this.reportAuthorService.resolveLabel(authorId),
       generatedAt: new Date(),
       filters: buildReportPdfFilters(definition.dateFilterLabel, filters),
+      columns: [
+        ...REPORT_PDF_BASE_COLUMNS,
+        { label: definition.dateColumnLabel, width: REPORT_PDF_DATE_COLUMN_WIDTH },
+      ],
       rows: users.map(toReportUserPdfRow),
+      totalLabel: REPORT_PDF_TEXT.totalRecords(users.length),
     });
   }
 
