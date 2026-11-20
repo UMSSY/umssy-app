@@ -1825,6 +1825,7 @@ model RefreshToken {
   revokedReason     String?   @map("revoked_reason") @db.VarChar(30)
   userAgent         String?   @map("user_agent") @db.VarChar(255)
   createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
