@@ -22,13 +22,12 @@ export const AUDIT_EVENT_LIST_SELECT = {
 export const AUDIT_EVENT_DETAIL_SELECT = {
   ...AUDIT_EVENT_LIST_SELECT,
   applicantCareer: true,
-  accessRequest: {
-    select: {
-      graduationYear: true,
-      documentType: { select: { title: true } },
-    },
-  },
 } satisfies Prisma.AuditEventSelect;
+
+export const AUDIT_APPLICANT_DETAILS_SELECT = {
+  graduationYear: true,
+  documentType: { select: { title: true } },
+} satisfies Prisma.AccessRequestSelect;
 
 export const AUDIT_EVENT_ORDER = [
   { occurredAt: 'desc' },

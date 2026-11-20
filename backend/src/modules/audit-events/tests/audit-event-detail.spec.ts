@@ -82,7 +82,10 @@ describe('toAuditEventDetail', () => {
 
 describe('AuditEventsService.getDetail', () => {
   it('devuelve el detalle del evento', async () => {
-    const repository = { findDetailById: vi.fn().mockResolvedValue(ROW) };
+    const repository = {
+      findDetailById: vi.fn().mockResolvedValue(ROW),
+      findApplicantDetails: vi.fn().mockResolvedValue(ROW.accessRequest),
+    };
     const service = new AuditEventsService(repository as never, {} as never);
 
     await expect(service.getDetail('evt-2')).resolves.toMatchObject({

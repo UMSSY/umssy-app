@@ -3,12 +3,9 @@ import type {
   AuditEvidenceResponse,
   AuditResponsibleResponse,
 } from './audit-event-response.types.js';
+import type { AuditEventApplicantResponse } from './audit-event-applicant-response.types.js';
 
-export interface AuditEventApplicantResponse {
-  fullName: string;
-  career: string;
-  graduationYear: number;
-}
+export type { AuditEventApplicantResponse };
 
 export interface AuditEventDetailResponse {
   id: string;
