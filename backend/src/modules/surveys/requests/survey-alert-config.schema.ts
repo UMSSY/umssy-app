@@ -15,5 +15,3 @@ export const surveyAlertConfigSchema = z.object({
     .max(50, 'El umbral máximo es 50 puntos porcentuales'),
   questionIds: z.array(z.string()).nullable().optional(),
 });
-
-export type SurveyAlertConfigDto = z.infer<typeof surveyAlertConfigSchema>;
