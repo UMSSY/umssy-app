@@ -114,7 +114,7 @@ const selectItemVariants = cva(
     variants: {
       variant: {
         default:
-          "focus:bg-interaction focus:text-accent-foreground not-data-[variant=destructive]:focus:**:text-accent-foreground",
+          "focus:bg-interaction focus:text-ink not-data-[variant=destructive]:focus:**:text-ink",
         subtle:
           "text-ink focus:bg-surface-soft focus:text-ink data-highlighted:bg-surface-soft data-highlighted:text-ink data-selected:text-ink",
       },

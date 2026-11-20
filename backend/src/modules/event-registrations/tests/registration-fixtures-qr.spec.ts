@@ -28,4 +28,36 @@ describe('registration fixture QR tokens', () => {
     for (const token of tokens) expect(token).toMatch(/^[a-f0-9]{64}$/);
     expect(new Set(tokens).size).toBe(count);
   });
+
+  it('adds nine confirmed supports for the QA workshop when it is in voting', async () => {
+    const context = new FixtureContext(
+      new Date('2026-11-19T12:00:00Z'),
+      'admin',
+    );
+    context.setReference('registration_statuses', 'Confirmada', 'confirmed');
+    context.setReference('registration_statuses', 'Cancelada', 'cancelled');
+    const createMany = vi.fn().mockResolvedValue({ count: 0 });
+    await seedEventRegistrationsFixtures(
+      {
+        eventRegistration: {
+          createMany,
+          findMany: vi.fn().mockResolvedValue([]),
+        },
+      } as never,
+      context,
+    );
+    const supports = createMany.mock.calls[0]![0].data.filter(
+      (row: { eventId: string }) =>
+        row.eventId === context.getId('qa-workshop-2026-11-19'),
+    );
+    expect(supports).toHaveLength(9);
+    expect(
+      new Set(supports.map((row: { userId: string }) => row.userId)).size,
+    ).toBe(9);
+    expect(
+      supports.every(
+        (row: { statusId: string }) => row.statusId === 'confirmed',
+      ),
+    ).toBe(true);
+  });
 });

@@ -12,7 +12,7 @@ const mockBlock = {
   id: "1",
   mentorId: "m1",
   startAt: "2030-05-13T14:00:00Z",
-  endAt: "2030-05-13T16:00:00Z",
+  endAt: "2030-05-13T15:30:00Z",
   state: "free" as const,
   createdAt: "",
   updatedAt: "",
@@ -33,11 +33,13 @@ describe("EditBlockPanel", () => {
     renderWithQuery(<EditBlockPanel block={mockBlock} onClose={vi.fn()} />)
 
     expect(screen.getByText("Editar bloque")).toBeInTheDocument()
-    expect(screen.getByText("Modifica la hora de inicio o de fin del bloque.")).toBeInTheDocument()
+    expect(
+      screen.getByText("Modifica la hora de inicio del bloque; la hora de fin se ajusta sola a 1 h 30 después."),
+    ).toBeInTheDocument()
     expect(screen.getByText("Lunes 13 de mayo")).toBeInTheDocument()
     expect(screen.getByLabelText(/Día/)).toHaveValue("13/05/2030")
     expect(screen.getByLabelText(/Desde/)).toHaveTextContent("10:00")
-    expect(screen.getByLabelText(/Hasta/)).toHaveTextContent("12:00")
+    expect(screen.getByLabelText(/Hasta/)).toHaveTextContent("11:30")
     expect(screen.getByRole("button", { name: "Guardar cambios" })).toBeInTheDocument()
     expect(
       screen.getByRole("button", { name: "Eliminar bloque" }),
@@ -100,6 +102,25 @@ describe("EditBlockPanel", () => {
     expect(deleteSpy).not.toHaveBeenCalled()
   })
 
+  it("un bloque creado antes con otra duración se guarda con 1 h 30", async () => {
+    const updateSpy = vi.spyOn(availabilityApi, "updateAvailabilityBlock").mockResolvedValue(mockBlock)
+    const user = userEvent.setup()
+
+    renderWithQuery(
+      <EditBlockPanel block={{ ...mockBlock, endAt: "2030-05-13T16:00:00Z" }} onClose={vi.fn()} />,
+    )
+
+    expect(screen.getByLabelText(/Hasta/)).toHaveTextContent("11:30")
+    await user.click(screen.getByRole("button", { name: "Guardar cambios" }))
+
+    await waitFor(() => {
+      expect(updateSpy).toHaveBeenCalledWith("1", {
+        startAt: "2030-05-13T14:00:00.000Z",
+        endAt: "2030-05-13T15:30:00.000Z",
+      })
+    })
+  })
+
   it("guarda los cambios, avisa con un toast y notifica el cierre", async () => {
     const onClose = vi.fn()
     const updateSpy = vi
@@ -114,7 +135,7 @@ describe("EditBlockPanel", () => {
     await waitFor(() => {
       expect(updateSpy).toHaveBeenCalledWith("1", {
         startAt: "2030-05-13T14:00:00.000Z",
-        endAt: "2030-05-13T16:00:00.000Z",
+        endAt: "2030-05-13T15:30:00.000Z",
       })
     })
     await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1))
