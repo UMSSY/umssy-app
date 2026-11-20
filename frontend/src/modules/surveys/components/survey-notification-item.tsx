@@ -16,7 +16,7 @@ export function SurveyNotificationItem({ notification }: SurveyNotificationItemP
   const renderAction = () => {
     if (isPending) {
       return (
-        <Link href={`${SURVEY_NOTIFICATIONS_PATH}/${id}`} className={cn(buttonVariants({ variant: "brand" }), "w-full")}>
+        <Link href={`${SURVEY_NOTIFICATIONS_PATH}/${id}`} className={cn(buttonVariants({ variant: "default" }), "w-full")}>
           <FileClock data-icon="inline-start" aria-hidden="true" />
           {"Responder encuesta"}
           <ArrowRight data-icon="inline-end" aria-hidden="true" />
