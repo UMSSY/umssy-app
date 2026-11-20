@@ -101,14 +101,6 @@ export const WORKSPACE_TASKS: readonly WorkspaceTask[] = [
     keywords: 'nueva encuesta formulario preguntas',
   },
   {
-    label: 'Mapas de calor',
-    href: '/backoffice/reports/heatmaps',
-    icon: LayoutGrid,
-    area: 'management',
-    keywords:
-      'mapa de calor analíticas datos gráficos visualización estadísticas',
-  },
-  {
     label: 'Habilidades por Carrera',
     href: '/backoffice/reports/heatmaps/skills-by-career',
     icon: LayoutGrid,

@@ -9,6 +9,8 @@ export function HeatmapExportMenu({ onExport, disabled }: HeatmapExportMenuProps
     <ExportFormatMenu
       triggerLabel={HEATMAP_TEXT.export}
       formatTexts={HEATMAP_EXPORT_FORMAT_TEXTS}
+      cancelLabel={HEATMAP_TEXT.cancel}
+      triggerVariant="default"
       onSelectFormat={onExport}
       disabled={disabled}
     />
