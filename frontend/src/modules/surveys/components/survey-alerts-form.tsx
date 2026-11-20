@@ -180,7 +180,7 @@ export function SurveyAlertsForm({ questions, config, isSaving, onCancel, onDirt
         <Button type="button" variant="outline" onClick={onCancel} disabled={isSaving}>
           {SURVEY_ALERTS_TEXT.cancel}
         </Button>
-        <Button type="button" onClick={() => void handleSave()} disabled={isSaving}>
+        <Button type="button" onClick={() => void handleSave()} disabled={isSaving || !isDirty}>
           {isSaving && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}
           {isSaving ? SURVEY_ALERTS_TEXT.saving : SURVEY_ALERTS_TEXT.save}
         </Button>
