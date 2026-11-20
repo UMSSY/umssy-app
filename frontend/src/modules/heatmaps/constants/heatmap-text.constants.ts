@@ -12,7 +12,8 @@ export const HEATMAP_TEXT = {
   retry: "Reintentar",
   export: "Exportar",
   cancel: "Cancelar",
-  pdfPending: "Exportación PDF pendiente de integración.",
+  pdfReady: "PDF generado correctamente.",
+  pdfError: "No se pudo generar el PDF. Inténtalo de nuevo.",
   csvReady: "CSV generado correctamente.",
   noSummary: "No hay datos suficientes para generar una lectura rápida.",
   cellTooltip: (count: number, total: number, unit: string, column: string, skill: string, percentage: number) =>
@@ -51,3 +52,7 @@ export const HEATMAPS_QUERY_KEYS = {
   all: ["heatmaps"] as const,
   detail: (type: string, filters: object) => ["heatmaps", type, filters] as const,
 };
+
+export const HEATMAP_PDF_FILE_NAME = (type: string) => `mapa-calor-${type}.pdf`;
+
+export const HEATMAP_TOAST_OPTIONS = { duration: 4000, closeButton: true } as const;
