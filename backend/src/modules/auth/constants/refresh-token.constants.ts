@@ -9,5 +9,4 @@ export const REFRESH_REVOCATION_REASONS = {
 export type RefreshRevocationReason =
   (typeof REFRESH_REVOCATION_REASONS)[keyof typeof REFRESH_REVOCATION_REASONS];
 
-// The refresh cookie is only sent to the auth endpoints (global prefix "api").
 export const REFRESH_TOKEN_COOKIE_PATH = '/api/auth';

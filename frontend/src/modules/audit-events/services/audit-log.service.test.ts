@@ -78,3 +78,49 @@ describe("auditLogService.getEvidenceBlob", () => {
     expect(await auditLogService.getEvidenceBlob("evt-1")).toMatchObject({ ok: false, status: 0 });
   });
 });
+
+describe("auditLogService.getEventDetail", () => {
+  beforeEach(() => get.mockReset());
+
+  const validDetail = {
+    id: "evt-1",
+    code: "EVT-2026-000001",
+    occurredAt: "2026-11-20T10:00:00.000Z",
+    action: "approved",
+    request: { id: "req-1", code: "SOL-2026-0001" },
+    applicant: {
+      fullName: "Juan Perez",
+      career: "Ingeniería de Sistemas",
+      graduationYear: 2024,
+    },
+    responsible: {
+      id: "user-1",
+      name: "Admin",
+      role: "admin",
+    },
+    rejectionReason: null,
+    documentType: "Diploma",
+    evidence: null,
+  };
+
+  it("devuelve el detalle del evento cuando la carga es válida", async () => {
+    reply(200, { data: validDetail });
+
+    const result = await auditLogService.getEventDetail("evt-1");
+
+    expect(get).toHaveBeenCalledWith("/audit-events/evt-1", expect.objectContaining({ validateStatus: expect.any(Function) }));
+    expect(result).toEqual({ ok: true, data: validDetail });
+  });
+
+  it("distingue una respuesta mal formada y un fallo de conexión", async () => {
+    reply(200, { data: { id: "evt-1", incomplete: true } });
+    expect(await auditLogService.getEventDetail("evt-1")).toMatchObject({ ok: false, status: 0 });
+
+    get.mockRejectedValueOnce(new Error("Network Error"));
+    expect(await auditLogService.getEventDetail("evt-1")).toEqual({
+      ok: false,
+      status: 0,
+      message: "No se pudo conectar con el servidor. Inténtalo de nuevo.",
+    });
+  });
+});

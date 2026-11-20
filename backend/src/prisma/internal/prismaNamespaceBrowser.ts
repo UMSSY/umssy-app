@@ -1511,7 +1511,8 @@ export const RefreshTokenScalarFieldEnum = {
   revokedAt: 'revokedAt',
   revokedReason: 'revokedReason',
   userAgent: 'userAgent',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type RefreshTokenScalarFieldEnum = (typeof RefreshTokenScalarFieldEnum)[keyof typeof RefreshTokenScalarFieldEnum]

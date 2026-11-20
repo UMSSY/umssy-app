@@ -47,7 +47,11 @@ export class AuditEventsService {
     if (!event) {
       throw new AuditEventNotFoundException();
     }
-    return toAuditEventDetail(event);
+    const applicantDetails =
+      await this.auditEventsRepository.findApplicantDetails(
+        event.accessRequestId,
+      );
+    return toAuditEventDetail(event, applicantDetails);
   }
 
   // La evidencia sale de la referencia guardada en el evento, nunca del documento actual de la solicitud
