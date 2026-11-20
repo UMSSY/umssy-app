@@ -4,6 +4,8 @@ import { getNotificationActionLabel } from "../utils/get-notification-action-lab
 describe("getNotificationActionLabel", () => {
   it("devuelve la etiqueta correspondiente para tipos conocidos", () => {
     expect(getNotificationActionLabel("SURVEY_PUBLISHED")).toBe("Responder encuesta");
+    expect(getNotificationActionLabel("SURVEY_CLOSING_SOON")).toBe("Ver analíticas");
+    expect(getNotificationActionLabel("SURVEY_CLOSED")).toBe("Ver analíticas");
     expect(getNotificationActionLabel("APPOINTMENT_BOOKED")).toBe("Ver cita");
     expect(getNotificationActionLabel("MENTOR_SLOT_OFFERED")).toBe("Ver oferta");
   });

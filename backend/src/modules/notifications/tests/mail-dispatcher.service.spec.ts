@@ -74,13 +74,13 @@ describe('MailDispatcherService', () => {
 
     const result = await service.dispatchToUsers(['user-1'], 'Title', 'Body', '/url', renderMail);
 
-    expect(renderMail).toHaveBeenCalledWith({ recipientName: 'Ana Rojas', actionUrl: '/url' });
+    expect(renderMail).toHaveBeenCalledWith({ recipientName: 'Ana Rojas', actionUrl: expect.stringMatching(/\/url$/) });
     expect(mockMailService.send).toHaveBeenCalledWith({
       to: 'test@umssy.com',
       subject: 'Recordatorio',
       text: 'Hola Ana Rojas',
       mjml: '<mjml>survey-reminder</mjml>',
-      values: { recipientName: 'Ana Rojas', actionUrl: '/url' },
+      values: { recipientName: 'Ana Rojas', actionUrl: expect.stringMatching(/\/url$/) },
     });
     expect(result.status).toBe('sent');
   });

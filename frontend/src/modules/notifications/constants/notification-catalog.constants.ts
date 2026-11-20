@@ -1,5 +1,6 @@
 import {
   Award,
+  BarChart3,
   Bell,
   BriefcaseBusiness,
   CalendarClock,
@@ -27,6 +28,8 @@ export const NOTIFICATION_CATALOG: Record<NotificationType, NotificationCatalogD
   APPOINTMENT_CANCELLED: { category: "REMINDERS", icon: CircleX, fallbackPath: "/appointments" },
   APPOINTMENT_BOOKED: { category: "REMINDERS", icon: CalendarDays, fallbackPath: "/appointments" },
   SURVEY_PUBLISHED: { category: "SURVEYS", icon: ClipboardList, fallbackPath: "/backoffice/surveys" },
+  SURVEY_CLOSING_SOON: { category: "SURVEYS", icon: BarChart3, fallbackPath: "/backoffice/surveys" },
+  SURVEY_CLOSED: { category: "SURVEYS", icon: BarChart3, fallbackPath: "/backoffice/surveys" },
   APPLICATION_STATUS_CHANGED: { category: "SYSTEM", icon: BriefcaseBusiness, fallbackPath: "/vacancies/my-applications" },
   NEW_JOB_APPLICANT: { category: "SYSTEM", icon: UserRoundPlus, fallbackPath: "/matching" },
   EVENT_STARTING_SOON: { category: "REMINDERS", icon: CalendarClock, fallbackPath: "/events" },

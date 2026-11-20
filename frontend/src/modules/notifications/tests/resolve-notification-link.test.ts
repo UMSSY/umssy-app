@@ -11,6 +11,11 @@ describe("resolveNotificationLink", () => {
     expect(resolveNotificationLink({ typeCode: "APPOINTMENT_BOOKED", link: "https://example.com" })).toBe("/appointments");
   });
 
+  it("convierte un link absoluto del mismo origen en una ruta interna", () => {
+    const link = `${window.location.origin}/backoffice/surveys/statistics/abc`;
+    expect(resolveNotificationLink({ typeCode: "SURVEY_CLOSED", link })).toBe("/backoffice/surveys/statistics/abc");
+  });
+
   it("usa /dashboard para tipos desconocidos", () => {
     expect(resolveNotificationLink({ typeCode: "NEW_FUTURE_TYPE", link: "" })).toBe("/dashboard");
   });

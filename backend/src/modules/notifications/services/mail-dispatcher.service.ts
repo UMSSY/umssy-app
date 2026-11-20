@@ -46,7 +46,7 @@ export class MailDispatcherService {
         const content: NotificationMailContent = renderMail
           ? await renderMail({
               recipientName: buildRecipientName(contact.firstName, contact.lastName),
-              actionUrl,
+              actionUrl: absoluteActionUrl,
             })
           : {
               mjml: await loadGenericTemplate(),

@@ -10,6 +10,8 @@ export const NOTIFICATION_ACTION_LABELS: Record<NotificationType, string> = {
   APPOINTMENT_CANCELLED: "Ver cita",
   APPOINTMENT_BOOKED: "Ver cita",
   SURVEY_PUBLISHED: "Responder encuesta",
+  SURVEY_CLOSING_SOON: "Ver analíticas",
+  SURVEY_CLOSED: "Ver analíticas",
   APPLICATION_STATUS_CHANGED: "Ver postulación",
   NEW_JOB_APPLICANT: "Ver postulantes",
   EVENT_STARTING_SOON: "Ver evento",
