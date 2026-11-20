@@ -13,5 +13,6 @@ export function useHeatmapFilters() {
     setYear: (year?: string) => setFilters((current) => ({ ...current, year })),
     setMonth: (month?: string) => setFilters((current) => ({ ...current, month })),
     setSemesterRange: (semesterRange?: HeatmapSemesterRange) => setFilters((current) => ({ ...current, semesterRange, year: semesterRange ? undefined : current.year })),
+    clearFilters: () => setFilters({}),
   };
 }

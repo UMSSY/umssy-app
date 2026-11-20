@@ -17,6 +17,12 @@ export function buildSurveyFrontendUrl(path: string): string {
   return `${frontendBaseUrl()}${path.startsWith('/') ? path : `/${path}`}`;
 }
 
+export function toAbsoluteSurveyUrl(actionUrl: string): string {
+  return /^https?:\/\//i.test(actionUrl)
+    ? actionUrl
+    : buildSurveyFrontendUrl(actionUrl);
+}
+
 export function formatSurveyClosureDate(date: Date): string {
   return `${formatBoliviaDateTime(date)}.`;
 }
