@@ -69,6 +69,7 @@ describe('mapEventToResponse', () => {
       startTime: '09:00',
       endTime: '11:30',
       location: 'Sala A',
+      sessions: [],
       capacity: 20,
       availableSpots: 15,
       registrationCount: 5,

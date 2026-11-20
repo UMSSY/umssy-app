@@ -1,9 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { EventRegistrationsService } from '../services/event-registrations.service.js';
 
-const threshold = {
-  eventDate: new Date('2026-10-23T00:00:00.000Z'),
-  endTime: new Date('1970-01-01T11:00:00.000Z'),
+const finishedFilter = {
+  status: { title: { in: ['Publicado', 'Finalizado'] } },
 };
 const registration = {
   id: 'reg-a',
@@ -23,17 +22,17 @@ const registration = {
 describe('EventRegistrationsService finished history', () => {
   const findByUserId = vi.fn();
   const findFinishedByUserId = vi.fn();
-  const getFinishedEventThreshold = vi.fn();
+  const getFinishedEventFilter = vi.fn();
   let service: EventRegistrationsService;
 
   beforeEach(() => {
     findByUserId.mockReset().mockResolvedValue([]);
     findFinishedByUserId.mockReset().mockResolvedValue({ items: [], total: 0 });
-    getFinishedEventThreshold.mockReset().mockReturnValue(threshold);
+    getFinishedEventFilter.mockReset().mockReturnValue(finishedFilter);
     service = new EventRegistrationsService(
       { findByUserId, findFinishedByUserId } as never,
       {
-        getFinishedEventThreshold,
+        getFinishedEventFilter,
         getActiveRegistrationEventFilter: () => ({
           status: { title: 'Publicado' },
         }),
@@ -49,7 +48,7 @@ describe('EventRegistrationsService finished history', () => {
       status: { title: 'Publicado' },
     });
     expect(findFinishedByUserId).not.toHaveBeenCalled();
-    expect(getFinishedEventThreshold).not.toHaveBeenCalled();
+    expect(getFinishedEventFilter).not.toHaveBeenCalled();
   });
 
   it('uses the EventsService criterion and returns paginated mapped items', async () => {
@@ -68,6 +67,7 @@ describe('EventRegistrationsService finished history', () => {
             startTime: registration.event.startTime,
             endTime: registration.event.endTime,
             location: 'Virtual',
+            sessions: [],
             status: 'Confirmada',
             registeredAt: '2026-10-20T12:00:00.000Z',
             cancelledAt: null,
@@ -80,10 +80,10 @@ describe('EventRegistrationsService finished history', () => {
       page: 2,
       offset: 2,
     });
-    expect(getFinishedEventThreshold).toHaveBeenCalledOnce();
+    expect(getFinishedEventFilter).toHaveBeenCalledOnce();
     expect(findFinishedByUserId).toHaveBeenCalledWith(
       'user-a',
-      threshold,
+      finishedFilter,
       2,
       2,
     );
@@ -100,7 +100,7 @@ describe('EventRegistrationsService finished history', () => {
     });
     expect(findFinishedByUserId).toHaveBeenCalledWith(
       'user-a',
-      threshold,
+      finishedFilter,
       0,
       10,
     );

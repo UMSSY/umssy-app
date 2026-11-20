@@ -1,5 +1,6 @@
 export const MAX_PAGE_SIZE = 50;
 export const MAX_SEARCH_LENGTH = 50;
+export const MAX_EVENT_SESSIONS = 20;
 export const PUBLISHED_STATUS_TITLE = 'Publicado';
 export const FINISHED_STATUS_TITLE = 'Finalizado';
 export const VOTING_STATUS_TITLE = 'Votacion';

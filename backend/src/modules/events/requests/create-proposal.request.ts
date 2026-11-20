@@ -1,4 +1,7 @@
 import { proposalLocationError } from './proposal-location-validation.js';
+import { AdditionalSessionsSchema } from './proposal-sessions.request.js';
+import { buildProposalSessions } from '../utils/build-proposal-sessions.js';
+import { hasOverlappingSessions } from '../utils/event-session-schedule.js';
 import { z } from 'zod';
 
 const time = (label: string) =>
@@ -51,6 +54,7 @@ export const CreateProposalSchema = z
       error: 'Selecciona Presencial o Virtual.',
     }),
     location: z.string({ error: 'Completa la ubicación o el enlace.' }),
+    additionalSessions: AdditionalSessionsSchema.optional(),
   })
   .strict()
   .superRefine((value, context) => {
@@ -87,6 +91,26 @@ export const CreateProposalSchema = z
         code: 'custom',
         path: ['location'],
         message: locationError,
+      });
+    value.additionalSessions?.forEach((session, index) => {
+      if (session.location === undefined) return;
+      const error = proposalLocationError(session.location, value.modality);
+      if (error)
+        context.addIssue({
+          code: 'custom',
+          path: ['additionalSessions', index, 'location'],
+          message: error,
+        });
+    });
+    if (
+      value.additionalSessions?.length &&
+      value.endTime > value.startTime &&
+      hasOverlappingSessions(buildProposalSessions(value))
+    )
+      context.addIssue({
+        code: 'custom',
+        path: ['additionalSessions'],
+        message: 'Las sesiones no pueden superponerse.',
       });
   });
 export type { CreateProposalPayload } from '../types/create-proposal-payload.types.js';
