@@ -109,6 +109,19 @@ describe("useMentorFreeBlocks", () => {
     await waitFor(() => expect(spy.mock.calls.length).toBeGreaterThan(callsBeforeFocus))
   })
 
+  it("conserva los datos si falla una actualización en segundo plano", async () => {
+    vi.spyOn(availabilityApi, "getMentorFreeBlocks")
+      .mockResolvedValueOnce([mockBlock]).mockRejectedValue(new Error("Network error"))
+    const wrapper = createQueryWrapper()
+    const { result } = renderHook(() => useMentorFreeBlocks("m1", CURRENT_WEEK), wrapper)
+    await waitFor(() => expect(result.current.blocks).toEqual([mockBlock]))
+
+    await act(async () => wrapper.client.invalidateQueries({ queryKey: ["availability", "free-blocks", "m1"] }))
+
+    expect(result.current.blocks).toEqual([mockBlock])
+    expect(result.current.error).toBeNull()
+  })
+
   it("reutiliza la disponibilidad mientras la caché sigue fresca", async () => {
     const spy = vi.spyOn(availabilityApi, "getMentorFreeBlocks").mockResolvedValue([mockBlock])
 
