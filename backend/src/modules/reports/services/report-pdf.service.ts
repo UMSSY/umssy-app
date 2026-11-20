@@ -1,10 +1,13 @@
 import { Injectable } from '@nestjs/common';
+import {
+  UMSS_SEAL_PDF_IMAGE,
+  UMSSY_LOGO_PDF_IMAGE,
+} from '../../../common/constants/institutional-logos.constants.js';
 import { SimplePdfDocument } from '../../../common/utils/simple-pdf-document.js';
 import { formatBoliviaDateTime } from '../../../common/utils/date-time.js';
 import {
-  REPORT_PDF_BASE_COLUMNS,
   REPORT_PDF_COLORS,
-  REPORT_PDF_DATE_COLUMN_WIDTH,
+  REPORT_PDF_LOGOS,
   REPORT_PDF_PAGE,
   REPORT_PDF_TEXT,
 } from '../constants/report-pdf.constants.js';
@@ -44,10 +47,7 @@ function truncate(text: string, maxWidth: number, fontSize: number, bold = false
 export class ReportPdfService {
   render(content: ReportPdfContent): Buffer {
     const doc = new SimplePdfDocument(PAGE_WIDTH, PAGE_HEIGHT);
-    const columns: ReportPdfColumn[] = [
-      ...REPORT_PDF_BASE_COLUMNS,
-      { label: content.dateColumnLabel, width: REPORT_PDF_DATE_COLUMN_WIDTH },
-    ];
+    const { columns } = content;
 
     let y = this.drawPageHeader(doc);
     y = this.drawIntro(doc, y, content);
@@ -78,6 +78,8 @@ export class ReportPdfService {
 
       let x = MARGIN;
       cells.forEach((lines, columnIndex) => {
+        const fill = content.cellFills?.[rowIndex]?.[columnIndex];
+        if (fill) doc.rect(x, y, columns[columnIndex]!.width, rowHeight, fill, REPORT_PDF_COLORS.white);
         lines.forEach((line, lineIndex) => {
           doc.text(line, x + CELL_PADDING, y + 8 + lineIndex * ROW_LINE_HEIGHT, {
             fontSize: TABLE_FONT_SIZE,
@@ -94,23 +96,23 @@ export class ReportPdfService {
   }
 
   private drawPageHeader(doc: SimplePdfDocument): number {
-    doc.text(REPORT_PDF_TEXT.universityName, MARGIN, MARGIN + 4, {
+    const { sealHeight, brandHeight, gap } = REPORT_PDF_LOGOS;
+    const sealWidth = (UMSS_SEAL_PDF_IMAGE.width / UMSS_SEAL_PDF_IMAGE.height) * sealHeight;
+    const brandWidth = (UMSSY_LOGO_PDF_IMAGE.width / UMSSY_LOGO_PDF_IMAGE.height) * brandHeight;
+    const textX = MARGIN + sealWidth + gap;
+
+    doc.image(UMSS_SEAL_PDF_IMAGE, MARGIN, MARGIN - 2, sealWidth, sealHeight);
+    doc.text(REPORT_PDF_TEXT.universityName, textX, MARGIN + 6, {
       fontSize: 12,
       font: 'Helvetica-Bold',
       color: REPORT_PDF_COLORS.text,
     });
-    doc.text(REPORT_PDF_TEXT.universitySubtitle, MARGIN, MARGIN + 21, {
+    doc.text(REPORT_PDF_TEXT.universitySubtitle, textX, MARGIN + 23, {
       fontSize: 8.5,
       color: REPORT_PDF_COLORS.muted,
     });
-    doc.text(REPORT_PDF_TEXT.brand, MARGIN, MARGIN + 6, {
-      fontSize: 16,
-      font: 'Helvetica-Bold',
-      color: REPORT_PDF_COLORS.navy,
-      align: 'right',
-      width: CONTENT_WIDTH,
-    });
-    const dividerY = MARGIN + 42;
+    doc.image(UMSSY_LOGO_PDF_IMAGE, PAGE_WIDTH - MARGIN - brandWidth, MARGIN + (sealHeight - brandHeight) / 2 - 2, brandWidth, brandHeight);
+    const dividerY = MARGIN + sealHeight + 4;
     doc.rect(MARGIN, dividerY, CONTENT_WIDTH, 2.5, REPORT_PDF_COLORS.navy);
     return dividerY + 16;
   }
@@ -129,7 +131,7 @@ export class ReportPdfService {
     const cardsBottom = this.drawCards(doc, top + 44, [
       { label: REPORT_PDF_TEXT.generatedAtCard, value: formatBoliviaDateTime(content.generatedAt) },
       { label: REPORT_PDF_TEXT.generatedByCard, value: content.generatedBy },
-      { label: REPORT_PDF_TEXT.totalCard, value: REPORT_PDF_TEXT.totalRecords(content.rows.length) },
+      { label: REPORT_PDF_TEXT.totalCard, value: content.totalLabel },
     ]);
     return this.drawFilterPills(doc, cardsBottom + 14, content.filters) + 16;
   }
@@ -179,7 +181,7 @@ export class ReportPdfService {
     return rowTop + PILL_HEIGHT;
   }
 
-  private drawTableHeader(doc: SimplePdfDocument, top: number, columns: ReportPdfColumn[]): number {
+  private drawTableHeader(doc: SimplePdfDocument, top: number, columns: readonly ReportPdfColumn[]): number {
     doc.rect(MARGIN, top, CONTENT_WIDTH, TABLE_HEADER_HEIGHT, REPORT_PDF_COLORS.navy);
     let x = MARGIN;
     for (const column of columns) {
