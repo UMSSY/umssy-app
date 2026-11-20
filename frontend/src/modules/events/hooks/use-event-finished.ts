@@ -2,17 +2,46 @@
 
 import { useEffect, useState } from 'react';
 import type { EventItem } from '../types/event-item.types';
-import { formatRegistrationTime } from '../utils/registration-format';
+import { getRegistrationEventTimestamp } from '../utils/registration-format';
 
-export function useEventFinished(event: Pick<EventItem, 'eventDate' | 'endTime'>): boolean {
+export function useEventTiming(event: {
+  date: string;
+  startTime?: string;
+  endTime: string;
+}) {
   const [now, setNow] = useState(Date.now);
-  // Event clocks are stored as local Bolivia times, independently of the browser timezone.
-  const endsAt = Date.parse(`${event.eventDate.split('T')[0]}T${formatRegistrationTime(event.endTime)}:00-04:00`);
-  const finished = Number.isFinite(endsAt) && now >= endsAt;
+  const startsAt = getRegistrationEventTimestamp(event.date, event.startTime ?? '');
+  const endsAt = getRegistrationEventTimestamp(event.date, event.endTime);
+  const hasValidStart = Number.isFinite(startsAt);
+  const hasStarted = hasValidStart && now >= startsAt;
+  const isPast = Number.isFinite(endsAt) && now >= endsAt;
+  const isInProgress =
+    hasValidStart &&
+    Number.isFinite(endsAt) &&
+    now >= startsAt &&
+    now < endsAt;
+
   useEffect(() => {
-    if (!Number.isFinite(endsAt) || finished) return;
-    const timer = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => window.clearInterval(timer);
-  }, [endsAt, finished]);
-  return finished;
+    const nextTransition = [startsAt, endsAt]
+      .filter((timestamp) => Number.isFinite(timestamp) && timestamp > now)
+      .sort((left, right) => left - right)[0];
+    if (nextTransition === undefined) return;
+
+    const timer = window.setTimeout(
+      () => setNow(Date.now()),
+      Math.min(2_147_483_647, Math.max(0, nextTransition - Date.now())),
+    );
+    return () => window.clearTimeout(timer);
+  }, [endsAt, now, startsAt]);
+
+  return { isPast, isInProgress, hasValidStart, hasStarted };
+}
+
+export function useEventFinished(
+  event: Pick<EventItem, 'eventDate' | 'endTime'>,
+): boolean {
+  return useEventTiming({
+    date: event.eventDate,
+    endTime: event.endTime,
+  }).isPast;
 }

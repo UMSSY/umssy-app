@@ -180,13 +180,13 @@ export class EventRegistrationsRepository {
     });
   }
 
-  findByUserId(userId: string) {
+  findByUserId(userId: string, event: Prisma.EventWhereInput) {
     return this.prisma.eventRegistration.findMany({
       where: {
         userId,
         cancelledAt: null,
         status: { title: REGISTRATION_STATUS_TITLES.confirmed },
-        event: { status: { title: PUBLISHED_STATUS_TITLE } },
+        event,
       },
       select: {
         id: true,

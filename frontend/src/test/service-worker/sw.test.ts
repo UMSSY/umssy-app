@@ -9,8 +9,8 @@ type Listener = (event: Record<string, unknown>) => void;
 type Route = () => Response;
 
 const ORIGIN = "https://umssy.test";
-const SHELL = "umssy-shell-v1";
-const ASSETS = "umssy-assets-v1";
+const SHELL = "umssy-shell-v5";
+const ASSETS = "umssy-assets-v5";
 const source = readFileSync(path.resolve(import.meta.dirname, "../../../public/sw.js"), "utf8");
 
 const keyOf = (input: RequestLike) =>
@@ -85,6 +85,7 @@ function loadWorker(routes: Record<string, Route> = {}) {
     addEventListener: (type: string, listener: Listener) => listeners.set(type, listener),
     skipWaiting: vi.fn(),
     clients: { claim: vi.fn().mockResolvedValue(undefined) },
+    registration: { showNotification: vi.fn().mockResolvedValue(undefined) },
   };
   vm.runInContext(
     source,
@@ -131,9 +132,10 @@ function loadWorker(routes: Record<string, Route> = {}) {
     caches,
     fetch,
     self,
+    push: (payload: unknown) => dispatch("push", { data: { json: () => payload } }),
     install: () => dispatch("install"),
     activate: () => dispatch("activate"),
-    message: (data: unknown) => dispatch("message", { data }),
+    message: (data: unknown, ports: unknown[] = []) => dispatch("message", { data, ports }),
     get: (url: string, init?: Parameters<typeof request>[1]) => dispatch("fetch", { request: request(url, init) }),
     navigate: (url: string) => dispatch("fetch", { request: request(url, { mode: "navigate" }) }),
   };
@@ -201,13 +203,14 @@ describe("service worker navigations", () => {
   it("caches allowed static routes and never other navigations", async () => {
     const worker = loadWorker({
       "/events/my-passes/": html("passes shell"),
+      "/events/my-passes": html("passes shell"),
       "/chat": html("chat"),
       "/dashboard": html("private dashboard", "private, no-cache, no-store, max-age=0, must-revalidate"),
     });
     await worker.navigate("/events/my-passes/");
     await worker.navigate("/chat");
     await worker.navigate("/dashboard");
-    expect(worker.caches.cachedUrls(SHELL)).toEqual(["/events/my-passes"]);
+    expect(worker.caches.cachedUrls(SHELL)).toEqual(["/events/my-passes", "/chat"]);
   });
 
   it("falls back to the cached route and then to offline.html without network", async () => {
@@ -220,6 +223,31 @@ describe("service worker navigations", () => {
     expect(await cached.response!.text()).toBe("cached passes");
     const fallback = await worker.navigate("/chat");
     expect(await fallback.response!.text()).toBe("offline page");
+  });
+
+  it("serves the saved passes route when Mis inscripciones is opened without network", async () => {
+    const worker = loadWorker();
+    const shell = await worker.caches.open(SHELL);
+    await shell.put("/events/my-passes", html("session passes shell")());
+    await shell.put("/offline/passes", html("saved passes")());
+
+    const result = await worker.navigate("/events/my-passes/");
+    expect(await result.response!.text()).toBe("saved passes");
+  });
+
+  it("keeps the same route when the network is only slow", async () => {
+    vi.useFakeTimers();
+    const worker = loadWorker({ "/events/my-passes": html("fresh passes") });
+    worker.fetch.mockImplementationOnce(
+      () => new Promise<Response>((resolve) => setTimeout(() => resolve(html("fresh passes")()), 10000)),
+    );
+    const shell = await worker.caches.open(SHELL);
+    await shell.put("/events/my-passes", html("cached passes")());
+    await shell.put("/offline/passes", html("saved passes")());
+
+    const pending = worker.navigate("/events/my-passes");
+    await vi.advanceTimersByTimeAsync(10000);
+    expect(await (await pending).response!.text()).toBe("cached passes");
   });
 
   it("returns a network error when nothing is cached", async () => {
@@ -238,7 +266,7 @@ describe("service worker navigations", () => {
     await shell.put("/dashboard", html("cached dashboard")());
 
     const pending = worker.navigate("/dashboard");
-    await vi.advanceTimersByTimeAsync(10000);
+    await vi.advanceTimersByTimeAsync(20000);
     const result = await pending;
     expect(await result.response!.text()).toBe("cached dashboard");
     expect(await (await shell.match("/dashboard"))!.text()).toBe("fresh dashboard");
@@ -249,7 +277,7 @@ describe("service worker navigations", () => {
     let resolveNetwork: (response: Response) => void = () => undefined;
     const worker = loadWorker();
     worker.fetch.mockImplementation(() => new Promise<Response>((resolve) => { resolveNetwork = resolve; }));
-    const pending = worker.navigate("/chat");
+    const pending = worker.navigate("/unknown-route");
     await vi.advanceTimersByTimeAsync(4000);
     resolveNetwork(html("late chat")());
     const result = await pending;
@@ -270,7 +298,10 @@ describe("service worker lifecycle", () => {
       "/": html(shellHtml),
       "/events/my-passes": html(shellHtml),
       "/dashboard": html(shellHtml),
-      "/events": html("dynamic", "private, no-cache, no-store, max-age=0, must-revalidate"),
+      "/events": html(shellHtml),
+      "/login": html(shellHtml),
+      "/offline/passes": html(shellHtml),
+      "/mentor/availability": html("dynamic", "private, no-cache, no-store, max-age=0, must-revalidate"),
       "/manifest.json": asset("{}"),
       "/_next/static/css/app.css": asset("css"),
       "/_next/static/chunks/main.js": asset("main"),
@@ -283,7 +314,7 @@ describe("service worker lifecycle", () => {
     expect(worker.caches.cachedUrls(SHELL)).toEqual(
       expect.arrayContaining(["/offline.html", "/manifest.json", "/", "/events/my-passes", "/dashboard"]),
     );
-    expect(worker.caches.cachedUrls(SHELL)).not.toContain("/events");
+    expect(worker.caches.cachedUrls(SHELL)).not.toContain("/mentor/availability");
     expect(worker.caches.cachedUrls(ASSETS).sort()).toEqual([
       "/_next/static/chunks/main.js",
       "/_next/static/chunks/page.js",
@@ -292,10 +323,61 @@ describe("service worker lifecycle", () => {
     expect(worker.fetch.mock.calls.filter(([input]) => keyOf(input).endsWith("main.js"))).toHaveLength(1);
   });
 
+  it("releases the connection of routes that cannot be cached", async () => {
+    const cancelled: string[] = [];
+    const streamed = (name: string, cacheControl: string, contentType = "text/html") => () =>
+      new Response(
+        new ReadableStream({
+          start(controller) { controller.enqueue(new TextEncoder().encode(name)); },
+          cancel() { cancelled.push(name); },
+        }),
+        { headers: { "Content-Type": contentType, "Cache-Control": cacheControl } },
+      );
+    const worker = loadWorker({
+      "/offline.html": html("offline"),
+      "/": html("home"), "/dashboard": html("dashboard"), "/login": html("login"),
+      "/events": html("events"), "/events/my-passes": html("passes"), "/offline/passes": html("saved"),
+      "/mentor/availability": streamed("dynamic", "private, no-cache, no-store, max-age=0, must-revalidate"),
+      "/mentors/participation": streamed("not html", "s-maxage=31536000", "application/json"),
+      "/manifest.json": streamed("private asset", "private, max-age=0", "application/json"),
+    });
+    await worker.install();
+    expect(cancelled.sort()).toEqual(["dynamic", "not html", "private asset"]);
+    expect(worker.caches.cachedUrls(SHELL)).not.toContain("/mentor/availability");
+  });
+
   it("fails the install when the offline fallback cannot be cached", async () => {
     const worker = loadWorker({ "/offline.html": () => new Response("x", { status: 500 }) });
     const result = await worker.install();
     await expect(result.waits[0]).rejects.toThrow("offline fallback could not be cached");
+  });
+
+  it("recovers a missing passes route on a later online visit and caches Next route-group chunks", async () => {
+    const chunk = "/_next/static/chunks/app/(app)/events/my-passes/page-2257.js";
+    const routes: Record<string, Route> = {
+      "/offline.html": html("offline"), "/": html("home"), "/dashboard": html("dashboard"),
+      "/login": html("login"), "/events": html("events"), "/events/my-passes": html("passes"),
+      "/offline/passes": html("saved passes"),
+    };
+    const worker = loadWorker(routes);
+    await worker.install();
+    (await worker.caches.open(SHELL)).entries.delete(keyOf("/events/my-passes"));
+    delete routes["/events/my-passes"];
+    expect(await (await worker.navigate("/events/my-passes")).response!.text()).toBe("saved passes");
+
+    routes["/events/my-passes"] = html(`<script src="${chunk}"></script>`);
+    routes[chunk] = asset("passes chunk");
+    await worker.message({ type: "CACHE_URLS", urls: [] });
+    expect(worker.caches.cachedUrls(ASSETS)).toContain(chunk);
+    expect(worker.fetch.mock.calls.some(([request]) =>
+      keyOf(request).endsWith("/events/my-passes") &&
+      request instanceof Request && request.credentials === "omit",
+    )).toBe(true);
+
+    const recovered = await worker.caches.match(keyOf("/events/my-passes"), { cacheName: SHELL });
+    expect(await recovered!.text()).toContain(chunk);
+    delete routes["/events/my-passes"];
+    expect(await (await worker.navigate("/events/my-passes")).response!.text()).toBe("saved passes");
   });
 
   it("deletes caches from other versions and claims clients", async () => {
@@ -306,6 +388,13 @@ describe("service worker lifecycle", () => {
     await worker.activate();
     expect(await worker.caches.keys()).toEqual([SHELL, ASSETS, "third-party"]);
     expect(worker.self.clients.claim).toHaveBeenCalled();
+  });
+
+  it("keeps an incomplete update from taking over the existing worker", async () => {
+    const worker = loadWorker({ "/offline.html": html("offline") });
+    const result = await worker.install();
+    await expect(result.waits[0]).rejects.toThrow();
+    expect(worker.self.skipWaiting).not.toHaveBeenCalled();
   });
 
   it("caches only same-origin Next assets sent by the page", async () => {
@@ -331,4 +420,58 @@ describe("service worker lifecycle", () => {
     const result = await worker.message({ type: "OTHER" });
     expect(result.waits).toHaveLength(0);
   });
+
+  it.each([true, false])("reports whether the required routes and chunks are ready (%s)", async (ready) => {
+    const worker = loadWorker({
+      "/login": html(shellHtml),
+      "/events": html(shellHtml),
+      "/": html(shellHtml),
+      "/dashboard": html(shellHtml),
+      "/events/my-passes": html(shellHtml),
+      "/offline/passes": html(shellHtml),
+      "/_next/static/css/app.css": asset("css"),
+      "/_next/static/chunks/main.js": asset("main"),
+      ...(ready ? { "/_next/static/chunks/page.js": asset("page") } : {}),
+    });
+    const postMessage = vi.fn();
+    // Simulate the MessageChannel carried by the preparation request.
+    await worker.message({ type: "PREPARE_OFFLINE_PASSES" }, [{ postMessage }]);
+    expect(postMessage).toHaveBeenCalledWith(ready);
+  });
+});
+
+it('keeps push delivery and offline asset caching in the same worker', async () => {
+  const worker = loadWorker({
+    '/_next/static/chunks/app.js': asset('offline chunk'),
+  });
+  await worker.activate();
+  await worker.get('/_next/static/chunks/app.js');
+  await worker.push({
+    title: 'Taller actualizado',
+    body: 'Consulta tu inscripción',
+    actionUrl: '/events/my-passes',
+  });
+
+  expect(worker.self.clients.claim).toHaveBeenCalledOnce();
+  expect(worker.caches.cachedUrls(ASSETS)).toContain(
+    '/_next/static/chunks/app.js',
+  );
+  expect(worker.self.registration.showNotification).toHaveBeenCalledWith(
+    'Taller actualizado',
+    expect.objectContaining({
+      body: 'Consulta tu inscripción',
+      data: expect.objectContaining({ actionUrl: '/events/my-passes' }),
+    }),
+  );
+});
+
+it('groups pushes by groupKey and re-alerts the user (HU-17)', async () => {
+  const worker = loadWorker({});
+  await worker.push({ title: 'Mensaje nuevo de: Ana', body: 'Hola', groupKey: 'chat:1' });
+  await worker.push({ title: 'Sin grupo', body: 'Aviso' });
+
+  const calls = worker.self.registration.showNotification.mock.calls;
+  expect(calls[0][1]).toEqual(expect.objectContaining({ tag: 'chat:1', renotify: true }));
+  expect(calls[1][1]).not.toHaveProperty('tag');
+  expect(calls[1][1]).not.toHaveProperty('renotify');
 });

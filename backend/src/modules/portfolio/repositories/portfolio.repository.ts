@@ -1,31 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
-import type { Prisma } from '../../../prisma/client.js';
+import { PORTFOLIO_PROJECT_SELECT } from '../constants/portfolio-project-select.constants.js';
 import { UnknownPortfolioProviderException } from '../exceptions/unknown-portfolio-provider.exception.js';
 import type { NormalizedPortfolioProject } from '../types/normalized-portfolio-project.type.js';
 import type { PortfolioProjectEntity } from '../types/portfolio-project-entity.type.js';
+import type { PortfolioProjectMetadataUpdate } from '../types/portfolio-project-metadata-update.type.js';
+import type { PortfolioProjectRecord } from '../types/portfolio-project-record.type.js';
 import { parsePortfolioProvider } from '../utils/parse-portfolio-provider.util.js';
-
-const portfolioProjectSelect = {
-  id: true,
-  userId: true,
-  repoName: true,
-  repoUrl: true,
-  description: true,
-  language: true,
-  starsCount: true,
-  isOwner: true,
-  displayOrder: true,
-  provider: {
-    select: {
-      name: true,
-    },
-  },
-} as const;
-
-type PortfolioProjectRecord = Prisma.UserPortfolioProjectGetPayload<{
-  select: typeof portfolioProjectSelect;
-}>;
 
 @Injectable()
 export class PortfolioRepository {
@@ -76,6 +57,23 @@ export class PortfolioRepository {
     return rows.map((row) => this.toEntity(row));
   }
 
+  async syncMetadataForUser(
+    userId: string,
+    projects: readonly PortfolioProjectMetadataUpdate[],
+  ): Promise<PortfolioProjectEntity[]> {
+    const rows = await this.prisma.$transaction(async (tx) => {
+      for (const project of projects) {
+        const { id, ...metadata } = project;
+        await tx.userPortfolioProject.updateMany({
+          where: { id, userId },
+          data: metadata,
+        });
+      }
+      return this.queryProjectsByUserId(tx, userId);
+    });
+    return rows.map((row) => this.toEntity(row));
+  }
+
   private queryProjectsByUserId(
     client: Pick<PrismaService, 'userPortfolioProject'>,
     userId: string,
@@ -83,7 +81,7 @@ export class PortfolioRepository {
     return client.userPortfolioProject.findMany({
       where: { userId },
       orderBy: { displayOrder: 'asc' },
-      select: portfolioProjectSelect,
+      select: PORTFOLIO_PROJECT_SELECT,
     });
   }
 
@@ -102,4 +100,3 @@ export class PortfolioRepository {
     };
   }
 }
-

@@ -1,4 +1,4 @@
-import type { Registration } from "@/modules/registrations";
+import type { Registration } from "@/modules/event-registrations";
 import type { FinishedRegistrationItem } from "../types/finished-registration-item.types";
 
 export function toFinishedRegistrationItem(registration: Registration): FinishedRegistrationItem {

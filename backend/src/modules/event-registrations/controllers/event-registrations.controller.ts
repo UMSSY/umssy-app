@@ -29,6 +29,7 @@ import { ZodValidationPipe } from '../../../common/pipes/zod-validation.pipe.js'
 import { ValidationException } from '../../../common/exceptions/validation.exception.js';
 import { EventRegistrationsService } from '../services/event-registrations.service.js';
 import { RegistrationResponses } from '../decorators/registration-responses.decorator.js';
+import { MyRegistrationsResponses } from '../decorators/my-registrations-responses.decorator.js';
 import {
   EVENT_REGISTRATION_PARAMS_SCHEMA,
   REGISTRATION_ID_SCHEMA,
@@ -113,7 +114,7 @@ export class EventRegistrationsController {
   }
   @Get('event-registrations/me')
   @Header('Cache-Control', 'private, no-store')
-  @ApiOperation({ summary: 'Consultar los pases activos del usuario' })
+  @ApiOperation({ operationId: 'getMyEventRegistrations', summary: 'Consultar pases activos o historial terminado del usuario', description: 'Requiere sesión. Sin scope devuelve un arreglo de pases vigentes; scope=finished devuelve un objeto paginado con items, total, limit y totalPages.' })
   @ApiQuery({
     name: 'scope',
     required: false,
@@ -133,9 +134,7 @@ export class EventRegistrationsController {
     description:
       'Resultados del historial por página (máximo 50, por defecto 10)',
   })
-  @ApiResponse({ status: 200, description: 'Inscripciones propias obtenidas' })
-  @ApiResponse({ status: 400, description: 'Parámetros de consulta inválidos' })
-  @ApiResponse({ status: 401, description: 'Se requiere una sesión válida' })
+  @MyRegistrationsResponses()
   findMine(
     @CurrentUser() user: AuthenticatedUser,
     @Query(

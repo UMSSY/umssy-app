@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { BEFORE_OFFLINE_NAVIGATION } from "@/shared/services/offline-navigation";
 
 function findInternalLink(
   target: EventTarget | null,
@@ -49,9 +50,15 @@ export function useUnsavedChangesGuard(isActive: boolean) {
     };
 
     window.addEventListener("beforeunload", handleBeforeUnload);
+    const handleOfflineNavigation = (event: Event) => {
+      event.preventDefault();
+      setPendingHref((event as CustomEvent<string>).detail);
+    };
+    window.addEventListener(BEFORE_OFFLINE_NAVIGATION, handleOfflineNavigation);
     document.addEventListener("click", handleClick, true);
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener(BEFORE_OFFLINE_NAVIGATION, handleOfflineNavigation);
       document.removeEventListener("click", handleClick, true);
     };
   }, [isActive]);

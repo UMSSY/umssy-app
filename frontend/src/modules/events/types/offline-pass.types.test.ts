@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { describe, expectTypeOf, it } from "vitest";
 
-import type { Registration } from "@/modules/registrations";
+import type { Registration } from "@/modules/event-registrations";
 import type { registrationsService } from "../services/registrations.service";
 import type { offlinePassesStore } from "../utils/offline-passes-store";
 import type { OfflinePass } from "./offline-pass.types";

@@ -8,7 +8,6 @@ import { ManagedWorkshopCard } from '../components/managed-workshop-card';
 import { RequestFeedback } from '../components/request-feedback';
 import { useManagedWorkshops } from '../hooks/use-managed-workshops';
 import { isManagedWorkshopFinished } from '../utils/managed-workshop-status';
-import type { ManagedWorkshop } from '../types/managed-workshop.types';
 
 type Filter = 'active' | 'finished';
 
@@ -32,12 +31,6 @@ export function MyWorkshopsView() {
     return matchesStatus && matchesSearch;
   });
 
-  function handleRegisterAttendance(_workshop: ManagedWorkshop, finished: boolean) {
-    setNotice(finished
-      ? 'Fuera de la ventana horaria de validación. El taller ha finalizado.'
-      : 'El registro de asistencias estará disponible próximamente.');
-  }
-
   return (
     <main className="mx-auto w-full max-w-7xl space-y-6">
       <PageHeading title="Mis talleres" description="Talleres que organizas o gestionas." />
@@ -53,7 +46,7 @@ export function MyWorkshopsView() {
         : error ? <RequestFeedback message={error} isError onRetry={retry} />
           : visible.length ? (
             <section aria-label="Talleres gestionados" className="space-y-4">
-              {visible.map((workshop) => <ManagedWorkshopCard key={workshop.id} workshop={workshop} finished={isManagedWorkshopFinished(workshop, now)} onRegisterAttendance={handleRegisterAttendance} />)}
+              {visible.map((workshop) => <ManagedWorkshopCard key={workshop.id} workshop={workshop} finished={isManagedWorkshopFinished(workshop, now)} onFinishedClick={() => setNotice('Fuera de la ventana horaria de validación. El taller ha finalizado.')} />)}
             </section>
           ) : <p className="py-10 text-center text-text-secondary">{search.trim() ? 'No se encontraron talleres con esa búsqueda.' : filter === 'active' ? 'No tienes talleres activos.' : 'No tienes talleres finalizados.'}</p>}
     </main>

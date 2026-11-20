@@ -1,12 +1,15 @@
 import type { RegistrationScheduleEvent } from '../types/registration-schedule-event.types.js';
 import { BOLIVIA_OFFSET_MS } from '../../../common/constants/date-time.constants.js';
 import type { FinishedEventThreshold } from '../types/finished-event-threshold.types.js';
+import { PUBLISHED_STATUS_TITLE } from '../constants/events.constants.js';
 import { Injectable } from '@nestjs/common';
 import type { Prisma } from '../../../prisma/client.js';
 import { EventNotFoundException } from '../exceptions/event-not-found.exception.js';
 import { EventsRepository } from '../repositories/events.repository.js';
 import { mapEventsToListResponse } from '../mappers/events.mapper.js';
 import { mapEventDetailToResponse } from '../mappers/event-detail.mapper.js';
+import { mapManagedWorkshops } from '../mappers/managed-workshops.mapper.js';
+import type { ManagedWorkshopResponse } from '../types/managed-workshop-response.types.js';
 import type { GetEventsPayload } from '../types/get-events-payload.types.js';
 import type {
   EventDetailResponse,
@@ -17,6 +20,15 @@ import type {
 @Injectable()
 export class EventsService {
   constructor(private readonly repository: EventsRepository) {}
+
+  async findManaged(userId: string): Promise<ManagedWorkshopResponse[]> {
+    const events = await this.repository.findManaged(userId);
+    return mapManagedWorkshops(events);
+  }
+
+  findManagedWorkshop(eventId: string, userId: string, tx?: Prisma.TransactionClient) {
+    return this.repository.findManagedWorkshop(eventId, userId, tx);
+  }
 
   getFinishedEventThreshold(now: Date = new Date()): FinishedEventThreshold {
     const localNow = new Date(now.getTime() + BOLIVIA_OFFSET_MS);
@@ -39,6 +51,19 @@ export class EventsService {
           localNow.getUTCMilliseconds(),
         ),
       ),
+    };
+  }
+
+  getActiveRegistrationEventFilter(
+    now: Date = new Date(),
+  ): Prisma.EventWhereInput {
+    const threshold = this.getFinishedEventThreshold(now);
+    return {
+      status: { title: PUBLISHED_STATUS_TITLE },
+      OR: [
+        { eventDate: { gt: threshold.eventDate } },
+        { eventDate: threshold.eventDate, endTime: { gt: threshold.endTime } },
+      ],
     };
   }
 

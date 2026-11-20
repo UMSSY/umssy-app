@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import Image from "next/image";
-import { getInitials } from "@/shared/utils/get-initials";
-import type { ProfileHeaderProps } from "../types/radar-profile-components.types";
-import { RadarCard } from "./radar-card";
+import { useState } from 'react';
+import Image from 'next/image';
+import { getInitials } from '@/shared/utils/get-initials';
+import type { ProfileHeaderProps } from '../types/profile-header-props.types';
+import { RadarCard } from './radar-card';
 
 const PHOTO_SIZE = 80;
 
@@ -40,7 +40,10 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
           <p className="mt-1 text-sm text-text-secondary">
             {profile.title} · {profile.yearsOfExperience} años de experiencia
           </p>
-          <ul aria-label="Tecnologías" className="mt-3 flex min-w-0 flex-wrap gap-1.5">
+          <ul
+            aria-label="Tecnologías"
+            className="mt-3 flex min-w-0 flex-wrap gap-1.5"
+          >
             {profile.technologies.map((technology) => (
               <li
                 key={technology}

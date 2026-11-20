@@ -193,7 +193,10 @@ export class EventRegistrationsService {
   }
 
   findByUserId(userId: string) {
-    return this.repository.findByUserId(userId);
+    return this.repository.findByUserId(
+      userId,
+      this.eventsService.getActiveRegistrationEventFilter(),
+    );
   }
   async support(eventId: string, userId: string): Promise<SupportResponse> {
     const result = await this.registerSupport(eventId, userId, (event) =>

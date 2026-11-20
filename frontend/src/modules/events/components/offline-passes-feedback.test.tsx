@@ -33,7 +33,7 @@ describe("offline pass indicators", () => {
   it("explains that there is no saved copy instead of the empty registrations state", () => {
     render(<NoOfflineCopyState />);
     expect(screen.getByRole("heading", { name: "No hay pases guardados en este dispositivo." })).toBeInTheDocument();
-    expect(screen.getByText("Conéctate a Internet para cargarlos.")).toBeInTheDocument();
+    expect(screen.getByText(/abre un pase confirmado para guardarlo/)).toBeInTheDocument();
     expect(screen.queryByText(/Aún no tienes inscripciones/)).not.toBeInTheDocument();
     expect(screen.queryByRole("link")).not.toBeInTheDocument();
   });

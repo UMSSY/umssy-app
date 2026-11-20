@@ -1,7 +1,8 @@
 import "@/shared/testing/indexed-db.mock";
 import { waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { saveAccessToken } from "@/shared/services/storage/access-token-storage";
+import { clearAccessToken, saveAccessToken } from "@/shared/services/storage/access-token-storage";
+import { writeIndexedDb } from "@/shared/services/storage/browser-indexed-db";
 import { renderHookWithQuery } from "@/shared/testing/render-hook-with-query";
 import { offlinePassesStore } from "../utils/offline-passes-store";
 import { useMyPasses } from "./use-my-passes";
@@ -14,7 +15,7 @@ vi.mock("./use-online-status", () => ({ useOnlineStatus: vi.fn() }));
 type LiveState = ReturnType<typeof useMyPasses>;
 
 const retry = vi.fn();
-const live: LiveState = { registrations: [], isLoading: false, error: null, isConnectionError: false, retry };
+const live: LiveState = { registrations: [], isLoading: false, error: null, isConnectionError: false, removedSavedPasses: false, retry };
 const registration = { id: "reg-1", eventName: "React", date: "2026-11-20", startTime: "09:00", endTime: "12:00", location: "Aula 101", status: "Confirmada" };
 const saved = { ...registration, location: null, qrToken: "c".repeat(64) };
 const token = (sub: string) => `h.${btoa(JSON.stringify({ sub }))}.s`;
@@ -63,10 +64,10 @@ describe("usePassesViewState", () => {
     expect(result.current.passes).toEqual([]);
   });
 
-  it("treats an empty saved copy as no copy offline", async () => {
+  it("keeps a successfully saved empty list available offline", async () => {
     await offlinePassesStore.save("user-a", []);
     const { result } = setup({ online: false });
-    await waitFor(() => expect(result.current.status).toBe("no-offline-copy"));
+    await waitFor(() => expect(result.current.status).toBe("saved"));
   });
 
   it("falls back to the saved copy when the online query fails", async () => {
@@ -96,4 +97,20 @@ describe("usePassesViewState", () => {
     await waitFor(() => expect(result.current.status).toBe("saved"));
     expect(result.current.isConnectionError).toBe(false);
   });
+
+  it("shows the saved copy without a session even when the browser reports a connection", async () => {
+    clearAccessToken();
+    await writeIndexedDb("offline-passes:owner", "user-a");
+    await writeIndexedDb("offline-passes:user-a", { userId: "user-a", savedAt: "2026-11-18T12:00:00.000Z", passes: [saved] });
+    const { result } = setup();
+    await waitFor(() => expect(result.current.status).toBe("saved"));
+    expect(result.current.passes).toHaveLength(1);
+  });
+
+  it("explains there is no saved copy without a session", async () => {
+    clearAccessToken();
+    const { result } = setup();
+    await waitFor(() => expect(result.current.status).toBe("no-offline-copy"));
+  });
 });
+

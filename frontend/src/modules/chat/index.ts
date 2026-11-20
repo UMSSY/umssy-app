@@ -25,6 +25,8 @@ export type {
   EventRoomEmptyStateProps,
 } from "./types";
 export { useLinkPreview } from "./hooks/use-link-preview";
+export { useConversationVisibility } from "./hooks/use-conversation-visibility";
+export { getActiveConversationId } from "./services/active-conversation";
 export {
   parseMessageWithLinks,
   extractFirstValidUrl,

@@ -1,7 +1,9 @@
+import { resolveMentorAreas } from '../constants/radar-mentor-areas.constants.js';
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '../../../prisma/client.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { MENTOR_ROLE_NAME } from '../constants/mentor.constants.js';
+import type { MentorProfileSnapshot } from '../types/mentor-profile-snapshot.types.js';
 import {} from '../exceptions/index.js';
 import {
   readMentorCapacity,
@@ -45,6 +47,15 @@ interface DirectoryFilters {
 }
 
 type MentorDirectorySort = 'default' | 'name_asc' | 'name_desc';
+
+const similaritySelect = {
+  id: true,
+  mentorTechnicalAreas: { select: { technicalAreaId: true } },
+  mentorOrientationTypes: {
+    where: { orientationType: { isActive: true } },
+    select: { orientationTypeId: true },
+  },
+} satisfies Prisma.UserSelect;
 
 @Injectable()
 export class MentorsRepository extends MentorIntakeRepository {
@@ -248,6 +259,43 @@ export class MentorsRepository extends MentorIntakeRepository {
     };
   }
 
+  findSimilaritySource(userId: string, now: Date) {
+    return this.prisma.user.findFirst({
+      where: { ...this.activeMentorWhere(now), id: userId },
+      select: similaritySelect,
+    });
+  }
+
+  findSimilarCandidates(
+    userId: string,
+    technicalAreaIds: string[],
+    orientationTypeIds: string[],
+    now: Date,
+  ) {
+    return this.prisma.user.findMany({
+      where: {
+        ...this.activeMentorWhere(now),
+        id: { not: userId },
+        OR: [
+          {
+            mentorTechnicalAreas: {
+              some: { technicalAreaId: { in: technicalAreaIds } },
+            },
+          },
+          {
+            mentorOrientationTypes: {
+              some: {
+                orientationTypeId: { in: orientationTypeIds },
+                orientationType: { isActive: true },
+              },
+            },
+          },
+        ],
+      },
+      select: similaritySelect,
+    });
+  }
+
   private directoryWhere(
     filters: DirectoryFilters,
     now: Date,
@@ -260,7 +308,7 @@ export class MentorsRepository extends MentorIntakeRepository {
 
     if (filters.area) {
       where.mentorTechnicalAreas = {
-        some: { technicalArea: { name: filters.area } },
+        some: { technicalArea: { name: { in: resolveMentorAreas(filters.area) } } },
       };
     }
 
@@ -381,6 +429,24 @@ export class MentorsRepository extends MentorIntakeRepository {
         },
       },
     });
+  }
+
+  async findActiveMentorProfileSnapshot(
+    userId: string,
+    now: Date,
+  ): Promise<MentorProfileSnapshot | null> {
+    const rows = await this.prisma.$queryRaw<
+      MentorProfileSnapshot[]
+    >(Prisma.sql`
+      SELECT octet_length(u.photo_url) AS "photoByteLength",
+        u.about_me AS "aboutMe",
+        EXISTS (SELECT 1 FROM mentor_technical_areas a WHERE a.mentor_id = u.id) AS "hasTechnicalAreas",
+        EXISTS (SELECT 1 FROM work_experiences w WHERE w.user_id = u.id) AS "hasWorkExperience"
+      FROM users u
+      WHERE u.id = ${userId}::uuid
+        AND ${directoryPredicate({ search: '', available: false }, now)}
+    `);
+    return rows[0] ?? null;
   }
 
   findActiveMentorById(userId: string, now: Date) {

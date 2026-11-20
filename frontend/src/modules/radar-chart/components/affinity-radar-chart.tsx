@@ -1,9 +1,7 @@
 'use client';
 
 import { Label } from '@/components/ui/label';
-
 import { MAX_SCORE } from '@/modules/radar-chart/constants/radar-score.constants';
-
 import { useId, useState } from 'react';
 import {
   PolarAngleAxis,
@@ -15,7 +13,7 @@ import {
 } from 'recharts';
 import { cn } from '@/lib/utils';
 import { Switch } from '@/components/ui/switch';
-import type { AffinityRadarChartProps } from '../types/radar-profile-components.types';
+import type { AffinityRadarChartProps } from '../types/affinity-radar-chart-props.types';
 import { formatDecimal } from '../utils/format-decimal';
 import { AffinityRadarAxisTick } from './affinity-radar-axis-tick';
 import { AffinityRadarDot } from './affinity-radar-dot';
@@ -24,10 +22,18 @@ import { RadarCard } from './radar-card';
 const LEVEL_TICK_COUNT = 6;
 const SERIES_LABEL = 'Puntaje de afinidad del perfil';
 
+function getResponsiveRadius(width: number): string {
+  if (width < 320) return '42%';
+  if (width < 380) return '48%';
+  if (width < 460) return '54%';
+  return '68%';
+}
+
 export function AffinityRadarChart({
   areas,
+  projectedScores,
   previousScores,
-  comparisonEnabled = false,
+  isComparisonEnabled = false,
   onComparisonChange,
   previousPublishedAt,
   publishedAt,
@@ -38,19 +44,19 @@ export function AffinityRadarChart({
   const titleId = useId();
   const comparisonId = useId();
   const comparisonDescriptionId = useId();
-  const showPrevious = comparisonEnabled && Boolean(previousScores);
+  const hasPreviousComparison = isComparisonEnabled && Boolean(previousScores);
   const formatDate = (date: string) =>
     new Date(date).toLocaleString('es-BO', {
       dateStyle: 'medium',
       timeStyle: 'short',
     });
-  const [radius, setRadius] = useState('68%');
+  const [radius, setRadius] = useState('54%');
   const hasAreas = areas.length > 0;
 
   return (
     <RadarCard
       aria-labelledby={titleId}
-      className={cn('flex flex-col p-4 sm:p-6', className)}
+      className={cn('flex w-full min-w-0 flex-col p-4 sm:p-6', className)}
     >
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
@@ -77,8 +83,8 @@ export function AffinityRadarChart({
       </div>
 
       {hasAreas && previousScores && onComparisonChange ? (
-        <div className="mt-4 flex items-center justify-between gap-4 rounded-lg border border-border bg-surface-soft px-4 py-3">
-          <div>
+        <div className="mt-4 flex min-h-12 items-center justify-between gap-4 rounded-lg border border-border bg-surface-soft px-4 py-3">
+          <div className="min-w-0">
             <Label
               htmlFor={comparisonId}
               className="cursor-pointer text-sm font-semibold text-ink"
@@ -97,28 +103,28 @@ export function AffinityRadarChart({
           <Switch
             id={comparisonId}
             aria-describedby={comparisonDescriptionId}
-            checked={comparisonEnabled}
+            checked={isComparisonEnabled}
             onCheckedChange={onComparisonChange}
-            className="data-checked:bg-accent"
+            className="shrink-0 data-checked:bg-accent"
           />
         </div>
       ) : null}
 
       {hasAreas ? (
         <>
-          <div className="mt-2 h-[360px] w-full sm:h-[440px] [&_.recharts-surface]:outline-none">
+          <div className="mt-2 h-[310px] w-full min-w-0 sm:h-[440px] [&_.recharts-surface]:outline-none">
             <ResponsiveContainer
               width="100%"
               height="100%"
-              onResize={(width) =>
-                setRadius(width < 280 ? '30%' : width < 360 ? '50%' : '68%')
-              }
+              onResize={(width) => setRadius(getResponsiveRadius(width))}
             >
               <RadarChart
                 data={areas.map((area) => ({
                   ...area,
                   previousScore: previousScores?.[area.id],
+                  projectedScore: projectedScores?.[area.id] ?? area.score,
                 }))}
+                margin={{ top: 16, right: 24, bottom: 16, left: 24 }}
                 outerRadius={radius}
                 accessibilityLayer={false}
               >
@@ -145,7 +151,7 @@ export function AffinityRadarChart({
                   axisLine={false}
                   tick={{ fill: 'var(--color-text-secondary)', fontSize: 10 }}
                 />
-                {showPrevious ? (
+                {hasPreviousComparison ? (
                   <Radar
                     name="Publicación anterior"
                     dataKey="previousScore"
@@ -181,24 +187,47 @@ export function AffinityRadarChart({
                     />
                   )}
                 />
+                {projectedScores ? (
+                  <Radar
+                    name="Proyección con mentoría"
+                    dataKey="projectedScore"
+                    stroke="var(--color-success)"
+                    strokeWidth={2}
+                    strokeDasharray="4 3"
+                    fill="var(--color-success)"
+                    fillOpacity={0.1}
+                    isAnimationActive={false}
+                    dot={false}
+                    className="pointer-events-none"
+                  />
+                ) : null}
               </RadarChart>
             </ResponsiveContainer>
           </div>
-          <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs text-text-secondary">
-            <p className="flex items-center gap-2">
-              <span
-                className="h-2.5 w-5 rounded-sm border border-accent bg-accent/15"
-                aria-hidden="true"
-              />
-              {showPrevious
-                ? `Actual (línea continua): ${publishedAt ? formatDate(publishedAt) : 'Sin fecha'}`
-                : SERIES_LABEL}
-            </p>
-            {showPrevious ? (
+          <div className="flex w-full flex-wrap gap-x-6 gap-y-2 text-xs text-text-secondary">
+            {projectedScores ? (
               <p className="flex items-center gap-2">
                 <span
                   aria-hidden="true"
-                  className="w-5 border-t-2 border-dashed border-ink"
+                  className="w-5 border-t-2 border-dashed border-success"
+                />
+                Proyección con mentoría (línea verde discontinua)
+              </p>
+            ) : null}
+            <p className="flex items-center gap-2">
+              <span
+                className="h-2.5 w-5 shrink-0 rounded-sm border border-accent bg-accent/15"
+                aria-hidden="true"
+              />
+              {hasPreviousComparison
+                ? `Actual (línea continua): ${publishedAt ? formatDate(publishedAt) : 'Sin fecha'}`
+                : SERIES_LABEL}
+            </p>
+            {hasPreviousComparison ? (
+              <p className="flex items-center gap-2">
+                <span
+                  aria-hidden="true"
+                  className="w-5 shrink-0 border-t-2 border-dashed border-ink"
                 />
                 Anterior (línea discontinua):{' '}
                 {previousPublishedAt

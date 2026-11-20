@@ -1,16 +1,18 @@
 import { CalendarDays, Clock3, MapPin, ScanLine } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button-variants';
 import { Card } from '@/components/ui/card';
+import Link from 'next/link';
 import { formatRegistrationDate, formatRegistrationTime } from '../utils/registration-format';
 import type { ManagedWorkshop } from '../types/managed-workshop.types';
 
 interface ManagedWorkshopCardProps {
   workshop: ManagedWorkshop;
   finished: boolean;
-  onRegisterAttendance: (workshop: ManagedWorkshop, finished: boolean) => void;
+  onFinishedClick: () => void;
 }
 
-export function ManagedWorkshopCard({ workshop, finished, onRegisterAttendance }: ManagedWorkshopCardProps) {
+export function ManagedWorkshopCard({ workshop, finished, onFinishedClick }: ManagedWorkshopCardProps) {
   return (
     <Card className="flex flex-col gap-4 rounded-lg border-border bg-surface p-5 sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0 space-y-2">
@@ -24,9 +26,15 @@ export function ManagedWorkshopCard({ workshop, finished, onRegisterAttendance }
         <p className="flex items-center gap-2 text-sm text-text-secondary"><Clock3 aria-hidden="true" className="size-4 shrink-0" />{formatRegistrationTime(workshop.startTime)} – {formatRegistrationTime(workshop.endTime)}</p>
         <p className="flex items-center gap-2 text-sm text-text-secondary"><MapPin aria-hidden="true" className="size-4 shrink-0" />{workshop.location?.trim() || 'Lugar por confirmar'}</p>
       </div>
-      <Button type="button" className="w-full shrink-0 sm:w-auto" onClick={() => onRegisterAttendance(workshop, finished)}>
-        <ScanLine aria-hidden="true" />Registrar asistencias
-      </Button>
+      {finished ? (
+        <Button type="button" className="w-full shrink-0 sm:w-auto" onClick={onFinishedClick}>
+          <ScanLine aria-hidden="true" />Registrar asistencias
+        </Button>
+      ) : (
+        <Link href={`/events/my-workshops/${encodeURIComponent(workshop.id)}/attendance`} className={buttonVariants({ className: 'w-full shrink-0 sm:w-auto' })}>
+          <ScanLine aria-hidden="true" />Registrar asistencias
+        </Link>
+      )}
     </Card>
   );
 }

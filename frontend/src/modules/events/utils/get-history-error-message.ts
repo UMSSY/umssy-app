@@ -1,4 +1,4 @@
-import { getRegistrationErrorMessage, REGISTRATION_ERROR_MESSAGES } from "@/modules/registrations";
+import { getRegistrationErrorMessage, REGISTRATION_ERROR_MESSAGES } from "@/modules/event-registrations";
 import { parseApiError } from "@/shared/utils/parse-api-error";
 
 export function getHistoryErrorMessage(cause: unknown): string {

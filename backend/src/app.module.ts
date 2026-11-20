@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ScheduleModule } from '@nestjs/schedule';
 import { MailModule } from './modules/mail/index.js';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
@@ -25,6 +26,7 @@ import { SkillsModule } from './modules/skills/skills.module.js';
 import { TechnicalAreasModule } from './modules/technical-areas/technical-areas.module.js';
 import { WorkExperienceModule } from './modules/work-experience/work-experience.module.js';
 import { ReportsModule } from './modules/reports/reports.module.js';
+import { AnalyticsModule } from './modules/analytics/analytics.module.js';
 import { AccessRequestsModule } from './modules/access-requests/access-requests.module.js';
 import { AuditEventsModule } from './modules/audit-events/audit-events.module.js';
 import { ChatModule } from './modules/chat/chat.module.js';
@@ -40,6 +42,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    ScheduleModule.forRoot(),
     PrismaModule,
     MailModule,
     AvailabilityModule,
@@ -62,6 +65,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
     AccessRequestsModule,
     AuditEventsModule,
     ReportsModule,
+    AnalyticsModule,
     ChatModule,
     MatchingModule,
     ApplicationsModule,
