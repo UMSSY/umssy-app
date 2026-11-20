@@ -18,7 +18,6 @@ import type { SurveyParticipationResponse } from '../responses/survey-participat
 import type { SurveyReminderResponse } from '../responses/survey-reminder.response.js';
 import type { SurveyParticipationTarget } from '../types/survey-participation-target.type.js';
 import {
-  buildSurveyFrontendUrl,
   formatSurveyClosureDate,
 } from '../utils/survey-frontend-url.js';
 import {
@@ -86,9 +85,7 @@ export class SurveyParticipationService {
           ? formatSurveyClosureDate(target.closesAt)
           : SURVEY_WITHOUT_CLOSING_DATE_TEXT,
       }),
-      actionUrl: buildSurveyFrontendUrl(
-        `${SURVEY_ANSWER_FRONTEND_PATH}/${target.id}`,
-      ),
+      actionUrl: `${SURVEY_ANSWER_FRONTEND_PATH}/${target.id}`,
       groupKey: `${SURVEY_REMINDER_GROUP_KEY_PREFIX}:${target.id}`,
     });
 
