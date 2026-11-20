@@ -5,7 +5,7 @@ import { NotificationsRepository } from '../repositories/notifications.repositor
 describe('Radar publication notification ownership', () => {
   it('creates an ID through Prisma and skips an existing recipient snapshot group', async () => {
     const tx = {
-      $queryRaw: vi.fn(),
+      $executeRaw: vi.fn(),
       notification: {
         findFirst: vi
           .fn()
@@ -41,8 +41,8 @@ describe('Radar publication notification ownership', () => {
       data: notice,
       select: { id: true, recipientId: true },
     });
-    expect(tx.$queryRaw).toHaveBeenCalledTimes(2);
-    expect(tx.$queryRaw.mock.invocationCallOrder[0]).toBeLessThan(
+    expect(tx.$executeRaw).toHaveBeenCalledTimes(2);
+    expect(tx.$executeRaw.mock.invocationCallOrder[0]).toBeLessThan(
       tx.notification.findFirst.mock.invocationCallOrder[0],
     );
   });

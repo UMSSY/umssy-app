@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button-variants";
-import { RefreshButton, ReportFilterSelect, ReportSearchInput } from "@/modules/reports";
+import { EMAIL_SEARCH_LABEL, RefreshButton, ReportFilterSelect, ReportSearchInput } from "@/modules/reports";
 import { WorkspacePage } from "@/shared/components/layout/workspace-page";
 import { SurveysTable } from "../components/surveys-table";
 import { ALL_ACADEMIC_PERIODS_OPTION_LABEL } from "../constants/survey-builder.constants";
@@ -36,7 +36,7 @@ export function SurveysView() {
       }
     >
       <div className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-4 sm:flex-row sm:flex-wrap sm:items-center">
-        <ReportSearchInput value={creatorSearch} onChange={setCreatorSearch} label={"Buscar por correo electrónico de administradores"} />
+        <ReportSearchInput value={creatorSearch} onChange={setCreatorSearch} label={EMAIL_SEARCH_LABEL} />
         <ReportFilterSelect
           label={"Gestión académica"}
           allLabel={ALL_ACADEMIC_PERIODS_OPTION_LABEL}
