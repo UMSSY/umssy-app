@@ -36,7 +36,7 @@ export function SurveysView() {
       }
     >
       <div className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-4 sm:flex-row sm:flex-wrap sm:items-center">
-        <ReportSearchInput value={creatorSearch} onChange={setCreatorSearch} label={"Buscar por correo electrónico de administradores"} />
+        <ReportSearchInput value={creatorSearch} onChange={setCreatorSearch} label={"Buscar por correo electrónico"} />
         <ReportFilterSelect
           label={"Gestión académica"}
           allLabel={ALL_ACADEMIC_PERIODS_OPTION_LABEL}

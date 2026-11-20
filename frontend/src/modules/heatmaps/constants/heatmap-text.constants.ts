@@ -11,6 +11,7 @@ export const HEATMAP_TEXT = {
   loadError: "No se pudo cargar el mapa de calor. Inténtalo de nuevo.",
   retry: "Reintentar",
   export: "Exportar",
+  cancel: "Cancelar",
   pdfPending: "Exportación PDF pendiente de integración.",
   csvReady: "CSV generado correctamente.",
   noSummary: "No hay datos suficientes para generar una lectura rápida.",
