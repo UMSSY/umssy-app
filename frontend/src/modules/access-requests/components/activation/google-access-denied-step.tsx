@@ -5,20 +5,23 @@ import { Button } from '@/components/ui/button';
 interface GoogleAccessDeniedStepProps {
   onRetryAnotherAccount: () => void;
   onGoToLogin?: () => void;
+  title?: string;
+  message?: string;
 }
 
 export function GoogleAccessDeniedStep({
   onRetryAnotherAccount,
   onGoToLogin,
+  title = 'Acceso no permitido',
+  message = 'Esta cuenta de Google no está registrada en el sistema. Por favor, inicia sesión con un correo electrónico previamente registrado.',
 }: GoogleAccessDeniedStepProps) {
   return (
     <div className="w-full max-w-md animate-in duration-300 ease-out fade-in slide-in-from-right-2">
       <h1 className="font-tight text-3xl font-extrabold text-ink md:text-4xl">
-        Acceso no permitido
+        {title}
       </h1>
       <p className="mt-3 mb-8 text-base leading-relaxed text-text-secondary">
-        Esta cuenta de Google no está registrada en el sistema. Por favor,
-        inicia sesión con un correo electrónico previamente registrado.
+        {message}
       </p>
 
       <div className="space-y-4">

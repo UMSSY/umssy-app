@@ -9,7 +9,7 @@ import { AccountActivationView } from "./account-activation-view";
 
 const push = vi.fn();
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
-vi.mock("@/modules/auth", () => ({ startSession: vi.fn(), resolvePostLoginPath: vi.fn(() => "/community") }));
+vi.mock("@/modules/auth", () => ({ startSession: vi.fn(), endSession: vi.fn(), resolvePostLoginPath: vi.fn(() => "/community") }));
 vi.mock("../services/account-activation.service", () => ({
   accountActivationService: { getStatus: vi.fn(), verifyCode: vi.fn(), activate: vi.fn(), resend: vi.fn() },
 }));

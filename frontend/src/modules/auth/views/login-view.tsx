@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { BrandLogo } from '@/shared/components/layout/brand-logo';
@@ -21,7 +21,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { GoogleIcon } from '@/shared/components/icons/google-icon';
-import { googleAuthService } from '../services/google-auth.service';
+import { googleAuthService, decodeGoogleIdToken } from '../services/google-auth.service';
 import { useLogin } from '../hooks/use-login';
 import { useCredentialRestrictions } from '../hooks/use-credential-restrictions';
 import { CredentialRestrictionNotice } from '../components/credential-restriction-notice';
@@ -54,7 +54,13 @@ export function LoginView() {
   const [fieldErrors, setFieldErrors] = useState<LoginFieldErrors>({});
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-  const [isAccessDenied, setIsAccessDenied] = useState(false);
+  const [accessDeniedState, setAccessDeniedState] = useState<{
+    reason: 'not_registered' | 'role_not_allowed';
+    message?: string;
+  } | null>(null);
+  const [googleError, setGoogleError] = useState<string | null>(null);
+
+  const isAccessDenied = accessDeniedState !== null;
 
   const [isExpiredNoticeVisible] = useState(() => {
     if (typeof window === 'undefined') return false;
@@ -62,11 +68,78 @@ export function LoginView() {
     return reason === 'SESSION_EXPIRED' || reason === 'session_expired';
   });
 
+    const [isPopupCallback] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const isPopup = Boolean(window.opener || window.name === 'google-oauth-popup');
+    const hasHash =
+      window.location.hash.includes('id_token=') ||
+      window.location.hash.includes('error=');
+    return isPopup && hasHash;
+  });
+
+  useEffect(() => {
+    googleAuthService.handleOAuthCallback?.(async (idToken) => {
+      setIsGoogleLoading(true);
+      setAccessDeniedState(null);
+      setGoogleError(null);
+      try {
+        const payload = decodeGoogleIdToken(idToken);
+        if (!payload?.email) return;
+
+        const result = await googleAuthService.loginWithGoogle(
+          payload.email,
+          idToken,
+        );
+        if (result.success && result.session) {
+          setIsSigningIn(true);
+          await startSession(result.session.accessToken);
+          const next = new URLSearchParams(window.location.search).get(
+            NEXT_PARAM,
+          );
+          router.push(
+            resolvePostLoginPath(
+              result.session.roles ?? result.session.roleTag,
+              next,
+            ),
+          );
+        } else if (result.reason === 'role_not_allowed') {
+          setAccessDeniedState({
+            reason: 'role_not_allowed',
+            message:
+              result.message ||
+              'El acceso con Google solo está permitido para estudiantes, titulados y mentores.',
+          });
+        } else if (result.reason === 'not_registered') {
+          setAccessDeniedState({
+            reason: 'not_registered',
+            message:
+              result.message ||
+              'Esta cuenta de Google no está registrada en el sistema. Por favor, inicia sesión con un correo electrónico previamente registrado.',
+          });
+        } else {
+          setGoogleError(
+            result.message ||
+              'Ocurrió un error al intentar iniciar sesión con Google.',
+          );
+        }
+      } catch {
+        setGoogleError(
+          'Ocurrió un error al intentar iniciar sesión con Google.',
+        );
+      } finally {
+        setIsGoogleLoading(false);
+      }
+    });
+
+    // Handled in popup callback
+  }, [router]);
+
   useRedirectAuthenticated(!isSigningIn);
   const loginRestriction = restrictions.getRestriction('login', email);
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
+    setGoogleError(null);
     if (isLoading || isSigningIn || restrictions.isBlocked('login', email))
       return;
     const errors = validateLoginFields(email, password);
@@ -93,7 +166,8 @@ export function LoginView() {
 
   async function handleGoogleLogin() {
     setIsGoogleLoading(true);
-    setIsAccessDenied(false);
+    setAccessDeniedState(null);
+    setGoogleError(null);
 
     try {
       const googleProfile = await googleAuthService.promptSelectAccount();
@@ -116,14 +190,52 @@ export function LoginView() {
             next,
           ),
         );
+      } else if (result.reason === 'role_not_allowed') {
+        setAccessDeniedState({
+          reason: 'role_not_allowed',
+          message:
+            result.message ||
+            'El acceso con Google solo está permitido para estudiantes, titulados y mentores.',
+        });
+      } else if (result.reason === 'not_registered') {
+        setAccessDeniedState({
+          reason: 'not_registered',
+          message:
+            result.message ||
+            'Esta cuenta de Google no está registrada en el sistema. Por favor, inicia sesión con un correo electrónico previamente registrado.',
+        });
       } else {
-        setIsAccessDenied(true);
+        setGoogleError(
+          result.message ||
+            'Ocurrió un error al intentar iniciar sesión con Google.',
+        );
       }
-    } catch {
+    } catch (err: unknown) {
+      if (
+        err instanceof Error &&
+        err.message.includes('NEXT_PUBLIC_GOOGLE_CLIENT_ID')
+      ) {
+        setGoogleError(
+          'El servicio de inicio de sesión con Google no está disponible en este momento. Por favor, inicia sesión con tu correo y contraseña.',
+        );
+      }
       // User closed Google popup or cancelled
     } finally {
       setIsGoogleLoading(false);
     }
+  }
+
+  if (isPopupCallback) {
+    return (
+      <main className="flex min-h-dvh flex-col items-center justify-center bg-surface p-6 text-center">
+        <p className="text-sm font-semibold text-foreground">
+          Conectando con Google...
+        </p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Esta ventana se cerrará automáticamente.
+        </p>
+      </main>
+    );
   }
 
   return (
@@ -160,28 +272,54 @@ export function LoginView() {
                 Acceso no permitido
               </h1>
               <p className="mt-3 mb-8 text-base leading-relaxed text-text-secondary">
-                Esta cuenta de Google no está registrada en el sistema. Por
-                favor, inicia sesión con un correo electrónico previamente
-                registrado.
+                {accessDeniedState?.reason === 'role_not_allowed'
+                  ? accessDeniedState.message ||
+                    'El acceso con Google solo está permitido para estudiantes, titulados y mentores. Si eres empresa o administrativo, por favor inicia sesión con tu correo electrónico y contraseña.'
+                  : 'Esta cuenta de Google no está registrada en el sistema. Por favor, inicia sesión con un correo electrónico previamente registrado.'}
               </p>
-              <Button
-                type="button"
-                variant="institutional"
-                onClick={handleGoogleLogin}
-                className="flex h-12 w-full items-center justify-center gap-2 text-base font-extrabold tracking-wide uppercase institutional-button"
-              >
-                PROBAR CON OTRA CUENTA →
-              </Button>
-              <div className="mt-6 text-center">
-                <Button
-                  type="button"
-                  variant="link"
-                  onClick={() => setIsAccessDenied(false)}
-                  className="text-sm font-semibold text-accent hover:underline"
-                >
-                  Volver a iniciar sesión
-                </Button>
-              </div>
+              {accessDeniedState?.reason === 'role_not_allowed' ? (
+                <>
+                  <Button
+                    type="button"
+                    variant="institutional"
+                    onClick={() => setAccessDeniedState(null)}
+                    className="flex h-12 w-full items-center justify-center gap-2 text-base font-extrabold tracking-wide uppercase institutional-button"
+                  >
+                    INICIAR SESIÓN CON CONTRASEÑA →
+                  </Button>
+                  <div className="mt-6 text-center">
+                    <Button
+                      type="button"
+                      variant="link"
+                      onClick={handleGoogleLogin}
+                      className="text-sm font-semibold text-accent hover:underline"
+                    >
+                      Probar con otra cuenta de Google
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <Button
+                    type="button"
+                    variant="institutional"
+                    onClick={handleGoogleLogin}
+                    className="flex h-12 w-full items-center justify-center gap-2 text-base font-extrabold tracking-wide uppercase institutional-button"
+                  >
+                    PROBAR CON OTRA CUENTA →
+                  </Button>
+                  <div className="mt-6 text-center">
+                    <Button
+                      type="button"
+                      variant="link"
+                      onClick={() => setAccessDeniedState(null)}
+                      className="text-sm font-semibold text-accent hover:underline"
+                    >
+                      Volver a iniciar sesión
+                    </Button>
+                  </div>
+                </>
+              )}
             </div>
           ) : (
             <form
@@ -345,6 +483,15 @@ export function LoginView() {
                   <CircleAlert aria-hidden="true" />
                   <AlertDescription className="font-medium text-danger">
                     {error}
+                  </AlertDescription>
+                </Alert>
+              ) : null}
+
+              {googleError ? (
+                <Alert className="mb-4 border-danger/25 bg-surface text-danger">
+                  <CircleAlert aria-hidden="true" />
+                  <AlertDescription className="font-medium text-danger">
+                    {googleError}
                   </AlertDescription>
                 </Alert>
               ) : null}
