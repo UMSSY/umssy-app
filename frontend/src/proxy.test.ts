@@ -23,7 +23,7 @@ describe("Root proxy", () => {
     expect(response.headers.get("location")).toBeNull();
   });
 
-  it("matches only the root, leaving authentication to route layouts", () => {
+  it("matches the public root and the private passes route", () => {
     expect(config.matcher).toEqual(["/", "/events/my-passes"]);
   });
 
@@ -44,6 +44,15 @@ describe("Root proxy", () => {
 
   it("keeps Mis inscripciones reachable when the session marker exists", () => {
     const response = callProxy("/events/my-passes", "1");
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("location")).toBeNull();
+  });
+
+  it("allows anonymous service worker shell precaching without a session cookie", () => {
+    const response = proxy(new NextRequest(`${BASE_ORIGIN}/events/my-passes`, {
+      headers: { "x-umssy-offline-shell": "1" },
+    }));
 
     expect(response.status).toBe(200);
     expect(response.headers.get("location")).toBeNull();
