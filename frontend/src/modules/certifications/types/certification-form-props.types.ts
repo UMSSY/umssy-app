@@ -10,5 +10,8 @@ export interface CertificationFormProps {
     documentChange: CertificationDocumentChange,
   ) => Promise<string | null>;
   onValuesChange?: () => void;
+  onDirtyChange?: (dirty: boolean) => void;
+  onBusyChange?: (busy: boolean) => void;
+  saveLabel?: string;
   onCancel: () => void;
 }

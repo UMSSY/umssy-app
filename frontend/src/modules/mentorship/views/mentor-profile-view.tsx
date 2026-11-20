@@ -1,20 +1,23 @@
-"use client";
-import type { MentorProfileViewProps } from "../types/mentor-profile-view-props.types";
+'use client';
+import type { MentorProfileViewProps } from '../types/mentor-profile-view-props.types';
 
-import { MentorProfileHeader } from "../components/mentor/mentor-profile-header";
-import { MentorAbout } from "../components/mentor/mentor-about";
-import { MentorCareer } from "../components/mentor/mentor-career";
-import { MentorGuidanceTypes } from "../components/mentor/mentor-guidance-types";
-import { MentorTechnicalAreas } from "../components/mentor/mentor-technical-areas";
-import { useMentorProfile } from "../hooks/use-mentor-profile";
-import { MentorQueryFeedback } from "../components/mentor/mentor-query-feedback";
-import { MentorQuerySkeleton } from "../components/mentor/mentor-query-skeleton";
-import { MentorProfileNavigation } from "../components/mentor/mentor-profile-navigation";
-import { useCurrentUserId } from "../hooks/use-current-user-id";
+import { MentorProfileHeader } from '../components/mentor/mentor-profile-header';
+import { MentorAbout } from '../components/mentor/mentor-about';
+import { MentorCareer } from '../components/mentor/mentor-career';
+import { MentorGuidanceTypes } from '../components/mentor/mentor-guidance-types';
+import { MentorTechnicalAreas } from '../components/mentor/mentor-technical-areas';
+import { useMentorProfile } from '../hooks/use-mentor-profile';
+import { MentorQueryFeedback } from '../components/mentor/mentor-query-feedback';
+import { MentorQuerySkeleton } from '../components/mentor/mentor-query-skeleton';
+import { MentorProfileNavigation } from '../components/mentor/mentor-profile-navigation';
+import { useCurrentUserId } from '../hooks/use-current-user-id';
+import { SimilarMentorsSection } from '../components/mentor/similar-mentors-section';
+import { useSimilarMentors } from '../hooks/use-similar-mentors';
+import type { SimilarMentorsSectionProps } from '../types/similar-mentor.types';
 
 export function MentorProfileView({
   mentorId,
-  returnTo = "/mentorship/mentors",
+  returnTo = '/mentorship/mentors',
 }: MentorProfileViewProps) {
   const { currentUserId, canVerifyIdentity } = useCurrentUserId();
 
@@ -25,6 +28,11 @@ export function MentorProfileView({
     isFetching,
     refetch,
   } = useMentorProfile(mentorId);
+
+  const similar = useSimilarMentors(
+    mentorId,
+    !isError && Boolean(mentor?.fullName?.trim()),
+  );
 
   if (isPending || (isError && isFetching)) {
     return (
@@ -77,7 +85,21 @@ export function MentorProfileView({
   }
   const professionalInterests = mentor.skills.filter((skill) => skill.name?.trim());
   const directoryParams = new URL(returnTo, "http://localhost").searchParams;
-  const selectedArea = mentor.technicalAreas.find(area => area.id === directoryParams.get("areaId") || area.name === directoryParams.get("area"));
+  const areaId = directoryParams.get("areaId");
+  const selectedArea = mentor.technicalAreas.find(area =>
+    areaId ? area.id === areaId : area.name === directoryParams.get("area"),
+  );
+  const similarProps: SimilarMentorsSectionProps =
+    similar.isPending || (similar.isError && similar.isFetching)
+      ? { status: 'loading' }
+      : similar.isError
+        ? {
+            status: 'error',
+            onRetry: () => {
+              void similar.refetch();
+            },
+          }
+        : { status: 'success', mentors: similar.data };
 
   return (
     <main className="bg-background lg:-mt-3">
@@ -100,8 +122,9 @@ export function MentorProfileView({
 
         <MentorProfileHeader
           mentor={mentor}
-          selectedAreaId={selectedArea?.id}
-          returnTo={selectedArea ? returnTo : undefined}
+          selectedArea={selectedArea?.name}
+          selectedAreaId={areaId ? selectedArea?.id : undefined}
+          returnTo={returnTo}
           showRequestAction={canVerifyIdentity && currentUserId !== mentor.id}
         />
 
@@ -143,6 +166,7 @@ export function MentorProfileView({
             <MentorTechnicalAreas areas={mentor.technicalAreas} />
           </aside>
         </div>
+        <SimilarMentorsSection {...similarProps} returnTo={returnTo} />
       </div>
     </main>
   );

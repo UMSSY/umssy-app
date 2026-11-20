@@ -1,5 +1,4 @@
 BEGIN;
--- A version is enqueued in the same transaction as its original file.
 CREATE TABLE radar_document_verifications (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -63,7 +62,6 @@ BEGIN
 END $$;
 CREATE TRIGGER radar_cert_deleted AFTER DELETE ON certifications FOR EACH ROW EXECUTE FUNCTION radar_remove_certificate_versions();
 
--- The established publication service reads the review and extraction catalogs.
 CREATE FUNCTION radar_apply_cv_verification() RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN
   IF NOT NEW.active OR NEW.source_type <> 'cv' OR NEW.status IN ('queued','reading') THEN RETURN NEW; END IF;
@@ -80,7 +78,6 @@ END $$;
 CREATE TRIGGER radar_cv_result AFTER UPDATE OF status ON radar_document_verifications FOR EACH ROW
 WHEN (NEW.status IS DISTINCT FROM OLD.status) EXECUTE FUNCTION radar_apply_cv_verification();
 
--- Keep existing decisions and expose previously uploaded files without reclassifying them.
 INSERT INTO radar_document_verifications(user_id,source_type,source_id,filename,mime,content,size_bytes,digest,status,created_at,reason,synced)
 SELECT user_id,'cv',id,coalesce(cv_file_name,'Currículum.pdf'),'application/pdf',bytes,octet_length(bytes),encode(sha256(bytes),'hex'),
   'legacy',coalesce(cv_uploaded_at,created_at),'Documento registrado antes de la verificación automática.',true

@@ -1,48 +1,15 @@
 import type { MentorCardProps } from "../../types/mentor-card-props.types";
 import { ArrowRight } from "lucide-react";
 
-import Link from "next/link";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { getInitials } from "@/shared/utils/get-initials";
-import { buttonVariants } from "@/components/ui/button-variants";
-import { cn } from "@/lib/utils";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-} from "@/components/ui/card";
+import Link from 'next/link';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { getInitials } from '@/shared/utils/get-initials';
+import { buttonVariants } from '@/components/ui/button-variants';
+import { cn } from '@/lib/utils';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 
-function getSafeReturnTo(returnTo?: string): string | null {
-  if (!returnTo) {
-    return null;
-  }
-
-  if (
-    !returnTo.startsWith("/mentorship/mentors") ||
-    returnTo.startsWith("//") ||
-    returnTo.includes("\\") ||
-    returnTo.includes("#")
-  ) {
-    return null;
-  }
-
-  try {
-    const url = new URL(returnTo, "http://localhost");
-
-    if (url.origin !== "http://localhost") {
-      return null;
-    }
-
-    if (url.pathname !== "/mentorship/mentors") {
-      return null;
-    }
-
-    return `${url.pathname}${url.search}`;
-  } catch {
-    return null;
-  }
-}
+import { getSafeReturnTo } from '../../utils/get-safe-mentor-return-to';
 
 export function MentorCard({
   mentor,
@@ -104,7 +71,7 @@ export function MentorCard({
             {mentor.isAvailable ? (
               <Badge
                 variant="outline"
-                aria-current={highlightAvailability ? "true" : undefined}
+                aria-current={highlightAvailability ? 'true' : undefined}
                 className={cn(
                   "absolute top-[22px] right-[22px] border-transparent bg-transparent px-0 text-[10px] whitespace-nowrap text-[#246448]",
                   highlightAvailability && "font-semibold",
@@ -119,8 +86,8 @@ export function MentorCard({
             ) : null}
             {showAffinityBadge && mentor.sharedInterestsCount !== undefined && (
               <Badge variant="secondary" className="whitespace-nowrap">
-                {mentor.sharedInterestsCount}{" "}
-                {mentor.sharedInterestsCount === 1 ? "interés" : "intereses"} en
+                {mentor.sharedInterestsCount}{' '}
+                {mentor.sharedInterestsCount === 1 ? 'interés' : 'intereses'} en
                 común
               </Badge>
             )}
@@ -135,12 +102,12 @@ export function MentorCard({
               {mentor.technicalAreas.map((area) => (
                 <li
                   key={area}
-                  aria-current={area === selectedArea ? "true" : undefined}
+                  aria-current={area === selectedArea ? 'true' : undefined}
                   className={cn(
                     "max-w-full min-w-0 rounded-[2px] border bg-interaction px-2 py-1 text-[10px] [overflow-wrap:anywhere] text-accent",
                     area === selectedArea
-                      ? "border-accent font-semibold ring-1 ring-accent"
-                      : "border-accent/15",
+                      ? 'border-accent font-semibold ring-1 ring-accent'
+                      : 'border-accent/15',
                   )}
                 >
                   {area}

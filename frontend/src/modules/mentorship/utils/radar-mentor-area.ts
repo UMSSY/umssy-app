@@ -1,4 +1,4 @@
-import type { AreaId } from "@/modules/radar-chart/types/area-detail.types";
+import type { AreaId } from "@/modules/radar-chart/types/area-id.types";
 import type { TechnicalAreaResponse } from "../types/technical-area-response.types";
 
 // Resolve against the live catalog; never fabricate UUIDs or substitute unrelated specialties.

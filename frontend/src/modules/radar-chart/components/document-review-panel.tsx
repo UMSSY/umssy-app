@@ -1,78 +1,28 @@
 'use client';
-import { useEffect, useState } from 'react';
-import { useMutation, useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
-import { verificationApi } from '@/modules/documents/services/document-verification.service';
-import {
-  verificationLabels,
-  type DocumentVerification,
-} from '@/modules/documents/types/document-verification.types';
+import { verificationLabels } from '@/modules/cv';
+import { useDocumentReview } from '../hooks/use-document-review';
+import { DOCUMENT_REVIEW_LABELS as labels } from '../constants/document-review-labels.constants';
 import { ConfirmActionDialog } from '@/shared/components/confirm-action-dialog';
 
 export function DocumentReviewPanel() {
-  const [filter, setFilter] = useState('pending');
-  const labels = {
-    approved: 'Aprobar documento',
-    rejected: 'Rechazar documento',
-    revoke: 'Revocar aprobación',
-    reprocess: 'Reprocesar archivo',
-  } as const;
-  type Decision = keyof typeof labels;
-  const queue = useQuery({
-    queryKey: ['radar-integration', 'document-reviews', filter],
-    queryFn: () => verificationApi.list(true, filter),
-    refetchInterval: 15000,
-  });
-  const [selected, setSelected] = useState<string | null>(null);
-  const [confirmation, setConfirmation] = useState<{
-    id: string;
-    decision: Decision;
-    name: string;
-  } | null>(null);
-  const [error, setError] = useState('');
-  const [preview, setPreview] = useState<{ url: string; name: string } | null>(
-    null,
-  );
-  useEffect(
-    () => () => {
-      if (preview) URL.revokeObjectURL(preview.url);
-    },
-    [preview],
-  );
-  const mutation = useMutation({
-    mutationFn: ({ id, decision }: { id: string; decision: Decision }) =>
-      verificationApi.decide(id, decision),
-    onSuccess: () => {
-      setConfirmation(null);
-      setError('');
-    },
-    onError: () =>
-      setError(
-        'No se pudo confirmar la decisión. Comprueba el estado actualizado.',
-      ),
-    onSettled: () => queue.refetch(),
-  });
-  const rows = queue.data ?? [];
-  const item = rows.find((d) => d.id === selected) ?? rows[0];
-  const actions: Decision[] = !item
-    ? []
-    : item.status === 'legacy'
-      ? ['reprocess']
-      : ['review', 'low_confidence'].includes(item.status)
-        ? ['approved', 'rejected', 'reprocess']
-        : ['approved', 'manual_approved'].includes(item.status)
-          ? ['revoke']
-          : [];
-  async function open(row: DocumentVerification) {
-    try {
-      const file = await verificationApi.file(row.id, true);
-      setPreview({ url: URL.createObjectURL(file), name: row.filename });
-      setError('');
-    } catch {
-      setError('El respaldo no está disponible.');
-    }
-  }
+  const {
+    filter,
+    setFilter,
+    queue,
+    setSelected,
+    confirmation,
+    setConfirmation,
+    error,
+    preview,
+    setPreview,
+    mutation,
+    rows,
+    item,
+    actions,
+    open,
+  } = useDocumentReview();
   return (
     <section className="rounded-xl border p-4">
       <h2 className="text-lg font-bold">Documentos que requieren revisión</h2>
@@ -151,7 +101,7 @@ export function DocumentReviewPanel() {
           </div>
         </div>
       )}
-      {error && <p role="alert">{error}</p>}
+      {error && !confirmation && <p role="alert">{error}</p>}
       <ConfirmActionDialog
         open={!!confirmation}
         title="Confirmar decisión"
@@ -160,6 +110,7 @@ export function DocumentReviewPanel() {
             ? labels[confirmation.decision] + ' · ' + confirmation.name + '?'
             : ''
         }
+        error={error}
         busy={mutation.isPending}
         onOpenChange={(v) => {
           if (!v) setConfirmation(null);
@@ -183,6 +134,9 @@ export function DocumentReviewPanel() {
               className="h-[60vh] w-full"
             />
           )}
+          <Button variant="outline" onClick={() => setPreview(null)}>
+            Cerrar vista previa
+          </Button>
         </DialogContent>
       </Dialog>
     </section>

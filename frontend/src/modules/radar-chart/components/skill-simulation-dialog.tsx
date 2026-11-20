@@ -19,12 +19,12 @@ import {
   NativeSelectOption,
 } from '@/components/ui/native-select';
 import { ArrowRight, X } from 'lucide-react';
-import type { AreaId } from '../types/area-detail.types';
-import type { RadarAreaScore } from '../types/radar-profile.types';
+import type { AreaId } from '../types/area-id.types';
+import type { RadarAreaScore } from '../types/radar-area-score.types';
 import { projectRadarScore } from '../utils/project-radar-score';
 import type { SkillItem } from '@/modules/skills/types/skill-item.types';
 import type { Epic2Skill } from '../types/epic2-skill.types';
-import { RADAR_SKILLS_CATALOG } from '../../../../../backend/src/modules/skills/constants/radar-skills-catalog.constants';
+import { RADAR_SKILLS_CATALOG } from '../constants/radar-skills-catalog.constants';
 
 const areaBySkillName = new Map(
   RADAR_SKILLS_CATALOG.map(({ name, areaId }) => [name.toLowerCase(), areaId]),

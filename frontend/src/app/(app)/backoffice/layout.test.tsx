@@ -1,6 +1,7 @@
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import "@/shared/testing/indexed-db.mock";
 import { saveAccessToken } from "@/shared/services/storage/access-token-storage";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { stubMatchMedia } from "@/shared/testing/stub-match-media";
 import AppLayout from "../layout";
@@ -9,6 +10,11 @@ import BackofficeLayout from "./layout";
 vi.mock("next/navigation", () => ({
   usePathname: () => "/backoffice/solicitudes",
   useRouter: () => ({ replace: vi.fn() }),
+}));
+vi.mock("@/modules/notifications/hooks/use-notifications", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/modules/notifications/hooks/use-notifications")>()),
+  useNotificationsRealtimeSync: vi.fn(),
+  useUnreadNotificationsCount: () => ({ data: { count: 0 } }),
 }));
 
 vi.mock("@/modules/request-review/hooks/use-backoffice-session", () => ({

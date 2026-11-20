@@ -1,3 +1,5 @@
+the project have standard too, you can read in: **[Backend Standards](./standard.md)**
+
 ## Description
 
 This repository contains the backend for the **UMSSY** application.
@@ -17,7 +19,41 @@ pnpm install
 cp .env.example .env
 ```
 
-> **Note:** For local development, using the default values in `.env` is sufficient. Feel free to update the environment variables as needed.
+> **Note**: The default values in `.env.example` are not
+> sufficient for local development. You must generate
+> `JWT_SECRET` and configure the VAPID keys before
+> starting the backend.
+
+### Generate JWT Secret
+
+The `JWT_SECRET` environment variable is required to sign authentication tokens.
+
+Generate a secure secret using:
+
+```bash
+openssl rand -base64 32
+```
+
+Copy the generated value and paste it into `JWT_SECRET` in `backend/.env`.
+
+Never commit your secret to version control.
+
+### Generate VAPID Keys
+
+From `backend/`, generate a key pair with the Web Push CLI. The temporary
+command requires access to the package registry:
+
+```bash
+pnpm dlx web-push generate-vapid-keys
+```
+
+After installing the backend dependencies, you can also use the local CLI with
+`pnpm exec web-push generate-vapid-keys`.
+
+Replace the placeholders in `backend/.env` with the matching public and private
+keys in `VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY`. Set `VAPID_SUBJECT` to a
+contact URI, such as `mailto:developer@example.com`. Keep the private key in
+your local `.env` file.
 
 ## Compile and Run the Project
 
@@ -149,7 +185,7 @@ returning a token.
 
 Required environment variables in `.env`:
 
-- `JWT_SECRET` — secret used to sign tokens. You can generate with `openssl rand -base64 32` and paste in `JWT_SECRET` in `.env`.
+- `JWT_SECRET` — See [Generate JWT Secret](#generate-jwt-secret).
 
 ## Seeds
 

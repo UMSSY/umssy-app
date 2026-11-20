@@ -4,12 +4,12 @@ import Link from "next/link";
 import { resolveRadarMentorArea } from "../utils/radar-mentor-area";
 import { RADAR_AXIS_NAMES } from "@/modules/radar-chart/constants/radar-axis-names.constants";
 
-import { useEffect, useMemo } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
+import { useEffect, useMemo } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
 import {
   NativeSelect,
   NativeSelectOption,
@@ -30,7 +30,7 @@ import {
   normalizeMentorDirectoryParams,
   parseMentorDirectoryState,
   updateMentorDirectoryParams,
-} from "../utils/mentor-directory-navigation";
+} from '../utils/mentor-directory-navigation';
 
 export function MentorDirectoryView({
   directoryState,
@@ -39,6 +39,7 @@ export function MentorDirectoryView({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const queryString = searchParams.toString();
+  const fromRadar = searchParams.get('from') === 'radar';
 
   const {
     page,
@@ -53,7 +54,7 @@ export function MentorDirectoryView({
 
   const { technicalAreas, orientationTypes, isTechnicalAreasLoading, isTechnicalAreasError, retryTechnicalAreas } = useMentorshipCatalogs();
   const radarAxis = RADAR_AXIS_NAMES.find(axis => axis.id === searchParams.get("radarArea"));
-  const isHu2Flow = Boolean(radarAxis) || searchParams.get("hu2") === "radar";
+  const isHu2Flow = fromRadar || Boolean(radarAxis) || searchParams.get("hu2") === "radar";
   const isAvailableOnly = isHu2Flow || requestedAvailable;
   const resolvedArea = radarAxis ? resolveRadarMentorArea(radarAxis.id, technicalAreas) : undefined;
   const area = rawArea || resolvedArea?.name || "";
@@ -94,19 +95,19 @@ export function MentorDirectoryView({
     directory?.totalPages ?? directoryState?.totalPages ?? 0;
 
   const effectiveSort: MentorSort =
-    sortBy !== "affinity"
+    sortBy !== 'affinity'
       ? sortBy
       : (directory?.effectiveSort ??
         directoryState?.effectiveSort ??
-        "default");
+        'default');
 
   const affinityStatus =
     directory?.affinityStatus ?? directoryState?.affinityStatus;
   const hasFilters = Boolean(
     search.trim() ||
-      area ||
-      orientation ||
-      isAvailableOnly !== MENTOR_DIRECTORY_DEFAULTS.available
+    area ||
+    orientation ||
+    isAvailableOnly !== MENTOR_DIRECTORY_DEFAULTS.available,
   );
 
   useEffect(() => {
@@ -134,15 +135,15 @@ export function MentorDirectoryView({
   ]);
 
   const affinityMessage =
-    sortBy !== "affinity" || effectiveSort === "affinity"
+    sortBy !== 'affinity' || effectiveSort === 'affinity'
       ? null
-      : affinityStatus === "no_skills"
-        ? "Agrega habilidades profesionales a tu perfil para encontrar mentores con mayor afinidad. Se muestran los mentores por defecto."
-        : affinityStatus === "unmapped_skills"
-          ? "Tus habilidades profesionales aún no tienen correspondencia con las áreas técnicas. Se muestran los mentores por defecto."
-          : affinityStatus === "ready"
-            ? "El orden por afinidad no se aplicó. Se muestran los mentores por defecto."
-            : "La afinidad todavía no está disponible. Se muestran los mentores por defecto.";
+      : affinityStatus === 'no_skills'
+        ? 'Agrega habilidades profesionales a tu perfil para encontrar mentores con mayor afinidad. Se muestran los mentores por defecto.'
+        : affinityStatus === 'unmapped_skills'
+          ? 'Tus habilidades profesionales aún no tienen correspondencia con las áreas técnicas. Se muestran los mentores por defecto.'
+          : affinityStatus === 'ready'
+            ? 'El orden por afinidad no se aplicó. Se muestran los mentores por defecto.'
+            : 'La afinidad todavía no está disponible. Se muestran los mentores por defecto.';
 
   function navigateWithUpdates(updates: {
     search?: string;
@@ -173,11 +174,11 @@ export function MentorDirectoryView({
 
   function handleClearFilters() {
     navigateWithUpdates({
-      search: "",
-      area: "",
-      orientation: "",
+      search: '',
+      area: '',
+      orientation: '',
       available: true,
-      sort: "default",
+      sort: 'default',
     });
   }
 
@@ -204,18 +205,23 @@ export function MentorDirectoryView({
             areaAsChips
             area={area}
             orientation={orientation}
-            technicalAreas={technicalAreas.map((item) => item.name)}
-            orientationTypes={orientationTypes.map((item) => item.name)}
-            onAreaChange={(value) =>
-              navigateWithUpdates({ area: value })
+            technicalAreas={
+              fromRadar
+                ? RADAR_AXIS_NAMES.map((item) => item.name)
+                : technicalAreas.map((item) => item.name)
             }
+            orientationTypes={orientationTypes.map((item) => item.name)}
+            onAreaChange={(value) => navigateWithUpdates({ area: value })}
             onOrientationChange={(value) =>
               navigateWithUpdates({ orientation: value })
             }
           />
 
           <Label
-            className={cn("flex items-center gap-2", isAvailableOnly && "text-primary")}
+            className={cn(
+              'flex items-center gap-2',
+              isAvailableOnly && 'text-primary',
+            )}
           >
             <Checkbox
               checked={isAvailableOnly}
@@ -236,8 +242,8 @@ export function MentorDirectoryView({
               id="mentor-sort"
               aria-label="Ordenar mentores"
               className={
-                sortBy === "affinity"
-                  ? "rounded-lg ring-2 ring-accent"
+                sortBy === 'affinity'
+                  ? 'rounded-lg ring-2 ring-accent'
                   : undefined
               }
               value={sortBy}
@@ -265,10 +271,7 @@ export function MentorDirectoryView({
             </NativeSelect>
           </div>
 
-          <Button
-            variant="ghost"
-            onClick={handleClearFilters}
-          >
+          <Button variant="ghost" onClick={handleClearFilters}>
             Limpiar
           </Button>
           <Link href="/profile/radar" className="ml-auto self-center text-xs text-accent hover:underline">Volver al radar</Link>
@@ -289,12 +292,18 @@ export function MentorDirectoryView({
           <MentorQueryFeedback
             title={
               totalItems > 0
-                ? "No hay mentores en esta página"
+                ? 'No hay mentores en esta página'
                 : hasFilters
-                  ? "No hay mentores que coincidan con tu búsqueda"
-                  : "No hay mentores disponibles por el momento"
+                  ? 'No hay mentores que coincidan con tu búsqueda'
+                  : 'No hay mentores disponibles por el momento'
             }
-            description={totalItems > 0 ? "Ajustando la paginación del directorio." : hasFilters ? "Prueba con otros filtros o limpia la búsqueda." : "Vuelve a consultar más adelante."}
+            description={
+              totalItems > 0
+                ? 'Ajustando la paginación del directorio.'
+                : hasFilters
+                  ? 'Prueba con otros filtros o limpia la búsqueda.'
+                  : 'Vuelve a consultar más adelante.'
+            }
             onClearFilters={hasFilters ? handleClearFilters : undefined}
           />
         ) : (
@@ -326,7 +335,7 @@ export function MentorDirectoryView({
               mentors={mentors}
               currentUserId={currentUserId}
               returnTo={returnTo}
-              showAffinityBadge={effectiveSort === "affinity"}
+              showAffinityBadge={effectiveSort === 'affinity'}
               selectedArea={area}
               highlightAvailability={isAvailableOnly}
             />

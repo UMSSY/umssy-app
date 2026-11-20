@@ -14,8 +14,8 @@ export class RadarCvRepository {
   ) {
     return this.prisma.$queryRaw<{ review_status: string }[]>`
       WITH managed AS (
-        SELECT status FROM radar_document_verifications WHERE user_id=${userId}::uuid
-          AND source_id=${cvId}::uuid AND source_type='cv' AND status<>'legacy' AND active
+        SELECT status_id FROM radar_document_verifications WHERE user_id=${userId}::uuid
+          AND source_id=${cvId}::uuid AND source_type_id=(SELECT id FROM radar_document_source_types WHERE title='cv') AND status_id<>(SELECT id FROM radar_document_statuses WHERE title='legacy') AND active
       ), saved AS (
         INSERT INTO radar_cv_evidence
           (cv_id,user_id,extracted_text,extraction_status_id,review_status_id)
@@ -32,7 +32,7 @@ export class RadarCvRepository {
       )
       SELECT review.title AS review_status FROM saved
       JOIN radar_cv_review_statuses review ON review.id=saved.review_status_id
-      UNION ALL SELECT CASE WHEN status IN ('approved','manual_approved') THEN 'approved'
-        WHEN status IN ('low_confidence','manual_rejected') THEN 'rejected' ELSE 'pending' END FROM managed`;
+      UNION ALL SELECT CASE WHEN status_id IN (SELECT id FROM radar_document_statuses WHERE title IN ('approved','manual_approved')) THEN 'approved'
+        WHEN status_id IN (SELECT id FROM radar_document_statuses WHERE title IN ('low_confidence','manual_rejected')) THEN 'rejected' ELSE 'pending' END FROM managed`;
   }
 }

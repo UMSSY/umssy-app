@@ -35,6 +35,8 @@ function buildMatch(score: number, requirements: CategorizedJobRequirement[]): J
     companyName: "Acme",
     modality: "Remoto",
     description: "Administra la infraestructura.",
+    publishedAt: "2026-11-10T15:00:00.000Z",
+    expiresAt: "2026-11-29T15:00:00.000Z",
     score,
     requirements,
     hasPendingRequirements: requirements.some(({ status }) => status === "Pendiente"),

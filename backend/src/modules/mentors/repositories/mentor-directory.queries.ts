@@ -1,3 +1,4 @@
+import { resolveMentorAreas } from '../constants/radar-mentor-areas.constants.js';
 import { Prisma } from '../../../prisma/client.js';
 import type { MentorDirectoryQuery } from '../requests/mentor-directory-query.schema.js';
 import { MENTOR_ROLE_NAME } from '../constants/mentor.constants.js';
@@ -27,7 +28,7 @@ export function directoryPredicate(
   if (filters.area)
     conditions.push(Prisma.sql`EXISTS (
     SELECT 1 FROM mentor_technical_areas mta JOIN technical_areas ta ON ta.id = mta.technical_area_id
-    WHERE mta.mentor_id = u.id AND (ta.name = ${filters.area} OR ta.id::text = ${filters.area})
+    WHERE mta.mentor_id = u.id AND (ta.id::text = ${filters.area} OR ta.name IN (${Prisma.join(resolveMentorAreas(filters.area))}))
   )`);
   if (filters.orientation)
     conditions.push(Prisma.sql`EXISTS (

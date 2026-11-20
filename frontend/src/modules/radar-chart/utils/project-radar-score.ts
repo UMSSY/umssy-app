@@ -1,6 +1,6 @@
 import { RADAR_AXIS_NAMES } from "../constants/radar-axis-names.constants";
-import type { AreaId } from "../types/area-detail.types";
-import type { RadarAreaScore } from "../types/radar-profile.types";
+import type { AreaId } from "../types/area-id.types";
+import type { RadarAreaScore } from "../types/radar-area-score.types";
 
 /** Vista temporal: misma media aritmética de los seis ejes y redondeo del radar oficial. */
 export function projectRadarScore(areas: readonly RadarAreaScore[], areaId: AreaId, value: number) {

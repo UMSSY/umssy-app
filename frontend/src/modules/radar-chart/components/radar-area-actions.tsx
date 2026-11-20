@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { buttonVariants } from '@/components/ui/button-variants';
 import { AreaLevelBadge } from './area-level-badge';
 import { getAreaLevel } from '../utils/get-area-level';
-import type { RadarAreaScore } from '../types/radar-profile.types';
+import type { RadarAreaScore } from '../types/radar-area-score.types';
 
 export function RadarAreaActions({
   area,

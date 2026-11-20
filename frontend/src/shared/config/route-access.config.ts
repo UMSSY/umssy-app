@@ -2,6 +2,7 @@ import type { RouteAccessRule } from "@/shared/types/route-access-rule.types";
 
 export const APP_ROUTE_ACCESS: readonly RouteAccessRule[] = [
   { pattern: /^\/dashboard\/?$/, roles: ["titulado", "estudiante", "mentor", "empresa", "administrativo"] },
+  { pattern: /^\/notifications\/open\/?$/, roles: ["titulado", "estudiante", "mentor", "empresa", "administrativo"] },
   { pattern: /^\/backoffice(?:\/|$)/, roles: ["administrativo"] },
   { pattern: /^\/affinity-radar\/review-queue\/?$/, roles: ["administrativo"] },
   { pattern: /^\/recruiters(?:\/|$)/, roles: ["empresa"] },
@@ -11,6 +12,8 @@ export const APP_ROUTE_ACCESS: readonly RouteAccessRule[] = [
   { pattern: /^\/profile(?:\/|$)/, roles: ["titulado", "estudiante", "mentor", "empresa"] },
   { pattern: /^\/chat(?:\/|$)/, roles: ["titulado", "estudiante", "mentor", "empresa"] },
   { pattern: /^\/events\/propose\/?$/, roles: ["titulado"] },
+  { pattern: /^\/events\/my-workshops\/?$/, roles: ["titulado"] },
+  { pattern: /^\/events\/my-workshops\/[^/]+\/attendance\/?$/, roles: ["titulado"] },
   { pattern: /^\/events(?:\/|$)/, roles: ["titulado", "mentor"] },
   { pattern: /^\/vacancies\/recommended(?:\/|$)/, roles: ["titulado", "estudiante"] },
   { pattern: /^\/vacancies\/my-applications\/?$/, roles: ["titulado", "estudiante"] },
@@ -25,4 +28,5 @@ export const APP_ROUTE_ACCESS: readonly RouteAccessRule[] = [
   { pattern: /^\/mentorship\/mentors\/?$/, roles: ["titulado", "estudiante", "mentor"] },
   { pattern: /^\/mentors\/(?!participation(?:\/|$)|register(?:\/|$))[^/]+(?:\/availability)?\/?$/, roles: ["titulado", "estudiante", "mentor"] },
   { pattern: /^\/appointments\/?$/, roles: ["titulado", "estudiante", "mentor"] },
+  { pattern: /^\/notifications(?:\/|$)/, roles: ["titulado", "estudiante", "mentor", "empresa", "administrativo"] },
 ];

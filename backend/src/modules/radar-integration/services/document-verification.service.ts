@@ -1,3 +1,7 @@
+import { RadarDocumentSourceType } from '../constants/radar-document-source-type.enum.js';
+import { RadarDocumentStatus } from '../constants/radar-document-status.enum.js';
+import { UsersService } from '../../users/services/users.service.js';
+import { CertificationRecordsService } from '../../certifications/services/certification-records.service.js';
 import {
   Injectable,
   Logger,
@@ -13,7 +17,7 @@ import { DocumentVerificationRepository } from '../repositories/document-verific
 import { evaluateRadarDocument } from '../utils/evaluate-radar-document.js';
 import { MAX_NLP_SOURCE_LENGTH } from '../../nlp/constants/nlp-validation.constants.js';
 import { AREA_IDS } from '../utils/radar-scoring.js';
-import type { VerificationJob } from '../types/document-verification.type.js';
+import type { VerificationJob } from '../types/verification-job.types.js';
 import { RadarPublicationService } from './radar-publication.service.js';
 
 @Injectable()
@@ -31,6 +35,8 @@ export class DocumentVerificationService
     private readonly skills: SkillAnalysisService,
     private readonly nlp: ProfileSkillsAnalysisService,
     private readonly radar: RadarPublicationService,
+    private readonly users: UsersService,
+    private readonly certificates: CertificationRecordsService,
   ) {}
   onApplicationBootstrap() {
     this.timer = setInterval(() => {
@@ -51,7 +57,7 @@ export class DocumentVerificationService
   async processNext() {
     const job = await this.store.claim();
     if (!job) return;
-    if (job.status === 'reading') {
+    if (job.status === RadarDocumentStatus.READING) {
       const result = await this.read(job);
       if (!(await this.store.finish(job, result))) return;
     }
@@ -71,7 +77,22 @@ export class DocumentVerificationService
       ids,
     );
   }
-  private async read(job: VerificationJob) {
+  private async read(claimed: VerificationJob) {
+    const [owner, certificate] = await Promise.all([
+      this.users.findRecruitmentProfile(claimed.userId),
+      claimed.sourceType === RadarDocumentSourceType.CERTIFICATION
+        ? this.certificates.findById(claimed.sourceId)
+        : null,
+    ]);
+    const job = {
+      ...claimed,
+      firstName: owner?.firstName ?? '',
+      lastName: owner?.lastName ?? '',
+      issuer:
+        certificate?.userId === claimed.userId
+          ? certificate.issuingOrganization
+          : null,
+    };
     let reading;
     try {
       reading = await this.ocr.extract(
@@ -93,10 +114,9 @@ export class DocumentVerificationService
     const checked = this.validation.validateSources(sources);
     if (checked.rejected.length)
       return {
-        status: 'review' as const,
+        status: RadarDocumentStatus.REVIEW as const,
         confidence: reading.confidence,
-        reason:
-          `El OCR extrajo ${reading.text.length.toLocaleString('es-BO')} caracteres. El análisis de habilidades admite hasta ${MAX_NLP_SOURCE_LENGTH.toLocaleString('es-BO')} por documento. Se omitió la detección y se solicitó revisión administrativa.`,
+        reason: `El OCR extrajo ${reading.text.length.toLocaleString('es-BO')} caracteres. El análisis de habilidades admite hasta ${MAX_NLP_SOURCE_LENGTH.toLocaleString('es-BO')} por documento. Se omitió la detección y se solicitó revisión administrativa.`,
         skills: [],
       };
     const detected = this.detection.detect(

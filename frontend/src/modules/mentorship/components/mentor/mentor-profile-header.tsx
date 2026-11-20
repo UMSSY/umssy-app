@@ -25,13 +25,14 @@ function getInitials(name: string) {
 
 export function MentorProfileHeader({
   mentor,
+  selectedArea,
   showRequestAction = true,
   selectedAreaId,
   returnTo,
 }: MentorProfileHeaderProps) {
   const primaryEducation = mentor.educations[0];
   const currentCompany = mentor.workExperiences.find(experience => experience.isCurrent)?.company.title;
-  const { requestMentorship, isChecking, hasNoSlots } = useRequestMentorship(mentor.id, selectedAreaId, returnTo);
+  const { requestMentorship, isChecking, hasNoSlots } = useRequestMentorship(mentor.id, selectedArea, returnTo, selectedAreaId);
 
   return (
     <Card className="gap-0 overflow-visible rounded-none border border-border bg-[#edf3f6] py-0 text-sm shadow-none ring-0">
