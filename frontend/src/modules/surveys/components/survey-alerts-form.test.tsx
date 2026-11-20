@@ -16,6 +16,7 @@ function renderForm(overrides: Partial<SurveyAlertsFormProps> = {}) {
     config: { enabled: true, threshold: 10, questionIds: null },
     isSaving: false,
     onCancel: vi.fn(),
+    onDirtyChange: vi.fn(),
     onSave: vi.fn().mockResolvedValue(undefined),
     ...overrides,
   };
@@ -108,5 +109,17 @@ describe("SurveyAlertsForm - campo de umbral", () => {
     await user.type(thresholdInput(), "123");
 
     expect(thresholdInput()).toHaveValue("12");
+  });
+
+  it("mantiene Guardar deshabilitado hasta que haya cambios", async () => {
+    const user = userEvent.setup();
+    renderForm();
+
+    expect(screen.getByRole("button", { name: "Guardar" })).toBeDisabled();
+
+    await user.clear(thresholdInput());
+    await user.type(thresholdInput(), "25");
+
+    expect(screen.getByRole("button", { name: "Guardar" })).toBeEnabled();
   });
 });
