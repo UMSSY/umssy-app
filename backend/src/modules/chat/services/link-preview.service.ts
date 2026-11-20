@@ -22,7 +22,6 @@ function decodeHtmlEntities(text: string): string {
 }
 
 function extractMetaTag(html: string, property: string): string | null {
-  // Matches <meta property="og:title" content="..."> or <meta name="og:title" content="..."> or reverse order
   const escapedProp = property.replace(':', '\\:');
   const pattern1 = new RegExp(
     `<meta\\s+[^>]*(?:property|name)=["']${escapedProp}["'][^>]*content=["']([^"']*)["']`,
@@ -111,12 +110,10 @@ export class LinkPreviewService {
         return fallback;
       }
 
-      // Read at most MAX_HTML_BYTES to prevent memory abuse
       const buffer = await response.arrayBuffer();
       const slicedBuffer = buffer.slice(0, MAX_HTML_BYTES);
       const html = new TextDecoder('utf-8').decode(slicedBuffer);
 
-      // Extract Open Graph & HTML metadata
       const ogTitle = extractMetaTag(html, 'og:title');
       const standardTitle = extractTitleTag(html);
       const title =
@@ -135,9 +132,7 @@ export class LinkPreviewService {
 
       if (rawOgImage) {
         try {
-          // Resolve relative URLs to absolute URLs
           const resolved = new URL(rawOgImage, trimmedUrl).href;
-          // Validate resolved image URL against SSRF
           const isImageSafe = await validateSafeUrl(resolved);
           if (isImageSafe) {
             imageUrl = resolved;
@@ -158,7 +153,6 @@ export class LinkPreviewService {
         hasPreview,
       };
     } catch {
-      // In case of timeout, connection reset, or parsing errors, return safe fallback
       return fallback;
     }
   }

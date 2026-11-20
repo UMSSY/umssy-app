@@ -268,6 +268,11 @@ export type MentorParticipationRequest = Prisma.MentorParticipationRequestModel
  */
 export type MentorSlotOffer = Prisma.MentorSlotOfferModel
 /**
+ * Model MentorCapacitySetting
+ *
+ */
+export type MentorCapacitySetting = Prisma.MentorCapacitySettingModel
+/**
  * Model ActivationOtp
  * 
  */

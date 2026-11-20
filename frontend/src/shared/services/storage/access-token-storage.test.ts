@@ -116,3 +116,31 @@ describe("access token memory storage (no IndexedDB persistence)", () => {
     });
   });
 });
+
+it('migrates legacy offline ownership before removing the persisted credential', async () => {
+  const credential = `h.${btoa(JSON.stringify({ sub: 'legacy-a' }))}.s`;
+  await writeIndexedDb(ACCESS_TOKEN_STORAGE_KEY, credential);
+  await writeIndexedDb(offlinePassesKey('legacy-a'), { userId: 'legacy-a', passes: [] });
+  vi.resetModules();
+  const storage = await import('./access-token-storage');
+  await storage.initializeAccessTokenStorage();
+  expect(storage.getAccessToken()).toBeNull();
+  expect(await readIndexedDb(ACCESS_TOKEN_STORAGE_KEY)).toBeNull();
+  expect(await readIndexedDb(OFFLINE_PASSES_OWNER_KEY)).toBe('legacy-a');
+  expect(await readIndexedDb(offlinePassesKey('legacy-a'))).not.toBeNull();
+});
+
+it('keeps the new account copy when an older logout finishes', async () => {
+  const credential = (sub: string) => `h.${btoa(JSON.stringify({ sub }))}.s`;
+  await saveAccessToken(credential('old-a'));
+  await writeIndexedDb(OFFLINE_PASSES_OWNER_KEY, 'old-a');
+  await writeIndexedDb(offlinePassesKey('old-a'), { userId: 'old-a', passes: [] });
+  clearAccessToken();
+  await writeIndexedDb(OFFLINE_PASSES_OWNER_KEY, 'new-b');
+  await writeIndexedDb(offlinePassesKey('new-b'), { userId: 'new-b', passes: [] });
+  await saveAccessToken(credential('new-b'));
+  await waitForAccessTokenWrites();
+  expect(getAccessToken()).toBe(credential('new-b'));
+  expect(await readIndexedDb(OFFLINE_PASSES_OWNER_KEY)).toBe('new-b');
+  expect(await readIndexedDb(offlinePassesKey('new-b'))).not.toBeNull();
+});

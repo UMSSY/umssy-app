@@ -1,4 +1,5 @@
 import {
+  readIndexedDb,
   removeIndexedDb,
   writeIndexedDb,
 } from '@/shared/services/storage/browser-indexed-db';
@@ -70,7 +71,9 @@ export async function loadSessionOfflinePasses(
   if (accessToken && (!sessionUserId || getAccessToken() !== accessToken))
     return null;
   try {
-    const owner = await readOfflinePassesOwner();
+    const owner = sessionUserId
+      ? await confirmSessionOwner(sessionUserId)
+      : await readOfflinePassesOwner();
     if (!owner || (sessionUserId && owner !== sessionUserId)) return null;
     const copy = await readOwnedOfflinePasses(owner);
     if (accessToken && getAccessToken() !== accessToken) return null;
@@ -80,8 +83,14 @@ export async function loadSessionOfflinePasses(
   }
 }
 
-// Passes whose cancellation was confirmed but could not be removed locally are hidden
-// right away, and their removal is retried without contacting the server again.
+async function confirmSessionOwner(userId: string): Promise<string | null> {
+  const owner = await readOfflinePassesOwner();
+  if (owner) return owner;
+  if (!toSnapshot(await readIndexedDb<unknown>(keyFor(userId)), userId)) return null;
+  await claimOfflinePasses(userId);
+  return userId;
+}
+
 async function withoutPendingRemovals(
   snapshot: OfflinePassesSnapshot | null,
   userId: string,
@@ -106,6 +115,14 @@ async function withoutPendingRemovals(
     clearPendingPassRemovals(userId, pending);
   } catch {}
   return visible;
+}
+
+export async function claimSessionOfflinePasses(
+  accessToken: string,
+): Promise<void> {
+  const userId = readAccessTokenSubject(accessToken);
+  if (!userId || getAccessToken() !== accessToken) return;
+  await claimOfflinePasses(userId);
 }
 
 export async function updateSessionOfflinePasses(

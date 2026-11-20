@@ -13,7 +13,7 @@ export function useOfflinePassesSnapshot(
   isOnline: boolean,
 ): OfflinePassesSnapshotState {
   const userId = getTokenUserId(accessToken);
-  const enabled = Boolean(userId) || (!accessToken && !isOnline);
+  const enabled = Boolean(userId) || !accessToken;
   const query = useQuery({
     queryKey: [OFFLINE_PASSES_SNAPSHOT_QUERY_KEY, accessToken, isOnline],
     queryFn: () => loadSessionOfflinePasses(accessToken),

@@ -100,3 +100,20 @@ it('does not prepare data without a valid in-memory identity', async () => {
   await expect(withOfflineSessionCopy('invalid', 'invalid-token', async () => 'live', { requireStorage: true })).rejects.toThrow('La sesión cambió');
   expect(await database.readIndexedDb('umssy:session-draft:offline:invalid')).toBeNull();
 });
+
+it('migrates a legacy copy only for its current in-memory account', async () => {
+  vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
+  const credential = token('legacy-a');
+  await saveAccessToken(credential);
+  await database.writeIndexedDb('umssy:session-draft:offline:legacy', { token: credential, data: 'saved' });
+  await expect(withOfflineSessionCopy('legacy', credential, vi.fn())).resolves.toBe('saved');
+  expect(await database.readIndexedDb('umssy:session-draft:offline:legacy')).toEqual({ userId: 'legacy-a', data: 'saved' });
+  await saveAccessToken(token('legacy-b'));
+  await expect(withOfflineSessionCopy('legacy', token('legacy-b'), vi.fn())).rejects.toThrow('Conéctate');
+});
+
+it('keeps a data key named owner separate from the ownership marker', async () => {
+  await saveAccessToken(token('owner-a'));
+  await withOfflineSessionCopy('owner', token('owner-a'), async () => 'saved');
+  expect(await database.readIndexedDb('umssy:session-draft:offline:owner')).toEqual({ userId: 'owner-a', data: 'saved' });
+});

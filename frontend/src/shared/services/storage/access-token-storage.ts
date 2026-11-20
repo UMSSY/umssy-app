@@ -1,7 +1,8 @@
 import { ACCESS_TOKEN_STORAGE_KEY } from '@/shared/constants/auth.constants';
 import { readAccessTokenSubject } from '@/shared/utils/read-access-token-subject';
-import { removeIndexedDb } from './browser-indexed-db';
-import { clearOfflinePasses, readOfflinePassesOwner } from './offline-passes-owner';
+import { readIndexedDb, removeIndexedDb } from './browser-indexed-db';
+import { offlinePassesKey } from '@/shared/constants/offline-passes.constants';
+import { claimOfflinePasses, endOfflinePassesSession, readOfflinePassesOwner } from './offline-passes-owner';
 
 let token: string | null = null;
 let ready = false;
@@ -15,7 +16,7 @@ const emit = () => {
 };
 const clearOfflinePassesOfOtherUser = async (userId: string | null) => {
   const owner = await readOfflinePassesOwner();
-  if (owner && owner !== userId) await clearOfflinePasses();
+  if (owner && owner !== userId) await endOfflinePassesSession(owner);
 };
 
 export function isAccessTokenReady(): boolean {
@@ -25,8 +26,17 @@ export function initializeAccessTokenStorage(): Promise<void> {
   if (ready) return Promise.resolve();
   if (loading) return loading;
   const currentRevision = revision;
-  loading = removeIndexedDb(ACCESS_TOKEN_STORAGE_KEY)
+  loading = readIndexedDb<unknown>(ACCESS_TOKEN_STORAGE_KEY)
+    .then(async (legacyToken) => {
+      const legacyUser = readAccessTokenSubject(legacyToken);
+      if (!legacyUser || revision !== currentRevision) return;
+      const owner = await readOfflinePassesOwner();
+      const copy = await readIndexedDb<{ userId?: unknown; passes?: unknown }>(offlinePassesKey(legacyUser));
+      if (!owner && revision === currentRevision && copy?.userId === legacyUser && Array.isArray(copy.passes))
+        await claimOfflinePasses(legacyUser);
+    })
     .catch(() => {})
+    .then(() => removeIndexedDb(ACCESS_TOKEN_STORAGE_KEY).catch(() => {}))
     .finally(() => {
       if (revision !== currentRevision) return;
       ready = true;
@@ -66,14 +76,16 @@ export async function waitForAccessTokenWrites(): Promise<void> {
 }
 
 export function clearAccessToken(): boolean {
-  revision++;
+  const previousUser = readAccessTokenSubject(token);
+  const logoutRevision = ++revision;
   token = null;
   ready = true;
   loading = null;
   emit();
   const operation = writes.then(async () => {
     await removeIndexedDb(ACCESS_TOKEN_STORAGE_KEY).catch(() => {});
-    await clearOfflinePasses();
+    const owner = previousUser ?? (revision === logoutRevision ? await readOfflinePassesOwner() : null);
+    if (owner) await endOfflinePassesSession(owner);
   });
   writes = operation.catch(() => {});
   void operation.then(() => channel?.postMessage('changed')).catch(() => {});

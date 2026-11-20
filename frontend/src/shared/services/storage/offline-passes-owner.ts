@@ -64,6 +64,21 @@ export async function updateOwnedOfflinePasses(
   return applied;
 }
 
+export async function endOfflinePassesSession(userId: string): Promise<void> {
+  let ended = false;
+  await updateIndexedDbPair(
+    OFFLINE_PASSES_OWNER_KEY,
+    offlinePassesKey(userId),
+    (owner) => {
+      const current = asOwner(owner);
+      if (current && current !== userId) return {};
+      ended = true;
+      return { primary: current ? null : undefined, secondary: null };
+    },
+  );
+  if (ended) removeLocalStorage(pendingPassRemovalsKey(userId));
+}
+
 export async function clearOfflinePasses(): Promise<void> {
   const owner = await readOfflinePassesOwner().catch(() => null);
   if (owner) removeLocalStorage(pendingPassRemovalsKey(owner));

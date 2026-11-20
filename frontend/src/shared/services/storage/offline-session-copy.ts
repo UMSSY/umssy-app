@@ -10,24 +10,33 @@ export async function withOfflineSessionCopy<T>(
 ): Promise<T> {
   options.signal?.throwIfAborted();
   const storageKey = 'umssy:session-draft:offline:' + key;
-  const ownerKey = 'umssy:session-draft:offline:owner';
+  const ownerKey = 'umssy:session-draft:owner';
   const userId = readAccessTokenSubject(token);
   if (typeof navigator !== 'undefined' && navigator.onLine === false) {
     const [storedOwner, copy] = await readIndexedDbPair(
       ownerKey,
       storageKey,
     );
-    const saved = copy as { userId?: string; data?: T } | null;
+    const saved = copy as { userId?: string; token?: string; data?: T } | null;
+    const ownsCopy = saved?.userId === userId || (saved?.userId === undefined && saved?.token === token);
     options.signal?.throwIfAborted();
     if (
       userId &&
       token &&
-      storedOwner === userId &&
+      (storedOwner == null || storedOwner === userId) &&
       getAccessToken() === token &&
-      saved?.userId === userId &&
-      saved.data !== undefined
-    )
-      return saved.data;
+      ownsCopy &&
+      saved?.data !== undefined
+    ) {
+      if (storedOwner == null || saved.token !== undefined) {
+        await updateIndexedDbPair(ownerKey, storageKey, () => {
+          if (getAccessToken() !== token || options.signal?.aborted) return {};
+          return { primary: userId, secondary: { userId, data: saved.data } };
+        }).catch(() => {});
+      }
+      options.signal?.throwIfAborted();
+      if (getAccessToken() === token) return saved.data;
+    }
     throw new Error('Conéctate para descargar estos datos.');
   }
   const data = await fetchData();
