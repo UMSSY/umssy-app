@@ -53,6 +53,9 @@ function setupCv() {
 function setupReview() {
   const cvs = { cvById: vi.fn() };
   const repository = {
+    lockReviewOperation: vi.fn().mockResolvedValue(undefined),
+    findReviewOperation: vi.fn().mockResolvedValue([]),
+    saveReviewOperationResult: vi.fn().mockResolvedValue(1),
     listReviewQueue: vi.fn().mockResolvedValue([[], []]),
     changeCvDecision: vi.fn(),
     cvOwner: vi.fn(),
@@ -217,8 +220,22 @@ describe('Separación de CV y revisión', () => {
       verificationStatus: 'pending',
     });
     repository.changeSkillDecision.mockResolvedValue({ count: 1 });
-    const result = await service.decision(admin, 'skill', cvId, 'approved');
-    expect(result).toEqual({ userId: owner });
+    const result = await service.decision(
+      admin,
+      'skill',
+      cvId,
+      'approved',
+      '44444444-4444-4444-8444-444444444444',
+    );
+    expect(result).toMatchObject({
+      operationId: '44444444-4444-4444-8444-444444444444',
+      status: 'completed',
+      kind: 'skill',
+      targetId: cvId,
+      decision: 'approved',
+      changed: true,
+      userId: owner,
+    });
     expect(access.recordAudit).toHaveBeenCalledWith(
       owner,
       admin,

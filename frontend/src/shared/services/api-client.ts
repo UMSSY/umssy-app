@@ -1,5 +1,6 @@
 import { BEARER_PREFIX } from "@/shared/constants/auth.constants";
 import axios from "axios";
+import { toast } from "sonner";
 import { ENV_CONFIG } from "@/shared/config/env.config";
 import {
   getAccessToken,
@@ -9,12 +10,19 @@ import {
 import { broadcastAuthEvent } from "@/shared/utils/auth-broadcast";
 import { executeSharedRefresh } from "@/shared/utils/session-refresh-lock";
 
+
 export const apiClient = axios.create({
   baseURL: ENV_CONFIG.apiUrl,
   withCredentials: true,
 });
 
 apiClient.interceptors.request.use(async (config) => {
+  if (typeof navigator !== "undefined" && navigator.onLine === false) {
+    const message = "Necesitas conexión para realizar esta acción.";
+    if (config.method !== "get" && config.method !== "head")
+      toast.info(message);
+    throw new axios.AxiosError(message, "ERR_NETWORK", config);
+  }
   await initializeAccessTokenStorage();
   const accessToken = getAccessToken();
 
@@ -35,7 +43,6 @@ apiClient.interceptors.response.use(
     if (axios.isAxiosError(error) && error.response?.status === 401) {
       const responseCode = (error.response?.data as { code?: string } | undefined)?.code;
 
-      // 1. Si el 401 trae un código explícito de sesión terminada (CA7)
       if (
         responseCode === "SESSION_EXPIRED" ||
         responseCode === "SESSION_REVOKED" ||
@@ -54,7 +61,6 @@ apiClient.interceptors.response.use(
         return Promise.reject(error);
       }
 
-      // 2. 401 sin code: intentar un refresh y reintentar la petición una vez
       const originalRequest = error.config as (typeof error.config & { _retry?: boolean });
       const url = originalRequest?.url || "";
       const isAuthUrl =
@@ -88,9 +94,8 @@ apiClient.interceptors.response.use(
         }
       }
 
-      // 3. Si ya fue reintentada o falló el refresh, invalidar la sesión actual
       const token = getAccessToken();
-      const authorization = error.config?.headers?.get?.("Authorization");
+      const authorization = error.config?.headers?.get?.('Authorization');
       if (token && authorization === `${BEARER_PREFIX}${token}`)
         clearAccessToken();
     }

@@ -7,10 +7,12 @@ import {
   PHOTO_ERROR_MESSAGES_BY_STATUS,
 } from "../constants/photo-error-messages.constants";
 import { profilePhotoService } from "../services/profile-photo.service";
+import { useInvalidateProfileCompleteness } from "./use-invalidate-profile-completeness";
 import { getHttpStatus } from "../utils/get-http-status";
 import { validatePhotoFile } from "../utils/validate-photo-file";
 
 export function useProfilePhoto() {
+  const invalidateCompleteness = useInvalidateProfileCompleteness();
   const photoQuery = useQuery({ queryKey: ["profile", "photo"], queryFn: () => profilePhotoService.getPhoto(), enabled: false });
   const refetchPhoto = photoQuery.refetch;
   const photoMutation = useMutation({ mutationFn: (request: () => Promise<void>) => request() });
@@ -117,6 +119,7 @@ export function useProfilePhoto() {
     setError(null);
     try {
       await photoMutation.mutateAsync(request);
+      await invalidateCompleteness();
       if (!mountedRef.current || requestId !== requestIdRef.current) return;
       onSuccess();
       setLoadError(null);

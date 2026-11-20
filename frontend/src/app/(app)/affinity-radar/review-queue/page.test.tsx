@@ -1,5 +1,5 @@
 
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, within } from "@testing-library/react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { createQueryClient } from "@/shared/services/query-client";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -41,9 +41,16 @@ describe("ColaRevisionPage", () => {
   it("offers the current document review filters", () => {
     renderQueuePage();
 
+    const heading = screen.getByRole("heading", {
+      name: "Documentos que requieren revisión",
+    });
+    const documentSection = heading.closest("section");
+
+    expect(documentSection).not.toBeNull();
+
     for (const name of ["Pendientes", "Aprobados", "Rechazados", "Todos"]) {
       expect(
-        screen.getByRole("button", { name }),
+        within(documentSection!).getByRole("button", { name }),
       ).toBeInTheDocument();
     }
   });

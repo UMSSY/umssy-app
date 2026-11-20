@@ -9,6 +9,8 @@ import {
   saveAccessToken,
 } from "./storage/access-token-storage";
 
+afterEach(() => vi.restoreAllMocks());
+
 async function captureRequestHeaders(config: AxiosRequestConfig = {}) {
   let headers: AxiosHeaders | undefined;
 
@@ -32,6 +34,15 @@ async function captureRequestHeaders(config: AxiosRequestConfig = {}) {
 describe("apiClient authorization", () => {
   afterEach(() => {
     clearAccessToken();
+  });
+
+  it('rejects offline mutations before sending them', async () => {
+    vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
+    const adapter = vi.fn();
+    await expect(
+      apiClient.post('/events/test', {}, { adapter }),
+    ).rejects.toThrow('Necesitas conexión');
+    expect(adapter).not.toHaveBeenCalled();
   });
 
   it("configures withCredentials to true to transmit HttpOnly session cookies", () => {

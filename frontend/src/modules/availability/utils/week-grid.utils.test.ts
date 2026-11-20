@@ -5,8 +5,9 @@ import {
   capitalize,
   getWeekDayDates,
   isBlockClickable,
+  isWeekGridDensity,
 } from "./week-grid.utils";
-import { HOUR_HEIGHT_PX } from "../constants/week-grid.constants";
+import { COMPACT_HOUR_HEIGHT_PX, HOUR_HEIGHT_PX } from "../constants/week-grid.constants";
 
 const WEEK_RANGE = {
   startAt: "2026-10-05T04:00:00.000Z",
@@ -48,6 +49,18 @@ describe("getBlockVerticalPosition", () => {
     );
     expect(heightPx).toBeCloseTo(150 * (HOUR_HEIGHT_PX / 60), 1);
   });
+
+  it("usa la altura de hora recibida para calcular el top y la altura en modo compacto", () => {
+    const { topPx, heightPx } = getBlockVerticalPosition(
+      "2026-10-06T22:00:00.000Z", // 18:00 Bolivia
+      "2026-10-06T23:00:00.000Z", // 19:00 Bolivia
+      7,
+      22,
+      COMPACT_HOUR_HEIGHT_PX
+    );
+    expect(topPx).toBeCloseTo(11 * COMPACT_HOUR_HEIGHT_PX, 1);
+    expect(heightPx).toBeCloseTo(COMPACT_HOUR_HEIGHT_PX, 1);
+  });
 });
 
 describe("capitalize", () => {
@@ -63,6 +76,15 @@ describe("isBlockClickable", () => {
     expect(isBlockClickable("selectable", "free")).toBe(true);
     expect(isBlockClickable("selectable", "confirmed")).toBe(false);
     expect(isBlockClickable("public", "free")).toBe(false);
+  });
+});
+
+describe("isWeekGridDensity", () => {
+  it("acepta solo normal y compact", () => {
+    expect(isWeekGridDensity("normal")).toBe(true);
+    expect(isWeekGridDensity("compact")).toBe(true);
+    expect(isWeekGridDensity("cozy")).toBe(false);
+    expect(isWeekGridDensity(null)).toBe(false);
   });
 });
 

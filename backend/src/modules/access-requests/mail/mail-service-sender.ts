@@ -1,7 +1,7 @@
 import { MINUTE_MS } from '../../../common/constants/date-time.constants.js';
 import { Injectable } from '@nestjs/common';
 import { MailService } from '../../mail/services/mail.service.js';
-import { buildFrontendUrl } from './helpers/frontend-url.js';
+import { buildFrontendUrl } from '../../mail/helpers/frontend-url.js';
 import { RejectionMailLinkService } from '../services/rejection-mail-link.service.js';
 import type { MailSender } from './mail-sender.js';
 import { loadMailTemplate } from '../../mail/helpers/load-mail-template.js';
