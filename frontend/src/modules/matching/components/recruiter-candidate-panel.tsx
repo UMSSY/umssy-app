@@ -54,6 +54,8 @@ export function RecruiterCandidatePanel({
 
   const stateLabel =
     RECRUITER_APPLICATION_STATE_LABELS[candidate.state] ?? candidate.state;
+  const candidateUserId = candidate.userId;
+  const candidateApplicationId = candidate.applicationId;
 
   async function openCandidateChat() {
     if (isStartingChat) return;
@@ -62,9 +64,9 @@ export function RecruiterCandidatePanel({
     setChatError(null);
 
     try {
-      const conversation = await getOrCreateConversation(candidate.userId, {
+      const conversation = await getOrCreateConversation(candidateUserId, {
         contextType: "POSTULACION",
-        contextId: candidate.applicationId,
+        contextId: candidateApplicationId,
       });
 
       queryClient.setQueryData(
