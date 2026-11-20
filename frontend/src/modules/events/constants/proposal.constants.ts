@@ -9,3 +9,5 @@ export const EMPTY_PROPOSAL: ProposalValues = {
   title: '', description: '', categoryId: '', eventDate: '',
   startTime: '', endTime: '', capacity: '', modality: 'presencial', location: '',
 };
+
+export const PROPOSAL_MAX_ADDITIONAL_SESSIONS = 19;

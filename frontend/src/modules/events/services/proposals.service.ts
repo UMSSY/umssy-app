@@ -2,12 +2,14 @@ import { BEARER_PREFIX } from "@/shared/constants/auth.constants";
 import { apiClient } from '@/shared/services/api-client';
 
 import type { CreatedProposal, ProposalValues } from '../types/proposal.types';
+import type { ProposalSession } from '../types/proposal-session.types';
 import { readCount, readRecord, readString } from '../utils/response-validation';
 
 export const proposalsService = {
-  async create(values: ProposalValues, cover: File, requestId: string, accessToken?: string | null): Promise<CreatedProposal> {
+  async create(values: ProposalValues, cover: File, requestId: string, accessToken?: string | null, sessions: ProposalSession[] = []): Promise<CreatedProposal> {
     const payload = new FormData();
     Object.entries(values).forEach(([key, value]) => payload.append(key, value.trim()));
+    if (sessions.length) payload.append('additionalSessions', JSON.stringify(sessions));
     payload.append('cover', cover);
     const response = await apiClient.post<unknown>('/event-proposals', payload, {
       headers: { 'Idempotency-Key': requestId, ...(accessToken !== undefined && { Authorization: accessToken ? `${BEARER_PREFIX}${accessToken}` : '' }) },
