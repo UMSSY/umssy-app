@@ -12,6 +12,7 @@ import { ActivationPasswordStep } from "../components/activation/activation-pass
 import { ActivationSuccessStep } from "../components/activation/activation-success-step";
 import { GoogleLinkedSuccessStep } from "../components/activation/google-linked-success-step";
 import { GoogleAccessDeniedStep } from "../components/activation/google-access-denied-step";
+import { endSession } from "@/modules/auth";
 import { googleAuthService } from "@/modules/auth/services/google-auth.service";
 import { PublicHeader } from "../components/request-steps/public-header";
 import { RequestStepsSidebar } from "../components/request-steps/request-steps-sidebar";
@@ -100,7 +101,15 @@ function ActivationFlow({ email }: { email: string }) {
             "No se pudo conectar con el servidor para vincular la cuenta. Inténtalo de nuevo."
         );
       }
-    } catch {
+    } catch (err: unknown) {
+      if (
+        err instanceof Error &&
+        err.message.includes("NEXT_PUBLIC_GOOGLE_CLIENT_ID")
+      ) {
+        setLinkError(
+          "El servicio de vinculación con Google no está disponible en este momento."
+        );
+      }
       // User closed Google prompt or cancelled
     } finally {
       setIsLinking(false);
@@ -108,6 +117,7 @@ function ActivationFlow({ email }: { email: string }) {
   }
 
   function handleGoToLogin() {
+    endSession();
     router.push("/login");
   }
 
