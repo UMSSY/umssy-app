@@ -1,6 +1,29 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import { googleAuthService, decodeGoogleIdToken } from "./google-auth.service";
 import { apiClient } from "@/shared/services/api-client";
+import { requestGoogleOAuth } from "../utils/google-oauth-redirect";
+
+vi.mock("../utils/google-oauth-redirect", () => ({
+  requestGoogleOAuth: vi.fn(),
+}));
+
+describe("googleAuthService redirect fallback", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+    vi.clearAllMocks();
+  });
+
+  it("uses the callback flow and preserves account linking when the Google SDK is unavailable", async () => {
+    vi.stubEnv("NEXT_PUBLIC_GOOGLE_CLIENT_ID", "qa.apps.googleusercontent.com");
+    vi.stubGlobal("google", undefined);
+    const profile = { email: "qa@gmail.com", idToken: "credential", credential: "credential" };
+    vi.mocked(requestGoogleOAuth).mockResolvedValueOnce(profile);
+
+    await expect(googleAuthService.promptSelectAccount({ intent: "link", accountEmail: "qa@gmail.com" })).resolves.toEqual(profile);
+    expect(requestGoogleOAuth).toHaveBeenCalledWith("qa.apps.googleusercontent.com", { intent: "link", accountEmail: "qa@gmail.com" });
+  });
+});
 
 vi.mock("@/shared/services/api-client", () => ({
   apiClient: {
