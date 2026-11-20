@@ -695,7 +695,8 @@ model EventSession {
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  event       Event             @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  attendances EventAttendance[]
 
   @@index([eventId])
   @@index([startsAt])
@@ -717,7 +718,7 @@ model EventRegistration {
   event      Event              @relation(fields: [eventId], references: [id], onDelete: Cascade)
   user       User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   status     RegistrationStatus @relation(fields: [statusId], references: [id], onDelete: Restrict)
-  attendance EventAttendance?
+  attendances EventAttendance[]
 
   @@unique([eventId, userId])
   @@index([userId])
@@ -727,7 +728,8 @@ model EventRegistration {
 
 model EventAttendance {
   id               String    @id @default(uuid()) @db.Uuid
-  registrationId   String    @unique @map("registration_id") @db.Uuid
+  registrationId   String    @map("registration_id") @db.Uuid
+  sessionId        String?   @map("session_id") @db.Uuid
   checkedInAt      DateTime  @map("checked_in_at") @db.Timestamptz(6)
   checkedInById    String?   @map("checked_in_by_id") @db.Uuid
   checkedInOffline Boolean   @default(false) @map("checked_in_offline")
@@ -736,8 +738,11 @@ model EventAttendance {
   updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   registration EventRegistration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+  session      EventSession?     @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   checkedInBy  User?             @relation(fields: [checkedInById], references: [id], onDelete: SetNull)
 
+  @@unique([registrationId, sessionId])
+  @@index([sessionId])
   @@index([checkedInById])
   @@map("event_attendances")
 }

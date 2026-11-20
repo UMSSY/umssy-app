@@ -8469,6 +8469,7 @@ export type EventRegistrationScalarFieldEnum = (typeof EventRegistrationScalarFi
 export const EventAttendanceScalarFieldEnum = {
   id: 'id',
   registrationId: 'registrationId',
+  sessionId: 'sessionId',
   checkedInAt: 'checkedInAt',
   checkedInById: 'checkedInById',
   checkedInOffline: 'checkedInOffline',
