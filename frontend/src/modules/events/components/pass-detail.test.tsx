@@ -60,6 +60,14 @@ describe('Private pass detail', () => {
     expect(secondQr.outerHTML).not.toBe(firstQr.outerHTML);
   });
 
+  it('shows the saved QR without a session and without contacting the server', async () => {
+    clearAccessToken();
+    renderWithQuery(<PassDetail registration={pass} offlineQrToken={'c'.repeat(64)} />);
+    expect(await screen.findByRole('img', { name: 'Código QR del pase' })).toBeInTheDocument();
+    expect(screen.queryByText('Inicia sesión para consultar el pase.')).not.toBeInTheDocument();
+    expect(registrationsService.getPass).not.toHaveBeenCalled();
+  });
+
   it('does not request a private pass without authentication', () => {
     clearAccessToken();
     renderWithQuery(<PassDetail registration={pass} />);

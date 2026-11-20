@@ -98,7 +98,7 @@ export function PassDetail({ registration, offlineQrToken }: PassDetailProps) {
 
         <div className="flex flex-col gap-2">
           <div className="flex min-h-[220px] items-center justify-center rounded-xl bg-surface p-6 shadow-inner">
-            {!accessToken ? (
+            {!accessToken && !savedQrToken ? (
               <p role="alert">Inicia sesión para consultar el pase.</p>
             ) : pass.isPending && !savedQrToken ? (
               <div className="flex flex-col items-center gap-2 text-ink/70">
