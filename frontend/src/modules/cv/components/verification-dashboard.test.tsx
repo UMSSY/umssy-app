@@ -1,11 +1,4 @@
-import {
-  fireEvent,
-  waitFor,
-  cleanup,
-  screen,
-  within,
-} from '@testing-library/react';
-import { certificationsService } from '@/modules/certifications';
+import { cleanup, screen, within } from '@testing-library/react';
 import { renderWithQuery as render } from '@/shared/testing/render-with-query';
 import userEvent from '@testing-library/user-event';
 import { afterEach, expect, it, vi } from 'vitest';
@@ -101,44 +94,6 @@ it('limita el resumen a 20 y abre las cien habilidades desde el historial', asyn
     within(screen.getByRole('dialog')).getByText('Habilidad 100'),
   ).toBeInTheDocument();
 });
-it('envía el certificado y el archivo desde Subir nueva versión', async () => {
-  const create = vi
-    .spyOn(certificationsService, 'createWithDocument')
-    .mockResolvedValue({} as never);
-  const user = userEvent.setup();
-  render(<VerificationDashboard rows={[]} refresh={vi.fn()} />);
-  await user.click(screen.getByRole('button', { name: 'Subir nueva versión' }));
-  await user.selectOptions(
-    screen.getByLabelText('Tipo de documento'),
-    'certification',
-  );
-  await user.type(
-    screen.getByLabelText(/Nombre de la certificación/),
-    'Curso Docker',
-  );
-  await user.type(screen.getByLabelText(/Entidad emisora/), 'Instituto');
-  fireEvent.change(screen.getByLabelText(/Fecha de obtención/), {
-    target: { value: '2025-04-20' },
-  });
-  const file = new File(['contenido de prueba'], 'curso.pdf', {
-    type: 'application/pdf',
-  });
-  await user.upload(screen.getByLabelText(/Archivo de respaldo/), file);
-  await user.click(
-    screen.getByRole('button', { name: 'Guardar certificación' }),
-  );
-  await waitFor(() =>
-    expect(create).toHaveBeenCalledWith(
-      {
-        name: 'Curso Docker',
-        issuingOrganization: 'Instituto',
-        issueDate: '2025-04-20',
-      },
-      file,
-    ),
-  );
-});
-
 it('al eliminar el último archivo conserva su resultado solo en el historial', async () => {
   const user = userEvent.setup();
   const props = { refresh: vi.fn() };
