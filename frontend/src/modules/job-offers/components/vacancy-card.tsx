@@ -9,7 +9,14 @@ import type { VacancyCardProps } from "../types/vacancy-card-props.types";
 import { formatOpenTime } from "../utils/format-open-time";
 import { formatPublicationDate } from "../utils/format-publication-date";
 
-export function VacancyCard({ offer, onDetails, showStatus = false, onReopen, onDelete }: VacancyCardProps) {
+export function VacancyCard({
+  offer,
+  onDetails,
+  showStatus = false,
+  onReopen,
+  onClose,
+  onDelete,
+}: VacancyCardProps) {
   const isPublished = offer.status === PUBLISHED_STATUS;
   const isClosed = offer.status === "Cerrada";
   const isDeleted = offer.status === "Eliminada";
@@ -82,16 +89,30 @@ export function VacancyCard({ offer, onDetails, showStatus = false, onReopen, on
         ) : null}
       </div>
       {isPublished ? (
-        <Button
-          type="button"
-          variant="destructive"
-          size="icon-sm"
-          aria-label={`Eliminar vacante ${offer.title}`}
-          className="max-md:size-11"
-          onClick={() => onDelete?.(offer)}
-        >
-          <Trash2 aria-hidden="true" />
-        </Button>
+        <div className="flex shrink-0 flex-wrap items-end justify-end gap-2">
+          {onClose ? (
+            <Button
+              type="button"
+              size="sm"
+              aria-label={`Cerrar vacante ${offer.title}`}
+              className="cursor-pointer bg-blue-600 text-white hover:bg-blue-700 hover:text-white max-md:h-11"
+              onClick={() => onClose(offer)}
+            >
+              Cerrar
+            </Button>
+          ) : null}
+
+          <Button
+            type="button"
+            variant="destructive"
+            size="icon-sm"
+            aria-label={`Eliminar vacante ${offer.title}`}
+            className="max-md:size-11"
+            onClick={() => onDelete?.(offer)}
+          >
+            <Trash2 aria-hidden="true" />
+          </Button>
+        </div>
       ) : null}
     </li>
   );
