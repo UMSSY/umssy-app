@@ -53,22 +53,31 @@ export function MentorDirectoryView({
   const { currentUserId } = useCurrentUserId();
 
   const { technicalAreas, orientationTypes, isTechnicalAreasLoading, isTechnicalAreasError, retryTechnicalAreas } = useMentorshipCatalogs();
-  const radarAxis = RADAR_AXIS_NAMES.find(axis => axis.id === searchParams.get("radarArea"));
-  const isHu2Flow = fromRadar || Boolean(radarAxis) || searchParams.get("hu2") === "radar";
+  const requestedAxis = RADAR_AXIS_NAMES.find(axis => axis.id === searchParams.get("radarArea"));
+  const isHu2Flow = fromRadar || Boolean(requestedAxis) || searchParams.get("hu2") === "radar";
+  const radarAxis = requestedAxis ?? (isHu2Flow && !searchParams.has("areaId")
+    ? RADAR_AXIS_NAMES.find(axis => axis.name === rawArea)
+    : undefined);
   const isAvailableOnly = isHu2Flow || requestedAvailable;
   const resolvedArea = radarAxis ? resolveRadarMentorArea(radarAxis.id, technicalAreas) : undefined;
-  const area = rawArea || resolvedArea?.name || "";
-  const missingRadarArea = Boolean(radarAxis && !rawArea && !resolvedArea);
+  const area = radarAxis ? resolvedArea?.name ?? radarAxis.name : rawArea;
+  const missingRadarArea = Boolean(radarAxis && !resolvedArea);
+
+  const radarQuery = new URLSearchParams(queryString);
+  if (resolvedArea && radarAxis) {
+    radarQuery.set("radarArea", radarAxis.id);
+    radarQuery.set("area", resolvedArea.name);
+    radarQuery.set("areaId", resolvedArea.id);
+    radarQuery.set("hu2", "radar");
+    radarQuery.delete("available");
+  }
+  const resolvedQuery = radarQuery.toString();
 
   useEffect(() => {
-    if (!resolvedArea || rawArea) return;
-    const next = new URLSearchParams(queryString);
-    next.set("area", resolvedArea.name);
-    next.set("areaId", resolvedArea.id);
-    next.set("hu2", "radar");
-    next.delete("available");
-    router.replace(`${pathname}?${next}`, { scroll: false });
-  }, [resolvedArea, rawArea, queryString, pathname, router]);
+    if (resolvedQuery !== queryString) {
+      router.replace(`${pathname}?${resolvedQuery}`, { scroll: false });
+    }
+  }, [resolvedQuery, queryString, pathname, router]);
 
   const {
     data: directory,
@@ -79,7 +88,7 @@ export function MentorDirectoryView({
   } = useMentorDirectory({
     page,
     search,
-    area: technicalAreas.find(item => item.id === searchParams.get("areaId") && item.name === area)?.id ?? (!rawArea ? resolvedArea?.id : undefined) ?? area,
+    area: technicalAreas.find(item => item.id === searchParams.get("areaId") && item.name === area)?.id ?? resolvedArea?.id ?? area,
     orientation,
     available: isAvailableOnly,
     sort: sortBy,
@@ -153,15 +162,19 @@ export function MentorDirectoryView({
     sort?: MentorSort;
     page?: number;
   }) {
+    const nextAxis = isHu2Flow && RADAR_AXIS_NAMES.find(axis => axis.name === updates.area);
+    const selected = nextAxis
+      ? resolveRadarMentorArea(nextAxis.id, technicalAreas)
+      : technicalAreas.find(item => item.name === updates.area);
     const next = updateMentorDirectoryParams(
       new URLSearchParams(queryString),
-      isHu2Flow ? { ...updates, available: true } : updates,
+      isHu2Flow ? { ...updates, area: nextAxis ? selected?.name ?? "" : updates.area, available: true } : updates,
     );
     if (isHu2Flow) next.set("hu2", "radar");
     if (updates.area !== undefined) {
-      next.delete("radarArea");
+      if (nextAxis) next.set("radarArea", nextAxis.id);
+      else next.delete("radarArea");
       next.delete("areaId");
-      const selected = technicalAreas.find(item => item.name === updates.area);
       if (selected) next.set("areaId", selected.id);
     }
 
@@ -182,7 +195,7 @@ export function MentorDirectoryView({
     });
   }
 
-  const returnTo = queryString ? `${pathname}?${queryString}` : pathname;
+  const returnTo = resolvedQuery ? `${pathname}?${resolvedQuery}` : pathname;
 
   return (
     <main className="min-h-full bg-background lg:-mx-12 lg:-mt-10">
@@ -190,24 +203,24 @@ export function MentorDirectoryView({
         <div role="search" aria-label="Filtros de mentores" className="flex flex-wrap gap-5">
         <header className="w-full space-y-2 border-b border-border bg-[#edf3f6] px-4 py-6 sm:px-8 lg:-mr-10 lg:-ml-14 lg:w-[calc(100%+6rem)] lg:shrink-0 lg:px-14 lg:pt-11 lg:pb-8">
           <p className="text-[11px] font-bold tracking-[0.14em] text-accent uppercase">Mentorías</p>
-          <h1 className="max-w-[650px] [font-family:Georgia,serif] text-3xl leading-[1.13] font-semibold text-wrap tracking-tight text-accent sm:text-[38px]">Encuentra un mentor para tu próximo desafío</h1>
+          <h1 className="max-w-[650px] [font-family:Georgia,serif] text-3xl leading-[1.13] font-semibold tracking-tight text-wrap text-accent sm:text-[38px]">Encuentra un mentor para tu próximo desafío</h1>
           <p className="max-w-[690px] text-sm leading-[22px] text-text-secondary">Conecta con profesionales titulados de nuestra comunidad y recibe orientación en el área que quieres desarrollar.</p>
           <div className="max-w-[610px] pt-4">
             <MentorSearchBar value={search} onSearchChange={(nextSearch) => navigateWithUpdates({ search: nextSearch })} />
           </div>
         </header>
         {missingRadarArea ? <div className="rounded-lg border border-border bg-surface-soft p-4">
-          {isTechnicalAreasLoading ? <p role="status">Cargando especialidades...</p> : isTechnicalAreasError ? <div role="alert">No pudimos cargar las especialidades. <Button variant="outline" onClick={retryTechnicalAreas}>Reintentar</Button></div> : <p role="status">No hay mentores de {radarAxis?.name} en el catálogo disponible. Puedes seleccionar otra especialidad o volver al radar.</p>}
+          {isTechnicalAreasLoading ? <p role="status">Cargando especialidades...</p> : isTechnicalAreasError ? <div role="alert">No pudimos cargar las especialidades. <Button variant="outline" onClick={retryTechnicalAreas}>Reintentar</Button></div> : <p role="status">La especialidad {radarAxis?.name} no está registrada en el catálogo.</p>}
         </div> : null}
 
         <div className="flex w-full flex-wrap items-end gap-x-4 gap-y-2">
           <MentorFiltersBar
             areaAsChips
-            area={area}
+            area={radarAxis?.name ?? area}
             orientation={orientation}
             technicalAreas={
-              fromRadar
-                ? RADAR_AXIS_NAMES.map((item) => item.name)
+              isHu2Flow
+                ? [...new Set([...RADAR_AXIS_NAMES.map((item) => item.name), ...technicalAreas.map((item) => item.name)])]
                 : technicalAreas.map((item) => item.name)
             }
             orientationTypes={orientationTypes.map((item) => item.name)}
@@ -293,9 +306,11 @@ export function MentorDirectoryView({
             title={
               totalItems > 0
                 ? 'No hay mentores en esta página'
-                : hasFilters
-                  ? 'No hay mentores que coincidan con tu búsqueda'
-                  : 'No hay mentores disponibles por el momento'
+                : radarAxis && !search.trim() && !orientation
+                  ? `No hay mentores disponibles en ${radarAxis.name}`
+                  : hasFilters
+                    ? 'No hay mentores que coincidan con tu búsqueda'
+                    : 'No hay mentores disponibles por el momento'
             }
             description={
               totalItems > 0

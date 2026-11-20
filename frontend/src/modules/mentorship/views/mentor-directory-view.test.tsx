@@ -73,6 +73,7 @@ vi.mock("../hooks/use-mentorship-catalogs", () => ({
         name: "Cloud",
         description: null,
       },
+      { id: "area-qa", name: "QA", description: null },
     ],
     isTechnicalAreasLoading: false,
     isTechnicalAreasError: false,
@@ -124,6 +125,7 @@ it("preselecciona el catálogo real desde el radar y conserva el contexto", asyn
   const get = vi.spyOn(directoryService, "getMentorDirectory").mockResolvedValue(makeDirectoryPage([]));
   render(<MentorDirectoryView />);
   await waitFor(() => expect(get).toHaveBeenCalledWith(expect.objectContaining({ area: "area-cloud", available: true }), expect.anything()));
+  expect(await screen.findByRole("heading", { name: "No hay mentores disponibles en Cloud/DevOps" })).toBeInTheDocument();
   expect(navigationMocks.replace).toHaveBeenCalledWith(expect.stringContaining("areaId=area-cloud"), { scroll: false });
   expect(screen.getByRole("link", { name: "Volver al radar" })).toHaveAttribute("href", "/profile/radar");
 });
@@ -132,9 +134,29 @@ it("no presenta otra especialidad cuando falta el área del radar en el catálog
   navigationMocks.search = "?radarArea=ciberseguridad";
   const get = vi.spyOn(directoryService, "getMentorDirectory").mockResolvedValue(makeDirectoryPage(mentors));
   render(<MentorDirectoryView />);
-  expect(screen.getByRole("status")).toHaveTextContent("No hay mentores de Ciberseguridad");
+  expect(screen.getByRole("status")).toHaveTextContent("La especialidad Ciberseguridad no está registrada en el catálogo");
   expect(get).not.toHaveBeenCalled();
   expect(screen.queryByText(mentors[0].fullName)).not.toBeInTheDocument();
+});
+
+it.each([
+  ["Ciberseguridad", "ciberseguridad"],
+  ["Gobernanza TI", "gobernanza-ti"],
+])("distingue %s ausente al cambiar el filtro desde un eje registrado", async (name, id) => {
+  navigationMocks.search = "?radarArea=cloud-devops";
+  const get = vi.spyOn(directoryService, "getMentorDirectory").mockResolvedValue(makeDirectoryPage([]));
+  const view = render(<MentorDirectoryView />);
+  await screen.findByRole("heading", { name: "No hay mentores disponibles en Cloud/DevOps" });
+  get.mockClear();
+
+  fireEvent.click(screen.getByRole("button", { name }));
+  const destination = new URL(navigationMocks.replace.mock.lastCall![0], "http://localhost");
+  expect(destination.searchParams.get("radarArea")).toBe(id);
+  expect(destination.searchParams.has("areaId")).toBe(false);
+  applyNavigation(view.rerender);
+
+  expect(screen.getByRole("status")).toHaveTextContent(`La especialidad ${name} no está registrada en el catálogo`);
+  expect(get).not.toHaveBeenCalled();
 });
 
 it("exige disponibilidad desde el radar aunque la URL solicite lo contrario", async () => {
@@ -1105,12 +1127,12 @@ it("recibe el área del radar, mantiene disponibles y permite cambiar de compete
   navigationMocks.search = "?area=Desarrollo&from=radar&available=false";
   const query = vi.spyOn(directoryService, "getMentorDirectory").mockResolvedValue(makeDirectoryPage([]));
   const view = render(<MentorDirectoryView />);
-  await waitFor(() => expect(query).toHaveBeenCalledWith(expect.objectContaining({ area: "Desarrollo", available: true }), expect.anything()));
+  await waitFor(() => expect(query).toHaveBeenCalledWith(expect.objectContaining({ area: "area-backend", available: true }), expect.anything()));
   expect(screen.getByRole("link", { name: "Volver al radar" })).toHaveAttribute("href", "/profile/radar");
   expect(screen.getByRole("checkbox", { name: "Solo disponibles" })).toHaveAttribute("aria-disabled", "true");
   fireEvent.click(screen.getByRole("button", { name: "QA" }));
   applyNavigation(view.rerender);
-  await waitFor(() => expect(query).toHaveBeenLastCalledWith(expect.objectContaining({ area: "QA", available: true }), expect.anything()));
+  await waitFor(() => expect(query).toHaveBeenLastCalledWith(expect.objectContaining({ area: "area-qa", available: true }), expect.anything()));
   fireEvent.click(screen.getByRole("button", { name: "Todas las áreas" }));
   applyNavigation(view.rerender);
   await waitFor(() => expect(query).toHaveBeenLastCalledWith(expect.objectContaining({ area: "", available: true }), expect.anything()));

@@ -42,7 +42,7 @@ export function MentorFiltersBar({
     <>
       {areaAsChips ? (
         <div
-          className="hidden w-full flex-wrap items-center gap-2 sm:flex min-[1700px]:w-auto"
+          className="hidden w-full flex-wrap items-center gap-2 min-[1700px]:w-auto sm:flex"
           role="group"
           aria-label="Especialidades"
         >

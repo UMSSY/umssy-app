@@ -22,13 +22,6 @@ import { RadarCard } from './radar-card';
 const LEVEL_TICK_COUNT = 6;
 const SERIES_LABEL = 'Puntaje de afinidad del perfil';
 
-function getResponsiveRadius(width: number): string {
-  if (width < 320) return '42%';
-  if (width < 380) return '48%';
-  if (width < 460) return '54%';
-  return '68%';
-}
-
 export function AffinityRadarChart({
   areas,
   projectedScores,

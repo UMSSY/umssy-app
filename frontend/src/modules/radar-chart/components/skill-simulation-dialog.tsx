@@ -1,17 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { Dialog as DialogPrimitive } from '@base-ui/react/dialog';
 import {
   Dialog,
   DialogClose,
   DialogDescription,
   DialogHeader,
   DialogOverlay,
+  DialogPopup,
   DialogPortal,
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
   NativeSelect,
@@ -72,7 +73,7 @@ export function SkillSimulationDialog({
     >
       <DialogPortal>
         <DialogOverlay className="bg-[#102a43]/60 backdrop-blur-[2px]" />
-        <DialogPrimitive.Popup className="fixed top-1/2 left-1/2 z-50 max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-[650px] -translate-1/2 overflow-y-auto border-t-4 border-accent bg-surface text-ink shadow-[0_28px_60px_#102a4340] outline-none">
+        <DialogPopup className="fixed top-1/2 left-1/2 z-50 max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-[650px] -translate-1/2 overflow-y-auto border-t-4 border-accent bg-surface text-ink shadow-[0_28px_60px_#102a4340] outline-none">
           <DialogHeader className="gap-2 border-b border-border px-4 pt-[29px] pb-[18px] sm:px-7">
             <span className="mb-1 w-fit rounded-[2px] bg-[#ffedb8] px-2 py-1 text-[9px] leading-[14px] font-bold tracking-widest text-[#6c5624]">
               SIMULADA
@@ -153,7 +154,7 @@ export function SkillSimulationDialog({
                 </span>
               </div>
               <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 pt-2 sm:gap-5">
-                <div className="min-h-[84px] border border-border bg-surface px-3 py-3 sm:px-4">
+                <div className="min-h-[84px] border border-border bg-surface p-3 sm:px-4">
                   <p className="text-[11px] text-text-secondary">
                     Puntaje oficial
                   </p>
@@ -168,7 +169,7 @@ export function SkillSimulationDialog({
                   className="size-4 text-text-secondary"
                   aria-hidden="true"
                 />
-                <div className="min-h-[84px] border border-accent/50 bg-surface px-3 py-3 sm:px-4">
+                <div className="min-h-[84px] border border-accent/50 bg-surface p-3 sm:px-4">
                   <Label
                     htmlFor="simulation-score"
                     className="text-[11px] font-normal text-text-secondary"
@@ -176,7 +177,8 @@ export function SkillSimulationDialog({
                     Proyección simulada
                   </Label>
                   <div className="mt-1 flex items-baseline gap-1 text-accent">
-                    <input
+                    <Input
+                      unstyled
                       id="simulation-score"
                       aria-label="Puntaje proyectado"
                       type="number"
@@ -215,7 +217,8 @@ export function SkillSimulationDialog({
                   className="absolute left-0 h-2 rounded-l-[2px] bg-[#7793a6]"
                   style={{ width: `${area.score * 10}%` }}
                 />
-                <input
+                <Input
+                  unstyled
                   aria-label="Ajustar proyección"
                   type="range"
                   min={area.score}
@@ -231,7 +234,7 @@ export function SkillSimulationDialog({
                     marginLeft: `${area.score * 10}%`,
                     width: `${100 - area.score * 10}%`,
                   }}
-                  className="relative h-5 cursor-pointer appearance-none bg-transparent focus-visible:outline-2 focus-visible:outline-accent disabled:hidden [&::-webkit-slider-thumb]:size-2.5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-accent [&::-moz-range-thumb]:size-2.5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-accent"
+                  className="relative h-5 cursor-pointer appearance-none bg-transparent focus-visible:outline-2 focus-visible:outline-accent disabled:hidden [&::-moz-range-thumb]:size-2.5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-accent [&::-webkit-slider-thumb]:size-2.5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-accent"
                 />
               </div>
               <div
@@ -286,7 +289,7 @@ export function SkillSimulationDialog({
               Cerrar simulación
             </Button>
           </footer>
-        </DialogPrimitive.Popup>
+        </DialogPopup>
       </DialogPortal>
     </Dialog>
   );

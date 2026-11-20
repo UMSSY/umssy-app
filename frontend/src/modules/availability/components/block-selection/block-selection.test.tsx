@@ -103,11 +103,21 @@ describe("BlockSelection", () => {
     [{ area: "QA", selectedAreaId: "otro-id" }, false],
     [{ area: "Otra especialidad" }, false],
   ] as const)("valida la especialidad solicitada contra el perfil (%j)", async (areaContext, isValid) => {
+    const create = vi.spyOn(appointmentsApi, "createAppointment").mockResolvedValue({ id: "a1" } as Appointment)
+    const user = userEvent.setup()
     renderSelection(vi.fn().mockResolvedValue([tuesdayBlock]), undefined, areaContext)
-    await selectTuesday(userEvent.setup())
+    await selectTuesday(user)
     const heading = screen.queryByText(/Área de mentoría: QA/)
     if (isValid) expect(heading).toBeInTheDocument()
     else expect(heading).not.toBeInTheDocument()
+
+    await fillRequest(user)
+    await user.click(screen.getByRole("button", { name: REQUEST_APPOINTMENT_TEXT.submit }))
+    expect(create).toHaveBeenCalledWith({
+      blockId: tuesdayBlock.id,
+      orientationTypeId: "t1",
+      message: isValid ? "Área de mentoría: QA.\nQuiero revisar mi CV" : "Quiero revisar mi CV",
+    })
   })
 
   it("notifica si tiene selección y deja de retener el panel al desmontarse", async () => {
