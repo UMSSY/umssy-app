@@ -87,6 +87,7 @@ export const ModelName = {
   AppointmentNotification: 'AppointmentNotification',
   EventCategory: 'EventCategory',
   Event: 'Event',
+  EventSession: 'EventSession',
   EventRegistration: 'EventRegistration',
   EventAttendance: 'EventAttendance',
   JobOffer: 'JobOffer',
@@ -649,6 +650,19 @@ export const EventScalarFieldEnum = {
 } as const
 
 export type EventScalarFieldEnum = (typeof EventScalarFieldEnum)[keyof typeof EventScalarFieldEnum]
+
+
+export const EventSessionScalarFieldEnum = {
+  id: 'id',
+  eventId: 'eventId',
+  startsAt: 'startsAt',
+  endsAt: 'endsAt',
+  location: 'location',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EventSessionScalarFieldEnum = (typeof EventSessionScalarFieldEnum)[keyof typeof EventSessionScalarFieldEnum]
 
 
 export const EventRegistrationScalarFieldEnum = {
