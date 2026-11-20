@@ -53,13 +53,19 @@ function createTransaction() {
           where,
           data,
         }: {
-          where: { name: { in: string[] } };
+          where: {
+            name?: { in: string[] };
+            id?: { in: string[] };
+            expiresAt?: null;
+          };
           data: Record<string, unknown>;
         }) => {
           let count = 0;
-          for (const name of where.name.in) {
+          for (const name of where.name?.in ?? where.id?.in ?? []) {
             const existing = stores[model].get(name);
             if (!existing) continue;
+            if (where.expiresAt === null && existing.expiresAt != null)
+              continue;
             stores[model].set(name, { ...existing, ...data });
             count += 1;
           }
@@ -188,6 +194,25 @@ describe('seedJobOffers', () => {
         ],
       },
     });
+  });
+
+  it('assigns demo deadlines and backfills only missing expiration dates', async () => {
+    const { stores, tx } = createTransaction();
+    await seedJobOffers(tx, NOW);
+    const id = SEED_JOB_OFFERS[0].id;
+    const record = stores.jobOffer.get(id)!;
+    const deadline = new Date(NOW.getTime() + 30 * DAY_MS);
+    expect(record.expiresAt).toEqual(deadline);
+    record.expiresAt = null;
+    stores.jobOffer.set('user-created-offer', {
+      id: 'user-created-offer',
+      expiresAt: null,
+    });
+    await seedJobOffers(tx, NOW);
+    expect(stores.jobOffer.get('user-created-offer')?.expiresAt).toBeNull();
+    expect(stores.jobOffer.get(id)?.expiresAt).toEqual(deadline);
+    await seedJobOffers(tx, new Date(NOW.getTime() + DAY_MS));
+    expect(stores.jobOffer.get(id)?.expiresAt).toEqual(deadline);
   });
 
   it('muestra "A convenir" en la pasantía sin salario', async () => {

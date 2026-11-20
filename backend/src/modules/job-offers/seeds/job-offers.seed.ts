@@ -90,6 +90,8 @@ async function seedDemoJobOffers(
   const statusIds = idsByTitle(statuses);
   const skillIds = new Map(skills.map((skill) => [skill.name, skill.id]));
 
+  const expiresAt = new Date(now.getTime() + 30 * DAY_MS);
+
   for (const offer of SEED_JOB_OFFERS) {
     await tx.jobOffer.upsert({
       where: { id: offer.id },
@@ -111,6 +113,7 @@ async function seedDemoJobOffers(
         salaryRange: formatSalaryRange(offer.salaryMin, offer.salaryMax),
         languages: offer.languages,
         locationUrl: 'https://maps.app.goo.gl/UmssCochabamba',
+        expiresAt,
         publishedAt: new Date(now.getTime() - offer.daysAgo * DAY_MS),
         createdAt: new Date(now.getTime() - offer.daysAgo * DAY_MS),
         skills: {
@@ -121,4 +124,13 @@ async function seedDemoJobOffers(
       },
     });
   }
+
+  // Backfill only demo offers without a deadline; preserve existing dates.
+  await tx.jobOffer.updateMany({
+    where: {
+      id: { in: SEED_JOB_OFFERS.map((offer) => offer.id) },
+      expiresAt: null,
+    },
+    data: { expiresAt },
+  });
 }
