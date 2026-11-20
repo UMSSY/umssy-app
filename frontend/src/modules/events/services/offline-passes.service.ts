@@ -23,6 +23,7 @@ export async function saveOfflinePass(
     endTime: pass.endTime,
     location: pass.location,
     status: pass.status,
+    ...(pass.sessions && { sessions: pass.sessions }),
   };
   await updateSessionOfflinePasses(accessToken, signal, (snapshot, userId) => ({
     userId,
@@ -53,7 +54,7 @@ export async function reconcileOfflinePasses(
       const passes = snapshot.passes.flatMap((pass) => {
         const live = current.get(pass.id);
         if (!live) return [];
-        const { eventName, date, startTime, endTime, location } = live;
+        const { eventName, date, startTime, endTime, location, sessions } = live;
         return [
           {
             id: pass.id,
@@ -64,6 +65,7 @@ export async function reconcileOfflinePasses(
             startTime,
             endTime,
             location,
+            ...(sessions && { sessions }),
           },
         ];
       });

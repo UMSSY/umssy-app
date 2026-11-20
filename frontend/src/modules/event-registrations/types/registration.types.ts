@@ -1,3 +1,5 @@
+import type { RegistrationSession } from './registration-session.types';
+
 export interface Registration {
   id: string;
   eventId?: string;
@@ -9,4 +11,5 @@ export interface Registration {
   status: string;
   registeredAt?: string;
   cancelledAt?: string | null;
+  sessions?: RegistrationSession[];
 }

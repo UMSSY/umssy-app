@@ -1,5 +1,7 @@
 import type { EventItem } from '../types/event-item.types';
 import type { EventSession } from '../types/event-session.types';
+import type { SessionSchedule } from '../types/session-schedule.types';
+import { getRegistrationEventTimestamp } from './registration-format';
 
 // Los horarios de las sesiones se muestran en la hora local de Bolivia.
 const SESSION_TIME_ZONE = 'America/La_Paz';
@@ -63,4 +65,55 @@ export function formatSessionDateRange(sessions: EventSession[]): string {
   const last = sessions.at(-1) && toValidDate(sessions.at(-1)!.startsAt);
   if (!first || !last) return 'Fecha por confirmar';
   return sessionRangeFormat.formatRange(first, last);
+}
+
+// Inicio de la primera sesión y fin de la última; sin sesiones usa fecha y horario del taller.
+export function getScheduleBounds(schedule: {
+  date: string;
+  startTime?: string | null;
+  endTime?: string | null;
+  sessions?: EventSession[];
+}): { startsAt: number; endsAt: number } {
+  const sessions = getSortedSessions(schedule);
+  if (sessions.length) {
+    return {
+      startsAt: new Date(sessions[0].startsAt).getTime(),
+      endsAt: Math.max(...sessions.map((session) => new Date(session.endsAt).getTime())),
+    };
+  }
+  return {
+    startsAt: getRegistrationEventTimestamp(schedule.date, schedule.startTime ?? ''),
+    endsAt: getRegistrationEventTimestamp(schedule.date, schedule.endTime ?? ''),
+  };
+}
+
+// Sesión en curso o, si no hay ninguna, la siguiente por empezar.
+export function getNextSession(sessions: EventSession[], now = Date.now()): EventSession | null {
+  return sessions.find((session) => new Date(session.endsAt).getTime() > now) ?? null;
+}
+
+export function formatSessionLabel(sessions: EventSession[], session: EventSession): string {
+  return `Sesión ${sessions.indexOf(session) + 1} · ${formatSessionDate(session)}`;
+}
+
+const sessionDayKeyFormat = new Intl.DateTimeFormat('en-CA', {
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  timeZone: SESSION_TIME_ZONE,
+});
+
+// Convierte una sesión a fecha y horas locales para reutilizar los formatos del pase.
+export function toSessionSchedule(session: EventSession): SessionSchedule {
+  const start = toValidDate(session.startsAt);
+  const end = toValidDate(session.endsAt);
+  return {
+    date: start ? sessionDayKeyFormat.format(start) : '',
+    startTime: start ? sessionTimeFormat.format(start) : '',
+    endTime: end ? sessionTimeFormat.format(end) : '',
+  };
+}
+
+export function formatSessionPosition(sessions: EventSession[], session: EventSession): string {
+  return `Sesión ${sessions.indexOf(session) + 1} de ${sessions.length}`;
 }
