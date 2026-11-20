@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { Info, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,16 +14,24 @@ import type { SurveyAlertFormErrors } from "../types/survey-alert-form-errors.ty
 import type { SurveyAlertsFormProps } from "../types/survey-alerts-form-props.types";
 import { parseAlertThreshold, validateSurveyAlertForm } from "../utils/validate-survey-alert-form";
 
-export function SurveyAlertsForm({ questions, config, isSaving, onCancel, onSave }: SurveyAlertsFormProps) {
+export function SurveyAlertsForm({ questions, config, isSaving, onCancel, onDirtyChange, onSave }: SurveyAlertsFormProps) {
   const fieldId = useId();
   const availableIds = (questions ?? []).map((question) => question.id);
   const [enabled, setEnabled] = useState(config.enabled);
   const [threshold, setThreshold] = useState(String(config.threshold));
-  const [questionIds, setQuestionIds] = useState<string[]>(
-    config.questionIds ? config.questionIds.filter((id) => availableIds.includes(id)) : availableIds,
-  );
+  const initialQuestionIds = config.questionIds ? config.questionIds.filter((id) => availableIds.includes(id)) : availableIds;
+  const [questionIds, setQuestionIds] = useState<string[]>(initialQuestionIds);
   const [errors, setErrors] = useState<SurveyAlertFormErrors>({});
   const isDisabled = !enabled || isSaving;
+  const isDirty =
+    enabled !== config.enabled ||
+    threshold !== String(config.threshold) ||
+    questionIds.length !== initialQuestionIds.length ||
+    questionIds.some((id) => !initialQuestionIds.includes(id));
+
+  useEffect(() => {
+    onDirtyChange(isDirty);
+  }, [isDirty, onDirtyChange]);
   const thresholdId = `${fieldId}-threshold`;
   const thresholdHintId = `${fieldId}-threshold-hint`;
   const thresholdErrorId = `${fieldId}-threshold-error`;

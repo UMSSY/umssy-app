@@ -54,6 +54,7 @@ export const SURVEY_ALERTS_TEXT = {
   exampleTitle: "Ejemplo.",
   example: "Si en P1 Buscando empleo pasa de 18% a 30%, subió 12 puntos y se enviará un aviso.",
   cancel: "Cancelar",
+  discardDescription: "Los cambios en la configuración de alertas no se guardarán.",
   save: "Guardar",
   saving: "Guardando...",
   saved: "Configuración de alertas guardada.",
