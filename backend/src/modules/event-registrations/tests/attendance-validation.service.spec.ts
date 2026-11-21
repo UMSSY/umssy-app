@@ -114,7 +114,7 @@ describe('AttendanceValidationService', () => {
   });
 
   it.each([
-    '2026-11-16T13:59:59.999Z',
+    '2026-11-16T11:59:59.999Z',
     '2026-11-16T15:00:00.000Z',
     '2026-11-17T14:30:00.000Z',
   ])('rejects a confirmed pass outside the local workshop window at %s', async (instant) => {
@@ -124,7 +124,7 @@ describe('AttendanceValidationService', () => {
     expect(findPass).toHaveBeenCalledOnce();
   });
 
-  it.each(['2026-11-16T14:00:00.000Z', '2026-11-16T14:59:59.999Z'])(
+  it.each(['2026-11-16T12:00:00.000Z', '2026-11-16T13:59:59.999Z', '2026-11-16T14:00:00.000Z', '2026-11-16T14:59:59.999Z'])(
     'accepts a confirmed pass inside the local workshop window at %s', async (instant) => {
       const { service } = setup();
       await expect(service.resolveForCheckIn(EVENT_ID, ACTOR, TOKEN, undefined, new Date(instant)))
