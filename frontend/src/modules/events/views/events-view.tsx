@@ -43,6 +43,8 @@ export function EventsView({ initialProposalId = null }: EventsViewProps) {
     setCategoryId,
     isPopular,
     setIsPopular,
+    isExpired,
+    setIsExpired,
     filters,
   } = useEventsFilters();
   const {
@@ -201,19 +203,36 @@ export function EventsView({ initialProposalId = null }: EventsViewProps) {
               }}
             />
             <div className="flex flex-wrap items-center gap-2">
+              <Button
+                type="button"
+                variant={isExpired ? "default" : "outline"}
+                onClick={() => {
+                  setSelectedEventId(null);
+                  setIsExpired(!isExpired);
+                  setCategoryId(null);
+                  setIsPopular(false);
+                }}
+                className="rounded-full text-xs"
+              >
+                Propuestas vencidas
+              </Button>
               <PopularFilterChip
                 isSelected={isPopular}
                 onToggle={() => {
                   setSelectedEventId(null);
                   setIsPopular(!isPopular);
+                  setIsExpired(false);
                 }}
               />
               <CategoryFilterChips
                 categories={categories}
                 selectedId={categoryId}
+                isAllActive={!isExpired && !isPopular}
                 onSelect={(id) => {
                   setSelectedEventId(null);
                   setCategoryId(id);
+                  setIsExpired(false);
+                  setIsPopular(false);
                 }}
               />
             </div>
@@ -254,9 +273,11 @@ export function EventsView({ initialProposalId = null }: EventsViewProps) {
             )}
             {!isLoading && !error && visibleEvents.length === 0 && (
               <p className="py-10 text-center text-text-secondary">
-                {filters.search.trim() || filters.categoryId
-                  ? "No se encontraron talleres con esos filtros. Prueba otra búsqueda o categoría."
-                  : "No hay talleres disponibles."}
+                {isExpired
+                  ? "No hay propuestas vencidas por el momento."
+                  : filters.search.trim() || filters.categoryId
+                    ? "No se encontraron talleres con esos filtros. Prueba otra búsqueda o categoría."
+                    : "No hay talleres disponibles."}
               </p>
             )}
             {error && (

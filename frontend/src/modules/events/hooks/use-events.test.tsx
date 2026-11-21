@@ -66,7 +66,7 @@ describe("useEvents", () => {
     expect(result.current.isLoading).toBe(true);
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(getEventsMock).toHaveBeenCalledWith(
-      { page: 1, includeProposals: true, limit: 50 },
+      { page: 1, includeProposals: true, limit: 50, isPublishedOnly: true },
       expect.any(AbortSignal),
       null,
     );
@@ -103,7 +103,7 @@ describe("useEvents", () => {
     await waitFor(() => expect(result.current.events).toHaveLength(51));
 
     expect(getEventsMock).toHaveBeenLastCalledWith(
-      { page: 2, includeProposals: true, limit: 50 },
+      { page: 2, includeProposals: true, limit: 50, isPublishedOnly: true },
       expect.any(AbortSignal),
       null,
     );
@@ -194,12 +194,12 @@ describe("useEvents", () => {
     await waitFor(() => expect(result.current.events[0]?.hasSupported).toBe(false));
 
     expect(getEventsMock).toHaveBeenCalledWith(
-      expect.objectContaining({ includeProposals: true }),
+      expect.objectContaining({ includeProposals: true, isPublishedOnly: true }),
       expect.any(AbortSignal),
       'token-a',
     );
     expect(getEventsMock).toHaveBeenCalledWith(
-      expect.objectContaining({ includeProposals: true }),
+      expect.objectContaining({ includeProposals: true, isPublishedOnly: true }),
       expect.any(AbortSignal),
       'token-b',
     );
