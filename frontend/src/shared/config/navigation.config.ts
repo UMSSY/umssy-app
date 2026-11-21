@@ -1,6 +1,10 @@
 import type { NavigationItem } from '@/shared/types/navigation-item.types';
 import { getRouteRoles } from '@/shared/utils/get-route-roles';
-import { NOTIFICATION_INBOX_FILTER_LABELS } from '@/modules/notifications';
+import {
+  getNotificationInboxPath,
+  NOTIFICATION_INBOX_FILTER_LABELS,
+  NOTIFICATIONS_INBOX_PATH,
+} from '@/modules/notifications';
 import { WORKSPACE_SECTIONS } from './workspace-sections.config';
 import {
   Bell,
@@ -32,7 +36,7 @@ function getSectionItems(sectionId: string) {
   );
 }
 
-const notificationRoles = getRouteRoles('/notifications');
+const notificationRoles = getRouteRoles(NOTIFICATIONS_INBOX_PATH);
 
 export const SIDEBAR_NAVIGATION: NavigationItem[] = [
   {
@@ -80,22 +84,22 @@ export const SIDEBAR_NAVIGATION: NavigationItem[] = [
     children: [
       {
         label: NOTIFICATION_INBOX_FILTER_LABELS.ALL,
-        href: '/notifications',
+        href: getNotificationInboxPath('ALL'),
         roles: notificationRoles,
       },
       {
         label: NOTIFICATION_INBOX_FILTER_LABELS.SURVEYS,
-        href: '/notifications?filter=SURVEYS',
+        href: getNotificationInboxPath('SURVEYS'),
         roles: notificationRoles,
       },
       {
         label: NOTIFICATION_INBOX_FILTER_LABELS.REMINDERS,
-        href: '/notifications?filter=REMINDERS',
+        href: getNotificationInboxPath('REMINDERS'),
         roles: notificationRoles,
       },
       {
         label: NOTIFICATION_INBOX_FILTER_LABELS.SYSTEM,
-        href: '/notifications?filter=SYSTEM',
+        href: getNotificationInboxPath('SYSTEM'),
         roles: notificationRoles,
       },
     ],

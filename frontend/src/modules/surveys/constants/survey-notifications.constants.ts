@@ -1,8 +1,9 @@
+import { getNotificationInboxPath, NOTIFICATION_INBOX_FILTER_LABELS } from "@/modules/notifications";
 import type { SurveyNotificationStatus } from "../types/survey-notification-status.types";
 
 export const SURVEY_ANSWER_PATH = "/surveys";
-export const SURVEY_NOTIFICATIONS_PATH = "/notifications?filter=SURVEYS";
-export const SURVEY_NOTIFICATIONS_LABEL = "Notificaciones de Encuestas";
+export const SURVEY_NOTIFICATIONS_PATH = getNotificationInboxPath("SURVEYS");
+export const SURVEY_NOTIFICATIONS_LABEL = NOTIFICATION_INBOX_FILTER_LABELS.SURVEYS;
 
 export const SURVEY_NOTIFICATIONS_QUERY_KEYS = {
   notifications: ["surveys", "notifications"] as const,

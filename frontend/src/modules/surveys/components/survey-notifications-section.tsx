@@ -1,7 +1,8 @@
 "use client";
 
+import { ClipboardCheck } from "lucide-react";
+import { NotificationsInboxEmpty, NotificationsInboxLoading } from "@/modules/notifications";
 import { SurveyNotificationItem } from "./survey-notification-item";
-import { SurveyNotificationsEmpty } from "./survey-notifications-empty";
 import { useCanAnswerSurveys } from "../hooks/use-can-answer-surveys";
 import { useSurveyNotifications } from "../hooks/use-survey-notifications";
 import { formatPendingSurveysLabel } from "../utils/format-pending-surveys-label";
@@ -12,11 +13,7 @@ function SurveyNotificationsList() {
   const renderContent = () => {
     if (isLoading) {
       return (
-        <div aria-busy="true" className="flex flex-col gap-2.5">
-          {Array.from({ length: 2 }, (_, index) => (
-            <div key={index} className="h-18 animate-pulse rounded-xl border border-border bg-muted/60" />
-          ))}
-        </div>
+        <NotificationsInboxLoading rows={2} />
       );
     }
 
@@ -29,7 +26,14 @@ function SurveyNotificationsList() {
     }
 
     if (notifications.length === 0) {
-      return <SurveyNotificationsEmpty />;
+      return (
+        <NotificationsInboxEmpty
+          icon={ClipboardCheck}
+          title="No hay encuestas disponibles"
+          description="Cuando tengas una nueva encuesta asignada, aparecerá aquí."
+          titleAs="h3"
+        />
+      );
     }
 
     return (
