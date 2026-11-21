@@ -106,7 +106,9 @@ Capacity is `ceil(approvedGraduates * percentage / 100)`, with fallback percenta
 
 Intake verifies catalog selections, eligibility and existing participation. Activation and request creation use Idempotency-Key. Waiting requests are accepted when no capacity remains; existing requests or reserved offers prevent bypassing the intake flow. Preference updates and cancellation operate on the authenticated user's PENDING request.
 
-Capacity mutations and reconciliation share PostgreSQL transaction advisory lock 1436, UTC transaction time and ReadCommitted isolation. Reconciliation expires overdue offers and their OFFERED requests, then selects eligible PENDING requests by queuedAt ascending and ID ascending. It revalidates user roles, catalog selections and absence of existing offers, locks selected rows, and reserves available capacity for 24 hours. The worker reconciles at startup and every 15 seconds outside the test environment. Administrative percentage updates also reconcile in the same transaction. GET overview/history endpoints do not reconcile or write business state. Reducing capacity never removes existing mentors or valid offers.
+Capacity mutations and reconciliation share PostgreSQL transaction advisory lock 1436, UTC transaction time and ReadCommitted isolation. Reconciliation expires overdue offers and their OFFERED requests, then selects eligible PENDING requests by queuedAt ascending and ID ascending. It revalidates user roles, catalog selections and absence of existing offers, locks selected rows, and reserves available capacity for 24 hours. The worker reconciles at startup and every 15 seconds outside the test environment. After the capacity transaction commits, it scans the durable set of unexpired OFFERED rows, asks the public notifications service whether the recipient/type/group notice already exists, and only calls `notify()` when it is absent; it never performs network work while holding the capacity lock. Administrative percentage updates also reconcile in the same transaction, and their new offers are discovered by the worker. GET overview/history endpoints do not reconcile or write business state. Reducing capacity never removes existing mentors or valid offers.
+
+The producer validates `{ offerId, expiresAt }` with Zod and uses `/mentors/participation` plus `groupKey=mentor-slot-offer:<offerId>`. The persisted central notification suppresses routine `notify()` calls on later ticks and after restarts. Central notification creation remains the race-safe second defense: it serializes that recipient/group combination with a PostgreSQL advisory transaction lock and skips an existing in-app notice when two instances observed it as absent concurrently. Confirmed and expired offers are excluded. Channel selection remains owned by notifications preferences and the catalog; the producer does not force push and email together. This central row is not a mentor-owned processing outbox: a crash after it commits but before an external dispatcher completes cannot provide exactly-once external delivery or a durable external-channel retry without an approved delivery outbox.
 
 ```mermaid
 flowchart TD
@@ -115,6 +117,10 @@ flowchart TD
   Count --> Select[Select eligible waiting requests in FIFO order]
   Select --> Reserve[Create 24-hour offers]
   Reserve --> Commit[Commit request and offer state together]
+  Commit --> Scan[Scan current offers after commit]
+  Scan --> Existing{Central notice exists?}
+  Existing -->|No| Notify[Validate and call central notifications]
+  Existing -->|Yes| Skip[Skip the repeated call]
 ```
 
 ## Models and relationships

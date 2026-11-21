@@ -1,7 +1,6 @@
 import { Module, forwardRef } from '@nestjs/common';
-import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from '../../common/prisma/prisma.module.js';
-import { JwtAuthModule } from '../../common/guards/jwt-auth.module.js';
 import { AuthModule } from '../auth/auth.module.js';
 import { MailModule } from '../mail/mail.module.js';
 
@@ -27,9 +26,8 @@ import { ChatModule } from '../chat/chat.module.js';
 @Module({
   imports: [
     PrismaModule,
-    JwtAuthModule,
+    ConfigModule,
     AuthModule,
-    JwtModule.register({}),
     MailModule,
     UsersModule,
     forwardRef(() => ChatModule),
