@@ -109,6 +109,32 @@ describe('useNotificationToasts', () => {
     expect(mockPush).toHaveBeenCalledWith('/chat?conversationId=conv-123');
   });
 
+  it('muestra las notificaciones de Radar en la parte superior derecha', () => {
+    const socket = createSocket();
+    vi.mocked(getAccessToken).mockReturnValue('fake-token');
+    vi.mocked(getNotificationsSocket).mockReturnValue(
+      socket as unknown as Socket,
+    );
+
+    renderHook(() => useNotificationToasts());
+
+    act(() => {
+      socket.emitEvent('notification:new', {
+        typeCode: 'RADAR_PUBLISHED',
+        title: 'Tu Radar de afinidad se ha actualizado',
+        body: 'Se publicó la versión 2 de tu Radar.',
+        actionUrl: '/profile/radar',
+      });
+    });
+
+    expect(toast).toHaveBeenCalledWith(
+      'Tu Radar de afinidad se ha actualizado',
+      expect.objectContaining({
+        position: 'top-right',
+        duration: 7000,
+      }),
+    );
+  });
   it('usa la etiqueta del catálogo según el tipo, no según el título', () => {
     const socket = createSocket();
     vi.mocked(getAccessToken).mockReturnValue('fake-token');

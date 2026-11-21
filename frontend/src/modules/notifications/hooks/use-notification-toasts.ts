@@ -68,6 +68,9 @@ export function useNotificationToasts(): void {
       toast(data.title, {
         description: data.body,
         duration: 7000,
+        ...(data.typeCode === 'RADAR_PUBLISHED'
+          ? { position: 'top-right' as const }
+          : {}),
         action: data.actionUrl
           ? {
               label: actionLabel,

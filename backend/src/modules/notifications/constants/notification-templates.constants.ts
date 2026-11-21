@@ -39,9 +39,9 @@ export const NOTIFICATION_TEMPLATES: NotificationTemplateMap = {
   },
 
   [NotificationType.RADAR_PUBLISHED]: {
-    renderTitle: () => 'Nueva versión del Radar publicada',
+    renderTitle: () => 'Tu Radar de afinidad se ha actualizado',
     renderBody: (p) =>
-      truncate(`Tu radar ha sido actualizado (Versión: ${p.radarVersion}).`),
+      truncate(`Se publicó la versión ${p.radarVersion} de tu Radar. Consulta tus resultados y áreas de afinidad actualizadas.`),
   },
 
   [NotificationType.APPOINTMENT_CANCELLED]: APPOINTMENT_CANCELLED_TEMPLATE,
