@@ -12,10 +12,20 @@ describe('event registration lookup', () => {
     ).toEqual({
       status: { title: 'Publicado' },
       OR: [
-        { eventDate: { gt: new Date('2026-10-23T00:00:00Z') } },
         {
-          eventDate: new Date('2026-10-23T00:00:00Z'),
-          endTime: { gt: new Date('1970-01-01T22:00:00Z') },
+          sessions: {
+            some: { endsAt: { gt: new Date('2026-10-24T02:00:00Z') } },
+          },
+        },
+        {
+          sessions: { none: {} },
+          OR: [
+            { eventDate: { gt: new Date('2026-10-23T00:00:00Z') } },
+            {
+              eventDate: new Date('2026-10-23T00:00:00Z'),
+              endTime: { gt: new Date('1970-01-01T22:00:00Z') },
+            },
+          ],
         },
       ],
     });
@@ -37,6 +47,7 @@ describe('event registration lookup', () => {
         eventDate: true,
         startTime: true,
         endTime: true,
+        sessions: { select: { startsAt: true, endsAt: true } },
         status: { select: { title: true } },
       },
     });

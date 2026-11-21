@@ -173,10 +173,9 @@ export class EventRegistrationsService {
     }
 
     const offset = (query.page - 1) * query.limit;
-    const threshold = this.eventsService.getFinishedEventThreshold();
     const { items, total } = await this.repository.findFinishedByUserId(
       userId,
-      threshold,
+      this.eventsService.getFinishedEventFilter(),
       offset,
       query.limit,
     );

@@ -87,6 +87,7 @@ describe('EventRegistrationsService', () => {
         eventName: 'Taller de NestJS',
         date: new Date('2026-10-20T00:00:00.000Z'),
         location: 'Aula 101',
+        sessions: [],
         status: 'Confirmada',
         registeredAt: '2026-10-18T10:00:00.000Z',
         cancelledAt: null,

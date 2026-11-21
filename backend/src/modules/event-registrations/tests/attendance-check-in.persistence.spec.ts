@@ -13,6 +13,7 @@ const ACTOR: AuthenticatedUser = {
   roles: ['titulado'],
 };
 const REFERENCE = 'a'.repeat(64);
+const SESSION_ID = '44444444-4444-4444-8444-444444444444';
 const ORIGINAL_TIME = new Date('2026-11-16T14:20:00.000Z');
 
 function setup() {
@@ -24,7 +25,7 @@ function setup() {
     findAttendance: vi.fn().mockResolvedValue({ checkedInAt: ORIGINAL_TIME }),
   };
   const validation = {
-    resolveForCheckIn: vi.fn().mockResolvedValue({ registrationId: REGISTRATION_ID }),
+    resolveForCheckIn: vi.fn().mockResolvedValue({ registrationId: REGISTRATION_ID, sessionId: SESSION_ID }),
   };
   const service = new AttendanceCheckInService(repository as never, validation as never);
   return { service, repository, validation, tx };
@@ -33,17 +34,17 @@ function setup() {
 describe('AttendanceCheckInService', () => {
   it('persists one online attendance with the authenticated actor and server time', async () => {
     const { service, repository, validation, tx } = setup();
-    await expect(service.checkIn(EVENT_ID, ACTOR, REFERENCE)).resolves.toEqual({
-      result: 'registered', checkedInAt: ORIGINAL_TIME.toISOString(),
+    await expect(service.checkIn(EVENT_ID, ACTOR, REFERENCE, SESSION_ID)).resolves.toEqual({
+      result: 'registered', checkedInAt: ORIGINAL_TIME.toISOString(), sessionId: SESSION_ID,
     });
     expect(validation.resolveForCheckIn).toHaveBeenCalledTimes(2);
-    expect(validation.resolveForCheckIn).toHaveBeenNthCalledWith(1, EVENT_ID, ACTOR, REFERENCE, tx);
+    expect(validation.resolveForCheckIn).toHaveBeenNthCalledWith(1, EVENT_ID, ACTOR, REFERENCE, tx, undefined, SESSION_ID);
     const checkedInAt = validation.resolveForCheckIn.mock.calls[1][4];
     expect(checkedInAt).toBeInstanceOf(Date);
-    expect(validation.resolveForCheckIn).toHaveBeenNthCalledWith(2, EVENT_ID, ACTOR, REFERENCE, tx, checkedInAt);
+    expect(validation.resolveForCheckIn).toHaveBeenNthCalledWith(2, EVENT_ID, ACTOR, REFERENCE, tx, checkedInAt, SESSION_ID);
     expect(repository.lockRegistration).toHaveBeenCalledWith(tx, EVENT_ID, REGISTRATION_ID);
-    expect(repository.insertIfAbsent).toHaveBeenCalledWith(tx, REGISTRATION_ID, ACTOR.id, checkedInAt);
-    expect(repository.findAttendance).toHaveBeenCalledWith(tx, REGISTRATION_ID);
+    expect(repository.insertIfAbsent).toHaveBeenCalledWith(tx, REGISTRATION_ID, SESSION_ID, ACTOR.id, checkedInAt);
+    expect(repository.findAttendance).toHaveBeenCalledWith(tx, REGISTRATION_ID, SESSION_ID);
     expect(repository.lockRegistration.mock.invocationCallOrder[0])
       .toBeLessThan(repository.insertIfAbsent.mock.invocationCallOrder[0]);
   });
@@ -51,8 +52,8 @@ describe('AttendanceCheckInService', () => {
   it('returns duplicate with the original timestamp without changing the existing row', async () => {
     const { service, repository } = setup();
     repository.insertIfAbsent.mockResolvedValue({ count: 0 });
-    await expect(service.checkIn(EVENT_ID, ACTOR, REFERENCE)).resolves.toEqual({
-      result: 'duplicate', checkedInAt: ORIGINAL_TIME.toISOString(),
+    await expect(service.checkIn(EVENT_ID, ACTOR, REFERENCE, SESSION_ID)).resolves.toEqual({
+      result: 'duplicate', checkedInAt: ORIGINAL_TIME.toISOString(), sessionId: SESSION_ID,
     });
     expect(repository.insertIfAbsent).toHaveBeenCalledTimes(1);
   });
@@ -94,17 +95,17 @@ describe('AttendanceCheckInService', () => {
 });
 
 describe('AttendanceCheckInRepository', () => {
-  it('uses a read-committed transaction, a scoped row lock and conflict-safe insertion', async () => {
+  it('uses a read-committed transaction, a scoped row lock and conflict-safe insertion per session', async () => {
     const queryRaw = vi.fn().mockResolvedValue([{ id: REGISTRATION_ID }]);
     const createMany = vi.fn().mockResolvedValue({ count: 1 });
-    const findUnique = vi.fn().mockResolvedValue({ checkedInAt: ORIGINAL_TIME });
-    const tx = { $queryRaw: queryRaw, eventAttendance: { createMany, findUnique } };
+    const findFirst = vi.fn().mockResolvedValue({ checkedInAt: ORIGINAL_TIME });
+    const tx = { $queryRaw: queryRaw, eventAttendance: { createMany, findFirst } };
     const transaction = vi.fn((operation: (tx: never) => Promise<unknown>) => operation(tx as never));
     const repository = new AttendanceCheckInRepository({ $transaction: transaction } as never);
     await repository.transaction(async (client) => {
       expect(await repository.lockRegistration(client, EVENT_ID, REGISTRATION_ID)).toBe(true);
-      await repository.insertIfAbsent(client, REGISTRATION_ID, ACTOR.id, ORIGINAL_TIME);
-      await repository.findAttendance(client, REGISTRATION_ID);
+      await repository.insertIfAbsent(client, REGISTRATION_ID, SESSION_ID, ACTOR.id, ORIGINAL_TIME);
+      await repository.findAttendance(client, REGISTRATION_ID, SESSION_ID);
     });
     expect(transaction).toHaveBeenCalledWith(expect.any(Function), {
       isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted,
@@ -116,6 +117,7 @@ describe('AttendanceCheckInRepository', () => {
     expect(createMany).toHaveBeenCalledWith({
       data: {
         registrationId: REGISTRATION_ID,
+        sessionId: SESSION_ID,
         checkedInAt: ORIGINAL_TIME,
         checkedInById: ACTOR.id,
         checkedInOffline: false,
@@ -123,8 +125,22 @@ describe('AttendanceCheckInRepository', () => {
       },
       skipDuplicates: true,
     });
-    expect(findUnique).toHaveBeenCalledWith({
-      where: { registrationId: REGISTRATION_ID }, select: { checkedInAt: true },
+    expect(findFirst).toHaveBeenCalledTimes(1);
+    expect(findFirst).toHaveBeenCalledWith({
+      where: { registrationId: REGISTRATION_ID, sessionId: SESSION_ID }, select: { checkedInAt: true },
     });
+  });
+
+  it('does not insert a second attendance without session for the same registration', async () => {
+    const createMany = vi.fn();
+    const findFirst = vi.fn().mockResolvedValue({ checkedInAt: ORIGINAL_TIME });
+    const repository = new AttendanceCheckInRepository({} as never);
+    await expect(
+      repository.insertIfAbsent({ eventAttendance: { createMany, findFirst } } as never, REGISTRATION_ID, null, ACTOR.id, ORIGINAL_TIME),
+    ).resolves.toEqual({ count: 0 });
+    expect(findFirst).toHaveBeenCalledWith({
+      where: { registrationId: REGISTRATION_ID, sessionId: null }, select: { checkedInAt: true },
+    });
+    expect(createMany).not.toHaveBeenCalled();
   });
 });

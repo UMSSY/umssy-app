@@ -12,6 +12,7 @@ const RegistrationIdReferenceSchema = z.string().trim().pipe(z.guid()).transform
 
 export const AttendanceCheckInBodySchema = z.strictObject({
   reference: z.union([QrReferenceSchema, RegistrationIdReferenceSchema]),
+  sessionId: z.guid().optional(),
 });
 
 export const AttendanceCheckInParamsSchema = z.object({
