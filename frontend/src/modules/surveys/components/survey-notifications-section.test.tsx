@@ -3,7 +3,9 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { createQueryWrapper } from "@/shared/testing/create-query-wrapper";
 import { surveyNotificationsService } from "../services/survey-notifications.service";
 import type { SurveyNotification } from "../types/survey-notification.types";
-import { SurveyNotificationsView } from "./survey-notifications-view";
+import { SurveyNotificationsSection } from "./survey-notifications-section";
+
+vi.mock("../hooks/use-can-answer-surveys", () => ({ useCanAnswerSurveys: () => true }));
 
 const SURVEYS: SurveyNotification[] = [
   { id: "employability-2026", title: "Encuesta de empleabilidad 2026", publishedAt: "2026-10-15", status: "pending" },
@@ -19,7 +21,7 @@ function mockSurveys(surveys: SurveyNotification[]) {
 
 function renderView() {
   const { wrapper } = createQueryWrapper();
-  return render(<SurveyNotificationsView />, { wrapper });
+  return render(<SurveyNotificationsSection />, { wrapper });
 }
 
 async function findSurveyRow(title: string): Promise<HTMLElement> {
@@ -28,17 +30,16 @@ async function findSurveyRow(title: string): Promise<HTMLElement> {
   return row;
 }
 
-describe("SurveyNotificationsView", () => {
+describe("SurveyNotificationsSection", () => {
   afterEach(() => {
     cleanup();
     vi.restoreAllMocks();
   });
 
-  it("muestra el título, todas las encuestas y cuántas están pendientes", async () => {
+  it("muestra todas las encuestas y cuántas están pendientes", async () => {
     mockSurveys(SURVEYS);
     renderView();
 
-    expect(screen.getByRole("heading", { level: 1, name: "Notificaciones de encuestas" })).toBeInTheDocument();
     const surveyList = screen.getByRole("region", { name: "Encuestas" });
     expect(await within(surveyList).findAllByRole("listitem")).toHaveLength(5);
     expect(within(surveyList).getByText("2 pendientes")).toBeInTheDocument();
