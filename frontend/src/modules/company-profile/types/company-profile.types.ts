@@ -14,6 +14,6 @@ export type ProfileLoadStatus = "idle" | "loading" | "success" | "error";
 
 export interface CompanyProfileViewState {
   status: ProfileLoadStatus;
-  profile: CompanyMainProfile | null;
+  profile: CompanyProfile | null;
   errorMessage: string | null;
 }
