@@ -23,9 +23,11 @@ import { MentorParticipationRepository } from './repositories/mentor-participati
 import { MentorCapacityAdminController } from './controllers/mentor-capacity-admin.controller.js';
 import { MentorCapacityAdminRepository } from './repositories/mentor-capacity-admin.repository.js';
 import { MentorCapacityAdminService } from './services/mentor-capacity-admin.service.js';
+import { NotificationsModule } from '../notifications/notifications.module.js';
+import { MentorOfferNotificationsService } from './services/mentor-offer-notifications.service.js';
 
 @Module({
-  imports: [AuthModule, ProfileModule, SkillsModule],
+  imports: [AuthModule, ProfileModule, SkillsModule, NotificationsModule],
   controllers: [
     MentorsController,
     MentorPhotoController,
@@ -44,6 +46,7 @@ import { MentorCapacityAdminService } from './services/mentor-capacity-admin.ser
     MentorOffersRepository,
     MentorOffersService,
     MentorOffersWorker,
+    MentorOfferNotificationsService,
     MentorExitRepository,
     MentorExitService,
     MentorParticipationService,
