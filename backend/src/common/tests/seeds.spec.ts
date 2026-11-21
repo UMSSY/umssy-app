@@ -6,6 +6,7 @@ const seedAccessRequests = vi.fn();
 const seedEvents = vi.fn();
 const seedHistoryScenarioEvents = vi.fn();
 const seedEventRegistrations = vi.fn();
+const seedHistoryScenarioRegistrations = vi.fn();
 const seedTechnicalAreas = vi.fn();
 const seedOrientationTypes = vi.fn();
 const seedJobOffers = vi.fn();
@@ -36,6 +37,10 @@ vi.mock(
       seedEventRegistrations(...args),
   }),
 );
+vi.mock('../../modules/event-registrations/seeds/history-scenarios-registrations.seed.js', () => ({
+  seedHistoryScenarioRegistrations: (...args: unknown[]) =>
+    seedHistoryScenarioRegistrations(...args),
+}));
 vi.mock('../../modules/technical-areas/seeds/technical-areas.seed.js', () => ({
   seedTechnicalAreas: (...args: unknown[]) => seedTechnicalAreas(...args),
 }));
@@ -110,7 +115,7 @@ describe('runSeed', () => {
 
     const summary = await runSeed(client as never);
 
-    expect(client.$transaction).toHaveBeenCalledTimes(11);
+    expect(client.$transaction).toHaveBeenCalledTimes(12);
     expect(seedTechnicalAreas).toHaveBeenCalledWith(tx);
     expect(seedOrientationTypes).toHaveBeenCalledWith(tx);
     expect(seedJobOffers).toHaveBeenCalledWith(tx);
@@ -122,6 +127,12 @@ describe('runSeed', () => {
       expect.any(Date),
     );
     expect(seedEventRegistrations).toHaveBeenCalledWith(tx, 'e1');
+    expect(seedHistoryScenarioRegistrations).toHaveBeenCalledWith(
+      tx,
+      'e1',
+      'h1',
+      expect.any(Date),
+    );
     expect(seedAvailability).toHaveBeenCalledWith(
       tx,
       expect.objectContaining({

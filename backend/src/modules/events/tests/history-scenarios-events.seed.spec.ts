@@ -2,6 +2,8 @@ import { describe, expect, it, vi } from 'vitest';
 import type { Prisma } from '../../../prisma/client.js';
 import { buildHistoryEventScenarios, HISTORY_EVENT_IDS } from '../constants/history-scenarios.constants.js';
 import { seedHistoryScenarioEvents } from '../seeds/history-scenarios-events.seed.js';
+import { EventsService } from '../services/events.service.js';
+import type { EventsRepository } from '../repositories/events.repository.js';
 
 describe('history scenario events', () => {
   const now = new Date('2026-11-20T15:00:00.000Z');
@@ -43,5 +45,19 @@ describe('history scenario events', () => {
       where: { id: HISTORY_EVENT_IDS.boundarySession },
       update: { startsAt: new Date('2026-11-20T23:40:00.000Z'), endsAt: new Date('2026-11-21T00:20:00.000Z') },
     }));
+  });
+
+  it('crosses UTC midnight before, during, and exactly after the controlled session', () => {
+    const boundary = buildHistoryEventScenarios(now).boundary;
+    const event = {
+      eventDate: boundary.eventDate,
+      endTime: boundary.endTime,
+      sessions: [{ startsAt: boundary.startsAt, endsAt: boundary.endsAt }],
+    };
+    const service = new EventsService({} as EventsRepository);
+    expect(service.isFinished(event, new Date('2026-11-20T23:39:59.000Z'))).toBe(false);
+    expect(service.isFinished(event, new Date('2026-11-21T00:00:00.000Z'))).toBe(false);
+    expect(service.isFinished(event, boundary.endsAt)).toBe(true);
+    expect(service.isFinished(event, new Date('2026-11-21T00:20:01.000Z'))).toBe(true);
   });
 });

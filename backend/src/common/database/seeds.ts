@@ -7,6 +7,7 @@ import { Logger } from '@nestjs/common';
 import { seedEvents } from '../../modules/events/seeds/events.seed.js';
 import { seedHistoryScenarioEvents } from '../../modules/events/seeds/history-scenarios-events.seed.js';
 import { seedEventRegistrations } from '../../modules/event-registrations/seeds/event-registrations.seed.js';
+import { seedHistoryScenarioRegistrations } from '../../modules/event-registrations/seeds/history-scenarios-registrations.seed.js';
 import { seedAccessRequests } from '../../modules/access-requests/seeds/access-requests.seed.js';
 import { seedAvailability } from '../../modules/availability/seeds/availability.seed.js';
 import { seedJobOffers } from '../../modules/job-offers/seeds/job-offers.seed.js';
@@ -73,6 +74,14 @@ export async function runSeed(client?: PrismaClient): Promise<SeedSummary> {
     );
     await runModule('inscripciones', (tx) =>
       seedEventRegistrations(tx, users.eventGraduate.id),
+    );
+    await runModule('inscripciones de historial', (tx) =>
+      seedHistoryScenarioRegistrations(
+        tx,
+        users.eventGraduate.id,
+        users.historyGraduate.id,
+        now,
+      ),
     );
     const availabilityResult = await runModule('disponibilidad', (tx) =>
       seedAvailability(
