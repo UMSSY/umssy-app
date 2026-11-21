@@ -2,18 +2,50 @@ import React from "react";
 import { Building2, Mail, MapPin, Phone } from "lucide-react";
 import { MOCK_COMPANY_PROFILE } from "../constants/company-mock.data";
 import { COMPANY_PROFILE_LABELS } from "../constants/company-profile.labels";
-import type { CompanyProfile } from "../types/company-profile.types";
+import type { CompanyProfile, ProfileLoadStatus } from "../types/company-profile.types";
+import { CompanyAboutSection } from "../components/company-about-section";
+import { CompanyWebsiteSection } from "../components/company-website-section";
+import {
+  CompanyProfileErrorBanner,
+  CompanyProfileSkeleton,
+} from "../components/company-profile-states";
 
-export function CompanyProfileView() {
-  const company: CompanyProfile = MOCK_COMPANY_PROFILE;
+interface CompanyProfileViewProps {
+  profile: CompanyProfile | null;
+  status: ProfileLoadStatus;
+  onRetry: () => void;
+}
+
+export function CompanyProfileView({
+  profile,
+  status = "success",
+  onRetry,
+}: CompanyProfileViewProps) {
+  if (status === "loading" || status === "idle") {
+    return (
+      <div className="mx-auto max-w-5xl p-6">
+        <CompanyProfileSkeleton />
+      </div>
+    );
+  }
+
+  if (status === "error") {
+    return (
+      <div className="mx-auto max-w-5xl p-6">
+        <CompanyProfileErrorBanner onRetry={onRetry ?? (() => undefined)} />
+      </div>
+    );
+  }
+
+  const company: CompanyProfile = profile ?? MOCK_COMPANY_PROFILE;
 
   return (
     <div className="mx-auto max-w-5xl space-y-6 p-6">
       <div className="space-y-1">
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground select-none">
           {COMPANY_PROFILE_LABELS.pageTitle}
         </h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-muted-foreground select-none">
           {COMPANY_PROFILE_LABELS.pageSubtitle}
         </p>
       </div>
@@ -43,11 +75,9 @@ export function CompanyProfileView() {
       </section>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        <div className="space-y-4 rounded-xl border border-border bg-white p-6 shadow-sm md:col-span-2">
-          <h3 className="text-base font-semibold text-foreground">Sobre nosotros</h3>
-          <p className="text-sm leading-relaxed text-muted-foreground">
-            {company.description}
-          </p>
+        <div className="space-y-6 md:col-span-2">
+          <CompanyAboutSection description={company.description} />
+          <CompanyWebsiteSection website={company.website} />
         </div>
 
         <div
@@ -84,21 +114,6 @@ export function CompanyProfileView() {
                 </span>
                 <span className="text-primary">{company.email}</span>
               </div>
-            </div>
-            <div>
-              <span className="block font-medium text-foreground">Sitio Web</span>
-              {company.website ? (
-                <a
-                  href={company.website}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-primary hover:underline"
-                >
-                  {company.website}
-                </a>
-              ) : (
-                <span className="text-muted-foreground">No registrado</span>
-              )}
             </div>
           </div>
         </div>
