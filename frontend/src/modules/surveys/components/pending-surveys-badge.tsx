@@ -2,6 +2,7 @@
 
 import { useContext } from "react";
 import { QueryClientContext } from "@tanstack/react-query";
+import { useCanAnswerSurveys } from "../hooks/use-can-answer-surveys";
 import { useSurveyNotifications } from "../hooks/use-survey-notifications";
 
 function PendingSurveysCount() {
@@ -21,5 +22,6 @@ function PendingSurveysCount() {
 
 export function PendingSurveysBadge() {
   const queryClient = useContext(QueryClientContext);
-  return queryClient ? <PendingSurveysCount /> : null;
+  const canAnswerSurveys = useCanAnswerSurveys();
+  return queryClient && canAnswerSurveys ? <PendingSurveysCount /> : null;
 }
