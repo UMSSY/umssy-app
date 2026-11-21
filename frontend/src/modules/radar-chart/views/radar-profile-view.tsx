@@ -10,6 +10,11 @@ import { useQuery } from '@tanstack/react-query';
 import { skillsService } from '@/modules/skills/services/skills.service';
 import { RadarAreaActions } from '../components/radar-area-actions';
 import { SkillSimulationDialog } from '../components/skill-simulation-dialog';
+import { cn } from '@/lib/utils';
+import {
+  readSessionStorage,
+  writeSessionStorage,
+} from '@/shared/services/storage/browser-session-storage';
 import { AffinityRadarChart } from '../components/affinity-radar-chart';
 import { AreaBreakdownPanel } from '../components/area-breakdown-panel';
 import type { AreaId } from '../types/area-id.types';
@@ -65,7 +70,16 @@ export function RadarProfileView() {
   });
   const [isSimulationOpen, setIsSimulationOpen] = useState(false);
   const [isEvidenceVisible, setIsEvidenceVisible] = useState(false);
-  const [isComparing, setIsComparing] = useState(false);
+  const [comparisonPreference, setComparisonPreference] = useState<{
+    key: string;
+    enabled: boolean;
+  } | null>(null);
+  const comparisonKey = data ? `radar:comparison:${data.userId}` : null;
+  const isComparing = comparisonKey
+    ? comparisonPreference?.key === comparisonKey
+      ? comparisonPreference.enabled
+      : readSessionStorage(comparisonKey) === 'true'
+    : false;
   const selectedPanelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -141,7 +155,6 @@ export function RadarProfileView() {
             onClick={() => {
               setDismissedSnapshot(snapshotId);
               window.history.replaceState(null, '', window.location.pathname);
-              setIsComparing(false);
               setSelectedArea(null);
             }}
           >
@@ -291,8 +304,11 @@ export function RadarProfileView() {
               previousPublishedAt={previous?.updatedAt}
               publishedAt={data.updatedAt}
               isComparisonEnabled={Boolean(comparison)}
+              highlightedArea={comparison ? selected?.id : undefined}
               onComparisonChange={(enabled) => {
-                setIsComparing(enabled);
+                if (!comparisonKey) return;
+                writeSessionStorage(comparisonKey, String(enabled));
+                setComparisonPreference({ key: comparisonKey, enabled });
                 setSelectedArea(null);
                 setIsEvidenceVisible(false);
               }}
@@ -383,7 +399,13 @@ export function RadarProfileView() {
                     Puntaje actual: {selected.score.toLocaleString('es-BO')} /
                     10
                   </span>
-                  <span className="font-semibold">
+                  <span
+                    className={cn(
+                      'font-semibold',
+                      delta > 0 && 'text-success',
+                      delta < 0 && 'text-destructive',
+                    )}
+                  >
                     {delta === 0
                       ? 'Sin cambio'
                       : `${delta > 0 ? 'Subió' : 'Bajó'} ${Math.abs(delta).toLocaleString('es-BO')} puntos`}

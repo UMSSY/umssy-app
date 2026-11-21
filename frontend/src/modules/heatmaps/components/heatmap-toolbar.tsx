@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarRange, X } from "lucide-react";
+import { CalendarRange, FilterX, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ReportFilterSelect } from "@/modules/reports";
 import { HEATMAP_FILTER_TEXT, HEATMAP_MONTH_OPTIONS, HEATMAP_YEAR_OPTIONS } from "../constants/heatmap-filters.constants";
@@ -17,11 +17,13 @@ export function HeatmapToolbar({
   onMonthChange,
   onOpenDateRange,
   onClearDateRange,
+  onClearFilters,
   onExport,
   canExport,
   aside,
 }: HeatmapToolbarProps) {
   const range = filters.semesterRange;
+  const hasActiveFilters = Boolean(filters.careerId || filters.year || filters.month || range);
 
   return (
     <div role="search" aria-label="Filtros del mapa de calor" className="flex flex-wrap items-start justify-between gap-4 rounded-lg border border-border bg-surface p-4">
@@ -43,6 +45,10 @@ export function HeatmapToolbar({
         {config.showMonthFilter && (
           <ReportFilterSelect label={HEATMAP_FILTER_TEXT.monthLabel} allLabel={HEATMAP_FILTER_TEXT.allMonths} options={HEATMAP_MONTH_OPTIONS} value={filters.month} onChange={onMonthChange} />
         )}
+        <Button type="button" onClick={onClearFilters} disabled={!hasActiveFilters} className="gap-2 sm:self-center">
+          <FilterX className="size-4" aria-hidden="true" />
+          {HEATMAP_FILTER_TEXT.clearFilters}
+        </Button>
       </div>
 
       <div className="flex flex-col items-end gap-3">

@@ -27,6 +27,7 @@ export function AffinityRadarChart({
   projectedScores,
   previousScores,
   isComparisonEnabled = false,
+  highlightedArea,
   onComparisonChange,
   previousPublishedAt,
   publishedAt,
@@ -137,6 +138,7 @@ export function AffinityRadarChart({
                   tick={({ x, y, textAnchor, verticalAnchor, index }) => (
                     <AffinityRadarAxisTick
                       area={areas[index]}
+                      highlighted={areas[index].id === highlightedArea}
                       x={x}
                       y={areas[index].id === 'desarrollo' ? Number(y) - 10 : y}
                       textAnchor={textAnchor}
@@ -182,6 +184,11 @@ export function AffinityRadarChart({
                     <AffinityRadarDot
                       key={areas[index].id}
                       area={areas[index]}
+                      className={
+                        areas[index].id === highlightedArea
+                          ? 'stroke-yellow-500'
+                          : undefined
+                      }
                       cx={cx}
                       cy={cy}
                       onAreaClick={onAreaClick}

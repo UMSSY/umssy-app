@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { Info, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,21 +9,30 @@ import { DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { SURVEY_ALERT_THRESHOLD_MAX, SURVEY_ALERT_THRESHOLD_MIN, SURVEY_ALERTS_TEXT } from "../constants/survey-participation.constants";
+import { SURVEY_ALERTS_TEXT } from "../constants/survey-participation.constants";
 import type { SurveyAlertFormErrors } from "../types/survey-alert-form-errors.types";
 import type { SurveyAlertsFormProps } from "../types/survey-alerts-form-props.types";
+import { sanitizeAlertThreshold } from "../utils/sanitize-alert-threshold";
 import { parseAlertThreshold, validateSurveyAlertForm } from "../utils/validate-survey-alert-form";
 
-export function SurveyAlertsForm({ questions, config, isSaving, onCancel, onSave }: SurveyAlertsFormProps) {
+export function SurveyAlertsForm({ questions, config, isSaving, onCancel, onDirtyChange, onSave }: SurveyAlertsFormProps) {
   const fieldId = useId();
   const availableIds = (questions ?? []).map((question) => question.id);
   const [enabled, setEnabled] = useState(config.enabled);
   const [threshold, setThreshold] = useState(String(config.threshold));
-  const [questionIds, setQuestionIds] = useState<string[]>(
-    config.questionIds ? config.questionIds.filter((id) => availableIds.includes(id)) : availableIds,
-  );
+  const initialQuestionIds = config.questionIds ? config.questionIds.filter((id) => availableIds.includes(id)) : availableIds;
+  const [questionIds, setQuestionIds] = useState<string[]>(initialQuestionIds);
   const [errors, setErrors] = useState<SurveyAlertFormErrors>({});
   const isDisabled = !enabled || isSaving;
+  const isDirty =
+    enabled !== config.enabled ||
+    threshold !== String(config.threshold) ||
+    questionIds.length !== initialQuestionIds.length ||
+    questionIds.some((id) => !initialQuestionIds.includes(id));
+
+  useEffect(() => {
+    onDirtyChange(isDirty);
+  }, [isDirty, onDirtyChange]);
   const thresholdId = `${fieldId}-threshold`;
   const thresholdHintId = `${fieldId}-threshold-hint`;
   const thresholdErrorId = `${fieldId}-threshold-error`;
@@ -77,13 +86,12 @@ export function SurveyAlertsForm({ questions, config, isSaving, onCancel, onSave
             <div className="relative w-28">
               <Input
                 id={thresholdId}
-                type="number"
+                type="text"
                 inputMode="numeric"
-                min={SURVEY_ALERT_THRESHOLD_MIN}
-                max={SURVEY_ALERT_THRESHOLD_MAX}
+                autoComplete="off"
                 value={threshold}
                 onChange={(event) => {
-                  setThreshold(event.target.value);
+                  setThreshold(sanitizeAlertThreshold(event.target.value));
                   setErrors((current) => ({ ...current, threshold: undefined }));
                 }}
                 disabled={isDisabled}
@@ -172,7 +180,7 @@ export function SurveyAlertsForm({ questions, config, isSaving, onCancel, onSave
         <Button type="button" variant="outline" onClick={onCancel} disabled={isSaving}>
           {SURVEY_ALERTS_TEXT.cancel}
         </Button>
-        <Button type="button" onClick={() => void handleSave()} disabled={isSaving}>
+        <Button type="button" onClick={() => void handleSave()} disabled={isSaving || !isDirty}>
           {isSaving && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}
           {isSaving ? SURVEY_ALERTS_TEXT.saving : SURVEY_ALERTS_TEXT.save}
         </Button>

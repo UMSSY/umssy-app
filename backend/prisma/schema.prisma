@@ -1273,6 +1273,7 @@ model Survey {
   closingSoonNotifiedAt DateTime? @map("closing_soon_notified_at") @db.Timestamptz(6)
   closedNotifiedAt      DateTime? @map("closed_notified_at") @db.Timestamptz(6)
   lastReminderSentAt    DateTime? @map("last_reminder_sent_at") @db.Timestamptz(6)
+  publishedNotifiedPeriod String? @map("published_notified_period") @db.VarChar(7)
   createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt             DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 

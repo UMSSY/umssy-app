@@ -308,6 +308,14 @@ describe("service worker lifecycle", () => {
       "/_next/static/chunks/page.js": asset("page"),
     };
     const worker = loadWorker(routes);
+    const fetchRoute = worker.fetch.getMockImplementation()!;
+    worker.fetch.mockImplementation(async (request) => {
+      if (keyOf(request) === `${ORIGIN}/events/my-passes` &&
+          !(request instanceof Request && request.credentials === "omit" && request.headers.get("x-umssy-offline-shell") === "1")) {
+        return Response.redirect(`${ORIGIN}/login`);
+      }
+      return fetchRoute(request);
+    });
     await worker.install();
 
     expect(worker.self.skipWaiting).toHaveBeenCalled();

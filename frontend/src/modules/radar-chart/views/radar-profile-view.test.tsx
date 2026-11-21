@@ -122,12 +122,12 @@ describe('Radar personal integrado con Épica 2', () => {
   });
 
   it.each([
-    [0, 0, 'Sin cambio'],
-    [2, 0, 'Bajó 2 puntos'],
-    [0, 2, 'Subió 2 puntos'],
+    [0, 0, 'Sin cambio', 'font-semibold'],
+    [2, 0, 'Bajó 2 puntos', 'text-destructive'],
+    [0, 2, 'Subió 2 puntos', 'text-success'],
   ])(
     'compara el eje con diferencia %s',
-    (previousScore, currentScore, label) => {
+    (previousScore, currentScore, label, colorClass) => {
       const data = mockHook().data!;
       setRadar({
         data: {
@@ -152,8 +152,8 @@ describe('Radar personal integrado con Épica 2', () => {
           },
         },
       });
-      renderWithQuery(<RadarProfileView />);
-      const toggle = screen.getByRole('switch', {
+      const view = renderWithQuery(<RadarProfileView />);
+      let toggle = screen.getByRole('switch', {
         name: 'Comparar con la anterior',
       });
       expect(toggle).not.toBeChecked();
@@ -163,6 +163,10 @@ describe('Radar personal integrado con Épica 2', () => {
       expect(document.querySelectorAll('.recharts-radar')).toHaveLength(1);
       fireEvent.click(toggle);
       expect(toggle).toBeChecked();
+      view.unmount();
+      renderWithQuery(<RadarProfileView />);
+      toggle = screen.getByRole('switch', { name: 'Comparar con la anterior' });
+      expect(toggle).toBeChecked();
       expect(document.querySelectorAll('.recharts-radar')).toHaveLength(2);
       expect(
         screen.getByRole('heading', { name: 'Detalle de los cambios' }),
@@ -171,7 +175,15 @@ describe('Radar personal integrado con Épica 2', () => {
         screen.queryByRole('table', { name: 'Cambios por eje' }),
       ).not.toBeInTheDocument();
       fireEvent.click(screen.getByRole('button', { name: 'QA' }));
-      expect(screen.getByText(label)).toBeInTheDocument();
+      expect(screen.getByText(label)).toHaveClass(colorClass);
+      expect(
+        screen
+          .getByRole('button', { name: 'Ver detalle de QA' })
+          .querySelector('text'),
+      ).toHaveClass('fill-accent', 'underline');
+      expect(
+        screen.getByTestId('radar-dot-qa').querySelector('.stroke-yellow-500'),
+      ).toBeInTheDocument();
       expect(
         screen.getByText(`Puntaje anterior: ${previousScore} / 10`),
       ).toBeInTheDocument();

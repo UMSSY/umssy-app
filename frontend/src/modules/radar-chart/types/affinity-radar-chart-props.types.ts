@@ -6,6 +6,7 @@ export interface AffinityRadarChartProps {
   projectedScores?: Partial<Record<AreaId, number>>;
   previousScores?: Partial<Record<AreaId, number>>;
   isComparisonEnabled?: boolean;
+  highlightedArea?: AreaId;
   onComparisonChange?: (enabled: boolean) => void;
   previousPublishedAt?: string;
   publishedAt?: string | null;

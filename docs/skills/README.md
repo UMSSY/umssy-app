@@ -203,3 +203,5 @@ The frontend does not call this service; its data is shown in the backoffice hea
 - Detected skills panel with analysis state and manual re-analysis.
 - Skill chips in light blue for experiences and vacancies.
 - `SkillAnalysisService.findSkillSummariesByUserIds` and the `UserSkillSummaryResponse` contract to feed the heatmaps.
+
+Experience-linked skills appear once in the general list alongside manual skills. A manual skill keeps its manual origin when linked to work experiences; the remove action is hidden while experience evidence exists and reappears after its last experience is removed. Skills created automatically by Matching keep source `nlp` instead of being promoted to `manual`. The repository handles both structured `work-experience` references and older `work_experience:` references. Deleting one experience preserves skills referenced by others; deleting the final reference removes only skills without a manual origin. An NLP analysis refreshes the general skill list without a page reload.
