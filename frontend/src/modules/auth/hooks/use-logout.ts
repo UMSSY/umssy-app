@@ -1,6 +1,7 @@
 "use client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { waitForAccessTokenWrites } from "@/shared/services/storage/access-token-storage";
 import { endSession } from "../utils/session";
 import { usePushNotifications } from "@/shared/hooks/use-push-notifications";
 
@@ -25,6 +26,8 @@ export function useLogout() {
 
     endSession();
     queryClient.clear();
-    router.replace("/login");
+    if (navigator.onLine === false) {
+      void waitForAccessTokenWrites().then(() => window.location.replace("/login"));
+    } else router.replace("/login");
   };
 }

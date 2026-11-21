@@ -20,6 +20,6 @@ export function useMentorFreeBlocks(mentorId: string, weekRange: WeekRange) {
   return {
     blocks: query.data ?? [],
     isLoading: query.isPending,
-    error: query.isError ? MENTOR_FREE_BLOCKS_TEXT.loadError : null,
+    error: query.isError && query.data === undefined ? MENTOR_FREE_BLOCKS_TEXT.loadError : null,
   };
 }

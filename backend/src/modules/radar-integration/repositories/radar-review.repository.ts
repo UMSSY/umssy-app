@@ -27,7 +27,7 @@ export class RadarReviewRepository {
     operationId: string,
     context: TransactionContext,
   ): Promise<void> {
-    await context.client.$queryRaw`
+    await context.client.$executeRaw`
       SELECT pg_advisory_xact_lock(hashtextextended(${operationId}, 0))
     `;
   }

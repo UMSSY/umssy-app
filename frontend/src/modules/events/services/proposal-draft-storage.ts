@@ -14,7 +14,8 @@ export const proposalDraftStorage = {
     const value = await storage.read(userId) as ProposalDraft | undefined;
     if (!value || !value.values || Object.keys(EMPTY_PROPOSAL).some((key) => typeof value.values[key as keyof ProposalValues] !== 'string')) return null;
     if (value.file !== null && !(value.file instanceof File)) return null;
-    return { values: value.values, file: value.file, operationKey: typeof value.operationKey === 'string' ? value.operationKey : null };
+    const locations = value.locations && typeof value.locations.presencial === 'string' && typeof value.locations.virtual === 'string' ? value.locations : undefined;
+    return { ...(locations ? { locations } : {}), values: value.values, file: value.file, operationKey: typeof value.operationKey === 'string' ? value.operationKey : null };
   },
   save(userId: string, draft: ProposalDraft) {
     writes = writes.catch(() => undefined).then(async () => { await storage.write(userId, draft); });

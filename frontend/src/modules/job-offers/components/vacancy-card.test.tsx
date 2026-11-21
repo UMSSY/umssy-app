@@ -31,6 +31,33 @@ describe("VacancyCard", () => {
     expect(screen.getByText("Tipo de contrato: Tiempo completo")).toBeInTheDocument();
   });
 
+  it("muestra hace cuánto se publicó la vacante", () => {
+    renderCard({ offer: buildJobOffer({ publishedAt: new Date().toISOString() }) });
+
+    expect(screen.getByText(/Publicado: .* · Hoy/)).toBeInTheDocument();
+  });
+
+  it("muestra la fecha de expiración", () => {
+    renderCard({ offer: buildJobOffer({ expiresAt: "2026-12-31T03:59:00.000Z" }) });
+
+    expect(screen.getByText("Expiración: 30/12/2026")).toBeInTheDocument();
+  });
+
+  it("indica que no hay fecha de cierre cuando no se definió expiración", () => {
+    renderCard({ offer: buildJobOffer({ expiresAt: null }) });
+
+    expect(screen.getByText("Expiración: Sin fecha de cierre")).toBeInTheDocument();
+  });
+
+  it("muestra la expiración también en vacantes cerradas del historial", () => {
+    renderCard({
+      offer: buildJobOffer({ status: "Cerrada", expiresAt: "2026-12-31T03:59:00.000Z" }),
+      showStatus: true,
+    });
+
+    expect(screen.getByText("Expiración: 30/12/2026")).toBeInTheDocument();
+  });
+
   it("no muestra la etiqueta de estado por defecto", () => {
     renderCard();
 

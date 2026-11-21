@@ -36,12 +36,14 @@ import { NlpModule } from './modules/nlp/nlp.module.js';
 import { RadarIntegrationModule } from './modules/radar-integration/radar-integration.module.js';
 import { SurveysModule } from './modules/surveys/surveys.module.js';
 import { AppointmentsModule } from './modules/appointments/appointments.module.js';
+import { ScheduleModule } from '@nestjs/schedule';
 import { NotificationsModule } from './modules/notifications/notifications.module.js';
 import { CompanyAccessRequestsModule } from './modules/company-access-requests/company-access-requests.module.js';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    ScheduleModule.forRoot(),
     PrismaModule,
     MailModule,
     AvailabilityModule,

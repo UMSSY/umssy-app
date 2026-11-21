@@ -290,6 +290,7 @@ export type UserWhereInput = {
   studentAppointments?: Prisma.AppointmentListRelationFilter
   cancelledAppointments?: Prisma.AppointmentListRelationFilter
   appointmentChanges?: Prisma.AppointmentHistoryListRelationFilter
+  appointmentNotifications?: Prisma.AppointmentNotificationListRelationFilter
   createdEvents?: Prisma.EventListRelationFilter
   moderatedEvents?: Prisma.EventListRelationFilter
   eventRegistrations?: Prisma.EventRegistrationListRelationFilter
@@ -372,6 +373,7 @@ export type UserOrderByWithRelationInput = {
   studentAppointments?: Prisma.AppointmentOrderByRelationAggregateInput
   cancelledAppointments?: Prisma.AppointmentOrderByRelationAggregateInput
   appointmentChanges?: Prisma.AppointmentHistoryOrderByRelationAggregateInput
+  appointmentNotifications?: Prisma.AppointmentNotificationOrderByRelationAggregateInput
   createdEvents?: Prisma.EventOrderByRelationAggregateInput
   moderatedEvents?: Prisma.EventOrderByRelationAggregateInput
   eventRegistrations?: Prisma.EventRegistrationOrderByRelationAggregateInput
@@ -457,6 +459,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   studentAppointments?: Prisma.AppointmentListRelationFilter
   cancelledAppointments?: Prisma.AppointmentListRelationFilter
   appointmentChanges?: Prisma.AppointmentHistoryListRelationFilter
+  appointmentNotifications?: Prisma.AppointmentNotificationListRelationFilter
   createdEvents?: Prisma.EventListRelationFilter
   moderatedEvents?: Prisma.EventListRelationFilter
   eventRegistrations?: Prisma.EventRegistrationListRelationFilter
@@ -581,6 +584,7 @@ export type UserCreateInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -661,6 +665,7 @@ export type UserUncheckedCreateInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -741,6 +746,7 @@ export type UserUpdateInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -821,6 +827,7 @@ export type UserUncheckedUpdateInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -1302,6 +1309,20 @@ export type UserUpdateOneWithoutAppointmentChangesNestedInput = {
   delete?: Prisma.UserWhereInput | boolean
   connect?: Prisma.UserWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAppointmentChangesInput, Prisma.UserUpdateWithoutAppointmentChangesInput>, Prisma.UserUncheckedUpdateWithoutAppointmentChangesInput>
+}
+
+export type UserCreateNestedOneWithoutAppointmentNotificationsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAppointmentNotificationsInput, Prisma.UserUncheckedCreateWithoutAppointmentNotificationsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAppointmentNotificationsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutAppointmentNotificationsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAppointmentNotificationsInput, Prisma.UserUncheckedCreateWithoutAppointmentNotificationsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAppointmentNotificationsInput
+  upsert?: Prisma.UserUpsertWithoutAppointmentNotificationsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAppointmentNotificationsInput, Prisma.UserUpdateWithoutAppointmentNotificationsInput>, Prisma.UserUncheckedUpdateWithoutAppointmentNotificationsInput>
 }
 
 export type UserCreateNestedOneWithoutCreatedEventsInput = {
@@ -2014,6 +2035,7 @@ export type UserCreateWithoutCityInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -2093,6 +2115,7 @@ export type UserUncheckedCreateWithoutCityInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -2220,6 +2243,7 @@ export type UserCreateWithoutCompanyInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -2299,6 +2323,7 @@ export type UserUncheckedCreateWithoutCompanyInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -2404,6 +2429,7 @@ export type UserCreateWithoutRolesInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -2483,6 +2509,7 @@ export type UserUncheckedCreateWithoutRolesInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -2578,6 +2605,7 @@ export type UserUpdateWithoutRolesInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -2657,6 +2685,7 @@ export type UserUncheckedUpdateWithoutRolesInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -2736,6 +2765,7 @@ export type UserCreateWithoutEducationsInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -2815,6 +2845,7 @@ export type UserUncheckedCreateWithoutEducationsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -2910,6 +2941,7 @@ export type UserUpdateWithoutEducationsInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -2989,6 +3021,7 @@ export type UserUncheckedUpdateWithoutEducationsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -3068,6 +3101,7 @@ export type UserCreateWithoutWorkExperiencesInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -3147,6 +3181,7 @@ export type UserUncheckedCreateWithoutWorkExperiencesInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -3242,6 +3277,7 @@ export type UserUpdateWithoutWorkExperiencesInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -3321,6 +3357,7 @@ export type UserUncheckedUpdateWithoutWorkExperiencesInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -3400,6 +3437,7 @@ export type UserCreateWithoutUserSkillsInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -3479,6 +3517,7 @@ export type UserUncheckedCreateWithoutUserSkillsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -3574,6 +3613,7 @@ export type UserUpdateWithoutUserSkillsInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -3653,6 +3693,7 @@ export type UserUncheckedUpdateWithoutUserSkillsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -3732,6 +3773,7 @@ export type UserCreateWithoutCertificationsInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -3811,6 +3853,7 @@ export type UserUncheckedCreateWithoutCertificationsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -3906,6 +3949,7 @@ export type UserUpdateWithoutCertificationsInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -3985,6 +4029,7 @@ export type UserUncheckedUpdateWithoutCertificationsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -4064,6 +4109,7 @@ export type UserCreateWithoutCvFilesInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -4143,6 +4189,7 @@ export type UserUncheckedCreateWithoutCvFilesInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -4238,6 +4285,7 @@ export type UserUpdateWithoutCvFilesInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -4317,6 +4365,7 @@ export type UserUncheckedUpdateWithoutCvFilesInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -4396,6 +4445,7 @@ export type UserCreateWithoutSkillProcessingStateInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -4475,6 +4525,7 @@ export type UserUncheckedCreateWithoutSkillProcessingStateInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -4570,6 +4621,7 @@ export type UserUpdateWithoutSkillProcessingStateInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -4649,6 +4701,7 @@ export type UserUncheckedUpdateWithoutSkillProcessingStateInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -4728,6 +4781,7 @@ export type UserCreateWithoutMentorTechnicalAreasInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -4807,6 +4861,7 @@ export type UserUncheckedCreateWithoutMentorTechnicalAreasInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -4902,6 +4957,7 @@ export type UserUpdateWithoutMentorTechnicalAreasInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -4981,6 +5037,7 @@ export type UserUncheckedUpdateWithoutMentorTechnicalAreasInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -5060,6 +5117,7 @@ export type UserCreateWithoutMentorOrientationTypesInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -5139,6 +5197,7 @@ export type UserUncheckedCreateWithoutMentorOrientationTypesInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -5234,6 +5293,7 @@ export type UserUpdateWithoutMentorOrientationTypesInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -5313,6 +5373,7 @@ export type UserUncheckedUpdateWithoutMentorOrientationTypesInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -5392,6 +5453,7 @@ export type UserCreateWithoutAvailabilityBlocksInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -5471,6 +5533,7 @@ export type UserUncheckedCreateWithoutAvailabilityBlocksInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -5566,6 +5629,7 @@ export type UserUpdateWithoutAvailabilityBlocksInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -5645,6 +5709,7 @@ export type UserUncheckedUpdateWithoutAvailabilityBlocksInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -5724,6 +5789,7 @@ export type UserCreateWithoutBlockedDatesInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -5803,6 +5869,7 @@ export type UserUncheckedCreateWithoutBlockedDatesInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -5898,6 +5965,7 @@ export type UserUpdateWithoutBlockedDatesInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -5977,6 +6045,7 @@ export type UserUncheckedUpdateWithoutBlockedDatesInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -6056,6 +6125,7 @@ export type UserCreateWithoutMentorAppointmentsInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -6135,6 +6205,7 @@ export type UserUncheckedCreateWithoutMentorAppointmentsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -6219,6 +6290,7 @@ export type UserCreateWithoutStudentAppointmentsInput = {
   mentorAppointments?: Prisma.AppointmentCreateNestedManyWithoutMentorInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -6298,6 +6370,7 @@ export type UserUncheckedCreateWithoutStudentAppointmentsInput = {
   mentorAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutMentorInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -6382,6 +6455,7 @@ export type UserCreateWithoutCancelledAppointmentsInput = {
   mentorAppointments?: Prisma.AppointmentCreateNestedManyWithoutMentorInput
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -6461,6 +6535,7 @@ export type UserUncheckedCreateWithoutCancelledAppointmentsInput = {
   mentorAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutMentorInput
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -6556,6 +6631,7 @@ export type UserUpdateWithoutMentorAppointmentsInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -6635,6 +6711,7 @@ export type UserUncheckedUpdateWithoutMentorAppointmentsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -6725,6 +6802,7 @@ export type UserUpdateWithoutStudentAppointmentsInput = {
   mentorAppointments?: Prisma.AppointmentUpdateManyWithoutMentorNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -6804,6 +6882,7 @@ export type UserUncheckedUpdateWithoutStudentAppointmentsInput = {
   mentorAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutMentorNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -6894,6 +6973,7 @@ export type UserUpdateWithoutCancelledAppointmentsInput = {
   mentorAppointments?: Prisma.AppointmentUpdateManyWithoutMentorNestedInput
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -6973,6 +7053,7 @@ export type UserUncheckedUpdateWithoutCancelledAppointmentsInput = {
   mentorAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutMentorNestedInput
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -7052,6 +7133,7 @@ export type UserCreateWithoutAppointmentChangesInput = {
   mentorAppointments?: Prisma.AppointmentCreateNestedManyWithoutMentorInput
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -7131,6 +7213,7 @@ export type UserUncheckedCreateWithoutAppointmentChangesInput = {
   mentorAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutMentorInput
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -7226,6 +7309,7 @@ export type UserUpdateWithoutAppointmentChangesInput = {
   mentorAppointments?: Prisma.AppointmentUpdateManyWithoutMentorNestedInput
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -7305,6 +7389,323 @@ export type UserUncheckedUpdateWithoutAppointmentChangesInput = {
   mentorAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutMentorNestedInput
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
+  createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedUpdateManyWithoutReviewerNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
+  socialAccounts?: Prisma.UserSocialAccountUncheckedUpdateManyWithoutUserNestedInput
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedUpdateManyWithoutUserNestedInput
+  notificationPreferences?: Prisma.NotificationPreferenceUncheckedUpdateOneWithoutUserNestedInput
+  receivedNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
+  triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutAppointmentNotificationsInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
+  city?: Prisma.CityCreateNestedOneWithoutUsersInput
+  roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationCreateNestedManyWithoutReviewerInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
+  socialAccounts?: Prisma.UserSocialAccountCreateNestedManyWithoutUserInput
+  portfolioProjects?: Prisma.UserPortfolioProjectCreateNestedManyWithoutUserInput
+  notificationPreferences?: Prisma.NotificationPreferenceCreateNestedOneWithoutUserInput
+  receivedNotifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
+  triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutAppointmentNotificationsInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  cityId?: string | null
+  companyId?: string | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutOwnerInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUncheckedCreateNestedManyWithoutReviewerInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
+  socialAccounts?: Prisma.UserSocialAccountUncheckedCreateNestedManyWithoutUserInput
+  portfolioProjects?: Prisma.UserPortfolioProjectUncheckedCreateNestedManyWithoutUserInput
+  notificationPreferences?: Prisma.NotificationPreferenceUncheckedCreateNestedOneWithoutUserInput
+  receivedNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
+  triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutAppointmentNotificationsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutAppointmentNotificationsInput, Prisma.UserUncheckedCreateWithoutAppointmentNotificationsInput>
+}
+
+export type UserUpsertWithoutAppointmentNotificationsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutAppointmentNotificationsInput, Prisma.UserUncheckedUpdateWithoutAppointmentNotificationsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutAppointmentNotificationsInput, Prisma.UserUncheckedCreateWithoutAppointmentNotificationsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutAppointmentNotificationsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutAppointmentNotificationsInput, Prisma.UserUncheckedUpdateWithoutAppointmentNotificationsInput>
+}
+
+export type UserUpdateWithoutAppointmentNotificationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
+  city?: Prisma.CityUpdateOneWithoutUsersNestedInput
+  roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  documentVerifications?: Prisma.RadarDocumentVerificationUpdateManyWithoutOwnerNestedInput
+  reviewedDocuments?: Prisma.RadarDocumentVerificationUpdateManyWithoutReviewerNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
+  socialAccounts?: Prisma.UserSocialAccountUpdateManyWithoutUserNestedInput
+  portfolioProjects?: Prisma.UserPortfolioProjectUpdateManyWithoutUserNestedInput
+  notificationPreferences?: Prisma.NotificationPreferenceUpdateOneWithoutUserNestedInput
+  receivedNotifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
+  triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutAppointmentNotificationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -7385,6 +7786,7 @@ export type UserCreateWithoutCreatedEventsInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
   checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
@@ -7464,6 +7866,7 @@ export type UserUncheckedCreateWithoutCreatedEventsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
   checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
@@ -7548,6 +7951,7 @@ export type UserCreateWithoutModeratedEventsInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
   checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
@@ -7627,6 +8031,7 @@ export type UserUncheckedCreateWithoutModeratedEventsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
   checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
@@ -7722,6 +8127,7 @@ export type UserUpdateWithoutCreatedEventsInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
   checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
@@ -7801,6 +8207,7 @@ export type UserUncheckedUpdateWithoutCreatedEventsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
   checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
@@ -7891,6 +8298,7 @@ export type UserUpdateWithoutModeratedEventsInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
   checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
@@ -7970,6 +8378,7 @@ export type UserUncheckedUpdateWithoutModeratedEventsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
   checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
@@ -8049,6 +8458,7 @@ export type UserCreateWithoutEventRegistrationsInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
@@ -8128,6 +8538,7 @@ export type UserUncheckedCreateWithoutEventRegistrationsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
@@ -8223,6 +8634,7 @@ export type UserUpdateWithoutEventRegistrationsInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
@@ -8302,6 +8714,7 @@ export type UserUncheckedUpdateWithoutEventRegistrationsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
@@ -8381,6 +8794,7 @@ export type UserCreateWithoutCheckedInAttendancesInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -8460,6 +8874,7 @@ export type UserUncheckedCreateWithoutCheckedInAttendancesInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -8555,6 +8970,7 @@ export type UserUpdateWithoutCheckedInAttendancesInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -8634,6 +9050,7 @@ export type UserUncheckedUpdateWithoutCheckedInAttendancesInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -8713,6 +9130,7 @@ export type UserCreateWithoutExportHistoriesInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -8792,6 +9210,7 @@ export type UserUncheckedCreateWithoutExportHistoriesInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -8887,6 +9306,7 @@ export type UserUpdateWithoutExportHistoriesInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -8966,6 +9386,7 @@ export type UserUncheckedUpdateWithoutExportHistoriesInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -9045,6 +9466,7 @@ export type UserCreateWithoutOpenedAccessRequestsInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -9124,6 +9546,7 @@ export type UserUncheckedCreateWithoutOpenedAccessRequestsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -9208,6 +9631,7 @@ export type UserCreateWithoutReviewedAccessRequestsInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -9287,6 +9711,7 @@ export type UserUncheckedCreateWithoutReviewedAccessRequestsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -9371,6 +9796,7 @@ export type UserCreateWithoutApprovedAccessRequestInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -9450,6 +9876,7 @@ export type UserUncheckedCreateWithoutApprovedAccessRequestInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -9545,6 +9972,7 @@ export type UserUpdateWithoutOpenedAccessRequestsInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -9624,6 +10052,7 @@ export type UserUncheckedUpdateWithoutOpenedAccessRequestsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -9714,6 +10143,7 @@ export type UserUpdateWithoutReviewedAccessRequestsInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -9793,6 +10223,7 @@ export type UserUncheckedUpdateWithoutReviewedAccessRequestsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -9883,6 +10314,7 @@ export type UserUpdateWithoutApprovedAccessRequestInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -9962,6 +10394,7 @@ export type UserUncheckedUpdateWithoutApprovedAccessRequestInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -10041,6 +10474,7 @@ export type UserCreateWithoutMentorParticipationRequestsInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -10120,6 +10554,7 @@ export type UserUncheckedCreateWithoutMentorParticipationRequestsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -10215,6 +10650,7 @@ export type UserUpdateWithoutMentorParticipationRequestsInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -10294,6 +10730,7 @@ export type UserUncheckedUpdateWithoutMentorParticipationRequestsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -10373,6 +10810,7 @@ export type UserCreateWithoutMentorSlotOffersInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -10452,6 +10890,7 @@ export type UserUncheckedCreateWithoutMentorSlotOffersInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -10547,6 +10986,7 @@ export type UserUpdateWithoutMentorSlotOffersInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -10626,6 +11066,7 @@ export type UserUncheckedUpdateWithoutMentorSlotOffersInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -10705,6 +11146,7 @@ export type UserCreateWithoutConversationsAsUserAInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -10784,6 +11226,7 @@ export type UserUncheckedCreateWithoutConversationsAsUserAInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -10868,6 +11311,7 @@ export type UserCreateWithoutConversationsAsUserBInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -10947,6 +11391,7 @@ export type UserUncheckedCreateWithoutConversationsAsUserBInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -11042,6 +11487,7 @@ export type UserUpdateWithoutConversationsAsUserAInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -11121,6 +11567,7 @@ export type UserUncheckedUpdateWithoutConversationsAsUserAInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -11211,6 +11658,7 @@ export type UserUpdateWithoutConversationsAsUserBInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -11290,6 +11738,7 @@ export type UserUncheckedUpdateWithoutConversationsAsUserBInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -11369,6 +11818,7 @@ export type UserCreateWithoutChatParticipantsInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -11448,6 +11898,7 @@ export type UserUncheckedCreateWithoutChatParticipantsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -11543,6 +11994,7 @@ export type UserUpdateWithoutChatParticipantsInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -11622,6 +12074,7 @@ export type UserUncheckedUpdateWithoutChatParticipantsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -11701,6 +12154,7 @@ export type UserCreateWithoutChatMessagesInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -11780,6 +12234,7 @@ export type UserUncheckedCreateWithoutChatMessagesInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -11875,6 +12330,7 @@ export type UserUpdateWithoutChatMessagesInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -11954,6 +12410,7 @@ export type UserUncheckedUpdateWithoutChatMessagesInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -12033,6 +12490,7 @@ export type UserCreateWithoutChatBlocksMadeInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -12112,6 +12570,7 @@ export type UserUncheckedCreateWithoutChatBlocksMadeInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -12196,6 +12655,7 @@ export type UserCreateWithoutChatBlocksReceivedInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -12275,6 +12735,7 @@ export type UserUncheckedCreateWithoutChatBlocksReceivedInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -12370,6 +12831,7 @@ export type UserUpdateWithoutChatBlocksMadeInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -12449,6 +12911,7 @@ export type UserUncheckedUpdateWithoutChatBlocksMadeInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -12539,6 +13002,7 @@ export type UserUpdateWithoutChatBlocksReceivedInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -12618,6 +13082,7 @@ export type UserUncheckedUpdateWithoutChatBlocksReceivedInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -12697,6 +13162,7 @@ export type UserCreateWithoutSentRequestsInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -12776,6 +13242,7 @@ export type UserUncheckedCreateWithoutSentRequestsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -12860,6 +13327,7 @@ export type UserCreateWithoutReceivedRequestsInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -12939,6 +13407,7 @@ export type UserUncheckedCreateWithoutReceivedRequestsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -13034,6 +13503,7 @@ export type UserUpdateWithoutSentRequestsInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -13113,6 +13583,7 @@ export type UserUncheckedUpdateWithoutSentRequestsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -13203,6 +13674,7 @@ export type UserUpdateWithoutReceivedRequestsInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -13282,6 +13754,7 @@ export type UserUncheckedUpdateWithoutReceivedRequestsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -13361,6 +13834,7 @@ export type UserCreateWithoutPresenceInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -13440,6 +13914,7 @@ export type UserUncheckedCreateWithoutPresenceInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -13535,6 +14010,7 @@ export type UserUpdateWithoutPresenceInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -13614,6 +14090,7 @@ export type UserUncheckedUpdateWithoutPresenceInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -13693,6 +14170,7 @@ export type UserCreateWithoutPasswordHistoriesInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -13772,6 +14250,7 @@ export type UserUncheckedCreateWithoutPasswordHistoriesInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -14199,6 +14678,7 @@ export type UserUpdateWithoutPasswordResetOtpsInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -14278,6 +14758,7 @@ export type UserUncheckedUpdateWithoutPasswordResetOtpsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -14357,6 +14838,7 @@ export type UserCreateWithoutMentorParticipationAttemptLimitInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -14436,6 +14918,7 @@ export type UserUncheckedCreateWithoutMentorParticipationAttemptLimitInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -14531,6 +15014,7 @@ export type UserUpdateWithoutMentorParticipationAttemptLimitInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -14610,6 +15094,7 @@ export type UserUncheckedUpdateWithoutMentorParticipationAttemptLimitInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -14689,6 +15174,7 @@ export type UserCreateWithoutJobApplicationsInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -14768,6 +15254,7 @@ export type UserUncheckedCreateWithoutJobApplicationsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -14863,6 +15350,7 @@ export type UserUpdateWithoutJobApplicationsInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -14942,6 +15430,7 @@ export type UserUncheckedUpdateWithoutJobApplicationsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -15021,6 +15510,7 @@ export type UserCreateWithoutCreatedSurveysInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -15100,6 +15590,7 @@ export type UserUncheckedCreateWithoutCreatedSurveysInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -15195,6 +15686,7 @@ export type UserUpdateWithoutCreatedSurveysInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -15274,6 +15766,7 @@ export type UserUncheckedUpdateWithoutCreatedSurveysInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -15353,6 +15846,7 @@ export type UserCreateWithoutSurveyResponsesInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -15432,6 +15926,7 @@ export type UserUncheckedCreateWithoutSurveyResponsesInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -15527,6 +16022,7 @@ export type UserUpdateWithoutSurveyResponsesInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -15606,6 +16102,7 @@ export type UserUncheckedUpdateWithoutSurveyResponsesInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -15685,6 +16182,7 @@ export type UserCreateWithoutAuditEventsInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -15764,6 +16262,7 @@ export type UserUncheckedCreateWithoutAuditEventsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -15859,6 +16358,7 @@ export type UserUpdateWithoutAuditEventsInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -15938,6 +16438,7 @@ export type UserUncheckedUpdateWithoutAuditEventsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -16017,6 +16518,7 @@ export type UserCreateWithoutRevertedValidationsInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -16096,6 +16598,7 @@ export type UserUncheckedCreateWithoutRevertedValidationsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -16191,6 +16694,7 @@ export type UserUpdateWithoutRevertedValidationsInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -16270,6 +16774,7 @@ export type UserUncheckedUpdateWithoutRevertedValidationsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -16348,6 +16853,7 @@ export type UserCreateWithoutMentorIntakeAttemptsInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -16427,6 +16933,7 @@ export type UserUncheckedCreateWithoutMentorIntakeAttemptsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -16522,6 +17029,7 @@ export type UserUpdateWithoutMentorIntakeAttemptsInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -16601,6 +17109,7 @@ export type UserUncheckedUpdateWithoutMentorIntakeAttemptsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -16680,6 +17189,7 @@ export type UserCreateWithoutMentorParticipationSanctionsInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -16759,6 +17269,7 @@ export type UserUncheckedCreateWithoutMentorParticipationSanctionsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -16854,6 +17365,7 @@ export type UserUpdateWithoutMentorParticipationSanctionsInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -16933,6 +17445,7 @@ export type UserUncheckedUpdateWithoutMentorParticipationSanctionsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -17013,6 +17526,7 @@ export type UserCreateWithoutRadarCvOwnedInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -17092,6 +17606,7 @@ export type UserUncheckedCreateWithoutRadarCvOwnedInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -17176,6 +17691,7 @@ export type UserCreateWithoutRadarCvReviewedInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -17255,6 +17771,7 @@ export type UserUncheckedCreateWithoutRadarCvReviewedInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -17350,6 +17867,7 @@ export type UserUpdateWithoutRadarCvOwnedInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -17429,6 +17947,7 @@ export type UserUncheckedUpdateWithoutRadarCvOwnedInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -17519,6 +18038,7 @@ export type UserUpdateWithoutRadarCvReviewedInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -17598,6 +18118,7 @@ export type UserUncheckedUpdateWithoutRadarCvReviewedInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -17677,6 +18198,7 @@ export type UserCreateWithoutRadarSnapshotsInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -17756,6 +18278,7 @@ export type UserUncheckedCreateWithoutRadarSnapshotsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -17851,6 +18374,7 @@ export type UserUpdateWithoutRadarSnapshotsInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -17930,6 +18454,7 @@ export type UserUncheckedUpdateWithoutRadarSnapshotsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -18009,6 +18534,7 @@ export type UserCreateWithoutRadarAuditSubjectsInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -18088,6 +18614,7 @@ export type UserUncheckedCreateWithoutRadarAuditSubjectsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -18172,6 +18699,7 @@ export type UserCreateWithoutRadarAuditActorsInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -18251,6 +18779,7 @@ export type UserUncheckedCreateWithoutRadarAuditActorsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -18346,6 +18875,7 @@ export type UserUpdateWithoutRadarAuditSubjectsInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -18425,6 +18955,7 @@ export type UserUncheckedUpdateWithoutRadarAuditSubjectsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -18515,6 +19046,7 @@ export type UserUpdateWithoutRadarAuditActorsInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -18594,6 +19126,7 @@ export type UserUncheckedUpdateWithoutRadarAuditActorsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -18673,6 +19206,7 @@ export type UserCreateWithoutDocumentVerificationsInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -18752,6 +19286,7 @@ export type UserUncheckedCreateWithoutDocumentVerificationsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -18836,6 +19371,7 @@ export type UserCreateWithoutReviewedDocumentsInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -18915,6 +19451,7 @@ export type UserUncheckedCreateWithoutReviewedDocumentsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -19010,6 +19547,7 @@ export type UserUpdateWithoutDocumentVerificationsInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -19089,6 +19627,7 @@ export type UserUncheckedUpdateWithoutDocumentVerificationsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -19179,6 +19718,7 @@ export type UserUpdateWithoutReviewedDocumentsInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -19258,6 +19798,7 @@ export type UserUncheckedUpdateWithoutReviewedDocumentsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -19337,6 +19878,7 @@ export type UserCreateWithoutSocialAccountsInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -19416,6 +19958,7 @@ export type UserUncheckedCreateWithoutSocialAccountsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -19511,6 +20054,7 @@ export type UserUpdateWithoutSocialAccountsInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -19590,6 +20134,7 @@ export type UserUncheckedUpdateWithoutSocialAccountsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -19669,6 +20214,7 @@ export type UserCreateWithoutPortfolioProjectsInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -19748,6 +20294,7 @@ export type UserUncheckedCreateWithoutPortfolioProjectsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -19843,6 +20390,7 @@ export type UserUpdateWithoutPortfolioProjectsInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -19922,6 +20470,7 @@ export type UserUncheckedUpdateWithoutPortfolioProjectsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -20001,6 +20550,7 @@ export type UserCreateWithoutReceivedNotificationsInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -20080,6 +20630,7 @@ export type UserUncheckedCreateWithoutReceivedNotificationsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -20164,6 +20715,7 @@ export type UserCreateWithoutTriggeredNotificationsInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -20243,6 +20795,7 @@ export type UserUncheckedCreateWithoutTriggeredNotificationsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -20338,6 +20891,7 @@ export type UserUpdateWithoutReceivedNotificationsInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -20417,6 +20971,7 @@ export type UserUncheckedUpdateWithoutReceivedNotificationsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -20507,6 +21062,7 @@ export type UserUpdateWithoutTriggeredNotificationsInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -20586,6 +21142,7 @@ export type UserUncheckedUpdateWithoutTriggeredNotificationsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -20665,6 +21222,7 @@ export type UserCreateWithoutPushSubscriptionsInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -20744,6 +21302,7 @@ export type UserUncheckedCreateWithoutPushSubscriptionsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -20839,6 +21398,7 @@ export type UserUpdateWithoutPushSubscriptionsInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -20918,6 +21478,7 @@ export type UserUncheckedUpdateWithoutPushSubscriptionsInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -20996,6 +21557,7 @@ export type UserCreateWithoutRefreshTokensInput = {
   studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
@@ -21075,6 +21637,7 @@ export type UserUncheckedCreateWithoutRefreshTokensInput = {
   studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
   cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedCreateNestedManyWithoutRecipientInput
   createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
@@ -21170,6 +21733,7 @@ export type UserUpdateWithoutRefreshTokensInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -21249,6 +21813,7 @@ export type UserUncheckedUpdateWithoutRefreshTokensInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -22674,6 +23239,7 @@ export type UserUpdateWithoutCityInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -22753,6 +23319,7 @@ export type UserUncheckedUpdateWithoutCityInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -22868,6 +23435,7 @@ export type UserUpdateWithoutCompanyInput = {
   studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
@@ -22947,6 +23515,7 @@ export type UserUncheckedUpdateWithoutCompanyInput = {
   studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
   cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
   appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  appointmentNotifications?: Prisma.AppointmentNotificationUncheckedUpdateManyWithoutRecipientNestedInput
   createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
@@ -23033,6 +23602,7 @@ export type UserCountOutputType = {
   studentAppointments: number
   cancelledAppointments: number
   appointmentChanges: number
+  appointmentNotifications: number
   createdEvents: number
   moderatedEvents: number
   eventRegistrations: number
@@ -23091,6 +23661,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   studentAppointments?: boolean | UserCountOutputTypeCountStudentAppointmentsArgs
   cancelledAppointments?: boolean | UserCountOutputTypeCountCancelledAppointmentsArgs
   appointmentChanges?: boolean | UserCountOutputTypeCountAppointmentChangesArgs
+  appointmentNotifications?: boolean | UserCountOutputTypeCountAppointmentNotificationsArgs
   createdEvents?: boolean | UserCountOutputTypeCountCreatedEventsArgs
   moderatedEvents?: boolean | UserCountOutputTypeCountModeratedEventsArgs
   eventRegistrations?: boolean | UserCountOutputTypeCountEventRegistrationsArgs
@@ -23258,6 +23829,13 @@ export type UserCountOutputTypeCountCancelledAppointmentsArgs<ExtArgs extends ru
  */
 export type UserCountOutputTypeCountAppointmentChangesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.AppointmentHistoryWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountAppointmentNotificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AppointmentNotificationWhereInput
 }
 
 /**
@@ -23564,6 +24142,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   studentAppointments?: boolean | Prisma.User$studentAppointmentsArgs<ExtArgs>
   cancelledAppointments?: boolean | Prisma.User$cancelledAppointmentsArgs<ExtArgs>
   appointmentChanges?: boolean | Prisma.User$appointmentChangesArgs<ExtArgs>
+  appointmentNotifications?: boolean | Prisma.User$appointmentNotificationsArgs<ExtArgs>
   createdEvents?: boolean | Prisma.User$createdEventsArgs<ExtArgs>
   moderatedEvents?: boolean | Prisma.User$moderatedEventsArgs<ExtArgs>
   eventRegistrations?: boolean | Prisma.User$eventRegistrationsArgs<ExtArgs>
@@ -23693,6 +24272,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   studentAppointments?: boolean | Prisma.User$studentAppointmentsArgs<ExtArgs>
   cancelledAppointments?: boolean | Prisma.User$cancelledAppointmentsArgs<ExtArgs>
   appointmentChanges?: boolean | Prisma.User$appointmentChangesArgs<ExtArgs>
+  appointmentNotifications?: boolean | Prisma.User$appointmentNotificationsArgs<ExtArgs>
   createdEvents?: boolean | Prisma.User$createdEventsArgs<ExtArgs>
   moderatedEvents?: boolean | Prisma.User$moderatedEventsArgs<ExtArgs>
   eventRegistrations?: boolean | Prisma.User$eventRegistrationsArgs<ExtArgs>
@@ -23770,6 +24350,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     studentAppointments: Prisma.$AppointmentPayload<ExtArgs>[]
     cancelledAppointments: Prisma.$AppointmentPayload<ExtArgs>[]
     appointmentChanges: Prisma.$AppointmentHistoryPayload<ExtArgs>[]
+    appointmentNotifications: Prisma.$AppointmentNotificationPayload<ExtArgs>[]
     createdEvents: Prisma.$EventPayload<ExtArgs>[]
     moderatedEvents: Prisma.$EventPayload<ExtArgs>[]
     eventRegistrations: Prisma.$EventRegistrationPayload<ExtArgs>[]
@@ -24245,6 +24826,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   studentAppointments<T extends Prisma.User$studentAppointmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$studentAppointmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AppointmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   cancelledAppointments<T extends Prisma.User$cancelledAppointmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$cancelledAppointmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AppointmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   appointmentChanges<T extends Prisma.User$appointmentChangesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$appointmentChangesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AppointmentHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  appointmentNotifications<T extends Prisma.User$appointmentNotificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$appointmentNotificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AppointmentNotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   createdEvents<T extends Prisma.User$createdEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$createdEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   moderatedEvents<T extends Prisma.User$moderatedEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$moderatedEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   eventRegistrations<T extends Prisma.User$eventRegistrationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$eventRegistrationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EventRegistrationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -25196,6 +25778,30 @@ export type User$appointmentChangesArgs<ExtArgs extends runtime.Types.Extensions
   take?: number
   skip?: number
   distinct?: Prisma.AppointmentHistoryScalarFieldEnum | Prisma.AppointmentHistoryScalarFieldEnum[]
+}
+
+/**
+ * User.appointmentNotifications
+ */
+export type User$appointmentNotificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AppointmentNotification
+   */
+  select?: Prisma.AppointmentNotificationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AppointmentNotification
+   */
+  omit?: Prisma.AppointmentNotificationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AppointmentNotificationInclude<ExtArgs> | null
+  where?: Prisma.AppointmentNotificationWhereInput
+  orderBy?: Prisma.AppointmentNotificationOrderByWithRelationInput | Prisma.AppointmentNotificationOrderByWithRelationInput[]
+  cursor?: Prisma.AppointmentNotificationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AppointmentNotificationScalarFieldEnum | Prisma.AppointmentNotificationScalarFieldEnum[]
 }
 
 /**

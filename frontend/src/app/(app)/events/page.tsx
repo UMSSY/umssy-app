@@ -1,6 +1,23 @@
+'use client';
+
+import { Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { EventsView } from '@/modules/events';
 
-export default async function EventsPage({ searchParams }: { searchParams: Promise<{ proposal?: string }> }) {
-  const { proposal } = await searchParams;
-  return <EventsView key={proposal ?? 'browse'} initialProposalId={proposal ?? null} />;
+function EventsContent() {
+  const proposal = useSearchParams().get('proposal');
+  return (
+    <EventsView
+      key={proposal ?? 'browse'}
+      initialProposalId={proposal ?? null}
+    />
+  );
+}
+
+export default function EventsPage() {
+  return (
+    <Suspense fallback={null}>
+      <EventsContent />
+    </Suspense>
+  );
 }

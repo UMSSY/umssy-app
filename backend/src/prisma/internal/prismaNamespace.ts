@@ -427,6 +427,10 @@ export const ModelName = {
   AppointmentDocument: 'AppointmentDocument',
   TimeProposal: 'TimeProposal',
   AppointmentHistory: 'AppointmentHistory',
+  AppointmentNotificationEvent: 'AppointmentNotificationEvent',
+  AppointmentNotificationChannel: 'AppointmentNotificationChannel',
+  AppointmentNotificationStatus: 'AppointmentNotificationStatus',
+  AppointmentNotification: 'AppointmentNotification',
   EventCategory: 'EventCategory',
   Event: 'Event',
   EventRegistration: 'EventRegistration',
@@ -443,6 +447,7 @@ export const ModelName = {
   AccessRequest: 'AccessRequest',
   MentorParticipationRequest: 'MentorParticipationRequest',
   MentorSlotOffer: 'MentorSlotOffer',
+  MentorCapacitySetting: 'MentorCapacitySetting',
   ActivationOtp: 'ActivationOtp',
   MessageStatus: 'MessageStatus',
   ConnectionRequestStatus: 'ConnectionRequestStatus',
@@ -454,7 +459,6 @@ export const ModelName = {
   ChatUserBlock: 'ChatUserBlock',
   ConnectionRequest: 'ConnectionRequest',
   UserPresence: 'UserPresence',
-  PasswordHistory: 'PasswordHistory',
   PasswordResetOtp: 'PasswordResetOtp',
   MentorParticipationAttemptLimit: 'MentorParticipationAttemptLimit',
   JobApplicationStatus: 'JobApplicationStatus',
@@ -489,12 +493,7 @@ export const ModelName = {
   NotificationType: 'NotificationType',
   Notification: 'Notification',
   PushSubscription: 'PushSubscription',
-  RefreshToken: 'RefreshToken',
   NotificationPreference: 'NotificationPreference',
-  CompanyProfile: 'CompanyProfile',
-  CompanyLogo: 'CompanyLogo',
-  CompanyAccessRequest: 'CompanyAccessRequest',
-  CompanyActivationOtp: 'CompanyActivationOtp',
   RadarDocumentStatus: 'RadarDocumentStatus',
   RadarDocumentSourceType: 'RadarDocumentSourceType'
 } as const
@@ -512,7 +511,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "appointmentStatus" | "proposalStatus" | "eventModality" | "eventOrigin" | "eventStatus" | "registrationStatus" | "city" | "company" | "user" | "role" | "userRole" | "education" | "workExperience" | "radarArea" | "skill" | "jobOfferSkill" | "userSkill" | "certification" | "userCvFile" | "profileSkillProcessingState" | "technicalArea" | "orientationType" | "mentorTechnicalArea" | "mentorOrientationType" | "availabilityBlock" | "blockedDate" | "appointment" | "appointmentDocument" | "timeProposal" | "appointmentHistory" | "eventCategory" | "event" | "eventRegistration" | "eventAttendance" | "jobOffer" | "jobOfferModality" | "jobOfferContractType" | "jobOfferStatus" | "adminExportHistory" | "accessRequestStatus" | "accessRequestDocumentType" | "file" | "career" | "accessRequest" | "mentorParticipationRequest" | "mentorSlotOffer" | "activationOtp" | "messageStatus" | "connectionRequestStatus" | "attachmentType" | "conversation" | "conversationParticipant" | "message" | "messageAttachment" | "chatUserBlock" | "connectionRequest" | "userPresence" | "passwordHistory" | "passwordResetOtp" | "mentorParticipationAttemptLimit" | "jobApplicationStatus" | "jobApplication" | "radarApplicationConsent" | "surveyStatus" | "surveyQuestionType" | "surveyTargetAudience" | "survey" | "surveyAlertConfig" | "surveyQuestion" | "surveyQuestionOption" | "surveyResponse" | "surveyAnswer" | "auditAction" | "auditEvent" | "documentValidation" | "mentorIntakeAttempt" | "mentorParticipationSanction" | "mentorIntakeOperation" | "radarCvEvidence" | "radarScoreSnapshot" | "radarAuditEvent" | "radarCvExtractionStatus" | "radarCvReviewStatus" | "mentorParticipationStatus" | "mentorOfferStatus" | "radarDocumentVerification" | "portfolioProvider" | "userSocialAccount" | "userPortfolioProject" | "notificationType" | "notification" | "pushSubscription" | "refreshToken" | "notificationPreference" | "companyProfile" | "companyLogo" | "companyAccessRequest" | "companyActivationOtp" | "radarDocumentStatus" | "radarDocumentSourceType"
+    modelProps: "appointmentStatus" | "proposalStatus" | "eventModality" | "eventOrigin" | "eventStatus" | "registrationStatus" | "city" | "company" | "user" | "role" | "userRole" | "education" | "workExperience" | "radarArea" | "skill" | "jobOfferSkill" | "userSkill" | "certification" | "userCvFile" | "profileSkillProcessingState" | "technicalArea" | "orientationType" | "mentorTechnicalArea" | "mentorOrientationType" | "availabilityBlock" | "blockedDate" | "appointment" | "appointmentDocument" | "timeProposal" | "appointmentHistory" | "appointmentNotificationEvent" | "appointmentNotificationChannel" | "appointmentNotificationStatus" | "appointmentNotification" | "eventCategory" | "event" | "eventRegistration" | "eventAttendance" | "jobOffer" | "jobOfferModality" | "jobOfferContractType" | "jobOfferStatus" | "adminExportHistory" | "accessRequestStatus" | "accessRequestDocumentType" | "file" | "career" | "accessRequest" | "mentorParticipationRequest" | "mentorSlotOffer" | "mentorCapacitySetting" | "activationOtp" | "messageStatus" | "connectionRequestStatus" | "attachmentType" | "conversation" | "conversationParticipant" | "message" | "messageAttachment" | "chatUserBlock" | "connectionRequest" | "userPresence" | "passwordResetOtp" | "mentorParticipationAttemptLimit" | "jobApplicationStatus" | "jobApplication" | "radarApplicationConsent" | "surveyStatus" | "surveyQuestionType" | "surveyTargetAudience" | "survey" | "surveyAlertConfig" | "surveyQuestion" | "surveyQuestionOption" | "surveyResponse" | "surveyAnswer" | "auditAction" | "auditEvent" | "documentValidation" | "mentorIntakeAttempt" | "mentorParticipationSanction" | "mentorIntakeOperation" | "radarCvEvidence" | "radarScoreSnapshot" | "radarAuditEvent" | "radarCvExtractionStatus" | "radarCvReviewStatus" | "mentorParticipationStatus" | "mentorOfferStatus" | "radarDocumentVerification" | "portfolioProvider" | "userSocialAccount" | "userPortfolioProject" | "notificationType" | "notification" | "pushSubscription" | "notificationPreference" | "radarDocumentStatus" | "radarDocumentSourceType"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2736,6 +2735,302 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    AppointmentNotificationEvent: {
+      payload: Prisma.$AppointmentNotificationEventPayload<ExtArgs>
+      fields: Prisma.AppointmentNotificationEventFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AppointmentNotificationEventFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentNotificationEventPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AppointmentNotificationEventFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentNotificationEventPayload>
+        }
+        findFirst: {
+          args: Prisma.AppointmentNotificationEventFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentNotificationEventPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AppointmentNotificationEventFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentNotificationEventPayload>
+        }
+        findMany: {
+          args: Prisma.AppointmentNotificationEventFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentNotificationEventPayload>[]
+        }
+        create: {
+          args: Prisma.AppointmentNotificationEventCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentNotificationEventPayload>
+        }
+        createMany: {
+          args: Prisma.AppointmentNotificationEventCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AppointmentNotificationEventCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentNotificationEventPayload>[]
+        }
+        delete: {
+          args: Prisma.AppointmentNotificationEventDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentNotificationEventPayload>
+        }
+        update: {
+          args: Prisma.AppointmentNotificationEventUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentNotificationEventPayload>
+        }
+        deleteMany: {
+          args: Prisma.AppointmentNotificationEventDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AppointmentNotificationEventUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AppointmentNotificationEventUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentNotificationEventPayload>[]
+        }
+        upsert: {
+          args: Prisma.AppointmentNotificationEventUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentNotificationEventPayload>
+        }
+        aggregate: {
+          args: Prisma.AppointmentNotificationEventAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAppointmentNotificationEvent>
+        }
+        groupBy: {
+          args: Prisma.AppointmentNotificationEventGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AppointmentNotificationEventGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AppointmentNotificationEventCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AppointmentNotificationEventCountAggregateOutputType> | number
+        }
+      }
+    }
+    AppointmentNotificationChannel: {
+      payload: Prisma.$AppointmentNotificationChannelPayload<ExtArgs>
+      fields: Prisma.AppointmentNotificationChannelFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AppointmentNotificationChannelFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentNotificationChannelPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AppointmentNotificationChannelFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentNotificationChannelPayload>
+        }
+        findFirst: {
+          args: Prisma.AppointmentNotificationChannelFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentNotificationChannelPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AppointmentNotificationChannelFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentNotificationChannelPayload>
+        }
+        findMany: {
+          args: Prisma.AppointmentNotificationChannelFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentNotificationChannelPayload>[]
+        }
+        create: {
+          args: Prisma.AppointmentNotificationChannelCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentNotificationChannelPayload>
+        }
+        createMany: {
+          args: Prisma.AppointmentNotificationChannelCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AppointmentNotificationChannelCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentNotificationChannelPayload>[]
+        }
+        delete: {
+          args: Prisma.AppointmentNotificationChannelDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentNotificationChannelPayload>
+        }
+        update: {
+          args: Prisma.AppointmentNotificationChannelUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentNotificationChannelPayload>
+        }
+        deleteMany: {
+          args: Prisma.AppointmentNotificationChannelDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AppointmentNotificationChannelUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AppointmentNotificationChannelUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentNotificationChannelPayload>[]
+        }
+        upsert: {
+          args: Prisma.AppointmentNotificationChannelUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentNotificationChannelPayload>
+        }
+        aggregate: {
+          args: Prisma.AppointmentNotificationChannelAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAppointmentNotificationChannel>
+        }
+        groupBy: {
+          args: Prisma.AppointmentNotificationChannelGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AppointmentNotificationChannelGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AppointmentNotificationChannelCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AppointmentNotificationChannelCountAggregateOutputType> | number
+        }
+      }
+    }
+    AppointmentNotificationStatus: {
+      payload: Prisma.$AppointmentNotificationStatusPayload<ExtArgs>
+      fields: Prisma.AppointmentNotificationStatusFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AppointmentNotificationStatusFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentNotificationStatusPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AppointmentNotificationStatusFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentNotificationStatusPayload>
+        }
+        findFirst: {
+          args: Prisma.AppointmentNotificationStatusFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentNotificationStatusPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AppointmentNotificationStatusFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentNotificationStatusPayload>
+        }
+        findMany: {
+          args: Prisma.AppointmentNotificationStatusFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentNotificationStatusPayload>[]
+        }
+        create: {
+          args: Prisma.AppointmentNotificationStatusCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentNotificationStatusPayload>
+        }
+        createMany: {
+          args: Prisma.AppointmentNotificationStatusCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AppointmentNotificationStatusCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentNotificationStatusPayload>[]
+        }
+        delete: {
+          args: Prisma.AppointmentNotificationStatusDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentNotificationStatusPayload>
+        }
+        update: {
+          args: Prisma.AppointmentNotificationStatusUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentNotificationStatusPayload>
+        }
+        deleteMany: {
+          args: Prisma.AppointmentNotificationStatusDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AppointmentNotificationStatusUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AppointmentNotificationStatusUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentNotificationStatusPayload>[]
+        }
+        upsert: {
+          args: Prisma.AppointmentNotificationStatusUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentNotificationStatusPayload>
+        }
+        aggregate: {
+          args: Prisma.AppointmentNotificationStatusAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAppointmentNotificationStatus>
+        }
+        groupBy: {
+          args: Prisma.AppointmentNotificationStatusGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AppointmentNotificationStatusGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AppointmentNotificationStatusCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AppointmentNotificationStatusCountAggregateOutputType> | number
+        }
+      }
+    }
+    AppointmentNotification: {
+      payload: Prisma.$AppointmentNotificationPayload<ExtArgs>
+      fields: Prisma.AppointmentNotificationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AppointmentNotificationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentNotificationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AppointmentNotificationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentNotificationPayload>
+        }
+        findFirst: {
+          args: Prisma.AppointmentNotificationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentNotificationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AppointmentNotificationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentNotificationPayload>
+        }
+        findMany: {
+          args: Prisma.AppointmentNotificationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentNotificationPayload>[]
+        }
+        create: {
+          args: Prisma.AppointmentNotificationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentNotificationPayload>
+        }
+        createMany: {
+          args: Prisma.AppointmentNotificationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AppointmentNotificationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentNotificationPayload>[]
+        }
+        delete: {
+          args: Prisma.AppointmentNotificationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentNotificationPayload>
+        }
+        update: {
+          args: Prisma.AppointmentNotificationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentNotificationPayload>
+        }
+        deleteMany: {
+          args: Prisma.AppointmentNotificationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AppointmentNotificationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AppointmentNotificationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentNotificationPayload>[]
+        }
+        upsert: {
+          args: Prisma.AppointmentNotificationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AppointmentNotificationPayload>
+        }
+        aggregate: {
+          args: Prisma.AppointmentNotificationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAppointmentNotification>
+        }
+        groupBy: {
+          args: Prisma.AppointmentNotificationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AppointmentNotificationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AppointmentNotificationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AppointmentNotificationCountAggregateOutputType> | number
+        }
+      }
+    }
     EventCategory: {
       payload: Prisma.$EventCategoryPayload<ExtArgs>
       fields: Prisma.EventCategoryFieldRefs
@@ -3920,6 +4215,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    MentorCapacitySetting: {
+      payload: Prisma.$MentorCapacitySettingPayload<ExtArgs>
+      fields: Prisma.MentorCapacitySettingFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MentorCapacitySettingFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorCapacitySettingPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MentorCapacitySettingFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorCapacitySettingPayload>
+        }
+        findFirst: {
+          args: Prisma.MentorCapacitySettingFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorCapacitySettingPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MentorCapacitySettingFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorCapacitySettingPayload>
+        }
+        findMany: {
+          args: Prisma.MentorCapacitySettingFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorCapacitySettingPayload>[]
+        }
+        create: {
+          args: Prisma.MentorCapacitySettingCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorCapacitySettingPayload>
+        }
+        createMany: {
+          args: Prisma.MentorCapacitySettingCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MentorCapacitySettingCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorCapacitySettingPayload>[]
+        }
+        delete: {
+          args: Prisma.MentorCapacitySettingDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorCapacitySettingPayload>
+        }
+        update: {
+          args: Prisma.MentorCapacitySettingUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorCapacitySettingPayload>
+        }
+        deleteMany: {
+          args: Prisma.MentorCapacitySettingDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MentorCapacitySettingUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MentorCapacitySettingUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorCapacitySettingPayload>[]
+        }
+        upsert: {
+          args: Prisma.MentorCapacitySettingUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorCapacitySettingPayload>
+        }
+        aggregate: {
+          args: Prisma.MentorCapacitySettingAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMentorCapacitySetting>
+        }
+        groupBy: {
+          args: Prisma.MentorCapacitySettingGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MentorCapacitySettingGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MentorCapacitySettingCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MentorCapacitySettingCountAggregateOutputType> | number
+        }
+      }
+    }
     ActivationOtp: {
       payload: Prisma.$ActivationOtpPayload<ExtArgs>
       fields: Prisma.ActivationOtpFieldRefs
@@ -4731,80 +5100,6 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.UserPresenceCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.UserPresenceCountAggregateOutputType> | number
-        }
-      }
-    }
-    PasswordHistory: {
-      payload: Prisma.$PasswordHistoryPayload<ExtArgs>
-      fields: Prisma.PasswordHistoryFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.PasswordHistoryFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordHistoryPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.PasswordHistoryFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordHistoryPayload>
-        }
-        findFirst: {
-          args: Prisma.PasswordHistoryFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordHistoryPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.PasswordHistoryFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordHistoryPayload>
-        }
-        findMany: {
-          args: Prisma.PasswordHistoryFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordHistoryPayload>[]
-        }
-        create: {
-          args: Prisma.PasswordHistoryCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordHistoryPayload>
-        }
-        createMany: {
-          args: Prisma.PasswordHistoryCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.PasswordHistoryCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordHistoryPayload>[]
-        }
-        delete: {
-          args: Prisma.PasswordHistoryDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordHistoryPayload>
-        }
-        update: {
-          args: Prisma.PasswordHistoryUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordHistoryPayload>
-        }
-        deleteMany: {
-          args: Prisma.PasswordHistoryDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.PasswordHistoryUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.PasswordHistoryUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordHistoryPayload>[]
-        }
-        upsert: {
-          args: Prisma.PasswordHistoryUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordHistoryPayload>
-        }
-        aggregate: {
-          args: Prisma.PasswordHistoryAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregatePasswordHistory>
-        }
-        groupBy: {
-          args: Prisma.PasswordHistoryGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.PasswordHistoryGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.PasswordHistoryCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.PasswordHistoryCountAggregateOutputType> | number
         }
       }
     }
@@ -7324,80 +7619,6 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
-    RefreshToken: {
-      payload: Prisma.$RefreshTokenPayload<ExtArgs>
-      fields: Prisma.RefreshTokenFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.RefreshTokenFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$RefreshTokenPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.RefreshTokenFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$RefreshTokenPayload>
-        }
-        findFirst: {
-          args: Prisma.RefreshTokenFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$RefreshTokenPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.RefreshTokenFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$RefreshTokenPayload>
-        }
-        findMany: {
-          args: Prisma.RefreshTokenFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$RefreshTokenPayload>[]
-        }
-        create: {
-          args: Prisma.RefreshTokenCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$RefreshTokenPayload>
-        }
-        createMany: {
-          args: Prisma.RefreshTokenCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.RefreshTokenCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$RefreshTokenPayload>[]
-        }
-        delete: {
-          args: Prisma.RefreshTokenDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$RefreshTokenPayload>
-        }
-        update: {
-          args: Prisma.RefreshTokenUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$RefreshTokenPayload>
-        }
-        deleteMany: {
-          args: Prisma.RefreshTokenDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.RefreshTokenUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.RefreshTokenUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$RefreshTokenPayload>[]
-        }
-        upsert: {
-          args: Prisma.RefreshTokenUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$RefreshTokenPayload>
-        }
-        aggregate: {
-          args: Prisma.RefreshTokenAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateRefreshToken>
-        }
-        groupBy: {
-          args: Prisma.RefreshTokenGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.RefreshTokenGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.RefreshTokenCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.RefreshTokenCountAggregateOutputType> | number
-        }
-      }
-    }
     NotificationPreference: {
       payload: Prisma.$NotificationPreferencePayload<ExtArgs>
       fields: Prisma.NotificationPreferenceFieldRefs
@@ -7469,302 +7690,6 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.NotificationPreferenceCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.NotificationPreferenceCountAggregateOutputType> | number
-        }
-      }
-    }
-    CompanyProfile: {
-      payload: Prisma.$CompanyProfilePayload<ExtArgs>
-      fields: Prisma.CompanyProfileFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.CompanyProfileFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyProfilePayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.CompanyProfileFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyProfilePayload>
-        }
-        findFirst: {
-          args: Prisma.CompanyProfileFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyProfilePayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.CompanyProfileFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyProfilePayload>
-        }
-        findMany: {
-          args: Prisma.CompanyProfileFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyProfilePayload>[]
-        }
-        create: {
-          args: Prisma.CompanyProfileCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyProfilePayload>
-        }
-        createMany: {
-          args: Prisma.CompanyProfileCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.CompanyProfileCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyProfilePayload>[]
-        }
-        delete: {
-          args: Prisma.CompanyProfileDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyProfilePayload>
-        }
-        update: {
-          args: Prisma.CompanyProfileUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyProfilePayload>
-        }
-        deleteMany: {
-          args: Prisma.CompanyProfileDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.CompanyProfileUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.CompanyProfileUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyProfilePayload>[]
-        }
-        upsert: {
-          args: Prisma.CompanyProfileUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyProfilePayload>
-        }
-        aggregate: {
-          args: Prisma.CompanyProfileAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateCompanyProfile>
-        }
-        groupBy: {
-          args: Prisma.CompanyProfileGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.CompanyProfileGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.CompanyProfileCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.CompanyProfileCountAggregateOutputType> | number
-        }
-      }
-    }
-    CompanyLogo: {
-      payload: Prisma.$CompanyLogoPayload<ExtArgs>
-      fields: Prisma.CompanyLogoFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.CompanyLogoFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyLogoPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.CompanyLogoFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyLogoPayload>
-        }
-        findFirst: {
-          args: Prisma.CompanyLogoFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyLogoPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.CompanyLogoFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyLogoPayload>
-        }
-        findMany: {
-          args: Prisma.CompanyLogoFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyLogoPayload>[]
-        }
-        create: {
-          args: Prisma.CompanyLogoCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyLogoPayload>
-        }
-        createMany: {
-          args: Prisma.CompanyLogoCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.CompanyLogoCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyLogoPayload>[]
-        }
-        delete: {
-          args: Prisma.CompanyLogoDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyLogoPayload>
-        }
-        update: {
-          args: Prisma.CompanyLogoUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyLogoPayload>
-        }
-        deleteMany: {
-          args: Prisma.CompanyLogoDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.CompanyLogoUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.CompanyLogoUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyLogoPayload>[]
-        }
-        upsert: {
-          args: Prisma.CompanyLogoUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyLogoPayload>
-        }
-        aggregate: {
-          args: Prisma.CompanyLogoAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateCompanyLogo>
-        }
-        groupBy: {
-          args: Prisma.CompanyLogoGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.CompanyLogoGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.CompanyLogoCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.CompanyLogoCountAggregateOutputType> | number
-        }
-      }
-    }
-    CompanyAccessRequest: {
-      payload: Prisma.$CompanyAccessRequestPayload<ExtArgs>
-      fields: Prisma.CompanyAccessRequestFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.CompanyAccessRequestFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAccessRequestPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.CompanyAccessRequestFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAccessRequestPayload>
-        }
-        findFirst: {
-          args: Prisma.CompanyAccessRequestFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAccessRequestPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.CompanyAccessRequestFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAccessRequestPayload>
-        }
-        findMany: {
-          args: Prisma.CompanyAccessRequestFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAccessRequestPayload>[]
-        }
-        create: {
-          args: Prisma.CompanyAccessRequestCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAccessRequestPayload>
-        }
-        createMany: {
-          args: Prisma.CompanyAccessRequestCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.CompanyAccessRequestCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAccessRequestPayload>[]
-        }
-        delete: {
-          args: Prisma.CompanyAccessRequestDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAccessRequestPayload>
-        }
-        update: {
-          args: Prisma.CompanyAccessRequestUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAccessRequestPayload>
-        }
-        deleteMany: {
-          args: Prisma.CompanyAccessRequestDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.CompanyAccessRequestUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.CompanyAccessRequestUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAccessRequestPayload>[]
-        }
-        upsert: {
-          args: Prisma.CompanyAccessRequestUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyAccessRequestPayload>
-        }
-        aggregate: {
-          args: Prisma.CompanyAccessRequestAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateCompanyAccessRequest>
-        }
-        groupBy: {
-          args: Prisma.CompanyAccessRequestGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.CompanyAccessRequestGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.CompanyAccessRequestCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.CompanyAccessRequestCountAggregateOutputType> | number
-        }
-      }
-    }
-    CompanyActivationOtp: {
-      payload: Prisma.$CompanyActivationOtpPayload<ExtArgs>
-      fields: Prisma.CompanyActivationOtpFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.CompanyActivationOtpFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyActivationOtpPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.CompanyActivationOtpFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyActivationOtpPayload>
-        }
-        findFirst: {
-          args: Prisma.CompanyActivationOtpFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyActivationOtpPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.CompanyActivationOtpFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyActivationOtpPayload>
-        }
-        findMany: {
-          args: Prisma.CompanyActivationOtpFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyActivationOtpPayload>[]
-        }
-        create: {
-          args: Prisma.CompanyActivationOtpCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyActivationOtpPayload>
-        }
-        createMany: {
-          args: Prisma.CompanyActivationOtpCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.CompanyActivationOtpCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyActivationOtpPayload>[]
-        }
-        delete: {
-          args: Prisma.CompanyActivationOtpDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyActivationOtpPayload>
-        }
-        update: {
-          args: Prisma.CompanyActivationOtpUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyActivationOtpPayload>
-        }
-        deleteMany: {
-          args: Prisma.CompanyActivationOtpDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.CompanyActivationOtpUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.CompanyActivationOtpUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyActivationOtpPayload>[]
-        }
-        upsert: {
-          args: Prisma.CompanyActivationOtpUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CompanyActivationOtpPayload>
-        }
-        aggregate: {
-          args: Prisma.CompanyActivationOtpAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateCompanyActivationOtp>
-        }
-        groupBy: {
-          args: Prisma.CompanyActivationOtpGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.CompanyActivationOtpGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.CompanyActivationOtpCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.CompanyActivationOtpCountAggregateOutputType> | number
         }
       }
     }
@@ -8293,6 +8218,8 @@ export const AppointmentScalarFieldEnum = {
   rejectionReason: 'rejectionReason',
   meetingUrl: 'meetingUrl',
   cancelledById: 'cancelledById',
+  cancellationReason: 'cancellationReason',
+  cancelledAt: 'cancelledAt',
   requestedAt: 'requestedAt',
   respondedAt: 'respondedAt',
   createdAt: 'createdAt',
@@ -8344,6 +8271,56 @@ export const AppointmentHistoryScalarFieldEnum = {
 } as const
 
 export type AppointmentHistoryScalarFieldEnum = (typeof AppointmentHistoryScalarFieldEnum)[keyof typeof AppointmentHistoryScalarFieldEnum]
+
+
+export const AppointmentNotificationEventScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AppointmentNotificationEventScalarFieldEnum = (typeof AppointmentNotificationEventScalarFieldEnum)[keyof typeof AppointmentNotificationEventScalarFieldEnum]
+
+
+export const AppointmentNotificationChannelScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AppointmentNotificationChannelScalarFieldEnum = (typeof AppointmentNotificationChannelScalarFieldEnum)[keyof typeof AppointmentNotificationChannelScalarFieldEnum]
+
+
+export const AppointmentNotificationStatusScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AppointmentNotificationStatusScalarFieldEnum = (typeof AppointmentNotificationStatusScalarFieldEnum)[keyof typeof AppointmentNotificationStatusScalarFieldEnum]
+
+
+export const AppointmentNotificationScalarFieldEnum = {
+  id: 'id',
+  appointmentId: 'appointmentId',
+  recipientId: 'recipientId',
+  eventId: 'eventId',
+  channelId: 'channelId',
+  statusId: 'statusId',
+  attempts: 'attempts',
+  lastError: 'lastError',
+  sentAt: 'sentAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AppointmentNotificationScalarFieldEnum = (typeof AppointmentNotificationScalarFieldEnum)[keyof typeof AppointmentNotificationScalarFieldEnum]
 
 
 export const EventCategoryScalarFieldEnum = {
@@ -8589,6 +8566,15 @@ export const MentorSlotOfferScalarFieldEnum = {
 export type MentorSlotOfferScalarFieldEnum = (typeof MentorSlotOfferScalarFieldEnum)[keyof typeof MentorSlotOfferScalarFieldEnum]
 
 
+export const MentorCapacitySettingScalarFieldEnum = {
+  id: 'id',
+  percentage: 'percentage',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MentorCapacitySettingScalarFieldEnum = (typeof MentorCapacitySettingScalarFieldEnum)[keyof typeof MentorCapacitySettingScalarFieldEnum]
+
+
 export const ActivationOtpScalarFieldEnum = {
   id: 'id',
   accessRequestId: 'accessRequestId',
@@ -8729,16 +8715,6 @@ export const UserPresenceScalarFieldEnum = {
 } as const
 
 export type UserPresenceScalarFieldEnum = (typeof UserPresenceScalarFieldEnum)[keyof typeof UserPresenceScalarFieldEnum]
-
-
-export const PasswordHistoryScalarFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  passwordHash: 'passwordHash',
-  createdAt: 'createdAt'
-} as const
-
-export type PasswordHistoryScalarFieldEnum = (typeof PasswordHistoryScalarFieldEnum)[keyof typeof PasswordHistoryScalarFieldEnum]
 
 
 export const PasswordResetOtpScalarFieldEnum = {
@@ -9219,24 +9195,6 @@ export const PushSubscriptionScalarFieldEnum = {
 export type PushSubscriptionScalarFieldEnum = (typeof PushSubscriptionScalarFieldEnum)[keyof typeof PushSubscriptionScalarFieldEnum]
 
 
-export const RefreshTokenScalarFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  familyId: 'familyId',
-  roleTag: 'roleTag',
-  tokenHash: 'tokenHash',
-  expiresAt: 'expiresAt',
-  absoluteExpiresAt: 'absoluteExpiresAt',
-  usedAt: 'usedAt',
-  revokedAt: 'revokedAt',
-  revokedReason: 'revokedReason',
-  userAgent: 'userAgent',
-  createdAt: 'createdAt'
-} as const
-
-export type RefreshTokenScalarFieldEnum = (typeof RefreshTokenScalarFieldEnum)[keyof typeof RefreshTokenScalarFieldEnum]
-
-
 export const NotificationPreferenceScalarFieldEnum = {
   userId: 'userId',
   pushEnabled: 'pushEnabled',
@@ -9247,82 +9205,6 @@ export const NotificationPreferenceScalarFieldEnum = {
 } as const
 
 export type NotificationPreferenceScalarFieldEnum = (typeof NotificationPreferenceScalarFieldEnum)[keyof typeof NotificationPreferenceScalarFieldEnum]
-
-
-export const CompanyProfileScalarFieldEnum = {
-  id: 'id',
-  companyId: 'companyId',
-  sector: 'sector',
-  email: 'email',
-  phone: 'phone',
-  websiteUrl: 'websiteUrl',
-  cityId: 'cityId',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-} as const
-
-export type CompanyProfileScalarFieldEnum = (typeof CompanyProfileScalarFieldEnum)[keyof typeof CompanyProfileScalarFieldEnum]
-
-
-export const CompanyLogoScalarFieldEnum = {
-  id: 'id',
-  companyId: 'companyId',
-  fileName: 'fileName',
-  mimeType: 'mimeType',
-  sizeBytes: 'sizeBytes',
-  data: 'data',
-  uploadedAt: 'uploadedAt',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-} as const
-
-export type CompanyLogoScalarFieldEnum = (typeof CompanyLogoScalarFieldEnum)[keyof typeof CompanyLogoScalarFieldEnum]
-
-
-export const CompanyAccessRequestScalarFieldEnum = {
-  id: 'id',
-  requestCode: 'requestCode',
-  companyName: 'companyName',
-  description: 'description',
-  sector: 'sector',
-  email: 'email',
-  phone: 'phone',
-  websiteUrl: 'websiteUrl',
-  cityId: 'cityId',
-  username: 'username',
-  statusId: 'statusId',
-  documentFileId: 'documentFileId',
-  logoFileId: 'logoFileId',
-  ocrMatchScore: 'ocrMatchScore',
-  ocrFieldResults: 'ocrFieldResults',
-  submittedAt: 'submittedAt',
-  openedById: 'openedById',
-  openedAt: 'openedAt',
-  reviewedById: 'reviewedById',
-  reviewedAt: 'reviewedAt',
-  rejectionReason: 'rejectionReason',
-  approvedCompanyId: 'approvedCompanyId',
-  approvedUserId: 'approvedUserId',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  accessRequestDocumentTypeId: 'accessRequestDocumentTypeId'
-} as const
-
-export type CompanyAccessRequestScalarFieldEnum = (typeof CompanyAccessRequestScalarFieldEnum)[keyof typeof CompanyAccessRequestScalarFieldEnum]
-
-
-export const CompanyActivationOtpScalarFieldEnum = {
-  id: 'id',
-  companyAccessRequestId: 'companyAccessRequestId',
-  codeHash: 'codeHash',
-  expiresAt: 'expiresAt',
-  attempts: 'attempts',
-  usedAt: 'usedAt',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-} as const
-
-export type CompanyActivationOtpScalarFieldEnum = (typeof CompanyActivationOtpScalarFieldEnum)[keyof typeof CompanyActivationOtpScalarFieldEnum]
 
 
 export const RadarDocumentStatusScalarFieldEnum = {
@@ -9686,6 +9568,10 @@ export type GlobalOmitConfig = {
   appointmentDocument?: Prisma.AppointmentDocumentOmit
   timeProposal?: Prisma.TimeProposalOmit
   appointmentHistory?: Prisma.AppointmentHistoryOmit
+  appointmentNotificationEvent?: Prisma.AppointmentNotificationEventOmit
+  appointmentNotificationChannel?: Prisma.AppointmentNotificationChannelOmit
+  appointmentNotificationStatus?: Prisma.AppointmentNotificationStatusOmit
+  appointmentNotification?: Prisma.AppointmentNotificationOmit
   eventCategory?: Prisma.EventCategoryOmit
   event?: Prisma.EventOmit
   eventRegistration?: Prisma.EventRegistrationOmit
@@ -9702,6 +9588,7 @@ export type GlobalOmitConfig = {
   accessRequest?: Prisma.AccessRequestOmit
   mentorParticipationRequest?: Prisma.MentorParticipationRequestOmit
   mentorSlotOffer?: Prisma.MentorSlotOfferOmit
+  mentorCapacitySetting?: Prisma.MentorCapacitySettingOmit
   activationOtp?: Prisma.ActivationOtpOmit
   messageStatus?: Prisma.MessageStatusOmit
   connectionRequestStatus?: Prisma.ConnectionRequestStatusOmit
@@ -9713,7 +9600,6 @@ export type GlobalOmitConfig = {
   chatUserBlock?: Prisma.ChatUserBlockOmit
   connectionRequest?: Prisma.ConnectionRequestOmit
   userPresence?: Prisma.UserPresenceOmit
-  passwordHistory?: Prisma.PasswordHistoryOmit
   passwordResetOtp?: Prisma.PasswordResetOtpOmit
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitOmit
   jobApplicationStatus?: Prisma.JobApplicationStatusOmit
@@ -9748,12 +9634,7 @@ export type GlobalOmitConfig = {
   notificationType?: Prisma.NotificationTypeOmit
   notification?: Prisma.NotificationOmit
   pushSubscription?: Prisma.PushSubscriptionOmit
-  refreshToken?: Prisma.RefreshTokenOmit
   notificationPreference?: Prisma.NotificationPreferenceOmit
-  companyProfile?: Prisma.CompanyProfileOmit
-  companyLogo?: Prisma.CompanyLogoOmit
-  companyAccessRequest?: Prisma.CompanyAccessRequestOmit
-  companyActivationOtp?: Prisma.CompanyActivationOtpOmit
   radarDocumentStatus?: Prisma.RadarDocumentStatusOmit
   radarDocumentSourceType?: Prisma.RadarDocumentSourceTypeOmit
 }

@@ -9,13 +9,15 @@ import { registrationsService } from "../services/registrations.service";
 import { REGISTRATION_QUERY_KEYS } from "../constants/registration-query-keys.constants";
 import { getRegistrationErrorMessage } from "../utils/registration-error";
 import type { RegistrationResponse } from "../types/registration-response.types";
-import type { CancelRegistrationMutation, RegistrationMutation } from "../types/registration-mutation.types";
+import type { RegistrationMutation } from "../types/registration-mutation.types";
+import { useCancelRegistration } from './use-cancel-registration';
 
 export function useRegistrationActions(eventId: string) {
   const queryClient = useQueryClient();
   const accessToken = useRegistrationSession();
   const isSubmittingRef = useRef(false);
   const isMountedRef = useRef(true);
+  const { cancelRegistration, isCancelling, cancelError, resetCancellation } = useCancelRegistration();
 
   useEffect(() => {
     isMountedRef.current = true;
@@ -55,20 +57,13 @@ export function useRegistrationActions(eventId: string) {
     retry: false,
   });
 
-  const cancellation = useMutation({
-    mutationKey: ["events", "cancel-registration", eventId, accessToken],
-    mutationFn: (variables: CancelRegistrationMutation) => registrationsService.cancel(variables.registrationId, variables.accessToken),
-    onSuccess: updateQueries,
-    retry: false,
-  });
-
-  const error = creation.error ?? cancellation.error;
+  const error = creation.error ?? cancelError;
 
   return {
     register: async () => {
       if (isSubmittingRef.current) return null;
       isSubmittingRef.current = true;
-      cancellation.reset();
+      resetCancellation();
       try {
         const data = await creation.mutateAsync({ eventId, accessToken: getAccessToken() });
         return { data, error: null };
@@ -78,9 +73,9 @@ export function useRegistrationActions(eventId: string) {
     },
     cancel: (registrationId: string) => {
       creation.reset();
-      cancellation.mutate({ registrationId, eventId, accessToken: getAccessToken() });
+      void cancelRegistration(registrationId).catch(() => {});
     },
-    isPending: creation.isPending || cancellation.isPending,
+    isPending: creation.isPending || isCancelling,
     isSuccess: creation.isSuccess,
     errorCode: parseApiError(creation.error)?.code ?? null,
     error: error ? getRegistrationErrorMessage(error) : null,

@@ -1,4 +1,5 @@
 export { EducationView } from "./views/education-view";
+export { educationsService } from "./services/educations.service";
 
 export { EducationProfileSection } from "./components/education-profile-section";
 export { EducationGuideStep } from "./components/education-guide-step";
@@ -11,4 +12,3 @@ export { getEducationDegrees, resolveEducationDegree } from "./utils/resolve-edu
 export { resolveEducationInstitution } from "./utils/resolve-education-institution";
 export { EDUCATION_DESCRIPTION_MAX_LENGTH, EDUCATION_MIN_DATE } from "./constants/education-validation.constants";
 export { EDUCATIONS_QUERY_KEY } from "./constants/education-query-keys.constants";
-export { educationsService } from "./services/educations.service";

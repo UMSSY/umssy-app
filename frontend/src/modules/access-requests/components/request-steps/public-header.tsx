@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { BEFORE_OFFLINE_NAVIGATION, openOfflineRoute } from "@/shared/services/offline-navigation";
 import type { MouseEvent } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -21,6 +22,17 @@ export function PublicHeader() {
   const { status, hasData } = useAccessRequestForm();
   const [open, setOpen] = useState(false);
   const [pendingHref, setPendingHref] = useState("/login");
+  useEffect(() => {
+    const protectForm = (event: Event) => {
+      if (status === "idle" && !hasData) return;
+      event.preventDefault();
+      if (status !== "idle") return;
+      setPendingHref((event as CustomEvent<string>).detail);
+      setOpen(true);
+    };
+    window.addEventListener(BEFORE_OFFLINE_NAVIGATION, protectForm);
+    return () => window.removeEventListener(BEFORE_OFFLINE_NAVIGATION, protectForm);
+  }, [status, hasData]);
 
   // TODO: el borrador guardado queda huérfano en el servidor al salir (no hay GET y el id vive en memoria)
   // TODO: interceptar recarga, cierre de pestaña y botón atrás (beforeunload y popstate no son fiables en el App Router)
@@ -40,7 +52,8 @@ export function PublicHeader() {
   }
 
   function handleLeave() {
-    router.push(pendingHref);
+    if (navigator.onLine === false) void openOfflineRoute(pendingHref);
+    else router.push(pendingHref);
     setOpen(false);
   }
 

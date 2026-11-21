@@ -1,9 +1,10 @@
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import "@/shared/testing/indexed-db.mock";
 import { clearAccessToken } from "@/shared/services/storage/access-token-storage";
 import { saveAccessToken } from "@/shared/services/storage/access-token-storage";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { createQueryClient } from "@/shared/services/query-client";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import AppLayout from "@/app/(app)/layout";

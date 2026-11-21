@@ -40,6 +40,8 @@ export const PUBLISH_MESSAGES = {
   session: "Tu sesión no es válida. Inicia sesión nuevamente.",
   noCompany: "No hay una empresa asociada a tu sesión. Inicia sesión como empresa.",
   incompleteForm: "Faltan datos en los pasos anteriores. Vuelve atrás y complétalos.",
+  expirationNotConfirmed:
+    "Elige y confirma una fecha de cierre, o desmarca la opción para publicar sin fecha límite.",
 } as const;
 
 export const SKILLS_CATALOG_MESSAGES = {
@@ -143,6 +145,11 @@ export const VACANCY_LIST_TEXT = {
     noMatches: "Ninguna vacante coincide con los filtros.",
     noSearchMatches: "No se encontraron vacantes que coincidan con la búsqueda",
   },
+} as const;
+
+export const NO_COMPANY_TEXT = {
+  title: "Tu cuenta aún no está vinculada a una empresa",
+  description: "Por eso no podemos mostrar vacantes. Pide al administrador que vincule tu cuenta con tu empresa.",
 } as const;
 
 export const TOAST_OPTIONS = { position: "top-center", duration: 5000 } as const;

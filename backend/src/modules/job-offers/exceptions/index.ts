@@ -5,3 +5,4 @@ export { JobOfferNotFoundException } from './job-offer-not-found.exception.js';
 export { JobOfferNotReopenableException } from './job-offer-not-reopenable.exception.js';
 export { JobOfferSkillNotFoundException } from './job-offer-skill-not-found.exception.js';
 export { TooManyJobOfferSkillsException } from './too-many-job-offer-skills.exception.js';
+export { JobOfferExpiryInPastException } from './job-offer-expiry-in-past.exception.js';

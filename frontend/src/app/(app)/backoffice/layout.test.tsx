@@ -1,6 +1,7 @@
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import "@/shared/testing/indexed-db.mock";
 import { saveAccessToken } from "@/shared/services/storage/access-token-storage";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { stubMatchMedia } from "@/shared/testing/stub-match-media";
 import AppLayout from "../layout";

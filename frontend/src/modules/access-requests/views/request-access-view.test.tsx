@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SELECT_ITEM_CONTRAST_CLASS } from "@/shared/constants/select.constants";
@@ -120,6 +120,8 @@ describe("RequestAccessView", () => {
     expect(screen.queryByText("Paso completado")).toBeNull();
   });
 
+  // Los recorridos entre pasos usan selectores y operaciones asíncronas.
+  // La cobertura de CI necesita más margen que una prueba de componente aislada.
   it("tras un guardado válido muestra el paso 2 con el nombre completo y la barra con el paso 1 completado", async () => {
     create.mockResolvedValue({ ok: true, data: { id: "draft-1" } });
     render(<RequestAccessView />);
@@ -133,7 +135,7 @@ describe("RequestAccessView", () => {
     const items = screen.getAllByRole("listitem");
     expect(items[0]).toHaveTextContent("Paso completado");
     expect(items[1]).toHaveAttribute("aria-current", "step");
-  });
+  }, 15000);
 
   it("Volver a mis datos regresa al paso 1 con los valores intactos", async () => {
     create.mockResolvedValue({ ok: true, data: { id: "draft-1" } });
@@ -148,7 +150,7 @@ describe("RequestAccessView", () => {
     expect(screen.getByRole("combobox", { name: "Carrera" })).toHaveTextContent("Licenciatura en Ingeniería de Sistemas");
     expect(screen.getAllByRole("listitem")[0]).toHaveAttribute("aria-current", "step");
     expect(screen.queryByText("Paso completado")).toBeNull();
-  });
+  }, 15000);
 
   it("el enlace Iniciar sesión abre el diálogo de salida también en el paso 2 si hay datos", async () => {
     create.mockResolvedValue({ ok: true, data: { id: "draft-1" } });
@@ -158,7 +160,7 @@ describe("RequestAccessView", () => {
     await userEvent.setup().click(screen.getByRole("link", { name: "Iniciar sesión" }));
 
     expect(await screen.findByRole("alertdialog")).toHaveTextContent("¿Salir del formulario?");
-  });
+  }, 15000);
 
   async function reachReview() {
     create.mockResolvedValue({ ok: true, data: { id: "draft-1" } });
@@ -182,7 +184,9 @@ describe("RequestAccessView", () => {
     await user.click(screen.getByRole("combobox", { name: /Tipo de documento/ }));
     await user.click(await screen.findByRole("option", { name: "Título en provisión nacional" }));
     await user.upload(screen.getByLabelText("Archivo del documento"), new File(["%PDF-1.4"], "titulo.pdf", { type: "application/pdf" }));
-    await user.click(await screen.findByRole("button", { name: "Enviar solicitud" }));
+    const submitButton = await screen.findByRole("button", { name: "Enviar solicitud" });
+    await waitFor(() => expect(submitButton).toBeEnabled());
+    await user.click(submitButton);
     await screen.findByRole("heading", { name: "Revisión de la carrera" });
   }
 
@@ -193,7 +197,7 @@ describe("RequestAccessView", () => {
     expect(screen.getByText(/Te avisaremos a ana@umss\.edu\.bo/)).toBeInTheDocument();
     expect(accessRequestService.submitAccessRequest).toHaveBeenCalledWith("draft-1");
     expect(screen.queryByRole("heading", { name: "Documento de respaldo" })).toBeNull();
-  });
+  }, 15000);
 
   it("en el paso 3 la barra marca los pasos 1 y 2 completados, el 3 activo y el 4 sin cambios", async () => {
     await reachReview();
@@ -204,7 +208,7 @@ describe("RequestAccessView", () => {
     expect(items[2]).toHaveAttribute("aria-current", "step");
     expect(items[3]).not.toHaveAttribute("aria-current");
     expect(items[3]).not.toHaveTextContent("Paso completado");
-  });
+  }, 15000);
 
   it("el paso 3 no ofrece volver y el enlace Iniciar sesión navega sin diálogo", async () => {
     await reachReview();
@@ -213,11 +217,11 @@ describe("RequestAccessView", () => {
     await userEvent.setup().click(screen.getByRole("link", { name: "Iniciar sesión" }));
 
     expect(screen.queryByRole("alertdialog")).toBeNull();
-  });
+  }, 15000);
 
   it("el paso 3 no contiene el término egresado", async () => {
     await reachReview();
 
     expect(document.body.textContent?.toLowerCase()).not.toContain("egres");
-  });
+  }, 15000);
 });

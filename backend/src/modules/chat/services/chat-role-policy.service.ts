@@ -4,7 +4,7 @@ import { UsersService } from '../../users/services/users.service.js';
 import { ApplicationsService } from '../../applications/services/applications.service.js';
 
 import { CHAT_APPLICATION_CONTEXT_TYPE } from '../constants/chat-role-policy.constants.js';
-import { ChatRoleNotAllowedException } from '../exceptions/chat.exceptions.js';
+import { ChatRoleNotAllowedException } from '../exceptions/chat.exception.js';
 import type { ChatCommunicationAuthorization } from '../types/chat-communication-authorization.types.js';
 import type { ChatCommunicationContext } from '../types/chat-communication-context.types.js';
 

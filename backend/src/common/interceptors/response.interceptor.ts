@@ -39,7 +39,6 @@ export class ResponseInterceptor<T = unknown> implements NestInterceptor<T> {
   ): Observable<unknown> {
     const http = context.switchToHttp();
     const response = http.getResponse<{ statusCode?: number }>();
-    const statusCode = response?.statusCode ?? 200;
     const request =
       typeof http.getRequest === 'function'
         ? http.getRequest<{ url?: string }>()
@@ -57,6 +56,7 @@ export class ResponseInterceptor<T = unknown> implements NestInterceptor<T> {
 
     return next.handle().pipe(
       map((value: unknown) => {
+        const statusCode = response?.statusCode ?? 200;
         if (value instanceof StreamableFile || isAlreadyFormatted(value)) {
           return value;
         }
