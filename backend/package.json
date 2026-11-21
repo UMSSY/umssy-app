@@ -35,7 +35,8 @@
     "seed:catalogs": "pnpm run seed:production",
     "seed:admin": "tsc -p tsconfig.seed.json && node dist-seed/src/common/database/production-seeds.js",
     "ocr:models": "node scripts/prepare-ocr-models.ts",
-    "ocr:smoke": "node scripts/ocr-smoke.ts"
+    "ocr:smoke": "node scripts/ocr-smoke.ts",
+    "seed:attendance-qa": "tsc -p tsconfig.seed.json && node dist-seed/src/modules/event-registrations/seeds/attendance-qa-fixtures.seed.js"
   },
   "dependencies": {
     "@nestjs/common": "^12.1.0",

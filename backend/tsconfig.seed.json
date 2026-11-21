@@ -11,7 +11,8 @@
     "src/common/database/seeds.ts",
     "src/common/database/development-seeds.ts",
     "src/common/database/production-seeds.ts",
-    "src/common/database/catalog-seeds.ts"
+    "src/common/database/catalog-seeds.ts",
+    "src/modules/event-registrations/seeds/attendance-qa-fixtures.seed.ts"
   ],
   "exclude": ["node_modules", "dist", "test", "**/*spec.ts"]
 }
