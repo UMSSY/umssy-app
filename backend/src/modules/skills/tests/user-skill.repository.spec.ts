@@ -97,13 +97,17 @@ describe('UserSkillRepository', () => {
 
   it('adds the new manual skills in a single transaction', async () => {
     const records = [
-      { skill: { id: skillId, name: 'Python', isCustom: false } },
+      {
+        skill: { id: skillId, name: 'Python', isCustom: false },
+        source: 'manual',
+        evidenceRefs: [],
+      },
     ];
     userSkill.findMany.mockResolvedValue(records);
 
     await expect(
       repository.replaceForUser(userId, [skillId, otherSkillId]),
-    ).resolves.toBe(records);
+    ).resolves.toEqual(records);
     expect(transaction).toHaveBeenCalledOnce();
     expect(tx.userSkill.createMany).toHaveBeenCalledWith({
       data: [
