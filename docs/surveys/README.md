@@ -5,7 +5,7 @@
 The `surveys` module lets administrative staff create, publish and analyze employability surveys aimed at graduates, students or mentors of a career and academic year, and lets those audiences answer them. Since Sprint 3 it also tracks audience participation, manual reminders, variation alerts between semesters and automatic closing notices to the survey creator.
 
 - Backend: `backend/src/modules/surveys` (controllers `SurveysController`, `SurveyNotificationsController`, `CareersController`; services for surveys, participation, audience, variation, lifecycle, PDF and employability responses; `notification/` folder with the survey notification contracts).
-- Frontend: `frontend/src/modules/surveys` (survey builder, answer view, backoffice list, analytics view with the response rate card, reminder dialog and alerts dialog).
+- Frontend: `frontend/src/modules/surveys` (survey builder, answer view, backoffice list, analytics view with the response rate card, reminder dialog and alerts dialog, and the survey notices section and pending badge shown inside the central notifications inbox).
 
 ## Functionality
 
@@ -34,8 +34,12 @@ flowchart LR
     AD --> HA[useSurveyAlertConfig]
     HP --> PS[surveyParticipationService]
     HA --> PS
+    SNS[SurveyNotificationsSection / PendingSurveysBadge] --> HSN[useSurveyNotifications]
+    HSN --> SNSV[surveyNotificationsService]
   end
+  NV[notifications: NotificationsView filterSections.SURVEYS] --> SNS
   PS -->|HTTP| SC[SurveysController]
+  SNSV -->|HTTP| SNC[SurveyNotificationsController]
   subgraph Backend["backend/src/modules/surveys"]
     SC --> SS[SurveysService]
     SC --> PSV[SurveyParticipationService]
@@ -263,7 +267,8 @@ Swagger (`/docs`) documents each endpoint with `operationId`, Bearer JWT, roles,
 
 | Module | Service | Use |
 | --- | --- | --- |
-| notifications | `NotificationsService.notify()` | Reminders and lifecycle notices |
+| notifications | `NotificationsService.notify()` | Publication notice, reminders and lifecycle notices |
+| notifications (frontend) | `NotificationsView` (`filterSections`) | Shows `SurveyNotificationsSection` in the "Notificaciones de Encuestas" filter of the central inbox |
 | users | `UsersService.findActiveContactsByRoles` | Active users by audience role |
 | access-requests | `ApprovedGraduateCareersService.findApprovedUserIds` | Cohort by career and graduation year |
 | reports | `ReportHistoryService.registerGeneratedReport`, `getAcademicPeriod` | PDF history and semester calculation |
@@ -275,6 +280,7 @@ Swagger (`/docs`) documents each endpoint with `operationId`, Bearer JWT, roles,
 | Direction | Module | Use |
 | --- | --- | --- |
 | Uses | [notifications](../notifications/README.md) | In-app, push and email delivery |
+| Uses (frontend) | [notifications](../notifications/README.md) | Central inbox (`/notifications?filter=SURVEYS`) that hosts the survey notices section |
 | Uses | [mail](../mail/README.md) | `loadMailTemplate` to read the domain's `.mjml` templates |
 | Uses | [users](../users/README.md) | Active contacts by role |
 | Uses | [access-requests](../access-requests/README.md) | Approved graduates by career and academic year |
@@ -291,6 +297,8 @@ Tables `surveys`, `survey_alert_configs`, `survey_questions`, `survey_question_o
 - `SurveyAnalyticsView` (`/backoffice/surveys/statistics/:id`) shows `SurveyResponseRateCard`, the reminder button with its confirmation dialog and the "Alertas" button.
 - Query keys `SURVEYS_QUERY_KEYS.participation(id)` and `SURVEYS_QUERY_KEYS.alertConfig(id)`; sending a reminder or saving alerts invalidates its key.
 - `toSurveyAlertQuestions` names the questions `P1`, `P2`... by position; `formatReminderResult` builds the delivered and failed message.
+- Single inbox: the survey module no longer has its own inbox page. It delegates to the central notifications inbox of [notifications](../notifications/README.md): `/notifications` renders `SurveyNotificationsSection` (data from `GET /surveys/notifications`) through the `filterSections.SURVEYS` slot of `NotificationsView`, and `PendingSurveysBadge` is shown on the "Notificaciones de Encuestas" sidebar sub-item (`SURVEY_NOTIFICATIONS_LABEL`). `/surveys` redirects to `/notifications?filter=SURVEYS` (`SURVEY_NOTIFICATIONS_PATH`), which is also where the answer view goes back to; answering stays at `/surveys/:id` (`SURVEY_ANSWER_PATH`).
+- `useCanAnswerSurveys` limits the section and the badge to the roles allowed on `/surveys` (`titulado`, `estudiante`, `mentor`); administrative staff and companies only see the notifications of the central inbox.
 
 ## Sprint History
 
@@ -308,4 +316,5 @@ Tables `surveys`, `survey_alert_configs`, `survey_questions`, `survey_question_o
 - Single criterion for an approved graduate (`findApprovedGraduateUserIds`: `approvedUserId` or, if missing, email), used both to answer and to compute the audience, so the response rate matches the recorded responses.
 - Variation alerts: unsaved changes warning, strict threshold (`>`), specific threshold messages and "Guardar" disabled without changes.
 - Survey notification links as relative routes (the inbox opens the analytics directly) and absolute URLs in the emails.
+- Survey notices unified into the central notifications inbox: `SURVEY_PUBLISHED` links to `/notifications?filter=SURVEYS`, where the survey list and the pending badge are shown; the separate "Notificaciones de encuestas" page and sidebar entry were removed.
 - Formal fixtures (`formal-surveys-and-students.seed.ts`): 10 graduates and 8 surveys with responses and closing scenarios, deterministic and idempotent.
