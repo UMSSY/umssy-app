@@ -17,11 +17,11 @@ export function FeaturedCompaniesSection() {
   if (query.isError) {
     return (
       <div className="rounded-lg border border-border p-6">
-        <p className="mb-4 text-text-secondary">No pudimos cargar las empresas.</p>
+        <p className="mb-4 text-text-secondary">Las empresas destacadas no están disponibles por el momento.</p>
         <Button variant="outline" onClick={() => void query.refetch()}>Volver a intentar</Button>
       </div>
     );
   }
-  if (!query.data.length) return <p className="py-8 text-text-secondary">Aún no hay empresas con vacantes publicadas. Vuelve pronto.</p>;
+  if (!query.data.length) return <p className="py-8 text-text-secondary">Pronto publicaremos nuevas empresas destacadas.</p>;
   return <div className={FEATURED_COMPANIES_GRID_CLASS}>{query.data.map((company) => <CompanyCard key={company.id} company={company} />)}</div>;
 }

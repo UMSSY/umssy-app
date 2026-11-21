@@ -22,9 +22,9 @@ export function CompanyCard({ company }: CompanyCardProps) {
           <Briefcase className="size-4 shrink-0" aria-hidden="true" />
           {count === 1 ? "1 vacante disponible" : `${count} vacantes disponibles`}
         </p>
-        <Link href={COMPANY_VACANCIES_HREF} aria-label={`Ver vacantes de ${company.name}`} className="flex items-center justify-between border-t border-border pt-4 text-sm font-semibold text-accent">
+        <Link href={COMPANY_VACANCIES_HREF} aria-label={`Ver vacantes de ${company.name}`} className="group flex cursor-pointer items-center justify-between rounded-sm border-t border-border pt-4 text-sm font-semibold text-accent transition-colors hover:text-accent/75 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
           Ver vacantes
-          <ArrowUpRight className="size-4" aria-hidden="true" />
+          <ArrowUpRight className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
         </Link>
       </div>
     </article>

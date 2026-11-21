@@ -35,15 +35,15 @@ describe("FeaturedCompaniesSection", () => {
   it("shows an empty message", async () => {
     vi.spyOn(companiesService, "getFeaturedCompanies").mockResolvedValue([]);
     render(<FeaturedCompaniesSection />);
-    expect(await screen.findByText("Aún no hay empresas con vacantes publicadas. Vuelve pronto.")).toBeInTheDocument();
+    expect(await screen.findByText("Pronto publicaremos nuevas empresas destacadas.")).toBeInTheDocument();
   });
 
   it("offers a retry on error", async () => {
     const getFeaturedCompanies = vi.spyOn(companiesService, "getFeaturedCompanies").mockRejectedValueOnce(new Error("offline")).mockResolvedValue([]);
     render(<FeaturedCompaniesSection />);
-    expect(await screen.findByText("No pudimos cargar las empresas.")).toBeInTheDocument();
+    expect(await screen.findByText("Las empresas destacadas no están disponibles por el momento.")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Volver a intentar" }));
-    expect(await screen.findByText("Aún no hay empresas con vacantes publicadas. Vuelve pronto.")).toBeInTheDocument();
+    expect(await screen.findByText("Pronto publicaremos nuevas empresas destacadas.")).toBeInTheDocument();
     expect(getFeaturedCompanies).toHaveBeenCalledTimes(2);
   });
 });
