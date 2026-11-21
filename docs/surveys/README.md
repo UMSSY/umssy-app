@@ -12,8 +12,8 @@ The `surveys` module lets administrative staff create, publish and analyze emplo
 | Feature | Where |
 | --- | --- |
 | Create, edit draft, publish and disable surveys | `POST /surveys`, `PATCH /surveys/:id`, `PATCH /surveys/:id/unpublish`; `/backoffice/surveys`, `/backoffice/surveys/create`, `/backoffice/surveys/:id` |
-| Answer a survey | `GET /surveys/:id`, `POST /surveys/:id/responses`; `/surveys/:id` (`/surveys` redirects to the notifications inbox, `/notifications?filter=SURVEYS`) |
-| Notices of surveys assigned to the user | `GET /surveys/notifications` |
+| Answer a survey | `GET /surveys/:id`, `POST /surveys/:id/responses`; `/surveys/:id` (`/surveys` redirects to `/notifications?filter=SURVEYS`) |
+| Notices of surveys assigned to the user | `GET /surveys/notifications`; `SurveyNotificationsSection` inside the "Notificaciones de Encuestas" filter of the central inbox, `PendingSurveysBadge` on that sidebar entry |
 | Statistics per semester and PDF report | `GET /surveys/:id/statistics`, `GET /surveys/:id/report`; `/backoffice/surveys/statistics/:id` |
 | Response rate of the target audience | `GET /surveys/:id/participation`; `SurveyResponseRateCard` |
 | Manual reminder to those who have not answered | `POST /surveys/:id/reminders`; `SendSurveyReminderDialog` |
@@ -215,7 +215,7 @@ sequenceDiagram
 
 - It is sent when a survey is created as published or a draft is published, to the eligible audience of the survey (same criterion as the response rate).
 - Payload validated with Zod: `surveyTitle`, `previousPeriod`, `currentPeriod` (semester of the publication) and `change`, a text summary of the variations between the previous and current semester (or "Sin variaciones registradas respecto al semestre anterior.").
-- Link `/notifications?filter=SURVEYS` (the "Notificaciones de Encuestas" filter of the central notifications inbox), without `groupKey`. The survey module has no inbox of its own: users see survey notices only in the notifications inbox.
+- Link `/notifications?filter=SURVEYS` (the "Notificaciones de Encuestas" filter of the central notifications inbox), without `groupKey`. That filter shows the `SurveyNotificationsSection` (pending, expired and answered surveys with the "Responder encuesta" link to `/surveys/:id`) above the notification history, so there is a single inbox. The section and the pending badge only render for the roles that can answer surveys (`titulado`, `estudiante`, `mentor`).
 - A single notice per survey and semester: `published_notified_period` is claimed with a conditional `updateMany` before sending, so republishing in the same semester or concurrent publications do not duplicate it.
 
 ### Automatic lifecycle
