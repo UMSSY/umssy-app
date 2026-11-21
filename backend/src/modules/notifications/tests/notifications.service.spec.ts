@@ -15,6 +15,7 @@ import { NotificationType } from '../types/notification-type.enum.js';
 interface MockNotificationsRepo {
   findTypeByCode: ReturnType<typeof vi.fn>;
   createMany: ReturnType<typeof vi.fn>;
+  hasGroupedNotification: ReturnType<typeof vi.fn>;
 }
 
 interface MockPreferencesRepo {
@@ -75,6 +76,7 @@ describe('NotificationsService', () => {
       createMany: vi
         .fn()
         .mockResolvedValue([{ id: 'notification-1', recipientId: 'user-2' }]),
+      hasGroupedNotification: vi.fn().mockResolvedValue(false),
     };
     mockPreferencesRepo = { findManyByUserIds: vi.fn().mockResolvedValue([]) };
     mockUserLookupRepo = { hasBlockBetween: vi.fn().mockResolvedValue(false) };
@@ -108,6 +110,23 @@ describe('NotificationsService', () => {
     }).compile();
 
     service = module.get<NotificationsService>(NotificationsService);
+  });
+
+  it('expone la comprobación durable de grupos mediante el servicio público', async () => {
+    mockNotificationsRepo.hasGroupedNotification.mockResolvedValue(true);
+
+    await expect(
+      service.hasGroupedNotification(
+        'user-2',
+        NotificationType.MENTOR_SLOT_OFFERED,
+        'mentor-slot-offer:offer-1',
+      ),
+    ).resolves.toBe(true);
+    expect(mockNotificationsRepo.hasGroupedNotification).toHaveBeenCalledWith(
+      'user-2',
+      NotificationType.MENTOR_SLOT_OFFERED,
+      'mentor-slot-offer:offer-1',
+    );
   });
 
   it('debe omitir la notificación si el actor es el mismo destinatario (Anti-Autor)', async () => {
@@ -275,7 +294,9 @@ describe('NotificationsService', () => {
     mockPreferencesRepo.findManyByUserIds.mockResolvedValue([
       { userId: 'user-2', pushEnabled: false, emailEnabled: true },
     ]);
-    mockMailDispatcher.dispatchToUsers.mockRejectedValue(new Error('SMTP down'));
+    mockMailDispatcher.dispatchToUsers.mockRejectedValue(
+      new Error('SMTP down'),
+    );
 
     const result = await service.notify({
       recipientIds: ['user-2'],
