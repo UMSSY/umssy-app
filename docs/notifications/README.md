@@ -131,7 +131,7 @@ The inbox stays owned by this module; other domains can add content to it withou
 
 | Extension point | Consumer | Use |
 | --- | --- | --- |
-| `NotificationsView` optional `filterSections` prop (`Partial<Record<NotificationInboxFilter, ReactNode>>`) | [surveys](../surveys/README.md) | `/notifications` passes `{ SURVEYS: <SurveyNotificationsSection /> }`, rendered above the history only when that filter is active. Without the prop the view is unchanged |
+| `NotificationsView` optional `filterSections` prop (`Partial<Record<NotificationInboxFilter, ReactNode>>`) | [surveys](../surveys/README.md) | `/notifications` passes `{ SURVEYS: <SurveyNotificationsSection /> }`, rendered above the history only when that filter is active, using the same card and group header styles as `NotificationItem`. Without the prop the view is unchanged |
 | Sidebar sub-item badges (`AppShell` `sidebarItemBadges`, matched by label) | [surveys](../surveys/README.md) | `PendingSurveysBadge` on the "Notificaciones de Encuestas" sub-item |
 
 The other filters, the notification list, read state and link resolution are not affected.
