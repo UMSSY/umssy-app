@@ -5,4 +5,5 @@ export interface EventsListDataResponse {
   total: number;
   limit: number;
   totalPages: number;
+  isProfileComplete?: boolean;
 }

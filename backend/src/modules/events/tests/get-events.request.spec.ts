@@ -74,3 +74,16 @@ describe('GetEventsSchema', () => {
     expect(parsed.statusId).toBe('22222222-2222-2222-2222-222222222224');
   });
 });
+
+describe('GetEventsSchema sort', () => {
+  it('accepts the supported sort options', () => {
+    expect(GetEventsSchema.parse({ sort: 'popular' }).sort).toBe('popular');
+    expect(GetEventsSchema.parse({ sort: 'recommended' }).sort).toBe(
+      'recommended',
+    );
+  });
+
+  it('rejects an unknown sort option', () => {
+    expect(GetEventsSchema.safeParse({ sort: 'date' }).success).toBe(false);
+  });
+});

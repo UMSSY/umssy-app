@@ -52,6 +52,40 @@ describe('eventsService', () => {
     });
   });
 
+  it('sends the requested order to GET /events', async () => {
+    const getSpy = vi.spyOn(apiClient, 'get').mockResolvedValueOnce({
+      data: { data: { items: [] }, page: 1, offset: 0 },
+    } as unknown as AxiosResponse<EventsListResponse>);
+
+    await eventsService.getEvents(
+      { page: 1, limit: 50, sort: 'popular' },
+      undefined,
+      'signed-token',
+    );
+
+    expect(getSpy).toHaveBeenCalledWith(
+      '/events',
+      expect.objectContaining({ params: { page: 1, limit: 50, sort: 'popular' } }),
+    );
+  });
+
+  it('reads the profile state only when the backend sends it', async () => {
+    vi.spyOn(apiClient, 'get')
+      .mockResolvedValueOnce({
+        data: { data: { items: [], isProfileComplete: false }, page: 1, offset: 0 },
+      } as unknown as AxiosResponse<EventsListResponse>)
+      .mockResolvedValueOnce({
+        data: { data: { items: [], isProfileComplete: 'no' }, page: 1, offset: 0 },
+      } as unknown as AxiosResponse<EventsListResponse>);
+
+    await expect(
+      eventsService.getEvents({ page: 1, limit: 50, sort: 'recommended' }),
+    ).resolves.toEqual({ data: [], page: 1, offset: 0, isProfileComplete: false });
+    await expect(
+      eventsService.getEvents({ page: 1, limit: 50, sort: 'recommended' }),
+    ).resolves.toEqual({ data: [], page: 1, offset: 0 });
+  });
+
   it('falla claramente si falta configurar la URL del backend', async () => {
     apiClient.defaults.baseURL = undefined;
 
