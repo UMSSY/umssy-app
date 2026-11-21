@@ -97,7 +97,9 @@ sequenceDiagram
 
 ## Publication notices and historical access
 
-The central inbox opens `/profile/radar?snapshot=<snapshotId>`. `useHistoricalRadar` requests `GET /profile/me/radar/snapshots/:id`, scoped to the current session. The backend authorizes ownership and returns the requested publication with its preceding version. The view displays a historical-version banner and **Volver al radar actual**, which clears the historical selection and comparison. Loading and unavailable-publication errors are explicit.
+The central inbox opens `/profile/radar?snapshot=<snapshotId>`. `useHistoricalRadar` requests `GET /profile/me/radar/snapshots/:id`, scoped to the current session. The backend authorizes ownership and returns the requested publication with its preceding version. The view displays a historical-version banner and **Volver al radar actual**, which clears the historical selection and returns to the latest publication. Loading and unavailable-publication errors are explicit.
+
+The comparison preference is stored per radar owner for the current browser tab session. The view restores it when the owner reopens the radar or returns from a historical publication. When the displayed publication has a preceding version, the restored setting controls whether the chart overlays that version.
 
 Listing notices and marking them read stay in the Notifications module. Opening a historical snapshot directly does not itself acknowledge a notification. A missing or foreign snapshot returns 404; the client never substitutes another person's data.
 
@@ -115,7 +117,7 @@ sequenceDiagram
   API-->>Hook: Authorized snapshot and preceding publication, or 404
   Hook-->>View: Data, loading or error state
   Owner->>View: Return to current radar
-  View->>View: Clear historical selection and comparison
+  View->>View: Clear historical selection and apply the owner's comparison preference
 ```
 
 ## Administrative review and recoverable decisions
