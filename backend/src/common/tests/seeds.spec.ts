@@ -4,6 +4,7 @@ const seedUsers = vi.fn();
 const seedAvailability = vi.fn();
 const seedAccessRequests = vi.fn();
 const seedEvents = vi.fn();
+const seedHistoryScenarioEvents = vi.fn();
 const seedEventRegistrations = vi.fn();
 const seedTechnicalAreas = vi.fn();
 const seedOrientationTypes = vi.fn();
@@ -23,6 +24,10 @@ vi.mock('../../modules/access-requests/seeds/access-requests.seed.js', () => ({
 }));
 vi.mock('../../modules/events/seeds/events.seed.js', () => ({
   seedEvents: (...args: unknown[]) => seedEvents(...args),
+}));
+vi.mock('../../modules/events/seeds/history-scenarios-events.seed.js', () => ({
+  seedHistoryScenarioEvents: (...args: unknown[]) =>
+    seedHistoryScenarioEvents(...args),
 }));
 vi.mock(
   '../../modules/event-registrations/seeds/event-registrations.seed.js',
@@ -58,6 +63,7 @@ function setupSeeds() {
     users: {
       eventGraduate: user('e1'),
       emptyGraduate: user('e2'),
+      historyGraduate: user('h1'),
       mentorA: user('m1'),
       mentorB: user('m2'),
       graduate: user('g1'),
@@ -104,12 +110,17 @@ describe('runSeed', () => {
 
     const summary = await runSeed(client as never);
 
-    expect(client.$transaction).toHaveBeenCalledTimes(10);
+    expect(client.$transaction).toHaveBeenCalledTimes(11);
     expect(seedTechnicalAreas).toHaveBeenCalledWith(tx);
     expect(seedOrientationTypes).toHaveBeenCalledWith(tx);
     expect(seedJobOffers).toHaveBeenCalledWith(tx);
     expect(seedUsers).toHaveBeenCalledWith(tx, 'hash');
     expect(seedEvents).toHaveBeenCalledWith(tx, 'e1');
+    expect(seedHistoryScenarioEvents).toHaveBeenCalledWith(
+      tx,
+      'e1',
+      expect.any(Date),
+    );
     expect(seedEventRegistrations).toHaveBeenCalledWith(tx, 'e1');
     expect(seedAvailability).toHaveBeenCalledWith(
       tx,
@@ -125,7 +136,7 @@ describe('runSeed', () => {
     expect(summary).toMatchObject({
       roles: 5,
       statuses: 3,
-      users: 11,
+      users: 12,
       userRoles: 7,
       blocks: 58,
       appointments: 53,

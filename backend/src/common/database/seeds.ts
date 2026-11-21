@@ -5,6 +5,7 @@ import { pathToFileURL } from 'node:url';
 import { Logger } from '@nestjs/common';
 
 import { seedEvents } from '../../modules/events/seeds/events.seed.js';
+import { seedHistoryScenarioEvents } from '../../modules/events/seeds/history-scenarios-events.seed.js';
 import { seedEventRegistrations } from '../../modules/event-registrations/seeds/event-registrations.seed.js';
 import { seedAccessRequests } from '../../modules/access-requests/seeds/access-requests.seed.js';
 import { seedAvailability } from '../../modules/availability/seeds/availability.seed.js';
@@ -67,6 +68,9 @@ export async function runSeed(client?: PrismaClient): Promise<SeedSummary> {
     );
     const { users } = usersResult;
     await runModule('eventos', (tx) => seedEvents(tx, users.eventGraduate.id));
+    await runModule('escenarios de talleres históricos', (tx) =>
+      seedHistoryScenarioEvents(tx, users.eventGraduate.id, now),
+    );
     await runModule('inscripciones', (tx) =>
       seedEventRegistrations(tx, users.eventGraduate.id),
     );
