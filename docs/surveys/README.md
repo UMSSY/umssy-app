@@ -12,7 +12,7 @@ The `surveys` module lets administrative staff create, publish and analyze emplo
 | Feature | Where |
 | --- | --- |
 | Create, edit draft, publish and disable surveys | `POST /surveys`, `PATCH /surveys/:id`, `PATCH /surveys/:id/unpublish`; `/backoffice/surveys`, `/backoffice/surveys/create`, `/backoffice/surveys/:id` |
-| Answer a survey | `GET /surveys/:id`, `POST /surveys/:id/responses`; `/surveys`, `/surveys/:id` |
+| Answer a survey | `GET /surveys/:id`, `POST /surveys/:id/responses`; `/surveys/:id` (`/surveys` redirects to the notifications inbox, `/notifications?filter=SURVEYS`) |
 | Notices of surveys assigned to the user | `GET /surveys/notifications` |
 | Statistics per semester and PDF report | `GET /surveys/:id/statistics`, `GET /surveys/:id/report`; `/backoffice/surveys/statistics/:id` |
 | Response rate of the target audience | `GET /surveys/:id/participation`; `SurveyResponseRateCard` |
@@ -94,7 +94,7 @@ sequenceDiagram
     P->>P: Resolves the eligible audience
     P->>R: claimPublishedNotification(surveyId, semester) (conditional updateMany)
     P->>E: evaluateSurvey(surveyId, { closesAt: now })
-    P->>N: notify(SURVEY_PUBLISHED, eligible, { surveyTitle, previousPeriod, currentPeriod, change }, actionUrl /surveys/:id, renderMail)
+    P->>N: notify(SURVEY_PUBLISHED, eligible, { surveyTitle, previousPeriod, currentPeriod, change }, actionUrl /notifications?filter=SURVEYS, renderMail)
   end
   Note over S,P: A notification error is logged and never blocks the publication
 ```
@@ -215,7 +215,7 @@ sequenceDiagram
 
 - It is sent when a survey is created as published or a draft is published, to the eligible audience of the survey (same criterion as the response rate).
 - Payload validated with Zod: `surveyTitle`, `previousPeriod`, `currentPeriod` (semester of the publication) and `change`, a text summary of the variations between the previous and current semester (or "Sin variaciones registradas respecto al semestre anterior.").
-- Link `/surveys/:id` (the answer page, same as the reminder), without `groupKey`. The notification is listed in the inbox under the "Encuestas" filter by its type; the link opens the survey to answer it.
+- Link `/notifications?filter=SURVEYS` (the "Notificaciones de Encuestas" filter of the central notifications inbox), without `groupKey`. The survey module has no inbox of its own: users see survey notices only in the notifications inbox.
 - A single notice per survey and semester: `published_notified_period` is claimed with a conditional `updateMany` before sending, so republishing in the same semester or concurrent publications do not duplicate it.
 
 ### Automatic lifecycle
@@ -225,7 +225,7 @@ sequenceDiagram
 - **Closing**: published surveys with `closes_at <= now` and no `closed_notified_at`. The creator is notified (`SURVEY_CLOSED`, email only), the date is marked and, if alerts are enabled, the variation is evaluated (`SURVEY_VARIATION_ALERT`, email only).
 - If the survey has no closing date, the notices use the text `SURVEY_WITHOUT_CLOSING_DATE_TEXT` ("Sin fecha de cierre definida.") instead of an empty date.
 - The `closing_soon_notified_at` and `closed_notified_at` marks guarantee a single notice per survey. An error in one survey is logged and does not stop the others.
-- Notice links are relative routes so the notifications inbox opens them inside the app: `/backoffice/surveys/statistics/:id` for the creator and `/surveys/:id` for reminders. The emails turn them into absolute URLs with `FRONTEND_URL` (or the first `CORS_ORIGIN`).
+- Notice links are relative routes so the notifications inbox opens them inside the app: `/backoffice/surveys/statistics/:id` for the creator, `/notifications?filter=SURVEYS` for the publication notice and `/surveys/:id` for reminders. The emails turn them into absolute URLs with `FRONTEND_URL` (or the first `CORS_ORIGIN`).
 
 ## Endpoints
 
