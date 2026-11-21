@@ -117,6 +117,8 @@ beforeEach(() => {
     setCategoryId: vi.fn(),
     isPopular: false,
     setIsPopular: vi.fn(),
+    isExpired: false,
+    setIsExpired: vi.fn(),
     filters: { search: "", categoryId: null, sort: "recommended" },
   });
   mockUseEventCategories.mockReturnValue({
@@ -396,6 +398,8 @@ describe("EventsView", () => {
       setCategoryId: vi.fn(),
       isPopular: true,
       setIsPopular,
+      isExpired: false,
+      setIsExpired: vi.fn(),
       filters: { search: "", categoryId: "cat-1", sort: "popular" },
     });
     render(<EventsView />);
@@ -460,6 +464,8 @@ describe("EventsView", () => {
       setCategoryId: vi.fn(),
       isPopular: false,
       setIsPopular: vi.fn(),
+      isExpired: false,
+      setIsExpired: vi.fn(),
       filters: { search: "Marketing", categoryId: null },
     });
     mockUseEvents.mockReturnValue({
