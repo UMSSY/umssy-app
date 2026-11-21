@@ -1,7 +1,6 @@
 import Link from "next/link";
-import { ArrowRight, CircleCheck, Clock, FileCheck, FileClock } from "lucide-react";
+import { CircleCheck, Clock, FileCheck } from "lucide-react";
 import { cn } from "cn";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button-variants";
 import { SURVEY_STATUS_LABELS, SURVEY_STATUS_MESSAGES, SURVEY_STATUS_TONES, SURVEY_ANSWER_PATH } from "../constants/survey-notifications.constants";
@@ -12,44 +11,43 @@ export function SurveyNotificationItem({ notification }: SurveyNotificationItemP
   const { id, title, publishedAt, status } = notification;
   const tone = SURVEY_STATUS_TONES[status];
   const isPending = status === "pending";
-
-  const renderAction = () => {
-    if (isPending) {
-      return (
-        <Link href={`${SURVEY_ANSWER_PATH}/${id}`} className={cn(buttonVariants({ variant: "default" }), "w-full")}>
-          <FileClock data-icon="inline-start" aria-hidden="true" />
-          {"Responder encuesta"}
-          <ArrowRight data-icon="inline-end" aria-hidden="true" />
-        </Link>
-      );
-    }
-
-    const StatusIcon = status === "expired" ? Clock : CircleCheck;
-    return (
-      <Button disabled className={cn("w-full disabled:opacity-100", tone)}>
-        <StatusIcon aria-hidden="true" />
-        {SURVEY_STATUS_LABELS[status]}
-      </Button>
-    );
-  };
+  const StatusIcon = status === "expired" ? Clock : CircleCheck;
 
   return (
-    <li className="flex min-w-0 flex-col gap-4 p-4 sm:px-6 @3xl:min-h-27 @3xl:flex-row @3xl:items-center @3xl:gap-3">
-      <div className="flex min-w-0 flex-1 items-start gap-3 @3xl:items-center">
-        <div className={cn("flex size-12 shrink-0 items-center justify-center rounded-lg", tone)}>
-          <FileCheck className="size-6" strokeWidth={1.5} aria-hidden="true" />
+    <li
+      className={cn(
+        "flex flex-col gap-3 rounded-xl border px-4 py-3.5 transition-colors sm:flex-row sm:items-center sm:justify-between",
+        isPending ? "border-border bg-card shadow-xs" : "border-border/80 bg-muted/40",
+      )}
+    >
+      <div className="flex min-w-0 items-start gap-3 sm:items-center">
+        <span
+          aria-hidden="true"
+          className={cn("mt-2 size-2 shrink-0 rounded-full sm:mt-0", isPending ? "bg-brand-red" : "bg-transparent")}
+        />
+        <div className={cn("flex size-10 shrink-0 items-center justify-center rounded-lg border border-border", tone)}>
+          <FileCheck className="size-5" aria-hidden="true" />
         </div>
-        <div className="min-w-0 flex-1 space-y-1">
-          <h3 className="text-lg font-semibold break-words text-ink">{title}</h3>
-          <p className="text-sm break-words text-text-secondary">{SURVEY_STATUS_MESSAGES[status]}</p>
-          {isPending ? <Badge className={tone}>{SURVEY_STATUS_LABELS.pending}</Badge> : null}
+        <div className="min-w-0 flex-1">
+          <h3 className="truncate text-sm font-semibold text-foreground">{title}</h3>
+          <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{SURVEY_STATUS_MESSAGES[status]}</p>
         </div>
       </div>
-      <div className="flex shrink-0 flex-col gap-3 @3xl:flex-row @3xl:items-center @3xl:gap-4">
-        <time dateTime={publishedAt} className="text-sm whitespace-nowrap text-text-secondary @3xl:w-24 @3xl:text-right">
+
+      <div className="flex shrink-0 items-center justify-end gap-3 pl-5 sm:pl-0">
+        <time dateTime={publishedAt} className="text-xs whitespace-nowrap text-muted-foreground">
           {formatSurveyDate(publishedAt)}
         </time>
-        <div className="w-full whitespace-nowrap @3xl:w-52">{renderAction()}</div>
+        {isPending ? (
+          <Link href={`${SURVEY_ANSWER_PATH}/${id}`} className={buttonVariants({ variant: "default", size: "sm" })}>
+            {"Responder encuesta"}
+          </Link>
+        ) : (
+          <Button type="button" size="sm" variant="outline" disabled className="gap-1.5 disabled:opacity-100">
+            <StatusIcon className="size-3.5" aria-hidden="true" />
+            {SURVEY_STATUS_LABELS[status]}
+          </Button>
+        )}
       </div>
     </li>
   );

@@ -1,9 +1,5 @@
 "use client";
 
-import { FileCheck } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { SurveyNotificationItem } from "./survey-notification-item";
 import { SurveyNotificationsEmpty } from "./survey-notifications-empty";
 import { useCanAnswerSurveys } from "../hooks/use-can-answer-surveys";
@@ -16,9 +12,9 @@ function SurveyNotificationsList() {
   const renderContent = () => {
     if (isLoading) {
       return (
-        <div aria-busy="true" className="space-y-4 p-6">
-          {Array.from({ length: 3 }, (_, index) => (
-            <Skeleton key={index} className="h-20 w-full" />
+        <div aria-busy="true" className="flex flex-col gap-2.5">
+          {Array.from({ length: 2 }, (_, index) => (
+            <div key={index} className="h-18 animate-pulse rounded-xl border border-border bg-muted/60" />
           ))}
         </div>
       );
@@ -26,7 +22,7 @@ function SurveyNotificationsList() {
 
     if (errorMessage) {
       return (
-        <p role="alert" className="px-6 py-8 text-sm text-danger">
+        <p role="alert" className="rounded-xl border border-destructive/20 bg-destructive/10 px-4 py-3.5 text-sm font-medium text-destructive">
           {errorMessage}
         </p>
       );
@@ -37,7 +33,7 @@ function SurveyNotificationsList() {
     }
 
     return (
-      <ul className="divide-y divide-border">
+      <ul className="flex flex-col gap-2.5">
         {notifications.map((notification) => (
           <SurveyNotificationItem key={notification.id} notification={notification} />
         ))}
@@ -46,20 +42,19 @@ function SurveyNotificationsList() {
   };
 
   return (
-    <Card role="region" aria-labelledby="survey-list-title" className="@container gap-0 py-0">
-      <CardHeader className="flex flex-wrap items-center gap-3 py-4">
-        <FileCheck className="size-6 text-accent" strokeWidth={1.5} aria-hidden="true" />
-        <CardTitle id="survey-list-title" className="text-ink">
+    <section aria-labelledby="survey-list-title" className="flex flex-col gap-2.5">
+      <div className="flex items-center gap-2">
+        <h2 id="survey-list-title" className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
           Encuestas
-        </CardTitle>
+        </h2>
         {notifications.length > 0 ? (
-          <Badge className="rounded-full bg-interaction font-semibold text-accent">
+          <span className="inline-flex items-center justify-center rounded-full bg-muted px-1.5 py-0.5 text-[11px] font-semibold text-muted-foreground">
             {formatPendingSurveysLabel(pendingCount)}
-          </Badge>
+          </span>
         ) : null}
-      </CardHeader>
-      <CardContent className="border-t border-border px-0">{renderContent()}</CardContent>
-    </Card>
+      </div>
+      {renderContent()}
+    </section>
   );
 }
 
