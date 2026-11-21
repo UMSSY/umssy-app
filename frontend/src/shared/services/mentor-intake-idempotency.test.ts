@@ -11,6 +11,8 @@ vi.mock('@/shared/services/storage/browser-indexed-db', () => ({
   readIndexedDb: vi.fn(async (key: string) => records.get(key) ?? null),
   writeIndexedDb: vi.fn(async (key: string, value: unknown) => {
     records.set(key, value);
+
+
   }),
   removeIndexedDb: vi.fn(async (key: string) => {
     records.delete(key);
