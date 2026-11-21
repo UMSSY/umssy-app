@@ -236,7 +236,7 @@ export function VacancyList({ scope = "published" }: VacancyListProps) {
                 onDetails={openDetails}
                 showStatus={isHistory}
                 onReopen={isHistory ? openReopenDialog : undefined}
-                onClose={isHistory ? undefined : openCloseDialog}
+                onClose={openCloseDialog}
                 onDelete={openDeleteDialog}
               />
             ))}
