@@ -24,13 +24,13 @@ export function MentorGuidanceTypes({
           <CardTitle
             role="heading"
             aria-level={2}
-            className="flex items-center gap-2 text-xl font-bold text-ink"
+            className="flex items-center gap-2 [font-family:Georgia,serif] text-[22px] font-semibold text-accent"
           >
             <Compass
               className="size-5 shrink-0 text-accent"
               aria-hidden="true"
             />
-            Tipos de orientación
+            ¿En qué puedo orientarte?
           </CardTitle>
         </CardHeader>
 
@@ -53,13 +53,13 @@ export function MentorGuidanceTypes({
         <CardTitle
           role="heading"
           aria-level={2}
-          className="flex items-center gap-2 text-xl font-bold text-ink"
+          className="flex items-center gap-2 [font-family:Georgia,serif] text-[22px] font-semibold text-accent"
         >
           <Compass
             className="size-5 shrink-0 text-accent"
             aria-hidden="true"
           />
-          Tipos de orientación
+          ¿En qué puedo orientarte?
         </CardTitle>
       </CardHeader>
 

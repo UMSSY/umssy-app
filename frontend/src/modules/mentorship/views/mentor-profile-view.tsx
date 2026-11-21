@@ -52,6 +52,7 @@ export function MentorProfileView({
             void refetch();
           }}
           showDirectoryLink
+          directoryHref={returnTo}
         />
       </main>
     );
@@ -64,6 +65,7 @@ export function MentorProfileView({
           title="Mentor no encontrado"
           description="No se pudo encontrar el perfil solicitado."
           showDirectoryLink
+          directoryHref={returnTo}
         />
       </main>
     );
@@ -76,12 +78,16 @@ export function MentorProfileView({
           title="Perfil incompleto"
           description="Falta el nombre del mentor. El perfil completo todavía no está disponible."
           showDirectoryLink
+          directoryHref={returnTo}
         />
       </main>
     );
   }
-  const professionalInterests = mentor.skills.filter((skill) =>
-    skill.name?.trim(),
+  const professionalInterests = mentor.skills.filter((skill) => skill.name?.trim());
+  const directoryParams = new URL(returnTo, "http://localhost").searchParams;
+  const areaId = directoryParams.get("areaId");
+  const selectedArea = mentor.technicalAreas.find(area =>
+    areaId ? area.id === areaId : area.name === directoryParams.get("area"),
   );
   const similarProps: SimilarMentorsSectionProps =
     similar.isPending || (similar.isError && similar.isFetching)
@@ -96,8 +102,8 @@ export function MentorProfileView({
         : { status: 'success', mentors: similar.data };
 
   return (
-    <main className="bg-background">
-      <div className="mx-auto w-full max-w-7xl min-w-0">
+    <main className="bg-background lg:-mt-3">
+      <div className="mx-auto w-full max-w-[1344px] min-w-0 space-y-[18px]">
         <MentorProfileNavigation
           mentorName={mentor.fullName}
           returnTo={returnTo}
@@ -116,16 +122,18 @@ export function MentorProfileView({
 
         <MentorProfileHeader
           mentor={mentor}
-          selectedArea={new URL(returnTo, "http://localhost").searchParams.get("area") ?? undefined}
+          selectedArea={selectedArea?.name}
+          selectedAreaId={areaId ? selectedArea?.id : undefined}
+          returnTo={returnTo}
           showRequestAction={canVerifyIdentity && currentUserId !== mentor.id}
         />
 
-        <div className="mt-6 grid min-w-0 grid-cols-12 gap-6">
-          <div className="col-span-8 flex min-w-0 flex-col gap-6">
+        <div className="grid min-w-0 gap-[18px] lg:grid-cols-[minmax(0,2.25fr)_minmax(0,1fr)]">
+          <div className="flex min-w-0 flex-col border border-border bg-surface [&_[data-slot=card]]:rounded-none [&_[data-slot=card]]:border-0 [&_[data-slot=card]]:shadow-none">
             {mentor.aboutMe && <MentorAbout description={mentor.aboutMe} />}
 
-            <section className="rounded-xl border border-border bg-surface p-6">
-              <h2 className="text-xl font-bold text-ink">
+            <section className="order-last border-t border-border px-7 py-4">
+              <h2 className="font-serif text-lg font-semibold text-accent">
                 Intereses profesionales
               </h2>
               {professionalInterests.length ? (
@@ -152,11 +160,11 @@ export function MentorProfileView({
             />
           </div>
 
-          <div className="col-span-4 flex min-w-0 flex-col gap-6">
+          <aside aria-label="Trayectoria y especialidades" className="flex min-w-0 flex-col divide-y divide-border border border-border bg-surface [&_[data-slot=card]]:rounded-none [&_[data-slot=card]]:border-0 [&_[data-slot=card]]:shadow-none">
             <MentorCareer mentor={mentor} />
 
             <MentorTechnicalAreas areas={mentor.technicalAreas} />
-          </div>
+          </aside>
         </div>
         <SimilarMentorsSection {...similarProps} returnTo={returnTo} />
       </div>

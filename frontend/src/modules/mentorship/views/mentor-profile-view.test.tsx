@@ -175,8 +175,8 @@ describe('MentorProfileView', () => {
 
     expect((await screen.findAllByText('Ana Rojas')).length).toBeGreaterThan(0);
     expect(screen.getByText('Arquitecta de Software')).toBeInTheDocument();
-    expect(screen.getByText('Backend')).toBeInTheDocument();
-    expect(screen.getByText('Arquitectura')).toBeInTheDocument();
+    expect(screen.getAllByText('Backend')).toHaveLength(2);
+    expect(screen.getAllByText('Arquitectura')).toHaveLength(2);
     expect(screen.getByText('Orientación técnica')).toBeInTheDocument();
     expect(
       screen.getByRole('heading', { name: 'Sobre mí' }),
@@ -185,7 +185,7 @@ describe('MentorProfileView', () => {
       screen.getByRole('heading', { name: 'Trayectoria actual' }),
     ).toBeInTheDocument();
     expect(container.querySelector('main > div > div.grid')).toHaveClass(
-      'grid-cols-12',
+      'lg:grid-cols-[minmax(0,2.25fr)_minmax(0,1fr)]',
     );
     const recommendations = screen.getByRole('region', {
       name: 'También podría interesarte',

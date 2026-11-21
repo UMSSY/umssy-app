@@ -1,5 +1,6 @@
 export interface MentorFiltersBarProps {
   area: string;
+  areaAsChips?: boolean;
   orientation: string;
   technicalAreas: string[];
   orientationTypes: string[];

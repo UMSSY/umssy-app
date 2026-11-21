@@ -4,6 +4,27 @@ import { directoryPredicate } from '../repositories/mentor-directory.queries.js'
 import { MentorsRepository } from '../repositories/mentors.repository.js';
 
 describe('MentorsRepository directory page', () => {
+  it('incluye el cargo del perfil aunque no exista experiencia laboral', () => {
+    const predicate = directoryPredicate(
+      { search: 'Arquitecta Senior', available: true },
+      new Date('2026-11-15T12:00:00Z'),
+    );
+    expect(predicate.sql).toContain("coalesce(u.headline, '')");
+    expect(predicate.sql.indexOf('u.headline')).toBeLessThan(
+      predicate.sql.indexOf('FROM work_experiences'),
+    );
+    expect(predicate.values).toContain('Arquitecta');
+    expect(predicate.values).toContain('Senior');
+    expect(predicate.sql).not.toContain('Arquitecta');
+  });
+  it('busca por cargo, biografía, especialidad y habilidades con parámetros', () => {
+    const predicate = directoryPredicate({ search: "Cloud' OR true", available: true, area: '06d773ee-90d1-40c0-9744-c7c3601b84ef' }, new Date());
+    for (const field of ['we.position', 'u.about_me', 'ta.name', 's.name', 'ta.id::text']) expect(predicate.sql).toContain(field);
+    expect(predicate.sql).toContain('u.is_active = true');
+    expect(predicate.sql).toContain('u.is_available_for_mentoring = true');
+    expect(predicate.sql).not.toContain("Cloud'");
+    expect(predicate.values).toContain("Cloud'");
+  });
   const now = new Date('2026-10-24T12:00:00.000Z');
 
   const filters = {
@@ -84,6 +105,7 @@ describe('MentorsRepository directory page', () => {
     ).toEqual(Array(32).fill(0));
     for (const [index, [query]] of raw.mock.calls.entries()) {
       const term = 'u'.repeat(index % 2 ? 20 : 100);
+      expect(query.sql.length).toBeLessThan(4000);
       expect(query.sql).not.toContain(term);
       expect(query.values).toContain(term);
       expect(query.sql).toBe(raw.mock.calls[0][0].sql);

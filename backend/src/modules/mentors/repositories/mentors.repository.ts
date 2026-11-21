@@ -308,7 +308,11 @@ export class MentorsRepository extends MentorIntakeRepository {
 
     if (filters.area) {
       where.mentorTechnicalAreas = {
-        some: { technicalArea: { name: { in: resolveMentorAreas(filters.area) } } },
+        some: {
+          technicalArea: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(filters.area)
+            ? { id: filters.area }
+            : { name: { in: resolveMentorAreas(filters.area) } },
+        },
       };
     }
 

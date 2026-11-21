@@ -1,5 +1,4 @@
 import type { MentorAboutProps } from "../../types/mentor-about-props.types";
-import { Badge } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -12,14 +11,11 @@ export function MentorAbout({ description }: MentorAboutProps) {
     <Card className="gap-0 overflow-visible rounded-xl border border-border bg-white py-0 text-base shadow-sm ring-0">
       <CardHeader className="px-6 pt-6">
         <div className="flex items-center gap-3">
-          <div className="flex size-9 items-center justify-center rounded-lg bg-interaction text-accent">
-            <Badge size={20} />
-          </div>
 
           <CardTitle
             role="heading"
             aria-level={2}
-            className="text-xl font-bold text-ink"
+            className="[font-family:Georgia,serif] text-[22px] font-semibold text-accent"
           >
             Sobre mí
           </CardTitle>
@@ -27,7 +23,7 @@ export function MentorAbout({ description }: MentorAboutProps) {
       </CardHeader>
 
       <CardContent className="px-6 pt-4 pb-6">
-        <p className="leading-7 [overflow-wrap:anywhere] whitespace-pre-line text-text-secondary">{description}</p>
+        <p className="text-sm leading-6 [overflow-wrap:anywhere] whitespace-pre-line text-text-secondary">{description}</p>
       </CardContent>
     </Card>
   );

@@ -28,7 +28,7 @@ export function MentorshipProjection(props: ProjectionProps) {
   return (
     <Dialog open={isExpanded} onOpenChange={changeOpen}>
       <DialogTrigger render={<Button className="w-full" />}>
-        Simular habilidad
+        {props.triggerLabel ?? "Simular habilidad"}
       </DialogTrigger>
       {isExpanded ? (
         <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-md">
